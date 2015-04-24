@@ -245,9 +245,9 @@ if (!function_exists("tee_jt_tilaus")) {
           // Kuitenkin niin, ett‰ mahdollisuuksien mukaan ei eroteta samalla siirtolistalla olleita rivej‰
           // - t‰m‰ tehd‰‰n vanhan siirtolistanumeron mukaan
           $lisatjoin = "JOIN tilausrivi
-          		            ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-          	            JOIN tilausrivin_lisatiedot
-          		            ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)";
+                          ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+                        JOIN tilausrivin_lisatiedot
+                          ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)";
 
           $lisatehdot = "AND tilausrivin_lisatiedot.vanha_otunnus = {$otsikkorivi["tunnus"]}";
         }

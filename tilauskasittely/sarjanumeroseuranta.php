@@ -311,11 +311,11 @@ if ($toiminto == 'MUOKKAA') {
       //jos ei saa muuttaa niin disabloidaan sarjanumeron muokkauskenttä, Jos myyntirivi on
       // laskutettu niin ei muokata
       if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false or
-           $PHP_SELF == "sarjanumeroseuranta.php" or
-           strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== false or
-           $PHP_SELF == "tervetuloa.php") and
-          ($muutarow["myynti_laskaika"] == "" or $muutarow["myynti_laskaika"] == "0000-00-00" or
-           (substr($muutarow['sarjanumero'], 0, $viiva) == "PUUTTUU" or
+          $PHP_SELF == "sarjanumeroseuranta.php" or
+          strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== false or
+          $PHP_SELF == "tervetuloa.php") and
+        ($muutarow["myynti_laskaika"] == "" or $muutarow["myynti_laskaika"] == "0000-00-00" or
+          (substr($muutarow['sarjanumero'], 0, $viiva) == "PUUTTUU" or
             substr($muutarow['sarjanumero'], 0, $viiva) == t("PUUTTUU") or
             substr($muutarow['sarjanumero'], 0, $viiva) == t("PUUTTUU", $yhtiorow["kieli"])))
       ) {
@@ -427,12 +427,12 @@ if ($toiminto == 'MUOKKAA') {
                     style='width:40%;border:0px;display:block;'
                     frameborder='0'
                     src='{$palvelin2}yllapito.php" .
-                      "?toim=liitetiedostot" .
-                      "&from=yllapito" .
-                      "&haku[7]=@sarjanumeroseuranta" .
-                      "&haku[8]=@{$muutarow["tunnus"]}" .
-                      "&lukitse_avaimeen={$muutarow["tunnus"]}" .
-                      "&lukitse_laji=sarjanumeroseuranta'></iFrame>";
+        "?toim=liitetiedostot" .
+        "&from=yllapito" .
+        "&haku[7]=@sarjanumeroseuranta" .
+        "&haku[8]=@{$muutarow["tunnus"]}" .
+        "&lukitse_avaimeen={$muutarow["tunnus"]}" .
+        "&lukitse_laji=sarjanumeroseuranta'></iFrame>";
     }
     else {
       echo t("Muutettava sarjanumero on kadonnut")."!!!!<br>";
@@ -1234,22 +1234,22 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
     echo "<tr>";
     echo "<td valign='top'>
             <a href='$PHP_SELF" .
-                 "?toiminto=MUOKKAA" .
-                 "&$tunnuskentta=$rivitunnus" .
-                 "&from=$from" .
-                 "&aputoim=$aputoim" .
-                 "&otunnus=$otunnus" .
-                 "&sarjatunnus=$sarjarow[tunnus]" .
-                 "&sarjanumero_haku=$sarjanumero_haku" .
-                 "&tuoteno_haku=".urlencode($tuoteno_haku)."" .
-                 "&nimitys_haku=$nimitys_haku" .
-                 "&varasto_haku=$varasto_haku" .
-                 "&ostotilaus_haku=$ostotilaus_haku" .
-                 "&myyntitilaus_haku=$myyntitilaus_haku" .
-                 "&lisatieto_haku=$lisatieto_haku" .
-                 "&muut_siirrettavat=$muut_siirrettavat'>".
-              strtoupper($sarjarow["sarjanumero"]).
-           "</a>
+      "?toiminto=MUOKKAA" .
+      "&$tunnuskentta=$rivitunnus" .
+      "&from=$from" .
+      "&aputoim=$aputoim" .
+      "&otunnus=$otunnus" .
+      "&sarjatunnus=$sarjarow[tunnus]" .
+      "&sarjanumero_haku=$sarjanumero_haku" .
+      "&tuoteno_haku=".urlencode($tuoteno_haku)."" .
+      "&nimitys_haku=$nimitys_haku" .
+      "&varasto_haku=$varasto_haku" .
+      "&ostotilaus_haku=$ostotilaus_haku" .
+      "&myyntitilaus_haku=$myyntitilaus_haku" .
+      "&lisatieto_haku=$lisatieto_haku" .
+      "&muut_siirrettavat=$muut_siirrettavat'>".
+      strtoupper($sarjarow["sarjanumero"]).
+      "</a>
             <a name='$sarjarow[sarjanumero]'></a>";
 
     if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {

@@ -167,7 +167,7 @@ if (!function_exists("toimitustapatarkista")) {
     if ($trow and (mysql_field_name($result, $i) == "vak_kielto") and ($t[$i] != "")) {
       $query = "SELECT count(*) AS count
                 FROM toimitustapa
-                WHERE yhtio = '{$kukarow["yhtio"]}'
+                WHERE yhtio                         = '{$kukarow["yhtio"]}'
                 AND vaihtoehtoinen_vak_toimitustapa = '{$trow["selite"]}'";
       $tt_count = pupe_query($query);
       $tt_count = mysql_fetch_assoc($tt_count);
@@ -175,7 +175,7 @@ if (!function_exists("toimitustapatarkista")) {
 
       if ($tt_count > 0) {
         $virhe[$i] = t("Et voi asettaa toimitustavalle VAK-kieltoa, sillä muut toimitustavat " .
-                       "käyttävät tätä toimitustapaa vaihtoehtoisena VAK-toimitustapana");
+          "käyttävät tätä toimitustapaa vaihtoehtoisena VAK-toimitustapana");
       }
     }
 

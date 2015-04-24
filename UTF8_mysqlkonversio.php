@@ -1,11 +1,11 @@
 <?php
 
-require('inc/connect.inc');
-require('inc/functions.inc');
+require 'inc/connect.inc';
+require 'inc/functions.inc';
 
-$hname 		  = php_uname('n');
-$timeparts	= explode(" ",microtime());
-$starttime	= $timeparts[1].substr($timeparts[0],1);
+$hname       = php_uname('n');
+$timeparts  = explode(" ", microtime());
+$starttime  = $timeparts[1].substr($timeparts[0], 1);
 
 echo "\nSTART: $hname :$dbkanta\n";
 
@@ -55,8 +55,8 @@ while ($tables = mysql_fetch_row($tabresult)) {
     }
 
     $sql = "ALTER TABLE $tables[0] DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
-		pupe_query($sql);
+    pupe_query($sql);
 
-  	echo "$sql\n";
+    echo "$sql\n";
   }
 }

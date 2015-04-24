@@ -732,7 +732,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       }
     }
     elseif ($toim == "BIO") {
-      # V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
+      // V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
       $ostoehdotus = $enp - ($saldot + $ostot);
 
       if ($ostoehdotus < 0) {

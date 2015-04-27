@@ -405,20 +405,22 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         if ($toim == "PERHE") {
           $querylisa = "ohita_kerays = '{$ohita_kerays}',";
         }
+        elseif ($toim == "RESEPTI") {
+          $querylisa = "piirustusnumero = '{$piirustusnumero}',
+                        osanumero       = '{$osanumero}',
+                        positiokentta   = '{$positiokentta}',";
+        }
 
         $query  .= "  tuoteperhe set
-                isatuoteno      = '{$isatrow['tuoteno']}',
-                tuoteno         = '{$laptrow['tuoteno']}',
-                kerroin         = '$kerroin',
-                omasivu         = '$kpl2',
-                hintakerroin    = '$hintakerroin',
-                alekerroin      = '$alekerroin',
-                #rivikommentti  = '$rivikommentti',
-                yhtio           = '$kukarow[yhtio]',
-                tyyppi          = '$hakutyyppi',
-                piirustusnumero = '{$piirustusnumero}',
-                osanumero       = '{$osanumero}',
-                positiokentta   = '{$positiokentta}',
+                isatuoteno     = '{$isatrow['tuoteno']}',
+                tuoteno        = '{$laptrow['tuoteno']}',
+                kerroin        = '$kerroin',
+                omasivu        = '$kpl2',
+                hintakerroin   = '$hintakerroin',
+                alekerroin     = '$alekerroin',
+                #rivikommentti = '$rivikommentti',
+                yhtio          = '$kukarow[yhtio]',
+                tyyppi         = '$hakutyyppi',
                 {$querylisa}
                 ei_nayteta     = '$ei_nayteta'
                 $postq";

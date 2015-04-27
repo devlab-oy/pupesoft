@@ -7,8 +7,6 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
-echo "<script src='js/tuoteperhe.js'></script>";
-
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -18,6 +16,8 @@ if ($livesearch_tee == "TUOTEHAKU") {
   livesearch_tuotehaku();
   exit;
 }
+
+echo "<script src='js/tuoteperhe.js'></script>";
 
 // Enaboidaan ajax kikkare
 enable_ajax();

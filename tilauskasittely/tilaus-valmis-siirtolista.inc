@@ -313,7 +313,10 @@ else {
             if (isset($split_toimitustapa)) {
               $values .= ", '$split_toimitustapa'";
             }
-            break;
+            else {
+              $values .= ", '" . $laskurow[$fieldname] . "'";
+            }
+          break;
           case 'kate_korjattu':
             $values .= ", NULL";
             break;

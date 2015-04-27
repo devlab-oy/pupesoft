@@ -31259,10 +31259,10 @@ if (!function_exists("piirra_maksupaate_formi")) {
     $query_maksuehto = "SELECT *
                         FROM maksuehto
                         WHERE yhtio='{$kukarow["yhtio"]}'
-                        AND kateinen != ''
-                        AND kaytossa  = ''
+                        AND kateinen                 != ''
+                        AND kaytossa                  = ''
                         AND (maksuehto.sallitut_maat = ''
-                          OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
+                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')";
 
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
@@ -31379,10 +31379,10 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
     $query = "SELECT *
               FROM maksupaatetapahtumat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausnumero = '{$tilausnumero}'
-              AND maksutapa != ''
-              AND tila IN ('K', 'H')";
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND tilausnumero  = '{$tilausnumero}'
+              AND maksutapa    != ''
+              AND tila          IN ('K', 'H')";
 
     $result = pupe_query($query);
 

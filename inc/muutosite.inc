@@ -42,7 +42,7 @@ $trow = mysql_fetch_assoc($result);
 $query = "SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
           GROUP_CONCAT(DISTINCT oletus_kulutili) kulutilit
           FROM yriti
-          WHERE yhtio = '{$kukarow['yhtio']}'
+          WHERE yhtio  = '{$kukarow['yhtio']}'
           AND kaytossa = ''";
 $tilit_chk_res = pupe_query($query);
 $tilit_chk_row = mysql_fetch_assoc($tilit_chk_res);
@@ -294,16 +294,16 @@ if ($kukarow['taso'] != 1) {
 
   //Täällä päivitetään muun tositteen pvm
   if ($tila == 'P') {
-    
+
     // Päivitetään myyntilaskulle "popvm"-jotta me saadaan osittain käteisellä maksetut laskut
     // näkymään käteismyynnit-raportissa oikealla päivällä vaikka mapvm on nolla
     // Tämä siis vain jos myyntlaskun popvm oli ennestään setattu
     $query = "UPDATE lasku
               SET tapvm = '$vv-$kk-$pp',
-              popvm = if (tila = 'U' and popvm > 0, '$vv-$kk-$pp', popvm)
+              popvm        = if (tila = 'U' and popvm > 0, '$vv-$kk-$pp', popvm)
               WHERE tunnus = '$tunnus'
-              AND yhtio = '$kukarow[yhtio]'
-              AND tapvm = '$trow[tapvm]'";
+              AND yhtio    = '$kukarow[yhtio]'
+              AND tapvm    = '$trow[tapvm]'";
     $result = pupe_query($query);
 
     $query = "LOCK table tiliointi WRITE";

@@ -27,13 +27,13 @@ elseif (@include "parametrit.inc");
 else exit;
 
 if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" or
-                                      ($kukarow["dynaaminen_kassamyynti"] == "" and
-                                       $yhtiorow["dynaaminen_kassamyynti"] != ""))
+    ($kukarow["dynaaminen_kassamyynti"] == "" and
+      $yhtiorow["dynaaminen_kassamyynti"] != ""))
 ) {
   $paivita_kassalipas_query = "UPDATE lasku
                                SET kassalipas = '{$kertakassa}'
                                WHERE yhtio = '{$kukarow["yhtio"]}'
-                               AND tunnus = '{$kukarow["kesken"]}'";
+                               AND tunnus  = '{$kukarow["kesken"]}'";
 
   pupe_query($paivita_kassalipas_query);
 
@@ -41,8 +41,8 @@ if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" o
 }
 
 $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
-                            $kukarow["maksupaate_kassamyynti"] == "") or
-                           $kukarow["maksupaate_kassamyynti"] == "K");
+    $kukarow["maksupaate_kassamyynti"] == "") or
+  $kukarow["maksupaate_kassamyynti"] == "K");
 
 if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
   require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
@@ -797,8 +797,8 @@ if ((int) $kukarow["kesken"] > 0) {
       jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
 
     if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
-                                    ($kateismaksu["luottokortti"] != 0 or
-                                     $kateismaksu["pankkikortti"] != 0)
+      ($kateismaksu["luottokortti"] != 0 or
+        $kateismaksu["pankkikortti"] != 0)
     ) {
       $tee = "VALMIS";
       $seka = "kylla";
@@ -1382,7 +1382,7 @@ if ($tee == "VALMIS"
         echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
         echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
         echo "<td><input type='submit' value='" .
-             t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV") . "'></td>";
+          t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV") . "'></td>";
         echo "</form>";
       }
 
@@ -1860,7 +1860,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       }
 
       if ($maksupaate_kassamyynti and
-          $maksuehtorow["kateinen"] != "" and $kateismaksu["kateinen"] != ""
+        $maksuehtorow["kateinen"] != "" and $kateismaksu["kateinen"] != ""
       ) {
         $kateista_takaisin = $kateista_annettu - $kateismaksu["kateinen"];
 
@@ -1883,14 +1883,14 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       }
 
       if (($kukarow["kassamyyja"] != '' or
-           $kukarow["dynaaminen_kassamyynti"] != "" or
-           $yhtiorow["dynaaminen_kassamyynti"] != "") and
-          $kateinen != '' and
-          $kukarow['extranet'] == '' and
-          $kateisohitus == "" and
-          (($yhtiorow["maksupaate_kassamyynti"] == "" and
+          $kukarow["dynaaminen_kassamyynti"] != "" or
+          $yhtiorow["dynaaminen_kassamyynti"] != "") and
+        $kateinen != '' and
+        $kukarow['extranet'] == '' and
+        $kateisohitus == "" and
+        (($yhtiorow["maksupaate_kassamyynti"] == "" and
             $kukarow["maksupaate_kassamyynti"] == "") or
-           $kukarow["maksupaate_kassamyynti"] == "E")
+          $kukarow["maksupaate_kassamyynti"] == "E")
       ) {
         echo "  <script type='text/javascript' language='JavaScript'>
             <!--
@@ -6101,10 +6101,10 @@ if ($tee == '') {
 
       if ($vakit_eri_tilaukselle) {
         echo "<br><font class='error'>" . t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita") .
-             "! ($toimtapa_kv)</font><br>";
+          "! ($toimtapa_kv)</font><br>";
         echo "<font class='error'>$toimtapa_kv " .
-             t("toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
-             " {$vak_toimitustapa}.</font> ";
+          t("toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+          " {$vak_toimitustapa}.</font> ";
       }
       elseif ($kukarow['extranet'] == '') {
         // jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
@@ -9371,7 +9371,7 @@ if ($tee == '') {
 
             if (!$loytyy_maksutapahtumia) {
               echo "<td class='back' colspan='2'><input type='submit' value='" . t("Jyvit‰") .
-                   "' $state></form></td>";
+                "' $state></form></td>";
             }
             else {
               echo "</form>";
@@ -9567,19 +9567,19 @@ if ($tee == '') {
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
     if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "" and
-                                    ($muokkauslukko == "" or $toim == "PROJEKTI" or
-                                     $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
-                                                              $tilausok == 0 and
-                                                              $rivilaskuri > 0 and
-                                                              $asiakasOnProspekti != "JOO"
+      ($muokkauslukko == "" or $toim == "PROJEKTI" or
+        $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
+      $tilausok == 0 and
+      $rivilaskuri > 0 and
+      $asiakasOnProspekti != "JOO"
     ) {
       $kateinen = isset($kateinen) ? $kateinen : "";
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       $korttimaksutapahtuman_status =
         isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
       piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
-                              $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-                              $korttimaksutapahtuman_status);
+        $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+        $korttimaksutapahtuman_status);
     }
 
     echo "<br><table width='100%'><tr>$jarjlisa";

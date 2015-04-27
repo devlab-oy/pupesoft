@@ -407,15 +407,18 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         }
 
         $query  .= "  tuoteperhe set
-                isatuoteno     = '{$isatrow['tuoteno']}',
-                tuoteno        = '{$laptrow['tuoteno']}',
-                kerroin        = '$kerroin',
-                omasivu        = '$kpl2',
-                hintakerroin   = '$hintakerroin',
-                alekerroin     = '$alekerroin',
-                #rivikommentti = '$rivikommentti',
-                yhtio          = '$kukarow[yhtio]',
-                tyyppi         = '$hakutyyppi',
+                isatuoteno      = '{$isatrow['tuoteno']}',
+                tuoteno         = '{$laptrow['tuoteno']}',
+                kerroin         = '$kerroin',
+                omasivu         = '$kpl2',
+                hintakerroin    = '$hintakerroin',
+                alekerroin      = '$alekerroin',
+                #rivikommentti  = '$rivikommentti',
+                yhtio           = '$kukarow[yhtio]',
+                tyyppi          = '$hakutyyppi',
+                piirustusnumero = '{$piirustusnumero}',
+                osanumero       = '{$osanumero}',
+                positiokentta   = '{$positiokentta}',
                 {$querylisa}
                 ei_nayteta     = '$ei_nayteta'
                 $postq";
@@ -1288,6 +1291,18 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "</option>";
 
             echo "</select>";
+            echo "</td>";
+
+            echo "<td>";
+            echo "<input type='text' name='piirustusnumero' value='{$prow["piirustusnumero"]}'>";
+            echo "</td>";
+
+            echo "<td>";
+            echo "<input type='text' name='osanumero' value='{$prow["osanumero"]}'>";
+            echo "</td>";
+
+            echo "<td>";
+            echo "<input type='text' name='positiokentta' value='{$prow["positiokentta"]}'>";
             echo "</td>";
           }
 

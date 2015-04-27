@@ -1453,7 +1453,8 @@ elseif ($tee == "") {
     $lisa1 .= " and tuoteperhe.tuoteno like '%$tuoteno_haku%' ";
   }
 
-  $query = "SELECT DISTINCT tuoteperhe.isatuoteno
+  if ($toim == "RESEPTI") {
+    $query = "SELECT DISTINCT tuoteperhe.isatuoteno
             FROM tuoteperhe
             INNER JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
               AND ti.tuoteno = tuoteperhe.isatuoteno)
@@ -1464,6 +1465,28 @@ elseif ($tee == "") {
             ORDER BY tuoteperhe.isatuoteno
             {$lisalimit}
             {$limitteri}";
+  }
+  else {
+    $query = "SELECT tuoteperhe.isatuoteno,
+              ti.nimitys,
+              group_concat(
+                concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) ORDER BY tuoteperhe.tuoteno,
+                tuoteperhe.tunnus separator '<br>') AS tuotteet
+              FROM tuoteperhe
+              JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
+                AND ti.tuoteno       = tuoteperhe.isatuoteno)
+              JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
+                AND tl.tuoteno       = tuoteperhe.tuoteno)
+              WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+              AND tuoteperhe.tyyppi  = '$hakutyyppi'
+              $lisa1
+              GROUP BY tuoteperhe.isatuoteno
+              ORDER BY $lisalimit
+              tuoteperhe.isatuoteno,
+              tuoteperhe.tuoteno
+              $limitteri";
+  }
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1488,18 +1511,26 @@ elseif ($tee == "") {
     while ($prow = mysql_fetch_array($result)) {
       $_isatuoteno = urlencode($prow["isatuoteno"]);
       $_href = "{$PHP_SELF}?toim={$toim}&isatuoteno={$_isatuoteno}&hakutuoteno={$_isatuoteno}";
-      $tuoteperhe = hae_tuoteperhe($prow["isatuoteno"]);
-      $tuoteperhe = reset($tuoteperhe);
 
       echo "<tr class='aktiivi'>";
-      echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$tuoteperhe["nimitys"]}</a></td>";
-      echo "<td>";
 
-      $tuoteperhe = $tuoteperhe["lapset"];
+      if ($toim == "RESEPTI") {
+        $tuoteperhe = hae_tuoteperhe($prow["isatuoteno"]);
+        $tuoteperhe = reset($tuoteperhe);
 
-      piirra_tuoteperhe($tuoteperhe);
+        echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$tuoteperhe["nimitys"]}</a></td>";
+        echo "<td>";
 
-      echo "</td>";
+        $tuoteperhe = $tuoteperhe["lapset"];
+
+        piirra_tuoteperhe($tuoteperhe);
+
+        echo "</td>";
+      }
+      else {
+        echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$prow["nimitys"]}</a></td>";
+        echo "<td>{$prow["tuotteet"]} {$prow["nimitykset"]}</td>";
+      }
       echo "</tr>";
     }
 

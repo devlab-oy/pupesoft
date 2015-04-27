@@ -70,6 +70,24 @@ $suuntalavat_res = pupe_query($query);
 if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
   if (empty($suuntalava)) $errors[] = t("Valitse suuntalava");
 
+  if (!empty($sscc) and $submit == "hae") {
+    $_sscc = mysql_escape_string($sscc);
+
+    $query = " SELECT *
+               FROM suuntalavat
+               WHERE suuntalavat.yhtio = '{$kukarow['yhtio']}'
+               AND suuntalavat.tila IN ('', 'S', 'P')
+               AND suuntalavat.sscc = '{$_sscc}'";
+    $_chk_res = pupe_query($query);
+
+    if (mysql_num_rows($_chk_res) == 1) {
+      $_chk_row = mysql_fetch_assoc($_chk_res);
+      $suuntalava = $_chk_row['tunnus'];
+      $submit = "ok";
+      $errors = array();
+    }
+  }
+
   // Rivi suuntalavalle
   if (($submit == 'ok' or $submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') and count($errors) == 0) {
 

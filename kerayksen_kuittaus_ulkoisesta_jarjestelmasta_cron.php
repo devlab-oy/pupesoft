@@ -93,98 +93,100 @@ if ($handle = opendir($path)) {
 
           $kerayspoikkeama = array();
 
-          foreach ($xml->CustPackingSlip->Lines as $line) {
+          if ($laskurow["alatila"] != "X") {
+            foreach ($xml->CustPackingSlip->Lines as $line) {
 
-            $tilausrivin_tunnus = (int) $line->TransId;
-            $eankoodi = mysql_real_escape_string($line->ItemNumber);
-            $keratty = (float) $line->DeliveredQuantity;
+              $tilausrivin_tunnus = (int) $line->TransId;
+              $eankoodi = mysql_real_escape_string($line->ItemNumber);
+              $keratty = (float) $line->DeliveredQuantity;
 
-            $query = "SELECT *
-                      FROM tilausrivi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus  = '{$tilausrivin_tunnus}'";
-            $tilausrivi_res = pupe_query($query);
-            $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
+              $query = "SELECT *
+                        FROM tilausrivi
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = '{$tilausrivin_tunnus}'";
+              $tilausrivi_res = pupe_query($query);
+              $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
-            $varattuupdate = "";
+              $varattuupdate = "";
 
-            // Verkkokaupassa etuk‰teen maksettu tuote!
-            if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
-              $a = (int) ($tilausrivi_row['tilkpl'] * 10000);
-              $b = (int) ($keratty * 10000);
+              // Verkkokaupassa etuk‰teen maksettu tuote!
+              if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
+                $a = (int) ($tilausrivi_row['tilkpl'] * 10000);
+                $b = (int) ($keratty * 10000);
 
-              if ($a != $b) {
-                $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
-                $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+                if ($a != $b) {
+                  $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
+                  $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+                }
               }
+              else {
+                // Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
+                $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
+              }
+
+              if ($laskurow["tila"] == "G") {
+                $toimitettu_lisa = "";
+              }
+              else {
+                $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
+                                      tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
+              }
+
+              $query = "UPDATE tilausrivi
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
+                        SET tilausrivi.keratty = '{$kukarow['kuka']}',
+                        tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
+                        {$toimitettu_lisa}
+                        {$varattuupdate}
+                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
+              pupe_query($query);
+
+              $query = "SELECT SUM(tuote.tuotemassa) paino
+                        FROM tilausrivi
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
+              $painores = pupe_query($query);
+              $painorow = mysql_fetch_assoc($painores);
+
+              $tuotteiden_paino += $painorow['paino'];
             }
-            else {
-              // Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
-              $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
-            }
+
+            $query  = "INSERT INTO rahtikirjat SET
+                       kollit         = 1,
+                       kilot          = {$tuotteiden_paino},
+                       pakkaus        = '',
+                       pakkauskuvaus  = '',
+                       rahtikirjanro  = '',
+                       otsikkonro     = '{$otunnus}',
+                       tulostuspaikka = '{$laskurow['varasto']}',
+                       yhtio          = '{$kukarow['yhtio']}',
+                       viesti         = ''";
+            $result_rk = pupe_query($query);
 
             if ($laskurow["tila"] == "G") {
-              $toimitettu_lisa = "";
+              $tilalisa = "tila = 'G', alatila = 'C'";
             }
             else {
-              $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                                    tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
+              $tilalisa = "tila = 'L', alatila = 'D'";
             }
 
-            $query = "UPDATE tilausrivi
-                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
-                      SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                      tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
-                      {$toimitettu_lisa}
-                      {$varattuupdate}
-                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
-            pupe_query($query);
+            $query = "UPDATE lasku SET
+                      {$tilalisa}
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$laskurow['tunnus']}'";
+            $upd_res = pupe_query($query);
 
-            $query = "SELECT SUM(tuote.tuotemassa) paino
-                      FROM tilausrivi
-                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
-            $painores = pupe_query($query);
-            $painorow = mysql_fetch_assoc($painores);
-
-            $tuotteiden_paino += $painorow['paino'];
+            // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+            $query = "UPDATE lasku SET
+                      alatila      = 'X'
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      AND tunnus   = '$laskurow[tunnus]'
+                      AND mapvm   != '0000-00-00'
+                      AND chn      = '999'";
+            $yoimresult  = pupe_query($query);
           }
-
-          $query  = "INSERT INTO rahtikirjat SET
-                     kollit         = 1,
-                     kilot          = {$tuotteiden_paino},
-                     pakkaus        = '',
-                     pakkauskuvaus  = '',
-                     rahtikirjanro  = '',
-                     otsikkonro     = '{$otunnus}',
-                     tulostuspaikka = '{$laskurow['varasto']}',
-                     yhtio          = '{$kukarow['yhtio']}',
-                     viesti         = ''";
-          $result_rk = pupe_query($query);
-
-          if ($laskurow["tila"] == "G") {
-            $tilalisa = "tila = 'G', alatila = 'C'";
-          }
-          else {
-            $tilalisa = "tila = 'L', alatila = 'D'";
-          }
-
-          $query = "UPDATE lasku SET
-                    {$tilalisa}
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$laskurow['tunnus']}'";
-          $upd_res = pupe_query($query);
-
-          // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
-          $query = "UPDATE lasku SET
-                    alatila      = 'X'
-                    WHERE yhtio  = '$kukarow[yhtio]'
-                    AND tunnus   = '$laskurow[tunnus]'
-                    AND mapvm   != '0000-00-00'
-                    AND chn      = '999'";
-          $yoimresult  = pupe_query($query);
 
           if (count($kerayspoikkeama) != 0) {
 

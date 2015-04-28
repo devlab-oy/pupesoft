@@ -409,10 +409,12 @@ if (!function_exists('alku')) {
     $rivi_ind++;
 
     if ($laskutyyppi == 20) {
+      $lahetysmaa = hae_maa(array("maakoodi" => $laskurow["maa_lahetys"]));
+      $lahetysmaa = $lahetysmaa["nimi"];
+
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Lähetys-/Vientimaa", $kieli),
                             $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["maa_lahetys"], $page_lasku[$sivu],
-                            $norm);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $lahetysmaa, $page_lasku[$sivu], $norm);
 
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Poistumistoimipaikka", $kieli),
                             $page_lasku[$sivu], $pieni);

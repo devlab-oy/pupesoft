@@ -1800,6 +1800,16 @@ if (!function_exists('loppu')) {
       $pdf_lasku->draw_text(30, 132+$vientikala+$barcode_korkeus, $allekirjoitus_row['asema'], $thispage, $norm);
     }
 
+    if ($laskutyyppi == 20) {
+      $pdf_lasku->draw_rectangle(130 + $vientikala + $barcode_korkeus, 207,
+                                 110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+      $pdf_lasku->draw_text(217, 122 + $vientikala + $barcode_korkeus, t("Lisätietoja", $kieli),
+                            $thispage, $pieni);
+      $pdf_lasku->draw_text(217, 112 + $vientikala + $barcode_korkeus,
+                            pdf_substr($laskurow["comments"], 363, $pdf_lasku, $norm), $thispage,
+                            $norm);
+    }
+
     if (!kyseessa_eramaksu($laskurow)) {
       //yhteensärivi
       $pdf_lasku->draw_rectangle(110 + $vientikala + $barcode_korkeus, 20,

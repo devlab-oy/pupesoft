@@ -436,9 +436,6 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
       $sanoma = laadi_edifact_sanoma($parametrit, $korjaus);
 
-      echo $sanoma,'<hr>';
-
-
     }
 
     if (laheta_sanoma($sanoma)) {

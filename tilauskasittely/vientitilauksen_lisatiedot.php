@@ -40,6 +40,8 @@ if ($tapa == "tuonti" and $tee != "") {
               aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
               poistumistoimipaikka             = '$poistumistoimipaikka',
               poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
+              aiotut_rajatoimipaikat           = '$aiotut_rajatoimipaikat',
+              maaratoimipaikka                 = '$maaratoimipaikka',
               bruttopaino                      = '$bruttopaino',
               lisattava_era                    = '$lisattava_era',
               vahennettava_era                 = '$vahennettava_era',
@@ -265,6 +267,8 @@ elseif ($tee != "") {
                 aktiivinen_kuljetus_kansallisuus= '$aktiivinen_kuljetus_kansallisuus',
                 poistumistoimipaikka           = '$poistumistoimipaikka',
                 poistumistoimipaikka_koodi     = '$poistumistoimipaikka_koodi',
+                aiotut_rajatoimipaikat         = '$aiotut_rajatoimipaikat',
+                maaratoimipaikka               = '$maaratoimipaikka',
                 bruttopaino                    = '$bruttopaino',
                 lisattava_era                  = '$lisattava_era',
                 vahennettava_era               = '$vahennettava_era',
@@ -555,6 +559,18 @@ elseif ($tee != "") {
     echo "<th>44.</th>";
     echo "<th>".t("Lis‰tiedot")."</th>";
     echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>51.</th>";
+    echo "<th>" . t("Aiotut rajatoimipaikat (ja maat)") . "</th>";
+    echo "<td><input type='text' name='aiotut_rajatoimipaikat' style='width:300px;' value='$laskurow[aiotut_rajatoimipaikat]'></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>53.</th>";
+    echo "<th>" . t("M‰‰r‰toimipaikka (ja maa)") . "</th>";
+    echo "<td><input type='text' name='maaratoimipaikka' style='width:300px;' value='$laskurow[maaratoimipaikka]'></td>";
     echo "</tr>";
 
     echo "</table>";

@@ -102,6 +102,36 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
   return $rullat_ja_kontit;
 }
 
+function bookkauksen_poisto($kombo) {
+  global $kukarow;
+
+  $query = "SELECT data
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND selite = '{$kombo}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+  else {
+
+    $sanoma = mysql_result($result, 0);
+    $segmentit = explode("'", $sanoma);
+
+    foreach ($segmentit as $key => $segmentti) {
+      if (substr($segmentti, 0, 8) == "BGM+335+") {
+       $segmentit[$key] = substr($segmentti, 0, -1) . '1';
+      }
+    }
+
+    $sanoma = implode("'", $segmentit);
+
+    kasittele_bookkaussanoma($sanoma);
+    return true;
+  }
+}
+
 function laheta_sanoma($sanoma) {
 
   // ei l‰hetell‰ sanomia muualla kuin tuotannossa
@@ -862,7 +892,7 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
     $segmentit++;
 
     // LOC -segmentti
-    $s .= "LOC+8+XXX::86:". $kuljettaja_info['maaranpaa'] ."'";
+    $s .= "LOC+8+". $kuljettaja_info['maaranpaakoodi'] ."::86:". $kuljettaja_info['maaranpaa'] ."'";
     $segmentit++;
   }
 
@@ -936,7 +966,7 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   elseif ($laji == 'rekkakontitus') {
 
     // LOC+5 -segmentti (l‰htˆ-infoa)
-    $s .= "LOC+5+FIKTMU::86:KOTKA+FIKTMU::86:MUSSALO'";
+    $s .= "LOC+5+FIKTMU::86:KOTKA'";
     $segmentit++;
 
     // EQD+CN -segmentti (kontti-infoa)
@@ -1379,9 +1409,7 @@ function kasittele_bookkaussanoma($edi_data) {
     $peruutusparametrit = array(
       'rullamaara' => $rullamaara,
       'tilausnro' => $tilausnro,
-      'rivinro' => $rivinro,
-      'konttiviite' => $konttiviite,
-      'matkakoodi' => $matkakoodi
+      'rivinro' => $rivinro
       );
 
     peruuta_bookkaus($peruutusparametrit);
@@ -2544,7 +2572,6 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
 
       $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Reel Number: {$rulla['juoksu']}\n";
 
-      //$pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
 
     $pakkalista = serialize($pakkalista);
@@ -2552,7 +2579,6 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
 
     $konttilista = rtrim($konttilista, ',');
 
-    $kontit[$konttinumero]['lista'] = $konttilista;
     $kontit[$konttinumero]['paino'] = $konttipaino;
     $kontit[$konttinumero]['mrn'] = $mrn;
     $kontit[$konttinumero]['kpl'] = count($kontti);
@@ -2561,6 +2587,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
     $kontit[$konttinumero]['taara'] = $taara;
     $kontit[$konttinumero]['isokoodi'] = $isokoodi;
     $kontit[$konttinumero]['pakkalista'] = $pakkalista;
+    $kontit[$konttinumero]['lista'] = $konttilista;
   }
 
   return $kontit;
@@ -2821,30 +2848,33 @@ function muuta_bookkaus($muutosparametrit) {
   pupe_query($update_query);
 }
 
-
 function peruuta_bookkaus($peruutusparametrit) {
   global $kukarow;
-
   extract($peruutusparametrit);
 
   $kombo = $tilausnro.":".$rivinro;
 
   $query = "SELECT
-            count(tr.tunnus) AS rullia,
             lasku.asiakkaan_tilausnumero,
-            lasku.tunnus
+            lasku.tunnus,
+            COUNT(tr.tunnus) AS kaikki_rullat,
+            GROUP_CONCAT(IF(trlt.asiakkaan_rivinumero = '{$rivinro}', tr.tunnus, NULL)) AS poistettavat_myyntirivitunnukset
             FROM lasku
             LEFT JOIN tilausrivi AS tr
               ON tr.yhtio = lasku.yhtio
               AND tr.otunnus = lasku.tunnus
+            LEFT JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = lasku.yhtio
+              AND trlt.tilausrivitunnus = tr.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_tilausnumero = '{$tilausnro}'
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
             AND tilaustyyppi = 'N'
             GROUP BY lasku.tunnus";
-  $result = pupe_query($query);
+  $result = pupe_query($query);echo $query;die;
   $laskuinfo = mysql_fetch_assoc($result);
 
-  if (mysql_num_rows($result) == 1 and $laskuinfo['rullia'] == 0) {
+  if (mysql_num_rows($result) == 1 and $laskuinfo['kaikki_rullat'] == 0) {
+
 
     // Vain yksi lasku, ei rullia, tutkitaan lis‰‰...
     $query = "SELECT
@@ -2855,9 +2885,11 @@ function peruuta_bookkaus($peruutusparametrit) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND kayttotarkoitus = 'bookkaussanoma'
               AND selite LIKE '{$tilausnro}:%'";
-    $result = pupe_query($query);
+    $result = pupe_query($query);echo $query;die;
 
     $liiteinfo = mysql_fetch_assoc($result);
+
+
 
     // yksi tilaus ja yksi rivi: poistetaan...
     if ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] == 1) {
@@ -2879,56 +2911,62 @@ function peruuta_bookkaus($peruutusparametrit) {
     }
     elseif ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] > 1) {
 
-      // myˆs muita rivej‰, v‰hennet‰‰n t‰m‰n rivin rullat kokonaism‰‰r‰st‰
-      $query = "SELECT rullamaara
-                FROM laskun_lisatiedot
+      // myˆs muita rivej‰, v‰hennet‰‰n bookkauksen rullam‰‰r‰ kokonaism‰‰r‰st‰
+      $query = "UPDATE laskun_lisatiedot
+                SET rullamaara = rullamaara - '{$rullamaara}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = '{$liiteinfo['laskutunnukset']}'";
-      $result = pupe_query($query);
-      $rullainfo = mysql_fetch_assoc($result);
+      pupe_query($query);
 
-      if ($rullainfo['rullamaara'] > $rullamaara) {
-
-        $uusi_rullamaara = $rullainfo['rullamaara'] - $rullamaara;
-
-        $query = "UPDATE laskun_lisatiedot
-                  SET rullamaara = '{$uusi_rullamaara}'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$liiteinfo['laskutunnukset']}'";
-        pupe_query($query);
-      }
+      // poistetaan liite
+      $query = "DELETE FROM liitetiedostot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND selite = '{$kombo}'";
+      pupe_query($query);
     }
     else {
-
       // jokin on vialla, ei tehd‰ mit‰‰n
       return false;
     }
   }
-  elseif (mysql_num_rows($result) == 1 and $laskuinfo['rullia'] > 0) {
+  elseif (mysql_num_rows($result) == 1 and $laskuinfo['omat_rullat'] > 0) {
 
-    // yksi lasku, rullia, muutetaan tilaus bookkauksettomaksi
-    $muutos = "UPDATE lasku
-                SET sisviesti1 = ''
+    if ($laskuinfo['muut_rullat'] > 0) {
+      // v‰hennet‰‰n bookkauksen rullam‰‰r‰ kokonaism‰‰r‰st‰
+      $muutos = "UPDATE laskun_lisatiedot
+                 SET rullamaara = rullamaara - {$laskuinfo['omat_rullat']}
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND otunnus = '{$laskuinfo['tunnus']}'";
+      pupe_query($muutos);
+    }
+    else {
+      // ei muita rullia, poistetaan myyntitilaus ja lisatiedot
+      $query = "DELETE FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus = '{$laskuinfo['tunnus']}'";
-    pupe_query($muutos);
+      pupe_query($query);
 
-    $muutos = "UPDATE laskun_lisatiedot SET
-                konttiviite = 'bookkaukseton',
-                rullamaara = 0,
-                konttimaara = 0,
-                konttityyppi = '',
-                matkatiedot = '',
-                matkakoodi = 'bookkaukseton'
+      $query = "DELETE FROM laskun_lisatiedot
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = '{$laskuinfo['tunnus']}'";
-    pupe_query($muutos);
+      pupe_query($query);
+    }
+
+    // poistetaan bookkauksen myyntirivit ja lisatiedot
+    $query = "DELETE FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus IN ({$laskuinfo['poistettavat_myyntirivitunnukset']})";
+    pupe_query($query);
+
+    $query = "DELETE FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus IN ({$laskuinfo['poistettavat_myyntirivitunnukset']})";
+    pupe_query($query);
 
     $query = "DELETE FROM liitetiedostot
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND selite = '{$kombo}'";
     pupe_query($query);
-
   }
   else {
     return false;

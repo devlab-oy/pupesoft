@@ -311,6 +311,11 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
     if (empty($maaranpaa)) {
       $errors['maaranpaa'] = t("Syötä määränpää!");
     }
+
+    if (empty($maaranpaakoodi)) {
+      $errors['maaranpaakoodi'] = t("Syötä määränpää-koodi!");
+    }
+
   }
   else {
 
@@ -410,7 +415,8 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
           'nimi' => $nimi,
           'auto_rekno' => $rekisterinumero,
           'traileri_rekno' => $rekisterinumero_traileri,
-          'maaranpaa' => $maaranpaa
+          'maaranpaa' => $maaranpaa,
+          'maaranpaakoodi' => $maaranpaakoodi
           );
 
         $parametrit['kuljettaja_info'] = $kuljettaja_info;
@@ -429,6 +435,10 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       }
 
       $sanoma = laadi_edifact_sanoma($parametrit, $korjaus);
+
+      echo $sanoma,'<hr>';
+
+
     }
 
     if (laheta_sanoma($sanoma)) {
@@ -703,7 +713,11 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
       <td><input type='text' name='maaranpaa' value='{$maaranpaa}' /></td>
       <td class='back error'>{$errors['maaranpaa']}</td>
     </tr>
-    <tr>";
+    <tr>
+      <th>" . t("Määränpää-koodi") ."</th>
+      <td><input type='text' name='maaranpaakoodi' value='{$maaranpaakoodi}' /></td>
+      <td class='back error'>{$errors['maaranpaakoodi']}</td>
+    </tr>";
 
   }
   else {
@@ -742,22 +756,6 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   <tr>
     <th>" . t("Paino") ."</th>
     <td>{$paino} kg</td>
-    <td class='back'></td>
-  </tr>
-  <tr>
-    <th>" . t("Kuljetustyypin vaihto") ."</th>
-    <td>";
-
-    if (isset($rekkakuljetukseksi) or $kuljetustyyppi == 'rekka') {
-      echo "<input type='submit' disabled  value='". t("Rekka") ."' />";
-      echo "<input type='submit' name='konttikuljetukseksi' value='". t("Kontti") ."' />";
-    }
-    else {
-      echo "<input type='submit' name='rekkakuljetukseksi' value='". t("Rekka") ."' />";
-      echo "<input type='submit' disabled value='". t("Kontti") ."' />";
-    }
-
-  echo "</td>
     <td class='back'></td>
   </tr>
   <tr>
@@ -1370,6 +1368,132 @@ echo "
 </script>";
 }
 
+if (isset($poistettava_bookkausx)) {
+  $kombo = $poistettava_tilausnumero . ':' . $poistettava_tilausrivi;
+
+  if (bookkauksen_poisto($kombo)) {
+    $poista_bookkaus_viesti = t("Bookkaus") . ' ' . $kombo . ' ' . t("poistettu");
+  }
+  else {
+    $poista_bookkaus_error = t("Bookkausta ei löytynyt");
+  }
+  $task = 'bookkauksen_poisto';
+}
+
+if (isset($poistettava_bookkaus)) {
+
+  $task = 'poisto';
+
+  list($poistettava_tilausnumero, $poistettava_tilausrivi) = explode(':', $poistettava_bookkaus);
+
+  if (!isset($poistettava_tilausnumero)) {
+    $poistettava_tilausnumero = '';
+  }
+
+  if (!isset($poistettava_tilausrivi)) {
+    $poistettava_tilausrivi = '';
+  }
+
+  if (!isset($poista_bookkaus_error)) {
+    $poista_bookkaus_error = '';
+  }
+
+  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".t("Bookkauksen poisto")."</font><hr><br>";
+
+  if (isset($poista_bookkaus_viesti)) {
+    echo "<font class='message'>{$poista_bookkaus_viesti}</font><hr><br>";
+  }
+
+  echo "
+  <form method='post' action='toimitusten_seuranta.php'>
+  <input type='hidden' name='task' value='poista_bookkaus' />
+  <table>";
+
+    echo "
+
+    <tr>
+      <th>" . t("Tilausnumero") ."</th>
+      <th>" . t("Tilausrivi") ."</th>
+      <td class='back'></td>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <td><input type='text' name='poistettava_tilausnumero' value='{$poistettava_tilausnumero}' /></td>
+      <td><input type='text' size='3' name='poistettava_tilausrivi' value='{$poistettava_tilausrivi}' /></td>
+      <td class='back'><input type='submit' value='" .t("Poista") . "'</td>
+      <td class='back error'>{$poista_bookkaus_error}</td>
+    </tr>
+  </table>
+  </form>";
+
+}
+
+if (isset($task) and $task == 'lisaa_rekkatoimitus') {
+
+  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".t("Rekkatoimituksen lisäys")."</font><hr><br>";
+
+
+  echo "
+  <form method='post' action='toimitusten_seuranta.php'>
+  <input type='hidden' name='task' value='poista_bookkaus' />
+  <table>";
+
+    echo "
+
+    <tr>
+      <th>" . t("Kuljetusfirma") ."</th>
+      <td><input type='text' name='viite' value='{$viite}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Viite") ."</th>
+      <td><input type='text' name='viite' value='{$viite}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Auton rekisterinumero") ."</th>
+      <td><input type='text' name='auton_rekisterinumero' value='{$auton_rekisterinumero}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Trailerin rekisterinumero") ."</th>
+      <td><input type='text' name='trailerin_rekisterinumero' value='{$trailerin_rekisterinumero}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Määränpää") ."</th>
+      <td><input type='text' name='maaranpaa' value='{$maaranpaa}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Määränpää-koodi") ."</th>
+      <td><input type='text' name='koodi' value='{$koodi}' /></th>
+      <td class='back'></td>
+    </tr>
+
+    <tr>
+      <th></th>
+      <td align='right'><input type='submit' value='".t("Lisää")."' /></th>
+      <td class='back'></td>
+    </tr>
+
+  </table>
+
+  </form>";
+
+
+
+}
+
+
 if (!isset($task)) {
 
   if (!isset($rajaus)) {
@@ -1411,21 +1535,23 @@ if (!isset($task)) {
   case 'Tulevat':
 
     $query = "SELECT
-              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
               group_concat(DISTINCT lasku.tunnus) AS laskutunnukset,
               llt.konttimaara AS bookattu_konttimaara,
               count(tr.tunnus) AS rullat,
-              SUM(IF(tr.var = 'P', 1, 0))
+              group_concat(liitetiedostot.selite) AS tilaukset
               FROM lasku
+              JOIN liitetiedostot
+                ON liitetiedostot.yhtio = lasku.yhtio
+                AND liitetiedostot.selite LIKE concat(lasku.asiakkaan_tilausnumero, ':%')
               LEFT JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
                 AND tr.otunnus = lasku.tunnus
               JOIN laskun_lisatiedot AS llt
                ON llt.yhtio = lasku.yhtio
                AND llt.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              WHERE lasku.yhtio = 'rplog'
               AND lasku.tilaustyyppi = 'N'
               AND lasku.asiakkaan_tilausnumero != ''
               AND konttiviite != 'bookkaukseton'
@@ -1514,39 +1640,51 @@ if (!isset($task)) {
     break;
   }
 
-  echo t("Näytä: ");
+  $nakyma_sel = array(
+    'Bookkauksettomat' => '',
+    'Tulevat' => '',
+    'Aktiiviset' => '',
+    'Toimitetut' => ''
+    );
 
-  if ($rajaus != 'Bookkauksettomat') {
-    echo "&nbsp;";
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='rajaus' value='Bookkauksettomat' />";
-    echo "<input type='submit' value='" .t("Bookkauksettomat") ."'>";
-    echo "</form>";
-  }
+  $nakyma_sel[$rajaus] = 'selected';
 
-  if ($rajaus != 'Tulevat') {
-    echo "&nbsp;";
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='rajaus' value='Tulevat' />";
-    echo "<input type='submit' value='" .t("Tulevat") ."'>";
-    echo "</form>";
-  }
+  echo "<form method='post' action='toimitusten_seuranta.php'>";
+  echo "<table><tr><th>";
+  echo t("Näkymä");
+  echo "</th><td>";
 
-  if ($rajaus != 'Aktiiviset') {
-    echo "&nbsp;";
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='rajaus' value='Aktiiviset' />";
-    echo "<input type='submit' value='" .t("Aktiiviset") ."'>";
-    echo "</form>";
-  }
+  echo "<select name='rajaus'>";
+  echo "<option selected disabled>" . t("Valitse") ."</option>";
+  echo "<option value='Bookkauksettomat' {$nakyma_sel['Bookkauksettomat']}>" . t("Bookkauksettomat") ."</option>";
+  echo "<option value='Tulevat' {$nakyma_sel['Tulevat']}>" . t("Tulevat") ."</option>";
+  echo "<option value='Aktiiviset' {$nakyma_sel['Aktiiviset']}>" . t("Aktiiviset") ."</option>";
+  echo "<option value='Toimitetut' {$nakyma_sel['Toimitetut']}>" . t("Toimitetut") ."</option>";
+  echo "</select>";
 
-  if ($rajaus != 'Toimitetut') {
-    echo "&nbsp;";
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='rajaus' value='Toimitetut' />";
-    echo "<input type='submit' value='" .t("Toimitetut") ."'>";
-    echo "</form>";
-  }
+  echo "</td><td class='back'>";
+  echo "<input type='submit' value='".t("Näytä")."'>";
+  echo "</td><tr>";
+  echo "</table>";
+  echo "</form>";
+
+echo '<br>';
+
+  /*
+
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='task' value='bookkauksen_poisto' />";
+  echo "<input type='submit' value='" .t("Bookkauksen poisto") ."'>";
+  echo "</form>";
+
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='task' value='lisaa_rekkatoimitus' />";
+  echo "<input type='submit' value='" .t("Rekkatoimituksen lisäys") ."'>";
+  echo "</form>";
+
+  */
 
   echo "<br><br>";
 
@@ -1558,6 +1696,8 @@ if (!isset($task)) {
 
   if (mysql_num_rows($result) > 0) {
 
+
+    echo "<form method='post' action='toimitusten_seuranta'>";
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Konttiviite")."</th>";
@@ -1582,8 +1722,21 @@ if (!isset($task)) {
 
       if ($rajaus == 'Tulevat') {
 
+        $bookkaukset = explode(",", $rivi['tilaukset']);
+
         echo "<td valign='top'>";
-        echo $rivi['tilaukset'];
+/*
+
+        foreach ($bookkaukset as $bookkaus) {
+          echo "<button name='poistettava_bookkaus' value='{$bookkaus}' style='background:none!important; border:none; padding:0!important;border-bottom:1px solid #444; cursor:pointer;'>{$bookkaus}</button><br>";
+        }*/
+
+
+        foreach ($bookkaukset as $bookkaus) {
+          echo $bookkaus, "<br>";
+        }
+
+
         echo "</td>";
       }
       else {
@@ -1740,6 +1893,7 @@ if (!isset($task)) {
       echo "</tr>";
     }
     echo "</table>";
+    echo "</form>";
   }
   else {
     echo "Ei tilauksia...";
@@ -2225,6 +2379,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
           foreach ($kontit as $konttinumero => $kontti) {
 
+
             if ($kontti['konttinumero'] == '') {
               echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
               echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
@@ -2244,8 +2399,17 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               $kesken++;
             }
             elseif ($kontti['sinettinumero'] == 'X') {
+
+              if ($kontti['isokoodi'] == 'rekka') {
+                $kuljetustyyppi = 'rekka';
+              }
+              else {
+               $kuljetustyyppi = 'kontti';
+              }
+
               echo "<form method='post'>";
               echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
+              echo "<input type='hidden' name='kuljetustyyppi' value='$kuljetustyyppi' />";
               echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
               echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
               echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";

@@ -289,7 +289,7 @@ if (!function_exists('alku')) {
     if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"],   $page_lasku[$sivu], $boldi);
     $rivi_ind = $laskutyyppi == 17 ? $rivi_ind + 2 : $rivi_ind + 1;
 
-    if ($laskutyyppi != 8 and !kyseessa_eramaksu($laskurow)) {
+    if (!in_array($laskutyyppi, array(8, 20)) and !kyseessa_eramaksu($laskurow)) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"],   $page_lasku[$sivu], $pieni);
 
       if ($laskurow["kasumma"] != 0.00) {
@@ -311,6 +311,21 @@ if (!function_exists('alku')) {
     }
     elseif (kyseessa_eramaksu($laskurow)) {
       $rivi_ind += 2;
+    }
+    elseif ($laskutyyppi == 20) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Aiotut rajatoimipaikat (ja maat)", $kieli),
+                            $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["aiotut_rajatoimipaikat"],
+                            $page_lasku[$sivu], $norm);
+
+      $rivi_ind++;
+
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Määrätoimipaikka (ja maa)", $kieli),
+                            $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["maaratoimipaikka"],
+                            $page_lasku[$sivu], $norm);
+
+      $rivi_ind++;
     }
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiaa hoitaa", $kieli),   $page_lasku[$sivu], $pieni);

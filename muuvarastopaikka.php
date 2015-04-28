@@ -893,11 +893,21 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka LEFT JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            inventointilista.aika as inventointilista_aika,
+            varastopaikat.nimitys,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
+              AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
+              AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
+              AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
+              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
+            LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
+              AND inventointilista.tunnus = inventointilistarivi.otunnus)
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'
@@ -914,7 +924,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilista_aika"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";
@@ -934,11 +944,21 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            varastopaikat.nimitys,
+            inventointilista.aika as inventointilista_aika,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
+              AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
+              AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
+              AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
+              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
+            LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
+              AND inventointilista.tunnus = inventointilistarivi.otunnus)
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'
@@ -952,7 +972,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilista_aika"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";

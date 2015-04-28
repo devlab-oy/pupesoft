@@ -698,11 +698,19 @@ if ($yhtiorow['kerayserat'] == 'K') {
               AND varaston_hyllypaikat.hyllyvali      = tuotepaikat.hyllyvali
               AND varaston_hyllypaikat.hyllytaso      = tuotepaikat.hyllytaso
               AND varaston_hyllypaikat.reservipaikka  = 'K')
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
+              AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
+              AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
+              AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
+              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
+            LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
+              AND inventointilista.tunnus = inventointilistarivi.otunnus)
             WHERE tuotepaikat.yhtio                   = '{$kukarow['yhtio']}'
             AND tuotepaikat.saldo                     = 0
             AND tuotepaikat.oletus                    = ''
             AND tuotepaikat.poistettava              != 'D'
-            AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
+            AND inventointilista.aika IS NULL";
   $tuotepaikat = pupe_query($query);
 
   // Poistetaan löydetyt rivit ja tehdään tapahtuma

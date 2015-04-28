@@ -222,7 +222,7 @@ if ($tee == 'VALMIS') {
 if ($tee == 'INVENTOI') {
 
   //hakulause, tämä on sama kaikilla vaihtoehdoilla
-  $select = " tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+  $select = " tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilista.tunnus as inventointilista, inventointilista.aika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "") {
     ///* Inventoidaan tuotenumeron perusteella *///
@@ -231,6 +231,14 @@ if ($tee == 'INVENTOI') {
     $query = "SELECT $select
               FROM tuote use index (tuoteno_index)
               JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+              LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
+                AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
+                AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
+                AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
+              LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
+                AND inventointilista.tunnus = inventointilistarivi.otunnus)
               WHERE tuote.yhtio             = '$kukarow[yhtio]'
               and tuote.tuoteno             = '$tuoteno'
               and tuote.ei_saldoa           = ''

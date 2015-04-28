@@ -202,6 +202,9 @@ if (!function_exists('alku')) {
       $pdf_lasku->draw_rectangle(674, 300, 653, 580, $page_lasku[$sivu], $rectparam);
     }
 
+    if ($laskutyyppi == 20) {
+      $pdf_lasku->draw_rectangle(632, 420, 611, 580, $page_lasku[$sivu], $rectparam);
+    }
 
 
     // Oikean laidan ruudukko, vasen sarake
@@ -410,6 +413,11 @@ if (!function_exists('alku')) {
                             $page_lasku[$sivu], $pieni);
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["maa_lahetys"], $page_lasku[$sivu],
                             $norm);
+
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Poistumistoimipaikka", $kieli),
+                            $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["poistumistoimipaikka"],
+                            $page_lasku[$sivu], $norm);
     }
     else {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), $page_lasku[$sivu],

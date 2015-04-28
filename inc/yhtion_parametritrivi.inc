@@ -300,6 +300,7 @@ if ($fieldname == "laskutyyppi") {
   $ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
   $ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
   $ulos .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
+  $ulos .= "<option value = '20' {$sel[20]}>".t("Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

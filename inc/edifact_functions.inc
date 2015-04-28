@@ -2870,7 +2870,7 @@ function peruuta_bookkaus($peruutusparametrit) {
             AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
             AND tilaustyyppi = 'N'
             GROUP BY lasku.tunnus";
-  $result = pupe_query($query);echo $query;die;
+  $result = pupe_query($query);
   $laskuinfo = mysql_fetch_assoc($result);
 
   if (mysql_num_rows($result) == 1 and $laskuinfo['kaikki_rullat'] == 0) {
@@ -2885,7 +2885,7 @@ function peruuta_bookkaus($peruutusparametrit) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND kayttotarkoitus = 'bookkaussanoma'
               AND selite LIKE '{$tilausnro}:%'";
-    $result = pupe_query($query);echo $query;die;
+    $result = pupe_query($query);
 
     $liiteinfo = mysql_fetch_assoc($result);
 

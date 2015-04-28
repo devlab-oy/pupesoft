@@ -405,7 +405,7 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
               AND laskun_lisatiedot.otunnus = lasku.tunnus
             WHERE tr.yhtio = '{$kukarow['yhtio']}'
             AND tr.tunnus IN ({$rullat_kontissa})
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')";
   $result = pupe_query($query);
 
   $tilaukset = array();

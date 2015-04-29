@@ -102,6 +102,13 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
   return $rullat_ja_kontit;
 }
 
+function lisaa_rekkatoimitus($parametrit) {
+  global $kukarow;
+
+  extract($parametrit);
+
+}
+
 function bookkauksen_poisto($kombo) {
   global $kukarow;
 
@@ -1627,6 +1634,7 @@ function kasittele_bookkaussanoma($edi_data) {
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
                          tullinimike = '{$rulla['tullinimike']}',
+                         matkakoodi = '{$rulla['matkakoodi']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}',
                          asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
@@ -1745,7 +1753,7 @@ function kasittele_bookkaussanoma($edi_data) {
       $kpl = 1;
       $var = '';
 
-      foreach ($rullat as $rulla) {
+      foreach ($ostorullat as $rulla) {
 
         require "tilauskasittely/lisaarivi.inc";
 
@@ -1765,6 +1773,7 @@ function kasittele_bookkaussanoma($edi_data) {
                          juoksu = '{$rulla['juoksu']}',
                          tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                         matkakoodi = '{$rulla['matkakoodi']}',
                          asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}',
                          asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2233,6 +2242,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                 rahtikirja_id = '{$data['rahtikirja_id']}',
                 juoksu = '{$rulla['juoksu']}',
                 tullinimike = '{$rulla['tullinimike']}',
+                matkakoodi = '{$rulla['matkakoodi']}',
                 tilauksen_paino = '{$rulla['tilauksen_paino']}',
                 kuljetuksen_rekno = '{$data['rekisterinumero']}',
                 asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
@@ -2323,6 +2333,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
                          tullinimike = '{$rulla['tullinimike']}',
+                         matkakoodi = '{$rulla['matkakoodi']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                          asiakkaan_rivinumero = '{$rulla['rivinro']}'
@@ -2365,6 +2376,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                          juoksu = '{$rulla['juoksu']}',
                          tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                         matkakoodi = '{$rulla['matkakoodi']}',
                          asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                          asiakkaan_rivinumero = '{$rulla['rivinro']}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2412,6 +2424,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                              juoksu = '{$rulla['juoksu']}',
                              tullinimike = '{$rulla['tullinimike']}',
                              tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                             matkakoodi = '{$rulla['matkakoodi']}',
                              asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                              asiakkaan_rivinumero = '{$rulla['rivinro']}'
                              WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2858,6 +2871,8 @@ function peruuta_bookkaus($peruutusparametrit) {
             lasku.asiakkaan_tilausnumero,
             lasku.tunnus,
             COUNT(tr.tunnus) AS kaikki_rullat,
+            SUM(IF(trlt.asiakkaan_rivinumero = '{$rivinro}', 1, 0)) AS omat_rullat,
+            SUM(IF(trlt.asiakkaan_rivinumero = '{$rivinro}', 0, 1)) AS muut_rullat,
             GROUP_CONCAT(IF(trlt.asiakkaan_rivinumero = '{$rivinro}', tr.tunnus, NULL)) AS poistettavat_myyntirivitunnukset
             FROM lasku
             LEFT JOIN tilausrivi AS tr
@@ -2875,7 +2890,6 @@ function peruuta_bookkaus($peruutusparametrit) {
 
   if (mysql_num_rows($result) == 1 and $laskuinfo['kaikki_rullat'] == 0) {
 
-
     // Vain yksi lasku, ei rullia, tutkitaan lis‰‰...
     $query = "SELECT
               group_concat(DISTINCT liitostunnus) AS laskutunnukset,
@@ -2888,8 +2902,6 @@ function peruuta_bookkaus($peruutusparametrit) {
     $result = pupe_query($query);
 
     $liiteinfo = mysql_fetch_assoc($result);
-
-
 
     // yksi tilaus ja yksi rivi: poistetaan...
     if ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] == 1) {
@@ -2967,6 +2979,13 @@ function peruuta_bookkaus($peruutusparametrit) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND selite = '{$kombo}'";
     pupe_query($query);
+
+    $query = "UPDATE sarjanumeroseuranta
+              SET myyntirivitunnus =  0
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND myyntirivitunnus IN ({$laskuinfo['poistettavat_myyntirivitunnukset']})";
+    pupe_query($query);
+
   }
   else {
     return false;

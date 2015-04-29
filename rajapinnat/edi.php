@@ -141,8 +141,6 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:".$order['customer_email']."\n";
     $edi_order .= "*RE OSTOTIL\n";
 
-    //$items = $order->getItemsCollection();
-
     $i = 1;
     foreach ($order['items'] as $item) {
       $product_id = $item['product_id'];
@@ -182,7 +180,7 @@ class Edi {
         // Rivin alennusmäärä
         $alennusmaara = $_item['base_discount_amount'];
 
-        // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu hintamääräistä alennusta
+        // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu euromääräistä alennusta
         if ($alennusprosentti == 0 and $alennusmaara > 0) {
           // Lasketaan alennusmäärä alennusprosentiksi
           $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 2);
@@ -216,17 +214,7 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
-
-        //$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_id);
-
-
-        //if ($stock->getQty() - $item->getQtyOrdered() <= 0 && $stock->getBackorders() != 0) {
-        //  $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
-        //}
-        //else {
         $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
-        //}
-
         $edi_order .= "*RE  OSTOTILRIV $i\n";
         $i++;
       }

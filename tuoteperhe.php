@@ -1043,7 +1043,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
-          echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
+          echo "<td></td>";
 
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }

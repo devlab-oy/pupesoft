@@ -37,6 +37,8 @@ if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'k
   exit;
 }
 
+$liiterow["selite"] = str_replace(array("å", "ä", "ö", "Å", "Ä", "Ö"), array("a", "a", "o", "A", "A", "O"), $liiterow["selite"]);
+
 if (mysql_num_rows($liiteres) > 0) {
   header("Content-type: $liiterow[filetype]");
   header("Content-length: $liiterow[filesize]");

@@ -1299,10 +1299,7 @@ if (isset($task) and $task == 'poista_bookkaus') {
   if (bookkauksen_poisto($kombo)) {
     $poista_bookkaus_viesti = t("Bookkaus") . ' ' . $kombo . ' ' . t("poistettu");
   }
-  else {
-    $poista_bookkaus_error = t("Bookkausta ei löytynyt");
-  }
-  $task = 'bookkauksen_poisto';
+  unset($task);
 }
 
 if (isset($poistettava_bookkaus)) {
@@ -1324,7 +1321,7 @@ if (isset($poistettava_bookkaus)) {
   }
 
   echo "<a href='toimitusten_seuranta.php?rajaus={$rajaus}'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Bookkauksen poisto")."</font><hr><br>";
+  echo "<font class='head'>".t("Bookkauksen peruutus")."</font><hr><br>";
 
   if (isset($poista_bookkaus_viesti)) {
     echo "<font class='message'>{$poista_bookkaus_viesti}</font><hr><br>";
@@ -1345,9 +1342,15 @@ if (isset($poistettava_bookkaus)) {
     </tr>
 
     <tr>
-      <td><input type='text' name='poistettava_tilausnumero' value='{$poistettava_tilausnumero}' /></td>
-      <td><input type='text' size='3' name='poistettava_tilausrivi' value='{$poistettava_tilausrivi}' /></td>
-      <td class='back'><input type='submit' value='" .t("Poista") . "'</td>
+      <td>
+        {$poistettava_tilausnumero}
+        <input type='hidden' name='poistettava_tilausnumero' value='{$poistettava_tilausnumero}' />
+      </td>
+      <td align='center'>
+        {$poistettava_tilausrivi}
+        <input type='hidden' size='3' name='poistettava_tilausrivi' value='{$poistettava_tilausrivi}' />
+      </td>
+      <td class='back'><input type='submit' value='" .t("Vahvista peruutus") . "'</td>
       <td class='back error'>{$poista_bookkaus_error}</td>
     </tr>
   </table>
@@ -1622,8 +1625,9 @@ if (!isset($task)) {
   echo "</table>";
   echo "</form>";
 
-echo '<br>';
+  echo '<br>';
 
+  /*
 
   echo "&nbsp;";
   echo "<form method='post'>";
@@ -1637,9 +1641,9 @@ echo '<br>';
   echo "<input type='submit' value='" .t("Rekkatoimituksen lisäys") ."'>";
   echo "</form>";
 
-
-
   echo "<br><br>";
+
+  */
 
   $result = pupe_query($query);
 
@@ -1694,7 +1698,7 @@ echo '<br>';
 
         echo "<td valign='top'>";
 
-        if ($rivi['kontitetut_rullat'] > 0) {
+        if ($rivi['kontitetut_rullat'] > 0 or $rajaus == 'Bookkauksettomat' or $rajaus == 'Toimitetut') {
 
           foreach ($tilausrivit as $tilausrivi => $value) {
             echo $tilausrivi;

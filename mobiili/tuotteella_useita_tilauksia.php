@@ -245,7 +245,8 @@ else {
 }
 
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
-$url_lisa .= "&backsaapuminen={$backsaapuminen}";
+$url_lisa .= $url_lisa ? "&" : "?";
+$url_lisa .= "backsaapuminen={$backsaapuminen}";
 
 //## UI ###
 echo "<div class='header'>

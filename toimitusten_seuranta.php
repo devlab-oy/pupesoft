@@ -1654,7 +1654,7 @@ if (!isset($task)) {
   if (mysql_num_rows($result) > 0) {
 
 
-    echo "<form method='post' action='toimitusten_seuranta'>";
+    echo "<form method='post' action='toimitusten_seuranta.php'>";
     echo "<input type='hidden' name='rajaus' value='{$rajaus}' >";
     echo "<table>";
     echo "<tr>";

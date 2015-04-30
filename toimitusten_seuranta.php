@@ -1330,6 +1330,7 @@ if (isset($poistettava_bookkaus)) {
   echo "
   <form method='post' action='toimitusten_seuranta.php'>
   <input type='hidden' name='task' value='poista_bookkaus' />
+  <input type='hidden' name='rajaus' value='{$rajaus}' />
   <table>";
 
     echo "
@@ -1497,7 +1498,7 @@ if (!isset($task)) {
               group_concat(DISTINCT lasku.tunnus) AS laskutunnukset,
               llt.konttimaara AS bookattu_konttimaara,
               count(tr.tunnus) AS rullat,
-              group_concat(liitetiedostot.selite) AS tilaukset
+              group_concat(DISTINCT liitetiedostot.selite) AS tilaukset
               FROM lasku
               JOIN liitetiedostot
                 ON liitetiedostot.yhtio = lasku.yhtio

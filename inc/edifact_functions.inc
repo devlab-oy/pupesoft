@@ -2987,6 +2987,24 @@ function peruuta_bookkaus($peruutusparametrit) {
     pupe_query($query);
 
   }
+  elseif (mysql_num_rows($result) > 1) {
+
+    while ($lasku = mysqL_fetch_assoc($result)) {
+
+      if ($lasku['kaikki_rullat'] == 0) {
+
+        $query = "DELETE FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$lasku['tunnus']}'";
+        pupe_query($query);
+
+        $query = "DELETE FROM laskun_lisatiedot
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$lasku['tunnus']}'";
+        pupe_query($query);
+      }
+    }
+  }
   else {
     return false;
   }

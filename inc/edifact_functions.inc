@@ -2886,9 +2886,10 @@ function peruuta_bookkaus($peruutusparametrit) {
             AND tilaustyyppi = 'N'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
-  $laskuinfo = mysql_fetch_assoc($result);
 
   if (mysql_num_rows($result) == 1 and $laskuinfo['kaikki_rullat'] == 0) {
+
+    $laskuinfo = mysql_fetch_assoc($result);
 
     // Vain yksi lasku, ei rullia, tutkitaan lis‰‰...
     $query = "SELECT
@@ -2942,6 +2943,8 @@ function peruuta_bookkaus($peruutusparametrit) {
     }
   }
   elseif (mysql_num_rows($result) == 1 and $laskuinfo['omat_rullat'] > 0) {
+
+    $laskuinfo = mysql_fetch_assoc($result);
 
     if ($laskuinfo['muut_rullat'] > 0) {
       // v‰hennet‰‰n bookkauksen rullam‰‰r‰ kokonaism‰‰r‰st‰

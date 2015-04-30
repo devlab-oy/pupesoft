@@ -544,19 +544,16 @@ if ($error == 0 and $tee == "file") {
                 pupe_query($query);
               }
               elseif (in_array ($taulu, $muutataulut)) {
-echo "547: $taulu, $sarake, $uustuoteno, $vantuoteno, $uusi_on_jo <br><br>";
                 $query = "UPDATE IGNORE $taulu
                           SET $sarake = '$uustuoteno'
                           WHERE yhtio = '$kukarow[yhtio]'
                           AND $sarake = '$vantuoteno'";
-                          echo "552: $query <br><br>";
                 pupe_query($query);
 
                 if ($uusi_on_jo != "SAMA") {
                   $query = "DELETE FROM $taulu
                             WHERE yhtio = '$kukarow[yhtio]'
                             AND $sarake = '$vantuoteno'";
-                  echo "559: $query <br><br>";
                   pupe_query($query);
                 }
               }

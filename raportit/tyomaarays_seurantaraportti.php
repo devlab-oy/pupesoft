@@ -71,7 +71,7 @@ if (!function_exists("count_workdays")) {
       $workdays = $firstweek+$midweeks+$lastweek;
     }
 
-    return $workdays;
+    return round($workdays, 2);
   }
 }
 

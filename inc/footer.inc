@@ -83,13 +83,20 @@ if ($lopeta_body) {
     }
 
     echo "<br><br>";
-    echo "<form name='sanakirjaform' method='post' action='${palvelin2}sanakirja.php'>";
-    echo "<input type='hidden' name='kieli[$kindex]' value='$kieli'>";
-    echo "<input type='hidden' name='show' value='all'>";
-    echo "<input type='hidden' name='etsi_kieli' value='fi'>";
-    echo "<input type='hidden' name='tarkkahaku' value='ON'>";
-    echo "<input type='hidden' name='hakusana' value='".implode("\n", $kaannetyt_sanat)."'>";
-    echo " <a style='cursor:pointer' onclick='sanakirjaform.submit()'><font class='info'>".t("Sanakirja")."</font></a>";
+
+    echo "<form name='sanakirjaform'
+                method='POST'
+                action='{$palvelin_pupenext}dictionaries'
+                accept-charset='UTF-8'>";
+    echo "<input type='hidden' name='languages[]' value='{$kieli}'>";
+    echo "<input type='hidden' name='search[language]' value='fi'>";
+    echo "<input type='hidden' name='search[strict]' value='true'>";
+    echo "<input type='hidden'
+                 name='search[keyword]'
+                 value='" . implode("\n", $kaannetyt_sanat) . "'>";
+    echo "<a style='cursor:pointer' onclick='sanakirjaform.submit()'>
+            <font class='info'>" . t("Sanakirja") . "</font>
+          </a>";
     echo "</form>";
   }
 

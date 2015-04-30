@@ -195,16 +195,28 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
     if ($submit == 'tilaus') {
 
-      foreach ($tilaukset as $tiedot) {
-        echo "<tr>";
-        echo "<th>";
-        echo $tiedot['tilaus'];
-        echo "</th>";
+      foreach ($tilaukset as $alkukirjaimet => $tilaukset_alkukirjaimittain ) {
 
-        echo "<td>";
-        echo (int)$tiedot['paino'] . " kg (" . $tiedot['kpl'] . " kpl.)";
-        echo "</td>";
+        echo "<tr>";
+        echo "<th colspan='2'>";
+        echo $alkukirjaimet;
+        echo "</th>";
         echo "</tr>";
+
+        foreach ($tilaukset_alkukirjaimittain as $tiedot) {
+          echo "<tr>";
+          echo "<th>";
+          echo $tiedot['tilaus'];
+          echo "</th>";
+
+          echo "<td>";
+          echo (int)$tiedot['paino'] . " kg (" . $tiedot['kpl'] . " kpl.)";
+          echo "</td>";
+          echo "</tr>";
+        }
+
+
+
       }
 
       echo "</table>";

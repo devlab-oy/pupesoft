@@ -3463,34 +3463,63 @@ function varastoraportti_pdf($pdf_data, $tyyppi) {
     $pdf->draw_text($x+150, $y, 'Rullia', $sivu, $bold);
     $pdf->draw_text($x+200, $y, 'Leveys', $sivu, $bold);
     $pdf->draw_text($x+270, $y, 'Halkaisija', $sivu, $bold);
-    $pdf->draw_text($x+370, $y, 'Toimitusaika', $sivu, $bold);
+    $pdf->draw_text($x+370, $y, 'Purkuaika', $sivu, $bold);
 
     $y -= 5;
     $yy[0] = $yy[1] = $y;
     $pdf->draw_line($xx, $yy, $sivu);
     $y -= 20;
 
-    foreach ($tilaukset as $tilaus) {
+    foreach ($tilaukset as $alkukirjaimet => $tilaukset_alkukirjaimittain ) {
 
-      if ($y < 30) {
+      if ($y < 90) {
         $sivu = $pdf->new_page("a4");
         $y = 800;
       }
 
-      $pdf->draw_text($x, $y, $tilaus['tilaus'], $sivu, $pieni);
-      $pdf->draw_text($x+100, $y, (int)$tilaus['paino'] . ' kg.', $sivu, $pieni);
-      $pdf->draw_text($x+150, $y, $tilaus['kpl']. ' kpl.', $sivu, $pieni);
-      $pdf->draw_text($x+200, $y, (int) $tilaus['leveys']. ' mm.', $sivu, $pieni);
-      $pdf->draw_text($x+270, $y, $tilaus['halkaisijat']. ' mm.', $sivu, $pieni);
-      $pdf->draw_text($x+370, $y, $tilaus['toimituspaivat'], $sivu, $pieni);
+      $pdf->draw_text($x, $y, $alkukirjaimet, $sivu, $bold);
 
+      $y -= 10;
+      $yy[0] = $yy[1] = $y;
+      $pdf->draw_line($xx, $yy, $sivu);
+      $y -= 20;
+
+      $valitotal_kg = 0;
+      $valitotal_kpl = 0;
+
+      foreach ($tilaukset_alkukirjaimittain as $tiedot) {
+
+        if ($y < 30) {
+          $sivu = $pdf->new_page("a4");
+          $y = 800;
+        }
+
+        $pdf->draw_text($x, $y, $tiedot['tilaus'], $sivu, $pieni);
+        $pdf->draw_text($x+100, $y, (int)$tiedot['paino'] . ' kg.', $sivu, $pieni);
+        $pdf->draw_text($x+150, $y, $tiedot['kpl']. ' kpl.', $sivu, $pieni);
+        $pdf->draw_text($x+200, $y, (int) $tiedot['leveys']. ' mm.', $sivu, $pieni);
+        $pdf->draw_text($x+270, $y, $tiedot['halkaisijat']. ' mm.', $sivu, $pieni);
+        $pdf->draw_text($x+370, $y, $tiedot['toimituspaivat'], $sivu, $pieni);
+
+
+        $y -= 10;
+        $yy[0] = $yy[1] = $y;
+        $pdf->draw_line($xx, $yy, $sivu);
+        $y -= 20;
+
+        $valitotal_kg += (int)$tiedot['paino'];
+        $valitotal_kpl += (int)$tiedot['kpl'];
+      }
+
+      $pdf->draw_text($x, $y, $alkukirjaimet . ' ' . t("total:"), $sivu, $bold);
+      $pdf->draw_text($x+90, $y, $valitotal_kg . ' kg.', $sivu, $pieni);
+      $pdf->draw_text($x+150, $y, $valitotal_kpl. ' kpl.', $sivu, $pieni);
 
       $y -= 10;
       $yy[0] = $yy[1] = $y;
       $pdf->draw_line($xx, $yy, $sivu);
       $y -= 20;
     }
-
   }
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -3717,6 +3746,7 @@ function varastotilanne_tilauksittain($hetki = false) {
             $result = pupe_query($query);
 
   $tilaukset = array();
+
   $totalpaino = 0;
   $totalmaara = 0;
 
@@ -3744,7 +3774,9 @@ function varastotilanne_tilauksittain($hetki = false) {
       $tilaus['toimituspaivat'] = date("d.m.y", strtotime($tilaus['toimituspaivat']));
     }
 
-    $tilaukset[] = $tilaus;
+    $alkukirjaimet = substr($tilaus['tilaus'], 0, 2);
+
+    $tilaukset[$alkukirjaimet][] = $tilaus;
     $totalpaino += $tilaus['paino'];
     $totalmaara += $tilaus['kpl'];
   }

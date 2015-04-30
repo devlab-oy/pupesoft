@@ -214,14 +214,19 @@ if ($raptee == "AJA") {
 
   $excelnimi = $worksheet->close();
 
-  echo "<br><br>";
-  echo "<font class='message'>".t("Tallenna excel").": </font>";
-  echo "<form method='post' class='multisubmit'>";
-  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='kaunisnimi' value='".t("tyomaaraysraportti").".xlsx'>";
-  echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-  echo "<input type='submit' value='".t("Tallenna")."'>";
-  echo "</form>";
+  echo "<br><br>";  
+  if ($excelrivi > 1) {
+    echo "<font class='message'>".t("Tallenna excel").": </font>";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='".t("tyomaaraysraportti").".xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+    echo "<input type='submit' value='".t("Tallenna")."'>";
+    echo "</form>";
+  }
+  else {
+    echo "<font class='message'>".t("Annetuilla ehdoilla ei löytynyt yhtään riviä").".</font>";
+  }  
   echo "<br><br>";
 }
 

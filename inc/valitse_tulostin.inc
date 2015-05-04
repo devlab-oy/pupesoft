@@ -392,7 +392,7 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
   }
 
-  if ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus') {
+  if (!empty($editoimrow['email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
     echo "<option value='toimittajaemail{$editoimrow['email']}'>".t("Toimittajan sähköpostiin").": {$editoimrow['email']}</option>";
   }
 

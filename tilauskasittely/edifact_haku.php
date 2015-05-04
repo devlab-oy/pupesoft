@@ -1,9 +1,9 @@
 <?php
 
-/*
+
 require "../inc/parametrit.inc";
 require "../inc/edifact_functions.inc";
-
+/*
 
 
 $query = "SELECT tunnus, asiakkaan_tilausnumero, asiakkaan_rivinumero FROM tilausrivin_lisatiedot";
@@ -36,7 +36,7 @@ while ($rivi = mysql_fetch_assoc($result)) {
 
 }
 
-
+*/
 
 
 
@@ -58,6 +58,7 @@ if ($task == 'input') {
 
 }
 
+/*
 
 if ($task == 'nollaa') {
 
@@ -75,7 +76,7 @@ if ($task == 'nollaa') {
   }
 
 }
-
+*/
 
   echo "
   <font class='head'>".t("Testaus")."</font>
@@ -100,7 +101,7 @@ if ($task == 'nollaa') {
 
 
   ";
-*/
+
 
 
 require "inc/footer.inc";

@@ -1489,11 +1489,16 @@ function kasittele_bookkaussanoma($edi_data) {
   }
 
   // katsotaan onko tilauksesta luotu jo myyntitilaus
-  $query = "SELECT *
+  $query = "SELECT
+            lasku.*,
+            laskun_lisatiedot.konttiviite
             FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_tilausnumero = '{$tilausnro}'
-            AND tilaustyyppi = 'N'";
+            JOIN laskun_lisatiedot
+            ON laskun_lisatiedot.yhtio = lasku.yhtio
+            AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
+            AND lasku.tilaustyyppi = 'N'";
   $result = pupe_query($query);
 
   $kukarow['kesken'] = 0;
@@ -1504,7 +1509,13 @@ function kasittele_bookkaussanoma($edi_data) {
 
   if (mysql_num_rows($result) == 1) {
     $lasku = mysql_fetch_assoc($result);
-    $tunnus_johon_liitetaan = $lasku['tunnus'];
+
+    if ($lasku['konttiviite'] == $konttiviite) {
+      $tunnus_johon_liitetaan = $lasku['tunnus'];
+    }
+    else {
+      $tarvitaan_uusi_tilaus = true;
+    }
   }
   elseif (mysql_num_rows($result) > 1) {
 

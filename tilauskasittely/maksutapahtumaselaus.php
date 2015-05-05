@@ -179,6 +179,13 @@ function piirra_tilaus_table($tilaukset, $rajaus) {
 
     echo "<td class='back'>";
     echo "<form>";
+    echo "<input type='hidden' name='rajaus[alku][vuosi]' value='{$rajaus["alku"]["vuosi"]}'>";
+    echo "<input type='hidden' name='rajaus[alku][kuukausi]' value='{$rajaus["alku"]["kuukausi"]}'>";
+    echo "<input type='hidden' name='rajaus[alku][paiva]' value='{$rajaus["alku"]["paiva"]}'>";
+    echo "<input type='hidden' name='rajaus[loppu][vuosi]' value='{$rajaus["loppu"]["vuosi"]}'>";
+    echo "<input type='hidden' name='rajaus[loppu][kuukausi]' value='{$rajaus["loppu"]["kuukausi"]}'>";
+    echo "<input type='hidden' name='rajaus[loppu][paiva]' value='{$rajaus["loppu"]["paiva"]}'>";
+    echo "<input type='hidden' name='rajaus[limit]' value='{$rajaus["limit"]}'>";
     echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
     echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
     echo "<input type='submit' value='" . t("Kuittikopio") . "'>";

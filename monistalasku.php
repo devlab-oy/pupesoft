@@ -2180,7 +2180,7 @@ if ($tee == '' and $vain_monista == "") {
 
   if (isset($mistatultiin) and $mistatultiin == "maksutapahtumaselaus") {
     $osoite = "{$palvelin2}tilauskasittely/tilaus_myynti.php?" .
-              "toim=PIKATILAUS&tilausnumero={$utunnus}";
+              "toim=PIKATILAUS&tilausnumero={$utunnus}&lopetus={$lopetus}";
 
     echo "<script>";
     echo "$(function() {

@@ -210,6 +210,7 @@ function piirra_tilaus_table($tilaukset, $rajaus) {
     echo "<input type='hidden' name='tee' value='MONISTA'>";
     echo "<input type='hidden' name='monistettavat[{$tilaus["myyntilaskun_tunnus"]}]' value='HYVITA'>";
     echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
+    echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
     echo "<input type='submit' value='" . t("Korjaa kuitti") . "'>";
     echo "</form>";
     echo "</td>";

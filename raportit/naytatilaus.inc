@@ -607,6 +607,12 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 }
 
+$maksutapahtumat = hae_maksutapahtumat($tunnus);
+
+if ($maksutapahtumat) {
+  piirra_maksutapahtumat($maksutapahtumat);
+}
+
 echo "<br>";
 echo "<strong>".t("Tilausrivit").":</strong><hr>";
 
@@ -2212,4 +2218,59 @@ function hae_kassalipas($tunnus) {
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
+}
+
+function hae_maksutapahtumat($tilausnumero) {
+  global $kukarow;
+
+  $query = "SELECT *
+            FROM maksupaatetapahtumat
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tilausnumero = {$tilausnumero}";
+
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+    return $result;
+  }
+  else {
+    return false;
+  }
+}
+
+function piirra_maksutapahtumat($maksutapahtumat) {
+  global $yhtiorow;
+
+  echo "<br>";
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th colspan='3'>" . t("Maksutapahtumat") . "</th>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t("Maksutapa") . "</th>";
+  echo "<th>" . t("Summa") . "</th>";
+  echo "<th>" . t("Osto") . "/" . t("Hyvitys") . "</th>";
+  echo "</tr>";
+
+  echo "</thead>";
+  echo "<tbody>";
+
+  while ($maksutapahtuma = mysql_fetch_assoc($maksutapahtumat)) {
+    $summa = number_format($maksutapahtuma["summa_valuutassa"],
+                           $yhtiorow["hintapyoristys"], ",", " ");
+    $tila = $maksutapahtuma["tila"] == "K" ? t("Osto") : t("Hyvitys");
+
+    echo "<tr>";
+    echo "<td>{$maksutapahtuma["maksutapa"]}</td>";
+    echo "<td>{$summa} {$maksutapahtuma["valkoodi"]}</td>";
+    echo "<td>{$tila}</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
 }

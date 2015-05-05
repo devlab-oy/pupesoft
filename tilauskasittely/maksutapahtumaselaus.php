@@ -2,6 +2,16 @@
 
 require "../inc/parametrit.inc";
 
+if (isset($tilaus) and $tilaus["toiminto"] == "kuittikopio") {
+  require "tulosta_asiakkaan_kuitti.inc";
+
+  $kuitti_params = array(
+    "avaa_lipas_lopuksi" => false
+  );
+
+  tulosta_asiakkaan_kuitti($tilaus["laskunro"], $kukarow["kuittitulostin"], $kuitti_params);
+}
+
 $rajaus = isset($rajaus) ? $rajaus : array();
 $rajaus = kasittele_rajaus($rajaus);
 
@@ -82,7 +92,7 @@ function piirra_hakuformi($rajaus) {
 
   echo "<td><input type='checkbox' name='rajaus[limit]' id='rajaus_limit' value='500'{$checked}></td>";
   echo "<td class='back'>";
-  echo "<input type='submit' value='Hae'>";
+  echo "<input type='submit' value='" . t("Hae") . "'>";
   echo "</td>";
   echo "</tr>";
 
@@ -151,6 +161,15 @@ function piirra_tilaus_table($tilaukset) {
     echo "<td class='text-right'>{$tilaus["summa"]}</td>";
     echo "<td class='text-right'>{$tilaus["asiakkaan_tilausnumero"]}</td>";
     echo "<td class='text-right'>{$tilaus["viite"]}</td>";
+
+    echo "<td class='back'>";
+    echo "<form>";
+    echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
+    echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
+    echo "<input type='submit' value='" . t("Kuittikopio") . "'>";
+    echo "</form>";
+    echo "</td>";
+
     echo "</tr>";
   }
 

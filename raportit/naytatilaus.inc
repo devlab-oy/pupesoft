@@ -2247,7 +2247,7 @@ function piirra_maksutapahtumat($maksutapahtumat) {
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th colspan='3'>" . t("Maksutapahtumat") . "</th>";
+  echo "<th class='text-center' colspan='3'>" . t("Maksutapahtumat") . "</th>";
   echo "</tr>";
 
   echo "<tr>";

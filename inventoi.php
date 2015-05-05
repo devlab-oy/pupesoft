@@ -333,7 +333,7 @@ if ($tee == 'VALMIS') {
           }
 
           if ($virhe == 0) {
-            $laadittuaika = "'$yyyy-$mm-$dd 23:59:59'";
+            $laadittuaika = "{$yyyy}-{$mm}-{$dd} 23:59:59";
 
             // Inventointipvm käsisyöttöfallbacki - ei sallita päivämäärää jos sen jälkeen on tuloja, valmistuksia tai epäkuranttiajoja
             $query = "SELECT *
@@ -341,7 +341,7 @@ if ($tee == 'VALMIS') {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and tuoteno  = '$tuote_row[tuoteno]'
                       and laji     IN ('tulo', 'valmistus', 'epäkurantti')
-                      and laadittu >= {$laadittuaika}";
+                      and laadittu >= '{$laadittuaika}'";
             $ressu = pupe_query($query);
 
             if (mysql_num_rows($ressu) > 0) {
@@ -571,14 +571,10 @@ if ($tee == 'VALMIS') {
         if (mysql_num_rows($result) == 1 and $virhe != 1) {
           $row = mysql_fetch_assoc($result);
 
-
           if (($lista != '' and $row["inventointilista_aika"] !== null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
 
             if ($validi_kasinsyotetty_inventointipaivamaara) {
               $row['inventointilista_aika'] = $laadittuaika;
-            }
-            else {
-              $row['inventointilista_aika'] = "'".$row['a']."'";
             }
 
             //jos invataan raportin avulla niin tehdään päivämäärätsekit ja lasketaan saldo takautuvasti
@@ -597,7 +593,7 @@ if ($tee == 'VALMIS') {
                           and tilausrivi.hyllytaso  = '$hyllytaso')
                         WHERE tapahtuma.yhtio       = '$kukarow[yhtio]'
                         and tapahtuma.tuoteno       = '$tuoteno'
-                        and tapahtuma.laadittu      >= {$row['inventointilista_aika']}
+                        and tapahtuma.laadittu      >= '{$row['inventointilista_aika']}'
                         and tapahtuma.kpl           <> 0
                         and tapahtuma.laji         != 'Inventointi'";
               $result = pupe_query($query);
@@ -614,9 +610,9 @@ if ($tee == 'VALMIS') {
                         and tyyppi      in ('L','G','V')
                         and tuoteno     = '$tuoteno'
                         and varattu     <> 0
-                        and kerattyaika < {$row['inventointilista_aika']}
+                        and kerattyaika < '{$row['inventointilista_aika']}'
                         and kerattyaika > '0000-00-00 00:00:00'
-                        and (laskutettuaika  > {$row['inventointilista_aika']} or laskutettuaika  = '0000-00-00 00:00:00')
+                        and (laskutettuaika  > '{$row['inventointilista_aika']}' or laskutettuaika  = '0000-00-00 00:00:00')
                         and hyllyalue   = '$hyllyalue'
                         and hyllynro    = '$hyllynro'
                         and hyllyvali   = '$hyllyvali'
@@ -836,7 +832,7 @@ if ($tee == 'VALMIS') {
             ///* Tehdään tapahtuma *///
             $query = "INSERT into tapahtuma set
                       yhtio     = '$kukarow[yhtio]',
-                      tuoteno   = '$row[tuoteno]',
+                      tuoteno   = '$tuoteno',
                       laji      = 'Inventointi',
                       kpl       = '$erotus',
                       kplhinta  = '$row[kehahin]',
@@ -847,7 +843,7 @@ if ($tee == 'VALMIS') {
                       hyllytaso = '$hyllytaso',
                       selite    = '$selite',
                       laatija   = '$kukarow[kuka]',
-                      laadittu  = $laadittuaika";
+                      laadittu  = '$laadittuaika'";
             $result = pupe_query($query);
 
             // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -867,7 +863,7 @@ if ($tee == 'VALMIS') {
             }
 
             $query .= " saldoaika             = now(),
-                        inventointiaika       = {$laadittuaika},
+                        inventointiaika       = '{$laadittuaika}',
                         inventointipoikkeama  = '$poikkeama',
                         muuttaja              = '$kukarow[kuka]',
                         muutospvm             = now()

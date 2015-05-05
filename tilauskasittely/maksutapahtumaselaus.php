@@ -113,7 +113,8 @@ function hae_tilaukset($rajaus) {
             lasku.summa,
             lasku.asiakkaan_tilausnumero,
             lasku.viite,
-            lasku.yhtio
+            lasku.yhtio,
+            myyntilasku.tunnus AS myyntilaskun_tunnus
             FROM lasku
             INNER JOIN maksupaatetapahtumat ON (maksupaatetapahtumat.yhtio = lasku.yhtio
               AND maksupaatetapahtumat.tilausnumero = lasku.tunnus)
@@ -121,6 +122,10 @@ function hae_tilaukset($rajaus) {
               AND asiakas.tunnus = lasku.liitostunnus)
             INNER JOIN kuka ON (kuka.yhtio = lasku.yhtio
               AND kuka.tunnus = lasku.myyja)
+            INNER JOIN lasku AS myyntilasku ON (myyntilasku.yhtio = lasku.yhtio
+              AND myyntilasku.laskunro = lasku.laskunro
+              AND myyntilasku.tila = 'U'
+              AND myyntilasku.alatila = 'X')
             WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
             AND lasku.laskutettu BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
             ORDER BY lasku.laskutettu DESC
@@ -197,6 +202,15 @@ function piirra_tilaus_table($tilaukset, $rajaus) {
     echo "<input type='hidden' name='vvl' value='{$rajaus["loppu"]["vuosi"]}'>";
     echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
     echo "<input type='submit' value='" . t("Näytä tilaus") . "'>";
+    echo "</form>";
+    echo "</td>";
+
+    echo "<td class='back'>";
+    echo "<form action='../monistalasku.php'>";
+    echo "<input type='hidden' name='tee' value='MONISTA'>";
+    echo "<input type='hidden' name='monistettavat[{$tilaus["myyntilaskun_tunnus"]}]' value='HYVITA'>";
+    echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
+    echo "<input type='submit' value='" . t("Korjaa kuitti") . "'>";
     echo "</form>";
     echo "</td>";
 

@@ -2178,5 +2178,16 @@ if ($tee == '' and $vain_monista == "") {
     echo "</form>";
   }
 
+  if (isset($mistatultiin) and $mistatultiin == "maksutapahtumaselaus") {
+    $osoite = "{$palvelin2}tilauskasittely/tilaus_myynti.php?" .
+              "toim=PIKATILAUS&tilausnumero={$utunnus}";
+
+    echo "<script>";
+    echo "$(function() {
+            window.location.replace('{$osoite}');
+          })";
+    echo "</script>";
+  }
+
   require 'inc/footer.inc';
 }

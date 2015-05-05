@@ -61,7 +61,7 @@ if (!function_exists("asiakastarkista")) {
       if ($ytunnus == "") {
         $virhe[$i] = t("Y-tunnus puuttuu")."!";
       }
-      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y" and $alias_set != "PROSPEKTI") {
 
         $qry = "SELECT luottoraja
                 FROM asiakas
@@ -75,7 +75,7 @@ if (!function_exists("asiakastarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja'])) {
+    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja']) and $alias_set != "PROSPEKTI") {
       $t[$i] = $t['luottoraja'];
     }
 

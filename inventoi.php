@@ -223,6 +223,8 @@ if ($tee == 'VALMIS') {
     // lukitaan tableja
     $query = "LOCK TABLES
               avainsana READ,
+              inventointilista READ,
+              inventointilistarivi READ,
               lasku WRITE,
               sanakirja WRITE,
               sarjanumeroseuranta WRITE,

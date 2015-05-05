@@ -21,7 +21,7 @@ piirra_hakuformi($rajaus);
 
 $tilaukset = hae_tilaukset($rajaus);
 
-piirra_tilaus_table($tilaukset);
+piirra_tilaus_table($tilaukset, $rajaus);
 
 require "inc/footer.inc";
 
@@ -107,11 +107,13 @@ function hae_tilaukset($rajaus) {
             lasku.tunnus,
             asiakas.nimi AS asiakas,
             asiakas.asiakasnro,
+            asiakas.tunnus AS asiakkaan_tunnus,
             lasku.laskutettu,
             kuka.nimi AS myyja,
             lasku.summa,
             lasku.asiakkaan_tilausnumero,
-            lasku.viite
+            lasku.viite,
+            lasku.yhtio
             FROM lasku
             INNER JOIN maksupaatetapahtumat ON (maksupaatetapahtumat.yhtio = lasku.yhtio
               AND maksupaatetapahtumat.tilausnumero = lasku.tunnus)
@@ -127,8 +129,8 @@ function hae_tilaukset($rajaus) {
   return pupe_query($query);
 }
 
-function piirra_tilaus_table($tilaukset) {
-  global $yhtiorow;
+function piirra_tilaus_table($tilaukset, $rajaus) {
+  global $yhtiorow, $palvelin2;
 
   echo "<table>";
   echo "<thead>";
@@ -150,6 +152,14 @@ function piirra_tilaus_table($tilaukset) {
 
   while ($tilaus = mysql_fetch_assoc($tilaukset)) {
     $tilaus["summa"] = number_format($tilaus["summa"], $yhtiorow["hintapyoristys"], ",", " ");
+    $lopetus = "{$palvelin2}tilauskasittely/maksutapahtumaselaus.php////" .
+               "rajaus[alku][paiva]={$rajaus["alku"]["paiva"]}//" .
+               "rajaus[alku][kuukausi]={$rajaus["alku"]["kuukausi"]}//" .
+               "rajaus[alku][vuosi]={$rajaus["alku"]["vuosi"]}//" .
+               "rajaus[loppu][paiva]={$rajaus["loppu"]["paiva"]}//" .
+               "rajaus[loppu][kuukausi]={$rajaus["loppu"]["kuukausi"]}//" .
+               "rajaus[loppu][vuosi]={$rajaus["loppu"]["vuosi"]}//" .
+               "rajaus[limit]={$rajaus["limit"]}";
 
     echo "<tr>";
     echo "<td class='text-right'>{$tilaus["laskunro"]}</td>";
@@ -167,6 +177,26 @@ function piirra_tilaus_table($tilaukset) {
     echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
     echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
     echo "<input type='submit' value='" . t("Kuittikopio") . "'>";
+    echo "</form>";
+    echo "</td>";
+
+    echo "<td class='back'>";
+    echo "<form action='../raportit/asiakkaantilaukset.php'>";
+    echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+    echo "<input type='hidden' name='toim' value='MYYNTI'>";
+    echo "<input type='hidden' name='asiakasid' value='{$tilaus["asiakkaan_tunnus"]}'>";
+    echo "<input type='hidden' name='laskunro' value='{$tilaus["laskunro"]}'>";
+    echo "<input type='hidden' name='lasku_yhtio' value='{$tilaus["yhtio"]}'>";
+    echo "<input type='hidden' name='tunnus' value='{$tilaus["tunnus"]}'>";
+    echo "<input type='hidden' name='ytunnus' value='{$tilaus["asiakasnro"]}'>";
+    echo "<input type='hidden' name='ppa' value='{$rajaus["alku"]["paiva"]}'>";
+    echo "<input type='hidden' name='kka' value='{$rajaus["alku"]["kuukausi"]}'>";
+    echo "<input type='hidden' name='vva' value='{$rajaus["alku"]["vuosi"]}'>";
+    echo "<input type='hidden' name='ppl' value='{$rajaus["loppu"]["paiva"]}'>";
+    echo "<input type='hidden' name='kkl' value='{$rajaus["loppu"]["kuukausi"]}'>";
+    echo "<input type='hidden' name='vvl' value='{$rajaus["loppu"]["vuosi"]}'>";
+    echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+    echo "<input type='submit' value='" . t("Näytä tilaus") . "'>";
     echo "</form>";
     echo "</td>";
 

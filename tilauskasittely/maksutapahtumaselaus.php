@@ -1,5 +1,7 @@
 <?php
 
+$pupe_DataTables = "maksutapahtumaselaus";
+
 require "../inc/parametrit.inc";
 
 if (isset($tilaus) and $tilaus["toiminto"] == "kuittikopio") {
@@ -21,7 +23,7 @@ piirra_hakuformi($rajaus);
 
 $tilaukset = hae_tilaukset($rajaus);
 
-piirra_tilaus_table($tilaukset, $rajaus);
+piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables);
 
 require "inc/footer.inc";
 
@@ -134,10 +136,12 @@ function hae_tilaukset($rajaus) {
   return pupe_query($query);
 }
 
-function piirra_tilaus_table($tilaukset, $rajaus) {
+function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   global $yhtiorow, $palvelin2;
 
-  echo "<table>";
+  pupe_DataTables(array(array($pupe_DataTables, 9, 12)));
+
+  echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";
 
   echo "<tr>";
@@ -150,7 +154,25 @@ function piirra_tilaus_table($tilaukset, $rajaus) {
   echo "<th>" . t("Summa") . "</th>";
   echo "<th>" . t("Astilno") . "</th>";
   echo "<th>" . t("Tilausviite") . "</th>";
-  echo "</trLi>";
+  echo "<th class='back'></th>";
+  echo "<th class='back'></th>";
+  echo "<th class='back'></th>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><input type='text' class='search_field' name='search_kuitti'></td>";
+  echo "<td><input type='text' class='search_field' name='search_tilaus'></td>";
+  echo "<td><input type='text' class='search_field' name='search_asiakas'></td>";
+  echo "<td><input type='text' class='search_field' name='search_asnro'></td>";
+  echo "<td><input type='text' class='search_field' name='search_aika'></td>";
+  echo "<td><input type='text' class='search_field' name='search_myyja'></td>";
+  echo "<td><input type='text' class='search_field' name='search_summa'></td>";
+  echo "<td><input type='text' class='search_field' name='search_astilno'></td>";
+  echo "<td><input type='text' class='search_field' name='search_tilausviite'></td>";
+  echo "<td class='back'>";
+  echo "<td class='back'>";
+  echo "<td class='back'>";
+  echo "</tr>";
 
   echo "</thead>";
   echo "<tbody>";

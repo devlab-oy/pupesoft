@@ -21,6 +21,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
+  "kassalipas" => "{$palvelin2}pupenext/cash_registers",
   "tili" => "{$palvelin2}pupenext/accounts",
   "taso" => "{$palvelin2}pupenext/sum_levels",
   "kirjoittimet" => "{$palvelin2}pupenext/printers"

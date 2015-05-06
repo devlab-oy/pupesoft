@@ -37,15 +37,20 @@ function hae_asiakkaan_kuitti($tunnus) {
 
   $archive_id = hae_archive_id($tunnus);
 
-  $kuitit = hae_kuitit($archive_id);
-  $asiakkaan_kuitti = $kuitit["asiakkaan_kuitti"];
+  if ($archive_id) {
+    $kuitit = hae_kuitit($archive_id);
+    $asiakkaan_kuitti = $kuitit["asiakkaan_kuitti"];
 
-  $query = "UPDATE maksupaatetapahtumat
-            SET asiakkaan_kuitti = '{$asiakkaan_kuitti}'
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$tunnus}";
+    $query = "UPDATE maksupaatetapahtumat
+              SET asiakkaan_kuitti = '{$asiakkaan_kuitti}'
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = {$tunnus}";
 
-  return pupe_query($query);
+    return pupe_query($query);
+  }
+  else {
+    return false;
+  }
 }
 
 function hae_kauppiaan_kuitti($tunnus) {
@@ -53,15 +58,20 @@ function hae_kauppiaan_kuitti($tunnus) {
 
   $archive_id = hae_archive_id($tunnus);
 
-  $kuitit = hae_kuitit($archive_id);
-  $asiakkaan_kuitti = $kuitit["kauppiaan_kuitti"];
+  if ($archive_id) {
+    $kuitit = hae_kuitit($archive_id);
+    $asiakkaan_kuitti = $kuitit["kauppiaan_kuitti"];
 
-  $query = "UPDATE maksupaatetapahtumat
-            SET kauppiaan_kuitti = '{$asiakkaan_kuitti}'
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$tunnus}";
+    $query = "UPDATE maksupaatetapahtumat
+              SET kauppiaan_kuitti = '{$asiakkaan_kuitti}'
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = {$tunnus}";
 
-  return pupe_query($query);
+    return pupe_query($query);
+  }
+  else {
+    return false;
+  }
 }
 
 function hae_archive_id($tunnus) {

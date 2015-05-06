@@ -262,6 +262,7 @@ while ($row = mysql_fetch_array($res)) {
     'kuvaus'               => $row["kuvaus"],
     'lyhytkuvaus'          => $row["lyhytkuvaus"],
     'yksikko'              => $row["yksikko"],
+    'muuta'                => $row["muuta"],
     'tuotemassa'           => $row["tuotemassa"],
     'tuotemerkki'          => $row["tuotemerkki"],
     'myyntihinta'          => $myyntihinta,

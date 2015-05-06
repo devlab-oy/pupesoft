@@ -38,6 +38,24 @@ if (!function_exists("toimitustapatarkista")) {
 
         echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
+        if ($trow) {
+          $query = "UPDATE toimitustapa
+                    SET vak_kielto='{$toita}'
+                    WHERE vak_kielto='{$trow[$i]}'
+                    AND yhtio='{$kukarow["yhtio"]}'";
+          pupe_query($query);
+
+          echo ", " . mysql_affected_rows() . " " . t("VAK-käsittelyä");
+
+          $query = "UPDATE toimitustapa
+                    SET vaihtoehtoinen_vak_toimitustapa='{$toita}'
+                    WHERE vaihtoehtoinen_vak_toimitustapa='{$trow[$i]}'
+                    AND yhtio='{$kukarow["yhtio"]}'";
+          pupe_query($query);
+
+          echo ", " . mysql_affected_rows() . " " . t("vaihtoehtoista VAK-toimitustapaa");
+        }
+
         $query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
         $updre = pupe_query($query);
 
@@ -146,8 +164,19 @@ if (!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if ((mysql_field_name($result, $i) == "vak_kielto")) {
-      $apuvakkielto  = $t[$i];
+    if ($trow and (mysql_field_name($result, $i) == "vak_kielto") and ($t[$i] != "")) {
+      $query = "SELECT count(*) AS count
+                FROM toimitustapa
+                WHERE yhtio                         = '{$kukarow["yhtio"]}'
+                AND vaihtoehtoinen_vak_toimitustapa = '{$trow["selite"]}'";
+      $tt_count = pupe_query($query);
+      $tt_count = mysql_fetch_assoc($tt_count);
+      $tt_count = $tt_count["count"];
+
+      if ($tt_count > 0) {
+        $virhe[$i] = t("Et voi asettaa toimitustavalle VAK-kieltoa, sillä muut toimitustavat " .
+          "käyttävät tätä toimitustapaa vaihtoehtoisena VAK-toimitustapana");
+      }
     }
 
     if (mysql_field_name($result, $i) == "erilliskasiteltavakulu" or mysql_field_name($result, $i) == "lisakulu" or mysql_field_name($result, $i) == "lisakulu_summa") {

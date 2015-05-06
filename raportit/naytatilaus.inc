@@ -2241,19 +2241,23 @@ function hae_maksutapahtumat($tilausnumero) {
 function piirra_maksutapahtumat($maksutapahtumat) {
   global $yhtiorow;
 
+  echo "<script src='../js/naytatilaus.js'></script>";
+
   echo "<br>";
 
   echo "<table>";
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th class='text-center' colspan='3'>" . t("Maksutapahtumat") . "</th>";
+  echo "<th class='text-center' colspan='5'>" . t("Maksutapahtumat") . "</th>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<th>" . t("Maksutapa") . "</th>";
   echo "<th>" . t("Summa") . "</th>";
   echo "<th>" . t("Osto") . "/" . t("Hyvitys") . "</th>";
+  echo "<th>" . t("Asiakkaan kuitti") . "</th>";
+  echo "<th>" . t("Kauppiaan kuitti") . "</th>";
   echo "</tr>";
 
   echo "</thead>";
@@ -2263,11 +2267,21 @@ function piirra_maksutapahtumat($maksutapahtumat) {
     $summa = number_format($maksutapahtuma["summa_valuutassa"],
                            $yhtiorow["hintapyoristys"], ",", " ");
     $tila = $maksutapahtuma["tila"] == "K" ? t("Osto") : t("Hyvitys");
+    $asiakkaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["asiakkaan_kuitti"]);
+    $kauppiaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["kauppiaan_kuitti"]);
 
     echo "<tr>";
     echo "<td>{$maksutapahtuma["maksutapa"]}</td>";
     echo "<td>{$summa} {$maksutapahtuma["valkoodi"]}</td>";
     echo "<td>{$tila}</td>";
+    echo "<td>";
+    echo "<a class='nayta_asiakkaan_kuitti' href>" . t("Näytä") . "</a>";
+    echo "<div class='hidden'>{$asiakkaan_kuitti}</div>";
+    echo "</td>";
+    echo "<td>";
+    echo "<a class='nayta_kauppiaan_kuitti' href>" . t("Näytä") . "</a>";
+    echo "<div class='hidden'>{$kauppiaan_kuitti}</div>";
+    echo "</td>";
     echo "</tr>";
   }
 

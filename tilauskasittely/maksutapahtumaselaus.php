@@ -129,7 +129,7 @@ function hae_tilaukset($rajaus) {
               AND myyntilasku.tila = 'U'
               AND myyntilasku.alatila = 'X')
             WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND lasku.laskutettu BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
+            AND DATE(lasku.laskutettu) BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
             ORDER BY lasku.laskutettu DESC
             LIMIT {$rajaus["limit"]};";
 

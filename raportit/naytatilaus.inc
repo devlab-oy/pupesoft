@@ -2318,6 +2318,7 @@ function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_
       echo "<input type='hidden' name='ppl' value='{$ppl}'>";
       echo "<input type='hidden' name='kkl' value='{$kkl}'>";
       echo "<input type='hidden' name='vvl' value='{$vvl}'>";
+      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
       echo "<input type='hidden' name='kuitin_haku[tunnus]' value='{$maksutapahtuma["tunnus"]}'>";
       echo "<input type='hidden' name='kuitin_haku[toiminto]' value='kauppias'>";
       echo "</form>";

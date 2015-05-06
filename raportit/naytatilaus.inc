@@ -607,12 +607,14 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 }
 
-if (isset($hae_kuitti)) {
-  if ($hae_kuitti == "kauppias") {
-    hae_kauppiaan_kuitti();
+require "inc/maksupaate_funktiot.inc";
+
+if (isset($kuitin_haku)) {
+  if ($kuitin_haku["toiminto"] == "kauppias") {
+    hae_kauppiaan_kuitti($kuitin_haku["tunnus"]);
   }
   else {
-    hae_asiakkaan_kuitti();
+    hae_asiakkaan_kuitti($kuitin_haku["tunnus"]);
   }
 }
 
@@ -2230,24 +2232,6 @@ function hae_kassalipas($tunnus) {
   return mysql_fetch_assoc($result);
 }
 
-function hae_maksutapahtumat($tilausnumero) {
-  global $kukarow;
-
-  $query = "SELECT *
-            FROM maksupaatetapahtumat
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tilausnumero = {$tilausnumero}";
-
-  $result = pupe_query($query);
-
-  if (mysql_num_rows($result) > 0) {
-    return $result;
-  }
-  else {
-    return false;
-  }
-}
-
 function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus,
                                 $ytunnus, $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus) {
   global $yhtiorow, $toim;
@@ -2305,7 +2289,8 @@ function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_
       echo "<input type='hidden' name='kkl' value='{$kkl}'>";
       echo "<input type='hidden' name='vvl' value='{$vvl}'>";
       echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-      echo "<input type='hidden' name='hae_kuitti' value='asiakas'>";
+      echo "<input type='hidden' name='kuitin_haku[tunnus]' value='{$maksutapahtuma["tunnus"]}'>";
+      echo "<input type='hidden' name='kuitin_haku[toiminto]' value='asiakas'>";
       echo "</form>";
     }
     else {
@@ -2333,8 +2318,8 @@ function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_
       echo "<input type='hidden' name='ppl' value='{$ppl}'>";
       echo "<input type='hidden' name='kkl' value='{$kkl}'>";
       echo "<input type='hidden' name='vvl' value='{$vvl}'>";
-      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-      echo "<input type='hidden' name='hae_kuitti' value='kauppias'>";
+      echo "<input type='hidden' name='kuitin_haku[tunnus]' value='{$maksutapahtuma["tunnus"]}'>";
+      echo "<input type='hidden' name='kuitin_haku[toiminto]' value='kauppias'>";
       echo "</form>";
     }
     else {
@@ -2348,12 +2333,4 @@ function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_
 
   echo "</tbody>";
   echo "</table>";
-}
-
-function hae_asiakkaan_kuitti() {
-  echo "Asiakas";
-}
-
-function hae_kauppiaan_kuitti() {
-  echo "Kauppias";
 }

@@ -216,6 +216,59 @@ class LumoClient {
     return $return;
   }
 
+  function getPreviousReceipts($archive_id) {
+    $return = array();
+    $haettu = false;
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+             <GetPreviousReceipts>
+               <ArchiveID>{$archive_id}</ArchiveID>
+               <GetReceiptInfo>true</GetReceiptInfo>
+             </GetPreviousReceipts>
+           </EMVLumo>\0";
+
+    for ($i = 1; $i < 4; $i++) {
+      fwrite($this->_socket, $in);
+
+      $this->log("Haetaan kuitteja tunnuksella {$archive_id}, yritys {$i}");
+
+      $out = "";
+
+      while ($patka = fgets($this->_socket)) {
+        $out .= $patka;
+      }
+
+      $stringit = explode("\0", $out);
+
+      foreach ($stringit as $stringi) {
+        $xml = simplexml_load_string($stringi);
+
+        if ($xml) {
+          $return["kauppiaan_kuitti"] = simplexml_load_string($xml->GetPreviousReceipts->Result);
+          $return["kauppiaan_kuitti"] = (string) $return["kauppiaan_kuitti"]->Receipt[0]->Text;
+
+          $return["asiakkaan_kuitti"] = simplexml_load_string($xml->GetPreviousReceipts->Result);
+          $return["asiakkaan_kuitti"] = (string) $return["asiakkaan_kuitti"]->Receipt[1]->Text;
+
+          $haettu = !empty($return["kauppiaan_kuitti"]) and !empty($return["asiakkaan_kuitti"]);
+        }
+
+        if ($haettu) {
+          break;
+        }
+      }
+
+      if ($haettu) {
+        break;
+      }
+    }
+
+    $msg = $return == "" ? "Kuitteja ei haettu" : "Kuitit haettu onnistuneesti";
+
+    $this->log($msg);
+
+    return $return;
+  }
+
   /**
    * Hakee error_countin:n
    *

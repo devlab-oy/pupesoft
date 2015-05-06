@@ -105,7 +105,7 @@ function piirra_hakuformi($rajaus) {
 function hae_tilaukset($rajaus) {
   global $kukarow;
 
-  $query = "SELECT lasku.laskunro,
+  $query = "SELECT DISTINCT lasku.laskunro,
             lasku.tunnus,
             asiakas.nimi AS asiakas,
             asiakas.asiakasnro,

@@ -607,10 +607,20 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 }
 
+if (isset($hae_kuitti)) {
+  if ($hae_kuitti == "kauppias") {
+    hae_kauppiaan_kuitti();
+  }
+  else {
+    hae_asiakkaan_kuitti();
+  }
+}
+
 $maksutapahtumat = hae_maksutapahtumat($tunnus);
 
 if ($maksutapahtumat) {
-  piirra_maksutapahtumat($maksutapahtumat);
+  piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus, $ytunnus,
+                         $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
 }
 
 echo "<br>";
@@ -2238,8 +2248,9 @@ function hae_maksutapahtumat($tilausnumero) {
   }
 }
 
-function piirra_maksutapahtumat($maksutapahtumat) {
-  global $yhtiorow;
+function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus,
+                                $ytunnus, $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus) {
+  global $yhtiorow, $toim;
 
   echo "<script src='../js/naytatilaus.js'></script>";
 
@@ -2275,16 +2286,74 @@ function piirra_maksutapahtumat($maksutapahtumat) {
     echo "<td>{$summa} {$maksutapahtuma["valkoodi"]}</td>";
     echo "<td>{$tila}</td>";
     echo "<td>";
-    echo "<a class='nayta_asiakkaan_kuitti' href>" . t("Näytä") . "</a>";
-    echo "<div class='hidden'>{$asiakkaan_kuitti}</div>";
+
+    if (empty($asiakkaan_kuitti)) {
+      echo "<span>Kuittia ei ole haettu</span><br>";
+      echo "<a class='hae_asiakkaan_kuitti' href>" . t("Yritä uudelleen") . "</a>";
+      echo "<form>";
+      echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>";
+      echo "<input type='hidden' name='laskunro' value='{$laskunro}'>";
+      echo "<input type='hidden' name='lasku_yhtio' value='{$lasku_yhtio}'>";
+      echo "<input type='hidden' name='tunnus' value='{$tunnus}'>";
+      echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
+      echo "<input type='hidden' name='ppa' value='{$ppa}'>";
+      echo "<input type='hidden' name='kka' value='{$kka}'>";
+      echo "<input type='hidden' name='vva' value='{$vva}'>";
+      echo "<input type='hidden' name='ppl' value='{$ppl}'>";
+      echo "<input type='hidden' name='kkl' value='{$kkl}'>";
+      echo "<input type='hidden' name='vvl' value='{$vvl}'>";
+      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+      echo "<input type='hidden' name='hae_kuitti' value='asiakas'>";
+      echo "</form>";
+    }
+    else {
+      echo "<a class='nayta_asiakkaan_kuitti' href>" . t("Näytä") . "</a>";
+      echo "<div class='hidden'>{$asiakkaan_kuitti}</div>";
+    }
+
     echo "</td>";
     echo "<td>";
-    echo "<a class='nayta_kauppiaan_kuitti' href>" . t("Näytä") . "</a>";
-    echo "<div class='hidden'>{$kauppiaan_kuitti}</div>";
+
+    if (empty($kauppiaan_kuitti)) {
+      echo "<span>Kuittia ei ole haettu</span><br>";
+      echo "<a class='hae_kauppiaan_kuitti' href>" . t("Yritä uudelleen") . "</a>";
+      echo "<form>";
+      echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>";
+      echo "<input type='hidden' name='laskunro' value='{$laskunro}'>";
+      echo "<input type='hidden' name='lasku_yhtio' value='{$lasku_yhtio}'>";
+      echo "<input type='hidden' name='tunnus' value='{$tunnus}'>";
+      echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
+      echo "<input type='hidden' name='ppa' value='{$ppa}'>";
+      echo "<input type='hidden' name='kka' value='{$kka}'>";
+      echo "<input type='hidden' name='vva' value='{$vva}'>";
+      echo "<input type='hidden' name='ppl' value='{$ppl}'>";
+      echo "<input type='hidden' name='kkl' value='{$kkl}'>";
+      echo "<input type='hidden' name='vvl' value='{$vvl}'>";
+      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+      echo "<input type='hidden' name='hae_kuitti' value='kauppias'>";
+      echo "</form>";
+    }
+    else {
+      echo "<a class='nayta_kauppiaan_kuitti' href>" . t("Näytä") . "</a>";
+      echo "<div class='hidden'>{$kauppiaan_kuitti}</div>";
+    }
+
     echo "</td>";
     echo "</tr>";
   }
 
   echo "</tbody>";
   echo "</table>";
+}
+
+function hae_asiakkaan_kuitti() {
+  echo "Asiakas";
+}
+
+function hae_kauppiaan_kuitti() {
+  echo "Kauppias";
 }

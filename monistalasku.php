@@ -1565,6 +1565,9 @@ if ($tee == 'MONISTA') {
           case 'otunnus':
             $values .= ", '{$utunnus}'";
             break;
+          case 'valmnro':
+            $values .= ", ''";
+            break;
           default:
             $values .= ", '".$monistalisrow[$fieldname]."'";
           }

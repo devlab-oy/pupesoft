@@ -147,29 +147,36 @@ class LumoClient {
    * Hakee edellisen tapahtuman asiakaskuitin
    */
   function getCustomerReceipt() {
-
-    $return = '';
+    $return = "";
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <GetReceiptCustomer/>
            </EMVLumo>\0";
 
-    fwrite($this->_socket, $in);
+    for ($i = 1; $i < 4; $i++) {
+      fwrite($this->_socket, $in);
 
-    $this->log("Haetaan asiakkaan kuittia");
+      $this->log("Haetaan asiakkaan kuittia, yritys {$i}/3");
 
-    while ($patka = fgets($this->_socket)) {
-      $out .= $patka;
-    }
+      $out = "";
 
-    $stringit = explode("\0", $out);
-
-    foreach ($stringit as $stringi) {
-      $xml = simplexml_load_string($stringi);
-
-      if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
-        $return = $xml->GetReceiptCustomer->Result;
+      while ($patka = fgets($this->_socket)) {
+        $out .= $patka;
       }
+
+      $stringit = explode("\0", $out);
+
+      foreach ($stringit as $stringi) {
+        $xml = simplexml_load_string($stringi);
+
+        if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
+          $return = $xml->GetReceiptCustomer->Result;
+
+          if (!empty($return)) break;
+        }
+      }
+
+      if (!empty($return)) break;
     }
 
     $msg = $return == '' ? "Asiakkaan kuittia ei haettu" : "Asiakkaan kuitti haettu";
@@ -184,29 +191,36 @@ class LumoClient {
    * Hakee edellisen tapahtuman kauppiaskuitin
    */
   function getMerchantReceipt() {
-
-    $return = '';
+    $return = "";
 
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <GetReceiptMerchant/>
            </EMVLumo>\0";
 
-    fwrite($this->_socket, $in);
+    for ($i = 1; $i < 4; $i++) {
+      fwrite($this->_socket, $in);
 
-    $this->log("Haetaan kauppiaan kuittia");
+      $this->log("Haetaan kauppiaan kuittia, yritys {$i}/3");
 
-    while ($patka = fgets($this->_socket)) {
-      $out .= $patka;
-    }
+      $out = "";
 
-    $stringit = explode("\0", $out);
-
-    foreach ($stringit as $stringi) {
-      $xml = simplexml_load_string($stringi);
-
-      if (isset($xml) and isset($xml->GetReceiptMerchant->Result)) {
-        $return = $xml->GetReceiptMerchant->Result;
+      while ($patka = fgets($this->_socket)) {
+        $out .= $patka;
       }
+
+      $stringit = explode("\0", $out);
+
+      foreach ($stringit as $stringi) {
+        $xml = simplexml_load_string($stringi);
+
+        if (isset($xml) and isset($xml->GetReceiptMerchant->Result)) {
+          $return = $xml->GetReceiptMerchant->Result;
+
+          if (!empty($return)) break;
+        }
+      }
+
+      if (!empty($return)) break;
     }
 
     $msg = $return == '' ? "Kauppiaan kuittia ei haettu" : "Kauppiaan kuitti haettu";

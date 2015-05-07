@@ -4,7 +4,7 @@
 require "../inc/parametrit.inc";
 require "../inc/edifact_functions.inc";
 
-
+/*
 if ($task == 'matkakoodipaivitys') {
 
   $query = "SELECT tunnus, asiakkaan_tilausnumero, asiakkaan_rivinumero FROM tilausrivin_lisatiedot WHERE matkakoodi = ''";
@@ -87,7 +87,7 @@ if ($task == 'tullinimikepalautus') {
   }
 }
 
-/*
+*/
 
 if ($task == 'input') {
 
@@ -106,7 +106,7 @@ if ($task == 'input') {
 }
 
 
-
+/*
 if ($task == 'nollaa') {
 
   $taulut = array(
@@ -139,7 +139,11 @@ if ($task == 'nollaa') {
     <input type='submit' value='".t("Lue sanoma")."'>
   </form>
 
-  <br><br>
+  <br><br>";
+
+/*
+
+  echo "
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='nollaa' />
@@ -157,7 +161,7 @@ if ($task == 'nollaa') {
   </form>
 
   ";
-
+*/
 
 
 require "inc/footer.inc";

@@ -40,11 +40,11 @@ if ($view == 'top') {
 elseif ($view == 'tulli') {
 
   if (tarkista_oikeus("sarjanumero/tullivarastointi.php")) {
-    echo "<p><a href='tullivarastointi.php' class='button index_button'>", t("Vie varastoon"), "</a></p>";
+    echo "<p><a href='tullivarastointi.php' class='button index_button'>", t("Purku"), "</a></p>";
   }
 
   if (tarkista_oikeus("sarjanumero/tullivarastointi_kontitus.php")) {
-    echo "<p><a href='tullivarastointi_kontitus.php' class='button index_button'>", t("Kontitus"), "</a></p>";
+    echo "<p><a href='tullivarastointi_kontitus.php' class='button index_button'>", t("Keräys"), "</a></p>";
   }
 
 }

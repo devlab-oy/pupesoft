@@ -1260,13 +1260,11 @@ if (isset($view) and $view == "perus") {
   $query = "SELECT
             lasku.asiakkaan_tilausnumero,
             lasku.tunnus,
-            FLOOR(tilausrivi.tilkpl) as kpl,
+            SUM(FLOOR(tilausrivi.tilkpl)) as kpl,
             concat(tilausrivi.nimitys, '&nbsp;&mdash;&nbsp;', tuote.malli) as tuote,
             tuote.muuta AS lisatieto,
             tilausrivi.tuoteno,
-            tilausrivi.hyllyalue,
-            tilausrivi.hyllynro,
-            concat(SUBSTRING(tilausrivi.hyllyalue, 2),  tilausrivi.hyllynro) AS varastopaikka,
+            GROUP_CONCAT(DISTINCT CONCAT(tilausrivi.hyllyalue, '#', tilausrivi.hyllynro)) AS varastopaikat,
             lasku.varasto,
             varastopaikat.nimitys AS varastonimi,
             varastopaikat.tunnus AS varastotunnus,
@@ -1287,7 +1285,7 @@ if (isset($view) and $view == "perus") {
             AND viesti = 'tullivarasto'
             AND sisviesti1 = ''
             AND tilausrivi.kommentti != 'kokonaan siirretty eu-numerolle'
-            GROUP BY lasku.tunnus, tilausrivi.tunnus
+            GROUP BY tilausrivi.tuoteno
             ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
 
@@ -1297,13 +1295,13 @@ if (isset($view) and $view == "perus") {
     echo "</font><br><br>";
   }
 
-  /*
+/*
   echo "
     <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='nollaus' />
     <input type='submit' value='". t("Nollaa") . "' />
     </form>";
-  */
+*/
 
   echo "
     <form action='tullivarastointi.php' method='post'>
@@ -1355,23 +1353,43 @@ if (isset($view) and $view == "perus") {
           break;
       }
 
-      if (empty($tulo['varastopaikka'])) {
-        $vp = '';
+
+      if ($tulo['varastopaikat'] == '#') {
+        $tarjolla = false;
       }
       else {
-        $vp = $tulo['varastopaikka'];
+
+        $varastopaikat = explode(',', $tulo['varastopaikat']);
+
+        $tarjolla = 0;
+
+        foreach ($varastopaikat as $varastopaikka) {
+
+          list($hyllyalue, $hyllynro) = explode('#', $varastopaikka);
+
+          $saldot = saldo_myytavissa(
+              $tulo['tuoteno'],
+              '',
+              $tulo['varastotunnus'],
+              '',
+              $hyllyalue,
+              $hyllynro,
+              0,
+              0
+          );
+
+          $tarjolla += $saldot[2];
+        }
       }
 
       $tuoteinfo = array(
         'varastotunnus' => $tulo['varastotunnus'],
         'rivitunnus' => $tulo['rivitunnus'],
         'lisatieto' => $tulo['lisatieto'],
-        'hyllyalue' => $tulo['hyllyalue'],
-        'hyllynro' => $tulo['hyllynro'],
+        'tarjolla' => $tarjolla,
         'tuoteno' => $tulo['tuoteno'],
         'tuote' => $tulo['tuote'],
-        'kpl' => $tulo['kpl'],
-        'vp' => $vp
+        'kpl' => $tulo['kpl']
       );
 
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimittaja'] = $tulo['nimi'];
@@ -1426,30 +1444,17 @@ if (isset($view) and $view == "perus") {
 
       foreach ($info['tuoteinfo'] as $tuote) {
 
-        $saldot = saldo_myytavissa(
-            $tuote['tuoteno'],
-            '',
-            $tuote['varastotunnus'],
-            '',
-            $tuote['hyllyalue'],
-            $tuote['hyllynro'],
-            0,
-            0
-        );
-
-        $tarjolla = $saldot[2];
-
-        if ($tarjolla === false or $tuote['hyllyalue'] == '') {
+        if ($tuote['tarjolla'] === false) {
           $statukset[$tulonumero][$tuote['rivitunnus']] = t("Ei varastossa");
         }
-        elseif ($tarjolla == 0) {
+        elseif ($tuote['tarjolla'] == 0) {
           $statukset[$tulonumero][$tuote['rivitunnus']] = t("Liitetty toimituksiin");
           $liitetty_toimituksiin = true;
         }
-        elseif ($tarjolla < $tuote['kpl']) {
+        elseif ($tuote['tarjolla'] < $tuote['kpl']) {
           $statukset[$tulonumero][$tuote['rivitunnus']] = t("Osa liitetty toimituksiin");
         }
-        elseif ($tarjolla == $tuote['kpl']) {
+        elseif ($tuote['tarjolla'] == $tuote['kpl']) {
           $statukset[$tulonumero][$tuote['rivitunnus']] = t("Varastossa");
         }
         else {
@@ -1591,19 +1596,17 @@ if (isset($view) and $view == "perus") {
 
 if (isset($view) and $view == "purkuraportin_lataus") {
 
-  js_openFormInNewWindow();
-
   echo "<table>";
   echo "<tr>";
   echo "<th>".t("Toimittaja")."</th>";
   echo "<th>".t("Tulonumero")."</th>";
   echo "<th>".t("Saapumispäivä")."</th>";
-  echo "<tr>";
+  echo "</tr>";
   echo "<tr>";
   echo "<td>{$toimittaja}</td>";
   echo "<td>{$tulonumero}</td>";
   echo "<td>{$saapumispaiva}</td>";
-  echo "<tr>";
+  echo "</tr>";
   echo "</table>";
 
   echo '<br>';

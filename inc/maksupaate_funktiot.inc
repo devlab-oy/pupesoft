@@ -87,7 +87,7 @@ function hae_archive_id($tunnus) {
   $maksutapahtuma = mysql_fetch_assoc($result);
 
   if (!empty($maksutapahtuma["asiakkaan_kuitti"])) {
-    $archive_id = explode("\n", $maksutapahtuma["kauppiaan_kuitti"]);
+    $archive_id = explode("\n", $maksutapahtuma["asiakkaan_kuitti"]);
     $archive_id = $archive_id[5];
     $archive_id = explode(" ", $archive_id);
     $archive_id = $archive_id[1];

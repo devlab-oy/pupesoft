@@ -1201,12 +1201,23 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selitetark) {
 }
 
 if ($_selite and $avain_sel["RESEPTI_KENTAT"] == "SELECTED") {
+  $kentat = array("piirustusnumero", "osanumero", "positiokentta");
+
+  $resepti_kentat_result = t_avainsana("RESEPTI_KENTAT");
+
+  while ($resepti_kentta = mysql_fetch_assoc($resepti_kentat_result)) {
+    if (in_array($resepti_kentta["selite"], $kentat) and $trow[$i] != $resepti_kentta["selite"]) {
+      $key = array_search($resepti_kentta["selite"], $kentat);
+      unset($kentat[$key]);
+    }
+  }
+
   $ulos = "<td>";
   $ulos .= "<select name='{$nimi}'" . js_alasvetoMaxWidth($nimi, 300) . ">";
 
-  $ulos .= "<option value='piirustusnumero'>" . t("Piirustusnumero") . "</option>>";
-  $ulos .= "<option value='osanumero'>" . t("Osanumero") . "</option>>";
-  $ulos .= "<option value='positiokentta'>" . t("Positiokenttä") . "</option>>";
+  foreach ($kentat as $kentta) {
+    $ulos .= "<option value='{$kentta}'>" . t(ucfirst($kentta)) . "</option>";
+  }
 
   $ulos .= "</select>";
   $ulos .= "</td>";

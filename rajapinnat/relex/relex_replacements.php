@@ -95,13 +95,12 @@ elseif ($paiva_ajo) {
 }
 
 // Haetaan ketjut
-$query = "SELECT yhtio.maa, korvaavat.id, count(*) + 1 kpl
+$query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           FROM tuote
           JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno {$korvaavatrajaus})
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio = '$yhtio'
-          {$tuoterajaus}
-          GROUP BY 1,2";
+          {$tuoterajaus}";
 $res = pupe_query($query);
 
 // Tallennetaan aikaleima
@@ -122,8 +121,7 @@ while ($row = mysql_fetch_assoc($res)) {
              JOIN tuote on (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
              WHERE korvaavat.yhtio = '{$yhtio}'
              AND korvaavat.id      = '{$row['id']}'
-             ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
-             LIMIT {$row['kpl']}";
+             ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $kresult = pupe_query($kquery);
 
   $korvaavat = array();

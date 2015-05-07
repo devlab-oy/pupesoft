@@ -7,13 +7,25 @@ if (isset($_POST['task']) and (strpos($_POST['task'], "_pdf") !== false)) {
 require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
 
-if (isset($task) and $task == 'purkuraportti_pdf') {
+if (isset($task) and ($task == 'purkuraportti_pdf' or $task == 'lastausraportti_pdf')) {
 
-  $query = "SELECT tunnus
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_tilausnumero = '{$tulonumero}'
-            AND viesti = 'tullivarasto'";
+  if ($tyyppi == 'purku') {
+
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND asiakkaan_tilausnumero = '{$tunniste}'
+              AND viesti = 'tullivarasto'";
+  }
+  else {
+
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tunniste}'
+              AND viesti = 'tullivarastotoimitus'";
+  }
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -22,8 +34,11 @@ if (isset($task) and $task == 'purkuraportti_pdf') {
   }
   else{
 
-    $tulotunnus = mysql_result($result, 0);
-    $pdf_data = purkuraportti_parametrit($tulotunnus);
+    if ($tyyppi == 'purku') {
+      $tunniste = mysql_result($result, 0);
+    }
+
+    $pdf_data = purkuraportti_parametrit($tunniste);
 
     $logo_info = pdf_logo();
     $pdf_data['logodata'] = $logo_info['logodata'];
@@ -32,7 +47,7 @@ if (isset($task) and $task == 'purkuraportti_pdf') {
     $pdf_tiedosto = purkuraportti_pdf($pdf_data);
 
     header("Content-type: application/pdf");
-    header("Content-Disposition:attachment;filename='purkuraportti_{$tulonumero}.pdf'");
+    header("Content-Disposition:attachment;filename='{$tyyppi}raportti_{$tunniste}.pdf'");
     echo file_get_contents($pdf_tiedosto);
     die;
   }
@@ -141,6 +156,10 @@ if (isset($task) and $task == 'valitse_raporttityyppi') {
 
     case 'purku':
       $viesti = t("Syötä tulonumero");
+      break;
+
+    case 'lastaus':
+      $viesti = t("Syötä toimitusnumero");
       break;
 
     default:
@@ -297,16 +316,18 @@ if (isset($view) and $view == "tulli") {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th colspan='2'>" . t("Nimitys") . "</th>";
+      echo "<th>" . t("Nimitys") . "</th>";
       echo "<th>" . t("Malli") . "</th>";
+      echo "<th>" . t("Paino (kg.)") . "</th>";
       echo "<th>" . t("Varastosaldo") . "</th>";
       echo "</tr>";
 
       foreach ($tiedot['tuotetiedot'] as $key => $value) {
         echo "<tr>";
-        echo "<td colspan='2'>{$value['nimitys']}</td>";
+        echo "<td>{$value['nimitys']}</td>";
         echo "<td>{$value['malli']}</td>";
-        echo "<td>{$value['saldo']}</td>";
+        echo "<td>{$value['paino']}</td>";
+        echo "<td>{$value['kpl']}</td>";
         echo "</tr>";
       }
 
@@ -322,21 +343,30 @@ if (isset($view) and $view == "tulli") {
 
 }
 
-if (isset($view) and $view == "purku") {
+if (isset($view) and ($view == "purku" or $view == "lastaus")) {
 
   if (!empty($tulonumeroerror)) {
     echo "<font class='error'>{$tulonumeroerror}</font><br><br>";
   }
 
+  if ($view == 'purku') {
+    $tunnusteksti = t("Tulonumero");
+  }
+  else {
+    $tunnusteksti = t("Toimitusumero");
+  }
+
+
   echo "<form method='post' class='multisubmit' action='tullivarasto_raportit.php' >";
-  echo "<input type='hidden' name='task' value='purkuraportti_pdf' />";
+  echo "<input type='hidden' name='task' value='{$view}raportti_pdf' />";
+  echo "<input type='hidden' name='tyyppi' value='{$view}' />";
   echo "<table>";
   echo "<tr>";
   echo "<th>";
-  echo t("Tulonumero") . ": ";
+  echo $tunnusteksti . ": ";
   echo "</th>";
   echo "<td>";
-  echo "<input type='text' name='tulonumero' value='{$tulonumero}' />";
+  echo "<input type='text' name='tunniste' value='{$tunniste}' />";
   echo "</td>";
   echo "<td class='back'>";
   echo "<input type='submit' value='". t("Lataa raportti")."' />";
@@ -640,12 +670,8 @@ if (isset($view) and $view == "tuloraportti_tiedot") {
       $toimitustunnus = $tuoterivi['toimitustunnus'];
     }
     echo "</table><br>";
-
-
   }
-
 }
-
 
 if (isset($view) and $view == "perus") {
 
@@ -662,6 +688,7 @@ if (isset($view) and $view == "perus") {
         <option value='tulo'>".t("Tuloraportti")."</option>
         <option value='tulli'>".t("Tulliraportti")."</option>
         <option value='purku'>".t("Purkuraportti")."</option>
+        <option value='lastaus'>".t("Lastausraportti")."</option>
       </select>
     </td><td class='back'></td>
   </tr>

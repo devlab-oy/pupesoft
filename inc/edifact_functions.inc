@@ -4118,6 +4118,7 @@ function toimitustoimenpiteet($toimitustunnus, $status) {
 
   if ($status == 'LD') {
     $toimenpiteet['pakkalista'] = t("Lataa pakkalista");
+    $toimenpiteet['lastausraportti'] = t("Lataa lastausraportti");
   }
 
   if ($status == 'LC') {
@@ -4355,6 +4356,8 @@ function purkuraportti_parametrit($tulotunnus) {
             lasku.toimaika AS saapumispaiva,
             lasku.sisviesti1,
             lasku.sisviesti2,
+            lasku.viesti,
+            lasku.tunnus,
             tr.kerattyaika AS purkuaika,
             tr.nimitys,
             tr.tuoteno,
@@ -4369,8 +4372,12 @@ function purkuraportti_parametrit($tulotunnus) {
             tuote.tuotemassa_netto,
             tuote.pakkauskpl,
             tuote.tilausrivi_kommentti,
+            varastopaikat.nimitys AS varasto,
             FLOOR(SUM(tr.tilkpl)) as kpl
             FROM lasku
+            LEFT JOIN varastopaikat
+              ON varastopaikat.yhtio = lasku.yhtio
+              AND varastopaikat.tunnus = lasku.varasto
             LEFT JOIN tilausrivi AS tr
               ON tr.yhtio = lasku.yhtio
               AND tr.otunnus = lasku.tunnus
@@ -4382,6 +4389,8 @@ function purkuraportti_parametrit($tulotunnus) {
               AND (tuote.tuoteno = tr.tuoteno)
             WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
             AND lasku.tunnus = '{$tulotunnus}'
+            AND tr.varasto IS NOT NULL
+            AND trlt.sinettinumero != ''
             GROUP BY tuote.tuoteno";
   $result = pupe_query($query);
 
@@ -4389,8 +4398,13 @@ function purkuraportti_parametrit($tulotunnus) {
 
   while ($rivi = mysql_fetch_assoc($result)) {
 
-    if ($rivi['sisviesti2'] != '') {
-
+    if ($rivi['viesti'] == 'tullivarasto') {
+      $tyyppi = 'purku';
+      $tulonumero = $rivi['tulonumero'];
+    }
+    else {
+      $tyyppi = 'lastaus';
+      $tulonumero = $rivi['tunnus'];
     }
 
     $query = "SELECT lasku.asiakkaan_tilausnumero,
@@ -4422,13 +4436,17 @@ function purkuraportti_parametrit($tulotunnus) {
     }
 
     $saapumispaiva = date("d.m.Y", strtotime($rivi['saapumispaiva']));
-    $tulonumero = $rivi['tulonumero'];
     $konttinumero = $rivi['konttinumero'];
     $rekisterinumero = $rivi['kuljetuksen_rekno'];
     $sinettinumero = $rivi['sinettinumero'];
     $edeltava_asiakirja = $rivi['kontin_mrn'];
     $toimittaja = $rivi['toimittaja'];
+    $varasto = $rivi['varasto'];
+
     $rivi['purkuaika'] = date("d.m.Y H:i", strtotime($rivi['purkuaika']));
+    $rivi['tuotemassa'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
+    $rivi['tuotemassa_netto'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
+    $rivi['tuotetilavuus'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
 
     $puretut_tuotteet[] = $rivi;
   }
@@ -4441,7 +4459,9 @@ function purkuraportti_parametrit($tulotunnus) {
     'sinettinumero' => $sinettinumero,
     'edeltava_asiakirja' => $edeltava_asiakirja,
     'rekisterinumero' => $rekisterinumero,
-    'puretut_tuotteet' => $puretut_tuotteet
+    'puretut_tuotteet' => $puretut_tuotteet,
+    'tyyppi' => $tyyppi,
+    'varasto' => $varasto
   );
 
   return $purkuraportti_parametrit;
@@ -4531,23 +4551,42 @@ function purkuraportti_pdf($pdf_data) {
     $kuljetustieto = $konttinumero;
   }
 
-  $pdf->draw_text($x, $y, t("PURKURAPORTTI"), $sivu, $bold);
+  if ($tyyppi == 'purku') {
+    $otsikko1 = t("PURKURAPORTTI");
+    $otsikko2 = t("Toimittaja");
+    $otsikko3 = t("Tulonumero");
+    $otsikko4 = t("Purkupäivä");
+  }
+  else {
+    $otsikko1 = t("LASTAUSRAPORTTI");
+    $otsikko2 = t("Asiakas");
+    $otsikko3 = t("Toimitusnumero");
+    $otsikko4 = t("Lastauspäivä");
+  }
+
+  $pdf->draw_text($x, $y, $otsikko1, $sivu, $bold);
   $y -= 20;
-  $pdf->draw_text($x, $y, t("Toimittaja"), $sivu, $bold);
+  $pdf->draw_text($x, $y, $otsikko2, $sivu, $bold);
   $pdf->draw_text($x+100, $y, $toimittaja, $sivu, $pieni);
   $y -= 13;
-  $pdf->draw_text($x, $y, t("Tulonumero"), $sivu, $bold);
+  $pdf->draw_text($x, $y, $otsikko3, $sivu, $bold);
   $pdf->draw_text($x+100, $y, $tulonumero, $sivu, $pieni);
   $y -= 13;
-  $pdf->draw_text($x, $y, t("Saapumispäivä"), $sivu, $bold);
+  $pdf->draw_text($x, $y, $otsikko4, $sivu, $bold);
   $pdf->draw_text($x+100, $y, $saapumispaiva, $sivu, $pieni);
   $y -= 13;
   $pdf->draw_text($x, $y, $kuljetusotsikko, $sivu, $bold);
   $pdf->draw_text($x+100, $y, $kuljetustieto, $sivu, $pieni);
   $y -= 13;
-  $pdf->draw_text($x, $y, t("Edeltävä asiakirja"), $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $edeltava_asiakirja, $sivu, $pieni);
+  $pdf->draw_text($x, $y, t("Sinettinumero"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $pieni);
   $y -= 13;
+
+  if ($tyyppi == 'purku') {
+    $pdf->draw_text($x, $y, t("Edeltävä asiakirja"), $sivu, $bold);
+    $pdf->draw_text($x+100, $y, $edeltava_asiakirja, $sivu, $pieni);
+    $y -= 13;
+  }
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -4556,11 +4595,16 @@ function purkuraportti_pdf($pdf_data) {
 
   $pdf->draw_text($x, $y,     t("Name"), $sivu, $bold);
   $pdf->draw_text($x+100, $y, t("Model"), $sivu, $bold);
-  $pdf->draw_text($x+200, $y, t("ctn."), $sivu, $bold);
-  $pdf->draw_text($x+250, $y, t("sets"), $sivu, $bold);
-  $pdf->draw_text($x+300, $y, t("Brutto kg"), $sivu, $bold);
-  $pdf->draw_text($x+370, $y, t("Netto kg"), $sivu, $bold);
-  $pdf->draw_text($x+440, $y, t("m³"), $sivu, $bold);
+  $pdf->draw_text($x+190, $y, t("ctn."), $sivu, $bold);
+  $pdf->draw_text($x+235, $y, t("sets"), $sivu, $bold);
+  $pdf->draw_text($x+285, $y, t("Brutto kg"), $sivu, $bold);
+  $pdf->draw_text($x+355, $y, t("Netto kg"), $sivu, $bold);
+  $pdf->draw_text($x+425, $y, t("m³"), $sivu, $bold);
+
+  if ($tyyppi == 'lastaus') {
+    $pdf->draw_text($x+470, $y, t("Tulo#"), $sivu, $bold);
+  }
+
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -4571,14 +4615,19 @@ function purkuraportti_pdf($pdf_data) {
 
     $pdf->draw_text($x, $y,     $tuote['nimitys'], $sivu, $pieni);
     $pdf->draw_text($x+100, $y, $tuote['malli'], $sivu, $pieni);
-    $pdf->draw_text($x+200, $y, $tuote['kpl'], $sivu, $pieni);
-    $pdf->draw_text($x+250, $y, $tuote['pakkauskpl'], $sivu, $pieni);
-    $pdf->draw_text($x+300, $y, $tuote['tuotemassa'], $sivu, $pieni);
-    $pdf->draw_text($x+370, $y, $tuote['tuotemassa_netto'], $sivu, $pieni);
-    $pdf->draw_text($x+440, $y, $tuote['tuotetilavuus'], $sivu, $pieni);
+    $pdf->draw_text($x+190, $y, $tuote['kpl'], $sivu, $pieni);
+    $pdf->draw_text($x+235, $y, $tuote['pakkauskpl'], $sivu, $pieni);
+    $pdf->draw_text($x+285, $y, $tuote['tuotemassa'], $sivu, $pieni);
+    $pdf->draw_text($x+355, $y, $tuote['tuotemassa_netto'], $sivu, $pieni);
+    $pdf->draw_text($x+425, $y, $tuote['tuotetilavuus'], $sivu, $pieni);
+
+    if ($tyyppi == 'lastaus') {
+      list($osa1, $osa2, $osa3) = explode('-', $tuote['tuoteno']);
+      $tulonumero = $osa1.'-'.$osa2.'-'.$osa3;
+      $pdf->draw_text($x+470, $y, $tulonumero, $sivu, $pieni);
+    }
 
     $y -= 15;
-
   }
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
@@ -4886,7 +4935,8 @@ function tulliraportti_pdf($pdf_data) {
   $pdf->draw_text($x, $y, t("Tulotiedot"), $sivu, $bold);
   $pdf->draw_text(200, $y, t("Nimitys"), $sivu, $bold);
   $pdf->draw_text(300, $y, t("Malli"), $sivu, $bold);
-  $pdf->draw_text(400, $y, t("Varastosaldo"), $sivu, $bold);
+  $pdf->draw_text(380, $y, t("Paino (kg.)"), $sivu, $bold);
+  $pdf->draw_text(440, $y, t("Varastosaldo"), $sivu, $bold);
   $y -= 5;
 
   $pdf->draw_text(530, 770, t("Sivu") .' '.$sivunro, $sivu, $bold);
@@ -4929,7 +4979,8 @@ function tulliraportti_pdf($pdf_data) {
       $pdf->draw_text($x, $y, t("Tulotiedot"), $sivu, $bold);
       $pdf->draw_text(200, $y, t("Nimitys"), $sivu, $bold);
       $pdf->draw_text(300, $y, t("Malli"), $sivu, $bold);
-      $pdf->draw_text(400, $y, t("Varastosaldo"), $sivu, $bold);
+      $pdf->draw_text(380, $y, t("Paino (kg.)"), $sivu, $bold);
+      $pdf->draw_text(440, $y, t("Varastosaldo"), $sivu, $bold);
       $y -= 5;
 
       $pdf->draw_text(530, 770, t("Sivu") .' '.$sivunro, $sivu, $bold);
@@ -4968,7 +5019,8 @@ function tulliraportti_pdf($pdf_data) {
 
       $pdf->draw_text($x+174, $y2, $tiedot['nimitys'], $sivu, $normal);
       $pdf->draw_text($x+274, $y2, $tiedot['malli'], $sivu, $normal);
-      $pdf->draw_text($x+374, $y2, $tiedot['saldo'], $sivu, $normal);
+      $pdf->draw_text($x+355, $y2, $tiedot['paino'], $sivu, $normal);
+      $pdf->draw_text($x+414, $y2, $tiedot['kpl'], $sivu, $normal);
       $y2 -= 15;
       $alalaita2 = $y2;
     }
@@ -5440,7 +5492,9 @@ function tulliraportti_tiedot() {
             tilausrivin_lisatiedot.kontin_mrn,
             tilausrivin_lisatiedot.konttinumero,
             tuote.nimitys,
-            tuote.malli
+            tuote.malli,
+            tuote.tuotemassa,
+            tuote.pakkauskpl
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
@@ -5462,24 +5516,32 @@ function tulliraportti_tiedot() {
 
     if ($saldotiedot[2] > 0) {
 
-     $tuote['saldo'] = $saldotiedot[2];
+      $tuote['saldo'] = $saldotiedot[2];
 
-     $tulotiedot = array(
-       'rekisterinumero' => $tuote['kuljetuksen_rekno'],
-       'edeltava_asiakirja' => $tuote['kontin_mrn'],
-       'sinettinumero' => $tuote['sinettinumero'],
-       'konttinumero' => $tuote['konttinumero']
-     );
+      $tulotiedot = array(
+        'rekisterinumero' => $tuote['kuljetuksen_rekno'],
+        'edeltava_asiakirja' => $tuote['kontin_mrn'],
+        'sinettinumero' => $tuote['sinettinumero'],
+        'konttinumero' => $tuote['konttinumero']
+      );
 
-     $tuotetiedot = array(
-       'tuotenumero' => $tuote['tuoteno'],
-       'nimitys' => $tuote['nimitys'],
-       'malli' => $tuote['malli'],
-       'saldo' => $saldotiedot[2]
-     );
+      if ($tuote['pakkauskpl'] > 1) {
+        $kpl = $saldotiedot[2] . ' x ' . $tuote['pakkauskpl'];
+      }
+      else {
+        $kpl = $saldotiedot[2];
+      }
 
-     $saldot[$tuote['asiakkaan_tilausnumero']]['tulotiedot'] = $tulotiedot;
-     $saldot[$tuote['asiakkaan_tilausnumero']]['tuotetiedot'][] = $tuotetiedot;
+      $tuotetiedot = array(
+        'tuotenumero' => $tuote['tuoteno'],
+        'nimitys' => $tuote['nimitys'],
+        'paino' => number_format($tuote['tuotemassa'], 2,","," "),
+        'malli' => $tuote['malli'],
+        'kpl' => $kpl
+      );
+
+      $saldot[$tuote['asiakkaan_tilausnumero']]['tulotiedot'] = $tulotiedot;
+      $saldot[$tuote['asiakkaan_tilausnumero']]['tuotetiedot'][] = $tuotetiedot;
     }
   }
 

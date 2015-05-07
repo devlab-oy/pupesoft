@@ -1199,3 +1199,17 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selitetark) {
   $ulos .= "</select></td>";
   $jatko = 0;
 }
+
+if ($_selite and $avain_sel["RESEPTI_KENTAT"] == "SELECTED") {
+  $ulos = "<td>";
+  $ulos .= "<select name='{$nimi}'" . js_alasvetoMaxWidth($nimi, 300) . ">";
+
+  $ulos .= "<option value='piirustusnumero'>" . t("Piirustusnumero") . "</option>>";
+  $ulos .= "<option value='osanumero'>" . t("Osanumero") . "</option>>";
+  $ulos .= "<option value='positiokentta'>" . t("Positiokenttä") . "</option>>";
+
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+
+  $jatko = 0;
+}

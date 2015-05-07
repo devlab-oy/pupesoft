@@ -47,6 +47,13 @@ elseif ($toim == "VSUUNNITTELU") {
 elseif ($toim == "RESEPTI") {
   echo t("Tuotereseptit");
   $hakutyyppi = "R";
+
+  $resepti_kentat_result = t_avainsana("RESEPTI_KENTAT");
+  $resepti_kentat = array();
+
+  while ($resepti_kentta = mysql_fetch_assoc($resepti_kentat_result)) {
+    array_push($resepti_kentat, $resepti_kentta);
+  }
 }
 else {
   echo t("Tuntematon toiminto");
@@ -406,9 +413,11 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
           $querylisa = "ohita_kerays = '{$ohita_kerays}',";
         }
         elseif ($toim == "RESEPTI") {
-          $querylisa = "piirustusnumero = '{$piirustusnumero}',
-                        osanumero       = '{$osanumero}',
-                        positiokentta   = '{$positiokentta}',";
+          $querylisa = "";
+
+          foreach ($resepti_kentat as $resepti_kentta) {
+            $querylisa .= "{$resepti_kentta["selite"]} = '{${$resepti_kentta["selite"]}}',";
+          }
         }
 
         $query  .= "  tuoteperhe set
@@ -951,9 +960,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin*Kerroin")."</th>";
         echo "<th>".t("Pituus kerroin")."</th>";
-        echo "<th>".t("Piirustusnumero")."</th>";
-        echo "<th>".t("Osanumero")."</th>";
-        echo "<th>".t("Positiokenttä")."</th>";
+
+        foreach ($resepti_kentat as $resepti_kentta) {
+          echo "<th>{$resepti_kentta["selitetark"]}</th>";
+        }
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
@@ -962,9 +972,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Piirustusnumero"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Osanumero"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Positiokenttä"));
+
+        foreach ($resepti_kentat as $resepti_kentta) {
+          $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
+        }
       }
 
       echo "<td class='back'></td>";
@@ -1041,9 +1052,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
-          echo "<td></td>";
-          echo "<td></td>";
-          echo "<td></td>";
+
+          for ($i = 0; $i < count($resepti_kentat); $i++) {
+            echo "<td></td>";
+          }
 
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }
@@ -1161,14 +1173,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
               $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"));
             }
 
-            echo "<td>{$prow["piirustusnumero"]}</td>";
-            $worksheet->writeString($excelrivi, $excelsarake++, $prow["piirustusnumero"]);
-
-            echo "<td>{$prow["osanumero"]}</td>";
-            $worksheet->writeString($excelrivi, $excelsarake++, $prow["osanumero"]);
-
-            echo "<td>{$prow["positiokentta"]}</td>";
-            $worksheet->writeString($excelrivi, $excelsarake++, $prow["positiokentta"]);
+            foreach ($resepti_kentat as $resepti_kentta) {
+              echo "<td>{$prow[$resepti_kentta["selite"]]}</td>";
+              $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]]);
+            }
           }
 
           $excelrivi++;
@@ -1295,17 +1303,13 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "</select>";
             echo "</td>";
 
-            echo "<td>";
-            echo "<input type='text' name='piirustusnumero' value='{$prow["piirustusnumero"]}'>";
-            echo "</td>";
-
-            echo "<td>";
-            echo "<input type='text' name='osanumero' value='{$prow["osanumero"]}'>";
-            echo "</td>";
-
-            echo "<td>";
-            echo "<input type='text' name='positiokentta' value='{$prow["positiokentta"]}'>";
-            echo "</td>";
+            foreach ($resepti_kentat as $resepti_kentta) {
+              echo "<td>";
+              echo "<input type='text'
+                           name='{$resepti_kentta["selite"]}'
+                           value='{$prow[$resepti_kentta["selite"]]}'>";
+              echo "</td>";
+            }
           }
 
           echo "<td class='back'>";

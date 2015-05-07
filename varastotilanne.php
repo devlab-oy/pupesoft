@@ -310,7 +310,6 @@ if (isset($task) and ($task == 'ylijaamasiirto')) {
 
 if (isset($task) and ($task == 'palautus')) {
 
-
   $query = "UPDATE tilausrivi SET
             toimitettu = '{$kukarow['kuka']}',
             toimitettuaika = NOW()
@@ -320,7 +319,6 @@ if (isset($task) and ($task == 'palautus')) {
 
   $task = 'ylijaamakasittely';
 }
-
 
 if (isset($task) and ($task == 'ylijaamakasittely')) {
 

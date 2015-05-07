@@ -238,6 +238,10 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TYOM_PRIORIT")      $ulos .= "<option value='TYOM_PRIORIT' $avain_sel[TYOM_PRIORIT]>      ".t("Työmääräysten prioriteetti")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
+  if ($lukitse_laji == "") $ulos .= "<optgroup label='" . t("Reseptien avainsanat") . "'>";
+  if ($lukitse_laji == "" or $lukitse_laji == "RESEPTI_KENTAT") $ulos .= "<option value='RESEPTI_KENTAT' $avain_sel[RESEPTI_KENTAT]>" . t("Reseptien kentät") . "</option>";
+  if ($lukitse_laji == "") $ulos .= "</optgroup>";
+
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "KT")         $ulos .= "<option value='KT' $avain_sel[KT]>                ".t("Kauppatapahtuman luonne")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TULLI")       $ulos .= "<option value='TULLI' $avain_sel[TULLI]>              ".t("Poistumistoimipaikka")."</option>";

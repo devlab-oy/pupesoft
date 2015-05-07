@@ -176,7 +176,12 @@ class LumoClient {
         }
       }
 
-      if (!empty($return)) break;
+      if (empty($return)) {
+        sleep(3);
+      }
+      else {
+        break;
+      }
     }
 
     $msg = $return == '' ? "Asiakkaan kuittia ei haettu" : "Asiakkaan kuitti haettu";
@@ -220,7 +225,12 @@ class LumoClient {
         }
       }
 
-      if (!empty($return)) break;
+      if (empty($return)) {
+        sleep(3);
+      }
+      else {
+        break;
+      }
     }
 
     $msg = $return == '' ? "Kauppiaan kuittia ei haettu" : "Kauppiaan kuitti haettu";
@@ -273,6 +283,9 @@ class LumoClient {
 
       if ($haettu) {
         break;
+      }
+      else {
+        sleep(3);
       }
     }
 

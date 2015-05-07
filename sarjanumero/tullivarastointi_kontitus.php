@@ -10,6 +10,35 @@ require '../inc/edifact_functions.inc';
 
 if (isset($task) and $task == 'kontitus') {
 
+  $rivitunnukset_array = explode(',', $rivitunnukset);
+
+  foreach ($rivitunnukset_array as $rivitunnus) {
+    if ($kpl[$rivitunnus] != $alku_kpl[$rivitunnus]) {
+
+      $query = "UPDATE tilausrivi SET
+                tilkpl = '{$kpl[$rivitunnus]}',
+                varattu = '{$kpl[$rivitunnus]}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$rivitunnus}'";
+      pupe_query($query);
+
+      $query = "SELECT tuoteno, hyllyalue, hyllynro
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$rivitunnus}'";
+      $result = pupe_query($query);
+      $tuoteinfo = mysql_fetch_assoc($result);
+
+      $query = "UPDATE tuotepaikat SET
+                saldo = '{$kpl[$rivitunnus]}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteinfo['tuoteno']}'
+                AND hyllyalue = '{$tuoteinfo['hyllyalue']}'
+                AND hyllynro = '{$tuoteinfo['hyllynro']}'";
+      pupe_query($query);
+    }
+  }
+
   $query = "UPDATE tilausrivi SET
             kerattyaika = NOW(),
             keratty = '{$kukarow['kuka']}'
@@ -28,10 +57,11 @@ if (isset($task) and $task == 'kontitus') {
 
 }
 
-
 $query = "SELECT
           tilausrivi.nimitys,
           tilausrivi.tunnus,
+          tilausrivi.hyllyalue,
+          tilausrivi.hyllynro,
           tuote.malli,
           SUM(tilausrivi.tilkpl) AS kpl,
           lasku.tunnus AS toimitustunnus,
@@ -51,7 +81,7 @@ $query = "SELECT
           AND lasku.tila = 'L'
           AND lasku.alatila = 'A'
           AND tuote.mallitarkenne != 'varastointinimike'
-          GROUP BY tilausrivi.tuoteno";
+          GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro";
 $result = pupe_query($query);
 
 while ($rivi = mysql_fetch_assoc($result)) {
@@ -60,7 +90,7 @@ while ($rivi = mysql_fetch_assoc($result)) {
   $toimitukset[$rivi['toimitustunnus']]['rivit'][] = $rivi;
 }
 
-$otsikko = t("Valitse kontitettava er‰");
+$otsikko = t("Valitse ker‰tt‰v‰ er‰");
 $view = 'valinta';
 
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
@@ -104,54 +134,66 @@ if (count($viestit) > 0) {
 
 if ($view == 'valinta') {
 
-  foreach ($toimitukset as $toimitustunnus => $toimitus) {
+  if (count($toimitukset) > 0) {
 
-    echo "<form method='post' action=''><div style='margin-bottom:10px; background:silver;   border-radius: 5px;'>";
-    echo "<table border='0' cellspacing='5' cellpadding='0'>";
-    echo "<tr>";
-    echo "<td valign='top' style='background:white; padding:5px; margin:5px; width:190px;  border-radius: 3px; text-align:left; line-height:20px;'>";
-    echo $toimitus['asiakas'] . "<br>";
-    echo t("Numero: ") . $toimitustunnus . "<br>";
-    echo "</td>";
-    echo "<td valign='top' style=' padding:0px; margin:0px; width:430px; border-radius: 3px;'>";
+    foreach ($toimitukset as $toimitustunnus => $toimitus) {
 
-    $rivitunnukset = '';
+      echo "<form method='post' action=''><div style='margin-bottom:10px; background:silver;   border-radius: 5px;'>";
+      echo "<table border='0' cellspacing='5' cellpadding='0'>";
+      echo "<tr>";
+      echo "<td valign='top' style='background:white; padding:5px; margin:5px; width:190px;  border-radius: 3px; text-align:left; line-height:20px;'>";
+      echo $toimitus['asiakas'] . "<br>";
+      echo t("Numero: ") . $toimitustunnus . "<br>";
+      echo "</td>";
+      echo "<td valign='top' style=' padding:0px; margin:0px; width:430px; border-radius: 3px;'>";
 
-    foreach ($toimitus['rivit'] as $toimitusrivi) {
+      $rivitunnukset = '';
 
-      echo "<div style='text-align:left; padding:10px; background:#e7e7e7; border-radius: 3px; margin:3px; '>";
-      echo "<div style='text-align:left;display:inline-block; width:150px;'>";
-      echo "<input style='font-size:1em; width:60px;' type ='text' name='kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' />";
-      echo "<input type='hidden' name='alku_kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' />";
-      echo "&nbsp;" . t("kpl");
+      foreach ($toimitus['rivit'] as $toimitusrivi) {
+
+        $paikka = substr($toimitusrivi['hyllyalue'], 1) . $toimitusrivi['hyllynro'];
+
+        echo "<div style='text-align:left; padding:10px; background:#e7e7e7; border-radius: 3px; margin:3px; '>";
+        echo "<div style='text-align:left;display:inline-block; width:150px;'>";
+        echo "<input style='font-size:1em; width:60px;' type ='text' name='kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' readonly/>";
+        echo "<input type='hidden' name='alku_kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' />";
+        echo "&nbsp;" . t("kpl");
+        echo "</div>";
+        echo "<div style='text-align:left;display:inline-block; margin-right:20px;'>";
+        echo $toimitusrivi['nimitys'] . ' - ' . $toimitusrivi['malli'] . ' - ' . $paikka;
+        echo "</div>";
+        echo "</div>";
+
+        $rivitunnukset .= $toimitusrivi['tunnus'] . ',';
+      }
+      echo "</td>";
+      echo "<td style='background:silver; padding:5px; margin:5px; border-radius: 3px;'>";
+
+      $rivitunnukset = rtrim($rivitunnukset, ',');
+
+      echo "
+          <input type='hidden' name='rivitunnukset' value='{$rivitunnukset}' />
+          <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
+          <input type='hidden' name='konttimaara' value='{$toimitus['konttimaara']}' />
+          <input type ='hidden'name='task' value='kontitus' >
+          <input type='submit' class='button' value='&#10145' />
+        </form>";
+      echo "</td>";
+
+      echo "</tr>";
+      echo "</table>";
       echo "</div>";
-      echo "<div style='text-align:left;display:inline-block; margin-right:20px;'>";
-      echo $toimitusrivi['nimitys'] . ' - ' . $toimitusrivi['malli'];
-      echo "</div>";
-      echo "</div>";
-
-      $rivitunnukset .= $toimitusrivi['tunnus'] . ',';
     }
-    echo "</td>";
-    echo "<td style='background:silver; padding:5px; margin:5px; border-radius: 3px;'>";
-
-    $rivitunnukset = rtrim($rivitunnukset, ',');
-
-    echo "
-        <input type='hidden' name='rivitunnukset' value='{$rivitunnukset}' />
-        <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
-        <input type='hidden' name='konttimaara' value='{$toimitus['konttimaara']}' />
-        <input type ='hidden'name='task' value='kontitus' >
-        <input type='submit' class='button' value='&#10145' />
-      </form>";
-    echo "</td>";
-
-    echo "</tr>";
-    echo "</table>";
     echo "</div>";
   }
+  else {
+    echo "<div class='error' style='text-align:center'>";
+    echo t("Ei ker‰tt‰v‰‰");
+    echo "<div>";
+  }
 
-  echo "</div>";
+
+
 
 }
 

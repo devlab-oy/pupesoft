@@ -318,15 +318,31 @@ if (!function_exists('alku')) {
     elseif ($laskutyyppi == 20) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Aiotut rajatoimipaikat (ja maat)", $kieli),
                             $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["aiotut_rajatoimipaikat"],
-                            $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(430,
+                            $arvo[$rivi_ind],
+                            t_avainsana("RAJATOIMIPAIKAT",
+                                        $kieli,
+                                        "AND avainsana.selite = '{$laskurow["aiotut_rajatoimipaikat"]}'",
+                                        "",
+                                        "",
+                                        "selitetark"),
+                            $page_lasku[$sivu],
+                            $norm);
 
       $rivi_ind++;
 
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Määrätoimipaikka (ja maa)", $kieli),
                             $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["maaratoimipaikka"],
-                            $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(430,
+                            $arvo[$rivi_ind],
+                            t_avainsana("MAARATOIMPAIKKA",
+                                        $kieli,
+                                        "AND avainsana.selite = '{$laskurow["maaratoimipaikka"]}'",
+                                        "",
+                                        "",
+                                        "selitetark"),
+                            $page_lasku[$sivu],
+                            $norm);
 
       $rivi_ind++;
     }

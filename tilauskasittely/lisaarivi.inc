@@ -2911,6 +2911,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 FROM tuotepaikat
                 where tuotepaikat.yhtio = '$kukarow[yhtio]'
                 and tuotepaikat.tuoteno = '$trow[tuoteno]'
+                AND tuotepaikat.hyllyalue != '!!M'
                 ORDER BY tuotepaikat.oletus DESC";
       $result = pupe_query($query);
 

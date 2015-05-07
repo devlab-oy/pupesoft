@@ -145,7 +145,7 @@ else {
                 lukko            = '1',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
 
       $vastasumma += $tiliointisumma;
       $vastasumma_valuutassa += $tiliointisumma_valuutassa;
@@ -249,7 +249,7 @@ else {
                 lukko            = '$lukko',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
       $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
       $lukko = "";
@@ -273,7 +273,7 @@ else {
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now(),
                   aputunnus        = '$isa'";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
       }
 
       // Jos maksetaan k‰teisell‰ ja meill‰ on kassa-alennusta, niin kirjataan ne t‰ss‰ (samalle kustannuspaikalle ku myynti)
@@ -299,7 +299,7 @@ else {
                   lukko            = '$lukko',
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
         $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
         if ($xrow["alv"] != 0) {
@@ -329,7 +329,7 @@ else {
                     laatija          = '$kukarow[kuka]',
                     laadittu         = now(),
                     aputunnus        = $isa";
-          $laskutusres = pupe_query($query);
+          pupe_query($query);
         }
       }
     }
@@ -389,7 +389,7 @@ else {
                 lukko            = '',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
 
       $tiliointisumma = $tiliointisumma * -1;
       $tiliointisumma_valuutassa = $tiliointisumma_valuutassa * -1;
@@ -411,7 +411,7 @@ else {
                 lukko            = '',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
     }
   }
 
@@ -528,17 +528,20 @@ else {
                   lukko            = '1',
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
 
         $loppusumma += $arvo;
         $loppusumma_valuutassa += $arvo_valuutassa;
 
         // P‰ivitet‰‰n laskulle
         if ($tili == "laskulle" and $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+          // P‰ivitet‰‰n myyntilaskulle "popvm"-jotta me saadaan osittain k‰teisell‰ maksetut laskut
+          // n‰kym‰‰n k‰teismyynnit-raportissa oikealla p‰iv‰ll‰ vaikka mapvm on nolla
           $query = "UPDATE lasku
                     SET saldo_maksettu = (summa - $arvo),
                     saldo_maksettu_valuutassa = (summa_valuutassa  - $arvo_valuutassa),
-                    mapvm                     = 0
+                    mapvm                     = 0,
+                    popvm                     = '$tapvm 00:00:00'
                     WHERE tunnus              = '$lasku[tunnus]'
                     AND yhtio                 = '$kukarow[yhtio]'";
           pupe_query($query);
@@ -565,7 +568,7 @@ else {
               lukko            = '1',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
-    $laskutusres = pupe_query($query);
+    pupe_query($query);
   }
 
   // Kirjataan pyoristykset, jos niita on
@@ -591,7 +594,7 @@ else {
               lukko            = '',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
-    $laskutusres = pupe_query($query);
+    pupe_query($query);
   }
 
   $vastasumma = 0;

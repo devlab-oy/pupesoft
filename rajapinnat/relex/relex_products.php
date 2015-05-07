@@ -674,6 +674,9 @@ while ($row = mysql_fetch_assoc($res)) {
       // Haetaan ostohinta
       list($ostohinta, $netto, $alennus, $valuutta) = alehinta_osto($laskurow, array("tuoteno" => $row['tuoteno']), 1, '', '', '');
 
+      // kerrotaan ostohinta tuotekertoimella, jotta saadaan yhden kpl ostohinta
+      $ostohinta = $ostohinta * $ttrow['tuotekerroin'];
+
       $alennukset      = 1;
       $ostohinta_netto = $ostohinta;
 

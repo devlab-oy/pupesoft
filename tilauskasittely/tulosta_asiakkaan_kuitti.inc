@@ -394,7 +394,7 @@ function tulostimen_tyyppi($tulostimen_tunnus) {
   $query = "SELECT mediatyyppi
             FROM kirjoittimet
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tulostimen_tunnus}'";
+            AND tunnus  = '{$tulostimen_tunnus}'";
 
   $result = pupe_query($query);
   $result = mysql_fetch_assoc($result);

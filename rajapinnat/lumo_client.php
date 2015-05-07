@@ -4,8 +4,9 @@
  * LUMO-API simple TCP/IP maksup‰‰teclient, jolla voi l‰hett‰‰ ja vastaanottaa XML-sanomia
  * maksup‰‰tteelle
  */
-class LumoClient
-{
+
+
+class LumoClient {
 
   /**
    * Logging p‰‰ll‰/pois
@@ -22,11 +23,12 @@ class LumoClient
    */
   private $_error_count = 0;
 
+
   /**
    * Constructor
    *
-   * @param string $address IP address where Lumo is listening
-   * @param string $service_port PORT number where Lumo is listening
+   * @param string  $address      IP address where Lumo is listening
+   * @param string  $service_port PORT number where Lumo is listening
    */
   function __construct($address, $service_port) {
     try {
@@ -46,6 +48,7 @@ class LumoClient
     }
   }
 
+
   /**
    * Destructor
    */
@@ -58,12 +61,13 @@ class LumoClient
     }
   }
 
+
   /**
    * Start transaction
    *
-   * @param int    $amount Maksettava m‰‰r‰. Aina positiitiven integer
-   * @param int    $transaction_type Maksun tyyppi. 0: Maksu, 1: hyvitys / peruutus
-   * @param string $archive_id Arkistotunnus. T‰ytyy antaa, jos kyseess‰ on hyvitys tai peruutus
+   * @param int     $amount           Maksettava m‰‰r‰. Aina positiitiven integer
+   * @param int     $transaction_type Maksun tyyppi. 0: Maksu, 1: hyvitys / peruutus
+   * @param string  $archive_id       Arkistotunnus. T‰ytyy antaa, jos kyseess‰ on hyvitys tai peruutus
    *
    * @return bool
    */
@@ -138,6 +142,7 @@ class LumoClient
     return $return;
   }
 
+
   /**
    * Hakee edellisen tapahtuman asiakaskuitin
    */
@@ -173,6 +178,7 @@ class LumoClient
 
     return $return;
   }
+
 
   /**
    * Hakee edellisen tapahtuman kauppiaskuitin
@@ -212,6 +218,7 @@ class LumoClient
 
   /**
    * Hakee error_countin:n
+   *
    * @return int  virheiden m‰‰r‰
    */
   public function getErrorCount() {
@@ -221,7 +228,7 @@ class LumoClient
   /**
    * Virhelogi
    *
-   * @param string           $message Virheviesti
+   * @param string  $message   Virheviesti
    * @param exception|string $exception $exception Exception
    */
   private function log($message, $exception = '') {

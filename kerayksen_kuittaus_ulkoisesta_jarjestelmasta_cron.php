@@ -85,15 +85,17 @@ if ($handle = opendir($path)) {
           $query = "SELECT *
                     FROM lasku
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$otunnus}'";
+                    AND tunnus  = '{$otunnus}'
+                    AND tila IN ('L', 'V', 'G', 'S')
+                    AND alatila = 'A'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
-
+$_num = mysql_num_rows($laskures); echo "93 $_num \n\n";
           $tuotteiden_paino = 0;
 
           $kerayspoikkeama = array();
 
-          if ($laskurow["alatila"] != "X") {
+          if (mysql_num_rows($laskures) > 0) {
             foreach ($xml->CustPackingSlip->Lines as $line) {
 
               $tilausrivin_tunnus = (int) $line->TransId;
@@ -124,7 +126,7 @@ if ($handle = opendir($path)) {
                 $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
               }
 
-              if ($laskurow["tila"] == "G") {
+              if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or ($laskurow["tila"] == "G" and $laskurow["tilaustyyppi"] != 'M')) {
                 $toimitettu_lisa = "";
               }
               else {
@@ -166,7 +168,19 @@ if ($handle = opendir($path)) {
             $result_rk = pupe_query($query);
 
             if ($laskurow["tila"] == "G") {
-              $tilalisa = "tila = 'G', alatila = 'C'";
+              if ($laskurow["tilaustyyppi"] != 'M') {
+                $tilalisa = "tila = 'G', alatila = 'C'";
+              }
+              else {
+                $tilalisa = "tila = 'G', alatila = 'D'";
+              }
+
+            }
+            elseif ($laskurow["tila"] == "V") {
+              $tilalisa = "tila = 'V', alatila = 'C'";
+            }
+            elseif ($laskurow["tila"] == "S") {
+              $tilalisa = "tila = 'S', alatila = 'C'";
             }
             else {
               $tilalisa = "tila = 'L', alatila = 'D'";
@@ -186,6 +200,30 @@ if ($handle = opendir($path)) {
                       AND mapvm   != '0000-00-00'
                       AND chn      = '999'";
             $yoimresult  = pupe_query($query);
+          }
+          else {
+            // Laitetaan sähköpostia tuplakeräyksestä - ollaan yritetty merkitä kerätyksi jo käsin kerättyä tilausta
+            // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
+            // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+            $error_email = $yhtiorow["admin_email"];
+
+            if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+              $error_email = $yhtiorow["talhal_email"];
+            }
+            elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+              $error_email = $yhtiorow["alert_email"];
+            }
+
+            $body = t("Pupessa jo kerätyksi merkitty tilaus %d yritettiin merkitä kerätyksi keräyssanomalla", "", $otunnus);
+
+            $params = array(
+              "to"      => $error_email,
+              "subject" => t("Mahdollinen tuplakeräyksen yritys ulkoisesta järjestelmästä", "", ""),
+              "ctype"   => "text",
+              "body"    => $body
+            );
+
+            pupesoft_sahkoposti($params);
           }
 
           if (count($kerayspoikkeama) != 0) {

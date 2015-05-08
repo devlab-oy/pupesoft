@@ -716,7 +716,6 @@ class Unifaun {
     }
 
     $posti_rahdinkuljettaja = array(
-      'ITELLAMAILEC',
       'IT16',
       'IT14',
       'ITKY14',
@@ -726,19 +725,14 @@ class Unifaun {
       'ITKYEXPC',
       'IT21',
       'ITKY21',
-      'IT09',
       'ITKY09',
-      'TPSTD',
-      'ITELLALOGKR',
-      'ITELLAMAILPR',
-      'ITPR',
       'ITSP',
       'ITVAK',
       'ITKYVAK',
     );
 
     // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää
-    if (($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_rahdinkuljettaja)) {
+    if (1==2 and ($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_rahdinkuljettaja)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'cons');
 

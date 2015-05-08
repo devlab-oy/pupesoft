@@ -1409,7 +1409,7 @@ function kasittele_bookkaussanoma($edi_data) {
     'jatko_transport_id' => $jatko_transport_id,
     'jatko_transport_name' => $jatko_transport_name,
     'maaranpaa_id' => $maaranpaa_id
-    );
+  );
 
   if ($tyyppi == 1) {
 

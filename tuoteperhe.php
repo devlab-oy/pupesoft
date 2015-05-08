@@ -1577,7 +1577,7 @@ function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
     }
 
     if (!empty($tuote["lapset"])) {
-      echo " <a class='toggle-list'>+</a>";
+      echo " <a href class='toggle-list'>+</a>";
     }
 
     echo "</li>";

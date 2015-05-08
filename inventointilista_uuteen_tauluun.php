@@ -63,7 +63,6 @@ while ($row = mysql_fetch_assoc($res)) {
   if (mysql_num_rows($_res) == 0) {
     $query = "INSERT INTO inventointilista SET
               yhtio = '{$yhtio}',
-              aika = '{$row['inventointilista_aika']}',
               naytamaara = '{$row['inventointilista_naytamaara']}',
               muuttaja = '{$row['muuttaja']}',
               laatija = '{$row['laatija']}',
@@ -87,9 +86,19 @@ while ($row = mysql_fetch_assoc($res)) {
   $_row_res = pupe_query($query);
 
   if (mysql_num_rows($_row_res) == 0) {
+
+    if ($row['inventointilista_aika'] != '0000-00-00 00:00:00') {
+      $_tila = "I";
+    }
+    else {
+      $_tila = "A";
+    }
+
     $query = "INSERT INTO inventointilistarivi SET
               yhtio = '{$yhtio}',
               otunnus = '{$_id}',
+              tila = '{$_tila}',
+              aika = '{$row['inventointilista_aika']}',
               tuoteno = '{$row['tuoteno']}',
               hyllyalue = '{$row['hyllyalue']}',
               hyllynro = '{$row['hyllynro']}',

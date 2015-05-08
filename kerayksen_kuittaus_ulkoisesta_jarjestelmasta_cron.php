@@ -90,7 +90,7 @@ if ($handle = opendir($path)) {
                     AND alatila = 'A'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
-$_num = mysql_num_rows($laskures); echo "93 $_num \n\n";
+
           $tuotteiden_paino = 0;
 
           $kerayspoikkeama = array();

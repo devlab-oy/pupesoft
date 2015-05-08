@@ -312,31 +312,29 @@ if ($tee == 'paikat') {
           $ptunnus = $rivivarasto[$tun];
         }
 
-        $query = "SELECT *, inventointilista.aika as inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.aika as inventointilista_aika
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
                     AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                     AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                     AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                  LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                    AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                    AND inventointilistarivi.tila = 'A')
                   WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
                   and tuotepaikat.tunnus  = '{$ptunnus}'
                   and tuotepaikat.tuoteno = '{$tilausrivirow['tuoteno']}'";
       }
       else {
-        $query = "SELECT *, inventointilista.aika as inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.aika as inventointilista_aika
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
                     AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                     AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                     AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                  LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                    AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                    AND inventointilistarivi.tila = 'A')
                   WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
                   and tuotepaikat.hyllyalue = '{$t1[$tun]}'
                   and tuotepaikat.hyllynro  = '{$t2[$tun]}'
@@ -455,16 +453,15 @@ if ($tee == 'paikat') {
     }
 
     //haetaan antavan varastopaikan tunnus
-    $query = "SELECT inventointilista.aika
+    $query = "SELECT inventointilistarivi.aika
               FROM inventointilistarivi
-              JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                AND inventointilista.tunnus = inventointilistarivi.otunnus)
               WHERE inventointilistarivi.yhtio   = '{$kukarow['yhtio']}'
               and inventointilistarivi.hyllyalue = '{$tilausrivirow['hyllyalue']}'
               and inventointilistarivi.hyllynro  = '{$tilausrivirow['hyllynro']}'
               and inventointilistarivi.hyllyvali = '{$tilausrivirow['hyllyvali']}'
               and inventointilistarivi.hyllytaso = '{$tilausrivirow['hyllytaso']}'
-              and inventointilistarivi.tuoteno   = '{$tilausrivirow['tuoteno']}'";
+              and inventointilistarivi.tuoteno   = '{$tilausrivirow['tuoteno']}'
+              AND inventointilistarivi.tila = 'A'";
     $presult = pupe_query($query);
     $prow = mysql_fetch_assoc($presult);
 

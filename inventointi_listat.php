@@ -514,14 +514,13 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                 AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                 AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                 AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-              LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tila = 'I')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               and tilausrivi.tyyppi         = 'L'
               $where
               and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-              AND inventointilista.aika IS NULL
+              AND inventointilistarivi.tunnus IS NULL
               GROUP BY 1
               ORDER BY summa desc
               LIMIT $top";
@@ -685,9 +684,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                       AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                       AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                       AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                      AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                    LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                      AND inventointilista.tunnus = inventointilistarivi.otunnus)";
+                      AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                      AND inventointilistarivi.tila = 'I')";
 
       if (empty($piilotaToim_tuoteno)) {
         $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
@@ -695,7 +693,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       $where    = " $lisa
                     and tuote.ei_saldoa = ''
-                    and inventointilista.aika IS NULL
+                    AND inventointilistarivi.tunnus IS NULL
                     {$rajauslisatuote}";
     }
 
@@ -712,10 +710,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                         AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                         AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                         AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                      LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                        AND inventointilista.tunnus = inventointilistarivi.otunnus)";
-        $where .= " and inventointilista.aika IS NULL";
+                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                        AND inventointilistarivi.tila = 'I')";
+        $where .= " AND inventointilistarivi.tunnus IS NULL";
 
         if (empty($piilotaToim_tuoteno)) {
           $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
@@ -740,9 +737,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                         AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                         AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                         AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                      LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                        AND inventointilista.tunnus = inventointilistarivi.otunnus)";
+                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                        AND inventointilistarivi.tila = 'I')";
 
 
         if (empty($piilotaToim_tuoteno)) {
@@ -753,7 +749,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                 concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'),5, '0'))
                 and concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso),5, '0')) <=
                 concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))
-                and inventointilista.aika is null $rajauslisa $invaamatta $extra ";
+                AND inventointilistarivi.tunnus IS NULL $rajauslisa $invaamatta $extra ";
       }
       else {
         $join .= "  and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) >=
@@ -777,15 +773,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                         AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                         AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                         AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                      LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                        AND inventointilista.tunnus = inventointilistarivi.otunnus)";
+                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                        AND inventointilistarivi.tila = 'I')";
 
         if (empty($piilotaToim_tuoteno)) {
           $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
         }
 
-        $where    = " and inventointilista.aika is null $rajauslisa $invaamatta $extra ";
+        $where    = " AND inventointilistarivi.tunnus IS NULL $rajauslisa $invaamatta $extra ";
       }
       else {
         $join .= " and tuotepaikat.varasto = '{$varasto}' ";
@@ -809,12 +804,11 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                         AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                         AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                         AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                      LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                        AND inventointilista.tunnus = inventointilistarivi.otunnus)";
+                        AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                        AND inventointilistarivi.tila = 'I')";
 
         $where = " and toimi.ytunnus = '$toimittaja'
-                   and inventointilista.aika IS NULL";
+                   AND inventointilistarivi.tunnus IS NULL";
 
         $kutsujoinlisa = " JOIN tuotteen_toimittajat
                             ON (tuotteen_toimittajat.yhtio = tuote.yhtio
@@ -904,9 +898,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                   AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                   AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                  AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                  AND inventointilistarivi.tila = 'I')
                 WHERE tuotepaikat.yhtio               = '{$kukarow['yhtio']}'
                 AND tuotepaikat.saldoaika             >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                 AND tuotepaikat.saldoaika             <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
@@ -914,7 +907,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                 {$rajauslisa}
                 {$invaamatta}
                 {$extra}
-                and inventointilista.aika IS NULL
+                AND inventointilistarivi.tunnus IS NULL
                 group by $groupby
                 ORDER BY $orderby";
       $saldoresult = pupe_query($query);
@@ -947,9 +940,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                   AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                   AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                  AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                  AND inventointilistarivi.tila = 'I')
                 WHERE tilausrivi.yhtio                = '{$kukarow['yhtio']}'
                 and tilausrivi.tyyppi                 = 'L'
                 AND tilausrivi.laskutettuaika         >= '{$vva}-{$kka}-{$ppa}'
@@ -960,7 +952,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                 and tuotepaikat.hyllynro              = tilausrivi.hyllynro
                 and tuotepaikat.hyllyvali             = tilausrivi.hyllyvali
                 and tuotepaikat.hyllytaso             = tilausrivi.hyllytaso
-                and inventointilista.aika IS NULL
+                AND inventointilistarivi.tunnus IS NULL
                 group by $groupby
                 ORDER BY $orderby";
       $saldoresult = pupe_query($query);
@@ -992,15 +984,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                   AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                   AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                  AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                  AND inventointilistarivi.tila = 'I')
                 WHERE tuotepaikat.yhtio               = '{$kukarow['yhtio']}'
                 and tuotepaikat.saldo                 < 0
                 $rajauslisa
                 $invaamatta
                 $extra
-                and inventointilista.aika is null
+                AND inventointilistarivi.tunnus IS NULL
                 group by $groupby
                 ORDER BY $orderby";
       $saldoresult = pupe_query($query);
@@ -1045,14 +1036,13 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                   AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                   AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-                LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                  AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                  AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                  AND inventointilistarivi.tila = 'I')
                 {$_lisaleftjoin}
                 WHERE tapahtuma.yhtio                                         = '$kukarow[yhtio]'
                 AND tapahtuma.laji                                            IN ('tulo', 'laskutus', 'valmistus', 'siirto')
                 AND tapahtuma.laadittu BETWEEN '$vva-$kka-$ppa' and '$vvl-$kkl-$ppl'
-                AND inventointilista.aika is null
+                AND inventointilistarivi.tunnus IS NULL
                 GROUP BY $groupby
                 ORDER BY $orderby";
       $saldoresult = pupe_query($query);
@@ -1073,14 +1063,13 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                 AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                 AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                 AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-              LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tila = 'I')
               WHERE tuotepaikat.yhtio               = '{$kukarow['yhtio']}'
               AND tuotepaikat.tunnus                IN ({$saldot})
               {$rajauslisa}
               {$invaamatta}
-              and inventointilista.aika is null
+              AND inventointilistarivi.tunnus IS NULL
               GROUP BY {$groupby}
               ORDER BY sorttauskentta, tuoteno";
     $saldoresult = pupe_query($query);
@@ -1180,7 +1169,6 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     if ($ei_inventointi == "") {
       $query = "INSERT INTO inventointilista SET
                 yhtio = '{$kukarow['yhtio']}',
-                aika = '{$listaaika}',
                 naytamaara = '{$naytasaldo}',
                 muuttaja = '{$kukarow['kuka']}',
                 laatija = '{$kukarow['kuka']}',
@@ -1198,6 +1186,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       if ($ei_inventointi == "") {
         $query = "INSERT INTO inventointilistarivi SET
                   yhtio = '{$kukarow['yhtio']}',
+                  tila = 'A',
+                  aika = '{$listaaika}',
                   otunnus = '{$listanro}',
                   tuoteno = '{$tuoterow['tuoteno']}',
                   hyllyalue = '{$tuoterow['hyllyalue']}',

@@ -697,35 +697,7 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
 
   $lahtopvm_arvio = date("d.m.Y", strtotime($lahtopvm_arvio));
 
-  echo "
-    <script>
-      $(function($){
-         $.datepicker.regional['fi'] = {
-                     closeText: 'Sulje',
-                     prevText: '&laquo;Edellinen',
-                     nextText: 'Seuraava&raquo;',
-                     currentText: 'T&auml;n&auml;&auml;n',
-             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
-              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
-              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
-              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
-                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
-                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
-                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
-                      weekHeader: 'Vk',
-              dateFormat: 'dd.mm.yy',
-                      firstDay: 1,
-                      isRTL: false,
-                      showMonthAfterYear: false,
-                      yearSuffix: ''};
-          $.datepicker.setDefaults($.datepicker.regional['fi']);
-      });
-
-      $(function() {
-        $('#lahtopvm').datepicker();
-      });
-      </script>
-  ";
+  datepicker('lahtopvm');
 
   if ($matkakoodi == 'rekka') {
     $otsikko = t("Lähtökuittaus");
@@ -1368,23 +1340,80 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
   if (empty($viite)) {
     $errors['viite'] = t("Syötä viite!");
   }
+  else {
+
+    $viite = mysql_real_escape_string($viite);
+
+    $query = "SELECT tunnus
+              FROM  laskun_lisatiedot
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND konttiviite = '{$viite}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) != 0) {
+      $errors['viite'] = t("Syöttetty viite on jo käytössä");
+    }
+  }
+
+  if (empty($lahtopvm)) {
+    $errors['lahtopvm'] = t("Valitse lähtöpäivä");
+  }
+  else {
+    list($pp, $kk, $vvvv) = explode('.', $lahtopvm);
+
+    $_lahtopvm = $vvvv.'-'.$kk.'-'.$pp;
+    $_lahtopvm = date_create($_lahtopvm);
+
+    if (!$_lahtopvm = date_format($_lahtopvm,"Y-m-d")) {
+      $errors['lahtopvm'] = t("Tarkista lähtöpäivä");
+    }
+  }
 
   if (empty($maaranpaa)) {
     $errors['maaranpaa'] = t("Syötä määränpää!");
   }
 
-  if (empty($maaranpaa_koodi)) {
-    $errors['maaranpaa_koodi'] = t("Syötä määränpääkoodi!");
+  if (empty($maaranpaakoodi)) {
+    $errors['maaranpaakoodi'] = t("Syötä määränpääkoodi!");
   }
 
   if (count($errors) == 0) {
 
-    $parametrit = array(
+    $matkatiedot = array(
       'kuljetusfirma' => $kuljetusfirma,
-      'viite' => $viite,
       'maaranpaa' => $maaranpaa,
-      'maaranpaa_koodi' => $maaranpaa_koodi
+      'maaranpaakoodi' => $maaranpaakoodi
     );
+
+    $matkatiedot = serialize($matkatiedot);
+    $matkatiedot = mysql_real_escape_string($matkatiedot);
+    $pakkausohje = mysql_real_escape_string($pakkausohje);
+
+    /*
+
+    $kukarow['kesken'] = 0;
+
+    require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
+
+    $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 102);
+
+    $update_query = "UPDATE lasku SET
+                     toimaika = '{$_lahtopvm}',
+                     asiakkaan_tilausnumero = 'XXX',
+                     sisviesti1 = '{$pakkausohje}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$tunnus}'";
+    pupe_query($update_query);
+
+    $update_query = "UPDATE laskun_lisatiedot SET
+                     konttiviite = '{$viite}',
+                     matkakoodi = 'rekka',
+                     matkatiedot = '{$matkatiedot}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND otunnus = '{$tunnus}'";
+    pupe_query($update_query);
+
+   */
 
     $task = 'rekkatoimituksen_rivivalinta';
   }
@@ -1393,47 +1422,145 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
   }
 }
 
+if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
 
+  $query = "SELECT
+            lasku.asiakkaan_tilausnumero,
+            lasku.tunnus
+            FROM lasku
+            JOIN tilausrivi AS tr
+              ON tr.yhtio = lasku.yhtio
+              AND tr.otunnus = lasku.tunnus
+            JOIN laskun_lisatiedot AS llt
+              ON llt.yhtio = lasku.yhtio
+              AND llt.otunnus = lasku.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = llt.yhtio
+              AND ss.myyntirivitunnus = tr.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND llt.konttiviite = 'bookkaukseton'
+            GROUP BY lasku.tunnus";
+  $result = pupe_query($query);
 
-if (isset($task) and $task == 'rekkatoimituksen_lisays') {
+  $tilaukset = array();
+
+  while ($tilaus = mysql_fetch_assoc($result)) {
+    $tilaukset[] = $tilaus;
+  }
+
 
   echo "
   <a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>
   <font class='head'>".t("Rekkatoimituksen lisäys")."</font><hr><br>
 
   <form method='post' action='toimitusten_seuranta.php'>
+  <input type='hidden' name='task' value='liita_tilauksia_rekkaviitteelle' />
+
+  <input type='hidden' name='kuljetusfirma' value='{$kuljetusfirma}' />
+  <input type='hidden' name='viite' value='{$viite}' />
+  <input type='hidden' name='maaranpaa' value='{$maaranpaa}' />
+  <input type='hidden' name='maaranapaakoodi' value='{$maaranpaakoodi}' />
+  <input type='hidden' name='pakkausohje' value='{$pakkausohje}' />
+  <input type='hidden' name='lahtopvm' value='{$_lahtopvm}' />
+
+  <table>
+    <tr>
+      <th>" . t("Kuljetusfirma") ."</th>
+      <td>{$kuljetusfirma}</th>
+    </tr>
+
+    <tr>
+      <th>" . t("Viite") ."</th>
+      <td>{$viite}</th>
+    </tr>
+
+    <tr>
+      <th>" . t("Lähtöpäivä") ."</th>
+      <td>{$lahtopvm}</th>
+    </tr>
+
+    <tr>
+      <th>" . t("Määränpää") ."</th>
+      <td>{$maaranpaa}</th>
+    </tr>
+
+    <tr>
+      <th>" . t("Määränpää-koodi") ."</th>
+      <td>{$maaranpaakoodi}</th>
+    </tr>
+
+    <tr>
+      <th>" . t("Pakkausohje") ."</th>
+      <td>{$pakkausohje}</th>
+    </tr>
+
+  </table>
+  <br>
+  <font class='message'>".t("Valitse lisättävät tilaukset")."</font>
+  <br>
+  <table>";
+
+  foreach ($tilaukset as $tilaus) {
+    echo "
+    <tr>
+      <th>{$tilaus['asiakkaan_tilausnumero']}</th>
+      <td align='right'><input type='checkbox' name='valitut' value='{$tilaus['tunnus']}' /></th>
+    </tr>";
+  }
+
+  echo "
+  <tr>
+    <th></th>
+    <td align='right'><input type='submit' value='".t("Lisää")."' /></th>
+  </tr>
+
+  </table>";
+}
+
+if (isset($task) and $task == 'rekkatoimituksen_lisays') {
+
+  echo "
+  <a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>
+  <font class='head'>".t("Rekkatoimituksen lisäys")."</font><hr>
+
+  <form method='post' action='toimitusten_seuranta.php'>
   <input type='hidden' name='task' value='lisaa_rekkatoimitus' />
   <table>";
 
     echo "
-
     <tr>
       <th>" . t("Kuljetusfirma") ."</th>
       <td><input type='text' name='kuljetusfirma' value='{$kuljetusfirma}' /></th>
-      <td class='back'>{$errors['kuljetusfirma']}</td>
+      <td class='back error'>{$errors['kuljetusfirma']}</td>
     </tr>
 
     <tr>
       <th>" . t("Viite") ."</th>
       <td><input type='text' name='viite' value='{$viite}' /></th>
-      <td class='back'>{$errors['viite']}</td>
+      <td class='back error'>{$errors['viite']}</td>
+    </tr>
+
+    <tr>
+      <th>" . t("Lähtöpäivä") ."</th>
+      <td><input type='text' id='lahtopvm' name='lahtopvm' value='{$lahtopvm}' /></th>
+      <td class='back error'>{$errors['lahtopvm']}</td>
     </tr>
 
     <tr>
       <th>" . t("Määränpää") ."</th>
       <td><input type='text' name='maaranpaa' value='{$maaranpaa}' /></th>
-      <td class='back'>{$errors['maaranpaa']}</td>
+      <td class='back error'>{$errors['maaranpaa']}</td>
     </tr>
 
     <tr>
       <th>" . t("Määränpää-koodi") ."</th>
-      <td><input type='text' name='koodi' value='{$koodi}' /></th>
-      <td class='back'>{$errors['maaranpaakoodi']}</td>
+      <td><input type='text' name='maaranpaakoodi' value='{$maaranpaakoodi}' /></th>
+      <td class='back error'>{$errors['maaranpaakoodi']}</td>
     </tr>
 
     <tr>
       <th>" . t("Pakkausohje") ."</th>
-      <td><textarea name='pakkausohje'>{$pakausohje}</textarea></th>
+      <td><textarea name='pakkausohje'>{$pakkausohje}</textarea></th>
       <td class='back'></td>
     </tr>
 
@@ -1447,7 +1574,7 @@ if (isset($task) and $task == 'rekkatoimituksen_lisays') {
 
   </form>";
 
-
+  datepicker('lahtopvm');
 
 }
 
@@ -1628,14 +1755,6 @@ if (!isset($task)) {
 
   echo '<br>';
 
-  /*
-
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='task' value='bookkauksen_poisto' />";
-  echo "<input type='submit' value='" .t("Bookkauksen poisto") ."'>";
-  echo "</form>";
-
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='task' value='rekkatoimituksen_lisays' />";
@@ -1644,8 +1763,6 @@ if (!isset($task)) {
 
   echo "<br><br>";
 
-  */
-
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -1653,7 +1770,6 @@ if (!isset($task)) {
   $viitteet = array();
 
   if (mysql_num_rows($result) > 0) {
-
 
     echo "<form method='post' action='toimitusten_seuranta.php'>";
     echo "<input type='hidden' name='rajaus' value='{$rajaus}' >";
@@ -1666,7 +1782,6 @@ if (!isset($task)) {
     echo "<th>" . t("Kontit") ."</th>";
     echo "<th>" . t("Status") ."</th>";
     echo "</tr>";
-
 
     while ($rivi = mysql_fetch_assoc($result)) {
         $rivit[] = $rivi;
@@ -1863,8 +1978,6 @@ if (!isset($task)) {
   }
 }
 
-
-
 if (isset($kv) and isset($task) and $task == 'nkv') {
 
   if ($r == 'Tulevat') {
@@ -1988,9 +2101,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
           </form>";
       }*/
 
-
     echo "<hr><br>";
-
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Tilauskoodi")."</th>";
@@ -2342,7 +2453,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
           foreach ($kontit as $konttinumero => $kontti) {
 
-
             if ($kontti['konttinumero'] == '') {
               echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
               echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
@@ -2492,7 +2602,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               <input type='submit' value='". $nappiteksti ."' />
               </form>
               </div>";
-
           }
 
           if ($kesken == 0 and $mrn_tullut) {
@@ -2576,7 +2685,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                   <input type='hidden' name='poistettavatunnus' value='{$poistettavatunnus['tunnus']}' />
                   <input type='submit' value='laadi uudestaan' />
                   </form></div>";
-
               }
               */
             }

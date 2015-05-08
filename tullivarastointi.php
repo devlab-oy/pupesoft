@@ -1281,10 +1281,9 @@ if (isset($view) and $view == "perus") {
             LEFT JOIN tuote
               ON tuote.yhtio = lasku.yhtio
               AND (tuote.tuoteno = tilausrivi.tuoteno OR tuote.tilausrivi_kommentti = tilausrivi.tuoteno)
-            WHERE lasku.yhtio = 'rplog'
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND viesti = 'tullivarasto'
             AND sisviesti1 = ''
-            AND tilausrivi.kommentti != 'kokonaan siirretty eu-numerolle'
             GROUP BY tilausrivi.tuoteno
             ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
@@ -1295,13 +1294,13 @@ if (isset($view) and $view == "perus") {
     echo "</font><br><br>";
   }
 
-/*
+
   echo "
     <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='nollaus' />
     <input type='submit' value='". t("Nollaa") . "' />
     </form>";
-*/
+
 
   echo "
     <form action='tullivarastointi.php' method='post'>
@@ -1482,22 +1481,6 @@ if (isset($view) and $view == "perus") {
 
       if ($tuote['kpl'] == '') {
         echo t("Varaus");
-      }
-      elseif ($info['vt'] == 'väliaikainen') {
-
-        $kaikki_varastossa = false;
-
-        if ($varastossa == $tuotemaara) {
-          $status = t("Väliaikaisvarastoitu");
-          $kaikki_varastossa = true;
-        }
-        elseif ($ei_varastossa == $tuotemaara){
-          $status = t("Ei vielä väliaikaisvarastoitu");
-        }
-        else {
-          $status = t("Osittain väliaikaisvarastoitu");
-        }
-        echo $status;
       }
       else{
         foreach ($statukset as $tulo => $tuotteet) {

@@ -57,8 +57,8 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 
     $query = "SELECT
               tuote.tuoteno,
-              inventointilista.tunnus as inventointilista,
-              inventointilista.aika as inventointilista_aika,
+              inventointilistarivi.otunnus as inventointilista,
+              inventointilistarivi.aika as inventointilista_aika,
               concat(  lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
                   lpad(upper(tuotepaikat.hyllynro), 5, '0'),
                   lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
@@ -77,9 +77,8 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
                 AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                 AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                 AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-              LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tila = 'A')
               WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
               AND $haku_ehto
               LIMIT 200";
@@ -178,10 +177,11 @@ if ($tee == 'listat') {
   if (!isset($reservipaikka)) $reservipaikka = 'E';
 
   // Haetaan inventointilistat
-  $query = "SELECT tunnus as lista
-            FROM inventointilista
+  $query = "SELECT otunnus as lista
+            FROM inventointilistarivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND aika IS NOT NULL
+            GROUP BY 1
             ORDER BY 1";
   $result = pupe_query($query);
 
@@ -192,11 +192,9 @@ if ($tee == 'listat') {
 
     $query = "SELECT count(inventointilistarivi.tuoteno) as tuotteita,
               concat_ws('-', min(inventointilistarivi.hyllyalue), max(inventointilistarivi.hyllyalue)) as hyllyvali
-              FROM inventointilista
-              JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
-                AND inventointilistarivi.otunnus = inventointilista.tunnus)
-              WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
-              AND inventointilista.tunnus = '{$row['lista']}'";
+              FROM inventointilistarivi
+              WHERE inventointilistarivi.yhtio = '{$kukarow['yhtio']}'
+              AND inventointilistarivi.otunnus = '{$row['lista']}'";
     $_count_res = pupe_query($query);
     $_count_row = mysql_fetch_assoc($_count_res);
 
@@ -207,11 +205,9 @@ if ($tee == 'listat') {
               inventointilistarivi.hyllynro,
               inventointilistarivi.hyllyvali,
               inventointilistarivi.hyllytaso
-              FROM inventointilista
-              JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
-                AND inventointilistarivi.otunnus = inventointilista.tunnus)
-              WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
-              AND inventointilista.tunnus = '{$row['lista']}'";
+              FROM inventointilistarivi
+              WHERE inventointilistarivi.yhtio = '{$kukarow['yhtio']}'
+              AND inventointilistarivi.otunnus = '{$row['lista']}'";
     $_chk_res = pupe_query($query);
 
     while ($_chk_row = mysql_fetch_assoc($_chk_res)) {
@@ -311,7 +307,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                 AND tuotepaikat.hyllytaso = inventointilistarivi.hyllytaso)
                WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
                AND inventointilista.tunnus = '{$lista}'
-               AND inventointilista.aika IS NOT NULL # Inventoidut tuotteet on nollattu
+               AND inventointilistarivi.tila = 'A' # Inventoidut tuotteet on nollattu
                ORDER BY sorttauskentta, tuoteno
                LIMIT 1";
     $result = pupe_query($query);

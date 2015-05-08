@@ -282,7 +282,7 @@ if (isset($view) and $view == "tulli") {
   if (count($varastotilanne) > 0) {
 
     echo "
-    <form method='post' class='multisubmit' action='tullivarasto_raportit'>
+    <form method='post' class='multisubmit' action='tullivarasto_raportit.php'>
     <input type='hidden' name='varastotilanne' value='{$pdf_varastotilanne}' />
     <input type='hidden' name='task' value='tulliraportti_pdf' />
     <input type='submit' value='" . t("Lataa PDF") . "' />
@@ -465,7 +465,7 @@ if (isset($view) and $view == "laskutus_data") {
 if (isset($view) and $view == "tuloraportti_tiedot") {
 
   echo "
-  <form method='post' class='multisubmit' action='tullivarasto_raportit'>
+  <form method='post' class='multisubmit' action='tullivarasto_raportit.php'>
   <input type='hidden' name='tulonumero' value='{$tulonumero}' />
   <input type='hidden' name='task' value='tuloraportti_pdf' />
   <input type='submit' value='" . t("Lataa PDF") . "' />

@@ -1294,13 +1294,13 @@ if (isset($view) and $view == "perus") {
     echo "</font><br><br>";
   }
 
-
+  /*
   echo "
     <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='nollaus' />
     <input type='submit' value='". t("Nollaa") . "' />
     </form>";
-
+*/
 
   echo "
     <form action='tullivarastointi.php' method='post'>

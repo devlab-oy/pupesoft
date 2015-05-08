@@ -893,7 +893,7 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka LEFT JOIN
   $query = "SELECT tuotepaikat.*,
-            inventointilista.aika as inventointilista_aika,
+            inventointilistarivi.aika as inventointilista_aika,
             varastopaikat.nimitys,
             if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
@@ -905,9 +905,8 @@ if ($tee == 'M') {
               AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
               AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
               AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-            LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-              AND inventointilista.tunnus = inventointilistarivi.otunnus)
+              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+              AND inventointilistarivi.tila = 'A')
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'
@@ -945,7 +944,7 @@ if ($tee == 'M') {
   // Saldot per varastopaikka JOIN
   $query = "SELECT tuotepaikat.*,
             varastopaikat.nimitys,
-            inventointilista.aika as inventointilista_aika,
+            inventointilistarivi.aika as inventointilista_aika,
             if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
             FROM tuotepaikat
@@ -956,9 +955,8 @@ if ($tee == 'M') {
               AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
               AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
               AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-            LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-              AND inventointilista.tunnus = inventointilistarivi.otunnus)
+              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+              AND inventointilistarivi.tila = 'A')
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'

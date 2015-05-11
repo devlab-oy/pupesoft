@@ -1047,6 +1047,58 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   echo "<font class='head'>".t("Laadi laskutusraportti")."</font><hr><br>";
 
   echo "
+  <script type='text/javascript'>
+  $( document ).ready(function() {
+    $('#nimikevalinta').bind('change',function(){
+
+      var txt = $('#nimikevalinta option:selected').text();
+
+      if (txt.indexOf('(t.)') >= 0) {
+
+        var value = $('#hidden_tonnit').val();
+
+        $('#kplvalinta').prop('readonly', true);
+        $('#kplvalinta').val(value);
+        $('#nimikeyksikko').text('t.');
+        $('#kplvalinta').css('visibility', 'visible');
+        $('#nimikelisaysnappi').css('visibility', 'visible');
+      }
+      else if (txt.indexOf('(kpl.)') >= 0) {
+
+        $('#kplvalinta').prop('readonly', false);
+        $('#kplvalinta').val('');
+        $('#nimikeyksikko').text('kpl.');
+        $('#kplvalinta').css('visibility', 'visible');
+        $('#nimikelisaysnappi').css('visibility', 'visible');
+      }
+      else if (txt.indexOf('(h.)') >= 0) {
+
+        $('#kplvalinta').prop('readonly', false);
+        $('#kplvalinta').val('');
+        $('#nimikeyksikko').text('h.');
+        $('#kplvalinta').css('visibility', 'visible');
+        $('#nimikelisaysnappi').css('visibility', 'visible');
+      }
+      else if (txt.indexOf('(m.)') >= 0) {
+
+        $('#kplvalinta').prop('readonly', false);
+        $('#kplvalinta').val('');
+        $('#nimikeyksikko').text('m.');
+        $('#kplvalinta').css('visibility', 'visible');
+        $('#nimikelisaysnappi').css('visibility', 'visible');
+      }
+      else {
+
+        $('#nimikeyksikko').text('');
+        $('#kplvalinta').css('visibility', 'hidden');
+        $('#nimikelisaysnappi').css('visibility', 'hidden');
+      }
+    });
+  });
+
+  </script>";
+
+  echo "
   <form method='post' id='luo_laskutusraportti'>
   <input type='hidden' name='task' value='luo_laskutusraportti' />
   <input type='hidden' id='hidden_tonnit' name='tonnit' value='{$tonnit}' />
@@ -1211,57 +1263,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   </table>
   </form>";
 
-echo "
-<script type='text/javascript'>
 
-  $('#nimikevalinta').bind('change',function(){
-
-    var txt = $('#nimikevalinta option:selected').text();
-
-    if (txt.indexOf('(t.)') >= 0) {
-
-      var value = $('#hidden_tonnit').val();
-
-      $('#kplvalinta').prop('readonly', true);
-      $('#kplvalinta').val(value);
-      $('#nimikeyksikko').text('t.');
-      $('#kplvalinta').css('visibility', 'visible');
-      $('#nimikelisaysnappi').css('visibility', 'visible');
-    }
-    else if (txt.indexOf('(kpl.)') >= 0) {
-
-      $('#kplvalinta').prop('readonly', false);
-      $('#kplvalinta').val('');
-      $('#nimikeyksikko').text('kpl.');
-      $('#kplvalinta').css('visibility', 'visible');
-      $('#nimikelisaysnappi').css('visibility', 'visible');
-    }
-    else if (txt.indexOf('(h.)') >= 0) {
-
-      $('#kplvalinta').prop('readonly', false);
-      $('#kplvalinta').val('');
-      $('#nimikeyksikko').text('h.');
-      $('#kplvalinta').css('visibility', 'visible');
-      $('#nimikelisaysnappi').css('visibility', 'visible');
-    }
-    else if (txt.indexOf('(m.)') >= 0) {
-
-      $('#kplvalinta').prop('readonly', false);
-      $('#kplvalinta').val('');
-      $('#nimikeyksikko').text('m.');
-      $('#kplvalinta').css('visibility', 'visible');
-      $('#nimikelisaysnappi').css('visibility', 'visible');
-    }
-    else {
-
-      $('#nimikeyksikko').text('');
-      $('#kplvalinta').css('visibility', 'hidden');
-      $('#nimikelisaysnappi').css('visibility', 'hidden');
-    }
-
-  });
-
-</script>";
 }
 
 if (isset($task) and $task == 'poista_bookkaus') {
@@ -1755,13 +1757,17 @@ if (!isset($task)) {
 
   echo '<br>';
 
+/*
+
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='task' value='rekkatoimituksen_lisays' />";
   echo "<input type='submit' value='" .t("Rekkatoimituksen lisäys") ."'>";
   echo "</form>";
 
+
   echo "<br><br>";
+*/
 
   $result = pupe_query($query);
 

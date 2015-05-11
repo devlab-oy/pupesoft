@@ -2207,7 +2207,7 @@ function hae_kassalipas($tunnus) {
   $query = "SELECT nimi
             FROM kassalipas
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus  = {$tunnus}";
+            AND tunnus  = '{$tunnus}'";
 
   $result = pupe_query($query);
 

@@ -24,7 +24,8 @@ $psx_ohjelmat = array(
   "kassalipas" => "{$palvelin2}pupenext/cash_registers",
   "tili" => "{$palvelin2}pupenext/accounts",
   "taso" => "{$palvelin2}pupenext/sum_levels",
-  "kirjoittimet" => "{$palvelin2}pupenext/printers"
+  "kirjoittimet" => "{$palvelin2}pupenext/printers",
+  "tilikaudet" => "{$palvelin2}pupenext/fiscal_years",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -2290,7 +2291,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "extranet_kayttajan_lisatiedot" or
     $toim == "asiakkaan_avainsanat" or
     $toim == "rahtisopimukset" or
-    $toim == "tilikaudet" or
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or
     $toim == "tuotteen_orginaalit" or

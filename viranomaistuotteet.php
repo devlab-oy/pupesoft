@@ -244,25 +244,27 @@ if ($tee == "synkronoi") {
 
   echo t("Lis‰t‰‰n uudet viranomaistuotteet tietokantaan")."...<br>";
 
-  $ok = FALSE;
+  $ch  = curl_init();
+  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssiviranomaistuotteet.sql");
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  $nimikeet = curl_exec($ch);
 
-  if ($file = fopen("http://api.devlab.fi/referenssiviranomaistuotteet.sql", "r")) {
-    $ok = TRUE;
-  }
-  elseif ($file = fopen("http://10.0.1.2/referenssiviranomaistuotteet.sql", "r")) {
-    $ok = TRUE;
+  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $nimikeet = utf8_encode($nimikeet); //NO_MB_OVERLOAD
   }
 
-  if (!$ok) {
-    echo t("Tiedoston avaus ep‰onnistui")."!";
-    require "inc/footer.inc";
-    exit;
-  }
+  $nimikeet = explode("\n", trim($nimikeet));
 
   // Eka rivi roskikseen
-  $rivi = fgets($file);
+  array_shift($nimikeet);
 
-  while ($rivi = fgets($file)) {
+  foreach ($nimikeet as $rivi) {
     list($tuoteno, $nimitys, $alv, $kommentoitava, $kuvaus, $myyntihinta, $tuotetyyppi, $vienti, $malli, $myymalahinta) = explode("\t", trim($rivi));
 
     if (strpos($nimitys, "Ulkomaanp‰iv‰raha") !== FALSE) {
@@ -312,25 +314,27 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
 
   echo t("P‰ivitet‰‰n maat tietokantaan")."...<br>";
 
-  $ok = FALSE;
+  $ch  = curl_init();
+  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssimaat.sql");
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  $nimikeet = curl_exec($ch);
 
-  if ($file = fopen("http://api.devlab.fi/referenssimaat.sql", "r")) {
-    $ok = TRUE;
-  }
-  elseif ($file = fopen("http://10.0.1.2/referenssimaat.sql", "r")) {
-    $ok = TRUE;
+  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $nimikeet = utf8_encode($nimikeet); //NO_MB_OVERLOAD
   }
 
-  if (!$ok) {
-    echo t("Tiedoston avaus ep‰onnistui")."!";
-    require "inc/footer.inc";
-    exit;
-  }
+  $nimikeet = explode("\n", trim($nimikeet));
 
   // Eka rivi roskikseen
-  $rivi = fgets($file);
+  array_shift($nimikeet);
 
-  while ($rivi = fgets($file)) {
+  foreach ($nimikeet as $rivi) {
     list($koodi, $nimi, $eu, $ryhma_tunnus, $iso3, $iso_name) = explode("\t", trim($rivi));
 
     $query  = "INSERT INTO maat SET

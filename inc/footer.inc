@@ -49,8 +49,8 @@ if (isset($ohje) and $ohje == "off") {
 }
 
 // Piilotetaan sanakirja
-if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") !== FALSE or !isset($kaannetyt_sanat) or count($kaannetyt_sanat) == 0 or !tarkista_oikeus("pupenext/dictionaries", '', '1')) {
-  $piirra_sanakirja = FALSE;
+if (empty($kaannetyt_sanat) or !tarkista_oikeus("pupenext/dictionaries", '', '1')) {
+  $piirra_sanakirja = false;
 }
 
 if ($lopeta_body) {

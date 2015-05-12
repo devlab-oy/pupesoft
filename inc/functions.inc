@@ -12746,39 +12746,66 @@ if (!function_exists("tarkista_iban")) {
 }
 
 if (!function_exists("tarkista_oikeus")) {
-  function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '', $return = '') {
+  function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '', $return = '', $toimi_array = "") {
     global $kukarow;
+
+    $alanimet = array();
+    $loytyi = false;
+
+    if ($toimi_array) {
+      $alias_alanimi = $alanimi;
+
+      if (!empty($toimi_array[1])) {
+        $alias_alanimi .= "!!!{$toimi_array[1]}";
+
+        if (!empty($toimi_array[2])) {
+          $alias_alanimi .= "!!!{$toimi_array[2]}";
+        }
+      }
+
+      array_push($alanimet, $alias_alanimi);
+    }
 
     $ohjelma = mysql_real_escape_string(trim($ohjelma));
     $alanimi = mysql_real_escape_string(trim($alanimi));
-    $querylisa = "";
 
-    if (strpos($alanimi, "%") !== FALSE) {
-      $querylisa .= " AND alanimi like '$alanimi'";
+    array_push($alanimet, $alanimi);
+
+    foreach ($alanimet as $alanimi) {
+      $querylisa = "";
+
+      if (strpos($alanimi, "%") !== FALSE) {
+        $querylisa .= " AND alanimi like '$alanimi'";
+      }
+      elseif ($alanimi != "") {
+        // Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
+        $querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
+      }
+      else {
+        $querylisa .= " AND alanimi = '' ";
+      }
+
+      if ($paivitys != "") {
+        $querylisa .= " AND paivitys = '1' ";
+      }
+
+      $query = "SELECT *
+                FROM oikeu
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND kuka    = '$kukarow[kuka]'
+                AND nimi    LIKE '%$ohjelma'
+                $querylisa
+                ORDER BY length(alanimi)";
+      $res = pupe_query($query);
+
+      if (mysql_num_rows($res) > 0) {
+        $loytyi = true;
+
+        break;
+      }
     }
-    elseif ($alanimi != "") {
-      // Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
-      $querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
-    }
-    else {
-      $querylisa .= " AND alanimi = '' ";
-    }
 
-    if ($paivitys != "") {
-      $querylisa .= " AND paivitys = '1' ";
-    }
-
-    $query = "SELECT *
-              FROM oikeu
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND kuka    = '$kukarow[kuka]'
-              AND nimi    LIKE '%$ohjelma'
-              $querylisa
-              ORDER BY length(alanimi)";
-    $res = pupe_query($query);
-
-    if (mysql_num_rows($res) > 0) {
-
+    if ($loytyi) {
       if ($return != "") {
         return mysql_fetch_array($res);
       }

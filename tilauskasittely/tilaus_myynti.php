@@ -1550,9 +1550,9 @@ if ($tee == "VALMIS"
 
     echo "  summa = Math.round(summa*100)/100;
 
-            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || 
-                document.getElementById('pankkikortti').value != '' || 
-                document.getElementById('luottokortti').value != '' || 
+            if (summa == 0 && (document.getElementById('kateismaksu').value != '' ||
+                document.getElementById('pankkikortti').value != '' ||
+                document.getElementById('luottokortti').value != '' ||
                 document.getElementById('laskulle').value != '')) {
 
               summa = 0.00;
@@ -1560,7 +1560,7 @@ if ($tee == "VALMIS"
               if(document.getElementById('korttimaksunappi')){
                   document.getElementById('korttimaksunappi').disabled = true;
               }
-   
+
               document.getElementById('seka').value = 'kylla';
             } else {
               document.getElementById('hyvaksy_nappi').disabled = true;
@@ -9753,7 +9753,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $yhtiorow['laite_huolto'] == 'X' and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
+    if ($kukarow["extranet"] == "" and $tapa != "MUOKKAA" and $yhtiorow['laite_huolto'] == 'X' and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
       echo "<td class='back' valign='top'>";
       echo "<form action='{$palvelin2}tyomaarays/tyojono2.php'>";
       echo "<input type='submit' value='OK' />";

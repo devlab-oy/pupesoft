@@ -1404,8 +1404,9 @@ elseif ($tee == "") {
     $limitteri = "";
   }
 
-  if ($isatuoteno_haku != '') {
-    $lisa1 .= " and tuoteperhe.isatuoteno like '%$isatuoteno_haku%' ";
+  if (isset ($isatuoteno_haku) and $isatuoteno_haku != '') {
+    $lisa1 .= "AND (tuoteperhe.isatuoteno LIKE '%{$isatuoteno_haku}%'
+                 OR ti.nimitys LIKE '%{$isatuoteno_haku}%') ";
   }
 
   if ($tuoteno_haku != '') {

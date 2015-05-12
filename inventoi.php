@@ -16,7 +16,7 @@ if (!isset($fileesta))       $fileesta = "";
 if (!isset($filusta))        $filusta = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($mobiili))        $mobiili = "";
-if (!isset($laadittuaika))   $laadittuaika = "now()";
+if (!isset($laadittuaika))   $laadittuaika = "";
 if (!isset($enarifocus))     $enarifocus = "";
 
 $validi_kasinsyotetty_inventointipaivamaara = 0;
@@ -828,6 +828,8 @@ if ($tee == 'VALMIS') {
               $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("täsmäsi").".<br>$lisaselite<br>$inven_laji";
             }
 
+            $laadittuaikalisa = $laadittuaika != "now()" ? "'{$laadittuaika}'" : $laadittuaika;
+
             ///* Tehdään tapahtuma *///
             $query = "INSERT into tapahtuma set
                       yhtio     = '$kukarow[yhtio]',
@@ -842,7 +844,7 @@ if ($tee == 'VALMIS') {
                       hyllytaso = '$hyllytaso',
                       selite    = '$selite',
                       laatija   = '$kukarow[kuka]',
-                      laadittu  = '$laadittuaika'";
+                      laadittu  = {$laadittuaikalisa}";
             $result = pupe_query($query);
 
             // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
@@ -862,7 +864,7 @@ if ($tee == 'VALMIS') {
             }
 
             $query .= " saldoaika             = now(),
-                        inventointiaika       = '{$laadittuaika}',
+                        inventointiaika       = {$laadittuaikalisa},
                         inventointipoikkeama  = '$poikkeama',
                         muuttaja              = '$kukarow[kuka]',
                         muutospvm             = now()

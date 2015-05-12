@@ -799,7 +799,10 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA" and !$_cli) {
               AND tuote.tuoteno        = tapahtuma.tuoteno
               AND tuote.ei_saldoa      = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
-              AND varastopaikat.tunnus = tuotepaikat.varasto)
+              AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0'))
+                <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
+              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
+                >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0')))
             WHERE tapahtuma.yhtio      = '{$kukarow["yhtio"]}'
             AND tapahtuma.laji         not in ('epäkurantti')
             AND varastopaikat.tunnus IS NULL

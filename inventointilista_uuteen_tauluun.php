@@ -67,7 +67,8 @@ while ($row = mysql_fetch_assoc($res)) {
               muuttaja = '{$row['muuttaja']}',
               laatija = '{$row['laatija']}',
               luontiaika = '{$row['luontiaika']}',
-              muutospvm = '{$row['muutospvm']}'";
+              muutospvm = '{$row['muutospvm']}',
+              tunnus = '{$row['inventointilista']}'";
     $_id = mysql_insert_id();
   }
   else {

@@ -881,7 +881,8 @@ if ($tee == 'VALMIS') {
                       AND hyllyalue = '{$hyllyalue}'
                       AND hyllynro = '{$hyllynro}'
                       AND hyllyvali = '{$hyllyvali}'
-                      AND hyllytaso = '{$hyllytaso}'";
+                      AND hyllytaso = '{$hyllytaso}'
+                      AND tila = 'A'";
             $_chk_res = pupe_query($query);
 
             if (mysql_num_rows($_chk_res) != 0) {
@@ -1248,7 +1249,8 @@ if ($tee == 'VALMIS') {
     $query = "SELECT *
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
-                AND inventointilistarivi.otunnus = inventointilista.tunnus)
+                AND inventointilistarivi.otunnus = inventointilista.tunnus
+                AND inventointilistarivi.tila = 'A')
               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
                 AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
                 AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue
@@ -1361,7 +1363,7 @@ if ($tee == 'INVENTOI') {
   }
 
   //hakulause, tämä on sama kaikilla vaihtoehdoilla
-  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilista.tunnus as inventointilista, inventointilistarivi.aika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.aika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "" and $lista == "") {
     ///* Inventoidaan tuotenumeron perusteella *///
@@ -1375,9 +1377,8 @@ if ($tee == 'INVENTOI') {
                 AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                 AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                 AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
-              LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
-                AND inventointilista.tunnus = inventointilistarivi.otunnus)
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tila = 'A')
               WHERE tuote.yhtio   = '$kukarow[yhtio]'
               and tuote.tuoteno   = '$tuoteno'
               and tuote.ei_saldoa = ''
@@ -2047,10 +2048,10 @@ if ($tee == '') {
   echo "<br><br>";
 
   //haetaan inventointilista numero tässä vaiheessa
-  $query = "SELECT otunnus as inventointilista, luontiaika as inventointilista_aika
+  $query = "SELECT DISTINCT otunnus as inventointilista, luontiaika as inventointilista_aika
             FROM inventointilistarivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'I'
+            AND tila = 'A'
             GROUP BY 1
             ORDER BY 1";
   $result = pupe_query($query);

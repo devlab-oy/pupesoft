@@ -435,7 +435,8 @@ if (isset($task) and $task == 'varaa_tulonumero') {
             AND tunnus = '{$laskurow['tunnus']}'";
   pupe_query($query);
 
-  header("Location: tullivarastointi.php?va=ok&tn={$tulonumero}");
+  echo "<meta http-equiv='refresh' content='0;url=tullivarastointi.php?va=ok&tn={$tulonumero}'>";
+  die;
 }
 
 if (isset($task) and $task == 'tullisiirto') {
@@ -687,7 +688,8 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
       tullituotelisays($tuotteen_lisays_parametrit);
 
     }
-    header("Location: tullivarastointi.php?pe=ok&tn={$tulonumero}");
+    echo "<meta http-equiv='refresh' content='0;url=tullivarastointi.php?pe=ok&tn={$tulonumero}'>";
+    die;
   }
   elseif ($task == 'tallenna') {
 
@@ -767,7 +769,8 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
 
       }
     } //muutetut vanhat sekä uudet tuotteet käyty läpi
-  header("Location: tullivarastointi.php");
+  echo "<meta http-equiv='refresh' content='0;url=tullivarastointi.php'>";
+  die;
   }
 }
 

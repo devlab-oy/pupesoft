@@ -69,11 +69,10 @@ while ($row = mysql_fetch_assoc($res)) {
               luontiaika = '{$row['luontiaika']}',
               muutospvm = '{$row['muutospvm']}',
               tunnus = '{$row['inventointilista']}'";
-    $_id = mysql_insert_id();
+    $_ot_res = pupe_query($query);
   }
-  else {
-    $_id = $row['inventointilista'];
-  }
+
+  $_id = $row['inventointilista'];
 
   $query = "SELECT *
             FROM inventointilistarivi

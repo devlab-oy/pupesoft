@@ -729,7 +729,10 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT" and !$_cli) {
               and tuote.tuoteno        = tilausrivi.tuoteno
               and tuote.ei_saldoa      = '')
             LEFT OUTER JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-              AND varastopaikat.tunnus = tilausrivi.varasto)
+              AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'), lpad(upper(varastopaikat.alkuhyllynro),  5, '0'))
+                <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
+              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
+                >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
             WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
             AND tilausrivi.tyyppi      in ('L','G','V')
             AND tilausrivi.jt + tilausrivi.varattu != 0

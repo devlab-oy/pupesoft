@@ -16,7 +16,7 @@ if (!isset($fileesta))       $fileesta = "";
 if (!isset($filusta))        $filusta = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($mobiili))        $mobiili = "";
-if (!isset($laadittuaika))   $laadittuaika = "";
+if (!isset($laadittuaika))   $laadittuaika = "now()";
 if (!isset($enarifocus))     $enarifocus = "";
 
 $validi_kasinsyotetty_inventointipaivamaara = 0;

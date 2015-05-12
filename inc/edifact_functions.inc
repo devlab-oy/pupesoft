@@ -4221,15 +4221,26 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
 function paivita_tullivarastointituote($tiedot) {
   global $kukarow;
 
+  $nimitys = mysql_real_escape_string($tiedot['nimitys']);
+  $malli = mysql_real_escape_string($tiedot['malli']);
+  $pakkauslaji = mysql_real_escape_string($tiedot['pakkauslaji']);
+  $pakkauskpl = mysql_real_escape_string($tiedot['pakkauskpl']);
+  $maara2 = mysql_real_escape_string($tiedot['maara2']);
+  $nimitys = mysql_real_escape_string($tiedot['nimitys']);
+  $bruttopaino = mysql_real_escape_string($tiedot['bruttopaino']);
+  $nettopaino = mysql_real_escape_string($tiedot['nettopaino']);
+  $tilavuus = mysql_real_escape_string($tiedot['tilavuus']);
+  $lisatieto = mysql_real_escape_string($tiedot['lisatieto']);
+
   $query = "UPDATE tuote SET
-            nimitys = '{$tiedot['nimitys']}',
-            malli = '{$tiedot['malli']}',
-            pakkauslaji = '{$tiedot['pakkauslaji']}',
-            pakkauskpl = '{$tiedot['maara2']}',
-            tuotemassa = '{$tiedot['bruttopaino']}',
-            tuotemassa_netto = '{$tiedot['nettopaino']}',
-            tuotetilavuus = '{$tiedot['tilavuus']}',
-            muuta = '{$tiedot['lisatieto']}'
+            nimitys = '{$nimitys}',
+            malli = '{$malli}',
+            pakkauslaji = '{$pakkauslaji}',
+            pakkauskpl = '{$maara2}',
+            tuotemassa = '{$bruttopaino}',
+            tuotemassa_netto = '{$nettopaino}',
+            tuotetilavuus = '{$tilavuus}',
+            muuta = '{$lisatieto}'
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus = '{$tiedot['tuotetunnus']}'";
   pupe_query($query);
@@ -4238,6 +4249,9 @@ function paivita_tullivarastointituote($tiedot) {
 function paivita_tullivarastointirivi($tiedot) {
   global $kukarow;
 
+  $nimitys = mysql_real_escape_string($tiedot['nimitys']);
+  $kpl = mysql_real_escape_string($tiedot['maara1']);
+
   if ($tiedot['hyllyalue'] == '') {
     $muutettava = 'varattu';
   }
@@ -4245,7 +4259,7 @@ function paivita_tullivarastointirivi($tiedot) {
    $muutettava = 'kpl';
 
    $query = "UPDATE tuotepaikat SET
-             saldo = {$tiedot['maara1']}
+             saldo = {$kpl}
              WHERE yhtio = '{$kukarow['yhtio']}'
              AND tuoteno = '{$tiedot['tuotenumero']}'
              AND hyllyalue = '{$tiedot['hyllyalue']}'
@@ -4253,15 +4267,26 @@ function paivita_tullivarastointirivi($tiedot) {
    pupe_query($query);
   }
 
-  $nimitys = mysql_real_escape_string($tiedot['nimitys']);
-
   $query = "UPDATE tilausrivi SET
-            tilkpl = {$tiedot['maara1']},
-            nimitys = '{$nimitys}',
-            {$muutettava} = {$tiedot['maara1']}
+            tilkpl = {$kpl},
+            {$muutettava} = {$kpl}
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$tiedot['tilausrivitunnus']}'";
   pupe_query($query);
+
+  $query = "SELECT tuoteno
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tiedot['tilausrivitunnus']}'";
+  $result = pupe_query($query);
+  $tuotenumero = mysql_result($result, 0);
+
+  $query = "UPDATE tilausrivi SET
+            nimitys = '{$nimitys}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno  = '{$tuotenumero}'";
+  pupe_query($query);
+
 }
 
 function tullituotelisays($tuotteen_lisays_parametrit) {

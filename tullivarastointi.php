@@ -24,7 +24,6 @@ if (isset($task) and $task == 'purkuraportti_pdf') {
   die;
 }
 
-
 if (isset($task) and $task == 'viivakoodi_pdf') {
 
   $pdf_tiedosto = viivakoodi_pdf($tuotenumero);
@@ -35,8 +34,6 @@ if (isset($task) and $task == 'viivakoodi_pdf') {
   echo file_get_contents($pdf_tiedosto);
   die;
 }
-
-js_popup();
 
 $errors = array();
 
@@ -314,7 +311,6 @@ if (isset($task) and $task == 'purkuraportti') {
   extract($purkuraportti_parametrit);
   $pdf_data = serialize($purkuraportti_parametrit);
   $pdf_data = base64_encode($pdf_data);
-
 }
 
 if (isset($task) and $task == 'varaustaydennys') {
@@ -503,7 +499,6 @@ if (isset($task) and $task == 'tullisiirto') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND asiakkaan_tilausnumero = '{$tulonumero}'";
     pupe_query($query);
-
   }
 
   $query = "SELECT toimaika, luontiaika
@@ -546,19 +541,17 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     }
 
     if (empty($tiedot['maara1'])) {
-      $errors[$key]["maara"] = t("Syˆt‰ m‰‰ra");
+      $errors[$key]["maara1"] = t("Syˆt‰ m‰‰ra");
     }
-
-    if (!is_numeric($tiedot['maara1'])) {
-      $errors[$key]["maara"] = t("Tarkista m‰‰ra");
+    elseif (!is_numeric($tiedot['maara1'])) {
+      $errors[$key]["maara1"] = t("Tarkista m‰‰ra");
     }
 
     if (empty($tiedot['maara2'])) {
-      $errors[$key]["maara"] = t("Syˆt‰ m‰‰ra");
+      $errors[$key]["maara2"] = t("Syˆt‰ pakkausm‰‰r‰");
     }
-
-    if (!is_numeric($tiedot['maara2'])) {
-      $errors[$key]["maara"] = t("Tarkista m‰‰ra");
+    elseif (!is_numeric($tiedot['maara2'])) {
+      $errors[$key]["maara2"] = t("Tarkista pakkausm‰‰r‰");
     }
 
     if (empty($tiedot['nettopaino'])) {
@@ -566,7 +559,13 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     }
     else {
       $tiedot['nettopaino'] = str_replace(',', '.', $tiedot['nettopaino']);
-      $tiedot['nettopaino'] = number_format($tiedot['nettopaino'], 4);
+
+      if (!is_numeric($tiedot['nettopaino'])) {
+        $errors[$key]["nettopaino"] = t("Tarkista nettopaino");
+      }
+      else {
+        $tuotteet[$key]['nettopaino'] = $tiedot['nettopaino'];
+      }
     }
 
     if (empty($tiedot['bruttopaino'])) {
@@ -574,7 +573,13 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     }
     else {
       $tiedot['bruttopaino'] = str_replace(',', '.', $tiedot['bruttopaino']);
-      $tiedot['bruttopaino'] = number_format($tiedot['bruttopaino'], 4);
+
+      if (!is_numeric($tiedot['bruttopaino'])) {
+        $errors[$key]["bruttopaino"] = t("Tarkista bruttopaino");
+      }
+      else {
+        $tuotteet[$key]['bruttopaino'] = $tiedot['bruttopaino'];
+      }
     }
 
     if (empty($tiedot['tilavuus'])) {
@@ -582,22 +587,36 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     }
     else {
       $tiedot['tilavuus'] = str_replace(',', '.', $tiedot['tilavuus']);
-      $tiedot['tilavuus'] = number_format($tiedot['tilavuus'], 4);
+
+      if (!is_numeric($tiedot['tilavuus'])) {
+        $errors[$key]["tilavuus"] = t("Tarkista tilavuus");
+      }
+      else {
+        $tuotteet[$key]['tilavuus'] = $tiedot['tilavuus'];
+      }
     }
 
     if (empty($tiedot['pakkauslaji'])) {
       $errors[$key]["pakkauslaji"] = t("Syˆt‰ pakkauslaji");
     }
     elseif (strlen($tiedot['pakkauslaji']) > 6) {
-      $errors[$key]["tilavuus"] = t("Liian pitk‰ pakkauslaji ");
+      $errors[$key]["pakkauslaji"] = t("Liian pitk‰ pakkauslaji");
+    }
+
+    if (strlen($tiedot['lisatieto']) > 250) {
+      $errors[$key]["lisatieto"] = t("Maksimimerkkim‰‰r‰: 250");
     }
   }
 
   if (count($errors) > 0) {
     $view = 'tuotetiedot';
 
-    if ($task == 'perusta' or $task == 'tallenna') {
+    if ($task == 'perusta') {
       $otsikko = t("T‰ydenn‰ tulotiedot");
+    }
+    elseif ($task == 'tallenna') {
+      $otsikko = t("T‰ydenn‰ tulotiedot");
+      $task = 'muokkaus';
     }
     else {
       $otsikko = t("Tulon tuotetiedot");
@@ -715,15 +734,10 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
 
     foreach ($tuotteet as $key => $tiedot) {
 
-      if ($tiedot['tyyppi'] == 'vanha' and $tiedot['muutosmittari'] == 'X') {
+      if ($tiedot['tyyppi'] == 'vanha') {
 
-        if (!in_array($tiedot['tuotetunnus'], $paivitetyt_tuotteet)) {
-          paivita_tullivarastointituote($tiedot);
-          $paivitetyt_tuotteet[] = $tiedot['tuotetunnus'];
-        }
-
+        paivita_tullivarastointituote($tiedot);
         paivita_tullivarastointirivi($tiedot);
-
       }
       elseif ($tiedot['tyyppi'] == 'uusi') {
 
@@ -755,7 +769,6 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     } //muutetut vanhat sek‰ uudet tuotteet k‰yty l‰pi
   header("Location: tullivarastointi.php");
   }
-  unset($task);
 }
 
 if (!isset($task)) {
@@ -854,6 +867,23 @@ if (isset($view) and $view == "tuotetiedot") {
   </tr>
   </table>";
 
+  if (isset($tuotteet)) {
+
+    echo "
+    <script type='text/javascript'>
+    $( document ).ready(function() {
+
+      $('input').attr('autocomplete','off');
+
+      $('.tuote').bind('keyup change', function(e) {
+        var muutosluokka = $(this).attr('class').split(' ')[1];
+        $('.'+muutosluokka).val($(this).val());
+      });
+
+    });
+    </script>";
+  }
+
   $laskuri = 1;
   while ($laskuri <= $tuoteryhmien_maara) {
 
@@ -893,6 +923,10 @@ if (isset($view) and $view == "tuotetiedot") {
 
     $hylly = substr($hyllyalue, 1) . $hyllynro;
 
+    if (empty($hylly)) {
+      $hylly = '&mdash;';
+    }
+
     if ($task != 'tarkastelu') {
 
       echo "
@@ -907,18 +941,24 @@ if (isset($view) and $view == "tuotetiedot") {
     }
 
     echo "
-    <table id='tuotetaulu{$laskuri}' class='tuotetaulu' style='display:inline-block; margin:10px 10px 0 0;'>
-      <tr>
-        <th colspan='2'>" . t("Tuote") ." {$laskuri} {$hylly}</th>
-        <td class='back error'></td>
-      </tr>
+    <table id='tuotetaulu{$laskuri}' class='tuotetaulu' style='display:inline-block; margin:10px 10px 0 0;'>";
 
+    if (!isset($tuotteet)) {
+
+      echo "
+      <tr>
+        <th colspan='2'>" . t("Tuote") ." {$laskuri}</th>
+        <td class='back error'></td>
+      </tr>";
+     }
+
+     echo "
       <tr>
         <th>" . t("Nimitys") ."</th>
         <td>";
 
     if ($task != 'tarkastelu') {
-      echo "<input type='text' name='tuotteet[{$laskuri}][nimitys]' value='{$nimitys}' />";
+      echo "<input type='text' class='tuote t1{$tuotetunnus}' name='tuotteet[{$laskuri}][nimitys]' value='{$nimitys}' />";
     }
     else {
       echo $nimitys;
@@ -934,7 +974,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <td>";
 
     if ($task != 'tarkastelu') {
-      echo "<input type='text' name='tuotteet[{$laskuri}][malli]' value='{$malli}' />";
+      echo "<input type='text' class='tuote t2{$tuotetunnus}' name='tuotteet[{$laskuri}][malli]' value='{$malli}' />";
     }
     else {
       echo $malli;
@@ -943,14 +983,41 @@ if (isset($view) and $view == "tuotetiedot") {
     echo "
       </td>
         <td class='back error'>{$errors[$laskuri]['malli']}</td>
-      </tr>
+      </tr>";
 
+      if (isset($tuotteet)) {
+        echo "
+        <tr>
+          <th>" . t("Varastopaikka") ."</th>
+          <td>{$hylly}</td>
+          <td class='back'></td>
+        </tr>";
+      }
+
+      echo "
+        <tr>
+          <th>" . t("Kpl.") ."</th>
+          <td>";
+
+      if ($task != 'tarkastelu') {
+        echo "<input type='text' name='tuotteet[{$laskuri}][maara1]' value='{$maara1}' />";
+      }
+      else {
+        echo $maara1;
+      }
+
+      echo "
+        </td>
+          <td class='back error'>{$errors[$laskuri]['maara1']}</td>
+        </tr>";
+
+    echo "
       <tr>
         <th>" . t("Pakkauslaji") ."</th>
         <td>";
 
     if ($task != 'tarkastelu') {
-      echo "<input type='text' name='tuotteet[{$laskuri}][pakkauslaji]' value='{$pakkauslaji}' />";
+      echo "<input type='text' class='tuote t3{$tuotetunnus}' name='tuotteet[{$laskuri}][pakkauslaji]' value='{$pakkauslaji}' />";
     }
     else {
       echo $pakkauslaji;
@@ -962,25 +1029,21 @@ if (isset($view) and $view == "tuotetiedot") {
       </tr>
 
       <tr>
-        <th>" . t("M‰‰r‰") ."</th>
+        <th>" . t("M‰‰r‰ pakkauksessa") ."</th>
         <td>";
 
     if ($task != 'tarkastelu') {
 
       echo "
-        <input type='text' style='width:45px;' name='tuotteet[{$laskuri}][maara1]' value='$maara1' />
-        &nbsp;X&nbsp;
-        <input type='text' style='width:45px;' name='tuotteet[{$laskuri}][maara2]' value='$maara2' />
-        <img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='{$laskuri}'>
-        <div id='div_{$laskuri}' class='popup'>".t("Pakkauksia X kpl.")."</div>";
+        <input type='text' class='tuote t4{$tuotetunnus}' style='width:45px;' name='tuotteet[{$laskuri}][maara2]' value='$maara2' />";
     }
     else {
-      echo $maara1 . ' X ' . $maara2;
+      echo $maara2;
     }
 
     echo "
       </td>
-        <td class='back error'>{$errors[$laskuri]['maara']}</td>
+        <td class='back error'>{$errors[$laskuri]['maara2']}</td>
       </tr>
 
       <tr>
@@ -988,7 +1051,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <td>";
 
         if ($task != 'tarkastelu') {
-          echo "<input type='text' name='tuotteet[{$laskuri}][nettopaino]' value='{$nettopaino}' />";
+          echo "<input type='text' class='tuote t5{$tuotetunnus}' name='tuotteet[{$laskuri}][nettopaino]' value='{$nettopaino}' />";
         }
         else {
           echo $nettopaino;
@@ -1004,7 +1067,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <td>";
 
         if ($task != 'tarkastelu') {
-          echo "<input type='text' name='tuotteet[{$laskuri}][bruttopaino]' value='{$bruttopaino}' />";
+          echo "<input type='text' class='tuote t6{$tuotetunnus}' name='tuotteet[{$laskuri}][bruttopaino]' value='{$bruttopaino}' />";
         }
         else {
           echo $bruttopaino;
@@ -1020,7 +1083,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <td>";
 
         if ($task != 'tarkastelu') {
-          echo "<input type='text' name='tuotteet[{$laskuri}][tilavuus]' value='{$tilavuus}' />";
+          echo "<input type='text' class='tuote t7{$tuotetunnus}' name='tuotteet[{$laskuri}][tilavuus]' value='{$tilavuus}' />";
         }
         else {
           echo $tilavuus;
@@ -1036,7 +1099,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <td>";
 
         if ($task != 'tarkastelu') {
-          echo "<textarea name='tuotteet[{$laskuri}][lisatieto]'>{$lisatieto}</textarea>";
+          echo "<textarea class='tuote t8{$tuotetunnus}' name='tuotteet[{$laskuri}][lisatieto]'>{$lisatieto}</textarea>";
         }
         else {
           echo $lisatieto;
@@ -1052,17 +1115,7 @@ if (isset($view) and $view == "tuotetiedot") {
     $laskuri++;
   }
 
-  if ($task != 'tarkastelu') {
-
-    echo "
-    <script type='text/javascript'>
-
-      $('.tuotetaulu :input').change(function() {
-        var taulu_id = $(this).closest('.tuotetaulu').prop('id').substring(10);
-        $('#mm'+taulu_id).val('X');
-      });
-
-    </script>";
+  if ($task != 'tarkastelu' ) {
 
     if (isset($varaustaydennys)) {
       echo "<br><br><input type='submit' value='". t("Lisaa tuotteet") ."' /></form>&nbsp;";
@@ -1294,13 +1347,12 @@ if (isset($view) and $view == "perus") {
     echo "</font><br><br>";
   }
 
-  /*
+
   echo "
     <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='nollaus' />
     <input type='submit' value='". t("Nollaa") . "' />
     </form>";
-*/
 
   echo "
     <form action='tullivarastointi.php' method='post'>
@@ -1400,6 +1452,25 @@ if (isset($view) and $view == "perus") {
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastotunnus'] = $tulo['varastotunnus'];
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
     }
+
+    echo "
+    <script type='text/javascript'>
+
+      $( document ).ready(function() {
+
+        $('.tpselect').change(function() {
+          var tunnus = $(this).attr('id');
+          var valittu = $(this).val();
+          var nappitunnus = tunnus+'_nappi';
+          $('.nappi').prop('disabled', true);
+          $('.tpselect').val('.');
+          $(this).val(valittu);
+          $('#'+nappitunnus).prop('disabled', false);
+        });
+
+      });
+
+    </script>";
 
     echo "<table>";
     echo "<tr>";
@@ -1556,20 +1627,6 @@ if (isset($view) and $view == "perus") {
     }
     echo "</table>";
 
-    echo "
-    <script type='text/javascript'>
-
-      $('.tpselect').change(function() {
-        var tunnus = $(this).attr('id');
-        var valittu = $(this).val();
-        var nappitunnus = tunnus+'_nappi';
-        $('.nappi').prop('disabled', true);
-        $('.tpselect').val('.');
-        $(this).val(valittu);
-        $('#'+nappitunnus).prop('disabled', false);
-      });
-
-    </script>";
   }
 }
 
@@ -1769,7 +1826,6 @@ if (isset($view) and $view == "eusiirto") {
     <input type='hidden' name='pdf_data' value='{$pdf_data}' />
     <input type='submit' value='" . t("Siirr‰") . "' />
     </form>";
-
 }
 
 require "inc/footer.inc";

@@ -180,7 +180,7 @@ if ($tee == 'listat') {
   $query = "SELECT otunnus as lista
             FROM inventointilistarivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND aika IS NOT NULL
+            AND tila = 'A'
             GROUP BY 1
             ORDER BY 1";
   $result = pupe_query($query);

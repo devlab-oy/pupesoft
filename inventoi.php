@@ -1453,11 +1453,7 @@ if ($tee == 'INVENTOI') {
     $query = "SELECT {$select}
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
-                AND inventointilistarivi.tuoteno = inventointilista.tuoteno
-                AND inventointilistarivi.hyllyalue = inventointilista.hyllyalue
-                AND inventointilistarivi.hyllynro = inventointilista.hyllynro
-                AND inventointilistarivi.hyllyvali = inventointilista.hyllyvali
-                AND inventointilistarivi.hyllytaso = inventointilista.hyllytaso)
+                AND inventointilistarivi.otunnus = inventointilista.tunnus)
               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
                 AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
                 AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue

@@ -972,7 +972,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   if ($limit == "") {
     $rajaus = "LIMIT 50";
   }
-  else {
+  elseif ($tee_excel == "") {
     $rajaus  = "";
   }
 }
@@ -3018,6 +3018,8 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='etsi' value='{$etsi}'>";
       echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
+      echo "<input type='hidden' name='limit' value='NO'>";
+      echo "<input type='hidden' name='rajaus' value='{$rajaus}'>";
       echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
       echo "<input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>";
       echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";

@@ -969,7 +969,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 
-  if ($limit == "" ) {
+  if ($limit == "") {
     $rajaus = "LIMIT 50";
   }
   else {

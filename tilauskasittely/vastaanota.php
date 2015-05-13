@@ -312,7 +312,7 @@ if ($tee == 'paikat') {
           $ptunnus = $rivivarasto[$tun];
         }
 
-        $query = "SELECT *, inventointilistarivi.aika as inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
@@ -326,7 +326,7 @@ if ($tee == 'paikat') {
                   and tuotepaikat.tuoteno = '{$tilausrivirow['tuoteno']}'";
       }
       else {
-        $query = "SELECT *, inventointilistarivi.aika as inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
@@ -410,7 +410,7 @@ if ($tee == 'paikat') {
       else {
         $paikkarow = mysql_fetch_assoc($result);
 
-        if ($paikkarow["inventointilista_aika"] !== null) {
+        if ($paikkarow["inventointilistatunnus"] !== null) {
           if ($echotaanko) {
             echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
           }
@@ -453,7 +453,7 @@ if ($tee == 'paikat') {
     }
 
     //haetaan antavan varastopaikan tunnus
-    $query = "SELECT inventointilistarivi.aika
+    $query = "SELECT inventointilistarivi.tunnus
               FROM inventointilistarivi
               WHERE inventointilistarivi.yhtio   = '{$kukarow['yhtio']}'
               and inventointilistarivi.hyllyalue = '{$tilausrivirow['hyllyalue']}'
@@ -465,7 +465,7 @@ if ($tee == 'paikat') {
     $presult = pupe_query($query);
     $prow = mysql_fetch_assoc($presult);
 
-    if ($prow["aika"] !== null) {
+    if ($prow["tunnus"] !== null) {
       if ($echotaanko) {
         echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
       }

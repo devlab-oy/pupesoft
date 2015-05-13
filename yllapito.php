@@ -26,6 +26,7 @@ $psx_ohjelmat = array(
   "taso" => "{$palvelin2}pupenext/sum_levels",
   "kirjoittimet" => "{$palvelin2}pupenext/printers",
   "tilikaudet" => "{$palvelin2}pupenext/fiscal_years",
+  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details"
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {

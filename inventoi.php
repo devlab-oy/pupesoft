@@ -570,7 +570,7 @@ if ($tee == 'VALMIS') {
         if (mysql_num_rows($result) == 1 and $virhe != 1) {
           $row = mysql_fetch_assoc($result);
 
-          if (($lista != '' and $row["inventointilista_aika"] !== null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
+          if (($lista != '' and $row["inventointilista_aika"] === null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
 
             if ($validi_kasinsyotetty_inventointipaivamaara) {
               $row['inventointilista_aika'] = $laadittuaika;
@@ -894,7 +894,7 @@ if ($tee == 'VALMIS') {
                         aika = now(),
                         tila = 'I'
                         WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$_chk_row['otunnus']}'";
+                        AND tunnus = '{$_chk_row['tunnus']}'";
               pupe_query($query);
             }
 
@@ -1624,7 +1624,7 @@ if ($tee == 'INVENTOI') {
       $sarjares = pupe_query($query);
     }
 
-    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] !== null)) {
+    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] === null)) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
@@ -1792,7 +1792,7 @@ if ($tee == 'INVENTOI') {
       }
 
     }
-    elseif ($tuoterow["inventointilista_aika"] === null and $tuoterow["inventointilista"] == $lista) {
+    elseif ($tuoterow["inventointilista_aika"] !== null and $tuoterow["inventointilista"] == $lista) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
@@ -1861,7 +1861,7 @@ if ($tee == 'INVENTOI') {
     else {
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
-      echo "<td valign='top'>".sprintf(t("Tätä tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
+      echo "<td colspan='5' valign='top'>".sprintf(t("Tätä tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
       echo "</tr>";
     }
   }

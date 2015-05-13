@@ -1187,7 +1187,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $query = "INSERT INTO inventointilistarivi SET
                   yhtio = '{$kukarow['yhtio']}',
                   tila = 'A',
-                  aika = '{$listaaika}',
+                  aika = null,
                   otunnus = '{$listanro}',
                   tuoteno = '{$tuoterow['tuoteno']}',
                   hyllyalue = '{$tuoterow['hyllyalue']}',

@@ -58,7 +58,7 @@ if ($lopeta_body) {
   echo "
     <script>
       $(document).ready(function() {
-        window.parent.document.title = \"Pupesoft: \"+$('font.head').first().text().replace(\":\", \"\");
+        top.document.title = \"Pupesoft: \"+$('font.head').first().text().replace(\":\", \"\");
       });
     </script>";
 

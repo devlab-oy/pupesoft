@@ -97,17 +97,22 @@ while ($row = mysql_fetch_assoc($res)) {
 
     if ($row['inventointilista_aika'] == '0000-00-00 00:00:00') {
       $_tila = "I";
+      $row['luontiaika'] = $row['inventointiaika'];
+      $row['muutospvm'] = $row['inventointiaika'];
+      $row['inventointilista_aika'] = "'".$row['inventointiaika']."'";
     }
     else {
       $_tila = "A";
-      $row['inventointilista_aika'] = null;
+      $row['luontiaika'] = $row['inventointilista_aika'];
+      $row['muutospvm'] = $row['inventointilista_aika'];
+      $row['inventointilista_aika'] = "null";
     }
 
     $query = "INSERT INTO inventointilistarivi SET
               yhtio = '{$yhtio}',
               otunnus = '{$_id}',
               tila = '{$_tila}',
-              aika = '{$row['inventointilista_aika']}',
+              aika = {$row['inventointilista_aika']},
               tuoteno = '{$row['tuoteno']}',
               hyllyalue = '{$row['hyllyalue']}',
               hyllynro = '{$row['hyllynro']}',

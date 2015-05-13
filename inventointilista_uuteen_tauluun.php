@@ -92,6 +92,7 @@ while ($row = mysql_fetch_assoc($res)) {
     }
     else {
       $_tila = "A";
+      $row['inventointilista_aika'] = null;
     }
 
     $query = "INSERT INTO inventointilistarivi SET

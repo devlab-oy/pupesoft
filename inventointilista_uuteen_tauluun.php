@@ -95,7 +95,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
   if (mysql_num_rows($_row_res) == 0) {
 
-    if ($row['inventointilista_aika'] != '0000-00-00 00:00:00') {
+    if ($row['inventointilista_aika'] == '0000-00-00 00:00:00') {
       $_tila = "I";
     }
     else {

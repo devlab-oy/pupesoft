@@ -570,7 +570,7 @@ if ($tee == 'VALMIS') {
         if (mysql_num_rows($result) == 1 and $virhe != 1) {
           $row = mysql_fetch_assoc($result);
 
-          if (($lista != '' and $row["inventointilista_aika"] === null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
+          if (($lista != '' and $row["inventointilista_aika"] !== null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
 
             if ($validi_kasinsyotetty_inventointipaivamaara) {
               $row['inventointilista_aika'] = $laadittuaika;

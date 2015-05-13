@@ -117,6 +117,7 @@ while ($row = mysql_fetch_assoc($res)) {
               laatija = '{$row['laatija']}',
               luontiaika = '{$row['luontiaika']}',
               muutospvm = '{$row['muutospvm']}'";
+    pupe_query($query);
   }
 }
 

@@ -3018,7 +3018,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='etsi' value='{$etsi}'>";
       echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
-      echo "<input type='hidden' name='limit' value='NO'>";
+      echo "<input type='hidden' name='limit' value='{$limit}'>";
       if(!empty($rajaus)) {
         $_rajaus = '1';
       }

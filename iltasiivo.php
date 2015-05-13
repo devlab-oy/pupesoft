@@ -709,7 +709,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.saldo                     = 0
             AND tuotepaikat.oletus                    = ''
             AND tuotepaikat.poistettava              != 'D'
-            AND inventointilistarivi.aika IS NULL";
+            AND inventointilistarivi.tunnus IS NULL";
   $tuotepaikat = pupe_query($query);
 
   // Poistetaan löydetyt rivit ja tehdään tapahtuma

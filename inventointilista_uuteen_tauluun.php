@@ -46,10 +46,18 @@ if (mysql_num_rows($kukares) != 1) {
 
 $kukarow = mysql_fetch_assoc($kukares);
 
+$query = "SELECT group_concat(distinct inventointilista) inventointilistat
+          FROM tuotepaikat
+          WHERE yhtio = '{$yhtio}'
+          AND inventointilista != 0
+          AND inventointilista_aika != '0000-00-00 00:00:00'";
+$res = pupe_query($query);
+$listat_row = mysql_fetch_assoc($res);
+
 $query = "SELECT *
           FROM tuotepaikat
           WHERE yhtio = '{$yhtio}'
-          AND inventointilista != 0";
+          AND inventointilista in ({$listat_row['inventointilistat']})";
 $res = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($res)) {

@@ -298,7 +298,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                FROM inventointilista
                JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
                   AND inventointilistarivi.otunnus = inventointilista.tunnus)
-               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
+               JOIN tuote on (tuote.yhtio=inventointilistarivi.yhtio and tuote.tuoteno=inventointilistarivi.tuoteno)
                JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
                 AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
                 AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue

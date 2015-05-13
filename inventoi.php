@@ -1624,7 +1624,7 @@ if ($tee == 'INVENTOI') {
       $sarjares = pupe_query($query);
     }
 
-    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] === null)) {
+    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] !== null)) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
@@ -1792,7 +1792,7 @@ if ($tee == 'INVENTOI') {
       }
 
     }
-    elseif ($tuoterow["inventointilista_aika"] !== null and $tuoterow["inventointilista"] == $lista) {
+    elseif ($tuoterow["inventointilista_aika"] === null and $tuoterow["inventointilista"] == $lista) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');

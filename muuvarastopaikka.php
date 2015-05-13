@@ -893,7 +893,7 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka LEFT JOIN
   $query = "SELECT tuotepaikat.*,
-            inventointilistarivi.aika as inventointilista_aika,
+            inventointilistarivi.tunnus as inventointilistatunnus,
             varastopaikat.nimitys,
             if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
@@ -923,7 +923,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] !== null) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";
@@ -944,7 +944,7 @@ if ($tee == 'M') {
   // Saldot per varastopaikka JOIN
   $query = "SELECT tuotepaikat.*,
             varastopaikat.nimitys,
-            inventointilistarivi.aika as inventointilista_aika,
+            inventointilistarivi.tunnus as inventointilistatunnus,
             if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
             FROM tuotepaikat
@@ -970,7 +970,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] !== null) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";

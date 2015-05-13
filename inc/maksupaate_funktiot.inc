@@ -6,7 +6,7 @@ function hae_maksutapahtumat($tilausnumero) {
   $query = "SELECT *
             FROM maksupaatetapahtumat
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tilausnumero IN ({$tilausnumero})";
+            AND tilausnumero = {$tilausnumero}";
 
   $result = pupe_query($query);
 

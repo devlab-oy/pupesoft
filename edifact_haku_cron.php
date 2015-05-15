@@ -73,7 +73,7 @@ foreach ($iftstat as $iftsta) {
   if (ftp_get($yhteys, $lokaali_file, $iftsta, FTP_ASCII)) {
     $edi_data = file_get_contents($lokaali_file);
     kasittele_iftsta($edi_data);
-    //ftp_delete($yhteys, $iftsta);
+    ftp_delete($yhteys, $iftsta);
   }
 }
 
@@ -84,7 +84,7 @@ foreach ($rahtikirjat as $rahtikirja) {
   if (ftp_get($yhteys, $lokaali_file, $rahtikirja, FTP_ASCII)) {
     $edi_data = file_get_contents($lokaali_file);
     kasittele_rahtikirjasanoma($edi_data);
-    //ftp_delete($yhteys, $rahtikirja);
+    ftp_delete($yhteys, $rahtikirja);
   }
 }
 
@@ -95,7 +95,7 @@ foreach ($bookkaukset as $bookkaus) {
   if (ftp_get($yhteys, $lokaali_file, $bookkaus, FTP_ASCII)) {
     $edi_data = file_get_contents($lokaali_file);
     kasittele_bookkaussanoma($edi_data);
-    //ftp_delete($yhteys, $bookkaus);
+    ftp_delete($yhteys, $bookkaus);
   }
 }
 

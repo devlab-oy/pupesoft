@@ -3665,6 +3665,17 @@ if (isset($jatka)) {
     $keraysvkopva  = "";
   }
 
+  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+    //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+    //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
+      $toimpp = $kerpp;
+      $toimkk = $kerkk;
+      $toimvv = $kervv;
+      $toimvko = $keraysvko;
+    }
+  }
+
   if ($kukarow["kesken"] == 0) {
     $query = "INSERT into ";
     $postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
@@ -3959,17 +3970,6 @@ if (isset($jatka)) {
 
   if ($apuval == $valkoodi) {
     $kurssi = $apukurssi;
-  }
-
-  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
-    //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
-    //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
-      $toimpp = $kerpp;
-      $toimkk = $kerkk;
-      $toimvv = $kervv;
-      $toimvko = $keraysvko;
-    }
   }
 
   if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {

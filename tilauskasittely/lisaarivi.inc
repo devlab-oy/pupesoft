@@ -57,13 +57,13 @@ if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-  if (empty($tuotteen_oletuspaikka) or ($laskurow['tilaustyyppi'] == 'M' and $kohde_taso == $laskurow['liitostunnus'])) {
+  if (empty($tuotteen_oletuspaikka) or ($laskurow['tilaustyyppi'] == 'M' and $kohde_taso != $laskurow['liitostunnus'])) {
     // Kun kyseessä myyntitili, niin hyllytaso = laskun liitostunnus
     if ($laskurow['tilaustyyppi'] == 'M') {
-      $kohde_taso   = $laskurow['liitostunnus'];
+      $kohde_taso = $laskurow['liitostunnus'];
     }
     else {
-      $kohde_taso   = '';
+      $kohde_taso = '';
     }
 
     //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
@@ -2917,6 +2917,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 FROM tuotepaikat
                 where tuotepaikat.yhtio = '$kukarow[yhtio]'
                 and tuotepaikat.tuoteno = '$trow[tuoteno]'
+                AND tuotepaikat.hyllyalue != '!!M'
                 ORDER BY tuotepaikat.oletus DESC";
       $result = pupe_query($query);
 

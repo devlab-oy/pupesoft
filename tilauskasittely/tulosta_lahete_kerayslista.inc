@@ -905,7 +905,7 @@ if (!function_exists('rivi_kerayslista')) {
         $kohderow   = mysql_fetch_assoc($kohderesult);
         $varastopaikkakohde = '';
 
-        if ($laskurow['varasto'] == $laskurow['clearing'] and $kohderow['kohde_hyllyalue'] != '' and $kohderow['kohde_hyllynro'] != '' and $kohderow['kohde_hyllyvali'] != '' and $kohderow['kohde_hyllytaso'] != '') {
+        if (($laskurow['varasto'] == $laskurow['clearing'] or $yhtiorow['varastosiirto_kohdepaikka'] == "K") and $kohderow['kohde_hyllyalue'] != '' and $kohderow['kohde_hyllynro'] != '' and $kohderow['kohde_hyllyvali'] != '' and $kohderow['kohde_hyllytaso'] != '') {
           $varastopaikkakohde = $kohderow["kohde_hyllyalue"] . " " . $kohderow["kohde_hyllynro"] . " " . $kohderow["kohde_hyllyvali"] . " " . $kohderow["kohde_hyllytaso"];
           $row['kommentti'] .= "\n".t("Vie paikalle", $kieli)." ".$varastopaikkakohde;
         }

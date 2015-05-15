@@ -311,11 +311,11 @@ if ($toiminto == 'MUOKKAA') {
       //jos ei saa muuttaa niin disabloidaan sarjanumeron muokkauskenttä, Jos myyntirivi on
       // laskutettu niin ei muokata
       if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false or
-           $PHP_SELF == "sarjanumeroseuranta.php" or
-           strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== false or
-           $PHP_SELF == "tervetuloa.php") and
-          ($muutarow["myynti_laskaika"] == "" or $muutarow["myynti_laskaika"] == "0000-00-00" or
-           (substr($muutarow['sarjanumero'], 0, $viiva) == "PUUTTUU" or
+          $PHP_SELF == "sarjanumeroseuranta.php" or
+          strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== false or
+          $PHP_SELF == "tervetuloa.php") and
+        ($muutarow["myynti_laskaika"] == "" or $muutarow["myynti_laskaika"] == "0000-00-00" or
+          (substr($muutarow['sarjanumero'], 0, $viiva) == "PUUTTUU" or
             substr($muutarow['sarjanumero'], 0, $viiva) == t("PUUTTUU") or
             substr($muutarow['sarjanumero'], 0, $viiva) == t("PUUTTUU", $yhtiorow["kieli"])))
       ) {
@@ -427,12 +427,12 @@ if ($toiminto == 'MUOKKAA') {
                     style='width:40%;border:0px;display:block;'
                     frameborder='0'
                     src='{$palvelin2}yllapito.php" .
-                      "?toim=liitetiedostot" .
-                      "&from=yllapito" .
-                      "&haku[7]=@sarjanumeroseuranta" .
-                      "&haku[8]=@{$muutarow["tunnus"]}" .
-                      "&lukitse_avaimeen={$muutarow["tunnus"]}" .
-                      "&lukitse_laji=sarjanumeroseuranta'></iFrame>";
+        "?toim=liitetiedostot" .
+        "&from=yllapito" .
+        "&haku[7]=@sarjanumeroseuranta" .
+        "&haku[8]=@{$muutarow["tunnus"]}" .
+        "&lukitse_avaimeen={$muutarow["tunnus"]}" .
+        "&lukitse_laji=sarjanumeroseuranta'></iFrame>";
     }
     else {
       echo t("Muutettava sarjanumero on kadonnut")."!!!!<br>";
@@ -686,7 +686,6 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                 and tunnus  in ($sarjatun)";
       $sarjares = pupe_query($query);
 
-
       if ($tunnuskentta == "myyntirivitunnus" and $rivitunnus > 0) {
         // Täällä pitäisi poistaa laitetaulusta myyntirivitunnus
         $spessukveri = "SELECT *
@@ -704,14 +703,6 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                         AND tuoteno  = '{$spessurivi['tuoteno']}'
                         AND paikka   = '{$rivitunnus}'";
         pupe_query($laiteupdate);
-      }
-
-      // Poistetaan erät jotka varaa tätä erää
-      if ($sarrow["trivitunnus"] > 0 and $tunnuskentta == 'ostorivitunnus' and $from == "kohdista" and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
-        $query = "DELETE FROM sarjanumeroseuranta
-                  WHERE yhtio        = '$kukarow[yhtio]'
-                  and ostorivitunnus = '$sarrow[trivitunnus]'";
-        $sarjares = pupe_query($query);
       }
 
       if ($sarrow["kaytetty"] == 'K') {
@@ -733,10 +724,10 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       if ($tunnuskentta == "ostorivitunnus") {
         //Hanskataan sarjanumeron varastopaikkaa
         $paikkalisa = "  ,
-                hyllyalue  = '$rivirow[hyllyalue]',
+                hyllyalue = '$rivirow[hyllyalue]',
                 hyllynro  = '$rivirow[hyllynro]',
-                hyllyvali  = '$rivirow[hyllyvali]',
-                hyllytaso  = '$rivirow[hyllytaso]'";
+                hyllyvali = '$rivirow[hyllyvali]',
+                hyllytaso = '$rivirow[hyllytaso]'";
       }
       else {
         $paikkalisa = "";
@@ -1243,22 +1234,22 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
     echo "<tr>";
     echo "<td valign='top'>
             <a href='$PHP_SELF" .
-                 "?toiminto=MUOKKAA" .
-                 "&$tunnuskentta=$rivitunnus" .
-                 "&from=$from" .
-                 "&aputoim=$aputoim" .
-                 "&otunnus=$otunnus" .
-                 "&sarjatunnus=$sarjarow[tunnus]" .
-                 "&sarjanumero_haku=$sarjanumero_haku" .
-                 "&tuoteno_haku=".urlencode($tuoteno_haku)."" .
-                 "&nimitys_haku=$nimitys_haku" .
-                 "&varasto_haku=$varasto_haku" .
-                 "&ostotilaus_haku=$ostotilaus_haku" .
-                 "&myyntitilaus_haku=$myyntitilaus_haku" .
-                 "&lisatieto_haku=$lisatieto_haku" .
-                 "&muut_siirrettavat=$muut_siirrettavat'>".
-              strtoupper($sarjarow["sarjanumero"]).
-           "</a>
+      "?toiminto=MUOKKAA" .
+      "&$tunnuskentta=$rivitunnus" .
+      "&from=$from" .
+      "&aputoim=$aputoim" .
+      "&otunnus=$otunnus" .
+      "&sarjatunnus=$sarjarow[tunnus]" .
+      "&sarjanumero_haku=$sarjanumero_haku" .
+      "&tuoteno_haku=".urlencode($tuoteno_haku)."" .
+      "&nimitys_haku=$nimitys_haku" .
+      "&varasto_haku=$varasto_haku" .
+      "&ostotilaus_haku=$ostotilaus_haku" .
+      "&myyntitilaus_haku=$myyntitilaus_haku" .
+      "&lisatieto_haku=$lisatieto_haku" .
+      "&muut_siirrettavat=$muut_siirrettavat'>".
+      strtoupper($sarjarow["sarjanumero"]).
+      "</a>
             <a name='$sarjarow[sarjanumero]'></a>";
 
     if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
@@ -1485,7 +1476,7 @@ else {
 
 if ($rivirow["tyyppi"] != 'V') {
   if ($rivirow["tuoteno"] != '') {
-    echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post'>
+    echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post' class='left clear'>
         <input type='hidden' name='$tunnuskentta'     value='$rivitunnus'>
         <input type='hidden' name='from'         value='$from'>
         <input type='hidden' name='lopetus'       value='$lopetus'>
@@ -1696,7 +1687,7 @@ if ($from == "INVENTOINTI") {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
-  echo "<div class='left'>";
+  echo "<div class='left clear'>";
   require "inc/footer.inc";
   echo "</div>";
 }

@@ -42,7 +42,7 @@ $trow = mysql_fetch_assoc($result);
 $query = "SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
           GROUP_CONCAT(DISTINCT oletus_kulutili) kulutilit
           FROM yriti
-          WHERE yhtio = '{$kukarow['yhtio']}'
+          WHERE yhtio  = '{$kukarow['yhtio']}'
           AND kaytossa = ''";
 $tilit_chk_res = pupe_query($query);
 $tilit_chk_row = mysql_fetch_assoc($tilit_chk_res);
@@ -295,7 +295,15 @@ if ($kukarow['taso'] != 1) {
   //Täällä päivitetään muun tositteen pvm
   if ($tila == 'P') {
 
-    $query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp'  WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
+    // Päivitetään myyntilaskulle "popvm"-jotta me saadaan osittain käteisellä maksetut laskut
+    // näkymään käteismyynnit-raportissa oikealla päivällä vaikka mapvm on nolla
+    // Tämä siis vain jos myyntlaskun popvm oli ennestään setattu
+    $query = "UPDATE lasku
+              SET tapvm = '$vv-$kk-$pp',
+              popvm        = if (tila = 'U' and popvm > 0, '$vv-$kk-$pp', popvm)
+              WHERE tunnus = '$tunnus'
+              AND yhtio    = '$kukarow[yhtio]'
+              AND tapvm    = '$trow[tapvm]'";
     $result = pupe_query($query);
 
     $query = "LOCK table tiliointi WRITE";
@@ -532,8 +540,8 @@ if ($tila == 'maksuehto') {
   $mehres = pupe_query($query);
   $mehrow = mysql_fetch_assoc($mehres);
 
-  if ($mehrow['kassa_abspvm'] != '0000-00-00' or $mehrow["kassa_relpvm"] > 0) {
-    if ($mehrow['kassa_abspvm'] == '0000-00-00') {
+  if ($mehrow['kassa_abspvm'] !== null or $mehrow["kassa_relpvm"] > 0) {
+    if ($mehrow['kassa_abspvm'] === null) {
       $kassa_erapvm = "adddate(tapvm, interval $mehrow[kassa_relpvm] day)";
     }
     else {
@@ -549,7 +557,7 @@ if ($tila == 'maksuehto') {
     $kassa_loppusumma_valuutassa = 0;
   }
 
-  if ($mehrow['abs_pvm'] == '0000-00-00') {
+  if ($mehrow['abs_pvm'] === null) {
     $uerapvm = "adddate(tapvm, interval $mehrow[rel_pvm] day)";
   }
   else {
@@ -1973,7 +1981,7 @@ if ($tila == '') {
   // Lasku on suoritettu
   if ((($trow['tila'] == 'Y') or ($trow['tila'] == 'U')) and ($trow['mapvm'] != '0000-00-00')) {
     if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
-      $pvm=erottele($trow['mapvm']);
+      $pvm = erottele($trow['mapvm']);
       echo "<form method='post'>
           <input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
         <input type = 'hidden' name='tila' value='S'>

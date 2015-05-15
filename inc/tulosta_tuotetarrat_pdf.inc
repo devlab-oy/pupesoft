@@ -85,11 +85,27 @@ for ($i = 1; $i < $kappalemaara; $i++) {
     $pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
   }
 
-  if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== FALSE) {
-    $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
+  if (isset($viivakoodityyppi) and $viivakoodityyppi == "viivakoodi") {
+    if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
+      $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
+    }
+    else {
+      $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");
+    }
   }
   else {
-    $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");
+    $qr_params = array(
+      "format" => "jpg",
+      "size" => 10,
+      "height" => 400
+    );
+
+    if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
+      $data = qr_koodi($eankoodirow['eankoodi'], $qr_params);
+    }
+    else {
+      $data = qr_koodi($eankoodirow[$koodi], $qr_params);
+    }
   }
 
   $image = $pdf->jfif_embed($data);

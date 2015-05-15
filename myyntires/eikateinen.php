@@ -194,15 +194,15 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
   }
   else {
     // korjaillaan eräpäivät ja kassa-alet
-    if ($params['mehtorow']['abs_pvm'] == '0000-00-00') {
+    if ($params['mehtorow']['abs_pvm'] === null) {
       $erapvm = "adddate('{$params['laskurow']['tapvm']}', interval {$params['mehtorow']['rel_pvm']} day)";
     }
     else {
       $erapvm = "'{$params['mehtorow']['abs_pvm']}'";
     }
 
-    if ($params['mehtorow']['kassa_abspvm'] != '0000-00-00' or $params['mehtorow']["kassa_relpvm"] > 0) {
-      if ($params['mehtorow']['kassa_abspvm'] == '0000-00-00') {
+    if ($params['mehtorow']['kassa_abspvm'] !== null or $params['mehtorow']["kassa_relpvm"] > 0) {
+      if ($params['mehtorow']['kassa_abspvm'] === null) {
         $kassa_erapvm = "adddate('{$params['laskurow']['tapvm']}', interval {$params['mehtorow']['kassa_relpvm']} day)";
       }
       else {

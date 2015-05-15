@@ -238,6 +238,10 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TYOM_PRIORIT")      $ulos .= "<option value='TYOM_PRIORIT' $avain_sel[TYOM_PRIORIT]>      ".t("Työmääräysten prioriteetti")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
+  if ($lukitse_laji == "") $ulos .= "<optgroup label='" . t("Reseptien avainsanat") . "'>";
+  if ($lukitse_laji == "" or $lukitse_laji == "RESEPTI_KENTAT") $ulos .= "<option value='RESEPTI_KENTAT' $avain_sel[RESEPTI_KENTAT]>" . t("Reseptien kentät") . "</option>";
+  if ($lukitse_laji == "") $ulos .= "</optgroup>";
+
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "KT")         $ulos .= "<option value='KT' $avain_sel[KT]>                ".t("Kauppatapahtuman luonne")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TULLI")       $ulos .= "<option value='TULLI' $avain_sel[TULLI]>              ".t("Poistumistoimipaikka")."</option>";
@@ -1193,5 +1197,30 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selitetark) {
   }
 
   $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+if ($_selite and $avain_sel["RESEPTI_KENTAT"] == "SELECTED") {
+  $kentat = array("piirustusnumero", "osanumero", "positiokentta");
+
+  $resepti_kentat_result = t_avainsana("RESEPTI_KENTAT");
+
+  while ($resepti_kentta = mysql_fetch_assoc($resepti_kentat_result)) {
+    if (in_array($resepti_kentta["selite"], $kentat) and $trow[$i] != $resepti_kentta["selite"]) {
+      $key = array_search($resepti_kentta["selite"], $kentat);
+      unset($kentat[$key]);
+    }
+  }
+
+  $ulos = "<td>";
+  $ulos .= "<select name='{$nimi}'" . js_alasvetoMaxWidth($nimi, 300) . ">";
+
+  foreach ($kentat as $kentta) {
+    $ulos .= "<option value='{$kentta}'>" . t(ucfirst($kentta)) . "</option>";
+  }
+
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+
   $jatko = 0;
 }

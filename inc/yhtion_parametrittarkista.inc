@@ -95,21 +95,6 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
-    if ($fieldname == "maksuehto_tuotenumero") {
-
-      $tuote = trim($t[$i]);
-
-      $query = "SELECT *
-                from maksuehto
-                where yhtio             = '$kukarow[yhtio]'
-                and summanjakoprososa2 != 0";
-      $xyresult = pupe_query($query);
-
-      if (mysql_num_rows($xyresult) != 0 and $tuote=='') {
-        $virhe[$i] = t("Yhtiölla on moniehto-maksuehtoja, maksuehto_tuotenumero on syötettävä!");
-      }
-    }
-
     if ($fieldname == "myynnin_alekentat_muokkaus") {
       if (count($t[$i]) > 0) {
         if (count($t[$i]) == 1 and $t[$i][0] == 'default') {

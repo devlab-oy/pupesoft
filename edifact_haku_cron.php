@@ -51,48 +51,52 @@ $bookkaukset = array();
 $rahtikirjat = array();
 $iftstat = array();
 
-$nyt_miinus_15min = time() - 900;
-
 foreach ($files as $file) {
 
-  if (ftp_mdtm($yhteys, $file) > $nyt_miinus_15min) {
+  if (substr($file, -3) == 'IFF') {
+    $bookkaukset[] = $file;
+  }
 
-    if (substr($file, -3) == 'IFF') {
-      $bookkaukset[] = $file;
-    }
+  if (substr($file, -3) == 'DAD') {
+    $rahtikirjat[] = $file;
+  }
 
-    if (substr($file, -3) == 'DAD') {
-      $rahtikirjat[] = $file;
-    }
+  if (substr($file, -3) == 'IFS') {
+    $iftstat[] = $file;
+  }
+}
 
-    if (substr($file, -3) == 'IFS') {
-      $iftstat[] = $file;
-    }
+foreach ($iftstat as $iftsta) {
+
+  $lokaali_file =  dirname(__FILE__) . "/datain/lue-data-{$iftsta}";
+
+  if (ftp_get($yhteys, $lokaali_file, $iftsta, FTP_ASCII)) {
+    $edi_data = file_get_contents($lokaali_file);
+    kasittele_iftsta($edi_data);
+    //ftp_delete($yhteys, $iftsta);
+  }
+}
+
+foreach ($rahtikirjat as $rahtikirja) {
+
+  $lokaali_file =  dirname(__FILE__) . "/datain/lue-data-{$rahtikirja}";
+
+  if (ftp_get($yhteys, $lokaali_file, $rahtikirja, FTP_ASCII)) {
+    $edi_data = file_get_contents($lokaali_file);
+    kasittele_rahtikirjasanoma($edi_data);
+    //ftp_delete($yhteys, $rahtikirja);
   }
 }
 
 foreach ($bookkaukset as $bookkaus) {
-  $temp_file = tempnam("/tmp", "IFF-");
-  ftp_get($yhteys, $temp_file, $bookkaus, FTP_ASCII);
-  $edi_data = file_get_contents($temp_file);
-  kasittele_bookkaussanoma($edi_data);
-  unlink($temp_file);
-}
 
-foreach ($rahtikirjat as $rahtikirja) {
-  $temp_file = tempnam("/tmp", "DAD-");
-  ftp_get($yhteys, $temp_file, $rahtikirja, FTP_ASCII);
-  $edi_data = file_get_contents($temp_file);
-  kasittele_rahtikirjasanoma($edi_data);
-  unlink($temp_file);
-}
+  $lokaali_file =  dirname(__FILE__) . "/datain/lue-data-{$bookkaus}";
 
-foreach ($iftstat as $iftsta) {
-  $temp_file = tempnam("/tmp", "IFT-");
-  ftp_get($yhteys, $temp_file, $iftsta, FTP_ASCII);
-  $edi_data = file_get_contents($temp_file);
-  kasittele_iftsta($edi_data);
-  unlink($temp_file);
+  if (ftp_get($yhteys, $lokaali_file, $bookkaus, FTP_ASCII)) {
+    $edi_data = file_get_contents($lokaali_file);
+    kasittele_bookkaussanoma($edi_data);
+    //ftp_delete($yhteys, $bookkaus);
+  }
 }
 
 ftp_close($yhteys);

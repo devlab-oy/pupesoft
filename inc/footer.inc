@@ -55,6 +55,13 @@ if (empty($kaannetyt_sanat) or !tarkista_oikeus("pupenext/dictionaries", '', '1'
 
 if ($lopeta_body) {
 
+  echo "
+    <script>
+      $(document).ready(function() {
+        top.document.title = \"Pupesoft: \"+$('font.head').first().text().replace(\":\", \"\");
+      });
+    </script>";
+
   if ($piirra_sanakirja) {
     switch (strtoupper($kukarow["kieli"])) {
     case "EN":

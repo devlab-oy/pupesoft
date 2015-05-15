@@ -53,7 +53,7 @@ function paperi_alku() {
     $presult = pupe_query($query);
     $xrow = mysql_fetch_assoc($presult);
 
-    if ($xrow['abs_pvm'] == '0000-00-00') {
+    if ($xrow['abs_pvm'] === null) {
 
       $seurday   = sprintf('%02d', date("j", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
       $seurmonth = sprintf('%02d', date("n", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));

@@ -63,3 +63,8 @@ table.indexvas td {
 .clear {
   clear: both;
 }
+
+ul.list-unstyled {
+  list-style: none;
+  padding-left: 20px;
+}

@@ -24,7 +24,8 @@ $psx_ohjelmat = array(
   "kassalipas" => "{$palvelin2}pupenext/cash_registers",
   "tili" => "{$palvelin2}pupenext/accounts",
   "taso" => "{$palvelin2}pupenext/sum_levels",
-  "kirjoittimet" => "{$palvelin2}pupenext/printers",
+  "maksuehto" => "{$palvelin2}pupenext/terms_of_payments",
+  "kirjoittimet" => "{$palvelin2}pupenext/printers"
   "tilikaudet" => "{$palvelin2}pupenext/fiscal_years",
 );
 
@@ -1402,7 +1403,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo "</form>";
   }
 
-  if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
+  if ($toim == "asiakas" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>
         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1602,7 +1603,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
     if (($toim == "asiakas" and $trow["HIDDEN_laji"] == "P") or
       ($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
-      (($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
+      ($toim == "yriti" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
       ($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
@@ -2130,7 +2131,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
+  if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
 
     if (isset($perhe) and $perhe > 0) {
       $la_tunnus = $perhe;
@@ -2141,10 +2142,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if ($toim == "toimitustapa") {
       $laji = "TOIMTAPAKV";
-      $urilisa = "&haku[3]=@$tunnus";
-    }
-    elseif ($toim == "maksuehto") {
-      $laji = "MAKSUEHTOKV";
       $urilisa = "&haku[3]=@$tunnus";
     }
     elseif ($toim == "pakkaus") {

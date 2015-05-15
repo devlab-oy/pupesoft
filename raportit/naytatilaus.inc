@@ -56,10 +56,13 @@ $query = "SELECT lasku.*,
                     WHERE tilausrivi.yhtio      = lasku.yhtio
                     AND tilausrivi.otunnus      = lasku.tunnus
                     AND tilausrivi.var         != 'O'
-                    AND tilausrivi.tyyppi      != 'D')) alv
+                    AND tilausrivi.tyyppi      != 'D')) alv,
+          maksuehto.kateinen
           FROM lasku
           LEFT JOIN laskun_lisatiedot
           ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+          LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+            AND maksuehto.tunnus = lasku.maksuehto)
           WHERE lasku.tunnus                    = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";
@@ -607,22 +610,28 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 }
 
-require "inc/maksupaate_funktiot.inc";
+$maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
+                            $kukarow["maksupaate_kassamyynti"] == "") or
+                           $kukarow["maksupaate_kassamyynti"] == "K");
 
-if (isset($kuitin_haku)) {
-  if ($kuitin_haku["toiminto"] == "kauppias") {
-    hae_kauppiaan_kuitti($kuitin_haku["tunnus"]);
+if ($maksupaate_kassamyynti and $laskurow["kateinen"] != "") {
+  require "inc/maksupaate_funktiot.inc";
+
+  if (isset($kuitin_haku)) {
+    if ($kuitin_haku["toiminto"] == "kauppias") {
+      hae_kauppiaan_kuitti($kuitin_haku["tunnus"]);
+    }
+    else {
+      hae_asiakkaan_kuitti($kuitin_haku["tunnus"]);
+    }
   }
-  else {
-    hae_asiakkaan_kuitti($kuitin_haku["tunnus"]);
+
+  $maksutapahtumat = hae_maksutapahtumat($tunnus);
+
+  if ($maksutapahtumat) {
+    piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus, $ytunnus,
+                           $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
   }
-}
-
-$maksutapahtumat = hae_maksutapahtumat($tunnus);
-
-if ($maksutapahtumat) {
-  piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus, $ytunnus,
-                         $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
 }
 
 echo "<br>";

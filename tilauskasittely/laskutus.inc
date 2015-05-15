@@ -902,7 +902,7 @@ else {
 
     $xrow = mysql_fetch_assoc($presult);
 
-    if ($xrow['abs_pvm'] == '0000-00-00' and $xrow["rel_pvm"] != 0) {
+    if ($xrow['abs_pvm'] === null and $xrow["rel_pvm"] != 0) {
       if (isset($erpcmlaskenta) and $erpcmlaskenta == "NOW") {
         $erapvm = "adddate(curdate(), interval $xrow[rel_pvm] day)";
       }
@@ -910,15 +910,15 @@ else {
         $erapvm = "adddate('$laskutuspvm', interval $xrow[rel_pvm] day)";
       }
     }
-    elseif ($xrow['abs_pvm'] != '0000-00-00') {
+    elseif ($xrow['abs_pvm'] !== null) {
       $erapvm = "'$xrow[abs_pvm]'";
     }
     else {
       $erapvm = "'$laskutuspvm'";
     }
 
-    if ($xrow['kassa_abspvm'] != '0000-00-00' or $xrow["kassa_relpvm"] > 0) {
-      if ($xrow['kassa_abspvm'] == '0000-00-00') {
+    if ($xrow['kassa_abspvm'] !== null or $xrow["kassa_relpvm"] > 0) {
+      if ($xrow['kassa_abspvm'] === null) {
         $kassa_erapvm = "adddate('$laskutuspvm', interval $xrow[kassa_relpvm] day)";
       }
       else {

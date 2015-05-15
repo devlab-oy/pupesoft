@@ -277,7 +277,7 @@ elseif ($sanoma == "GetPicks") {
     $kpl_arr = explode(",", $kerattavat_rivit_row['tilausrivit']);
     $kpl    = count($kpl_arr);
     $n      = 1;
-    
+
     if ($kerattavat_rivit_row['otunnukset'] != '' and $otunnukset == '') {
 
       // jos ker‰yser‰ j‰‰nyt vaiheeseen ja ker‰‰j‰ ottaa sen uusiksi

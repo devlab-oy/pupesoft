@@ -610,7 +610,11 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 }
 
-if ($yhtiorow["maksupaate_kassamyynti"] != "" and $laskurow["kateinen"] != "") {
+$maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
+                            $kukarow["maksupaate_kassamyynti"] == "") or
+                           $kukarow["maksupaate_kassamyynti"] == "K");
+
+if ($maksupaate_kassamyynti and $laskurow["kateinen"] != "") {
   require "inc/maksupaate_funktiot.inc";
 
   if (isset($kuitin_haku)) {

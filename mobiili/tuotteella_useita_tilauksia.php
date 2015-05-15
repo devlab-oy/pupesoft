@@ -128,8 +128,7 @@ $query = "SELECT
             AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
           LEFT JOIN tilausrivin_lisatiedot
           ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-          WHERE lasku.tila          = 'O'
-          AND lasku.alatila         = 'A'
+          WHERE ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))
           AND lasku.yhtio='{$kukarow['yhtio']}'
           AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
           {$query_lisa}
@@ -173,8 +172,7 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
               AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
             LEFT JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-            WHERE lasku.tila          = 'O'
-            AND lasku.alatila         = 'A'
+            WHERE ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))
             AND lasku.yhtio='{$kukarow['yhtio']}'
             AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
             {$query_lisa}
@@ -247,7 +245,8 @@ else {
 }
 
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
-$url_lisa .= "&backsaapuminen={$backsaapuminen}";
+$url_lisa .= $url_lisa ? "&" : "?";
+$url_lisa .= "backsaapuminen={$backsaapuminen}";
 
 //## UI ###
 echo "<div class='header'>

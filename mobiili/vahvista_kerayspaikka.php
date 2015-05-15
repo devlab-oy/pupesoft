@@ -266,8 +266,13 @@ if (isset($submit_button) and trim($submit_button) != '') {
       if (isset($hyllytys)) {
         $ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? $row['otunnus'] : "";
         $tilausten_lukumaara--;
-        $url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
-        echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
+        if ($tilausten_lukumaara < 1) {
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=ostotilaus.php'>";
+        } 
+        else {  
+          $url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
+        }
       }
       else {
         echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";

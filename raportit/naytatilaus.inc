@@ -56,10 +56,13 @@ $query = "SELECT lasku.*,
                     WHERE tilausrivi.yhtio      = lasku.yhtio
                     AND tilausrivi.otunnus      = lasku.tunnus
                     AND tilausrivi.var         != 'O'
-                    AND tilausrivi.tyyppi      != 'D')) alv
+                    AND tilausrivi.tyyppi      != 'D')) alv,
+          maksuehto.kateinen
           FROM lasku
           LEFT JOIN laskun_lisatiedot
           ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+          LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+            AND maksuehto.tunnus = lasku.maksuehto)
           WHERE lasku.tunnus                    = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";
@@ -361,10 +364,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   }
 
   echo "<tr><th colspan='{$toimitus_colspan}'>" . t("Toimitustapa") . " / " . t("Rahtikirjanro") .
-       "</th><th colspan='2'>" . t("Toimitusehto") . "</th>{$kassalipas_header}</tr>";
+    "</th><th colspan='2'>" . t("Toimitusehto") . "</th>{$kassalipas_header}</tr>";
   echo "<tr><td colspan='{$toimitus_colspan}'>" .
-       t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV") .
-       " / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td>{$kassalipas_data}</tr>";
+    t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV") .
+    " / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td>{$kassalipas_data}</tr>";
 }
 
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
@@ -605,6 +608,30 @@ echo "</table>";
 
 if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
+}
+
+$maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
+                            $kukarow["maksupaate_kassamyynti"] == "") or
+                           $kukarow["maksupaate_kassamyynti"] == "K");
+
+if ($maksupaate_kassamyynti and $laskurow["kateinen"] != "") {
+  require "inc/maksupaate_funktiot.inc";
+
+  if (isset($kuitin_haku)) {
+    if ($kuitin_haku["toiminto"] == "kauppias") {
+      hae_kauppiaan_kuitti($kuitin_haku["tunnus"]);
+    }
+    else {
+      hae_asiakkaan_kuitti($kuitin_haku["tunnus"]);
+    }
+  }
+
+  $maksutapahtumat = hae_maksutapahtumat($tunnus);
+
+  if ($maksutapahtumat) {
+    piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus, $ytunnus,
+                           $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
+  }
 }
 
 echo "<br>";
@@ -2207,9 +2234,113 @@ function hae_kassalipas($tunnus) {
   $query = "SELECT nimi
             FROM kassalipas
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$tunnus}";
+            AND tunnus  = '{$tunnus}'";
 
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
+}
+
+function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus,
+                                $ytunnus, $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus) {
+  global $yhtiorow, $toim;
+
+  echo "<script src='../js/naytatilaus.js'></script>";
+
+  echo "<br>";
+
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th class='text-center' colspan='5'>" . t("Maksutapahtumat") . "</th>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>" . t("Maksutapa") . "</th>";
+  echo "<th>" . t("Summa") . "</th>";
+  echo "<th>" . t("Osto") . "/" . t("Hyvitys") . "</th>";
+  echo "<th>" . t("Asiakkaan kuitti") . "</th>";
+  echo "<th>" . t("Kauppiaan kuitti") . "</th>";
+  echo "</tr>";
+
+  echo "</thead>";
+  echo "<tbody>";
+
+  while ($maksutapahtuma = mysql_fetch_assoc($maksutapahtumat)) {
+    $summa = number_format($maksutapahtuma["summa_valuutassa"],
+                           $yhtiorow["hintapyoristys"], ",", " ");
+    $tila = $maksutapahtuma["tila"] == "K" ? t("Osto") : t("Hyvitys");
+    $asiakkaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["asiakkaan_kuitti"]);
+    $kauppiaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["kauppiaan_kuitti"]);
+
+    echo "<tr>";
+    echo "<td>{$maksutapahtuma["maksutapa"]}</td>";
+    echo "<td>{$summa} {$maksutapahtuma["valkoodi"]}</td>";
+    echo "<td>{$tila}</td>";
+    echo "<td>";
+
+    if (empty($asiakkaan_kuitti)) {
+      echo "<span>Kuittia ei ole haettu</span><br>";
+      echo "<a class='hae_asiakkaan_kuitti' href>" . t("Yritä uudelleen") . "</a>";
+      echo "<form>";
+      echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>";
+      echo "<input type='hidden' name='laskunro' value='{$laskunro}'>";
+      echo "<input type='hidden' name='lasku_yhtio' value='{$lasku_yhtio}'>";
+      echo "<input type='hidden' name='tunnus' value='{$tunnus}'>";
+      echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
+      echo "<input type='hidden' name='ppa' value='{$ppa}'>";
+      echo "<input type='hidden' name='kka' value='{$kka}'>";
+      echo "<input type='hidden' name='vva' value='{$vva}'>";
+      echo "<input type='hidden' name='ppl' value='{$ppl}'>";
+      echo "<input type='hidden' name='kkl' value='{$kkl}'>";
+      echo "<input type='hidden' name='vvl' value='{$vvl}'>";
+      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+      echo "<input type='hidden' name='kuitin_haku[tunnus]' value='{$maksutapahtuma["tunnus"]}'>";
+      echo "<input type='hidden' name='kuitin_haku[toiminto]' value='asiakas'>";
+      echo "</form>";
+    }
+    else {
+      echo "<a class='nayta_asiakkaan_kuitti' href>" . t("Näytä") . "</a>";
+      echo "<div class='hidden'>{$asiakkaan_kuitti}</div>";
+    }
+
+    echo "</td>";
+    echo "<td>";
+
+    if (empty($kauppiaan_kuitti)) {
+      echo "<span>Kuittia ei ole haettu</span><br>";
+      echo "<a class='hae_kauppiaan_kuitti' href>" . t("Yritä uudelleen") . "</a>";
+      echo "<form>";
+      echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>";
+      echo "<input type='hidden' name='laskunro' value='{$laskunro}'>";
+      echo "<input type='hidden' name='lasku_yhtio' value='{$lasku_yhtio}'>";
+      echo "<input type='hidden' name='tunnus' value='{$tunnus}'>";
+      echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
+      echo "<input type='hidden' name='ppa' value='{$ppa}'>";
+      echo "<input type='hidden' name='kka' value='{$kka}'>";
+      echo "<input type='hidden' name='vva' value='{$vva}'>";
+      echo "<input type='hidden' name='ppl' value='{$ppl}'>";
+      echo "<input type='hidden' name='kkl' value='{$kkl}'>";
+      echo "<input type='hidden' name='vvl' value='{$vvl}'>";
+      echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+      echo "<input type='hidden' name='kuitin_haku[tunnus]' value='{$maksutapahtuma["tunnus"]}'>";
+      echo "<input type='hidden' name='kuitin_haku[toiminto]' value='kauppias'>";
+      echo "</form>";
+    }
+    else {
+      echo "<a class='nayta_kauppiaan_kuitti' href>" . t("Näytä") . "</a>";
+      echo "<div class='hidden'>{$kauppiaan_kuitti}</div>";
+    }
+
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
 }

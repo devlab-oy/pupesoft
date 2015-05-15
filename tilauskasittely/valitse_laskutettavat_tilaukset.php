@@ -9,7 +9,7 @@ require "../inc/parametrit.inc";
 
 $maksupaate_kassamyynti =
   (($yhtiorow['maksupaate_kassamyynti'] == 'K' and $kukarow["maksupaate_kassamyynti"] == "") or
-   $kukarow["maksupaate_kassamyynti"] == "K");
+  $kukarow["maksupaate_kassamyynti"] == "K");
 $yksi_valittu = isset($yksi_valittu) ? $yksi_valittu : false;
 
 if ($maksupaate_kassamyynti) {
@@ -74,7 +74,7 @@ if ($tee == 'MAKSUEHTO') {
 $query_ale_lisa = generoi_alekentta('M');
 
 if ($maksupaate_kassamyynti) {
-if (!empty($tilausnumero)) {
+  if (!empty($tilausnumero)) {
     $tunnari = $tilausnumero;
   }
   elseif (!empty($tunnukset) and !$yksi_valittu) {
@@ -109,9 +109,9 @@ if (!empty($tilausnumero)) {
         jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"]);
 
       if (($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
-                                       ($kateismaksu["luottokortti"] != 0 or
-                                        $kateismaksu["pankkikortti"] != 0)) or
-          ($maksettavaa_jaljella - $kateista_annettu <= 0)
+          ($kateismaksu["luottokortti"] != 0 or
+            $kateismaksu["pankkikortti"] != 0)) or
+        ($maksettavaa_jaljella - $kateista_annettu <= 0)
       ) {
         $tee = "TOIMITA";
         $tunnus = array($tunnari);
@@ -958,8 +958,8 @@ if ($tee == "VALITSE") {
     if ($yksi_valittu) {
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       piirra_maksupaate_formi($ekarow, $ekarow["summa"], $kateinen, $maksettavaa_jaljella,
-                              $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-                              $korttimaksutapahtuman_status, false);
+        $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+        $korttimaksutapahtuman_status, false);
     }
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>

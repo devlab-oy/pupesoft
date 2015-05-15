@@ -307,6 +307,8 @@ if (isset($task) and $task == 'lisaa') {
               AND tuoteno = '{$tuoteno}'";
     $tuoteres = pupe_query($query);
 
+    $paikka = $hyllyalue."#!¡!#".$hyllynro."#!¡!#0#!¡!#0";
+
     $trow = mysql_fetch_assoc($tuoteres);
     $toim = '';
     $hinta = 0;
@@ -466,6 +468,7 @@ if (isset($task) and $task == 'hae_tulorivit') {
             tilausrivi.hyllynro,
             tilausrivi.hyllyvali,
             tilausrivi.hyllytaso,
+            tilausrivi.tunnus,
             varastopaikat.tunnus AS varastotunnus
             FROM tilausrivi
             JOIN lasku
@@ -679,18 +682,18 @@ if (isset($view) and $view == 'kasittely') {
         <td valign='top' align='center'>" . $kappaleet ."</td>
         <td  valign='bottom' class='back'>";
 
-        echo "
-          <form method='post'>
-          <input type='hidden' name='task' value='lisaa' />
-          <input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}'>
-          <input type='hidden' name='varastotunnus' value='{$varastotunnus}'>
-          <input type='hidden' name='toimitustunnus' value='{$toimitusrivi['toimitustunnus']}'>
-          <input type='submit' value='" . t("Valitse") . "'/>
-          </form>";
+      echo "
+        <form method='post'>
+        <input type='hidden' name='task' value='lisaa' />
+        <input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}'>
+        <input type='hidden' name='varastotunnus' value='{$varastotunnus}'>
+        <input type='hidden' name='toimitustunnus' value='{$toimitusrivi['toimitustunnus']}'>
+        <input type='submit' value='" . t("Valitse") . "'/>
+        </form>";
 
-        echo "
-        </td>
-        </tr>";
+      echo "
+      </td>
+      </tr>";
     }
     echo "<tr><td style='padding:15px;' align='center' colspan='4'>";
 
@@ -702,16 +705,12 @@ if (isset($view) and $view == 'kasittely') {
       <input type='hidden' name='ytunnus' value='{$toimittaja['ytunnus']}'>
       <input type='submit' value='" . t("Perusta uusi toimitus") . "'/>
       </form>";
-
-      echo "</td><td class='back'></td></tr>";
-
-
+    echo "</td><td class='back'></td></tr>";
     echo "</table>";
   }
   elseif (isset($toimittaja) and isset($varasto) and !isset($toimitustunnus)) {
 
     echo "<br><font class='message'>".t("Ei keskeneräisiä toimituksia.")."</font><br><br>";
-
     echo "
       <form method='post'>
       <input type='hidden' name='task' value='lisaa' />
@@ -721,7 +720,6 @@ if (isset($view) and $view == 'kasittely') {
       <input type='hidden' name='tulonumero' value='{$tulonumero}'>
       <input type='submit' value='" . t("Perusta uusi toimitus") . "'/>
       </form>";
-
   }
 
   if (isset($tulorivit) and count($tulorivit) > 0) {
@@ -1157,6 +1155,26 @@ if (isset($view) and $view == 'perus') {
 
   if ($toimitukset) {
 
+
+    echo "
+    <script type='text/javascript'>
+      $( document ).ready(function() {
+
+        $('.tpselect').change(function() {
+          var tunnus = $(this).attr('id');
+          var valittu = $(this).val();
+          var nappitunnus = tunnus+'_nappi';
+          $('.nappi').prop('disabled', true);
+          $('.tpselect').val('.');
+          $(this).val(valittu);
+          $('#'+nappitunnus).prop('disabled', false);
+        });
+
+      });
+    </script>";
+
+
+
     echo "<table>";
     echo "
     <tr>
@@ -1187,6 +1205,7 @@ if (isset($view) and $view == 'perus') {
           echo "<form action='tullivarastointi_toimitus.php' class='multisubmit' method='post'>";
           echo "<input type='hidden' name='task' value='suorita_toimenpide' />";
           echo "<input type='hidden' name='asiakas' value='{$toimitustiedot['asiakas']}' />";
+          echo "<input type='hidden' name='varastotunnus' value='{$toimitustiedot['varastotunnus']}' />";
           echo "<input type='hidden' name='toimittajatunnus' value='{$toimitustiedot['toimittajatunnus']}' />";
           echo "<input type='hidden' name='toimitustunnus' value='{$tunnus}' />";
           echo "<select name='toimenpide' id='{$tunnus}' class='tpselect' style='width:100px;'>";
@@ -1211,24 +1230,6 @@ if (isset($view) and $view == 'perus') {
         </tr>";
     }
     echo "</table>";
-
-    echo "
-    <script type='text/javascript'>
-
-      $('.tpselect').change(function() {
-        var tunnus = $(this).attr('id');
-        var valittu = $(this).val();
-        var nappitunnus = tunnus+'_nappi';
-        $('.nappi').prop('disabled', true);
-        $('.tpselect').val('.');
-        $(this).val(valittu);
-        $('#'+nappitunnus).prop('disabled', false);
-      });
-
-    </script>";
-
-    echo "</td>
-    <td  valign='top' class='back'>";
   }
   else {
 

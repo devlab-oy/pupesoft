@@ -1340,7 +1340,7 @@ if (isset($view) and $view == "perus") {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND viesti = 'tullivarasto'
             AND sisviesti1 = ''
-            GROUP BY tilausrivi.tuoteno
+            GROUP BY tilausrivi.tuoteno, lasku.tunnus
             ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
 

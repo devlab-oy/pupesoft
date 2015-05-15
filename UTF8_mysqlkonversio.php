@@ -1,21 +1,15 @@
 <?php
 
-require('inc/connect.inc');
-require('inc/functions.inc');
+require 'inc/connect.inc';
+require 'inc/functions.inc';
 
-$hname 		  = php_uname('n');
-$timeparts	= explode(" ",microtime());
-$starttime	= $timeparts[1].substr($timeparts[0],1);
+$hname       = php_uname('n');
+$timeparts  = explode(" ", microtime());
+$starttime  = $timeparts[1].substr($timeparts[0], 1);
 
 echo "\nSTART: $hname :$dbkanta\n";
 
 $sql = "ALTER DATABASE $dbkanta CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
-pupe_query($sql);
-
-$sql = "ALTER TABLE budjetti_tuote drop index tubu;";
-pupe_query($sql);
-
-$sql = "CREATE INDEX tubu on budjetti_tuote (yhtio, kausi, tuoteno, osasto(50), try(50));";
 pupe_query($sql);
 
 $query  = "SHOW TABLES FROM $dbkanta";
@@ -61,8 +55,8 @@ while ($tables = mysql_fetch_row($tabresult)) {
     }
 
     $sql = "ALTER TABLE $tables[0] DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
-		pupe_query($sql);
+    pupe_query($sql);
 
-  	echo "$sql\n";
+    echo "$sql\n";
   }
 }

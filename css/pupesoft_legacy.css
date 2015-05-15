@@ -59,3 +59,12 @@ table.indexvas td {
 .right {
   float: right;
 }
+
+.clear {
+  clear: both;
+}
+
+ul.list-unstyled {
+  list-style: none;
+  padding-left: 20px;
+}

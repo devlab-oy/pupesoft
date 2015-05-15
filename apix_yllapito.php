@@ -65,7 +65,11 @@ if ($tee == "SendRegistrationInfo") {
   $ch = curl_init($real_url);
   curl_setopt($ch, CURLOPT_PUT, true);
   curl_setopt($ch, CURLOPT_INFILE, $tempfile);
-  curl_setopt($ch, CURLOPT_INFILESIZE, strlen($xmlfile));
+
+  // Tässä on "//NO_MB_OVERLOAD"-kommentti
+  // jotta UTF8-konversio ei osu tähän riviin
+  curl_setopt($ch, CURLOPT_INFILESIZE, strlen($xmlfile)); //NO_MB_OVERLOAD
+
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 

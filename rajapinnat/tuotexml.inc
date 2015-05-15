@@ -65,7 +65,7 @@ foreach ($dnstuote as $tuote) {
   $salesunitname = $salesunit->addChild('salesunitname', utf8_encode(xmlentities($tuote["yksikko"])));
   $unit->addChild('unitprice', $tuote["myyntihinta"]);
   $unit->addChild('kuluttajahinta', $tuote["myymalahinta"]);
-  $unit->addChild('handlingunit', utf8_encode(xmlentities($tuote["yksikko"])));
+  $unit->addChild('handlingunit', utf8_encode(xmlentities($tuote["muuta"])));
   $unit->addChild('handlingunitfactor', $tuote["myynti_era"]);
   $unit->unitprice->addAttribute('extSystemID', '');
 }

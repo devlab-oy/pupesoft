@@ -4064,6 +4064,7 @@ function toimitukset($toimitustunnus) {
             lasku.tunnus AS toimitustunnus,
             lasku.nimi,
             lasku.liitostunnus,
+            lasku.varasto AS varastotunnus,
             concat(lasku.tila, lasku.alatila) AS status
             FROM lasku
             JOIN tilausrivi
@@ -4103,6 +4104,7 @@ function toimitukset($toimitustunnus) {
 
     $toimitukset[$rivi['toimitustunnus']]['tuotetiedot'] .= $rivi['nimitys'] .' - '. $rivi['malli'] .' - '. $rivi['kpl'] . ' kpl.<br>';
     $toimitukset[$rivi['toimitustunnus']]['asiakas'] = $rivi['nimi'];
+    $toimitukset[$rivi['toimitustunnus']]['varastotunnus'] = $rivi['varastotunnus'];
     $toimitukset[$rivi['toimitustunnus']]['toimittajatunnus'] = $rivi['liitostunnus'];
     $toimitukset[$rivi['toimitustunnus']]['status'] = $status;
     $toimitukset[$rivi['toimitustunnus']]['statuskoodi'] = $rivi['status'];

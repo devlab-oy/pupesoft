@@ -1230,11 +1230,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
-              tilausrivi.hinta_alkuperainen,
-              ta1.selite p2,
-              ta1.selitetark p2s,
-              ta2.selite p3,
-              ta2.selitetark p3s
+              tilausrivi.hinta_alkuperainen
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno                      = tuote.tuoteno
@@ -1244,12 +1240,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                 AND tilausrivin_lisatiedot.tilausrivilinkki > 0
                 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
-              LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-                AND ta1.tuoteno                             = tuote.tuoteno
-                AND ta1.laji                                = 'pakkauskoko2' )
-              LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-                AND ta2.tuoteno                             = tuote.tuoteno
-                AND ta2.laji                                = 'pakkauskoko3')
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
               and tilausrivi.tyyppi                         = 'O'

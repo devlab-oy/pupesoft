@@ -1253,8 +1253,7 @@ if ($tee == 'VALMIS') {
     $query = "SELECT *
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
-                AND inventointilistarivi.otunnus = inventointilista.tunnus
-                AND inventointilistarivi.tila = 'A')
+                AND inventointilistarivi.otunnus = inventointilista.tunnus)
               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
                 AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
                 AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue
@@ -1278,7 +1277,7 @@ if ($tee == 'VALMIS') {
                 and hyllynro  = '{$listarow['hyllynro']}'
                 and hyllyvali = '{$listarow['hyllyvali']}'
                 and hyllytaso = '{$listarow['hyllytaso']}'
-                and laadittu  = '{$listarow['inventointiaika']}'
+                and laadittu  = '{$listarow['aika']}'
                 ORDER BY tunnus desc
                 LIMIT 1";
       $tapresult = pupe_query($query);

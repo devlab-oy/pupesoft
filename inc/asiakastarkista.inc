@@ -73,7 +73,9 @@ if (!function_exists("asiakastarkista")) {
           if ($alias_set != "PROSPEKTI") {
             $t['luottoraja'] = mysql_result($res, 0);
           }
-          else {
+          elseif ($asiak_laji == "") {
+            // P‰ivitet‰‰n prospektien luottoraja,
+            // mutta vasta kun tehd‰‰n prospektista normiasiakas
             $_luottoraja = mysql_result($res, 0);
             $qry = "UPDATE asiakas
                     SET luottoraja = '{$_luottoraja}'

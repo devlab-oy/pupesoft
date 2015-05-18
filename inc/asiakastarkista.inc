@@ -61,7 +61,7 @@ if (!function_exists("asiakastarkista")) {
       if ($ytunnus == "") {
         $virhe[$i] = t("Y-tunnus puuttuu")."!";
       }
-      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y" and $alias_set != "PROSPEKTI") {
+      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
 
         $qry = "SELECT luottoraja
                 FROM asiakas
@@ -70,7 +70,17 @@ if (!function_exists("asiakastarkista")) {
         $res = pupe_query($qry);
 
         if (mysql_num_rows($res) > 0) {
-          $t['luottoraja'] = mysql_result($res, 0);
+          if ($alias_set != "PROSPEKTI") {
+            $t['luottoraja'] = mysql_result($res, 0);
+          }
+          else {
+            $_luottoraja = mysql_result($res, 0);
+            $qry = "UPDATE asiakas
+                    SET luottoraja = '{$_luottoraja}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '$tunnus'";
+            pupe_query($qry);
+          }
         }
       }
     }

@@ -312,6 +312,7 @@ $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] !=
 // $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:stä
 // $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
 $palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
+$palvelin_pupenext = "{$palvelin2}pupenext/";
 
 // Haetaan requestin dirname
 $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pupesoft_scheme.$_SERVER["SERVER_NAME"].$_SERVER["SCRIPT_NAME"]);

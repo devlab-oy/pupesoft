@@ -207,7 +207,7 @@ class pdffile {
   }
 
   // draw text
-  function draw_text($left, $bottom, $text, $parent, $attrib = array(), $iconvdone) {
+  function draw_text($left, $bottom, $text, $parent, $attrib = array(), $iconvdone = "") {
     // Käännetään merkistö LATIN:iksi PDF-library ei hanskaa UTF-8:ia
     if (PUPE_UNICODE and $iconvdone != "DONE") {
       $text = iconv("UTF-8", "ISO-8859-15//TRANSLIT", $text);

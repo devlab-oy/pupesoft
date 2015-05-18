@@ -570,7 +570,9 @@ if ($tee == 'VALMIS') {
         if (mysql_num_rows($result) == 1 and $virhe != 1) {
           $row = mysql_fetch_assoc($result);
 
-          if (($lista != '' and $row["inventointilista_aika"] !== null) or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] === null)) {
+          if (($lista != '' and $row["inventointilista_aika"] !== null) or
+              ($validi_kasinsyotetty_inventointipaivamaara) or
+              ($lista == '' and $row["inventointilista_aika"] === null)) {
 
             if ($validi_kasinsyotetty_inventointipaivamaara) {
               $row['inventointilista_aika'] = $laadittuaika;
@@ -1365,7 +1367,7 @@ if ($tee == 'INVENTOI') {
   }
 
   //hakulause, tämä on sama kaikilla vaihtoehdoilla
-  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.tila as inventointilista_tila, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "" and $lista == "") {
     ///* Inventoidaan tuotenumeron perusteella *///
@@ -1404,7 +1406,8 @@ if ($tee == 'INVENTOI') {
                 AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
                 AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
                 AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso)
+                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tila = 'A')
               LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
                 AND inventointilista.tunnus = inventointilistarivi.otunnus)
               WHERE tuote.yhtio   = '$kukarow[yhtio]'
@@ -1624,7 +1627,7 @@ if ($tee == 'INVENTOI') {
       $sarjares = pupe_query($query);
     }
 
-    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] !== null)) {
+    if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] !== null and $tuoterow['inventointilista_tila'] != 'I')) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
@@ -1792,7 +1795,7 @@ if ($tee == 'INVENTOI') {
       }
 
     }
-    elseif ($tuoterow["inventointilista_aika"] === null and $tuoterow["inventointilista"] == $lista) {
+    elseif ($tuoterow['inventointilista_tila'] == 'I' and $tuoterow["inventointilista"] == $lista) {
 
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
@@ -1828,7 +1831,7 @@ if ($tee == 'INVENTOI') {
 
       $taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
 
-      echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!")." $taptrow[selite]";
+      echo "<td valign='top' class='green' colspan='5'>".t("Tuote on inventoitu!")." $taptrow[selite]";
 
       //Jos invauserohälytys on triggeröity
       $query = "SELECT abs(kpl) kpl

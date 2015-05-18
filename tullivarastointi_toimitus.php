@@ -193,7 +193,7 @@ if (isset($task) and $task == 'lisaa_nimike') {
   }
 
   $otsikko = t("Työnimikkeiden lisays");
-  $view = t("nimikelisays");
+  $view = 'nimikelisays';
 }
 
 if (isset($task) and $task == 'toimitus_valmis') {
@@ -208,17 +208,45 @@ if (isset($task) and $task == 'toimitus_valmis') {
 unset($task);
 }
 
-if (isset($task) and $task == 'sinetoi') {
+if (isset($task) and $task == 'kuljetustietojen_tallennus') {
 
-  if (empty($konttinumero)) {
-    $errors['konttinumero'] = t("Syötä konttinumero");
+  if ($kuljetustyyppi == 'kontti') {
+
+    if (empty($konttinumero)) {
+      $errors['konttinumero'] = t("Syötä konttinumero");
+    }
+
+    if (empty($uusi_sinettinumero)) {
+      $errors['uusi_sinettinumero'] = t("Syötä uusi sinettinumero");
+    }
+
+    if (empty($poistettu_sinettinumero)) {
+      $errors['poistettu_sinettinumero'] = t("Syötä poistettu sinettinumero");
+    }
+
+    $sinettinumero = $poistettu_sinettinumero . "#" . $uusi_sinettinumero;
+
+  }
+  else {
+    $konttinumero = '';
+    $sinettinumero = '';
   }
 
-  if (empty($sinettinumero)) {
-    $errors['sinettinumero'] = t("Syötä sinettinumero");
+  if (empty($auton_rekno)) {
+    $errors['auton_rekno'] = t("Syötä auton rekisterinumero");
+  }
+
+  if (empty($asiakirja)) {
+    $errors['asiakirja'] = t("Syötä asiakirja");
+  }
+
+  if (empty($viite)) {
+    $errors['viite'] = t("Syötä viite");
   }
 
   if(count($errors) == 0) {
+
+    $lisatieto = mysql_real_escape_string($lisatieto);
 
     $query = "UPDATE tilausrivi SET
               toimitettu = '{$kukarow['kuka']}',
@@ -234,6 +262,13 @@ if (isset($task) and $task == 'sinetoi') {
               AND tunnus = '{$toimitustunnus}'";
     pupe_query($query);
 
+    $query = "UPDATE laskun_lisatiedot SET
+              konttiviite = '{$viite}',
+              matkatiedot = '{$lisatieto}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$toimitustunnus}'";
+    pupe_query($query);
+
     $query = "SELECT group_concat(tunnus)
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -243,7 +278,8 @@ if (isset($task) and $task == 'sinetoi') {
 
     $query = "UPDATE tilausrivin_lisatiedot SET
               konttinumero = '{$konttinumero}',
-              sinettinumero = '{$sinettinumero}'
+              sinettinumero = '{$sinettinumero}',
+              kontin_mrn = '{$asiakirja}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tilausrivitunnus IN ({$tunnukset})";
     pupe_query($query);
@@ -251,7 +287,7 @@ if (isset($task) and $task == 'sinetoi') {
     unset($task);
   }
   else{
-    $task = 'konttitiedot';
+    $task = 'kuljetustietojen_syotto';
   }
 }
 
@@ -330,14 +366,19 @@ if (!isset($task)) {
   $view = t("perus");
 }
 
-if (isset($task) and $task == 'konttitiedot') {
-  $otsikko = t("Syötä kontin tiedot");
-  $view = t("konttitiedot");
+if (isset($task) and $task == 'kuljetustiedot') {
+  $otsikko = t("Valitse kuljetustyyppi");
+  $view = 'kuljetustyypin_valinta';
+}
+
+if (isset($task) and $task == 'kuljetustietojen_syotto') {
+  $otsikko = t("Syötä tiedot");
+  $view = 'kuljetustietojen_syotto';
 }
 
 if (isset($task) and $task == 'perusta') {
   $otsikko = t("Toimituksen kokoaminen") . " - " . t("Valitse toimittaja");
-  $view = t("kasittely");
+  $view = 'kasittely';
 }
 
 if (isset($task) and $task == 'valitse_varasto') {
@@ -1024,57 +1065,99 @@ if (isset($view) and $view == 'nimikelisays') {
 
 }
 
-if (isset($view) and $view == 'konttitiedot') {
+
+
+if (isset($view) and $view == 'kuljetustyypin_valinta') {
 
   echo "
-    <form method='post'>
+  <form action='tullivarastointi_toimitus.php' method='post'>
+  <input type='hidden' name='task' value='kuljetustietojen_syotto' />
+  <input type='hidden' name='asiakas' value='{$asiakas}' />
+  <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
+  <table>
+  <tr>
+    <th>" . t("Kuljetustyyppi") . "</th>
+    <td>
+      <select name='kuljetustyyppi' onchange='submit();'>
+        <option selected disabled>" . t("Valitse kuljetustyyppi") ."</option>
+        <option value='rekka'>Rekka</option>
+        <option value='kontti'>Kontti</option>
+    </select></td><td class='back'></td>
+  </tr>
+  </table>
+  </form>";
+
+}
+
+
+if (isset($view) and $view == 'kuljetustietojen_syotto') {
+
+  echo "
+    <form action='tullivarastointi_toimitus.php' method='post'>
     <table>
     <tr>
       <th>" . t("Asiakas") ."</th>
       <td>{$asiakas}</td>
       <td class='back error'></td>
     </tr>
-
     <tr>
       <th>" . t("Toimitus#") ."</th>
       <td>{$toimitustunnus}</td>
       <td class='back error'></td>
-    </tr>
-
-    <tr>
-      <th>" . t("Konttinumero") ."</th>
-      <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
-      <td class='back error'>{$errors['konttinumero']}</td>
-    </tr>
-    <tr>
-      <th>" . t("Sinettinumero") ."</th>
-      <td><input type='text' name='sinettinumero' value='{$sinettinumero}' /></td>
-      <td class='back error'>{$errors['sinettinumero']}</td>
     </tr>";
 
-/* ei ehkä tarvita näitä
+    if ($kuljetustyyppi == 'kontti') {
 
+      echo "
+      <tr>
+        <th>" . t("Konttinumero") ."</th>
+        <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
+        <td class='back error'>{$errors['konttinumero']}</td>
+      </tr>
+      <tr>
+        <th>" . t("Poistettu sinetti") ."</th>
+        <td><input type='text' name='poistettu_sinettinumero' value='{$poistettu_sinettinumero}' /></td>
+        <td class='back error'>{$errors['poistettu_sinettinumero']}</td>
+      </tr>
+      <tr>
+        <th>" . t("Uusi sinetti") ."</th>
+        <td><input type='text' name='uusi_sinettinumero' value='{$uusi_sinettinumero}' /></td>
+        <td class='back error'>{$errors['uusi_sinettinumero']}</td>
+      </tr>";
+
+    }
+
+
+    echo"
     <tr>
-      <th>" . t("Taarapaino") ." (kg)</th>
-      <td><input type='text' name='taara' value='{$taara}' /></td>
-      <td class='back error'>{$errors['taara']}</td>
+      <th>" . t("Auton rekisterinumero") . "</th>
+      <td><input type='text' name='auton_rekno' value='{$auton_rekno}' /></td>
+      <td class='back error'>{$errors['auton_rekno']}</td>
     </tr>
     <tr>
-      <th>" . t("ISO-koodi") ."</th>
-      <td><input type='text' name='isokoodi' value='{$isokoodi}' /></td>
-      <td class='back error'>{$errors['isokoodi']}</td>
+      <th>" . t("Asiakirja") ." </th>
+      <td><input type='text' name='asiakirja' value='{$asiakirja}' /></td>
+      <td class='back error'>{$errors['asiakirja']}</td>
     </tr>
     <tr>
-*/
-
-
-  echo "<th></th>
-      <td align='right'>
-      <input type='hidden' name='task' value='sinetoi' />
+      <th>" . t("Viite") ."</th>
+      <td><input type='text' name='viite' value='{$viite}' /></td>
+      <td class='back error'>{$errors['viite']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Lisätietoja") ."</th>
+      <td><textarea name='lisatieto'>{$lisatieto}</textarea></td>
+      <td class='back error'>{$errors['lisatieto']}</td>
+    </tr>
+    <tr>
+    <th></th>
+    <td align='right'>
+      <input type='hidden' name='task' value='kuljetustietojen_tallennus' />
       <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
+      <input type='hidden' name='kuljetustyyppi' value='{$kuljetustyyppi}' />
       <input type='hidden' name='asiakas' value='{$asiakas}' />
-      <input type='submit' value='". t("Sinetöi") ."' /></td>
-      <td class='back'></td>
+      <input type='submit' value='". t("Tallenna tiedot") ."' /></td>
+    <td class='back'></td>
     </tr>
     </table>
     </form>";

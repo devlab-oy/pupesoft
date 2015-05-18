@@ -8,6 +8,8 @@ elseif (@include_once "inc/parametrit.inc");
 
 require '../inc/edifact_functions.inc';
 
+$viestit = array();
+
 if (!isset($task)) {
   $view = 'aloitus';
   $otsikko = t("Toimitettavien tuotteiden kerääminen");
@@ -22,6 +24,7 @@ if (isset($submit) and $submit == 'haku') {
   if (strpos($hakutieto, '-') === false) {
 
     $toimitustunnus = $hakutieto;
+    $task = 'tietojen_haku';
   }
   else {
 
@@ -32,17 +35,20 @@ if (isset($submit) and $submit == 'haku') {
               AND (tuoteno = '{$hakutieto}' OR kommentti = '{$hakutieto}')";
     $result = pupe_query($query);
 
-    if (mysql_num_rows($result) == ) {
-      # code...
+    if (mysql_num_rows($result) == 0) {
+      $viestit[] = t("Ei osumia");
+
     }
+    elseif (mysql_num_rows($result) > 1) {
 
+    }
+    else {
 
-    $toimitustunnus = mysql_result($result, 0);
-
-    $luettu_tuotenumero = $hakutieto;
+      $toimitustunnus = mysql_result($result, 0);
+      $luettu_tuotenumero = $hakutieto;
+      $task = 'tietojen_haku';
+    }
   }
-
-  $task = 'tietojen_haku';
 }
 
 if (isset($task) and $task == 'kontitus') {
@@ -69,6 +75,24 @@ if (isset($task) and $task == 'kontitus') {
             AND hyllyalue = '{$tuoteinfo['hyllyalue']}'
             AND hyllynro = '{$tuoteinfo['hyllynro']}'";
   pupe_query($query);
+
+  $query = "SELECT *
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$toimitustunnus}'
+            AND keratty = ''";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+
+    $query = "UPDATE lasku SET
+              kerayspvm = NOW(),
+              alatila = 'C'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$toimitustunnus}'";
+    pupe_query($query);
+
+  }
 
   $task = 'tietojen_haku';
 }

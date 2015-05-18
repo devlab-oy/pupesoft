@@ -395,7 +395,18 @@ if (isset($task) and $task == 'anna_tulotiedot') {
    $tuoteryhmien_maara = 1;
   }
 
+  $palat = explode('.', $tulopaiva);
+  $toimaika = $palat[2] . '-' . $palat[1] . '-' . $palat[0];
+
+  $syotetty_aika = strtotime($toimaika);
+  $tanaan = strtotime('today midnight');
+
+  if ($syotetty_aika < $tanaan) {
+    $errors['tulopaiva'] = t("Tulopäivä ei voi olla menneisyydessä");
+  }
+
   if (count($errors) > 0) {
+
     $otsikko = t("Syötä tulon tiedot");
     $view = 'tulotiedot';
   }

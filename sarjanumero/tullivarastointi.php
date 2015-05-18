@@ -8,6 +8,7 @@ elseif (@include_once "inc/parametrit.inc");
 require '../inc/edifact_functions.inc';
 
 if (!isset($view)) {
+  $purettavat_tulonumerot = purettavat_tulonumerot();
   $view = 'tulonumero';
 }
 
@@ -194,6 +195,25 @@ if (isset($task) and $task == 'vie_varastoon') {
     $result = pupe_query($query);
   }
 
+  $query = "SELECT toimaika, tunnus
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakkaan_tilausnumero = '{$tulonumero}'";
+  $result = pupe_query($query);
+  $tiedot = mysql_fetch_assoc($result);
+
+  $alkuperainen_toimaika = strtotime($tiedot['toimaika']);
+  $tanaan = strtotime("today midnight");
+  $date_tanaan = date("Y-m-d", $tanaan);
+
+  if($alkuperainen_toimaika > $tanaan) {
+    $update = "UPDATE lasku
+               SET toimaika = '{$date_tanaan}'
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus = '{$tiedot['tunnus']}'";
+    pupe_query($update);
+  }
+
   $submit = 'tulonumero';
 }
 
@@ -250,6 +270,32 @@ echo "</div>";
 
 if ($view == 'tulonumero') {
 
+  if (!$purettavat_tulonumerot) {
+    echO "<div style='text-align:center'>" .  t("Ei purettavaa") . "</div>";
+  }
+  else {
+
+    if (count($purettavat_tulonumerot)) {
+
+      echo "<div style='text-align:center;'>";
+      echo "<br><font class='message'>". t("Valitse purettava tulonumero") ."</font><br><br>";
+
+      foreach ($purettavat_tulonumerot as $tulonumero) {
+        echo "<div style='display:inline-block; margin:5px;'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tulonumero' value='" . $tulonumero['asiakkaan_tilausnumero'] . "' />";
+        echo "<button name='submit' value='tulonumero' style='padding:10px' class='button {$luokka}'>";
+        echo $tulonumero['asiakkaan_tilausnumero'];
+        echo "</button>";
+        echo "</form>";
+        echo "</div>";
+      }
+
+      echo "</div>";
+    }
+  }
+
+/*
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
@@ -265,6 +311,8 @@ if ($view == 'tulonumero') {
       $('#tulonumero').focus();
     });
   </script>";
+*/
+
 
 }
 

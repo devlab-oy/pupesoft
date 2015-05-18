@@ -3879,6 +3879,9 @@ function toimittajat($rivitarkastus = false) {
 
   $joinlisa = '';
   $wherelisa = '';
+  $lisa_0 = '';
+  $lisa_1 = '';
+  $lisa_2 = '';
 
   if ($rivitarkastus) {
     $lisa_0 = ", group_concat(DISTINCT tilausrivi.tuoteno) AS tuotteet ";
@@ -4124,7 +4127,7 @@ function toimitustoimenpiteet($toimitustunnus, $status) {
   }
 
   if ($status == 'LC') {
-    $toimenpiteet['konttitiedot'] = t("Syˆt‰ konttitiedot");
+    $toimenpiteet['kuljetustiedot'] = t("Syˆt‰ kuljetustiedot");
   }
 
   if ($status == 'N') {
@@ -4519,6 +4522,8 @@ function viivakoodi_pdf($tuoteno) {
   $image = $pdf->jfif_embed($data);
   $parametrit['scale'] = 0.7;
   $pdf->image_place($image, 600, 100, $sivu, $parametrit);
+
+  $pdf->draw_text($x, $y, $tuoteno, $sivu, $bold);
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/".md5(uniqid(rand(),true)).".pdf";
@@ -5894,6 +5899,33 @@ function tulonumeron_tuoterivit($tulonumerot) {
   }
   else {
    return false;
+  }
+}
+
+function purettavat_tulonumerot() {
+  global $kukarow;
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi. yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.viesti = 'tullivarasto'
+            AND tilausrivi.keratty = ''";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+  else {
+
+    $purettavat_tulonumerot = array();
+
+    while ($tulonumero = mysqL_fetch_assoc($result)) {
+      $purettavat_tulonumerot[] = $tulonumero;
+    }
+    return $purettavat_tulonumerot;
   }
 }
 

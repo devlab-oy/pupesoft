@@ -719,13 +719,13 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       );
     }
 
-    // Jos yhtiön hinnat eivät sisällä alv:tä
-    if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
-      $myyntihinta          = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
-      $myyntihinta_veroton       = $alirow["myyntihinta"];
+    // Anvian hinnat verottomia, mutta myymälähinta verollinen
+    if ($verkkokauppatyyppi == 'anvia') {
+      $myyntihinta           = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+      $myyntihinta_veroton   = $row["myyntihinta"];
 
-      $myymalahinta          = hintapyoristys($alirow["myymalahinta"] * (1+($alirow["alv"]/100)));
-      $myymalahinta_veroton       = $alirow["myymalahinta"];
+      $myymalahinta          = $row["myymalahinta"];
+      $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
     }
     else {
       $myyntihinta          = $alirow["myyntihinta"];

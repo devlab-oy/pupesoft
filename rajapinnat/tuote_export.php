@@ -132,23 +132,19 @@ $res = pupe_query($query);
 // Pyöräytetään muuttuneet tuotteet läpi
 while ($row = mysql_fetch_array($res)) {
 
-  // Anvian hinnat verottomia, mutta myymälähinta verollinen
-  if ($verkkokauppatyyppi == 'anvia') {
-    $myyntihinta           = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+  // Jos yhtiön hinnat eivät sisällä alv:tä
+  if ($yhtiorow["alv_kasittely"] != "") {
+    $myyntihinta           = $row["myyntihinta"];
     $myyntihinta_veroton   = $row["myyntihinta"];
-
-    $myymalahinta          = $row["myymalahinta"];
-    $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
   else {
     // Magenton hinnat verollisia
     $myyntihinta           = $row["myyntihinta"];
     $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
-
-    $myymalahinta          = $row["myymalahinta"];
-    $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
   }
 
+  $myymalahinta          = $row["myymalahinta"];
+  $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
 
   $asiakashinnat = array ();
   if (isset($tuotteiden_asiakashinnat_magentoon)) {
@@ -602,13 +598,13 @@ $res = pupe_query($query);
 while ($row = mysql_fetch_array($res)) {
 
   // Jos yhtiön hinnat eivät sisällä alv:tä
-  if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
-    $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
-    $hinta_veroton       = $row["hinta"];
+  if ($yhtiorow["alv_kasittely"] != "") {
+    $hinta            = $row["hinta"];
+    $hinta_veroton    = $row["hinta"];
   }
   else {
-    $hinta           = $row["hinta"];
-    $hinta_veroton      = hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
+    $hinta            = $row["hinta"];
+    $hinta_veroton    = hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
   }
 
   $dnshinnasto[] = array(  'tuoteno'        => $row["tuoteno"],
@@ -719,21 +715,19 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       );
     }
 
-    // Anvian hinnat verottomia, mutta myymälähinta verollinen
-    if ($verkkokauppatyyppi == 'anvia') {
-      $myyntihinta           = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+    // Jos yhtiön hinnat eivät sisällä alv:tä
+    if ($yhtiorow["alv_kasittely"] != "") {
+      $myyntihinta           = $row["myyntihinta"];
       $myyntihinta_veroton   = $row["myyntihinta"];
-
-      $myymalahinta          = $row["myymalahinta"];
-      $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
     }
     else {
-      $myyntihinta          = $alirow["myyntihinta"];
-      $myyntihinta_veroton       = hintapyoristys($alirow["myyntihinta"] / (1+($alirow["alv"]/100)));
-
-      $myymalahinta          = $alirow["myymalahinta"];
-      $myymalahinta_veroton       = hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
+      // Magenton hinnat verollisia
+      $myyntihinta           = $row["myyntihinta"];
+      $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
     }
+
+    $myymalahinta          = $row["myymalahinta"];
+    $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
     $query = "SELECT t0.nimi node, t0.lft,

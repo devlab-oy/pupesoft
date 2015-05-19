@@ -733,20 +733,20 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     
       // Anviassa myyntihintaan verot päälle
       if ($verkkokauppatyyppi == 'anvia') {
-        $myyntihinta         = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+        $myyntihinta         = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
       }
       else {
-        $myyntihinta         = $row["myyntihinta"];
+        $myyntihinta         = $alirow["myyntihinta"];
       }
-      $myyntihinta_veroton   = $row["myyntihinta"];
+      $myyntihinta_veroton   = $alirow["myyntihinta"];
     }
     else {
-      $myyntihinta           = $row["myyntihinta"];
-      $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
+      $myyntihinta           = $alirow["myyntihinta"];
+      $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($alirow["alv"]/100)));
     }
 
-    $myymalahinta          = $row["myymalahinta"];
-    $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
+    $myymalahinta          = $alirow["myymalahinta"];
+    $myymalahinta_veroton  = hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
     $query = "SELECT t0.nimi node, t0.lft,

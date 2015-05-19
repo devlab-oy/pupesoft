@@ -6039,7 +6039,7 @@ if (!function_exists("alehinta_osto")) {
       $alehi_torow = array();
       $aperuste .= t("Toimittajaa ei löytynyt").". ";
     }
-echo "6042F hinta $hinta <br><br>";
+
     // 1. käyttäjän syöttämä hinta/nettohinta
     if ($hinta != '') {
       $hintaperuste = 1;
@@ -6327,14 +6327,14 @@ echo "6042F hinta $hinta <br><br>";
         $hintaperuste   = 6;
       }
     }
-echo "6335F hinta $hinta <br><br>";
+
     // Käydään läpi käsin syötetyt alennukset jos niitä on
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
       if (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "+") {
         if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
           $hinta_eur = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
         }
-        
+
         // 1. käyttäjän syöttämä EURO-määräinen alennus
         $aleperuste["ale".$alepostfix] = 1;
 
@@ -6348,7 +6348,7 @@ echo "6335F hinta $hinta <br><br>";
         if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
           $hinta_eur = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
         }
-        
+
         // 2. käyttäjän syöttämä EURO-määräinen alennus
         $aleperuste["ale".$alepostfix] = 2;
 
@@ -6361,7 +6361,7 @@ echo "6335F hinta $hinta <br><br>";
         if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
           $hinta_eur = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
         }
-        
+
         // 3. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 3;
 
@@ -6371,7 +6371,7 @@ echo "6335F hinta $hinta <br><br>";
         if (trim(strtoupper($valuutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
           $hinta_eur = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
         }
-        
+
         // 4. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 4;
 
@@ -6489,7 +6489,7 @@ echo "6335F hinta $hinta <br><br>";
         $ale["ale".$alepostfix] = 0;
       }
     }
-echo "6481F hinta $hinta {$yhtiorow["valkoodi"]} valuutta $valuutta <br><br>";
+
     $debug = 0;
     if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ", var_dump($ale), "% ".t("HINTA")." $hinta_eur $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 

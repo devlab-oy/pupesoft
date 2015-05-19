@@ -4580,3 +4580,16 @@ if ($fieldname == "tilausrivin_kateraja") {
 
   $jatko = 0;
 }
+
+if ($fieldname == "viitemaksujen_oikaisut") {
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Viitemaksujen oikaisuja ei tallenneta");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Viitemaksujen oikaisut tallennetaan");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}

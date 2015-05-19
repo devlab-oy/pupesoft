@@ -134,11 +134,17 @@ while ($row = mysql_fetch_array($res)) {
 
   // Jos yhtiön hinnat eivät sisällä alv:tä
   if ($yhtiorow["alv_kasittely"] != "") {
-    $myyntihinta           = $row["myyntihinta"];
+    
+    // Anviassa myyntihintaan verot päälle
+    if ($verkkokauppatyyppi == 'anvia') {
+      $myyntihinta         = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+    }
+    else {
+      $myyntihinta         = $row["myyntihinta"];
+    }
     $myyntihinta_veroton   = $row["myyntihinta"];
   }
   else {
-    // Magenton hinnat verollisia
     $myyntihinta           = $row["myyntihinta"];
     $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
   }
@@ -599,7 +605,14 @@ while ($row = mysql_fetch_array($res)) {
 
   // Jos yhtiön hinnat eivät sisällä alv:tä
   if ($yhtiorow["alv_kasittely"] != "") {
-    $hinta            = $row["hinta"];
+
+    // Anviassa myyntihintaan verot päälle
+    if ($verkkokauppatyyppi == 'anvia') {
+      $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
+    }
+    else {
+      $hinta          = $row["hinta"];
+    }
     $hinta_veroton    = $row["hinta"];
   }
   else {
@@ -717,11 +730,17 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
 
     // Jos yhtiön hinnat eivät sisällä alv:tä
     if ($yhtiorow["alv_kasittely"] != "") {
-      $myyntihinta           = $row["myyntihinta"];
+    
+      // Anviassa myyntihintaan verot päälle
+      if ($verkkokauppatyyppi == 'anvia') {
+        $myyntihinta         = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+      }
+      else {
+        $myyntihinta         = $row["myyntihinta"];
+      }
       $myyntihinta_veroton   = $row["myyntihinta"];
     }
     else {
-      // Magenton hinnat verollisia
       $myyntihinta           = $row["myyntihinta"];
       $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
     }

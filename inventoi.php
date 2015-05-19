@@ -18,7 +18,6 @@ if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($mobiili))        $mobiili = "";
 if (!isset($laadittuaika))   $laadittuaika = "";
 if (!isset($enarifocus))     $enarifocus = "";
-if (!isset($hae_hyllyssa_oleva_maara)) $hae_hyllyssa_oleva_maara = "";
 
 $validi_kasinsyotetty_inventointipaivamaara = 0;
 
@@ -1576,20 +1575,6 @@ if ($tee == 'INVENTOI') {
     $vapaa_teksti_row = mysql_fetch_assoc($vapaa_teksti_res);
 
     echo t("Vapaa teksti"),": {$vapaa_teksti_row['vapaa_teksti']}<br /><br />";
-
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='toim' value='$toim'>";
-    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-    echo "<input type='hidden' name='tee' value='INVENTOI'>";
-    echo "<input type='hidden' name='lista' value='$lista'>";
-    echo "<input type='hidden' name='hae_hyllyssa_oleva_maara' value='1' />";
-    echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
-    echo "<input type='hidden' name='alku' value='$alku'>";
-    echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
-    echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
-    echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
-    echo "<input type='submit' value='",t("Hae hyllyssä oleva määrä"),"' />";
-    echo "</form>";
   }
 
   echo "<form name='inve' method='post' autocomplete='off'>";
@@ -1644,6 +1629,10 @@ if ($tee == 'INVENTOI') {
     $hylrow = mysql_fetch_assoc($hylresult);
 
     $hyllyssa = sprintf('%.2f', $tuoterow['saldo']-$hylrow['keratty']);
+
+    if ($yhtiorow['laaja_inventointilista']) {
+      $hyllyssa = $tuoterow['inventointilista_hyllyssa'];
+    }
 
     if ($tuoterow["sarjanumeroseuranta"] != "") {
       $query = "SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, tilausrivi_myynti.otunnus myyntitunnus, tilausrivi_myynti.varattu myyntikpl,
@@ -1824,10 +1813,6 @@ if ($tee == 'INVENTOI') {
 
       echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
       echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
-
-      if (!empty($hae_hyllyssa_oleva_maara)) {
-        $maara[$tuoterow['tptunnus']] = $tuoterow['inventointilista_hyllyssa'];
-      }
 
       echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 

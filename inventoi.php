@@ -2062,14 +2062,32 @@ if ($tee == '') {
     echo "<tr>";
     echo "<th>".t("Numero")."</th>";
     echo "<th>".t("Luontiaika")."</th>";
+
+    if ($yhtiorow['laaja_inventointilista'] != "") {
+      echo "<th>",t("Vapaa teksti"),"</th>";
+    }
+
     echo "<th colspan='2'></th>";
     echo "</tr>";
 
     while ($lrow = mysql_fetch_assoc($result)) {
-      echo "<tr>
-          <td>$lrow[inventointilista]</td>
-          <td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>
-          <td>
+
+      echo "<tr>";
+      echo "<td>$lrow[inventointilista]</td>";
+      echo "<td>".tv1dateconv($lrow["inventointilista_aika"], "PITKA")."</td>";
+
+      if ($yhtiorow['laaja_inventointilista'] != "") {
+        $query = "SELECT vapaa_teksti
+                  FROM inventointilista
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$lrow['inventointilista']}'";
+        $vapaa_teksti_res = pupe_query($query);
+        $vapaa_teksti_row = mysql_fetch_assoc($vapaa_teksti_res);
+
+        echo "<td>{$vapaa_teksti_row['vapaa_teksti']}</td>";
+      }
+
+      echo "<td>
             <form action='inventoi.php' method='post'>
             <input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='lopetus' value='$lopetus'>

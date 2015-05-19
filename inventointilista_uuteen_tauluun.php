@@ -135,5 +135,5 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
   }
 }
 
-// $query = "ALTER TABLE tuotepaikat DROP COLUMN inventointilista, DROP COLUMN inventointilista_aika, DROP COLUMN inventointilista_naytamaara";
-// $_drop_res = pupe_query($query);
+$query = "ALTER TABLE tuotepaikat DROP COLUMN inventointilista, DROP COLUMN inventointilista_aika, DROP COLUMN inventointilista_naytamaara";
+$_drop_res = pupe_query($query);

@@ -277,6 +277,22 @@ if ($tee == 'VALMIS') {
           $tuoteno = $tuote_row["tuoteno"];
         }
 
+        if ($yhtiorow['laaja_inventointilista'] != '' and isset($tallenna_laskettu_hyllyssa) and $lista != '') {
+
+          $query = "UPDATE inventointilistarivi SET
+                    laskettu = '{$kpl}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus = '{$lista}'
+                    AND tuoteno = '{$tuoteno}'
+                    AND hyllyalue = '{$hyllyalue}'
+                    AND hyllynro = '{$hyllynro}'
+                    AND hyllyvali = '{$hyllyvali}'
+                    AND hyllytaso = '{$hyllytaso}'";
+          $updres = pupe_query($query);
+
+          continue;
+        }
+
         if ($inven_laji != "") {
           $query = "SELECT selitetark_2, selitetark_4
                     FROM avainsana
@@ -1219,6 +1235,9 @@ if ($tee == 'VALMIS') {
       $alku = $alku+$rivimaara;
       $tee = "INVENTOI";
     }
+    elseif (isset($tallenna_laskettu_hyllyssa)) {
+      $tee = "INVENTOI";
+    }
     elseif (isset($valmis)) {
       $tee = "";
       $tmp_tuoteno = "";
@@ -1366,7 +1385,7 @@ if ($tee == 'INVENTOI') {
   }
 
   //hakulause, tämä on sama kaikilla vaihtoehdoilla
-  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.tila as inventointilista_tila, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.hyllyssa as inventointilista_hyllyssa, inventointilistarivi.rivinro as inventointilista_rivinro, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.tila as inventointilista_tila, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.laskettu as inventointilista_laskettu, inventointilistarivi.hyllyssa as inventointilista_hyllyssa, inventointilistarivi.rivinro as inventointilista_rivinro, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "" and $lista == "") {
     ///* Inventoidaan tuotenumeron perusteella *///
@@ -1558,7 +1577,7 @@ if ($tee == 'INVENTOI') {
     echo "</form>";
   }
 
-  if ($lista != '') {
+  if ($lista != '' and $yhtiorow['laaja_inventointilista'] != '') {
     echo "<br /><br />";
     echo "<font class='message'>";
     echo t("Inventointilista"),": {$lista}";
@@ -1814,6 +1833,10 @@ if ($tee == 'INVENTOI') {
       echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
       echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]###$tuoterow[hyllyalue]###$tuoterow[hyllynro]###$tuoterow[hyllyvali]###$tuoterow[hyllytaso]'>";
 
+      if ($yhtiorow['laaja_inventointilista'] and $tuoterow['inventointilista_laskettu'] !== null) {
+        $maara[$tuoterow['tptunnus']] = $tuoterow['inventointilista_laskettu'];
+      }
+
       echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
@@ -1973,6 +1996,8 @@ if ($tee == 'INVENTOI') {
   if ($ean_koodi != '') {
     echo "<input type='hidden' name='enarifocus' value='1'>";
   }
+
+  echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' />";
 
   if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
     echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";

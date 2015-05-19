@@ -4483,6 +4483,24 @@ if ($fieldname == "inventointi_yhteenveto") {
   $jatko = 0;
 }
 
+if ($fieldname == "laaja_inventointilista") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Inventointilistaa inventoidessa ei k‰ytet‰ laajaa inventointilistaa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Inventointilistaa inventoidessa k‰ytet‰‰n laajaa inventointilistaa");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "inventointi_siirron_yhteydessa") {
   $sel = $trow[$i] == "K" ? "selected" : "";
 

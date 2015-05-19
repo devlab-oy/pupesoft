@@ -1578,6 +1578,17 @@ if ($tee == 'INVENTOI') {
     echo t("Inventointilista"),": {$lista}";
     echo "</font>";
     echo "<br /><br />";
+
+    $tuoterow = mysql_fetch_assoc($saldoresult);
+
+    $query = "SELECT *
+              FROM inventointilista
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tuoterow['inventointilista']}'";
+    $vapaa_teksti_res = pupe_query($query);
+    $vapaa_teksti_row = mysql_fetch_assoc($vapaa_teksti_res);
+
+    echo t("Vapaa teksti"),": {$vapaa_teksti_row['vapaa_teksti']}<br /><br />";
   }
 
   echo "<table>";

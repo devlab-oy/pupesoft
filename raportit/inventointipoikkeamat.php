@@ -669,6 +669,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
   $worksheet->write($excelrivi, 7, t("Inv.pvm"),               $format_bold);
   $worksheet->write($excelrivi, 8, t("Varastonarvo ennen inventointia"),   $format_bold);
   $worksheet->write($excelrivi, 9, t("Arvonmuutos"),             $format_bold);
+  $worksheet->write($excelrivi, 10, t("Selite"),             $format_bold);
   $excelrivi++;
 
   while ($row = mysql_fetch_assoc($saldoresult)) {
@@ -691,6 +692,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
     $worksheet->writeDate($excelrivi, 7, $row["inventointiaika"]);
     $worksheet->writeNumber($excelrivi, 8, $vararvo_ennen);
     $worksheet->writeNumber($excelrivi, 9, round($row["arvo"], 2));
+    $worksheet->writeNumber($excelrivi, 10, $row["selite"]);
 
     $excelrivi++;
   }

@@ -62,6 +62,8 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
   $res = pupe_query($query);
   $listat_row = mysql_fetch_assoc($res);
 
+  if ($listat_row['inventointilistat'] == "") continue;
+
   $query = "SELECT *
             FROM tuotepaikat
             WHERE yhtio = '{$yhtio}'

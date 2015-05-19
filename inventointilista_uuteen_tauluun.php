@@ -15,7 +15,7 @@ if (!$php_cli) {
 }
 
 if (trim($argv[1]) == '') {
-  die ("Et antanut lähettävää yhtiötä!\n");
+  die ("Et antanut yhtiötä!\n");
 }
 
 $yhtio = mysql_escape_string(trim($argv[1]));
@@ -46,83 +46,92 @@ if (mysql_num_rows($kukares) != 1) {
 
 $kukarow = mysql_fetch_assoc($kukares);
 
-$query = "SELECT group_concat(distinct inventointilista) inventointilistat
-          FROM tuotepaikat
-          WHERE yhtio = '{$yhtio}'
-          AND inventointilista != 0
-          AND inventointilista_aika != '0000-00-00 00:00:00'";
-$res = pupe_query($query);
-$listat_row = mysql_fetch_assoc($res);
+$query = "SELECT yhtio
+          FROM yhtio";
+$yhtiores = pupe_query($query);
 
-$query = "SELECT *
-          FROM tuotepaikat
-          WHERE yhtio = '{$yhtio}'
-          AND inventointilista in ({$listat_row['inventointilistat']})";
-$res = pupe_query($query);
+while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
 
-while ($row = mysql_fetch_assoc($res)) {
+  $yhtio = $yhtiorow['yhtio'];
+
+  $query = "SELECT group_concat(distinct inventointilista) inventointilistat
+            FROM tuotepaikat
+            WHERE yhtio = '{$yhtio}'
+            AND inventointilista != 0
+            AND inventointilista_aika != '0000-00-00 00:00:00'";
+  $res = pupe_query($query);
+  $listat_row = mysql_fetch_assoc($res);
 
   $query = "SELECT *
-            FROM inventointilista
+            FROM tuotepaikat
             WHERE yhtio = '{$yhtio}'
-            AND tunnus = '{$row['inventointilista']}'";
-  $_res = pupe_query($query);
+            AND inventointilista in ({$listat_row['inventointilistat']})";
+  $res = pupe_query($query);
 
-  if (mysql_num_rows($_res) == 0) {
-    $query = "INSERT INTO inventointilista SET
-              yhtio = '{$yhtio}',
-              naytamaara = '{$row['inventointilista_naytamaara']}',
-              muuttaja = '{$row['muuttaja']}',
-              laatija = '{$row['laatija']}',
-              luontiaika = '{$row['luontiaika']}',
-              muutospvm = '{$row['muutospvm']}',
-              tunnus = '{$row['inventointilista']}'";
-    $_ot_res = pupe_query($query);
-  }
+  while ($row = mysql_fetch_assoc($res)) {
 
-  $_id = $row['inventointilista'];
+    $query = "SELECT *
+              FROM inventointilista
+              WHERE yhtio = '{$yhtio}'
+              AND tunnus = '{$row['inventointilista']}'";
+    $_res = pupe_query($query);
 
-  $query = "SELECT *
-            FROM inventointilistarivi
-            WHERE yhtio = '{$yhtio}'
-            AND tuoteno = '{$row['tuoteno']}'
-            AND otunnus = '{$_id}'
-            AND hyllyalue = '{$row['hyllyalue']}'
-            AND hyllynro = '{$row['hyllynro']}'
-            AND hyllyvali = '{$row['hyllyvali']}'
-            AND hyllytaso = '{$hyllytaso}'";
-  $_row_res = pupe_query($query);
-
-  if (mysql_num_rows($_row_res) == 0) {
-
-    if ($row['inventointilista_aika'] == '0000-00-00 00:00:00') {
-      $_tila = "I";
-      $row['luontiaika'] = $row['inventointiaika'];
-      $row['muutospvm'] = $row['inventointiaika'];
-      $row['inventointilista_aika'] = "'".$row['inventointiaika']."'";
-    }
-    else {
-      $_tila = "A";
-      $row['luontiaika'] = $row['inventointilista_aika'];
-      $row['muutospvm'] = $row['inventointilista_aika'];
-      $row['inventointilista_aika'] = "null";
+    if (mysql_num_rows($_res) == 0) {
+      $query = "INSERT INTO inventointilista SET
+                yhtio = '{$yhtio}',
+                naytamaara = '{$row['inventointilista_naytamaara']}',
+                muuttaja = '{$row['muuttaja']}',
+                laatija = '{$row['laatija']}',
+                luontiaika = '{$row['luontiaika']}',
+                muutospvm = '{$row['muutospvm']}',
+                tunnus = '{$row['inventointilista']}'";
+      $_ot_res = pupe_query($query);
     }
 
-    $query = "INSERT INTO inventointilistarivi SET
-              yhtio = '{$yhtio}',
-              otunnus = '{$_id}',
-              tila = '{$_tila}',
-              aika = {$row['inventointilista_aika']},
-              tuoteno = '{$row['tuoteno']}',
-              hyllyalue = '{$row['hyllyalue']}',
-              hyllynro = '{$row['hyllynro']}',
-              hyllyvali = '{$row['hyllyvali']}',
-              hyllytaso = '{$row['hyllytaso']}',
-              muuttaja = '{$row['muuttaja']}',
-              laatija = '{$row['laatija']}',
-              luontiaika = '{$row['luontiaika']}',
-              muutospvm = '{$row['muutospvm']}'";
-    pupe_query($query);
+    $_id = $row['inventointilista'];
+
+    $query = "SELECT *
+              FROM inventointilistarivi
+              WHERE yhtio = '{$yhtio}'
+              AND tuoteno = '{$row['tuoteno']}'
+              AND otunnus = '{$_id}'
+              AND hyllyalue = '{$row['hyllyalue']}'
+              AND hyllynro = '{$row['hyllynro']}'
+              AND hyllyvali = '{$row['hyllyvali']}'
+              AND hyllytaso = '{$hyllytaso}'";
+    $_row_res = pupe_query($query);
+
+    if (mysql_num_rows($_row_res) == 0) {
+
+      if ($row['inventointilista_aika'] == '0000-00-00 00:00:00') {
+        $_tila = "I";
+        $row['luontiaika'] = $row['inventointiaika'];
+        $row['muutospvm'] = $row['inventointiaika'];
+        $row['inventointilista_aika'] = "'".$row['inventointiaika']."'";
+      }
+      else {
+        $_tila = "A";
+        $row['luontiaika'] = $row['inventointilista_aika'];
+        $row['muutospvm'] = $row['inventointilista_aika'];
+        $row['inventointilista_aika'] = "null";
+      }
+
+      $query = "INSERT INTO inventointilistarivi SET
+                yhtio = '{$yhtio}',
+                otunnus = '{$_id}',
+                tila = '{$_tila}',
+                aika = {$row['inventointilista_aika']},
+                tuoteno = '{$row['tuoteno']}',
+                hyllyalue = '{$row['hyllyalue']}',
+                hyllynro = '{$row['hyllynro']}',
+                hyllyvali = '{$row['hyllyvali']}',
+                hyllytaso = '{$row['hyllytaso']}',
+                muuttaja = '{$row['muuttaja']}',
+                laatija = '{$row['laatija']}',
+                luontiaika = '{$row['luontiaika']}',
+                muutospvm = '{$row['muutospvm']}'";
+      pupe_query($query);
+    }
   }
 }
 

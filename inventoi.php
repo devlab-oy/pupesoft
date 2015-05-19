@@ -1366,7 +1366,7 @@ if ($tee == 'INVENTOI') {
   }
 
   //hakulause, t‰m‰ on sama kaikilla vaihtoehdoilla
-  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.tila as inventointilista_tila, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+  $select = " tuote.kehahin, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, inventointilistarivi.tila as inventointilista_tila, inventointilistarivi.otunnus as inventointilista, inventointilistarivi.rivinro as inventointilista_rivinro, inventointilistarivi.luontiaika as inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
 
   if ($tuoteno != "" and $lista == "") {
     ///* Inventoidaan tuotenumeron perusteella *///
@@ -1572,11 +1572,29 @@ if ($tee == 'INVENTOI') {
   echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
   echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 
+  if ($lista != '') {
+    echo "<br /><br />";
+    echo "<font class='message'>";
+    echo t("Inventointilista"),": {$lista}";
+    echo "</font>";
+    echo "<br /><br />";
+  }
+
   echo "<table>";
   echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
 
   echo "<tr>";
+
+  if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+    echo "<th>#</th>";
+  }
+
   echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
+
+  if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+    echo "<th>#</th>";
+  }
+
   echo "</tr>";
 
   $rivilask = 0;
@@ -1629,6 +1647,11 @@ if ($tee == 'INVENTOI') {
     if (($tuoterow["inventointilista_aika"] === null and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] !== null and $tuoterow['inventointilista_tila'] != 'I')) {
 
       echo "<tr>";
+
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
@@ -1785,6 +1808,10 @@ if ($tee == 'INVENTOI') {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
 
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "</tr>";
 
       if ($rivilask == 0) {
@@ -1797,6 +1824,11 @@ if ($tee == 'INVENTOI') {
     elseif ($tuoterow['inventointilista_tila'] == 'I' and $tuoterow["inventointilista"] == $lista) {
 
       echo "<tr>";
+
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
       if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
@@ -1858,12 +1890,26 @@ if ($tee == 'INVENTOI') {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
 
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "</tr>";
     }
     else {
       echo "<tr>";
+
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
       echo "<td colspan='5' valign='top'>".sprintf(t("T‰t‰ tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
+
+      if ($yhtiorow['laaja_inventointilista'] != "" and $lista != "") {
+        echo "<td>{$tuoterow['inventointilista_rivinro']}</td>";
+      }
+
       echo "</tr>";
     }
   }

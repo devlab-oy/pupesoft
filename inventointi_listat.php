@@ -1527,8 +1527,6 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     //k‰‰nnet‰‰n kauniiksi
 
-    // $debug = 1;
-
     if ($debug == '1') {
       echo "filenimi = {$filenimi}<br>";
     }

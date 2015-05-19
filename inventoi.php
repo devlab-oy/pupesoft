@@ -218,7 +218,14 @@ if ($tee == 'VALMIS') {
     $tuoteno_ean_kentta = "tuoteno";
   }
 
-  if (count($tuote) > 0) {
+  if ($yhtiorow['laaja_inventointilista'] and $lista != '' and (isset($prev) or isset($next))) {
+    $_mennaa = false;
+  }
+  else {
+    $_mennaan = true;
+  }
+
+  if (count($tuote) > 0 and $_mennaan) {
 
     // lukitaan tableja
     $query = "LOCK TABLES
@@ -1997,9 +2004,13 @@ if ($tee == 'INVENTOI') {
     echo "<input type='hidden' name='enarifocus' value='1'>";
   }
 
-  echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' />";
+  if ($yhtiorow['laaja_inventointilista'] != '' and $lista != '') {
+    echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' /> ";
+    echo "<input type='submit' name='prev' value='".t("Edellinen sivu")."'> ";
+    echo "<input type='submit' name='next' value='".t("Seuraava sivu")."'>   ";
+  }
 
-  if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
+  if ($yhtiorow['laaja_inventointilista'] == '' and $lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
     echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
   }
   else {

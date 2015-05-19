@@ -29,6 +29,7 @@ elseif ($type == '3' or ($type == 'S' and
   // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";
   // print "Välitystapa => ".substr($tietue, 88, 1)."\n";
   // print "Palautekoodi => ".substr($tietue, 89, 1)."\n";
+
   if ($type == 'S') {
     $account = $tiliotedatarow['tilino'];
   }
@@ -117,8 +118,7 @@ elseif ($type == '3' or ($type == 'S' and
   $dataupdres = pupe_query($query);
 }
 elseif ($type == 'S') {
-  // Oikaisuja ei huomioida
-  // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";
+  // Oikaisuja ei huomioida, jos $yhtiorow["viitemaksujen_oikaisut"] on tyhjä
 }
 elseif ($type == '9') {
   // print "Tietuetunnus => $type\n";

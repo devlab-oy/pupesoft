@@ -69,13 +69,43 @@ if (isset($task) and $task == 'tuloraportti_pdf') {
   die;
 }
 
+if (isset($task) and $task == 'tullivarasto_laskutusraportti_pdf') {
+
+  $parametrit = array(
+    'asiakastunnus' => $toimittajatunnus,
+    'raporttikuun_alku' => $raporttikuun_alku
+  );
+
+  $pdf_data = tullivarasto_laskutustiedot($parametrit);
+
+  $logo_info = pdf_logo();
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+  $pdf_data['kuukausi'] = $kuustring;
+  $pdf_data['asiakas'] = $asiakas;
+
+  $pdf_tiedosto = tullivarasto_laskutusraportti_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+  header("Content-Disposition:attachment;filename='laskutusraportti.pdf'");
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
+
 if (isset($task) and $task == 'tulliraportti_pdf') {
 
   $varastotilanne = unserialize(base64_decode($varastotilanne));
+
   $logo_info = pdf_logo();
   $pdf_data['varastotilanne'] = $varastotilanne;
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
+  $pdf_data['tyyppi'] = $raporttityyppi;
+
+  if ($raporttityyppi == 'varasto_asiakas') {
+    $eka = reset($varastotilanne);
+    $pdf_data['asiakas'] = $eka['tulotiedot']['asiakas'];
+  }
 
   $pdf_tiedosto = tulliraportti_pdf($pdf_data);
 
@@ -113,8 +143,15 @@ if (isset($task) and $task == 'nayta_tiedot') {
   );
 
   $tiedot = tullivarasto_laskutustiedot($parametrit);
-
   extract($tiedot);
+
+  $query = "SELECT nimi
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakasnro = '{$toimittajatunnus}'";
+  $result = pupe_query($query);
+
+  $asiakas = mysql_result($result, 0);
 
   $otsikko = t("Laskutusraportti");
   $view = 'laskutus_data';
@@ -137,6 +174,9 @@ if (isset($task) and $task == 'valitse_asiakas') {
 
 if (isset($task) and $task == 'valitse_raporttityyppi') {
 
+  $view = $raporttityyppi;
+  $otsikko = t("Tullivarastoraportit");
+
   switch ($raporttityyppi) {
 
     case 'laskutus':
@@ -148,10 +188,22 @@ if (isset($task) and $task == 'valitse_raporttityyppi') {
       $viesti = t("Syötä tulonumero");
       break;
 
-    case 'tulli':
+    case 'varasto_tulli':
       $varastotilanne = tulliraportti_tiedot();
       $pdf_varastotilanne = serialize($varastotilanne);
       $pdf_varastotilanne = base64_encode($pdf_varastotilanne);
+      $view = 'varastoraportti';
+      break;
+
+    case 'varasto_asiakas':
+      $varastotilanne = tulliraportti_tiedot($asiakastunnus);
+      $pdf_varastotilanne = serialize($varastotilanne);
+      $pdf_varastotilanne = base64_encode($pdf_varastotilanne);
+      $view = 'varastoraportti';
+      break;
+
+    case 'varasto':
+      $asiakkaat = toimittajat(true,true);
       break;
 
     case 'purku':
@@ -166,9 +218,6 @@ if (isset($task) and $task == 'valitse_raporttityyppi') {
       # code...
       break;
   }
-
-  $view = $raporttityyppi;
-  $otsikko = t("Tullivarastoraportit");
 }
 
 if (!isset($task)) {
@@ -226,6 +275,57 @@ if (isset($view) and $view == "valitse_kuukausi") {
 
 }
 
+if (isset($view) and $view == "varasto") {
+
+  echo "
+  <script type='text/javascript'>
+  $(document).ready(function() {
+
+    $('#vrtt').bind('click', function() {
+      $('#varasto_asiakas_select').attr('disabled', 'disable');
+    });
+
+    $('#vrta').bind('click', function() {
+      $('#varasto_asiakas_select').removeAttr('disabled');
+    });
+
+  });
+  </script>";
+
+
+  echo "<table><tr><th>";
+  echo t("Raporttityyppi");
+  echo "</th><td>".t("Varastoraportti")."</td></tr>
+  <form action='tullivarasto_raportit.php' method='post'>
+  <input type='hidden' name='task' value='valitse_raporttityyppi' />
+
+  <tr>
+    <th>" . t("Tyyppi") . "</th>
+    <td>
+    <input type='radio' id='vrtt' name='raporttityyppi' checked value='varasto_tulli'>
+    <label for='vrtt'>" . t("Tulliraportti") . "</label>
+    <input type='radio' id='vrta' name='raporttityyppi' value='varasto_asiakas'>
+    <label for='vrta'>" . t("Asiakaskohtainen") . "</label>
+    </td>
+  </tr>
+
+  <tr>
+    <th>" . t("Asiakas") . "</th>
+    <td>
+      <select name='asiakastunnus' id='varasto_asiakas_select' disabled>
+        <option selected disabled>" . t("Valitse asiakas") ."</option>";
+
+        foreach ($asiakkaat as $tunnus => $nimi) {
+          echo "<option value='{$tunnus}'>{$nimi}</option>";
+        }
+
+    echo "</select></td><td class='back'></td>
+  </tr>
+  </table><br>
+  <input type='submit' value='".t("Lataa raportti")."' />
+  </form>";
+}
+
 if (isset($view) and $view == "laskutus") {
 
   echo "<table><tr><th>";
@@ -277,13 +377,14 @@ if (isset($view) and $view == "tulo") {
 
 }
 
-if (isset($view) and $view == "tulli") {
+if (isset($view) and $view == "varastoraportti") {
 
   if (count($varastotilanne) > 0) {
 
     echo "
     <form method='post' class='multisubmit' action='tullivarasto_raportit.php'>
     <input type='hidden' name='varastotilanne' value='{$pdf_varastotilanne}' />
+    <input type='hidden' name='raporttityyppi' value='{$raporttityyppi}' />
     <input type='hidden' name='task' value='tulliraportti_pdf' />
     <input type='submit' value='" . t("Lataa PDF") . "' />
     </form><br><br>";
@@ -303,6 +404,7 @@ if (isset($view) and $view == "tulli") {
 
       echo "<tr>";
       echo "<th>" . t("Tulonumero") . "</th>";
+      echo "<th>" . t("Asiakas") . "</th>";
       echo "<th>{$kuljetusotsikko}</th>";
       echo "<th>" . t("Sinettinumero") . "</th>";
       echo "<th>" . t("Edeltävä asiakirja") . "</th>";
@@ -310,13 +412,14 @@ if (isset($view) and $view == "tulli") {
 
       echo "<tr>";
       echo "<td>{$tulonumero}</td>";
+      echo "<td>{$tiedot['tulotiedot']['asiakas']}</td>";
       echo "<td>{$kuljetustieto}</td>";
       echo "<td>{$tiedot['tulotiedot']['sinettinumero']}</td>";
       echo "<td>{$tiedot['tulotiedot']['edeltava_asiakirja']}</td>";
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>" . t("Nimitys") . "</th>";
+      echo "<th colspan='2'>" . t("Nimitys") . "</th>";
       echo "<th>" . t("Malli") . "</th>";
       echo "<th>" . t("Paino (kg.)") . "</th>";
       echo "<th>" . t("Varastosaldo") . "</th>";
@@ -324,7 +427,7 @@ if (isset($view) and $view == "tulli") {
 
       foreach ($tiedot['tuotetiedot'] as $key => $value) {
         echo "<tr>";
-        echo "<td>{$value['nimitys']}</td>";
+        echo "<td colspan='2'>{$value['nimitys']}</td>";
         echo "<td>{$value['malli']}</td>";
         echo "<td>{$value['paino']}</td>";
         echo "<td>{$value['kpl']}</td>";
@@ -379,6 +482,8 @@ if (isset($view) and ($view == "purku" or $view == "lastaus")) {
 
 if (isset($view) and $view == "laskutus_data") {
 
+  $kuustring = date("m.Y",$kuukausi);
+
   echo "<table>";
   echo "<tr>";
   echo "<th>";
@@ -393,7 +498,7 @@ if (isset($view) and $view == "laskutus_data") {
   echo t("Asiakas");
   echo "</th>";
   echo "<td>";
-  echo $toimittajatunnus;
+  echo $asiakas;
   echo "</td>";
   echo "</tr>";
   echo "<tr>";
@@ -401,7 +506,7 @@ if (isset($view) and $view == "laskutus_data") {
   echo t("Kuukausi");
   echo "</th>";
   echo "<td>";
-  echo date("m.Y",$kuukausi);
+  echo $kuustring;
   echo "</td>";
   echo "</tr>";
   echo "</table><br>";
@@ -460,6 +565,18 @@ if (isset($view) and $view == "laskutus_data") {
     }
     echo "</table>";
   }
+
+  echo "
+  <br>
+  <form method='post' class='multisubmit' action='tullivarasto_raportit.php'>
+  <input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}' />
+  <input type='hidden' name='raporttikuun_alku' value='{$raporttikuun_alku}' />
+  <input type='hidden' name='kuustring' value='{$kuustring}' />
+  <input type='hidden' name='asiakas' value='{$asiakas}' />
+  <input type='hidden' name='task' value='tullivarasto_laskutusraportti_pdf' />
+  <input type='submit' value='" . t("Lataa PDF") . "' />
+  </form><br><br>";
+
 }
 
 if (isset($view) and $view == "tuloraportti_tiedot") {
@@ -686,7 +803,7 @@ if (isset($view) and $view == "perus") {
         <option selected disabled>" . t("Valitse") ."</option>
         <option value='laskutus'>".t("Laskutusraportti")."</option>
         <option value='tulo'>".t("Tuloraportti")."</option>
-        <option value='tulli'>".t("Tulliraportti")."</option>
+        <option value='varasto'>".t("Varasto- / Tulliraportti")."</option>
         <option value='purku'>".t("Purkuraportti")."</option>
         <option value='lastaus'>".t("Lastausraportti")."</option>
       </select>

@@ -296,7 +296,7 @@ if (!function_exists("tuoteperhe_reku2")) {
   }
 }
 
-if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ", var_dump($varasto), "<br>";
+if (isset($varasto) and $lisaarivi_debug == 1) echo "299 Myyd‰‰n varastoista: ", var_dump($varasto), "<br>";
 
 // katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 if (isset($olpaikalta) and $olpaikalta != '') {
@@ -486,6 +486,17 @@ elseif ($rivityyppi == 'L' and $laaja_toim_kasittely) {
     'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
   );
   $varasto = sallitut_varastot($params);
+}
+elseif ($laskurow["tila"] == "G" and $laskurow["varasto"] == 0) {
+  // Varastosiirtojen tapauksessa, jos halutaan siirt‰‰ kaikista
+  // niin haetaan todella kaikki varastot,
+  // sill‰ varastosiirrot tulee todella saada tehd‰ KAIKISTA vasrastoista
+  $query = "SELECT GROUP_CONCAT(tunnus) AS varastoTunnukset
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $_varastot = mysql_fetch_assoc(pupe_query($query));
+
+  $varasto = explode(",", $_varastot["varastoTunnukset"]);
 }
 elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
   $varasto = explode(",", $kukarow["varasto"]);
@@ -1453,7 +1464,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         or {$zrow["varastotyyppi"]} == ''
                         or {$zrow["varastotyyppi"]} == 'V'
                         or (is_array($varasto)
-                          and in_array({$zrow["varasto"]}, $varasto)
+                          and in_array({$zrow["varasto"]}, "; var_dump($varasto); echo ")
                           and {$laskurow["varasto"]} == 0)
                         or {$laskurow["varasto"]} == {$zrow["varasto"]})
                     )
@@ -1598,7 +1609,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     if ($paikka != '') {
       $paikat = explode('#!°!#', $paikka);
 
-      if ($lisaarivi_debug == 1) echo "Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
+      if ($lisaarivi_debug == 1) echo "1603 Halutaan myyd‰ paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
       $paikkakelpasi = FALSE;
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
@@ -1638,7 +1649,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     // Myyd‰‰n tietyst‰ varastosta
     if (isset($varasto) and is_array($varasto) and $paikka == '') {
 
-      if ($lisaarivi_debug == 1) echo "Halutaan myyd‰ varastoista ", var_dump($varasto).".<br>";
+      if ($lisaarivi_debug == 1) echo "1643 Halutaan myyd‰ varastoista ", var_dump($varasto).".<br>";
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
         if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {

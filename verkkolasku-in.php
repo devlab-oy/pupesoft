@@ -82,10 +82,10 @@ if ($handle = opendir($laskut)) {
     $encoding = exec("file -b --mime-encoding '$nimi'");
 
     if (!PUPE_UNICODE and $encoding != "" and strtoupper($encoding) != 'ISO-8859-15') {
-      exec("recode $encoding..ISO-8859-15 '$nimi'");
+      exec("recode -f $encoding..ISO-8859-15 '$nimi'");
     }
     elseif (PUPE_UNICODE and $encoding != "" and strtoupper($encoding) != 'UTF-8') {
-      exec("recode $encoding..UTF8 '$nimi'");
+      exec("recode -f $encoding..UTF8 '$nimi'");
     }
 
     $luotiinlaskuja = erittele_laskut($nimi);

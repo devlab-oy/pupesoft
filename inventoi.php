@@ -1510,6 +1510,8 @@ if ($tee == 'INVENTOI') {
       $order = " sorttauskentta, tuoteno ";
     }
 
+    $limit = "LIMIT {$alku}, {$loppu}";
+
     $query = "SELECT {$select}
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
@@ -1521,9 +1523,14 @@ if ($tee == 'INVENTOI') {
                 AND tuote.ei_saldoa = '' {$joinon})
               WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
               AND inventointilista.tunnus = '{$lista}'
-              ORDER BY {$order}
-              LIMIT {$alku}, {$loppu}";
+              ORDER BY {$order}";
     $saldoresult = pupe_query($query);
+
+    if (mysql_num_rows($saldoresult) > $alku) {
+      $query .= " {$limit}";
+
+      $saldoresult = pupe_query($query);
+    }
 
     if (mysql_num_rows($saldoresult) == 0) {
       echo "<font class='error'>".t("Listaa")." '$lista' ".t("ei löydy, tai se on jo inventoitu")."!</font><br><br>";

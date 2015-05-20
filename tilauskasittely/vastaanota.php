@@ -315,11 +315,7 @@ if ($tee == 'paikat') {
         $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                    AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                    AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                    AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                    AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                    AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                     AND inventointilistarivi.tila = 'A')
                   WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
                   and tuotepaikat.tunnus  = '{$ptunnus}'
@@ -329,11 +325,7 @@ if ($tee == 'paikat') {
         $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                    AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                    AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                    AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                    AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                    AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                     AND inventointilistarivi.tila = 'A')
                   WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
                   and tuotepaikat.hyllyalue = '{$t1[$tun]}'

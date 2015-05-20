@@ -33,6 +33,23 @@ require "inc/functions.inc";
 // Logitetaan ajo
 cron_log();
 
+# tarkistetaan onko tietyt kentät jo dropattu
+# jos on niin ei ajeta tätä skriptiä
+$query = "DESC tuotepaikat";
+$res = pupe_query($query);
+
+$loyty = false;
+
+while ($row = mysql_fetch_assoc($res)) {
+  if (in_array($row['Field'],
+    array('inventointilista', 'inventointilista_aika', 'inventointilista_naytamaara'))) {
+    $loyty = true;
+    break;
+  }
+}
+
+if (!$loyty) exit;
+
 // Haetaan kukarow
 $query = "SELECT *
           FROM kuka
@@ -100,7 +117,8 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
               AND hyllyalue = '{$row['hyllyalue']}'
               AND hyllynro = '{$row['hyllynro']}'
               AND hyllyvali = '{$row['hyllyvali']}'
-              AND hyllytaso = '{$hyllytaso}'";
+              AND hyllytaso = '{$row['hyllytaso']}'
+              AND tuotepaikkatunnus = '{$row['tunnus']}'";
     $_row_res = pupe_query($query);
 
     if (mysql_num_rows($_row_res) == 0) {
@@ -128,6 +146,7 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
                 hyllynro = '{$row['hyllynro']}',
                 hyllyvali = '{$row['hyllyvali']}',
                 hyllytaso = '{$row['hyllytaso']}',
+                tuotepaikkatunnus = '{$row['tunnus']}',
                 muuttaja = '{$row['muuttaja']}',
                 laatija = '{$row['laatija']}',
                 luontiaika = '{$row['luontiaika']}',

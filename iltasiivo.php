@@ -699,11 +699,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
               AND varaston_hyllypaikat.hyllytaso      = tuotepaikat.hyllytaso
               AND varaston_hyllypaikat.reservipaikka  = 'K')
             LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-              AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-              AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-              AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-              AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-              AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
               AND inventointilistarivi.tila = 'A')
             WHERE tuotepaikat.yhtio                   = '{$kukarow['yhtio']}'
             AND tuotepaikat.saldo                     = 0

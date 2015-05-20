@@ -1365,7 +1365,7 @@ if ($tee == "VALMIS"
 
     if (mysql_num_rows($maksuehtores) > 1) {
       echo "<font class='head'>$otsikko</font><hr><br>";
-      echo "<table><tr><th>" . t("Maksutapa") . ":</th>";
+      echo "<table><tr><th>" . t("1368 Maksutapa") . ":</th>";
 
       while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
         echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
@@ -1413,7 +1413,7 @@ if ($tee == "VALMIS"
       echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
       echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
       echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-      echo "<td><input type='submit' value='".t("Ei vielä laskuteta, siirrä tilaus keräykseen")."'></td>";
+      echo "<td><input type='submit' value='".t("1416 Ei vielä laskuteta, siirrä tilaus keräykseen")."'></td>";
       echo "</form></tr>";
 
       echo "</table>";
@@ -9567,8 +9567,9 @@ if ($tee == '') {
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
     if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "" and
-      ($muokkauslukko == "" or $toim == "PROJEKTI" or
-        $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
+      (($muokkauslukko == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE"))) 
+        or $toim == "PROJEKTI" 
+        or $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
       $tilausok == 0 and
       $rivilaskuri > 0 and
       $asiakasOnProspekti != "JOO"

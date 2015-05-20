@@ -225,6 +225,63 @@ if ($tee == 'VALMIS') {
     $_mennaan = true;
   }
 
+  $_param_paalla = ($yhtiorow['laaja_inventointilista'] != '');
+  $_tallenna = isset($tallenna_laskettu_hyllyssa);
+
+  if ($_param_paalla and $_tallenna and $lista != '' and count($tuote) > 0 and $_mennaan) {
+
+    foreach ($tuote as $i => $tuotteet) {
+
+      $tuotetiedot = explode("###", $tuotteet);
+
+      $tuoteno           = $tuotetiedot[0];
+      $hyllyalue         = $tuotetiedot[1];
+      $hyllynro          = $tuotetiedot[2];
+      $hyllyvali         = $tuotetiedot[3];
+      $hyllytaso         = $tuotetiedot[4];
+      $kpl               = str_replace(",", ".", $maara[$i]);
+
+      if ($kpl != '' and is_numeric($kpl)) {
+
+        $query = "UPDATE inventointilistarivi SET
+                  laskettu = '{$kpl}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$lista}'
+                  AND tuoteno = '{$tuoteno}'
+                  AND hyllyalue = '{$hyllyalue}'
+                  AND hyllynro = '{$hyllynro}'
+                  AND hyllyvali = '{$hyllyvali}'
+                  AND hyllytaso = '{$hyllytaso}'";
+        $updres = pupe_query($query);
+      }
+    }
+
+    $_mennaan = false;
+  }
+
+  if ($_param_paalla and $lista != '' and count($tuote) > 0 and $_mennaan) {
+
+    $query = "SELECT *
+              FROM inventointilistarivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$lista}'
+              AND laskettu != 0";
+    $_lasketut_res = pupe_query($query);
+
+    query_dump($query);
+
+    while ($lrow = mysql_fetch_assoc($_lasketut_res)) {
+
+      $_paikka  = "{$lrow['tuoteno']}###{$lrow['hyllyalue']}###{$lrow['hyllynro']}###";
+      $_paikka .= "{$lrow['hyllyvali']}###{$lrow['hyllytaso']}";
+
+      if (!array_key_exists($lrow['tuotepaikkatunnus'], $tuote)) {
+        $tuote[$lrow['tuotepaikkatunnus']] = $_paikka;
+        $maara[$lrow['tuotepaikkatunnus']] = $lrow['laskettu'];
+      }
+    }
+  }
+
   if (count($tuote) > 0 and $_mennaan) {
 
     // lukitaan tableja
@@ -282,22 +339,6 @@ if ($tee == 'VALMIS') {
         }
         else {
           $tuoteno = $tuote_row["tuoteno"];
-        }
-
-        if ($yhtiorow['laaja_inventointilista'] != '' and isset($tallenna_laskettu_hyllyssa) and $lista != '') {
-
-          $query = "UPDATE inventointilistarivi SET
-                    laskettu = '{$kpl}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND otunnus = '{$lista}'
-                    AND tuoteno = '{$tuoteno}'
-                    AND hyllyalue = '{$hyllyalue}'
-                    AND hyllynro = '{$hyllynro}'
-                    AND hyllyvali = '{$hyllyvali}'
-                    AND hyllytaso = '{$hyllytaso}'";
-          $updres = pupe_query($query);
-
-          continue;
         }
 
         if ($inven_laji != "") {

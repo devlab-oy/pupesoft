@@ -1225,6 +1225,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   hyllytaso = '{$tuoterow['hyllytaso']}',
                   rivinro = '{$rivinro}',
                   hyllyssa = '{$_hyllyssa}',
+                  laskettu = '{$_hyllyssa}',
                   tuotepaikkatunnus = '{$tuoterow['tuotepaikkatunnus']}',
                   muuttaja = '{$kukarow['kuka']}',
                   laatija = '{$kukarow['kuka']}',

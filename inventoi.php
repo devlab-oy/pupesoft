@@ -1615,6 +1615,8 @@ if ($tee == 'INVENTOI') {
 
     $tuoterow = mysql_fetch_assoc($saldoresult);
 
+    mysql_data_seek($saldoresult, 0);
+
     $query = "SELECT *
               FROM inventointilista
               WHERE yhtio = '{$kukarow['yhtio']}'

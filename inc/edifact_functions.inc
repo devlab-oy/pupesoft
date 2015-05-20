@@ -3874,7 +3874,7 @@ function varastotilanne($hetki = false) {
   return $return;
 }
 
-function toimittajat($rivitarkastus = false) {
+function toimittajat($rivitarkastus = false, $asiakashaku = false) {
   global $kukarow;
 
   $joinlisa = '';
@@ -3900,7 +3900,9 @@ function toimittajat($rivitarkastus = false) {
                 GROUP BY toimi.tunnus";
   }
 
-  $query = "SELECT toimi.nimi, toimi.tunnus {$lisa_0}
+  $query = "SELECT
+            asiakas.tunnus AS asiakastunnus,
+            toimi.nimi, toimi.tunnus {$lisa_0}
             FROM toimi
             JOIN asiakas
               ON asiakas.yhtio = toimi.yhtio
@@ -3910,13 +3912,13 @@ function toimittajat($rivitarkastus = false) {
             {$lisa_2}";
   $result = pupe_query($query);
 
-  $toimittajat = array();
+  $toimittajat = $asiakkaat = array();
 
-  while ($toimittaja = mysql_fetch_assoc($result)) {
+  while ($rivi = mysql_fetch_assoc($result)) {
 
     if ($rivitarkastus) {
       $tarjolla = 0;
-      $tuotteet = explode(',', $toimittaja['tuotteet']);
+      $tuotteet = explode(',', $rivi['tuotteet']);
 
       foreach ($tuotteet as $tuoteno) {
         $saldot = saldo_myytavissa($tuoteno);
@@ -3924,10 +3926,17 @@ function toimittajat($rivitarkastus = false) {
       }
     }
 
-    if (!$rivitarkastus or $tarjolla > 0) {
-      $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
+    if ($asiakashaku and $tarjolla > 0) {
+      $asiakkaat[$rivi['asiakastunnus']] = $rivi['nimi'];
     }
 
+    if (!$rivitarkastus or $tarjolla > 0) {
+      $toimittajat[$rivi['tunnus']] = $rivi['nimi'];
+    }
+  }
+
+  if ($asiakashaku) {
+    return $asiakkaat;
   }
 
   if (count($toimittajat) < 1) {
@@ -4420,7 +4429,7 @@ function purkuraportti_parametrit($tulotunnus) {
             WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
             AND lasku.tunnus = '{$tulotunnus}'
             AND tr.varasto IS NOT NULL
-            AND trlt.sinettinumero != ''
+            AND trlt.kuljetuksen_rekno != ''
             GROUP BY tuote.tuoteno";
   $result = pupe_query($query);
 
@@ -4465,10 +4474,17 @@ function purkuraportti_parametrit($tulotunnus) {
       }
     }
 
+    if ($tyyppi == 'lastaus') {
+      list($poistettu_sinettinumero, $sinettinumero) = explode('#', $rivi['sinettinumero']);
+    }
+    else {
+      $sinettinumero = $rivi['sinettinumero'];
+    }
+
     $saapumispaiva = date("d.m.Y", strtotime($rivi['saapumispaiva']));
     $konttinumero = $rivi['konttinumero'];
     $rekisterinumero = $rivi['kuljetuksen_rekno'];
-    $sinettinumero = $rivi['sinettinumero'];
+
     $edeltava_asiakirja = $rivi['kontin_mrn'];
     $toimittaja = $rivi['toimittaja'];
     $varasto = $rivi['varasto'];
@@ -4610,9 +4626,13 @@ function purkuraportti_pdf($pdf_data) {
   $pdf->draw_text($x, $y, $kuljetusotsikko, $sivu, $bold);
   $pdf->draw_text($x+100, $y, $kuljetustieto, $sivu, $pieni);
   $y -= 13;
-  $pdf->draw_text($x, $y, t("Sinettinumero"), $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $pieni);
-  $y -= 13;
+
+  if (!empty($sinettinumero)) {
+    $pdf->draw_text($x, $y, t("Sinettinumero"), $sivu, $bold);
+    $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $pieni);
+    $y -= 13;
+  }
+
 
   if ($tyyppi == 'purku') {
     $pdf->draw_text($x, $y, t("Edeltävä asiakirja"), $sivu, $bold);
@@ -4925,6 +4945,107 @@ function tuloraportti_pdf($pdf_data) {
   return $pdffilenimi;
 }
 
+function tullivarasto_laskutusraportti_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $normal["height"] = 10;
+  $normal["font"] = "Times-Roman";
+
+  $bold["height"] = 10;
+  $bold["font"] = "Times-Bold";
+
+  $pvm = date("d.m.Y");
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $x = 30;
+  $y = 800;
+
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
+
+  $pdf->draw_text($x, $y, t("LASKUTUSRAPORTTI"), $sivu, $bold);
+  $y -= 20;
+  $pdf->draw_text($x, $y, $asiakas, $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, t("Kuukausi") . ": {$kuukausi}", $sivu, $bold);
+  $y -= 15;
+
+
+  $xx = array(20,580);
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+
+  $pdf->draw_text($x, $y,     t("Tuote"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y,  t("Tulo#"), $sivu, $bold);
+  $pdf->draw_text($x+180, $y, t("Kpl"), $sivu, $bold);
+  $pdf->draw_text($x+230, $y, t("Paino"), $sivu, $bold);
+  $pdf->draw_text($x+280, $y, t("Tilavuus"), $sivu, $bold);
+  $pdf->draw_text($x+350, $y, t("Alku"), $sivu, $bold);
+  $pdf->draw_text($x+400, $y, t("Loppu"), $sivu, $bold);
+  $pdf->draw_text($x+450, $y, t("Päivät"), $sivu, $bold);
+  $pdf->draw_text($x+500, $y, t("Hinta"), $sivu, $bold);
+
+  $y -= 20;
+
+  foreach ($tuotekaudet as $tuote => $kaudet) {
+
+    $tila = 30 * count($kaudet);
+
+    if ($y < $tila) {
+      $sivu = $pdf->new_page("a4");
+    }
+
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
+
+    foreach ($kaudet as $kausi) {
+
+      $pdf->draw_text($x, $y,     $kausi['nimitys_malli'], $sivu, $normal);
+      $pdf->draw_text($x+100, $y,  $kausi['tulonumero'], $sivu, $normal);
+      $pdf->draw_text($x+180, $y, $kausi['kpl'], $sivu, $normal);
+      $pdf->draw_text($x+230, $y, $kausi['tonnit'], $sivu, $normal);
+      $pdf->draw_text($x+280, $y, $kausi['tilavuus'], $sivu, $normal);
+      $pdf->draw_text($x+350, $y, $kausi['sisaan'], $sivu, $normal);
+      $pdf->draw_text($x+400, $y, $kausi['ulos'], $sivu, $normal);
+      $pdf->draw_text($x+450, $y, $kausi['paivat'], $sivu, $normal);
+      $pdf->draw_text($x+500, $y, $kausi['hinta'], $sivu, $normal);
+
+      $y -= 20;
+
+    }
+  }
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+
+
+}
+
 function tulliraportti_pdf($pdf_data) {
 
   extract($pdf_data);
@@ -4959,8 +5080,21 @@ function tulliraportti_pdf($pdf_data) {
   $logoparam['scale'] = $pdf_data['scale'];
   $pdf->image_place($image, 780, 420, $sivu, $logoparam);
 
-  $pdf->draw_text($x, $y, t("TULLIRAPORTTI"), $sivu, $bold);
-  $y -= 20;
+  if ($tyyppi == 'varasto_tulli') {
+    $otsikko = t("TULLIRAPORTTI");
+  }
+  else {
+   $otsikko = t("VARASTOTILANNE");
+  }
+
+  $pdf->draw_text($x, $y, $otsikko, $sivu, $bold);
+  $y -= 15;
+
+  if ($tyyppi == 'varasto_asiakas') {
+    $pdf->draw_text($x, $y, $asiakas, $sivu, $bold);
+    $y -= 15;
+  }
+
   $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
   $y -= 30;
 
@@ -5003,8 +5137,14 @@ function tulliraportti_pdf($pdf_data) {
 
       $pdf->image_place($image, 780, 420, $sivu, $logoparam);
 
-      $pdf->draw_text($x, $y, t("TULLIRAPORTTI"), $sivu, $bold);
-      $y -= 20;
+      $pdf->draw_text($x, $y, $otsikko, $sivu, $bold);
+      $y -= 15;
+
+      if ($tyyppi == 'varasto_asiakas') {
+        $pdf->draw_text($x, $y, $asiakas, $sivu, $bold);
+        $y -= 15;
+      }
+
       $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
       $y -= 30;
 
@@ -5037,13 +5177,19 @@ function tulliraportti_pdf($pdf_data) {
     }
 
     $pdf->draw_text($x, $y, t("Tulonumero"). ': ' .$tulonumero, $sivu, $bold);
-    $y -= 15;
+    $y -= 14;
+
+    if ($tyyppi == 'varasto_tulli') {
+      $pdf->draw_text($x, $y, $tiedot['tulotiedot']['asiakas'], $sivu, $normal);
+      $y -= 14;
+    }
+
     $pdf->draw_text($x, $y, $kuljetusotsikko. ': ' .$kuljetustieto, $sivu, $normal);
-    $y -= 15;
+    $y -= 14;
     $pdf->draw_text($x, $y, t("Sinettinumero"). ': ' .$tiedot['tulotiedot']['sinettinumero'], $sivu, $normal);
-    $y -= 15;
+    $y -= 14;
     $pdf->draw_text($x, $y, t("Edellinen asiakirja"). ': ' .$tiedot['tulotiedot']['edeltava_asiakirja'], $sivu, $normal);
-    $y -= 15;
+    $y -= 14;
 
     $alalaita1 = $y;
 
@@ -5429,6 +5575,9 @@ function tullivarasto_laskutustiedot($parametrit) {
         $paivat = $interval->days + 1;
         $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
 
+        $ulos = date("d.m.y", strtotime($ulos));
+        $sisaan = date("d.m.y", strtotime($sisaan));
+
         $kausi_info = array(
           'nimitys_malli' => $nimitys_malli,
           'sisaan' => $sisaan,
@@ -5457,6 +5606,9 @@ function tullivarasto_laskutustiedot($parametrit) {
         $paivat = $interval->days + 1;
 
         $hinta = $varastointihinta * $paivat * $sisaan_kpl; // laskutustapa...
+
+        $ulos = date("d.m.y", strtotime($ulos));
+        $sisaan = date("d.m.y", strtotime($sisaan));
 
         $kausi_info = array(
           'nimitys_malli' => $nimitys_malli,
@@ -5489,6 +5641,9 @@ function tullivarasto_laskutustiedot($parametrit) {
 
       $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
 
+      $ulos = date("d.m.y", strtotime($ulos));
+      $sisaan = date("d.m.y", strtotime($sisaan));
+
       $kausi_info = array(
         'nimitys_malli' => $nimitys_malli,
         'sisaan' => $sisaan,
@@ -5513,8 +5668,15 @@ function tullivarasto_laskutustiedot($parametrit) {
   return $tiedot;
 }
 
-function tulliraportti_tiedot() {
+function tulliraportti_tiedot($asiakastunnus = false) {
   global $kukarow;
+
+  if ($asiakastunnus) {
+    $asiakaslisa = " AND asiakas.tunnus = '{$asiakastunnus}' ";
+  }
+  else {
+    $asiakaslisa = '';
+  }
 
   $query = "SELECT
             tilausrivi.tuoteno,
@@ -5526,7 +5688,9 @@ function tulliraportti_tiedot() {
             tuote.nimitys,
             tuote.malli,
             tuote.tuotemassa,
-            tuote.pakkauskpl
+            tuote.pakkauskpl,
+            asiakas.nimi,
+            asiakas.tunnus
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
@@ -5534,7 +5698,17 @@ function tulliraportti_tiedot() {
             JOIN tuote
               ON tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = tilausrivi.tuoteno
+            JOIN lasku
+              ON lasku.yhtio = tilausrivi.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+            JOIN toimi
+              ON toimi.yhtio = tilausrivi.yhtio
+              AND toimi.tunnus = lasku.liitostunnus
+            JOIN asiakas
+              ON asiakas.yhtio = tilausrivi.yhtio
+              AND asiakas.asiakasnro = toimi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            {$asiakaslisa}
             AND tilausrivi.tyyppi = 'O'";
   $result = pupe_query($query);
 
@@ -5554,7 +5728,9 @@ function tulliraportti_tiedot() {
         'rekisterinumero' => $tuote['kuljetuksen_rekno'],
         'edeltava_asiakirja' => $tuote['kontin_mrn'],
         'sinettinumero' => $tuote['sinettinumero'],
-        'konttinumero' => $tuote['konttinumero']
+        'konttinumero' => $tuote['konttinumero'],
+        'asiakastunnus' => $tuote['tunnus'],
+        'asiakas' => $tuote['nimi']
       );
 
       if ($tuote['pakkauskpl'] > 1) {

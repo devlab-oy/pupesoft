@@ -277,6 +277,7 @@ if (isset($task) and $task == 'kuljetustietojen_tallennus') {
     $tunnukset = mysql_result($result, 0);
 
     $query = "UPDATE tilausrivin_lisatiedot SET
+              kuljetuksen_rekno = '{$auton_rekno}',
               konttinumero = '{$konttinumero}',
               sinettinumero = '{$sinettinumero}',
               kontin_mrn = '{$asiakirja}'

@@ -268,8 +268,6 @@ if ($tee == 'VALMIS') {
               AND laskettu != 0";
     $_lasketut_res = pupe_query($query);
 
-    query_dump($query);
-
     while ($lrow = mysql_fetch_assoc($_lasketut_res)) {
 
       $_paikka  = "{$lrow['tuoteno']}###{$lrow['hyllyalue']}###{$lrow['hyllynro']}###";

@@ -112,7 +112,7 @@ if ($oikeurow["paivitys"] != '1') { // Saako p‰ivitt‰‰
 }
 
 if ($rivimaara == '') {
-  $rivimaara = '17';
+  $rivimaara = $yhtiorow['laaja_inventointilista'] != '' ? '16' : '17';
 }
 
 //katotaan onko tiedosto ladattu
@@ -1485,10 +1485,19 @@ if ($tee == 'INVENTOI') {
       $alku = 0;
     }
 
-    $loppu = "17";
+    if ($yhtiorow['laaja_inventointilista'] != '') {
+      $loppu = "16";
 
-    if ($rivimaara != "17" and $rivimaara != '') {
-      $loppu = $rivimaara;
+      if ($rivimaara != "16" and $rivimaara != '') {
+        $loppu = $rivimaara;
+      }
+    }
+    else {
+      $loppu = "17";
+
+      if ($rivimaara != "17" and $rivimaara != '') {
+        $loppu = $rivimaara;
+      }
     }
 
     if ($jarjestys == 'tuoteno') {
@@ -1551,16 +1560,31 @@ if ($tee == 'INVENTOI') {
     //-->
     </script>";
 
-  $sel1rivi=$sel17rivi=$sel170rivi="";
+  if ($yhtiorow['laaja_inventointilista'] != '') {
+    $sel1rivi=$sel16rivi=$sel160rivi="";
 
-  if ($rivimaara == '1') {
-    $sel1rivi = "SELECTED";
-  }
-  elseif ($rivimaara == '17') {
-    $sel17rivi = "SELECTED";
+    if ($rivimaara == '1') {
+      $sel1rivi = "SELECTED";
+    }
+    elseif ($rivimaara == '16') {
+      $sel16rivi = "SELECTED";
+    }
+    else {
+      $sel160rivi = "SELECTED";
+    }
   }
   else {
-    $sel170rivi = "SELECTED";
+    $sel1rivi=$sel17rivi=$sel170rivi="";
+
+    if ($rivimaara == '1') {
+      $sel1rivi = "SELECTED";
+    }
+    elseif ($rivimaara == '17') {
+      $sel17rivi = "SELECTED";
+    }
+    else {
+      $sel170rivi = "SELECTED";
+    }
   }
 
   $seljarj1 = "";
@@ -1586,8 +1610,16 @@ if ($tee == 'INVENTOI') {
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='lopetus' value='$lopetus'>";
     echo "<select name='rivimaara' onchange='submit()'>";
-    echo "<option value='170' $sel170rivi>".t("N‰ytet‰‰n 170 rivi‰")."</option>";
-    echo "<option value='17' $sel17rivi>".t("N‰ytet‰‰n 17 rivi‰")."</option>";
+
+    if ($yhtiorow['laaja_inventointilista'] != '') {
+      echo "<option value='160' $sel160rivi>".t("N‰ytet‰‰n 160 rivi‰")."</option>";
+      echo "<option value='16' $sel16rivi>".t("N‰ytet‰‰n 16 rivi‰")."</option>";
+    }
+    else {
+      echo "<option value='170' $sel170rivi>".t("N‰ytet‰‰n 170 rivi‰")."</option>";
+      echo "<option value='17' $sel17rivi>".t("N‰ytet‰‰n 17 rivi‰")."</option>";
+    }
+
     echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
     echo "</select>";
     echo "<select name='jarjestys' onchange='submit()'>";

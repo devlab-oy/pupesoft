@@ -296,7 +296,7 @@ if (!function_exists("tuoteperhe_reku2")) {
   }
 }
 
-if (isset($varasto) and $lisaarivi_debug == 1) echo "299 Myydään varastoista: ", var_dump($varasto), "<br>";
+if (isset($varasto) and $lisaarivi_debug == 1) echo "Myydään varastoista: ", var_dump($varasto), "<br>";
 
 // katotaan oletuspaikka ja myydään tietenkin sieltä jos niin halutaan
 if (isset($olpaikalta) and $olpaikalta != '') {
@@ -1609,7 +1609,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     if ($paikka != '') {
       $paikat = explode('#!¡!#', $paikka);
 
-      if ($lisaarivi_debug == 1) echo "1603 Halutaan myydä paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
+      if ($lisaarivi_debug == 1) echo "Halutaan myydä paikalta: $paikat[0]-$paikat[1]-$paikat[2]-$paikat[3]<br>";
       $paikkakelpasi = FALSE;
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
@@ -1649,7 +1649,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     // Myydään tietystä varastosta
     if (isset($varasto) and is_array($varasto) and $paikka == '') {
 
-      if ($lisaarivi_debug == 1) echo "1643 Halutaan myydä varastoista ", var_dump($varasto).".<br>";
+      if ($lisaarivi_debug == 1) echo "Halutaan myydä varastoista ", var_dump($varasto).".<br>";
 
       foreach ($myy_tuoteno as $i => $tuoteno) {
         if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {

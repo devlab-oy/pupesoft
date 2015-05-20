@@ -839,8 +839,16 @@ if ($tee == 'VALMIS') {
               }
             }
 
-            if ($lista != "" and stripos($lisaselite, " - ".t("Inv.lista")." {$lista}") === FALSE) {
-              $lisaselite .=  " - ".t("Inv.lista")." {$lista}";
+            $_laaja_invlista = ($yhtiorow['laaja_inventointilista'] != '');
+            $_selitelisa = (stripos($lisaselite, t("Inv.lista")." {$lista}") === FALSE);
+
+            if ($_laaja_invlista and $lista != "" and $_selitelisa) {
+
+              if ($lisaselite != "") {
+                $lisaselite .= " - ";
+              }
+
+              $lisaselite .=  t("Inv.lista")." {$lista}";
             }
 
             if ($erotus > 0) {

@@ -117,7 +117,7 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
               AND hyllyalue = '{$row['hyllyalue']}'
               AND hyllynro = '{$row['hyllynro']}'
               AND hyllyvali = '{$row['hyllyvali']}'
-              AND hyllytaso = '{$hyllytaso}'
+              AND hyllytaso = '{$row['hyllytaso']}'
               AND tuotepaikkatunnus = '{$row['tunnus']}'";
     $_row_res = pupe_query($query);
 

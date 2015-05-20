@@ -839,6 +839,10 @@ if ($tee == 'VALMIS') {
               }
             }
 
+            if ($lista != "" and stripos($lisaselite, " - ".t("Inv.lista")." {$lista}") === FALSE) {
+              $lisaselite .=  " - ".t("Inv.lista")." {$lista}";
+            }
+
             if ($erotus > 0) {
               $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
             }

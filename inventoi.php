@@ -218,15 +218,12 @@ if ($tee == 'VALMIS') {
     $tuoteno_ean_kentta = "tuoteno";
   }
 
-  if ($yhtiorow['laaja_inventointilista'] and $lista != '' and (isset($prev) or isset($next))) {
-    $_mennaa = false;
-  }
-  else {
-    $_mennaan = true;
-  }
-
   $_param_paalla = ($yhtiorow['laaja_inventointilista'] != '');
   $_tallenna = (isset($tallenna_laskettu_hyllyssa) or isset($prev) or isset($next));
+
+  if ($_tallenna) {
+    $_mennaan = true;
+  }
 
   if ($_param_paalla and $_tallenna and $lista != '' and count($tuote) > 0 and $_mennaan) {
 

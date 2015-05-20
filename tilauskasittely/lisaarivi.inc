@@ -493,7 +493,8 @@ elseif ($laskurow["tila"] == "G" and $laskurow["varasto"] == 0) {
   // sillä varastosiirrot tulee todella saada tehdä KAIKISTA vasrastoista
   $query = "SELECT GROUP_CONCAT(tunnus) AS varastoTunnukset
             FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'";
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi != 'P'";
   $_varastot = mysql_fetch_assoc(pupe_query($query));
 
   $varasto = explode(",", $_varastot["varastoTunnukset"]);

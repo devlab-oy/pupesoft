@@ -485,11 +485,7 @@ if ($tee == 'VALMIS') {
                   FROM tuotepaikat
                   JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                    AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                    AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                    AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                    AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                    AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                    AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                     AND inventointilistarivi.tila = 'A')
                   WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
                   and tuotepaikat.tuoteno   = '$tuoteno'
@@ -878,8 +874,10 @@ if ($tee == 'VALMIS') {
                         and hyllytaso         = '$hyllytaso'";
             $result = pupe_query($query);
 
-            $query = "SELECT *
-                      FROM inventointilistarivi
+            $query = "UPDATE inventointilistarivi SET
+                      aika = now(),
+                      tila = 'I',
+                      tapahtumatunnus = '{$tapahtumaid}'
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tuoteno = '{$tuoteno}'
                       AND hyllyalue = '{$hyllyalue}'
@@ -888,17 +886,6 @@ if ($tee == 'VALMIS') {
                       AND hyllytaso = '{$hyllytaso}'
                       AND tila = 'A'";
             $_chk_res = pupe_query($query);
-
-            if (mysql_num_rows($_chk_res) != 0) {
-              $_chk_row = mysql_fetch_assoc($_chk_res);
-
-              $query = "UPDATE inventointilistarivi SET
-                        aika = now(),
-                        tila = 'I'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$_chk_row['tunnus']}'";
-              pupe_query($query);
-            }
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
@@ -1255,11 +1242,7 @@ if ($tee == 'VALMIS') {
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
                 AND inventointilistarivi.otunnus = inventointilista.tunnus)
               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
-                AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
-                AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue
-                AND tuotepaikat.hyllynro = inventointilistarivi.hyllynro
-                AND tuotepaikat.hyllyvali = inventointilistarivi.hyllyvali
-                AND tuotepaikat.hyllytaso = inventointilistarivi.hyllytaso)
+                AND tuotepaikat.tunnus = inventointilistarivi.tuotepaikkatunnus)
               WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
               AND inventointilista.tunnus = '{$lista}'";
     $listares = pupe_query($query);
@@ -1376,11 +1359,7 @@ if ($tee == 'INVENTOI') {
               FROM tuote use index (tuoteno_index)
               JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
               LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                 AND inventointilistarivi.tila = 'A')
               WHERE tuote.yhtio   = '$kukarow[yhtio]'
               and tuote.tuoteno   = '$tuoteno'
@@ -1401,11 +1380,7 @@ if ($tee == 'INVENTOI') {
               FROM tuote use index (tuoteno_index)
               JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
               LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                 AND inventointilistarivi.tila = 'A')
               LEFT JOIN inventointilista ON (inventointilista.yhtio = inventointilistarivi.yhtio
                 AND inventointilista.tunnus = inventointilistarivi.otunnus)
@@ -1457,11 +1432,7 @@ if ($tee == 'INVENTOI') {
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
                 AND inventointilistarivi.otunnus = inventointilista.tunnus)
               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
-                AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
-                AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue
-                AND tuotepaikat.hyllynro = inventointilistarivi.hyllynro
-                AND tuotepaikat.hyllyvali = inventointilistarivi.hyllyvali
-                AND tuotepaikat.hyllytaso = inventointilistarivi.hyllytaso)
+                AND tuotepaikat.tunnus = inventointilistarivi.tuotepaikkatunnus)
               JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio
                 AND tuote.tuoteno = tuotepaikat.tuoteno
                 AND tuote.ei_saldoa = '' {$joinon})

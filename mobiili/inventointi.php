@@ -73,11 +73,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
               )
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
               LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-                AND inventointilistarivi.tuoteno = tuotepaikat.tuoteno
-                AND inventointilistarivi.hyllyalue = tuotepaikat.hyllyalue
-                AND inventointilistarivi.hyllynro = tuotepaikat.hyllynro
-                AND inventointilistarivi.hyllyvali = tuotepaikat.hyllyvali
-                AND inventointilistarivi.hyllytaso = tuotepaikat.hyllytaso
+                AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                 AND inventointilistarivi.tila = 'A')
               WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
               AND $haku_ehto
@@ -300,11 +296,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                   AND inventointilistarivi.otunnus = inventointilista.tunnus)
                JOIN tuote on (tuote.yhtio=inventointilistarivi.yhtio and tuote.tuoteno=inventointilistarivi.tuoteno)
                JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
-                AND tuotepaikat.tuoteno = inventointilistarivi.tuoteno
-                AND tuotepaikat.hyllyalue = inventointilistarivi.hyllyalue
-                AND tuotepaikat.hyllynro = inventointilistarivi.hyllynro
-                AND tuotepaikat.hyllyvali = inventointilistarivi.hyllyvali
-                AND tuotepaikat.hyllytaso = inventointilistarivi.hyllytaso)
+                AND tuotepaikat.tunnus = inventointilistarivi.tuotepaikkatunnus)
                WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
                AND inventointilista.tunnus = '{$lista}'
                AND inventointilistarivi.tila = 'A' # Inventoidut tuotteet on nollattu

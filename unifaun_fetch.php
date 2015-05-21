@@ -107,7 +107,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $query = "SELECT toimitustapa
                     FROM lasku
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$eranumero_sscc}'";
+                    AND tunnus  = '{$eranumero_sscc}'";
           $toimitrow = mysql_fetch_assoc(pupe_query($query));
         }
 

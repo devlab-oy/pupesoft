@@ -1038,7 +1038,12 @@ if (!isset($from_kaikkikorj)) {
 
     $_jarj = $yhtiorow['tilauksen_jarjestys_suunta'];
 
-    //Haetaan valmistettavat valmisteet ja käytettävät raaka-aineet
+    if (empty($row["Tilaus"]) or empty($valmistettavat)) {
+      echo "<font class='error'>".t("Yhtään valmistettavaa tilausta/tuotetta ei löytynyt")."!</font>";
+      exit;
+    }
+
+    // Haetaan valmistettavat valmisteet ja käytettävät raaka-aineet
     $query = "SELECT tilausrivi.nimitys,
               tilausrivi.tuoteno,
               tilkpl tilattu,

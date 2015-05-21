@@ -198,7 +198,10 @@ if (isset($tee) and trim($tee) == 'aja') {
       "kohdevarasto_tunnus" => $kohde["tunnus"],
     );
 
-    $lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde["tunnus"], "G");
+    // halutaan lis‰t‰ tuoteperheen lapsetkin siirtolistalle
+    $perhekielto = "";
+
+    $lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde["tunnus"], "G", $perhekielto);
 
     echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} siirtolistalle {$varastosiirto["tunnus"]}.<br>";
   }

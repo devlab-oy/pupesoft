@@ -228,6 +228,7 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
               AND tuotteen_toimittajat.tuoteno = invrivi.tuoteno)
             WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
             AND inventointilista.tunnus = '{$lista}'
+            AND inventointilistarivi.laskettu - inventointilistarivi.hyllyssa != 0
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
   $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);

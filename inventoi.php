@@ -278,6 +278,9 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
   $rivit = 1;
   $sivulaskuri = 1;
 
+  $_poikkeama_yht = 0;
+  $_poikkeama_yht_eur = 0;
+
   while ($row = mysql_fetch_assoc($res)) {
 
     if ($rivit >= $maxrivit) {
@@ -302,9 +305,13 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $prn .= sprintf('%-5.5s', $row['yksikko']);
 
     $_poikkeama = $row['laskettu'] - $row['hyllyssa'];
+    $_poikkeama_eur = $_poikkeama * $row['kehahin'];
+
+    $_poikkeama_yht += abs($_poikkeama);
+    $_poikkeama_yht_eur += abs($_poikkeama_eur);
 
     $prn .= sprintf('%-10.10s', $_poikkeama);
-    $prn .= sprintf('%-10.10s', round($_poikkeama * $row['kehahin'], $yhtiorow['hintapyoristys']));
+    $prn .= sprintf('%-10.10s', round($_poikkeama_eur, $yhtiorow['hintapyoristys']));
 
     $prn .= sprintf('%-5.5s', $row['rivinro']);
 
@@ -316,6 +323,18 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $rivit++;
     $rivinro++;
   }
+
+  if (($rivit + 3) >= $maxrivit) {
+    $sivulaskuri++;
+    fwrite($fh, str_replace("<SIVUNUMERO>", "{$sivulaskuri} / {$kokonaissivumaara}", $ots));
+    $rivit = 1;
+  }
+
+  $prn = "\n\n";
+  $prn .= sprintf('%-100.100s', t("Poikkeama yhteensä").": {$_poikkeama_yht}")."\n";
+  $prn .= sprintf('%-100.100s', t("Poikkeama yhteensä EUR").": {$_poikkeama_yht_eur}");
+
+  fwrite($fh, $prn);
 
   fclose($fh);
 

@@ -10,6 +10,10 @@ if (!function_exists("toimitustapatarkista")) {
       if (!file_exists("tilauskasittely/".$t[$i])) {
         $virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
       }
+      
+      if ($aputulostustapa == 'L' and strpos($t['rahtikirja'], 'rahtikirja_unifaun') !== FALSE) {
+        $virhe[$i] = t("Virheellinen tulostustapa")."! ". t("Koontierätulostus ei toimi Unifaun Online rahtikirjan kanssa").".";
+      }
     }
 
     if ((mysql_field_name($result, $i)=="tulostustapa") and ($t[$i]!='')) {

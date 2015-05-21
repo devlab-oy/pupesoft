@@ -3018,6 +3018,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='etsi' value='{$etsi}'>";
       echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
+      echo "<input type='hidden' name='limit' value='{$limit}'>";
       echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
       echo "<input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>";
       echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";

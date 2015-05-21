@@ -6518,7 +6518,7 @@ if ($tee == '') {
       $_onkovalmistettavaa = FALSE;
 
       while ($row = mysql_fetch_assoc($result)) {
-        $rows[]  = $row;
+        $rows[] = $row;
 
         // Katotaan onko tilauksella valmistettavia rivejä
         if ($_onko_valmistus and !$_onkovalmistettavaa and in_array($row['tyyppi'], array('W', 'M', 'V')) and $row['varattu'] > 0) {
@@ -10117,10 +10117,7 @@ if ($tee == '') {
           echo "</select>";
         }
 
-        if ((
-            in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
-            or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
-          )
+        if ($_kassamyyntiok
           and $kukarow["extranet"] == ""
           and $kateinen == 'X'
           and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")

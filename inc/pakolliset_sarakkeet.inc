@@ -46,8 +46,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
         "SALDOAIKA",
         "INVENTOINTIAIKA",
         "INVENTOINTIPOIKKEAMA",
-        "INVENTOINTILISTA",
-        "INVENTOINTILISTA_AIKA"
       );
       $joinattavat  = array("TUOTENO" => "tuote");
       $saakopoistaa = TRUE;

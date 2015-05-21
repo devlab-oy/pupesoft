@@ -133,21 +133,24 @@ $res = pupe_query($query);
 while ($row = mysql_fetch_array($res)) {
 
   // Jos yhtiön hinnat eivät sisällä alv:tä
-  if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
-    $myyntihinta          = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
-    $myyntihinta_veroton       = $row["myyntihinta"];
-
-    $myymalahinta          = hintapyoristys($row["myymalahinta"] * (1+($row["alv"]/100)));
-    $myymalahinta_veroton       = $row["myymalahinta"];
+  if ($yhtiorow["alv_kasittely"] != "") {
+    
+    // Anviassa myyntihintaan verot päälle
+    if ($verkkokauppatyyppi == 'anvia') {
+      $myyntihinta         = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
+    }
+    else {
+      $myyntihinta         = $row["myyntihinta"];
+    }
+    $myyntihinta_veroton   = $row["myyntihinta"];
   }
   else {
-    $myyntihinta          = $row["myyntihinta"];
-    $myyntihinta_veroton       = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
-
-    $myymalahinta          = $row["myymalahinta"];
-    $myymalahinta_veroton       = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
+    $myyntihinta           = $row["myyntihinta"];
+    $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($row["alv"]/100)));
   }
 
+  $myymalahinta          = $row["myymalahinta"];
+  $myymalahinta_veroton  = hintapyoristys($row["myymalahinta"] / (1+($row["alv"]/100)));
 
   $asiakashinnat = array ();
   if (isset($tuotteiden_asiakashinnat_magentoon)) {
@@ -601,13 +604,20 @@ $res = pupe_query($query);
 while ($row = mysql_fetch_array($res)) {
 
   // Jos yhtiön hinnat eivät sisällä alv:tä
-  if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
-    $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
-    $hinta_veroton       = $row["hinta"];
+  if ($yhtiorow["alv_kasittely"] != "") {
+
+    // Anviassa myyntihintaan verot päälle
+    if ($verkkokauppatyyppi == 'anvia') {
+      $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
+    }
+    else {
+      $hinta          = $row["hinta"];
+    }
+    $hinta_veroton    = $row["hinta"];
   }
   else {
-    $hinta           = $row["hinta"];
-    $hinta_veroton      = hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
+    $hinta            = $row["hinta"];
+    $hinta_veroton    = hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
   }
 
   $dnshinnasto[] = array(  'tuoteno'        => $row["tuoteno"],
@@ -719,20 +729,24 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
     }
 
     // Jos yhtiön hinnat eivät sisällä alv:tä
-    if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
-      $myyntihinta          = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
-      $myyntihinta_veroton       = $alirow["myyntihinta"];
-
-      $myymalahinta          = hintapyoristys($alirow["myymalahinta"] * (1+($alirow["alv"]/100)));
-      $myymalahinta_veroton       = $alirow["myymalahinta"];
+    if ($yhtiorow["alv_kasittely"] != "") {
+    
+      // Anviassa myyntihintaan verot päälle
+      if ($verkkokauppatyyppi == 'anvia') {
+        $myyntihinta         = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
+      }
+      else {
+        $myyntihinta         = $alirow["myyntihinta"];
+      }
+      $myyntihinta_veroton   = $alirow["myyntihinta"];
     }
     else {
-      $myyntihinta          = $alirow["myyntihinta"];
-      $myyntihinta_veroton       = hintapyoristys($alirow["myyntihinta"] / (1+($alirow["alv"]/100)));
-
-      $myymalahinta          = $alirow["myymalahinta"];
-      $myymalahinta_veroton       = hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
+      $myyntihinta           = $alirow["myyntihinta"];
+      $myyntihinta_veroton   = hintapyoristys($row["myyntihinta"] / (1+($alirow["alv"]/100)));
     }
+
+    $myymalahinta          = $alirow["myymalahinta"];
+    $myymalahinta_veroton  = hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
     $query = "SELECT t0.nimi node, t0.lft,

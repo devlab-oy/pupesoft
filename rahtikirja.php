@@ -2714,8 +2714,20 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
             AND tunnus  = '{$otsik['liitostunnus']}'";
   $as_chk_res = pupe_query($query);
   $as_chk_row = mysql_fetch_assoc($as_chk_res);
+  
+  if (!$toimitustapa_row) {
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND selite  = '$toimitustapa'";
+    $toimitustapa_res = pupe_query($query);
+    $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+  }
+  
+  // ei esit‰ytet‰ koonti-tulostustavoissa rahtikirjatietoja ker‰yserien ollessa p‰‰ll‰
+  $_tulostustapa_chk = (!in_array($toimitustapa_row['tulostustapa'], array('K', 'L')));
 
-  if ($id != 'dummy' and $mista != 'rahtikirja-tulostus.php' and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $as_chk_row['kerayserat'] == 'A'))) {
+  if ($_tulostustapa_chk and $id != 'dummy' and $mista != 'rahtikirja-tulostus.php' and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $as_chk_row['kerayserat'] == 'A'))) {
 
     if (strpos($tunnukset, ',') !== FALSE) {
       $rahti_otsikot = " AND otsikkonro in ({$tunnukset}) ";

@@ -39,7 +39,10 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 }
 
-if (!$loyty) exit;
+if (!$loyty) {
+  echo "Konversioajo on jo tehty!";
+  exit;
+}
 
 $query = "SELECT yhtio
           FROM yhtio";
@@ -133,3 +136,13 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
     }
   }
 }
+
+$query = "ALTER TABLE tuotepaikat
+          DROP inventointilista,
+          DROP inventointilista_aika,
+          DROP inventointilista_naytamaara,
+          DROP INDEX yhtio_inventointilista_aika,
+          DROP INDEX yhtio_inventointilista";
+pupe_query($query);
+
+echo "Done!";

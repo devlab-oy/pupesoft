@@ -11,7 +11,7 @@
     </tr>
 
     <?php foreach($tuotteet as $tuote) { ?>
-      <?php if ($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') { ?>
+      <?php if ($tuote['inventointilista'] !== null) { ?>
         <tr>
           <td><?php echo $tuote['tuoteno'] ?></td>
           <td><?php echo $tuote['tuotepaikka'] ?></td>
@@ -26,7 +26,7 @@
         <tr>
           <td><a href='inventointi.php?<?php echo $url ?>'><?php echo $tuote['tuoteno'] ?></a></td>
           <td><?php echo $tuote['tuotepaikka'] ?></td>
-          <td><?php if($tuote['inventointilista'] != 0 and $tuote['inventointilista_aika'] != '0000-00-00 00:00:00') echo "(listalla {$tuote['inventointilista']})" ?></td>
+          <td><?php if($tuote['inventointilista'] !== null) echo "(listalla {$tuote['inventointilista']})" ?></td>
         </tr>
       <?php } ?>
     <?php } ?>

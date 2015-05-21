@@ -720,10 +720,12 @@ if ($tila == "" and !isset($jatka)) {
 
       $asiakasid = substr($asiakasid, 1);
 
-      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*,  lasku.hyvaksynnanmuutos as luokka
+      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*,  lasku.hyvaksynnanmuutos as luokka,
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                 LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                  WHERE lasku.tunnus = '$asiakasid'";
 
       $srow_from = "LASKU";
@@ -750,19 +752,23 @@ if ($tila == "" and !isset($jatka)) {
       $srow_from = "ASIAKAS";
     }
     elseif ($kopioitava_otsikko > 0) {
-      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka,
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                 LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                  WHERE lasku.tunnus = '$kopioitava_otsikko'";
 
       $srow_from = "LASKU";
     }
     else {
-      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+      $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka,
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                 LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                  WHERE lasku.tunnus = '$kukarow[kesken]'";
 
       $srow_from = "LASKU";
@@ -3665,6 +3671,17 @@ if (isset($jatka)) {
     $keraysvkopva  = "";
   }
 
+  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+    //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+    //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
+      $toimpp = $kerpp;
+      $toimkk = $kerkk;
+      $toimvv = $kervv;
+      $toimvko = $keraysvko;
+    }
+  }
+
   if ($kukarow["kesken"] == 0) {
     $query = "INSERT into ";
     $postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
@@ -3959,17 +3976,6 @@ if (isset($jatka)) {
 
   if ($apuval == $valkoodi) {
     $kurssi = $apukurssi;
-  }
-
-  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
-    //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
-    //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
-      $toimpp = $kerpp;
-      $toimkk = $kerkk;
-      $toimvv = $kervv;
-      $toimvko = $keraysvko;
-    }
   }
 
   if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {

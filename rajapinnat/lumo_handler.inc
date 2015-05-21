@@ -5,9 +5,11 @@
  * Tarvitaan $tilausnumero, $korttimaksu (summa)
  * Maksutapahtuman tila tarkastetaan ensin aina tietokannasta ja ajetaan vasta sitten maksupäätteelle
  * Settaa lopuksi muuttujat käyttöliittymää varten
- **/
+ *
+ */
 
-require_once("rajapinnat/lumo_client.php");
+
+require_once "rajapinnat/lumo_client.php";
 
 $korttimaksu   = str_replace(",", ".", $korttimaksu);
 $korttimaksu_f = $korttimaksu * 100;
@@ -26,9 +28,9 @@ else {
 
 
 // 1 = tee maksutapahtuma, 2 = hae asiakkaan kuitti, 3 = hae kauppiaan kuitti
-$suoritukset = array (1,2,3);
+$suoritukset = array (1, 2, 3);
 
-foreach($suoritukset as $suoritus) {
+foreach ($suoritukset as $suoritus) {
 
   if ($suoritus == 1) $onnistuuko = false;
 
@@ -37,19 +39,19 @@ foreach($suoritukset as $suoritus) {
   $lumo_service_port = $lumo_ip[1] ? $lumo_ip[1] : 1234;
 
   // Jos käyttäjältä puuttuu maksupäätteen IP
-  if(empty($lumo_service_address)) {
+  if (empty($lumo_service_address)) {
     $onnistuuko = "Maksupäätettä ei ole konfiguroitu oikein tälle käyttäjälle";
     break;
   }
 
   // Jos puuttuu jostain syystä tilausnumero
-  if(!isset($tilausnumero) or trim($tilausnumero) == '') {
+  if (!isset($tilausnumero) or trim($tilausnumero) == '') {
     $onnistuuko = "Tilausnumero kadonnut, maksutapahtumaa ei voi tehdä";
     break;
   }
 
   // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
-  if(is_numeric($korttimaksu_f) and $voi_maksaa_viela) {
+  if (is_numeric($korttimaksu_f) and $voi_maksaa_viela) {
     // Jos maksutapahtuma epäonnistui niin ei tehdä mitään
     if ($suoritus > 1 and $onnistuuko != "VELOITETTU") break;
 
@@ -61,122 +63,122 @@ foreach($suoritukset as $suoritus) {
     }
 
     switch ($suoritus) {
-      case '1':
-        // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
-        if ($korttimaksu_f >= 1) {
-         $onnistuuko = $clientti->startTransaction($korttimaksu_f);
-        }
-        elseif($korttimaksu_f < 0) {
-          // Jos summa on negatiivinen tehdään hyvitys/peruutus
-          // Dummyarkistointitunnus
-          $arkistointitunnus = 999999999999;
-          // Haetaan viimeisimmän onnistuneen maksusuorituksen kuitti
-          $query = "SELECT asiakkaan_kuitti
+    case '1':
+      // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
+      if ($korttimaksu_f >= 1) {
+        $onnistuuko = $clientti->startTransaction($korttimaksu_f);
+      }
+      elseif ($korttimaksu_f < 0) {
+        // Jos summa on negatiivinen tehdään hyvitys/peruutus
+        // Dummyarkistointitunnus
+        $arkistointitunnus = 999999999999;
+        // Haetaan viimeisimmän onnistuneen maksusuorituksen kuitti
+        $query = "SELECT asiakkaan_kuitti
                     FROM maksupaatetapahtumat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausnumero = '{$tilausnumero}'
-                    AND tila = 'K'
+                    WHERE yhtio           = '{$kukarow['yhtio']}'
+                    AND tilausnumero      = '{$tilausnumero}'
+                    AND tila              = 'K'
                     AND asiakkaan_kuitti != ''
                     ORDER BY luontiaika desc
                     LIMIT 1";
-          $res = pupe_query($query);
-          $kuittirivi = mysql_fetch_assoc($res);
+        $res = pupe_query($query);
+        $kuittirivi = mysql_fetch_assoc($res);
 
-          if(isset($kuittirivi['asiakkaan_kuitti']) and !empty($kuittirivi['asiakkaan_kuitti'])) {
-            $kaikki_kuittirivit = explode("\n",$kuittirivi['asiakkaan_kuitti']);
+        if (isset($kuittirivi['asiakkaan_kuitti']) and !empty($kuittirivi['asiakkaan_kuitti'])) {
+          $kaikki_kuittirivit = explode("\n", $kuittirivi['asiakkaan_kuitti']);
 
-            foreach($kaikki_kuittirivit as $kuitin_rivi) {
-              list($rivinotsikko, $rivintieto) = explode(":",$kuitin_rivi);
-              // Etsitään kuittiriviltä arkistointitunnusta
-              if(trim($rivinotsikko) == "AVIITE") {
-                $arkistointitunnus = trim($rivintieto);
-                break;
-              }
+          foreach ($kaikki_kuittirivit as $kuitin_rivi) {
+            list($rivinotsikko, $rivintieto) = explode(":", $kuitin_rivi);
+            // Etsitään kuittiriviltä arkistointitunnusta
+            if (trim($rivinotsikko) == "AVIITE") {
+              $arkistointitunnus = trim($rivintieto);
+              break;
             }
           }
-          // Jos käyttöliittymässä summa on negatiivinen, muutetaan maksupäätteelle
-          $korttimaksu_f = $korttimaksu_f * -1;
-          $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,$arkistointitunnus);
         }
-        elseif ($peruutus == "X") {
-          $query = "SELECT *
+        // Jos käyttöliittymässä summa on negatiivinen, muutetaan maksupäätteelle
+        $korttimaksu_f = $korttimaksu_f * -1;
+        $onnistuuko = $clientti->startTransaction($korttimaksu_f, 1, $arkistointitunnus);
+      }
+      elseif ($peruutus == "X") {
+        $query = "SELECT *
                     FROM maksupaatetapahtumat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausnumero = '{$tilausnumero}'
-                    AND tila = 'K'
+                    WHERE yhtio           = '{$kukarow['yhtio']}'
+                    AND tilausnumero      = '{$tilausnumero}'
+                    AND tila              = 'K'
                     AND asiakkaan_kuitti != ''
                     ORDER BY luontiaika desc
                     LIMIT 1";
 
-          $res        = pupe_query($query);
-          $kuittirivi = mysql_fetch_assoc($res);
+        $res        = pupe_query($query);
+        $kuittirivi = mysql_fetch_assoc($res);
 
-          if (isset($kuittirivi['asiakkaan_kuitti']) and !empty($kuittirivi['asiakkaan_kuitti'])) {
-            $kaikki_kuittirivit = explode("\n", $kuittirivi['asiakkaan_kuitti']);
+        if (isset($kuittirivi['asiakkaan_kuitti']) and !empty($kuittirivi['asiakkaan_kuitti'])) {
+          $kaikki_kuittirivit = explode("\n", $kuittirivi['asiakkaan_kuitti']);
 
-            foreach ($kaikki_kuittirivit as $kuitin_rivi) {
-              list($rivinotsikko, $rivintieto) = explode(":", $kuitin_rivi);
-              // Etsitään kuittiriviltä arkistointitunnusta
-              if (trim($rivinotsikko) == "AVIITE") {
-                $arkistointitunnus = trim($rivintieto);
-                break;
-              }
+          foreach ($kaikki_kuittirivit as $kuitin_rivi) {
+            list($rivinotsikko, $rivintieto) = explode(":", $kuitin_rivi);
+            // Etsitään kuittiriviltä arkistointitunnusta
+            if (trim($rivinotsikko) == "AVIITE") {
+              $arkistointitunnus = trim($rivintieto);
+              break;
             }
           }
-
-          $korttimaksu   = $kuittirivi["summa_valuutassa"];
-          $korttimaksu_f = str_replace(",", ".", $korttimaksu);
-          $korttimaksu_f = $korttimaksu_f * 100;
-          $onnistuuko    = $clientti->startTransaction($korttimaksu_f, 1, $arkistointitunnus);
-          $korttimaksu   = $korttimaksu * -1;
-        }
-        else {
-          $onnistuuko = "HYLÄTTY";
-        }
-        $onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
-        break;
-
-      case '2':
-        $kuitti1 = $clientti->getCustomerReceipt();
-        $kuitti1 = utf8_decode($kuitti1);
-        $pankkivailuotto = '';
-        $maksutyyppi = '';
-
-        if(strpos($kuitti1, "LUOTTOKORTTI") !== false) {
-          $pankkivailuotto = 'LUOTTOKORTTI';
-          $maksupaate_maksetut['luottokortti'] += $korttimaksu;
-        }
-        elseif(strpos($kuitti1, "PANKKIKORTTI") !== false) {
-          $pankkivailuotto = 'PANKKIKORTTI';
-          $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
-        }
-        else {
-          // Failsafe jos kuitilta ei jostain syystä löydy pankki/luottokorttitekstiä Suomeksi
-          $pankkivailuotto = 'PANKKIKORTTI';
-          $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
 
-        if(strpos($kuitti1, "PERUUTUS") !== false) {
-          $maksutyyppi = "PERUUTUS";
-        }
-        elseif(strpos($kuitti1, "HYVITYS") !== false) {
-          $maksutyyppi = "HYVITYS";
-        }
-        else {
-          $maksutyyppi = "OSTO";
-        }
+        $korttimaksu   = $kuittirivi["summa_valuutassa"];
+        $korttimaksu_f = str_replace(",", ".", $korttimaksu);
+        $korttimaksu_f = $korttimaksu_f * 100;
+        $onnistuuko    = $clientti->startTransaction($korttimaksu_f, 1, $arkistointitunnus);
+        $korttimaksu   = $korttimaksu * -1;
+      }
+      else {
+        $onnistuuko = "HYLÄTTY";
+      }
+      $onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
+      break;
 
-        break;
+    case '2':
+      $kuitti1 = $clientti->getCustomerReceipt();
+      $kuitti1 = utf8_decode($kuitti1);
+      $pankkivailuotto = '';
+      $maksutyyppi = '';
 
-      case '3':
-        $kuitti2 = $clientti->getMerchantReceipt();
-        $kuitti2 = utf8_decode($kuitti2);
+      if (strpos($kuitti1, "LUOTTOKORTTI") !== false) {
+        $pankkivailuotto = 'LUOTTOKORTTI';
+        $maksupaate_maksetut['luottokortti'] += $korttimaksu;
+      }
+      elseif (strpos($kuitti1, "PANKKIKORTTI") !== false) {
+        $pankkivailuotto = 'PANKKIKORTTI';
+        $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
+      }
+      else {
+        // Failsafe jos kuitilta ei jostain syystä löydy pankki/luottokorttitekstiä Suomeksi
+        $pankkivailuotto = 'PANKKIKORTTI';
+        $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
+      }
 
-        if (strpos($kuitti2, "ALLEKIRJOITUS")) {
-          require("tilauskasittely/tulosta_asiakkaan_kuitti.inc");
-          tulosta_kauppiaan_kuitti($kuitti2, $kukarow["kuittitulostin"]);
-        }
-        break;
+      if (strpos($kuitti1, "PERUUTUS") !== false) {
+        $maksutyyppi = "PERUUTUS";
+      }
+      elseif (strpos($kuitti1, "HYVITYS") !== false) {
+        $maksutyyppi = "HYVITYS";
+      }
+      else {
+        $maksutyyppi = "OSTO";
+      }
+
+      break;
+
+    case '3':
+      $kuitti2 = $clientti->getMerchantReceipt();
+      $kuitti2 = utf8_decode($kuitti2);
+
+      if (strpos($kuitti2, "ALLEKIRJOITUS")) {
+        require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+        tulosta_kauppiaan_kuitti($kuitti2, $kukarow["kuittitulostin"]);
+      }
+      break;
     }
 
     // Tuhotaan objekti että socketti sulkeutuu
@@ -208,24 +210,24 @@ if ($status == 'K' or $status == 'H') {
 
   $kuittilisa = "";
 
-  if(!empty($kuitti1)) {
+  if (!empty($kuitti1)) {
     $kuittilisa .= " asiakkaan_kuitti = '{$kuitti1}', ";
   }
 
-  if(!empty($kuitti2)) {
+  if (!empty($kuitti2)) {
     $kuittilisa .= " kauppiaan_kuitti = '{$kuitti2}', ";
   }
 
   $query = "INSERT INTO maksupaatetapahtumat SET
-            yhtio = '{$kukarow['yhtio']}',
+            yhtio            = '{$kukarow['yhtio']}',
             $kuittilisa
-            maksutapa = '{$pankkivailuotto}',
-            luontiaika  = now(),
-            muutospvm   = now(),
-            laatija = 'Lumo',
-            valkoodi = '{$laskurow['valkoodi']}',
-            tila = '{$status}',
-            tilausnumero = '{$tilausnumero}',
+            maksutapa        = '{$pankkivailuotto}',
+            luontiaika       = now(),
+            muutospvm        = now(),
+            laatija          = 'Lumo',
+            valkoodi         = '{$laskurow['valkoodi']}',
+            tila             = '{$status}',
+            tilausnumero     = '{$tilausnumero}',
             summa_valuutassa = $korttimaksu
             ";
   $result = pupe_query($query);

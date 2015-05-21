@@ -30,6 +30,8 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
+$ajotext = "";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -39,7 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  $paiva_ajo = TRUE;
+
+  if (strtoupper($argv[2]) == 'WEEKLY') {
+    $weekly_ajo = TRUE;
+    $ajotext = "weekly_";
+  }
+  else {
+    $paiva_ajo = TRUE;
+  }
 }
 
 // Yhtiö
@@ -58,7 +67,7 @@ if (@include "inc/tecdoc.inc") {
 
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/product_replacement_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_replacement_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -112,7 +121,6 @@ while ($row = mysql_fetch_assoc($res)) {
              JOIN tuote on (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
              WHERE korvaavat.yhtio = '{$yhtio}'
              AND korvaavat.id      = '{$row['id']}'
-             {$korvaavatrajaus}
              ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $kresult = pupe_query($kquery);
 
@@ -140,7 +148,7 @@ while ($row = mysql_fetch_assoc($res)) {
 fclose($fp);
 
 // Tehdään FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;

@@ -135,13 +135,14 @@ if (!function_exists("relex_product_ostoehdotus_update")) {
 $_tuoterajaus_ilman_hakukenttia = $tuoterajaus;
 $_tuoterajaus = "";
 $tehdaan_updatefile = FALSE;
+$_tee_ostoehdotus_update = ($paiva_ajo or $weekly_ajo);
 
 foreach ($update_kentat as $_kentta) {
 
   // siivotaan eka tuoterajaukset ilman spessukenttiä
   $_hakukentta_loytyi = strpos($_tuoterajaus_ilman_hakukenttia, "tuote.$_kentta");
 
-  if ($_hakukentta_loytyi !== FALSE and $paiva_ajo) {
+  if ($_hakukentta_loytyi !== FALSE and $_tee_ostoehdotus_update) {
 
     $_rajaus_alkaa_hakukentalla = substr($_tuoterajaus_ilman_hakukenttia, $_hakukentta_loytyi);
     $_rajaukset = explode(" AND", $_rajaus_alkaa_hakukentalla);
@@ -150,7 +151,7 @@ foreach ($update_kentat as $_kentta) {
   }
 
   // spessukentät läpi
-  $tuoterajaus_kentta = relex_product_ostoehdotus_update($_kentta, $tuoterajaus, $paiva_ajo);
+  $tuoterajaus_kentta = relex_product_ostoehdotus_update($_kentta, $tuoterajaus, $_tee_ostoehdotus_update);
 
   if ($tuoterajaus_kentta) {
     $_tuoterajaus .= "({$tuoterajaus_kentta}) OR ";
@@ -215,7 +216,7 @@ if ($_tuoterajaus) {
   fclose($ofp);
 
   // Tehdään FTP-siirto
-  if ($paiva_ajo and !empty($relex_ftphost)) {
+  if ($_tee_ostoehdotus_update and !empty($relex_ftphost)) {
     // Tuotetiedot
     $ftphost = $relex_ftphost;
     $ftpuser = $relex_ftpuser;
@@ -673,6 +674,9 @@ while ($row = mysql_fetch_assoc($res)) {
 
       // Haetaan ostohinta
       list($ostohinta, $netto, $alennus, $valuutta) = alehinta_osto($laskurow, array("tuoteno" => $row['tuoteno']), 1, '', '', '');
+
+      // kerrotaan ostohinta tuotekertoimella, jotta saadaan yhden kpl ostohinta
+      $ostohinta = $ostohinta * $ttrow['tuotekerroin'];
 
       $alennukset      = 1;
       $ostohinta_netto = $ostohinta;

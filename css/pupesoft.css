@@ -199,3 +199,15 @@ ul.list-unstyled {
 .right {
   float: right;
 }
+
+.clear {
+  clear: both;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}

@@ -205,6 +205,145 @@ if ($tee == "FILE") {
   }
 }
 
+if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '') {
+
+  $query = "SELECT inventointilista.vapaa_teksti,
+            invrivi.rivinro,
+            invrivi.hyllyalue,
+            invrivi.hyllynro,
+            invrivi.hyllyvali,
+            invrivi.hyllytaso,
+            invrivi.tuoteno,
+            tuote.nimitys,
+            tuote.yksikko,
+            invrivi.hyllyssa,
+            invrivi.laskettu,
+            tuote.kehahin,
+            GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
+            FROM inventointilista
+            JOIN inventointilistarivi AS invrivi ON (invrivi.yhtio = inventointilista.yhtio
+              AND invrivi.otunnus = inventointilista.tunnus)
+            JOIN tuote ON (tuote.yhtio = invrivi.yhtio AND tuote.tuoteno = invrivi.tuoteno)
+            LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = invrivi.yhtio
+              AND tuotteen_toimittajat.tuoteno = invrivi.tuoteno)
+            WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
+            AND inventointilista.tunnus = '{$lista}'
+            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
+  $res = pupe_query($query);
+  $row = mysql_fetch_assoc($res);
+
+  mysql_data_seek($res, 0);
+
+  $vapaa_teksti = $row['vapaa_teksti'];
+
+  list($usec, $sec) = explode(' ', microtime());
+  mt_srand((float) $sec + ((float) $usec * 100000));
+  $filenimi  = "/tmp/".preg_replace("/[^a-z0-9\-_]/i", "", t("Inventointierolista")."-";
+  $filenimi .= md5(uniqid(mt_rand(), true))).".txt";
+  $fh = fopen($filenimi, "w+");
+
+  //rivinleveys default
+  $rivinleveys = 147;
+  $maxrivit = 17;
+
+  $pp = date('d');
+  $kk = date('m');
+  $vv = date('Y');
+  $kello = date('H:i:s');
+
+  $ots  = t("Inventointierolista")."\t".t("Sivu")." <SIVUNUMERO>\n";
+  $ots .= t("Listanumero").": {$lista}\t\t{$yhtiorow['nimi']}\t\t{$pp}.{$kk}.{$vv} - {$kello}\n\n";
+  $ots .= t("Vapaa teksti").": {$vapaa_teksti}\n\n";
+  $ots .= sprintf('%-5.5s', "#");
+  $ots .= sprintf('%-18.14s', t("Paikka"));
+  $ots .= sprintf('%-21.21s', t("Tuoteno"));
+  $ots .= sprintf('%-21.21s', t("Toim.Tuoteno"));
+  $ots .= sprintf('%-35.33s', t("Nimitys"));
+  $ots .= sprintf('%-10.10s', t("Hyllyssä"));
+  $ots .= sprintf('%-10.10s', t("Laskettu"));
+  $ots .= sprintf('%-5.5s', t("Yks."));
+  $ots .= sprintf('%-10.10s', t("Poikkeama"));
+  $ots .= sprintf('%-10.10s', t("Poik. EUR"));
+  $ots .= sprintf('%-5.5s', "#");
+
+  $ots .= "\n";
+  $ots .= "__________________________________________________________________________________";
+  $ots .= "_________________________________________________________________\n";
+
+  $kokonaissivumaara = ceil(mysql_num_rows($res) / 16);
+
+  fwrite($fh, str_replace("<SIVUNUMERO>", "1 / {$kokonaissivumaara}", $ots));
+  $ots = chr(12).$ots;
+
+  $rivit = 1;
+  $sivulaskuri = 1;
+
+  while ($row = mysql_fetch_assoc($res)) {
+
+    if ($rivit >= $maxrivit) {
+      $sivulaskuri++;
+      fwrite($fh, str_replace("<SIVUNUMERO>", "{$sivulaskuri} / {$kokonaissivumaara}", $ots));
+      $rivit = 1;
+    }
+
+    $prn = "\n";
+
+    if ($rivit > 1) $prn .= "\n";
+
+    $prn .= sprintf('%-5.5s', $row['rivinro']);
+
+    $_paikka = "{$row['hyllyalue']}-{$row['hyllynro']}-{$row['hyllyvali']}-{$row['hyllytaso']}";
+    $prn .= sprintf('%-18.14s', $_paikka);
+    $prn .= sprintf('%-21.20s', $row['tuoteno']);
+    $prn .= sprintf('%-21.20s', $row['toim_tuoteno']);
+    $prn .= sprintf('%-35.33s', $row['nimitys']);
+    $prn .= sprintf('%-10.09s', $row['hyllyssa']);
+    $prn .= sprintf('%-10.09s', $row['laskettu']);
+    $prn .= sprintf('%-5.5s', $row['yksikko']);
+
+    $_poikkeama = $row['laskettu'] - $row['hyllyssa'];
+
+    $prn .= sprintf('%-10.10s', $_poikkeama);
+    $prn .= sprintf('%-10.10s', round($_poikkeama * $row['kehahin'], $yhtiorow['hintapyoristys']));
+
+    $prn .= sprintf('%-5.5s', $row['rivinro']);
+
+    $prn .= "\n";
+    $prn .= "____________________________________________________________________________";
+    $prn .= "_______________________________________________________________________";
+
+    fwrite($fh, $prn);
+    $rivit++;
+    $rivinro++;
+  }
+
+  fclose($fh);
+
+  system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
+
+  if ($komento["Inventointierolista"] == 'email') {
+
+    system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+
+    $liite = $filenimi.".pdf";
+    $kutsu = t("Inventointierolista")."_$lista";
+
+    require "inc/sahkoposti.inc";
+  }
+  else {
+    // itse print komento...
+    $line = exec("{$komento['Inventointierolista']} ".$filenimi.".ps");
+  }
+
+  echo "<font class='message'>", t("Inventointierolista tulostuu!"), "</font><br><br>";
+
+  //poistetaan tmp file samantien kuleksimasta...
+  unlink($filenimi);
+  unlink($filenimi.".ps");
+
+  $tee = "INVENTOI";
+}
+
 //tuotteen varastostatus
 if ($tee == 'VALMIS') {
 
@@ -2092,6 +2231,40 @@ if ($tee == 'INVENTOI') {
   }
 
   echo "</form>";
+
+  if ($yhtiorow['laaja_inventointilista'] != '' and $lista != '') {
+    echo "<br><br>";
+
+    echo "<form name='inve' method='post' autocomplete='off'>";
+    echo "<input type='hidden' name='toim' value='$toim'>";
+    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='hidden' name='tee' value='EROLISTA'>";
+    echo "<input type='hidden' name='lista' value='$lista'>";
+    echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
+    echo "<input type='hidden' name='alku' value='$alku'>";
+    echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
+    echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
+    echo "<input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>";
+    echo "<input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>";
+    echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
+
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              ORDER BY kirjoitin";
+    $kires = pupe_query($query);
+
+    echo "<select name='komento[Inventointierolista]'>";
+
+    while ($kirow = mysql_fetch_assoc($kires)) {
+      echo "<option value='{$kirow['komento']}'>{$kirow['kirjoitin']}</option>";
+    }
+
+    echo "</select>";
+
+    echo "<input type='submit' name='erolista' value='",t("Erolista"),"'>";
+    echo "</form>";
+  }
 }
 
 if ($tee == 'MITATOI') {

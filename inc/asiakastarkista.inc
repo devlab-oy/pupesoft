@@ -73,7 +73,7 @@ if (!function_exists("asiakastarkista")) {
           if ($alias_set != "PROSPEKTI") {
             $t['luottoraja'] = mysql_result($res, 0);
           }
-          elseif ($asiak_laji == "") {
+          elseif ($asiak_laji == "" and $alias_set == "PROSPEKTI") {
             // P‰ivitet‰‰n prospektien luottoraja,
             // mutta vasta kun tehd‰‰n prospektista normiasiakas
             $_luottoraja = mysql_result($res, 0);

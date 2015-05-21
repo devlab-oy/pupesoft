@@ -312,21 +312,27 @@ if ($tee == 'paikat') {
           $ptunnus = $rivivarasto[$tun];
         }
 
-        $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$ptunnus'
-                  and tuoteno = '$tilausrivirow[tuoteno]'";
+                  LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                    AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                    AND inventointilistarivi.tila = 'A')
+                  WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                  and tuotepaikat.tunnus  = '{$ptunnus}'
+                  and tuotepaikat.tuoteno = '{$tilausrivirow['tuoteno']}'";
       }
       else {
-        $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
+        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
-                  WHERE yhtio   = '$kukarow[yhtio]'
-                  and hyllyalue = '$t1[$tun]'
-                  and hyllynro  = '$t2[$tun]'
-                  and hyllyvali = '$t3[$tun]'
-                  and hyllytaso = '$t4[$tun]'
-                  and tuoteno   = '$tilausrivirow[tuoteno]'";
+                  LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                    AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                    AND inventointilistarivi.tila = 'A')
+                  WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
+                  and tuotepaikat.hyllyalue = '{$t1[$tun]}'
+                  and tuotepaikat.hyllynro  = '{$t2[$tun]}'
+                  and tuotepaikat.hyllyvali = '{$t3[$tun]}'
+                  and tuotepaikat.hyllytaso = '{$t4[$tun]}'
+                  and tuotepaikat.tuoteno   = '{$tilausrivirow['tuoteno']}'";
       }
 
       $result = pupe_query($query);
@@ -396,7 +402,7 @@ if ($tee == 'paikat') {
       else {
         $paikkarow = mysql_fetch_assoc($result);
 
-        if ($paikkarow["inventointilista_aika"] > 0) {
+        if ($paikkarow["inventointilistatunnus"] !== null) {
           if ($echotaanko) {
             echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
           }
@@ -439,18 +445,19 @@ if ($tee == 'paikat') {
     }
 
     //haetaan antavan varastopaikan tunnus
-    $query = "SELECT inventointilista_aika
-              FROM tuotepaikat
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and hyllyalue = '$tilausrivirow[hyllyalue]'
-              and hyllynro  = '$tilausrivirow[hyllynro]'
-              and hyllyvali = '$tilausrivirow[hyllyvali]'
-              and hyllytaso = '$tilausrivirow[hyllytaso]'
-              and tuoteno   = '$tilausrivirow[tuoteno]'";
+    $query = "SELECT inventointilistarivi.tunnus
+              FROM inventointilistarivi
+              WHERE inventointilistarivi.yhtio   = '{$kukarow['yhtio']}'
+              and inventointilistarivi.hyllyalue = '{$tilausrivirow['hyllyalue']}'
+              and inventointilistarivi.hyllynro  = '{$tilausrivirow['hyllynro']}'
+              and inventointilistarivi.hyllyvali = '{$tilausrivirow['hyllyvali']}'
+              and inventointilistarivi.hyllytaso = '{$tilausrivirow['hyllytaso']}'
+              and inventointilistarivi.tuoteno   = '{$tilausrivirow['tuoteno']}'
+              AND inventointilistarivi.tila = 'A'";
     $presult = pupe_query($query);
     $prow = mysql_fetch_assoc($presult);
 
-    if ($prow["inventointilista_aika"] > 0) {
+    if ($prow["tunnus"] !== null) {
       if ($echotaanko) {
         echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
       }

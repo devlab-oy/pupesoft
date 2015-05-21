@@ -137,4 +137,12 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
   }
 }
 
+$query = "ALTER TABLE tuotepaikat
+          DROP inventointilista,
+          DROP inventointilista_aika,
+          DROP inventointilista_naytamaara,
+          DROP INDEX yhtio_inventointilista_aika,
+          DROP INDEX yhtio_inventointilista";
+pupe_query($query);
+
 echo "Done!";

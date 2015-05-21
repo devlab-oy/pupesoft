@@ -133,6 +133,3 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
     }
   }
 }
-
-$query = "ALTER TABLE tuotepaikat DROP COLUMN inventointilista, DROP COLUMN inventointilista_aika, DROP COLUMN inventointilista_naytamaara";
-pupe_query($query);

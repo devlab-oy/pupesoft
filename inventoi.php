@@ -359,11 +359,11 @@ if ($tee == 'VALMIS') {
   $_param_paalla = ($yhtiorow['laaja_inventointilista'] != '');
   $_tallenna = (isset($tallenna_laskettu_hyllyssa) or isset($prev) or isset($next));
 
-  if ($_tallenna) {
+  if (!$_tallenna) {
     $_mennaan = true;
   }
 
-  if ($_param_paalla and $_tallenna and $lista != '' and count($tuote) > 0 and $_mennaan) {
+  if ($_param_paalla and $_tallenna and $lista != '' and count($tuote) > 0) {
 
     foreach ($tuote as $i => $tuotteet) {
 

@@ -1561,6 +1561,18 @@ if ($tee == 'INVENTOI') {
       }
     }
 
+    function verify(){
+      msg = '".t("Oletko varma? Olet inventoimassa koko listaa, haluatko jatkaa?")."';
+
+      if (confirm(msg)) {
+        return true;
+      }
+      else {
+        skippaa_tama_submitti = true;
+        return false;
+      }
+    }
+
     //-->
     </script>";
 
@@ -2065,16 +2077,18 @@ if ($tee == 'INVENTOI') {
   }
 
   if ($yhtiorow['laaja_inventointilista'] != '' and $lista != '') {
-    echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' /> ";
-    echo "<input type='submit' name='prev' value='".t("Edellinen sivu")."'> ";
-    echo "<input type='submit' name='next' value='".t("Seuraava sivu")."'>   ";
-  }
-
-  if ($yhtiorow['laaja_inventointilista'] == '' and $lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
-    echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
+    echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' />&nbsp;";
+    echo "<input type='submit' name='prev' value='".t("Edellinen sivu")."'>&nbsp;";
+    echo "<input type='submit' name='next' value='".t("Seuraava sivu")."'>&nbsp;";
+    echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."' onClick='return verify();' >";
   }
   else {
-    echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
+    if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
+      echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
+    }
+    else {
+      echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
+    }
   }
 
   echo "</form>";

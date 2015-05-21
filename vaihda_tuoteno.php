@@ -170,6 +170,10 @@ $tee            = (isset($tee)) ? $tee : "";
 $jatavanha      = (isset($jatavanha)) ? $jatavanha : "";
 $postit         = (isset($postit)) ? $postit : array();
 $suuraakkosiin  = array();
+$muutataulut    = array(
+  "tuotteen_alv"          => "tuotteen_alv",
+  "yhteensopivuus_tuote"  => "yhteensopivuus_tuote",
+);
 
 if (!isset($muistutus)) $muistutus = "";
 
@@ -539,7 +543,7 @@ if ($error == 0 and $tee == "file") {
                           AND status  not in ('E', 'D')";
                 pupe_query($query);
               }
-              elseif ($taulu == 'tuotteen_alv') {
+              elseif (in_array ($taulu, $muutataulut)) {
                 $query = "UPDATE IGNORE $taulu
                           SET $sarake = '$uustuoteno'
                           WHERE yhtio = '$kukarow[yhtio]'

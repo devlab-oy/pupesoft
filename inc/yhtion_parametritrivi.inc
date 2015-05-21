@@ -430,6 +430,17 @@ if ($fieldname == "varastosiirto_tilausvahvistus") {
   $jatko = 0;
 }
 
+if ($fieldname == "varastosiirto_kohdepaikka") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("N‰ytet‰‰n varaston sis‰isiss‰ siirroissa kohdepaikka")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("N‰ytet‰‰n kaikissa siirroissa kohdepaikka")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostotilaustyyppi") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";

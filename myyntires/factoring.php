@@ -61,15 +61,15 @@ if (isset($maksuehto) and isset($tunnus)) {
 if (isset($maksuehto) and isset($tunnus)) {
 
   // korjaillaan eräpäivät ja kassa-alet
-  if ($mehtorow['abs_pvm'] == '0000-00-00') {
+  if ($mehtorow['abs_pvm'] === null) {
     $erapvm = "adddate('$laskurow[tapvm]', interval $mehtorow[rel_pvm] day)";
   }
   else {
     $erapvm = "'$mehtorow[abs_pvm]'";
   }
 
-  if ($mehtorow['kassa_abspvm'] != '0000-00-00' or $mehtorow["kassa_relpvm"] > 0) {
-    if ($mehtorow['kassa_abspvm'] == '0000-00-00') {
+  if ($mehtorow['kassa_abspvm'] !== null or $mehtorow["kassa_relpvm"] > 0) {
+    if ($mehtorow['kassa_abspvm'] === null) {
       $kassa_erapvm = "adddate('$laskurow[tapvm]', interval $mehtorow[kassa_relpvm] day)";
     }
     else {

@@ -183,17 +183,17 @@ class Edi {
         // Jos alennusprosentti on 0, tarkistetaan viel‰ onko annettu eurom‰‰r‰ist‰ alennusta
         if ($alennusprosentti == 0 and $alennusmaara > 0) {
           // Lasketaan alennusm‰‰r‰ alennusprosentiksi
-          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 2);
+          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 6);
         }
 
         // Verokanta
         $alvprosentti = $_item['tax_percent'];
 
         // Verollinen rivihinta
-        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         // Veroton rivihinta
-        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         $edi_order .= "*RS OSTOTILRIV $i\n";
         $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";

@@ -307,8 +307,8 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $_poikkeama = $row['laskettu'] - $row['hyllyssa'];
     $_poikkeama_eur = $_poikkeama * $row['kehahin'];
 
-    $_poikkeama_yht += abs($_poikkeama);
-    $_poikkeama_yht_eur += abs($_poikkeama_eur);
+    $_poikkeama_yht += $_poikkeama;
+    $_poikkeama_yht_eur += $_poikkeama_eur;
 
     $prn .= sprintf('%-10.10s', $_poikkeama);
     $prn .= sprintf('%-10.10s', round($_poikkeama_eur, $yhtiorow['hintapyoristys']));

@@ -258,13 +258,13 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
   $ots .= sprintf('%-18.14s', t("Paikka"));
   $ots .= sprintf('%-21.21s', t("Tuoteno"));
   $ots .= sprintf('%-21.21s', t("Toim.Tuoteno"));
-  $ots .= sprintf('%-35.33s', t("Nimitys"));
+  $ots .= sprintf('%-33.31s', t("Nimitys"));
   $ots .= sprintf('%-10.10s', t("Hyllyssä"));
   $ots .= sprintf('%-10.10s', t("Laskettu"));
   $ots .= sprintf('%-5.5s', t("Yks."));
   $ots .= sprintf('%-10.10s', t("Poikkeama"));
   $ots .= sprintf('%-10.10s', t("Poik. EUR"));
-  $ots .= sprintf('%-5.5s', "#");
+  $ots .= sprintf('%-6.6s', "#");
 
   $ots .= "\n";
   $ots .= "__________________________________________________________________________________";
@@ -299,10 +299,10 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $prn .= sprintf('%-18.14s', $_paikka);
     $prn .= sprintf('%-21.20s', $row['tuoteno']);
     $prn .= sprintf('%-21.20s', $row['toim_tuoteno']);
-    $prn .= sprintf('%-35.33s', $row['nimitys']);
+    $prn .= sprintf('%-33.31s', $row['nimitys']);
     $prn .= sprintf('%-10.09s', $row['hyllyssa']);
     $prn .= sprintf('%-10.09s', $row['laskettu']);
-    $prn .= sprintf('%-5.5s', $row['yksikko']);
+    $prn .= sprintf('%-6.6s', $row['yksikko']);
 
     $_poikkeama = $row['laskettu'] - $row['hyllyssa'];
     $_poikkeama_eur = $_poikkeama * $row['kehahin'];

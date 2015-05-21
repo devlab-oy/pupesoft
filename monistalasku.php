@@ -1565,6 +1565,9 @@ if ($tee == 'MONISTA') {
           case 'otunnus':
             $values .= ", '{$utunnus}'";
             break;
+          case 'valmnro':
+            $values .= ", ''";
+            break;
           default:
             $values .= ", '".$monistalisrow[$fieldname]."'";
           }
@@ -2176,6 +2179,17 @@ if ($tee == '' and $vain_monista == "") {
     echo "<input type='hidden' name='tee' value='mikrotila'>";
     echo "<br><input type='submit' value='".t("Lue monistettavat laskut tiedostosta")."'>";
     echo "</form>";
+  }
+
+  if (isset($mistatultiin) and $mistatultiin == "maksutapahtumaselaus") {
+    $osoite = "{$palvelin2}tilauskasittely/tilaus_myynti.php?" .
+              "toim=PIKATILAUS&tilausnumero={$utunnus}&lopetus={$lopetus}";
+
+    echo "<script>";
+    echo "$(function() {
+            window.location.replace('{$osoite}');
+          })";
+    echo "</script>";
   }
 
   require 'inc/footer.inc';

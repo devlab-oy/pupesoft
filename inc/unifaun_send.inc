@@ -348,7 +348,11 @@ class Unifaun {
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 
         if ($this->toitarow['virallinen_selite'] == "KKSTD") $rahtisopimusnro = 999999;
-        elseif ($this->toitarow['virallinen_selite'] == "TPSTD" or $this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") $rahtisopimusnro = 123456;
+        elseif ($this->toitarow['virallinen_selite'] == "TPSTD"
+          or $this->toitarow['virallinen_selite'] == "IT09"
+          or $this->toitarow['virallinen_selite'] == "IT14"
+          or $this->toitarow['virallinen_selite'] == "IT16"
+          or $this->toitarow['virallinen_selite'] == "IT21") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
@@ -357,7 +361,10 @@ class Unifaun {
       // Jos sopparinumero on, mutta se on virheellinen
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
 
-        if (($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") and strlen($rahtisopimusnro) != 6) {
+        if (($this->toitarow['virallinen_selite'] == "IT09"
+            or $this->toitarow['virallinen_selite'] == "IT14"
+            or $this->toitarow['virallinen_selite'] == "IT16"
+            or $this->toitarow['virallinen_selite'] == "IT21") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
 
@@ -699,7 +706,10 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
       $uni_add_val->addAttribute('n', 'custno');
 
-      if ($this->toitarow['virallinen_selite'] == "IT09" or $this->toitarow['virallinen_selite'] == "IT14") {
+      if ($this->toitarow['virallinen_selite'] == "IT09"
+        or $this->toitarow['virallinen_selite'] == "IT14"
+        or $this->toitarow['virallinen_selite'] == "IT16"
+        or $this->toitarow['virallinen_selite'] == "IT21") {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
         $uni_add_val->addAttribute('n', "reference");
       }
@@ -713,6 +723,17 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");
     }
+    elseif ($this->toitarow['virallinen_selite'] == "IT16" and $this->postirow["toim_puh"] != "") {
+      $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
+      $uni_addon->addAttribute('adnid', "NOT");
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
+      $uni_add_val->addAttribute('n', "text3");
+
+      if ($this->asiakasrow["email"] != '') {
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->asiakasrow["email"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val->addAttribute('n', "text4");
+      }
+    }
     elseif ($this->toitarow['virallinen_selite'] == "P19") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTLTR");
@@ -721,6 +742,15 @@ class Unifaun {
     if ($this->rakir_row["jv"] != '' or $this->mehto['jv'] != '') {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "COD");
+
+      $uni_par_val = $uni_addon->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"]));   // BIC number
+      $uni_par_val->addAttribute('n', "bank");
+
+      $uni_par_val = $uni_addon->addChild('val', utf8_encode($this->yhtiorow["pankkiiban1"]));   // IBAN account number
+      $uni_par_val->addAttribute('n', "account");
+
+      $uni_par_val = $uni_addon->addChild('val', "IBAN");   // Account type
+      $uni_par_val->addAttribute('n', "accounttype");
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->yhteensa)); // Amount. Used only with add-on COD (Cash On Delivery).
       $uni_add_val->addAttribute('n', "amount");

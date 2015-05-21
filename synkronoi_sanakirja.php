@@ -35,6 +35,14 @@ if ($tee == "TEE" or $tee == "UPDATE") {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $sanakirja = curl_exec($ch);
+
+  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $sanakirja = utf8_encode($sanakirja); //NO_MB_OVERLOAD
+  }
+
   $sanakirja = explode("\n", trim($sanakirja));
 
   // Eka rivi

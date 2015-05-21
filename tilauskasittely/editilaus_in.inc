@@ -105,13 +105,15 @@ if (!function_exists('jt_toimita_editilaus')) {
 }
 
 if (!function_exists('hae_erikoiskaupan_parametrit')) {
-  function hae_erikoiskaupan_parametrit($storename, $verkkokauppa_erikoiskasittely) {
+  function hae_erikoiskaupan_parametrit($storename) {
+    global $verkkokauppa_erikoiskasittely;
 
     foreach ($verkkokauppa_erikoiskasittely as $sp) {
       if (strpos($storename, $sp[0]) !== false) {
         return $sp;
       }
     }
+
     return array();
   }
 }
@@ -693,7 +695,7 @@ while ($tietue = fgets($fd)) {
       and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
-      $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa);
       if (count($e_parametrit) > 0) {
 
         $verkkokauppamyyjanro = $e_parametrit[3];
@@ -1002,7 +1004,7 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == 'magento' and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
-      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa);
       if (count($result) > 0) {
         // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
         $tieto = '';
@@ -1285,8 +1287,12 @@ while ($tietue = fgets($fd)) {
         $editilaus_toimitustapa = $arow["toimitustapa"];
       }
 
-      // jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
-      if ($editilaus_rahtivapaa == '') {
+      $rahtivapaus = hae_erikoiskaupan_parametrit($verkkokauppa);
+      $rahtivapaus = $rahtivapaus[5];
+
+      // jos ei olla pakotettu rahtivapaata, tai poistettu erikoisparametreissä rahtivapautta,
+      // niin otetaan asiakkaan oletus
+      if ($editilaus_rahtivapaa == '' or $rahtivapaus == "E") {
         $editilaus_rahtivapaa = $arow["rahtivapaa"];
       }
 
@@ -1319,7 +1325,7 @@ while ($tietue = fgets($fd)) {
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
         list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) =
-          hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+          hae_erikoiskaupan_parametrit($verkkokauppa);
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
@@ -1970,7 +1976,7 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
-      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa);
       if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
         $editilaus_hinta = 0;
       }

@@ -1512,8 +1512,19 @@ else {
       }
 
       if ($naytamaksupvm != "") {
-        $group .= ",lasku.mapvm";
-        $select .= "lasku.mapvm maksupvm, ";
+        $maksupvm_join = "";
+        // Maksup‰iv‰m‰‰r‰ on varmasti tallennettu vain itse laskulle
+        // tilauksia haettaessa t‰ytyy siis k‰yd‰ katsomassa maksupvm laskulta
+        if ($ajotapa != "lasku") {
+          $maksupvm_join = "LEFT JOIN lasku AS UX ON (UX.yhtio = lasku.yhtio AND UX.laskunro = lasku.laskunro AND UX.tila = 'U')";
+          $group .= ",UX.mapvm";
+          $select .= "UX.mapvm maksupvm, ";
+        }
+        else {
+          $group .= ",lasku.mapvm";
+          $select .= "lasku.mapvm maksupvm, ";
+        }
+
         $gluku++;
         $muutgroups++;
       }
@@ -2300,6 +2311,7 @@ else {
               {$maksuehto_join}
               {$toimtuoteno_join}
               {$lisa_parametri}
+              {$maksupvm_join}
               WHERE lasku.yhtio in ({$yhtio})
               and lasku.tila in ({$tila})";
 

@@ -311,7 +311,7 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $_poikkeama_yht_eur += $_poikkeama_eur;
 
     $prn .= sprintf('%-10.10s', $_poikkeama);
-    $prn .= sprintf('%.2f', round($_poikkeama_eur, $yhtiorow['hintapyoristys']));
+    $prn .= round($_poikkeama_eur, 1);
 
     $prn .= sprintf('%-5.5s', $row['rivinro']);
 

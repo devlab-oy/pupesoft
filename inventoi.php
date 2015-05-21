@@ -238,8 +238,7 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
 
   list($usec, $sec) = explode(' ', microtime());
   mt_srand((float) $sec + ((float) $usec * 100000));
-  $filenimi  = "/tmp/".preg_replace("/[^a-z0-9\-_]/i", "", t("Inventointierolista")."-";
-  $filenimi .= md5(uniqid(mt_rand(), true))).".txt";
+  $filenimi  = "/tmp/".preg_replace("/[^a-z0-9\-_]/i", "", t("Inventointierolista")."-".md5(uniqid(mt_rand(), true))).".txt";
   $fh = fopen($filenimi, "w+");
 
   //rivinleveys default

@@ -9564,16 +9564,27 @@ if ($tee == '') {
     echo "<font class='message'>".t("Tilaus OK, kaikille riveille riitt‰‰ saldoa")."</font><br>";
   }
 
+  // Voidaanko myyd‰ kassamyyntin‰:
+  $_kassamyyntiok = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+    or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
+      or ($toim == 'REKLAMAATIO'
+        and ($yhtiorow['reklamaation_kasittely'] == ''
+          or ($yhtiorow['reklamaation_kasittely'] == 'X'
+            and $laskurow['tilaustyyppi'] == 'U'))));
+
+  // Jos tilausta ei voida hoitaa kassamyyntin‰, niin ei voi myˆsk‰‰n laskuttaa maksup‰‰tteell‰
+  if (!$_kassamyyntiok) $maksupaate_kassamyynti = FALSE;
+
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
-    if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "" and
-      (($muokkauslukko == ""
-          and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE")))
-        or $toim == "PROJEKTI"
-        or $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
-      $tilausok == 0 and
-      $rivilaskuri > 0 and
-      $asiakasOnProspekti != "JOO"
+    if ($maksupaate_kassamyynti and
+        $_kassamyyntiok and
+        $maksuehtorow["kateinen"] != "" and
+        $muokkauslukko == "" and
+        $laskurow["liitostunnus"] != 0 and
+        $tilausok == 0 and
+        $rivilaskuri > 0 and
+        $asiakasOnProspekti != "JOO"
     ) {
       $kateinen = isset($kateinen) ? $kateinen : "";
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
@@ -9955,7 +9966,7 @@ if ($tee == '') {
           ($yhtiorow['reklamaation_kasittely'] == '' or
             ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U')) )) {
 
-        if (($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {
+        if ($_kassamyyntiok and ($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {
           $laskelisa = " / ".t("Laskuta")." $otsikko";
         }
         else {
@@ -10001,7 +10012,9 @@ if ($tee == '') {
           echo "<input type='hidden' name='toimitetaan_ulkomaailta' value='NO'>";
         }
 
-        echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+        if ($_kassamyyntiok) {
+          echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+        }
 
         if (!$maksupaate_kassamyynti or $maksuehtorow["kateinen"] == "") {
           echo "<input type='submit' ACCESSKEY='V' value='$painike_txt'>";

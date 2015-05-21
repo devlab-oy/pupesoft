@@ -2439,7 +2439,7 @@ if (!function_exists('alvierittely')) {
     }
 
     if (($yhtiorow['maksupaate_kassamyynti'] == 'K' and $kukarow["maksupaate_kassamyynti"] == "") or
-        $kukarow["maksupaate_kassamyynti"] == "K"
+      $kukarow["maksupaate_kassamyynti"] == "K"
     ) {
       // Jos maksupääte on enabloitu, tarvitaan myös maksupäätetapahtumien kuitit
       $query = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
@@ -2456,13 +2456,13 @@ if (!function_exists('alvierittely')) {
                 *
                 FROM maksupaatetapahtumat
                 WHERE yhtio ='{$yhtiorow['yhtio']}'
-                AND tilausnumero IN ($tilausnumerot)
-                AND maksutapa != ''
-                AND tila != ''
+                AND tilausnumero      IN ($tilausnumerot)
+                AND maksutapa        != ''
+                AND tila             != ''
                 AND asiakkaan_kuitti != ''
-                AND tilausnumero != 0";
+                AND tilausnumero     != 0";
       $result = pupe_query($query);
-      
+
       if (mysql_affected_rows() > 0) {
         $pdf_lasku->draw_text(20, $kala, t("Maksupäätetapahtumat"), $thispage, $norm);
         $kala -= 10;

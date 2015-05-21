@@ -893,11 +893,16 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka LEFT JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-            concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            inventointilistarivi.tunnus as inventointilistatunnus,
+            varastopaikat.nimitys,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+              AND inventointilistarivi.tila = 'A')
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'
@@ -914,7 +919,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";
@@ -934,11 +939,16 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-            concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            varastopaikat.nimitys,
+            inventointilistarivi.tunnus as inventointilistatunnus,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus  = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+              AND inventointilistarivi.tila = 'A')
             WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
             and tuotepaikat.tuoteno     = '$tuoteno'
             and tuotepaikat.hyllyalue  != '!!M'
@@ -952,7 +962,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";

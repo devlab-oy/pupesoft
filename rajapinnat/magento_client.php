@@ -313,6 +313,7 @@ class MagentoClient {
 
       $tuetut_kieliversiot = array();
       $kauppakohtaiset_hinnat = array();
+      $kauppakohtaiset_verokannat = array();
 
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
@@ -330,6 +331,10 @@ class MagentoClient {
           }
           elseif ($key == 'kauppakohtaiset_hinnat') {
             $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            continue;
+          }
+          if ($key == 'kauppakohtaiset_verokannat') {
+            $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
             continue;
           }
 
@@ -490,6 +495,10 @@ class MagentoClient {
                 'price' => $tuote[$tuotekentta]
               );
 
+              if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+              }
+
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
@@ -598,6 +607,7 @@ class MagentoClient {
       }
 
       $kauppakohtaiset_hinnat = array();
+      $kauppakohtaiset_verokannat = array();
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
@@ -605,6 +615,10 @@ class MagentoClient {
           if ($key == 'kieliversiot') continue;
           if ($key == 'kauppakohtaiset_hinnat') {
             $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            continue;
+          }
+          if ($key == 'kauppakohtaiset_verokannat') {
+            $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
             continue;
           }
           if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
@@ -731,6 +745,10 @@ class MagentoClient {
                 $tuotteen_kauppakohtainen_data = array(
                   'price' => $tuotteet[0][$tuotekentta]
                 );
+
+                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                }
 
                 $this->_proxy->call($this->_session, 'catalog_product.update',
                   array(

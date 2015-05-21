@@ -2662,12 +2662,8 @@ if (!function_exists("synkronoi")) {
                       and kassa_alepros      = '$aburow[kassa_alepros]'
                       and kassa_relpvm       = '$aburow[kassa_relpvm]'
                       and kateinen           = '$aburow[kateinen]'
-                      and osamaksuehto1      = '$aburow[osamaksuehto1]'
-                      and osamaksuehto2      = '$aburow[osamaksuehto2]'
                       and rel_pvm            = '$aburow[rel_pvm]'
                       and sallitut_maat      = '$aburow[sallitut_maat]'
-                      and summanjakoprososa2 = '$aburow[summanjakoprososa2]'
-                      and suoraveloitus      = '$aburow[suoraveloitus]'
                       LIMIT 1";
             $tarkres = pupe_query($query);
 
@@ -12746,39 +12742,66 @@ if (!function_exists("tarkista_iban")) {
 }
 
 if (!function_exists("tarkista_oikeus")) {
-  function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '', $return = '') {
+  function tarkista_oikeus($ohjelma, $alanimi = '', $paivitys = '', $return = '', $toimi_array = "") {
     global $kukarow;
+
+    $alanimet = array();
+    $loytyi = false;
+
+    if ($toimi_array) {
+      $alias_alanimi = $alanimi;
+
+      if (!empty($toimi_array[1])) {
+        $alias_alanimi .= "!!!{$toimi_array[1]}";
+
+        if (!empty($toimi_array[2])) {
+          $alias_alanimi .= "!!!{$toimi_array[2]}";
+        }
+      }
+
+      array_push($alanimet, $alias_alanimi);
+    }
 
     $ohjelma = mysql_real_escape_string(trim($ohjelma));
     $alanimi = mysql_real_escape_string(trim($alanimi));
-    $querylisa = "";
 
-    if (strpos($alanimi, "%") !== FALSE) {
-      $querylisa .= " AND alanimi like '$alanimi'";
+    array_push($alanimet, $alanimi);
+
+    foreach ($alanimet as $alanimi) {
+      $querylisa = "";
+
+      if (strpos($alanimi, "%") !== FALSE) {
+        $querylisa .= " AND alanimi like '$alanimi'";
+      }
+      elseif ($alanimi != "") {
+        // Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
+        $querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
+      }
+      else {
+        $querylisa .= " AND alanimi = '' ";
+      }
+
+      if ($paivitys != "") {
+        $querylisa .= " AND paivitys = '1' ";
+      }
+
+      $query = "SELECT *
+                FROM oikeu
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND kuka    = '$kukarow[kuka]'
+                AND nimi    LIKE '%$ohjelma'
+                $querylisa
+                ORDER BY length(alanimi)";
+      $res = pupe_query($query);
+
+      if (mysql_num_rows($res) > 0) {
+        $loytyi = true;
+
+        break;
+      }
     }
-    elseif ($alanimi != "") {
-      // Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
-      $querylisa = " AND substring(alanimi, 1, if(LOCATE('&', alanimi) > 0, LOCATE('&', alanimi) - 1, CHAR_LENGTH(alanimi))) = '$alanimi'";
-    }
-    else {
-      $querylisa .= " AND alanimi = '' ";
-    }
 
-    if ($paivitys != "") {
-      $querylisa .= " AND paivitys = '1' ";
-    }
-
-    $query = "SELECT *
-              FROM oikeu
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND kuka    = '$kukarow[kuka]'
-              AND nimi    LIKE '%$ohjelma'
-              $querylisa
-              ORDER BY length(alanimi)";
-    $res = pupe_query($query);
-
-    if (mysql_num_rows($res) > 0) {
-
+    if ($loytyi) {
       if ($return != "") {
         return mysql_fetch_array($res);
       }
@@ -31275,10 +31298,10 @@ if (!function_exists("piirra_maksupaate_formi")) {
     $query_maksuehto = "SELECT *
                         FROM maksuehto
                         WHERE yhtio='{$kukarow["yhtio"]}'
-                        AND kateinen != ''
-                        AND kaytossa  = ''
+                        AND kateinen                 != ''
+                        AND kaytossa                  = ''
                         AND (maksuehto.sallitut_maat = ''
-                          OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
+                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')";
 
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
@@ -31395,10 +31418,10 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
     $query = "SELECT *
               FROM maksupaatetapahtumat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausnumero = '{$tilausnumero}'
-              AND maksutapa != ''
-              AND tila IN ('K', 'H')";
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND tilausnumero  = '{$tilausnumero}'
+              AND maksutapa    != ''
+              AND tila          IN ('K', 'H')";
 
     $result = pupe_query($query);
 
@@ -31437,5 +31460,62 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     }
 
     return $palautettava;
+  }
+}
+
+if (!function_exists("hae_tuoteperhe")) {
+  /**
+   * Hakee tuoteperheen kaikkine lapsineen rekursiivisesti
+   *
+   * @param int|string $tuoteno Isätuotteen tuoteno
+   * @param string     $tyyppi Tuoteperheen tyyppi, defaulttaa reseptiin
+   *
+   * @return array Tuoteperhe lapsineen. Rakenne on seuraavanlainen:
+   *   array(
+   *     100 => array(
+   *       "lapset" => array(
+   *         101 => array(
+   *           "lapset => array(etc),
+   *           "nimitys" => "Kissa"
+   *         )
+   *       ),
+   *       "nimitys" => "Kala"
+   *     )
+   *   );
+   */
+  function hae_tuoteperhe($tuoteno, $tyyppi = "R") {
+    global $kukarow;
+
+    $query = "SELECT tuote.tuoteno,
+              tuote.nimitys,
+              lapsi.tuoteno AS lapsi_tuoteno
+              FROM tuote
+              LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
+                AND lapsi.isatuoteno = tuote.tuoteno
+                AND lapsi.tyyppi = '{$tyyppi}')
+              WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+              AND tuote.tuoteno = '{$tuoteno}'";
+    $result = pupe_query($query);
+
+    $tuoteperhe = array();
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $tuoteno = $row["tuoteno"];
+      $nimitys = $row["nimitys"];
+      $lapsi = hae_tuoteperhe($row["lapsi_tuoteno"]);
+
+      if (empty($lapsi)) {
+        $tuoteperhe[$tuoteno]["lapset"] = array();
+      }
+      else {
+        $tuoteperhe[$tuoteno]["lapset"][$row["lapsi_tuoteno"]] = reset($lapsi);
+      }
+    }
+
+    if (!empty($nimitys)) {
+      $tuoteperhe[$tuoteno]["nimitys"] = $nimitys;
+    }
+
+    return $tuoteperhe;
   }
 }

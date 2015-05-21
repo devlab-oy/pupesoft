@@ -10,9 +10,7 @@ if (mysql_field_name($result, $i) == "saldo" or
   mysql_field_name($result, $i) == "inventointiaika" or
   mysql_field_name($result, $i) == "inventointipoikkeama" or
   mysql_field_name($result, $i) == "oletus" or
-  mysql_field_name($result, $i) == "inventointilista" or
-  mysql_field_name($result, $i) == "tuoteno" or
-  mysql_field_name($result, $i) == "inventointilista_aika") {
+  mysql_field_name($result, $i) == "tuoteno") {
   $tyyppi = 2;
 }
 

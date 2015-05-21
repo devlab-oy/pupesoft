@@ -677,7 +677,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $select .= ", group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno ";
     $lefttoimi = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
   }
-  
+
   $_tuote_chk = (!empty($lisa) or !empty($toimittaja) or !empty($tuotemerkki));
   $_tuote_chk = ($_tuote_chk or (!empty($ahyllyalue) and !empty($lhyllyalue)) or (!empty($varasto)));
 
@@ -691,6 +691,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $yhtiotaulu = "tuote";
       $from     = " FROM tuote use index (osasto_try_index) ";
       $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno {$rajauslisa} {$invaamatta} {$extra} ";
+
+      if ($ahyllyalue != '' and $lhyllyalue != '') {
+        $join .= "  and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) >=
+              concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'),5, '0'))
+              and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <=
+              concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))";
+      }
+
       $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                       AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                       AND inventointilistarivi.tila = 'A')";
@@ -713,11 +721,11 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                         AND inventointilistarivi.tila = 'A')";
         $where .= " AND inventointilistarivi.tunnus IS NULL";
       }
-      
+
       $where .= " and tuote.tuotemerkki = '$tuotemerkki' {$rajauslisatuote}";
     }
 
-    if ($ahyllyalue != '' and $lhyllyalue != '') {
+    if ($ahyllyalue != '' and $lhyllyalue != '' and $lisa == '') {
       ///* Inventoidaan tietty varastoalue *///
       $apaikka = strtoupper(sprintf("%-05s", $ahyllyalue)).strtoupper(sprintf("%05s", $ahyllynro)).strtoupper(sprintf("%05s", $ahyllyvali)).strtoupper(sprintf("%05s", $ahyllytaso));
       $lpaikka = strtoupper(sprintf("%-05s", $lhyllyalue)).strtoupper(sprintf("%05s", $lhyllynro)).strtoupper(sprintf("%05s", $lhyllyvali)).strtoupper(sprintf("%05s", $lhyllytaso));

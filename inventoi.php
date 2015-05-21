@@ -332,7 +332,8 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
 
   $prn = "\n\n";
   $prn .= sprintf('%-100.100s', t("Poikkeama yhteensä").": {$_poikkeama_yht}")."\n";
-  $prn .= sprintf('%-100.100s', t("Poikkeama yhteensä EUR").": {$_poikkeama_yht_eur}");
+  $prn .= sprintf('%-100.100s',
+    t("Poikkeama yhteensä EUR").": ".round($_poikkeama_yht_eur, $yhtiorow['hintapyoristys']));
 
   fwrite($fh, $prn);
 

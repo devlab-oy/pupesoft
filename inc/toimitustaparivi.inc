@@ -580,6 +580,33 @@ if (mysql_field_name($result, $i) == "vak_kielto") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos = "<td>
+             <select name='{$nimi}'>
+               <option value>" . t("VAK-tuotteita ei siirret‰ omalle tilaukselleen") . "</option>";
+
+  $query = "SELECT DISTINCT selite
+            FROM toimitustapa
+            WHERE yhtio    = '{$kukarow['yhtio']}'
+            AND vak_kielto = ''
+            AND nouto      = ''";
+  $toimitustapa_result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($toimitustapa_result)) {
+    $ulos .= "<option value='{$row["selite"]}' {$sel[$row['selite']]}>" .
+      t("VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+      " {$row["selite"]}</option>";
+  }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+
 if (mysql_field_name($result, $i) == "erikoispakkaus_kielto") {
 
   $sel = $sela = '';

@@ -55,6 +55,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") !== FALSE or !isset($kaanne
 
 if ($lopeta_body) {
 
+  echo "
+    <script>
+      $(document).ready(function() {
+        top.document.title = $('font.head').first().text().replace(\":\", \"\")+\" / Pupesoft\";
+      });
+    </script>";
+
   if ($piirra_sanakirja) {
     switch (strtoupper($kukarow["kieli"])) {
     case "EN":

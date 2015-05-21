@@ -44,6 +44,11 @@ if ($type == '0' and substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) 
 elseif ($type == '3' or $type == 'S') {
 
   $viiteaineisto_summa = sprintf('%01.2f', substr($tietue, 77, 10) / 100);
+
+  if (substr($tietue, 87, 1) == '1') {
+    $viiteaineisto_summa = sprintf('%.2f', $viiteaineisto_summa * -1);
+  }
+
   $viiteaineisto_viite = ltrim(substr($tietue, 43, 20), "0");
   if ($type == 'S') {
     $viiteaineisto_tilino = $tiliotedatarow['tilino'];

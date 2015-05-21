@@ -71,7 +71,7 @@ if (!function_exists("count_workdays")) {
       $workdays = $firstweek+$midweeks+$lastweek;
     }
 
-    return $workdays;
+    return round($workdays, 2);
   }
 }
 
@@ -86,9 +86,23 @@ if ($raptee == "AJA") {
   $excelrivi = 0;
   $i = 0;
 
-  $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki like '%{$valmistajarajaus}%' " : "" ;
-  $aloituspaiva = "{$aloitusvv}-{$aloituskk}-{$aloituspp}";
-  $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
+  $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki like '%{$valmistajarajaus}%' " : "";
+  $asiakaslisa = !empty($asiakasrajaus) ? " and lasku.toim_nimi like '%{$asiakasrajaus}%' " : ""; 
+  $alkuok = (!empty($aloitusvv) and !empty($aloituskk) and !empty($aloituspp)) ? true : false;
+  $loppuok = (!empty($lopetusvv) and !empty($lopetuskk) and !empty($lopetuspp)) ? true : false;
+
+  if ($alkuok or $loppuok) {
+    $pvmlisa = " HAVING ";
+    if ($alkuok) {
+      $pvmlisa .= " alkupvm >= '{$aloitusvv}-{$aloituskk}-{$aloituspp} 00:00:01'";
+    }
+    if ($alkuok and $loppuok) {
+      $pvmlisa .= " AND ";
+    }
+    if ($loppuok) {
+      $pvmlisa .= " loppupvm <= '{$lopetusvv}-{$lopetuskk}-{$lopetuspp} 23:59:59' ";
+    }
+  }
 
   $query = "SELECT
             concat(lasku.toim_nimi,'\n',
@@ -102,8 +116,7 @@ if ($raptee == "AJA") {
             a2.selitetark loppu_nimitys
             FROM tyomaarayksen_tapahtumat tt1
             JOIN tyomaarays tm ON (tm.yhtio = tt1.yhtio
-              AND tm.otunnus            = tt1.tyomaarays_tunnus
-              {$valmistajalisa})
+              AND tm.otunnus            = tt1.tyomaarays_tunnus)
             LEFT JOIN avainsana a1 ON (a1.yhtio = tt1.yhtio
               AND a1.laji               = 'tyom_tyostatus'
               AND a1.selite             = tt1.tyostatus_selite)
@@ -115,11 +128,12 @@ if ($raptee == "AJA") {
             LEFT JOIN lasku ON (lasku.yhtio = tm.yhtio
               AND lasku.tunnus          = tm.otunnus)
             WHERE tt1.yhtio             = '{$kukarow['yhtio']}'
-            AND tt1.tyostatus_selite    = '{$aloitustila}'
-            AND tt2.tyostatus_selite    = '{$lopetustila}'
+              AND tt1.tyostatus_selite    = '{$aloitustila}'
+              AND tt2.tyostatus_selite    = '{$lopetustila}'
+              {$valmistajalisa}
+              {$asiakaslisa}
             GROUP BY tt1.tyomaarays_tunnus
-            HAVING alkupvm >= '{$aloituspaiva}'
-            AND loppupvm                <= '{$lopetuspaiva}'";
+            {$pvmlisa}";
   $result = pupe_query($query);
 
   $worksheet->write($excelrivi, $i, t('Työmääräysnumero'), $format_bold);
@@ -214,14 +228,19 @@ if ($raptee == "AJA") {
 
   $excelnimi = $worksheet->close();
 
-  echo "<br><br>";
-  echo "<font class='message'>".t("Tallenna excel").": </font>";
-  echo "<form method='post' class='multisubmit'>";
-  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='kaunisnimi' value='".t("tyomaaraysraportti").".xlsx'>";
-  echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-  echo "<input type='submit' value='".t("Tallenna")."'>";
-  echo "</form>";
+  echo "<br><br>";  
+  if ($excelrivi > 1) {
+    echo "<font class='message'>".t("Tallenna excel").": </font>";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='".t("tyomaaraysraportti").".xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+    echo "<input type='submit' value='".t("Tallenna")."'>";
+    echo "</form>";
+  }
+  else {
+    echo "<font class='message'>".t("Annetuilla ehdoilla ei löytynyt yhtään riviä").".</font>";
+  }  
   echo "<br><br>";
 }
 
@@ -267,6 +286,11 @@ echo "</tr>";
 echo "<tr>
   <th>".t("Rajaa tuotemerkillä")."</th>
   <td><input type='text' name='valmistajarajaus' value='$valmistajarajaus'></td>
+  </tr>";
+
+echo "<tr>
+  <th>".t("Rajaa asiakkaalla")."</th>
+  <td><input type='text' name='asiakasrajaus' value='$asiakasrajaus'></td>
   </tr>";
 
 echo "<tr>

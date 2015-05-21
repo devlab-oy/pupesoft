@@ -1799,7 +1799,8 @@ if (!function_exists("verkkolasku_in")) {
         $selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
         // Tallennetaan laskun XML liitetiedostoksi
-        $filename = array_pop(explode("/", $file));
+        $_tmfilename = explode("/", $file);
+        $filename = array_pop($_tmfilename);
         $xmlstr   = mysql_real_escape_string($xmlstr);
 
         if ($ebid == "FINVOICEXML" or $ebid == 'MAVENTAXML') {

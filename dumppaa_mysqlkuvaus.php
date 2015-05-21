@@ -108,7 +108,7 @@ curl_close($ch);
 $updatet = trim($result);
 
 // Yhdistet‰‰n
-$result = $alterit.$updatet;
+$result = $alterit."\n".$updatet;
 
 // Poistetaan viel‰ tuplaspacet jos sellasia on
 $result = trim(preg_replace("/ {2,}/", " ", $result));

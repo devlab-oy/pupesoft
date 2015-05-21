@@ -96,6 +96,14 @@ if ($tee == "synkronoi") {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $nimikeet = curl_exec($ch);
+
+  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $nimikeet = utf8_encode($nimikeet); //NO_MB_OVERLOAD
+  }
+
   $nimikeet = explode("\n", trim($nimikeet));
 
   if (count($nimikeet) == 0) {

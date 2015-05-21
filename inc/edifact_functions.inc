@@ -1485,7 +1485,7 @@ function kasittele_bookkaussanoma($edi_data) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0) {
-    //return false;
+    return false;
   }
 
   // katsotaan onko tilauksesta luotu jo myyntitilaus
@@ -1741,7 +1741,7 @@ function kasittele_bookkaussanoma($edi_data) {
       $ostorullat[] = $rulla;
     }
 
-    if (count($ostorullat) > 0) {
+    if (count($myyntirullat) == 0 and count($ostorullat) > 0) {
 
       $laskuquery = "SELECT *
                      FROM lasku

@@ -113,12 +113,34 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, 6, 4));
   }
 
-  // Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
-  $viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
+  if (substr($juokseva, 0, 2) != "CE" or substr($juokseva, -2, 2) != "FI") {
+    // Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
+    $viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
+  }
+  else {
+    $viiva = $juokseva;
+  }
 
-  $viiva1   = "CE".$viiva."FI";
-  $viivaedi = "CE".$viiva."FI";
-  $viiva2   = "*CE".$viiva."FI*";
+  if (substr($viiva, 0, 2) != "CE" and substr($viiva, -2, 2) != "FI") {
+    $viiva1   = "CE".$viiva."FI";
+    $viivaedi = "CE".$viiva."FI";
+    $viiva2   = "*CE".$viiva."FI*";
+  }
+  elseif (substr($viiva, 0, 2) != "CE") {
+    $viiva1   = "CE".$viiva;
+    $viivaedi = "CE".$viiva;
+    $viiva2   = "*CE".$viiva."*";
+  }
+  elseif (substr($viiva, -2, 2) != "FI") {
+    $viiva1   = $viiva."FI";
+    $viivaedi = $viiva."FI";
+    $viiva2   = "*".$viiva."FI*";
+  }
+  else {
+    $viiva1   = $viiva;
+    $viivaedi = $viiva;
+    $viiva2   = "*".$viiva."*";
+  }
 
   // erotellaan spacella jokainen rahtikirjanumero
   $rahtikirjanro .= "$viiva1 ";
@@ -268,7 +290,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(30,  380,  "treat item as abandoned",          $firstpage, $pieni);
   $pdf->draw_text(30,  375,  "traiter l'envoi comme abandonné",      $firstpage, $pieni);
 
-
+  $pdf->draw_rectangle(385, 128, 375, 138,                   $firstpage, $rectparam);
   $pdf->draw_text(140,  380,  "return to the sender immediately",      $firstpage, $pieni);
   $pdf->draw_text(140,  375,  "renvoyer à l'expéditeur immédiatement",  $firstpage, $pieni);
 

@@ -364,6 +364,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
   echo "<script type=\"text/javascript\" charset=\"utf-8\">
 
+  $(function() {
+
     var tilaatuote = function() {
       if ($(this).attr(\"disabled\") == undefined) {
         var submitid     = $(this).attr(\"id\");
@@ -379,14 +381,15 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
         $.post('{$_SERVER['SCRIPT_NAME']}',
           {   tee: 'TILAA_AJAX',
+            async: false,
             tuoteno: tuoteno,
             toimittaja: toimittaja,
             maara: maara,
             valittuvarasto: valittuvarasto,
             no_head: 'yes',
             ohje: 'off' },
-          function(return_value) {
-            var message = jQuery.parseJSON(return_value);
+          function(json) {
+            var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
             if (message == \"ok\") {
               $(\"#\"+submitid).val('".t("Tilattu")."').attr('disabled', true);
@@ -411,6 +414,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       $.post('{$_SERVER['SCRIPT_NAME']}',
         {   tee: 'PAIVITA_AJAX',
           tuoteno: tuoteno,
+          async: false,
           toimittaja: toimittaja,
           varmuusvarastot: varmuusvarastot,
           pakkauskoot: pakkauskoot,
@@ -418,8 +422,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
           varastoitavat: varastoitavat,
           no_head: 'yes',
           ohje: 'off' },
-        function(return_value) {
-          var message = jQuery.parseJSON(return_value);
+        function(json) {
+          var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
           if (message == \"ok\") {
             $(\"#paivitetty_\"+osat[1]).html(' ".t("Tiedot p‰ivitetty")."!');
@@ -431,7 +435,19 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     $('.tilaa').live('click', tilaatuote);
 
     $('#tilaakaikki').live('click', function(){
-      $('.tilaa').each(tilaatuote);
+
+      var time = 0;
+
+      $('.tilaa').each(function() {
+        _id = $(this).attr('id');
+
+        setTimeout(function(id) {
+          $('#'+id).each(tilaatuote);
+        }, time, _id);
+
+        time = time + 100;
+      });
+
       $('#tilaakaikki').val('".t("Tilattu")."').attr('disabled', true);
     });
 
@@ -452,7 +468,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
     $('.hailaitimg').live('click', hailaittaa);
 
-    </script>";
+  });
+  </script>";
 
   $lisaa  = ""; // tuote-rajauksia
   $lisaa2 = ""; // toimittaja-rajauksia
@@ -715,7 +732,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       }
     }
     elseif ($toim == "BIO") {
-      # V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
+      // V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
       $ostoehdotus = $enp - ($saldot + $ostot);
 
       if ($ostoehdotus < 0) {

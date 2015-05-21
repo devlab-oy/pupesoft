@@ -11,6 +11,7 @@ if ($_REQUEST['malli'] == 'PDF24' or
 }
 
 require "inc/parametrit.inc";
+require "inc/pupenext_functions.inc";
 
 // $toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan
 // tulostetaan suoraan tuoteno viivakoodiin
@@ -241,7 +242,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "2" : "4";
+  $colspan = $toim == 'HINTA' ? "2" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -254,6 +255,7 @@ if (!isset($nayta_pdf)) {
   if ($toim != 'HINTA') {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
+    echo "<th><label for='viivakoodityyppi_1'>" . t("Viivakoodityyppi") . "</label></th>";
   }
 
   if ($uusean!= '') {
@@ -312,6 +314,13 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<td>";
+    echo "<select id='viivakoodityyppi_1' name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
   }
 
   if ($uusean != '') {
@@ -406,6 +415,17 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<tr>";
+    echo "<th><label for='viivakoodityyppi_2'>" . t("Viivakoodityyppi") . "</label></th>";
+    echo "<td>";
+    echo "<select id='viivakoodityyppi_2' name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
     echo
     "<tr><td class='back'></td><td class='back'><input type='submit' value='" .
       t("Tulosta tarrat") .

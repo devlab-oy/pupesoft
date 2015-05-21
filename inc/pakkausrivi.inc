@@ -26,9 +26,9 @@ if (mysql_field_name($result, $i) == "rahtivapaa_veloitus") {
   $ulos = "<td>
           <select name='{$nimi}'>
             <option value='' {$sel}>" .
-          t("Tehd‰‰n lavaveloitus, vaikka tilaus olisi merkitty rahtivapaaksi") . "</option>
+    t("Tehd‰‰n lavaveloitus, vaikka tilaus olisi merkitty rahtivapaaksi") . "</option>
             <option value='E' {$sel}>" .
-          t("Ei tehd‰ lavaveloitusta, jos tilaus on merkitty rahtivapaaksi") . "</option>
+    t("Ei tehd‰ lavaveloitusta, jos tilaus on merkitty rahtivapaaksi") . "</option>
           </select>
           </td>";
 

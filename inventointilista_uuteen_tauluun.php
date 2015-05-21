@@ -39,7 +39,10 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 }
 
-if (!$loyty) exit;
+if (!$loyty) {
+  echo "Konversioajo on jo tehty!";
+  exit;
+}
 
 $query = "SELECT yhtio
           FROM yhtio";
@@ -133,3 +136,5 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
     }
   }
 }
+
+echo "Done!";

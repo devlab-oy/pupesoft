@@ -640,13 +640,16 @@ if ($tee == 'add') {
         // ja insertataan vaan jos se on erisuurta ku nolla (n‰in voidaan nollalla tai spacella tyhjent‰‰ kentti‰)
         if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
 
-          $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
-          $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
-          $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
-          $lavametri[$i]  = str_replace(',', '.', $lavametri[$i]);
+          $kilot[$i]     = str_replace(',', '.', $kilot[$i]);
+          $kollit[$i]    = str_replace(',', '.', $kollit[$i]);
+          $kuutiot[$i]   = str_replace(',', '.', $kuutiot[$i]);
+          $lavametri[$i] = str_replace(',', '.', $lavametri[$i]);
 
           if ($rakirno == '') {
-            $query = "SELECT max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and (otsikkonro='$otsikkonro' or otsikkonro='0')";
+            $query = "SELECT max(rahtikirjanro) rakirno
+                      FROM rahtikirjat
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND (otsikkonro = '$otsikkonro' or otsikkonro = '0')";
             $result = pupe_query($query);
             $rakirow = mysql_fetch_assoc($result);
             $rakirno = $rakirow["rakirno"]+1;
@@ -664,7 +667,6 @@ if ($tee == 'add') {
           }
 
           foreach ($tilaukset as $otsikkonro) {
-
             foreach ($kiloja as $yksikilo) {
               $query  = "INSERT into rahtikirjat
                          (poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
@@ -2007,7 +2009,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
   $query = "SELECT lasku.yhtio yhtio,
             lasku.yhtio_nimi yhtio_nimi,
             if(rahtikirjat.rahtikirjanro='', rahtikirjat.otsikkonro, rahtikirjat.rahtikirjanro) rakirno,
-             group_concat(distinct lasku.tunnus SEPARATOR ', ') 'tilaus',
+            group_concat(distinct lasku.tunnus SEPARATOR ', ') 'tilaus',
             group_concat(distinct lasku.liitostunnus) asiakkaat,
             max(lasku.nimi) asiakas,
             max(concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys)) toimitustapa,
@@ -2072,7 +2074,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
       echo "  <form method='post'>
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='tee' value='change'>
-          <input type='hidden' name='rakirno' value='$row[rakirno]'>
+          <input type='hidden' name='rakirno' value='".urlencode($row["rakirno"])."'>
           <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
           <input type='hidden' name='id' value='$row[tilaus]'>
           <input type='hidden' name='tunnukset' value='$row[tilaus]'>
@@ -2092,7 +2094,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
       echo "<form method='post'>
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='tee' value='lisaatilaus'>
-          <input type='hidden' name='rakirno' value='$row[rakirno]'>
+          <input type='hidden' name='rakirno' value='".urlencode($row["rakirno"])."'>
           <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
           <input type='hidden' name='id' value='$row[tilaus]'>
           <input type='hidden' name='tunnukset' value='$row[tilaus]'>
@@ -2577,7 +2579,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
                   AND tunnus in($tunnukset)";
         $pakkaamotres = pupe_query($query);
         $pakkaamotrow = mysql_fetch_assoc($pakkaamotres);
-        $pakkaamotunnukset = " AND tunnus in($pakkaamotrow[pakkaamot]) ";
+        $pakkaamotunnukset = " AND tunnus in ($pakkaamotrow[pakkaamot]) ";
       }
       else {
         $pakkaamotunnukset = " AND tunnus = $otsik[pakkaamo] ";

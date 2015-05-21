@@ -490,7 +490,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
     $rakir_i_kala-= 10;
 
-    if ($rakir_i_kala < 410 or $lotsikot[$rakir_i] == '') {
+    if ($rakir_i_kala < 410) {
       break;
     }
   }

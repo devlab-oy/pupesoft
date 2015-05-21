@@ -23,7 +23,7 @@ if ($type == '0') {
   // print "Rahayksikön koodi => ".substr($tietue, 22, 1)."\n";
   // print "Varalla => ".substr($tietue, 23, 67)."\n";
 }
-elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
+elseif ($type == '3' or ($type == 'S')) {
   // viitesiirto
   // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";
   // print "Välitystapa => ".substr($tietue, 88, 1)."\n";
@@ -40,6 +40,9 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   $reference = ltrim(substr($tietue, 43, 20), '0');
   $sum = substr($tietue, 77, 10);
   $sum = $sum / 100; // XXX summa on sentteinä, etunollatäytöllä.
+  if ($factoring_oikaisutunnus != '0') {
+    $sum = $sum * -1;
+  }
   $currency_code = substr($tietue, 75, 1);
   $entry_date = "20".dateconv(substr($tietue, 15, 6)); // VVKKPP
   $payment_date = "20".dateconv(substr($tietue, 21, 6)); // VVKKPP

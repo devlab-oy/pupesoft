@@ -29,7 +29,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
   $kateinen           = empty($params["kateinen"]) ? false : hintapyoristys($params["kateinen"]);
-  $avaa_lipas_lopuksi = empty($params["avaa_lipas_lopuksi"]) ? true : $params["avaa_lipas_lopuksi"];
+  $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"] !== false;
 
   list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
@@ -394,7 +394,7 @@ function tulostimen_tyyppi($tulostimen_tunnus) {
   $query = "SELECT mediatyyppi
             FROM kirjoittimet
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tulostimen_tunnus}'";
+            AND tunnus  = '{$tulostimen_tunnus}'";
 
   $result = pupe_query($query);
   $result = mysql_fetch_assoc($result);

@@ -14,12 +14,6 @@ if (!$php_cli) {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 }
 
-if (trim($argv[1]) == '') {
-  die ("Et antanut yhtiötä!\n");
-}
-
-$yhtio = mysql_escape_string(trim($argv[1]));
-
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 error_reporting(E_ALL);
@@ -29,9 +23,6 @@ ini_set("memory_limit", "2G");
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
-
-// Logitetaan ajo
-cron_log();
 
 # tarkistetaan onko tietyt kentät jo dropattu
 # jos on niin ei ajeta tätä skriptiä
@@ -49,19 +40,6 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 if (!$loyty) exit;
-
-// Haetaan kukarow
-$query = "SELECT *
-          FROM kuka
-          WHERE yhtio = '{$yhtio}'
-          AND kuka    = 'admin'";
-$kukares = pupe_query($query);
-
-if (mysql_num_rows($kukares) != 1) {
-  exit("VIRHE: Admin käyttäjä ei löydy!\n");
-}
-
-$kukarow = mysql_fetch_assoc($kukares);
 
 $query = "SELECT yhtio
           FROM yhtio";
@@ -104,7 +82,7 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
                 luontiaika = '{$row['luontiaika']}',
                 muutospvm = '{$row['muutospvm']}',
                 tunnus = '{$row['inventointilista']}'";
-      $_ot_res = pupe_query($query);
+      pupe_query($query);
     }
 
     $_id = $row['inventointilista'];
@@ -157,4 +135,4 @@ while ($yhtiorow = mysql_fetch_assoc($yhtiores)) {
 }
 
 $query = "ALTER TABLE tuotepaikat DROP COLUMN inventointilista, DROP COLUMN inventointilista_aika, DROP COLUMN inventointilista_naytamaara";
-$_drop_res = pupe_query($query);
+pupe_query($query);

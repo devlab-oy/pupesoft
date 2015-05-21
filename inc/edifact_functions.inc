@@ -6088,7 +6088,8 @@ function purettavat_tulonumerot() {
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.viesti = 'tullivarasto'
-            AND tilausrivi.keratty = ''";
+            AND tilausrivi.keratty = ''
+            GROUP BY lasku.tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

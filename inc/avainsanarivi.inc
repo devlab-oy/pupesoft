@@ -247,6 +247,8 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TULLI")       $ulos .= "<option value='TULLI' $avain_sel[TULLI]>              ".t("Poistumistoimipaikka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KM")         $ulos .= "<option value='KM' $avain_sel[KM]>                ".t("Kuljetusmuoto")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "C")         $ulos .= "<option value='C' $avain_sel[C]>                  ".t("CHN tietue")."</option>";
+  if ($lukitse_laji == "" or $lukitse_laji == "RAJATOIMIPAIKAT") $ulos .= "<option value='RAJATOIMIPAIKAT' $avain_sel[RAJATOIMIPAIKAT]>" . t("Aiotut rajatoimipaikat (ja maat)") . "</option>";
+  if ($lukitse_laji == "" or $lukitse_laji == "MAARATOIMPAIKKA") $ulos .= "<option value='MAARATOIMPAIKKA' $avain_sel[MAARATOIMPAIKKA]>" . t("M‰‰r‰toimipaikka (ja maa)") . "</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";

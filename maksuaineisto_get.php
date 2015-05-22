@@ -42,8 +42,13 @@ if (!is_writable($pankkiaineiston_haku["local_dir"])) {
   exit;
 }
 
-// Avataan yhteys
-$conn_id = @ftp_connect($pankkiaineiston_haku["host"]);
+// Avataan yhteys, tarkistetaan onko portti setattu konffiin
+if(isset($pankkiaineiston_haku["port"]) and (int) $pankkiaineiston_haku["port"] > 0) {
+  $conn_id = @ftp_connect($pankkiaineiston_haku["host"], $pankkiaineiston_haku["port"]);
+}
+else {
+  $conn_id = @ftp_connect($pankkiaineiston_haku["host"]);
+}
 
 if ($conn_id === FALSE) {
   echo "Yhteys epaonnistui {$pankkiaineiston_haku["host"]}!";

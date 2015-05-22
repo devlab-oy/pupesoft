@@ -274,7 +274,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO")    $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>      ".t("Tilausvahvistuksen lis‰tiedot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI")      $ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>        ".t("Inventoinnin laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA")    $ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>      ".t("Hae ja selaa -ohjelman parametrit")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")    $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman osasto / tuoteryhm‰")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")    $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM")       $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>          ".t("Puuterivin kommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA")  $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>    ".t("Extranet ulkoasuteema")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA")  $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>    ".t("Yll‰pitosopimuksen rivien kent‰t")."</option>";
@@ -1070,24 +1070,6 @@ if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selite) {
   $ulos = "<td><select name = '$nimi'>";
   $ulos .= "<option value = 'A' $sel[A]>".t("Hae ja selaa -ohjelmassa k‰ytet‰‰n alkuper‰ist‰ ulkoasua")."</option>";
   $ulos .= "<option value = 'B' $sel[B]>".t("Hae ja selaa -ohjelmassa k‰ytet‰‰n uutta ulkoasua")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
-if ($avain_sel["INVLISTA_OSTRY"] == "SELECTED" and $_selite) {
-  $sel = $trow[$i] == "B" ? "selected" : "";
-
-  $ulos = "<td><select name = '{$nimi}'>";
-
-  $ulos .= "<option value = 'A'>";
-  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n m‰‰riteltyj‰ monivalintalaatikoita");
-  $ulos .= "</option>";
-
-  $ulos .= "<option value = 'B' {$sel}>";
-  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n vain osasto / try monivalintalaatikoita");
-  $ulos .= "</option>";
-
   $ulos .= "</select></td>";
 
   $jatko = 0;

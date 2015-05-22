@@ -57,12 +57,12 @@ $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-if (trim($avainsana_row['selitetark']) != '' and $avainsana_row['selite'] == 'A') {
+if (trim($avainsana_row['selite']) != '') {
 
-  $monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
+  $monivalintalaatikot = explode(",", $avainsana_row['selite']);
 
-  if (trim($avainsana_row['selitetark_2'] != '')) {
-    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark_2']);
+  if (trim($avainsana_row['selitetark'] != '')) {
+    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark']);
   }
   else {
     $monivalintalaatikot_normaali = array();

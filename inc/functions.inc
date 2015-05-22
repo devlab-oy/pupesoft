@@ -25534,11 +25534,11 @@ if (!function_exists('hyllysiirto')) {
                       AND tunnus  = '{$minnevarasto_row['toimipaikka']}'";
             $minnetoimipaikka_res = pupe_query($query);
             $minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+            
+            if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
+            if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
+            if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
           }
-
-          if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
-          if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
-          if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
         }
 
         $mennaanko = FALSE;

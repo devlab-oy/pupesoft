@@ -328,6 +328,7 @@ else {
               dynaaminen_puu AS parent READ,
               etaisyydet READ,
               factoring READ,
+              inventointilistarivi READ,
               hinnasto READ,
               kalenteri WRITE,
               kassalipas READ,

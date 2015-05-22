@@ -30190,6 +30190,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
               WHERE tilino = '{$tiliotedatarow['tilino']}'";
     $yriti_result = pupe_query($query);
     $yritirow = mysql_fetch_assoc($yriti_result);
+    $yhtiorow = hae_yhtion_parametrit($yritirow['yhtio']);
 
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];

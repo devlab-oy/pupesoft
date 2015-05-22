@@ -1058,8 +1058,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
     //haetaan inventointilista numero tässä vaiheessa
     $query = "SELECT max(tunnus) listanro
-              FROM inventointilista
-              WHERE yhtio = '{$kukarow['yhtio']}'";
+              FROM inventointilista";
     $result = pupe_query($query);
     $lrow = mysql_fetch_assoc($result);
 

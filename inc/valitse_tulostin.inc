@@ -65,6 +65,7 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
   <input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
   <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />
+  <input type='hidden' name='vapaa_teksti' value='{$vapaa_teksti}' />
   <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />";
 
 if (!empty($kateismaksu["kateinen"])) {

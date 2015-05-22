@@ -1237,7 +1237,7 @@ if ($tee == 'VALMIS') {
 
     $lista = (int) $lista;
 
-    $query = "SELECT *
+    $query = "SELECT inventointilistarivi.*
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
                 AND inventointilistarivi.otunnus = inventointilista.tunnus)

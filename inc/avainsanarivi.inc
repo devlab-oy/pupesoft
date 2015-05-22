@@ -1081,11 +1081,11 @@ if ($avain_sel["INVLISTA_OSTRY"] == "SELECTED" and $_selite) {
   $ulos = "<td><select name = '{$nimi}'>";
 
   $ulos .= "<option value = 'A'>";
-  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n monivalintalaatikoita");
+  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n m‰‰riteltyj‰ monivalintalaatikoita");
   $ulos .= "</option>";
 
   $ulos .= "<option value = 'B' {$sel}>";
-  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n osasto / try valintaa");
+  $ulos .= t("Inventointilista -ohjelmassa k‰ytet‰‰n vain osasto / try monivalintalaatikoita");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

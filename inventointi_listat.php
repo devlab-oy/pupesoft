@@ -57,8 +57,7 @@ $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-if (trim($avainsana_row['selitetark']) != '' and
-   ($avainsana_row['selite'] == 'A' or mysql_num_rows($avainsana_result) == 0)) {
+if (trim($avainsana_row['selitetark']) != '' and $avainsana_row['selite'] == 'A') {
 
   $monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
 

@@ -682,6 +682,8 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
 
     $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"], 2);
 
+    $row["selite"] = str_replace("<br>", " ", $row["selite"]);
+
     $worksheet->writeString($excelrivi, 0, $row["tuoteno"]);
     $worksheet->writeString($excelrivi, 1, t_tuotteen_avainsanat($row, 'nimitys'));
     $worksheet->writeString($excelrivi, 2, $row["toim_tuoteno"]);
@@ -692,7 +694,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
     $worksheet->writeDate($excelrivi, 7, $row["inventointiaika"]);
     $worksheet->writeNumber($excelrivi, 8, $vararvo_ennen);
     $worksheet->writeNumber($excelrivi, 9, round($row["arvo"], 2));
-    $worksheet->writeNumber($excelrivi, 10, $row["selite"]);
+    $worksheet->writeString($excelrivi, 10, $row["selite"]);
 
     $excelrivi++;
   }

@@ -1996,6 +1996,21 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   // Joka tarkoittaa että "Reklamaatio on vastaanotettu
   // tämän jälkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
 
+  $_tilaustyyppi = ($laskurow['tilaustyyppi'] != 'U');
+  $_tilaustyyppi = ($_tilaustyyppi and $yhtiorow['reklamaation_kasittely'] == 'X');
+  $sahkoinen_lahete_check = !empty($sahkoinen_lahete);
+  $sahkoinen_lahete_check = ($sahkoinen_lahete_check and isset($generoi_sahkoinen_lahete));
+  $sahkoinen_lahete_check = ($sahkoinen_lahete_check and trim($generoi_sahkoinen_lahete) != "");
+  $sahkoinen_lahete_check = ($sahkoinen_lahete_check and !empty($sahkoinen_lahete_toim));
+  $sahkoinen_lahete_check = ($sahkoinen_lahete_check and in_array($toim, $sahkoinen_lahete_toim));
+
+  if ($_tilaustyyppi and  $sahkoinen_lahete_check and $kukarow["extranet"] == "") {
+
+    require_once "inc/sahkoinen_lahete.class.inc";
+
+    sahkoinen_lahete($laskurow);
+  }
+
   if ($tee == 'VALMIS' or $yhtiorow['reklamaation_kasittely'] == 'X') {
     $alatila_lisa = "AND alatila = ''";              // semilaaja reklamaatio & takuu
   }

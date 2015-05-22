@@ -1082,6 +1082,19 @@ if ($tee == 'VALMIS') {
             // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
             $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
+            $query = "UPDATE inventointilistarivi SET
+                      aika = now(),
+                      tila = 'I',
+                      tapahtumatunnus = '{$tapahtumaid}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$tuoteno}'
+                      AND hyllyalue = '{$hyllyalue}'
+                      AND hyllynro = '{$hyllynro}'
+                      AND hyllyvali = '{$hyllyvali}'
+                      AND hyllytaso = '{$hyllytaso}'
+                      AND tila = 'A'";
+            $_chk_res = pupe_query($query);
+
             // Päivitetään tuotepaikka
             $query = "UPDATE tuotepaikat";
 
@@ -1107,19 +1120,6 @@ if ($tee == 'VALMIS') {
                         and hyllyvali         = '$hyllyvali'
                         and hyllytaso         = '$hyllytaso'";
             $result = pupe_query($query);
-
-            $query = "UPDATE inventointilistarivi SET
-                      aika = now(),
-                      tila = 'I',
-                      tapahtumatunnus = '{$tapahtumaid}'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tuoteno = '{$tuoteno}'
-                      AND hyllyalue = '{$hyllyalue}'
-                      AND hyllynro = '{$hyllynro}'
-                      AND hyllyvali = '{$hyllyvali}'
-                      AND hyllytaso = '{$hyllytaso}'
-                      AND tila = 'A'";
-            $_chk_res = pupe_query($query);
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {

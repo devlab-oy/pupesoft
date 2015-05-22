@@ -25534,11 +25534,11 @@ if (!function_exists('hyllysiirto')) {
                       AND tunnus  = '{$minnevarasto_row['toimipaikka']}'";
             $minnetoimipaikka_res = pupe_query($query);
             $minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
+            
+            if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
+            if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
+            if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
           }
-
-          if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
-          if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
-          if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
         }
 
         $mennaanko = FALSE;
@@ -30190,6 +30190,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
               WHERE tilino = '{$tiliotedatarow['tilino']}'";
     $yriti_result = pupe_query($query);
     $yritirow = mysql_fetch_assoc($yriti_result);
+    $yhtiorow = hae_yhtion_parametrit($yritirow['yhtio']);
 
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];

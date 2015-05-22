@@ -571,6 +571,8 @@ if ($tee == 'N') {
     $uusitee = "M";
   }
 
+  if (!isset($_poikkeavalaskutuspvm)) $_poikkeavalaskutuspvm = "";
+
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
     $params = array(

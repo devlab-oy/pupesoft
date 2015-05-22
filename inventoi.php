@@ -704,7 +704,7 @@ if ($tee == 'VALMIS') {
         }
 
         //Haetaan tuotepaikan tiedot
-        $query = "SELECT *, inventointilistarivi.luontiaika AS inventointilista_aika
+        $query = "SELECT tuotepaikat.*, tuote.*, inventointilistarivi.luontiaika AS inventointilista_aika
                   FROM tuotepaikat
                   JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
@@ -1474,7 +1474,7 @@ if ($tee == 'VALMIS') {
 
     $lista = (int) $lista;
 
-    $query = "SELECT *
+    $query = "SELECT inventointilistarivi.*
               FROM inventointilista
               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
                 AND inventointilistarivi.otunnus = inventointilista.tunnus)

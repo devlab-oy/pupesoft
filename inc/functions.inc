@@ -5415,26 +5415,7 @@ if (!function_exists("alehinta")) {
 
     // Käydään läpi käsin syötetyt alennukset jos niitä on
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-      if (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "+") {
-        // 1. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 1;
-
-        $hinta_xxx = $hinta + substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta/$hinta_xxx))*100;
-        $hinta = $hinta_xxx;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "-") {
-        // 2. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 2;
-
-        $hinta_xxx = $hinta - substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta_xxx/$hinta))*100;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
+      if (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
         // 3. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 3;
 
@@ -6330,26 +6311,7 @@ if (!function_exists("alehinta_osto")) {
 
     // Käydään läpi käsin syötetyt alennukset jos niitä on
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-      if (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "+") {
-        // 1. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 1;
-
-        $hinta_xxx = $hinta + substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta/$hinta_xxx))*100;
-        $hinta = $hinta_xxx;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "-") {
-        // 2. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 2;
-
-        $hinta_xxx = $hinta - substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta_xxx/$hinta))*100;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
+      if (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
         // 3. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 3;
 

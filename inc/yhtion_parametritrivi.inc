@@ -497,11 +497,11 @@ if ($fieldname == "ostolaskujen_oletusvaluutta") {
   $sel = $trow[$i] == 'T' ? "selected" : "";
 
   $ulos .= "<option value = ''>";
-  $ulos .= t("Ostolaskulla k‰ytet‰‰n ensisijaisesti laskuttajan valuuttaa");
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston valuuttaa");
   $ulos .= "</option>";
 
   $ulos .= "<option value = 'T' {$sel}>";
-  $ulos .= t("Ostolaskulla k‰ytet‰‰n ensisijaisesti toimittajan oletusvaluuttaa");
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti toimittajan oletusvaluuttaa");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

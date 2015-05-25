@@ -43,6 +43,10 @@ while ($yhtio = mysql_fetch_assoc($row)) {
 
     echo "\nYhtio: {$yhtiorow['yhtio']},tapahtuma: $tapahtumaid, $tapahtumarow[tuoteno], $tapahtumarow[laadittu], $tiliointisumma, $yhtiorow[varastonmuutos], $yhtiorow[varastonmuutos_inventointi]  \n";
 
+    $query = "  SELECT * FROM tuote WHERE yhtio = '$yhtiorow[yhtio]' AND tuoteno = '$tuoteno'";
+    $tuoteres = pupe_query($query);
+    $tuote_row = mysql_fetch_assoc($tuoteres);
+
     // P‰iv‰m‰‰r‰ll‰ inventoitaessa laitetaan t‰m‰p‰iv‰m‰‰r‰,
 
     $query = "INSERT INTO lasku SET
@@ -58,7 +62,7 @@ while ($yhtio = mysql_fetch_assoc($row)) {
 
     // Seuraako myyntitiliˆinti tuotteen tyyppi‰ ja onko kyseess‰ raaka-aine?
     $raaka_aine_tiliointi = $yhtiorow["raaka_aine_tiliointi"];
-    $raaka_ainetililta = ($raaka_aine_tiliointi == "Y" and $row["tuotetyyppi"] == "R");
+    $raaka_ainetililta = ($raaka_aine_tiliointi == "Y" and $tuote_row["tuotetyyppi"] == "R");
 
     // M‰‰ritet‰‰n varastonmuutostili
     if ($raaka_ainetililta) {
@@ -78,10 +82,6 @@ while ($yhtio = mysql_fetch_assoc($row)) {
     else {
       $varastotili = $yhtiorow["varasto"];
     }
-
-    $query = "  SELECT * FROM tuote WHERE yhtio = '$yhtiorow[yhtio]' AND tuoteno = '$tuoteno'";
-    $tuoteres = pupe_query($query);
-    $tuote_row = mysql_fetch_assoc($tuoteres);
 
     if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
 

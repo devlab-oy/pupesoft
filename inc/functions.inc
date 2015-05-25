@@ -5415,39 +5415,20 @@ if (!function_exists("alehinta")) {
 
     // Käydään läpi käsin syötetyt alennukset jos niitä on
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-      if (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "+") {
-        // 1. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 1;
-
-        $hinta_xxx = $hinta + substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta/$hinta_xxx))*100;
-        $hinta = $hinta_xxx;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "-") {
-        // 2. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 2;
-
-        $hinta_xxx = $hinta - substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta_xxx/$hinta))*100;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
-        // 3. käyttäjän syöttämä alennus
+      if (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
+        // 1. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 3;
 
         $aperuste .= " Käyttäjän syöttämä ale (Aletaso: $alepostfix)";
       }
       elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == 0) {
-        // 4. käyttäjän syöttämä alennus
+        // 2. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 4;
 
         $aperuste .= " Ei alennusta (Aletaso: $alepostfix)";
       }
       elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] < 0) {
-        // 5. käyttäjän syöttämä katejuttu
+        // 3. käyttäjän syöttämä katejuttu
         // Nolla keskihankintahinta tai kokoepäkurantti, katemyynti ei onnaa laitetaan sentti-hinnalla
         if ($trow['kehahin'] <= 0) {
           $hinta = 0.01;
@@ -5495,7 +5476,7 @@ if (!function_exists("alehinta")) {
 
     if ($jatka and $netto != 'N' and $netto != 'E') {
 
-      // 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
+      // 4. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
       $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
                  FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
                  WHERE yhtio  = '$kukarow[yhtio]'
@@ -5524,7 +5505,7 @@ if (!function_exists("alehinta")) {
 
       list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 5, "Asiakkaan tuotteen alennus");
 
-      // 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
+      // 5. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
                    FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
@@ -5555,7 +5536,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 6, "Asiakkaan tuotealeryhmän alennus");
       }
 
-      // 7. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus)
+      // 6. asiakas.segmentti tuote.tuoteno aleprosentti (asiakassegmentin tuotteen alennus)
       if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_tuoteno)
@@ -5576,7 +5557,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 7, "Asiakassegmentin tuotteen alennus");
       }
 
-      // 8. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasryhmän tuotteen alennus)
+      // 7. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasryhmän tuotteen alennus)
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_tuoteno)
@@ -5597,7 +5578,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 8, "Asiakasryhmän tuotteen alennus");
       }
 
-      // 9. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus)
+      // 8. asiakas.piiri tuote.tuoteno aleprosentti (asiakaspiirin tuotteen alennus)
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_piiri_tuoteno)
@@ -5618,7 +5599,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 9, "Asiakaspiirin tuotteen alennus");
       }
 
-      // 10. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
+      // 9. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
       if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
@@ -5639,7 +5620,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 10, "Asiakassegmentin tuotealeryhmän alennus");
       }
 
-      // 11. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasryhmän tuotealeryhmän alennus)
+      // 10. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasryhmän tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
@@ -5660,7 +5641,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 11, "Asiakasryhmän tuotealeryhmän alennus");
       }
 
-      // 12. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus)
+      // 11. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
@@ -5681,7 +5662,7 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Asiakaspiirin tuotealeryhmän alennus");
       }
 
-      // 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
+      // 12. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
       if (!isset($ale["ale1"])) {
 
         $query = "SELECT alennus
@@ -6056,11 +6037,6 @@ if (!function_exists("alehinta_osto")) {
       }
 
       $valuutta = $laskurow["valkoodi"];
-
-      if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-        $hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
-        $valuutta = $yhtiorow["valkoodi"];
-      }
     }
     elseif ($hinta == '') {
 
@@ -6335,33 +6311,14 @@ if (!function_exists("alehinta_osto")) {
 
     // Käydään läpi käsin syötetyt alennukset jos niitä on
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-      if (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "+") {
-        // 1. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 1;
-
-        $hinta_xxx = $hinta + substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta/$hinta_xxx))*100;
-        $hinta = $hinta_xxx;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and substr($ale["ale".$alepostfix], -1) == "-") {
-        // 2. käyttäjän syöttämä EURO-määräinen alennus
-        $aleperuste["ale".$alepostfix] = 2;
-
-        $hinta_xxx = $hinta - substr($ale["ale".$alepostfix], 0, -1);
-        $ale["ale".$alepostfix] = (1 - ($hinta_xxx/$hinta))*100;
-
-        $aperuste .= " Käyttäjän syöttämä EURO-määräinen ale (Aletaso: $alepostfix)";
-      }
-      elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
-        // 3. käyttäjän syöttämä alennus
+      if (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] > 0) {
+        // 1. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 3;
 
         $aperuste .= " Käyttäjän syöttämä ale (Aletaso: $alepostfix)";
       }
       elseif (isset($ale["ale".$alepostfix]) and is_numeric($ale["ale".$alepostfix]) and $ale["ale".$alepostfix] == 0) {
-        // 4. käyttäjän syöttämä alennus
+        // 2. käyttäjän syöttämä alennus
         $aleperuste["ale".$alepostfix] = 4;
 
         $aperuste .= " Ei alennusta (Aletaso: $alepostfix)";
@@ -6385,7 +6342,7 @@ if (!function_exists("alehinta_osto")) {
 
     if ($jatka and $netto != 'N' and $netto != 'E') {
 
-      // 5. toimi.tunnus/toimi.ytunnus tuote.tuotenumero aleprosentti (toimittajan tuotteen alennus)
+      // 3. toimi.tunnus/toimi.ytunnus tuote.tuotenumero aleprosentti (toimittajan tuotteen alennus)
       $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
                  FROM toimittajaalennus asale1 USE INDEX (yhtio_toimittaja_tuoteno)
                  WHERE yhtio     = '$kukarow[yhtio]'
@@ -6414,7 +6371,7 @@ if (!function_exists("alehinta_osto")) {
 
       list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 9, "Toimittajan tuotteen alennus");
 
-      // 6. toimi.tunnus/toimi.ytunnus tuote.aleryhmä aleprosentti (toimittajan tuotealeryhmän alennus)
+      // 4. toimi.tunnus/toimi.ytunnus tuote.aleryhmä aleprosentti (toimittajan tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
                    FROM toimittajaalennus asale1 USE INDEX (yhtio_toimittaja_ryhma)
@@ -6445,7 +6402,7 @@ if (!function_exists("alehinta_osto")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 10, "Toimittajan tuotealeryhmän alennus");
       }
 
-      // 7. Tuotteen toimittajan oletusalennus (Vain ykköstason alennus voidaan tallentaa tähän)
+      // 5. Tuotteen toimittajan oletusalennus (Vain ykköstason alennus voidaan tallentaa tähän)
       if (!isset($ale["ale1"])) {
 
         $query = "SELECT alennus
@@ -6480,7 +6437,7 @@ if (!function_exists("alehinta_osto")) {
     }
 
     $debug = 0;
-    if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ", var_dump($ale), "% ".t("HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+    if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: ", var_dump($ale), "% ".t("HINTA")." $hinta $valuutta KPL:$kpl<br><br>";
 
     if ($laskurow["valkoodi"] != $valuutta) {
       $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);

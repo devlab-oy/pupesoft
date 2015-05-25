@@ -1511,8 +1511,8 @@ else {
         $lisa .= " and tilausrivi.var != 'P' ";
       }
 
+      $maksupvm_join = "";
       if ($naytamaksupvm != "") {
-        $maksupvm_join = "";
         // Maksup‰iv‰m‰‰r‰ on varmasti tallennettu vain itse laskulle
         // tilauksia haettaessa t‰ytyy siis k‰yd‰ katsomassa maksupvm laskulta
         if ($ajotapa != "lasku") {

@@ -732,6 +732,25 @@ elseif ($sanoma == "StopAssignment") {
       if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) $print_array[] = "{$lahete_tulostus_paperille} lähetettä";
       if (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 0) $print_array[] = "{$lahete_tulostus_paperille_vak} vak/adr {$dokumenttiteksti}";
 
+      $query = "SELECT asav.avainsana
+                FROM kerayserat
+                JOIN lasku ON (lasku.yhtio = kerayserat.yhtio
+                  AND lasku.tunnus = kerayserat.otunnus)
+                JOIN asiakkaan_avainsanat AS asav (asav.yhtio = lasku.yhtio
+                  AND asav.liitostunnus = lasku.liitostunnus
+                  AND asav.laji = 'OPTISCAN_KERAYSKOMMENTTI')
+                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                AND kerayserat.nro = '{$nro}'";
+      $avainsanares = pupe_query($query);
+
+      if (mysql_num_rows($avainsanares) > 0) {
+        $avainsanarow = mysql_fetch_assoc($avainsanares);
+
+        if (!empty($avainsanarow['avainsana'])) {
+          $print_array[] = $avainsanarow['avainsana'];
+        }
+      }
+
       if (count($print_array) == 0) {
         $response = "99,Lähetteitä ei tulosteta\r\n\r\n";
       }

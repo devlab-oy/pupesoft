@@ -21,10 +21,10 @@ while ($yhtio = mysql_fetch_assoc($row)) {
   ///* Luetaan tapahtuma *///
   $query = "  SELECT tapahtuma.*, lasku.tunnus AS laskutunnus 
               FROM tapahtuma 
-              LEFT JOIN lasku ON lasku.yhtio = tapahtuma.yhtio 
-              AND tila       = 'X'
-              AND alatila    = 'I'
-              AND viite      = tapahtuma.tunnus
+              LEFT JOIN lasku ON (lasku.yhtio = tapahtuma.yhtio 
+                AND tila       = 'X'
+                AND alatila    = 'I'
+                AND viite      = tapahtuma.tunnus)
               WHERE tapahtuma.yhtio       =  '$yhtiorow[yhtio]'
               AND tapahtuma.laji      = 'Inventointi'
               AND tapahtuma.laadittu  > '2015-05-21 00:00:00'

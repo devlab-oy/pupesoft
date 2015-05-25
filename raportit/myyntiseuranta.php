@@ -976,15 +976,16 @@ else {
       $query_ale_lisa = generoi_alekentta('M');
 
       // HUOM: ", " (pilkku-space) stringi‰ k‰ytet‰‰n vain sarakkeiden v‰lill‰, eli ole tarkkana concatissa ja muissa funkkareissa $select-muuttujassa
-      $select       = "";
-      $query        = "";
-      $group        = "";
-      $order        = "";
-      $gluku        = 0;
-      $varasto_join     = "";
-      $kantaasiakas_join   = "";
-      $maksuehto_join   = "";
+      $select            = "";
+      $query             = "";
+      $group             = "";
+      $order             = "";
+      $gluku             = 0;
+      $varasto_join      = "";
+      $kantaasiakas_join = "";
+      $maksuehto_join    = "";
       $toimtuoteno_join  = "";
+      $maksupvm_join     = "";
 
       // n‰it‰ k‰ytet‰‰n queryss‰
       $sel_osasto = "";
@@ -1511,7 +1512,6 @@ else {
         $lisa .= " and tilausrivi.var != 'P' ";
       }
 
-      $maksupvm_join = "";
       if ($naytamaksupvm != "") {
         // Maksup‰iv‰m‰‰r‰ on varmasti tallennettu vain itse laskulle
         // tilauksia haettaessa t‰ytyy siis k‰yd‰ katsomassa maksupvm laskulta

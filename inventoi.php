@@ -425,8 +425,7 @@ if ($tee == 'VALMIS') {
     $query = "SELECT *
               FROM inventointilistarivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$lista}'
-              AND laskettu != 0";
+              AND otunnus = '{$lista}'";
     $_lasketut_res = pupe_query($query);
 
     while ($lrow = mysql_fetch_assoc($_lasketut_res)) {

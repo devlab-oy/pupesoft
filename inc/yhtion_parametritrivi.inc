@@ -3911,6 +3911,21 @@ if ($fieldname == 'saldo_varastossa_valmistuksella') {
   $jatko = 0;
 }
 
+if ($fieldname == "sarjanumeron_muodostus") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>" . t("Tuotteen nimitys, jonka perässä nouseva numero, esim. 'Testituote-4'") . "</option>";
+  $ulos .= "<option value = '1' $sel[1]>" . t("Kuluva vuosi, jonka perässä 100 alkava numerointi, esim. '2015-102'") . "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'tulosta_valmistus_tulosteet') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

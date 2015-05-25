@@ -5466,6 +5466,32 @@ function tullivarasto_laskutustiedot($parametrit) {
 
   extract($parametrit);
 
+  $query = "SELECT toimitusehto
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakasnro = '{$asiakastunnus}'";
+  $result = pupe_query($query);
+
+  $maksuperuste = mysql_result($result, 0);
+
+  if ($maksuperuste == 'K') {
+    // kuutiot
+    $kerroin = 'tuotetilavuus';
+  }
+  elseif ($maksuperuste == 'T') {
+    // tonnit
+    $kerroin = 'tuotemassa';
+  }
+  elseif ($maksuperuste == 'P') {
+
+  }
+
+  $hinnat = array(
+    'K' => 1,
+    'T' => 2,
+    'P' => 3
+  );
+
   $rkl = new DateTime($raporttikuun_alku);
   $rkl->modify('last day of this month');
   $raporttikuun_loppu = $rkl->format("Y-m-d");
@@ -5573,7 +5599,7 @@ function tullivarasto_laskutustiedot($parametrit) {
         $date2 = new DateTime($ulos);
         $interval = $date1->diff($date2);
         $paivat = $interval->days + 1;
-        $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
+        $hinta = ($hinnat[$maksuperuste] * $paivat) * ($kpl * $rivi[$kerroin]);
 
         $ulos = date("d.m.y", strtotime($ulos));
         $sisaan = date("d.m.y", strtotime($sisaan));
@@ -5597,7 +5623,6 @@ function tullivarasto_laskutustiedot($parametrit) {
 
       if ($sisaan_kpl > 0) {
 
-        // katsotaanko kesken kuun otetussa raportissa kuun loppu vai tänään?
         $ulos = $raporttikuun_loppu;
 
         $date1 = new DateTime($sisaan);
@@ -5605,7 +5630,7 @@ function tullivarasto_laskutustiedot($parametrit) {
         $interval = $date1->diff($date2);
         $paivat = $interval->days + 1;
 
-        $hinta = $varastointihinta * $paivat * $sisaan_kpl; // laskutustapa...
+        $hinta = ($hinnat[$maksuperuste] * $paivat) * ($sisaan_kpl * $rivi[$kerroin]);
 
         $ulos = date("d.m.y", strtotime($ulos));
         $sisaan = date("d.m.y", strtotime($sisaan));
@@ -5639,7 +5664,7 @@ function tullivarasto_laskutustiedot($parametrit) {
       $tonnit = ($tiedot['sisaan']['tuotemassa'] * $kpl);
       $tilavuus = ($tiedot['sisaan']['tuotetilavuus'] * $kpl);
 
-      $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
+      $hinta = ($hinnat[$maksuperuste] * $paivat) * ($kpl * $rivi[$kerroin]);
 
       $ulos = date("d.m.y", strtotime($ulos));
       $sisaan = date("d.m.y", strtotime($sisaan));

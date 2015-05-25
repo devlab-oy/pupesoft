@@ -2454,7 +2454,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
     }
   }
   elseif ($tyyppi == "B") {
-
     if ($kpl == 0) {
       $errori .= "<font class='error'>".t("VIRHE: kappalem‰‰r‰ on annettava")."</font><br>";
     }

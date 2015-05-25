@@ -1563,21 +1563,18 @@ if ($rivirow["tyyppi"] != 'V') {
 
       if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
 
-        $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
+        $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
                   FROM sarjanumeroseuranta
-                  WHERE yhtio='$kukarow[yhtio]'
-                  and tuoteno = '$rivirow[tuoteno]'
-                  and $tunnuskentta = '$rivirow[tunnus]'";
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND substr(sarjanumero, 1, 4) = year(now())";
         $vresult = pupe_query($query);
         $vrow = mysql_fetch_assoc($vresult);
 
-        $sarjanumero = $rivirow["nimitys"];
-
-        if ($vrow["sarjanumero"] > 0) {
-          $sarjanumero = $sarjanumero."-".$vrow["sarjanumero"];
+        if ($vrow["kuluvan_vuoden_suurin_numero"]) {
+          $sarjanumero = date("Y") . "-" . ($vrow["kuluvan_vuoden_suurin_numero"] + 1);
         }
         else {
-          $sarjanumero = $sarjanumero."-1";
+          $sarjanumero = date("Y") . "-100";
         }
       }
 

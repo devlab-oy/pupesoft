@@ -799,10 +799,14 @@ if ($tee == 'VALMIS') {
             //jos invataan raportin avulla niin tehd‰‰n p‰iv‰m‰‰r‰tsekit ja lasketaan saldo takautuvasti
             $saldomuutos = 0;
             $kerattymuut = 0;
+            $saldomuutoskeratty = 0;
 
             if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] !== null and $mobiili != "YES") {
               //katotaan paljonko saldot on muuttunut listan ajoajankohdasta
-              $query = "SELECT sum(tapahtuma.kpl) muutos
+              //paljonko rivej‰ on ker‰tty listan ajohetkell‰, jotka ovat nyt laskutettu
+              $query = "SELECT
+                        ifnull(sum(tapahtuma.kpl), 0) muutos,
+                        ifnull(sum(if(tilausrivi.tyyppi in ('L','G','V') and tilausrivi.kerattyaika < '{$row['inventointilista_aika']}' and tilausrivi.kerattyaika > 0, tapahtuma.kpl * -1, 0)), 0) keratty
                         FROM tapahtuma
                         JOIN tilausrivi ON (tapahtuma.yhtio = tilausrivi.yhtio
                           and tapahtuma.rivitunnus  = tilausrivi.tunnus
@@ -822,20 +826,24 @@ if ($tee == 'VALMIS') {
                 $saldomuutos = $trow["muutos"];
               }
 
-              // kuinka monta ker‰tty‰ oli listan ajohetkell‰, mutta nyt ne ovat laskutettu tai laskuttamatta
-              $query = "SELECT ifnull(sum(if(laskutettuaika='0000-00-00 00:00:00', varattu, kpl)), 0) keratty
+              if ($trow["keratty"] != 0) {
+                $saldomuutoskeratty = $trow["keratty"];
+              }
+
+              // kuinka monta ker‰tty‰ oli listan ajohetkell‰, mutta ovat viel‰ laskuttamatta
+              $query = "SELECT ifnull(sum(varattu), 0) keratty
                         FROM tilausrivi
-                        WHERE yhtio     = '$kukarow[yhtio]'
-                        and tyyppi      in ('L','G','V')
-                        and tuoteno     = '$tuoteno'
-                        and varattu     <> 0
-                        and kerattyaika < '{$row['inventointilista_aika']}'
-                        and kerattyaika > '0000-00-00 00:00:00'
-                        and (laskutettuaika  > '{$row['inventointilista_aika']}' or laskutettuaika  = '0000-00-00 00:00:00')
-                        and hyllyalue   = '$hyllyalue'
-                        and hyllynro    = '$hyllynro'
-                        and hyllyvali   = '$hyllyvali'
-                        and hyllytaso   = '$hyllytaso'";
+                        WHERE yhtio        = '$kukarow[yhtio]'
+                        and tyyppi         in ('L','G','V')
+                        and tuoteno        = '$tuoteno'
+                        and varattu        <> 0
+                        and kerattyaika    < '{$row['inventointilista_aika']}'
+                        and kerattyaika    > 0
+                        and laskutettuaika = 0
+                        and hyllyalue      = '$hyllyalue'
+                        and hyllynro       = '$hyllynro'
+                        and hyllyvali      = '$hyllyvali'
+                        and hyllytaso      = '$hyllytaso'";
               $hylresult = pupe_query($query);
               $hylrow = mysql_fetch_assoc($hylresult);
 
@@ -845,7 +853,7 @@ if ($tee == 'VALMIS') {
             }
             elseif ($row["sarjanumeroseuranta"] == "") {
               //Haetaan ker‰tty m‰‰r‰
-              $query = "SELECT ifnull(sum(if(keratty!='', tilausrivi.varattu, 0)), 0) keratty
+              $query = "SELECT ifnull(sum(if(keratty!='', varattu, 0)), 0) keratty
                         FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
                         WHERE yhtio    = '$kukarow[yhtio]'
                         and tyyppi     in ('L','G','V')
@@ -878,7 +886,7 @@ if ($tee == 'VALMIS') {
             else {
               //$kpl on k‰ytt‰j‰n syˆtt‰m‰ hyllys‰oleva m‰‰r‰ joka muutetaan saldoksi lis‰‰m‰ll‰ siihen ker‰tyt kappaleet
               //ja ottamalla huomioon $saldomuutos joka on saldon muutos listan ajohetkest‰
-              $kpl = $kpl + $kerattymuut + $saldomuutos;
+              $kpl = $kpl + $kerattymuut + $saldomuutos + $saldomuutoskeratty;
               $skp = 0;
             }
 

@@ -804,8 +804,9 @@ if ($tee == 'VALMIS') {
             if ($row["sarjanumeroseuranta"] == "" and $row["inventointilista_aika"] !== null and $mobiili != "YES") {
               //katotaan paljonko saldot on muuttunut listan ajoajankohdasta
               //paljonko rivejä on kerätty listan ajohetkellä, jotka ovat nyt laskutettu
-              $query = "SELECT sum(tapahtuma.kpl) muutos, 
-                        sum(if(tilausrivi.tyyppi in ('L','G','V') and tilausrivi.kerattyaika < '{$row['inventointilista_aika']}', tapahtuma.kpl * -1, 0)) keratty
+              $query = "SELECT
+                        ifnull(sum(tapahtuma.kpl), 0) muutos,
+                        ifnull(sum(if(tilausrivi.tyyppi in ('L','G','V') and tilausrivi.kerattyaika < '{$row['inventointilista_aika']}' and tilausrivi.kerattyaika > 0, tapahtuma.kpl * -1, 0)), 0) keratty
                         FROM tapahtuma
                         JOIN tilausrivi ON (tapahtuma.yhtio = tilausrivi.yhtio
                           and tapahtuma.rivitunnus  = tilausrivi.tunnus
@@ -821,15 +822,10 @@ if ($tee == 'VALMIS') {
               $result = pupe_query($query);
               $trow = mysql_fetch_assoc($result);
 
-              if ($tuoteno == 'T1184') {
-                
-                echo "$query<br><br>";
-              }
-
               if ($trow["muutos"] != 0) {
                 $saldomuutos = $trow["muutos"];
               }
-              
+
               if ($trow["keratty"] != 0) {
                 $saldomuutoskeratty = $trow["keratty"];
               }
@@ -837,25 +833,19 @@ if ($tee == 'VALMIS') {
               // kuinka monta kerättyä oli listan ajohetkellä, mutta ovat vielä laskuttamatta
               $query = "SELECT ifnull(sum(varattu), 0) keratty
                         FROM tilausrivi
-                        WHERE yhtio     = '$kukarow[yhtio]'
-                        and tyyppi      in ('L','G','V')
-                        and tuoteno     = '$tuoteno'
-                        and varattu     <> 0
-                        and kerattyaika < '{$row['inventointilista_aika']}'
-                        and kerattyaika > '0000-00-00 00:00:00'
-                        and laskutettuaika  = '0000-00-00 00:00:00'
-                        and hyllyalue   = '$hyllyalue'
-                        and hyllynro    = '$hyllynro'
-                        and hyllyvali   = '$hyllyvali'
-                        and hyllytaso   = '$hyllytaso'";
+                        WHERE yhtio        = '$kukarow[yhtio]'
+                        and tyyppi         in ('L','G','V')
+                        and tuoteno        = '$tuoteno'
+                        and varattu        <> 0
+                        and kerattyaika    < '{$row['inventointilista_aika']}'
+                        and kerattyaika    > 0
+                        and laskutettuaika = 0
+                        and hyllyalue      = '$hyllyalue'
+                        and hyllynro       = '$hyllynro'
+                        and hyllyvali      = '$hyllyvali'
+                        and hyllytaso      = '$hyllytaso'";
               $hylresult = pupe_query($query);
               $hylrow = mysql_fetch_assoc($hylresult);
-              
-              if ($tuoteno == 'T1184') {
-                
-                echo "$query<br><br>";
-                
-              }
 
               if ($hylrow['keratty'] != 0) {
                 $kerattymuut = $hylrow['keratty'];
@@ -863,7 +853,7 @@ if ($tee == 'VALMIS') {
             }
             elseif ($row["sarjanumeroseuranta"] == "") {
               //Haetaan kerätty määrä
-              $query = "SELECT ifnull(sum(if(keratty!='', tilausrivi.varattu, 0)), 0) keratty
+              $query = "SELECT ifnull(sum(if(keratty!='', varattu, 0)), 0) keratty
                         FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
                         WHERE yhtio    = '$kukarow[yhtio]'
                         and tyyppi     in ('L','G','V')
@@ -898,12 +888,6 @@ if ($tee == 'VALMIS') {
               //ja ottamalla huomioon $saldomuutos joka on saldon muutos listan ajohetkestä
               $kpl = $kpl + $kerattymuut + $saldomuutos + $saldomuutoskeratty;
               $skp = 0;
-            }
-
-            if ($tuoteno == 'T1184') {
-              echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Kerätty: $kerattymuut Saldomuutoskeratty (uusi): $saldomuutoskeratty Syötetty: $kpl Hyllyssä: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
-              exit;
-              
             }
 
             $nykyinensaldo = $row['saldo'];

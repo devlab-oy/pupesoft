@@ -68,6 +68,10 @@ $localdir_error = $maksuaineiston_siirto[$y]["local_dir_error"];
 $ftpsucc = $maksuaineiston_siirto[$y]["local_dir_ok"];
 $ftpfail = $localdir_error;
 
+if (isset($maksuaineiston_siirto[$y]["port"]) and (int)$maksuaineiston_siirto[$y]["port"] > 0) {
+  $ftpport = (int) $maksuaineiston_siirto[$y]["port"];
+}
+
 // Loopataan läpi pankkipolku
 if ($handle = opendir($localdir)) {
   while (($file = readdir($handle)) !== FALSE) {

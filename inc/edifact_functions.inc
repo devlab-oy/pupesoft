@@ -4089,7 +4089,7 @@ function toimitukset($toimitustunnus) {
             AND lasku.viesti = 'tullivarastotoimitus'
             AND lasku.tila != 'D'
             AND tuote.mallitarkenne != 'varastointinimike'
-            GROUP BY toimitustunnus, nimitys, malli
+            GROUP BY tilausrivi.tuoteno
             ORDER BY toimitustunnus DESC";
   $result = pupe_query($query);
 

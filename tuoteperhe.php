@@ -1217,7 +1217,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "</tr>";
         }
         elseif ($tunnus == $prow["tunnus"]) {
-          $query  = "SELECT tuoteperhe.*, tuote.nimitys
+          $query  = "SELECT tuoteperhe.*,
+                     tuote.nimitys,
+                     tuote.yksikko
                      FROM tuoteperhe
                      INNER JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
                        AND tuote.tuoteno = tuoteperhe.tuoteno)
@@ -1243,7 +1245,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "RESEPTI") {
-            echo "<td></td>";
+            echo "<td>{$zrow["yksikko"]}</td>";
 
             foreach ($resepti_kentat as $resepti_kentta) {
               echo "<td>";

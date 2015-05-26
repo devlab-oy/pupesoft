@@ -1211,11 +1211,13 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "</tr>";
         }
         elseif ($tunnus == $prow["tunnus"]) {
-          $query  = "SELECT *
+          $query  = "SELECT tuoteperhe.*, tuote.nimitys
                      FROM tuoteperhe
-                     WHERE yhtio = '$kukarow[yhtio]'
-                     and tunnus  = '$tunnus'
-                     and tyyppi  = '$hakutyyppi'";
+                     INNER JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+                       AND tuote.tuoteno = tuoteperhe.tuoteno)
+                     WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+                     and tuoteperhe.tunnus  = '$tunnus'
+                     and tuoteperhe.tyyppi  = '$hakutyyppi'";
           $zresult = pupe_query($query);
           $zrow = mysql_fetch_array($zresult);
 
@@ -1228,7 +1230,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           echo "<tr>";
           echo "<td><input type='text' name='tuoteno' size='20' value='$zrow[tuoteno]'></td>";
-          echo "<td></td>";
+          echo "<td>{$zrow["nimitys"]}</td>";
 
           if ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU") {
             echo "<td><input type='text' name='kerroin' size='10' value='$zrow[kerroin]'></td>";

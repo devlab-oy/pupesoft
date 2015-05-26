@@ -349,7 +349,6 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
             AND lasku.tilaustyyppi = 'N'
             AND lasku.asiakkaan_tilausnumero != ''
             AND lasku.sisviesti1 != 'konttiviitelasku'
-            AND laskun_lisatiedot.konttiviite != 'bookkaukseton'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
             GROUP BY lasku.asiakkaan_tilausnumero
             ORDER BY trlt.asiakkaan_tilausnumero";

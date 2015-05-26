@@ -1111,7 +1111,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["nimitys"]);
 
           if ($toim != "LISAVARUSTE") {
-            echo "<td align='right'>$prow[kerroin]</td>";
+            echo "<td align='right'>" . (float) $prow[kerroin] . "</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["kerroin"]);
           }
 

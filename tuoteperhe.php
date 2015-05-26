@@ -7,6 +7,21 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
+if (isset($tuotetiedot_exceliin)) {
+  setcookie("reseptin_tuotetiedot_exceliin", true);
+  $myos_tuotetiedot_exceliin = true;
+}
+elseif (isset($tuotetiedot_nappulaa_klikattu)) {
+  setcookie("reseptin_tuotetiedot_exceliin", false, time() - 3600);
+  $myos_tuotetiedot_exceliin = false;
+}
+elseif ($reseptin_tuotetiedot_exceliin) {
+  $myos_tuotetiedot_exceliin = true;
+}
+else {
+  $myos_tuotetiedot_exceliin = false;
+}
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -958,10 +973,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Määrä")."-<br>".t("kerroin")."</th>";
         echo "<th>".t("Yksikkö")."</th>";
 
-        if ($toim == "RESEPTI") {
-          foreach ($resepti_kentat as $resepti_kentta) {
-            echo "<th>{$resepti_kentta["selitetark"]}</th>";
-          }
+        foreach ($resepti_kentat as $resepti_kentta) {
+          echo "<th>{$resepti_kentta["selitetark"]}</th>";
         }
 
         echo "<th>".t("Kehahin")."</th>";
@@ -970,13 +983,18 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+
+        if ($myos_tuotetiedot_exceliin) {
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"));
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Mallitarkenne"));
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Tuotemerkki"));
+        }
+
         $worksheet->writeString($excelrivi, $excelsarake++, t("Määräkerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Yksikkö"));
 
-        if ($toim == "RESEPTI") {
-          foreach ($resepti_kentat as $resepti_kentta) {
-            $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
-          }
+        foreach ($resepti_kentat as $resepti_kentta) {
+          $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
         }
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
@@ -1115,6 +1133,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           $worksheet->writeString($excelrivi, $excelsarake++, $prow["tuoteno"]);
           $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["nimitys"]);
+
+          if ($myos_tuotetiedot_exceliin) {
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["malli"]);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["mallitarkenne"]);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["tuotemerkki"]);
+          }
 
           if ($toim != "LISAVARUSTE") {
             echo "<td align='right'>" . (float) $prow[kerroin] . "</td>";
@@ -1375,6 +1399,26 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       echo "<br><br><table>";
       echo "<tr><th>".t("Tallenna exceliin")."</th>";
+
+      $checked = $myos_tuotetiedot_exceliin ? "checked" : "";
+
+      echo "<td>
+              <form>
+                <input type='hidden' name='toim' value='{$toim}'>
+                <input type='hidden' name='isatuoteno' value='{$isatuoteno}'>
+                <input type='hidden' name='hakutuoteno' value='{$hakutuoteno}'>
+                <input type='hidden' name='lopetus' value='{$lopetus}'>
+                <input type='hidden' name='tuotetiedot_nappulaa_klikattu' value='kylla'>
+
+                <label>" . t("Myös malli, malli, mallitarkenne ja tuotemerkki") . "
+                  <input type='checkbox'
+                         name='tuotetiedot_exceliin'
+                         value='kylla'
+                         onchange='this.form.submit()'
+                         {$checked}>
+                </label>
+              </form>
+            </td>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

@@ -957,25 +957,31 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th class='full-width'>".t("Nimitys")."</th>";
         echo "<th>".t("Määrä")."-<br>".t("kerroin")."</th>";
         echo "<th>".t("Yksikkö")."</th>";
+
+        if ($toim == "RESEPTI") {
+          foreach ($resepti_kentat as $resepti_kentta) {
+            echo "<th>{$resepti_kentta["selitetark"]}</th>";
+          }
+        }
+
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin *Kerroin")."</th>";
         echo "<th>".t("Pituus kerroin")."</th>";
-
-        foreach ($resepti_kentat as $resepti_kentta) {
-          echo "<th>{$resepti_kentta["selitetark"]}</th>";
-        }
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Määräkerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Yksikkö"));
+
+        if ($toim == "RESEPTI") {
+          foreach ($resepti_kentat as $resepti_kentta) {
+            $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
+          }
+        }
+
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
-
-        foreach ($resepti_kentat as $resepti_kentta) {
-          $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
-        }
       }
 
       echo "<td class='back'></td>";
@@ -1131,6 +1137,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           if ($toim == "RESEPTI") {
             echo "<td align='left'>$tuoterow[yksikko]</td>";
             $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["yksikko"]);
+
+            foreach ($resepti_kentat as $resepti_kentta) {
+              echo "<td>{$prow[$resepti_kentta["selite"]]}</td>";
+              $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]]);
+            }
           }
 
           if ($toim != "VSUUNNITTELU") {
@@ -1171,11 +1182,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             else {
               echo "<td>".t("Kerrotaan")."</td>";
               $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"));
-            }
-
-            foreach ($resepti_kentat as $resepti_kentta) {
-              echo "<td>{$prow[$resepti_kentta["selite"]]}</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]]);
             }
           }
 
@@ -1238,6 +1244,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           if ($toim == "RESEPTI") {
             echo "<td></td>";
+
+            foreach ($resepti_kentat as $resepti_kentta) {
+              echo "<td>";
+              echo "<input type='text'
+                           name='{$resepti_kentta["selite"]}'
+                           value='{$prow[$resepti_kentta["selite"]]}'>";
+              echo "</td>";
+            }
           }
 
           if ($toim == "PERHE") {
@@ -1304,14 +1318,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
             echo "</select>";
             echo "</td>";
-
-            foreach ($resepti_kentat as $resepti_kentta) {
-              echo "<td>";
-              echo "<input type='text'
-                           name='{$resepti_kentta["selite"]}'
-                           value='{$prow[$resepti_kentta["selite"]]}'>";
-              echo "</td>";
-            }
           }
 
           echo "<td class='back'>";

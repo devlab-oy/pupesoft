@@ -882,7 +882,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $excelsarake = 0;
       $worksheet->writeString($excelrivi, $excelsarake++, t("Isätuote"));
 
-      echo "<table>";
+      echo "<table class='responsive'>";
       echo "<tr>";
 
       if ($toim == "PERHE") {
@@ -954,7 +954,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       }
       else {
         echo "<th>".t("Raaka-aineet")."</th>";
-        echo "<th>".t("Nimitys")."</th>";
+        echo "<th class='full-width'>".t("Nimitys")."</th>";
         echo "<th>".t("Määräkerroin")."</th>";
         echo "<th>".t("Yksikkö")."</th>";
         echo "<th>".t("Kehahin")."</th>";
@@ -1012,7 +1012,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
         echo "<tr>";
-        echo "<td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td>";
+        echo "<td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", "", '', 'X', '', "")."</td>";
 
         // Nimitys
         echo "<td></td>";

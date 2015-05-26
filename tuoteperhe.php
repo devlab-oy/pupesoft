@@ -1134,7 +1134,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim != "VSUUNNITTELU") {
-            echo "<td align='right'>$tuoterow[kehahin]</td>";
+            echo "<td align='right'>" . (float) $tuoterow["kehahin"] . "</td>";
             echo "<td align='right'>".round($lapsiyht, 6)."</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $tuoterow["kehahin"]);
             $worksheet->writeNumber($excelrivi, $excelsarake++, round($lapsiyht, 6));

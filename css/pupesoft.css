@@ -211,3 +211,17 @@ ul.list-unstyled {
 .text-center {
   text-align: center;
 }
+
+.full-width {
+  width: 100%;
+}
+
+table.responsive {
+  width: 100%;
+}
+
+table.responsive td input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}

@@ -955,10 +955,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       else {
         echo "<th>".t("Raaka-aineet")."</th>";
         echo "<th class='full-width'>".t("Nimitys")."</th>";
-        echo "<th>".t("Määräkerroin")."</th>";
+        echo "<th>".t("Määrä")."-<br>".t("kerroin")."</th>";
         echo "<th>".t("Yksikkö")."</th>";
         echo "<th>".t("Kehahin")."</th>";
-        echo "<th>".t("Kehahin*Kerroin")."</th>";
+        echo "<th>".t("Kehahin *Kerroin")."</th>";
         echo "<th>".t("Pituus kerroin")."</th>";
 
         foreach ($resepti_kentat as $resepti_kentta) {

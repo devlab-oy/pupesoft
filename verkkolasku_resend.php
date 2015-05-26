@@ -250,7 +250,7 @@ if ($handle = opendir($kansio)) {
       if ($status != 'OK: INVOICE CREATED SUCCESSFULLY') {
         
         // Rakennetaan sähköpostiin lähetettävä virheviesti
-        $maventaerrorreport .= t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro)."!\n\n";
+        $maventaerrorreport = t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro)."!\n\n";
         $maventaerrorreport .= t("Lähetetyn tiedoston nimi").": $lasku \n\n";
          
         // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,

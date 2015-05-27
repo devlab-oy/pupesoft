@@ -440,7 +440,7 @@ if ($tee == 'VALMIS') {
     }
   }
 
-  if (count($tuote) > 0 and ($_mennaan)) {
+  if (count($tuote) > 0 and $_mennaan) {
 
     // lukitaan tableja
     $query = "LOCK TABLES

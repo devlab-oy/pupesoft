@@ -31235,7 +31235,8 @@ if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
                                    $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
                                    $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
-    global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila;
+    global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
+           $kassalipas, $kieli, $valittu_tulostin;
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -31288,6 +31289,9 @@ if (!function_exists("piirra_maksupaate_formi")) {
     echo "<input type='hidden' id='peruutus' name='peruutus' value>";
     echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen' value='{$kateismaksu["kateinen"]}'>";
     echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu' value='{$kateista_annettu}'>";
+    echo "<input type='hidden' name='kassalipas' value='{$kassalipas}'>";
+    echo "<input type='hidden' name='kieli' value='{$kieli}'>";
+    echo "<input type='hidden' name='valittu_tulostin' value='{$valittu_tulostin}'>";
 
     echo "<table style='width: 100%; margin-top: 20px;'>";
     echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";

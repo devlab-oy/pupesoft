@@ -1372,25 +1372,6 @@ if ($tee == 'MUUTA') {
         }
         echo "</select></td></tr>";
 
-        $sel1 = $sel2 = $sel3 = "";
-
-        if ($krow['kayttoliittyma'] == "") {
-          $sel1 = "SELECTED";
-        }
-        if ($krow['kayttoliittyma'] == "C") {
-          $sel2 = "SELECTED";
-        }
-        if ($krow['kayttoliittyma'] == "U") {
-          $sel3 = "SELECTED";
-        }
-
-        echo "<tr><th align='left'>", t("Käyttöliittymä"), ":</th>
-            <td><select name='kayttoliittyma'>
-            <option value='' {$sel1}>", t("Yhtiön oletus"), "</option>
-            <option value='C' {$sel2}>", t("Pupesoft Classic"), "</option>
-            <option value='U' {$sel3}>", t("Pupesoft Next"), "</option>
-            </select></td></tr>";
-
         if ($krow['naytetaan_katteet_tilauksella'] == "") {
           $sel1 = "SELECTED";
           $sel2 = "";
@@ -1485,6 +1466,25 @@ if ($tee == 'MUUTA') {
           echo "</select></td></tr>";
         }
       }
+
+      $sel1 = $sel2 = $sel3 = "";
+
+      if ($krow['kayttoliittyma'] == "") {
+        $sel1 = "SELECTED";
+      }
+      if ($krow['kayttoliittyma'] == "C") {
+        $sel2 = "SELECTED";
+      }
+      if ($krow['kayttoliittyma'] == "U") {
+        $sel3 = "SELECTED";
+      }
+
+      echo "<tr><th align='left'>", t("Käyttöliittymä"), ":</th>
+          <td><select name='kayttoliittyma'>
+          <option value='' {$sel1}>", t("Yhtiön oletus"), "</option>
+          <option value='C' {$sel2}>", t("Pupesoft Classic"), "</option>
+          <option value='U' {$sel3}>", t("Pupesoft Next"), "</option>
+          </select></td></tr>";
 
       $sel = $krow['mitatoi_tilauksia'] == 'X' ? ' selected' : '';
 

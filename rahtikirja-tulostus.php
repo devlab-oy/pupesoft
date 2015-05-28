@@ -661,6 +661,9 @@ if ($tee == 'tulosta') {
                     AND yhtio      = '$kukarow[yhtio]'
                     AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
+          
+          // unifaunille täs kohtaa rahtikirja myös!
+          
         }
 
         // käytetään tästä alaspäin vanhoja tunnuksia
@@ -843,6 +846,8 @@ if ($tee == 'tulosta') {
       $kaikki_lotsikot = substr($kaikki_lotsikot, 0, -2);
 
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
+
+       // unifaunille täs kohtaa ei mitään, jos koontierätulostus! alla olevan iffin sisään sillon myöskin!
 
       // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississä
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {

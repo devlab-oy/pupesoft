@@ -4,16 +4,17 @@ if (!function_exists("toimitustapatarkista")) {
   function toimitustapatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
-    static $aputulostustapa, $apuvakkielto;
+    static $aputulostustapa, $apuvakkielto, $apurahtikirja;
 
     if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
+
+      // otetaan arvo talteen
+      $apurahtikirja = $t[$i];
       if (!file_exists("tilauskasittely/".$t[$i])) {
         $virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
       }
       
-      if ($aputulostustapa == 'L' and strpos($t['rahtikirja'], 'rahtikirja_unifaun') !== FALSE) {
-        $virhe[$i] = t("Virheellinen tulostustapa")."! ". t("Koontierätulostus ei toimi Unifaun Online rahtikirjan kanssa").".";
-      }
+      $apurahtikirja = $t[$i];
     }
 
     if ((mysql_field_name($result, $i)=="tulostustapa") and ($t[$i]!='')) {
@@ -21,6 +22,13 @@ if (!function_exists("toimitustapatarkista")) {
       $aputulostustapa = $t[$i];
       if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L' and $t[$i]!='X') {
         $virhe[$i] = t("Virheellinen tulostustapa")."!";
+      }
+    }
+    
+    if ((mysql_field_name($result, $i)=="uudet_pakkaustiedot")) {
+
+      if ($aputulostustapa == 'L' and strpos($apurahtikirja, 'rahtikirja_unifaun') !== FALSE and $t[$i] != 'K') {
+        $virhe[$i] = t("Virhe")."! ". t("Koontierätulostus ei toimi Unifaun Online rahtikirjan kanssa ilman koontirahtikirjan pakkaustietoja").".";
       }
     }
 

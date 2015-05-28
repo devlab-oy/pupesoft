@@ -10,6 +10,8 @@ if (!is_array($erat)) {
 $otunnukset      = implode(",", $erat['tilaukset']);
 $tilausrivit      = '';
 $pakkaus_kirjaimet = array();
+$lisatyt_tilausrivit = array();
+$lisatyt_tilaukset = array();
 $kerayseran_numero = 0;
 
 foreach ($erat as $era_key => $era_arr) {
@@ -98,9 +100,6 @@ foreach ($erat as $era_key => $era_arr) {
               GROUP BY 1,2
               ORDER BY 1,2";
     $era_res = pupe_query($query);
-
-    $lisatyt_tilausrivit = array();
-    $lisatyt_tilaukset = array();
 
     while ($era_row = mysql_fetch_assoc($era_res)) {
       $lisatyt_tilaukset[$era_row['otunnus']] = $era_row['otunnus'];

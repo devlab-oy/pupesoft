@@ -62,7 +62,7 @@ $_onko_unifaun = ($_onko_unifaun or $toitarow["rahtikirja"] == 'rahtikirja_unifa
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
-  if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+  if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka)) {
 
     $linkkilisa = '';
 
@@ -670,7 +670,7 @@ if ($tee == 'tulosta') {
                     AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
 
-          if ($_onko_unifaun) {
+          if ($_onko_unifaun and isset($tulosta_rahtikirjat_nappulatsukka)) {
             require_once "inc/unifaun_send.inc";
 
             $query = "SELECT unifaun_nimi

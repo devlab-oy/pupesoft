@@ -385,7 +385,7 @@ if ($tee == 'VALMIS') {
 
   $_tallenna = (isset($tallenna_laskettu_hyllyssa) or isset($prev) or isset($next));
 
-  if (!$_tallenna) {
+  if (!$_tallenna or !$laaja_inventointilista) {
     $_mennaan = true;
   }
 

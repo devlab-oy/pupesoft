@@ -4491,8 +4491,13 @@ function purkuraportti_parametrit($tulotunnus) {
 
     $rivi['purkuaika'] = date("d.m.Y H:i", strtotime($rivi['purkuaika']));
     $rivi['tuotemassa'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
-    $rivi['tuotemassa_netto'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
-    $rivi['tuotetilavuus'] = number_format($rivi['tuotemassa'], 2, ',', ' ');
+    $rivi['tuotemassa_netto'] = number_format($rivi['tuotemassa_netto'], 2, ',', ' ');
+    $rivi['tuotetilavuus'] = number_format($rivi['tuotetilavuus'], 2, ',', ' ');
+
+    $rivi['kpl_yhteensa'] = $rivi['pakkauskpl'] * $rivi['kpl'];
+    $rivi['paino_yhteensa'] = $rivi['tuotemassa'] * $rivi['kpl'];
+    $rivi['paino_yhteensa_netto'] = $rivi['tuotemassa_netto'] * $rivi['kpl'];
+    $rivi['tilavuus_yhteensa'] = $rivi['tuotetilavuus'] * $rivi['kpl'];
 
     $puretut_tuotteet[] = $rivi;
   }
@@ -4645,10 +4650,10 @@ function purkuraportti_pdf($pdf_data) {
   $pdf->draw_line($xx, $yy, $sivu);
   $y -= 20;
 
-  $pdf->draw_text($x, $y,     t("Name"), $sivu, $bold);
-  $pdf->draw_text($x+100, $y, t("Model"), $sivu, $bold);
-  $pdf->draw_text($x+190, $y, t("ctn."), $sivu, $bold);
-  $pdf->draw_text($x+235, $y, t("sets"), $sivu, $bold);
+  $pdf->draw_text($x, $y,     t("Nimitys"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, t("Malli"), $sivu, $bold);
+  $pdf->draw_text($x+190, $y, t("Pakkauksia"), $sivu, $bold);
+  $pdf->draw_text($x+235, $y, t("kpl."), $sivu, $bold);
   $pdf->draw_text($x+285, $y, t("Brutto kg"), $sivu, $bold);
   $pdf->draw_text($x+355, $y, t("Netto kg"), $sivu, $bold);
   $pdf->draw_text($x+425, $y, t("m³"), $sivu, $bold);
@@ -4668,10 +4673,10 @@ function purkuraportti_pdf($pdf_data) {
     $pdf->draw_text($x, $y,     $tuote['nimitys'], $sivu, $pieni);
     $pdf->draw_text($x+100, $y, $tuote['malli'], $sivu, $pieni);
     $pdf->draw_text($x+190, $y, $tuote['kpl'], $sivu, $pieni);
-    $pdf->draw_text($x+235, $y, $tuote['pakkauskpl'], $sivu, $pieni);
-    $pdf->draw_text($x+285, $y, $tuote['tuotemassa'], $sivu, $pieni);
-    $pdf->draw_text($x+355, $y, $tuote['tuotemassa_netto'], $sivu, $pieni);
-    $pdf->draw_text($x+425, $y, $tuote['tuotetilavuus'], $sivu, $pieni);
+    $pdf->draw_text($x+235, $y, $tuote['kpl_yhteensa'], $sivu, $pieni);
+    $pdf->draw_text($x+285, $y, $tuote['paino_yhteensa'], $sivu, $pieni);
+    $pdf->draw_text($x+355, $y, $tuote['paino_yhteensa_netto'], $sivu, $pieni);
+    $pdf->draw_text($x+425, $y, $tuote['tilavuus_yhteensa'], $sivu, $pieni);
 
     if ($tyyppi == 'lastaus') {
       list($osa1, $osa2, $osa3) = explode('-', $tuote['tuoteno']);

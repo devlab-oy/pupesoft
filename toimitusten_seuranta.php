@@ -221,6 +221,8 @@ if (isset($rekkakuljetukseksi) or isset($konttikuljetukseksi)) {
 
 if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
+  $konttinumeroa_muutettu = false;
+
   if ($kuljetustyyppi == 'rekka') {
 
     if (empty($kuljettaja)) {
@@ -273,6 +275,11 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
     if (strlen($sinettinumero) > 10) {
       $errors['sinettinumero'] = t("Sinettinumero saa olla korkeintaan 10 merkkiä pitkä.");
     }
+
+    if ($konttinumero != $konttinumero_vertailu and empty($errors['konttinumero'])) {
+      $konttinumeroa_muutettu = true;
+    }
+
   }
 
   if (count($errors) == 0) {
@@ -365,7 +372,13 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
     }
 
-    if (laheta_sanoma($sanoma)) {
+    $sanoman_lahetys = true;
+
+    if ($korjaus and !$konttinumeroa_muutettu) {
+      $sanoman_lahetys = false;
+    }
+
+    if ($sanoman_lahetys and laheta_sanoma($sanoma)) {
 
       $query = "SELECT group_concat(DISTINCT lasku.tunnus) AS tunnukset
                 FROM tilausrivin_lisatiedot AS trlt
@@ -651,7 +664,10 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
     echo "
     <tr>
       <th>" . t("Konttinumero") ."</th>
-      <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
+      <td>
+        <input type='text' name='konttinumero' value='{$konttinumero}' />
+        <input type='hidden' name='konttinumero_vertailu' value='{$konttinumero}' />
+      </td>
       <td class='back error'>{$errors['konttinumero']}</td>
     </tr>
     <tr>

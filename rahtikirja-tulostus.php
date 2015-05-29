@@ -56,6 +56,9 @@ if ($tee == 'tulosta') {
   }
 }
 
+$_onko_unifaun = ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
+$_onko_unifaun = ($_onko_unifaun or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
@@ -652,7 +655,12 @@ if ($tee == 'tulosta') {
 
       $tulostuskpl = $kollityht;
 
-      if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
+      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
+      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
+      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
+
+      if ($_tulostustapa and $_paktiedot) {
         // merkataan rahtikirjat tulostetuksi..
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
           $query = "UPDATE rahtikirjat
@@ -661,9 +669,38 @@ if ($tee == 'tulosta') {
                     AND yhtio      = '$kukarow[yhtio]'
                     AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
-          
-          // unifaunille t‰s kohtaa rahtikirja myˆs!
-          
+
+          require_once "inc/unifaun_send.inc";
+
+          $query = "SELECT unifaun_nimi
+                    FROM kirjoittimet
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$kirjoitin_tunnus}'";
+          $kires = pupe_query($query);
+          $kirow = mysql_fetch_assoc($kires);
+
+          $query = "SELECT *
+                    FROM rahtikirjat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otsikkonro = 0
+                    AND tunnus IN ({$tunnukset})
+                    AND pakkaustieto_tunnukset != ''";
+          $mergeidres = pupe_query($query);
+          $mergeidrow = mysql_fetch_assoc($mergeidres);
+          $mergeid = $mergeidrow['rahtikirjanro'];
+
+          if (!empty($kirow['unifaun_nimi']) and !empty($mergeid)) {
+
+            if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
+              $unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
+            }
+            elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+              $unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+            }
+
+            $unifaun->_closeWithPrinter($mergeid, $kirow['unifaun_nimi']);
+            $unifaun->ftpSend();
+          }
         }
 
         // k‰ytet‰‰n t‰st‰ alasp‰in vanhoja tunnuksia
@@ -847,7 +884,15 @@ if ($tee == 'tulosta') {
 
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
-       // unifaunille t‰s kohtaa ei mit‰‰n, jos koontier‰tulostus! alla olevan iffin sis‰‰n sillon myˆskin!
+      // unifaunille t‰ss‰ kohtaa normaali rahtikirja, jos koontier‰tulostus!
+      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
+      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
+      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
+      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
+
+      if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
+        $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
+      }
 
       // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississ‰
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {

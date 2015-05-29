@@ -599,7 +599,12 @@ if ($tee == 'tulosta') {
 
       $pakkaustieto_tunnukset = '';
 
-      if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
+      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
+      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
+      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
+
+      if ($_tulostustapa and $_paktiedot) {
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -654,11 +659,6 @@ if ($tee == 'tulosta') {
       $kuljetusohjeet = $pak["viesti"];
 
       $tulostuskpl = $kollityht;
-
-      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
-      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
-      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
-      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
 
       if ($_tulostustapa and $_paktiedot) {
         // merkataan rahtikirjat tulostetuksi..

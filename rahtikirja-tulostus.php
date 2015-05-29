@@ -887,11 +887,6 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
       // unifaunille tässä kohtaa normaali rahtikirja, jos koontierätulostus!
-      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
-      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
-      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
-      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
-
       if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
         $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
       }

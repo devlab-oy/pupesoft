@@ -692,6 +692,8 @@ if ($tee == 'tulosta') {
 
             if (!empty($kirow['unifaun_nimi']) and !empty($mergeid)) {
 
+              @include "tilauskasittely/$toitarow[rahtikirja]";
+
               if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
                 $unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
               }

@@ -29370,66 +29370,82 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
       $tuote_temp = TRUE;
     }
 
+    $tuote_temp = FALSE;
+
     mysql_data_seek($parametrit['result'], 0);
 
-    while ($row = mysql_fetch_assoc($parametrit['result'])) {
+    $_row_dummy = mysql_fetch_assoc($parametrit['result']);
+
+    mysql_data_seek($parametrit['result'], 0);
+
+    // foreach ($_row_dummy as $_header => &$_value) {
+    //   if ($_header == 'ytunnus') $_value = 'FI07099963';
+    //   else $_value = 1;
+    // }
+
+    $_rows = array();
+
+    echo "count: ".mysql_num_rows($parametrit['result'])."<br>";
+
+    while ($_row = mysql_fetch_assoc($parametrit['result'])) {
+      // array_push($_rows, $_row_dummy);
+      // array_push($_rows, $_row);
+      $_rows[] = $_row;
+    }
+
+    // while ($row = mysql_fetch_assoc($parametrit['result'])) {
+    foreach ($_rows as $row) {
 
       $ryhmitys = '';
 
-      foreach ($parametrit['group_by'] as $value) {
-        if (isset($row[$value])) {
-          $ryhmitys .= $row[$value];
+      # Myynninseurannan performance
+      if (!empty($parametrit['group_by_column'])) {
+        $ryhmitys = $parametrit['group_by_column'];
+      }
+      else {
+        foreach ($parametrit['group_by'] as $value) {
+          if (isset($row[$value])) {
+            $ryhmitys .= $row[$value];
+          }
         }
       }
 
       if (array_key_exists($ryhmitys, $ryhmitetty_array)) {
         foreach ($parametrit['sum'] as $k) {
 
-          if (!isset($ryhmitetty_array[$ryhmitys][$k])) {
-            $ryhmitetty_array[$ryhmitys][$k] = 0;
-          }
+          // if (!isset($ryhmitetty_array[$ryhmitys][$k])) {
+          //   $ryhmitetty_array[$ryhmitys][$k] = 0;
+          // }
 
-          if (    isset($row[$k])
-            and $tuote_temp) {
+          if (isset($row[$k])) {
 
-            if (in_array($k, $parametrit['laske_kate'])) {
-
+            if ($tuote_temp and in_array($k, $parametrit['laske_kate'])) {
               $b = str_replace('kate', 'myynti', $k);
               $hinta = $row[$b];
 
               $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
-
             }
 
+            $ryhmitetty_array[$ryhmitys][$k] += $row[$k];
           }
-
-          if (isset($row[$k])) {
-            $ryhmitetty_array[$ryhmitys][$k] = $row[$k] + $ryhmitetty_array[$ryhmitys][$k];
-          }
-
         }
       }
       else {
         foreach ($parametrit['sum'] as $k) {
 
-          if (    isset($row[$k])
-            and $tuote_temp) {
-
-            if (in_array($k, $parametrit['laske_kate'])) {
-
+          if (isset($row[$k])) {
+            if ($tuote_temp and in_array($k, $parametrit['laske_kate'])) {
               $b = str_replace('kate', 'myynti', $k);
               $hinta = $row[$b];
 
               $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
-
             }
 
+            $ryhmitetty_array[$ryhmitys][$k] = $row[$k];
           }
-
-          if (isset($row[$k])) {
-            $ryhmitetty_array[$ryhmitys][$k] =  $row[$k];
+          else {
+            $ryhmitetty_array[$ryhmitys][$k] = 0;
           }
-
         }
       }
 

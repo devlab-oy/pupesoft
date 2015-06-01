@@ -888,11 +888,6 @@ if ($tee == 'tulosta') {
 
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
-      // unifaunille t‰ss‰ kohtaa normaali rahtikirja, jos koontier‰tulostus!
-      if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
-        $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
-      }
-
       // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississ‰
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
         $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
@@ -902,7 +897,7 @@ if ($tee == 'tulosta') {
       if (!isset($tee_varsinainen_tulostus) or (isset($tee_varsinainen_tulostus) and $tee_varsinainen_tulostus)) {
 
         // tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
-        if (@include "tilauskasittely/$toitarow[rahtikirja]") {
+        if (($_onko_unifaun and $_tulostustapa and $_paktiedot) or @include "tilauskasittely/$toitarow[rahtikirja]") {
 
           // Otetaan talteen t‰ss‰ $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;

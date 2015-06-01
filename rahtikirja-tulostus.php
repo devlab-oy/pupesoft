@@ -689,6 +689,7 @@ if ($tee == 'tulosta') {
             $mergeidres = pupe_query($query);
             $mergeidrow = mysql_fetch_assoc($mergeidres);
             $mergeid = $mergeidrow['rahtikirjanro'];
+            $rahtikirjanro = $pakkaustieto_rahtikirjanro;
 
             if (!empty($kirow['unifaun_nimi']) and !empty($mergeid)) {
 

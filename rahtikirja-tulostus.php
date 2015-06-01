@@ -670,7 +670,7 @@ if ($tee == 'tulosta') {
                     AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
 
-          if ($_onko_unifaun and isset($tulosta_rahtikirjat_nappulatsukka)) {
+          if ($_onko_unifaun and $tultiin == 'koonti_eratulostus_pakkaustiedot') {
             require_once "inc/unifaun_send.inc";
 
             $query = "SELECT unifaun_nimi

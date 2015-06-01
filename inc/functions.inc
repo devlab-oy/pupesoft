@@ -25491,7 +25491,7 @@ if (!function_exists('hyllysiirto')) {
                       AND tunnus  = '{$minnevarasto_row['toimipaikka']}'";
             $minnetoimipaikka_res = pupe_query($query);
             $minnetoimipaikka_row = mysql_fetch_assoc($minnetoimipaikka_res);
-            
+
             if ($minne_kustp == 0)    $minne_kustp    = $minnetoimipaikka_row['kustp'];
             if ($minne_kohde == 0)    $minne_kohde    = $minnetoimipaikka_row['kohde'];
             if ($minne_projekti == 0) $minne_projekti = $minnetoimipaikka_row['projekti'];
@@ -29638,6 +29638,16 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     // Otetaan talteen, koska täällä muutellaan
     $kukarow_talteen = $kukarow;
+
+    // Muutetaan oikeaan merkistöön
+    $encoding = exec("file -b --mime-encoding '$filenimi'");
+
+    if (!PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'ISO-8859-15') {
+      exec("recode -f $encoding..ISO-8859-15 '$filenimi'");
+    }
+    elseif (PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
+      exec("recode -f $encoding..UTF8 '$filenimi'");
+    }
 
     // Otetaan koko aineisto muuttujaan jotta voidaan vertailla onko tämä jo koneella
     // koska joskus voi tulla esim kaksi LMP aineistoa samalle päivälle mutta eri sisällöllä

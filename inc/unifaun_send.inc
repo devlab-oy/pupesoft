@@ -723,12 +723,14 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");
     }
-    elseif ($this->toitarow['virallinen_selite'] == "IT16" and $this->postirow["toim_puh"] != "") {
+    elseif ($this->toitarow['virallinen_selite'] == "IT16" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOT");
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
-      $uni_add_val->addAttribute('n', "text3");
 
+      if ($this->postirow["toim_puh"] != '') {
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val->addAttribute('n', "text3"); 
+      }
       if ($this->asiakasrow["email"] != '') {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->asiakasrow["email"])); // Used to define notification mode for add-on NOT.
         $uni_add_val->addAttribute('n', "text4");

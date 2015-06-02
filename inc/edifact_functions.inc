@@ -1508,9 +1508,50 @@ function kasittele_bookkaussanoma($edi_data) {
   $kviitteet = array();
 
   if (mysql_num_rows($result) == 1) {
+
     $lasku = mysql_fetch_assoc($result);
 
-    if ($lasku['konttiviite'] == $konttiviite) {
+    if ($lasku['konttiviite'] == 'bookkaukseton') {
+
+      $update_query = "UPDATE lasku SET
+                       sisviesti1 = '{$ohje}',
+                       toimaika = '{$lahtopvm}'
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus = '{$lasku['tunnus']}'";
+      pupe_query($update_query);
+
+      $update_query = "UPDATE laskun_lisatiedot SET
+                       konttiviite  = '{$konttiviite}',
+                       konttimaara  = '{$konttimaara}',
+                       konttityyppi = '{$konttityyppi}',
+                       matkakoodi   = '{$matkakoodi}',
+                       rullamaara   = '{$rullamaara}',
+                       matkatiedot  = '{$matkatiedot}'
+                       WHERE yhtio  = '{$kukarow['yhtio']}'
+                       AND otunnus  = '{$lasku['tunnus']}'";
+      pupe_query($update_query);
+
+      $filesize = strlen($liitedata);
+      $liitedata = mysql_real_escape_string($liitedata);
+
+      $query = "INSERT INTO liitetiedostot SET
+                yhtio           = '{$kukarow['yhtio']}',
+                liitos          = 'lasku',
+                liitostunnus    = '{$lasku['tunnus']}',
+                selite          = '{$tilausnro}:{$rivinro}',
+                laatija         = '{$kukarow['kuka']}',
+                luontiaika      = NOW(),
+                data            = '{$liitedata}',
+                filename        = '{$sanoma_id}',
+                filesize        = '{$filesize}',
+                filetype        = 'text/plain',
+                kayttotarkoitus = 'bookkaussanoma'";
+      pupe_query($query);
+
+      return true;
+
+    }
+    elseif ($lasku['konttiviite'] == $konttiviite) {
       $tunnus_johon_liitetaan = $lasku['tunnus'];
     }
     else {
@@ -5365,33 +5406,35 @@ function eu_kopioi_rivit($kopiointiparametrit) {
 function datepicker($input_id) {
 
   echo "
-    <script>
-      $(function($){
-         $.datepicker.regional['fi'] = {
-                     closeText: 'Sulje',
-                     prevText: '&laquo;Edellinen',
-                     nextText: 'Seuraava&raquo;',
-                     currentText: 'T&auml;n&auml;&auml;n',
-             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
-              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
-              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
-              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
-                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
-                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
-                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
-                      weekHeader: 'Vk',
-              dateFormat: 'dd.mm.yy',
-                      firstDay: 1,
-                      isRTL: false,
-                      showMonthAfterYear: false,
-                      yearSuffix: ''};
-          $.datepicker.setDefaults($.datepicker.regional['fi']);
-      });
+      <script>
+      $(document).ready(function() {
+        $(function($){
+           $.datepicker.regional['fi'] = {
+                       closeText: 'Sulje',
+                       prevText: '&laquo;Edellinen',
+                       nextText: 'Seuraava&raquo;',
+                       currentText: 'T&auml;n&auml;&auml;n',
+               monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
+                'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
+                monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
+                'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
+                        dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
+                        dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
+                        dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
+                        weekHeader: 'Vk',
+                dateFormat: 'dd.mm.yy',
+                        firstDay: 1,
+                        isRTL: false,
+                        showMonthAfterYear: false,
+                        yearSuffix: ''};
+            $.datepicker.setDefaults($.datepicker.regional['fi']);
+        });
 
-      $(function() {
-        $('#{$input_id}').datepicker();
+        $(function() {
+          $('#{$input_id}').datepicker();
+        });
       });
-      </script>";
+    </script>";
 }
 
 function tullivarastoraportti($kopiointiparametrit) {

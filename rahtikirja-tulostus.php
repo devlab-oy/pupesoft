@@ -324,6 +324,10 @@ if ($tee == 'close_with_printer') {
     $res   = pupe_query($query);
   }
 
+  if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
+    require "tilauskasittely/rahtikirja_erittely_pdf.inc";
+  }
+
   require_once "inc/unifaun_send.inc";
 
   $query = "SELECT unifaun_nimi
@@ -907,11 +911,11 @@ if ($tee == 'tulosta') {
           // Otetaan talteen tässä $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;
 
-          if ($tulosta_vak_yleisrahtikirja != '') {
+          if (!$unifaun_era_vainkollitarra and $tulosta_vak_yleisrahtikirja != '') {
             require "tilauskasittely/rahtikirja_pdf.inc";
           }
 
-          if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
+          if (!$unifaun_era_vainkollitarra and $toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
             require "tilauskasittely/rahtikirja_erittely_pdf.inc";
           }
 

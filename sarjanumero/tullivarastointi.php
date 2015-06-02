@@ -325,6 +325,8 @@ if ($view == 'splittaus') {
   $result = pupe_query($query);
   $tilausrivi = mysql_fetch_assoc($result);
 
+  $kpl = (INT) $tilausrivi['tilkpl'];
+
   echo "<form method='post'>";
   echo "<div class='alue_0'>";
   echo "<div class='alue_1 alue' style='text-align:center;'>";
@@ -337,7 +339,8 @@ if ($view == 'splittaus') {
 
   echo "<div class='tilaus_alue' style='overflow:auto'>";
 
-  echo "<input type='hidden' id='hidden_vanhakpl' name='vanhakpl' value='{$tilausrivi['tilkpl']}' />";
+  echo "<input type='hidden' id='total_kpl' name='total_kpl' value='{$kpl}' />";
+  echo "<input type='hidden' id='hidden_vanhakpl' name='vanhakpl' value='{$kpl}' />";
   echo "<input type='hidden' id='hidden_uusikpl' name='uusikpl' value='0' />";
   echo "<input type='hidden' name='task' value='split' />";
   echo "<input type='hidden' name='rivitunnus' value='{$rivitunnus}' />";
@@ -346,7 +349,7 @@ if ($view == 'splittaus') {
   echo "<div style='float:left; width:200px; text-align:left;'>";
   echo t("Alkuperäinen erä");
   echo '<br>';
-  echo "<span id='vanhakpl'>" . $tilausrivi['tilkpl'] . "</span>";
+  echo "<input type='text' size='4' id='vanhakpl' value='{$kpl}' readonly>";
   echo "</div>";
 
   echo "<div style='float:left; width:280px; text-align:center;'>";
@@ -358,7 +361,7 @@ if ($view == 'splittaus') {
   echo "<div style='float:right; width:200px;  text-align:right;'>";
   echo t("Uusi erä");
   echo '<br>';
-  echo "<span id='uusikpl'>0</span>";
+  echo "<input type='text' size='4' id='uusikpl' value='0'>";
   echo "</div>";
 
   echo "</div>";
@@ -379,10 +382,27 @@ if ($view == 'splittaus') {
       var vkpl = Number(vkpl);
 
       if (vkpl > 1) {
-        $('#vanhakpl').html(vkpl-1);
+        $('#vanhakpl').val(vkpl-1);
         $('#hidden_vanhakpl').val(vkpl-1);
-        $('#uusikpl').html(ukpl+1);
+        $('#uusikpl').val(ukpl+1);
         $('#hidden_uusikpl').val(ukpl+1);
+      }
+    });
+
+    $('#uusikpl').keyup(function() {
+
+      var total_kpl = $('#total_kpl').val();
+
+      var vkpl = total_kpl - $('#uusikpl').val();
+      var ukpl = $('#uusikpl').val();
+
+      var vkpl = Number(vkpl);
+      var ukpl = Number(ukpl);
+
+      if (vkpl > 1) {
+        $('#hidden_vanhakpl').val(vkpl);
+        $('#vanhakpl').val(vkpl);
+        $('#hidden_uusikpl').val(ukpl);
       }
     });
 
@@ -395,9 +415,9 @@ if ($view == 'splittaus') {
       var vkpl = Number(vkpl);
 
       if (ukpl > 0) {
-        $('#vanhakpl').html(vkpl+1);
+        $('#vanhakpl').val(vkpl+1);
         $('#hidden_vanhakpl').val(vkpl+1);
-        $('#uusikpl').html(ukpl-1);
+        $('#uusikpl').val(ukpl-1);
         $('#hidden_uusikpl').val(ukpl-1);
       }
 

@@ -597,6 +597,14 @@ if ($tee == 'tulosta') {
         $groupby_lisa = "";
       }
 
+      $query = "SELECT min(rahtikirjanro) rahtikirjanro
+                FROM rahtikirjat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus IN ({$tunnukset})";
+      $rahtikirjanrores = pupe_query($query);
+      $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
+      $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
+
       $pakkaustieto_tunnukset = '';
 
       $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
@@ -690,16 +698,8 @@ if ($tee == 'tulosta') {
             $mergeidrow = mysql_fetch_assoc($mergeidres);
             $mergeid = $mergeidrow['rahtikirjanro'];
 
-            $query = "SELECT min(rahtikirjanro) rahtikirjanro
-                      FROM rahtikirjat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus IN ({$tunnukset})";
-            $rahtikirjanrores = pupe_query($query);
-            $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
-            $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
-
             @include "tilauskasittely/$toitarow[rahtikirja]";
-           
+
             if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") {
               $unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
             }

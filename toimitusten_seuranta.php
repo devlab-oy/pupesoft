@@ -100,6 +100,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $update_query = "UPDATE laskun_lisatiedot SET
                    konttiviite = '{$viite}',
                    matkakoodi = 'rekka',
+                   konttimaara = '{$konttimaara}',
                    matkatiedot = '{$matkatiedot}'
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND otunnus IN ({$tunnukset})";
@@ -1423,6 +1424,14 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
     $errors['maaranpaakoodi'] = t("Syˆt‰ m‰‰r‰np‰‰koodi!");
   }
 
+  if (empty($konttimaara)) {
+    $errors['konttimaara'] = t("Syˆt‰ konttim‰‰r‰");
+  }
+
+  if (!is_numeric($konttimaara)) {
+    $errors['konttimaara'] = t("Tarkista konttim‰‰r‰!");
+  }
+
   if (count($errors) == 0) {
 
     $matkatiedot = array(
@@ -1474,6 +1483,7 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
 
   <input type='hidden' name='kuljetusfirma' value='{$kuljetusfirma}' />
   <input type='hidden' name='viite' value='{$viite}' />
+  <input type='hidden' name='konttimaara' value='{$konttimaara}' />
   <input type='hidden' name='maaranpaa' value='{$maaranpaa}' />
   <input type='hidden' name='maaranapaakoodi' value='{$maaranpaakoodi}' />
   <input type='hidden' name='pakkausohje' value='{$pakkausohje}' />
@@ -1574,6 +1584,12 @@ if (isset($task) and $task == 'rekkatoimituksen_lisays') {
       <th>" . t("M‰‰r‰np‰‰-koodi") ."</th>
       <td><input type='text' name='maaranpaakoodi' value='{$maaranpaakoodi}' /></th>
       <td class='back error'>{$errors['maaranpaakoodi']}</td>
+    </tr>
+
+    <tr>
+      <th>" . t("Konttim‰‰r‰") ."</th>
+      <td><input type='text' name='konttimaara' value='{$konttimaara}' /></th>
+      <td class='back error'>{$errors['konttimaara']}</td>
     </tr>
 
     <tr>

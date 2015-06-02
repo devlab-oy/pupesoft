@@ -80,6 +80,34 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
 if (!isset($errors)) $errors = array();
 
+if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
+
+  $tunnukset = implode(",", $valitut);
+
+  $matkatiedot = serialize($matkatiedot);
+  $matkatiedot = mysql_real_escape_string($matkatiedot);
+  $pakkausohje = mysql_real_escape_string($pakkausohje);
+
+  $kukarow['kesken'] = 0;
+
+  $update_query = "UPDATE lasku SET
+                   toimaika = '{$lahtopvm}',
+                   sisviesti1 = '{$pakkausohje}'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus IN ({$tunnukset})";
+  pupe_query($update_query);
+
+  $update_query = "UPDATE laskun_lisatiedot SET
+                   konttiviite = '{$viite}',
+                   matkakoodi = 'rekka',
+                   matkatiedot = '{$matkatiedot}'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND otunnus IN ({$tunnukset})";
+  pupe_query($update_query);
+
+  unset($task);
+}
+
 if (isset($task) and $task == 'laivamuutos') {
 
   if (!empty($uusilaiva)) {
@@ -1403,36 +1431,6 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
       'maaranpaakoodi' => $maaranpaakoodi
     );
 
-    $matkatiedot = serialize($matkatiedot);
-    $matkatiedot = mysql_real_escape_string($matkatiedot);
-    $pakkausohje = mysql_real_escape_string($pakkausohje);
-
-    /*
-
-    $kukarow['kesken'] = 0;
-
-    require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
-
-    $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 102);
-
-    $update_query = "UPDATE lasku SET
-                     toimaika = '{$_lahtopvm}',
-                     asiakkaan_tilausnumero = 'XXX',
-                     sisviesti1 = '{$pakkausohje}'
-                     WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND tunnus = '{$tunnus}'";
-    pupe_query($update_query);
-
-    $update_query = "UPDATE laskun_lisatiedot SET
-                     konttiviite = '{$viite}',
-                     matkakoodi = 'rekka',
-                     matkatiedot = '{$matkatiedot}'
-                     WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND otunnus = '{$tunnus}'";
-    pupe_query($update_query);
-
-   */
-
     $task = 'rekkatoimituksen_rivivalinta';
   }
   else {
@@ -1522,7 +1520,7 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
     echo "
     <tr>
       <th>{$tilaus['asiakkaan_tilausnumero']}</th>
-      <td align='right'><input type='checkbox' name='valitut' value='{$tilaus['tunnus']}' /></th>
+      <td align='right'><input type='checkbox' name='valitut[]' value='{$tilaus['tunnus']}' /></th>
     </tr>";
   }
 
@@ -1536,6 +1534,8 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
 }
 
 if (isset($task) and $task == 'rekkatoimituksen_lisays') {
+
+  datepicker('lahtopvm');
 
   echo "
   <a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>
@@ -1591,8 +1591,6 @@ if (isset($task) and $task == 'rekkatoimituksen_lisays') {
   </table>
 
   </form>";
-
-  datepicker('lahtopvm');
 
 }
 
@@ -1772,18 +1770,12 @@ if (!isset($task)) {
   echo "</form>";
 
   echo '<br>';
-
-/*
-
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='task' value='rekkatoimituksen_lisays' />";
   echo "<input type='submit' value='" .t("Rekkatoimituksen lisäys") ."'>";
   echo "</form>";
-
-
   echo "<br><br>";
-*/
 
   $result = pupe_query($query);
 

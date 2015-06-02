@@ -911,7 +911,7 @@ if ($tee == 'tulosta') {
           // Otetaan talteen tässä $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;
 
-          if (!$unifaun_era_vainkollitarra and $tulosta_vak_yleisrahtikirja != '') {
+          if ($tulosta_vak_yleisrahtikirja != '') {
             require "tilauskasittely/rahtikirja_pdf.inc";
           }
 

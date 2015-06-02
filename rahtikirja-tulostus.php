@@ -689,7 +689,14 @@ if ($tee == 'tulosta') {
             $mergeidres = pupe_query($query);
             $mergeidrow = mysql_fetch_assoc($mergeidres);
             $mergeid = $mergeidrow['rahtikirjanro'];
-            $rahtikirjanro = $pakkaustieto_rahtikirjanro;
+
+            $query = "SELECT min(rahtikirjanro) rahtikirjanro
+                      FROM rahtikirjat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus IN ({$tunnukset})";
+            $rahtikirjanrores = pupe_query($query);
+            $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
+            $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
 
             if (!empty($kirow['unifaun_nimi']) and !empty($mergeid)) {
 

@@ -875,6 +875,7 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
             WHERE tunnus in ($ltunnukset)
             and yhtio    = '$kukarow[yhtio]'
             and tila     = 'U'
+            order by laskunro desc
             LIMIT 1";
   $result_temp = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result_temp);

@@ -487,7 +487,7 @@ elseif ($rivityyppi == 'L' and $laaja_toim_kasittely) {
   );
   $varasto = sallitut_varastot($params);
 }
-elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+elseif ($laskurow["tila"] != "G" and isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
   $varasto = explode(",", $kukarow["varasto"]);
 }
 else {
@@ -1453,7 +1453,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         or {$zrow["varastotyyppi"]} == ''
                         or {$zrow["varastotyyppi"]} == 'V'
                         or (is_array($varasto)
-                          and in_array({$zrow["varasto"]}, $varasto)
+                          and in_array({$zrow["varasto"]}, "; var_dump($varasto); echo ")
                           and {$laskurow["varasto"]} == 0)
                         or {$laskurow["varasto"]} == {$zrow["varasto"]})
                     )
@@ -1475,7 +1475,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 or $zrow["varastotyyppi"] == 'V'
                 or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
                   and $laskurow["varasto"] == 0)
-                or $laskurow["varasto"] == $zrow["varasto"]))) {
+                or $laskurow["varasto"] == $zrow["varasto"]
+                or ($laskurow["tila"] == "G"
+                  and $laskurow["varasto"] == 0)))) {
 
             if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 

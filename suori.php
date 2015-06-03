@@ -649,7 +649,7 @@ if ($tee == "W") {
 
 if ($tee == '') {
   // Tällä ollaan, jos olemme vasta valitsemassa pankkitiliä
-  $query = "SELECT lasku.maksu_tili, yriti.nimi, yriti.tilino, count(*) 'kpl'
+  $query = "SELECT lasku.maksu_tili, yriti.nimi, yriti.iban, count(*) 'kpl'
             FROM lasku, yriti
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'Q'

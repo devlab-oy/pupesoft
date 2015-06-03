@@ -114,7 +114,7 @@ if ($tee == '') {
               lasku.popvm aika,
               ifnull(kuka.nimi, lasku.maksaja) kukanimi,
               lasku.olmapvm,
-              CONCAT(yriti.nimi, ' ', yriti.tilino) maksu_tili,
+              CONCAT(yriti.nimi, ' ', yriti.iban) maksu_tili,
               COUNT(*) kpl,
               GROUP_CONCAT(lasku.tunnus) tunnukset,
               round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
@@ -133,7 +133,7 @@ if ($tee == '') {
     $query = "SELECT if(lasku.maa = 'fi', 1, 2) tyyppi,
               lasku.popvm aika,
               ifnull(kuka.nimi, lasku.maksaja) kukanimi,
-              group_CONCAT(distinct yriti.nimi, ' ', yriti.tilino separator '<br>') maksu_tili,
+              group_CONCAT(distinct yriti.nimi, ' ', yriti.iban separator '<br>') maksu_tili,
               COUNT(*) kpl,
               GROUP_CONCAT(lasku.tunnus) tunnukset,
               round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa

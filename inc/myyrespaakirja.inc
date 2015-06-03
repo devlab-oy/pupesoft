@@ -92,7 +92,7 @@ echo "
   <tr>";
 
 // haetaan kaikki yrityksen rahatilit mysql muodossa
-$query  = "SELECT oletus_rahatili, nimi, tilino
+$query  = "SELECT oletus_rahatili, nimi, iban
            FROM yriti
            WHERE yhtio          = '$kukarow[yhtio]'
            AND kaytossa         = ''
@@ -109,7 +109,7 @@ $psel[$rahatili] = "SELECTED";
 
 while ($ratiro = mysql_fetch_array($ratire)) {
   $rahatilisel = $ratiro["oletus_rahatili"];
-  echo "<option value='$ratiro[oletus_rahatili]' $psel[$rahatilisel]>$ratiro[nimi] ($ratiro[tilino])</option>";
+  echo "<option value='$ratiro[oletus_rahatili]' $psel[$rahatilisel]>$ratiro[nimi] ($ratiro[iban])</option>";
 }
 
 echo "

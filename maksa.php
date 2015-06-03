@@ -894,7 +894,7 @@ if ($tee == 'W') {
 
   echo "<font class='message'>".t("Valitse maksutili")."</font><hr>";
 
-  $query = "SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, tilinylitys, valkoodi
+  $query = "SELECT tunnus, concat(nimi, ' (', iban, ')') tili, maksulimitti, tilinylitys, valkoodi
             FROM yriti
             WHERE yhtio   = '$kukarow[yhtio]'
             and (maksulimitti > 0 or tilinylitys != '')
@@ -1053,7 +1053,7 @@ if ($tee == 'DM') {
             h5time,
             if(alatila='k','*','') kale,
             lasku.tunnus peru,
-            yriti.tilino,
+            yriti.iban,
             yriti.nimi tilinimi,
             lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti, lasku.vanhatunnus, lasku.arvo, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
             FROM lasku, valuu, yriti
@@ -1178,7 +1178,7 @@ if ($tee == 'DM') {
 
       echo "</td>";
       echo "<td class='ptop'>$trow[laskunro]</td>";
-      echo "<td class='ptop'>$trow[tilinimi]<br>$trow[tilino]</td>";
+      echo "<td class='ptop'>$trow[tilinimi]<br>$trow[iban]</td>";
       echo "<td class='ptop'>$trow[viite] $trow[viesti]";
 
       if ($trow["vanhatunnus"] != 0) {

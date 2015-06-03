@@ -450,21 +450,40 @@ if ($avain_sel['KOPIOITUOTE'] == 'SELECTED') {
   }
 }
 
-if ($_selite and $avain_sel['CARRIER_SSCC'] == 'SELECTED') {
-  $toimitustavat = hae_kaikki_toimitustavat();
+if ($avain_sel['CARRIER_SSCC'] == 'SELECTED') {
 
-  $ulos .= "<td>";
-  $ulos .= "<select name='{$nimi}'>";
+  if ($_selite) {
+    $toimitustavat = hae_kaikki_toimitustavat();
 
-  foreach ($toimitustavat as $toimitustapa) {
-    $sel = $trow[$i] == $toimitustapa['selite'] ? "selected" : "";
-    $ulos .= "<option value='{$toimitustapa['selite']}'>{$toimitustapa['selite']}</optino>";
+    $ulos .= "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+
+    foreach ($toimitustavat as $toimitustapa) {
+      $sel = $trow[$i] == $toimitustapa['selite'] ? "selected" : "";
+      $ulos .= "<option value='{$toimitustapa['selite']}' {$sel}>{$toimitustapa['selite']}</optino>";
+    }
+
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
   }
 
-  $ulos .= "</select>";
-  $ulos .= "</td>";
-  $jatko = 0;
+  if ($_selitetark) {
+    $ulos .= "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+
+    foreach (range(0, 9) as $n) {
+      $sel = (int) $trow[$i] == $n ? "selected" : "";
+      $ulos .= "<option value='{$n}' {$sel}>{$n}</optino>";
+    }
+
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
 }
+
+
 
 $_toimmyynti = ($avain_sel['TOIMMYYNTI'] == 'SELECTED' and $_selite);
 

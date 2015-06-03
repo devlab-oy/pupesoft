@@ -131,25 +131,42 @@ if ($kollityht > 0) {
 
   //$tulostakolli = 1; // tulostetaan aina yksi kappale???miks???
 
+  $kuljetusliike_sscc = false;
+  $expansion_code = "";
+
+  if (!empty($yhtiorow['gs1_company_id'])) {
+    $_selitetark = t_avainsana("CARRIER_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+    if (!empty($_selitetark)) {
+      $expansioncode = $_selitetark;
+      $kuljetusliike_sscc = true;
+    }
+  }
+
   $tulostakolli = $kollityht;
 
   for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-    // tehdään SSCC :
-    // (00)
-    // 1
-    // ytunnus (8)
-    // lähetenro (6)
-    // kollityht (2)
-    // tarkiste (1)
+    if ($kuljetusliike_sscc) {
+      $sscc = carrier_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
+    }
+    else {
+      // tehdään SSCC :
+      // (00)
+      // 1
+      // ytunnus (8)
+      // lähetenro (6)
+      // kollityht (2)
+      // tarkiste (1)
 
-    //$prefix = "(00)"; // tää on turha
-    $sscc = 1;
-    $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
-    $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
-    $sscc .= sprintf('%02.2s', $tulostuskpl);
-    $loppu = tarkiste($sscc);
-    $sscc = $sscc.$loppu;
+      //$prefix = "(00)"; // tää on turha
+      $sscc = 1;
+      $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
+      $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+      $sscc .= sprintf('%02.2s', $tulostuskpl);
+      $loppu = tarkiste($sscc);
+      $sscc = $sscc.$loppu;
+    }
 
     // tehdään pdf:n uusi sivu
     $firstpage = $pdf->new_page("a5");

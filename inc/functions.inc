@@ -31419,6 +31419,24 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
   }
 }
 
+if (!function_exists("carrier_sscc")) {
+  function carrier_sscc($expansioncode, $id, $n) {
+    global $yhtiorow;
+
+    $sscc_prefix = '00';
+    $sscc_expansioncode = $expansioncode;
+    $sscc_gs1_company_id = $yhtiorow['gs1_company_id'];
+    $sscc_item_id = substr($id, -7);
+    $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
+
+    $sscc = $sscc_prefix.$sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
+    $sscc_checknum = tarkiste($sscc);
+    $sscc = $sscc.$sscc_checknum;
+
+    return $sscc;
+  }
+}
+
 if (!function_exists("hae_tuoteperhe")) {
   /**
    * Hakee tuoteperheen kaikkine lapsineen rekursiivisesti

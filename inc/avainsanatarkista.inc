@@ -259,5 +259,22 @@ if (!function_exists("avainsanatarkista")) {
         $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
       }
     }
+
+    if (in_array(strtoupper($tem_laji), array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA"))) {
+      if (mysql_field_name($result, $i) == "selite") {
+        $selite = trim($tem_selite);
+
+        if (empty($selite)) {
+          $virhe[$i] = t("Selite on pakollinen");
+        }
+      }
+      elseif (mysql_field_name($result, $i) == "selitetark") {
+        $selitetark = trim($tem_selitetark);
+
+        if (empty($selitetark)) {
+          $virhe[$i] = t("Selitetark on pakollinen");
+        }
+      }
+    }
   }
 }

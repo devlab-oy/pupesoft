@@ -120,7 +120,7 @@ if ($iframe != '') echo "<div style='float: left; width: 55%; padding-right: 10p
 
 if ($jarj == '') $jarj = "nimi";
 
-$query = "SELECT *
+$query = "SELECT *, luontiaika sypvm
           FROM lasku
           WHERE yhtio = '$kukarow[yhtio]'
           $pvmlisa
@@ -143,6 +143,7 @@ else {
   echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=nimi'>".t("Nimi")."</a></th>";
   echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=tapvm'>".t("Tapvm")."</a></th>";
   echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=mapvm'>".t("Mapvm")."</a></th>";
+  echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=sypvm'>".t("Syötetty")."</a></th>";
   echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=summa'>".t("Summa")."</a></th>";
   echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=mapvm'>".t("valkoodi")."</a></th>";
   echo "</tr>";
@@ -168,6 +169,7 @@ else {
     echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=$jarj#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
     echo "<$ero>".tv1dateconv($trow["tapvm"])."</$ero>";
     echo "<$ero>".tv1dateconv($trow["mapvm"])."</$ero>";
+    echo "<$ero>".tv1dateconv($trow["sypvm"])."</$ero>";
     echo "<$ero style='text-align: right;'>$trow[summa]</$ero>";
     echo "<$ero>$trow[valkoodi]</$ero>";
     echo "</tr>";
@@ -196,14 +198,14 @@ if ($tee == 'P') {
 
   $tiliointirow = mysql_fetch_assoc($result);
 
-  $tili    = $tiliointirow['tilino'];
-  $kustp    = $tiliointirow['kustp'];
-  $kohde    = $tiliointirow['kohde'];
+  $tili      = $tiliointirow['tilino'];
+  $kustp     = $tiliointirow['kustp'];
+  $kohde     = $tiliointirow['kohde'];
   $projekti  = $tiliointirow['projekti'];
-  $summa    = $tiliointirow['summa'];
-  $vero    = $tiliointirow['vero'];
+  $summa     = $tiliointirow['summa'];
+  $vero      = $tiliointirow['vero'];
   $selite    = $tiliointirow['selite'];
-  $tositenro  = $tiliointirow['tosite'];
+  $tositenro = $tiliointirow['tosite'];
 
   $ok = 1;
 
@@ -256,13 +258,13 @@ if ($tee == 'U') {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace( ",", ".", $summa);
-  $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
-  $tositetila   = $laskurow["tila"];
-  $tositeliit   = $laskurow["liitostunnus"];
+  $summa         = str_replace( ",", ".", $summa);
+  $selausnimi    = 'tili'; // Minka niminen mahdollinen popup on?
+  $tositetila    = $laskurow["tila"];
+  $tositeliit    = $laskurow["liitostunnus"];
   $kustp_tark    = $kustp;
   $kohde_tark    = $kohde;
-  $projekti_tark  = $projekti;
+  $projekti_tark = $projekti;
 
   require "inc/tarkistatiliointi.inc";
 

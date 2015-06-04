@@ -300,6 +300,7 @@ if ($fieldname == "laskutyyppi") {
   $ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
   $ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
   $ulos .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
+  $ulos .= "<option value = '20' {$sel[20]}>".t("Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4483,6 +4484,24 @@ if ($fieldname == "inventointi_yhteenveto") {
   $jatko = 0;
 }
 
+if ($fieldname == "laaja_inventointilista") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Inventointilistaa inventoidessa ei k‰ytet‰ laajaa inventointilistaa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Inventointilistaa inventoidessa k‰ytet‰‰n laajaa inventointilistaa");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "inventointi_siirron_yhteydessa") {
   $sel = $trow[$i] == "K" ? "selected" : "";
 
@@ -4577,6 +4596,19 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
 if ($fieldname == "tilausrivin_kateraja") {
   $ulos = "<td><input type='number' min='0' max='100' name='{$nimi}' value='{$trow[$i]}'></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "viitemaksujen_oikaisut") {
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Viitemaksujen oikaisuja ei tallenneta");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Viitemaksujen oikaisut tallennetaan");
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }

@@ -511,7 +511,7 @@ if ($ytunnus != '' and $tee == "") {
              FROM yriti
              WHERE yhtio  = '$kukarow[yhtio]'
              and kaytossa = ''
-             order by tilino";
+             order by iban";
   $result = pupe_query($query);
 
   $sel='';
@@ -525,7 +525,7 @@ if ($ytunnus != '' and $tee == "") {
     else {
       if ($tilino == $row['tilino']) $sel='selected';
     }
-    echo "<option value='$row[tunnus]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
+    echo "<option value='$row[tunnus]' $sel>$row[nimi] $row[iban] $row[valkoodi]</option>\n";
     $sel='';
   }
   echo "</select>";

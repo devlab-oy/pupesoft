@@ -9977,7 +9977,7 @@ if ($tee == '') {
               echo "<input type='hidden' name='tee' value='ODOTTAA'>";
               echo "<input type='submit' value='* ".t("{$napin_teksti} Odottaa Tuotteita saapuvaksi")." *'>";
             }
-                    }
+          }
           echo "</form></td>";
         }
       }

@@ -976,15 +976,16 @@ else {
       $query_ale_lisa = generoi_alekentta('M');
 
       // HUOM: ", " (pilkku-space) stringi‰ k‰ytet‰‰n vain sarakkeiden v‰lill‰, eli ole tarkkana concatissa ja muissa funkkareissa $select-muuttujassa
-      $select       = "";
-      $query        = "";
-      $group        = "";
-      $order        = "";
-      $gluku        = 0;
-      $varasto_join     = "";
-      $kantaasiakas_join   = "";
-      $maksuehto_join   = "";
+      $select            = "";
+      $query             = "";
+      $group             = "";
+      $order             = "";
+      $gluku             = 0;
+      $varasto_join      = "";
+      $kantaasiakas_join = "";
+      $maksuehto_join    = "";
       $toimtuoteno_join  = "";
+      $maksupvm_join     = "";
 
       // n‰it‰ k‰ytet‰‰n queryss‰
       $sel_osasto = "";
@@ -1512,8 +1513,18 @@ else {
       }
 
       if ($naytamaksupvm != "") {
-        $group .= ",lasku.mapvm";
-        $select .= "lasku.mapvm maksupvm, ";
+        // Maksup‰iv‰m‰‰r‰ on varmasti tallennettu vain itse laskulle
+        // tilauksia haettaessa t‰ytyy siis k‰yd‰ katsomassa maksupvm laskulta
+        if ($ajotapa != "lasku") {
+          $maksupvm_join = "LEFT JOIN lasku AS UX ON (UX.yhtio = lasku.yhtio AND UX.laskunro = lasku.laskunro AND UX.tila = 'U')";
+          $group .= ",UX.mapvm";
+          $select .= "UX.mapvm maksupvm, ";
+        }
+        else {
+          $group .= ",lasku.mapvm";
+          $select .= "lasku.mapvm maksupvm, ";
+        }
+
         $gluku++;
         $muutgroups++;
       }
@@ -2300,6 +2311,7 @@ else {
               {$maksuehto_join}
               {$toimtuoteno_join}
               {$lisa_parametri}
+              {$maksupvm_join}
               WHERE lasku.yhtio in ({$yhtio})
               and lasku.tila in ({$tila})";
 

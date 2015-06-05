@@ -743,19 +743,21 @@ elseif ($sanoma == "StopAssignment") {
                 AND kerayserat.nro = '{$nro}'";
       $avainsanares = pupe_query($query);
 
-      if (mysql_num_rows($avainsanares) > 0) {
-        $avainsanarow = mysql_fetch_assoc($avainsanares);
-
-        if (!empty($avainsanarow['avainsana'])) {
-          $print_array[] = $avainsanarow['avainsana'];
-        }
-      }
-
       if (count($print_array) == 0) {
         $response = "99,Lähetteitä ei tulosteta\r\n\r\n";
       }
       else {
-        $response = "99,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
+        $response  = "99,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}";
+
+      if (mysql_num_rows($avainsanares) > 0) {
+        $avainsanarow = mysql_fetch_assoc($avainsanares);
+
+        if (!empty($avainsanarow['avainsana'])) {
+          $response .= ", {$avainsanarow['avainsana']}";
+        }
+      }
+
+        $response .= \r\n\r\n";
       }
     }
   }

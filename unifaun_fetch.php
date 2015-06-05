@@ -173,9 +173,15 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
           if (!empty($eranumero_sscc)) {
 
-            // koontierätulostuksessa pikkuisen eri tavalla kuin muissa
-            if ($toimitrow["tulostustapa"] == 'L') {
+            $query = "SELECT *
+                      FROM toimitustapa
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND selite  = '{$toimitrow['toimitustapa']}'";
+            $toimitustapa_res = pupe_query($query);
+            $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
+            // koontierätulostuksessa pikkuisen eri tavalla kuin muissa
+            if ($toimitustapa_row["tulostustapa"] == 'L') {
               $_rahtiwherelisa = "AND otsikkonro = 0 and rahtikirjanro = '$eranumero_sscc'";
               $_otsikkonro = 0;
               $_pakkaustieto_tunnukset = "pakkaustieto_tunnukset = '$eranumero_sscc', ";

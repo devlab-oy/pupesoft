@@ -742,6 +742,8 @@ if ($tee == 'MUUTA') {
                   g_url = $('#generoi_url').attr('href'),
                   ktval = $('#ktunnus').val();
 
+                  ktval = encodeURIComponent(ktval);
+
                   if (g_url.toLowerCase().indexOf('ktval') === -1) {
                     g_url = g_url + '&ktval=' + ktval;
                     $('#generoi_url').attr('href', g_url);

@@ -841,6 +841,10 @@ if ((int) $kukarow["kesken"] > 0) {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
   }
 
+  if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
+    $yhtiorow['reklamaation_kasittely'] = '';
+  }
+
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
     $yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]), 0);
   }
@@ -9973,7 +9977,7 @@ if ($tee == '') {
               echo "<input type='hidden' name='tee' value='ODOTTAA'>";
               echo "<input type='submit' value='* ".t("{$napin_teksti} Odottaa Tuotteita saapuvaksi")." *'>";
             }
-          }
+                    }
           echo "</form></td>";
         }
       }

@@ -1391,6 +1391,13 @@ if ($kasitellaan_tiedosto) {
 
         $valinta_orig = $valinta;
 
+        $sama_tuote_useasti = FALSE;
+        // Saako tuoteperheessä olla sama tuote monesti
+        // jos sama tuote SAA olla monesti päästetään tässä kohtaa läpi
+        if ($table_mysql == 'tuoteperhe' and $yhtiorow["tuoteperhe_kasittely"] == "M") {
+          $sama_tuote_useasti = TRUE;
+        }
+
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA/LISAA") {
           // Muutetaan jos löytyy muuten lisätään!
           if (mysql_num_rows($fresult) == 0) {
@@ -1409,7 +1416,7 @@ if ($kasitellaan_tiedosto) {
           $taulunrivit[$taulu][$eriviindex][$postoiminto] = "LISAA";
         }
         elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($fresult) != 0) {
-          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta') {
+          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta' and !$sama_tuote_useasti) {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>");
             $tila = 'ohita';
           }
@@ -2045,6 +2052,15 @@ if ($kasitellaan_tiedosto) {
           $and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
         }
 
+        // Katsotaan onko jossain tuoteperheessä jo
+        // tismalleen samanlainen rivi
+        if ($hylkaa == 0 and $sama_tuote_useasti) {
+          $_sijainti = strpos($query, "muutospvm=now() , ");
+          $_pituus = strlen("muutospvm=now() , ");
+          $and = substr($query, $_sijainti + $_pituus);
+          $and = "and ".str_replace(" , ", " and ", $and);
+        }
+
         if (substr($taulu, 0, 11) == 'puun_alkio_' and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
           $query .= " , laji = '{$table_tarkenne}' ";
         }
@@ -2213,7 +2229,7 @@ if ($kasitellaan_tiedosto) {
 
         $tarq = "SELECT *
                  FROM $table_mysql";
-        if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
+        if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus' or $sama_tuote_useasti) {
           $tarq .= " WHERE yhtio = '$kukarow[yhtio]'";
           if (!empty($and)) {
             $tarq .= $and;
@@ -2242,7 +2258,7 @@ if ($kasitellaan_tiedosto) {
         }
         elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
 
-          if (!empty($and) and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus')) {
+          if (!empty($and) and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus' or $table_mysql == 'tuoteperhe')) {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>");
           }
         }

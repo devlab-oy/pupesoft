@@ -749,15 +749,15 @@ elseif ($sanoma == "StopAssignment") {
       else {
         $response  = "99,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}";
 
-      if (mysql_num_rows($avainsanares) > 0) {
-        $avainsanarow = mysql_fetch_assoc($avainsanares);
+        if (mysql_num_rows($avainsanares) > 0) {
+          $avainsanarow = mysql_fetch_assoc($avainsanares);
 
-        if (!empty($avainsanarow['avainsana'])) {
-          $response .= ", {$avainsanarow['avainsana']}";
+          if (!empty($avainsanarow['avainsana'])) {
+            $response .= ", {$avainsanarow['avainsana']}";
+          }
         }
-      }
 
-        $response .= \r\n\r\n";
+        $response .= "\r\n\r\n";
       }
     }
   }

@@ -753,7 +753,7 @@ elseif ($sanoma == "StopAssignment") {
           $avainsanarow = mysql_fetch_assoc($avainsanares);
 
           if (!empty($avainsanarow['avainsana'])) {
-            $response .= ", {$avainsanarow['avainsana']}";
+            $response .= " {$avainsanarow['avainsana']}";
           }
         }
 

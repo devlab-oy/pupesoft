@@ -841,6 +841,10 @@ if ((int) $kukarow["kesken"] > 0) {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
   }
 
+  # Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+  # Ja tilaustyyppi ei ole takuu
+  # Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+  # Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
   if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
     $yhtiorow['reklamaation_kasittely'] = '';
   }

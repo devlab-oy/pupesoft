@@ -21993,11 +21993,23 @@ if (!function_exists('paivita_oletuspaikka')) {
       $wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND t.uusiotunnus = '0'";
       $joinlisa = "";
 
-      if ($tultiin_mobiilista) $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+      if ($yhtiorow['paivita_oletuspaikka'] == 'S') {
+        $wherelisa = "";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $tyyppilisa = "AND t.tyyppi = 'O'";
+      }
+      elseif ($yhtiorow['paivita_oletuspaikka'] == 'M') {
+        $wherelisa = "";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $tyyppilisa = "AND t.tyyppi IN ('O','L','G')";
+      }
+      else {
+        $wherelisa = "AND t.uusiotunnus = '0'";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $tyyppilisa = "AND t.tyyppi = 'O'";
+      }
 
-      $tyyppilisa = $tultiin_mobiilista ? "AND t.tyyppi IN ('O','L','G')" : "AND t.tyyppi = 'O'";
-
-      // P‰ivitet‰‰n uusi oletuspaikka myˆs avoimille keskener‰isille ostotilauksille (jos uusi paikka on samassa varastossa kun vanha)
+      // P‰ivitet‰‰n uusi oletuspaikka (jos uusi paikka on samassa varastossa kun vanha)
       $query = "UPDATE tilausrivi AS t
                 {$joinlisa}
                 SET t.hyllyalue  = '{$hylly['hyllyalue']}',
@@ -22017,6 +22029,28 @@ if (!function_exists('paivita_oletuspaikka')) {
       $result = pupe_query($query);
 
       $return["paivitetyt_ostorivit"] = mysql_affected_rows();
+
+      // P‰ivitet‰‰n siirtorivien kohdepaikka
+      $query = "UPDATE tilausrivin_lisatiedot AS tt
+                JOIN tilausrivi AS t ON (t.yhtio = tt.yhtio AND
+                  t.tunnus = tt.tilausrivitunnus AND
+                  t.tuoteno = '{$tuoteno}' AND
+                  t.kpl = '0' AND
+                  t.varattu != '0' AND
+                  t.tyyppi = 'G')
+                SET tt.kohde_hyllyalue  = '{$hylly['hyllyalue']}',
+                tt.kohde_hyllynro       = '{$hylly['hyllynro']}',
+                tt.kohde_hyllyvali      = '{$hylly['hyllyvali']}',
+                tt.kohde_hyllytaso      = '{$hylly['hyllytaso']}'
+                WHERE tt.yhtio    = '{$kukarow['yhtio']}'
+                AND tt.kohde_hyllyalue  = '{$oletusrow['hyllyalue']}'
+                AND tt.kohde_hyllynro   = '{$oletusrow['hyllynro']}'
+                AND tt.kohde_hyllytaso  = '{$oletusrow['hyllytaso']}'
+                AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'
+                {$wherelisa}";
+      $result = pupe_query($query);
+
+      $return["paivitetyt_ostorivit"] += mysql_affected_rows();
     }
 
     return $return;

@@ -31419,6 +31419,26 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
   }
 }
 
+if (!function_exists("carrier_sscc_checksum")) {
+  function carrier_sscc_checksum($sscc) {
+    $multiply = array(
+      3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3
+    );
+
+    $sscc = (string) $sscc;
+
+    $sum = 0;
+
+    $length = strlen($sscc);
+
+    for ($i = 0; $i < $length; $i++) {
+      $sum += (int) $sscc[$i] * $multiply[$i];
+    }
+
+    return (ceil($sum / 10) * 10) - $sum;
+  }
+}
+
 if (!function_exists("carrier_sscc")) {
   function carrier_sscc($expansioncode, $id, $n) {
     global $yhtiorow;
@@ -31430,7 +31450,7 @@ if (!function_exists("carrier_sscc")) {
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
     $sscc = $sscc_prefix.$sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
-    $sscc_checknum = tarkiste($sscc);
+    $sscc_checknum = carrier_sscc_checksum($sscc);
     $sscc = $sscc.$sscc_checknum;
 
     return $sscc;

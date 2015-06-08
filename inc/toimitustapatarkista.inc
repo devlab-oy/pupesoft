@@ -4,28 +4,37 @@ if (!function_exists("toimitustapatarkista")) {
   function toimitustapatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
-    static $aputulostustapa, $apuvakkielto;
+    static $aputulostustapa, $apuvakkielto, $apurahtikirja;
 
-    if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
+    if (mysql_field_name($result, $i) == "rahtikirja" and $t[$i] != '') {
+
+      // otetaan arvo talteen
+      $apurahtikirja = $t[$i];
       if (!file_exists("tilauskasittely/".$t[$i])) {
         $virhe[$i] = t("Tiedosto tilauskasittely")."/$t[$i] ".t("ei löydy")."!";
       }
-      
-      if ($aputulostustapa == 'L' and strpos($t['rahtikirja'], 'rahtikirja_unifaun') !== FALSE) {
-        $virhe[$i] = t("Virheellinen tulostustapa")."! ". t("Koontierätulostus ei toimi Unifaun Online rahtikirjan kanssa").".";
-      }
+
+      $apurahtikirja = $t[$i];
     }
 
-    if ((mysql_field_name($result, $i)=="tulostustapa") and ($t[$i]!='')) {
+    if (mysql_field_name($result, $i) == "tulostustapa" and $t[$i] != '') {
       // otetaan arvo talteen
       $aputulostustapa = $t[$i];
-      if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L' and $t[$i]!='X') {
+
+      if ($t[$i] != 'H' and $t[$i] != 'E' and $t[$i] != 'K' and $t[$i] != 'L' and $t[$i] != 'X') {
         $virhe[$i] = t("Virheellinen tulostustapa")."!";
       }
     }
 
+    if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
+
+      if ($aputulostustapa == 'L' and strpos($apurahtikirja, 'rahtikirja_unifaun') !== FALSE and $t[$i] != 'K') {
+        $virhe[$i] = t("Virhe")."! ". t("Koontierätulostus ei toimi Unifaun Online rahtikirjan kanssa ilman koontirahtikirjan pakkaustietoja").".";
+      }
+    }
+
     // jos toimitustavan nimeä ollaan muuttamassa...
-    if ((mysql_field_name($result, $i)=="selite") and ($t[$i]!=$trow[$i])) {
+    if (mysql_field_name($result, $i) == "selite" and $t[$i] != $trow[$i]) {
       $toita = trim($t[$i]);
       $toita = str_replace("'", "", $toita);
       $toita = str_replace("\"", "", $toita);
@@ -33,7 +42,7 @@ if (!function_exists("toimitustapatarkista")) {
       $query = "SELECT tunnus from toimitustapa where selite='$toita' and yhtio='$kukarow[yhtio]' and tunnus != '$tunnus'";
       $updre = pupe_query($query);
 
-      if (mysql_num_rows($updre)!=0) {
+      if (mysql_num_rows($updre) > 0) {
         $virhe[$i] = t("Et voi muuttaa toimitustaavan nimeä, koska")." '$toita' ".t("on jo olemassa")."!";
       }
       else {
@@ -168,7 +177,7 @@ if (!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if ($trow and (mysql_field_name($result, $i) == "vak_kielto") and ($t[$i] != "")) {
+    if ($trow and mysql_field_name($result, $i) == "vak_kielto" and $t[$i] != "") {
       $query = "SELECT count(*) AS count
                 FROM toimitustapa
                 WHERE yhtio                         = '{$kukarow["yhtio"]}'

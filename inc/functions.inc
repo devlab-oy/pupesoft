@@ -22049,8 +22049,6 @@ if (!function_exists('paivita_oletuspaikka')) {
                 AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'
                 {$wherelisa}";
       $result = pupe_query($query);
-
-      $return["paivitetyt_ostorivit"] += mysql_affected_rows();
     }
 
     return $return;

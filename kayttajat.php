@@ -734,6 +734,43 @@ if ($tee == 'MUUTA') {
       }
     }
 
+    if ($selkuka != "KOPSAAUUSI") {
+      echo "<script type='text/javascript'>
+              $(function() {
+
+                generoi_url_ktval = function() {
+                  g_url = $('#generoi_url').attr('href'),
+                  ktval = $('#ktunnus').val();
+
+                  ktval = encodeURIComponent(ktval);
+
+                  if (g_url.toLowerCase().indexOf('ktval') === -1) {
+                    g_url = g_url + '&ktval=' + ktval;
+                    $('#generoi_url').attr('href', g_url);
+                  }
+                  else {
+                    g_url_parts = g_url.split('&');
+
+                    for (var indx=1; indx < g_url_parts.length; indx++) {
+                      if (g_url_parts[indx].toLowerCase().indexOf('ktval') !== -1) {
+                        g_url_parts[indx] = 'ktval=' + ktval;
+                        break;
+                      }
+                    }
+
+                    $('#generoi_url').attr('href', g_url_parts.join('&'));
+                  }
+                }
+
+                generoi_url_ktval();
+
+                $('#ktunnus').on('keyup', function() {
+                  generoi_url_ktval();
+                });
+              });
+            </script>";
+    }
+
     echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 
     if ($toim == 'extranet') {
@@ -755,14 +792,19 @@ if ($tee == 'MUUTA') {
         echo "<input type='hidden' name='kopsaakuka' value='JOO'>";
       }
 
+      if (!isset($ktval)) $ktval = "";
+
       echo "<input type='hidden' name='tee' value='UUSI'>";
-      echo "<tr><th align='left'>", t("Käyttäjätunnus"), ":</th>
-      <td><input type='text' size='50' maxlength='50' name='ktunnus'></td></tr>";
+      echo "<tr>";
+      echo "<th align='left'>", t("Käyttäjätunnus"), ":</th>";
+      echo "<td>";
+      echo "<input type='text' size='50' maxlength='50' id='ktunnus' name='ktunnus' value='{$ktval}'>";
+      echo "</td>";
+      echo "</tr>";
     }
 
     if ($selkuka != "KOPSAAUUSI") {
-
-      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>", t("Generoi salasana"), "</a></td></tr>";
+      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a id='generoi_url' href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>", t("Generoi salasana"), "</a></td></tr>";
       echo "<tr><th align='left'>", t("Nimi"), ":</th><td><input type='text' size='50' value='{$krow['nimi']}' name='firname'></td></tr>";
       echo "<tr><th align='left'>", t("Puhelinnumero"), ":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
       echo "<tr><th align='left'>", t("Sähköposti"), ":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";

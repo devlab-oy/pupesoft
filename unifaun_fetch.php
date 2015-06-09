@@ -172,10 +172,30 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
           if (!empty($eranumero_sscc)) {
+
+            $query = "SELECT *
+                      FROM toimitustapa
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      AND selite  = '{$toimitrow['toimitustapa']}'";
+            $toimitustapa_res = pupe_query($query);
+            $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+            // koontierätulostuksessa pikkuisen eri tavalla kuin muissa
+            if ($toimitustapa_row["tulostustapa"] == 'L') {
+              $_rahtiwherelisa = "AND otsikkonro = 0 and rahtikirjanro = '$eranumero_sscc'";
+              $_otsikkonro = 0;
+              $_pakkaustieto_tunnukset = "pakkaustieto_tunnukset = '$eranumero_sscc', ";
+            }
+            else {
+              $_rahtiwherelisa = "AND otsikkonro = '{$eranumero_sscc}'";
+              $_otsikkonro = $eranumero_sscc;
+              $_pakkaustieto_tunnukset = "";
+            }
+            
             $query = "SELECT tunnus, rahtikirjanro, sscc_ulkoinen
                       FROM rahtikirjat
                       WHERE yhtio    = '{$kukarow['yhtio']}'
-                      AND otsikkonro = '{$eranumero_sscc}'
+                      $_rahtiwherelisa
                       ORDER BY tunnus
                       LIMIT 1";
             $rakir_res = pupe_query($query);
@@ -222,7 +242,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                            pakkauskuvaus  = '',
                            rahtikirjanro  = '$rahtikirjanro',
                            sscc_ulkoinen  = '$sscc_ulkoinen',
-                           otsikkonro     = '{$lasku_row['tunnus']}',
+                           otsikkonro     = $_otsikkonro,
+                           $_pakkaustieto_tunnukset
                            tulostuspaikka = '{$lasku_row['varasto']}',
                            toimitustapa   = '{$lasku_row['toimitustapa']}',
                            tulostettu     = now(),

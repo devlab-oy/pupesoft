@@ -140,7 +140,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
       //  Trimmataan kaikki
       foreach ($kentat as &$k) {
-        $k = trim($k);
+        $k = pupesoft_cleanstring(trim($k));
+        $k = pupesoft_csvstring($k);
       }
 
       // Tili

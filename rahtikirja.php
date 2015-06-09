@@ -810,7 +810,8 @@ if ($tee == 'add') {
       }
 
       // t‰m‰ toimitustapa pit‰isi tulostaa nyt..
-      if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or $row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or
+         ($row['tulostustapa'] != 'L' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')))) {
         // rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
         // $toimitustapa_varasto  toimitustavan selite!!!!varastopaikan tunnus
@@ -2714,7 +2715,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
             AND tunnus  = '{$otsik['liitostunnus']}'";
   $as_chk_res = pupe_query($query);
   $as_chk_row = mysql_fetch_assoc($as_chk_res);
-  
+
   if (!$toimitustapa_row) {
     $query = "SELECT *
               FROM toimitustapa
@@ -2723,7 +2724,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     $toimitustapa_res = pupe_query($query);
     $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
   }
-  
+
   // ei esit‰ytet‰ koonti-tulostustavoissa rahtikirjatietoja ker‰yserien ollessa p‰‰ll‰
   $_tulostustapa_chk = (!in_array($toimitustapa_row['tulostustapa'], array('K', 'L')));
 

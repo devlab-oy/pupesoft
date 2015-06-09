@@ -31425,6 +31425,7 @@ if (!function_exists("hae_tuoteperhe")) {
    *
    * @param int|string $tuoteno Isätuotteen tuoteno
    * @param string     $tyyppi Tuoteperheen tyyppi, defaulttaa reseptiin
+   * @param array      $tuotenot Jo haetut reseptit
    *
    * @return array Tuoteperhe lapsineen. Rakenne on seuraavanlainen:
    *   array(
@@ -31439,7 +31440,7 @@ if (!function_exists("hae_tuoteperhe")) {
    *     )
    *   );
    */
-  function hae_tuoteperhe($tuoteno, $tyyppi = "R") {
+  function hae_tuoteperhe($tuoteno, $tyyppi = "R", $tuotenot = array()) {
     global $kukarow;
 
     $query = "SELECT tuote.tuoteno,
@@ -31458,7 +31459,11 @@ if (!function_exists("hae_tuoteperhe")) {
     while ($row = mysql_fetch_assoc($result)) {
       $tuoteno = $row["tuoteno"];
       $nimitys = $row["nimitys"];
-      $lapsi = hae_tuoteperhe($row["lapsi_tuoteno"]);
+
+      if (!in_array($row["lapsi_tuoteno"], $tuotenot)) {
+        array_push($tuotenot, $tuoteno);
+        $lapsi = hae_tuoteperhe($row["lapsi_tuoteno"], $tyyppi, $tuotenot);
+      }
 
       if (empty($lapsi)) {
         $tuoteperhe[$tuoteno]["lapset"] = array();

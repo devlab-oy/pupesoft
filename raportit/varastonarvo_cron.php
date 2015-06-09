@@ -24,6 +24,7 @@ if ($argv[2] == '') {
 }
 
 if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
+
   $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
   $email = escapeshellarg(trim($argv[2]));

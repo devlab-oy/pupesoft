@@ -21990,12 +21990,9 @@ if (!function_exists('paivita_oletuspaikka')) {
     }
     elseif (mysql_num_rows($upresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
 
-      $wherelisa = $yhtiorow['paivita_oletuspaikka'] == 'S' ? "" : "AND t.uusiotunnus = '0'";
-      $joinlisa = "";
-
       if ($yhtiorow['paivita_oletuspaikka'] == 'S') {
         $wherelisa = "";
-        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila = 'O' and lasku.alatila != 'X')";
         $tyyppilisa = "AND t.tyyppi = 'O'";
       }
       elseif ($yhtiorow['paivita_oletuspaikka'] == 'M') {
@@ -22005,7 +22002,7 @@ if (!function_exists('paivita_oletuspaikka')) {
       }
       else {
         $wherelisa = "AND t.uusiotunnus = '0'";
-        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila = 'O' and lasku.alatila != 'X')";
         $tyyppilisa = "AND t.tyyppi = 'O'";
       }
 
@@ -22046,8 +22043,7 @@ if (!function_exists('paivita_oletuspaikka')) {
                 AND tt.kohde_hyllyalue  = '{$oletusrow['hyllyalue']}'
                 AND tt.kohde_hyllynro   = '{$oletusrow['hyllynro']}'
                 AND tt.kohde_hyllytaso  = '{$oletusrow['hyllytaso']}'
-                AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'
-                {$wherelisa}";
+                AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'";
       $result = pupe_query($query);
     }
 

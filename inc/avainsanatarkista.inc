@@ -260,7 +260,7 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
-    $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA", "CARRIER_SSCC");
+    $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA", "GS1_SSCC");
 
     if (in_array(strtoupper($tem_laji), $_arr)) {
       if (mysql_field_name($result, $i) == "selite") {

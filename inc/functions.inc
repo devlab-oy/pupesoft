@@ -22215,22 +22215,19 @@ if (!function_exists('uusi_sscc_nro')) {
   }
 }
 
-if (!function_exists('uusi_gs1_sscc_nro')) {
-  function uusi_gs1_sscc_nro($sscc_sisainen) {
-    global $kukarow, $yhtiorow;
+if (!function_exists("gs1_sscc")) {
+  function gs1_sscc($expansioncode, $id, $n) {
+    global $yhtiorow;
 
-    // Rakennetaan GS1 SSCC -numero
-    $sscc_sovellustunnus = "00";
-    $sscc_gs1_laajennustunnus = "0";
+    $sscc_prefix = '00';
+    $sscc_expansioncode = $expansioncode;
+    $sscc_gs1_company_id = str_pad($yhtiorow['gs1_company_id'], 7, 0, STR_PAD_LEFT);
+    $sscc_item_id = str_pad(substr($id, -7), 7, 0, STR_PAD_LEFT);
+    $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
-    $sscc_gs1_yritystunnus = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
-    $sscc_sisainen = str_pad($sscc_sisainen, 7, 0, STR_PAD_LEFT);
-
-    $sscc = $sscc_sovellustunnus.$sscc_gs1_laajennustunnus.$sscc_gs1_yritystunnus.$sscc_sisainen;
-
-    $sscc_tarkiste = tarkiste($sscc);
-
-    $sscc = $sscc.$sscc_tarkiste;
+    $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
+    $sscc_checknum = tarkiste($sscc);
+    $sscc = $sscc_prefix.$sscc.$sscc_checknum;
 
     return $sscc;
   }
@@ -22315,7 +22312,26 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
             $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
             $sscc          = uusi_sscc_nro();
-            $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+
+            if (!empty($yhtiorow['gs1_company_id'])) {
+              $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+              if (empty($_selitetark)) {
+                $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+              }
+
+              if (!empty($_selitetark)) {
+                $expansioncode = $_selitetark;
+
+                $sscc_ulkoinen = gs1_sscc($expansioncode, $sscc, $pakkausnro);
+              }
+              else {
+                $sscc_ulkoinen = $sscc;
+              }
+            }
+            else {
+              $sscc_ulkoinen = $sscc;
+            }
           }
 
           break;
@@ -22335,7 +22351,26 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
         $pakkausnro++;
 
         $sscc          = uusi_sscc_nro();
-        $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+
+        if (!empty($yhtiorow['gs1_company_id'])) {
+          $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+          if (empty($_selitetark)) {
+            $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+          }
+
+          if (!empty($_selitetark)) {
+            $expansioncode = $_selitetark;
+
+            $sscc_ulkoinen = gs1_sscc($expansioncode, $sscc, $pakkausnro);
+          }
+          else {
+            $sscc_ulkoinen = $sscc;
+          }
+        }
+        else {
+          $sscc_ulkoinen = $sscc;
+        }
       }
 
       $keraysera_kpl = $kerayseran_rivit[$i]['data']['varattu'] - $jaljella;
@@ -22357,7 +22392,26 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
         $uusi_row['data']['paino'] = $uusi_row['data']['tuotemassa'] * $jaljella;
         $uusi_row['data']['uusirivi'] = true;
         $uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
-        $uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+
+        if (!empty($yhtiorow['gs1_company_id'])) {
+          $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+          if (empty($_selitetark)) {
+            $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+          }
+
+          if (!empty($_selitetark)) {
+            $expansioncode = $_selitetark;
+
+            $uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = gs1_sscc($expansioncode, $sscc, $pakkausnro);
+          }
+          else {
+            $uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = $sscc;
+          }
+        }
+        else {
+          $uusi_row['data']['sscc_ulkoinen'] = $sscc_ulkoinen = $sscc;
+        }
 
         // splitataan array
         // halutaan lis‰t‰ uusi_row arrayn keskelle, joten joudutaan k‰ytt‰m‰‰n array_slicea.
@@ -31416,44 +31470,6 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     }
 
     return $palautettava;
-  }
-}
-
-if (!function_exists("carrier_sscc_checksum")) {
-  function carrier_sscc_checksum($sscc) {
-    $multiply = array(
-      3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3
-    );
-
-    $sscc = (string) $sscc;
-
-    $sum = 0;
-
-    $length = strlen($sscc);
-
-    for ($i = 0; $i < $length; $i++) {
-      $sum += (int) $sscc[$i] * $multiply[$i];
-    }
-
-    return (ceil($sum / 10) * 10) - $sum;
-  }
-}
-
-if (!function_exists("carrier_sscc")) {
-  function carrier_sscc($expansioncode, $id, $n) {
-    global $yhtiorow;
-
-    $sscc_prefix = '00';
-    $sscc_expansioncode = $expansioncode;
-    $sscc_gs1_company_id = $yhtiorow['gs1_company_id'];
-    $sscc_item_id = substr($id, -7);
-    $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
-
-    $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
-    $sscc_checknum = carrier_sscc_checksum($sscc);
-    $sscc = $sscc_prefix.$sscc.$sscc_checknum;
-
-    return $sscc;
   }
 }
 

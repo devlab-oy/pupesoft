@@ -182,7 +182,11 @@ $kuljetusliike_sscc = false;
 $expansion_code = "";
 
 if (!empty($yhtiorow['gs1_company_id'])) {
-  $_selitetark = t_avainsana("CARRIER_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+  $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+  if (empty($_selitetark)) {
+    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+  }
 
   if (!empty($_selitetark)) {
     $expansioncode = $_selitetark;
@@ -206,7 +210,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
   }
   elseif ($kuljetusliike_sscc) {
-    $sscc = carrier_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
+    $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
   }
   else {
     // tehdään SSCC :

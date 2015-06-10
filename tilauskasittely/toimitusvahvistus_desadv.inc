@@ -387,7 +387,26 @@ if (!function_exists('desadv_row')) {
       // CPS - consignment packing sequence
       if ($desadv_version == "fi0089") {
         $sscc          = uusi_sscc_nro();
-        $sscc_ulkoinen = uusi_gs1_sscc_nro($sscc);
+
+        if (!empty($yhtiorow['gs1_company_id'])) {
+          $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$desadv_laskurow['toimitustapa']}'", "", "", "selitetark");
+
+          if (empty($_selitetark)) {
+            $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+          }
+
+          if (!empty($_selitetark)) {
+            $expansioncode = $_selitetark;
+
+            $sscc_ulkoinen = gs1_sscc($expansioncode, $sscc, 1);
+          }
+          else {
+            $sscc_ulkoinen = $pakkaukset[$monesko]['sscc'];
+          }
+        }
+        else {
+          $sscc_ulkoinen = $sscc;
+        }
 
         $desadv_message .= "CPS+{$sscc_ulkoinen}++1'";
         $x++;

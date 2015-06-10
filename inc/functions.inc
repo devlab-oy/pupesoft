@@ -31449,9 +31449,9 @@ if (!function_exists("carrier_sscc")) {
     $sscc_item_id = substr($id, -7);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
-    $sscc = $sscc_prefix.$sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
+    $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
     $sscc_checknum = carrier_sscc_checksum($sscc);
-    $sscc = $sscc.$sscc_checknum;
+    $sscc = $sscc_prefix.$sscc.$sscc_checknum;
 
     return $sscc;
   }

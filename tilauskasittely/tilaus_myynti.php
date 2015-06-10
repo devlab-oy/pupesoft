@@ -2208,6 +2208,14 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   $kaytiin_otsikolla = "NOJOO!";
 }
 
+# Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+# Ja tilaustyyppi ei ole takuu
+# Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+# Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
+if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
+  $yhtiorow['reklamaation_kasittely'] = '';
+}
+
 if (($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") and ((isset($tarjous_tee) and $tarjous_tee != 'luo_dummy_tarjous') or isset($action))) {
   require 'inc/valitse_asiakas.inc';
 }
@@ -9980,6 +9988,31 @@ if ($tee == '') {
             elseif ($mista != 'vastaanota' and ($laskurow["alatila"] == "" or $laskurow["alatila"] == "A")) {
               echo "<input type='hidden' name='tee' value='ODOTTAA'>";
               echo "<input type='submit' value='* ".t("{$napin_teksti} Odottaa Tuotteita saapuvaksi")." *'>";
+            }
+
+            if ($laskurow['yhtio_toimipaikka'] != 0) {
+
+              $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $laskurow['yhtio_toimipaikka']);
+
+              if (mysql_num_rows($toimipaikat_res) != 0) {
+
+                $toimipaikat_row = mysql_fetch_assoc($toimipaikat_res);
+
+                if ($sahkoinen_lahete and $kukarow["extranet"] == "" and in_array($toim, $sahkoinen_lahete_toim) and $toimipaikat_row['liiketunnus'] != '') {
+
+                  $query = "SELECT asiakkaan_avainsanat.*
+                            FROM asiakkaan_avainsanat
+                            WHERE asiakkaan_avainsanat.yhtio       = '{$kukarow['yhtio']}'
+                            and asiakkaan_avainsanat.laji          = 'futur_sahkoinen_lahete'
+                            and asiakkaan_avainsanat.avainsana    != ''
+                            AND asiakkaan_avainsanat.liitostunnus  = '{$laskurow['liitostunnus']}'";
+                  $as_avain_chk_res = pupe_query($query);
+
+                  if (mysql_num_rows($as_avain_chk_res) > 0) {
+                    echo "<br><br>", t("Lähetä sähköinen lähete"), " <input type='checkbox' name='generoi_sahkoinen_lahete' value='true' checked />";
+                  }
+                }
+              }
             }
           }
           echo "</form></td>";

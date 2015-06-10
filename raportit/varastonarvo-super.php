@@ -18,23 +18,51 @@ if (isset($_POST["tee"])) {
 // Tämä skripti käyttää slave-tietokantapalvelinta
 $useslave = 1;
 
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+ini_set("display_errors", 0);
+
 if (!$php_cli) {
-  require "../inc/parametrit.inc";
+  require "inc/parametrit.inc";
 
   ini_set("memory_limit", "5G");
 }
 else {
-  require_once "../inc/functions.inc";
-  require_once "../inc/connect.inc";
+
+  if ($argv[1] == '') {
+    die ("Yhtiö on pakollinen tieto!\n");
+  }
+  if ($argv[2] == '') {
+    die ("Sähköpostiosoite on pakollinen tieto!\n");
+  }
+
+  require_once "inc/functions.inc";
+  require_once "inc/connect.inc";
 
   // Logitetaan ajo
   cron_log();
 
   ini_set("memory_limit", "5G");
 
-  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
-  error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-  ini_set("display_errors", 0);
+  $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+  $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
+  $email = escapeshellarg(trim($argv[2]));
+
+  $query = "SELECT group_concat(distinct tunnus order by tunnus) varastot
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $varastores = pupe_query($query);
+  $varastorow = mysql_fetch_array($varastores);
+
+  #exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] $email");
+
+  if ($varastorow["varastot"] == "") {
+    die ("Yhtään varastoa ei löytynyt!\n");
+  }
+  // Ennen tätä on kutsuttu cronista 3:lla paramilla $kukarow[yhtio] $varastorow[varastot] $email
+  // Nyt kutsutaan vain kahdella $kukarow[yhtio] $email
+  $argv[3] = $email;
+  $argv[2] = $varastorow['varastot'];
 
   $tyyppi     = "";
   $email_osoite = "";
@@ -369,9 +397,9 @@ if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 $varastot2 = array();
 
-if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '')) {
+if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[1] != '')) {
 
-  if ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
+  if ($php_cli and $argv[1] != '' and $argv[2] != '') {
 
     $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
 
@@ -805,7 +833,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     fwrite($fh, pupesoft_csvstring(t("Saldo"))."\t");
   }
 
-  if ($varatturajaus == "O") {
+  if (isset($varatturajaus) and $varatturajaus == "O") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Varattu saldo"), $format_bold);
       $excelsarake++;
@@ -826,7 +854,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     fwrite($fh, pupesoft_csvstring(t("Varastonarvo"))."\t");
   }
 
-  if ($varatturajaus == "O") {
+  if (isset($varatturajaus) and $varatturajaus == "O") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Varattu varastonarvo"), $format_bold);
       $excelsarake++;
@@ -1028,7 +1056,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvorow = mysql_fetch_assoc($vararvores);
 
       $kpl = (float) $vararvorow["saldo"];
-      $varattu_saldo = $tuotevaraukset[$row["tuoteno"]];
+      $varattu_saldo = isset($tuotevaraukset[$row["tuoteno"]]) ? $tuotevaraukset[$row["tuoteno"]] : 0;
       $varaston_arvo = hinta_kuluineen( $row["tuoteno"], (float) $vararvorow["varasto"] );
       $varattu_varastonarvo = $varattu_saldo * $row["kehahin_nyt"];
       $varattu_varastonarvo =
@@ -1433,7 +1461,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $muutoskpl))."\t");
       }
 
-      if ($varatturajaus == "O") {
+      if (isset($varatturajaus) and $varatturajaus == "O") {
         if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $varattu_saldo));
           $excelsarake++;
@@ -1454,7 +1482,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $muutoshinta))."\t");
       }
 
-      if ($varatturajaus == "O") {
+      if (isset($varatturajaus) and $varatturajaus == "O") {
         if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $varattu_varastonarvo));
           $excelsarake++;

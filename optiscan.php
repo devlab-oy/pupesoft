@@ -736,7 +736,7 @@ elseif ($sanoma == "StopAssignment") {
                 FROM kerayserat
                 JOIN lasku ON (lasku.yhtio = kerayserat.yhtio
                   AND lasku.tunnus = kerayserat.otunnus)
-                JOIN asiakkaan_avainsanat AS asav (asav.yhtio = lasku.yhtio
+                JOIN asiakkaan_avainsanat AS asav ON (asav.yhtio = lasku.yhtio
                   AND asav.liitostunnus = lasku.liitostunnus
                   AND asav.laji = 'OPTISCAN_KERAYSKOMMENTTI')
                 WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'

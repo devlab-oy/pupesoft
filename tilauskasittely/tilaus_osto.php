@@ -1218,7 +1218,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuote.tuotemassa,
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
-              tuote.ostokommentti,
               tuotteen_toimittajat.ostohinta,
               if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,

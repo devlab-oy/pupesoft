@@ -1218,6 +1218,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuote.tuotemassa,
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
+              tuote.ostokommentti,
               tuotteen_toimittajat.ostohinta,
               if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
@@ -1729,6 +1730,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
 
+          if (trim($prow['ostokommentti']) != '') {
+            if (trim($prow["kommentti"]) != "") echo "<br>";
+            echo t("Ostokommentti").": {$prow['ostokommentti']}";
+          }
+ 
           if (!empty($prow['tilausrivilinkki'])) {
             $query = "SELECT tilausrivi.otunnus as otunnus, lasku.nimi as nimi
                       FROM tilausrivi
@@ -1738,7 +1744,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $linkattu_myyntitilaus_result = pupe_query($query);
             $linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
 
-            if (trim($prow["kommentti"]) != "") echo "<br>";
+            if ((trim($prow["kommentti"]) != "" and trim($prow["osto_kommentti"]) == "") or trim($prow["ostokommentti"]) != "") echo "<br>";
             echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('Näytä myyntitilaus').": {$linkattu_myyntitilaus_row['nimi']}</a>";
           }
 

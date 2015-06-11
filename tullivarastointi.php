@@ -1347,7 +1347,7 @@ if (isset($view) and $view == "perus") {
               AND varastopaikat.tunnus = lasku.varasto
             LEFT JOIN tuote
               ON tuote.yhtio = lasku.yhtio
-              AND (tuote.tuoteno = tilausrivi.tuoteno OR tuote.tilausrivi_kommentti = tilausrivi.tuoteno)
+              AND tuote.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND viesti = 'tullivarasto'
             AND sisviesti1 = ''

@@ -285,7 +285,17 @@ if ($view == 'tulonumero') {
         echo "<form method='post'>";
         echo "<input type='hidden' name='tulonumero' value='" . $tulonumero['asiakkaan_tilausnumero'] . "' />";
         echo "<button name='submit' value='tulonumero' style='padding:10px' class='button {$luokka}'>";
+
         echo $tulonumero['asiakkaan_tilausnumero'];
+
+        echo '<br>';
+
+        echo $tulonumero['nimitys'];
+
+        echo '<br>';
+
+        echo $tulonumero['kuljetuksen_rekno'];
+
         echo "</button>";
         echo "</form>";
         echo "</div>";
@@ -496,10 +506,16 @@ if ($view == 'tiedot') {
     $varastopaikat = array();
 
     if (mysql_num_rows($result) == 0) {
+
+      /*
+
       $varastopaikat[] = $saapumistiedot['varastokirjain'].'A1';
       if (!isset($valittu_varastopaikka)) {
         $valittu_varastopaikka = 'A1';
       }
+
+  */
+
     }
     else {
       while ($paikka = mysql_fetch_assoc($result)) {
@@ -532,10 +548,14 @@ if ($view == 'tiedot') {
     echo t("Varasto: ");
     echo $varasto['nimitys'] . $nimilisa;
 
-    echo "&nbsp&#124;&nbsp;";
+      if (count($varastopaikat) > 0) {
 
-    echo t("Viedään paikalle: ");
-    echo $valittu_varastopaikka;
+      echo "&nbsp&#124;&nbsp;";
+      echo t("Viedään paikalle: ");
+      echo $valittu_varastopaikka;
+
+    }
+
 
     echo "</div>";
 
@@ -545,39 +565,54 @@ if ($view == 'tiedot') {
     sort($varastopaikat);
     $varastopaikat = array_unique($varastopaikat);
 
-    foreach ($varastopaikat as $vp) {
 
-      $vp = substr($vp, 1);
+    if (count($varastopaikat) > 0) {
 
-      if ($vp == $valittu_varastopaikka) {
-        $luokka = 'aktiivi';
+      foreach ($varastopaikat as $vp) {
+
+        $vp = substr($vp, 1);
+
+        if ($vp == $valittu_varastopaikka) {
+          $luokka = 'aktiivi';
+        }
+        else {
+         $luokka = '';
+        }
+
+        echo "<div style='display:inline-block; margin:5px;'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='valittu_varastopaikka' value='" . $vp . "' />";
+        echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
+        echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button {$luokka}'>";
+        echo $vp;
+        echo "</button>";
+        echo "</form>";
+        echo "</div>";
       }
-      else {
-       $luokka = '';
-      }
 
-      echo "<div style='display:inline-block; margin:5px;'>";
-      echo "<form method='post'>";
-      echo "<input type='hidden' name='valittu_varastopaikka' value='" . $vp . "' />";
-      echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
-      echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button {$luokka}'>";
-      echo $vp;
+      echo '<hr>';
+      echo "<div>";
+      echo "<div id='lisaysnappi' style='display:inline-block; margin:5px;'>";
+      echo "<button name='submit' style='padding:10px' class='button'>";
+      echo t("Uusi paikka");
       echo "</button>";
-      echo "</form>";
+      if (isset($uusi_varastopaikka_error)) {
+        echo "<font id='varastopaikka_error' class='error'>{$uusi_varastopaikka_error} {$task}</font>";
+      }
       echo "</div>";
+
+    }
+    else {
+
+      echo "<div>";
+      echo "<div id='lisaysnappi' style='display:inline-block; margin:5px;'>";
+      echo "<button name='submit' style='padding:10px' class='button'>";
+      echo t("Syötä varastopaikka");
+      echo "</button>";
+      echo "</div>";
+
     }
 
-    echo '<hr>';
-
-    echo "<div>";
-    echo "<div id='lisaysnappi' style='display:inline-block; margin:5px;'>";
-    echo "<button name='submit' style='padding:10px' class='button'>";
-    echo t("Uusi paikka");
-    echo "</button>";
-    if (isset($uusi_varastopaikka_error)) {
-      echo "<font id='varastopaikka_error' class='error'>{$uusi_varastopaikka_error} {$task}</font>";
-    }
-    echo "</div>";
 
     echo "<div id='lisaysformi' style='display:none; margin:5px; position:relative; '>";
     echo "<form method='post'>";
@@ -632,11 +667,12 @@ if ($view == 'tiedot') {
   foreach ($saapumistiedot['rivit'] as $rivi) {
 
     $kpl = (int) $rivi['kpl'];
+    $pkpl = (int) $rivi['pakkauskpl'];
 
     echo "<div class='tilaus_alue' style='overflow:auto; height:55px; padding:0 10px;'>";
 
-    echo "<div style='float:left; max-width:300px; overflow:hidden; margin-right:10px;' class='pystykeski'>" . $rivi['nimitys'] . "</div>";
-    echo "<div style='float:left;' class='pystykeski'>" . $kpl . " kpl</div>";
+    echo "<div style='float:left; max-width:300px; overflow:hidden; margin-right:10px;' class='pystykeski'>" . $rivi['nimitys']  ." - ". $rivi['malli'] . "</div>";
+    echo "<div style='float:left;' class='pystykeski'>" . $kpl . " x " . $pkpl . " kpl</div>";
 
     if ($rivi['varattu'] != 0) {
 
@@ -644,22 +680,25 @@ if ($view == 'tiedot') {
         $valittu_varastopaikka = $uusi_varastopaikka;
       }
 
-      echo "
-        <div style='float:right;' class='pystykeski'>
-          <form method='post'>
-          <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
-          <input type='hidden' name='varastokirjain' value='{$saapumistiedot['varastokirjain']}' />
-          <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
-          <input type='hidden' name='varasto' value='{$rivi['varasto']}' />
-          <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
-          <input type='hidden' name='tulonumero' value='{$tulonumero}' />
-          <input type='hidden' name='task' value='vie_varastoon' />
-          <input type='submit' value='".t("Varastoon")."'>
-          </form>
-        </div>";
+      if (count($varastopaikat) > 0) {
 
-        if ($kpl > 1) {
-          echo "
+        echo "
+          <div style='float:right;' class='pystykeski'>
+            <form method='post'>
+            <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
+            <input type='hidden' name='varastokirjain' value='{$saapumistiedot['varastokirjain']}' />
+            <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
+            <input type='hidden' name='varasto' value='{$rivi['varasto']}' />
+            <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
+            <input type='hidden' name='tulonumero' value='{$tulonumero}' />
+            <input type='hidden' name='task' value='vie_varastoon' />
+            <input type='submit' value='".t("Varastoon")."' {$disablointi}>
+            </form>
+          </div>";
+      }
+
+      if ($kpl > 1) {
+        echo "
             <div style='float:right; margin:0 10px 0 0;' class='pystykeski'>
               <form method='post'>
               <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
@@ -669,7 +708,7 @@ if ($view == 'tiedot') {
               <input type='submit' value='".t("Jako")."'>
               </form>
             </div>";
-        }
+      }
     }
     else {
 

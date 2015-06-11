@@ -126,7 +126,7 @@ if (isset($task) and $task == 'tietojen_haku') {
             AND lasku.tila = 'L'
             AND lasku.alatila = 'A'
             AND tuote.mallitarkenne != 'varastointinimike'
-            AND lasku.tunnus = '{$toimitustunnus}'";
+            AND lasku.tunnus = '{$toimitustunnus}'";echo $query;
   $result = pupe_query($query);
 
   while ($rivi = mysql_fetch_assoc($result)) {

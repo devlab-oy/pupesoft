@@ -217,7 +217,7 @@ if (isset($task) and $task == 'kuljetustietojen_tallennus') {
     }
 
     if (empty($uusi_sinettinumero)) {
-      $errors['uusi_sinettinumero'] = t("Syötä uusi sinettinumero");
+      $errors['uusi_sinettinumero'] = t("Syötä sinettinumero");
     }
 
     if (empty($poistettu_sinettinumero)) {
@@ -238,10 +238,6 @@ if (isset($task) and $task == 'kuljetustietojen_tallennus') {
 
   if (empty($asiakirja)) {
     $errors['asiakirja'] = t("Syötä asiakirja");
-  }
-
-  if (empty($viite)) {
-    $errors['viite'] = t("Syötä viite");
   }
 
   if(count($errors) == 0) {
@@ -390,6 +386,18 @@ if (isset($task) and $task == 'valitse_varasto') {
             AND tunnus = '{$toimittajatunnus}'";
   $result = pupe_query($query);
   $toimittaja = mysql_fetch_assoc($result);
+
+  $query = "SELECT nimitys, tunnus
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND nimitark = 'tulli'";
+  $result = pupe_query($query);
+
+  $varastot = array();
+
+  while ($varasto = mysql_fetch_assoc($result)) {
+    $varastot[$varasto['tunnus']] = $varasto['nimitys'];
+  }
 
   $otsikko = t("Toimituksen kokoaminen") . " - " . t("Valitse varasto");
   $view = t("kasittely");
@@ -618,8 +626,11 @@ if (isset($view) and $view == 'kasittely') {
 
     echo "<select name='varastotunnus' onchange='submit();'>
         <option selected disabled>" . t("Valitse varasto") ."</option>";
-    echo "<option value='107'>Hanski</option>";
-    echo "<option value='108'>Romppi</option>";
+
+    foreach ($varastot as $tunnus => $nimi) {
+      echo "<option value='{$tunnus}'>{$nimi}</option>";
+    }
+
     echo "</select>";
 
     echo "</td><td class='back'></td></tr>";
@@ -1121,7 +1132,7 @@ if (isset($view) and $view == 'kuljetustietojen_syotto') {
         <td class='back error'>{$errors['poistettu_sinettinumero']}</td>
       </tr>
       <tr>
-        <th>" . t("Uusi sinetti") ."</th>
+        <th>" . t("Sinetti") ."</th>
         <td><input type='text' name='uusi_sinettinumero' value='{$uusi_sinettinumero}' /></td>
         <td class='back error'>{$errors['uusi_sinettinumero']}</td>
       </tr>";

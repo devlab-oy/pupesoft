@@ -184,11 +184,11 @@ $expansion_code = "";
 if (!empty($yhtiorow['gs1_company_id'])) {
   $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
 
-  if (empty($_selitetark)) {
+  if ($_selitetark == '') {
     $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
   }
 
-  if (!empty($_selitetark)) {
+  if ($_selitetark != '') {
     $expansioncode = $_selitetark;
     $kuljetusliike_sscc = true;
   }

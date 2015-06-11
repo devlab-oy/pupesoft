@@ -491,6 +491,25 @@ if ($fieldname == "ostolaskujen_paivays") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostolaskujen_oletusvaluutta") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'T' ? "selected" : "";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston valuuttaa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'T' {$sel}>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti toimittajan oletusvaluuttaa");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_kurssipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

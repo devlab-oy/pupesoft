@@ -3158,7 +3158,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
-    if ($rivityyppi = 'O' and $trow['ostokommentti'] != '') {
+    if ($rivityyppi == 'O' and $trow['ostokommentti'] != '') {
       if ($kommentti != '') $kommentti .= "\n";
       $kommentti .= $trow['ostokommentti'];
     }

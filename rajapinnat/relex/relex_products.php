@@ -339,6 +339,7 @@ $header .= "kuluprosentti;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
 $header .= "jarjestys;";
+$header .= "sales_price;";
 $header .= "vastaavat";
 $header .= "\n";
 fwrite($fp, $header);
@@ -414,6 +415,7 @@ $query = "SELECT
           tuote.vakkoodi,
           tuote.vakmaara,
           tuote.leimahduspiste,
+          tuote.myyntihinta,
           tuote.tunnus
           FROM tuote
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
@@ -775,6 +777,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$parastoimittaja['toim_yksikko']};";
   $rivi .= "{$parastoimittaja['tuotekerroin']};";
   $rivi .= "{$parastoimittaja['jarjestys']};";
+
+  $rivi .= "{$row['myyntihinta']};";
 
   // Vastaavat tuotteet
   $vastaavat = new Vastaavat($row['tuoteno']);

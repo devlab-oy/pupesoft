@@ -2961,6 +2961,7 @@ if ($fieldname == "livetuotehaku_poistetut") {
 
   $ulos .= "<option value = ''>".t("Poistuvia/poistettuja tuotteita ei n‰ytet‰")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Poistuvat tuotteet n‰ytet‰‰n")."</option>";
+  $ulos .= "<option value = 'P' $sel[P]>".t("Poistuvat ja poistetut tuotteet n‰ytet‰‰n")."</option>";
   $ulos .= "<option value = 'Y' $sel[Y]>".t("Poistuvat tuotteet n‰ytet‰‰n sek‰ ep‰kurantit korostetaan")."</option>";
   $ulos .= "</select></td>";
 

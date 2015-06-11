@@ -348,6 +348,19 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $taara = '1';
       $isokoodi = 'TRAILERI';
 
+      $matkatiedot = array(
+        'kuljetusfirma' => $kuljetusfirma,
+        'maaranpaa' => $maaranpaa,
+        'maaranpaakoodi' => $maaranpaakoodi
+      );
+
+      $matkatiedot = serialize($matkatiedot);
+
+      $query = "UPDATE laskun_lisatiedot SET
+                matkatiedot = '{$matkatiedot}',
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND konttiviite = '{$sinetoitava_konttiviite}'";
+      pupe_query($query);
     }
 
     $query = "UPDATE tilausrivin_lisatiedot SET

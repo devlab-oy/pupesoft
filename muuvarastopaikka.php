@@ -18,6 +18,7 @@ if ($tee != '') {
              tilausrivi WRITE,
              tilausrivi as t WRITE,
              tilausrivi as tilausrivi_osto READ,
+             tilausrivin_lisatiedot AS tt WRITE,
              sarjanumeroseuranta WRITE,
              sarjanumeroseuranta_arvomuutos READ,
              lasku WRITE,

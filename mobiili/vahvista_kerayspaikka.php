@@ -11,6 +11,8 @@ elseif (@include_once "inc/parametrit.inc");
 // Nämä on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
+
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $tilausrivi = (int) $tilausrivi;
@@ -19,7 +21,8 @@ $tilausrivi = (int) $tilausrivi;
 $data = array(
   'alusta_tunnus' => $alusta_tunnus,
   'liitostunnus' => $liitostunnus,
-  'tilausrivi' => $tilausrivi
+  'tilausrivi' => $tilausrivi,
+  'saapumisnro_haku' => $saapumisnro_haku
 );
 $url = http_build_query($data);
 
@@ -267,10 +270,10 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? $row['otunnus'] : "";
         $tilausten_lukumaara--;
         if ($tilausten_lukumaara < 1) {
-          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=ostotilaus.php'>";
-        } 
-        else {  
-          $url = "&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=ostotilaus.php?saapumisnro_haku={$saapumisnro_haku}'>";
+        }
+        else {
+          $url = "&tilausten_lukumaara={$tilausten_lukumaara}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
           echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
         }
       }

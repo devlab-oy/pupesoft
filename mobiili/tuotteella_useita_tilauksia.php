@@ -13,6 +13,7 @@ if (!isset($errors)) $errors = array();
 if (!isset($viivakoodi)) $viivakoodi = "";
 if (!isset($_viivakoodi)) $_viivakoodi = "";
 if (!isset($orig_tilausten_lukumaara)) $orig_tilausten_lukumaara = 0;
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
 
 $sort_by_direction_tuoteno     = (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
 $sort_by_direction_otunnus     = (!isset($sort_by_direction_otunnus) or $sort_by_direction_otunnus == 'asc') ? 'desc' : 'asc';
@@ -24,12 +25,13 @@ $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $vii
 $params = array();
 
 // Joku parametri tarvii olla setattu.
-if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
+if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '' or $saapumisnro_haku != '') {
 
   if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
 
   if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
   if ($ostotilaus != '')   $params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
+  if ($saapumisnro_haku != '') $params['uusiotunnus'] = "lasku.laskunro = '{$saapumisnro_haku}'";
 
   // Viivakoodi case
   if ($viivakoodi != '') {
@@ -197,12 +199,13 @@ if (isset($submit)) {
     $url_array['ostotilaus'] = $ostotilaus;
     $url_array['tilausrivi'] = $tilausrivi;
     $url_array['saapuminen'] = $saapuminen;
+    $url_array['saapumisnro_haku'] = $saapumisnro_haku;
 
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
     break;
   case 'cancel':
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}&saapumisnro_haku={$saapumisnro_haku}'>";
     exit;
   default:
     echo "Virhe";
@@ -212,7 +215,7 @@ if (isset($submit)) {
 
 // Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
+  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&saapumisnro_haku={$saapumisnro_haku}&virhe'>";
   exit();
 }
 
@@ -224,6 +227,7 @@ if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakood
   $url_array['saapuminen'] = $saapuminen;
   $url_array['manuaalisesti_syotetty_ostotilausnro'] = empty($manuaalisesti_syotetty_ostotilausnro) ? 0 : 1;
   $url_array['tilausten_lukumaara'] = $tilausten_lukumaara;
+  $url_array['saapumisnro_haku'] = $saapumisnro_haku;
 
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
   exit();
@@ -247,13 +251,18 @@ else {
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
 $url_lisa .= $url_lisa ? "&" : "?";
 $url_lisa .= "backsaapuminen={$backsaapuminen}";
+$url_lisa .= "&saapumisnro_haku={$saapumisnro_haku}";
 
 //## UI ###
 echo "<div class='header'>
   <button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
   <h1>", t("USEITA TILAUKSIA"), "</h1></div>";
 
-$viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli  = "?tuotenumero=".urlencode($tuotenumero);
+$viivakoodi_formi_urli .= "&ostotilaus={$ostotilaus}";
+$viivakoodi_formi_urli .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+$viivakoodi_formi_urli .= "&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli .= "&saapumisnro_haku={$saapumisnro_haku}";
 
 echo "<div class='main'>
 
@@ -271,7 +280,7 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&saapumisnro_haku={$saapumisnro_haku}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
   echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>", t("Ostotilaus"), "</a>&nbsp;";
@@ -326,7 +335,9 @@ while ($row = mysql_fetch_assoc($result)) {
       'tilausten_lukumaara' => $tilausten_lukumaara,
       'viivakoodi' => $viivakoodi,
       'tuotenumero' => $tuotenumero,
-      'ennaltakohdistettu' => $ennaltakohdistettu, )
+      'ennaltakohdistettu' => $ennaltakohdistettu,
+      'saapumisnro_haku' => $saapumisnro_haku
+    )
   );
 
   echo "<tr>";

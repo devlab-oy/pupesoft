@@ -106,6 +106,19 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
                    AND otunnus IN ({$tunnukset})";
   pupe_query($update_query);
 
+  $query = "SELECT group_concat(tunnus)
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus IN ({$tunnukset})";
+  $result = pupe_query($query);
+  $rivitunnukset = mysql_result($result, 0);
+
+  $update_query = "UPDATE tilausrivin_lisatiedot SET
+                   kontin_isokoodi = 'rekka'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tilausrivitunnus IN ({$rivitunnukset})";
+  pupe_query($update_query);
+
   unset($task);
 }
 
@@ -349,7 +362,7 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $isokoodi = 'TRAILERI';
 
       $matkatiedot = array(
-        'kuljetusfirma' => $kuljetusfirma,
+        'rekisterinumero_traileri' => $rekisterinumero_traileri,
         'maaranpaa' => $maaranpaa,
         'maaranpaakoodi' => $maaranpaakoodi
       );
@@ -357,9 +370,9 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $matkatiedot = serialize($matkatiedot);
 
       $query = "UPDATE laskun_lisatiedot SET
-                matkatiedot = '{$matkatiedot}',
+                matkatiedot = '{$matkatiedot}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND konttiviite = '{$sinetoitava_konttiviite}'";
+                AND konttiviite = '{$konttiviite}'";
       pupe_query($query);
     }
 
@@ -664,6 +677,18 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
     $kuljettaja = $sinettinumero;
     $rekisterinumero = $konttinumero;
 
+    $query = "SELECT matkatiedot
+              FROM laskun_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND konttiviite = '{$sinetoitava_konttiviite}'";
+    $result = pupe_query($query);
+    $matkatiedot = mysql_result($result, 0);
+
+    $matkatiedot = unserialize($matkatiedot);
+
+    $rekisterinumero_traileri = $matkatiedot['rekisterinumero_traileri'];
+    $maaranpaa = $matkatiedot['maaranpaa'];
+    $maaranpaakoodi = $matkatiedot['maaranpaakoodi'];
   }
 
   if (isset($rekkakuljetukseksi) or $kuljetustyyppi == 'rekka') {

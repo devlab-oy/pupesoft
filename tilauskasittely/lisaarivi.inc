@@ -3158,6 +3158,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
+    if ($rivityyppi = 'O' and $trow['ostokommentti'] != '') {
+      if ($kommentti != '') $kommentti .= "\n";
+      $kommentti .= $trow['ostokommentti'];
+    }
+
     // jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
     if ($rivilaadittu != "" and $rivitunnus != 0) {
       $vanharivilaadittu = "'$rivilaadittu'";

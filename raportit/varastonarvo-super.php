@@ -45,8 +45,8 @@ else {
   ini_set("memory_limit", "5G");
 
   $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-  $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
-  $email = escapeshellarg(trim($argv[2]));
+
+  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
   $query = "SELECT group_concat(distinct tunnus order by tunnus) varastot
             FROM varastopaikat
@@ -54,21 +54,19 @@ else {
   $varastores = pupe_query($query);
   $varastorow = mysql_fetch_array($varastores);
 
-  #exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] $email");
-
   if ($varastorow["varastot"] == "") {
     die ("Yhtään varastoa ei löytynyt!\n");
   }
-  // Ennen tätä on kutsuttu cronista 3:lla paramilla $kukarow[yhtio] $varastorow[varastot] $email
-  // Nyt kutsutaan vain kahdella $kukarow[yhtio] $email
-  $argv[3] = $email;
-  $argv[2] = $varastorow['varastot'];
 
-  $tyyppi     = "";
-  $email_osoite = "";
   $pupe_root_polku = dirname(dirname(__FILE__));
 
   $supertee = "RAPORTOI";
+
+  $varastot = explode(",", $varastorow['varastot']);
+  $email_osoite = $argv[2];
+
+  $epakur = 'kaikki';
+  $tyyppi = 'A';
 }
 
 if (!function_exists("force_echo")) {
@@ -397,48 +395,7 @@ if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 $varastot2 = array();
 
-if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[1] != '')) {
-
-  if ($php_cli and $argv[1] != '' and $argv[2] != '') {
-
-    $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-
-    $query = "SELECT *
-              FROM yhtio
-              WHERE yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) {
-      echo "<b>".t("Käyttäjän yritys ei löydy")."! ($kukarow[yhtio])";
-      exit;
-    }
-
-    $yhtiorow = mysql_fetch_assoc($result);
-
-    $query = "SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio='$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 1) {
-      $yhtion_parametritrow = mysql_fetch_assoc($result);
-
-      if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
-        $yhtion_parametritrow['hintapyoristys'] = 2;
-      }
-
-      // lisätään kaikki yhtiorow arrayseen
-      foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-        $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-      }
-    }
-
-    $varastot = explode(",", $argv[2]);
-    $email_osoite = mysql_real_escape_string($argv[3]);
-
-    $epakur = 'kaikki';
-    $tyyppi = 'A';
-  }
+if (isset($supertee) and $supertee == "RAPORTOI") {
 
   // Setataan jos ei olla setattu
   if (!isset($alaraja)) $alaraja = "";

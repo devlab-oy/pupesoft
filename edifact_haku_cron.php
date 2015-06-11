@@ -37,9 +37,6 @@ $login = ftp_login($yhteys, $user, $pass);
 if ((!$yhteys) || (!$login)) {
   echo t("Ftp-yhteyden muodostus epaonnistui! Tarkista salasanat."); die;
 }
-else {
-  echo t("Ftp-yhteys muodostettu.")."<br/>";
-}
 
 ftp_chdir($yhteys, 'out-prod');
 

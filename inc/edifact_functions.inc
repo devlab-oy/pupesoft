@@ -6247,7 +6247,3 @@ function tullinollaus() {
   }
 
 }
-
-
-?>
-

@@ -2987,6 +2987,20 @@ if ($fieldname == "livetuotehaku_poistetut") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostotilaus_tuotehaku") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Ei anneta lisätä poistettuja tuotteita ostotilauksella") . "</option>";
+  $ulos .= "<option value = 'P' $sel[P]>" . t("Annetaan lisätä poistettuja tuotteita ostotilauksella, jolloin poistetut voi korvata korvaavilla tuotteilla") . "</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "livetuotehaku_hakutapa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

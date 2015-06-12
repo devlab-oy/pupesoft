@@ -118,8 +118,8 @@ function hae_tilaukset($rajaus) {
             lasku.yhtio,
             myyntilasku.tunnus AS myyntilaskun_tunnus
             FROM lasku
-            INNER JOIN maksupaatetapahtumat ON (maksupaatetapahtumat.yhtio = lasku.yhtio
-              AND maksupaatetapahtumat.tilausnumero = lasku.tunnus)
+            INNER JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+              AND maksuehto.tunnus = lasku.maksuehto)
             INNER JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
               AND asiakas.tunnus = lasku.liitostunnus)
             INNER JOIN kuka ON (kuka.yhtio = lasku.yhtio
@@ -130,8 +130,9 @@ function hae_tilaukset($rajaus) {
               AND myyntilasku.alatila = 'X')
             WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
             AND DATE(lasku.laskutettu) BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
+            AND maksuehto.kateinen != ''
             ORDER BY lasku.laskutettu DESC
-            LIMIT {$rajaus["limit"]};";
+            LIMIT {$rajaus["limit"]}";
 
   return pupe_query($query);
 }

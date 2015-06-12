@@ -22027,24 +22027,26 @@ if (!function_exists('paivita_oletuspaikka')) {
 
       $return["paivitetyt_ostorivit"] = mysql_affected_rows();
 
-      // P‰ivitet‰‰n siirtorivien kohdepaikka
-      $query = "UPDATE tilausrivin_lisatiedot AS tt
-                JOIN tilausrivi AS t ON (t.yhtio = tt.yhtio AND
-                  t.tunnus = tt.tilausrivitunnus AND
-                  t.tuoteno = '{$tuoteno}' AND
-                  t.kpl = '0' AND
-                  t.varattu != '0' AND
-                  t.tyyppi = 'G')
-                SET tt.kohde_hyllyalue  = '{$hylly['hyllyalue']}',
-                tt.kohde_hyllynro       = '{$hylly['hyllynro']}',
-                tt.kohde_hyllyvali      = '{$hylly['hyllyvali']}',
-                tt.kohde_hyllytaso      = '{$hylly['hyllytaso']}'
-                WHERE tt.yhtio    = '{$kukarow['yhtio']}'
-                AND tt.kohde_hyllyalue  = '{$oletusrow['hyllyalue']}'
-                AND tt.kohde_hyllynro   = '{$oletusrow['hyllynro']}'
-                AND tt.kohde_hyllytaso  = '{$oletusrow['hyllytaso']}'
-                AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'";
-      $result = pupe_query($query);
+      if ($yhtiorow['paivita_oletuspaikka'] == 'M') {
+        // P‰ivitet‰‰n siirtorivien kohdepaikka
+        $query = "UPDATE tilausrivin_lisatiedot AS tt
+                  JOIN tilausrivi AS t ON (t.yhtio = tt.yhtio AND
+                    t.tunnus = tt.tilausrivitunnus AND
+                    t.tuoteno = '{$tuoteno}' AND
+                    t.kpl = '0' AND
+                    t.varattu != '0' AND
+                    t.tyyppi = 'G')
+                  SET tt.kohde_hyllyalue  = '{$hylly['hyllyalue']}',
+                  tt.kohde_hyllynro       = '{$hylly['hyllynro']}',
+                  tt.kohde_hyllyvali      = '{$hylly['hyllyvali']}',
+                  tt.kohde_hyllytaso      = '{$hylly['hyllytaso']}'
+                  WHERE tt.yhtio    = '{$kukarow['yhtio']}'
+                  AND tt.kohde_hyllyalue  = '{$oletusrow['hyllyalue']}'
+                  AND tt.kohde_hyllynro   = '{$oletusrow['hyllynro']}'
+                  AND tt.kohde_hyllytaso  = '{$oletusrow['hyllytaso']}'
+                  AND tt.kohde_hyllyvali  = '{$oletusrow['hyllyvali']}'";
+        $result = pupe_query($query);
+      }
     }
 
     return $return;

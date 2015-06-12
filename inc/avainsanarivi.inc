@@ -228,6 +228,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KERAYSERA_TK")     $ulos .= "<option value='KERAYSERA_TK' $avain_sel[KERAYSERA_TK]>      ".t("Käyttäjän oikeus tulostaa kaikki keräyserät varastossa")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMMYYNTI")    $ulos .= "<option value='TOIMMYYNTI' {$avain_sel['TOIMMYYNTI']}>      ".t("Toimipaikan myyntioikeus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VARTOIMTULOSTIN") $ulos .= "<option value='VARTOIMTULOSTIN' {$avain_sel['VARTOIMTULOSTIN']}>".t("Varaston toimipaikan tulostin")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "OPTISCANKOM") $ulos .= "<option value='OPTISCANKOM' $avain_sel[OPTISCANKOM]>".t("Optiscan oletuskeräyskommentti")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";

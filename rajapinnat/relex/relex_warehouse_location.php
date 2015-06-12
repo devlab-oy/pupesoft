@@ -48,7 +48,7 @@ if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
-$header = "product;location;varastopaikka\n";
+$header = "product;location;varastopaikka;poistuva\n";
 fwrite($fp, $header);
 
 $tuoterajaus = rakenna_relex_tuote_parametrit();
@@ -73,7 +73,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $query = "SELECT DISTINCT varasto,
             oletus,
             saldo,
-            concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka
+            concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
+            poistettava
             FROM tuotepaikat
             WHERE yhtio='{$kukarow['yhtio']}'
             AND tuoteno='{$row['tuoteno']}'
@@ -92,7 +93,8 @@ while ($row = mysql_fetch_assoc($res)) {
   foreach ($tuotepaikat as $_varasto => $_arr) {
     $rivi  = "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
     $rivi .= "{$row['maa']}-{$_arr['varasto']};";
-    $rivi .= pupesoft_csvstring($_arr['hyllypaikka']);
+    $rivi .= pupesoft_csvstring($_arr['hyllypaikka']).";";
+    $rivi .= $_arr['poistettava'] == "D" ? "TRUE" : "FALSE";
     $rivi .= "\n";
 
     fwrite($fp, $rivi);

@@ -963,12 +963,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
 // Jos meillä on SEPA pankkiyhteys käytössä
 if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
-  // Katsotaan, että pankkiyhteys on perustettu ja asiakasid on oikein
+  // Katsotaan, että pankkiyhteys on perustettu
   $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
             FROM yriti
             INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
-              AND pankkiyhteys.pankki      = yriti.bic
-              AND pankkiyhteys.customer_id = yriti.asiakastunnus)
+              AND pankkiyhteys.pankki      = yriti.bic)
             WHERE yriti.yhtio              = '{$kukarow["yhtio"]}'
             AND yriti.tunnus               = {$pankkitili_tunnus}";
   $result = pupe_query($query);

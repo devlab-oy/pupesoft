@@ -48,6 +48,27 @@ if (mysql_field_name($result, $i) == "avainsana") {
   if (stripos($asavainsanatyyppi, "DATE") !== FALSE) {
     $tyyppi = 1.5;
   }
+  elseif (stripos($asavainsanalaji, "OPTISCAN_KERAYSKOMMENTTI") !== FALSE) {
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'OPTISCANKOM'
+              ORDER BY jarjestys, selite";
+    $kommenttires = pupe_query($query);
+
+    if (mysql_num_rows($kommenttires) > 0) {
+      $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+      while ($kommenttirow = mysql_fetch_assoc($kommenttires)) {
+        $sel = $trow[$i] == $kommenttirow['selite'] ? " selected" : "";
+
+        $ulos .= "<option value='{$kommenttirow['selite']}'{$sel}>{$kommenttirow['selite']}</option>";
+      }
+
+      $ulos .= "</select></td>";
+      $jatko = 0;
+   }
+  }
   elseif (stripos($asavainsanalaji, "OHJAUSMERKKI") !== FALSE) {
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";

@@ -350,7 +350,7 @@ echo "
 $paluu_url = "suuntalavan_tuotteet.php?$url";
 // Ostotilaus -> hyllytykseen
 if (isset($hyllytys)) {
-  $urlilisa = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
+  $urlilisa = "&viivakoodi={$viivakoodi}&saapumisnro_haku={$saapumisnro_haku}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
   $paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$urlilisa}";
 }
 
@@ -419,6 +419,7 @@ if (!isset($hyllytys)) {
 
 echo "
   <input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
+  <input type='hidden' name='saapumisnro_haku' value='{$saapumisnro_haku}' />
   <input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
   <input type='hidden' name='tilausrivi' value='{$tilausrivi}' />
   <input type='hidden' name='saapuminen' value='{$saapuminen}' />

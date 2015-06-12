@@ -388,7 +388,7 @@ if (!function_exists('desadv_row')) {
       if ($desadv_version == "fi0089") {
         $sscc          = uusi_sscc_nro();
 
-        if (!empty($yhtiorow['gs1_company_id'])) {
+        if (!empty($yhtiorow['ean'])) {
           $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$desadv_laskurow['toimitustapa']}'", "", "", "selitetark");
 
           if ($_selitetark == '') {

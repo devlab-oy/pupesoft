@@ -22221,7 +22221,7 @@ if (!function_exists("gs1_sscc")) {
 
     $sscc_prefix = '00';
     $sscc_expansioncode = $expansioncode;
-    $sscc_gs1_company_id = str_pad($yhtiorow['gs1_company_id'], 7, 0, STR_PAD_LEFT);
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
     $sscc_item_id = str_pad(substr($id, -7), 7, 0, STR_PAD_LEFT);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
@@ -22313,7 +22313,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
             $sscc          = uusi_sscc_nro();
 
-            if (!empty($yhtiorow['gs1_company_id'])) {
+            if (!empty($yhtiorow['ean'])) {
               $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
 
               if ($_selitetark == '') {
@@ -22352,7 +22352,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
         $sscc          = uusi_sscc_nro();
 
-        if (!empty($yhtiorow['gs1_company_id'])) {
+        if (!empty($yhtiorow['ean'])) {
           $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
 
           if ($_selitetark == '') {
@@ -22393,7 +22393,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
         $uusi_row['data']['uusirivi'] = true;
         $uusi_row['data']['sscc'] = $sscc = uusi_sscc_nro();
 
-        if (!empty($yhtiorow['gs1_company_id'])) {
+        if (!empty($yhtiorow['ean'])) {
           $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
 
           if ($_selitetark == '') {

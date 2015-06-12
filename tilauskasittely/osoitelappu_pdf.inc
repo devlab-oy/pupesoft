@@ -181,7 +181,7 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 $kuljetusliike_sscc = false;
 $expansion_code = "";
 
-if (!empty($yhtiorow['gs1_company_id'])) {
+if (!empty($yhtiorow['ean'])) {
   $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
 
   if ($_selitetark == '') {

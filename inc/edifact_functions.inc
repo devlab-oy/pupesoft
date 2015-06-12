@@ -5186,10 +5186,14 @@ function tulliraportti_pdf($pdf_data) {
   $y -= 30;
 
   $pdf->draw_text($x, $y, t("Tulotiedot"), $sivu, $bold);
+
   $pdf->draw_text(200, $y, t("Nimitys"), $sivu, $bold);
-  $pdf->draw_text(300, $y, t("Malli"), $sivu, $bold);
-  $pdf->draw_text(380, $y, t("Paino (kg.)"), $sivu, $bold);
-  $pdf->draw_text(440, $y, t("Varastosaldo"), $sivu, $bold);
+  $pdf->draw_text(280, $y, t("Malli"), $sivu, $bold);
+
+  $pdf->draw_text(360, $y, t("Varastosaldo"), $sivu, $bold);
+
+  $pdf->draw_text(445, $y, t("Paino (kg.)"), $sivu, $bold);
+  $pdf->draw_text(510, $y, t("Tilavuus"), $sivu, $bold);
   $y -= 5;
 
   $pdf->draw_text(530, 770, t("Sivu") .' '.$sivunro, $sivu, $bold);
@@ -5236,10 +5240,14 @@ function tulliraportti_pdf($pdf_data) {
       $y -= 30;
 
       $pdf->draw_text($x, $y, t("Tulotiedot"), $sivu, $bold);
+
       $pdf->draw_text(200, $y, t("Nimitys"), $sivu, $bold);
-      $pdf->draw_text(300, $y, t("Malli"), $sivu, $bold);
-      $pdf->draw_text(380, $y, t("Paino (kg.)"), $sivu, $bold);
-      $pdf->draw_text(440, $y, t("Varastosaldo"), $sivu, $bold);
+      $pdf->draw_text(280, $y, t("Malli"), $sivu, $bold);
+
+      $pdf->draw_text(360, $y, t("Varastosaldo"), $sivu, $bold);
+
+      $pdf->draw_text(445, $y, t("Paino (kg.)"), $sivu, $bold);
+      $pdf->draw_text(505, $y, t("Tilavuus"), $sivu, $bold);
       $y -= 5;
 
       $pdf->draw_text(530, 770, t("Sivu") .' '.$sivunro, $sivu, $bold);
@@ -5282,10 +5290,17 @@ function tulliraportti_pdf($pdf_data) {
 
     foreach ($tiedot['tuotetiedot'] as $tiedot) {
 
-      $pdf->draw_text($x+174, $y2, $tiedot['nimitys'], $sivu, $normal);
-      $pdf->draw_text($x+274, $y2, $tiedot['malli'], $sivu, $normal);
-      $pdf->draw_text($x+355, $y2, $tiedot['paino'], $sivu, $normal);
-      $pdf->draw_text($x+414, $y2, $tiedot['kpl'], $sivu, $normal);
+      $pdf->draw_text($x+175, $y2, $tiedot['nimitys'], $sivu, $normal);
+      $pdf->draw_text($x+255, $y2, $tiedot['malli'], $sivu, $normal);
+
+      $pdf->draw_text($x+335, $y2, $tiedot['kpl'], $sivu, $normal);
+
+      $paino = $tiedot['paino'] * $tiedot['kpl'];
+      $tilavuus = $tiedot['tilavuus'] * $tiedot['kpl'];
+
+      $pdf->draw_text($x+420, $y2, $paino, $sivu, $normal);
+      $pdf->draw_text($x+490, $y2, $tilavuus, $sivu, $normal);
+
       $y2 -= 15;
       $alalaita2 = $y2;
     }
@@ -5802,6 +5817,7 @@ function tulliraportti_tiedot($asiakastunnus = false) {
             tuote.nimitys,
             tuote.malli,
             tuote.tuotemassa,
+            tuote.tuotetilavuus,
             tuote.pakkauskpl,
             asiakas.nimi,
             asiakas.tunnus
@@ -5823,7 +5839,7 @@ function tulliraportti_tiedot($asiakastunnus = false) {
               AND asiakas.asiakasnro = toimi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$asiakaslisa}
-            AND tilausrivi.tyyppi = 'O'";
+            AND tilausrivi.tyyppi = 'O'";echo $query;
   $result = pupe_query($query);
 
   $saldot = array();
@@ -5848,7 +5864,11 @@ function tulliraportti_tiedot($asiakastunnus = false) {
       );
 
       if ($tuote['pakkauskpl'] > 1) {
-        $kpl = $saldotiedot[2] . ' x ' . $tuote['pakkauskpl'];
+
+        $total = $saldotiedot[2] * $tuote['pakkauskpl'];
+        //$kpl = $saldotiedot[2] . ' x ' . $tuote['pakkauskpl'] . "(".$total.")";
+        $kpl = $total;
+
       }
       else {
         $kpl = $saldotiedot[2];
@@ -5858,6 +5878,7 @@ function tulliraportti_tiedot($asiakastunnus = false) {
         'tuotenumero' => $tuote['tuoteno'],
         'nimitys' => $tuote['nimitys'],
         'paino' => number_format($tuote['tuotemassa'], 2,","," "),
+        'tilavuus' => number_format($tuote['tuotetilavuus'], 2,","," "),
         'malli' => $tuote['malli'],
         'kpl' => $kpl
       );

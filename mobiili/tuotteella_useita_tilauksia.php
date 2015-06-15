@@ -112,16 +112,22 @@ if (!empty($saapumisnro_haku_lisa)) {
                  {$saapumisnro_haku_lisa}";
   $join_lisa = "AND tilausrivi.uusiotunnus=lasku.tunnus
                 AND tilausrivi.suuntalava = 0";
+  $lasku_join_lisa = "JOIN lasku AS lasku_osto ON (lasku_osto.yhtio = tilausrivi.yhtio
+                      AND lasku_osto.tunnus = tilausrivi.otunnus
+                      AND lasku_osto.tila = 'O' AND lasku_osto.alatila = 'A')";
+  $select_lisa = "lasku_osto.tunnus AS ostotilaus,";
 }
 else {
   $where_lisa = "AND ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))";
   $join_lisa = "AND tilausrivi.otunnus=lasku.tunnus
                 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)";
+  $lasku_join_lisa = "";
+  $select_lisa = "lasku.tunnus as ostotilaus,";
 }
 
 // Haetaan ostotilaukset
 $query = "SELECT
-          lasku.tunnus as ostotilaus,
+          {$select_lisa}
           lasku.liitostunnus,
           tilausrivi.tunnus,
           tilausrivi.otunnus,
@@ -140,6 +146,7 @@ $query = "SELECT
             AND tilausrivi.tyyppi='O'
             AND tilausrivi.varattu != 0
             {$join_lisa}
+          {$lasku_join_lisa}
           JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
           JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
             AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
@@ -167,7 +174,7 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
   $query_lisa = " AND ".implode($params, " AND ");
 
   $query = "SELECT
-            lasku.tunnus as ostotilaus,
+            {$select_lisa}
             lasku.liitostunnus,
             tilausrivi.tunnus,
             tilausrivi.otunnus,
@@ -186,6 +193,7 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
               AND tilausrivi.tyyppi='O'
               AND tilausrivi.varattu != 0
               {$join_lisa}
+            {$lasku_join_lisa}
             JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
             JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
               AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
@@ -305,7 +313,7 @@ if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
   echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
 }
-if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
+if ($tuotenumero == '' and $viivakoodi == '' and ($ostotilaus != '' or $saapumisnro_haku != '')) {
   echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>", t("Tuoteno"), "</a>&nbsp;";
   echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
@@ -363,7 +371,7 @@ while ($row = mysql_fetch_assoc($result)) {
   if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
     echo "<td><a href='hyllytys.php?{$url}'>{$row['otunnus']}</a></td>";
   }
-  if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
+  if ($tuotenumero == '' and $viivakoodi == '' and ($ostotilaus != '' or $saapumisnro_haku != '')) {
     echo "<td><a href='hyllytys.php?{$url}'>{$row['tuoteno']}</a></td>";
   }
   echo "

@@ -1,6 +1,6 @@
 <?php
 
-if (isset($_POST['toimenpide']) and $_POST['toimenpide'] == 'pakkalista') {
+if (isset($_POST['task']) and (strpos($_POST['task'], "_pdf") !== false)) {
   $no_head = "yes";
 }
 

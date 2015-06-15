@@ -1410,7 +1410,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
                 <input type='hidden' name='lopetus' value='{$lopetus}'>
                 <input type='hidden' name='tuotetiedot_nappulaa_klikattu' value='kylla'>
 
-                <label>" . t("Myös malli, malli, mallitarkenne ja tuotemerkki") . "
+                <label>" . t("Myös malli, mallitarkenne ja tuotemerkki") . "
                   <input type='checkbox'
                          name='tuotetiedot_exceliin'
                          value='kylla'

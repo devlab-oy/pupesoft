@@ -144,7 +144,8 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   $query = "SELECT lasku.tunnus,
             lasku.nimi,
             lasku.liitostunnus,
-            lasku.tilausyhteyshenkilo
+            lasku.tilausyhteyshenkilo,
+            lasku.ohjelma_moduli
             FROM lasku
             JOIN asiakas
             ON ( asiakas.yhtio = lasku.yhtio
@@ -164,8 +165,7 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   while ($myyntitilaus = mysql_fetch_assoc($result)) {
     $myyntitilaus['tilausrivit'] = hae_myyntitilausrivit($myyntitilaus['tunnus']);
     $myyntitilaus['asiakas'] = hae_myyntitilauksen_asiakas($myyntitilaus['liitostunnus']);
-    $myyntitilaus['tilausyhteyshenkilo'] = hae_tilauksen_yhteyshenkilo($myyntitilaus["liitostunnus"],
-                                                                       $myyntitilaus['tilausyhteyshenkilo']);
+    $myyntitilaus['tilausyhteyshenkilo'] = hae_tilauksen_yhteyshenkilo($myyntitilaus);
     $myyntitilaukset[] = $myyntitilaus;
   }
 
@@ -393,21 +393,30 @@ function laheta_sahkoposti($email, $body) {
 }
 
 /**
- * @param $liitostunnus Tilauksen liitostunnus
- * @param $nimi         Yhteyshenkilon nimi
+ * @param array $tilaus
  *
  * @return array Yhteyshenkilon tiedot
  */
-function hae_tilauksen_yhteyshenkilo($liitostunnus, $nimi) {
+function hae_tilauksen_yhteyshenkilo($tilaus) {
   global $kukarow;
 
-  $query = "SELECT email
-            FROM yhteyshenkilo
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND liitostunnus = '{$liitostunnus}'
-            AND nimi = '{$nimi}'";
+  if ($tilaus["ohjelma_moduli"] == 'EXTRANET') {
+    $query = "SELECT eposti AS email
+              FROM kuka
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = '{$tilaus["myyja"]}'";
 
-  $result = pupe_query($query);
+    $result = pupe_query($query);
+  }
+  else {
+    $query = "SELECT email
+              FROM yhteyshenkilo
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND liitostunnus = '{$tilaus["liitostunnus"]}'
+              AND nimi = '{$tilaus["tilausyhteyshenkilo"]}'";
+
+    $result = pupe_query($query);
+  }
 
   return mysql_fetch_assoc($result);
 }

@@ -143,7 +143,8 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   //Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on Käytetään yhtiön oletus parametriä tai saa lähettää sähköposteja
   $query = "SELECT lasku.tunnus,
             lasku.nimi,
-            lasku.liitostunnus
+            lasku.liitostunnus,
+            lasku.tilausyhteyshenkilo
             FROM lasku
             JOIN asiakas
             ON ( asiakas.yhtio = lasku.yhtio
@@ -163,6 +164,8 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   while ($myyntitilaus = mysql_fetch_assoc($result)) {
     $myyntitilaus['tilausrivit'] = hae_myyntitilausrivit($myyntitilaus['tunnus']);
     $myyntitilaus['asiakas'] = hae_myyntitilauksen_asiakas($myyntitilaus['liitostunnus']);
+    $myyntitilaus['tilausyhteyshenkilo'] = hae_tilauksen_yhteyshenkilo($myyntitilaus["liitostunnus"],
+                                                                       $myyntitilaus['tilausyhteyshenkilo']);
     $myyntitilaukset[] = $myyntitilaus;
   }
 
@@ -313,9 +316,15 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['kieli'] = $kieli;
-  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $myyntitilaus['asiakas']['email'];
-}
 
+  $mailiosoite = $myyntitilaus['asiakas']['email'];
+
+  if (!empty($myyntitilaus["tilausyhteyshenkilo"])) {
+    $mailiosoite .= ", {$myyntitilaus["tilausyhteyshenkilo"]["email"]}";
+  }
+
+  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
+}
 
 /**
  * Lähettää generoidut emailit
@@ -381,4 +390,24 @@ function laheta_sahkoposti($email, $body) {
     "body"     => $body,
   );
   pupesoft_sahkoposti($parametrit);
+}
+
+/**
+ * @param $liitostunnus Tilauksen liitostunnus
+ * @param $nimi         Yhteyshenkilon nimi
+ *
+ * @return array Yhteyshenkilon tiedot
+ */
+function hae_tilauksen_yhteyshenkilo($liitostunnus, $nimi) {
+  global $kukarow;
+
+  $query = "SELECT email
+            FROM yhteyshenkilo
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND liitostunnus = '{$liitostunnus}'
+            AND nimi = '{$nimi}'";
+
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }

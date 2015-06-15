@@ -23,6 +23,7 @@ $sort_by_direction_hylly    = (!isset($sort_by_direction_hylly) or $sort_by_dire
 $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $viivakoodi;
 
 $params = array();
+$saapumisnro_haku_lisa = "";
 
 // Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '' or $saapumisnro_haku != '') {
@@ -31,7 +32,7 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '' or $saapumisnro
 
   if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
   if ($ostotilaus != '')   $params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
-  if ($saapumisnro_haku != '') $params['uusiotunnus'] = "lasku.laskunro = '{$saapumisnro_haku}'";
+  if ($saapumisnro_haku != '') $saapumisnro_haku_lisa = "AND lasku.laskunro = '{$saapumisnro_haku}'";
 
   // Viivakoodi case
   if ($viivakoodi != '') {
@@ -105,6 +106,19 @@ if (isset($sort_by)) {
   }
 }
 
+if (!empty($saapumisnro_haku_lisa)) {
+  $where_lisa = "AND lasku.tila = 'K'
+                 AND lasku.alatila = ''
+                 {$saapumisnro_haku_lisa}";
+  $join_lisa = "AND tilausrivi.uusiotunnus=lasku.tunnus
+                AND tilausrivi.suuntalava = 0";
+}
+else {
+  $where_lisa = "((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))";
+  $join_lisa = "AND tilausrivi.otunnus=lasku.tunnus
+                AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)";
+}
+
 // Haetaan ostotilaukset
 $query = "SELECT
           lasku.tunnus as ostotilaus,
@@ -122,17 +136,19 @@ $query = "SELECT
           tuotteen_toimittajat.liitostunnus,
           IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
           FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-            AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio
+            AND tilausrivi.tyyppi='O'
+            AND tilausrivi.varattu != 0
+            {$join_lisa}
           JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
           JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
             AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
             AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
           LEFT JOIN tilausrivin_lisatiedot
           ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-          WHERE ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))
-          AND lasku.yhtio='{$kukarow['yhtio']}'
+          WHERE lasku.yhtio='{$kukarow['yhtio']}'
           AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+          {$where_lisa}
           {$query_lisa}
           ORDER BY {$orderby} {$ascdesc}
           ";
@@ -166,17 +182,19 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
             tuotteen_toimittajat.liitostunnus,
             IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
             FROM lasku
-            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-              AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio
+              AND tilausrivi.tyyppi='O'
+              AND tilausrivi.varattu != 0
+              {$join_lisa}
             JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
             JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
               AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
               AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
             LEFT JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-            WHERE ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))
-            AND lasku.yhtio='{$kukarow['yhtio']}'
+            WHERE lasku.yhtio='{$kukarow['yhtio']}'
             AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+            {$where_lisa}
             {$query_lisa}
             ORDER BY {$orderby} {$ascdesc}
             ";

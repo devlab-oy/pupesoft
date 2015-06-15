@@ -3158,6 +3158,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
+    // Onko tuotteella staattinen ostorivikommentti
+    if ($rivityyppi == 'O' and $trow["ostokommentti"] != "" and $rivitunnus == 0) {
+      // Tilausrivin systeemikommentti
+      if (stripos($kommentti, $trow["ostokommentti"]) === FALSE) {
+        if (trim($kommentti) != "")  $kommentti = "\n".$kommentti;
+        $kommentti = trim($trow["ostokommentti"].$kommentti);
+      }
+    }
+
     // jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
     if ($rivilaadittu != "" and $rivitunnus != 0) {
       $vanharivilaadittu = "'$rivilaadittu'";

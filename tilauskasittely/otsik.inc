@@ -587,18 +587,22 @@ if ($kukarow["kesken"] != 0) {
             LIMIT 1";
   $rakre_chkres = pupe_query($query);
 }
-
+echo "590: $tila, $jatka <br><br>";
 // ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 if ($tila == "" and !isset($jatka)) {
-
+  echo "593: $asiakasid, $kukarow[kesken], $kopioitava_otsikko <br><br>"; 
   // Ihan ensin haetaan $srow
   if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
     //Asiakas vaihtuu
     if ($from == "vaihdaasiakas" and $asiakasid != "") {
       // asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
-      $squery = "SELECT *, 'O' kohdistettu
+      $squery = "SELECT *, 'O' kohdistettu,
+                    if(asiakas.gsm != '', asiakas.gsm,
+                       if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                         if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
+echo "602: $squery <br><br>";
       $assresult = pupe_query($squery);
       $assrow = mysql_fetch_assoc($assresult);
 
@@ -633,7 +637,7 @@ if ($tila == "" and !isset($jatka)) {
       else {
         $kerpvm = $kervv."-".$kerkk."-".$kerpp;
       }
-
+echo "636: $assrow[toim_nimi], $assrow[nimi], $assrow[toim_puh], $tpuh  <br><br>";
       if (trim($assrow["toim_nimi"]) == "") {
         $assrow["toim_nimi"]    = $assrow["nimi"];
         $assrow["toim_nimitark"]  = $assrow["nimitark"];
@@ -673,7 +677,7 @@ if ($tila == "" and !isset($jatka)) {
                 toim_postino        = '$assrow[toim_postino]',
                 toim_postitp        = '$assrow[toim_postitp]',
                 toim_maa            = '$assrow[toim_maa]',
-                toim_puh            = '$tpuh',
+                toim_puh            = '$assrow[toim_puh]',
                 laskutusvkopv       = '$assrow[laskutusvkopv]',
                 chn                 = '$assrow[chn]',
                 verkkotunnus        = '$assrow[verkkotunnus]',

@@ -114,7 +114,7 @@ if (!empty($saapumisnro_haku_lisa)) {
                 AND tilausrivi.suuntalava = 0";
 }
 else {
-  $where_lisa = "((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))";
+  $where_lisa = "AND ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))";
   $join_lisa = "AND tilausrivi.otunnus=lasku.tunnus
                 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)";
 }

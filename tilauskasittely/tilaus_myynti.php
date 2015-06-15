@@ -33,12 +33,13 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-$naytetaanko_kate = ($naytetaan_kate != "E"
-                   and ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
-                        or $kukarow["naytetaan_katteet_tilauksella"] == "B"
-                        or ($kukarow["naytetaan_katteet_tilauksella"] == ""
-                            and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
-                                 or $yhtiorow["naytetaan_katteet_tilauksella"] == "B"))));
+$oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
+                      or $kukarow["naytetaan_katteet_tilauksella"] == "B"
+                      or ($kukarow["naytetaan_katteet_tilauksella"] == ""
+                          and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
+                               or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
+
+$naytetaanko_kate = ($naytetaan_kate != "E" and $oikeus_nahda_kate);
 
 if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" or
     ($kukarow["dynaaminen_kassamyynti"] == "" and
@@ -6428,37 +6429,40 @@ if ($tee == '') {
 
       echo "</td>";
 
-      $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
-      $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
+      if ($oikeus_nahda_kate) {
+        $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
+        $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
 
-      echo "<td class='back' colspan='{$tokat_sarakkeet}'>";
-      echo "<form method='post'>
-              <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-              <input type='hidden' name='mista' value='$mista'>
-              <input type='hidden' name='tee' value='$tee'>
-              <input type='hidden' name='toim' value='$toim'>
-              <input type='hidden' name='lopetus' value='$lopetus'>
-              <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-              <input type='hidden' name='projektilla' value='$projektilla'>
-              <input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
-              <input type='hidden' name='orig_tila' value = '$orig_tila'>
-              <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+        echo "<td class='back' colspan='{$tokat_sarakkeet}'>";
+        echo "<form method='post'>
+                <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+                <input type='hidden' name='mista' value='$mista'>
+                <input type='hidden' name='tee' value='$tee'>
+                <input type='hidden' name='toim' value='$toim'>
+                <input type='hidden' name='lopetus' value='$lopetus'>
+                <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+                <input type='hidden' name='projektilla' value='$projektilla'>
+                <input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
+                <input type='hidden' name='orig_tila' value = '$orig_tila'>
+                <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 
-              <label>Näytetään kate
-                <input type='radio'
-                       name='naytetaan_kate'
-                       value='K'
-                       onclick='submit()'{$kate_sel["K"]}>
-              </label>
+                <label>Näytetään kate
+                  <input type='radio'
+                         name='naytetaan_kate'
+                         value='K'
+                         onclick='submit()'{$kate_sel["K"]}>
+                </label>
 
-              <label>Ei näytetä katetta
-                <input type='radio'
-                       name='naytetaan_kate'
-                       value='E'
-                       onclick='submit()'{$kate_sel["E"]}>
-              </label>
-            </form>";
-      echo "</td>";
+                <label>Ei näytetä katetta
+                  <input type='radio'
+                         name='naytetaan_kate'
+                         value='E'
+                         onclick='submit()'{$kate_sel["E"]}>
+                </label>
+              </form>";
+        echo "</td>";
+      }
+
       echo "</tr>";
 
       // Tsekataa onko tilausrivien varastojen toimipaikoilla lähdöt päällä, ja onko kyseisen lähdevaraston toimitustavalla lähtöjä

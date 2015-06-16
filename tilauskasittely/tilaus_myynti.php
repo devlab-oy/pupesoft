@@ -205,7 +205,6 @@ if (!isset($tiedot_laskulta)) $tiedot_laskulta = "";
 if (!isset($tila)) $tila = "";
 if (!isset($tilausnumero)) $tilausnumero = "";
 if (!isset($tilausrivilinkki)) $tilausrivilinkki = "";
-if (!isset($tilausrivi_alvillisuus)) $tilausrivi_alvillisuus = isset($_COOKIE["tilausrivi_alvillisuus"]) ? $_COOKIE["tilausrivi_alvillisuus"] : $tilausrivi_alvillisuus;
 if (!isset($tilaustyyppi)) $tilaustyyppi = "";
 if (!isset($toimaika)) $toimaika = "";
 if (!isset($toimittajan_tunnus)) $toimittajan_tunnus = "";
@@ -233,6 +232,16 @@ if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
 if (!isset($luottorajavirhe_ylivito_valmis)) $luottorajavirhe_ylivito_valmis = true;
+
+if (empty($_POST["tilausrivi_alvillisuus"]) and isset($_COOKIE["tilausrivi_alvillisuus"])) {
+  $tilausrivi_alvillisuus = $_COOKIE["tilausrivi_alvillisuus"];
+}
+elseif (!isset($tilausrivi_alvillisuus)) {
+  $tilausrivi_alvillisuus = "";
+}
+else {
+  $tilausrivi_alvillisuus = $_POST["tilausrivi_alvillisuus"];
+}
 
 if (!isset($valmiste_vai_raakaaine) and $toim == "VALMISTAVARASTOON") {
   $_cookie_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
@@ -6306,31 +6315,31 @@ if ($tee == '') {
       echo "<font class='head'>".t("Valmistusrivit")."</font>";
     }
     else {
+      $sele = array("K" => "", "E" => "");
+
+      if ($tilausrivi_alvillisuus == "") {
+        if ($yhtiorow["alv_kasittely"] == "") {
+          // verolliset hinnat
+          $tilausrivi_alvillisuus = "K";
+        }
+        else {
+          // verottomat hinnat
+          $tilausrivi_alvillisuus = "E";
+        }
+      }
+
+      if ($tilausrivi_alvillisuus == "E") {
+        $sele["E"] = "checked";
+      }
+      else {
+          $sele["K"] = "checked";
+        $tilausrivi_alvillisuus = "K";
+      }
+
       // jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
       if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
         echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
         echo "<font class='head'>".t("Tilausrivit")."</font>";
-
-        $sele = array("K" => "", "E" => "");
-
-        if ($tilausrivi_alvillisuus == "") {
-          if ($yhtiorow["alv_kasittely"] == "") {
-            // verolliset hinnat
-            $tilausrivi_alvillisuus = "K";
-          }
-          else {
-            // verottomat hinnat
-            $tilausrivi_alvillisuus = "E";
-          }
-        }
-
-        if ($tilausrivi_alvillisuus == "E") {
-          $sele["E"] = "checked";
-        }
-        else {
-          $sele["K"] = "checked";
-          $tilausrivi_alvillisuus = "K";
-        }
 
         echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -6365,7 +6374,6 @@ if ($tee == '') {
       else {
         echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
         echo "<font class='head'>".t("Tilausrivit")."</font>";
-        $tilausrivi_alvillisuus = "";
       }
     }
 

@@ -9144,7 +9144,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
         while ($row = mysql_fetch_assoc($result)) {
 
-          if ($yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00) ) {
+          if (empty($kukarow["extranet"]) and $yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00) ) {
             $tyyli = "font-weight:bold;color:red;";
             $tyyli2 = "font-weight:normal;color:red;";
           }

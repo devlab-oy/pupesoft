@@ -587,10 +587,10 @@ if ($kukarow["kesken"] != 0) {
             LIMIT 1";
   $rakre_chkres = pupe_query($query);
 }
-echo "590: $tila, $jatka <br><br>";
+
 // ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 if ($tila == "" and !isset($jatka)) {
-  echo "593: $asiakasid, $kukarow[kesken], $kopioitava_otsikko <br><br>"; 
+
   // Ihan ensin haetaan $srow
   if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
     //Asiakas vaihtuu
@@ -602,7 +602,7 @@ if ($tila == "" and !isset($jatka)) {
                          if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
-echo "602: $squery <br><br>";
+
       $assresult = pupe_query($squery);
       $assrow = mysql_fetch_assoc($assresult);
 
@@ -637,7 +637,7 @@ echo "602: $squery <br><br>";
       else {
         $kerpvm = $kervv."-".$kerkk."-".$kerpp;
       }
-echo "636: $assrow[toim_nimi], $assrow[nimi], $assrow[toim_puh], $tpuh  <br><br>";
+
       if (trim($assrow["toim_nimi"]) == "") {
         $assrow["toim_nimi"]    = $assrow["nimi"];
         $assrow["toim_nimitark"]  = $assrow["nimitark"];
@@ -689,7 +689,11 @@ echo "636: $assrow[toim_nimi], $assrow[nimi], $assrow[toim_puh], $tpuh  <br><br>
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',
                 toimitusehto        = '$assrow[toimitusehto]',
-                tilausyhteyshenkilo = '$yhtnimi[nimi]'
+                tilausyhteyshenkilo = '$yhtnimi[nimi]',
+                viesti              = '$assrow[tilaus_viesti]',
+                comments            = '$assrow[myynti_kommentti1]',
+                sisviesti2          = '$assrow[sisviesti2]',
+                sisviesti1          = '$assrow[sisviesti1]'
                 WHERE yhtio         = '$kukarow[yhtio]'
                 and tunnus          = '$kukarow[kesken]'
                 and liitostunnus    = 0";

@@ -778,7 +778,7 @@ if ($tee == 'MUUTA') {
     }
 
     if ($selkuka != "KOPSAAUUSI") {
-      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' id='password' name='password' value='{$generoitupass}'></td><td class='back'> <a id='generoi_url'>", t("Generoi salasana"), "</a></td></tr>";
+      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' id='password' name='password' value='{$generoitupass}'></td><td class='back'> <button id='generoi_url'>", t("Generoi salasana"), "</button></td></tr>";
       echo "<tr><th align='left'>", t("Nimi"), ":</th><td><input type='text' size='50' value='{$krow['nimi']}' name='firname'></td></tr>";
       echo "<tr><th align='left'>", t("Puhelinnumero"), ":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
       echo "<tr><th align='left'>", t("Sähköposti"), ":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";

@@ -383,7 +383,12 @@ if (!$enarimatch) {
           $ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
         }
 
-        $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("epäkurantti").")" : "";
+        if (empty($kukarow["extranet"])) {
+          $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% " . t("epäkurantti") . ")" : "";
+        }
+        else {
+          $epakuranttiteksti = "";
+        }
 
         $ulos .= "<option value='{$trow['tuoteno']}{$lisakala3}'>{$lisakala2} {$lisakala1} {$trow['tuoteno']} ".t_tuotteen_avainsanat($trow, 'nimitys')." ({$kokonaismyytavissa}){$epakuranttiteksti}</option>";
 

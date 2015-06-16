@@ -5,8 +5,10 @@ pupeslave_start();
 $enarimatch   = FALSE;
 $poistetulisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 
-if ((strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "") or
-  (strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== false and $yhtiorow["ostotilaus_tuotehaku"] == "P")
+if (
+  (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "")
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== false and $yhtiorow["poistetut_lisays"] == "P")
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== false and !empty($extranet) and $yhtiorow["poistetut_lisays"] == "P")
 ) {
   $poistetulisa = "";
 }

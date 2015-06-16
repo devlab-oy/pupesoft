@@ -584,6 +584,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               tuote.tuoteno
               FROM tuotepaikat
               JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' {$rajauslisatuote}
+              LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                  AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                  AND inventointilistarivi.tila = 'A')
               {$kutsujoinlisa}
               WHERE tuotepaikat.yhtio                       = '{$kukarow["yhtio"]}'
               and tuotepaikat.saldo                         <> 0

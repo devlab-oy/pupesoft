@@ -584,6 +584,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               tuote.tuoteno
               FROM tuotepaikat
               JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' {$rajauslisatuote}
+              LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                  AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                  AND inventointilistarivi.tila = 'A')
               {$kutsujoinlisa}
               WHERE tuotepaikat.yhtio                       = '{$kukarow["yhtio"]}'
               and tuotepaikat.saldo                         <> 0
@@ -808,7 +811,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     if ($top > 0) {
       $where .= il_topmyydyt($top, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }
-
+echo "814 $varastoonvaikutus > 0 or $varastonarvo > 0 <br><br>";
     if ($varastoonvaikutus > 0 or $varastonarvo > 0) {
       $where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }

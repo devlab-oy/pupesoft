@@ -28,7 +28,7 @@ $tuote_count = mysql_fetch_assoc($tuote_count);
 $tuote_count = $tuote_count["tuote_count"];
 
 if ($tuote_count > 1) {
-  $varaosavirhe .= t("VIRHE: Tuote löytyy jo tilaukselta") . "!<br>";
+  $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
   $riviok++;
   $tilausok++;
 }

@@ -811,7 +811,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     if ($top > 0) {
       $where .= il_topmyydyt($top, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }
-echo "814 $varastoonvaikutus > 0 or $varastonarvo > 0 <br><br>";
+
     if ($varastoonvaikutus > 0 or $varastonarvo > 0) {
       $where .= il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }

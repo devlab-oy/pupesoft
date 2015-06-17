@@ -74,7 +74,12 @@ if ($siirtorivitunnus != "") {
 
 // Haetaan tilausrivin tiedot
 if ($from != '' and $rivitunnus != "") {
-  $query    = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko, tilausrivin_lisatiedot.osto_vai_hyvitys, tuote.kehahin
+  $query    = "SELECT tilausrivi.*,
+               tuote.sarjanumeroseuranta,
+               tuote.automaattinen_sarjanumerointi,
+               tuote.yksikko,
+               tilausrivin_lisatiedot.osto_vai_hyvitys,
+               tuote.kehahin
                FROM tilausrivi use index (PRIMARY)
                JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
                LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -1561,21 +1566,8 @@ if ($rivirow["tyyppi"] != 'V') {
         $nxt2 = t("EI SARJANUMEROA")."-1";
       }
 
-      if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
-
-        $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND substr(sarjanumero, 1, 4) = year(now())";
-        $vresult = pupe_query($query);
-        $vrow = mysql_fetch_assoc($vresult);
-
-        if ($vrow["kuluvan_vuoden_suurin_numero"]) {
-          $sarjanumero = date("Y") . "-" . ($vrow["kuluvan_vuoden_suurin_numero"] + 1);
-        }
-        else {
-          $sarjanumero = date("Y") . "-100";
-        }
+      if ($sarjanumero == "" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
+        $sarjanumero = generoi_sarjanumero($rivirow, $tunnuskentta);
       }
 
       echo "<br><table>";
@@ -1687,4 +1679,61 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
   echo "<div class='left clear'>";
   require "inc/footer.inc";
   echo "</div>";
+}
+
+/**
+ * @param array  $tuote        Tarvitaan kentat tuoteno, tunnus ja automaattinen_sarjanumerointi
+ * @param string $tunnuskentta Tarvitaan, jos kaytossa on generointitapa 1
+ *
+ * @return string Sarjanumero
+ */
+function generoi_sarjanumero($tuote, $tunnuskentta = "") {
+  global $kukarow;
+
+  switch ($tuote["automaattinen_sarjanumerointi"]) {
+  case 1:
+    if (empty($tunnuskentta)) break;
+
+    $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero) + 1) + 0) + 1 sarjanumero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tuoteno = '{$tuote["tuoteno"]}'
+              AND {$tunnuskentta} = '{$tuote["tunnus"]}'";
+
+    $result = pupe_query($query);
+    $row    = mysql_fetch_assoc($result);
+
+    $sarjanumero = $tuote["nimitys"];
+
+    if ($row["sarjanumero"] > 0) {
+      $sarjanumero = $sarjanumero . "-" . $row["sarjanumero"];
+    }
+    else {
+      $sarjanumero = $sarjanumero . "-1";
+    }
+
+    break;
+  case 2:
+    $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND substr(sarjanumero, 1, 4) = year(now())";
+
+    $result = pupe_query($query);
+    $row    = mysql_fetch_assoc($result);
+
+    if ($row["kuluvan_vuoden_suurin_numero"]) {
+      $sarjanumero = date("Y") . "-" . ($row["kuluvan_vuoden_suurin_numero"] + 1);
+    }
+    else {
+      $sarjanumero = date("Y") . "-100";
+    }
+
+    break;
+
+  default:
+    $sarjanumero = "";
+  }
+
+  return $sarjanumero;
 }

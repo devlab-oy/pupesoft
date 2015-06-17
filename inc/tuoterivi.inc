@@ -277,9 +277,6 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
   }
-  if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
-    $ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
-  }
   if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
   }
@@ -294,6 +291,22 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   }
 
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "automaattinen_sarjanumerointi") {
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = " selected";
+
+  $ulos = "<td>
+             <select name='{$nimi}'>
+               <option value='0'{$sel["0"]}>" . t("Ei automaattista sarjanumerointia") . "</option>
+               <option value='1'{$sel["1"]}>" . t("Automaattinen sarjanumerointi kaavalla tuotteen nimitys + juokseva numero") . "</option>
+               <option value='2'{$sel["2"]}>" . t("Automaattinen sarjanumerointi kaavalla vuosi + 100 alkava juokseva numero") . "</option>
+             </select>
+           </td>";
 
   $jatko = 0;
 }

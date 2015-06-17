@@ -84,6 +84,12 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
 
   $tunnukset = implode(",", $valitut);
 
+  $matkatiedot = array(
+    'kuljetusfirma' => $kuljetusfirma,
+    'maaranpaa' => $maaranpaa,
+    'maaranpaakoodi' => $maaranpaakoodi
+    );
+
   $matkatiedot = serialize($matkatiedot);
   $matkatiedot = mysql_real_escape_string($matkatiedot);
   $pakkausohje = mysql_real_escape_string($pakkausohje);
@@ -116,7 +122,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $update_query = "UPDATE tilausrivin_lisatiedot SET
                    kontin_isokoodi = 'rekka'
                    WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND tilausrivitunnus IN ({$rivitunnukset})";
+                   AND tilausrivitunnus IN ({$rivitunnukset})";echo $update_query;die;
   pupe_query($update_query);
 
   unset($task);
@@ -359,7 +365,7 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $konttinumero = mysql_real_escape_string($rekisterinumero);
       $sinettinumero = mysql_real_escape_string($kuljettaja);
       $taara = '1';
-      $isokoodi = 'TRAILERI';
+      $isokoodi = 'rekka';
 
       $matkatiedot = array(
         'rekisterinumero_traileri' => $rekisterinumero_traileri,
@@ -1523,7 +1529,7 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
   <input type='hidden' name='viite' value='{$viite}' />
   <input type='hidden' name='konttimaara' value='{$konttimaara}' />
   <input type='hidden' name='maaranpaa' value='{$maaranpaa}' />
-  <input type='hidden' name='maaranapaakoodi' value='{$maaranpaakoodi}' />
+  <input type='hidden' name='maaranpaakoodi' value='{$maaranpaakoodi}' />
   <input type='hidden' name='pakkausohje' value='{$pakkausohje}' />
   <input type='hidden' name='lahtopvm' value='{$_lahtopvm}' />
 

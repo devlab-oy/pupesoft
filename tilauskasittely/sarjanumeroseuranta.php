@@ -397,7 +397,7 @@ if ($toiminto == 'MUOKKAA') {
 
       echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
 
-      if ($muutarow["sarjanumeroseuranta"] == "S" or $muutarow["sarjanumeroseuranta"] == "U") {
+      if ($muutarow["sarjanumeroseuranta"] == "S") {
 
         $chk = "";
         if ($muutarow["kaytetty"] == 'K') {
@@ -452,7 +452,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
   $era_kpl    = (float) str_replace(",", ".", $era_kpl);
   $insok      = "OK";
 
-  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
     $query = "SELECT *
               FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -560,7 +560,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
       $lisatietores_apu = pupe_query($query);
     }
 
-    if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+    if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
       echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
     }
     else {
@@ -1065,7 +1065,7 @@ elseif ((($from == "riviosto" or $from == "kohdista" or $valmiste_raakaine == "V
         and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
         $lisa";
 
-  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
     $query  .= " GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero ";
   }
   else {
@@ -1599,7 +1599,7 @@ if ($rivirow["tyyppi"] != 'V') {
       if ($rivirow['sarjanumeroseuranta'] == 'V') {
         echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
       }
-      elseif ($rivirow['sarjanumeroseuranta'] == 'S' or $rivirow['sarjanumeroseuranta'] == 'U') {
+      elseif ($rivirow['sarjanumeroseuranta'] == 'S') {
         echo "<input type='hidden' name='kehahin' value='$kehahin'>";
       }
     }

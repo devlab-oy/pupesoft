@@ -724,7 +724,7 @@ else {
       }
 
       // lasketaan kate
-      if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
+      if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
         $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 

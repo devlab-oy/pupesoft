@@ -63,7 +63,7 @@ if ($tuoteno != "") {
     }
     $tee = "";
   }
-  elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'U', 'G'))) {
+  elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'G'))) {
 
     $sarjanumerolisa = "";
 

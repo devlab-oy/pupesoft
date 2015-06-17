@@ -598,7 +598,7 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if (in_array($tuote_row["sarjanumeroseuranta"], array("S", "U", "G")) and $onko_vanhoja > 0 and $onko_uusia > 0) {
+        if (in_array($tuote_row["sarjanumeroseuranta"], array("S", "G")) and $onko_vanhoja > 0 and $onko_uusia > 0) {
           echo "<font class='error'>".t("VIRHE: Voit lisätä / poistaa vain uuden sarjanumeron")."!</font><br>";
           $virhe = 1;
         }
@@ -913,12 +913,11 @@ if ($tee == 'VALMIS') {
             // Lasketaan varastonarvon muutos
             // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
             // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
-            // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
             // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
             // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
             // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
             // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
-            if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+            if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
 
               $varvo_ennen = 0;
               $varvo_jalke = 0;
@@ -1939,7 +1938,7 @@ if ($tee == 'INVENTOI') {
 
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
         if (mysql_num_rows($sarjares) > 0) {
           echo "<br><table width='100%'>";
 
@@ -2091,7 +2090,7 @@ if ($tee == 'INVENTOI') {
 
       echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
         echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
@@ -2121,7 +2120,7 @@ if ($tee == 'INVENTOI') {
 
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
-      if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+      if ($tuoterow["sarjanumeroseuranta"] == "S") {
         if (mysql_num_rows($sarjares) > 0) {
           echo "<br><table>";
 
@@ -2173,7 +2172,7 @@ if ($tee == 'INVENTOI') {
 
       echo "</td>";
 
-      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+      if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
         echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {

@@ -1331,7 +1331,8 @@ if ($tila == '') {
             tilausrivin_lisatiedot.suoratoimitettuaika,
             lasku.comments,
             tuote.alv myyntialv,
-            tuote.sarjanumeroseuranta
+            tuote.sarjanumeroseuranta,
+            tuote.automaattinen_sarjanumerointi
             FROM lasku
             JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' AND tilausrivi.kpl+tilausrivi.varattu != 0 $tilaajanrivinro $lisa2
             LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -2013,7 +2014,7 @@ if ($tila == '') {
 
     echo "<{$td} {$class}>";
 
-    if ($rivirow["sarjanumeroseuranta"] == "U" and empty($nayta_siirrettavat)) {
+    if ($rivirow["automaattinen_sarjanumerointi"] != 0 and empty($nayta_siirrettavat)) {
       echo "<input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'>";
     }
     else {

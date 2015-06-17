@@ -32,24 +32,14 @@ if ($tee == "teeyhdistys") {
           foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
 
             if ((string) $_suuntalava != "0") {
-              # Katsotaan onko suuntalava vain kyseisellä saapumisella
-              $query = "SELECT *
-                        FROM suuntalavat_saapuminen
+              $query = "UPDATE suuntalavat_saapuminen SET
+                        saapuminen = '{$otunnus}',
+                        muuttaja = '{$kukarow['kuka']}',
+                        muutospvm = now()
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND suuntalava = '{$_suuntalava}'
                         AND saapuminen = '{$keikkatunnus}'";
-              $suuntalava_chk_res = pupe_query($query);
-
-              if (mysql_num_rows($suuntalava_chk_res) == 1) {
-                $query = "UPDATE suuntalavat_saapuminen SET
-                          saapuminen = '{$otunnus}',
-                          muuttaja = '{$kukarow['kuka']}',
-                          muutospvm = now()
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND suuntalava = '{$_suuntalava}'
-                          AND saapuminen = '{$keikkatunnus}'";
-                $upd_res = pupe_query($query);
-              }
+              $upd_res = pupe_query($query);
             }
           }
         }

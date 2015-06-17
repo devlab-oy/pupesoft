@@ -256,7 +256,7 @@ if (mysql_field_name($result, $i) == "kommentoitava") {
 
 if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-  $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+  $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'V', 'E', 'F', 'G'), '');
 
   $query = "SELECT count(*) saldo
             FROM tuotepaikat
@@ -271,7 +271,7 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
   }
-  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
+  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S")))) {
     $ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
   }
   if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {

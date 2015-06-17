@@ -122,7 +122,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $update_query = "UPDATE tilausrivin_lisatiedot SET
                    kontin_isokoodi = 'rekka'
                    WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND tilausrivitunnus IN ({$rivitunnukset})";echo $update_query;die;
+                   AND tilausrivitunnus IN ({$rivitunnukset})";
   pupe_query($update_query);
 
   unset($task);

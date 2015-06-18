@@ -23,24 +23,21 @@ if ($tee == "teeyhdistys") {
                   FROM tilausrivi
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tyyppi = 'O'
-                  AND uusiotunnus = '{$keikkatunnus}'";
+                  AND uusiotunnus = '{$keikkatunnus}'
+                  AND suuntalava != 0";
         $suuntalava_res = pupe_query($query);
         $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
 
-        if (trim($suuntalava_row['suuntalavat']) != '' and $suuntalava_row['suuntalavat'] != "0") {
-
+        if (trim($suuntalava_row['suuntalavat']) != '') {
           foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
-
-            if ((string) $_suuntalava != "0") {
-              $query = "UPDATE suuntalavat_saapuminen SET
-                        saapuminen = '{$otunnus}',
-                        muuttaja = '{$kukarow['kuka']}',
-                        muutospvm = now()
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND suuntalava = '{$_suuntalava}'
-                        AND saapuminen = '{$keikkatunnus}'";
-              $upd_res = pupe_query($query);
-            }
+            $query = "UPDATE suuntalavat_saapuminen SET
+                      saapuminen = '{$otunnus}',
+                      muuttaja = '{$kukarow['kuka']}',
+                      muutospvm = now()
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND suuntalava = '{$_suuntalava}'
+                      AND saapuminen = '{$keikkatunnus}'";
+            $upd_res = pupe_query($query);
           }
         }
 

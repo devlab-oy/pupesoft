@@ -63,6 +63,10 @@ $sivu = 1;
 
 $tulostakolli = $tulostuskpl;
 
+if (is_numeric($rahtikirjanro) and $tulostakolli > 0) {
+  $rahtikirjanro = "";
+}
+
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 

@@ -323,7 +323,7 @@ if (mysql_field_name($result, $i) == "aleryhma") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti" or mysql_field_name($result, $i) == "tilausrivi_kommentti" or mysql_field_name($result, $i) == "kerayskommentti" or mysql_field_name($result, $i) == "purkukommentti") {
+if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti" or mysql_field_name($result, $i) == "tilausrivi_kommentti" or mysql_field_name($result, $i) == "kerayskommentti" or mysql_field_name($result, $i) == "purkukommentti" or mysql_field_name($result, $i) == "ostokommentti") {
   $ulos = "<td><textarea cols='50' rows='10' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }

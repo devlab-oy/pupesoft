@@ -312,7 +312,7 @@ if ($tee == 'paikat') {
           $ptunnus = $rivivarasto[$tun];
         }
 
-        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
+        $query = "SELECT tuotepaikat.*, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
@@ -322,7 +322,7 @@ if ($tee == 'paikat') {
                   and tuotepaikat.tuoteno = '{$tilausrivirow['tuoteno']}'";
       }
       else {
-        $query = "SELECT *, inventointilistarivi.tunnus as inventointilistatunnus
+        $query = "SELECT tuotepaikat.*, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus

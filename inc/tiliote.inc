@@ -1172,6 +1172,12 @@ case 'T11':
     $erialla     = "VIITEAINEISTO";
   }
 
+  // Swedbank Viro häkki
+  if ($yhtiorow['maa'] == "EE" and $koodi == '770' and $koodiselite == "INTERNATIONAL PAYMENT" and $kuittikoodi != "E" and (int) $maksuviite > 0) {
+    $kuittikoodi = "E";
+    $erialla     = "VIITEAINEISTO";
+  }
+
   echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";
 
   if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";

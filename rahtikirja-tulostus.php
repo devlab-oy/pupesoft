@@ -611,13 +611,15 @@ echo "603 rahtikirjanro $rahtikirjanro <br><br>"; var_dump($toitarow); echo "<br
         $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
       }
 echo "611 rahtikirjanro $rahtikirjanro <br><br>";
+      $pakkaustieto_tunnukset = '';
+
       $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
       $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
       $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
       $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
 
       if ($_tulostustapa and $_paktiedot) {
-        $pakkaustieto_tunnukset = '';
+        
 
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat

@@ -465,7 +465,25 @@ if ($tee == "ETSILASKU") {
               and lasku.toim_postitp  = '$asiakasrow[toim_postitp]' ";
   }
 
+  $reklaprosessi = "";
+  // Pitk‰ prosessi aina reklamaation ja takuun k‰sittelyss‰
   if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == 'U') {
+    $reklaprosessi = "PITKA";
+  }
+  // Lyhyt prosessi aina reklamaation ja takuun k‰sittelss‰
+  elseif (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+    $reklaprosessi = "LYHYT";
+  }
+  // Pitk‰ prosessi vain reklamaation k‰sittelyss‰ (takuut lyhyell‰)
+  elseif ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    $reklaprosessi = "PITKA";
+  }
+  // Lyhyt prosessi takuiden k‰isttelyss‰ (reklamaatiot pitk‰ll‰)
+  elseif ($toim == "TAKUU" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    $reklaprosessi = "LYHYT";
+  }
+
+  if ($reklaprosessi == "PITKA") {
     $where1 .= " lasku.tila in ('C','L') ";
 
     $where2 .= " and lasku.alatila in('C','D','X')";
@@ -478,7 +496,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
-  if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+  if ($reklaprosessi == "LYHYT") {
 
     if ($toim == "TAKUU") {
       $where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'U' ";
@@ -957,6 +975,10 @@ if ($tee == "ETSILASKU") {
     $joinlisa = "JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'O')";
     $where5 = " AND tilausrivi.kpl != 0 ";
   }
+
+  $yhtio = "";
+
+  #if
 
   // Etsit‰‰n muutettavaa tilausta
   $query = "SELECT distinct

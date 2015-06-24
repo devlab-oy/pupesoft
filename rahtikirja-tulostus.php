@@ -600,23 +600,23 @@ if ($tee == 'tulosta') {
       else {
         $groupby_lisa = "";
       }
-
-      $query = "SELECT min(rahtikirjanro) rahtikirjanro
-                FROM rahtikirjat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus IN ({$tunnukset})";
-      $rahtikirjanrores = pupe_query($query);
-      $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
-      $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
-
-      $pakkaustieto_tunnukset = '';
-
+echo "603 rahtikirjanro $rahtikirjanro <br><br>";
       $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
       $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
       $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
       $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
 
       if ($_tulostustapa and $_paktiedot) {
+        $query = "SELECT min(rahtikirjanro) rahtikirjanro
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus IN ({$tunnukset})";
+        $rahtikirjanrores = pupe_query($query);
+        $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
+        $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
+echo "611 rahtikirjanro $rahtikirjanro <br><br>"; exit;
+        $pakkaustieto_tunnukset = '';
+        
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat
                   WHERE yhtio                 = '$kukarow[yhtio]'

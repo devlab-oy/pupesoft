@@ -600,7 +600,7 @@ if ($tee == 'tulosta') {
       else {
         $groupby_lisa = "";
       }
-echo "603 rahtikirjanro $rahtikirjanro <br><br>"; var_dump($toitarow); echo "<br><br>";
+
       if ($toitarow["rahtikirja"] != "rahtikirja_postitarra_pdf.inc") {
         $query = "SELECT min(rahtikirjanro) rahtikirjanro
                   FROM rahtikirjat
@@ -610,7 +610,7 @@ echo "603 rahtikirjanro $rahtikirjanro <br><br>"; var_dump($toitarow); echo "<br
         $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
         $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
       }
-echo "611 rahtikirjanro $rahtikirjanro <br><br>";
+
       $pakkaustieto_tunnukset = '';
 
       $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
@@ -619,7 +619,7 @@ echo "611 rahtikirjanro $rahtikirjanro <br><br>";
       $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
 
       if ($_tulostustapa and $_paktiedot) {
-        
+
 
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat

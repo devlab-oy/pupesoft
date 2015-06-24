@@ -78,7 +78,8 @@ class Logger {
    * @return string
    */
   private function format_message($message) {
-    return utf8_encode("[{$this->get_timestamp()}] {$message}" . PHP_EOL);
+    $returnthis = "[{$this->get_timestamp()}] {$message}" . PHP_EOL;
+    return utf8_encode($returnthis);
   }
 
   /**

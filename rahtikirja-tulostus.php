@@ -619,7 +619,6 @@ if ($tee == 'tulosta') {
       $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
 
       if ($_tulostustapa and $_paktiedot) {
-
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat
                   WHERE yhtio                 = '$kukarow[yhtio]'

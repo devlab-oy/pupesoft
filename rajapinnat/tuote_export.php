@@ -14,6 +14,8 @@ if (!$php_cli) {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+die ("Tämän skriptin ajo ei ole mahdollista tässä branchissa");
+
 $pupe_root_polku = dirname(dirname(__FILE__));
 
 require "{$pupe_root_polku}/inc/connect.inc";

@@ -976,10 +976,6 @@ if ($tee == "ETSILASKU") {
     $where5 = " AND tilausrivi.kpl != 0 ";
   }
 
-  $yhtio = "";
-
-  #if
-
   // Etsit‰‰n muutettavaa tilausta
   $query = "SELECT distinct
             lasku.tunnus,

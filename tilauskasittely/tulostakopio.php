@@ -141,6 +141,9 @@ if ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
 if ($toim == "DGD") {
   $fuse = "DGD - Multimodal Dangerous Goods Form";
 }
+if ($toim == "KOONTIDGD") {
+  $fuse = "Koonti-DGD - Multimodal Dangerous Goods Form";
+}
 if ($toim == "PAKKALISTA") {
   //  Tämä on about yhdistetty vienti-erittely ja lähete
   $fuse = t("Pakkalista");
@@ -678,7 +681,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_tapvm) ";
   }
 
-  if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD", "KOONTIDGD"))) {
     //myyntitilaus. Tulostetaan lähete.
     $where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -899,7 +902,7 @@ if ($tee == "ETSILASKU") {
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
-    if ($larow["laskunro"] > 0 and $toim != 'DGD') {
+    if ($larow["laskunro"] > 0 and !in_array($toim, array("DGD", "KOONTIDGD"))) {
       $where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
       $where3 = "";
@@ -949,7 +952,7 @@ if ($tee == "ETSILASKU") {
     $where4 = " and lasku.tila != 'D' ";
   }
 
-  if ($toim == "DGD") {
+  if (in_array($toim, array("DGD", "KOONTIDGD"))) {
     $joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
   }
 
@@ -1275,7 +1278,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
     $tulostimet[0] = 'Lähete';
   }
-  elseif ($toim == "DGD") {
+  elseif (in_array($toim, array("DGD", "KOONTIDGD"))) {
     $tulostimet[0] = 'DGD';
   }
   elseif ($toim == "PAKKALISTA") {
@@ -1928,7 +1931,25 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tee = '';
     }
 
-    if ($toim == "DGD") {
+    if (in_array($toim, array("DGD", "KOONTIDGD"))) {
+
+      if ($toim == "KOONTIDGD") {
+        $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND rahtikirjanro = (SELECT rahtikirjanro
+                                       FROM rahtikirjat
+                                       WHERE yhtio    = '{$kukarow["yhtio"]}'
+                                       AND otsikkonro = '{$laskurow["tunnus"]}')";
+
+        $rahti_result = pupe_query($query);
+
+        $tunnukset = mysql_fetch_assoc($rahti_result);
+        $tunnukset = $tunnukset["tunnukset"];
+      }
+      else {
+        $tunnukset = $laskurow["tunnus"];
+      }
 
       require_once "tilauskasittely/tulosta_dgd.inc";
 
@@ -1942,7 +1963,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'tee'      => $tee,
         'toim'      => $toim,
         'norm'      => $norm,
-        'otunnukset'  => $laskurow['tunnus'],
+        'otunnukset' => $tunnukset,
       );
 
       // Aloitellaan DGD:n teko

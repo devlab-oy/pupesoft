@@ -70,12 +70,24 @@ if (!function_exists("asiakastarkista")) {
         $res = pupe_query($qry);
 
         if (mysql_num_rows($res) > 0) {
-          $t['luottoraja'] = mysql_result($res, 0);
+          if ($alias_set != "PROSPEKTI") {
+            $t['luottoraja'] = mysql_result($res, 0);
+          }
+          elseif ($asiak_laji == "" and $alias_set == "PROSPEKTI") {
+            // P‰ivitet‰‰n prospektien luottoraja,
+            // mutta vasta kun tehd‰‰n prospektista normiasiakas
+            $_luottoraja = mysql_result($res, 0);
+            $qry = "UPDATE asiakas
+                    SET luottoraja = '{$_luottoraja}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '$tunnus'";
+            pupe_query($qry);
+          }
         }
       }
     }
 
-    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja'])) {
+    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja']) and $alias_set != "PROSPEKTI") {
       $t[$i] = $t['luottoraja'];
     }
 

@@ -558,7 +558,10 @@ if (!function_exists("verkkolasku_in")) {
       $viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
       $viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
 
-      if ($laskuttajan_valkoodi != "") {
+      if ($yhtiorow['ostolaskujen_oletusvaluutta'] == 'T' and !empty($trow['oletus_valkoodi'])) {
+        $valkoodi = $trow['oletus_valkoodi'];
+      }
+      elseif ($laskuttajan_valkoodi != "") {
         $valkoodi = $laskuttajan_valkoodi;
       }
       elseif ($trow['oletus_valkoodi'] != '') {

@@ -47,21 +47,22 @@ echo "<tr><th>", t("Rajaa tuotteita"), "</th><td nowrap>";
 
 // selitetark   = n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
 // selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
-$query = "SELECT selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
+$query = "SELECT selite, selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
           FROM avainsana
           WHERE yhtio  = '$kukarow[yhtio]'
-          AND laji     = 'HAE_JA_SELAA'
+          AND laji     = 'INVLISTA_OSTRY'
           AND selite  != ''";
 $avainsana_result = pupe_query($query);
 $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-if (trim($avainsana_row['selitetark']) != '') {
-  $monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
+if (trim($avainsana_row['selite']) != '') {
 
-  if (trim($avainsana_row['selitetark_2'] != '')) {
-    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark_2']);
+  $monivalintalaatikot = explode(",", $avainsana_row['selite']);
+
+  if (trim($avainsana_row['selitetark'] != '')) {
+    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark']);
   }
   else {
     $monivalintalaatikot_normaali = array();
@@ -283,6 +284,18 @@ echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p‰iv‰m‰‰r‰n‰ tai
   <input type='text' name='ikka' value='$ikka' size='3'>
   <input type='text' name='ivva' value='$ivva' size='5'></td>
 </tr>";
+
+if ($yhtiorow['laaja_inventointilista'] != "") {
+  if (!isset($vapaa_teksti)) $vapaa_teksti = "";
+
+  echo "<tr>";
+  echo "<th>",t("Vapaa teksti"),"</th>";
+  echo "<td><textarea name='vapaa_teksti' rows='4'>{$vapaa_teksti}</textarea></td>";
+  echo "</tr>";
+}
+else {
+  echo "<input type='hidden' name='vapaa_teksti' value='' />";
+}
 
 $sel = (!empty($status) and $status == 'EI') ? "selected" : "";
 
@@ -571,6 +584,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               tuote.tuoteno
               FROM tuotepaikat
               JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' {$rajauslisatuote}
+              LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                  AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                  AND inventointilistarivi.tila = 'A')
               {$kutsujoinlisa}
               WHERE tuotepaikat.yhtio                       = '{$kukarow["yhtio"]}'
               and tuotepaikat.saldo                         <> 0
@@ -663,7 +679,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $select .= ", group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno ";
     $lefttoimi = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
   }
-  
+
   $_tuote_chk = (!empty($lisa) or !empty($toimittaja) or !empty($tuotemerkki));
   $_tuote_chk = ($_tuote_chk or (!empty($ahyllyalue) and !empty($lhyllyalue)) or (!empty($varasto)));
 
@@ -677,7 +693,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $yhtiotaulu = "tuote";
       $from     = " FROM tuote use index (osasto_try_index) ";
       $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno {$rajauslisa} {$invaamatta} {$extra} ";
-      $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+      $join2    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                       AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                       AND inventointilistarivi.tila = 'A')";
       $where    = " $lisa
@@ -694,12 +710,12 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuote";
         $from     = " FROM tuote use index (osasto_try_index) ";
         $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno {$rajauslisa} {$invaamatta} {$extra} ";
-        $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+        $join2    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                         AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                         AND inventointilistarivi.tila = 'A')";
         $where .= " AND inventointilistarivi.tunnus IS NULL";
       }
-      
+
       $where .= " and tuote.tuotemerkki = '$tuotemerkki' {$rajauslisatuote}";
     }
 
@@ -714,7 +730,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuotepaikat";
         $from     = " FROM tuotepaikat ";
         $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+        $join2    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                         AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                         AND inventointilistarivi.tila = 'A')";
         $where    = "  and concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso),5, '0')) >=
@@ -740,7 +756,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuotepaikat";
         $from     = " FROM tuotepaikat ";
         $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+        $join2    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                         AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                         AND inventointilistarivi.tila = 'A')";
         $where    = " AND inventointilistarivi.tunnus IS NULL $rajauslisa $invaamatta $extra ";
@@ -762,7 +778,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
         $join = " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno $rajauslisa $invaamatta $extra
                    JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $join    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+        $join2    .= " LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                         AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                         AND inventointilistarivi.tila = 'A')";
 
@@ -816,6 +832,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $query = "SELECT $select
               $from
               $join
+              $join2
               $lefttoimi
               WHERE $yhtiotaulu.yhtio  = '$kukarow[yhtio]'
               $where
@@ -1034,10 +1051,16 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     //rivinleveys default
     $rivinleveys = 137;
 
+    if ($yhtiorow['laaja_inventointilista'] != "") {
+      $kokonaissivumaara = ceil(mysql_num_rows($saldoresult) / 16);
+    }
+    else {
+      $kokonaissivumaara = ceil(mysql_num_rows($saldoresult) / 17);
+    }
+
     //haetaan inventointilista numero t‰ss‰ vaiheessa
     $query = "SELECT max(tunnus) listanro
-              FROM inventointilista
-              WHERE yhtio = '{$kukarow['yhtio']}'";
+              FROM inventointilista";
     $result = pupe_query($query);
     $lrow = mysql_fetch_assoc($result);
 
@@ -1055,19 +1078,40 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $excel_info .= $yhtiorow['nimi']."\n";
     $excel_info .= "$pp.$kk.$vv - $kello";
 
+    if ($yhtiorow['laaja_inventointilista'] != "") {
+      $excel_info .= "\n".t("Vapaa teksti").": {$vapaa_teksti}";
+      array_unshift($excelheaderit, "#");
+
+      $ots .= t("Vapaa teksti").": {$vapaa_teksti}\n\n";
+
+      $ots .= sprintf('%-5.5s', "#");
+    }
+
     $ots .= sprintf('%-18.14s',   t("Paikka"));
     $ots .= sprintf('%-21.21s',   t("Tuoteno"));
 
     // Ei n‰ytet‰ toim_tuotenumeroa, nimitys voi olla pidempi
     if ($piilotaToim_tuoteno == "") {
       $ots .= sprintf('%-21.21s',   t("Toim.Tuoteno"));
-      $ots .= sprintf('%-40.38s',   t("Nimitys"));
+
+      if ($yhtiorow['laaja_inventointilista'] != "") {
+        $ots .= sprintf('%-35.33s',   t("Nimitys"));
+      }
+      else {
+        $ots .= sprintf('%-40.38s',   t("Nimitys"));
+      }
 
       $excelheaderit[] = "toim.tuoteno";
       $excelheaderit[] = "nimitys";
     }
     else {
-      $ots .= sprintf('%-60.58s',   t("Nimitys"));
+
+      if ($yhtiorow['laaja_inventointilista'] != "") {
+        $ots .= sprintf('%-55.53s',   t("Nimitys"));
+      }
+      else {
+        $ots .= sprintf('%-60.58s',   t("Nimitys"));
+      }
 
       $excelheaderit[] = "nimitys";
     }
@@ -1092,10 +1136,20 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $ots .= sprintf('%-7.7s',    t("M‰‰r‰"));
     $ots .= sprintf('%-9.9s',     t("Yksikkˆ"));
     $ots .= sprintf('%-7.7s',     t("Tilkpl"));
-    $ots .= sprintf('%-13.13s',  t("Varattu/Ker"));
+
+    if ($yhtiorow['laaja_inventointilista'] != "") {
+      $ots .= sprintf('%-7.7s',  t("Var/Ker"));
+      $ots .= sprintf('%-5.5s', "  #");
+
+      $excelheaderit[] = "#";
+    }
+    else {
+      $ots .= sprintf('%-13.13s',  t("Varattu/Ker"));
+    }
+
     $ots .= "\n";
     $ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
-    fwrite($fh, str_replace("<SIVUNUMERO>", "1", $ots));
+    fwrite($fh, str_replace("<SIVUNUMERO>", "1 / {$kokonaissivumaara}", $ots));
     $ots = chr(12).$ots;
 
     // oma rivilaskuri excelille kun siin‰ ei vaihdeta sivua
@@ -1103,8 +1157,12 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $sivulaskuri = 1;
 
     if ($ei_inventointi == "") {
+
+      $_vapaa_teksti = mysql_real_escape_string($vapaa_teksti);
+
       $query = "INSERT INTO inventointilista SET
                 yhtio = '{$kukarow['yhtio']}',
+                vapaa_teksti = '{$_vapaa_teksti}',
                 naytamaara = '{$naytasaldo}',
                 muuttaja = '{$kukarow['kuka']}',
                 laatija = '{$kukarow['kuka']}',
@@ -1114,12 +1172,29 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $munresult = pupe_query($query, $GLOBALS["masterlink"]);
     }
 
+    $rivinro = 1;
+
+    if ($yhtiorow['laaja_inventointilista'] != "") {
+      $maxrivit = 17;
+    }
+    else {
+      $maxrivit = 18;
+    }
+
     while ($tuoterow = mysql_fetch_assoc($saldoresult)) {
 
       if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
       // Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
       if ($ei_inventointi == "") {
+
+        if ($yhtiorow['laaja_inventointilista'] != "") {
+          list($_saldo, $_hyllyssa, $_myytavissa) = saldo_myytavissa($tuoterow["tuoteno"], '', '', '', $tuoterow["hyllyalue"], $tuoterow["hyllynro"], $tuoterow["hyllyvali"], $tuoterow["hyllytaso"]);
+        }
+        else {
+          $_hyllyssa = 0;
+        }
+
         $query = "INSERT INTO inventointilistarivi SET
                   yhtio = '{$kukarow['yhtio']}',
                   tila = 'A',
@@ -1130,6 +1205,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   hyllynro = '{$tuoterow['hyllynro']}',
                   hyllyvali = '{$tuoterow['hyllyvali']}',
                   hyllytaso = '{$tuoterow['hyllytaso']}',
+                  rivinro = '{$rivinro}',
+                  hyllyssa = '{$_hyllyssa}',
+                  laskettu = '{$_hyllyssa}',
                   tuotepaikkatunnus = '{$tuoterow['tuotepaikkatunnus']}',
                   muuttaja = '{$kukarow['kuka']}',
                   laatija = '{$kukarow['kuka']}',
@@ -1138,9 +1216,9 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $munresult = pupe_query($query, $GLOBALS["masterlink"]);
       }
 
-      if ($rivit >= 18) {
+      if ($rivit >= $maxrivit) {
         $sivulaskuri++;
-        fwrite($fh, str_replace("<SIVUNUMERO>", $sivulaskuri, $ots));
+        fwrite($fh, str_replace("<SIVUNUMERO>", "{$sivulaskuri} / {$kokonaissivumaara}", $ots));
         $rivit = 1;
       }
 
@@ -1200,6 +1278,11 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       if ($rivit > 1) $prn .= "\n";
 
+      if ($yhtiorow['laaja_inventointilista'] != "") {
+        $prn .= sprintf('%-5.5s', $rivinro);
+        $excelrivit[$xr]['rivinro'] =  $rivinro;
+      }
+
       $prn .= sprintf('%-18.14s',   $tuoterow["varastopaikka"]);
       $excelrivit[$xr]['varastopaikka'] =  $tuoterow["varastopaikka"];
 
@@ -1211,12 +1294,25 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $prn .= sprintf('%-21.21s',   $tuoterow["toim_tuoteno"]);
         $excelrivit[$xr]['toim_tuoteno'] =  $tuoterow["toim_tuoteno"];
 
-        $prn .= sprintf('%-40.38s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        if ($yhtiorow['laaja_inventointilista'] != "") {
+          $prn .= sprintf('%-35.33s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        }
+        else {
+          $prn .= sprintf('%-40.38s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        }
+
         $excelrivit[$xr]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
       else {
-        // Jos toim_tuoteno ei nn‰ytet‰, t‰m‰ voi olla pidempi
-        $prn .= sprintf('%-60.58s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+
+        if ($yhtiorow['laaja_inventointilista'] != "") {
+          $prn .= sprintf('%-55.53s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        }
+        else {
+          // Jos toim_tuoteno ei nn‰ytet‰, t‰m‰ voi olla pidempi
+          $prn .= sprintf('%-60.58s',   t_tuotteen_avainsanat($tuoterow, 'nimitys'));
+        }
+
         $excelrivit[$xr]['nimitys'] =  t_tuotteen_avainsanat($tuoterow, 'nimitys');
       }
 
@@ -1279,7 +1375,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $hylrow['ennpois'] = fmod($hylrow['ennpois'], 1) == 0 ? round($hylrow['ennpois']) : $hylrow['ennpois'];
       $hylrow['keratty'] = fmod($hylrow['keratty'], 1) == 0 ? round($hylrow['keratty']) : $hylrow['keratty'];
 
-      $prn .= sprintf('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
+      if ($yhtiorow['laaja_inventointilista'] != "") {
+        $prn .= sprintf('%-7.7s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
+        $prn .= sprintf('%-5.5s', $rivinro);
+      }
+      else {
+        $prn .= sprintf('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
+      }
+
       $excelrivit[$xr]['varattu/ker'] = "{$hylrow['ennpois']}/{$hylrow['keratty']}";
 
       if ($tuoterow["sarjanumeroseuranta"] != "") {
@@ -1343,7 +1446,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
             $prn .= sprintf('%-42.42s', $sarjarow["sarjanumero"]);
             $prn .= sprintf('%-74.74s', $sarjarow["nimitys"].$fnlina22);
 
-            if ($rivit >= 18) {
+            if ($rivit >= $maxrivit) {
               fwrite($fh, $ots);
               $rivit = 1;
             }
@@ -1357,6 +1460,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       fwrite($fh, $prn);
       $rivit++;
       $xr++;
+      $rivinro++;
     }
 
     fclose($fh);
@@ -1399,9 +1503,24 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $excelsarake = 0;
 
         foreach ($excelrivit as $key => $value) {
-          foreach ($excelrivit[$key] as $value) {
+
+          if ($yhtiorow['laaja_inventointilista'] != "") {
+            $worksheet->writeString($excelrivi, 0, $excelrivit[$key]['rivinro']);
+            $excelsarake = 1;
+          }
+
+          foreach ($excelrivit[$key] as $_k => $value) {
+            if ($yhtiorow['laaja_inventointilista'] != "" and $_k == 'rivinro') {
+              continue;
+            }
+
             $worksheet->writeString($excelrivi, $excelsarake++, $value);
           }
+
+          if ($yhtiorow['laaja_inventointilista'] != "") {
+            $worksheet->writeString($excelrivi, $excelsarake, $excelrivit[$key]['rivinro']);
+          }
+
           $excelrivi++;
           $excelsarake = 0;
         }

@@ -133,7 +133,7 @@ if ($laskun_tyyppi == "INV02") {
 $tuotetiedot = $xml->InvoiceRow;
 $i = 0;
 $rtuoteno = array();
-$ealvi = array("");
+$ealvi = array();
 $lisavat = array("");
 $laskun_rahtikulu = 0;
 $osto_kulu = 0;
@@ -178,8 +178,10 @@ if (count($tuotetiedot) > 0) {
       // Tämä pitää olla stringi (?!?), koska sitä käsittellään niin verkkolasku-in.incissä
       $xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
-      $rtuoteno[$i]["alv"] = $xvati;
-      $ealvi[$i] = $xvati;
+      if (!empty($xvati)) {
+        $rtuoteno[$i]["alv"] = $xvati;
+        $ealvi[$i]           = $xvati;
+      }
 
       $rtuoteno[$i]["ale"] = xml_float($tuotetieto->RowDiscountPercent);
       $rtuoteno[$i]["hinta"] = round(xml_float($tuotetieto->UnitPriceAmount), 2);

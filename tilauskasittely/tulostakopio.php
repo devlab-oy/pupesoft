@@ -15,22 +15,22 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-if (!isset($logistiikka_yhtio))   $logistiikka_yhtio = "";
+if (!isset($logistiikka_yhtio)) $logistiikka_yhtio = "";
 if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
-if (!isset($asiakasid))       $asiakasid = "";
-if (!isset($toimittajaid))       $toimittajaid = "";
-if (!isset($tee))           $tee = "";
-if (!isset($laskunro))         $laskunro = "";
-if (!isset($ytunnus))         $ytunnus = "";
-if (!isset($lopetus))         $lopetus = "";
-if (!isset($toim) or $toim == "")   $toim = "LASKU";
+if (!isset($asiakasid)) $asiakasid = "";
+if (!isset($toimittajaid)) $toimittajaid = "";
+if (!isset($tee)) $tee = "";
+if (!isset($laskunro)) $laskunro = "";
+if (!isset($ytunnus)) $ytunnus = "";
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($toim) or $toim == "") $toim = "LASKU";
 if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];
-if (!isset($tila))           $tila = "";
-if (!isset($tunnus))         $tunnus = "";
-if (!isset($laskunroloppu))     $laskunroloppu = "";
-if (!isset($kerayseran_numero))   $kerayseran_numero = "";
-if (!isset($kerayseran_tilaukset))   $kerayseran_tilaukset = "";
-if (!isset($toimipaikka))      $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+if (!isset($tila)) $tila = "";
+if (!isset($tunnus)) $tunnus = "";
+if (!isset($laskunroloppu)) $laskunroloppu = "";
+if (!isset($kerayseran_numero)) $kerayseran_numero = "";
+if (!isset($kerayseran_tilaukset)) $kerayseran_tilaukset = "";
+if (!isset($toimipaikka)) $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
@@ -696,7 +696,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_tapvm) ";
   }
 
-  if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD"))) {
     //myyntitilaus. Tulostetaan lähete.
     $where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -917,7 +917,7 @@ if ($tee == "ETSILASKU") {
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
-    if ($larow["laskunro"] > 0 and $toim != 'DGD') {
+    if ($larow["laskunro"] > 0 and $toim != "DGD") {
       $where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
       $where3 = "";
@@ -1948,6 +1948,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     if ($toim == "DGD") {
 
+      $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
+                FROM rahtikirjat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND rahtikirjanro = (SELECT rahtikirjanro
+                                     FROM rahtikirjat
+                                     WHERE yhtio    = '{$kukarow["yhtio"]}'
+                                     AND otsikkonro = '{$laskurow["tunnus"]}')";
+      $rahti_result = pupe_query($query);
+
+      $tunnukset = mysql_fetch_assoc($rahti_result);
+      $tunnukset = $tunnukset["tunnukset"];
+
       require_once "tilauskasittely/tulosta_dgd.inc";
 
       $params_dgd = array(
@@ -1960,7 +1972,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'tee'      => $tee,
         'toim'      => $toim,
         'norm'      => $norm,
-        'otunnukset'  => $laskurow['tunnus'],
+        'otunnukset' => $tunnukset,
       );
 
       // Aloitellaan DGD:n teko

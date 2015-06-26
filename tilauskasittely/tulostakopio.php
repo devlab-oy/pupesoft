@@ -15,22 +15,22 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-if (!isset($logistiikka_yhtio))   $logistiikka_yhtio = "";
+if (!isset($logistiikka_yhtio)) $logistiikka_yhtio = "";
 if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
-if (!isset($asiakasid))       $asiakasid = "";
-if (!isset($toimittajaid))       $toimittajaid = "";
-if (!isset($tee))           $tee = "";
-if (!isset($laskunro))         $laskunro = "";
-if (!isset($ytunnus))         $ytunnus = "";
-if (!isset($lopetus))         $lopetus = "";
-if (!isset($toim) or $toim == "")   $toim = "LASKU";
+if (!isset($asiakasid)) $asiakasid = "";
+if (!isset($toimittajaid)) $toimittajaid = "";
+if (!isset($tee)) $tee = "";
+if (!isset($laskunro)) $laskunro = "";
+if (!isset($ytunnus)) $ytunnus = "";
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($toim) or $toim == "") $toim = "LASKU";
 if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];
-if (!isset($tila))           $tila = "";
-if (!isset($tunnus))         $tunnus = "";
-if (!isset($laskunroloppu))     $laskunroloppu = "";
-if (!isset($kerayseran_numero))   $kerayseran_numero = "";
-if (!isset($kerayseran_tilaukset))   $kerayseran_tilaukset = "";
-if (!isset($toimipaikka))      $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+if (!isset($tila)) $tila = "";
+if (!isset($tunnus)) $tunnus = "";
+if (!isset($laskunroloppu)) $laskunroloppu = "";
+if (!isset($kerayseran_numero)) $kerayseran_numero = "";
+if (!isset($kerayseran_tilaukset)) $kerayseran_tilaukset = "";
+if (!isset($toimipaikka)) $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
@@ -140,9 +140,6 @@ if ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
 }
 if ($toim == "DGD") {
   $fuse = "DGD - Multimodal Dangerous Goods Form";
-}
-if ($toim == "KOONTIDGD") {
-  $fuse = "Koonti-DGD - Multimodal Dangerous Goods Form";
 }
 if ($toim == "PAKKALISTA") {
   //  Tämä on about yhdistetty vienti-erittely ja lähete
@@ -681,7 +678,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_tapvm) ";
   }
 
-  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD", "KOONTIDGD"))) {
+  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD"))) {
     //myyntitilaus. Tulostetaan lähete.
     $where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -902,7 +899,7 @@ if ($tee == "ETSILASKU") {
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
-    if ($larow["laskunro"] > 0 and !in_array($toim, array("DGD", "KOONTIDGD"))) {
+    if ($larow["laskunro"] > 0 and $toim != "DGD") {
       $where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
       $where3 = "";
@@ -952,7 +949,7 @@ if ($tee == "ETSILASKU") {
     $where4 = " and lasku.tila != 'D' ";
   }
 
-  if (in_array($toim, array("DGD", "KOONTIDGD"))) {
+  if ($toim == "DGD") {
     $joinlisa = "JOIN rahtikirjat ON (rahtikirjat.yhtio = lasku.yhtio and rahtikirjat.otsikkonro=lasku.tunnus)";
   }
 
@@ -1278,7 +1275,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "LAHETE" or $toim == "KOONTILAHETE") {
     $tulostimet[0] = 'Lähete';
   }
-  elseif (in_array($toim, array("DGD", "KOONTIDGD"))) {
+  elseif ($toim == "DGD") {
     $tulostimet[0] = 'DGD';
   }
   elseif ($toim == "PAKKALISTA") {
@@ -1931,25 +1928,19 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tee = '';
     }
 
-    if (in_array($toim, array("DGD", "KOONTIDGD"))) {
+    if ($toim == "DGD") {
 
-      if ($toim == "KOONTIDGD") {
-        $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
-                  FROM rahtikirjat
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND rahtikirjanro = (SELECT rahtikirjanro
-                                       FROM rahtikirjat
-                                       WHERE yhtio    = '{$kukarow["yhtio"]}'
-                                       AND otsikkonro = '{$laskurow["tunnus"]}')";
+      $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
+                FROM rahtikirjat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND rahtikirjanro = (SELECT rahtikirjanro
+                                     FROM rahtikirjat
+                                     WHERE yhtio    = '{$kukarow["yhtio"]}'
+                                     AND otsikkonro = '{$laskurow["tunnus"]}')";
+      $rahti_result = pupe_query($query);
 
-        $rahti_result = pupe_query($query);
-
-        $tunnukset = mysql_fetch_assoc($rahti_result);
-        $tunnukset = $tunnukset["tunnukset"];
-      }
-      else {
-        $tunnukset = $laskurow["tunnus"];
-      }
+      $tunnukset = mysql_fetch_assoc($rahti_result);
+      $tunnukset = $tunnukset["tunnukset"];
 
       require_once "tilauskasittely/tulosta_dgd.inc";
 

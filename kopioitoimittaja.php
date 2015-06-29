@@ -120,7 +120,7 @@ if ($tee == "edit") {
 if ($tee == '') {
 
   $kentat = 'tunnus, ytunnus, nimi, postitp, maa, oletus_valkoodi';
-  $jarjestys = 'selaus';
+  $jarjestys = 'nimi';
 
   $array = explode(",", $kentat);
   $count = count($array);

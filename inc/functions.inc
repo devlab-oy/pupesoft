@@ -30396,6 +30396,27 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   }
 }
 
+if (!function_exists("poista_osakeyhtio_lyhenne_mysql")) {
+  function poista_osakeyhtio_lyhenne_mysql($kentta = "nimi") {
+    return "TRIM(
+              REPLACE(
+                REPLACE(
+                  REPLACE(
+                    REPLACE(
+                      REPLACE(
+                        REPLACE(
+                          REPLACE(
+                            REPLACE(LOWER({$kentta}), 'oy', ''),
+                          'ab', ''),
+                        'as', ''),
+                      'oü', ''),
+                    'ou', ''),
+                  'mtü', ''),
+                'tü', ''),
+              'ttü', ''))";
+  }
+}
+
 if (!function_exists("rakenna_relex_tuote_parametrit")) {
   function rakenna_relex_tuote_parametrit() {
     global $yhtiorow, $kukarow;

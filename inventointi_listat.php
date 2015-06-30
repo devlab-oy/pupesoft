@@ -47,22 +47,22 @@ echo "<tr><th>", t("Rajaa tuotteita"), "</th><td nowrap>";
 
 // selitetark   = n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
 // selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
-$query = "SELECT selite, selitetark, REPLACE(selitetark_2, ', ', ',') selitetark_2
+$query = "SELECT selite, selitetark, selitetark_2
           FROM avainsana
           WHERE yhtio  = '$kukarow[yhtio]'
           AND laji     = 'INVLISTA_OSTRY'
-          AND selite  != ''";
+          AND selitetark  != ''";
 $avainsana_result = pupe_query($query);
 $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
 // Monivalintalaatikot (osasto, try tuotemerkki...)
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-if (trim($avainsana_row['selite']) != '') {
+if (trim($avainsana_row['selitetark']) != '') {
 
-  $monivalintalaatikot = explode(",", $avainsana_row['selite']);
+  $monivalintalaatikot = explode(",", $avainsana_row['selitetark']);
 
-  if (trim($avainsana_row['selitetark'] != '')) {
-    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark']);
+  if (trim($avainsana_row['selitetark_2'] != '')) {
+    $monivalintalaatikot_normaali = explode(",", $avainsana_row['selitetark_2']);
   }
   else {
     $monivalintalaatikot_normaali = array();

@@ -1522,8 +1522,8 @@ elseif ($tee == "") {
             WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
             AND tuoteperhe.tyyppi = '{$hakutyyppi}'
             {$lisa1}
-            ORDER BY tuoteperhe.isatuoteno
-            {$lisalimit}
+            ORDER BY {$lisalimit}
+            tuoteperhe.isatuoteno
             {$limitteri}";
   }
   else {

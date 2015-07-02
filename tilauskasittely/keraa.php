@@ -1218,7 +1218,26 @@ if ($tee == 'P') {
 
               if (!isset($pakkaukset[$monesko]['sscc'])) {
                 $pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
-                $pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
+
+                if (!empty($yhtiorow['ean'])) {
+                  $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$otsikkorivi['toimitustapa']}'", "", "", "selitetark");
+
+                  if ($_selitetark == '') {
+                    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+                  }
+
+                  if ($_selitetark != '') {
+                    $expansioncode = $_selitetark;
+
+                    $pakkaukset[$monesko]['sscc_ulkoinen'] = gs1_sscc($expansioncode, $pakkaukset[$monesko]['sscc'], $monesko);
+                  }
+                  else {
+                    $pakkaukset[$monesko]['sscc_ulkoinen'] = $pakkaukset[$monesko]['sscc'];
+                  }
+                }
+                else {
+                  $pakkaukset[$monesko]['sscc_ulkoinen'] = $pakkaukset[$monesko]['sscc'];
+                }
               }
             }
 

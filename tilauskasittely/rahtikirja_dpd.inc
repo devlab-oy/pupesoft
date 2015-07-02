@@ -131,25 +131,46 @@ if ($kollityht > 0) {
 
   //$tulostakolli = 1; // tulostetaan aina yksi kappale???miks???
 
+  $kuljetusliike_sscc = false;
+  $expansion_code = "";
+
+  if (!empty($yhtiorow['ean'])) {
+    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+    if ($_selitetark == '') {
+      $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+    }
+
+    if ($_selitetark != '') {
+      $expansioncode = $_selitetark;
+      $kuljetusliike_sscc = true;
+    }
+  }
+
   $tulostakolli = $kollityht;
 
   for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
-    // tehdään SSCC :
-    // (00)
-    // 1
-    // ytunnus (8)
-    // lähetenro (6)
-    // kollityht (2)
-    // tarkiste (1)
+    if ($kuljetusliike_sscc) {
+      $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
+    }
+    else {
+      // tehdään SSCC :
+      // (00)
+      // 1
+      // ytunnus (8)
+      // lähetenro (6)
+      // kollityht (2)
+      // tarkiste (1)
 
-    //$prefix = "(00)"; // tää on turha
-    $sscc = 1;
-    $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
-    $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
-    $sscc .= sprintf('%02.2s', $tulostuskpl);
-    $loppu = tarkiste($sscc);
-    $sscc = $sscc.$loppu;
+      //$prefix = "(00)"; // tää on turha
+      $sscc = 1;
+      $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
+      $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+      $sscc .= sprintf('%02.2s', $tulostuskpl);
+      $loppu = tarkiste($sscc);
+      $sscc = $sscc.$loppu;
+    }
 
     // tehdään pdf:n uusi sivu
     $firstpage = $pdf->new_page("a5");

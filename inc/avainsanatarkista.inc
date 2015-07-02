@@ -260,7 +260,9 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
-    if (in_array(strtoupper($tem_laji), array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA"))) {
+    $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA");
+
+    if (in_array(strtoupper($tem_laji), $_arr)) {
       if (mysql_field_name($result, $i) == "selite") {
         $selite = trim($tem_selite);
 

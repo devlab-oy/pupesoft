@@ -81,11 +81,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
 
   $viiva2   = "JJFI $toitarow[sopimusnro] $kuka$oma";
+  $viivatark = "JJFI $toitarow[sopimusnro] $kuka";
   $v2_alku  = substr($viiva2, 0, -6);
   $v2_loppu = substr($viiva2, -6);
 
   // erotellaan spacella jokainen rahtikirjanumero
-  $rahtikirjanro .= "$viiva2 ";
+  if (strpos($rahtikirjanro, $viivatark) === FALSE)  {
+    $rahtikirjanro .= "$viiva2 ";
+  }
 
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");

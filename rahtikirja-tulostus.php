@@ -899,7 +899,7 @@ if ($tee == 'tulosta') {
         }
 
         // Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
-        if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
+        if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
           $query = "UPDATE rahtikirjat
                     set rahtikirjanro = '$rahtikirjanro'
                     where tunnus in ($tunnukset)

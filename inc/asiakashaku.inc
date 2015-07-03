@@ -102,6 +102,8 @@ elseif ($ytunnus != '') {
                   if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                 AND asiakas.tunnus = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
                and lasku.tunnus = '$ytunnus'";
     $result = pupe_query($query);
@@ -122,7 +124,9 @@ elseif ($ytunnus != '') {
                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                   if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku use index (asiakasnimi)
-               JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN yhtio on lasku.yhtio = yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
                and lasku.tila != 'D'
                and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)

@@ -856,10 +856,10 @@ if ((int) $kukarow["kesken"] > 0) {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
   }
 
-  # Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
-  # Ja tilaustyyppi ei ole takuu
-  # Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
-  # Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
+  // Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+  // Ja tilaustyyppi ei ole takuu
+  // Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+  // Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
   if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
     $yhtiorow['reklamaation_kasittely'] = '';
   }
@@ -2223,10 +2223,10 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   $kaytiin_otsikolla = "NOJOO!";
 }
 
-# Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
-# Ja tilaustyyppi ei ole takuu
-# Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
-# Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
+// Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+// Ja tilaustyyppi ei ole takuu
+// Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+// Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
 if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
   $yhtiorow['reklamaation_kasittely'] = '';
 }
@@ -7470,7 +7470,7 @@ if ($tee == '') {
               }
             }
 
-            if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T', 'U'))) {
+            if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T'))) {
               $query  = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
                          FROM sarjanumeroseuranta
                          WHERE yhtio          = '$kukarow[yhtio]'
@@ -7558,7 +7558,7 @@ if ($tee == '') {
         }
 
         // Näytetäänkö sarjanumerolinkki
-        if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
+        if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "V" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
 
           if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
             $tunken1 = "siirtorivitunnus";
@@ -7637,7 +7637,7 @@ if ($tee == '') {
             }
           }
           else {
-            if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
+            if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "V") {
               $query = "SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
                         FROM sarjanumeroseuranta
                         where yhtio = '$kukarow[yhtio]'
@@ -8759,7 +8759,7 @@ if ($tee == '') {
             $rivikate     = 0;  // Rivin kate yhtiön valuutassa
             $rivikate_eieri  = 0;  // Rivin kate yhtiön valuutassa ilman erikoisalennusta
 
-            if ($arow["sarjanumeroseuranta"] == "S" or $arow["sarjanumeroseuranta"] == "U") {
+            if ($arow["sarjanumeroseuranta"] == "S") {
               //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
               if ($arow["varattu"] > 0) {
                 //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
@@ -9652,10 +9652,10 @@ if ($tee == '') {
   // Voidaanko myydä kassamyyntinä:
   $_kassamyyntiok = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
     or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
-      or ($toim == 'REKLAMAATIO'
-        and ($yhtiorow['reklamaation_kasittely'] == ''
-          or ($yhtiorow['reklamaation_kasittely'] == 'X'
-            and $laskurow['tilaustyyppi'] == 'U'))));
+    or ($toim == 'REKLAMAATIO'
+      and ($yhtiorow['reklamaation_kasittely'] == ''
+        or ($yhtiorow['reklamaation_kasittely'] == 'X'
+          and $laskurow['tilaustyyppi'] == 'U'))));
 
   // Jos tilausta ei voida hoitaa kassamyyntinä, niin ei voi myöskään laskuttaa maksupäätteellä
   if (!$_kassamyyntiok) $maksupaate_kassamyynti = FALSE;
@@ -9663,13 +9663,13 @@ if ($tee == '') {
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
     if ($maksupaate_kassamyynti and
-        $_kassamyyntiok and
-        $maksuehtorow["kateinen"] != "" and
-        $muokkauslukko == "" and
-        $laskurow["liitostunnus"] != 0 and
-        $tilausok == 0 and
-        $rivilaskuri > 0 and
-        $asiakasOnProspekti != "JOO"
+      $_kassamyyntiok and
+      $maksuehtorow["kateinen"] != "" and
+      $muokkauslukko == "" and
+      $laskurow["liitostunnus"] != 0 and
+      $tilausok == 0 and
+      $rivilaskuri > 0 and
+      $asiakasOnProspekti != "JOO"
     ) {
       $kateinen = isset($kateinen) ? $kateinen : "";
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;

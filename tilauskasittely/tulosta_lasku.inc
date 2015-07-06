@@ -317,32 +317,32 @@ if (!function_exists('alku')) {
     }
     elseif ($laskutyyppi == 20) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Aiotut rajatoimipaikat (ja maat)", $kieli),
-                            $page_lasku[$sivu], $pieni);
+        $page_lasku[$sivu], $pieni);
       $pdf_lasku->draw_text(430,
-                            $arvo[$rivi_ind],
-                            t_avainsana("RAJATOIMIPAIKAT",
-                                        $kieli,
-                                        "AND avainsana.selite = '{$laskurow["aiotut_rajatoimipaikat"]}'",
-                                        "",
-                                        "",
-                                        "selitetark"),
-                            $page_lasku[$sivu],
-                            $norm);
+        $arvo[$rivi_ind],
+        t_avainsana("RAJATOIMIPAIKAT",
+          $kieli,
+          "AND avainsana.selite = '{$laskurow["aiotut_rajatoimipaikat"]}'",
+          "",
+          "",
+          "selitetark"),
+        $page_lasku[$sivu],
+        $norm);
 
       $rivi_ind++;
 
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Määrätoimipaikka (ja maa)", $kieli),
-                            $page_lasku[$sivu], $pieni);
+        $page_lasku[$sivu], $pieni);
       $pdf_lasku->draw_text(430,
-                            $arvo[$rivi_ind],
-                            t_avainsana("MAARATOIMPAIKKA",
-                                        $kieli,
-                                        "AND avainsana.selite = '{$laskurow["maaratoimipaikka"]}'",
-                                        "",
-                                        "",
-                                        "selitetark"),
-                            $page_lasku[$sivu],
-                            $norm);
+        $arvo[$rivi_ind],
+        t_avainsana("MAARATOIMPAIKKA",
+          $kieli,
+          "AND avainsana.selite = '{$laskurow["maaratoimipaikka"]}'",
+          "",
+          "",
+          "selitetark"),
+        $page_lasku[$sivu],
+        $norm);
 
       $rivi_ind++;
     }
@@ -429,20 +429,20 @@ if (!function_exists('alku')) {
       $lahetysmaa = $lahetysmaa["nimi"];
 
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Lähetys-/Vientimaa", $kieli),
-                            $page_lasku[$sivu], $pieni);
+        $page_lasku[$sivu], $pieni);
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $lahetysmaa, $page_lasku[$sivu], $norm);
 
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Poistumistoimipaikka", $kieli),
-                            $page_lasku[$sivu], $pieni);
+        $page_lasku[$sivu], $pieni);
       $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["poistumistoimipaikka"],
-                            $page_lasku[$sivu], $norm);
+        $page_lasku[$sivu], $norm);
     }
     else {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), $page_lasku[$sivu],
-                            $pieni);
+        $pieni);
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
-                            pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
-                            $page_lasku[$sivu], $norm);
+        pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
+        $page_lasku[$sivu], $norm);
     }
     $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 
@@ -1820,12 +1820,12 @@ if (!function_exists('loppu')) {
 
     if ($laskutyyppi == 20) {
       $pdf_lasku->draw_rectangle(130 + $vientikala + $barcode_korkeus, 207,
-                                 110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+        110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
       $pdf_lasku->draw_text(217, 122 + $vientikala + $barcode_korkeus, t("Lisätietoja", $kieli),
-                            $thispage, $pieni);
+        $thispage, $pieni);
       $pdf_lasku->draw_text(217, 112 + $vientikala + $barcode_korkeus,
-                            pdf_substr($laskurow["comments"], 363, $pdf_lasku, $norm), $thispage,
-                            $norm);
+        pdf_substr($laskurow["comments"], 363, $pdf_lasku, $norm), $thispage,
+        $norm);
     }
 
     if (!kyseessa_eramaksu($laskurow)) {

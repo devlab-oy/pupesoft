@@ -841,10 +841,10 @@ if ((int) $kukarow["kesken"] > 0) {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
   }
 
-  # Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
-  # Ja tilaustyyppi ei ole takuu
-  # Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
-  # Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
+  // Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+  // Ja tilaustyyppi ei ole takuu
+  // Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+  // Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
   if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
     $yhtiorow['reklamaation_kasittely'] = '';
   }
@@ -2208,10 +2208,10 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   $kaytiin_otsikolla = "NOJOO!";
 }
 
-# Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
-# Ja tilaustyyppi ei ole takuu
-# Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
-# Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
+// Jos käytössä "semi laaja"-reklamaatiokäsittely (X)
+// Ja tilaustyyppi ei ole takuu
+// Ja ohitetaan varastoprosessi eli "suoraan laskutukseen" (eilahetetta != '')
+// Halutaan tällöin simuloida lyhyttä reklamaatioprosessia
 if ($toim == "REKLAMAATIO" and $laskurow['eilahetetta'] != '' and $yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U') {
   $yhtiorow['reklamaation_kasittely'] = '';
 }
@@ -9598,10 +9598,10 @@ if ($tee == '') {
   // Voidaanko myydä kassamyyntinä:
   $_kassamyyntiok = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
     or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
-      or ($toim == 'REKLAMAATIO'
-        and ($yhtiorow['reklamaation_kasittely'] == ''
-          or ($yhtiorow['reklamaation_kasittely'] == 'X'
-            and $laskurow['tilaustyyppi'] == 'U'))));
+    or ($toim == 'REKLAMAATIO'
+      and ($yhtiorow['reklamaation_kasittely'] == ''
+        or ($yhtiorow['reklamaation_kasittely'] == 'X'
+          and $laskurow['tilaustyyppi'] == 'U'))));
 
   // Jos tilausta ei voida hoitaa kassamyyntinä, niin ei voi myöskään laskuttaa maksupäätteellä
   if (!$_kassamyyntiok) $maksupaate_kassamyynti = FALSE;
@@ -9609,13 +9609,13 @@ if ($tee == '') {
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
     if ($maksupaate_kassamyynti and
-        $_kassamyyntiok and
-        $maksuehtorow["kateinen"] != "" and
-        $muokkauslukko == "" and
-        $laskurow["liitostunnus"] != 0 and
-        $tilausok == 0 and
-        $rivilaskuri > 0 and
-        $asiakasOnProspekti != "JOO"
+      $_kassamyyntiok and
+      $maksuehtorow["kateinen"] != "" and
+      $muokkauslukko == "" and
+      $laskurow["liitostunnus"] != 0 and
+      $tilausok == 0 and
+      $rivilaskuri > 0 and
+      $asiakasOnProspekti != "JOO"
     ) {
       $kateinen = isset($kateinen) ? $kateinen : "";
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;

@@ -2911,8 +2911,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       //jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
       $query = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                 FROM tuotepaikat
-                where tuotepaikat.yhtio = '$kukarow[yhtio]'
-                and tuotepaikat.tuoteno = '$trow[tuoteno]'
+                where tuotepaikat.yhtio    = '$kukarow[yhtio]'
+                and tuotepaikat.tuoteno    = '$trow[tuoteno]'
                 AND tuotepaikat.hyllyalue != '!!M'
                 ORDER BY tuotepaikat.oletus DESC";
       $result = pupe_query($query);

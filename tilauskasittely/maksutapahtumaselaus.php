@@ -33,7 +33,7 @@ function piirra_hakuformi($rajaus) {
 
   echo "<tr>";
   echo "<th><label for='rajaus_alku_paiva'>" . t("Syötä alkupäivämäärä") .
-       " (Pp-Kk-Vvvv)</label></th>";
+    " (Pp-Kk-Vvvv)</label></th>";
   echo "<td>";
   echo "<input type='number'
                name='rajaus[alku][paiva]'
@@ -61,7 +61,7 @@ function piirra_hakuformi($rajaus) {
 
   echo "<tr>";
   echo "<th><label for='rajaus_loppu_paiva'>" . t("Syötä loppupäivämäärä") .
-       " (Pp-Kk-Vvvv)</label></th>";
+    " (Pp-Kk-Vvvv)</label></th>";
   echo "<td>";
   echo "<input type='number'
                name='rajaus[loppu][paiva]'
@@ -119,20 +119,20 @@ function hae_tilaukset($rajaus) {
             myyntilasku.tunnus AS myyntilaskun_tunnus
             FROM lasku
             INNER JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              AND maksuehto.tunnus = lasku.maksuehto)
+              AND maksuehto.tunnus      = lasku.maksuehto)
             INNER JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus)
+              AND asiakas.tunnus        = lasku.liitostunnus)
             INNER JOIN kuka ON (kuka.yhtio = lasku.yhtio
-              AND kuka.tunnus = lasku.myyja)
+              AND kuka.tunnus           = lasku.myyja)
             INNER JOIN lasku AS myyntilasku ON (myyntilasku.yhtio = lasku.yhtio
-              AND myyntilasku.laskunro = lasku.laskunro
-              AND myyntilasku.tila = 'U'
-              AND myyntilasku.alatila = 'X')
-            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND lasku.tila = 'L'
-            AND lasku.alatila = 'X'
+              AND myyntilasku.laskunro  = lasku.laskunro
+              AND myyntilasku.tila      = 'U'
+              AND myyntilasku.alatila   = 'X')
+            WHERE lasku.yhtio           = '{$kukarow["yhtio"]}'
+            AND lasku.tila              = 'L'
+            AND lasku.alatila           = 'X'
             AND DATE(lasku.laskutettu) BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
-            AND maksuehto.kateinen != ''
+            AND maksuehto.kateinen     != ''
             ORDER BY lasku.laskutettu DESC
             LIMIT {$rajaus["limit"]}";
 
@@ -183,13 +183,13 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   while ($tilaus = mysql_fetch_assoc($tilaukset)) {
     $tilaus["summa"] = number_format($tilaus["summa"], $yhtiorow["hintapyoristys"], ",", " ");
     $lopetus = "{$palvelin2}tilauskasittely/maksutapahtumaselaus.php////" .
-               "rajaus[alku][paiva]={$rajaus["alku"]["paiva"]}//" .
-               "rajaus[alku][kuukausi]={$rajaus["alku"]["kuukausi"]}//" .
-               "rajaus[alku][vuosi]={$rajaus["alku"]["vuosi"]}//" .
-               "rajaus[loppu][paiva]={$rajaus["loppu"]["paiva"]}//" .
-               "rajaus[loppu][kuukausi]={$rajaus["loppu"]["kuukausi"]}//" .
-               "rajaus[loppu][vuosi]={$rajaus["loppu"]["vuosi"]}//" .
-               "rajaus[limit]={$rajaus["limit"]}";
+      "rajaus[alku][paiva]={$rajaus["alku"]["paiva"]}//" .
+      "rajaus[alku][kuukausi]={$rajaus["alku"]["kuukausi"]}//" .
+      "rajaus[alku][vuosi]={$rajaus["alku"]["vuosi"]}//" .
+      "rajaus[loppu][paiva]={$rajaus["loppu"]["paiva"]}//" .
+      "rajaus[loppu][kuukausi]={$rajaus["loppu"]["kuukausi"]}//" .
+      "rajaus[loppu][vuosi]={$rajaus["loppu"]["vuosi"]}//" .
+      "rajaus[limit]={$rajaus["limit"]}";
 
     echo "<tr>";
     echo "<td class='text-right'>{$tilaus["laskunro"]}</td>";
@@ -262,8 +262,8 @@ function kasittele_rajaus($rajaus) {
   if (!$rajaus["alku"]["paiva"]) $rajaus["alku"]["paiva"] = date("d", $kuukausi_sitten);
 
   $alku = strtotime("{$rajaus["alku"]["vuosi"]}-" .
-                    "{$rajaus["alku"]["kuukausi"]}-" .
-                    "{$rajaus["alku"]["paiva"]}");
+    "{$rajaus["alku"]["kuukausi"]}-" .
+    "{$rajaus["alku"]["paiva"]}");
   $rajaus["alku"]["pvm"] = date("Y-m-d", $alku);
 
   if (!$rajaus["loppu"]["vuosi"]) $rajaus["loppu"]["vuosi"] = date("Y");
@@ -271,8 +271,8 @@ function kasittele_rajaus($rajaus) {
   if (!$rajaus["loppu"]["paiva"]) $rajaus["loppu"]["paiva"] = date("d");
 
   $loppu = strtotime("{$rajaus["loppu"]["vuosi"]}-" .
-                     "{$rajaus["loppu"]["kuukausi"]}-" .
-                     "{$rajaus["loppu"]["paiva"]}");
+    "{$rajaus["loppu"]["kuukausi"]}-" .
+    "{$rajaus["loppu"]["paiva"]}");
   $rajaus["loppu"]["pvm"] = date("Y-m-d", $loppu);
 
   if (!$rajaus["limit"]) $rajaus["limit"] = 50;

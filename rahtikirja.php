@@ -811,7 +811,7 @@ if ($tee == 'add') {
 
       // tämä toimitustapa pitäisi tulostaa nyt..
       if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or
-         ($row['tulostustapa'] != 'L' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')))) {
+          ($row['tulostustapa'] != 'L' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')))) {
         // rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
         // $toimitustapa_varasto  toimitustavan selite!!!!varastopaikan tunnus

@@ -78,9 +78,9 @@ if ($kukarow["piirit"] != "") {
 if (is_numeric($asiakasid) and $asiakasid > 0) {
   // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
   $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi,
-              if(asiakas.gsm != '', asiakas.gsm,
-                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+             if(asiakas.gsm != '', asiakas.gsm,
+               if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                 if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
              FROM asiakas
              JOIN yhtio on asiakas.yhtio=yhtio.yhtio
              WHERE asiakas.$konsyhtiot
@@ -105,7 +105,7 @@ elseif ($ytunnus != '') {
                JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
                  AND asiakas.tunnus = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tunnus = '$ytunnus'";
+               and lasku.tunnus     = '$ytunnus'";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
   }
@@ -126,9 +126,9 @@ elseif ($ytunnus != '') {
                FROM lasku use index (asiakasnimi)
                JOIN yhtio on lasku.yhtio = yhtio.yhtio
                JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-                AND asiakas.tunnus = lasku.liitostunnus)
+                AND asiakas.tunnus  = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tila != 'D'
+               and lasku.tila      != 'D'
                and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)
                GROUP BY 1,2,3,4,5,6,7,8,9,10
                ORDER BY 1";

@@ -234,9 +234,7 @@ if (!function_exists("tuotetarkista")) {
         $vrow = mysql_fetch_array($vresult);
 
         // Tietyt vaihdot sallitaan!!!, huomaa NOT iffissä, helpompi kirjoittaa näin päin
-        if (!(($t[$i] == "S" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S", "U")))
-            or ($t[$i] == "U" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S", "U")))
-            or ($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
+        if (!(($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
             or ($t[$i] == "T" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
             or ($t[$i] == "V" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))
             or ($t[$i] == "E" and (in_array($trow["sarjanumeroseuranta"], array("E", "F")) or ($vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("", "T", "V", "E", "F")))))

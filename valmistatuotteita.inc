@@ -291,7 +291,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
     elseif ($tuoterow['epakurantti50pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.5,  6);
     elseif ($tuoterow['epakurantti25pvm'] != '0000-00-00') $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.75, 6);
 
-    if (in_array($raakaainerow["sarjanumeroseuranta"], array("S", "U", "G"))) {
+    if (in_array($raakaainerow["sarjanumeroseuranta"], array("S", "G"))) {
       $arvo = sarjanumeron_ostohinta("myyntirivitunnus", $raakaainerow["tunnus"])*$kpl;
     }
     else {
@@ -523,7 +523,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
         $uusiarvo = round($uusiarvo, 6);
       }
 
-      if ($valmisterow["sarjanumeroseuranta"] == "S" or $valmisterow["sarjanumeroseuranta"] == "U" or $valmisterow["sarjanumeroseuranta"] == "G") {
+      if ($valmisterow["sarjanumeroseuranta"] == "S" or $valmisterow["sarjanumeroseuranta"] == "G") {
         $kehahin = 0;
         $selite = t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($uusiarvo)";
       }
@@ -688,7 +688,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
         $upparesult = pupe_query($query);
 
         // Siirretään sarjanumerot valmistetulle tilausriville
-        if (in_array($valmisterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+        if (in_array($valmisterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
 
           $int_isavarattu = (int) $isavarattu;
 

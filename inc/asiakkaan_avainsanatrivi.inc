@@ -52,7 +52,7 @@ if (mysql_field_name($result, $i) == "avainsana") {
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji = 'OPTISCANKOM'
+              AND laji    = 'OPTISCANKOM'
               ORDER BY jarjestys, selite";
     $kommenttires = pupe_query($query);
 
@@ -67,7 +67,7 @@ if (mysql_field_name($result, $i) == "avainsana") {
 
       $ulos .= "</select></td>";
       $jatko = 0;
-   }
+    }
   }
   elseif (stripos($asavainsanalaji, "OHJAUSMERKKI") !== FALSE) {
 

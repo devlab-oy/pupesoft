@@ -271,7 +271,7 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
   }
-  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S")))) {
+  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and $trow[$i] == "S")) {
     $ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
   }
   if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {

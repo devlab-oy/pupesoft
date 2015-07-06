@@ -316,7 +316,7 @@ else {
             else {
               $values .= ", '" . $laskurow[$fieldname] . "'";
             }
-          break;
+            break;
           case 'kate_korjattu':
             $values .= ", NULL";
             break;

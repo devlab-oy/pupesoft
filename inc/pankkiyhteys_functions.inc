@@ -967,7 +967,7 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
- * @param array $params
+ * @param array   $params
  * @return array
  */
 function generoi_private_key_ja_csr($params = array()) {

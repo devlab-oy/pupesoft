@@ -735,12 +735,12 @@ elseif ($sanoma == "StopAssignment") {
       $query = "SELECT asav.avainsana
                 FROM kerayserat
                 JOIN lasku ON (lasku.yhtio = kerayserat.yhtio
-                  AND lasku.tunnus = kerayserat.otunnus)
+                  AND lasku.tunnus      = kerayserat.otunnus)
                 JOIN asiakkaan_avainsanat AS asav ON (asav.yhtio = lasku.yhtio
                   AND asav.liitostunnus = lasku.liitostunnus
-                  AND asav.laji = 'OPTISCAN_KERAYSKOMMENTTI')
-                WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-                AND kerayserat.nro = '{$nro}'";
+                  AND asav.laji         = 'OPTISCAN_KERAYSKOMMENTTI')
+                WHERE kerayserat.yhtio  = '{$kukarow['yhtio']}'
+                AND kerayserat.nro      = '{$nro}'";
       $avainsanares = pupe_query($query);
 
       if (count($print_array) == 0) {

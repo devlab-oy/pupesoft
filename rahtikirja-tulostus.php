@@ -601,7 +601,7 @@ if ($tee == 'tulosta') {
         $groupby_lisa = "";
       }
 
-      if ($toitarow["rahtikirja"] != "rahtikirja_postitarra_pdf.inc") {
+      if (strpos($toitarow["rahtikirja"], "unifaun") !== FALSE) {
         $query = "SELECT min(rahtikirjanro) rahtikirjanro
                   FROM rahtikirjat
                   WHERE yhtio = '{$kukarow['yhtio']}'

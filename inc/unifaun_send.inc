@@ -83,11 +83,11 @@ class Unifaun {
       $this->asiakasrow = mysql_fetch_assoc($asres);
     }
   }
-  
+
   public function sanitizeEmails ($emails) {
     $emails = str_replace(" ", "", $emails);
     $emails = str_replace(",", ";", $emails);
-    
+
     return $emails;
   }
 
@@ -489,7 +489,7 @@ class Unifaun {
     else {
       $asiakasemail = $this->asiakasrow["email"];
     }
-    
+
     if ($this->asiakasrow["email"] != "") {
       $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // E-mail
       $uni_rcv_val->addAttribute('n', "email");
@@ -747,7 +747,7 @@ class Unifaun {
 
       if ($this->postirow["toim_puh"] != '') {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
-        $uni_add_val->addAttribute('n', "text3"); 
+        $uni_add_val->addAttribute('n', "text3");
       }
       if ($this->asiakasrow["email"] != '') {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // Used to define notification mode for add-on NOT.

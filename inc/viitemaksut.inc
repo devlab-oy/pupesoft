@@ -23,7 +23,7 @@ if ($type == '0') {
   // print "Rahayksikön koodi => ".substr($tietue, 22, 1)."\n";
   // print "Varalla => ".substr($tietue, 23, 67)."\n";
 }
-elseif ($type == '3' or ($type == 'S' and 
+elseif ($type == '3' or ($type == 'S' and
   ($yhtiorow["viitemaksujen_oikaisut"] == 'K' or $factoring_oikaisutunnus == '0'))) {
   // viitesiirto
   // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";

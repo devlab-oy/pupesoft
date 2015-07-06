@@ -87,7 +87,7 @@ if ($raptee == "AJA") {
   $i = 0;
 
   $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki like '%{$valmistajarajaus}%' " : "";
-  $asiakaslisa = !empty($asiakasrajaus) ? " and lasku.toim_nimi like '%{$asiakasrajaus}%' " : ""; 
+  $asiakaslisa = !empty($asiakasrajaus) ? " and lasku.toim_nimi like '%{$asiakasrajaus}%' " : "";
   $alkuok = (!empty($aloitusvv) and !empty($aloituskk) and !empty($aloituspp)) ? true : false;
   $loppuok = (!empty($lopetusvv) and !empty($lopetuskk) and !empty($lopetuspp)) ? true : false;
 
@@ -228,7 +228,7 @@ if ($raptee == "AJA") {
 
   $excelnimi = $worksheet->close();
 
-  echo "<br><br>";  
+  echo "<br><br>";
   if ($excelrivi > 1) {
     echo "<font class='message'>".t("Tallenna excel").": </font>";
     echo "<form method='post' class='multisubmit'>";
@@ -240,7 +240,7 @@ if ($raptee == "AJA") {
   }
   else {
     echo "<font class='message'>".t("Annetuilla ehdoilla ei löytynyt yhtään riviä").".</font>";
-  }  
+  }
   echo "<br><br>";
 }
 

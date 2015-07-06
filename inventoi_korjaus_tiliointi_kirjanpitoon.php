@@ -8,20 +8,20 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
-  
+
 $query = "SELECT * FROM yhtio";
 $row = pupe_query($query);
 
 echo "\nSuoritetaan tiliöintien korjaus inventointeihin!\n";
 
 while ($yhtio = mysql_fetch_assoc($row)) {
-  
+
   $yhtiorow = hae_yhtion_parametrit($yhtio['yhtio']);
-  
+
   ///* Luetaan tapahtuma *///
-  $query = "  SELECT tapahtuma.*, lasku.tunnus AS laskutunnus 
-              FROM tapahtuma 
-              LEFT JOIN lasku ON (lasku.yhtio = tapahtuma.yhtio 
+  $query = "  SELECT tapahtuma.*, lasku.tunnus AS laskutunnus
+              FROM tapahtuma
+              LEFT JOIN lasku ON (lasku.yhtio = tapahtuma.yhtio
                 AND tila       = 'X'
                 AND alatila    = 'I'
                 AND viite      = tapahtuma.tunnus)

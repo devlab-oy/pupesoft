@@ -897,10 +897,10 @@ if ($tee == 'tulosta') {
         else {
           if (!isset($nayta_pdf)) echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
         }
-echo "900: $muutos, $rahtikirjanro, $uudet_koodit <br><br>";
+
         // Kopsuille ei päivitetä eikä kun muokataan rahtikirjan tietoja!
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE  
-          and (!isset($muutos) or $muutos != 'yes' or (isset($uudet_koodit) or $uudet_koodit == 'yes'))) {
+          and (!isset($muutos) or $muutos != 'yes' or (isset($uudet_koodit) and $uudet_koodit == 'yes'))) {
           $query = "UPDATE rahtikirjat
                     set rahtikirjanro = '$rahtikirjanro'
                     where tunnus in ($tunnukset)

@@ -62,7 +62,7 @@ $lask = 1;
 $sivu = 1;
 
 $tulostakolli = $tulostuskpl;
-echo "65: $rahtikirjanro, $rivi[rahtikirjanro] <br><br>";
+
 if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {
   $oma = sprintf("%09s", substr(trim($rivi["rahtikirjanro"]), -9));
 }
@@ -79,7 +79,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $kuka = sprintf("%02s", $tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
-echo "82: $rahtikirjanro, $rivi[rahtikirjanro], $oma <br><br>";
+
   // tehd‰‰n viivakoodit
   $viiva1   = "JJFI$toitarow[sopimusnro]$kuka$oma";
 

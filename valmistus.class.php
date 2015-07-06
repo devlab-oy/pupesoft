@@ -296,17 +296,17 @@ class Valmistus {
 
           $query = "UPDATE lasku
                     SET
-                      toimaika  = '2099-01-01',
-                      kerayspvm = '2099-01-01 00:00:00'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
+                      toimaika   = '2099-01-01',
+                      kerayspvm  = '2099-01-01 00:00:00'
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
                       AND tunnus = {$this->tunnus}";
           pupe_query($query);
 
           $query = "UPDATE tilausrivi
                     SET
-                      toimaika  = '2099-01-01',
-                      kerayspvm = '2099-01-01'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
+                      toimaika    = '2099-01-01',
+                      kerayspvm   = '2099-01-01'
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
                       AND otunnus = {$this->tunnus}";
           pupe_query($query);
         }

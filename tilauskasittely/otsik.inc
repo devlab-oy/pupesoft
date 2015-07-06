@@ -597,9 +597,9 @@ if ($tila == "" and !isset($jatka)) {
     if ($from == "vaihdaasiakas" and $asiakasid != "") {
       // asiakashaussa pit‰‰ olla vakio columni kohdistettu, jonka arvo on O ett‰ saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydess‰
       $squery = "SELECT *, 'O' kohdistettu,
-                    if(asiakas.gsm != '', asiakas.gsm,
-                       if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                         if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+                 if(asiakas.gsm != '', asiakas.gsm,
+                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 

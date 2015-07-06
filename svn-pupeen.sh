@@ -43,6 +43,7 @@ dbname=$(parse_salasanat '$dbkanta')
 host_array=(${dbhost//:/ })
 
 if [[ -n "${host_array[1]}" ]]; then
+  dbhost=${host_array[0]}
   dbport=${host_array[1]}
 else
   dbport="3306"

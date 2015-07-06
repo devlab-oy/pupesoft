@@ -63,7 +63,7 @@ while ($row = mysql_fetch_array($result)) {
       $sarjares = pupe_query($query);
       $sarjarow = mysql_fetch_array($sarjares);
 
-      if ((in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V")) and (float) $saldo != (float) $sarjarow["kpl"]) or (in_array($row["sarjanumeroseuranta"], array("E", "F", "G")) and (float) $saldo != (float) $sarjarow["era_kpl"])) {
+      if ((in_array($row["sarjanumeroseuranta"], array("S", "T", "V")) and (float) $saldo != (float) $sarjarow["kpl"]) or (in_array($row["sarjanumeroseuranta"], array("E", "F", "G")) and (float) $saldo != (float) $sarjarow["era_kpl"])) {
         echo "<tr>
             <td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
             <td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>
@@ -71,7 +71,7 @@ while ($row = mysql_fetch_array($result)) {
 
         echo "<td valign='top' align='right'>".sprintf("%.2f", $saldo)."</td>";
 
-        if (in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+        if (in_array($row["sarjanumeroseuranta"], array("S", "T", "V"))) {
           echo "<td valign='top' align='right'>".sprintf("%.2f", $sarjarow["kpl"])."</td>";
         }
         else {
@@ -80,7 +80,7 @@ while ($row = mysql_fetch_array($result)) {
 
         echo "<td valign='top'>$sarjarow[sarjanumerot]</td>";
 
-        if (in_array($row["sarjanumeroseuranta"], array("S", "U", "G"))) {
+        if (in_array($row["sarjanumeroseuranta"], array("S", "G"))) {
           echo "<td>".t("YKSI")."</td>";
         }
         else {
@@ -102,7 +102,7 @@ while ($row = mysql_fetch_array($result)) {
         <td></td>
         <td></td>";
 
-    if (in_array($row["sarjanumeroseuranta"], array("S", "U", "G"))) {
+    if (in_array($row["sarjanumeroseuranta"], array("S", "G"))) {
       echo "<td>".t("YKSI")."</td>";
     }
     else {

@@ -129,7 +129,7 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
   require "tilauskasittely/monivalintalaatikot.inc";
 
   $kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi>>asiakas.toim_nimi::asiakas.osoite>>asiakas.toim_osoite::asiakas.postino>>asiakas.toim_postino::asiakas.postitp>>asiakas.toim_postitp::asiakas.asiakasnro";
-  $jarjestys = 'ytunnus, nimi, selaus, tunnus';
+  $jarjestys = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
 
   $array = explode("::", $kentat);
   $count = count($array);

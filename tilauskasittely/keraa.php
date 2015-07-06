@@ -298,7 +298,7 @@ if ($tee == 'P') {
         $tunken = "myyntirivitunnus";
       }
 
-      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
+      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T" or $toimrow["sarjanumeroseuranta"] == "V") {
         $query = "SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -1218,7 +1218,26 @@ if ($tee == 'P') {
 
               if (!isset($pakkaukset[$monesko]['sscc'])) {
                 $pakkaukset[$monesko]['sscc'] = uusi_sscc_nro();
-                $pakkaukset[$monesko]['sscc_ulkoinen'] = uusi_gs1_sscc_nro($pakkaukset[$monesko]['sscc']);
+
+                if (!empty($yhtiorow['ean'])) {
+                  $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$otsikkorivi['toimitustapa']}'", "", "", "selitetark");
+
+                  if ($_selitetark == '') {
+                    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+                  }
+
+                  if ($_selitetark != '') {
+                    $expansioncode = $_selitetark;
+
+                    $pakkaukset[$monesko]['sscc_ulkoinen'] = gs1_sscc($expansioncode, $pakkaukset[$monesko]['sscc'], $monesko);
+                  }
+                  else {
+                    $pakkaukset[$monesko]['sscc_ulkoinen'] = $pakkaukset[$monesko]['sscc'];
+                  }
+                }
+                else {
+                  $pakkaukset[$monesko]['sscc_ulkoinen'] = $pakkaukset[$monesko]['sscc'];
+                }
               }
             }
 
@@ -2858,7 +2877,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       $query = "SELECT
                 lasku.*,
                 toimitustapa.tulostustapa,
-                toimitustapa.nouto
+                toimitustapa.nouto,
+                toimitustapa.rahtikirja
                 FROM lasku
                 LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
                 WHERE lasku.tunnus in ({$tilausnumeroita})
@@ -3360,7 +3380,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $tunken2 = "myyntirivitunnus";
           }
 
-          if ($row["tyyppi"] != "W" and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
+          if ($row["tyyppi"] != "W" and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "V")) {
 
             $query = "SELECT count(*) kpl, min(sarjanumero) sarjanumero
                       from sarjanumeroseuranta
@@ -3777,6 +3797,17 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
         $oslappkpl_hidden = 0;
         $disabled = '';
+
+        // jos unifaun + hetitulostus tai erätulostus
+        // --> ei tulosteta osoitelappuja Pupessa
+        $_ei_koonti = ($otsik_row['tulostustapa'] == 'H' or $otsik_row['tulostustapa'] == 'E');
+        $_onko_unifaun = ($otsik_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
+        $_onko_unifaun = ($_onko_unifaun or $otsik_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+
+        if (!empty($oslappkpl) and $_onko_unifaun and $_ei_koonti) {
+          $yhtiorow["oletus_oslappkpl"] = 0;
+          $oslappkpl = 0;
+        }
 
         if ($yhtiorow["oletus_oslappkpl"] != 0 and ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A')) {
 

@@ -500,7 +500,7 @@ if (
   }
 
   // Katotaan voidaanko tämä myydä joltain toiselta paikalta
-  if (!in_array($row["var"], array('J', 'S', 'U', 'T', 'P')) and $kpl_st > 0 and in_array($trow["sarjanumeroseuranta"], array('E', 'F', 'G'))) {
+  if (!in_array($row["var"], array('J', 'S', 'T', 'P')) and $kpl_st > 0 and in_array($trow["sarjanumeroseuranta"], array('E', 'F', 'G'))) {
 
     $paikat .= "<option value='EIERAAVIELA#!¡!#EIEI'>".t("Valitse erä")."</option>";
     $paikatlask++;

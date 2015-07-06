@@ -10,6 +10,7 @@ echo "<hr>";
 sepa_pankkiyhteys_kunnossa();
 
 $tee = empty($tee) ? '' : $tee;
+$company_name = empty($company_name) ? '' : $company_name;
 $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
@@ -268,9 +269,14 @@ if ($tee == "luo") {
 
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
+  $csr_params = array(
+    "company_name" => $company_name,
+    "customer_id" => $customer_id
+  );
+
   // Generoidaan allekirjoitusta ja salausta varten private key ja certificate-signing-request
-  $generoidut_tunnukset1 = generoi_private_key_ja_csr();
-  $generoidut_tunnukset2 = generoi_private_key_ja_csr();
+  $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
+  $generoidut_tunnukset2 = generoi_private_key_ja_csr($csr_params);
 
   $signing_private_key = $generoidut_tunnukset1["private_key"];
   $encryption_private_key = $generoidut_tunnukset2["private_key"];
@@ -378,6 +384,17 @@ if ($tee == "") {
     }
 
     echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>";
+    echo "<label for='company_name'>";
+    echo t("Yrityksen nimi (Sama kuin sopimuksessa)");
+    echo "</label>";
+    echo "</th>";
+    echo "<td>";
+    echo "<input type='text' name='company_name' id='company_name' value='{$company_name}'>";
     echo "</td>";
     echo "</tr>";
 

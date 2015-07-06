@@ -30,4 +30,4 @@ elseif ($alias_set == "KAYTTAJA") {
 
 $rajauslisa .= ")";
 
-$jarjestys = 'selaus';
+$jarjestys = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";

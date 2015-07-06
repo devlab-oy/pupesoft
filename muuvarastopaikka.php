@@ -18,6 +18,7 @@ if ($tee != '') {
              tilausrivi WRITE,
              tilausrivi as t WRITE,
              tilausrivi as tilausrivi_osto READ,
+             tilausrivin_lisatiedot AS tt WRITE,
              sarjanumeroseuranta WRITE,
              sarjanumeroseuranta_arvomuutos READ,
              lasku WRITE,
@@ -386,12 +387,11 @@ if ($tee == 'N') {
   // Tarkistetaan sarjanumeroseuranta
   // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
-  // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
   // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
-  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
+  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','V'), 1, 0)) sarjat,
             sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
             FROM tuote
             WHERE tuoteno            = '$tuoteno'
@@ -570,6 +570,8 @@ if ($tee == 'N') {
   else {
     $uusitee = "M";
   }
+
+  if (!isset($_poikkeavalaskutuspvm)) $_poikkeavalaskutuspvm = "";
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
@@ -899,13 +901,13 @@ if ($tee == 'M') {
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
             FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+              AND varastopaikat.tunnus                    = tuotepaikat.varasto)
             LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-              AND inventointilistarivi.tila = 'A')
-            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno     = '$tuoteno'
-            and tuotepaikat.hyllyalue  != '!!M'
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno                       = '$tuoteno'
+            and tuotepaikat.hyllyalue                    != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -945,13 +947,13 @@ if ($tee == 'M') {
             concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
             FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus  = tuotepaikat.varasto)
+              AND varastopaikat.tunnus                    = tuotepaikat.varasto)
             LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-              AND inventointilistarivi.tila = 'A')
-            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno     = '$tuoteno'
-            and tuotepaikat.hyllyalue  != '!!M'
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno                       = '$tuoteno'
+            and tuotepaikat.hyllyalue                    != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult2 = pupe_query($query);
 

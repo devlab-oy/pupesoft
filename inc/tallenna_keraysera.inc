@@ -10,6 +10,8 @@ if (!is_array($erat)) {
 $otunnukset      = implode(",", $erat['tilaukset']);
 $tilausrivit      = '';
 $pakkaus_kirjaimet = array();
+$lisatyt_tilausrivit = array();
+$lisatyt_tilaukset = array();
 $kerayseran_numero = 0;
 
 foreach ($erat as $era_key => $era_arr) {
@@ -99,15 +101,16 @@ foreach ($erat as $era_key => $era_arr) {
               ORDER BY 1,2";
     $era_res = pupe_query($query);
 
-    $lisatyt_tilausrivit = array();
-    $lisatyt_tilaukset = array();
+    $splittaa_tilaus_tilausrivit = array();
 
     while ($era_row = mysql_fetch_assoc($era_res)) {
       $lisatyt_tilaukset[$era_row['otunnus']] = $era_row['otunnus'];
       $lisatyt_tilausrivit[$era_row['otunnus']][$era_row['tunnus']] = $era_row['kerkpl'];
+
+      $splittaa_tilaus_tilausrivit[$era_row['otunnus']][$era_row['tunnus']] = $era_row['kerkpl'];
     }
 
-    splittaa_tilaus($lisatyt_tilausrivit);
+    splittaa_tilaus($splittaa_tilaus_tilausrivit);
 
     if (isset($kukarow['debugfile']) and $kukarow['debugfile'] != "") {
       file_put_contents($tee_keraysera_debugdir."/".basename($kukarow['debugfile']), $kukarow['debugstring'], FILE_APPEND);

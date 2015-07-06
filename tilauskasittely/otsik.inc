@@ -2718,7 +2718,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
 
-    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
       echo "<tr><td class='back'><br></td></tr>";
       echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
@@ -2810,7 +2810,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "</select></td></tr>";
     }
 
-    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
+    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
       //Täysin dynaaminen osio
       $al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != ''");
 
@@ -4396,7 +4396,7 @@ if (isset($jatka)) {
       }
     }
 
-    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or ($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
+    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or ($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
       //otetaan kantaa pyörän malliin
       if ($merkki2 != 'eimenu' and $merkki2 != '') {
         $merkki = $merkki2;
@@ -4432,7 +4432,7 @@ if (isset($jatka)) {
                   otunnus       = '$kukarow[kesken]'";
 
       // Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..
-      if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+      if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ", tyojono   = '$tyojono',
                     tyostatus   = '$tyostatus'";
 

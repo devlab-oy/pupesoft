@@ -293,6 +293,22 @@ class Valmistus {
           if (! pupe_query($query)) {
             throw new Exception("Kalenteri merkintää ei poistettu");
           }
+
+          $query = "UPDATE lasku
+                    SET
+                      toimaika   = '2099-01-01',
+                      kerayspvm  = '2099-01-01 00:00:00'
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND tunnus = {$this->tunnus}";
+          pupe_query($query);
+
+          $query = "UPDATE tilausrivi
+                    SET
+                      toimaika    = '2099-01-01',
+                      kerayspvm   = '2099-01-01'
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                      AND otunnus = {$this->tunnus}";
+          pupe_query($query);
         }
         // Jos työ on keskeytetty ja siirretään takaisin parkkiin
         // nollataan kalenterista valmistuslinja (kalenteri.henkilo)

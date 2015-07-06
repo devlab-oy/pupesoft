@@ -178,6 +178,22 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
   }
 }
 
+$kuljetusliike_sscc = false;
+$expansion_code = "";
+
+if (!empty($yhtiorow['ean'])) {
+  $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+  if ($_selitetark == '') {
+    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+  }
+
+  if ($_selitetark != '') {
+    $expansioncode = $_selitetark;
+    $kuljetusliike_sscc = true;
+  }
+}
+
 $kirjainlisa = '';
 
 for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
@@ -192,6 +208,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
   if (isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
     $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
+  }
+  elseif ($kuljetusliike_sscc) {
+    $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
   }
   else {
     // tehdään SSCC :

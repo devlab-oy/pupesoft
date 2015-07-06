@@ -16,7 +16,33 @@ if ($tee == "teeyhdistys") {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
-        $keikkarow = mysql_fetch_array($result);
+        $keikkarow = mysql_fetch_assoc($result);
+
+        // Siirretään myös suuntalavat
+        $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
+                  FROM tilausrivi
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tyyppi      = 'O'
+                  AND uusiotunnus = '{$keikkatunnus}'";
+        $suuntalava_res = pupe_query($query);
+        $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
+
+        if (trim($suuntalava_row['suuntalavat']) != '' and $suuntalava_row['suuntalavat'] != "0") {
+
+          foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
+
+            if ((string) $_suuntalava != "0") {
+              $query = "UPDATE suuntalavat_saapuminen SET
+                        saapuminen     = '{$otunnus}',
+                        muuttaja       = '{$kukarow['kuka']}',
+                        muutospvm      = now()
+                        WHERE yhtio    = '{$kukarow['yhtio']}'
+                        AND suuntalava = '{$_suuntalava}'
+                        AND saapuminen = '{$keikkatunnus}'";
+              $upd_res = pupe_query($query);
+            }
+          }
+        }
 
         //päivitetään otunnus jo kohdistetuille riveille jotta ne evät jäisi ilman otsikkoa
         $query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";

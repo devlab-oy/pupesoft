@@ -138,77 +138,82 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   }
   else {
     if (!$rahtikirja_ilman_asiakasta) {
-      $query = "SELECT *
+      $query = "SELECT *,
+                if(asiakas.gsm != '', asiakas.gsm,
+                  if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                    if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND ytunnus = '$ytunnus'";
       $asres = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asres);
 
-      $osoitelappurow["ytunnus"]       = $asiakasrow["ytunnus"];
-      $osoitelappurow["nimi"]       = $asiakasrow["nimi"];
+      $osoitelappurow["ytunnus"]      = $asiakasrow["ytunnus"];
+      $osoitelappurow["nimi"]         = $asiakasrow["nimi"];
       $osoitelappurow["nimitark"]     = $asiakasrow["nimitark"];
       $osoitelappurow["osoite"]       = $asiakasrow["osoite"];
-      $osoitelappurow["postino"]       = $asiakasrow["postino"];
-      $osoitelappurow["postitp"]       = $asiakasrow["postitp"];
+      $osoitelappurow["postino"]      = $asiakasrow["postino"];
+      $osoitelappurow["postitp"]      = $asiakasrow["postitp"];
+      $osoitelappurow["toim_puh"]     = $asiakasrow["toim_puh"];
       $osoitelappurow["viesti"]       = $asiakasrow["kuljetusohje"];
-      $osoitelappurow["liitostunnus"]   = $asiakasrow["tunnus"];
-      $osoitelappurow["maksuehto"]     = $asiakasrow["maksuehto"];
-      $osoitelappurow["sisviesti1"]     = $asiakasrow["sisviesti1"];
+      $osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
+      $osoitelappurow["maksuehto"]    = $asiakasrow["maksuehto"];
+      $osoitelappurow["sisviesti1"]   = $asiakasrow["sisviesti1"];
 
       if ($tnimi != '') {
-        $osoitelappurow["toim_postino"] = $tpostino;
-        $osoitelappurow["toim_nimi"]   = $tnimi;
-        $osoitelappurow["toim_nimitark"]= $tnimitark;
-        $osoitelappurow["toim_postitp"] = $tpostitp;
+        $osoitelappurow["toim_postino"]  = $tpostino;
+        $osoitelappurow["toim_nimi"]     = $tnimi;
+        $osoitelappurow["toim_nimitark"] = $tnimitark;
+        $osoitelappurow["toim_postitp"]  = $tpostitp;
         $osoitelappurow["toim_osoite"]   = $tosoite;
-        $osoitelappurow["toim_maa"]   = $tmaa;
+        $osoitelappurow["toim_maa"]      = $tmaa;
       }
       elseif ($asiakasrow["toim_nimi"] != '') {
-        $osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
-        $osoitelappurow["toim_nimi"]   = $asiakasrow["toim_nimi"];
-        $osoitelappurow["toim_nimitark"]= $asiakasrow["toim_nimitark"];
-        $osoitelappurow["toim_postitp"] = $asiakasrow["toim_postitp"];
-        $osoitelappurow["toim_maa"]   = $asiakasrow["toim_maa"];
+        $osoitelappurow["toim_postino"]  = $asiakasrow["toim_postino"];
+        $osoitelappurow["toim_nimi"]     = $asiakasrow["toim_nimi"];
+        $osoitelappurow["toim_nimitark"] = $asiakasrow["toim_nimitark"];
+        $osoitelappurow["toim_postitp"]  = $asiakasrow["toim_postitp"];
+        $osoitelappurow["toim_maa"]      = $asiakasrow["toim_maa"];
         $osoitelappurow["toim_osoite"]   = $asiakasrow["toim_osoite"];
       }
       else {
-        $osoitelappurow["toim_postino"] = $asiakasrow["postino"];
-        $osoitelappurow["toim_nimi"]   = $asiakasrow["nimi"];
-        $osoitelappurow["toim_nimitark"]= $asiakasrow["nimitark"];
-        $osoitelappurow["toim_postitp"] = $asiakasrow["postitp"];
-        $osoitelappurow["toim_maa"]   = $asiakasrow["maa"];
+        $osoitelappurow["toim_postino"]  = $asiakasrow["postino"];
+        $osoitelappurow["toim_nimi"]     = $asiakasrow["nimi"];
+        $osoitelappurow["toim_nimitark"] = $asiakasrow["nimitark"];
+        $osoitelappurow["toim_postitp"]  = $asiakasrow["postitp"];
+        $osoitelappurow["toim_maa"]      = $asiakasrow["maa"];
         $osoitelappurow["toim_osoite"]   = $asiakasrow["osoite"];
       }
     }
     else {
-      $osoitelappurow["nimi"]        = $tnimi;
-      $osoitelappurow["nimitark"]    = $tnimitark;
-      $osoitelappurow["osoite"]      = $tosoite;
-      $osoitelappurow["postino"]     = $tpostino;
-      $osoitelappurow["postitp"]     = $tpostitp;
-      $osoitelappurow["maa"]       = $tmaa;
+      $osoitelappurow["nimi"]     = $tnimi;
+      $osoitelappurow["nimitark"] = $tnimitark;
+      $osoitelappurow["osoite"]   = $tosoite;
+      $osoitelappurow["postino"]  = $tpostino;
+      $osoitelappurow["postitp"]  = $tpostitp;
+      $osoitelappurow["toim_puh"] = $tpuh;
+      $osoitelappurow["maa"]      = $tmaa;
 
-      $osoitelappurow["toim_postino"] = $tpostino;
-      $osoitelappurow["toim_nimi"]   = $tnimi;
-      $osoitelappurow["toim_nimitark"]= $tnimitark;
-      $osoitelappurow["toim_postitp"] = $tpostitp;
-      $osoitelappurow["toim_maa"]   = $tmaa;
+      $osoitelappurow["toim_postino"]  = $tpostino;
+      $osoitelappurow["toim_nimi"]     = $tnimi;
+      $osoitelappurow["toim_nimitark"] = $tnimitark;
+      $osoitelappurow["toim_postitp"]  = $tpostitp;
+      $osoitelappurow["toim_maa"]      = $tmaa;
       $osoitelappurow["toim_osoite"]   = $tosoite;
     }
 
-    $osoitelappurow["toimitustapa"]   = $data['toimitustapa'][0];
-    $osoitelappurow["yhteyshenkilo"]   = $kukarow["tunnus"];
+    $osoitelappurow["toimitustapa"]  = $data['toimitustapa'][0];
+    $osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
     $osoitelappurow["merahti"]       = $data['merahti'];
     $osoitelappurow["laatija"]       = $kukarow['kuka'];
-    $osoitelappurow["tunnus"]       = $otsikkonro;
+    $osoitelappurow["tunnus"]        = $otsikkonro;
 
     // yhtiön tiedot
-    $osoitelappurow['yhtio']      = $yhtiorow["yhtio"];
-    $osoitelappurow['yhtio_nimi']     = $yhtiorow["nimi"];
-    $osoitelappurow['yhtio_osoite']    = $yhtiorow["osoite"];
-    $osoitelappurow['yhtio_postino']  = $yhtiorow["postino"];
-    $osoitelappurow['yhtio_postitp']  = $yhtiorow["postitp"];
+    $osoitelappurow['yhtio']         = $yhtiorow["yhtio"];
+    $osoitelappurow['yhtio_nimi']    = $yhtiorow["nimi"];
+    $osoitelappurow['yhtio_osoite']  = $yhtiorow["osoite"];
+    $osoitelappurow['yhtio_postino'] = $yhtiorow["postino"];
+    $osoitelappurow['yhtio_postitp'] = $yhtiorow["postitp"];
 
     // poikkeava toimipaikka,otetaan sen osoitetiedot
     $alhqur = "SELECT *
@@ -413,7 +418,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   }
 
   if ($rahtikirja_ilman_asiakasta) {
-    $asiakasrow['toim_postitp']   = '';
+    $asiakasrow['toim_postitp']  = '';
     $asiakasrow['toim_postino']  = '';
     $asiakasrow['toim_osoite']   = '';
     $asiakasrow['toim_nimitark'] = '';
@@ -422,12 +427,13 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   }
 
   if (isset($tnimi) and trim($tnimi) != '') {
-    $asiakasrow['toim_postitp']   = $tpostitp;
+    $asiakasrow['toim_postitp']  = $tpostitp;
     $asiakasrow['toim_postino']  = $tpostino;
     $asiakasrow['toim_osoite']   = $tosoite;
     $asiakasrow['toim_nimitark'] = $tnimitark;
     $asiakasrow['toim_nimi']     = $tnimi;
     $asiakasrow['toim_maa']      = $tmaa;
+    $asiakasrow['toim_puh']      = $tpuh;
   }
 
   echo "<form method='post' action='rahtikirja_custom.php' name='rahtikirja'><table>";
@@ -446,7 +452,6 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       <td valign='top'>".t("Postitp").": </td>
       <td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
 
-
   $query = "SELECT distinct koodi, nimi
             FROM maat
             WHERE nimi != ''
@@ -454,7 +459,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   $vresult = pupe_query($query);
 
   echo "<tr>
-      <td valign='top'>".t("Postitp").": </td>
+      <td valign='top'>".t("Maa").": </td>
       <td><select name='tmaa'>";
 
   echo "<option value = '' >".t("Valitse maa")."</option>";
@@ -470,6 +475,12 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
   echo "</select></td></tr>";
 
+
+  $tpuh = $asiakasrow['gsm'] != '' ? $asiakasrow['gsm'] : ($yhteyshenkiloasiakas['tyopuhelin'] != '' ? $yhteyshenkiloasiakas['tyopuhelin'] : ($yhteyshenkiloasiakas['puhelin'] != '' ? $yhteyshenkiloasiakas['puhelin'] : ''));
+
+  echo "<tr>
+      <td valign='top'>".t("Puhelin").": </td>
+      <td><input type='text' name='tpuh' size='35' value='$tpuh'></td></tr>";
 ?>
 
 <tr><th><?php echo t('Varasto') ?></th><td><select name='varasto' onChange='document.rahtikirja.submit();'>

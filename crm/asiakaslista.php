@@ -44,7 +44,7 @@ else {
   $kentat = "asiakas.tunnus::asiakas.nimi::asiakas.myyjanro::asiakas.ytunnus::asiakas.asiakasnro::if (asiakas.toim_postitp!='',asiakas.toim_postitp,asiakas.postitp)::asiakas.yhtio";
 }
 
-$jarjestys = 'selaus, nimi';
+$jarjestys = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
 
 $array = explode("::", $kentat);
 $count = count($array);

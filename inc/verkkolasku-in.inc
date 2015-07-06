@@ -558,7 +558,10 @@ if (!function_exists("verkkolasku_in")) {
       $viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
       $viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
 
-      if ($laskuttajan_valkoodi != "") {
+      if ($yhtiorow['ostolaskujen_oletusvaluutta'] == 'T' and !empty($trow['oletus_valkoodi'])) {
+        $valkoodi = $trow['oletus_valkoodi'];
+      }
+      elseif ($laskuttajan_valkoodi != "") {
         $valkoodi = $laskuttajan_valkoodi;
       }
       elseif ($trow['oletus_valkoodi'] != '') {
@@ -1241,9 +1244,13 @@ if (!function_exists("verkkolasku_in")) {
       // Onko laskuriveillä useita alv-verokantoja?
       $ealvi = array_unique($ealvi);
 
-      // Katsotaan alv laskuerittelystä
+      // Katsotaan alv laskuerittelystä, rieveillä ei siis ollut tietoa verokannoista
       if (count($ealvi) == 1 and $ealvi[0] == "") {
         $ealvi = array($lisavat[0]);
+      }
+      elseif (count($ealvi) > 1 and $ealvi[0] == "") {
+        // Shiftataan eka tyhjä elementti pois, niin jäljelle jää riveiltä luetut tiedot
+        array_shift($ealvi);
       }
 
       // Tehdän pelkät oletustiliöinnit

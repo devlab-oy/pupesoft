@@ -743,7 +743,7 @@ else {
         $row = mysql_fetch_assoc($result);
 
         // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
           $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
                      FROM sarjanumeroseuranta
                      LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -994,15 +994,16 @@ else {
       $query_ale_lisa = generoi_alekentta('M');
 
       // HUOM: ", " (pilkku-space) stringiä käytetään vain sarakkeiden välillä, eli ole tarkkana concatissa ja muissa funkkareissa $select-muuttujassa
-      $select       = "";
-      $query        = "";
-      $group        = "";
-      $order        = "";
-      $gluku        = 0;
-      $varasto_join     = "";
-      $kantaasiakas_join   = "";
-      $maksuehto_join   = "";
+      $select            = "";
+      $query             = "";
+      $group             = "";
+      $order             = "";
+      $gluku             = 0;
+      $varasto_join      = "";
+      $kantaasiakas_join = "";
+      $maksuehto_join    = "";
       $toimtuoteno_join  = "";
+      $maksupvm_join     = "";
 
       // näitä käytetään queryssä
       $sel_osasto = "";
@@ -1495,7 +1496,9 @@ else {
             $lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
           }
 
-          if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
+          if ($laskutuspaiva != "" and strpos($select, "lasku.tapvm laskutuspvm, ") === FALSE) {
+            $select .= "lasku.tapvm laskutuspvm, ";
+          }
         }
         //**  Tilauksittain loppu **//
 
@@ -1554,8 +1557,18 @@ else {
       }
 
       if ($naytamaksupvm != "") {
-        $group .= ",lasku.mapvm";
-        $select .= "lasku.mapvm maksupvm, ";
+        // Maksupäivämäärä on varmasti tallennettu vain itse laskulle
+        // tilauksia haettaessa täytyy siis käydä katsomassa maksupvm laskulta
+        if ($ajotapa != "lasku") {
+          $maksupvm_join = "LEFT JOIN lasku AS UX ON (UX.yhtio = lasku.yhtio AND UX.laskunro = lasku.laskunro AND UX.tila = 'U')";
+          $group .= ",UX.mapvm";
+          $select .= "UX.mapvm maksupvm, ";
+        }
+        else {
+          $group .= ",lasku.mapvm";
+          $select .= "lasku.mapvm maksupvm, ";
+        }
+
         $gluku++;
         $muutgroups++;
       }
@@ -2343,6 +2356,7 @@ else {
               {$kohde_join}
               {$toimtuoteno_join}
               {$lisa_parametri}
+              {$maksupvm_join}
               WHERE lasku.yhtio in ({$yhtio})
               and lasku.tila in ({$tila})";
 

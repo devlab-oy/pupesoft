@@ -596,9 +596,13 @@ if ($tila == "" and !isset($jatka)) {
     //Asiakas vaihtuu
     if ($from == "vaihdaasiakas" and $asiakasid != "") {
       // asiakashaussa pit‰‰ olla vakio columni kohdistettu, jonka arvo on O ett‰ saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydess‰
-      $squery = "SELECT *, 'O' kohdistettu
+      $squery = "SELECT *, 'O' kohdistettu,
+                 if(asiakas.gsm != '', asiakas.gsm,
+                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
+
       $assresult = pupe_query($squery);
       $assrow = mysql_fetch_assoc($assresult);
 
@@ -673,7 +677,7 @@ if ($tila == "" and !isset($jatka)) {
                 toim_postino        = '$assrow[toim_postino]',
                 toim_postitp        = '$assrow[toim_postitp]',
                 toim_maa            = '$assrow[toim_maa]',
-                toim_puh            = '$tpuh',
+                toim_puh            = '$assrow[toim_puh]',
                 laskutusvkopv       = '$assrow[laskutusvkopv]',
                 chn                 = '$assrow[chn]',
                 verkkotunnus        = '$assrow[verkkotunnus]',
@@ -685,7 +689,11 @@ if ($tila == "" and !isset($jatka)) {
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',
                 toimitusehto        = '$assrow[toimitusehto]',
-                tilausyhteyshenkilo = '$yhtnimi[nimi]'
+                tilausyhteyshenkilo = '$yhtnimi[nimi]',
+                viesti              = '$assrow[tilaus_viesti]',
+                comments            = '$assrow[myynti_kommentti1]',
+                sisviesti2          = '$assrow[sisviesti2]',
+                sisviesti1          = '$assrow[sisviesti1]'
                 WHERE yhtio         = '$kukarow[yhtio]'
                 and tunnus          = '$kukarow[kesken]'
                 and liitostunnus    = 0";

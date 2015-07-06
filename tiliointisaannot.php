@@ -15,10 +15,6 @@ echo "<font class='head'>".t("Toimittajan tiliöintisäännöt")."</font><hr>";
 
 if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 
-  if ($tee == 'S') { // S = selaussanahaku
-    $lisat = "and selaus like '%" . $nimi . "%'";
-  }
-
   if ($tee == 'N') { // N = nimihaku
     $lisat = "and nimi like '%" . $nimi . "%'";
   }
@@ -110,7 +106,7 @@ if ($tee == 'U') {
             WHERE yhtio  = '$kukarow[yhtio]'
             and tyyppi  != 'P'
             $lisat
-            ORDER BY selaus";
+            ORDER BY ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -783,7 +779,6 @@ else {
       <td>".t("Valitse toimittaja")."</td>
       <td><input type = 'text' name = 'nimi'></td>
       <td><select name='tee'><option value = 'N'>".t("Toimittajan nimi")."
-      <option value = 'S'>".t("Toimittajan selaussana")."
       <option value = 'Y'>".t("Y-tunnus")."
       </select>
       </td>

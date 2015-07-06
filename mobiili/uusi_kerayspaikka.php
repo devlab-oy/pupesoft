@@ -8,6 +8,8 @@ $mobile = true;
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
+
 if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
 
   if (empty($tuotepaikan_tunnus)) {
@@ -19,6 +21,7 @@ if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
     'tuotepaikan_tunnus' => $tuotepaikan_tunnus,
     'mista_koodi' => $mista_koodi,
     'minne_koodi' => $minne_koodi,
+    'saapumisnro_haku' => $saapumisnro_haku
   );
 
   $url = http_build_query($data);
@@ -38,6 +41,7 @@ else {
     'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
     'tuotenumero' => $tuotenumero,
     'ennaltakohdistettu' => $ennaltakohdistettu,
+    'saapumisnro_haku' => $saapumisnro_haku,
   );
 
   $url = http_build_query($data);

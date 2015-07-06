@@ -487,7 +487,7 @@ elseif ($rivityyppi == 'L' and $laaja_toim_kasittely) {
   );
   $varasto = sallitut_varastot($params);
 }
-elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+elseif ($laskurow["tila"] != "G" and isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
   $varasto = explode(",", $kukarow["varasto"]);
 }
 else {
@@ -1453,7 +1453,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         or {$zrow["varastotyyppi"]} == ''
                         or {$zrow["varastotyyppi"]} == 'V'
                         or (is_array($varasto)
-                          and in_array({$zrow["varasto"]}, $varasto)
+                          and in_array({$zrow["varasto"]}, "; var_dump($varasto); echo ")
                           and {$laskurow["varasto"]} == 0)
                         or {$laskurow["varasto"]} == {$zrow["varasto"]})
                     )
@@ -1475,7 +1475,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 or $zrow["varastotyyppi"] == 'V'
                 or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
                   and $laskurow["varasto"] == 0)
-                or $laskurow["varasto"] == $zrow["varasto"]))) {
+                or $laskurow["varasto"] == $zrow["varasto"]
+                or ($laskurow["tila"] == "G"
+                  and $laskurow["varasto"] == 0)))) {
 
             if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 
@@ -2108,7 +2110,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $toimittamatta -= $myy_kpl[$indeksi];
               }
 
-              if (($trow["sarjanumeroseuranta"] == "S" or $trow["sarjanumeroseuranta"] == "T" or $trow["sarjanumeroseuranta"] == "U" or $trow["sarjanumeroseuranta"] == "V") and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
+              if (($trow["sarjanumeroseuranta"] == "S" or $trow["sarjanumeroseuranta"] == "T" or $trow["sarjanumeroseuranta"] == "V") and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
                 if ($varattu > 0) {
                   if ($laskurow["tila"] != 'G') {
                     $tunken = "myyntirivitunnus";
@@ -2915,8 +2917,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       //jos laskurow[varasto] on setattu niin yritet‰‰n lˆyt‰‰ paikka siit‰ varastosta
       $query = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                 FROM tuotepaikat
-                where tuotepaikat.yhtio = '$kukarow[yhtio]'
-                and tuotepaikat.tuoteno = '$trow[tuoteno]'
+                where tuotepaikat.yhtio    = '$kukarow[yhtio]'
+                and tuotepaikat.tuoteno    = '$trow[tuoteno]'
                 AND tuotepaikat.hyllyalue != '!!M'
                 ORDER BY tuotepaikat.oletus DESC";
       $result = pupe_query($query);
@@ -3159,6 +3161,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     if ($yhtiorow['myyntiera_pyoristys'] == 'K' and (isset($kutsuja) and $kutsuja == "EDITILAUS") and $edi_tyyppi != "magento" and $myyntierahuomatus) {
       if (strpos($kommentti, t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on", $kieli)) === FALSE) {
         $kommentti .= " ".t("HUOM: Rivin m‰‰r‰ on pyˆristetty t‰yteen myyntier‰‰n! Myyntier‰ on", $kieli).": $trow[myynti_era]";
+      }
+    }
+
+    // Onko tuotteella staattinen ostorivikommentti
+    if ($rivityyppi == 'O' and $trow["ostokommentti"] != "" and $rivitunnus == 0) {
+      // Tilausrivin systeemikommentti
+      if (stripos($kommentti, $trow["ostokommentti"]) === FALSE) {
+        if (trim($kommentti) != "")  $kommentti = "\n".$kommentti;
+        $kommentti = trim($trow["ostokommentti"].$kommentti);
       }
     }
 

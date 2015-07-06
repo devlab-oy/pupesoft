@@ -109,8 +109,7 @@ $kentat = "tunnus, ytunnus, concat_ws('<br>',
 $hakukentat = "tunnus, ytunnus, nimi/nimitark/toim_nimi/toim_nimitark,
   postitp/toim_postitp, asiakasnro, ovttunnus/toim_ovttunnus {$hakukentatlisa}";
 
-$jarjestys   = 'selaus, nimi';
-
+$jarjestys   = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
 
 if ($laji == "H") {
   // Yksityisasiakkaat

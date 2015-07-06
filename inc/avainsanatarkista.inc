@@ -128,10 +128,10 @@ if (!function_exists("avainsanatarkista")) {
       }
 
       if ($tem_laji == "PARAMETRI") {
-        preg_match_all('/([a-zA-Z_])+/', $tem_selite, $match);
+        preg_match_all('/([a-zA-Z_0-9])+/', $tem_selite, $match);
 
         if ($match[0][0] != $tem_selite) {
-          $virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejä");
+          $virhe[$i] = t("Vain aakkoset, numerot ja alaviivat ovat sallittuja merkkejä");
         }
       }
 
@@ -260,7 +260,9 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
-    if (in_array(strtoupper($tem_laji), array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA"))) {
+    $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA");
+
+    if (in_array(strtoupper($tem_laji), $_arr)) {
       if (mysql_field_name($result, $i) == "selite") {
         $selite = trim($tem_selite);
 

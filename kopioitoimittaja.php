@@ -120,7 +120,7 @@ if ($tee == "edit") {
 if ($tee == '') {
 
   $kentat = 'tunnus, ytunnus, nimi, postitp, maa, oletus_valkoodi';
-  $jarjestys = 'selaus';
+  $jarjestys = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
 
   $array = explode(",", $kentat);
   $count = count($array);

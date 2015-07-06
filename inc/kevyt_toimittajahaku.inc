@@ -23,7 +23,7 @@ if ($monta == 0 and $ytunnus != '') {
              WHERE yhtio  = '{$kukarow["yhtio"]}'
              AND ytunnus  = '{$ytunnus}'
              AND tyyppi  != 'P'
-             ORDER BY ytunnus, selaus, nimi";
+             ORDER BY ytunnus, ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, tunnus";
   $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
@@ -35,7 +35,7 @@ if ($monta == 0 and $ytunnus != '') {
              WHERE yhtio        = '{$kukarow["yhtio"]}'
              AND toimittajanro  = '{$ytunnus}'
              AND tyyppi        != 'P'
-             ORDER BY toimittajanro, selaus, nimi";
+             ORDER BY toimittajanro, ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
   $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
@@ -53,7 +53,7 @@ if ($monta == 0 and $ytunnus != '') {
               WHERE yhtio        = '{$kukarow["yhtio"]}'
               AND toimittajanro  like '{$ytunnus}%'
               AND tyyppi        != 'P')
-              ORDER BY ytunnus, toimittajanro, selaus, nimi";
+              ORDER BY ytunnus, toimittajanro, ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, tunnus";
   $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
@@ -65,7 +65,7 @@ if ($monta == 0 and $ytunnus != '') {
              WHERE yhtio  = '{$kukarow["yhtio"]}'
              AND (nimi like '%{$ytunnus}%' or nimitark like '%{$ytunnus}%')
              AND tyyppi  != 'P'
-             ORDER BY selaus, nimi";
+             ORDER BY ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
   $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }

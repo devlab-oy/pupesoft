@@ -541,6 +541,19 @@ if (table_exists('suorituskykyloki')) {
   if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri riviä suorituskykylokista.");
 }
 
+// Poistetaan poistettujen käyttäjien oikeudet
+$query = "DELETE oikeu
+          FROM oikeu
+          LEFT JOIN kuka ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+          WHERE oikeu.yhtio   = '{$kukarow['yhtio']}'
+          AND oikeu.kuka     != ''
+          AND oikeu.profiili  = ''
+          AND kuka.tunnus is null";
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen käyttäjien käyttöoikeuksia.");
+
 // Dellataan rogue oikeudet
 $query = "DELETE o1.*
           FROM oikeu o1
@@ -552,7 +565,10 @@ $query = "DELETE o1.*
           WHERE o1.yhtio     = '{$kukarow['yhtio']}'
           AND o1.kuka       != ''
           AND o2.tunnus is null";
-$result = pupe_query($query);
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen ohjelmien käyttöoikeuksia.");
 
 // Merkataan myyntitilit valmiiksi, jos niillä ei ole yhtään käsittelemättömiä rivejä
 $query = "SELECT lasku.tunnus,
@@ -693,18 +709,18 @@ if ($yhtiorow['kerayserat'] == 'K') {
   $query = "SELECT tuotepaikat.tunnus
             FROM tuotepaikat
             JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
-              AND varaston_hyllypaikat.hyllyalue      = tuotepaikat.hyllyalue
-              AND varaston_hyllypaikat.hyllynro       = tuotepaikat.hyllynro
-              AND varaston_hyllypaikat.hyllyvali      = tuotepaikat.hyllyvali
-              AND varaston_hyllypaikat.hyllytaso      = tuotepaikat.hyllytaso
-              AND varaston_hyllypaikat.reservipaikka  = 'K')
+              AND varaston_hyllypaikat.hyllyalue          = tuotepaikat.hyllyalue
+              AND varaston_hyllypaikat.hyllynro           = tuotepaikat.hyllynro
+              AND varaston_hyllypaikat.hyllyvali          = tuotepaikat.hyllyvali
+              AND varaston_hyllypaikat.hyllytaso          = tuotepaikat.hyllytaso
+              AND varaston_hyllypaikat.reservipaikka      = 'K')
             LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-              AND inventointilistarivi.tila = 'A')
-            WHERE tuotepaikat.yhtio                   = '{$kukarow['yhtio']}'
-            AND tuotepaikat.saldo                     = 0
-            AND tuotepaikat.oletus                    = ''
-            AND tuotepaikat.poistettava              != 'D'
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '{$kukarow['yhtio']}'
+            AND tuotepaikat.saldo                         = 0
+            AND tuotepaikat.oletus                        = ''
+            AND tuotepaikat.poistettava                  != 'D'
             AND inventointilistarivi.tunnus IS NULL";
   $tuotepaikat = pupe_query($query);
 
@@ -752,7 +768,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = {$poistettava_tuotepaikka['tunnus']}
               AND saldo   = 0";
-    $result2 = pupe_query($query);
+    pupe_query($query);
     $poistettu++;
   }
 

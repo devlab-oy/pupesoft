@@ -543,7 +543,7 @@ if ($error == 0 and $tee == "file") {
                           AND status  not in ('E', 'D')";
                 pupe_query($query);
               }
-              elseif (in_array ($taulu, $muutataulut)) {
+              elseif (in_array($taulu, $muutataulut)) {
                 $query = "UPDATE IGNORE $taulu
                           SET $sarake = '$uustuoteno'
                           WHERE yhtio = '$kukarow[yhtio]'

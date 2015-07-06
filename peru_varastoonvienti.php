@@ -53,7 +53,7 @@ if ($id != 0) {
 
     $voidaankosnropoistaa = "";
 
-    if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+    if ($tuorow["sarjanumeroseuranta"] == "S") {
       $query = "SELECT yhtio
                 FROM sarjanumeroseuranta
                 WHERE yhtio           = '$kukarow[yhtio]'

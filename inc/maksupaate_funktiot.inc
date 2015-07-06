@@ -5,7 +5,7 @@ function hae_maksutapahtumat($tilausnumero) {
 
   $query = "SELECT *
             FROM maksupaatetapahtumat
-            WHERE yhtio = '{$kukarow["yhtio"]}'
+            WHERE yhtio      = '{$kukarow["yhtio"]}'
             AND tilausnumero = {$tilausnumero}";
 
   $result = pupe_query($query);
@@ -44,7 +44,7 @@ function hae_asiakkaan_kuitti($tunnus) {
     $query = "UPDATE maksupaatetapahtumat
               SET asiakkaan_kuitti = '{$asiakkaan_kuitti}'
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = {$tunnus}";
+              AND tunnus  = {$tunnus}";
 
     return pupe_query($query);
   }
@@ -65,7 +65,7 @@ function hae_kauppiaan_kuitti($tunnus) {
     $query = "UPDATE maksupaatetapahtumat
               SET kauppiaan_kuitti = '{$asiakkaan_kuitti}'
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = {$tunnus}";
+              AND tunnus  = {$tunnus}";
 
     return pupe_query($query);
   }
@@ -81,7 +81,7 @@ function hae_archive_id($tunnus) {
             kauppiaan_kuitti
             FROM maksupaatetapahtumat
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$tunnus};";
+            AND tunnus  = {$tunnus};";
   $result = pupe_query($query);
 
   $maksutapahtuma = mysql_fetch_assoc($result);

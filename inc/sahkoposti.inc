@@ -21,6 +21,12 @@ if (isset($content_subject) and trim($content_subject) != "") {
   $subject = $content_subject;
 }
 
+if (isset($komento['Ostotilaus']) and substr($komento['Ostotilaus'], 0, 15) == 'toimittajaemail') {
+  $varaposti_trig    = TRUE;
+  $varaposti         = $kukarow['eposti'];
+  $kukarow['eposti'] = substr($komento['Ostotilaus'], 15);
+}
+
 if (substr($komento, 0, 12) == 'asiakasemail') {
   $varaposti_trig    = TRUE;
   $varaposti         = $kukarow['eposti'];
@@ -52,7 +58,7 @@ foreach ($liite as $key => $value) {
   );
 }
 
-if ($lisaliitteet) {
+if (isset($lisaliitteet)) {
   foreach ($lisaliitteet as $path => $nimi) {
     $mail_liitteet[] = array("filename" => $path, "newfilename" => $nimi);
   }

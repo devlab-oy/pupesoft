@@ -354,17 +354,30 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
   fi
 fi
 
-#Pidet‰‰nkˆ kaikki backupit eri serverill‰
+# Pidet‰‰nkˆ kaikki backupit eri serverill‰
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
-  # Siirret‰‰n failit remoteserverille
-  if $MYSQLBACKUP; then
-    scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  REMOTESKEY=""
+
+  # Onko k‰ytt‰j‰tunnuksen mukana annettu ssh-avain?
+  # Muodossa "/home/kala/.ssh/id_rsa kayttajatunnus"
+  echo ${REMOTEUSER} | grep " " > /dev/null
+
+  if [[ $? = 0 ]]; then
+    KEYUSR=(${REMOTEUSER})
+
+    REMOTESKEY="-i ${KEYUSR[0]}"
+    REMOTEUSER=${KEYUSR[1]}
   fi
 
-  scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  # Siirret‰‰n failit remoteserverille
+  if $MYSQLBACKUP; then
+    scp ${REMOTESKEY} ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  fi
+
+  scp ${REMOTESKEY} ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 
   # Siivotaan vanhat backupit pois remoteserverilt‰
-  ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -type f -mtime +${BACKUPPAIVAT} -delete";
+  ssh ${REMOTESKEY} ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -type f -mtime +${BACKUPPAIVAT} -delete";
 
   # Pidet‰‰n master serverill‰ vain uusin backuppi
   BACKUPPAIVAT=1

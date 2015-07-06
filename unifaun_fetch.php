@@ -191,10 +191,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
               $_otsikkonro = $eranumero_sscc;
               $_pakkaustieto_tunnukset = "";
             }
-            
+
             $query = "SELECT tunnus, rahtikirjanro, sscc_ulkoinen
                       FROM rahtikirjat
-                      WHERE yhtio    = '{$kukarow['yhtio']}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
                       $_rahtiwherelisa
                       ORDER BY tunnus
                       LIMIT 1";

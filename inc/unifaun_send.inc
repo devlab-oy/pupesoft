@@ -84,6 +84,13 @@ class Unifaun {
     }
   }
 
+  public function sanitizeEmails($emails) {
+    $emails = str_replace(" ", "", $emails);
+    $emails = str_replace(",", ";", $emails);
+
+    return $emails;
+  }
+
   public function setPostiRow($postirow) {
     $this->postirow = $postirow;
 
@@ -275,7 +282,7 @@ class Unifaun {
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode(str_replace("0037", "FI", $this->postirow["yhtio_ovttunnus"]))); // VAT number
     $uni_snd_val->addAttribute('n', "vatno");
 
-    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->yhtiorow["email"])); // E-mail
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->sanitizeEmails($this->yhtiorow["email"]))); // E-mail
     $uni_snd_val->addAttribute('n', "email");
 
     //$uni_snd_val = $uni_sender->addChild('val', ""); # Mobile phone number. In Sweden the number must begin with 07 and contain 10 digits.
@@ -476,8 +483,15 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["ytunnus"])); // VAT number
     $uni_rcv_val->addAttribute('n', "vatno");
 
+    if ($this->asiakasrow["email"] != "" and strpos($this->asiakasrow["email"], ",") !== FALSE) {
+      $asiakasemail = substr($this->asiakasrow["email"], 0, strpos($this->asiakasrow["email"], ","));
+    }
+    else {
+      $asiakasemail = $this->asiakasrow["email"];
+    }
+
     if ($this->asiakasrow["email"] != "") {
-      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); // E-mail
+      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // E-mail
       $uni_rcv_val->addAttribute('n', "email");
     }
 
@@ -733,10 +747,10 @@ class Unifaun {
 
       if ($this->postirow["toim_puh"] != '') {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
-        $uni_add_val->addAttribute('n', "text3"); 
+        $uni_add_val->addAttribute('n', "text3");
       }
       if ($this->asiakasrow["email"] != '') {
-        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->asiakasrow["email"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // Used to define notification mode for add-on NOT.
         $uni_add_val->addAttribute('n', "text4");
       }
     }

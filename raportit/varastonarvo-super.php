@@ -941,7 +941,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     }
 
     // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
-    if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+    if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
 
       // jos summaustaso on per paikka, otetaan varastonarvo vain siltä paikalta
       if ($summaustaso == "P") {

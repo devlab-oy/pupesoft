@@ -11,7 +11,7 @@ if ($luousitee == "") {
   $result = pupe_query($query);
   $tuoterow = mysql_fetch_array($result);
 
-  if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "U") {
+  if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G") {
     // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
     $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
                FROM sarjanumeroseuranta
@@ -63,13 +63,12 @@ if ($luousitee == "") {
   // Lasketaan varastonarvon muutos
   // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
-  // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
   // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
 
-  if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+  if ($tuoterow["sarjanumeroseuranta"] == "S") {
     echo "<tr><th>", t("Tuotteen keskimääräinen hankintahinta"), ":</th><td>$kehahin</td></tr>";
     echo "<tr><th>".t("Inventoitavan yksilön hankintahinta").":</th><td><input type='text' name='kehahin' size='10'  value='$kehahin'></td></tr>";
   }

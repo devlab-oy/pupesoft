@@ -1950,8 +1950,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
                 FROM rahtikirjat
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND rahtikirjanro = (SELECT rahtikirjanro
+                WHERE yhtio                         = '{$kukarow["yhtio"]}'
+                AND rahtikirjanro                   = (SELECT rahtikirjanro
                                      FROM rahtikirjat
                                      WHERE yhtio    = '{$kukarow["yhtio"]}'
                                      AND otsikkonro = '{$laskurow["tunnus"]}')";

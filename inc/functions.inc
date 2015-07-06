@@ -2652,18 +2652,18 @@ if (!function_exists("synkronoi")) {
             //  Melkein kaikki tiedot pit‰‰ stemmata!
             $query = "SELECT tunnus
                       from maksuehto
-                      where yhtio            = '$kohderow[yhtio]'
-                      and abs_pvm            = '$aburow[abs_pvm]'
-                      and erapvmkasin        = '$aburow[erapvmkasin]'
-                      and factoring          = '$aburow[factoring]'
-                      and jaksotettu         = '$aburow[jaksotettu]'
-                      and jv                 = '$aburow[jv]'
-                      and kassa_abspvm       = '$aburow[kassa_abspvm]'
-                      and kassa_alepros      = '$aburow[kassa_alepros]'
-                      and kassa_relpvm       = '$aburow[kassa_relpvm]'
-                      and kateinen           = '$aburow[kateinen]'
-                      and rel_pvm            = '$aburow[rel_pvm]'
-                      and sallitut_maat      = '$aburow[sallitut_maat]'
+                      where yhtio       = '$kohderow[yhtio]'
+                      and abs_pvm       = '$aburow[abs_pvm]'
+                      and erapvmkasin   = '$aburow[erapvmkasin]'
+                      and factoring     = '$aburow[factoring]'
+                      and jaksotettu    = '$aburow[jaksotettu]'
+                      and jv            = '$aburow[jv]'
+                      and kassa_abspvm  = '$aburow[kassa_abspvm]'
+                      and kassa_alepros = '$aburow[kassa_alepros]'
+                      and kassa_relpvm  = '$aburow[kassa_relpvm]'
+                      and kateinen      = '$aburow[kateinen]'
+                      and rel_pvm       = '$aburow[rel_pvm]'
+                      and sallitut_maat = '$aburow[sallitut_maat]'
                       LIMIT 1";
             $tarkres = pupe_query($query);
 
@@ -22031,16 +22031,16 @@ if (!function_exists('paivita_oletuspaikka')) {
         // P‰ivitet‰‰n siirtorivien kohdepaikka
         $query = "UPDATE tilausrivin_lisatiedot AS tt
                   JOIN tilausrivi AS t ON (t.yhtio = tt.yhtio AND
-                    t.tunnus = tt.tilausrivitunnus AND
-                    t.tuoteno = '{$tuoteno}' AND
-                    t.kpl = '0' AND
-                    t.varattu != '0' AND
-                    t.tyyppi = 'G')
+                    t.tunnus              = tt.tilausrivitunnus AND
+                    t.tuoteno             = '{$tuoteno}' AND
+                    t.kpl                 = '0' AND
+                    t.varattu            != '0' AND
+                    t.tyyppi              = 'G')
                   SET tt.kohde_hyllyalue  = '{$hylly['hyllyalue']}',
                   tt.kohde_hyllynro       = '{$hylly['hyllynro']}',
                   tt.kohde_hyllyvali      = '{$hylly['hyllyvali']}',
                   tt.kohde_hyllytaso      = '{$hylly['hyllytaso']}'
-                  WHERE tt.yhtio    = '{$kukarow['yhtio']}'
+                  WHERE tt.yhtio          = '{$kukarow['yhtio']}'
                   AND tt.kohde_hyllyalue  = '{$oletusrow['hyllyalue']}'
                   AND tt.kohde_hyllynro   = '{$oletusrow['hyllynro']}'
                   AND tt.kohde_hyllytaso  = '{$oletusrow['hyllytaso']}'
@@ -31554,9 +31554,9 @@ if (!function_exists("hae_tuoteperhe")) {
               FROM tuote
               LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
                 AND lapsi.isatuoteno = tuote.tuoteno
-                AND lapsi.tyyppi = '{$tyyppi}')
-              WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-              AND tuote.tuoteno = '{$tuoteno}'";
+                AND lapsi.tyyppi     = '{$tyyppi}')
+              WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
+              AND tuote.tuoteno      = '{$tuoteno}'";
     $result = pupe_query($query);
 
     $tuoteperhe = array();

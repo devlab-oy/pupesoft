@@ -545,9 +545,9 @@ if (table_exists('suorituskykyloki')) {
 $query = "DELETE oikeu
           FROM oikeu
           LEFT JOIN kuka ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
-          WHERE oikeu.yhtio = '{$kukarow['yhtio']}'
-          AND oikeu.kuka != ''
-          AND oikeu.profiili = ''
+          WHERE oikeu.yhtio   = '{$kukarow['yhtio']}'
+          AND oikeu.kuka     != ''
+          AND oikeu.profiili  = ''
           AND kuka.tunnus is null";
 pupe_query($query);
 $del = mysql_affected_rows();
@@ -709,18 +709,18 @@ if ($yhtiorow['kerayserat'] == 'K') {
   $query = "SELECT tuotepaikat.tunnus
             FROM tuotepaikat
             JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
-              AND varaston_hyllypaikat.hyllyalue      = tuotepaikat.hyllyalue
-              AND varaston_hyllypaikat.hyllynro       = tuotepaikat.hyllynro
-              AND varaston_hyllypaikat.hyllyvali      = tuotepaikat.hyllyvali
-              AND varaston_hyllypaikat.hyllytaso      = tuotepaikat.hyllytaso
-              AND varaston_hyllypaikat.reservipaikka  = 'K')
+              AND varaston_hyllypaikat.hyllyalue          = tuotepaikat.hyllyalue
+              AND varaston_hyllypaikat.hyllynro           = tuotepaikat.hyllynro
+              AND varaston_hyllypaikat.hyllyvali          = tuotepaikat.hyllyvali
+              AND varaston_hyllypaikat.hyllytaso          = tuotepaikat.hyllytaso
+              AND varaston_hyllypaikat.reservipaikka      = 'K')
             LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
-              AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-              AND inventointilistarivi.tila = 'A')
-            WHERE tuotepaikat.yhtio                   = '{$kukarow['yhtio']}'
-            AND tuotepaikat.saldo                     = 0
-            AND tuotepaikat.oletus                    = ''
-            AND tuotepaikat.poistettava              != 'D'
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '{$kukarow['yhtio']}'
+            AND tuotepaikat.saldo                         = 0
+            AND tuotepaikat.oletus                        = ''
+            AND tuotepaikat.poistettava                  != 'D'
             AND inventointilistarivi.tunnus IS NULL";
   $tuotepaikat = pupe_query($query);
 

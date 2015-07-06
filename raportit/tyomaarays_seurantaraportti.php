@@ -128,8 +128,8 @@ if ($raptee == "AJA") {
             LEFT JOIN lasku ON (lasku.yhtio = tm.yhtio
               AND lasku.tunnus          = tm.otunnus)
             WHERE tt1.yhtio             = '{$kukarow['yhtio']}'
-              AND tt1.tyostatus_selite    = '{$aloitustila}'
-              AND tt2.tyostatus_selite    = '{$lopetustila}'
+              AND tt1.tyostatus_selite  = '{$aloitustila}'
+              AND tt2.tyostatus_selite  = '{$lopetustila}'
               {$valmistajalisa}
               {$asiakaslisa}
             GROUP BY tt1.tyomaarays_tunnus

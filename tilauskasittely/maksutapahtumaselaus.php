@@ -119,20 +119,20 @@ function hae_tilaukset($rajaus) {
             myyntilasku.tunnus AS myyntilaskun_tunnus
             FROM lasku
             INNER JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              AND maksuehto.tunnus = lasku.maksuehto)
+              AND maksuehto.tunnus      = lasku.maksuehto)
             INNER JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus)
+              AND asiakas.tunnus        = lasku.liitostunnus)
             INNER JOIN kuka ON (kuka.yhtio = lasku.yhtio
-              AND kuka.tunnus = lasku.myyja)
+              AND kuka.tunnus           = lasku.myyja)
             INNER JOIN lasku AS myyntilasku ON (myyntilasku.yhtio = lasku.yhtio
-              AND myyntilasku.laskunro = lasku.laskunro
-              AND myyntilasku.tila = 'U'
-              AND myyntilasku.alatila = 'X')
-            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND lasku.tila = 'L'
-            AND lasku.alatila = 'X'
+              AND myyntilasku.laskunro  = lasku.laskunro
+              AND myyntilasku.tila      = 'U'
+              AND myyntilasku.alatila   = 'X')
+            WHERE lasku.yhtio           = '{$kukarow["yhtio"]}'
+            AND lasku.tila              = 'L'
+            AND lasku.alatila           = 'X'
             AND DATE(lasku.laskutettu) BETWEEN '{$rajaus["alku"]["pvm"]}' AND '{$rajaus["loppu"]["pvm"]}'
-            AND maksuehto.kateinen != ''
+            AND maksuehto.kateinen     != ''
             ORDER BY lasku.laskutettu DESC
             LIMIT {$rajaus["limit"]}";
 

@@ -104,32 +104,32 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
               ORDER BY 1";
 }
 else {
-  $query =  " SELECT tuote.tuoteno
-              FROM tuote
-              WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != ''";
+  $query =  "SELECT tuote.tuoteno
+             FROM tuote
+             WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
+             AND tuote.status      != 'P'
+             AND tuote.tuotetyyppi  NOT in ('A','B')
+             AND tuote.tuoteno     != ''
+             AND tuote.nakyvyys    != ''";
 }
 
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
   foreach($verkkokauppa_saldo_varasto as $varasto) {
-    $query =  " SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tunnus
-                FROM tuotepaikat
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tuoteno = '{$row["tuoteno"]}'
-                AND varasto = '$varasto'";
+    $query =  "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tunnus
+               FROM tuotepaikat
+               WHERE yhtio = '{$kukarow["yhtio"]}'
+               AND tuoteno = '{$row["tuoteno"]}'
+               AND varasto = '$varasto'";
     $tpres = pupe_query($query);
 
     while ($tprow = mysql_fetch_assoc($tpres)) {
       list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $tprow["hyllyalue"], $tprow["hyllynro"], $tprow["hyllyvali"], $tprow["hyllytaso"]);
 
-      $query =  " UPDATE tuotepaikat
-                  SET myytavissa_static = '$myytavissa'
-                  WHERE tunnus = '{$tprow["tunnus"]}'";
+      $query =  "UPDATE tuotepaikat
+                 SET myytavissa_static = '$myytavissa'
+                 WHERE tunnus = '{$tprow["tunnus"]}'";
       pupe_query($query);
     }
   }

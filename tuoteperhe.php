@@ -1246,7 +1246,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
                      tuote.yksikko
                      FROM tuoteperhe
                      INNER JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
-                       AND tuote.tuoteno = tuoteperhe.tuoteno)
+                       AND tuote.tuoteno    = tuoteperhe.tuoteno)
                      WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
                      and tuoteperhe.tunnus  = '$tunnus'
                      and tuoteperhe.tyyppi  = '$hakutyyppi'";
@@ -1514,17 +1514,17 @@ elseif ($tee == "") {
 
   if ($toim == "RESEPTI") {
     $query = "SELECT DISTINCT tuoteperhe.isatuoteno
-            FROM tuoteperhe
-            INNER JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
-              AND ti.tuoteno = tuoteperhe.isatuoteno)
-            INNER JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
-              AND tl.tuoteno = tuoteperhe.tuoteno)
-            WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
-            AND tuoteperhe.tyyppi = '{$hakutyyppi}'
-            {$lisa1}
-            ORDER BY {$lisalimit}
-            tuoteperhe.isatuoteno
-            {$limitteri}";
+              FROM tuoteperhe
+              INNER JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
+                AND ti.tuoteno       = tuoteperhe.isatuoteno)
+              INNER JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
+                AND tl.tuoteno       = tuoteperhe.tuoteno)
+              WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+              AND tuoteperhe.tyyppi  = '{$hakutyyppi}'
+              {$lisa1}
+              ORDER BY {$lisalimit}
+              tuoteperhe.isatuoteno
+              {$limitteri}";
   }
   else {
     $query = "SELECT tuoteperhe.isatuoteno,

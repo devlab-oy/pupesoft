@@ -62,7 +62,7 @@ $query = "SELECT lasku.*,
           LEFT JOIN laskun_lisatiedot
           ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
           LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-            AND maksuehto.tunnus = lasku.maksuehto)
+            AND maksuehto.tunnus                = lasku.maksuehto)
           WHERE lasku.tunnus                    = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";

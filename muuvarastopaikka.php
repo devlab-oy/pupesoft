@@ -387,12 +387,11 @@ if ($tee == 'N') {
   // Tarkistetaan sarjanumeroseuranta
   // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
-  // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
   // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
-  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
+  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','V'), 1, 0)) sarjat,
             sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
             FROM tuote
             WHERE tuoteno            = '$tuoteno'

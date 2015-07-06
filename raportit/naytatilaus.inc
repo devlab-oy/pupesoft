@@ -1614,7 +1614,7 @@ else {
 
         if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += $row["kate"];
       }
-      elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
+      elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S")) {
         if ($kpl > 0) {
           //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
           $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);

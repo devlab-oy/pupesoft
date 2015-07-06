@@ -74,7 +74,12 @@ if ($siirtorivitunnus != "") {
 
 // Haetaan tilausrivin tiedot
 if ($from != '' and $rivitunnus != "") {
-  $query    = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko, tilausrivin_lisatiedot.osto_vai_hyvitys, tuote.kehahin
+  $query    = "SELECT tilausrivi.*,
+               tuote.sarjanumeroseuranta,
+               tuote.automaattinen_sarjanumerointi,
+               tuote.yksikko,
+               tilausrivin_lisatiedot.osto_vai_hyvitys,
+               tuote.kehahin
                FROM tilausrivi use index (PRIMARY)
                JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
                LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -392,7 +397,7 @@ if ($toiminto == 'MUOKKAA') {
 
       echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
 
-      if ($muutarow["sarjanumeroseuranta"] == "S" or $muutarow["sarjanumeroseuranta"] == "U") {
+      if ($muutarow["sarjanumeroseuranta"] == "S") {
 
         $chk = "";
         if ($muutarow["kaytetty"] == 'K') {
@@ -447,7 +452,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
   $era_kpl    = (float) str_replace(",", ".", $era_kpl);
   $insok      = "OK";
 
-  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
     $query = "SELECT *
               FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
               WHERE yhtio     = '$kukarow[yhtio]'
@@ -516,7 +521,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
     $sarjares = pupe_query($query);
     $tun = mysql_insert_id($GLOBALS["masterlink"]);
 
-    if ($sarjanumeronLisatiedot == "OK" and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) {
+    if ($sarjanumeronLisatiedot == "OK" and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) {
       $query = "SELECT *
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -555,7 +560,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
       $lisatietores_apu = pupe_query($query);
     }
 
-    if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+    if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
       echo "<font class='message'>".t("Lis‰ttiin sarjanumero")." $sarjanumero.</font><br><br>";
     }
     else {
@@ -715,7 +720,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       }
     }
   }
-  elseif (($rivirow["varattu"] < count($sarjataan) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) or (($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and ($rivirow["varattu"] == 0 or count($sarjataan) == 0))) {
+  elseif (($rivirow["varattu"] < count($sarjataan) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) or (($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and ($rivirow["varattu"] == 0 or count($sarjataan) == 0))) {
     echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).". ".$rivirow["varattu"]." ".count($sarjataan)."</font><br><br>";
   }
 
@@ -1060,7 +1065,7 @@ elseif ((($from == "riviosto" or $from == "kohdista" or $valmiste_raakaine == "V
         and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
         $lisa";
 
-  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V") {
+  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
     $query  .= " GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero ";
   }
   else {
@@ -1561,21 +1566,8 @@ if ($rivirow["tyyppi"] != 'V') {
         $nxt2 = t("EI SARJANUMEROA")."-1";
       }
 
-      if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
-
-        $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND substr(sarjanumero, 1, 4) = year(now())";
-        $vresult = pupe_query($query);
-        $vrow = mysql_fetch_assoc($vresult);
-
-        if ($vrow["kuluvan_vuoden_suurin_numero"]) {
-          $sarjanumero = date("Y") . "-" . ($vrow["kuluvan_vuoden_suurin_numero"] + 1);
-        }
-        else {
-          $sarjanumero = date("Y") . "-100";
-        }
+      if ($sarjanumero == "" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
+        $sarjanumero = generoi_sarjanumero($rivirow, $tunnuskentta);
       }
 
       echo "<br><table>";
@@ -1607,7 +1599,7 @@ if ($rivirow["tyyppi"] != 'V') {
       if ($rivirow['sarjanumeroseuranta'] == 'V') {
         echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
       }
-      elseif ($rivirow['sarjanumeroseuranta'] == 'S' or $rivirow['sarjanumeroseuranta'] == 'U') {
+      elseif ($rivirow['sarjanumeroseuranta'] == 'S') {
         echo "<input type='hidden' name='kehahin' value='$kehahin'>";
       }
     }
@@ -1687,4 +1679,61 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
   echo "<div class='left clear'>";
   require "inc/footer.inc";
   echo "</div>";
+}
+
+/**
+ * @param array  $tuote        Tarvitaan kentat tuoteno, tunnus ja automaattinen_sarjanumerointi
+ * @param string $tunnuskentta Tarvitaan, jos kaytossa on generointitapa 1
+ *
+ * @return string Sarjanumero
+ */
+function generoi_sarjanumero($tuote, $tunnuskentta = "") {
+  global $kukarow;
+
+  switch ($tuote["automaattinen_sarjanumerointi"]) {
+  case 1:
+    if (empty($tunnuskentta)) break;
+
+    $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero) + 1) + 0) + 1 sarjanumero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tuoteno = '{$tuote["tuoteno"]}'
+              AND {$tunnuskentta} = '{$tuote["tunnus"]}'";
+
+    $result = pupe_query($query);
+    $row    = mysql_fetch_assoc($result);
+
+    $sarjanumero = $tuote["nimitys"];
+
+    if ($row["sarjanumero"] > 0) {
+      $sarjanumero = $sarjanumero . "-" . $row["sarjanumero"];
+    }
+    else {
+      $sarjanumero = $sarjanumero . "-1";
+    }
+
+    break;
+  case 2:
+    $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND substr(sarjanumero, 1, 4) = year(now())";
+
+    $result = pupe_query($query);
+    $row    = mysql_fetch_assoc($result);
+
+    if ($row["kuluvan_vuoden_suurin_numero"]) {
+      $sarjanumero = date("Y") . "-" . ($row["kuluvan_vuoden_suurin_numero"] + 1);
+    }
+    else {
+      $sarjanumero = date("Y") . "-1000";
+    }
+
+    break;
+
+  default:
+    $sarjanumero = "";
+  }
+
+  return $sarjanumero;
 }

@@ -90,7 +90,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
           }
 
           //  Ratkaistaan tulostusmäärä
-          if (in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+          if (in_array($row["sarjanumeroseuranta"], array("S", "T", "V"))) {
             $tarra_kpl = 1;
           }
           elseif (in_array(strtoupper($row["yksikko"]), array("KPL"))) {

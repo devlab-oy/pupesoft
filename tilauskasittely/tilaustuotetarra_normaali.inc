@@ -33,7 +33,7 @@ if (in_array($row["sarjanumeroseuranta"], array("E", "F", "G"))) {
   $h-=$pdf->ln(1.25);
   $pdf->write($h, 1, 0, 0,  "$row[lisatieto]", "norm", "L", "");
 }
-elseif (in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+elseif (in_array($row["sarjanumeroseuranta"], array("S", "T", "V"))) {
   $pdf->write($h, 1, 0, 15,   "Tilaus", "norm", "L", "B");
   $pdf->write($h, 1, 20, 45,   "S:nro", "norm", "L", "B");
   if ($lisarow["pituus"]>0) {

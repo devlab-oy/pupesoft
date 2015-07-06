@@ -475,7 +475,7 @@ if ($tee == 'TEEVALMISTUS') {
             echo "<font class='error'>".t("VIRHE: Negatiivista kappalem‰‰r‰‰ ei voi valmistaa")."!</font><br>";
             $tee = "VALMISTA";
           }
-          elseif (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "U", "V")) and $valmkpl != (int) $valmkpl) {
+          elseif (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "V")) and $valmkpl != (int) $valmkpl) {
             //  Tarkastetaan, ett‰ sarjanumeroseurattuja tuotteita valmistetaan tasam‰‰r‰.
             echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
             $tee = "VALMISTA";
@@ -498,7 +498,7 @@ if ($tee == 'TEEVALMISTUS') {
             // Tarkistetaan valmisteiden sarjanumerot
             if ($tilrivirow["sarjanumeroseuranta"] != "") {
               // katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ listalla
-              if (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+              if (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "V"))) {
 
                 $query = "SELECT count(*) kpl
                           FROM sarjanumeroseuranta
@@ -577,7 +577,7 @@ if ($tee == 'TEEVALMISTUS') {
                   //  Tarkistetaan raaka-aineiden sarjanumerot
                   if ($perherow["sarjanumeroseuranta"] != "") {
                     // katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ listalla
-                    if (in_array($perherow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+                    if (in_array($perherow["sarjanumeroseuranta"], array("S", "T", "V"))) {
 
                       $query = "SELECT count(*) kpl
                                 FROM sarjanumeroseuranta
@@ -1170,7 +1170,7 @@ if (!isset($from_kaikkikorj)) {
 
       $sarjavalinta = "";
 
-      if (in_array($prow["sarjanumeroseuranta"], array("S", "T", "U", "V")) and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+      if (in_array($prow["sarjanumeroseuranta"], array("S", "T", "V")) and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
 
         if ($prow["tyyppi"] == "V") {
           $tunken = "myyntirivitunnus";

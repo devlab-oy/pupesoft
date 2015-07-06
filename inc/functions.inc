@@ -25427,7 +25427,7 @@ if (!function_exists('hyllysiirto')) {
     if ($kehahin_row['sarjanumeroseuranta'] == 'G') {
       $keskihankintahinta = sarjanumeron_ostohinta("tunnus", $sarjano_array[0]);
     }
-    elseif ($kehahin_row['sarjanumeroseuranta'] == 'S' or $kehahin_row['sarjanumeroseuranta'] == 'U') {
+    elseif ($kehahin_row['sarjanumeroseuranta'] == 'S') {
       $keskihankintahinta = 0;
 
       foreach ($sarjano_array as $sarjano) {
@@ -26170,7 +26170,7 @@ if (!function_exists("tsekit")) {
         $tunken = "sarjanumeroseuranta.ostorivitunnus";
       }
 
-      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
+      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "V") {
         $query = "SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -31115,7 +31115,7 @@ if (!function_exists("laske_tilausrivin_kate")) {
     global $kukarow, $yhtiorow;
 
     if ($kukarow['extranet'] == '' and
-        ($tilausrivi["sarjanumeroseuranta"] == "S" or $tilausrivi["sarjanumeroseuranta"] == "U")
+        ($tilausrivi["sarjanumeroseuranta"] == "S")
     ) {
       if ($kpl > 0) {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰

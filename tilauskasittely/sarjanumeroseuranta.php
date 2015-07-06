@@ -720,7 +720,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       }
     }
   }
-  elseif (($rivirow["varattu"] < count($sarjataan) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) or (($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and ($rivirow["varattu"] == 0 or count($sarjataan) == 0))) {
+  elseif (($rivirow["varattu"] < count($sarjataan) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) or (($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") and ($rivirow["varattu"] == 0 or count($sarjataan) == 0))) {
     echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).". ".$rivirow["varattu"]." ".count($sarjataan)."</font><br><br>";
   }
 

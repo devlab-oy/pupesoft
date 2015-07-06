@@ -541,6 +541,19 @@ if (table_exists('suorituskykyloki')) {
   if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri riviä suorituskykylokista.");
 }
 
+// Poistetaan poistettujen käyttäjien oikeudet
+$query = "DELETE oikeu
+          FROM oikeu
+          LEFT JOIN kuka ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+          WHERE oikeu.yhtio = '{$kukarow['yhtio']}'
+          AND oikeu.kuka != ''
+          AND oikeu.profiili = ''
+          AND kuka.tunnus is null";
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen käyttäjien käyttöoikeuksia.");
+
 // Dellataan rogue oikeudet
 $query = "DELETE o1.*
           FROM oikeu o1
@@ -552,7 +565,10 @@ $query = "DELETE o1.*
           WHERE o1.yhtio     = '{$kukarow['yhtio']}'
           AND o1.kuka       != ''
           AND o2.tunnus is null";
-$result = pupe_query($query);
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen ohjelmien käyttöoikeuksia.");
 
 // Merkataan myyntitilit valmiiksi, jos niillä ei ole yhtään käsittelemättömiä rivejä
 $query = "SELECT lasku.tunnus,
@@ -752,7 +768,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = {$poistettava_tuotepaikka['tunnus']}
               AND saldo   = 0";
-    $result2 = pupe_query($query);
+    pupe_query($query);
     $poistettu++;
   }
 

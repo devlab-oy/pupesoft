@@ -408,7 +408,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               $kate_eur  = $row["kate"];
               $kate_yht += $kate_eur;
             }
-            elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
+            elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S")) {
               if ($kpl > 0) {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
                 $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);

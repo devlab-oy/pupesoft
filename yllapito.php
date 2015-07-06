@@ -1331,7 +1331,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     list($ojar, $osuu) = explode("_", $ojarj);
     $jarjestys = "$ojar $osuu ";
   }
-  else {
+  elseif (!isset($jarjestys)) {
     $jarjestys = "{$toim}.tunnus";
   }
 

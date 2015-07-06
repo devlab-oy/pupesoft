@@ -630,7 +630,7 @@ else {
         fclose($fh);
 
         // itse print komento...
-        if ($komento["Ostotilaus"] == 'email') {
+        if ($komento["Ostotilaus"] == 'email' or substr($komento["Ostotilaus"], 0, 15) == 'toimittajaemail') {
           $liite = $pdffilenimi;
           $kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
 

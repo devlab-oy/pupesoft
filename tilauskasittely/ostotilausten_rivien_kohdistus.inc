@@ -2014,7 +2014,7 @@ if ($tila == '') {
 
     echo "<{$td} {$class}>";
 
-    if ($rivirow["automaattinen_sarjanumerointi"] != 0 and empty($nayta_siirrettavat)) {
+    if ($rivirow["automaattinen_sarjanumerointi"] == 1 and empty($nayta_siirrettavat)) {
       echo "<input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'>";
     }
     else {

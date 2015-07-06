@@ -967,9 +967,9 @@ if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
   $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
             FROM yriti
             INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
-              AND pankkiyhteys.pankki      = yriti.bic)
-            WHERE yriti.yhtio              = '{$kukarow["yhtio"]}'
-            AND yriti.tunnus               = {$pankkitili_tunnus}";
+              AND pankkiyhteys.pankki = yriti.bic)
+            WHERE yriti.yhtio         = '{$kukarow["yhtio"]}'
+            AND yriti.tunnus          = {$pankkitili_tunnus}";
   $result = pupe_query($query);
 
   // Meill‰ on pankkiyhteys luotu, tehd‰‰n formi l‰hett‰mist‰ varten

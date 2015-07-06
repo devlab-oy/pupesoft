@@ -336,7 +336,7 @@ if ($tee == '') {
       <input type='hidden' name='tee' value='paivita'>
       <select name='tila' onchange='submit()'>
       <option value=''>Valitse</option>
-      <option value='OV'>Siirä parkkiin</option>
+      <option value='OV'>Siirrä parkkiin</option>
       <option value='VA'>Aloita valmistus</option>
       <option value='TK'>Keskeytä valmistus</option>
       <option value='VT'>Valmis tarkistukseen</option>

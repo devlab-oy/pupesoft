@@ -33,10 +33,10 @@ if ($tee == "teeyhdistys") {
           if (trim($suuntalava_row['suuntalavat']) != '') {
             foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
               $query = "UPDATE suuntalavat_saapuminen SET
-                        saapuminen = '{$otunnus}',
-                        muuttaja = '{$kukarow['kuka']}',
-                        muutospvm = now()
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        saapuminen     = '{$otunnus}',
+                        muuttaja       = '{$kukarow['kuka']}',
+                        muutospvm      = now()
+                        WHERE yhtio    = '{$kukarow['yhtio']}'
                         AND suuntalava = '{$_suuntalava}'
                         AND saapuminen = '{$keikkatunnus}'";
               $upd_res = pupe_query($query);

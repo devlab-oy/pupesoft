@@ -482,10 +482,6 @@ if ($tee == 'A') {
 
 $th_lisat = '';
 
-if ($tee == 'S') { // S = selaussanahaku
-  $th_lisat = "and toimi.selaus like '%$nimi%'";
-}
-
 if ($tee == 'N') { // N = nimihaku
   $th_lisat = "and (toimi.nimi like '%$nimi%' or kuka.nimi like '%$nimi%')";
 }
@@ -519,12 +515,10 @@ if ($th_lisat != '') {
             toimi.nimi,
             toimi.nimitark,
             toimi.postitp,
-            toimi.selaus,
             toimi.tunnus,
             toimi.tyyppi,
             toimi.ytunnus
-            ORDER BY toimi.selaus,
-            toimi.nimi";
+            ORDER BY ".poista_osakeyhtio_lyhenne_mysql("toimi.nimi").", toimi.nimitark, toimi.ytunnus, toimi.tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -579,7 +573,6 @@ if ($tee == '') {
       <td><input type = 'text' name = 'nimi'></td>
       <td><select name='tee'>
       <option value = 'N'>".t("Toimittajan nimi")."
-      <option value = 'S'>".t("Toimittajan selaussana")."
       <option value = 'Y'>".t("Y-tunnus")."
       <option value = 'T'>".t("Toimittajanro")."
       </select>

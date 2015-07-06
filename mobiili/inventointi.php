@@ -67,15 +67,15 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus      = tuotepaikat.varasto
-                AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}'
-                AND varastopaikat.tyyppi      = ''
+                AND varastopaikat.tunnus                   = tuotepaikat.varasto
+                AND varastopaikat.toimipaikka              = '{$kukarow['toimipaikka']}'
+                AND varastopaikat.tyyppi                   = ''
               )
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
               LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                 AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-                AND inventointilistarivi.tila = 'A')
-              WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
+                AND inventointilistarivi.tila              = 'A')
+              WHERE tuotepaikat.yhtio                      = '{$kukarow['yhtio']}'
               AND $haku_ehto
               LIMIT 200";
     $result = pupe_query($query);
@@ -176,7 +176,7 @@ if ($tee == 'listat') {
   $query = "SELECT otunnus as lista
             FROM inventointilistarivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'A'
+            AND tila    = 'A'
             GROUP BY 1
             ORDER BY 1";
   $result = pupe_query($query);
@@ -296,10 +296,10 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                   AND inventointilistarivi.otunnus = inventointilista.tunnus)
                JOIN tuote on (tuote.yhtio=inventointilistarivi.yhtio and tuote.tuoteno=inventointilistarivi.tuoteno)
                JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
-                AND tuotepaikat.tunnus = inventointilistarivi.tuotepaikkatunnus)
-               WHERE inventointilista.yhtio = '{$kukarow['yhtio']}'
-               AND inventointilista.tunnus = '{$lista}'
-               AND inventointilistarivi.tila = 'A' # Inventoidut tuotteet on nollattu
+                AND tuotepaikat.tunnus             = inventointilistarivi.tuotepaikkatunnus)
+               WHERE inventointilista.yhtio        = '{$kukarow['yhtio']}'
+               AND inventointilista.tunnus         = '{$lista}'
+               AND inventointilistarivi.tila       = 'A' # Inventoidut tuotteet on nollattu
                ORDER BY sorttauskentta, tuoteno
                LIMIT 1";
     $result = pupe_query($query);

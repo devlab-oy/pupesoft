@@ -725,7 +725,7 @@ else {
         $row = mysql_fetch_assoc($result);
 
         // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
           $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
                      FROM sarjanumeroseuranta
                      LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1478,7 +1478,9 @@ else {
             $lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
           }
 
-          if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
+          if ($laskutuspaiva != "" and strpos($select, "lasku.tapvm laskutuspvm, ") === FALSE) {
+            $select .= "lasku.tapvm laskutuspvm, ";
+          }
         }
         //**  Tilauksittain loppu **//
 

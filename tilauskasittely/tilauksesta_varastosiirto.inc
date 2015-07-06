@@ -329,6 +329,9 @@ if (!function_exists('luo_varastosiirto')) {
     if ($varastosiirtotyyppi == "G") {
       $comments   = t("Relex-varastosiirto");
       $viesti     = t("Relex-varastosiirto");
+
+      $_kohdevarasto = hae_varasto($kohdevaraston_tunnus);
+      $viesti .= " - {$_kohdevarasto['nimitys']}";
     }
     else {
       $comments   = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";

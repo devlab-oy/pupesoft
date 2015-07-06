@@ -491,6 +491,25 @@ if ($fieldname == "ostolaskujen_paivays") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostolaskujen_oletusvaluutta") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'T' ? "selected" : "";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston valuuttaa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'T' {$sel}>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti toimittajan oletusvaluuttaa");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_kurssipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -4339,10 +4358,11 @@ if ($fieldname == 'vastaavat_tuotteet_esitysmuoto') {
 if ($fieldname == 'paivita_oletuspaikka') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'S' ? 'selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'S' => '', 'M' => '');
 
   $ulos .= "<option value = ''>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ostoriveille")."</option>";
-  $ulos .= "<option value = 'S' {$sel}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+  $ulos .= "<option value = 'S' {$sel['S']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille, myyntiriveille ja siirtoriveille.")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

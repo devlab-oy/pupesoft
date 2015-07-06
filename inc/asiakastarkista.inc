@@ -80,7 +80,7 @@ if (!function_exists("asiakastarkista")) {
             $qry = "UPDATE asiakas
                     SET luottoraja = '{$_luottoraja}'
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '$tunnus'";
+                    AND tunnus  = '$tunnus'";
             pupe_query($qry);
           }
         }

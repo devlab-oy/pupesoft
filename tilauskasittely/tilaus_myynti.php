@@ -9755,10 +9755,7 @@ if ($tee == '') {
           $tarjouslisa = "<font class='message'>".t("Perusta tilauksesta").":</font><br>
                   <select name='perusta_tilaustyyppi'>";
 
-          $tarjouslisa_normi      = "";
-          $tarjouslisa_projekti   = "";
-          $tarjouslisa_tyomaarays = "";
-          $tarjouslisa_asvalm     = "";
+          $tarjouslisa_normi = $tarjouslisa_projekti = $tarjouslisa_tyomaarays = "";
 
           $tarjouslisa_normi .= "<option value=''>".t("Normaalitilaus")."</option>";
 
@@ -9770,21 +9767,14 @@ if ($tee == '') {
             $tarjouslisa_tyomaarays .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
           }
 
-          if (tarkista_oikeus("tilaus_myynti.php", "VALMISTAASIAKKAALLE")) {
-            $tarjouslisa_asvalm .= "<option value='VALMISTAASIAKKAALLE'>".t("Asiakkaallevalmistus")."</option>";
-          }
-
           if ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "T") {
-            $tarjouslisa .= $tarjouslisa_tyomaarays.$tarjouslisa_normi.$tarjouslisa_projekti.$tarjouslisa_asvalm;
+            $tarjouslisa .= $tarjouslisa_tyomaarays.$tarjouslisa_normi.$tarjouslisa_projekti;
           }
           elseif ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "P") {
-            $tarjouslisa .= $tarjouslisa_projekti.$tarjouslisa_normi.$tarjouslisa_tyomaarays.$tarjouslisa_asvalm;
-          }
-          elseif ($yhtiorow["hyvaksy_tarjous_tilaustyyppi"] == "V") {
-            $tarjouslisa .= $tarjouslisa_asvalm.$tarjouslisa_projekti.$tarjouslisa_normi.$tarjouslisa_tyomaarays;
+            $tarjouslisa .= $tarjouslisa_projekti.$tarjouslisa_normi.$tarjouslisa_tyomaarays;
           }
           else {
-            $tarjouslisa .= $tarjouslisa_normi.$tarjouslisa_projekti.$tarjouslisa_tyomaarays.$tarjouslisa_asvalm;
+            $tarjouslisa .= $tarjouslisa_normi.$tarjouslisa_projekti.$tarjouslisa_tyomaarays;
           }
 
           $tarjouslisa .= "</select><br><br>";

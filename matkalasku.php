@@ -2237,33 +2237,33 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
   $selite_array  = array();
   $errori      = "";
 
+  list($alkupaiva, $alkuaika)      = explode(" ", $alku);
+  list($alkuvv, $alkukk, $alkupp)    = explode("-", $alkupaiva);
+  list($alkuhh, $alkumm)          = explode(":", $alkuaika);
+
+  list($loppupaiva, $loppuaika)      = explode(" ", $loppu);
+  list($loppuvv, $loppukk, $loppupp) = explode("-", $loppupaiva);
+  list($loppuhh, $loppumm)        = explode(":", $loppuaika);
+
+  /*
+    Päivärahoilla ratkaistaan päivät
+    Samalla oletetaan että osapäiväraha on aina P+tuoteno
+  */
+
+  //  Lasketaan tunnit
+  $alkupp = sprintf("%02d", $alkupp);
+  $alkukk = sprintf("%02d", $alkukk);
+  $alkuvv = (int) $alkuvv;
+  $alkuhh = sprintf("%02d", $alkuhh);
+  $alkumm = sprintf("%02d", $alkumm);
+
+  $loppupp = sprintf("%02d", $loppupp);
+  $loppukk = sprintf("%02d", $loppukk);
+  $loppuvv = (int) $loppuvv;
+  $loppuhh = sprintf("%02d", $loppuhh);
+  $loppumm = sprintf("%02d", $loppumm);
+
   if ($tyyppi == "A") {
-
-    list($alkupaiva, $alkuaika)      = explode(" ", $alku);
-    list($alkuvv, $alkukk, $alkupp)    = explode("-", $alkupaiva);
-    list($alkuhh, $alkumm)          = explode(":", $alkuaika);
-
-    list($loppupaiva, $loppuaika)      = explode(" ", $loppu);
-    list($loppuvv, $loppukk, $loppupp) = explode("-", $loppupaiva);
-    list($loppuhh, $loppumm)        = explode(":", $loppuaika);
-
-    /*
-      Päivärahoilla ratkaistaan päivät
-      Samalla oletetaan että osapäiväraha on aina P+tuoteno
-    */
-
-    //  Lasketaan tunnit
-    $alkupp = sprintf("%02d", $alkupp);
-    $alkukk = sprintf("%02d", $alkukk);
-    $alkuvv = (int) $alkuvv;
-    $alkuhh = sprintf("%02d", $alkuhh);
-    $alkumm = sprintf("%02d", $alkumm);
-
-    $loppupp = sprintf("%02d", $loppupp);
-    $loppukk = sprintf("%02d", $loppukk);
-    $loppuvv = (int) $loppuvv;
-    $loppuhh = sprintf("%02d", $loppuhh);
-    $loppumm = sprintf("%02d", $loppumm);
 
     if (($alkupp >= 1 and $alkupp <= 31) and ($alkukk >= 1 and $alkukk <= 12) and $alkuvv > 0 and ($alkuhh >= 0 and $alkuhh <= 24) and ($loppupp >= 1 and $loppupp <= 31) and ($loppukk >= 1 and $loppukk <= 12) and $loppuvv > 0 and ($loppuhh >= 0 and $loppuhh <= 24)) {
       $alku  = mktime($alkuhh, $alkumm, 0, $alkukk, $alkupp, $alkuvv);
@@ -2480,6 +2480,9 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
     $varri_array[0]    = 0;
     $selite_array[0]  = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á ".(float) $hinta;
   }
+
+  $selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
+  $selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
 
   //  poistetan return carriage ja newline -> <br>
   $kommentti = str_replace("\n", "<br>", str_replace("\r", "", $kommentti));

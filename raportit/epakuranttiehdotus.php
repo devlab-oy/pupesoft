@@ -225,7 +225,7 @@ else {
                WHERE tuote.yhtio             = '$kukarow[yhtio]'
                AND tuote.ei_saldoa           = ''
                AND tuote.tuotetyyppi         NOT IN ('A', 'B')
-               AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
+               AND tuote.sarjanumeroseuranta NOT IN ('S','G')
                $epakuranttipvm
                $tuote_epa_rajaus
                $lisa

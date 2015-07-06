@@ -789,8 +789,8 @@ if ($tee == 'VALMIS') {
           $row = mysql_fetch_assoc($result);
 
           if (($lista != '' and $row["inventointilista_aika"] !== null) or
-              ($validi_kasinsyotetty_inventointipaivamaara) or
-              ($lista == '' and $row["inventointilista_aika"] === null)) {
+            ($validi_kasinsyotetty_inventointipaivamaara) or
+            ($lista == '' and $row["inventointilista_aika"] === null)) {
 
             if ($validi_kasinsyotetty_inventointipaivamaara) {
               $row['inventointilista_aika'] = $laadittuaika;
@@ -1812,7 +1812,7 @@ if ($tee == 'INVENTOI') {
     echo "</option>";
 
     if ($laaja_inventointilista) {
-      echo "<option value='rivinro' {$seljarj['rivinro']}>",t("Rivinumerojärjestys"),"</option>";
+      echo "<option value='rivinro' {$seljarj['rivinro']}>", t("Rivinumerojärjestys"), "</option>";
     }
 
     echo "</select>";
@@ -1829,7 +1829,7 @@ if ($tee == 'INVENTOI') {
   if ($laaja_inventointilista) {
     echo "<br /><br />";
     echo "<font class='message'>";
-    echo t("Inventointilista"),": {$lista}";
+    echo t("Inventointilista"), ": {$lista}";
     echo "</font>";
     echo "<br /><br />";
 
@@ -1844,7 +1844,7 @@ if ($tee == 'INVENTOI') {
     $vapaa_teksti_res = pupe_query($query);
     $vapaa_teksti_row = mysql_fetch_assoc($vapaa_teksti_res);
 
-    echo t("Vapaa teksti"),": {$vapaa_teksti_row['vapaa_teksti']}<br /><br />";
+    echo t("Vapaa teksti"), ": {$vapaa_teksti_row['vapaa_teksti']}<br /><br />";
   }
 
   echo "<form name='inve' method='post' autocomplete='off'>";
@@ -2249,7 +2249,7 @@ if ($tee == 'INVENTOI') {
   }
 
   if ($laaja_inventointilista) {
-    echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='",t("Tallenna laskettu hyllyssä"),"' />&nbsp;";
+    echo "<input type='submit' name='tallenna_laskettu_hyllyssa' value='", t("Tallenna laskettu hyllyssä"), "' />&nbsp;";
     echo "<input type='submit' name='prev' value='".t("Edellinen sivu")."'>&nbsp;";
     echo "<input type='submit' name='next' value='".t("Seuraava sivu")."'>&nbsp;";
     echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."' onClick='return verify();' >";
@@ -2295,7 +2295,7 @@ if ($tee == 'INVENTOI') {
 
     echo "</select>";
 
-    echo "<input type='submit' name='erolista' value='",t("Erolista"),"'>";
+    echo "<input type='submit' name='erolista' value='", t("Erolista"), "'>";
     echo "</form>";
   }
 }
@@ -2441,7 +2441,7 @@ if ($tee == '') {
     echo "<th>".t("Luontiaika")."</th>";
 
     if ($laaja_inventointilista) {
-      echo "<th>",t("Vapaa teksti"),"</th>";
+      echo "<th>", t("Vapaa teksti"), "</th>";
     }
 
     echo "<th colspan='2'></th>";

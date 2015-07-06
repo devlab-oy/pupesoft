@@ -18,7 +18,7 @@ if ($tee == "teeyhdistys") {
       if (mysql_num_rows($result) == 1) {
         $keikkarow = mysql_fetch_assoc($result);
 
-        # Siirretään myös suuntalavat
+        // Siirretään myös suuntalavat
         $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'

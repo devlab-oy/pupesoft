@@ -67,7 +67,7 @@ if (mysql_field_name($result, $i) == "avainsana") {
 
       $ulos .= "</select></td>";
       $jatko = 0;
-   }
+    }
   }
   elseif (stripos($asavainsanalaji, "OHJAUSMERKKI") !== FALSE) {
 

@@ -24,8 +24,8 @@ ini_set("memory_limit", "2G");
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-# tarkistetaan onko tietyt kentät jo dropattu
-# jos on niin ei ajeta tätä skriptiä
+// tarkistetaan onko tietyt kentät jo dropattu
+// jos on niin ei ajeta tätä skriptiä
 $query = "DESC tuotepaikat";
 $res = pupe_query($query);
 
@@ -33,7 +33,7 @@ $loyty = false;
 
 while ($row = mysql_fetch_assoc($res)) {
   if (in_array($row['Field'],
-    array('inventointilista', 'inventointilista_aika', 'inventointilista_naytamaara'))) {
+      array('inventointilista', 'inventointilista_aika', 'inventointilista_naytamaara'))) {
     $loyty = true;
     break;
   }

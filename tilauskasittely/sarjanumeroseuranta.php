@@ -1682,11 +1682,14 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
 }
 
 /**
- * @param array  $tuote        Tarvitaan kentat tuoteno, tunnus ja automaattinen_sarjanumerointi
- * @param string $tunnuskentta Tarvitaan, jos kaytossa on generointitapa 1
+ *
+ * @param array   $tuote        Tarvitaan kentat tuoteno, tunnus ja automaattinen_sarjanumerointi
+ * @param string  $tunnuskentta Tarvitaan, jos kaytossa on generointitapa 1
  *
  * @return string Sarjanumero
  */
+
+
 function generoi_sarjanumero($tuote, $tunnuskentta = "") {
   global $kukarow;
 

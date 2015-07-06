@@ -84,7 +84,7 @@ class Unifaun {
     }
   }
 
-  public function sanitizeEmails ($emails) {
+  public function sanitizeEmails($emails) {
     $emails = str_replace(" ", "", $emails);
     $emails = str_replace(",", ";", $emails);
 
@@ -484,7 +484,7 @@ class Unifaun {
     $uni_rcv_val->addAttribute('n', "vatno");
 
     if ($this->asiakasrow["email"] != "" and strpos($this->asiakasrow["email"], ",") !== FALSE) {
-      $asiakasemail = substr($this->asiakasrow["email"], 0, strpos($this->asiakasrow["email"],","));
+      $asiakasemail = substr($this->asiakasrow["email"], 0, strpos($this->asiakasrow["email"], ","));
     }
     else {
       $asiakasemail = $this->asiakasrow["email"];

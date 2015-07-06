@@ -1557,9 +1557,9 @@ elseif ($tee == "") {
     $kentta = "isatuoteno_haku";
 
     $lopetus = "{$palvelin2}tuoteperhe.php" .
-               "////toim={$toim}" .
-               "//isatuoteno_haku={$isatuoteno_haku}" .
-               "//tuoteno_haku={$tuoteno_haku}";
+      "////toim={$toim}" .
+      "//isatuoteno_haku={$isatuoteno_haku}" .
+      "//tuoteno_haku={$tuoteno_haku}";
 
     echo "<form name='haku' action='tuoteperhe.php' method='post'>";
     echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1576,10 +1576,10 @@ elseif ($tee == "") {
     while ($prow = mysql_fetch_array($result)) {
       $_isatuoteno = urlencode($prow["isatuoteno"]);
       $_href = "{$PHP_SELF}" .
-               "?toim={$toim}" .
-               "&isatuoteno={$_isatuoteno}" .
-               "&hakutuoteno={$_isatuoteno}" .
-               "&lopetus=$lopetus";
+        "?toim={$toim}" .
+        "&isatuoteno={$_isatuoteno}" .
+        "&hakutuoteno={$_isatuoteno}" .
+        "&lopetus=$lopetus";
 
       echo "<tr class='aktiivi'>";
 
@@ -1625,10 +1625,10 @@ function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
     }
     else {
       echo "<a href='{$PHP_SELF}" .
-                "?toim={$toim}" .
-                "&isatuoteno={$tuoteno}" .
-                "&hakutuoteno={$tuoteno}" .
-                "&lopetus={$lopetus}'>{$tuoteno} {$tuote["nimitys"]}
+        "?toim={$toim}" .
+        "&isatuoteno={$tuoteno}" .
+        "&hakutuoteno={$tuoteno}" .
+        "&lopetus={$lopetus}'>{$tuoteno} {$tuote["nimitys"]}
             </a>";
     }
 

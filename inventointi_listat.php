@@ -289,7 +289,7 @@ if ($yhtiorow['laaja_inventointilista'] != "") {
   if (!isset($vapaa_teksti)) $vapaa_teksti = "";
 
   echo "<tr>";
-  echo "<th>",t("Vapaa teksti"),"</th>";
+  echo "<th>", t("Vapaa teksti"), "</th>";
   echo "<td><textarea name='vapaa_teksti' rows='4'>{$vapaa_teksti}</textarea></td>";
   echo "</tr>";
 }

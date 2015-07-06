@@ -18718,7 +18718,7 @@ if (!function_exists("tee_keraysera")) {
                     }
 
                     $juokseva_nro--;
-                    # skipataan kyseinen nippu
+                    // skipataan kyseinen nippu
                     break 2;
                   }
 
@@ -19969,7 +19969,6 @@ if (!function_exists("pupeFileReader")) {
         /**
          * Luetaan CSV rivi tiedostosta *
          */
-
         // Katsotaan onko UTF-8 muodossa
         if (!PUPE_UNICODE and mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
           $rivi = str_getcsv(utf8_decode($rivi));
@@ -25342,7 +25341,7 @@ if (!function_exists('hyllysiirto')) {
         $_chk = true;
       }
       elseif ($_laji_chk == 'inventointi' and $minnerow['saldo'] == 0) {
-        # Jos tapahtuma oli inventointi ja saldo oli 0
+        // Jos tapahtuma oli inventointi ja saldo oli 0
         $_chk = true;
       }
 
@@ -25933,50 +25932,50 @@ if (!function_exists('paivita_ohjausmerkki')) {
 
     if ($asiakkaan_ohjausmerkki) {
 
-    $query = "SELECT tarkenne
+      $query = "SELECT tarkenne
               FROM asiakkaan_avainsanat
               WHERE yhtio      = '{$kukarow['yhtio']}'
               AND laji         = 'OHJAUSMERKKI'
               AND liitostunnus = '{$laskurow['liitostunnus']}'
               AND avainsana    = '{$laskurow['toimitustapa']}'
               LIMIT 1";
-    $ohjausmerkki_check_res = pupe_query($query);
+      $ohjausmerkki_check_res = pupe_query($query);
 
-    if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
-      $query = "SELECT tarkenne
+      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
+        $query = "SELECT tarkenne
                 FROM asiakkaan_avainsanat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND laji         = 'OHJAUSMERKKI'
                 AND liitostunnus = '{$laskurow['liitostunnus']}'
                 AND avainsana    = 'OLETUS'
                 LIMIT 1";
-      $ohjausmerkki_check_res = pupe_query($query);
-    }
+        $ohjausmerkki_check_res = pupe_query($query);
+      }
 
-    $ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
+      $ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
-    if ($ohjausmerkki_check_row['tarkenne'] != "") {
+      if ($ohjausmerkki_check_row['tarkenne'] != "") {
 
-      // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
-      // Ei haluta lisätä tekstiä kahteen kertaan
-      if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+        // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+        // Ei haluta lisätä tekstiä kahteen kertaan
+        if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
 
-        if ($laskurow['ohjausmerkki'] != "") {
-          $updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
-          $laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
-        }
-        else {
-          $updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
-          $laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
-        }
+          if ($laskurow['ohjausmerkki'] != "") {
+            $updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+            $laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+          }
+          else {
+            $updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+            $laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
+          }
 
-        $query = "UPDATE lasku SET
+          $query = "UPDATE lasku SET
                   {$updlisa}
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  = '{$laskurow['tunnus']}'";
-        $updres = pupe_query($query);
+          $updres = pupe_query($query);
+        }
       }
-    }
     }
 
     if ($laskurow['toimitustavan_lahto'] != 0) {
@@ -29555,12 +29554,12 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     $sorttaajat = $parametrit['order_by'];
 
     function sorttaajat($a, $b) {
-        foreach ($sorttaajat as $sorttaaja) {
-          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-        }
-        return 0;
-  }
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    }
 
     usort($ryhmitetty_array, "sorttaajat");
 
@@ -30703,11 +30702,11 @@ if (!function_exists("hae_saldo")) {
 
 if (!function_exists("mb_str_pad")) {
   function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
-      // Tässä on "//NO_MB_OVERLOAD"-kommentti
-      // jotta UTF8-konversio ei osu tähän riviin
-      $pad_string_length =  mb_strlen($pad_string);
-      $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
-      return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+    // Tässä on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu tähän riviin
+    $pad_string_length =  mb_strlen($pad_string);
+    $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
+    return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
   }
 }
 
@@ -30721,7 +30720,7 @@ if (!function_exists("mb_str_split")) {
         $parts[] = mb_substr($string, 0, $string_length);
         $string  = mb_substr($string, $string_length, $c-$string_length);
 
-      } while(!empty($string));
+      } while (!empty($string));
 
       // Tsekataan, että vika stringi ei ole liian lyhyt jos meillä on minimipituus annettu
       if ($string_min_length > 1 and mb_strlen(end($parts)) < $string_min_length and count($parts) > 1) {
@@ -30751,12 +30750,12 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     global $yhtiorow;
 
     if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
-        ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
+      ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
     ) {
       $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
       $myytavissa = $myytavissa[2];
       $saapumisaika = hae_tuotteen_saapumisaika($tilausrivi["tuoteno"],
-                                                $status, $myytavissa);
+        $status, $myytavissa);
       if (count($saapumisaika > 0)) {
         $saapumisaika = $saapumisaika[1];
 
@@ -31100,22 +31099,25 @@ if (!function_exists("paata_kvartaali")) {
 }
 
 if (!function_exists("laske_tilausrivin_kate")) {
+
+
   /**
-   * @param array  $tilausrivi Tilausrivi
-   * @param        $kotisumma_alviton
-   * @param        $kehahinta Tuoteen kehähinta
-   * @param string $kpl Kappalemäärä, jota tarvitaan, jos käytössä on sarjanumeroseuranta, muuten se
+   *
+   * @param array   $tilausrivi        Tilausrivi
+   * @param unknown $kotisumma_alviton
+   * @param unknown $kehahinta         Tuoteen kehähinta
+   * @param string  $kpl               Kappalemäärä, jota tarvitaan, jos käytössä on sarjanumeroseuranta, muuten se
    *   otetaan tilausrivistä
-   * @param array  $arow
+   * @param array   $arow
    *
    * @return string Kate
    */
   function laske_tilausrivin_kate($tilausrivi, $kotisumma_alviton, $kehahinta, $kpl = "",
-                                  $arow = "") {
+    $arow = "") {
     global $kukarow, $yhtiorow;
 
     if ($kukarow['extranet'] == '' and
-        ($tilausrivi["sarjanumeroseuranta"] == "S")
+      ($tilausrivi["sarjanumeroseuranta"] == "S")
     ) {
       if ($kpl > 0) {
         //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
@@ -31190,8 +31192,8 @@ if (!function_exists("laske_tilausrivin_kate")) {
       if ($kotisumma_alviton != 0) {
         $khh = hinta_kuluineen($tilausrivi['tuoteno'], $kehahinta);
         $kate = sprintf('%.2f', 100 * ($kotisumma_alviton - ($khh * ($tilausrivi["varattu"] +
-                                                                     $tilausrivi["jt"]))) /
-                                $kotisumma_alviton);
+                $tilausrivi["jt"]))) /
+          $kotisumma_alviton);
       }
       elseif ($kehahinta != 0 and ($tilausrivi["varattu"] + $tilausrivi["jt"]) > 0) {
         $kate = "-100.00";
@@ -31348,10 +31350,10 @@ if (!function_exists("choose_correct_date")) {
 
 if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
-                                   $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-                                   $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
+    $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+    $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
-           $kassalipas, $kieli, $valittu_tulostin;
+    $kassalipas, $kieli, $valittu_tulostin;
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -31460,7 +31462,7 @@ if (!function_exists("maksa_maksupaatteella")) {
         $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
       }
 
-      require("rajapinnat/lumo_handler.inc");
+      require "rajapinnat/lumo_handler.inc";
     }
 
     $korttimaksutapahtuman_status =
@@ -31525,12 +31527,14 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
 }
 
 if (!function_exists("hae_tuoteperhe")) {
+
+
   /**
    * Hakee tuoteperheen kaikkine lapsineen rekursiivisesti
    *
-   * @param int|string $tuoteno Isätuotteen tuoteno
-   * @param string     $tyyppi Tuoteperheen tyyppi, defaulttaa reseptiin
-   * @param array      $tuotenot Jo haetut reseptit
+   * @param int|string $tuoteno  Isätuotteen tuoteno
+   * @param string  $tyyppi   Tuoteperheen tyyppi, defaulttaa reseptiin
+   * @param array   $tuotenot Jo haetut reseptit
    *
    * @return array Tuoteperhe lapsineen. Rakenne on seuraavanlainen:
    *   array(

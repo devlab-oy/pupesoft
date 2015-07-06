@@ -1,7 +1,7 @@
 <?php
 
 if (php_sapi_name() != 'cli') {
-   die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
+  die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 }
 
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
@@ -35,7 +35,7 @@ while ($yhtio = mysql_fetch_assoc($row)) {
 
     $tapahtumaid = $tapahtumarow["tunnus"];
     $selite = $tapahtumarow["selite"];
-    $tiliointisumma = round($tapahtumarow["kpl"] * $tapahtumarow["hinta"],2);
+    $tiliointisumma = round($tapahtumarow["kpl"] * $tapahtumarow["hinta"], 2);
     $tapvm = $tapahtumarow["laadittu"];
     $hyllyalue = $tapahtumarow["hyllyalue"];
     $hyllynro = $tapahtumarow["hyllynro"];
@@ -69,7 +69,7 @@ while ($yhtio = mysql_fetch_assoc($row)) {
       $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
     }
     elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
-        $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+      $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
     }
     else {
       $varastonmuutos_tili = $yhtiorow["varastonmuutos"];

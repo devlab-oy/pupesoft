@@ -116,7 +116,7 @@ else {
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  foreach($verkkokauppa_saldo_varasto as $varasto) {
+  foreach ($verkkokauppa_saldo_varasto as $varasto) {
     $query =  "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tunnus
                FROM tuotepaikat
                WHERE yhtio = '{$kukarow["yhtio"]}'

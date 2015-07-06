@@ -62,33 +62,35 @@ $lask = 1;
 $sivu = 1;
 
 $tulostakolli = $tulostuskpl;
+echo "65: $rahtikirjanro, $rivi[rahtikirjanro] <br><br>";
+if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {
+  $oma = sprintf("%09s", substr(trim($rivi["rahtikirjanro"]), -9));
+}
+else {
+  $oma = sprintf("%09s", $rtunnus); // 9, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ ollaa uniikki
+}
+// T‰‰ll‰ tehd‰‰n aina uusiksi postin seurantakoodit=viivakoodit, joten
+// p‰ivitet‰‰n ne rahtikirjat-tauluun myˆs rahtikirjaa muutettaessa
+$rahtikirjanro = '';
+$uudet_koodit = 'yes';
 
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $kuka = sprintf("%02s", $tulostuskpl);     // laitetaan tulostuskpl alkuun niin jokalapulla on uniikki viiva
 
-  if (substr(trim($rivi["rahtikirjanro"]), 0, 4) == "JJFI") {
-    $oma = sprintf("%09s", substr(trim($rivi["rahtikirjanro"]), -9));
-  }
-  else {
-    $oma = sprintf("%09s", $rtunnus); // 9, pitk‰ numero tulee rahtikirja taulun tunnuksesta, pit‰‰ ollaa uniikki
-  }
-
+echo "82: $rahtikirjanro, $rivi[rahtikirjanro], $oma <br><br>";
   // tehd‰‰n viivakoodit
   $viiva1   = "JJFI$toitarow[sopimusnro]$kuka$oma";
 
   $viivaedi = "JJFI$toitarow[sopimusnro]$kuka$oma";
 
   $viiva2   = "JJFI $toitarow[sopimusnro] $kuka$oma";
-  $viivatark = "JJFI $toitarow[sopimusnro] $kuka";
   $v2_alku  = substr($viiva2, 0, -6);
   $v2_loppu = substr($viiva2, -6);
 
   // erotellaan spacella jokainen rahtikirjanumero
-  if (strpos($rahtikirjanro, $viivatark) === FALSE)  {
-    $rahtikirjanro .= "$viiva2 ";
-  }
+  $rahtikirjanro .= "$viiva2 ";
 
   // tehd‰‰n pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
@@ -333,7 +335,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     require "postiedi.inc";
   }
 }
-
+echo "338: $rahtikirjanro <br><br>";
 if ($tulostakolli > 0) {
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";

@@ -202,6 +202,9 @@ if (!function_exists('alku')) {
       $pdf_lasku->draw_rectangle(674, 300, 653, 580, $page_lasku[$sivu], $rectparam);
     }
 
+    if ($laskutyyppi == 20) {
+      $pdf_lasku->draw_rectangle(632, 420, 611, 580, $page_lasku[$sivu], $rectparam);
+    }
 
 
     // Oikean laidan ruudukko, vasen sarake
@@ -289,7 +292,7 @@ if (!function_exists('alku')) {
     if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"],   $page_lasku[$sivu], $boldi);
     $rivi_ind = $laskutyyppi == 17 ? $rivi_ind + 2 : $rivi_ind + 1;
 
-    if ($laskutyyppi != 8 and !kyseessa_eramaksu($laskurow)) {
+    if (!in_array($laskutyyppi, array(8, 20)) and !kyseessa_eramaksu($laskurow)) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"],   $page_lasku[$sivu], $pieni);
 
       if ($laskurow["kasumma"] != 0.00) {
@@ -311,6 +314,37 @@ if (!function_exists('alku')) {
     }
     elseif (kyseessa_eramaksu($laskurow)) {
       $rivi_ind += 2;
+    }
+    elseif ($laskutyyppi == 20) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Aiotut rajatoimipaikat (ja maat)", $kieli),
+        $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430,
+        $arvo[$rivi_ind],
+        t_avainsana("RAJATOIMIPAIKAT",
+          $kieli,
+          "AND avainsana.selite = '{$laskurow["aiotut_rajatoimipaikat"]}'",
+          "",
+          "",
+          "selitetark"),
+        $page_lasku[$sivu],
+        $norm);
+
+      $rivi_ind++;
+
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Määrätoimipaikka (ja maa)", $kieli),
+        $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430,
+        $arvo[$rivi_ind],
+        t_avainsana("MAARATOIMPAIKKA",
+          $kieli,
+          "AND avainsana.selite = '{$laskurow["maaratoimipaikka"]}'",
+          "",
+          "",
+          "selitetark"),
+        $page_lasku[$sivu],
+        $norm);
+
+      $rivi_ind++;
     }
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiaa hoitaa", $kieli),   $page_lasku[$sivu], $pieni);
@@ -390,9 +424,26 @@ if (!function_exists('alku')) {
     $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($toimehto, 270, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
     $rivi_ind++;
 
-    $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli),   $page_lasku[$sivu], $pieni);
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),     $page_lasku[$sivu], $norm);
+    if ($laskutyyppi == 20) {
+      $lahetysmaa = hae_maa(array("maakoodi" => $laskurow["maa_lahetys"]));
+      $lahetysmaa = $lahetysmaa["nimi"];
 
+      $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Lähetys-/Vientimaa", $kieli),
+        $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $lahetysmaa, $page_lasku[$sivu], $norm);
+
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Poistumistoimipaikka", $kieli),
+        $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["poistumistoimipaikka"],
+        $page_lasku[$sivu], $norm);
+    }
+    else {
+      $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), $page_lasku[$sivu],
+        $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
+        pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
+        $page_lasku[$sivu], $norm);
+    }
     $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 
 
@@ -740,7 +791,7 @@ if (!function_exists('rivi_lasku')) {
       if ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["kpl"] < 0 and $row["var2"] == "EIOST") {
         $sarjanutunnus = "ostorivitunnus";
       }
-      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'G')) {
         $sarjanutunnus = "myyntirivitunnus";
       }
       elseif ($row["kpl"] < 0) {
@@ -1765,6 +1816,16 @@ if (!function_exists('loppu')) {
 
       $pdf_lasku->draw_text(30, 142+$vientikala+$barcode_korkeus, $allekirjoitus_row['nimi'], $thispage, $norm);
       $pdf_lasku->draw_text(30, 132+$vientikala+$barcode_korkeus, $allekirjoitus_row['asema'], $thispage, $norm);
+    }
+
+    if ($laskutyyppi == 20) {
+      $pdf_lasku->draw_rectangle(130 + $vientikala + $barcode_korkeus, 207,
+        110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+      $pdf_lasku->draw_text(217, 122 + $vientikala + $barcode_korkeus, t("Lisätietoja", $kieli),
+        $thispage, $pieni);
+      $pdf_lasku->draw_text(217, 112 + $vientikala + $barcode_korkeus,
+        pdf_substr($laskurow["comments"], 363, $pdf_lasku, $norm), $thispage,
+        $norm);
     }
 
     if (!kyseessa_eramaksu($laskurow)) {

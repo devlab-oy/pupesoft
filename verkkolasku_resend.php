@@ -246,6 +246,38 @@ if ($handle = opendir($kansio)) {
       }
 
       echo "Maventa-lasku $laskunro: $status<br>\n";
+
+      if ($status != 'OK: INVOICE CREATED SUCCESSFULLY') {
+
+        // Rakennetaan sähköpostiin lähetettävä virheviesti
+        $maventaerrorreport = t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro)."!\n\n";
+        $maventaerrorreport .= t("Lähetetyn tiedoston nimi").": $lasku \n\n";
+
+        // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
+        // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+        $error_email = $yhtiorow["admin_email"];
+
+        if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+          $error_email = $yhtiorow["talhal_email"];
+        }
+        elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+          $error_email = $yhtiorow["alert_email"];
+        }
+
+        $params = array(
+          "to"      => $error_email,
+          "subject" => t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro),
+          "ctype"   => "text",
+          "body"    => $maventaerrorreport,
+          "attachements"  => array(0 => array(
+              "filename"    => "{$pupe_root_polku}/dataout/$lasku",
+              "newfilename" => ""))
+        );
+
+        pupesoft_sahkoposti($params);
+
+      }
+
       $mavelask++;
 
       // Pidetään sadan laskun jälkeen pieni paussi

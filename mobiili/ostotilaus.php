@@ -57,8 +57,13 @@ if (isset($virhe)) {
 if (isset($submit)) {
   switch ($submit) {
   case 'ok':
+    $_empty_data = empty($data['viivakoodi']);
+    $_empty_data = ($_empty_data and empty($data['tuotenumero']));
+    $_empty_data = ($_empty_data and empty($data['ostotilaus']));
+    $_empty_data = ($_empty_data and empty($data['saapumisnro_haku']));
+
     // Haettu vähintään yhdellä kentällä
-    if (empty($data['viivakoodi']) and empty($data['tuotenumero']) and empty($data['ostotilaus'])) {
+    if ($_empty_data) {
       $errors[] = t("Vähintään yksi kenttä on syötettävä");
       break;
     }
@@ -80,6 +85,7 @@ if (isset($submit)) {
 }
 
 $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
+$saapumisnro_haku = !empty($saapumisnro_haku) ? $saapumisnro_haku : '';
 
 //## UI ###
 echo "
@@ -102,6 +108,10 @@ echo "<div class='main'>
   <tr>
     <th><label for='ostotilaus'>", t("Ostotilaus"), "</label></th>
     <td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
+  </tr>
+  <tr>
+    <th><label for='saapumisnro_haku'>", t("Saapumisnumero"), "</label></th>
+    <td><input type='text' id='saapumisnro_haku' name='data[saapumisnro_haku]' value='{$saapumisnro_haku}'/><td>
   </tr>
 </table>
 </div>";

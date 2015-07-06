@@ -136,7 +136,7 @@ $sel = array();
 if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 $sel[$alkuvv] = "SELECTED";
 
-for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+for ($i = date("Y"); $i >= date("Y")-10; $i--) {
   if (!isset($sel[$i])) $sel[$i] = "";
   echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
 }
@@ -183,7 +183,7 @@ $sel = array();
 if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("y", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
 $sel[$loppuvv] = "SELECTED";
 
-for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+for ($i = date("Y")+1; $i >= date("Y")-10; $i--) {
 
   if (!isset($sel[$i])) $sel[$i] = "";
 

@@ -640,7 +640,7 @@ case 'T00':
 
       if ($tilioteselailu_oikrow !== FALSE) {
         echo "<tr>
-              <th><a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
+              <th><a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</a></th>
               <th>";
         echo "<form action='{$palvelin2}tilioteselailu.php' method='post'>";
         echo "<input type='hidden' name='toim'    value='$toim'>";
@@ -822,14 +822,14 @@ case 'T00':
   echo "<tr><td></td><td></td><td></td><td></td>";
   if ($tee == 'S') echo "<td></td>";
   echo "<td>".t("Saldo")." ".pankkipvm(substr($tietue, 65, 6))."</td>";
-  echo "<td style='text-align:right;'>".sprintf("%01.2f", ((substr($tietue, 71, 19) / 100)-$tililimiitti))."</td>";
+  echo "<td style='text-align:right;'>".sprintf("%01.2f", (substr($tietue, 71, 19) / 100))."</td>";
   echo "<td class='back' style='width:200px;'></td></tr>";
 
   if ($tililimiitti != "") {
     echo "<tr><td></td><td></td><td></td><td></td>";
     if ($tee == 'S') echo "<td></td>";
     echo "<td>".t("Käyttövara")."</td>";
-    echo "<td style='text-align:right;'>".(substr($tietue, 71, 19) / 100)."</td>";
+    echo "<td style='text-align:right;'>".sprintf("%01.2f", (substr($tietue, 71, 19) / 100)+$tililimiitti)."</td>";
     echo "<td class='back' style='width:200px;'></td></tr>";
   }
 
@@ -1172,6 +1172,12 @@ case 'T11':
     $erialla     = "VIITEAINEISTO";
   }
 
+  // Swedbank Viro häkki
+  if ($yhtiorow['maa'] == "EE" and $koodi == '770' and $koodiselite == "INTERNATIONAL PAYMENT" and $kuittikoodi != "E" and (int) $maksuviite > 0) {
+    $kuittikoodi = "E";
+    $erialla     = "VIITEAINEISTO";
+  }
+
   echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";
 
   if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
@@ -1486,4 +1492,11 @@ default:
     echo "<tr><td colspan='$colspan'>";
     echo t("Tunnistamaton tietue").": $tunnus</td><td class='back' style='width:200px;'></td></tr>";
   }
+}
+
+if ($tilioteselailu_oikrow !== FALSE and $tilioterivimaara == $tilioterivilaskuri) {
+  echo "<tr><td class='back' nowrap>
+        <a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</a>&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a>
+        </td><tr>";
 }

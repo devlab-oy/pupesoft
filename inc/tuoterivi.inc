@@ -256,7 +256,7 @@ if (mysql_field_name($result, $i) == "kommentoitava") {
 
 if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-  $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+  $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'V', 'E', 'F', 'G'), '');
 
   $query = "SELECT count(*) saldo
             FROM tuotepaikat
@@ -271,14 +271,11 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
   }
-  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
+  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and $trow[$i] == "S")) {
     $ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
   }
   if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
-  }
-  if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
-    $ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
   }
   if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
@@ -294,6 +291,22 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
   }
 
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "automaattinen_sarjanumerointi") {
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = " selected";
+
+  $ulos = "<td>
+             <select name='{$nimi}'>
+               <option value='0'{$sel["0"]}>" . t("Ei automaattista sarjanumerointia") . "</option>
+               <option value='1'{$sel["1"]}>" . t("Automaattinen sarjanumerointi kaavalla tuotteen nimitys + juokseva numero") . "</option>
+               <option value='2'{$sel["2"]}>" . t("Automaattinen sarjanumerointi kaavalla vuosi + 1000 alkava juokseva numero") . "</option>
+             </select>
+           </td>";
 
   $jatko = 0;
 }
@@ -323,7 +336,7 @@ if (mysql_field_name($result, $i) == "aleryhma") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti" or mysql_field_name($result, $i) == "tilausrivi_kommentti" or mysql_field_name($result, $i) == "kerayskommentti" or mysql_field_name($result, $i) == "purkukommentti") {
+if (mysql_field_name($result, $i) == "kuvaus" or mysql_field_name($result, $i) == "lyhytkuvaus" or mysql_field_name($result, $i) == "mainosteksti" or mysql_field_name($result, $i) == "tilausrivi_kommentti" or mysql_field_name($result, $i) == "kerayskommentti" or mysql_field_name($result, $i) == "purkukommentti" or mysql_field_name($result, $i) == "ostokommentti") {
   $ulos = "<td><textarea cols='50' rows='10' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }

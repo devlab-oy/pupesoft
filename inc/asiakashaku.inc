@@ -77,7 +77,10 @@ if ($kukarow["piirit"] != "") {
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
   // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
-  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi
+  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi,
+             if(asiakas.gsm != '', asiakas.gsm,
+               if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                 if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
              FROM asiakas
              JOIN yhtio on asiakas.yhtio=yhtio.yhtio
              WHERE asiakas.$konsyhtiot
@@ -93,11 +96,16 @@ elseif ($ytunnus != '') {
 
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi
+               concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi,
+               if(asiakas.gsm != '', asiakas.gsm,
+                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                 AND asiakas.tunnus = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tunnus = '$ytunnus'";
+               and lasku.tunnus     = '$ytunnus'";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
   }
@@ -111,11 +119,16 @@ elseif ($ytunnus != '') {
     // kokeillaan ihan asiakkaan nimellä laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi,
+                if(asiakas.gsm != '', asiakas.gsm,
+                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku use index (asiakasnimi)
-               JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN yhtio on lasku.yhtio = yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus  = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tila != 'D'
+               and lasku.tila      != 'D'
                and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)
                GROUP BY 1,2,3,4,5,6,7,8,9,10
                ORDER BY 1";

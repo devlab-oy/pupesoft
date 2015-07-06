@@ -269,7 +269,7 @@ $query = "SELECT
           {$laitelisa}
           FROM lasku
           JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
-          JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
+          JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus)
           LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
           LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
           LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono)
@@ -280,7 +280,7 @@ $query = "SELECT
           LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
           {$laitejoini}
           WHERE $konsernit
-          and lasku.tila     in ('A','L','N','S','C')
+          and lasku.tila in ('A','L','N','S','C','V')
           and lasku.alatila != 'X'
           $lisa
           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
@@ -324,6 +324,14 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   }
   elseif ($vrow["tila"] == "L" or $vrow["tila"] == "N") {
     $toimi = "TYOMAARAYS";
+  }
+  elseif ($vrow["tila"] == "V") {
+    if ($toim == 'TYOMAARAYS_ASENTAJA') {
+      $toimi = 'TYOMAARAYS_ASENTAJA';
+    }
+    else {
+      $toimi = "VALMISTAASIAKKAALLE";
+    }
   }
   elseif ($vrow["tila"] == "T") {
     $toimi = "TARJOUS";

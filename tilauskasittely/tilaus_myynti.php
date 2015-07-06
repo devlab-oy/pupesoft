@@ -3671,98 +3671,92 @@ if ($tee == '') {
 
             $kaletunnit[$nimi] += ($ltstamp - $atstamp)/60;
 
-            if ($toim == 'TYOMAARAYS' or $toim == "TYOMAARAYS_ASENTAJA") {
-
-              if ($asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] == $liiterow['pvmalku_sort'] and substr($asekal_alku, 5, 2).substr($asekal_alku, 8, 2).substr($asekal_alku, 0, 4) == substr($asekal_loppu, 5, 2).substr($asekal_loppu, 8, 2).substr($asekal_loppu, 0, 4)) {
-                continue;
-              }
-
-              echo "$asekal_nimi: ".tv1dateconv($asekal_alku, "", "LYHYT");
-
-              if ($kukarow['kuka'] == $asekal_kuka) {
-
-                // to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
-                date_default_timezone_set('UTC');
-
-                $query = "SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
-                          FROM kalenteri
-                          WHERE yhtio  = '$kukarow[yhtio]'
-                          AND kuka     = '$kukarow[kuka]'
-                          AND kentta02 = '$laskurow[tunnus]'
-                          AND pvmalku  like '".substr($asekal_alku, 0, 4)."-".substr($asekal_alku, 5, 2)."-".substr($asekal_alku, 8, 2)."%'
-                          AND tyyppi   = 'kalenteri'";
-                $tunti_chk_res = pupe_query($query);
-
-                $tunnit = 0;
-                $minuutit = 0;
-                $tuntimaara = '';
-
-                while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
-                  if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
-                    list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
-                    list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
-
-                    list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
-
-                    $tunnit += $temp_tunnit;
-                    $minuutit += $temp_minuutit;
-                  }
-                }
-
-                if ($tunnit != 0 or $minuutit != 0) {
-                  $minuutit = $minuutit / 60;
-                  $tuntimaara = " (".str_replace(".", ",", ($tunnit+$minuutit))."h)";
-                }
-
-                if ($tuntimaara != '') echo $tuntimaara;
-              }
-
-              if (substr($asekal_alku, 5, 2).substr($asekal_alku, 8, 2).substr($asekal_alku, 0, 4) != substr($asekal_loppu, 5, 2).substr($asekal_loppu, 8, 2).substr($asekal_loppu, 0, 4)) {
-                echo " - ".tv1dateconv($asekal_loppu, "", "LYHYT");
-
-                // to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
-                date_default_timezone_set('UTC');
-
-                $query = "SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
-                          FROM kalenteri
-                          WHERE yhtio  = '$kukarow[yhtio]'
-                          AND kuka     = '$kukarow[kuka]'
-                          AND kentta02 = '$laskurow[tunnus]'
-                          AND pvmloppu like '".substr($asekal_loppu, 0, 4)."-".substr($asekal_loppu, 5, 2)."-".substr($asekal_loppu, 8, 2)."%'
-                          AND tyyppi   = 'kalenteri'";
-                $tunti_chk_res = pupe_query($query);
-
-                $tunnit = 0;
-                $minuutit = 0;
-                $tuntimaara = '';
-
-                while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
-                  if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
-                    list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
-                    list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
-
-                    list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
-
-                    $tunnit += $temp_tunnit;
-                    $minuutit += $temp_minuutit;
-                  }
-                }
-
-                if ($tunnit != 0 or $minuutit != 0) {
-                  $minuutit = $minuutit / 60;
-                  $tuntimaara = " (".str_replace(".", ",", ($tunnit+$minuutit))."h)";
-                }
-
-                if ($tuntimaara != '') echo $tuntimaara;
-              }
-
-              $asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] = $liiterow['pvmalku_sort'];
-
-              echo "<br>";
+            if ($asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] == $liiterow['pvmalku_sort'] and substr($asekal_alku, 5, 2).substr($asekal_alku, 8, 2).substr($asekal_alku, 0, 4) == substr($asekal_loppu, 5, 2).substr($asekal_loppu, 8, 2).substr($asekal_loppu, 0, 4)) {
+              continue;
             }
-            else {
-              echo "$asekal_nimi: ".tv1dateconv($asekal_alku, "P")." - ".tv1dateconv($asekal_loppu, "P")."<br>";
+
+            echo "$asekal_nimi: ".tv1dateconv($asekal_alku, "", "LYHYT");
+
+            if ($kukarow['kuka'] == $asekal_kuka) {
+
+              // to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+              date_default_timezone_set('UTC');
+
+              $query = "SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+                        FROM kalenteri
+                        WHERE yhtio  = '$kukarow[yhtio]'
+                        AND kuka     = '$kukarow[kuka]'
+                        AND kentta02 = '$laskurow[tunnus]'
+                        AND pvmalku  like '".substr($asekal_alku, 0, 4)."-".substr($asekal_alku, 5, 2)."-".substr($asekal_alku, 8, 2)."%'
+                        AND tyyppi   = 'kalenteri'";
+              $tunti_chk_res = pupe_query($query);
+
+              $tunnit = 0;
+              $minuutit = 0;
+              $tuntimaara = '';
+
+              while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+                if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
+                  list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+                  list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+                  list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+                  $tunnit += $temp_tunnit;
+                  $minuutit += $temp_minuutit;
+                }
+              }
+
+              if ($tunnit != 0 or $minuutit != 0) {
+                $minuutit = $minuutit / 60;
+                $tuntimaara = " (".str_replace(".", ",", ($tunnit+$minuutit))."h)";
+              }
+
+              if ($tuntimaara != '') echo $tuntimaara;
             }
+
+            if (substr($asekal_alku, 5, 2).substr($asekal_alku, 8, 2).substr($asekal_alku, 0, 4) != substr($asekal_loppu, 5, 2).substr($asekal_loppu, 8, 2).substr($asekal_loppu, 0, 4)) {
+              echo " - ".tv1dateconv($asekal_loppu, "", "LYHYT");
+
+              // to ADD or SUBSTRACT times NOTE that if you dont specify the UTC zone your result is the difference +- your server UTC delay.
+              date_default_timezone_set('UTC');
+
+              $query = "SELECT right(pvmalku, 8) pvmalku, right(pvmloppu, 8) pvmloppu
+                        FROM kalenteri
+                        WHERE yhtio  = '$kukarow[yhtio]'
+                        AND kuka     = '$kukarow[kuka]'
+                        AND kentta02 = '$laskurow[tunnus]'
+                        AND pvmloppu like '".substr($asekal_loppu, 0, 4)."-".substr($asekal_loppu, 5, 2)."-".substr($asekal_loppu, 8, 2)."%'
+                        AND tyyppi   = 'kalenteri'";
+              $tunti_chk_res = pupe_query($query);
+
+              $tunnit = 0;
+              $minuutit = 0;
+              $tuntimaara = '';
+
+              while ($tunti_chk_row = mysql_fetch_assoc($tunti_chk_res)) {
+                if (trim($tunti_chk_row['pvmalku']) != '' and trim($tunti_chk_row['pvmloppu']) != '') {
+                  list($ah, $am, $as) = explode(":", $tunti_chk_row['pvmalku']);
+                  list($lh, $lm, $ls) = explode(":", $tunti_chk_row['pvmloppu']);
+
+                  list($temp_tunnit, $temp_minuutit) = explode(":", date("G:i", mktime($lh, $lm) - mktime($ah, $am)));
+
+                  $tunnit += $temp_tunnit;
+                  $minuutit += $temp_minuutit;
+                }
+              }
+
+              if ($tunnit != 0 or $minuutit != 0) {
+                $minuutit = $minuutit / 60;
+                $tuntimaara = " (".str_replace(".", ",", ($tunnit+$minuutit))."h)";
+              }
+
+              if ($tuntimaara != '') echo $tuntimaara;
+            }
+
+            $asekal_distinct_chk[$asekal_kuka][$laskurow['tunnus']] = $liiterow['pvmalku_sort'];
+
+            echo "<br>";
           }
           echo "</td></tr>";
         }

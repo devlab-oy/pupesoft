@@ -316,23 +316,23 @@ if ($tee == 'paikat') {
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-                    AND inventointilistarivi.tila = 'A')
-                  WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-                  and tuotepaikat.tunnus  = '{$ptunnus}'
-                  and tuotepaikat.tuoteno = '{$tilausrivirow['tuoteno']}'";
+                    AND inventointilistarivi.tila              = 'A')
+                  WHERE tuotepaikat.yhtio                      = '{$kukarow['yhtio']}'
+                  and tuotepaikat.tunnus                       = '{$ptunnus}'
+                  and tuotepaikat.tuoteno                      = '{$tilausrivirow['tuoteno']}'";
       }
       else {
         $query = "SELECT tuotepaikat.*, inventointilistarivi.tunnus as inventointilistatunnus
                   from tuotepaikat
                   LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
                     AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
-                    AND inventointilistarivi.tila = 'A')
-                  WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
-                  and tuotepaikat.hyllyalue = '{$t1[$tun]}'
-                  and tuotepaikat.hyllynro  = '{$t2[$tun]}'
-                  and tuotepaikat.hyllyvali = '{$t3[$tun]}'
-                  and tuotepaikat.hyllytaso = '{$t4[$tun]}'
-                  and tuotepaikat.tuoteno   = '{$tilausrivirow['tuoteno']}'";
+                    AND inventointilistarivi.tila              = 'A')
+                  WHERE tuotepaikat.yhtio                      = '{$kukarow['yhtio']}'
+                  and tuotepaikat.hyllyalue                    = '{$t1[$tun]}'
+                  and tuotepaikat.hyllynro                     = '{$t2[$tun]}'
+                  and tuotepaikat.hyllyvali                    = '{$t3[$tun]}'
+                  and tuotepaikat.hyllytaso                    = '{$t4[$tun]}'
+                  and tuotepaikat.tuoteno                      = '{$tilausrivirow['tuoteno']}'";
       }
 
       $result = pupe_query($query);
@@ -453,7 +453,7 @@ if ($tee == 'paikat') {
               and inventointilistarivi.hyllyvali = '{$tilausrivirow['hyllyvali']}'
               and inventointilistarivi.hyllytaso = '{$tilausrivirow['hyllytaso']}'
               and inventointilistarivi.tuoteno   = '{$tilausrivirow['tuoteno']}'
-              AND inventointilistarivi.tila = 'A'";
+              AND inventointilistarivi.tila      = 'A'";
     $presult = pupe_query($query);
     $prow = mysql_fetch_assoc($presult);
 

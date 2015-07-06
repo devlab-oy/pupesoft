@@ -18,11 +18,11 @@ if ($tee == "teeyhdistys") {
       if (mysql_num_rows($result) == 1) {
         $keikkarow = mysql_fetch_assoc($result);
 
-        # Siirretään myös suuntalavat
+        // Siirretään myös suuntalavat
         $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
                   FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi = 'O'
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tyyppi      = 'O'
                   AND uusiotunnus = '{$keikkatunnus}'";
         $suuntalava_res = pupe_query($query);
         $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
@@ -33,10 +33,10 @@ if ($tee == "teeyhdistys") {
 
             if ((string) $_suuntalava != "0") {
               $query = "UPDATE suuntalavat_saapuminen SET
-                        saapuminen = '{$otunnus}',
-                        muuttaja = '{$kukarow['kuka']}',
-                        muutospvm = now()
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        saapuminen     = '{$otunnus}',
+                        muuttaja       = '{$kukarow['kuka']}',
+                        muutospvm      = now()
+                        WHERE yhtio    = '{$kukarow['yhtio']}'
                         AND suuntalava = '{$_suuntalava}'
                         AND saapuminen = '{$keikkatunnus}'";
               $upd_res = pupe_query($query);

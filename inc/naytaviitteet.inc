@@ -6,7 +6,7 @@
 // 9 -> summatietue
 // S -> Danske Bank factoring VIPN -rivi
 
-$type=substr($tietue, 0, 1);
+$type = substr($tietue, 0, 1);
 
 if ($type == '0' and substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) != "EOF") {
 
@@ -17,12 +17,13 @@ if ($type == '0' and substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) 
 
   if (!isset($lopetus) or $lopetus == "") $lopetus = "/SPLIT/${palvelin2}tilioteselailu.php////toim=$toim//tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
 
-  echo "<table>";
-
   if ($tilioteselailu_oikrow !== FALSE) {
-    echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
+    echo "<a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</a>&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a>
+          <br><br>";
   }
 
+  echo "<table>";
   echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue, 1, 6))."</td></tr>";
   echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue, 7, 4)."</td></tr>";
   echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue, 11, 2)."</td></tr>";
@@ -103,8 +104,14 @@ elseif ($type == '9') {
   echo "<tr><th>".t("Tapahtumia")."</th><td>".(int) substr($tietue, 1, 6)."</td><td>".sprintf("%01.2f", substr($tietue, 7, 11)/100)."</td></tr>";
   echo "<tr><th>".t("Oikaisutapahtumia")."</th><td>".(int) substr($tietue, 18, 6)."</td><td>".sprintf("%01.2f", substr($tietue, 24, 11)/100)."</td></tr>";
   echo "</table>";
-  //echo "<td>Varalla</td><td>".substr($tietue,35,5)."</td></tr>";
 }
 elseif (substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) != "EOF") {
   echo "<td>".t("Tuntematon tietuetunnus")." $type</td>";
+}
+
+if ($tilioteselailu_oikrow !== FALSE and $tilioterivimaara == $tilioterivilaskuri) {
+  echo "<br>
+        <a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</a>&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a>
+        <br>";
 }

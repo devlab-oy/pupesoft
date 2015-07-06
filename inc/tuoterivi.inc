@@ -304,7 +304,7 @@ if (mysql_field_name($result, $i) == "automaattinen_sarjanumerointi") {
              <select name='{$nimi}'>
                <option value='0'{$sel["0"]}>" . t("Ei automaattista sarjanumerointia") . "</option>
                <option value='1'{$sel["1"]}>" . t("Automaattinen sarjanumerointi kaavalla tuotteen nimitys + juokseva numero") . "</option>
-               <option value='2'{$sel["2"]}>" . t("Automaattinen sarjanumerointi kaavalla vuosi + 100 alkava juokseva numero") . "</option>
+               <option value='2'{$sel["2"]}>" . t("Automaattinen sarjanumerointi kaavalla vuosi + 1000 alkava juokseva numero") . "</option>
              </select>
            </td>";
 

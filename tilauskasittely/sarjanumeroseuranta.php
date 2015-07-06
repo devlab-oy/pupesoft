@@ -1726,7 +1726,7 @@ function generoi_sarjanumero($tuote, $tunnuskentta = "") {
       $sarjanumero = date("Y") . "-" . ($row["kuluvan_vuoden_suurin_numero"] + 1);
     }
     else {
-      $sarjanumero = date("Y") . "-100";
+      $sarjanumero = date("Y") . "-1000";
     }
 
     break;

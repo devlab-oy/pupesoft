@@ -221,6 +221,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPALP")     $ulos .= "<option value='TOIMTAPALP' {$avain_sel['TOIMTAPALP']}>      ".t("Toimitustavan lajittelupiste")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE")   $ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>    ".t("Varaston terminaalialue")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SSCC")         $ulos .= "<option value='SSCC' $avain_sel[SSCC]>              ".t("SSCC-koodi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "GS1_SSCC") $ulos .= "<option value='GS1_SSCC' {$avain_sel['GS1_SSCC']}>".t("GS1 SSCC")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SIIRTO_VASTNRO")   $ulos .= "<option value='SIIRTO_VASTNRO' {$avain_sel['SIIRTO_VASTNRO']}>  ".t("Siirtolistan vastaanottonumero")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PAKKAUSKV")     $ulos .= "<option value='PAKKAUSKV' $avain_sel[PAKKAUSKV]>          ".t("Pakkaustiedon kieliversio")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "INVASTEPAIKKA")    $ulos .= "<option value='INVASTEPAIKKA' {$avain_sel['INVASTEPAIKKA']}>    ".t("Inventointiaste-raportin hylk‰‰m‰t tuotepaikat")."</option>";
@@ -449,6 +450,43 @@ if ($avain_sel['KOPIOITUOTE'] == 'SELECTED') {
     $jatko = 0;
   }
 }
+
+if ($avain_sel['GS1_SSCC'] == 'SELECTED') {
+
+  if ($_selite) {
+    $toimitustavat = hae_kaikki_toimitustavat();
+
+    $ulos .= "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+
+    $ulos .= "<option value='kaikki'>".t("Kaikki toimitustavat")."</optino>";
+
+    foreach ($toimitustavat as $toimitustapa) {
+      $sel = $trow[$i] == $toimitustapa['selite'] ? "selected" : "";
+      $ulos .= "<option value='{$toimitustapa['selite']}' {$sel}>{$toimitustapa['selite']}</optino>";
+    }
+
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
+
+  if ($_selitetark) {
+    $ulos .= "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+
+    foreach (range(0, 9) as $n) {
+      $sel = (int) $trow[$i] == $n ? "selected" : "";
+      $ulos .= "<option value='{$n}' {$sel}>{$n}</optino>";
+    }
+
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
+}
+
+
 
 $_toimmyynti = ($avain_sel['TOIMMYYNTI'] == 'SELECTED' and $_selite);
 

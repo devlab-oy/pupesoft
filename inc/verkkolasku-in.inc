@@ -1244,9 +1244,13 @@ if (!function_exists("verkkolasku_in")) {
       // Onko laskuriveillä useita alv-verokantoja?
       $ealvi = array_unique($ealvi);
 
-      // Katsotaan alv laskuerittelystä
+      // Katsotaan alv laskuerittelystä, rieveillä ei siis ollut tietoa verokannoista
       if (count($ealvi) == 1 and $ealvi[0] == "") {
         $ealvi = array($lisavat[0]);
+      }
+      elseif (count($ealvi) > 1 and $ealvi[0] == "") {
+        // Shiftataan eka tyhjä elementti pois, niin jäljelle jää riveiltä luetut tiedot
+        array_shift($ealvi);
       }
 
       // Tehdän pelkät oletustiliöinnit

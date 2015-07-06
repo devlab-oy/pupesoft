@@ -645,7 +645,14 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 // vaihdetaan tuotteen kehahinta
 if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
-  $query = "LOCK TABLES tuotepaikat WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tili READ";
+  $query = "LOCK TABLES 
+            tuotepaikat WRITE, 
+            tapahtuma WRITE, 
+            tuote WRITE, 
+            lasku WRITE, 
+            tiliointi WRITE, 
+            tili READ,
+            sanakirja READ";
   $lock = pupe_query($query);
 
   $query = "SELECT *

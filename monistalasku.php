@@ -825,7 +825,7 @@ if ($tee == "ETSILASKU") {
 
                   if ($nayta_rivit_row["tyyppi"] != "V" and $nayta_rivit_row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += $nayta_rivit_row["kate"];
                 }
-                elseif ($kukarow['extranet'] == '' and ($nayta_rivit_row["sarjanumeroseuranta"] == "S" or $nayta_rivit_row["sarjanumeroseuranta"] == "U")) {
+                elseif ($kukarow['extranet'] == '' and ($nayta_rivit_row["sarjanumeroseuranta"] == "S")) {
                   if ($kpl > 0) {
                     //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
                     $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $nayta_rivit_row["tunnus"]);
@@ -2183,7 +2183,7 @@ if ($tee == '' and $vain_monista == "") {
 
   if (isset($mistatultiin) and $mistatultiin == "maksutapahtumaselaus") {
     $osoite = "{$palvelin2}tilauskasittely/tilaus_myynti.php?" .
-              "toim=PIKATILAUS&tilausnumero={$utunnus}&lopetus={$lopetus}";
+      "toim=PIKATILAUS&tilausnumero={$utunnus}&lopetus={$lopetus}";
 
     echo "<script>";
     echo "$(function() {

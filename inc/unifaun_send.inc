@@ -84,6 +84,13 @@ class Unifaun {
     }
   }
 
+  public function sanitizeEmails($emails) {
+    $emails = str_replace(" ", "", $emails);
+    $emails = str_replace(",", ";", $emails);
+
+    return $emails;
+  }
+
   public function setPostiRow($postirow) {
     $this->postirow = $postirow;
 
@@ -241,7 +248,8 @@ class Unifaun {
     $uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
-    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_nimi"])); // Sender's name
+    $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($_yhtio_nimi)); // Sender's name
     $uni_snd_val->addAttribute('n', "name");
 
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_osoite"])); // Address line 1
@@ -274,7 +282,7 @@ class Unifaun {
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode(str_replace("0037", "FI", $this->postirow["yhtio_ovttunnus"]))); // VAT number
     $uni_snd_val->addAttribute('n', "vatno");
 
-    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->yhtiorow["email"])); // E-mail
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->sanitizeEmails($this->yhtiorow["email"]))); // E-mail
     $uni_snd_val->addAttribute('n', "email");
 
     //$uni_snd_val = $uni_sender->addChild('val', ""); # Mobile phone number. In Sweden the number must begin with 07 and contain 10 digits.
@@ -433,7 +441,10 @@ class Unifaun {
       $uni_rcv_val->addAttribute('n', "id4user");
     }
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($this->rakir_row["toim_nimi"]." ".$this->rakir_row["toim_nimitark"]))); // Receiver's name
+    $_toim_nimi = htmlspecialchars($this->rakir_row["toim_nimi"]);
+    $_toim_nimitark = htmlspecialchars($this->rakir_row["toim_nimitark"]);
+
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($_toim_nimi." ".$_toim_nimitark))); // Receiver's name
     $uni_rcv_val->addAttribute('n', "name");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_osoite"])); // Address line 1
@@ -472,8 +483,15 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["ytunnus"])); // VAT number
     $uni_rcv_val->addAttribute('n', "vatno");
 
+    if ($this->asiakasrow["email"] != "" and strpos($this->asiakasrow["email"], ",") !== FALSE) {
+      $asiakasemail = substr($this->asiakasrow["email"], 0, strpos($this->asiakasrow["email"], ","));
+    }
+    else {
+      $asiakasemail = $this->asiakasrow["email"];
+    }
+
     if ($this->asiakasrow["email"] != "") {
-      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); // E-mail
+      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // E-mail
       $uni_rcv_val->addAttribute('n', "email");
     }
 
@@ -723,14 +741,16 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");
     }
-    elseif ($this->toitarow['virallinen_selite'] == "IT16" and $this->postirow["toim_puh"] != "") {
+    elseif ($this->toitarow['virallinen_selite'] == "IT16" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOT");
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
-      $uni_add_val->addAttribute('n', "text3");
 
+      if ($this->postirow["toim_puh"] != '') {
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val->addAttribute('n', "text3");
+      }
       if ($this->asiakasrow["email"] != '') {
-        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->asiakasrow["email"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->sanitizeEmails($asiakasemail))); // Used to define notification mode for add-on NOT.
         $uni_add_val->addAttribute('n', "text4");
       }
     }
@@ -906,7 +926,8 @@ class Unifaun {
         }
 
         if (isset($vak['tuotenimitys']) and $vak['tuotenimitys'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['tuotenimitys'])); // UN-number for ADR. Supplied as a 4 digit code.
+          $_tuotenimitys = htmlspecialchars($vak["tuotenimitys"]);
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($_tuotenimitys)); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "name");
         }
 
@@ -944,7 +965,8 @@ class Unifaun {
         }
 
         if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['nimi_ja_kuvaus'])); // Official transport name for item regarding ADR
+          $_nimi_ja_kuvaus = htmlspecialchars($vak["nimi_ja_kuvaus"]);
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($_nimi_ja_kuvaus)); // Official transport name for item regarding ADR
           $uni_par_val->addAttribute('n', "dngdescr");
         }
 

@@ -62,7 +62,7 @@ $query = "SELECT lasku.*,
           LEFT JOIN laskun_lisatiedot
           ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
           LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-            AND maksuehto.tunnus = lasku.maksuehto)
+            AND maksuehto.tunnus                = lasku.maksuehto)
           WHERE lasku.tunnus                    = '$tunnus'
           $lis
           and lasku.yhtio='$kukarow[yhtio]'";
@@ -611,8 +611,8 @@ if ($verkkokauppa != "" and $muokkaa != "") {
 }
 
 $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
-                            $kukarow["maksupaate_kassamyynti"] == "") or
-                           $kukarow["maksupaate_kassamyynti"] == "K");
+    $kukarow["maksupaate_kassamyynti"] == "") or
+  $kukarow["maksupaate_kassamyynti"] == "K");
 
 if ($maksupaate_kassamyynti and $laskurow["kateinen"] != "") {
   require "inc/maksupaate_funktiot.inc";
@@ -630,7 +630,7 @@ if ($maksupaate_kassamyynti and $laskurow["kateinen"] != "") {
 
   if ($maksutapahtumat) {
     piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus, $ytunnus,
-                           $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
+      $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus);
   }
 }
 
@@ -1614,7 +1614,7 @@ else {
 
         if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += $row["kate"];
       }
-      elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
+      elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S")) {
         if ($kpl > 0) {
           //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
           $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
@@ -2242,7 +2242,7 @@ function hae_kassalipas($tunnus) {
 }
 
 function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_yhtio, $tunnus,
-                                $ytunnus, $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus) {
+  $ytunnus, $ppa, $kka, $vva, $ppl, $kkl, $vvl, $lopetus) {
   global $yhtiorow, $toim;
 
   echo "<script src='../js/naytatilaus.js'></script>";
@@ -2269,7 +2269,7 @@ function piirra_maksutapahtumat($maksutapahtumat, $asiakasid, $laskunro, $lasku_
 
   while ($maksutapahtuma = mysql_fetch_assoc($maksutapahtumat)) {
     $summa = number_format($maksutapahtuma["summa_valuutassa"],
-                           $yhtiorow["hintapyoristys"], ",", " ");
+      $yhtiorow["hintapyoristys"], ",", " ");
     $tila = $maksutapahtuma["tila"] == "K" ? t("Osto") : t("Hyvitys");
     $asiakkaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["asiakkaan_kuitti"]);
     $kauppiaan_kuitti = str_replace("\n", "<br>", $maksutapahtuma["kauppiaan_kuitti"]);

@@ -141,8 +141,6 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:".$order['customer_email']."\n";
     $edi_order .= "*RE OSTOTIL\n";
 
-    //$items = $order->getItemsCollection();
-
     $i = 1;
     foreach ($order['items'] as $item) {
       $product_id = $item['product_id'];
@@ -179,14 +177,23 @@ class Edi {
         // Rivin alennusprosentti
         $alennusprosentti = $_item['discount_percent'];
 
+        // Rivin alennusmäärä
+        $alennusmaara = $_item['base_discount_amount'];
+
+        // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu euromääräistä alennusta
+        if ($alennusprosentti == 0 and $alennusmaara > 0) {
+          // Lasketaan alennusmäärä alennusprosentiksi
+          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 6);
+        }
+
         // Verokanta
         $alvprosentti = $_item['tax_percent'];
 
         // Verollinen rivihinta
-        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         // Veroton rivihinta
-        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         $edi_order .= "*RS OSTOTILRIV $i\n";
         $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
@@ -207,17 +214,7 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
-
-        //$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_id);
-
-
-        //if ($stock->getQty() - $item->getQtyOrdered() <= 0 && $stock->getBackorders() != 0) {
-        //  $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
-        //}
-        //else {
         $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
-        //}
-
         $edi_order .= "*RE  OSTOTILRIV $i\n";
         $i++;
       }

@@ -23,7 +23,8 @@ if ($type == '0') {
   // print "Rahayksikön koodi => ".substr($tietue, 22, 1)."\n";
   // print "Varalla => ".substr($tietue, 23, 67)."\n";
 }
-elseif ($type == '3' or ($type == 'S')) {
+elseif ($type == '3' or ($type == 'S' and
+    ($yhtiorow["viitemaksujen_oikaisut"] == 'K' or $factoring_oikaisutunnus == '0'))) {
   // viitesiirto
   // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";
   // print "Välitystapa => ".substr($tietue, 88, 1)."\n";
@@ -116,16 +117,8 @@ elseif ($type == '3' or ($type == 'S')) {
             WHERE tunnus    = '$tiliotedatarow[tunnus]'";
   $dataupdres = pupe_query($query);
 }
-elseif ($type == '9') {
-  // print "Tietuetunnus => $type\n";
-  // print "Tapahtumien kpl => ".substr($tietue, 1, 6)."\n";
-  // print "Tapahtumien määrä => ".substr($tietue, 7, 11)."\n";
-  // print "Oikaisutapahtumien kpl => ".substr($tietue, 18, 6)."\n";
-  // print "Oikaisutapahtumien määrä => ".substr($tietue, 24, 11)."\n";
-  // print "Varalla => ".substr($tietue, 35, 5)."\n";
-  // print "done, insert/read/error: $insertcnt/$readcnt/$errcnt\n";
-}
-else {
+elseif ($type != 'S' and $type != '9') {
+  // Ei herjata summarivistä eikä oikaisurivistä, silloin kun sitä ei haluta käsitellä
   echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>\n";
   $errcnt++;
 }

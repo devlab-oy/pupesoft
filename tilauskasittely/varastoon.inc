@@ -706,7 +706,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   $ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
   //Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
-  if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+  if ($tuorow["sarjanumeroseuranta"] == "S") {
     //Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
     $kehahin = $ohinta;
   }
@@ -769,7 +769,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                and tunnus  = '$tilrivirow[tunnus]'";
     $resultxxx = pupe_query($query);
 
-    if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+    if ($tuorow["sarjanumeroseuranta"] == "S") {
       $kehalis = "";
     }
     else {
@@ -1188,7 +1188,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   $varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.6f', $ohinta)."</td>
             <td align='right' valign='top'>".sprintf('%.6f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
-  if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+  if ($tuorow["sarjanumeroseuranta"] == "S") {
     $varastoon_msg .= "  <td align='right'></td>";
   }
   else {

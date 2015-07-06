@@ -521,7 +521,7 @@ if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
     $sarjares = pupe_query($query);
     $tun = mysql_insert_id($GLOBALS["masterlink"]);
 
-    if ($sarjanumeronLisatiedot == "OK" and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) {
+    if ($sarjanumeronLisatiedot == "OK" and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) {
       $query = "SELECT *
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]'

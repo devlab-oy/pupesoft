@@ -128,10 +128,10 @@ if (!function_exists("avainsanatarkista")) {
       }
 
       if ($tem_laji == "PARAMETRI") {
-        preg_match_all('/([a-zA-Z_])+/', $tem_selite, $match);
+        preg_match_all('/([a-zA-Z_0-9])+/', $tem_selite, $match);
 
         if ($match[0][0] != $tem_selite) {
-          $virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejä");
+          $virhe[$i] = t("Vain aakkoset, numerot ja alaviivat ovat sallittuja merkkejä");
         }
       }
 
@@ -257,6 +257,25 @@ if (!function_exists("avainsanatarkista")) {
 
       if (mysql_num_rows($results) > 0) {
         $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+      }
+    }
+
+    $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA");
+
+    if (in_array(strtoupper($tem_laji), $_arr)) {
+      if (mysql_field_name($result, $i) == "selite") {
+        $selite = trim($tem_selite);
+
+        if (empty($selite)) {
+          $virhe[$i] = t("Selite on pakollinen");
+        }
+      }
+      elseif (mysql_field_name($result, $i) == "selitetark") {
+        $selitetark = trim($tem_selitetark);
+
+        if (empty($selitetark)) {
+          $virhe[$i] = t("Selitetark on pakollinen");
+        }
       }
     }
   }

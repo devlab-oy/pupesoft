@@ -108,7 +108,11 @@ function erittele_laskut($file) {
     // Muut kuin finvoicelaskut
     $xmldata = file_get_contents($file);
 
-    if (!PUPE_UNICODE) {
+    // Varmistetaan, että <xml>-tagi löytyy aineistosta, jos ei niin lisätään
+    if (!preg_match("/\<\?xml[^\>]*/i", $xmldata)) {
+      $xmldata = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n".$xmldata;
+    }
+    elseif (!PUPE_UNICODE) {
       // XML-tiedosto on konvertoitu ISO-8859-15-merkistöön, joten varmistetaan, että
       // <xml>-tagissa kerrotaan tämä
       $xmldata = preg_replace("/\<\?xml[^\>]*/i", "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?", $xmldata);

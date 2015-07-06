@@ -9,6 +9,7 @@ if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
 if (!isset($errors)) $errors = array();
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
 
 if (empty($ostotilaus) or empty($tilausrivi)) {
   exit("Virheelliset parametrit");
@@ -110,7 +111,7 @@ else {
 // Kontrolleri
 if (isset($submit)) {
 
-  $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}".urlencode($tuotenumero);
+  $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
 
   switch ($submit) {
   case 'ok':
@@ -124,12 +125,12 @@ if (isset($submit)) {
     }
 
     // Lis‰t‰‰n rivi suuntalavalle
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$url}'>"; exit();
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavalle.php?tilausrivi={$tilausrivi}&saapumisnro_haku={$saapumisnro_haku}&saapuminen={$saapuminen}{$url}'>"; exit();
 
     break;
   case 'kerayspaikka':
     // Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?hyllytys&ostotilaus={$ostotilaus}{$url}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}'>"; exit();
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?hyllytys&saapumisnro_haku={$saapumisnro_haku}&ostotilaus={$ostotilaus}{$url}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}'>"; exit();
     break;
   default:
     $errors[] = "Error";
@@ -154,6 +155,7 @@ $url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "&viivakoodi={$v
 $url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
 $url_lisa .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
 $url_lisa .= "&ennaltakohdistettu={$ennaltakohdistettu}";
+$url_lisa .= "&saapumisnro_haku={$saapumisnro_haku}";
 
 //####### UI ##########
 // Otsikko
@@ -168,6 +170,7 @@ echo "<div class='main'>
 <input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
+<input type='hidden' name='saapumisnro_haku' value='{$saapumisnro_haku}' />
 <table>
     <tr>
         <th>", t("Tilattu m‰‰r‰"), "</th>
@@ -229,7 +232,7 @@ echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
 </table>
 </div>";
 
-$url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
+$url = "&viivakoodi={$viivakoodi}&saapumisnro_haku={$saapumisnro_haku}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
 // Napit
 echo "<div class='controls'>";

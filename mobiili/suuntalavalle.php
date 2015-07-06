@@ -13,6 +13,8 @@ if (empty($tilausrivi) or empty($saapuminen)) {
   exit("Virheelliset parametrit (tilausrivi: $tilausrivi, saapuminen: $saapuminen");
 }
 
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
+
 // Virheet
 $errors = array();
 
@@ -136,7 +138,7 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
     }
 
     // Kaikki ok
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}'>";
     exit();
   }
 }
@@ -151,6 +153,7 @@ $url = array (
   'alusta_tunnus' => $alusta_tunnus,
   'liitostunnus' => $liitostunnus,
   'ennaltakohdistettu' => $ennaltakohdistettu,
+  'saapumisnro_haku' => $saapumisnro_haku,
 );
 
 if (!is_numeric($hyllytetty)) {
@@ -175,6 +178,7 @@ echo "<div class='main'>
 <input type='hidden' name='tullaan' value='{$tullaan}' />
 <input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 <input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+<input type='hidden' name='saapumisnro_haku' value='{$saapumisnro_haku}' />
 
 <table>
     <tr>

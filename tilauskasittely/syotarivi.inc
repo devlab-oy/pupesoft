@@ -897,7 +897,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   echo "<input type='hidden' name='var' value='$var'>";
 
   if ($ulos == '') {
-    if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+    if ($yhtiorow["livetuotehaku_tilauksella"] == "J") {
       echo "<td valign='top'>" .
         livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno) .
         "</td>";

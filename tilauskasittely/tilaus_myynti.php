@@ -6429,7 +6429,7 @@ if ($tee == '') {
 
       echo "</td>";
 
-      if ($oikeus_nahda_kate) {
+      if ($oikeus_nahda_kate and $kukarow["extranet"] == "") {
         $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
         $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
 

@@ -26,20 +26,7 @@ pupesoft_flock();
 
 $yhtio    = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
-
-// Haetaan kukarow
-$query = "SELECT *
-          FROM kuka
-          WHERE yhtio = '{$yhtio}'
-          AND kuka = 'admin'";
-
-$kukares = pupe_query($query);
-
-if (mysql_num_rows($kukares) != 1) {
-  exit("VIRHE: Admin käyttäjä ei löydy!\n");
-}
-
-$kukarow = mysql_fetch_assoc($kukares);
+$kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $query = "SELECT tunnus
           FROM lasku
@@ -65,7 +52,7 @@ if (mysql_num_rows($result) > 0) {
     "cc"      => "",
     "subject" => "Hyväksyttäviä Extranet-tilauksia",
     "body"    => "Hei,\n\n" .
-      "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
+                 "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
   );
 
   pupesoft_sahkoposti($email_params);

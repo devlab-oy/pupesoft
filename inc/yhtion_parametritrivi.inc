@@ -475,6 +475,23 @@ if ($fieldname == "ostotilaukseen_toimittajan_toimaika") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostotilaus_saman_tuotteen_lisays") {
+
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu       = $trow[$i];
+  $sel       = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Sama tuote voidaan lis‰t‰ ostotilaukselle useaan kertaan");
+  $ulos .= "<option value = 'V' $sel[V]>" . t("Saman tuotteen lis‰yksest‰ ostotilaukselle useaan kertaan varoitetaan");
+  $ulos .= "<option value = 'E' $sel[E]>" . t("Saman tuotteen lis‰ys ostotilaukselle useaan kertaan estet‰‰n");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_paivays") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -2982,6 +2982,7 @@ if ($fieldname == "livetuotehaku_tilauksella") {
 
   $ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Käytössä")."</option>";
+  $ulos .= "<option value = 'J' $sel[J]>".t("Käytössä extranetissä ja normimyynnissä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

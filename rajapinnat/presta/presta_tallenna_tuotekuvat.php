@@ -111,7 +111,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
       if (!empty($kuvaurli)) {
         $filename = "{$hakemisto}/{$pupe_product_code}.jpg";
         if (file_exists($filename)) {
-          $filename = "{$hakemisto}/{$pupe_product_code}%".md5(uniqid(mt_rand(), true)).".jpg";
+          $filename = "{$hakemisto}/{$pupe_product_code}#".md5(uniqid(mt_rand(), true)).".jpg";
         }
         # Imaistaan kuva
         exec("curl -s -o '{$filename}' -u {$presta_api_key}: $kuvaurli");

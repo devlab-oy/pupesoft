@@ -59,13 +59,16 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
   $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
 
   $pdf_data = array(
-    'pakkalista' => $pakkalista,
-    'taara' => $_POST['taara'],
-    'kpl' => $_POST['kpl'],
-    'paino' => $_POST['paino'],
-    'konttinumero' => $_POST['konttinumero'],
-    'sinettinumero' => $_POST['sinettinumero']
-    );
+    'pakkalista'               => $pakkalista,
+    'taara'                    => $_POST['taara'],
+    'kpl'                      => $_POST['kpl'],
+    'paino'                    => $_POST['paino'],
+    'konttinumero'             => $_POST['konttinumero'],
+    'sinettinumero'            => $_POST['sinettinumero'],
+    'maaranpaa'                => $_POST['maaranpaa'],
+    'maaranpaakoodi'           => $_POST['maaranpaakoodi'],
+    'rekisterinumero_traileri' => $_POST['rekisterinumero_traileri']
+  );
 
   $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
@@ -2598,6 +2601,9 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
               echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
               echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+              echo "<input type='hidden' name='rekisterinumero_traileri' value='{$matkatiedot["rekisterinumero_traileri"]}' />";
+              echo "<input type='hidden' name='maaranpaa' value='{$matkatiedot["maaranpaa"]}' />";
+              echo "<input type='hidden' name='maaranpaakoodi' value='{$matkatiedot["maaranpaakoodi"]}' />";
               echo "</form>";
               echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
               echo t("Pakkalista");

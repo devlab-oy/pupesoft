@@ -2590,7 +2590,8 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             trlt.kontin_mrn,
             ss.sarjanumero,
             lasku.asiakkaan_tilausnumero,
-            laskun_lisatiedot.konttimaara
+            laskun_lisatiedot.konttimaara,
+            laskun_lisatiedot.matkatiedot
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -3158,12 +3159,37 @@ function pakkalista_pdf($pdf_data) {
 
   $pdf->draw_text($x, $y, "PACKING LIST", $sivu, $bold);
   $y -= 20;
-  $pdf->draw_text($x, $y, 'Container Number', $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
-  $y -= 15;
-  $pdf->draw_text($x, $y, 'Seal Number', $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $bold);
-  $y -= 15;
+
+  if (empty($rekisterinumero_traileri)) {
+    $pdf->draw_text($x, $y, 'Container Number', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $konttinumero, $sivu, $bold);
+    $y -= 15;
+    $pdf->draw_text($x, $y, 'Seal Number', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $sinettinumero, $sivu, $bold);
+    $y -= 15;
+  }
+  else {
+    $pdf->draw_text($x, $y, 'Freight Company', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $sinettinumero, $sivu, $bold);
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Reg. number', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $konttinumero, $sivu, $bold);
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Trailer reg. number', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $rekisterinumero_traileri, $sivu, $bold);
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Destination', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $maaranpaa, $sivu, $bold);
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Destination code', $sivu, $bold);
+    $pdf->draw_text($x + 100, $y, $maaranpaakoodi, $sivu, $bold);
+    $y -= 15;
+  }
+
   $pdf->draw_text($x, $y, 'Weight', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $paino, $sivu, $bold);
   $y -= 15;

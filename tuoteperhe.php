@@ -76,7 +76,7 @@ else {
 }
 
 echo "</font><hr>";
-echo "79 toim $toim tee $tee<br><br>"; var_dump($resepti_kentat); echo "<br><br>";
+
 if ($toim == "PERHE") {
   // Haetaan viimeisin valinta keksistä
   $keijo = isset($_COOKIE["pupesoft_tuoteperhe"]) ? $_COOKIE["pupesoft_tuoteperhe"] : "";
@@ -246,7 +246,7 @@ if ($tee != "KOPIOI") {
   echo "<form method='post' action='tuoteperhe.php' name='$formi' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<tr>";
-echo "249 toim $toim tee $tee <br><br>";
+
   if ($toim == "PERHE") {
     echo "<th>".t("Etsi tuoteperhettä")."</th>";
   }
@@ -303,7 +303,7 @@ echo "249 toim $toim tee $tee <br><br>";
   echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td>";
   echo "</table></form>";
 }
-echo "306 toim $toim tee $tee <br><br>";
+
 if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
 
   echo "<br>";
@@ -532,7 +532,7 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
 
   $tee = '';
 }
-echo "535 toim $toim tee $tee hakutuoteno $hakutuoteno isatuoteno $isatuoteno <br><br>";
+
 if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
   $lisa = "";
@@ -1637,7 +1637,7 @@ elseif ($tee == "") {
         echo "<td>";
 
         $tuoteperhe = $tuoteperhe["lapset"];
-echo "1594 toim $toim tee $tee <br><br>";
+
         piirra_tuoteperhe($tuoteperhe);
 
         echo "</td>";

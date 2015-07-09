@@ -6347,11 +6347,6 @@ if ($tee == '') {
       echo "<font class='head'>".t("Valmistusrivit")."</font>";
     }
     else {
-      // jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
-      if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
-        echo "<tr>$jarjlisa<td class='back' colspan='$ekat_sarakkeet' nowrap>";
-        echo "<font class='head'>".t("Tilausrivit")."</font>";
-
       $sele = array("K" => "", "E" => "");
 
       if ($tilausrivi_alvillisuus == "") {
@@ -6375,7 +6370,7 @@ if ($tee == '') {
 
       // jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
       if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
-        echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
+        echo "<tr>$jarjlisa<td class='back' colspan='$ekat_sarakkeet' nowrap>";
         echo "<font class='head'>".t("Tilausrivit")."</font>";
 
         echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>

@@ -76,7 +76,7 @@ else {
 }
 
 echo "</font><hr>";
-
+echo "79 toim $toim tee $tee<br><br>"; var_dump($resepti_kentat); echo "<br><br>";
 if ($toim == "PERHE") {
   // Haetaan viimeisin valinta keksist‰
   $keijo = isset($_COOKIE["pupesoft_tuoteperhe"]) ? $_COOKIE["pupesoft_tuoteperhe"] : "";
@@ -246,7 +246,7 @@ if ($tee != "KOPIOI") {
   echo "<form method='post' action='tuoteperhe.php' name='$formi' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<tr>";
-
+echo "249 toim $toim tee $tee <br><br>";
   if ($toim == "PERHE") {
     echo "<th>".t("Etsi tuoteperhett‰")."</th>";
   }
@@ -303,7 +303,7 @@ if ($tee != "KOPIOI") {
   echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td>";
   echo "</table></form>";
 }
-
+echo "306 toim $toim tee $tee <br><br>";
 if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
 
   echo "<br>";
@@ -532,7 +532,7 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
 
   $tee = '';
 }
-
+echo "535 toim $toim tee $tee hakutuoteno $hakutuoteno isatuoteno $isatuoteno <br><br>";
 if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
   $lisa = "";
@@ -635,12 +635,21 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<tr>";
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("M‰‰r‰kerroin")."</th>";
-      echo "<th>".t("Hintakerroin")."</th>";
-      echo "<th>".t("Alennuskerroin")."</th>";
 
       if ($toim == "PERHE") {
+        echo "<th>".t("Hintakerroin")."</th>";
+        echo "<th>".t("Alennuskerroin")."</th>";
+
         echo "<th>".t("Ohita Ker‰ys")."</th>";
         echo "<th>".t("Ei n‰ytet‰")."</th>";
+      }
+
+      if ($toim == "RESEPTI") {
+        for ($i = 0; $i < count($resepti_kentat); $i++) {
+          echo "<th>".t($resepti_kentat[$i]["selitetark"])."</th>";
+        }
+
+        echo "<th>".t("Pituus kerroin")."</th>";
       }
 
       echo "<td class='back'></td>";
@@ -654,14 +663,36 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       }
       else {
         echo "<td><input type='text' name='kerroin' size='20'></td>";
-        echo "<td><input type='text' name='hintakerroin' size='20'></td>";
-        echo "<td><input type='text' name='alekerroin' size='20'></td>";
 
         if ($toim == "PERHE") {
+          echo "<td><input type='text' name='hintakerroin' size='20'></td>";
+          echo "<td><input type='text' name='alekerroin' size='20'></td>";
+
           echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
           echo "<td><input type='checkbox' name='ei_nayteta' value='E' {$chk_ei_nayteta}></td>";
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }
+
+        if ($toim == "RESEPTI") {
+          for ($i = 0; $i < count($resepti_kentat); $i++) {
+            echo "<td><input type='text' name='{$resepti_kentat[$i]["selite"]}' size='10'></td>";
+          }
+
+          echo "<td>";
+            echo "<select name='kpl2' style='width: 150px;'>";
+
+            echo "<option value='' $sel1>";
+            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
+            echo "<option value='X' $sel2>";
+            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
+            echo "</select>";
+          echo "</td>";
+        }
+
       }
 
       echo "<td class='back'><input type='submit' value='".t("Lis‰‰ rivi")."'></td>";
@@ -1073,13 +1104,28 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         elseif ($toim == "RESEPTI") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
           echo "<td></td>";
-          echo "<td></td>";
-          echo "<td></td>";
-          echo "<td></td>";
 
           for ($i = 0; $i < count($resepti_kentat); $i++) {
-            echo "<td></td>";
+            echo "<td><input type='text' name='{$resepti_kentat[$i]["selite"]}' size='10'></td>";
           }
+
+          echo "<td></td>";
+          echo "<td></td>";
+          echo "<td>";
+            echo "<select name='kpl2' style='width: 150px;'>";
+
+            echo "<option value='' $sel1>";
+            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
+            echo "<option value='X' $sel2>";
+            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+            echo "</option>";
+
+            echo "</select>";
+          echo "</td>";
+
+
 
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }
@@ -1591,7 +1637,7 @@ elseif ($tee == "") {
         echo "<td>";
 
         $tuoteperhe = $tuoteperhe["lapset"];
-
+echo "1594 toim $toim tee $tee <br><br>";
         piirra_tuoteperhe($tuoteperhe);
 
         echo "</td>";

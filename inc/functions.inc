@@ -9096,6 +9096,9 @@ if (!function_exists("livesearch_tuotehaku")) {
       if ($yhtiorow['livetuotehaku_poistetut'] == 'X' or $yhtiorow['livetuotehaku_poistetut'] == 'Y') {
         $naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
       }
+      elseif ($yhtiorow['livetuotehaku_poistetut'] == 'P') {
+        $naytetaanko_poistetut = '';
+      }
       else {
         $naytetaanko_poistetut = "and tuote.status != 'P'";
       }

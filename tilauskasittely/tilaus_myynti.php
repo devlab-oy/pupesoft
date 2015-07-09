@@ -2461,6 +2461,7 @@ if ($tee == '') {
       (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
       (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
       (isset($viesti) and $viesti != $laskurow["viesti"]) or
+      (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
@@ -2583,6 +2584,7 @@ if ($tee == '') {
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',
                viesti          = '$viesti',
+               asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',
                tilausvahvistus = '$tilausvahvistus',
                $pika_paiv_merahti
                $pika_paiv_myyja
@@ -3810,6 +3812,18 @@ if ($tee == '') {
       }
     }
     else {
+      echo "<th>
+              <label for='asiakkaan_tilausnumero'>" . t("Asiakkaan tilausnumero") . ":</label>
+            </th>";
+      echo "<td>
+              <input type='text'
+                     name='asiakkaan_tilausnumero'
+                     id='asiakkaan_tilausnumero'
+                     value='{$laskurow["asiakkaan_tilausnumero"]}'>
+
+              <input type='submit' value='" . t("Tallenna") . "'>
+            </td>";
+
       echo "<input type='hidden' size='30' name='myyja' value='$laskurow[myyja]'>";
       echo "</tr>";
 

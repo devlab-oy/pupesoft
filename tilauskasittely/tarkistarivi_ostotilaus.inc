@@ -19,18 +19,33 @@ $trow = mysql_fetch_assoc($rarresult);
 // parametreissä
 
 if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] != "") {
-  $query = "SELECT count(*) AS tuote_count
+  $query = "SELECT tunnus
             FROM tilausrivi
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND otunnus = '{$laskurow["tunnus"]}'
-            AND tuoteno = '{$trow["tuoteno"]}'";
+            AND tuoteno = '{$trow["tuoteno"]}'
+            ORDER BY tunnus";
 
-  $tuote_count = pupe_query($query);
-  $tuote_count = mysql_fetch_assoc($tuote_count);
-  $tuote_count = $tuote_count["tuote_count"];
+  $tr_result = pupe_query($query);
 
-  if ($tuote_count > 1) {
+  $tilausrivit = array();
+
+  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
+    array_push($tilausrivit, $tilausrivi);
+  }
+
+  $viimeinen_tilausrivi = end($tilausrivit);
+
+  if (count($tilausrivit) > 1 and $prow['tunnus'] == $viimeinen_tilausrivi['tunnus']) {
     $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
+    $varaosavirhe .= "<form method='post'>
+                        <input type='hidden' name='lopetus' value='{$lopetus}'>
+                        <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+                        <input type='hidden' name='lisattava[tuoteno]' value='{$trow['tuoteno']}'>
+                        <input type='hidden' name='lisattava[kpl]' value='{$prow['tilattu']}'>
+                        <input type='hidden' name='tee' value='lisaa_aiemmalle_riville'>
+                        <input type='submit' value='" . t("Lisää") . " {$prow['tilattu']} {$prow['toim_yksikko']}'>
+                      </form>";
 
     if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] == "E") {
       $riviok++;

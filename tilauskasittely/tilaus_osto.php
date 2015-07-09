@@ -131,6 +131,46 @@ if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
   enable_ajax();
 }
 
+if ($tee == 'lisaa_aiemmalle_riville') {
+  $query = "SELECT tunnus
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND otunnus = '{$tilausnumero}'
+            AND tuoteno = '{$lisattava['tuoteno']}'
+            ORDER BY tunnus";
+
+  $tr_result = pupe_query($query);
+
+  $tilausrivit = array();
+
+  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
+    array_push($tilausrivit, $tilausrivi);
+  }
+
+  $ensimmainen_tilausrivi = reset($tilausrivit);
+  $viimeinen_tilausrivi   = end($tilausrivit);
+
+  $query = "UPDATE tilausrivi
+            SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
+                varattu = varattu + '{$lisattava['kpl']}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$ensimmainen_tilausrivi['tunnus']}'";
+
+  $tru_result = pupe_query($query);
+
+  if ($tru_result) {
+    $query = "DELETE
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$tilausnumero}'
+              AND tunnus = '{$viimeinen_tilausrivi['tunnus']}'";
+
+    $trd_result = pupe_query($query);
+  }
+
+  $tee = 'AKTIVOI';
+}
+
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
 if (count($_POST) == 0 and $from == "") {
   $tila        = '';

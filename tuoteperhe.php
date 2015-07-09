@@ -636,10 +636,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("M‰‰r‰kerroin")."</th>";
 
-      if ($toim == "PERHE") {
+      if ($toim != "RESEPTI") {
         echo "<th>".t("Hintakerroin")."</th>";
         echo "<th>".t("Alennuskerroin")."</th>";
+      }
 
+      if ($toim == "PERHE") {
         echo "<th>".t("Ohita Ker‰ys")."</th>";
         echo "<th>".t("Ei n‰ytet‰")."</th>";
       }

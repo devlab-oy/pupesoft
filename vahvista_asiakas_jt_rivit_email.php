@@ -402,9 +402,9 @@ function hae_tilauksen_yhteyshenkilo($params = array()) {
   global $kukarow;
 
   $ohjelma_moduli      = $params['ohjelma_moduli'];
-  $myyja               = $parama['myyja'];
-  $liitostunnus        = $parama['liitostunnus'];
-  $tilausyhteyshenkilo = $parama['tilausyhteyshenkilo'];
+  $myyja               = $params['myyja'];
+  $liitostunnus        = $params['liitostunnus'];
+  $tilausyhteyshenkilo = $params['tilausyhteyshenkilo'];
 
   if ($ohjelma_moduli == 'EXTRANET') {
     $query = "SELECT eposti AS email

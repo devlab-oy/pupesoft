@@ -145,7 +145,8 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
             lasku.nimi,
             lasku.liitostunnus,
             lasku.tilausyhteyshenkilo,
-            lasku.ohjelma_moduli
+            lasku.ohjelma_moduli,
+            lasku.myyja
             FROM lasku
             JOIN asiakas
             ON ( asiakas.yhtio = lasku.yhtio

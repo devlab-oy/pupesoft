@@ -70,7 +70,8 @@ else {
   $oma = sprintf("%09s", $rtunnus); // 9, pitkä numero tulee rahtikirja taulun tunnuksesta, pitää ollaa uniikki
 }
 // Täällä tehdään aina uusiksi postin seurantakoodit=viivakoodit, joten
-// päivitetään ne rahtikirjat-tauluun myös rahtikirjaa muutettaessa
+// päivitetään ne rahtikirjat-tauluun myös rahtikirjaa muutettaessa,
+// kun lisätään/vähennetään kolleja rahtikirjalla
 $rahtikirjanro = '';
 $uudet_koodit = 'yes';
 
@@ -335,7 +336,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     require "postiedi.inc";
   }
 }
-echo "338: $rahtikirjanro <br><br>";
+
 if ($tulostakolli > 0) {
   //keksitään uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";

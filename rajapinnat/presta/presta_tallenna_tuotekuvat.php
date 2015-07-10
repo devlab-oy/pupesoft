@@ -82,8 +82,11 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
   # Haetaan kaikki Prestashopista kaikkien tuotteiden prestaid:t/tuotenumerot
   $all_products = $presta_products->all_skus();
 
+  # Huom!!! Editoitu hakemaan vain pieni ote kuvista alkuun
+  $all_products = array_slice($all_products, 0, 10);
+
   foreach ($all_products as $product_id => $pupe_product_code) {
-    # Haetaan jokaisen tuotteen tiedot
+    # Haetaan tuotteen kuvatiedot tuote kerrallaan
     $url = $presta_url ."/api/images/products/$product_id";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -100,21 +103,23 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
     $p = xml_parser_create();
     xml_parse_into_struct($p, $response, $product_data, $index);
 
-    # K‰yd‰‰n kaikki tuotetiedot l‰pi
-    foreach ($product_data as $value) {
-      $kuvaurli = '';
-      # Ainakin testikaupassa kuvaurlit lˆytyi n‰in tuotedatan alta
-      if ($value['tag'] == "DECLINATION") {
-        $kuvaurli = $value['attributes']['XLINK:HREF'];
+    $unique_picture_urls = array();
+
+    # K‰yd‰‰n kaikki tuotteen kuvatiedot l‰pi ja poimitaan uniikit kuvaurlit talteen
+    foreach ($product_data as $product) {
+      if ($product['tag'] == 'DECLINATION') {
+        $unique_picture_urls[$product['attributes']['XLINK:HREF']] = $product['attributes']['XLINK:HREF'];
       }
-      # Kuva nimet‰‰n tuotekoodilla, lis‰t‰‰n per‰‰n randomia jos tunnuksella lˆytyy jo kuva
-      if (!empty($kuvaurli)) {
+    }
+
+    foreach ($unique_picture_urls as $picture_url) {
+      if (!empty($picture_url)) {
         $filename = "{$hakemisto}/{$pupe_product_code}.jpg";
         if (file_exists($filename)) {
           $filename = "{$hakemisto}/{$pupe_product_code}#".md5(uniqid(mt_rand(), true)).".jpg";
         }
         # Imaistaan kuva
-        exec("curl -s -o '{$filename}' -u {$presta_api_key}: $kuvaurli");
+        exec("curl -s -o '{$filename}' -u {$presta_api_key}: $picture_url");
       }
     }
   }

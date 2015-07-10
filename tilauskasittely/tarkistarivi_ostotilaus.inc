@@ -19,24 +19,14 @@ $trow = mysql_fetch_assoc($rarresult);
 // parametreissä
 
 if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] != "") {
-  $query = "SELECT tunnus
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND otunnus = '{$laskurow["tunnus"]}'
-            AND tuoteno = '{$trow["tuoteno"]}'
-            ORDER BY tunnus";
+  $params = array(
+    "tilausnumero" => $laskurow["tunnus"],
+    "tuoteno"      => $trow["tuoteno"]
+  );
 
-  $tr_result = pupe_query($query);
+  list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
 
-  $tilausrivit = array();
-
-  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
-    array_push($tilausrivit, $tilausrivi);
-  }
-
-  $viimeinen_tilausrivi = end($tilausrivit);
-
-  if (count($tilausrivit) > 1 and $prow['tunnus'] == $viimeinen_tilausrivi['tunnus']) {
+  if ($ensimmainen_tilausrivi != $viimeinen_tilausrivi and $prow['tunnus'] == $viimeinen_tilausrivi['tunnus']) {
     $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
     $varaosavirhe .= "<form method='post'>
                         <input type='hidden' name='lopetus' value='{$lopetus}'>

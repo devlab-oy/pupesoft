@@ -132,23 +132,12 @@ if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
 }
 
 if ($tee == 'lisaa_aiemmalle_riville') {
-  $query = "SELECT tunnus
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND otunnus = '{$tilausnumero}'
-            AND tuoteno = '{$lisattava['tuoteno']}'
-            ORDER BY tunnus";
+  $params = array(
+    "tilausnumero" => $tilausnumero,
+    "tuoteno"      => $lisattava["tuoteno"]
+  );
 
-  $tr_result = pupe_query($query);
-
-  $tilausrivit = array();
-
-  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
-    array_push($tilausrivit, $tilausrivi);
-  }
-
-  $ensimmainen_tilausrivi = reset($tilausrivit);
-  $viimeinen_tilausrivi   = end($tilausrivit);
+  list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
 
   $query = "UPDATE tilausrivi
             SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
@@ -1990,3 +1979,32 @@ if (!empty($tuoteno) and empty($kpl)) {
 }
 
 require "inc/footer.inc";
+
+/**
+ * @param array $params
+ *
+ * @return array Ensimmäinen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisessä tilauksella
+ */
+function hae_eka_ja_vika_tilausrivi($params) {
+  global $kukarow;
+
+  $tilausnumero = $params['tilausnumero'];
+  $tuoteno      = $params['tuoteno'];
+
+  $query = "SELECT tunnus
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND otunnus = '{$tilausnumero}'
+            AND tuoteno = '{$tuoteno}'
+            ORDER BY tunnus";
+
+  $tr_result = pupe_query($query);
+
+  $tilausrivit = array();
+
+  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
+    array_push($tilausrivit, $tilausrivi);
+  }
+
+  return array(reset($tilausrivit), end($tilausrivit));
+}

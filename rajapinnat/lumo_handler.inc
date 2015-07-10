@@ -74,13 +74,13 @@ foreach ($suoritukset as $suoritus) {
         $arkistointitunnus = 999999999999;
         // Haetaan viimeisimmän onnistuneen maksusuorituksen kuitti
         $query = "SELECT asiakkaan_kuitti
-                    FROM maksupaatetapahtumat
-                    WHERE yhtio           = '{$kukarow['yhtio']}'
-                    AND tilausnumero      = '{$tilausnumero}'
-                    AND tila              = 'K'
-                    AND asiakkaan_kuitti != ''
-                    ORDER BY luontiaika desc
-                    LIMIT 1";
+                  FROM maksupaatetapahtumat
+                  WHERE yhtio           = '{$kukarow['yhtio']}'
+                  AND tilausnumero      = '{$tilausnumero}'
+                  AND tila              = 'K'
+                  AND asiakkaan_kuitti != ''
+                  ORDER BY luontiaika desc
+                  LIMIT 1";
         $res = pupe_query($query);
         $kuittirivi = mysql_fetch_assoc($res);
 
@@ -102,13 +102,13 @@ foreach ($suoritukset as $suoritus) {
       }
       elseif ($peruutus == "X") {
         $query = "SELECT *
-                    FROM maksupaatetapahtumat
-                    WHERE yhtio           = '{$kukarow['yhtio']}'
-                    AND tilausnumero      = '{$tilausnumero}'
-                    AND tila              = 'K'
-                    AND asiakkaan_kuitti != ''
-                    ORDER BY luontiaika desc
-                    LIMIT 1";
+                  FROM maksupaatetapahtumat
+                  WHERE yhtio           = '{$kukarow['yhtio']}'
+                  AND tilausnumero      = '{$tilausnumero}'
+                  AND tila              = 'K'
+                  AND asiakkaan_kuitti != ''
+                  ORDER BY luontiaika desc
+                  LIMIT 1";
 
         $res        = pupe_query($query);
         $kuittirivi = mysql_fetch_assoc($res);

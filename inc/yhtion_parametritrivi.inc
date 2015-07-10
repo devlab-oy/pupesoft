@@ -475,6 +475,23 @@ if ($fieldname == "ostotilaukseen_toimittajan_toimaika") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostotilaus_saman_tuotteen_lisays") {
+
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu       = $trow[$i];
+  $sel       = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Sama tuote voidaan lis‰t‰ ostotilaukselle useaan kertaan");
+  $ulos .= "<option value = 'V' $sel[V]>" . t("Saman tuotteen lis‰yksest‰ ostotilaukselle useaan kertaan varoitetaan");
+  $ulos .= "<option value = 'E' $sel[E]>" . t("Saman tuotteen lis‰ys ostotilaukselle useaan kertaan estet‰‰n");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_paivays") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -485,6 +502,25 @@ if ($fieldname == "ostolaskujen_paivays") {
 
   $ulos .= "<option value = '' $sel[0]>".t("Ostolaskulle syˆtet‰‰n vain laskun p‰iv‰");
   $ulos .= "<option value = '1' $sel[1]>".t("Ostolaskulle syˆtet‰‰n laskun p‰iv‰ sek‰ kirjausp‰iv‰");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ostolaskujen_oletusvaluutta") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'T' ? "selected" : "";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston valuuttaa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'T' {$sel}>";
+  $ulos .= t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti toimittajan oletusvaluuttaa");
+  $ulos .= "</option>";
 
   $ulos .= "</select></td>";
 
@@ -2946,6 +2982,7 @@ if ($fieldname == "livetuotehaku_tilauksella") {
 
   $ulos .= "<option value = ''>".t("Ei k‰ytˆss‰")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("K‰ytˆss‰")."</option>";
+  $ulos .= "<option value = 'J' $sel[J]>".t("K‰ytˆss‰ extranetiss‰ ja normimyynniss‰")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2961,7 +2998,22 @@ if ($fieldname == "livetuotehaku_poistetut") {
 
   $ulos .= "<option value = ''>".t("Poistuvia/poistettuja tuotteita ei n‰ytet‰")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Poistuvat tuotteet n‰ytet‰‰n")."</option>";
+  $ulos .= "<option value = 'P' $sel[P]>".t("Kaikki tuotteet n‰ytet‰‰n")."</option>";
   $ulos .= "<option value = 'Y' $sel[Y]>".t("Poistuvat tuotteet n‰ytet‰‰n sek‰ ep‰kurantit korostetaan")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "poistetut_lisays") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Ei anneta lis‰t‰ poistettuja tuotteita ostotilauksella, eik‰ extranetiss‰") . "</option>";
+  $ulos .= "<option value = 'P' $sel[P]>" . t("Annetaan lis‰t‰ poistettuja tuotteita ostotilauksella ja extranetiss‰, jolloin poistetut voi korvata korvaavilla tuotteilla") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4339,10 +4391,11 @@ if ($fieldname == 'vastaavat_tuotteet_esitysmuoto') {
 if ($fieldname == 'paivita_oletuspaikka') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'S' ? 'selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'S' => '', 'M' => '');
 
   $ulos .= "<option value = ''>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ostoriveille")."</option>";
-  $ulos .= "<option value = 'S' {$sel}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+  $ulos .= "<option value = 'S' {$sel['S']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille, myyntiriveille ja siirtoriveille.")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

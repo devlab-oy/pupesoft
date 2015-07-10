@@ -514,8 +514,8 @@ if (isset($ajax)) {
               $maara";
     $qresult = pupe_query($query);
 
-    // jos jsarjanumeroseuranta S tai U ja inout varastonarvo
-    if ($sarjanumeroseuranta == "S" or $sarjanumeroseuranta == "U") {
+    // jos jsarjanumeroseuranta S ja inout varastonarvo
+    if ($sarjanumeroseuranta == "S") {
       $kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
     }
 
@@ -1765,6 +1765,7 @@ if ($tee == 'N' or $tee == 'E') {
             WHERE tuote.yhtio = '$kukarow[yhtio]'
             and tuote.tuoteno $oper '$tuoteno'
             and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+            and tuote.tuotetyyppi not in ('A','B')
             ORDER BY tuote.tuoteno $suun
             LIMIT 1";
   $result = pupe_query($query);
@@ -1982,7 +1983,7 @@ if ($tee == 'Z') {
     $sarjanumero_kpl = 0;
 
     // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-    if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
+    if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow['sarjanumeroseuranta'] == 'G') {
       $query  = "SELECT sarjanumeroseuranta.tunnus
                  FROM sarjanumeroseuranta
                  LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -2732,7 +2733,7 @@ if ($tee == 'Z') {
       echo "<br />";
     }
 
-    if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
+    if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
       $query  = "SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
                  tilausrivi_osto.tunnus osto_rivitunnus,

@@ -86,7 +86,7 @@ if ($handle = opendir($path)) {
                     FROM lasku
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$otunnus}'
-                    AND tila IN ('L', 'V', 'G', 'S')
+                    AND tila    IN ('L', 'V', 'G', 'S')
                     AND alatila = 'A'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);

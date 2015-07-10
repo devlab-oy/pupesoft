@@ -244,7 +244,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     // lapsitasojen tuotteet
     $qu = "SELECT count(*) lkm
            FROM dynaaminen_puu puu
-           JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.tunnus = alkio.puun_tunnus)
+           JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.laji=alkio.laji AND puu.tunnus = alkio.puun_tunnus)
            WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
            AND puu.laji    = '{$toim}'
            AND puu.lft     > {$noderow['lft']}

@@ -964,13 +964,17 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
 
 
 /**
- * Generoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
+ * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
+ * @param array   $params
  * @return array
  */
-function generoi_private_key_ja_csr() {
+function generoi_private_key_ja_csr($params = array()) {
   global $kukarow, $yhtiorow;
+
+  $company_name = empty($params['company_name']) ? $yhtiorow['nimi'] : $params['company_name'];
+  $customer_id = empty($params['customer_id']) ? '' : $params['customer_id'];
 
   $key_config = array(
     "digest_alg"       => "sha1",
@@ -981,10 +985,14 @@ function generoi_private_key_ja_csr() {
   $csr_info = array(
     "countryName"      => $yhtiorow["maa"],
     "localityName"     => $yhtiorow["kotipaikka"],
-    "organizationName" => $yhtiorow["nimi"],
-    "commonName"       => $yhtiorow["nimi"],
+    "organizationName" => $company_name,
+    "commonName"       => $company_name,
     "emailAddress"     => $yhtiorow["email"]
   );
+
+  if (!empty($customer_id)) {
+    $csr_info["serialNumber"] = $customer_id;
+  }
 
   $key = openssl_pkey_new($key_config);
   $csr = openssl_csr_new($csr_info, $key);

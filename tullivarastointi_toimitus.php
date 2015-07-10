@@ -268,7 +268,8 @@ if (isset($task) and $task == 'kuljetustietojen_tallennus') {
     $query = "SELECT group_concat(tunnus)
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$toimitustunnus}'";
+              AND otunnus = '{$toimitustunnus}'
+              AND tyyppi != 'D'";
     $result = pupe_query($query);
     $tunnukset = mysql_result($result, 0);
 

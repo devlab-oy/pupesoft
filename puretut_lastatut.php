@@ -14,26 +14,28 @@ $loppu = explode(".", $pvm2);
 $loppupvm = $loppu[2] . '-' . $loppu[1] . '-' . $loppu[0] . ' 23:59:59';
 
 
-$query = "select sum(ss.massa)
-from sarjanumeroseuranta AS ss
-join tilausrivi AS otr
-on otr.yhtio = ss.yhtio
-AND otr.tunnus = ss.ostorivitunnus
-where ss.yhtio = '{$kukarow['yhtio']}'
-and otr.toimitettuaika > '{$alkupvm}'
-and otr.toimitettuaika < '{$loppupvm}'";
+$query = "SELECT sum(ss.massa)
+          FROM sarjanumeroseuranta AS ss
+          JOIN tilausrivi AS otr
+            ON (otr.yhtio = ss.yhtio
+            AND otr.tunnus = ss.ostorivitunnus
+            AND otr.tyyppi = 'O')
+          WHERE ss.yhtio = '{$kukarow['yhtio']}'
+          AND otr.toimitettuaika > '{$alkupvm}'
+          AND otr.toimitettuaika < '{$loppupvm}'";
 $result = pupe_query($query);
 
 $puretut = mysql_result($result, 0);
 
-$query = "select sum(ss.massa)
-from sarjanumeroseuranta AS ss
-join tilausrivi AS mtr
-on mtr.yhtio = ss.yhtio
-AND mtr.tunnus = ss.myyntirivitunnus
-where ss.yhtio = '{$kukarow['yhtio']}'
-and mtr.toimitettuaika > '{$alkupvm}'
-and mtr.toimitettuaika < '{$loppupvm}'";
+$query = "SELECT sum(ss.massa)
+          FROM sarjanumeroseuranta AS ss
+          JOIN tilausrivi AS mtr
+            ON (mtr.yhtio = ss.yhtio
+            AND mtr.tunnus = ss.myyntirivitunnus
+            AND mtr.tyyppi = 'L')
+          WHERE ss.yhtio = '{$kukarow['yhtio']}'
+          AND mtr.toimitettuaika > '{$alkupvm}'
+          AND mtr.toimitettuaika < '{$loppupvm}'";
 $result = pupe_query($query);
 
 $lastatut = mysql_result($result, 0);

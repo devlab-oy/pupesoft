@@ -199,6 +199,7 @@ function kuittaus_parametrit($hakunumero) {
             JOIN tilausrivi
               ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
               AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+              AND tilausrivi.tyyppi = 'O'
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = sarjanumeroseuranta.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
@@ -636,6 +637,7 @@ function satamavahvistus_parametrit($konttiviite) {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus IN ({$tunnukset})
+            AND tilausrivi.tyyppi = 'L'
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
   $result = pupe_query($query);
 
@@ -1623,6 +1625,7 @@ function kasittele_bookkaussanoma($edi_data) {
               JOIN tilausrivi AS tr
                 ON tr.yhtio = trlt.yhtio
                 AND tr.tunnus = trlt.tilausrivitunnus
+                AND tr.tyyppi = 'O'
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = trlt.yhtio
                 AND ss.ostorivitunnus = trlt.tilausrivitunnus
@@ -1749,8 +1752,12 @@ function kasittele_bookkaussanoma($edi_data) {
     pupe_query($update_query);
 
     // katsotaan onko tilaukseen kuuluvia rullia myyntitilauksella
-    $rquery = "SELECT *
+    $rquery = "SELECT tilausrivin_lisatiedot.*
               FROM tilausrivin_lisatiedot
+              JOIN tilausrivi
+                ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tyyppi = 'L')
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = tilausrivin_lisatiedot.yhtio
                 AND ss.myyntirivitunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -1766,8 +1773,12 @@ function kasittele_bookkaussanoma($edi_data) {
     }
 
     // katsotaan onko tilaukseen kuuluvia rullia ostotilauksilla
-    $rquery = "SELECT *
+    $rquery = "SELECT tilausrivin_lisatiedot.*
               FROM tilausrivin_lisatiedot
+              JOIN tilausrivi
+                ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tyyppi = 'O')
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = tilausrivin_lisatiedot.yhtio
                 AND ss.ostorivitunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -2558,6 +2569,7 @@ function kasittele_iftsta($edi_data) {
               ON trlt.yhtio = tilausrivi.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.otunnus IN ({$laskutunnukset})
+            AND tilausrivi.tyyppi != 'D'
             AND trlt.konttinumero = '{$konttinumero}'";
   $result = pupe_query($query);
   $tunnukset = mysql_result($result, 0);
@@ -2741,7 +2753,8 @@ function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly, $va
   $query = "SELECT varasto
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$ostorivitunnus}'";
+            AND tunnus = '{$ostorivitunnus}'
+            AND tyyppi = 'O'";
   $result = pupe_query($query);
   $varasto = mysql_result($result,0);
 
@@ -2846,6 +2859,7 @@ function tarkista_sarjanumero($sarjanumero) {
             JOIN tilausrivi
              ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
              AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+             AND tilausrivi.tyyppi = 'O'
             WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
             AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
   $result = pupe_query($query);
@@ -3830,12 +3844,14 @@ function varastotilanne_tilauksittain($hetki = false) {
             JOIN tilausrivi AS otr
               ON otr.yhtio = ss.yhtio
               AND otr.tunnus = ss.ostorivitunnus
+              AND otr.tyyppi = 'O'
             JOIN tilausrivin_lisatiedot AS otrlt
               ON otrlt.yhtio = ss.yhtio
               AND otrlt.tilausrivitunnus = otr.tunnus
             LEFT JOIN tilausrivi AS mtr
               ON mtr.yhtio = ss.yhtio
               AND mtr.tunnus = ss.myyntirivitunnus
+              AND mtr.tyyppi = 'L'
             LEFT JOIN tilausrivin_lisatiedot AS mtrlt
               ON mtrlt.yhtio = ss.yhtio
               AND mtrlt.tilausrivitunnus = mtr.tunnus
@@ -3908,12 +3924,14 @@ function varastotilanne($hetki = false) {
             JOIN tilausrivi AS otr
               ON otr.yhtio = ss.yhtio
               AND otr.tunnus = ss.ostorivitunnus
+              AND otr.tyyppi = 'O'
             JOIN tilausrivin_lisatiedot AS otrlt
               ON otrlt.yhtio = ss.yhtio
               AND otrlt.tilausrivitunnus = otr.tunnus
             LEFT JOIN tilausrivi AS mtr
               ON mtr.yhtio = ss.yhtio
               AND mtr.tunnus = ss.myyntirivitunnus
+              AND mtr.tyyppi = 'L'
             LEFT JOIN tilausrivin_lisatiedot AS mtrlt
               ON mtrlt.yhtio = ss.yhtio
               AND mtrlt.tilausrivitunnus = mtr.tunnus
@@ -4272,9 +4290,13 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
   $toimaika = $laskurow['toimaika'];
   $toimittajatunnus = $laskurow['liitostunnus'];
 
-  $query = "SELECT *
+  $query = "SELECT tilausrivin_lisatiedot.*
             FROM tilausrivin_lisatiedot
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            JOIN tilausrivi
+              ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+              AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              AND tilausrivi.tyyppi != 'D')
+            WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
             AND asiakkaan_tilausnumero = '{$tulonumero}'
             LIMIT 1";
   $result = pupe_query($query);
@@ -4361,7 +4383,8 @@ function paivita_tullivarastointirivi($tiedot) {
   $query = "SELECT tuoteno
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$tiedot['tilausrivitunnus']}'";
+            AND tunnus = '{$tiedot['tilausrivitunnus']}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
   $tuotenumero = mysql_result($result, 0);
 
@@ -6213,6 +6236,7 @@ function tulonumeron_tuoterivit($tulonumerot) {
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivin_lisatiedot.asiakkaan_tilausnumero IN ('{$tulonumerot_string}')
             AND tilausrivi.tilkpl > 0
+            AND tilausrivi.tyyppi != 'D'
             GROUP BY tilausrivi_kommentti";
   $result = pupe_query($query);
 

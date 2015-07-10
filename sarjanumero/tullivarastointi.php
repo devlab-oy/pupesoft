@@ -35,9 +35,13 @@ if (isset($task) and $task == 'split') {
               AND tunnus  = '{$rivitunnus}'";
     pupe_query($query);
 
-    $query = "SELECT *
+    $query = "SELECT tilausrivin_lisatiedot.*
               FROM tilausrivin_lisatiedot
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              JOIN tilausrivi
+                ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tyyppi != 'D')
+              WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND tilausrivitunnus = '{$rivitunnus}'";
     $result = pupe_query($query);
     $lisatiedot = mysql_fetch_assoc($result);
@@ -77,7 +81,8 @@ if (isset($task) and $task == 'vie_varastoon') {
   $query = "SELECT *
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
+            AND tunnus = '{$rivitunnus}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
   $tilausrivi = mysql_fetch_assoc($result);
 
@@ -90,7 +95,8 @@ if (isset($task) and $task == 'vie_varastoon') {
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tuoteno LIKE '{$tulonumero}-%'
-            AND uusiotunnus != ''";
+            AND uusiotunnus != ''
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -141,7 +147,8 @@ if (isset($task) and $task == 'vie_varastoon') {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tuoteno = '{$tilausrivi['tuoteno']}'
             AND hyllyalue = '{$hyllyalue}'
-            AND hyllynro  = '{$hyllynro}'";
+            AND hyllynro  = '{$hyllynro}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
 
   // ...jos on niin lis‰t‰‰n kpl olemassa olevaan riviin ja poistetaan toinen
@@ -331,7 +338,8 @@ if ($view == 'splittaus') {
   $query = "SELECT *
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
+            AND tunnus = '{$rivitunnus}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
   $tilausrivi = mysql_fetch_assoc($result);
 

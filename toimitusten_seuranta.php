@@ -118,7 +118,8 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $query = "SELECT group_concat(tunnus)
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus IN ({$tunnukset})";
+            AND otunnus IN ({$tunnukset})
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
   $rivitunnukset = mysql_result($result, 0);
 
@@ -157,6 +158,7 @@ if (isset($task) and $task == 'eu_tilaus') {
             JOIN tilausrivi
               ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
               AND tilausrivi.otunnus = laskun_lisatiedot.otunnus
+              AND tilausrivi.tyyppi = 'L'
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
@@ -1210,7 +1212,8 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         $query = "SELECT *
                   FROM tilausrivi
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$edit_tunnus}'";
+                  AND tunnus = '{$edit_tunnus}'
+                  AND tyyppi != 'D'";
         $result = pupe_query($query);
         $tilausrivi = mysql_fetch_assoc($result);
 
@@ -2211,7 +2214,8 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                   AND trlt.tilausrivitunnus = tilausrivi.tunnus
                 WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                 AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                AND trlt.sinettinumero != ''";
+                AND trlt.sinettinumero != ''
+                AND tilausrivi.tyyppi != 'D'";
       $result = pupe_query($query);
       $vahvistettu = mysql_result($result, 0);
 
@@ -2400,6 +2404,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                         AND ss.myyntirivitunnus = tilausrivi.tunnus
                       WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                       AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                      AND tilausrivi.tyyppi = 'L'
                       AND trlt.sinettinumero != ''
                       AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
             $result = pupe_query($query);

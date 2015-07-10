@@ -232,7 +232,8 @@ if (isset($task) and $task == 'suorita_eusiirto') {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
                 AND hyllyalue = '{$tiedot['hyllyalue']}'
-                AND hyllynro = '{$tiedot['hyllynro']}'";
+                AND hyllynro = '{$tiedot['hyllynro']}'
+                AND tilausrivi.tyyppi != 'D'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -240,13 +241,18 @@ if (isset($task) and $task == 'suorita_eusiirto') {
         $query = "SELECT *
                   FROM tilausrivi
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$rivitunnus}'";
+                  AND tunnus = '{$rivitunnus}'
+                  AND tyyppi != 'D'";
         $result = pupe_query($query);
         $kopioitavat['tilausrivi'] = mysql_fetch_assoc($result);
 
-        $query = "SELECT *
+        $query = "SELECT tilausrivin_lisatiedot.*
                   FROM tilausrivin_lisatiedot
-                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  JOIN tilausrivi
+                    ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                    AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                    AND tilausrivi.tyyppi != 'D')
+                  WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                   AND tilausrivitunnus = '{$rivitunnus}'";
         $result = pupe_query($query);
         $kopioitavat['tilausrivin_lisatiedot'] = mysql_fetch_assoc($result);
@@ -280,7 +286,8 @@ if (isset($task) and $task == 'suorita_eusiirto') {
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$tulotunnus}'
-              AND kommentti != 'kokonaan siirretty eu-numerolle'";
+              AND kommentti != 'kokonaan siirretty eu-numerolle'
+              AND tyyppi != 'D'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -464,7 +471,8 @@ if (isset($task) and $task == 'tullisiirto') {
   $query = "SELECT tuoteno
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$tulotunnus}'";
+            AND otunnus = '{$tulotunnus}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
 
   $tuotenumerot = array();

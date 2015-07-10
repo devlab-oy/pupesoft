@@ -25,6 +25,7 @@ if (isset($submit)) {
               JOIN tilausrivi AS tr
                 ON tr.yhtio = ss.yhtio
                 AND tr.tunnus = ss.myyntirivitunnus
+                AND tr.tyyppi = 'L'
               JOIN tilausrivin_lisatiedot AS trlt
                 ON trlt.yhtio = ss.yhtio
                 AND trlt.tilausrivitunnus = tr.tunnus

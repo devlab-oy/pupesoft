@@ -78,6 +78,7 @@ if (isset($submit)) {
                       JOIN tilausrivi AS tr
                         ON tr.yhtio = ss.yhtio
                         AND tr.tunnus = ss.ostorivitunnus
+                        AND tr.tyyppi = 'O'
                       JOIN tilausrivin_lisatiedot AS trlt
                         ON trlt.yhtio = tr.yhtio
                         AND trlt.tilausrivitunnus = tr.tunnus
@@ -140,7 +141,10 @@ if (isset($submit)) {
       // Haetaan tilausrivi
       $query =   "SELECT tr.*
                   FROM sarjanumeroseuranta AS ss
-                  JOIN tilausrivi AS tr ON tr.yhtio = ss.yhtio AND tr.tunnus = ss.ostorivitunnus
+                  JOIN tilausrivi AS tr
+                    ON tr.yhtio = ss.yhtio
+                    AND tr.tunnus = ss.ostorivitunnus
+                    AND tr.tyyppi = 'O'
                   WHERE ss.yhtio = '{$kukarow['yhtio']}'
                   AND ss.sarjanumero = '{$sarjanumero}'";
       $result = pupe_query($query);
@@ -149,7 +153,10 @@ if (isset($submit)) {
       // katsotaan onko saman rahdin paketteja laitettu saapumisella
       $query = "SELECT tilausrivi.uusiotunnus
                 FROM tilausrivin_lisatiedot AS trlt
-                JOIN tilausrivi ON tilausrivi.yhtio = trlt.yhtio AND tilausrivi.tunnus = trlt.tilausrivitunnus
+                JOIN tilausrivi
+                  ON tilausrivi.yhtio = trlt.yhtio
+                  AND tilausrivi.tunnus = trlt.tilausrivitunnus
+                  AND tilausrivi.tyyppi != 'D'
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND trlt.rahtikirja_id = '{$rahtikirja_id}'
                 AND tilausrivi.uusiotunnus != 0
@@ -233,9 +240,13 @@ if (isset($submit)) {
         $result = pupe_query($query);
         $myyntirivitunnus = mysql_result($result,0);
 
-        $query = "SELECT asiakkaan_tilausnumero
+        $query = "SELECT tilausrivin_lisatiedot.asiakkaan_tilausnumero
                   FROM tilausrivin_lisatiedot
-                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  JOIN tilausrivi
+                    ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                    AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                    AND tilausrivi.tyyppi = 'L')
+                  WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                   AND tilausrivitunnus = '{$myyntirivitunnus}'";
         $result = pupe_query($query);
         $asiakkaan_tilausnumero = mysql_result($result,0);

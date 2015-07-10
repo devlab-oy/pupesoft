@@ -64,7 +64,8 @@ if (isset($task) and $task == 'kontitus') {
   $query = "SELECT tuoteno, hyllyalue, hyllynro
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
+            AND tunnus = '{$rivitunnus}'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
   $tuoteinfo = mysql_fetch_assoc($result);
 
@@ -80,7 +81,8 @@ if (isset($task) and $task == 'kontitus') {
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND otunnus = '{$toimitustunnus}'
-            AND keratty = ''";
+            AND keratty = ''
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

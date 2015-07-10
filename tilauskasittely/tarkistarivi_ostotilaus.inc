@@ -14,6 +14,31 @@ $query = "SELECT *
 $rarresult = pupe_query($query);
 $trow = mysql_fetch_assoc($rarresult);
 
+//
+// Tarkistetaan, että tuotetta ei ole vielä lisätty tilaukselle, jos niin valittu yhtiön
+// parametreissä
+
+if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] != "") {
+  $query = "SELECT count(*) AS tuote_count
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND otunnus = '{$laskurow["tunnus"]}'
+            AND tuoteno = '{$trow["tuoteno"]}'";
+
+  $tuote_count = pupe_query($query);
+  $tuote_count = mysql_fetch_assoc($tuote_count);
+  $tuote_count = $tuote_count["tuote_count"];
+
+  if ($tuote_count > 1) {
+    $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
+
+    if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] == "E") {
+      $riviok++;
+      $tilausok++;
+    }
+  }
+}
+
 if (mysql_num_rows($rarresult) == 0) {
   $varaosavirhe .= t("VIRHE: Tuotetta ei löydy")."!<br>";
   $riviok++;

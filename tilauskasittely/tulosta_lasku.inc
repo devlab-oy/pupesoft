@@ -2027,6 +2027,17 @@ if (!function_exists('loppu')) {
         20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
     }
 
+    if (!empty($laskurow["yhtio_toimipaikka"])) {
+      $query = "SELECT vat_numero
+                FROM yhtion_toimipaikat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = '{$laskurow["yhtio_toimipaikka"]}'";
+
+      $toimipaikka_result = pupe_query($query);
+
+      $toimipaikkarow = mysql_fetch_assoc($toimipaikka_result);
+    }
+
     // yhtiötiedot
     $y_tiedot_ok  = FALSE;
     $y_nimi     = $laskurow["yhtio_nimi"];
@@ -2037,6 +2048,9 @@ if (!function_exists('loppu')) {
     $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
     if ($laskurow['yhtio_maa'] == 'EE') {
       $y_vatnumero  = $yhtiorow["ytunnus"];
+    }
+    elseif (!empty($toimipaikkarow["vat_numero"])) {
+      $y_vatnumero  = str_replace("0037", "", $toimipaikkarow["vat_numero"]);
     }
     else {
       $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);

@@ -72,7 +72,9 @@ else {
 // Täällä tehdään aina uusiksi postin seurantakoodit=viivakoodit, joten
 // päivitetään ne rahtikirjat-tauluun myös rahtikirjaa muutettaessa,
 // kun lisätään/vähennetään kolleja rahtikirjalla
-$rahtikirjanro = '';
+if ($tulostuskpl > 0) {
+  $rahtikirjanro = '';
+}
 $uudet_koodit = 'yes';
 
 // tulostetaan niin monta lappua kun on kollejakin

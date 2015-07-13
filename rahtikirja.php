@@ -627,7 +627,7 @@ if ($tee == 'add') {
     }
 
     // Poistetaan etukäteen syötetyt rahtikirjatiedot, ku nyt tässä ne menis muuten toistamiseen kantaan
-    if ((!isset($muutos) or $muutos != 'yes') and $tutkimus > 0) {
+    if ((!isset($muutos) or $muutos != 'yes' or (isset($uudet_koodit) and $uudet_koodit == 'yes')) and $tutkimus > 0) {
       $query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa}) and poikkeava = -9";
       $result = pupe_query($query);
     }

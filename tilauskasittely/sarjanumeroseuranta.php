@@ -3,7 +3,12 @@
 // otetaan sis‰‰n voidaan ottaa $myyntirivitunnus tai $ostorivitunnus
 // ja $from niin tiedet‰‰n mist‰ tullaan ja minne palata
 
-if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE) {
+if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false) {
+  if ($_REQUEST["toiminto"] == "TULOSTA") {
+    $_REQUEST['nayta_pdf'] = 1;
+    $nayta_pdf             = 1;
+  }
+
   require "../inc/parametrit.inc";
 }
 
@@ -14,6 +19,41 @@ echo "<SCRIPT type='text/javascript'>
       }
     //-->
     </SCRIPT>";
+
+if ($toiminto == "TULOSTA") {
+  require_once "pdflib/phppdflib.class.php";
+
+  $viivakoodityyppi = "viivakoodi";
+  $malli            = "PDF";
+  $pdf              = new pdffile;
+  $toim             = "SARJA";
+
+  $pdf->set_default('margin-top', 0);
+  $pdf->set_default('margin-bottom', 0);
+  $pdf->set_default('margin-left', 0);
+  $pdf->set_default('margin-right', 0);
+
+  $query = "SELECT sarjanumero
+            FROM sarjanumeroseuranta
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus IN ({$valitut_sarjat})";
+
+  $sarja_result = pupe_query($query);
+
+  while ($sarjarow = mysql_fetch_assoc($sarja_result)) {
+    require "inc/tulosta_tuotetarrat_pdf.inc";
+  }
+
+  $filename = "/tmp/sarjanumerotarra-" . md5(uniqid(mt_rand(), true)) . ".pdf";
+  $file     = fopen($filename, "w");
+
+  fwrite($file, $pdf->generate());
+  fclose($file);
+
+  echo file_get_contents($filename);
+
+  unlink($filename);
+}
 
 if ($toiminto == "sarjanumeronlisatiedot_popup") {
   @include 'sarjanumeron_lisatiedot_popup.inc';
@@ -1606,6 +1646,24 @@ if ($rivirow["tyyppi"] != 'V') {
 
     echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>";
     echo "</form>";
+
+    if (!empty($valitut_sarjat)) {
+      echo "<td class='back'>
+              <form method='post'>
+                <input type='hidden' name='ostorivitunnus' value='{$ostorivitunnus}'>
+                <input type='hidden' name='from' value='{$from}'>
+                <input type='hidden' name='lopetus' value='{$lopetus}'>
+                <input type='hidden' name='aputoim' value='{$aputoim}'>
+                <input type='hidden' name='otunnus' value='{$otunnus}'>
+                <input type='hidden' name='muut_siirrettavat' value='{$muut_siirrettavat}'>
+                <input type='hidden' name='toiminto' value='TULOSTA'>
+                <input type='hidden' name='valitut_sarjat' value='" . implode(",", $valitut_sarjat) . "'>
+
+                <input type='submit' value='" . t("Tulosta tarrat valituille sarjanumeroille") . "'>
+              </form>
+            </td>";
+    }
+
     echo "</tr></table>";
   }
 }

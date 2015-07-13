@@ -48,13 +48,24 @@ else {
   $y = 285;
 }
 
-$koodi = $toim == 'YKS' ? 'tuoteno' : 'eankoodi';
+if ($toim == 'YKS') {
+  $koodi = 'tuoteno';
+}
+elseif ($toim == "SARJA") {
+  $koodi = 'sarjanumero';
+}
+else {
+  $koodi = 'eankoodi';
+}
 
 for ($i = 1; $i < $kappalemaara; $i++) {
 
   $nimitys1 = $nimitys2 = '';
 
-  if ($pdf->strlen($eankoodirow['nimitys'], $norm) >= mm_pt($mm_pt)) {
+  if ($toim == "SARJA") {
+    $pdf->draw_text(mm_pt($x), mm_pt($y), t("Tuotenumero") . ": $eankoodirow[tuoteno]", $firstpage, $norm);
+  }
+  elseif ($pdf->strlen($eankoodirow['nimitys'], $norm) >= mm_pt($mm_pt)) {
     list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt($mm_pt), $pdf, $norm);
 
     $nimitys1 = substr($eankoodirow['nimitys'], 0, strlen($ff_string));
@@ -88,6 +99,9 @@ for ($i = 1; $i < $kappalemaara; $i++) {
   if (isset($viivakoodityyppi) and $viivakoodityyppi == "viivakoodi") {
     if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
       $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
+    }
+    elseif ($koodi == "sarjanumero") {
+      $data = viivakoodi($sarjarow["sarjanumero"], "codabar", $leveys, 100, "zz");
     }
     else {
       $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");

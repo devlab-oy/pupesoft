@@ -33,7 +33,7 @@ if ($toiminto == "TULOSTA") {
   $pdf->set_default('margin-left', 0);
   $pdf->set_default('margin-right', 0);
 
-  $query = "SELECT sarjanumero
+  $query = "SELECT sarjanumero, tuoteno
             FROM sarjanumeroseuranta
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND tunnus IN ({$valitut_sarjat})";
@@ -41,6 +41,8 @@ if ($toiminto == "TULOSTA") {
   $sarja_result = pupe_query($query);
 
   while ($sarjarow = mysql_fetch_assoc($sarja_result)) {
+    $tuoteno = $sarjarow["tuoteno"];
+
     require "inc/tulosta_tuotetarrat_pdf.inc";
   }
 

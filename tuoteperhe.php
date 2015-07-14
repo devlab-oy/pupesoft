@@ -1637,7 +1637,9 @@ elseif ($tee == "") {
 
         $tuoteperhe = $tuoteperhe["lapset"];
 
-        piirra_tuoteperhe($tuoteperhe);
+        if (!empty($tuoteperhe)) {
+          piirra_tuoteperhe($tuoteperhe);
+        }
 
         echo "</td>";
       }
@@ -1657,6 +1659,8 @@ require "inc/footer.inc";
 
 function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
   global $PHP_SELF, $toim, $lopetus;
+
+  ksort($tuoteperhe);
 
   $hidden_class = $hidden ? "hidden" : "";
 
@@ -1683,7 +1687,9 @@ function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
 
     echo "</li>";
 
-    piirra_tuoteperhe($tuote["lapset"], true);
+    if (!empty($tuote["lapset"])) {
+      piirra_tuoteperhe($tuote["lapset"], true);
+    }
   }
   echo "</ul>";
 }

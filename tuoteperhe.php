@@ -1125,49 +1125,59 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $resyht     += $lapsiyht;
         $reshikeyht += $prow['kerroin'] * $prow['hintakerroin'];
 
+        $style = array();
+
+        if ($toim == "RESEPTI" and $tuoterow["status"] == "P") {
+          $style["strike"] = true;
+          $del             = " del";
+        }
+        else {
+          $del = "";
+        }
+
         $excelsarake = 0;
-        $worksheet->writeString($excelrivi, $excelsarake++, $prow["isatuoteno"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $prow["isatuoteno"], $style);
 
         if ($tunnus != $prow["tunnus"]) {
-          echo "<tr class='aktiivi'>";
+          echo "<tr class='aktiivi{$del}'>";
 
           echo "<td>$prow[tuoteno] $error</td>";
           echo "<td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 
-          $worksheet->writeString($excelrivi, $excelsarake++, $prow["tuoteno"]);
-          $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["nimitys"]);
+          $worksheet->writeString($excelrivi, $excelsarake++, $prow["tuoteno"], $style);
+          $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["nimitys"], $style);
 
           if ($myos_tuotetiedot_exceliin) {
-            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["malli"]);
-            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["mallitarkenne"]);
-            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["tuotemerkki"]);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["malli"], $style);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["mallitarkenne"], $style);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["tuotemerkki"], $style);
           }
 
           if ($toim != "LISAVARUSTE") {
             echo "<td align='right'>" . (float) $prow["kerroin"] . "</td>";
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["kerroin"]);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["kerroin"], $style);
           }
 
           if ($toim == "PERHE") {
             echo "<td align='right'>$prow[hintakerroin]</td>";
             echo "<td align='right'>$prow[alekerroin]</td>";
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"]);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"], $style);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"], $style);
             //echo "<td align='right'>$prow[rivikommentti]</td>";
           }
 
           if ($toim == "OSALUETTELO") {
             echo "<td align='right'>$prow[hintakerroin]</td>";
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"], $style);
           }
 
           if ($toim == "RESEPTI") {
             echo "<td align='left'>$tuoterow[yksikko]</td>";
-            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["yksikko"]);
+            $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["yksikko"], $style);
 
             foreach ($resepti_kentat as $resepti_kentta) {
               echo "<td>{$prow[$resepti_kentta["selite"]]}</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]]);
+              $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]], $style);
             }
 
             $query = "SELECT
@@ -1210,14 +1220,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
             echo "<td align='right'>{$ostohinta} {$valuutta}</td>";
 
-            $worksheet->writeString($excelrivi, $excelsarake++, "{$ostohinta} {$valuutta}");
+            $worksheet->writeString($excelrivi, $excelsarake++, "{$ostohinta} {$valuutta}", $style);
           }
 
           if ($toim != "VSUUNNITTELU") {
             echo "<td align='right'>" . (float) $tuoterow["kehahin"] . "</td>";
             echo "<td align='right'>".round($lapsiyht, 6)."</td>";
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $tuoterow["kehahin"]);
-            $worksheet->writeNumber($excelrivi, $excelsarake++, round($lapsiyht, 6));
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $tuoterow["kehahin"], $style);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, round($lapsiyht, 6), $style);
           }
 
           if ($toim == "PERHE") {
@@ -1239,18 +1249,18 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td>{$chk_ohita_kerays}</td>";
             echo "<td>{$chk_ei_nayteta}</td>";
 
-            $worksheet->writeString($excelrivi, $excelsarake++, $chk_ohita_kerays);
-            $worksheet->writeString($excelrivi, $excelsarake++, $chk_ei_nayteta);
+            $worksheet->writeString($excelrivi, $excelsarake++, $chk_ohita_kerays, $style);
+            $worksheet->writeString($excelrivi, $excelsarake++, $chk_ei_nayteta, $style);
           }
 
           if ($toim == "RESEPTI") {
             if ($prow["omasivu"] != "") {
               echo "<td>".t("Ei kerrota")."</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, t("Ei kerrota"));
+              $worksheet->writeString($excelrivi, $excelsarake++, t("Ei kerrota"), $style);
             }
             else {
               echo "<td>".t("Kerrotaan")."</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"));
+              $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"), $style);
             }
           }
 
@@ -1670,15 +1680,20 @@ function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
     echo "<li>";
 
     if (empty($tuote["lapset"])) {
+      if ($tuote["status"] == "P") echo "<del>";
       echo "{$tuoteno} {$tuote["nimitys"]}";
+      if ($tuote["status"] == "P") echo "</del>";
     }
     else {
       echo "<a href='{$PHP_SELF}" .
-        "?toim={$toim}" .
-        "&isatuoteno={$tuoteno}" .
-        "&hakutuoteno={$tuoteno}" .
-        "&lopetus={$lopetus}'>{$tuoteno} {$tuote["nimitys"]}
-            </a>";
+           "?toim={$toim}" .
+           "&isatuoteno={$tuoteno}" .
+           "&hakutuoteno={$tuoteno}" .
+           "&lopetus={$lopetus}'>";
+      if ($tuote["status"] == "P") echo "<del>";
+      echo "{$tuoteno} {$tuote["nimitys"]}";
+      if ($tuote["status"] == "P") echo "</del>";
+      echo "</a>";
     }
 
     if (!empty($tuote["lapset"])) {

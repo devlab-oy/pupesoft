@@ -31557,6 +31557,7 @@ if (!function_exists("hae_tuoteperhe")) {
 
     $query = "SELECT tuote.tuoteno,
               tuote.nimitys,
+              tuote.status,
               lapsi.tuoteno AS lapsi_tuoteno
               FROM tuote
               LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
@@ -31571,6 +31572,7 @@ if (!function_exists("hae_tuoteperhe")) {
     while ($row = mysql_fetch_assoc($result)) {
       $tuoteno = $row["tuoteno"];
       $nimitys = $row["nimitys"];
+      $status  = $row["status"];
 
       if (!in_array($row["lapsi_tuoteno"], $tuotenot)) {
         array_push($tuotenot, $tuoteno);
@@ -31587,6 +31589,10 @@ if (!function_exists("hae_tuoteperhe")) {
 
     if (!empty($nimitys)) {
       $tuoteperhe[$tuoteno]["nimitys"] = $nimitys;
+    }
+
+    if (!empty($status)) {
+      $tuoteperhe[$tuoteno]["status"] = $status;
     }
 
     return $tuoteperhe;

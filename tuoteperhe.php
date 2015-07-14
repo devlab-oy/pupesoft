@@ -977,6 +977,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<th>{$resepti_kentta["selitetark"]}</th>";
         }
 
+        echo "<th>".t("Ostohinta")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin *Kerroin")."</th>";
         echo "<th>".t("Pituus kerroin")."</th>";
@@ -997,6 +998,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $worksheet->writeString($excelrivi, $excelsarake++, $resepti_kentta["selitetark"]);
         }
 
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Ostohinta"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
@@ -1072,6 +1074,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
         elseif ($toim == "RESEPTI") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
+          echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
@@ -1166,6 +1169,48 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
               echo "<td>{$prow[$resepti_kentta["selite"]]}</td>";
               $worksheet->writeString($excelrivi, $excelsarake++, $prow[$resepti_kentta["selite"]]);
             }
+
+            $query = "SELECT
+                        tuotteen_toimittajat.liitostunnus,
+                        toimi.oletus_valkoodi,
+                        toimi.ytunnus,
+                        if(jarjestys = 0, 9999, jarjestys) sorttaus
+                      FROM tuotteen_toimittajat
+                      LEFT JOIN toimi
+                        ON (toimi.yhtio = tuotteen_toimittajat.yhtio
+                        AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                      WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
+                      AND tuotteen_toimittajat.tuoteno = '{$tuoterow["tuoteno"]}'
+                      ORDER BY sorttaus
+                      LIMIT 1";
+
+            $ttrow = pupe_query($query);
+            $ttrow = mysql_fetch_assoc($ttrow);
+
+            $query = "SELECT kurssi
+                      FROM valuu
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND nimi = '{$ttrow['oletus_valkoodi']}'
+                      ORDER BY tunnus DESC
+                      LIMIT 1";
+
+            $valuurow = pupe_query($query);
+            $valuurow = mysql_fetch_assoc($valuurow);
+
+            $params = array(
+              'liitostunnus'  => $ttrow['liitostunnus'],
+              'valkoodi'      => $ttrow['oletus_valkoodi'],
+              'ytunnus'       => $ttrow['ytunnus'],
+              'vienti_kurssi' => $valuurow['kurssi']
+            );
+
+            $ostohintatiedot = alehinta_osto($params, $tuoterow, 1, '', '', array());
+            $ostohinta       = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $ostohintatiedot[0]));
+            $valuutta        = $ostohintatiedot[3];
+
+            echo "<td align='right'>{$ostohinta} {$valuutta}</td>";
+
+            $worksheet->writeString($excelrivi, $excelsarake++, "{$ostohinta} {$valuutta}");
           }
 
           if ($toim != "VSUUNNITTELU") {

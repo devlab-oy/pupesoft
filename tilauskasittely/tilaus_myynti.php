@@ -2604,12 +2604,16 @@ if ($tee == '') {
       $pika_paiv_merahti = " kohdistettu = 'K', ";
     }
 
+    if ((isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"])) {
+      $asiakkaan_tilaunumero_lisa = "asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',";
+    }
+
     $query  = "UPDATE lasku SET
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',
                viesti          = '$viesti',
-               asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',
                tilausvahvistus = '$tilausvahvistus',
+               $asiakkaan_tilaunumero_lisa
                $pika_paiv_merahti
                $pika_paiv_myyja
                $nollaa_lahto

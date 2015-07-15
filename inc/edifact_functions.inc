@@ -2569,17 +2569,17 @@ function kasittele_iftsta($edi_data) {
               ON trlt.yhtio = tilausrivi.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.otunnus IN ({$laskutunnukset})
-            AND tilausrivi.tyyppi != 'D'
             AND trlt.konttinumero = '{$konttinumero}'";
   $result = pupe_query($query);
   $tunnukset = mysql_result($result, 0);
 
-  $update_query = "UPDATE tilausrivin_lisatiedot SET
-                   kontin_mrn  = '{$mrn}'
-                   WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND tunnus IN ({$tunnukset})";
-  pupe_query($update_query);
-
+  if ($tunnukset) {
+    $update_query = "UPDATE tilausrivin_lisatiedot SET
+                     kontin_mrn  = '{$mrn}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus IN ({$tunnukset})";
+    pupe_query($update_query);
+  }
 }
 
 function kontitustiedot($konttiviite, $konttinumero = false) {

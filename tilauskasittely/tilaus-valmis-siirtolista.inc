@@ -35,24 +35,43 @@ if ($laskurow['chn'] == "GEN" and trim($laskurow['ohjausmerkki']) == "") {
 }
 
 $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
-
+echo "38 laskurowVarasto "; var_dump($laskurow); echo " yhti "; var_dump($yhtiorow); echo " <br><br>";
 // jos siirtolistan varasto on setattu ja on laaja toimipaikkakäsittely,
 // tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+  $_varasto = $laskurow["varasto"];
 
-  $query = "SELECT toimipaikka
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$laskurow['varasto']}";
-  $_tp_res = pupe_query($query);
-  $_tp_row = mysql_fetch_assoc($_tp_res);
+  if ($_varasto == 0) {
+    //haetaan kaikkien tilausrivien varastopaikat
+    $query = "SELECT tilausrivi.hyllyalue,
+              tilausrivi.hyllynro
+              FROM tilausrivi
+              WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
+              AND tilausrivi.yhtio      = '$kukarow[yhtio]'
+              AND tilausrivi.hyllyalue != ''
+              AND tilausrivi.tyyppi    != 'D'
+              LIMIT 1";
+    $_row = mysql_fetch_assoc(pupe_query($query));
 
-  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
-    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
-    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    // Mihin varastoon
+    $_varasto = kuuluukovarastoon($_row["hyllyalue"], $_row["hyllynro"]);
+  }
+
+  if ($_varasto != 0) {
+    $query = "SELECT toimipaikka
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = {$_varasto}";
+    $_tp_res = pupe_query($query);
+    $_tp_row = mysql_fetch_assoc($_tp_res);
+
+    if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+      $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    }
   }
 }
-
+echo "55 yhtiKr {$yhtiorow["kerayserat"]} <br><br>";
 // päivitetään vanhatunnus laskulle
 $query  = "UPDATE lasku SET
            vanhatunnus     = tunnus
@@ -88,7 +107,7 @@ $query = "SELECT tilausrivi.*
           and tilausrivi.keratty != ''
           $lisasalker";
 $keres = pupe_query($query);
-
+echo "91 lisasalker $lisasalker laskurowEilahetetta {$laskurow["eilahetetta"]} <br><br>";
 // jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
 // tai jos ollaan ruksattu suoraan valmiiksi (sisäiset työmääräykset)
 if (mysql_num_rows($keres) > 0 or $laskurow["eilahetetta"] != '') {
@@ -210,13 +229,14 @@ else {
 
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
-
+echo "213 yhtiKerayserat "; var_dump($toimitustavan_lahto); echo "<br><br> varasto $varasto <br><br>";
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
         $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
       }
       else {
         $toimitustavan_lahto_arvo = 0;
       }
+
       if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
         $varasto_row = hae_varasto($varasto);
         $varasto_toimipaikka = $varasto_row['toimipaikka'];
@@ -365,6 +385,7 @@ else {
         }
       }
       else {
+
         //päivitetään laskulle tieto mihin varastoon se kuuluu
         $query  ="UPDATE lasku SET
                   varasto                          = '$varasto',
@@ -390,7 +411,7 @@ else {
                   where yhtio                      = '$kukarow[yhtio]'
                   and tunnus                       = '$laskurow[tunnus]'";
         $varresult = pupe_query($query);
-
+echo "394 $query <br><br>";
         $laskurow["varasto"] = $varasto;
       }
 
@@ -436,7 +457,7 @@ else {
     if (!isset($splitatut)) {
       $splitatut = array($laskurow['tunnus']);
     }
-
+echo "440 yhtiKerayserat {$yhtiorow["kerayserat"]} yhtiSiirtolista {$yhtiorow["siirolistan_tulostustapa"]} <br><br>";
     if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
       foreach ($splitatut as $tunnus) {
         $query = "SELECT *
@@ -445,7 +466,7 @@ else {
                   AND tunnus  = '{$tunnus}'
                   AND (toimitustavan_lahto = 0 OR chn = 'GEN')";
         $result = pupe_query($query);
-
+echo "449 tunnus $tunnus query $query <br><br>";
         if (mysql_num_rows($result) == 1) {
           $lahtorow = mysql_fetch_assoc($result);
 
@@ -453,7 +474,7 @@ else {
           $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
 
           $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
-
+echo "457 {"; var_dump($lahdot[0]["tunnus"]); echo "} <br><br>";
           if ($lahdot !== FALSE) {
 
             // Otetaan eka lähtö
@@ -464,6 +485,7 @@ else {
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tunnus  = '{$tunnus}'";
             pupe_query($query);
+echo "468 $query <br><br>";
           }
         }
       }

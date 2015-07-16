@@ -236,7 +236,6 @@ else {
       else {
         $toimitustavan_lahto_arvo = 0;
       }
-
       if ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
         $varasto_row = hae_varasto($varasto);
         $varasto_toimipaikka = $varasto_row['toimipaikka'];
@@ -385,7 +384,6 @@ else {
         }
       }
       else {
-
         //p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
         $query  ="UPDATE lasku SET
                   varasto                          = '$varasto',

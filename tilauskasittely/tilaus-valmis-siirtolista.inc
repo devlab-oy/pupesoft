@@ -35,7 +35,7 @@ if ($laskurow['chn'] == "GEN" and trim($laskurow['ohjausmerkki']) == "") {
 }
 
 $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
-echo "38 laskurowVarasto "; var_dump($laskurow); echo " yhti "; var_dump($yhtiorow); echo " <br><br>";
+
 // jos siirtolistan varasto on setattu ja on laaja toimipaikkakäsittely,
 // tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
 if ($yhtiorow['toimipaikkakasittely'] == 'L') {
@@ -71,7 +71,7 @@ if ($yhtiorow['toimipaikkakasittely'] == 'L') {
     }
   }
 }
-echo "55 yhtiKr {$yhtiorow["kerayserat"]} <br><br>";
+
 // päivitetään vanhatunnus laskulle
 $query  = "UPDATE lasku SET
            vanhatunnus     = tunnus
@@ -229,7 +229,7 @@ else {
 
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
-echo "213 yhtiKerayserat "; var_dump($toimitustavan_lahto); echo "<br><br> varasto $varasto <br><br>";
+
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
         $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
       }
@@ -457,7 +457,7 @@ echo "394 $query <br><br>";
     if (!isset($splitatut)) {
       $splitatut = array($laskurow['tunnus']);
     }
-echo "440 yhtiKerayserat {$yhtiorow["kerayserat"]} yhtiSiirtolista {$yhtiorow["siirolistan_tulostustapa"]} <br><br>";
+
     if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
       foreach ($splitatut as $tunnus) {
         $query = "SELECT *
@@ -466,7 +466,7 @@ echo "440 yhtiKerayserat {$yhtiorow["kerayserat"]} yhtiSiirtolista {$yhtiorow["s
                   AND tunnus  = '{$tunnus}'
                   AND (toimitustavan_lahto = 0 OR chn = 'GEN')";
         $result = pupe_query($query);
-echo "449 tunnus $tunnus query $query <br><br>";
+
         if (mysql_num_rows($result) == 1) {
           $lahtorow = mysql_fetch_assoc($result);
 
@@ -474,7 +474,7 @@ echo "449 tunnus $tunnus query $query <br><br>";
           $eteenpain = ($lahtorow["chn"] == "GEN") ? 1 : 0;
 
           $lahdot = seuraavat_lahtoajat($lahtorow["toimitustapa"], $lahtorow["prioriteettinro"], $lahtorow["varasto"], 0, $eteenpain);
-echo "457 {"; var_dump($lahdot[0]["tunnus"]); echo "} <br><br>";
+
           if ($lahdot !== FALSE) {
 
             // Otetaan eka lähtö
@@ -485,7 +485,6 @@ echo "457 {"; var_dump($lahdot[0]["tunnus"]); echo "} <br><br>";
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tunnus  = '{$tunnus}'";
             pupe_query($query);
-echo "468 $query <br><br>";
           }
         }
       }

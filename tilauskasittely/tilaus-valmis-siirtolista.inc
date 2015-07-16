@@ -107,7 +107,7 @@ $query = "SELECT tilausrivi.*
           and tilausrivi.keratty != ''
           $lisasalker";
 $keres = pupe_query($query);
-echo "91 lisasalker $lisasalker laskurowEilahetetta {$laskurow["eilahetetta"]} <br><br>";
+
 // jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
 // tai jos ollaan ruksattu suoraan valmiiksi (sisäiset työmääräykset)
 if (mysql_num_rows($keres) > 0 or $laskurow["eilahetetta"] != '') {
@@ -411,7 +411,7 @@ else {
                   where yhtio                      = '$kukarow[yhtio]'
                   and tunnus                       = '$laskurow[tunnus]'";
         $varresult = pupe_query($query);
-echo "394 $query <br><br>";
+
         $laskurow["varasto"] = $varasto;
       }
 

@@ -7714,7 +7714,7 @@ if ($tee == '') {
         echo "</td>";
 
         if ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and $row["kpl"] != 0 and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {
-          echo "<td $class align='right' valign='top' nowrap><input type='text' size='5' name='kpl' value='$row[varattu]'></td>";
+          echo "<td $class align='right' valign='top' nowrap><input type='text' size='5' name='kpl' value='$row[varattu]' autocomplete='off'></td>";
           echo "</form>";
         }
         elseif ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {

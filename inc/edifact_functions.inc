@@ -2623,7 +2623,8 @@ function kontitustiedot($konttiviite, $lastaus = false) {
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
             {$rajaus}
-            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            ORDER BY tilausrivi.toimitettuaika";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

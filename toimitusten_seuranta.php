@@ -2524,8 +2524,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
           $kesken = 0;
 
-          asort($kontit);
-
           $v = $kontit[''];
           unset($kontit['']);
 
@@ -2601,7 +2599,9 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
               js_openFormInNewWindow();
 
-              echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
+              $_aika = strtotime($aika);
+
+              echo "&nbsp;<form method='post' id='hae_pakkalista_{$_konttinumero}_{$_aika}'>";
               echo "<input type='hidden' name='task' value='hae_pakkalista' />";
               echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
               echo "<input type='hidden' name='tee' value='XXX' />";
@@ -2615,7 +2615,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<input type='hidden' name='maaranpaa' value='{$matkatiedot["maaranpaa"]}' />";
               echo "<input type='hidden' name='maaranpaakoodi' value='{$matkatiedot["maaranpaakoodi"]}' />";
               echo "</form>";
-              echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
+              echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista_{$_konttinumero}_{$_aika}', 'Pakkalista'); return false;\" />";
               echo t("Pakkalista");
               echo "</button>";
 

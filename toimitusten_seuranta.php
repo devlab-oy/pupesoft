@@ -344,7 +344,9 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $korjaus = true;
     }
 
-    $kontit = kontitustiedot($konttiviite, urldecode($temp_konttinumero));
+    $temp_konttinumero = urldecode($temp_konttinumero);
+
+    $kontit = kontitustiedot($konttiviite, $temp_konttinumero);
 
     $kontin_kilot = $kontit[$temp_konttinumero]['paino'];
 

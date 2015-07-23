@@ -461,6 +461,9 @@ case "W":
   case "X":
     $alatila = "Valmis";
     break;
+  case "U":
+    $alatila = "Konttiviitelasku";
+    break;
   }
   break;
 }

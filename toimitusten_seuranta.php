@@ -344,7 +344,7 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
       $korjaus = true;
     }
 
-    $kontit = kontitustiedot($konttiviite, $temp_konttinumero);
+    $kontit = kontitustiedot($konttiviite, urldecode($temp_konttinumero));
 
     $kontin_kilot = $kontit[$temp_konttinumero]['paino'];
 
@@ -2533,7 +2533,9 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
           $mrn_tullut = true;
 
-          foreach ($kontit as $konttinumero => $kontti) {
+          foreach ($kontit as $lastaus => $kontti) {
+            $konttinumero = explode("|", $lastaus);
+            list($konttinumero, $aika) = $konttinumero;
 
             if ($kontti['konttinumero'] == '') {
               echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
@@ -2547,7 +2549,8 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             $_konttinumero = $konttinumero;
 
             echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-            echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
+            echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)";
+            echo "<br>Lastausaika: {$aika}<br>";
 
             if ($kontti['sinettinumero'] == '') {
               echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
@@ -2565,7 +2568,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<form method='post'>";
               echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
               echo "<input type='hidden' name='kuljetustyyppi' value='$kuljetustyyppi' />";
-              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+              echo "<input type='hidden' name='temp_konttinumero' value='" . urlencode($lastaus) . "' />";
               echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
               echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
               echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";

@@ -346,7 +346,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               ON trlt.yhtio = lasku.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tilaustyyppi = 'N'
+            AND lasku.tila = 'W'
+            AND lasku.alatila = 'A'
             AND lasku.asiakkaan_tilausnumero != ''
             AND lasku.sisviesti1 != 'konttiviitelasku'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
@@ -382,6 +383,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             JOIN lasku
               ON lasku.yhtio = ss.yhtio
+              AND lasku.tila = 'W'
+              AND lasku.alatila NOT IN ('T', 'TX')
               AND lasku.tunnus = tilausrivi.otunnus
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = ss.yhtio

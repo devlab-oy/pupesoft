@@ -1750,7 +1750,7 @@ if (!isset($task)) {
               JOIN laskun_lisatiedot AS llt
                ON llt.yhtio = lasku.yhtio
                AND llt.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = 'rplog'
+              WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
               AND lasku.tila = 'W'
               AND lasku.alatila = 'K'
               AND lasku.asiakkaan_tilausnumero != ''

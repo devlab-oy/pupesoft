@@ -2580,7 +2580,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
               echo "<form method='post'>";
               echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
-              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+              echo "<input type='hidden' name='temp_konttinumero' value='". urlencode($lastaus) ."' />";
               echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
               echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
               echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";

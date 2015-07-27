@@ -5,7 +5,18 @@ pupeslave_start();
 $enarimatch   = FALSE;
 $poistetulisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 
-if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== FALSE and $kukarow["extranet"] == "") {
+if (
+  // Haetaan myös poistetut, jos kyseessä on tuotehallinta, eikä olla extranetissä
+  (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "")
+
+  // Haetaan myös poistetut, jos kyseessä on ostotilaus ja yhtiön parametreistä on valittu, että
+  // myös poistettuja tuotteita voi lisätä tilaukselle
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== false and $yhtiorow["poistetut_lisays"] == "P")
+
+  // Haetaan myös poistetut, jos kyseessä on extranet-tilaus ja yhtiön parametreistä on valittu,
+  // että myös poistettuja tuotteita voi lisätä tilaukselle
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== false and !empty($extranet) and $yhtiorow["poistetut_lisays"] == "P")
+) {
   $poistetulisa = "";
 }
 
@@ -383,7 +394,12 @@ if (!$enarimatch) {
           $ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
         }
 
-        $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("epäkurantti").")" : "";
+        if (empty($kukarow["extranet"])) {
+          $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% " . t("epäkurantti") . ")" : "";
+        }
+        else {
+          $epakuranttiteksti = "";
+        }
 
         $ulos .= "<option value='{$trow['tuoteno']}{$lisakala3}'>{$lisakala2} {$lisakala1} {$trow['tuoteno']} ".t_tuotteen_avainsanat($trow, 'nimitys')." ({$kokonaismyytavissa}){$epakuranttiteksti}</option>";
 

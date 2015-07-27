@@ -143,6 +143,9 @@ if ($tee == 'lisaa_aiemmalle_riville') {
             SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
                 varattu = varattu + '{$lisattava['kpl']}'
             WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi = 'O'
+            AND otunnus = '{$kukarow["kesken"]}'
+            AND toimitettu = ''
             AND tunnus = '{$ensimmainen_tilausrivi}'";
 
   $tru_result = pupe_query($query);
@@ -151,7 +154,9 @@ if ($tee == 'lisaa_aiemmalle_riville') {
     $query = "DELETE
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tilausnumero}'
+              AND tyyppi = 'O'
+              AND otunnus = '{$kukarow["kesken"]}'
+              AND toimitettu = ''
               AND tunnus = '{$viimeinen_tilausrivi}'";
 
     $trd_result = pupe_query($query);

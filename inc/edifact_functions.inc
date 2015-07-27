@@ -2670,17 +2670,21 @@ function kasittele_iftsta($edi_data) {
   }
 }
 
-function kontitustiedot($konttiviite, $konttinumero = false) {
+function kontitustiedot($konttiviite, $lastaus = false) {
   global $kukarow;
 
-  if ($konttinumero) {
-    $rajaus = "AND trlt.konttinumero = '{$konttinumero}'";
+  if ($lastaus) {
+    list($konttinumero, $aika) = explode("|", $lastaus);
+
+    $rajaus = "AND trlt.konttinumero = '{$konttinumero}'
+               AND tilausrivi.toimitettuaika = '{$aika}'";
   }
   else{
     $rajaus = '';
   }
 
   $query = "SELECT tilausrivi.tunnus,
+            concat_ws('|', trlt.konttinumero, tilausrivi.toimitettuaika) AS lastaus,
             ss.massa,
             trlt.konttinumero,
             trlt.juoksu,
@@ -2710,7 +2714,8 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
             {$rajaus}
-            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            ORDER BY tilausrivi.toimitettuaika";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -2720,7 +2725,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
   $kontit = array();
 
   while ($rulla = mysql_fetch_assoc($result)) {
-    $kontit[$rulla['konttinumero']][] = $rulla;
+    $kontit[$rulla['lastaus']][] = $rulla;
   }
 
   foreach ($kontit as $konttinumero => $kontti) {
@@ -2733,6 +2738,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $konttipaino = $konttipaino + $rulla['massa'];
       $konttilista .= $rulla['tunnus'] . ',';
       $sinettinumero = $rulla['sinettinumero'];
+      $lastaus = $rulla['lastaus'];
       $konttinumero = $rulla['konttinumero'];
       $isokoodi = $rulla['kontin_isokoodi'];
       $taara = $rulla['kontin_taarapaino'];
@@ -2747,15 +2753,15 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
 
     $konttilista = rtrim($konttilista, ',');
 
-    $kontit[$konttinumero]['paino'] = $konttipaino;
-    $kontit[$konttinumero]['mrn'] = $mrn;
-    $kontit[$konttinumero]['kpl'] = count($kontti);
-    $kontit[$konttinumero]['sinettinumero'] = $sinettinumero;
-    $kontit[$konttinumero]['konttinumero'] = $konttinumero;
-    $kontit[$konttinumero]['taara'] = $taara;
-    $kontit[$konttinumero]['isokoodi'] = $isokoodi;
-    $kontit[$konttinumero]['pakkalista'] = $pakkalista;
-    $kontit[$konttinumero]['lista'] = $konttilista;
+    $kontit[$lastaus]['paino'] = $konttipaino;
+    $kontit[$lastaus]['mrn'] = $mrn;
+    $kontit[$lastaus]['kpl'] = count($kontti);
+    $kontit[$lastaus]['sinettinumero'] = $sinettinumero;
+    $kontit[$lastaus]['konttinumero'] = $konttinumero;
+    $kontit[$lastaus]['taara'] = $taara;
+    $kontit[$lastaus]['isokoodi'] = $isokoodi;
+    $kontit[$lastaus]['pakkalista'] = $pakkalista;
+    $kontit[$lastaus]['lista'] = $konttilista;
   }
 
   return $kontit;

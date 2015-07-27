@@ -356,11 +356,19 @@ $query = "SELECT
 $result = pupe_query($query);
 $laskutiedot = mysql_fetch_assoc($result);
 
+// Asiakkaalla vain kohdistamattomia suorituksia, ei avoimia laskuja
+if (!isset($laskutiedot['liitostunnus'])) {
+  $astunnus = $asiakasid;
+}
+else {
+  $astunnus = $laskutiedot['liitostunnus'];
+}
+
 //otetaan asiakastiedot ekalta laskulta
 $query = "SELECT *
           FROM asiakas
           WHERE yhtio = '$kukarow[yhtio]'
-          AND tunnus  = '$laskutiedot[liitostunnus]'";
+          AND tunnus  = '$astunnus'";
 $asiakasresult = pupe_query($query);
 $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 

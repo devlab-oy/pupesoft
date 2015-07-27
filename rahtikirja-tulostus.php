@@ -601,13 +601,15 @@ if ($tee == 'tulosta') {
         $groupby_lisa = "";
       }
 
-      $query = "SELECT min(rahtikirjanro) rahtikirjanro
-                FROM rahtikirjat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  IN ({$tunnukset})";
-      $rahtikirjanrores = pupe_query($query);
-      $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
-      $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
+      if (strpos($toitarow["rahtikirja"], "unifaun") !== FALSE) {
+        $query = "SELECT min(rahtikirjanro) rahtikirjanro
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus IN ({$tunnukset})";
+        $rahtikirjanrores = pupe_query($query);
+        $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
+        $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
+      }
 
       $pakkaustieto_tunnukset = '';
 

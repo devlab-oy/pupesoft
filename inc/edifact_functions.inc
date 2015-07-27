@@ -9,7 +9,7 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('B', 'T', 'TX')
+              AND lasku.alatila IN ('A', 'D', 'K')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
@@ -49,7 +49,7 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
               ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
             WHERE la.yhtio = '{$kukarow['yhtio']}'
             AND la.tila = 'W'
-            AND la.alatila NOT IN ('B', 'T', 'TX')
+            AND la.alatila IN ('A', 'D')
             AND la.tunnus IN ({$laskujen_tunnukset})
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
             ORDER BY group_class";
@@ -417,7 +417,7 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
             JOIN lasku
               ON lasku.yhtio = tr.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'D')
               AND lasku.tunnus = tr.otunnus
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -509,7 +509,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
               AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('B', 'T', 'TX')
+            AND lasku.alatila IN ('A', 'D')
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             AND tilausrivin_lisatiedot.konttinumero != ''
             GROUP BY lasku.asiakkaan_tilausnumero, asiakkaan_rivinumero";
@@ -579,10 +579,10 @@ function konttierittely_parametrit($konttiviite) {
               AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('B', 'T', 'TX')
+            AND lasku.alatila IN ('A', 'D')
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             AND tilausrivin_lisatiedot.konttinumero != ''
-            GROUP BY konttinumero, asiakkaan_tilausnumero, asiakkaan_rivinumero";
+            GROUP BY konttinumero, lasku.asiakkaan_tilausnumero, asiakkaan_rivinumero";
   $result = pupe_query($query);
 
   $kontit = array();
@@ -626,7 +626,7 @@ function satamavahvistus_parametrit($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('B', 'T', 'TX')
+              AND lasku.alatila IN ('A', 'D')
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
             AND konttiviite = '{$konttiviite}'";
   $result = pupe_query($query);
@@ -710,7 +710,7 @@ function hae_varastointikaudet($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('B', 'T', 'TX')
+              AND lasku.alatila IN ('A', 'D')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
             JOIN tilausrivi
               ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
@@ -775,7 +775,7 @@ function laskutusraportti_parametrit($konttiviite) {
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('B', 'T', 'TX')
+            AND lasku.alatila IN ('A', 'B', 'D')
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
@@ -795,7 +795,7 @@ function laskutusraportti_parametrit($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = tilausrivi.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('B', 'T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'D')
               AND lasku.tunnus = tilausrivi.otunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.asiakkaan_tilausnumero = '{$konttiviite}'";
@@ -1530,9 +1530,8 @@ function kasittele_bookkaussanoma($edi_data) {
               AND laskun_lisatiedot.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('T', 'TX')
-            AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
-            AND lasku.tilaustyyppi = 'N'";
+            AND lasku.alatila IN ('A', 'B', 'K')
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'";
   $result = pupe_query($query);
 
   $kukarow['kesken'] = 0;
@@ -1553,7 +1552,7 @@ function kasittele_bookkaussanoma($edi_data) {
                        alatila    = 'B'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND lasku.tila = 'W'
-                       AND lasku.alatila NOT IN ('T', 'TX')
+                       AND lasku.alatila IN ('A', 'B', 'K')
                        AND tunnus = '{$lasku['tunnus']}'";
       pupe_query($update_query);
 
@@ -1606,7 +1605,7 @@ function kasittele_bookkaussanoma($edi_data) {
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
                  WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                  AND lasku.tila = 'W'
-                 AND lasku.alatila NOT IN ('B', 'T', 'TX')
+                 AND lasku.alatila IN ('A', 'B', 'K')
                  AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'";
     $kv_result = pupe_query($kv_query);
 
@@ -1752,7 +1751,7 @@ function kasittele_bookkaussanoma($edi_data) {
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B', 'K')
                 AND lasku.tunnus = '{$tunnus_johon_liitetaan}'";
       $result = pupe_query($query);
 
@@ -1768,7 +1767,7 @@ function kasittele_bookkaussanoma($edi_data) {
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B', 'K')
                 AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'";
       $result = pupe_query($query);
 
@@ -1794,7 +1793,7 @@ function kasittele_bookkaussanoma($edi_data) {
                      toimaika   = '{$lahtopvm}'
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND lasku.tila = 'W'
-                     AND lasku.alatila NOT IN ('T', 'TX')
+                     AND lasku.alatila IN ('A', 'B', 'K')
                      AND tunnus = '{$tunnus}'";
     pupe_query($update_query);
 
@@ -1846,7 +1845,7 @@ function kasittele_bookkaussanoma($edi_data) {
                      FROM lasku
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND lasku.tila = 'W'
-                     AND lasku.alatila NOT IN ('T', 'TX')
+                     AND lasku.alatila IN ('A', 'B', 'K')
                      AND tunnus = '{$tunnus}'";
       $laskuresult = pupe_query($laskuquery);
       $laskurow = mysql_fetch_assoc($laskuresult);
@@ -1898,7 +1897,7 @@ function kasittele_bookkaussanoma($edi_data) {
                 SET alatila = 'A'
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND tila = 'W'
-                AND alatila = 'K'
+                AND lasku.alatila IN ('A', 'B', 'K')
                 AND tunnus = '{$tunnus}'";
 
       pupe_query($query);
@@ -2232,7 +2231,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                 AND tilausrivi.otunnus = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'K')
               AND lasku.asiakkaan_tilausnumero IN ('{$laskuinfo['tilausnumerot']}')
               GROUP BY lasku.tunnus";
     $result = pupe_query($query);
@@ -2409,7 +2408,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B', 'K')
                 AND lasku.asiakkaan_tilausnumero = '{$rulla['tilausnro']}'";
       $result = pupe_query($query);
 
@@ -2469,7 +2468,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                          alatila = 'A'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tila = 'W'
-                         AND alatila NOT IN ('T', 'TX')
+                         AND lasku.alatila IN ('B', 'K')
                          AND tunnus = '{$laskurow['tunnus']}'";
         pupe_query($update_query);
 
@@ -2512,7 +2511,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                          alatila = 'A'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tila = 'W'
-                         AND alatila NOT IN ('T', 'TX')
+                         AND lasku.alatila IN ('B', 'K')
                          AND tunnus = '{$tunnus}'";
         pupe_query($update_query);
 
@@ -2546,7 +2545,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
                   AND tila = 'W'
-                  AND alatila NOT IN ('T', 'TX')";
+                  AND lasku.alatila IN ('A', 'B', 'K')";
         $result = pupe_query($query);
         $laskurow = mysqL_fetch_assoc($result);
 
@@ -2644,9 +2643,10 @@ function kasittele_iftsta($edi_data) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'K')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
-            WHERE matkakoodi = '{$matkakoodi}'";
+            WHERE laskun_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
+            AND matkakoodi = '{$matkakoodi}'";
   $result = pupe_query($query);
   $laskutunnukset = mysql_result($result, 0);
 
@@ -2696,7 +2696,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('B', 'T', 'TX')
+              AND lasku.alatila IN ('A', 'D')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
             JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio
@@ -2986,7 +2986,7 @@ function muuta_bookkaus($muutosparametrit) {
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B', 'K')
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$laskutunnus}'";
     $result = pupe_query($query);
@@ -3048,7 +3048,7 @@ function peruuta_bookkaus($peruutusparametrit) {
               AND trlt.tilausrivitunnus = tr.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('T', 'TX')
+            AND lasku.alatila IN ('A', 'B', 'K')
             AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
@@ -3095,8 +3095,9 @@ function peruuta_bookkaus($peruutusparametrit) {
                 AND otunnus = '{$liiteinfo['laskutunnukset']}'";
       pupe_query($query);
 
-      // poistetaan liite
-      $query = "DELETE FROM liitetiedostot
+      // P‰ivitet‰‰n liite poistetuksi
+      $query = "UPDATE liitetiedostot SET
+                kayttotarkoitus = 'poistettu bookkaussanoma'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND selite = '{$kombo}'";
       pupe_query($query);

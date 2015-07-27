@@ -29,7 +29,7 @@ if (isset($submit)) {
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'D')
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND konttiviite = '{$hakukoodi}'";
     $result = pupe_query($query);
@@ -43,7 +43,7 @@ if (isset($submit)) {
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tila = 'W'
-                AND alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'D', 'K')
                 AND asiakkaan_tilausnumero = '{$hakukoodi}'";
       $result = pupe_query($query);
 
@@ -315,7 +315,7 @@ function hae_tiedot($hakukoodi, $tyyppi) {
               JOIN lasku
                 ON lasku.yhtio = sarjanumeroseuranta.yhtio
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B', 'D')
                 AND lasku.tunnus = tilausrivi.otunnus
               JOIN laskun_lisatiedot
                 ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -335,7 +335,7 @@ function hae_tiedot($hakukoodi, $tyyppi) {
                 AND laskun_lisatiedot.otunnus = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'D', 'K')
               AND lasku.asiakkaan_tilausnumero = '{$hakukoodi}'";
     $result = pupe_query($query);
 
@@ -376,7 +376,7 @@ function hae_tiedot($hakukoodi, $tyyppi) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'D')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
             LEFT JOIN tilausrivi
               ON tilausrivi.yhtio = laskun_lisatiedot.yhtio

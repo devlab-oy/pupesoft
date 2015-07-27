@@ -464,6 +464,9 @@ case "W":
   case "U":
     $alatila = "Konttiviitelasku";
     break;
+  case "M":
+    $alatila = "Muut";
+    break;
   }
   break;
 }

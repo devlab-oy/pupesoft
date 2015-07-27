@@ -143,7 +143,7 @@ if ($tee == 'lisaa_aiemmalle_riville') {
             SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
                 varattu = varattu + '{$lisattava['kpl']}'
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$ensimmainen_tilausrivi['tunnus']}'";
+            AND tunnus = '{$ensimmainen_tilausrivi}'";
 
   $tru_result = pupe_query($query);
 
@@ -152,7 +152,7 @@ if ($tee == 'lisaa_aiemmalle_riville') {
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$tilausnumero}'
-              AND tunnus = '{$viimeinen_tilausrivi['tunnus']}'";
+              AND tunnus = '{$viimeinen_tilausrivi}'";
 
     $trd_result = pupe_query($query);
   }
@@ -1991,20 +1991,17 @@ function hae_eka_ja_vika_tilausrivi($params) {
   $tilausnumero = $params['tilausnumero'];
   $tuoteno      = $params['tuoteno'];
 
-  $query = "SELECT tunnus
+  $query = "SELECT min(tunnus) AS eka,
+            max(tunnus)        AS vika
             FROM tilausrivi
             WHERE yhtio = '{$kukarow["yhtio"]}'
             AND otunnus = '{$tilausnumero}'
             AND tuoteno = '{$tuoteno}'
-            ORDER BY tunnus";
+            AND tyyppi = 'O'";
 
-  $tr_result = pupe_query($query);
+  $result = pupe_query($query);
 
-  $tilausrivit = array();
+  $tunnukset = mysql_fetch_assoc($result);
 
-  while ($tilausrivi = mysql_fetch_assoc($tr_result)) {
-    array_push($tilausrivit, $tilausrivi);
-  }
-
-  return array(reset($tilausrivit), end($tilausrivit));
+  return array($tunnukset["eka"], $tunnukset["vika"]);
 }

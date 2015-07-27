@@ -26,7 +26,7 @@ if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] != "") {
 
   list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
 
-  if ($ensimmainen_tilausrivi != $viimeinen_tilausrivi and $prow['tunnus'] == $viimeinen_tilausrivi['tunnus']) {
+  if ($ensimmainen_tilausrivi != $viimeinen_tilausrivi and $prow['tunnus'] == $viimeinen_tilausrivi) {
     $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
     $varaosavirhe .= "<form method='post'>
                         <input type='hidden' name='lopetus' value='{$lopetus}'>

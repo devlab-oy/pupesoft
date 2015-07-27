@@ -26179,7 +26179,7 @@ if (!function_exists("tsekit")) {
                   and tuoteno = '$toimrow[tuoteno]'
                   and $tunken = '$toimrow[tunnus]'";
       }
-      elseif ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
+      elseif ($toimrow["sarjanumeroseuranta"] == "E" or $toimrow["sarjanumeroseuranta"] == "F" or $toimrow["sarjanumeroseuranta"] == "G") {
         $query = "SELECT sum(sarjanumeroseuranta.era_kpl*if(tilausrivi.tunnus is not null, if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt > 0 or tilausrivi.tyyppi = 'O', 1, -1), 1)) kpl, min(sarjanumeroseuranta.sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   LEFT JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)

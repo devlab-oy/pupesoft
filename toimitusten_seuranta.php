@@ -104,7 +104,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
                    sisviesti1  = '{$pakkausohje}'
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND lasku.tila = 'W'
-                   AND lasku.alatila NOT IN ('T', 'TX')
+                   AND lasku.alatila IN ('A', 'B', 'D')
                    AND tunnus IN ({$tunnukset})";
   pupe_query($update_query);
 
@@ -456,7 +456,7 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
                 JOIN lasku
                   ON lasku.yhtio = tr.yhtio
                   AND lasku.tila = 'W'
-                  AND lasku.alatila NOT IN ('T', 'TX')
+                  AND lasku.alatila IN ('A', 'D')
                   AND lasku.tunnus = tr.otunnus
                 WHERE trlt.yhtio = '{$kukarow['yhtio']}'
                 AND trlt.konttinumero = '{$konttinumero}'
@@ -631,7 +631,7 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                 alatila = 'D'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'B')
                 AND tunnus = '{$tunnus}'";
       pupe_query($query);
     }
@@ -699,7 +699,7 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila = 'A'
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND konttiviite = '{$sinetoitava_konttiviite}'";
     $result = pupe_query($query);
@@ -877,7 +877,7 @@ if (isset($task) and $task == 'hylky') {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('T', 'TX')
+            AND lasku.alatila IN ('A', 'B')
             AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
             AND ss.lisatieto = 'Hylättävä'";
   $result = pupe_query($query);
@@ -926,7 +926,7 @@ if (isset($task) and $task == 'lusaus') {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('T', 'TX')
+            AND lasku.alatila IN ('A', 'B')
             AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
             AND ss.lisatieto = 'Lusattava'";
   $result = pupe_query($query);
@@ -998,7 +998,7 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
                    FROM lasku
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND lasku.tila = 'W'
-                   AND lasku.alatila NOT IN ('T', 'TX')
+                   AND lasku.alatila IN ('A', 'B', 'D')
                    AND asiakkaan_tilausnumero = '{$konttiviite}'";
     $laskuresult = pupe_query($laskuquery);
     $laskurow = mysql_fetch_assoc($laskuresult);
@@ -1149,8 +1149,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
             AND lasku.alatila = 'U'
-            AND asiakkaan_tilausnumero = '{$konttiviite}'
-            AND sisviesti1 = 'konttiviitelasku'";
+            AND asiakkaan_tilausnumero = '{$konttiviite}'";
   $result = pupe_query($query);
 
   $nimikkeet = array();
@@ -1470,7 +1469,7 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
                 AND lasku.tila = 'W'
-                AND lasku.alatila NOT IN ('T', 'TX')
+                AND lasku.alatila IN ('A', 'D', 'K')
               WHERE laskun_lisatiedot.yhtio  = '{$kukarow['yhtio']}'
               AND konttiviite = '{$viite}'";
     $result = pupe_query($query);
@@ -1543,7 +1542,6 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
             AND lasku.alatila = 'B'
-            AND llt.konttiviite = 'bookkaukseton'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
 
@@ -1727,7 +1725,6 @@ if (!isset($task)) {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'W'
               AND lasku.alatila = 'B'
-              AND konttiviite = 'bookkaukseton'
               GROUP BY lasku.tunnus";
       break;
 
@@ -1972,7 +1969,7 @@ if (!isset($task)) {
                 JOIN lasku
                   ON lasku.yhtio = laskun_lisatiedot.yhtio
                   AND lasku.tila = 'W'
-                  AND lasku.alatila NOT IN ('T', 'TX')
+                  AND lasku.alatila IN ('A', 'B', 'D', 'K')
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND otunnus IN ({$rivi['laskutunnukset']})";
         $res = pupe_query($qry);
@@ -2120,7 +2117,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                 AND laskun_lisatiedot.otunnus = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'W'
-              AND lasku.alatila NOT IN ('T', 'TX')
+              AND lasku.alatila IN ('A', 'B', 'D', 'K')
               AND laskun_lisatiedot.konttiviite = '{$kv}'
               GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
               ORDER BY toimaika, konttiviite";
@@ -2170,7 +2167,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila NOT IN ('T', 'TX')
+            AND lasku.alatila IN ('A', 'B', 'D')
             AND laskun_lisatiedot.konttiviite = '{$kv}'
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             ORDER BY toimaika, konttiviite";
@@ -2246,7 +2243,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                 JOIN lasku
                   ON lasku.yhtio = laskun_lisatiedot.yhtio
                   AND lasku.tila = 'W'
-                  AND lasku.alatila NOT IN ('T', 'TX')
+                  AND lasku.alatila IN ('A', 'B', 'D')
                 WHERE laskun_lisatiedot.yhtio = '{$yhtiorow['yhtio']}'
                 AND konttiviite = '{$tilaus['konttiviite']}'";
       $result = pupe_query($query);

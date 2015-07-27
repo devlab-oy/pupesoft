@@ -1968,7 +1968,7 @@ if ($tila == '') {
     echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
     echo "<span class='saldo_{$id}' style='display:none;'></span>";
 
-    if ($rivirow["sarjanumeroseuranta"] != "") {
+    if ($rivirow["sarjanumeroseuranta"] != "" and $rivirow["sarjanumeroseuranta"] != "T") {
       if ($rivirow["siskpl"] < 0) {
         $tunken = "sarjanumeroseuranta.myyntirivitunnus";
         $tunind = "yhtio_myyntirivi";
@@ -1988,7 +1988,7 @@ if ($tila == '') {
         $snro_ok = t("S:nro ok");
         $snro   = t("S:nro");
       }
-      elseif ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
+      else {
         $query = "SELECT sum(sarjanumeroseuranta.era_kpl*if(tilausrivi.tunnus is not null, if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt > 0 or tilausrivi.tyyppi = 'O', 1, -1), 1)) kpl, min(sarjanumeroseuranta.sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   LEFT JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)

@@ -268,7 +268,7 @@ if (isset($submit)) {
                     alatila = 'A'
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tila = 'W'
-                    AND alatila NOT IN ('T', 'TX')
+                    AND alatila IN ('B', 'K')
                     AND asiakkaan_tilausnumero  = '{$asiakkaan_tilausnumero}'";
           pupe_query($query);
         }

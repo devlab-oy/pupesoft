@@ -440,32 +440,29 @@ case "F":
 case "W":
   $laskutyyppi = "Rullatilaus";
   switch ($alatila) {
-  case "T":
-    $alatila = "Tuleva";
-    break;
-  case "K":
-    $alatila = "Tuleva lähtö";
+  case "A":
+    $alatila = "Aktiivinen";
     break;
   case "B":
     $alatila = "Bookkaukseton";
     break;
-  case "A":
-    $alatila = "Aktiivinen";
-    break;
   case "D":
     $alatila = "Toimitettu";
+    break;
+  case "K":
+    $alatila = "Tuleva lähtö";
+    break;
+  case "M":
+    $alatila = "Muut";
+    break;
+  case "T":
+    $alatila = "Tuleva";
     break;
   case "TX":
     $alatila = "Valmis tuleva";
     break;
-  case "X":
-    $alatila = "Valmis";
-    break;
   case "U":
     $alatila = "Konttiviitelasku";
-    break;
-  case "M":
-    $alatila = "Muut";
     break;
   }
   break;

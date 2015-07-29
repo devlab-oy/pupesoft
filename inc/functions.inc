@@ -6553,7 +6553,7 @@ if (!function_exists('ebid')) {
     }
     else {
 
-      $query = "SELECT tunnus
+      $query = "SELECT tunnus, filename, selite
                 from liitetiedostot
                 where liitostunnus = '$laskurow[tunnus]'
                 and liitos         = 'lasku'
@@ -6572,7 +6572,14 @@ if (!function_exists('ebid')) {
           $out[] = $palvelin2."view.php?id=$row[tunnus]";
         }
         else {
-          $out .= "<a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a> ";
+          if ($laskurow['tila'] == 'X') {
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
+                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Liite') .": $row[filename]</a>&nbsp;&nbsp;";
+          }
+          else {
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
+                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a>&nbsp;&nbsp;";
+          }
         }
       }
 

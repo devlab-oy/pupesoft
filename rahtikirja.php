@@ -134,10 +134,10 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
       if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
 
-        $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
-        $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
-        $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
-        $lavametri[$i]  = str_replace(',', '.', $lavametri[$i]);
+        $kilot[$i] = str_replace(',', '.', $kilot[$i]);
+        $kollit[$i] = str_replace(',', '.', $kollit[$i]);
+        $kuutiot[$i] = str_replace(',', '.', $kuutiot[$i]);
+        $lavametri[$i] = str_replace(',', '.', $lavametri[$i]);
 
         // katotaan ollaanko syˆtetty useampia kiloja
         $kiloja = explode('/', $kilot[$i]);
@@ -627,7 +627,7 @@ if ($tee == 'add') {
     }
 
     // Poistetaan etuk‰teen syˆtetyt rahtikirjatiedot, ku nyt t‰ss‰ ne menis muuten toistamiseen kantaan
-    if ((!isset($muutos) or $muutos != 'yes' or (isset($uudet_koodit) and $uudet_koodit == 'yes')) and $tutkimus > 0) {
+    if (!isset($muutos) or $muutos != 'yes' and $tutkimus > 0) {
       $query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro IN ({$tunnuslisa}) and rahtikirjanro IN ({$rakirnolisa}) and poikkeava = -9";
       $result = pupe_query($query);
     }
@@ -640,10 +640,10 @@ if ($tee == 'add') {
         // ja insertataan vaan jos se on erisuurta ku nolla (n‰in voidaan nollalla tai spacella tyhjent‰‰ kentti‰)
         if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
 
-          $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
-          $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
-          $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
-          $lavametri[$i]  = str_replace(',', '.', $lavametri[$i]);
+          $kilot[$i] = str_replace(',', '.', $kilot[$i]);
+          $kollit[$i] = str_replace(',', '.', $kollit[$i]);
+          $kuutiot[$i] = str_replace(',', '.', $kuutiot[$i]);
+          $lavametri[$i] = str_replace(',', '.', $lavametri[$i]);
 
           if ($rakirno == '') {
             $query = "SELECT max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and (otsikkonro='$otsikkonro' or otsikkonro='0')";

@@ -26155,7 +26155,7 @@ if (!function_exists("tsekit")) {
     // katotaan onko kaikki sarjanumerot ok
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
               FROM tilausrivi use index (uusiotunnus_index)
-              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta != '' and tuote.sarjanumeroseuranta != 'T'
+              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('', 'T')
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
               tilausrivi.uusiotunnus='$row[tunnus]' and
               tilausrivi.tyyppi='O'";
@@ -26179,7 +26179,7 @@ if (!function_exists("tsekit")) {
                   and tuoteno = '$toimrow[tuoteno]'
                   and $tunken = '$toimrow[tunnus]'";
       }
-      elseif ($toimrow["sarjanumeroseuranta"] == "E" or $toimrow["sarjanumeroseuranta"] == "F" or $toimrow["sarjanumeroseuranta"] == "G") {
+      else {
         $query = "SELECT sum(sarjanumeroseuranta.era_kpl*if(tilausrivi.tunnus is not null, if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt > 0 or tilausrivi.tyyppi = 'O', 1, -1), 1)) kpl, min(sarjanumeroseuranta.sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   LEFT JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)

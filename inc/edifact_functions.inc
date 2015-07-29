@@ -2289,7 +2289,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
     $laskurow = luo_ostotilausotsikko($params);
 
     $query = "UPDATE lasku
-              SET tila    = 'W'
+              SET tila    = 'W',
                   alatila = 'T'
               WHERE yhtio = '{$kukarow["yhtio"]}'
               AND tunnus  = '{$laskurow["tunnus"]}'";

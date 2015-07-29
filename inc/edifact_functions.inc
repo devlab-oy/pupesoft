@@ -543,6 +543,7 @@ function konttierittely_parametrit($konttiviite) {
   global $kukarow;
 
   $query = "SELECT
+            concat_ws('|', tilausrivin_lisatiedot.konttinumero, tilausrivi.toimitettuaika) AS lastaus,
             tilausrivin_lisatiedot.konttinumero,
             tilausrivin_lisatiedot.kontin_mrn,
             tilausrivin_lisatiedot.kontin_taarapaino,
@@ -567,7 +568,8 @@ function konttierittely_parametrit($konttiviite) {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             AND tilausrivin_lisatiedot.konttinumero != ''
-            GROUP BY konttinumero, asiakkaan_tilausnumero, asiakkaan_rivinumero";
+            GROUP BY lastaus, asiakkaan_tilausnumero, asiakkaan_rivinumero
+            ORDER BY tilausrivi.toimitettuaika";
   $result = pupe_query($query);
 
   $kontit = array();
@@ -579,18 +581,18 @@ function konttierittely_parametrit($konttiviite) {
     $total_paino += $rivi['paino'];
     $total_rullat += $rivi['rullia'];
 
-    $kontit[$rivi['konttinumero']]['mrn'] = $rivi['kontin_mrn'];
-    $kontit[$rivi['konttinumero']]['sinetti'] = $rivi['sinettinumero'];
-    $kontit[$rivi['konttinumero']]['taara'] = $rivi['kontin_taarapaino'];
+    $kontit[$rivi['lastaus']]['mrn'] = $rivi['kontin_mrn'];
+    $kontit[$rivi['lastaus']]['sinetti'] = $rivi['sinettinumero'];
+    $kontit[$rivi['lastaus']]['taara'] = $rivi['kontin_taarapaino'];
 
-    $kontit[$rivi['konttinumero']]['paino'] += $rivi['paino'];
-    $kontit[$rivi['konttinumero']]['rullia'] += $rivi['rullia'];
+    $kontit[$rivi['lastaus']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['lastaus']]['rullia'] += $rivi['rullia'];
 
-    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']]['paino'] += $rivi['paino'];
-    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']]['rullia'] += $rivi['rullia'];
+    $kontit[$rivi['lastaus']][$rivi['asiakkaan_tilausnumero']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['lastaus']][$rivi['asiakkaan_tilausnumero']]['rullia'] += $rivi['rullia'];
 
-    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['paino'] += $rivi['paino'];
-    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['rullia'] += $rivi['rullia'];
+    $kontit[$rivi['lastaus']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['lastaus']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['rullia'] += $rivi['rullia'];
   }
 
   $parametrit['kontit'] = $kontit;
@@ -3314,7 +3316,9 @@ function konttierittely_pdf($pdf_data) {
   $pdf->draw_text($x+100, $y, $total_rullat." pcs", $sivu, $bold);
   $y -= 15;
 
-  foreach ($kontit as $konttiviite => $tilaukset) {
+  foreach ($kontit as $lastaus => $tilaukset) {
+
+    list($konttiviite, $aika) = explode("|", $lastaus);
 
     $tarvittava_tila = 85;
     $tilauksia = count($tilaukset);
@@ -3333,6 +3337,11 @@ function konttierittely_pdf($pdf_data) {
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
     $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' reels', $sivu, $bold);
     $pdf->draw_text($x+300, $y, 'Tare weight: '.$tilaukset['taara']. ' kg', $sivu, $bold);
+
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Load date:', $sivu, $bold);
+    $pdf->draw_text($x+60, $y, $aika, $sivu, $bold);
 
     $y -= 15;
 

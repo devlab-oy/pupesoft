@@ -2145,8 +2145,14 @@ if ($tee == 'Z') {
     echo "<tr>";
     echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
 
-    if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
-      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=tuote&tunnus={$tuoterow["tunnus"]}&lopetus=$tkysy_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' /></a>";
+    $tuotehallintaoikeus = tarkista_oikeus('yllapito.php', 'tuote%', 1, true);
+
+    if ($tuotehallintaoikeus) {
+      echo "&nbsp;&nbsp;
+            <a href='{$palvelin2}yllapito.php?toim={$tuotehallintaoikeus["alanimi"]}&tunnus={$tuoterow["tunnus"]}&lopetus={$tkysy_lopetus}'>
+              <img src='{$palvelin2}pics/lullacons/document-properties.png'
+                   alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' />
+            </a>";
     }
 
     //haetaan orginaalit

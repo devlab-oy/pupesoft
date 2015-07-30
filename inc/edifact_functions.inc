@@ -3317,8 +3317,8 @@ function konttierittely_pdf($pdf_data) {
   $y -= 15;
 
   foreach ($kontit as $lastaus => $tilaukset) {
-
-    list($konttiviite, $aika) = explode("|", $lastaus);
+    $konttiviite = explode("|", $lastaus);
+    $konttiviite = $konttiviite[0];
 
     $tarvittava_tila = 85;
     $tilauksia = count($tilaukset);
@@ -3337,11 +3337,6 @@ function konttierittely_pdf($pdf_data) {
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
     $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' reels', $sivu, $bold);
     $pdf->draw_text($x+300, $y, 'Tare weight: '.$tilaukset['taara']. ' kg', $sivu, $bold);
-
-    $y -= 15;
-
-    $pdf->draw_text($x, $y, 'Load date:', $sivu, $bold);
-    $pdf->draw_text($x+60, $y, $aika, $sivu, $bold);
 
     $y -= 15;
 

@@ -35,7 +35,7 @@ $query = "SELECT
           AND ss.ostorivitunnus = tr.tunnus
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND lasku.tila = 'W'
-          AND lasku.alatila IN ('T', 'TX')
+          AND lasku.alatila IN ('T', 'X')
           {$lisa}
           GROUP BY rahtikirja, tilaus
           ORDER BY trlt.rahtikirja_id DESC";

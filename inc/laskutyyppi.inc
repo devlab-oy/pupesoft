@@ -458,7 +458,7 @@ case "W":
   case "T":
     $alatila = "Tuleva";
     break;
-  case "TX":
+  case "X":
     $alatila = "Valmis tuleva";
     break;
   case "U":

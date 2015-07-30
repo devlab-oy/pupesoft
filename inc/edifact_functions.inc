@@ -2214,7 +2214,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                 AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'W'
-              AND lasku.alatila IN ('T', 'TX')
+              AND lasku.alatila IN ('T', 'X')
               AND lasku.tunnus = '{$liiterivi['liitostunnus']}'";
     $result = pupe_query($query);
     $laskuinfo = mysql_fetch_assoc($result);
@@ -2936,7 +2936,7 @@ function hae_rullat($rahtikirja_id) {
 
   if ($viematta == 0) {
     $query = "UPDATE lasku
-              SET alatila = 'TX'
+              SET alatila = 'X'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tila = 'W'
               AND alatila = 'T'
@@ -3017,7 +3017,7 @@ function muuta_bookkaus($muutosparametrit) {
                    toimaika = '{$lahtopvm}'
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tila = 'W'
-                   AND alatila NOT IN ('T', 'TX')
+                   AND alatila NOT IN ('T', 'X')
                    AND tunnus = '{$laskutunnus}'";
   pupe_query($update_query);
 

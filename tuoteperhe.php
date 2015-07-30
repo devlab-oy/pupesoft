@@ -639,9 +639,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "PERHE") {
         echo "<th>".t("Hintakerroin")."</th>";
         echo "<th>".t("Alennuskerroin")."</th>";
-      }
 
-      if ($toim == "PERHE") {
         echo "<th>".t("Ohita Keräys")."</th>";
         echo "<th>".t("Ei näytetä")."</th>";
       }

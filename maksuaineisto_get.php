@@ -63,8 +63,6 @@ if ($login_result === FALSE) {
   exit;
 }
 
-$quote = ftp_site($conn_id, "NAMEFMT 0");
-
 ftp_pasv($conn_id, true);
 
 $local_file = $pankkiaineiston_haku["local_dir"]."tiliote-".date("YmdHis").".dat";

@@ -4,7 +4,7 @@
 // ja $from niin tiedet‰‰n mist‰ tullaan ja minne palata
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false) {
-  if ($_REQUEST["toiminto"] == "TULOSTA") {
+  if ($_REQUEST["tee"] == "NAYTATILAUS") {
     $_REQUEST['nayta_pdf'] = 1;
     $nayta_pdf             = 1;
   }
@@ -12,15 +12,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false) {
   require "../inc/parametrit.inc";
 }
 
-echo "<SCRIPT type='text/javascript'>
-    <!--
-      function sarjanumeronlisatiedot_popup(tunnus) {
-        window.open('$PHP_SELF?tunnus='+tunnus+'&toiminto=sarjanumeronlisatiedot_popup', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top=0,width=800,height=600');
-      }
-    //-->
-    </SCRIPT>";
-
-if ($toiminto == "TULOSTA") {
+if ($tee == "NAYTATILAUS") {
   require_once "pdflib/phppdflib.class.php";
 
   $viivakoodityyppi = "viivakoodi";
@@ -55,7 +47,19 @@ if ($toiminto == "TULOSTA") {
   echo file_get_contents($filename);
 
   unlink($filename);
+  exit;
 }
+
+// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+js_openFormInNewWindow();
+
+echo "<SCRIPT type='text/javascript'>
+    <!--
+      function sarjanumeronlisatiedot_popup(tunnus) {
+        window.open('$PHP_SELF?tunnus='+tunnus+'&toiminto=sarjanumeronlisatiedot_popup', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top=0,width=800,height=600');
+      }
+    //-->
+    </SCRIPT>";
 
 if ($toiminto == "sarjanumeronlisatiedot_popup") {
   @include 'sarjanumeron_lisatiedot_popup.inc';
@@ -1651,17 +1655,16 @@ if ($rivirow["tyyppi"] != 'V') {
 
     if (!empty($valitut_sarjat)) {
       echo "<td class='back'>
-              <form method='post'>
+              <form method='post' id='sarjanumerotarrat' name='sarjanumerotarrat'>
                 <input type='hidden' name='ostorivitunnus' value='{$ostorivitunnus}'>
                 <input type='hidden' name='from' value='{$from}'>
                 <input type='hidden' name='lopetus' value='{$lopetus}'>
                 <input type='hidden' name='aputoim' value='{$aputoim}'>
                 <input type='hidden' name='otunnus' value='{$otunnus}'>
                 <input type='hidden' name='muut_siirrettavat' value='{$muut_siirrettavat}'>
-                <input type='hidden' name='toiminto' value='TULOSTA'>
+                <input type='hidden' name='tee' value='NAYTATILAUS'>
                 <input type='hidden' name='valitut_sarjat' value='" . implode(",", $valitut_sarjat) . "'>
-
-                <input type='submit' value='" . t("Tulosta tarrat valituille sarjanumeroille") . "'>
+                <input type='submit' value='" . t("Tulosta tarrat valituille sarjanumeroille") . "' onClick=\"js_openFormInNewWindow('sarjanumerotarrat', ''); return false;\">
               </form>
             </td>";
     }

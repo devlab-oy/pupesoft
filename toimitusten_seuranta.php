@@ -100,6 +100,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $kukarow['kesken'] = 0;
 
   $update_query = "UPDATE lasku SET
+                   alatila     = 'A',
                    toimaika    = '{$lahtopvm}',
                    sisviesti1  = '{$pakkausohje}'
                    WHERE yhtio = '{$kukarow['yhtio']}'

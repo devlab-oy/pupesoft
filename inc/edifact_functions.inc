@@ -3086,6 +3086,13 @@ function peruuta_bookkaus($peruutusparametrit) {
                  AND tunnus = '{$liiteinfo['laskutunnukset']}'";
       pupe_query($poisto);
 
+      $query = "UPDATE tilausrivi
+                SET tilausrivi.tyyppi = 'D'
+                WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                AND tilausrivi.tyyppi = 'L'
+                AND tilausrivi.otunnus = '{$liiteinfo['laskutunnukset']}'";
+      pupe_query($query);
+
       $query = "UPDATE liitetiedostot SET
                 kayttotarkoitus = 'poistettu bookkaussanoma'
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -3094,6 +3101,7 @@ function peruuta_bookkaus($peruutusparametrit) {
     }
     elseif ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] > 1) {
 
+      // TODO pitää varmaan selvittää, mitkä rivit mitätöidään
       // myös muita rivejä, vähennetään bookkauksen rullamäärä kokonaismäärästä
       $query = "UPDATE laskun_lisatiedot
                 SET rullamaara = rullamaara - '{$rullamaara}'

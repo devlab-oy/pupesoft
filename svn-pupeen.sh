@@ -1,5 +1,19 @@
 #!/bin/bash
 
+####################################################################################################
+#### Functions #####################################################################################
+####################################################################################################
+
+function parse_salasanat {
+  grep "^[ \t]*${1}[ \t]*=" ${salasanat} \
+  | sed 's/^.*['\''"]\([^'\''"]*\)['\''"];/\1/' \
+  | tail -1
+}
+
+####################################################################################################
+#### Preparation ###################################################################################
+####################################################################################################
+
 hosti=$(hostname)
 underline=$(tput -Txterm-color smul)
 nounderline=$(tput -Txterm-color rmul)
@@ -12,6 +26,14 @@ echo
 echo "${green}${underline}Tervetuloa ${hosti} Pupesoft-narupalveluun!${nounderline}${normal}"
 echo
 
+# Check we have Git
+command -v git > /dev/null
+
+if [[ $? != 0 ]]; then
+  echo "${red}Install git first!${normal}"
+  exit
+fi
+
 if [[ "$(whoami)" = "root" ]]; then
   echo "${red}Ei ole suositeltavaa, että ajat tämän root -käyttäjällä!${normal}"
   echo
@@ -19,7 +41,9 @@ if [[ "$(whoami)" = "root" ]]; then
 fi
 
 pupedir=$(dirname ${0})
+pupenextdir=${pupedir}/pupenext
 salasanat=${pupedir}/inc/salasanat.php
+environment="production"
 jatketaan=
 
 if [[ ! -f ${salasanat} ]]; then
@@ -27,12 +51,6 @@ if [[ ! -f ${salasanat} ]]; then
   echo
   exit
 fi
-
-function parse_salasanat {
-  grep "^[ \t]*${1}[ \t]*=" ${salasanat} \
-  | sed 's/^.*['\''"]\([^'\''"]*\)['\''"];/\1/' \
-  | tail -1
-}
 
 dbhost=$(parse_salasanat '$dbhost')
 dbuser=$(parse_salasanat '$dbuser')
@@ -73,6 +91,9 @@ while [[ "$1" != "" ]]; do
       shift
       dbname=$1
       ;;
+    bundle )
+      bundle=true
+      ;;
     autopupe )
       jatketaan="autopupe"
       ;;
@@ -94,46 +115,9 @@ if [[ $? -ne 0 ]]; then
   exit
 fi
 
-echo "Haetaan tietokantamuutokset.."
-
-# Tutkitaan tietokantarakenne...
-mysqlkuvaus_file="/tmp/_mysqlkuvaus.tmp"
-
-php ${pupedir}/dumppaa_mysqlkuvaus.php 1> ${mysqlkuvaus_file} 2> /dev/null
-
-if [[ ! -s ${mysqlkuvaus_file} ]]; then
-  echo "${green}Tietokanta ajantasalla!${normal}"
-else
-  echo
-  echo "${green}Tarvittavat muutokset: ${normal}"
-
-  cat ${mysqlkuvaus_file}
-  echo
-
-  if [[ "${jatketaan}" = "autopupe" ]]; then
-    jatketaanko="e"
-  elif [[ "${jatketaan}" = "auto" ]]; then
-    jatketaanko="k"
-  else
-    echo
-    echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
-    read jatketaanko
-  fi
-
-  if [[ "$jatketaanko" = "k" ]]; then
-    ${mysql_komento} < ${mysqlkuvaus_file} 2> /dev/null
-
-    if [[ $? -eq 0 ]]; then
-      echo "${green}Tietokantamuutokset tehty!${normal}"
-    else
-      echo "${red}Tietokantamuutoksien ajo epäonnistui!${normal}"
-    fi
-  else
-    echo "${red}Tietokantamuutoksia ei tehty!${normal}"
-  fi
-fi
-
-rm -f ${mysqlkuvaus_file}
+####################################################################################################
+#### Pupesoft ######################################################################################
+####################################################################################################
 
 if [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
@@ -201,4 +185,155 @@ else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
 
-echo
+####################################################################################################
+#### Pupenext ######################################################################################
+####################################################################################################
+
+cd ${pupenextdir}
+
+# Setataan rails env
+export RAILS_ENV=${environment}
+
+# Make sure we have rbenv environment
+if [[ -d ~/.rbenv ]]; then
+  # Add rbenv to path
+  export PATH="$HOME/.rbenv/bin:$PATH"
+
+  # Load rbenv
+  eval "$(rbenv init -)"
+fi
+
+# Check we have Bundler
+command -v bundle > /dev/null
+
+if [[ $? != 0 ]]; then
+  echo "${red}Install bundle first!${normal}"
+  exit
+fi
+
+# Get required directories
+current_dir=$(pwd)
+dirname=$(dirname $0)
+app_dir=$(cd "${dirname}" && pwd)
+
+if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
+  jatketaanko="k"
+else
+  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
+  read jatketaanko
+fi
+
+if [[ "${jatketaanko}" = "k" ]]; then
+
+  # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
+  if [[ bundle = true ]]; then
+    OLD_HEAD=0
+  else
+    # Get old head
+    OLD_HEAD=$(cd "${app_dir}" && git rev-parse HEAD)
+  fi
+
+  # Change to app directory
+  cd "${app_dir}" &&
+
+  # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
+  if [[ bundle = true ]]; then
+    STATUS=0
+    NEW_HEAD=1
+  else
+    # Update app with git
+    git fetch origin &&
+    git checkout . &&
+    git checkout master &&
+    git pull origin master &&
+    git remote prune origin
+
+    # Save git exit status
+    STATUS=$?
+
+    # Get new head
+    NEW_HEAD=$(git rev-parse HEAD)
+  fi
+
+  # Check tmp dir
+  if [ ! -d "${app_dir}/tmp" ]; then
+    mkdir "${app_dir}/tmp"
+  fi
+
+  echo
+
+  # Ei päivitettävää
+  if [[ ${STATUS} -eq 0 && ${OLD_HEAD} = ${NEW_HEAD} ]]; then
+    echo "${green}Pupenext ajantasalla, ei päivitettävää!${normal}"
+  elif [[ ${STATUS} -eq 0 ]]; then
+    # Run bundle + rake
+    bundle --quiet &&
+    bundle exec rake css:write &&
+    bundle exec rake assets:precompile &&
+
+    # Restart rails App
+    touch "${app_dir}/tmp/restart.txt" &&
+    chmod 777 "${app_dir}/tmp/restart.txt" &&
+
+    # Restart Resque workers
+    bundle exec rake resque:stop_workers &&
+    TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work &&
+
+    # Tehdään requesti Rails appiin, jotta latautuu valmiiksi seuraavaa requestiä varten
+    curl --silent --connect-timeout 1 --insecure "https://$(hostname -I)/pupenext" > /dev/null &&
+    curl --silent --connect-timeout 1 --insecure "https://$(hostname)/pupenext" > /dev/null
+
+    if [[ ${STATUS} -eq 0 ]]; then
+      echo "${green}Pupenext päivitetty!${normal}"
+    else
+      echo "${red}Rails päivitys/uudelleenkäynnistys epäonnistui!${normal}"
+    fi
+  else
+    echo "${red}Pupenext päivitys epäonnistui!${normal}"
+  fi
+else
+  echo "${red}Pupenextiä ei päivitetty!${normal}"
+fi
+
+####################################################################################################
+#### Database changes ##############################################################################
+####################################################################################################
+
+echo "Haetaan tietokantamuutokset.."
+
+tarvittavat_muutokset=$(bundle exec rake db:migrate:status | grep down)
+
+if [[ $? -eq 1 ]]; then
+  echo "${green}Tietokanta ajantasalla!${normal}"
+else
+  echo
+  echo "${green}Tarvittavat muutokset: ${normal}"
+
+  echo ${tarvittavat_muutokset}
+  echo
+
+  if [[ "${jatketaan}" = "autopupe" ]]; then
+    jatketaanko="e"
+  elif [[ "${jatketaan}" = "auto" ]]; then
+    jatketaanko="k"
+  else
+    echo
+    echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
+    read jatketaanko
+  fi
+
+  if [[ "$jatketaanko" = "k" ]]; then
+    bundle exec rake db:migrate
+
+    if [[ $? -eq 0 ]]; then
+      echo "${green}Tietokantamuutokset tehty!${normal}"
+    else
+      echo "${red}Tietokantamuutoksien ajo epäonnistui!${normal}"
+    fi
+  else
+    echo "${red}Tietokantamuutoksia ei tehty!${normal}"
+  fi
+fi
+
+# Poistetaan rails env
+unset RAILS_ENV

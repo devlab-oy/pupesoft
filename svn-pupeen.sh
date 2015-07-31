@@ -226,7 +226,7 @@ fi
 if [[ "${jatketaanko}" = "k" ]]; then
 
   # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
-  if [[ bundle = true ]]; then
+  if [[ ${bundle} = true ]]; then
     OLD_HEAD=0
   else
     # Get old head
@@ -237,7 +237,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
   cd "${app_dir}" &&
 
   # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
-  if [[ bundle = true ]]; then
+  if [[ ${bundle} = true ]]; then
     STATUS=0
     NEW_HEAD=1
   else

@@ -91,6 +91,10 @@ while [[ "$1" != "" ]]; do
       shift
       dbname=$1
       ;;
+    -e | --environment )
+      shift
+      environment=$1
+      ;;
     bundle )
       bundle=true
       ;;
@@ -163,7 +167,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     # Informoidaan käyttäjiä päivityksestä
     while read -r line
     do
-      php pupesoft_changelog.php $line
+      php pupesoft_changelog.php ${line}
     done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
   fi
 

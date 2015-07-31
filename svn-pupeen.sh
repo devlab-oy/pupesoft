@@ -280,8 +280,8 @@ if [[ "${jatketaanko}" = "k" ]]; then
     TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work &&
 
     # Tehdään requesti Rails appiin, jotta latautuu valmiiksi seuraavaa requestiä varten
-    curl --silent --connect-timeout 1 --insecure "https://$(hostname -I)/pupenext" > /dev/null &&
-    curl --silent --connect-timeout 1 --insecure "https://$(hostname)/pupenext" > /dev/null
+    # curl --silent --connect-timeout 1 --insecure "https://$(hostname -I)/pupenext" > /dev/null &&
+    # curl --silent --connect-timeout 1 --insecure "https://$(hostname)/pupenext" > /dev/null
 
     if [[ ${STATUS} -eq 0 ]]; then
       echo "${green}Pupenext päivitetty!${normal}"

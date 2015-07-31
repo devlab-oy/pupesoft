@@ -305,7 +305,7 @@ fi
 
 echo "Haetaan tietokantamuutokset.."
 
-tarvittavat_muutokset=$(bundle exec rake db:migrate:status | grep down)
+tarvittavat_muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
 
 if [[ $? -eq 1 ]]; then
   echo "${green}Tietokanta ajantasalla!${normal}"
@@ -313,7 +313,7 @@ else
   echo
   echo "${green}Tarvittavat muutokset: ${normal}"
 
-  echo ${tarvittavat_muutokset}
+  echo "${tarvittavat_muutokset}"
   echo
 
   if [[ "${jatketaan}" = "autopupe" ]]; then

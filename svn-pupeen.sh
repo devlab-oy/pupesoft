@@ -223,7 +223,7 @@ app_dir=$(cd "${dirname}" && pwd)
 if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
 else
-  echo -n "${white}Päivitetäänkö Pupenext (Tietokantamuutokset vaativat Pupenextin päivittämisen) (k/e)? ${normal}"
+  echo -n "${white}Päivitetäänkö Pupenext (Tietokantamuutosten haku vaatii Pupenextin päivittämisen) (k/e)? ${normal}"
   read jatketaanko
 fi
 

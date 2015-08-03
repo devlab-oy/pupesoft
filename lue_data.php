@@ -2583,17 +2583,17 @@ if (!$cli and !isset($api_kentat)) {
 
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu_query);
 
-  echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
-  echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";
+  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
+  echo "<td><ul><li>".strtolower(implode("</li><li>", $pakolliset))."</li></ul></td></tr>";
 
   if (!empty($wherelliset)) {
-    echo "  <tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
-    echo "  <td>".strtolower(implode(", ", $wherelliset))."</td></tr>";
+    echo "<tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
+    echo "<td><ul><li>".strtolower(implode("</li><li>", $wherelliset))."</li></ul></td></tr>";
   }
 
   if (!empty($kielletyt)) {
-    echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
-    echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
+    echo "<tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
+    echo "<td><ul><li>".strtolower(implode("</li><li>", $kielletyt))."</li></ul></td></tr>";
   }
 
   $_ei_olemassa = array('todo');

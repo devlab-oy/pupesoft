@@ -6553,7 +6553,7 @@ if (!function_exists('ebid')) {
     }
     else {
 
-      $query = "SELECT tunnus
+      $query = "SELECT tunnus, filename, selite
                 from liitetiedostot
                 where liitostunnus = '$laskurow[tunnus]'
                 and liitos         = 'lasku'
@@ -6572,7 +6572,14 @@ if (!function_exists('ebid')) {
           $out[] = $palvelin2."view.php?id=$row[tunnus]";
         }
         else {
-          $out .= "<a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a> ";
+          if ($laskurow['tila'] == 'X') {
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
+                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Liite') .": $row[filename]</a>&nbsp;&nbsp;";
+          }
+          else {
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
+                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a>&nbsp;&nbsp;";
+          }
         }
       }
 
@@ -9096,6 +9103,9 @@ if (!function_exists("livesearch_tuotehaku")) {
       if ($yhtiorow['livetuotehaku_poistetut'] == 'X' or $yhtiorow['livetuotehaku_poistetut'] == 'Y') {
         $naytetaanko_poistetut = "and (tuote.status != 'P' or (tuote.status = 'P' and (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0))";
       }
+      elseif ($yhtiorow['livetuotehaku_poistetut'] == 'P') {
+        $naytetaanko_poistetut = '';
+      }
       else {
         $naytetaanko_poistetut = "and tuote.status != 'P'";
       }
@@ -9144,7 +9154,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
         while ($row = mysql_fetch_assoc($result)) {
 
-          if ($yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00) ) {
+          if (empty($kukarow["extranet"]) and $yhtiorow['livetuotehaku_poistetut'] == 'Y' and ($row["epakurantti25pvm"] != 0000-00-00 or $row["epakurantti50pvm"] != 0000-00-00 or $row["epakurantti75pvm"] != 0000-00-00 or $row["epakurantti100pvm"] != 0000-00-00) ) {
             $tyyli = "font-weight:bold;color:red;";
             $tyyli2 = "font-weight:normal;color:red;";
           }
@@ -26152,7 +26162,7 @@ if (!function_exists("tsekit")) {
     // katotaan onko kaikki sarjanumerot ok
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
               FROM tilausrivi use index (uusiotunnus_index)
-              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('', 'T')
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
               tilausrivi.uusiotunnus='$row[tunnus]' and
               tilausrivi.tyyppi='O'";

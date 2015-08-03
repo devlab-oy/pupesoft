@@ -974,11 +974,12 @@ function generoi_private_key_ja_csr($params = array()) {
   global $kukarow, $yhtiorow;
 
   $company_name = empty($params['company_name']) ? $yhtiorow['nimi'] : $params['company_name'];
-  $customer_id = empty($params['customer_id']) ? '' : $params['customer_id'];
+  $customer_id  = empty($params['customer_id']) ? '' : $params['customer_id'];
+  $key_bits     = empty($params['key_bits']) ? 2048 : $params['key_bits'];
 
   $key_config = array(
     "digest_alg"       => "sha1",
-    "private_key_bits" => 2048,
+    "private_key_bits" => $key_bits,
     "private_key_type" => OPENSSL_KEYTYPE_RSA
   );
 

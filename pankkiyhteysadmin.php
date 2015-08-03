@@ -269,9 +269,18 @@ if ($tee == "luo") {
 
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
+  switch ($bank) {
+  case "nordea":
+    $key_bits = 1024;
+    break;
+  default:
+    $key_bits = 2048;
+  }
+
   $csr_params = array(
     "company_name" => $company_name,
-    "customer_id" => $customer_id
+    "customer_id"  => $customer_id,
+    "key_bits"     => $key_bits
   );
 
   // Generoidaan allekirjoitusta ja salausta varten private key ja certificate-signing-request

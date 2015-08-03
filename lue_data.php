@@ -2618,9 +2618,13 @@ if (!$cli and !isset($api_kentat)) {
       echo "<tr>";
       echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
       echo "<td>";
+      echo "<ul>";
+      echo "<li>";
 
-      echo implode(", ", $_kentat);
+      echo implode("</li><li>", $_kentat);
 
+      echo "</li>";
+      echo "</ul>";
       echo "</td>";
       echo "</tr>";
     }

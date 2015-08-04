@@ -18,20 +18,20 @@ if ($tee == "teeyhdistys") {
       if (mysql_num_rows($result) == 1) {
         $keikkarow = mysql_fetch_assoc($result);
 
-        // Siirretään myös suuntalavat
-        $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
-                  FROM tilausrivi
-                  WHERE yhtio     = '{$kukarow['yhtio']}'
-                  AND tyyppi      = 'O'
-                  AND uusiotunnus = '{$keikkatunnus}'";
-        $suuntalava_res = pupe_query($query);
-        $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
+        if ($yhtiorow['suuntalavat'] != '') {
 
-        if (trim($suuntalava_row['suuntalavat']) != '' and $suuntalava_row['suuntalavat'] != "0") {
+          # Siirretään myös suuntalavat
+          $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tyyppi = 'O'
+                    AND uusiotunnus = '{$keikkatunnus}'
+                    AND suuntalava != 0";
+          $suuntalava_res = pupe_query($query);
+          $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
 
-          foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
-
-            if ((string) $_suuntalava != "0") {
+          if (trim($suuntalava_row['suuntalavat']) != '') {
+            foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
               $query = "UPDATE suuntalavat_saapuminen SET
                         saapuminen     = '{$otunnus}',
                         muuttaja       = '{$kukarow['kuka']}',

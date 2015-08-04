@@ -796,7 +796,7 @@ if ($view == 'kontituslista') {
     unset($aktiivinen_kontti);
 
     foreach ($kontit as $key => $kontti) {
-      if (!in_array('X', $konttien_valmius[$key])) {
+      if (!isset($konttien_valmius[$key])) {
         $aktiivinen_kontti = $key;
         break;
       }

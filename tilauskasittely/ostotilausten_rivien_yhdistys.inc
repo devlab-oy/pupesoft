@@ -23,10 +23,10 @@ if ($tee == "teeyhdistys") {
           # Siirretään myös suuntalavat
           $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
                     FROM tilausrivi
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tyyppi = 'O'
-                    AND uusiotunnus = '{$keikkatunnus}'
-                    AND suuntalava != 0";
+                    WHERE yhtio      = '{$kukarow['yhtio']}'
+                    AND tyyppi       = 'O'
+                    AND uusiotunnus  = '{$keikkatunnus}'
+                    AND suuntalava  != 0";
           $suuntalava_res = pupe_query($query);
           $suuntalava_row = mysql_fetch_assoc($suuntalava_res);
 

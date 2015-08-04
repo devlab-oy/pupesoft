@@ -30,10 +30,10 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $query = "SELECT tunnus
           FROM lasku
-          WHERE yhtio = '{$kukarow["yhtio"]}'
+          WHERE yhtio        = '{$kukarow["yhtio"]}'
           AND ohjelma_moduli = 'EXTRANET'
-          AND tila = 'N'
-          AND alatila = 'F'";
+          AND tila           = 'N'
+          AND alatila        = 'F'";
 
 $result = pupe_query($query);
 

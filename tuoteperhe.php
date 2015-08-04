@@ -1226,14 +1226,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             }
 
             $query = "SELECT
-                        tuotteen_toimittajat.liitostunnus,
-                        toimi.oletus_valkoodi,
-                        toimi.ytunnus,
-                        if(jarjestys = 0, 9999, jarjestys) sorttaus
+                      tuotteen_toimittajat.liitostunnus,
+                      toimi.oletus_valkoodi,
+                      toimi.ytunnus,
+                      if(jarjestys = 0, 9999, jarjestys) sorttaus
                       FROM tuotteen_toimittajat
                       LEFT JOIN toimi
-                        ON (toimi.yhtio = tuotteen_toimittajat.yhtio
-                        AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                      ON (toimi.yhtio = tuotteen_toimittajat.yhtio
+                      AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus)
                       WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}'
                       AND tuotteen_toimittajat.tuoteno = '{$tuoterow["tuoteno"]}'
                       ORDER BY sorttaus
@@ -1245,7 +1245,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $query = "SELECT kurssi
                       FROM valuu
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND nimi = '{$ttrow['oletus_valkoodi']}'
+                      AND nimi    = '{$ttrow['oletus_valkoodi']}'
                       ORDER BY tunnus DESC
                       LIMIT 1";
 

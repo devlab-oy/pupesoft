@@ -25943,22 +25943,22 @@ if (!function_exists('paivita_ohjausmerkki')) {
     if ($asiakkaan_ohjausmerkki) {
 
       $query = "SELECT tarkenne
-              FROM asiakkaan_avainsanat
-              WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND laji         = 'OHJAUSMERKKI'
-              AND liitostunnus = '{$laskurow['liitostunnus']}'
-              AND avainsana    = '{$laskurow['toimitustapa']}'
-              LIMIT 1";
-      $ohjausmerkki_check_res = pupe_query($query);
-
-      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
-        $query = "SELECT tarkenne
                 FROM asiakkaan_avainsanat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND laji         = 'OHJAUSMERKKI'
                 AND liitostunnus = '{$laskurow['liitostunnus']}'
-                AND avainsana    = 'OLETUS'
+                AND avainsana    = '{$laskurow['toimitustapa']}'
                 LIMIT 1";
+      $ohjausmerkki_check_res = pupe_query($query);
+
+      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
+        $query = "SELECT tarkenne
+                  FROM asiakkaan_avainsanat
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND laji         = 'OHJAUSMERKKI'
+                  AND liitostunnus = '{$laskurow['liitostunnus']}'
+                  AND avainsana    = 'OLETUS'
+                  LIMIT 1";
         $ohjausmerkki_check_res = pupe_query($query);
       }
 
@@ -25980,9 +25980,9 @@ if (!function_exists('paivita_ohjausmerkki')) {
           }
 
           $query = "UPDATE lasku SET
-                  {$updlisa}
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['tunnus']}'";
+                    {$updlisa}
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
           $updres = pupe_query($query);
         }
       }

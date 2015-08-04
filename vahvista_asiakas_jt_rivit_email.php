@@ -327,6 +327,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
 }
 
+
 /**
  * L‰hett‰‰ generoidut emailit
  *
@@ -393,8 +394,10 @@ function laheta_sahkoposti($email, $body) {
   pupesoft_sahkoposti($parametrit);
 }
 
+
 /**
- * @param array $params
+ *
+ * @param array   $params
  *
  * @return array Yhteyshenkilon tiedot
  */

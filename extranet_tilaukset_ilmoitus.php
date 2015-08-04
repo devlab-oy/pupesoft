@@ -52,7 +52,7 @@ if (mysql_num_rows($result) > 0) {
     "cc"      => "",
     "subject" => "Hyväksyttäviä Extranet-tilauksia",
     "body"    => "Hei,\n\n" .
-                 "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
+    "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
   );
 
   pupesoft_sahkoposti($email_params);

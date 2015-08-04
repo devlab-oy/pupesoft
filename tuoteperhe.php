@@ -679,17 +679,17 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           echo "<td>";
-            echo "<select name='kpl2' style='width: 150px;'>";
+          echo "<select name='kpl2' style='width: 150px;'>";
 
-            echo "<option value='' $sel1>";
-            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
+          echo "<option value='' $sel1>";
+          echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+          echo "</option>";
 
-            echo "<option value='X' $sel2>";
-            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
+          echo "<option value='X' $sel2>";
+          echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+          echo "</option>";
 
-            echo "</select>";
+          echo "</select>";
           echo "</td>";
         }
 
@@ -1114,17 +1114,17 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td></td>";
           echo "<td></td>";
           echo "<td>";
-            echo "<select name='kpl2' style='width: 150px;'>";
+          echo "<select name='kpl2' style='width: 150px;'>";
 
-            echo "<option value='' $sel1>";
-            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
+          echo "<option value='' $sel1>";
+          echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+          echo "</option>";
 
-            echo "<option value='X' $sel2>";
-            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
+          echo "<option value='X' $sel2>";
+          echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
+          echo "</option>";
 
-            echo "</select>";
+          echo "</select>";
           echo "</td>";
 
 
@@ -1731,10 +1731,10 @@ function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
     }
     else {
       echo "<a href='{$PHP_SELF}" .
-           "?toim={$toim}" .
-           "&isatuoteno={$tuoteno}" .
-           "&hakutuoteno={$tuoteno}" .
-           "&lopetus={$lopetus}'>";
+        "?toim={$toim}" .
+        "&isatuoteno={$tuoteno}" .
+        "&hakutuoteno={$tuoteno}" .
+        "&lopetus={$lopetus}'>";
       if ($tuote["status"] == "P") echo "<del>";
       echo "{$tuoteno} {$tuote["nimitys"]}";
       if ($tuote["status"] == "P") echo "</del>";

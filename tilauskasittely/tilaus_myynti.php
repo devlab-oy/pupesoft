@@ -34,10 +34,10 @@ elseif (@include "parametrit.inc");
 else exit;
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
-                      or $kukarow["naytetaan_katteet_tilauksella"] == "B"
-                      or ($kukarow["naytetaan_katteet_tilauksella"] == ""
-                          and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
-                               or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
+  or $kukarow["naytetaan_katteet_tilauksella"] == "B"
+  or ($kukarow["naytetaan_katteet_tilauksella"] == ""
+    and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
+      or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
 
 $naytetaanko_kate = ($naytetaan_kate != "E" and $oikeus_nahda_kate);
 
@@ -6370,7 +6370,7 @@ if ($tee == '') {
         $sele["E"] = "checked";
       }
       else {
-          $sele["K"] = "checked";
+        $sele["K"] = "checked";
         $tilausrivi_alvillisuus = "K";
       }
 

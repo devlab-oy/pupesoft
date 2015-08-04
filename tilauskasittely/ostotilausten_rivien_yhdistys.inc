@@ -20,7 +20,7 @@ if ($tee == "teeyhdistys") {
 
         if ($yhtiorow['suuntalavat'] != '') {
 
-          # Siirretään myös suuntalavat
+          // Siirretään myös suuntalavat
           $query = "SELECT GROUP_CONCAT(DISTINCT suuntalava) AS suuntalavat
                     FROM tilausrivi
                     WHERE yhtio      = '{$kukarow['yhtio']}'

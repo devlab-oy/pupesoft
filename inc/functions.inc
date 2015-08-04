@@ -26162,7 +26162,7 @@ if (!function_exists("tsekit")) {
     // katotaan onko kaikki sarjanumerot ok
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
               FROM tilausrivi use index (uusiotunnus_index)
-              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('', 'T')
+              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('')
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
               tilausrivi.uusiotunnus='$row[tunnus]' and
               tilausrivi.tyyppi='O'";
@@ -26179,7 +26179,7 @@ if (!function_exists("tsekit")) {
         $tunken = "sarjanumeroseuranta.ostorivitunnus";
       }
 
-      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "V") {
+      if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T" or $toimrow["sarjanumeroseuranta"] == "V") {
         $query = "SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
                   FROM sarjanumeroseuranta
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -26198,7 +26198,7 @@ if (!function_exists("tsekit")) {
       $sarjarow = mysql_fetch_assoc($sarjares);
 
       // pit‰‰ olla yht‰monta sarjanumeroa liitettyn‰ kun kamaa viety varastoon
-      if ($sarjarow["kpl"] != abs($toimrow["kpl"])) {
+      if ($sarjarow["kpl"] != abs($toimrow["kpl"]) and $toimrow["sarjanumeroseuranta"] != 'T') {
         $sarjanrook++;
       }
     }

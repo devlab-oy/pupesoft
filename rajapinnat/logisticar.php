@@ -159,7 +159,11 @@ function nimike($limit = '') {
             tuote.tuotetyyppi    nimikelaji,
             kuka.kuka        ostaja,
             tuote.tuotemassa    paino,
-            tuote.status      status
+            tuote.status      status,
+            tuote.epakurantti25pvm,
+            tuote.epakurantti50pvm,
+            tuote.epakurantti75pvm,
+            tuote.epakurantti100pvm
             FROM tuote
             LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio AND tuote.try not in ('','0'))
             LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro AND kuka.yhtio = tuote.yhtio AND kuka.myyja > 0)
@@ -192,7 +196,11 @@ function nimike($limit = '') {
     'nimikelaji'              => null,
     'ostaja'                  => null,
     'paino'                   => null,
-    'status'                  => null
+    'status'                  => null,
+    'epakurantti25pvm'        => null,
+    'epakurantti50pvm'        => null,
+    'epakurantti75pvm'        => null,
+    'epakurantti100pvm'       => null
   );
 
   create_headers($fp, array_keys($headers));

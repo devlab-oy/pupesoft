@@ -1410,11 +1410,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
 
       if ($yhtiorow['livetuotehaku_poistetut'] == 'Y'
-          and $kukarow["extranet"] == ""
-          and ($row["epakurantti25pvm"] != 0000-00-00
-               or $row["epakurantti50pvm"] != 0000-00-00
-               or $row["epakurantti75pvm"] != 0000-00-00
-               or $row["epakurantti100pvm"] != 0000-00-00)) {
+        and $kukarow["extranet"] == ""
+        and ($row["epakurantti25pvm"] != 0000-00-00
+          or $row["epakurantti50pvm"] != 0000-00-00
+          or $row["epakurantti75pvm"] != 0000-00-00
+          or $row["epakurantti100pvm"] != 0000-00-00)) {
         $vari = 'spec';
       }
 

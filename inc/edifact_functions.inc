@@ -2470,7 +2470,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                          alatila = 'A'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tila = 'W'
-                         AND lasku.alatila IN ('B', 'K')
+                         AND lasku.alatila IN ('K')
                          AND tunnus = '{$laskurow['tunnus']}'";
         pupe_query($update_query);
 
@@ -2513,7 +2513,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
                          alatila = 'A'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tila = 'W'
-                         AND lasku.alatila IN ('B', 'K')
+                         AND lasku.alatila IN ('K')
                          AND tunnus = '{$tunnus}'";
         pupe_query($update_query);
 

@@ -26162,7 +26162,7 @@ if (!function_exists("tsekit")) {
     // katotaan onko kaikki sarjanumerot ok
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
               FROM tilausrivi use index (uusiotunnus_index)
-              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('', 'T')
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
               tilausrivi.uusiotunnus='$row[tunnus]' and
               tilausrivi.tyyppi='O'";

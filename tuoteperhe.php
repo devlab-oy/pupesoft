@@ -1113,6 +1113,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           echo "<td></td>";
           echo "<td></td>";
+          echo "<td></td>";
+          
           echo "<td>";
           echo "<select name='kpl2' style='width: 150px;'>";
 
@@ -1430,7 +1432,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             else {
               $sel1 = "SELECTED";
             }
-
+            
+            echo "<td></td>";
             echo "<td>";
             echo "<select name='kpl2' style='width: 150px;'>";
 

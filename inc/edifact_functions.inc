@@ -1546,15 +1546,14 @@ function kasittele_bookkaussanoma($edi_data) {
 
     $lasku = mysql_fetch_assoc($result);
 
-    if ($lasku['konttiviite'] == 'bookkaukseton') {
-
+    if ($lasku['alatila'] == 'B') {
       $update_query = "UPDATE lasku SET
                        sisviesti1 = '{$ohje}',
                        toimaika   = '{$lahtopvm}',
-                       alatila    = 'B'
+                       alatila    = 'A',
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND lasku.tila = 'W'
-                       AND lasku.alatila IN ('A', 'B', 'K')
+                       AND lasku.alatila IN ('B')
                        AND tunnus = '{$lasku['tunnus']}'";
       pupe_query($update_query);
 
@@ -3103,7 +3102,7 @@ function peruuta_bookkaus($peruutusparametrit) {
     }
     elseif ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] > 1) {
 
-      // TODO pitää varmaan selvittää, mitkä rivit mitätöidään
+      // TODO pitää varmaan selvittää, mitkä rivit mitätöidään. Rivit tiedetään kombosta.
       // myös muita rivejä, vähennetään bookkauksen rullamäärä kokonaismäärästä
       $query = "UPDATE laskun_lisatiedot
                 SET rullamaara = rullamaara - '{$rullamaara}'

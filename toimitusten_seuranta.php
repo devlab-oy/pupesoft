@@ -675,7 +675,6 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
     $uusi_task = 'korjaa';
   }
 
-  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Kontin sinetöinti")."</font><hr><br>";
 
   if (!isset($sinetoitava_konttiviite)) {
@@ -2631,6 +2630,10 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
               echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
               echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+
+              $lopetus = "toimitusten_seuranta.php////r={$r}//kv={$tilaus['konttiviite']}//task=nkv";
+              echo "<input type='hidden' name='lopetus' value='{$lopetus}' />";
+
               echo "<input type='submit' value='". t("Korjaa") ."' />";
               echo "</form>";
             }

@@ -1014,7 +1014,7 @@ if ($tee2 == '') {
             GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
             GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
             lasku.mapvm,
-            sum(tuotemassa * (tilausrivi.kpl + tilausrivi.varattu)) AS tilauksen_paino
+            round(sum(tuotemassa * (tilausrivi.kpl + tilausrivi.varattu))) AS tilauksen_paino
             FROM lasku
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
@@ -1185,9 +1185,7 @@ if ($tee2 == '') {
 
       echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
-      echo "<$ero valign='top'>";
-      echo (float) $tilrow["tilauksen_paino"] . " kg";
-      echo "</$ero>";
+      echo "<$ero valign='top' class='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";

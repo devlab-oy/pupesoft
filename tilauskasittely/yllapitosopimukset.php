@@ -476,7 +476,7 @@ if (mysql_num_rows($result) > 0) {
 
         // katotaan ollaanko tämä lasku laskutettu
         $query = "SELECT *
-                  FROM lasku
+                  FROM lasku USE INDEX (yhtio_tila_luontiaika)
                   WHERE yhtio      = '$kukarow[yhtio]'
                   and liitostunnus = '$row[liitostunnus]'
                   and tila         = 'L'
@@ -489,7 +489,7 @@ if (mysql_num_rows($result) > 0) {
         if (mysql_num_rows($chkres) == 0) {
 
           $query = "SELECT *
-                    FROM lasku
+                    FROM lasku USE INDEX (yhtio_tila_luontiaika)
                     WHERE yhtio      = '$kukarow[yhtio]'
                     and liitostunnus = '$row[liitostunnus]'
                     and tila         = 'N'

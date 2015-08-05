@@ -1152,7 +1152,7 @@ if ($tee == 'M') {
       }
 
       $chk = $poistoteksti = "";
-      
+
       if ($saldorow["poistettava"] != "") {
         $chk = "CHECKED";
         $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla, eikä tuotepaikalle ole avoimia rivejä").")";
@@ -1168,7 +1168,7 @@ if ($tee == 'M') {
             <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
       }
       else {
-        
+
         if ($saldorow["poistettava"] != "") {
           $poistoteksti .= "<br>(".t("Voit myös poistaa tuotepaikan tästä heti").")";
         }

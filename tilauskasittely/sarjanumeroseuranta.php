@@ -28,7 +28,7 @@ if ($tee == "NAYTATILAUS") {
   $query = "SELECT sarjanumero, tuoteno
             FROM sarjanumeroseuranta
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus IN ({$valitut_sarjat})";
+            AND tunnus  IN ({$valitut_sarjat})";
 
   $sarja_result = pupe_query($query);
 

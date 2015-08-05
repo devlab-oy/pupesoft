@@ -1887,6 +1887,8 @@ function kasittele_bookkaussanoma($edi_data) {
 function kasittele_rahtikirjasanoma($edi_data) {
   global $kukarow, $yhtiorow;
 
+  $lisataan_rullia_vain_myyntitilaukseen = false;
+
   $edi_data = str_replace("\n", "", $edi_data);
 
   // otetaan talteen liitetiedoston lisäämistä varten
@@ -2344,7 +2346,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
       if (mysql_num_rows($result) > 0) {
         while($tilaus = mysql_fetch_assoc($result)) {
 
-          if ($tilaus['matkakoodi'] == $rulla['matkakoodi']) {
+          if ($tilaus['matkakoodi'] == $rulla['matkakoodi'] or $rulla['matkakoodi'] == "bookkaukseton") {
             $laskurow = $tilaus;
             break;
           }

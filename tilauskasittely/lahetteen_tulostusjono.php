@@ -1185,7 +1185,7 @@ if ($tee2 == '') {
 
       echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
-      echo "<$ero valign='top' class='right'>$tilrow[tilauksen_paino] kg</$ero>";
+      echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";

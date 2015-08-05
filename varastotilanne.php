@@ -352,7 +352,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
             AND lasku.sisviesti1 != 'konttiviitelasku'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
             GROUP BY lasku.asiakkaan_tilausnumero
-            ORDER BY trlt.asiakkaan_tilausnumero";
+            ORDER BY SUBSTRING(lasku.asiakkaan_tilausnumero, 1, 4),
+                     SUBSTRING(lasku.asiakkaan_tilausnumero, 5)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -365,7 +366,6 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
     while ($tilaus = mysql_fetch_assoc($result)) {
       $avoimet_tilaukset[] = $tilaus;
     }
-
   }
 
   $query = "SELECT concat(ss.hyllyalue,'-',ss.hyllynro) AS paikka,

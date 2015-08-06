@@ -2997,7 +2997,9 @@ function muuta_bookkaus($muutosparametrit) {
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$laskutunnus}'";
     $result = pupe_query($query);
-    $yhteensa = mysql_result($result, 0);
+    
+    if (mysql_num_rows($result) > 0) $yhteensa = mysql_result($result, 0);
+    else $yhteensa = 0;
 
     $uusi_maara = $yhteensa - $alkuperainen_maara + $rullamaara;
 
@@ -3081,7 +3083,7 @@ function peruuta_bookkaus($peruutusparametrit) {
     if ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] == 1) {
 
       $poisto = "UPDATE lasku SET
-                 tila    = 'D'
+                 tila    = 'D',
                  alatila = 'W'
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus = '{$liiteinfo['laskutunnukset']}'";

@@ -1717,7 +1717,12 @@ if ($tee == 'MONISTA') {
             break;
           case 'kerayspvm':
           case 'laadittu':
-            $rvalues .= ", now()";
+            if ($toim == 'SOPIMUS') {
+              $rvalues .= ", '".$rivirow[$fieldname]."'";
+            }
+            else {
+              $rvalues .= ", now()";
+            }
             break;
           case 'tunnus':
           case 'laskutettu':

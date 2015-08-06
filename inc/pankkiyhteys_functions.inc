@@ -976,6 +976,7 @@ function generoi_private_key_ja_csr($params = array()) {
   $company_name = empty($params['company_name']) ? $yhtiorow['nimi'] : $params['company_name'];
   $customer_id  = empty($params['customer_id']) ? '' : $params['customer_id'];
   $key_bits     = empty($params['key_bits']) ? 2048 : $params['key_bits'];
+  $email        = empty($params['email']) ? "" : $params['email'];
 
   $key_config = array(
     "digest_alg"       => "sha1",
@@ -987,9 +988,12 @@ function generoi_private_key_ja_csr($params = array()) {
     "countryName"      => $yhtiorow["maa"],
     "localityName"     => $yhtiorow["kotipaikka"],
     "organizationName" => $company_name,
-    "commonName"       => $company_name,
-    "emailAddress"     => $yhtiorow["email"]
+    "commonName"       => $company_name
   );
+
+  if (!empty($email)) {
+    $csr_info["emailAddress"] = $email;
+  }
 
   if (!empty($customer_id)) {
     $csr_info["serialNumber"] = $customer_id;

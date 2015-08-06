@@ -272,14 +272,17 @@ if ($tee == "luo" and $pin != '') {
   switch ($bank) {
   case "nordea":
     $key_bits = 1024;
+    $email    = "";
     break;
   default:
+    $email    = $yhtiorow["email"];
     $key_bits = 2048;
   }
 
   $csr_params = array(
     "company_name" => $company_name,
     "customer_id"  => $customer_id,
+    "email"        => $email,
     "key_bits"     => $key_bits
   );
 

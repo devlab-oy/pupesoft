@@ -8,6 +8,9 @@ if (strpos($_SERVER['SCRIPT_NAME'], "varastopaikka_aineistolla.php")  !== FALSE)
 if (!isset($tee) or (isset($varasto_valinta) and $varasto_valinta == '')) $tee = "";
 if (!isset($virheviesti)) $virheviesti = "";
 
+if ($toim == "FOO" and !isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = 'selected';
+else $kohdepaikasta_oletuspaikka = '';
+
 if ($tee == "AJA") {
   $virhe = 0;
   $kaikki_tiedostorivit = array();
@@ -121,6 +124,23 @@ if ($tee == "AJA") {
 
         // Jos kohdetuotepaikkaa ei löydy, yritetään perustaa sellainen
         if (mysql_num_rows($kvresult) == 0) {
+
+          if ($yhtiorow['kerayserat'] == 'K') {
+            $ahyllyalue = strtoupper($ahyllyalue);
+            $ahyllynro = strtoupper($ahyllynro);
+            $ahyllyvali = strtoupper($ahyllyvali);
+            $ahyllytaso = strtoupper($ahyllytaso);
+
+            if (!tarkista_varaston_hyllypaikka($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)) {
+              echo "<font class='error'>";
+              echo t("VIRHE: Varastopaikkaa ei ole olemassa")."!";
+              echo " {$tuoteno} {$ahyllyalue}-{$ahyllynro}-{$ahyllyvali}-{$ahyllytaso}";
+              echo "</font><br>";
+              $virhe = 1;
+              continue;
+            }
+          }
+
           $tee         = "UUSIPAIKKA";
           $kutsuja      = "varastopaikka_aineistolla.php";
           $ahalytysraja = 0;
@@ -239,8 +259,24 @@ if ($tee == "") {
     echo "<option value='{$varasto['tunnus']}' $sel>{$varasto['nimitys']}</option>";
   }
 
-  echo "  </select></td><td class='back'><font class='error'>{$virheviesti}</font></td></tr>
-      </table>
+  echo "</select></td><td class='back'><font class='error'>{$virheviesti}</font></td></tr>";
+
+  if ($toim == "FOO") {
+
+    $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
+
+    echo "<tr>";
+    echo "<th>",t("Kohdepaikasta tehdään oletuspaikka"),"</th>";
+    echo "<td>";
+    echo "<select name='kohdepaikasta_oletuspaikka'>";
+    echo "<option value=''>",t("Ei"),"</option>";
+    echo "<option value='x' {$sel}>",t("Kyllä"),"</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "</table>
       <br><input type = 'submit' value = '".t("Hae")."'>
       </form>";
 }

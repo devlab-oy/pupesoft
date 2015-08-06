@@ -24,9 +24,13 @@ if (isset($submit)) {
     $hakukoodi = trim($hakukoodi);
 
     // katsotaan ekana onko kyseessä konttiviite
-    $query = "SELECT tunnus
+    $query = "SELECT laskun_lisatiedot.tunnus
               FROM laskun_lisatiedot
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              JOIN lasku
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'D')
+              WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND konttiviite = '{$hakukoodi}'";
     $result = pupe_query($query);
 
@@ -38,6 +42,8 @@ if (isset($submit)) {
       $query = "SELECT tunnus
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'W'
+                AND lasku.alatila IN ('A', 'D', 'K')
                 AND asiakkaan_tilausnumero = '{$hakukoodi}'";
       $result = pupe_query($query);
 
@@ -308,6 +314,8 @@ function hae_tiedot($hakukoodi, $tyyppi) {
                 AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
               JOIN lasku
                 ON lasku.yhtio = sarjanumeroseuranta.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'B', 'D')
                 AND lasku.tunnus = tilausrivi.otunnus
               JOIN laskun_lisatiedot
                 ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -326,6 +334,8 @@ function hae_tiedot($hakukoodi, $tyyppi) {
                 ON laskun_lisatiedot.yhtio = lasku.yhtio
                 AND laskun_lisatiedot.otunnus = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tila = 'W'
+              AND lasku.alatila IN ('A', 'B', 'D', 'K')
               AND lasku.asiakkaan_tilausnumero = '{$hakukoodi}'";
     $result = pupe_query($query);
 
@@ -363,8 +373,10 @@ function hae_tiedot($hakukoodi, $tyyppi) {
             tilausrivi.toimitettuaika,
             ostotilausrivi.toimitettuaika
             FROM laskun_lisatiedot
-            LEFT JOIN lasku
+            JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
+              AND lasku.tila = 'W'
+              AND lasku.alatila IN ('A', 'B', 'D')
               AND lasku.tunnus = laskun_lisatiedot.otunnus
             LEFT JOIN tilausrivi
               ON tilausrivi.yhtio = laskun_lisatiedot.yhtio

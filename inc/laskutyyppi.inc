@@ -376,6 +376,9 @@ case "D":
   case "H":
     $alatila = "Ostolasku";
     break;
+  case "W":
+    $alatila = "Rullatilaus";
+    break;
   }
   break;
 case "Z":
@@ -431,6 +434,35 @@ case "F":
     break;
   case "X":
     $alatila = "valmis työmääräys";
+    break;
+  }
+  break;
+case "W":
+  $laskutyyppi = "Rullatilaus";
+  switch ($alatila) {
+  case "A":
+    $alatila = "Aktiivinen";
+    break;
+  case "B":
+    $alatila = "Bookkaukseton";
+    break;
+  case "D":
+    $alatila = "Toimitettu";
+    break;
+  case "K":
+    $alatila = "Tuleva lähtö";
+    break;
+  case "M":
+    $alatila = "Muut";
+    break;
+  case "T":
+    $alatila = "Tuleva";
+    break;
+  case "X":
+    $alatila = "Valmis tuleva";
+    break;
+  case "U":
+    $alatila = "Konttiviitelasku";
     break;
   }
   break;

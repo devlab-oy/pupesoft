@@ -346,12 +346,14 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               ON trlt.yhtio = lasku.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tilaustyyppi = 'N'
+            AND lasku.tila = 'W'
+            AND lasku.alatila IN ('A', 'B', 'K')
             AND lasku.asiakkaan_tilausnumero != ''
             AND lasku.sisviesti1 != 'konttiviitelasku'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
             GROUP BY lasku.asiakkaan_tilausnumero
-            ORDER BY trlt.asiakkaan_tilausnumero";
+            ORDER BY SUBSTRING(lasku.asiakkaan_tilausnumero, 1, 4),
+                     SUBSTRING(lasku.asiakkaan_tilausnumero, 5)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -364,7 +366,6 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
     while ($tilaus = mysql_fetch_assoc($result)) {
       $avoimet_tilaukset[] = $tilaus;
     }
-
   }
 
   $query = "SELECT concat(ss.hyllyalue,'-',ss.hyllynro) AS paikka,
@@ -382,6 +383,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             JOIN lasku
               ON lasku.yhtio = ss.yhtio
+              AND lasku.tila = 'W'
+              AND lasku.alatila IN ('A', 'D')
               AND lasku.tunnus = tilausrivi.otunnus
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = ss.yhtio

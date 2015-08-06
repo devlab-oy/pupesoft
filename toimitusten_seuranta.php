@@ -100,9 +100,12 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
   $kukarow['kesken'] = 0;
 
   $update_query = "UPDATE lasku SET
-                   toimaika = '{$lahtopvm}',
-                   sisviesti1 = '{$pakkausohje}'
+                   alatila     = 'A',
+                   toimaika    = '{$lahtopvm}',
+                   sisviesti1  = '{$pakkausohje}'
                    WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND lasku.tila = 'W'
+                   AND lasku.alatila IN ('A', 'B', 'D')
                    AND tunnus IN ({$tunnukset})";
   pupe_query($update_query);
 
@@ -119,7 +122,7 @@ if (isset($task) and $task == 'liita_tilauksia_rekkaviitteelle') {
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND otunnus IN ({$tunnukset})
-            AND tyyppi != 'D'";
+            AND tyyppi = 'L'";
   $result = pupe_query($query);
   $rivitunnukset = mysql_result($result, 0);
 
@@ -455,6 +458,8 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
                   AND tr.tunnus = trlt.tilausrivitunnus
                 JOIN lasku
                   ON lasku.yhtio = tr.yhtio
+                  AND lasku.tila = 'W'
+                  AND lasku.alatila IN ('A', 'D')
                   AND lasku.tunnus = tr.otunnus
                 WHERE trlt.yhtio = '{$kukarow['yhtio']}'
                 AND trlt.konttinumero = '{$konttinumero}'
@@ -628,6 +633,8 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
       $query = "UPDATE lasku SET
                 alatila = 'D'
                 WHERE yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'B')
                 AND tunnus = '{$tunnus}'";
       pupe_query($query);
     }
@@ -668,7 +675,6 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
     $uusi_task = 'korjaa';
   }
 
-  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Kontin sinetöinti")."</font><hr><br>";
 
   if (!isset($sinetoitava_konttiviite)) {
@@ -692,7 +698,11 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
 
     $query = "SELECT matkatiedot
               FROM laskun_lisatiedot
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              JOIN lasku
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila = 'A'
+              WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND konttiviite = '{$sinetoitava_konttiviite}'";
     $result = pupe_query($query);
     $matkatiedot = mysql_result($result, 0);
@@ -868,6 +878,8 @@ if (isset($task) and $task == 'hylky') {
               ON ss.yhtio = tilausrivi.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'W'
+            AND lasku.alatila IN ('A', 'B')
             AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
             AND ss.lisatieto = 'Hylättävä'";
   $result = pupe_query($query);
@@ -915,6 +927,8 @@ if (isset($task) and $task == 'lusaus') {
               ON ss.yhtio = tilausrivi.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'W'
+            AND lasku.alatila IN ('A', 'B')
             AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
             AND ss.lisatieto = 'Lusattava'";
   $result = pupe_query($query);
@@ -971,7 +985,9 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
   elseif (isset($delete)) {
 
     $tunnus = key($delete);
-    pupe_query("DELETE FROM tilausrivi WHERE tunnus = '{$tunnus}'");
+    pupe_query("UPDATE tilausrivi SET
+                tyyppi = 'D'
+                WHERE tunnus = '{$tunnus}'");
     $task = 'laadi_laskutusraportti';
   }
   elseif (isset($lisaa_nimike_submit)) {
@@ -983,6 +999,8 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
     $laskuquery = "SELECT *
                    FROM lasku
                    WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND lasku.tila = 'W'
+                   AND lasku.alatila IN ('A', 'B', 'D')
                    AND asiakkaan_tilausnumero = '{$konttiviite}'";
     $laskuresult = pupe_query($laskuquery);
     $laskurow = mysql_fetch_assoc($laskuresult);
@@ -1069,9 +1087,11 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
     $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 102);
 
     $update_query = "UPDATE lasku SET
+                     tila                   = 'W',
+                     alatila                = 'U'
                      asiakkaan_tilausnumero = '{$konttiviite}',
-                     sisviesti1 = 'konttiviitelasku',
-                     toimaika = now()
+                     sisviesti1             = 'konttiviitelasku',
+                     toimaika               = now()
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus = '{$tunnus}'";
     pupe_query($update_query);
@@ -1082,6 +1102,8 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
     $laskuquery = "SELECT *
                    FROM lasku
                    WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND lasku.tila = 'W'
+                   AND lasku.alatila = 'U'
                    AND tunnus = '{$tunnus}'";
     $laskuresult = pupe_query($laskuquery);
     $laskurow = mysql_fetch_assoc($laskuresult);
@@ -1127,8 +1149,9 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
               ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_tilausnumero = '{$konttiviite}'
-            AND sisviesti1 = 'konttiviitelasku'";
+            AND lasku.tila = 'W'
+            AND lasku.alatila = 'U'
+            AND asiakkaan_tilausnumero = '{$konttiviite}'";
   $result = pupe_query($query);
 
   $nimikkeet = array();
@@ -1443,9 +1466,13 @@ if (isset($task) and $task == 'lisaa_rekkatoimitus') {
 
     $viite = mysql_real_escape_string($viite);
 
-    $query = "SELECT tunnus
+    $query = "SELECT laskun_lisatiedot.tunnus
               FROM  laskun_lisatiedot
-              WHERE yhtio  = '{$kukarow['yhtio']}'
+              JOIN lasku
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'D', 'K')
+              WHERE laskun_lisatiedot.yhtio  = '{$kukarow['yhtio']}'
               AND konttiviite = '{$viite}'";
     $result = pupe_query($query);
 
@@ -1515,7 +1542,8 @@ if (isset($task) and $task == 'rekkatoimituksen_rivivalinta') {
               ON ss.yhtio = llt.yhtio
               AND ss.myyntirivitunnus = tr.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND llt.konttiviite = 'bookkaukseton'
+            AND lasku.tila = 'W'
+            AND lasku.alatila = 'B'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
 
@@ -1697,7 +1725,8 @@ if (!isset($task)) {
                 ON trlt.yhtio = lasku.yhtio
                 AND trlt.tilausrivitunnus = tr.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND konttiviite = 'bookkaukseton'
+              AND lasku.tila = 'W'
+              AND lasku.alatila = 'B'
               GROUP BY lasku.tunnus";
       break;
 
@@ -1720,8 +1749,9 @@ if (!isset($task)) {
               JOIN laskun_lisatiedot AS llt
                ON llt.yhtio = lasku.yhtio
                AND llt.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = 'rplog'
-              AND lasku.tilaustyyppi = 'N'
+              WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+              AND lasku.tila = 'W'
+              AND lasku.alatila = 'K'
               AND lasku.asiakkaan_tilausnumero != ''
               AND konttiviite != 'bookkaukseton'
               AND konttiviite != ''
@@ -1764,7 +1794,8 @@ if (!isset($task)) {
                 ON otr.yhtio = lasku.yhtio
                 AND otr.tunnus = ss.ostorivitunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND tilaustyyppi = 'N'
+              AND lasku.tila = 'W'
+              AND lasku.alatila = 'A'
               AND konttiviite != 'bookkaukseton'
               AND llt.satamavahvistus_pvm = '0000-00-00 00:00:00'
               GROUP BY konttiviite
@@ -1797,7 +1828,8 @@ if (!isset($task)) {
                 ON ss.yhtio = lasku.yhtio
                 AND ss.myyntirivitunnus = tr.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND tilaustyyppi = 'N'
+              AND lasku.tila = 'W'
+              AND lasku.alatila = 'D'
               AND konttiviite != 'bookkaukseton'
               AND trlt.konttinumero != ''
               AND llt.satamavahvistus_pvm != '0000-00-00 00:00:00'
@@ -1936,7 +1968,11 @@ if (!isset($task)) {
 
         $qry = "SELECT SUM(rullamaara) AS bookattu_rullamaara
                 FROM laskun_lisatiedot
-                WHERE yhtio = '{$kukarow['yhtio']}'
+                JOIN lasku
+                  ON lasku.yhtio = laskun_lisatiedot.yhtio
+                  AND lasku.tila = 'W'
+                  AND lasku.alatila IN ('A', 'B', 'D', 'K')
+                WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND otunnus IN ({$rivi['laskutunnukset']})";
         $res = pupe_query($qry);
         $bookattu_rullamaara = mysql_fetch_assoc($res);
@@ -2082,7 +2118,8 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                 ON laskun_lisatiedot.yhtio = lasku.yhtio
                 AND laskun_lisatiedot.otunnus = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tilaustyyppi = 'N'
+              AND lasku.tila = 'W'
+              AND lasku.alatila IN ('A', 'B', 'D', 'K')
               AND laskun_lisatiedot.konttiviite = '{$kv}'
               GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
               ORDER BY toimaika, konttiviite";
@@ -2131,7 +2168,8 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               ON ss.yhtio = lasku.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tilaustyyppi = 'N'
+            AND lasku.tila = 'W'
+            AND lasku.alatila IN ('A', 'B', 'D')
             AND laskun_lisatiedot.konttiviite = '{$kv}'
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             ORDER BY toimaika, konttiviite";
@@ -2204,7 +2242,11 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
       $query = "SELECT group_concat(otunnus)
                 FROM laskun_lisatiedot
-                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                JOIN lasku
+                  ON lasku.yhtio = laskun_lisatiedot.yhtio
+                  AND lasku.tila = 'W'
+                  AND lasku.alatila IN ('A', 'B', 'D')
+                WHERE laskun_lisatiedot.yhtio = '{$yhtiorow['yhtio']}'
                 AND konttiviite = '{$tilaus['konttiviite']}'";
       $result = pupe_query($query);
       $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
@@ -2217,7 +2259,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
                 WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                 AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
                 AND trlt.sinettinumero != ''
-                AND tilausrivi.tyyppi != 'D'";
+                AND tilausrivi.tyyppi = 'L'";
       $result = pupe_query($query);
       $vahvistettu = mysql_result($result, 0);
 
@@ -2588,6 +2630,10 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
               echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
               echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+
+              $lopetus = "toimitusten_seuranta.php////r={$r}//kv={$tilaus['konttiviite']}//task=nkv";
+              echo "<input type='hidden' name='lopetus' value='{$lopetus}' />";
+
               echo "<input type='submit' value='". t("Korjaa") ."' />";
               echo "</form>";
             }

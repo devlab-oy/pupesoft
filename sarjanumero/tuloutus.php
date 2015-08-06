@@ -264,9 +264,11 @@ if (isset($submit)) {
 
         if (mysql_num_rows($result) == 0) {
 
-          $query = "UPDATE lasku
-                    SET tila = 'L', alatila = 'A'
+          $query = "UPDATE lasku SET
+                    alatila = 'A'
                     WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tila = 'W'
+                    AND alatila IN ('B', 'K')
                     AND asiakkaan_tilausnumero  = '{$asiakkaan_tilausnumero}'";
           pupe_query($query);
         }

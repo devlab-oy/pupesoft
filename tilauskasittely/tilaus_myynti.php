@@ -34,10 +34,10 @@ elseif (@include "parametrit.inc");
 else exit;
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
-                      or $kukarow["naytetaan_katteet_tilauksella"] == "B"
-                      or ($kukarow["naytetaan_katteet_tilauksella"] == ""
-                          and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
-                               or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
+  or $kukarow["naytetaan_katteet_tilauksella"] == "B"
+  or ($kukarow["naytetaan_katteet_tilauksella"] == ""
+    and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
+      or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
 
 $naytetaanko_kate = ($naytetaan_kate != "E" and $oikeus_nahda_kate);
 
@@ -2604,12 +2604,18 @@ if ($tee == '') {
       $pika_paiv_merahti = " kohdistettu = 'K', ";
     }
 
+    $asiakkaan_tilaunumero_lisa = "";
+
+    if ((isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"])) {
+      $asiakkaan_tilaunumero_lisa = "asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',";
+    }
+
     $query  = "UPDATE lasku SET
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',
                viesti          = '$viesti',
-               asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',
                tilausvahvistus = '$tilausvahvistus',
+               $asiakkaan_tilaunumero_lisa
                $pika_paiv_merahti
                $pika_paiv_myyja
                $nollaa_lahto
@@ -6364,7 +6370,7 @@ if ($tee == '') {
         $sele["E"] = "checked";
       }
       else {
-          $sele["K"] = "checked";
+        $sele["K"] = "checked";
         $tilausrivi_alvillisuus = "K";
       }
 
@@ -7714,7 +7720,7 @@ if ($tee == '') {
         echo "</td>";
 
         if ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and $row["kpl"] != 0 and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {
-          echo "<td $class align='right' valign='top' nowrap><input type='text' size='5' name='kpl' value='$row[varattu]'></td>";
+          echo "<td $class align='right' valign='top' nowrap><input type='text' size='5' name='kpl' value='$row[varattu]' autocomplete='off'></td>";
           echo "</form>";
         }
         elseif ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V" and ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {

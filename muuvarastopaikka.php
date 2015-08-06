@@ -1151,24 +1151,29 @@ if ($tee == 'M') {
         echo "<td></td><td></td><td></td><td></td>";
       }
 
+      $chk = $poistoteksti = "";
+
+      if ($saldorow["poistettava"] != "") {
+        $chk = "CHECKED";
+        $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla, eikä tuotepaikalle ole avoimia rivejä").")";
+      }
+
       // Ei näytetä boxia, jos sitä ei saa käyttää
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
       elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0) {
 
-        $chk = $poistoteksti = "";
-
-        if ($saldorow["poistettava"] != "") {
-          $chk = "CHECKED";
-          $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla").")";
-        }
-
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
             <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
       }
       else {
-        echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'></td>";
+
+        if ($saldorow["poistettava"] != "") {
+          $poistoteksti .= "<br>(".t("Voit myös poistaa tuotepaikan tästä heti").")";
+        }
+
+        echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'> {$poistoteksti}</td>";
       }
 
       echo "</tr>";

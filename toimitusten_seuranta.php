@@ -1966,14 +1966,14 @@ if (!isset($task)) {
       }
       else {
 
-        $qry = "SELECT SUM(rullamaara) AS bookattu_rullamaara
-                FROM laskun_lisatiedot
-                JOIN lasku
-                  ON lasku.yhtio = laskun_lisatiedot.yhtio
-                  AND lasku.tila = 'W'
-                  AND lasku.alatila IN ('A', 'B', 'D', 'K')
-                WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-                AND otunnus IN ({$rivi['laskutunnukset']})";
+        $qry = "SELECT SUM(laskun_lisatiedot.rullamaara) AS bookattu_rullamaara
+                FROM lasku
+                JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
+                  AND laskun_lisatiedot.otunnus = lasku.tunnus)
+                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A','B','K','D')
+                AND lasku.tunnus IN ({$rivi['laskutunnukset']})";
         $res = pupe_query($qry);
         $bookattu_rullamaara = mysql_fetch_assoc($res);
         $bookattu_rullamaara = $bookattu_rullamaara['bookattu_rullamaara'];

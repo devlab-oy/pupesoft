@@ -64,6 +64,8 @@ if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
+js_popup();
+
 echo "  <script language='javascript'>
 
       $(function() {

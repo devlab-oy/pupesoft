@@ -30,10 +30,10 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $query = "SELECT tunnus
           FROM lasku
-          WHERE yhtio = '{$kukarow["yhtio"]}'
+          WHERE yhtio        = '{$kukarow["yhtio"]}'
           AND ohjelma_moduli = 'EXTRANET'
-          AND tila = 'N'
-          AND alatila = 'F'";
+          AND tila           = 'N'
+          AND alatila        = 'F'";
 
 $result = pupe_query($query);
 
@@ -52,7 +52,7 @@ if (mysql_num_rows($result) > 0) {
     "cc"      => "",
     "subject" => "Hyväksyttäviä Extranet-tilauksia",
     "body"    => "Hei,\n\n" .
-                 "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
+    "Seuraavat Extranet-tilaukset ovat valmiita hyväksyttäväksi: {$tilausnumerot}"
   );
 
   pupesoft_sahkoposti($email_params);

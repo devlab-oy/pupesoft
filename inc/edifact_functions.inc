@@ -797,7 +797,7 @@ function laskutusraportti_parametrit($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = tilausrivi.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila IN ('A', 'B', 'D')
+              AND lasku.alatila IN ('A', 'B', 'D','U')
               AND lasku.tunnus = tilausrivi.otunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.asiakkaan_tilausnumero = '{$konttiviite}'";
@@ -2997,7 +2997,7 @@ function muuta_bookkaus($muutosparametrit) {
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$laskutunnus}'";
     $result = pupe_query($query);
-    
+
     if (mysql_num_rows($result) > 0) $yhteensa = mysql_result($result, 0);
     else $yhteensa = 0;
 

@@ -142,23 +142,21 @@ if ($tee == 'lisaa_aiemmalle_riville') {
   $query = "UPDATE tilausrivi
             SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
                 varattu = varattu + '{$lisattava['kpl']}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi = 'O'
-            AND otunnus = '{$kukarow["kesken"]}'
-            AND toimitettu = ''
-            AND tunnus = '{$ensimmainen_tilausrivi}'";
-
+            WHERE yhtio    = '{$kukarow['yhtio']}'
+            AND tyyppi     = 'O'
+            AND otunnus    = '{$kukarow["kesken"]}'
+            AND laskutettu = ''
+            AND tunnus     = '{$ensimmainen_tilausrivi}'";
   $tru_result = pupe_query($query);
 
   if ($tru_result) {
     $query = "DELETE
               FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tyyppi = 'O'
-              AND otunnus = '{$kukarow["kesken"]}'
-              AND toimitettu = ''
-              AND tunnus = '{$viimeinen_tilausrivi}'";
-
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tyyppi     = 'O'
+              AND otunnus    = '{$kukarow["kesken"]}'
+              AND laskutettu = ''
+              AND tunnus     = '{$viimeinen_tilausrivi}'";
     $trd_result = pupe_query($query);
   }
 
@@ -1999,10 +1997,11 @@ function hae_eka_ja_vika_tilausrivi($params) {
   $query = "SELECT min(tunnus) AS eka,
             max(tunnus)        AS vika
             FROM tilausrivi
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND otunnus = '{$tilausnumero}'
-            AND tuoteno = '{$tuoteno}'
-            AND tyyppi = 'O'";
+            WHERE yhtio    = '{$kukarow["yhtio"]}'
+            AND otunnus    = '{$tilausnumero}'
+            AND tuoteno    = '{$tuoteno}'
+            AND laskutettu = ''
+            AND tyyppi     = 'O'";
 
   $result = pupe_query($query);
 

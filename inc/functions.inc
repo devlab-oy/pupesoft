@@ -25943,22 +25943,22 @@ if (!function_exists('paivita_ohjausmerkki')) {
     if ($asiakkaan_ohjausmerkki) {
 
       $query = "SELECT tarkenne
-              FROM asiakkaan_avainsanat
-              WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND laji         = 'OHJAUSMERKKI'
-              AND liitostunnus = '{$laskurow['liitostunnus']}'
-              AND avainsana    = '{$laskurow['toimitustapa']}'
-              LIMIT 1";
-      $ohjausmerkki_check_res = pupe_query($query);
-
-      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
-        $query = "SELECT tarkenne
                 FROM asiakkaan_avainsanat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND laji         = 'OHJAUSMERKKI'
                 AND liitostunnus = '{$laskurow['liitostunnus']}'
-                AND avainsana    = 'OLETUS'
+                AND avainsana    = '{$laskurow['toimitustapa']}'
                 LIMIT 1";
+      $ohjausmerkki_check_res = pupe_query($query);
+
+      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
+        $query = "SELECT tarkenne
+                  FROM asiakkaan_avainsanat
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND laji         = 'OHJAUSMERKKI'
+                  AND liitostunnus = '{$laskurow['liitostunnus']}'
+                  AND avainsana    = 'OLETUS'
+                  LIMIT 1";
         $ohjausmerkki_check_res = pupe_query($query);
       }
 
@@ -25980,9 +25980,9 @@ if (!function_exists('paivita_ohjausmerkki')) {
           }
 
           $query = "UPDATE lasku SET
-                  {$updlisa}
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['tunnus']}'";
+                    {$updlisa}
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
           $updres = pupe_query($query);
         }
       }
@@ -26162,7 +26162,7 @@ if (!function_exists("tsekit")) {
     // katotaan onko kaikki sarjanumerot ok
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
               FROM tilausrivi use index (uusiotunnus_index)
-              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+              JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta NOT IN ('', 'T')
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
               tilausrivi.uusiotunnus='$row[tunnus]' and
               tilausrivi.tyyppi='O'";
@@ -31564,6 +31564,7 @@ if (!function_exists("hae_tuoteperhe")) {
 
     $query = "SELECT tuote.tuoteno,
               tuote.nimitys,
+              tuote.status,
               lapsi.tuoteno AS lapsi_tuoteno
               FROM tuote
               LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
@@ -31578,6 +31579,7 @@ if (!function_exists("hae_tuoteperhe")) {
     while ($row = mysql_fetch_assoc($result)) {
       $tuoteno = $row["tuoteno"];
       $nimitys = $row["nimitys"];
+      $status  = $row["status"];
 
       if (!in_array($row["lapsi_tuoteno"], $tuotenot)) {
         array_push($tuotenot, $tuoteno);
@@ -31594,6 +31596,10 @@ if (!function_exists("hae_tuoteperhe")) {
 
     if (!empty($nimitys)) {
       $tuoteperhe[$tuoteno]["nimitys"] = $nimitys;
+    }
+
+    if (!empty($status)) {
+      $tuoteperhe[$tuoteno]["status"] = $status;
     }
 
     return $tuoteperhe;

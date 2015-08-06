@@ -385,6 +385,22 @@ if ($fieldname == "tilausvahvistustyyppi") {
   $jatko = 0;
 } //Jamppa s‰‰t‰‰
 
+if ($fieldname == "tilausvahvistus_tilausnumero") {
+
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu       = $trow[$i];
+  $sel       = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>" . t("Tilausvahvistukseen tulee tilausnumero") . "</option>";
+  $ulos .= "<option value = '1' $sel[1]>" . t("Tilausvahvistukseen tulee asiakkaan tilausnumero, jos se on annettu") . "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_lahetys") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

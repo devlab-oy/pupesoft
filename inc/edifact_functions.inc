@@ -777,7 +777,7 @@ function laskutusraportti_parametrit($konttiviite) {
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila IN ('A', 'B', 'D')
+            AND lasku.alatila IN ('A', 'B', 'D','U')
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);

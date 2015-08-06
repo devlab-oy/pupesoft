@@ -28,38 +28,4 @@ $yhtio    = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-$query = "SELECT
-            eposti,
-            count(*) AS hyvaksyttavia
-          FROM lasku
-            JOIN kuka
-              ON (kuka.kuka = lasku.hyvaksyja_nyt
-              AND kuka.yhtio = lasku.yhtio)
-          WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            AND tila = 'H'
-            AND alatila != 'H'
-            AND hyvaksyja_nyt != ''
-          GROUP BY lasku.hyvaksyja_nyt";
-
-$result = pupe_query($query);
-
-while ($row = mysql_fetch_assoc($result)) {
-  $sana = (int) $row["hyvaksyttavia"] > 1 ? "laskua" : "lasku";
-
-  $body = <<<TEXT
-Hei,
-
-Sinulla on {$row["hyvaksyttavia"]} {$sana} hyväksyttävänä.
-TEXT;
-
-  $email = $row["eposti"];
-
-  $email_params = array(
-    "to"      => $email,
-    "cc"      => "",
-    "subject" => "Hyväksyttäviä laskuja",
-    "body"    => $body
-  );
-
-  pupesoft_sahkoposti($email_params);
-}
+require "lahetamuistutus.php";

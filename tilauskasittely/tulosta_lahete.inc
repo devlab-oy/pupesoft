@@ -4200,16 +4200,29 @@ if (!function_exists('print_pdf_lahete')) {
               echo t("Tilausvahvistus tulostuu")."...<br>";
             }
 
+            switch ($yhtiorow["tilausvahvistus_tilausnumero"]) {
+            case 1:
+              if (empty($laskurow["asiakkaan_tilausnumero"])) {
+                $tilausnumero = $laskurow["tunnus"];
+              }
+              else {
+                $tilausnumero = $laskurow["asiakkaan_tilausnumero"];
+              }
+              break;
+            default:
+              $tilausnumero = $laskurow["tunnus"];
+            }
+
             if ($laskurow["tunnusnippu"] > 0) {
               if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
                 $subjnumero = $laskurow["tunnusnippu"];
               }
               else {
-                $subjnumero = $laskurow["tunnusnippu"]."/".$laskurow["tunnus"];
+                $subjnumero = $laskurow["tunnusnippu"] . "/" . $tilausnumero;
               }
             }
             else {
-              $subjnumero = $laskurow["tunnus"];
+              $subjnumero = $tilausnumero;
             }
 
             $kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);

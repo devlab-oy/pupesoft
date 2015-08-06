@@ -291,6 +291,26 @@ if (!$enarimatch) {
       }
     }
 
+    // Etsitään vielä asiakaskommenteista, jos ei ole mitenkään muuten löytynyt ja kyseessä on
+    // myyntitilaus
+    if (count($rows) == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== false) {
+      $query = "SELECT tuote.*
+                FROM tuote
+                JOIN asiakaskommentti
+                  ON (asiakaskommentti.yhtio = tuote.yhtio
+                  AND asiakaskommentti.tuoteno = tuote.tuoteno
+                  AND asiakaskommentti.ytunnus = '{$asiakasrow["ytunnus"]}')
+                WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                AND asiakaskommentti.kommentti = '{$tuoteno}'
+                {$poistetulisa}
+                LIMIT 1";
+
+      $row = pupe_query($query);
+      $row = mysql_fetch_assoc($row);
+
+      $rows[$row["tuoteno"]] = $row;
+    }
+
     if (count($rows) >  200) {
       $kentta      = 'tuoteno';
       $varaosavirhe   = t("VIRHE: Hakuehdolla löytyi liikaa tuotteita!");

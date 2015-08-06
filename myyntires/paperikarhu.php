@@ -1039,7 +1039,7 @@ if ($tee_pdf != 'tulosta_karhu') {
 if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'L‰het‰ Maventaan') {
   if (function_exists("pupesoft_sahkoposti") and !empty($laheta_karhuemail_myyjalle)) {
 
-    $polkupyora = pathinfo($pdffilenimi);
+    $pathinfo = pathinfo($pdffilenimi);
     $params = array(
       "to"     => $laheta_karhuemail_myyjalle,
       "subject"  => t("Maksukehotuskopio"),
@@ -1047,22 +1047,50 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
       "attachements" => array(0   => array(
           "filename"    => $pdffilenimi,
           "newfilename"  => "",
-          "ctype"      => $polkupyora['extension'],
+          "ctype"      => $pathinfo['extension'],
         )
       )
     );
-    $jou = pupesoft_sahkoposti($params);
-    if ($jou) echo t("Maksukehotuskopio l‰hetettiin myyj‰lle").": {$laheta_karhuemail_myyjalle}...\n<br>";
+
+    if (pupesoft_sahkoposti($params)) echo t("Maksukehotuskopio l‰hetettiin myyj‰lle").": {$laheta_karhuemail_myyjalle}...\n<br>";
   }
+
   if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
-    $liite       = $pdffilenimi;
-    $kutsu       = t("Maksukehotus", $kieli);
-    $komento     = "asiakasemail".$_REQUEST['karhu_email'];
-    $content_body = $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n";
 
-    echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+    if (!empty($yhtiorow['maksukehotus_email'])) {
+      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
+      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
+      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
+      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
+      $sahkoposti_cc = $yhtiorow['maksukehotus_email'];
+    }
+    else {
+      $newfilename = $pdffilenimi;
+      $sahkoposti_cc = "";
+    }
 
-    require "inc/sahkoposti.inc";
+    $pathinfo = pathinfo($pdffilenimi);
+    $params = array(
+      "to"     => $_REQUEST['karhu_email'],
+      "cc" => $sahkoposti_cc,
+      "subject"  => t("Maksukehotus", $kieli),
+      "ctype"    => "text",
+      "body" => $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n",
+      "attachements" => array(0   => array(
+          "filename"    => $pdffilenimi,
+          "newfilename"  => $newfilename,
+          "ctype"      => $pathinfo['extension'],
+        )
+      )
+    );
+
+    if (pupesoft_sahkoposti($params)) {
+      echo t("Maksukehotus l‰hetet‰‰n osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+
+      if (!empty($sahkoposti_cc)) {
+        echo t("Maksukehotuskopio l‰hetet‰‰n myˆs osoitteeseen").": {$sahkoposti_cc}...\n<br>";
+      }
+    }
   }
   else {
     $kirjoitin = $kirjoitin == 0 ? $kukarow['kirjoitin'] : $kirjoitin;

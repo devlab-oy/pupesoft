@@ -111,6 +111,35 @@ if ($tee == "AJA") {
           continue;
         }
 
+        if ($toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
+
+          if (empty($tvrow['oletus'])) {
+            echo "<font class='error'>";
+            echo t("Tuotteen %s lähdevarastopaikka %s %s %s %s ei ole oletuspaikka",
+                    "",
+                    $tuoteno,
+                    $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso
+                  );
+            echo "!</font><br>";
+            $virhe = 1;
+            continue;
+          }
+
+          if ($lahdetsekki != $kohdetsekki) {
+            echo "<font class='error'>";
+            echo t("Tuotteen %s lähdevarastopaikka %s %s %s %s ja
+                    kohdevarastopaikka %s %s %s %s ei sijaitse samassa varastossa",
+                    "",
+                    $tuoteno,
+                    $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso,
+                    $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso
+                  );
+            echo "!</font><br>";
+            $virhe = 1;
+            continue;
+          }
+        }
+
         // Onko kohdetuotepaikka olemassa
         $query_ktp = "SELECT *
                       FROM tuotepaikat use index (tuote_index)

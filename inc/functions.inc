@@ -25317,6 +25317,9 @@ if (!function_exists('hyllysiirto')) {
     if (!isset($params['poikkeavalaskutuspvm'])) $_poikkeavalaskutuspvm = '';
     else $_poikkeavalaskutuspvm = $params['poikkeavalaskutuspvm'];
 
+    if (!isset($params['kohdepaikasta_oletuspaikka'])) $kohdepaikasta_oletuspaikka = "";
+    else $kohdepaikasta_oletuspaikka = $params['kohdepaikasta_oletuspaikka'];
+
     if ($error) return false;
 
     if ($lisavaruste == "LISAVARUSTE") {
@@ -25361,10 +25364,25 @@ if (!function_exists('hyllysiirto')) {
       }
     }
 
+    # Jos kohdepaikasta tehd‰‰n oletuspaikka
+    # h‰lyrajat ja tilausm‰‰r‰t seuraavat mukana
+    if (!empty($kohdepaikasta_oletuspaikka)) {
+      $haly_tilausmaara_lisa  = "halytysraja = '{$mistarow['halytysraja']}',";
+      $haly_tilausmaara_lisa .= "tilausmaara = '{$mistarow['tilausmaara']}',";
+      $haly_tilausmaara_lisa .= "oletus = 'X',";
+
+      $mista_oletuspaikka_pois = "oletus = '',";
+    }
+    else {
+      $haly_tilausmaara_lisa = "";
+      $mista_oletuspaikka_pois = "";
+    }
+
     // Mist‰ varastosta otetaan?
     $query = "UPDATE tuotepaikat
               set saldo = saldo - {$kappaleet},
               {$lisavarlisa1}
+              {$mista_oletuspaikka_pois}
               saldoaika     = now(),
               muuttaja      = '{$kukarow['kuka']}',
               muutospvm     = now()
@@ -25377,6 +25395,7 @@ if (!function_exists('hyllysiirto')) {
     $query = "UPDATE tuotepaikat
               set saldo   = saldo + {$kappaleet},
               {$lisavarlisa2}
+              {$haly_tilausmaara_lisa}
               saldoaika     = now(),
               muuttaja      = '{$kukarow['kuka']}',
               muutospvm     = now()

@@ -1506,7 +1506,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             }
           }
 
-          if ($prow["sarjanumeroseuranta"] != "") {
+          if ($prow["sarjanumeroseuranta"] != "" and $prow["sarjanumeroseuranta"] != "T") {
             $query = "SELECT count(*) kpl
                       from sarjanumeroseuranta
                       where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";

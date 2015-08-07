@@ -1550,7 +1550,7 @@ function kasittele_bookkaussanoma($edi_data) {
       $update_query = "UPDATE lasku SET
                        sisviesti1 = '{$ohje}',
                        toimaika   = '{$lahtopvm}',
-                       alatila    = 'A',
+                       alatila    = 'A'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND lasku.tila = 'W'
                        AND lasku.alatila IN ('B')

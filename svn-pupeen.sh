@@ -10,6 +10,28 @@ function parse_salasanat {
   | tail -1
 }
 
+function git_repo_uptodate {
+  dir=$1
+  branch=$2
+
+  # Do git fetch to get status from origin
+  cd ${dir}
+  git fetch origin &> /dev/null
+
+  # Get latest commit from local branch
+  OLD_HEAD=$(cd "${dir}" && git log -n 1 ${branch} --pretty=format:"%H")
+
+  # Get latest commit from origin branch
+  NEWEST_HEAD=$(cd "${dir}" && git log -n 1 origin/${branch} --pretty=format:"%H")
+
+  # Ei ole muutoksia
+  if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 ####################################################################################################
 #### Preparation ###################################################################################
 ####################################################################################################
@@ -148,13 +170,14 @@ if [[ $? -ne 0 ]]; then
   exit
 fi
 
+# Check tmp dir
+if [ ! -d "${pupenextdir}/tmp" ]; then
+  mkdir "${pupenextdir}/tmp"
+fi
+
 ####################################################################################################
 #### Pupesoft ######################################################################################
 ####################################################################################################
-
-# Do git fetch to get status from origin
-cd ${pupedir}
-git fetch origin &> /dev/null
 
 # Onko spessubranchi käytössä?
 if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
@@ -163,14 +186,11 @@ else
   pupebranch="master"
 fi
 
-# Get latest commit from local branch
-OLD_HEAD=$(cd "${pupedir}" && git log -n 1 ${pupebranch} --pretty=format:"%H")
-
-# Get latest commit from origin branch
-NEWEST_HEAD=$(cd "${pupedir}" && git log -n 1 origin/${pupebranch} --pretty=format:"%H")
+# Katsotaan onko git hakemistossa muutoksia
+git_repo_uptodate ${pupedir} ${pupebranch}
 
 # Skipataan, jos ei ole muutoksia
-if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then
+if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
 elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
@@ -238,18 +258,11 @@ fi
 # Setataan rails env
 export RAILS_ENV=${environment}
 
-# Do git fetch to get status from origin
-cd ${pupenextdir}
-git fetch origin &> /dev/null
-
-# Get latest commit from local branch
-OLD_HEAD=$(cd "${pupenextdir}" && git log -n 1 master --pretty=format:"%H")
-
-# Get latest commit from origin branch
-NEWEST_HEAD=$(cd "${pupenextdir}" && git log -n 1 origin/master --pretty=format:"%H")
+# Katsotaan onko git hakemistossa muutoksia
+git_repo_uptodate ${pupedir} master
 
 # Skipataan, jos ei ole muutoksia
-if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then
+if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
 elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
@@ -271,13 +284,6 @@ if [[ "${jatketaanko}" = "k" ]]; then
 
   # Save git exit status
   STATUS=$?
-
-  # Check tmp dir
-  if [ ! -d "${pupenextdir}/tmp" ]; then
-    mkdir "${pupenextdir}/tmp"
-  fi
-
-  echo
 
   # Päivitys onnistui, bundlataan
   if [[ ${STATUS} -eq 0 ]]; then

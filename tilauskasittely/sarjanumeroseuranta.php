@@ -1534,6 +1534,16 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
 echo "</form>";
 echo "</table>";
 
+//Kursorinohjaus
+if ($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
+  $formi  = "sarjaformi";
+  $kentta = "sarjanumero";
+}
+else {
+  $formi  = "haku";
+  $kentta = "sarjanumero_haku";
+}
+
 if ($toiminto == '') {
   $sarjanumero = '';
   $lisatieto = '';

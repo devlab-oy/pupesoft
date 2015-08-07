@@ -37,6 +37,8 @@ if (isset($submit) and $submit == "rullapoisto") {
               AND tr.tunnus = ss.myyntirivitunnus
             JOIN lasku
               ON lasku.yhtio = ss.yhtio
+              AND lasku.tila = 'W'
+              AND lasku.alatila IN ('A', 'B', 'D')
               AND lasku.tunnus = tr.otunnus
             JOIN laskun_lisatiedot AS llt
               ON llt.yhtio = ss.yhtio
@@ -58,6 +60,8 @@ if (isset($submit) and $submit == "rullapoisto") {
               ON trlt.yhtio = tr.yhtio
               AND trlt.tilausrivitunnus = tr.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'W'
+            AND lasku.alatila IN ('A', 'D')
             AND llt.konttiviite = '{$rullainfo['konttiviite']}'
             AND trlt.konttinumero = '{$rullainfo['konttinumero']}'";
   $result = pupe_query($query);
@@ -113,6 +117,8 @@ if (isset($submit)) {
                 FROM laskun_lisatiedot
                 JOIN lasku
                   ON lasku.yhtio = laskun_lisatiedot.yhtio
+                  AND lasku.tila = 'W'
+                  AND lasku.alatila IN ('A', 'B', 'D')
                   AND lasku.tunnus = laskun_lisatiedot.otunnus
                 JOIN tilausrivi
                   ON tilausrivi.yhtio = lasku.yhtio
@@ -280,6 +286,8 @@ if (isset($submit)) {
                     FROM laskun_lisatiedot
                     JOIN lasku
                       ON lasku.yhtio = laskun_lisatiedot.yhtio
+                      AND lasku.tila = 'W'
+                      AND lasku.alatila IN ('A', 'B', 'D')
                       AND lasku.tunnus = laskun_lisatiedot.otunnus
                     JOIN tilausrivi
                       ON tilausrivi.yhtio = lasku.yhtio
@@ -385,6 +393,8 @@ if (isset($submit)) {
               FROM laskun_lisatiedot
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'B', 'D')
                 AND lasku.tunnus = laskun_lisatiedot.otunnus
               JOIN tilausrivi
                 ON tilausrivi.yhtio = lasku.yhtio
@@ -425,6 +435,8 @@ if (isset($submit)) {
                 AND tr.tunnus = ss.myyntirivitunnus
               JOIN lasku
                 ON lasku.yhtio = ss.yhtio
+                AND lasku.tila = 'W'
+                AND lasku.alatila IN ('A', 'B', 'D')
                 AND lasku.tunnus = tr.otunnus
               JOIN laskun_lisatiedot AS llt
                 ON llt.yhtio = ss.yhtio

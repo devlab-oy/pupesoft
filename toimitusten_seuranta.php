@@ -1088,7 +1088,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
     $update_query = "UPDATE lasku SET
                      tila                   = 'W',
-                     alatila                = 'U'
+                     alatila                = 'U',
                      asiakkaan_tilausnumero = '{$konttiviite}',
                      sisviesti1             = 'konttiviitelasku',
                      toimaika               = now()

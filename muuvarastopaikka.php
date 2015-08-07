@@ -310,6 +310,8 @@ if ($tee == 'MUUTA') {
   else {
     $tee = 'M';
   }
+
+  if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 }
 
 // Siirret‰‰n saldo, jos se on viel‰ olemassa

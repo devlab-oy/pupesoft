@@ -8,8 +8,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "varastopaikka_aineistolla.php")  !== FALSE)
 if (!isset($tee) or (isset($varasto_valinta) and $varasto_valinta == '')) $tee = "";
 if (!isset($virheviesti)) $virheviesti = "";
 
-if ($toim == "FOO" and !isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = 'selected';
-else $kohdepaikasta_oletuspaikka = '';
+if ($tee == '' and !isset($varasto_valinta)) $varasto_valinta = $kukarow['oletus_varasto'];
+
+if ($toim == "FOO") {
+  if (!isset($kohdepaikasta_oletuspaikka)) {
+    $kohdepaikasta_oletuspaikka = 'selected';
+  }
+}
+else {
+  $kohdepaikasta_oletuspaikka = '';
+}
 
 if ($tee == "AJA") {
   $virhe = 0;
@@ -34,6 +42,22 @@ if ($tee == "AJA") {
       }
 
       $kaikki_tiedostorivit = array_filter($kaikki_tiedostorivit);
+
+      # Etsit‰‰n tuoteperheit‰ joilla on runko-tuotteita
+      foreach ($kaikki_tiedostorivit as $rowkey => $tiedr) {
+        $query = "SELECT *
+                  FROM tuoteperhe
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND isatuoteno = '{$tiedr[0]}'
+                  AND tyyppi = 'P'
+                  AND ohita_kerays != ''";
+        $runkoresult = pupe_query($query);
+
+        while ($runkorow = mysql_fetch_assoc($runkoresult)) {
+          $tiedr[0] = $runkorow['tuoteno'];
+          $kaikki_tiedostorivit[] = $tiedr;
+        }
+      }
 
       // Siivous ja validitytsekit
       foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
@@ -237,7 +261,7 @@ if ($tee == "AJA") {
         $kutsuja = "varastopaikka_aineistolla.php";
         require "muuvarastopaikka.php";
 
-        if ($toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
+        if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN' and $toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
           # P‰ivitet‰‰n oletuspaikka
           $tee = "MUUTA";
           $oletus = $minne;
@@ -311,21 +335,6 @@ if ($tee == "") {
 
   echo "</select></td><td class='back'><font class='error'>{$virheviesti}</font></td></tr>";
 
-  if ($toim == "FOO") {
-
-    $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
-
-    echo "<tr>";
-    echo "<th>",t("Kohdepaikasta tehd‰‰n oletuspaikka"),"</th>";
-    echo "<td>";
-    echo "<select name='kohdepaikasta_oletuspaikka'>";
-    echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='x' {$sel}>",t("Kyll‰"),"</option>";
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-  }
-
   echo "</table>
       <br><input type = 'submit' value = '".t("Hae")."'>
       </form>";
@@ -356,8 +365,24 @@ if ($tee == 'VALITSE_TIEDOSTO' and $varasto_valinta != '') {
       <input type='hidden' name='lopetus' value='{$ahlopetus}'>
       <input type='hidden' name='varasto_valinta' value='$varasto_valinta'>
       <input type='hidden' name='tee' value='AJA'>
-      <table>
-      <tr><th>".t("Valitse tiedosto").":</th>
+      <table>";
+
+  if ($toim == "FOO") {
+
+    $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
+
+    echo "<tr>";
+    echo "<th>",t("Kohdepaikasta tehd‰‰n oletuspaikka"),"</th>";
+    echo "<td>";
+    echo "<select name='kohdepaikasta_oletuspaikka'>";
+    echo "<option value=''>",t("Ei"),"</option>";
+    echo "<option value='x' {$sel}>",t("Kyll‰"),"</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "<tr><th>".t("Valitse tiedosto").":</th>
       <td><input name='userfile' type='file'></td>
       </tr>
       </table>

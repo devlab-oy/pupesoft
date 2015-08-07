@@ -353,7 +353,7 @@ function hylky_lusaus_parametrit($parametrit) {
             JOIN lasku
               ON lasku.yhtio = lasku.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila = 'T'
+              AND lasku.alatila IN ('T','X')
               AND lasku.tunnus = tilausrivi.otunnus
             JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto

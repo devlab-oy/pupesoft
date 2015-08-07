@@ -236,6 +236,24 @@ if ($tee == "AJA") {
         $tee = "N";
         $kutsuja = "varastopaikka_aineistolla.php";
         require "muuvarastopaikka.php";
+
+        if ($toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
+          # P‰ivitet‰‰n oletuspaikka
+          $tee = "MUUTA";
+          $oletus = $minne;
+
+
+          $qry = "SELECT *
+                  FROM tuotepaikat use index (tuote_index)
+                  WHERE tuoteno = '{$tuoteno}'
+                  AND yhtio     = '{$kukarow['yhtio']}'
+                  AND tunnus    = '$mista'";
+          $mista_chk_res = pupe_query($qry);
+          $mista_chk_row = mysql_fetch_assoc($mista_chk_res);
+
+          # Siirret‰‰n h‰lytysrajat
+          $halyraja2[$minne] = $mista_chk_row['halytysraja'];
+        }
       }
 
       // Merkataan viel‰ l‰hdevarastopaikka poistettavaksi jos se ei ole oletuspaikka

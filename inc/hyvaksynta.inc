@@ -178,16 +178,25 @@ if ($tee == 'T') {
       $erotin = 'td';
     }
 
-    echo "<$erotin>".tv1dateconv($trow["tapvm"])."</$erotin>";
+    echo "<$erotin>";
+    echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["tapvm"])."</span>";
+    echo tv1dateconv($trow["tapvm"]);
+    echo "</$erotin>";
 
     if ($trow["kapvm"] != "0000-00-00") {
-      echo "<$erotin>".tv1dateconv($trow["kapvm"])."</$erotin>";
+      echo "<$erotin>";
+      echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["kapvm"])."</span>";
+      echo tv1dateconv($trow["kapvm"]);
+      echo "</$erotin>";
     }
     else {
       echo "<$erotin></$erotin>";
     }
 
-    echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
+    echo "<$erotin>";
+    echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["erpcm"])."</span>";
+    echo tv1dateconv($trow["erpcm"]);
+    echo "</$erotin>";
     echo "<$erotin>$trow[nimi]</$erotin>";
     echo "<$erotin>$trow[postitp]</$erotin>";
     echo "<$erotin>$trow[laskunro]</$erotin>";

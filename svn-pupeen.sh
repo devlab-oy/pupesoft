@@ -282,7 +282,6 @@ if [[ $? -eq 0 ]]; then
 elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
 else
-  echo
   echo "HUOM: Tietokantamuutosten haku vaatii Pupenextin päivittämisen!"
   echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
   read jatketaanko
@@ -349,7 +348,6 @@ echo "${muutokset}" | grep 'down'
 if [[ $? -eq 1 ]]; then
   echo "${green}Tietokanta ajantasalla, ei päivitettävää!${normal}"
 else
-  echo
   echo "${green}Tarvittavat tietokantamuutokset: ${normal}"
 
   echo "${muutokset}"
@@ -360,7 +358,6 @@ else
   elif [[ "${jatketaan}" = "auto" ]]; then
     jatketaanko="k"
   else
-    echo
     echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
     read jatketaanko
   fi

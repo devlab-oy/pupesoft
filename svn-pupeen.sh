@@ -274,7 +274,7 @@ echo
 export RAILS_ENV=${environment}
 
 # Katsotaan onko git hakemistossa muutoksia
-git_repo_uptodate ${pupedir} master
+git_repo_uptodate ${pupenextdir} master
 
 # Skipataan, jos ei ole muutoksia
 if [[ $? -eq 0 ]]; then

@@ -1000,7 +1000,7 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
                    FROM lasku
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND lasku.tila = 'W'
-                   AND lasku.alatila IN ('A', 'B', 'D')
+                   AND lasku.alatila = 'U'
                    AND asiakkaan_tilausnumero = '{$konttiviite}'";
     $laskuresult = pupe_query($laskuquery);
     $laskurow = mysql_fetch_assoc($laskuresult);

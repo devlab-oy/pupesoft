@@ -169,6 +169,9 @@ if [[ "${jatketaanko}" = "k" ]]; then
     pupebranch="master"
   fi
 
+  # Get old head
+  OLD_HEAD=$(cd "${pupedir}" && git rev-parse HEAD)
+
   cd ${pupedir} &&
   git fetch origin &&               # paivitetaan lokaali repo remoten tasolle
   git checkout . &&                 # revertataan kaikki local muutokset
@@ -198,7 +201,11 @@ if [[ "${jatketaanko}" = "k" ]]; then
     done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
   fi
 
-  if [[ $? -eq 0 ]]; then
+  # Ei päivitettävää
+  if [[ ${STATUS} -eq 0 && ${OLD_HEAD} = ${NEW_HEAD} ]]; then
+    echo
+    echo "${green}Pupesoft ajantasalla, ei päivitettävää!${normal}"
+  elif [[ ${STATUS} -eq 0 ]]; then
     echo
     echo "${green}Pupesoft päivitetty!${normal}"
   else
@@ -315,7 +322,7 @@ muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
 echo "${muutokset}" | grep 'down'
 
 if [[ $? -eq 1 ]]; then
-  echo "${green}Tietokanta ajantasalla!${normal}"
+  echo "${green}Tietokanta ajantasalla, ei päivitettävää!${normal}"
 else
   echo
   echo "${green}Tarvittavat muutokset: ${normal}"

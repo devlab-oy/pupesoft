@@ -30,7 +30,8 @@ echo
 command -v git > /dev/null
 
 if [[ $? != 0 ]]; then
-  echo "${red}Install git first!${normal}"
+  echo "${red}Git tulee olla asennettuna!${normal}"
+  echo
   exit
 fi
 
@@ -40,11 +41,39 @@ if [[ "$(whoami)" = "root" ]]; then
   exit
 fi
 
+# Make sure we have rbenv environment
+if [[ -d ~/.rbenv ]]; then
+  # Add rbenv to path
+  export PATH="$HOME/.rbenv/bin:$PATH"
+
+  # Load rbenv
+  eval "$(rbenv init -)"
+else
+  echo "${red}RBenv tulee olla asennettuna!${normal}"
+  echo
+  exit
+fi
+
+# Check we have Bundler
+command -v bundle > /dev/null
+
+if [[ $? != 0 ]]; then
+  echo "${red}Bundler tulee olla asennettuna!${normal}"
+  echo
+  exit
+fi
+
 pupedir=$(dirname ${0})
 pupenextdir=${pupedir}/pupenext
 salasanat=${pupedir}/inc/salasanat.php
 environment="production"
 jatketaan=
+
+if [[ ! -d ${pupenextdir} ]]; then
+  echo "${red}Pupenext asennusta ei löytynyt!${normal}"
+  echo
+  exit
+fi
 
 if [[ ! -f ${salasanat} ]]; then
   echo "${red}Salasanat.php ei löytynyt!${normal}"
@@ -197,23 +226,6 @@ cd ${pupenextdir}
 
 # Setataan rails env
 export RAILS_ENV=${environment}
-
-# Make sure we have rbenv environment
-if [[ -d ~/.rbenv ]]; then
-  # Add rbenv to path
-  export PATH="$HOME/.rbenv/bin:$PATH"
-
-  # Load rbenv
-  eval "$(rbenv init -)"
-fi
-
-# Check we have Bundler
-command -v bundle > /dev/null
-
-if [[ $? != 0 ]]; then
-  echo "${red}Install bundle first!${normal}"
-  exit
-fi
 
 # Get required directories
 current_dir=$(pwd)

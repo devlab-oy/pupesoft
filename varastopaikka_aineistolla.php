@@ -242,7 +242,6 @@ if ($tee == "AJA") {
           $tee = "MUUTA";
           $oletus = $minne;
 
-
           $qry = "SELECT *
                   FROM tuotepaikat use index (tuote_index)
                   WHERE tuoteno = '{$tuoteno}'
@@ -253,6 +252,10 @@ if ($tee == "AJA") {
 
           # Siirret‰‰n h‰lytysrajat
           $halyraja2[$minne] = $mista_chk_row['halytysraja'];
+          $tilausmaara2[$minne] = $mista_chk_row['tilausmaara'];
+
+          $kutsuja = "varastopaikka_aineistolla.php";
+          require "muuvarastopaikka.php";
         }
       }
 

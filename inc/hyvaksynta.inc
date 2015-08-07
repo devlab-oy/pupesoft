@@ -178,14 +178,12 @@ if ($tee == 'T') {
       $erotin = 'td';
     }
 
-    echo "<$erotin>";
-    echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["tapvm"])."</span>";
+    echo "<$erotin class='ptop' align='right' nowrap>".pupe_DataTablesEchoSort($trow['tapvm']);
     echo tv1dateconv($trow["tapvm"]);
     echo "</$erotin>";
 
     if ($trow["kapvm"] != "0000-00-00") {
-      echo "<$erotin>";
-      echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["kapvm"])."</span>";
+      echo "<$erotin class='ptop' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
       echo tv1dateconv($trow["kapvm"]);
       echo "</$erotin>";
     }
@@ -193,10 +191,8 @@ if ($tee == 'T') {
       echo "<$erotin></$erotin>";
     }
 
-    echo "<$erotin>";
-    echo "<span style='visibility:hidden;'>".str_replace("-", "", $trow["erpcm"])."</span>";
+    echo "<$erotin class='ptop' align='right' nowrap>".pupe_DataTablesEchoSort($trow['erpcm']);
     echo tv1dateconv($trow["erpcm"]);
-    echo "</$erotin>";
     echo "<$erotin>$trow[nimi]</$erotin>";
     echo "<$erotin>$trow[postitp]</$erotin>";
     echo "<$erotin>$trow[laskunro]</$erotin>";

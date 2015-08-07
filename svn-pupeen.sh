@@ -293,7 +293,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
 
     # Restart Resque workers
     bundle exec rake resque:stop_workers &&
-    TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work &&
+    TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
 
     # Tehdään requesti Rails appiin, jotta latautuu valmiiksi seuraavaa requestiä varten
     # curl --silent --connect-timeout 1 --insecure "https://$(hostname -I)/pupenext" > /dev/null &&
@@ -302,7 +302,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     if [[ ${STATUS} -eq 0 ]]; then
       echo "${green}Pupenext päivitetty!${normal}"
     else
-      echo "${red}Rails päivitys/uudelleenkäynnistys epäonnistui!${normal}"
+      echo "${red}Pupenext päivitys epäonnistui!${normal}"
     fi
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"

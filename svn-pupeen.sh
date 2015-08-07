@@ -14,6 +14,13 @@ function parse_salasanat {
 #### Preparation ###################################################################################
 ####################################################################################################
 
+# Get absolute path of pupesoft install dir
+pupedir=$(cd $(dirname ${0}) && echo $(pwd)/$line)
+pupenextdir=${pupedir}/pupenext
+salasanat=${pupedir}/inc/salasanat.php
+environment="production"
+jatketaan=
+bundle=false
 hosti=$(hostname)
 underline=$(tput -Txterm-color smul)
 nounderline=$(tput -Txterm-color rmul)
@@ -63,14 +70,6 @@ if [[ $? != 0 ]]; then
   exit
 fi
 
-# Get absolute path of pupesoft install dir
-pupedir=$(cd $(dirname ${0}) && echo $(pwd)/$line)
-pupenextdir=${pupedir}/pupenext
-salasanat=${pupedir}/inc/salasanat.php
-environment="production"
-jatketaan=
-bundle=false
-
 if [[ ! -d ${pupenextdir} ]]; then
   echo "${red}Pupenext asennusta ei löytynyt!${normal}"
   echo
@@ -100,7 +99,6 @@ fi
 
 # Loopataan kaikki argumentit, jos ollaan yliajettu joku
 while [[ "$1" != "" ]]; do
-
   case $1 in
     -h | --host )
       shift
@@ -156,7 +154,7 @@ fi
 
 # Do git fetch to get status from origin
 cd ${pupedir}
-git fetch origin > /dev/null
+git fetch origin &> /dev/null
 
 # Onko spessubranchi käytössä?
 if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
@@ -242,7 +240,7 @@ export RAILS_ENV=${environment}
 
 # Do git fetch to get status from origin
 cd ${pupenextdir}
-git fetch origin > /dev/null
+git fetch origin &> /dev/null
 
 # Get latest commit from local branch
 OLD_HEAD=$(cd "${pupenextdir}" && git log -n 1 master --pretty=format:"%H")

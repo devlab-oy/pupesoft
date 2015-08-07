@@ -154,9 +154,7 @@ fi
 
 if [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
-  echo
 else
-  echo
   echo -n "${white}Päivitetäänkö Pupesoft (k/e)? ${normal}"
   read jatketaanko
 fi
@@ -222,20 +220,15 @@ fi
 #### Pupenext ######################################################################################
 ####################################################################################################
 
-cd ${pupenextdir}
-
 # Setataan rails env
 export RAILS_ENV=${environment}
-
-# Get required directories
-current_dir=$(pwd)
-dirname=$(dirname $0)
-app_dir=$(cd "${dirname}" && pwd)
 
 if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
 else
-  echo -n "${white}Päivitetäänkö Pupenext (Tietokantamuutosten haku vaatii Pupenextin päivittämisen) (k/e)? ${normal}"
+  echo
+  echo "HUOM: Tietokantamuutosten haku vaatii Pupenextin päivittämisen!"
+  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
   read jatketaanko
 fi
 
@@ -246,11 +239,11 @@ if [[ "${jatketaanko}" = "k" ]]; then
     OLD_HEAD=0
   else
     # Get old head
-    OLD_HEAD=$(cd "${app_dir}" && git rev-parse HEAD)
+    OLD_HEAD=$(cd "${pupenextdir}" && git rev-parse HEAD)
   fi
 
   # Change to app directory
-  cd "${app_dir}" &&
+  cd "${pupenextdir}" &&
 
   # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
   if [[ ${bundle} = true ]]; then
@@ -272,8 +265,8 @@ if [[ "${jatketaanko}" = "k" ]]; then
   fi
 
   # Check tmp dir
-  if [ ! -d "${app_dir}/tmp" ]; then
-    mkdir "${app_dir}/tmp"
+  if [ ! -d "${pupenextdir}/tmp" ]; then
+    mkdir "${pupenextdir}/tmp"
   fi
 
   echo
@@ -288,8 +281,8 @@ if [[ "${jatketaanko}" = "k" ]]; then
     bundle exec rake assets:precompile &&
 
     # Restart rails App
-    touch "${app_dir}/tmp/restart.txt" &&
-    chmod 777 "${app_dir}/tmp/restart.txt" &&
+    touch "${pupenextdir}/tmp/restart.txt" &&
+    chmod 777 "${pupenextdir}/tmp/restart.txt" &&
 
     # Restart Resque workers
     bundle exec rake resque:stop_workers &&
@@ -315,6 +308,7 @@ fi
 #### Database changes ##############################################################################
 ####################################################################################################
 
+echo
 echo "Haetaan tietokantamuutokset.."
 
 muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
@@ -354,3 +348,4 @@ fi
 
 # Poistetaan rails env
 unset RAILS_ENV
+echo

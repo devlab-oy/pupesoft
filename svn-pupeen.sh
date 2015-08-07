@@ -14,15 +14,29 @@ function git_repo_uptodate {
   dir=$1
   branch=$2
 
-  # Do git fetch to get status from origin
-  cd ${dir}
-  git fetch origin &> /dev/null
+  if [[ ! -d ${dir} ]]; then
+    echo "${red}Hakemistoa '${dir}' ei löytynyt!${normal}"
+    echo
+    exit
+  fi
+
+  # Do git fetch to get current status from origin
+  cd "${dir}" && git fetch origin --quiet
+  EV1=$?
 
   # Get latest commit from local branch
-  OLD_HEAD=$(cd "${dir}" && git log -n 1 ${branch} --pretty=format:"%H")
+  OLD_HEAD=$(cd "${dir}" && git rev-parse --quiet --verify ${branch})
+  EV2=$?
 
   # Get latest commit from origin branch
-  NEWEST_HEAD=$(cd "${dir}" && git log -n 1 origin/${branch} --pretty=format:"%H")
+  NEWEST_HEAD=$(cd "${dir}" && git rev-parse --quiet --verify origin/${branch})
+  EV3=$?
+
+  if [[ ${EV1} -ne 0 || ${EV2} -ne 0 || ${EV3} -ne 0 ]]; then
+    echo "${red}Git branchiä ei '${branch}' löytynyt '${dir}' reposta!${normal}"
+    echo
+    exit
+  fi
 
   # Ei ole muutoksia
   if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then

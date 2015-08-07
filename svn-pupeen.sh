@@ -23,7 +23,7 @@ white=$(tput -Txterm-color setaf 7)
 normal=$(tput -Txterm-color sgr0)
 
 echo
-echo "${green}${underline}Tervetuloa ${hosti} Pupesoft-narupalveluun!${nounderline}${normal}"
+echo "${white}${underline}Tervetuloa ${hosti} Pupesoft-narupalveluun!${nounderline}${normal}"
 echo
 
 # Check we have Git
@@ -63,11 +63,13 @@ if [[ $? != 0 ]]; then
   exit
 fi
 
-pupedir=$(dirname ${0})
+# Get absolute path of pupesoft install dir
+pupedir=$(cd $(dirname ${0}) && echo $(pwd)/$line)
 pupenextdir=${pupedir}/pupenext
 salasanat=${pupedir}/inc/salasanat.php
 environment="production"
 jatketaan=
+bundle=false
 
 if [[ ! -d ${pupenextdir} ]]; then
   echo "${red}Pupenext asennusta ei löytynyt!${normal}"
@@ -152,7 +154,27 @@ fi
 #### Pupesoft ######################################################################################
 ####################################################################################################
 
-if [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
+# Do git fetch to get status from origin
+cd ${pupedir}
+git fetch origin > /dev/null
+
+# Onko spessubranchi käytössä?
+if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+  pupebranch=$(cat ${branchfile} | tr -d '\n')
+else
+  pupebranch="master"
+fi
+
+# Get latest commit from local branch
+OLD_HEAD=$(cd "${pupedir}" && git log -n 1 ${pupebranch} --pretty=format:"%H")
+
+# Get latest commit from origin branch
+NEWEST_HEAD=$(cd "${pupedir}" && git log -n 1 origin/${pupebranch} --pretty=format:"%H")
+
+# Skipataan, jos ei ole muutoksia
+if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then
+  jatketaanko="skip"
+elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
 else
   echo -n "${white}Päivitetäänkö Pupesoft (k/e)? ${normal}"
@@ -161,16 +183,6 @@ fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
   branchfile="/home/devlab/pupe_branch"
-
-  # Onko spessubranchi käytössä?
-  if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
-    pupebranch=$(cat ${branchfile} | tr -d '\n')
-  else
-    pupebranch="master"
-  fi
-
-  # Get old head
-  OLD_HEAD=$(cd "${pupedir}" && git rev-parse HEAD)
 
   cd ${pupedir} &&
   git fetch origin &&               # paivitetaan lokaali repo remoten tasolle
@@ -201,11 +213,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
   fi
 
-  # Ei päivitettävää
-  if [[ ${STATUS} -eq 0 && ${OLD_HEAD} = ${NEW_HEAD} ]]; then
-    echo
-    echo "${green}Pupesoft ajantasalla, ei päivitettävää!${normal}"
-  elif [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${STATUS} -eq 0 ]]; then
     echo
     echo "${green}Pupesoft päivitetty!${normal}"
   else
@@ -219,6 +227,8 @@ if [[ "${jatketaanko}" = "k" ]]; then
   if [[ -x "${nrfile}" ]]; then
     eval ${nrfile}
   fi
+elif [[ "${jatketaanko}" = "skip" ]]; then
+  echo "${green}Pupesoft ajantasalla, ei pävitettävää!${normal}"
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
@@ -230,7 +240,20 @@ fi
 # Setataan rails env
 export RAILS_ENV=${environment}
 
-if [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
+# Do git fetch to get status from origin
+cd ${pupenextdir}
+git fetch origin > /dev/null
+
+# Get latest commit from local branch
+OLD_HEAD=$(cd "${pupenextdir}" && git log -n 1 master --pretty=format:"%H")
+
+# Get latest commit from origin branch
+NEWEST_HEAD=$(cd "${pupenextdir}" && git log -n 1 origin/master --pretty=format:"%H")
+
+# Skipataan, jos ei ole muutoksia
+if [[ ${OLD_HEAD} = ${NEWEST_HEAD} ]]; then
+  jatketaanko="skip"
+elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
 else
   echo
@@ -240,36 +263,16 @@ else
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
-
-  # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
-  if [[ ${bundle} = true ]]; then
-    OLD_HEAD=0
-  else
-    # Get old head
-    OLD_HEAD=$(cd "${pupenextdir}" && git rev-parse HEAD)
-  fi
-
-  # Change to app directory
+  # Update app with git
   cd "${pupenextdir}" &&
+  git fetch origin &&
+  git checkout . &&
+  git checkout master &&
+  git pull origin master &&
+  git remote prune origin
 
-  # Jos bundle on annettu parametreissä, niin bundlataan aina eikä tarvitse tsekata git-juttuja
-  if [[ ${bundle} = true ]]; then
-    STATUS=0
-    NEW_HEAD=1
-  else
-    # Update app with git
-    git fetch origin &&
-    git checkout . &&
-    git checkout master &&
-    git pull origin master &&
-    git remote prune origin
-
-    # Save git exit status
-    STATUS=$?
-
-    # Get new head
-    NEW_HEAD=$(git rev-parse HEAD)
-  fi
+  # Save git exit status
+  STATUS=$?
 
   # Check tmp dir
   if [ ! -d "${pupenextdir}/tmp" ]; then
@@ -278,35 +281,39 @@ if [[ "${jatketaanko}" = "k" ]]; then
 
   echo
 
-  # Ei päivitettävää
-  if [[ ${STATUS} -eq 0 && ${OLD_HEAD} = ${NEW_HEAD} ]]; then
-    echo "${green}Pupenext ajantasalla, ei päivitettävää!${normal}"
-  elif [[ ${STATUS} -eq 0 ]]; then
-    # Run bundle + rake
-    bundle --quiet &&
-    bundle exec rake css:write &&
-    bundle exec rake assets:precompile &&
-
-    # Restart rails App
-    touch "${pupenextdir}/tmp/restart.txt" &&
-    chmod 777 "${pupenextdir}/tmp/restart.txt" &&
-
-    # Restart Resque workers
-    bundle exec rake resque:stop_workers &&
-    TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
-
-    # Tehdään requesti Rails appiin, jotta latautuu valmiiksi seuraavaa requestiä varten
-    # curl --silent --connect-timeout 1 --insecure "https://$(hostname -I)/pupenext" > /dev/null &&
-    # curl --silent --connect-timeout 1 --insecure "https://$(hostname)/pupenext" > /dev/null
-
-    if [[ ${STATUS} -eq 0 ]]; then
-      echo "${green}Pupenext päivitetty!${normal}"
-    else
-      echo "${red}Pupenext päivitys epäonnistui!${normal}"
-    fi
+  # Päivitys onnistui, bundlataan
+  if [[ ${STATUS} -eq 0 ]]; then
+    bundle=true
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"
   fi
+fi
+
+# Run bundle + rake
+if [[ ${bundle} = true ]]; then
+  cd "${pupenextdir}" &&
+  bundle --quiet &&
+  bundle exec rake css:write &&
+  bundle exec rake assets:precompile &&
+
+  # Restart rails App
+  touch "${pupenextdir}/tmp/restart.txt" &&
+  chmod 777 "${pupenextdir}/tmp/restart.txt" &&
+
+  # Restart Resque workers
+  bundle exec rake resque:stop_workers &&
+  TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
+
+  # Save bundle/rake exit status
+  STATUS=$?
+
+  if [[ ${STATUS} -eq 0 ]]; then
+    echo "${green}Pupenext päivitetty!${normal}"
+  else
+    echo "${red}Pupenext päivitys epäonnistui!${normal}"
+  fi
+elif [[ "${jatketaanko}" = "skip" ]]; then
+  echo "${green}Pupenext ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${red}Pupenextiä ei päivitetty!${normal}"
 fi
@@ -315,9 +322,7 @@ fi
 #### Database changes ##############################################################################
 ####################################################################################################
 
-echo
-echo "Haetaan tietokantamuutokset.."
-
+cd "${pupenextdir}"
 muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
 echo "${muutokset}" | grep 'down'
 
@@ -325,7 +330,7 @@ if [[ $? -eq 1 ]]; then
   echo "${green}Tietokanta ajantasalla, ei päivitettävää!${normal}"
 else
   echo
-  echo "${green}Tarvittavat muutokset: ${normal}"
+  echo "${green}Tarvittavat tietokantamuutokset: ${normal}"
 
   echo "${muutokset}"
   echo

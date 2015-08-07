@@ -40,6 +40,7 @@ function git_repo_uptodate {
 pupedir=$(cd $(dirname ${0}) && echo $(pwd)/$line)
 pupenextdir=${pupedir}/pupenext
 salasanat=${pupedir}/inc/salasanat.php
+branchfile="/home/devlab/pupe_branch"
 environment="production"
 jatketaan=
 bundle=false
@@ -200,10 +201,8 @@ else
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
-  branchfile="/home/devlab/pupe_branch"
-
+  # Update app with git
   cd ${pupedir} &&
-  git fetch origin &&               # paivitetaan lokaali repo remoten tasolle
   git checkout . &&                 # revertataan kaikki local muutokset
   git checkout ${pupebranch} &&     # varmistetaan, etta on master branchi kaytossa
   git pull origin ${pupebranch} &&  # paivitetaan master branchi
@@ -212,15 +211,15 @@ if [[ "${jatketaanko}" = "k" ]]; then
   # Save git exit status
   STATUS=$?
 
-  # Get new head
-  NEW_HEAD=$(git rev-parse HEAD)
-
   if [[ ${STATUS} -eq 0 ]]; then
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
       USER_IP=$(who -m am i|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
     else
-      USER_IP=localhost
+      USER_IP='localhost'
     fi
+
+    # Get new head
+    NEW_HEAD=$(git rev-parse HEAD)
 
     ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', date=now()" &> /dev/null
 
@@ -276,7 +275,6 @@ fi
 if [[ "${jatketaanko}" = "k" ]]; then
   # Update app with git
   cd "${pupenextdir}" &&
-  git fetch origin &&
   git checkout . &&
   git checkout master &&
   git pull origin master &&

@@ -290,6 +290,9 @@ if ($tee == "AJA") {
 
           $kutsuja = "varastopaikka_aineistolla.php";
           require "muuvarastopaikka.php";
+          
+          unset($halyraja2);
+          unset($tilausmaara2);
         }
       }
 
@@ -382,7 +385,7 @@ if ($tee == 'VALITSE_TIEDOSTO' and $varasto_valinta != '') {
     $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
 
     echo "<tr>";
-    echo "<th>",t("Kohdepaikasta tehd‰‰n oletuspaikka"),"</th>";
+    echo "<th>",t("Kohdepaikasta tehd‰‰n oletuspaikka"),"<br>(",t("Siirret‰‰n samalla avoimet tilausrivit uudelle oletuspaikalle"),")</th>";
     echo "<td>";
     echo "<select name='kohdepaikasta_oletuspaikka'>";
     echo "<option value=''>",t("Ei"),"</option>";

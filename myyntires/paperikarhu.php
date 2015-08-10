@@ -1057,12 +1057,12 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
 
   if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
 
-    if (!empty($yhtiorow['maksukehotus_email'])) {
+    if (!empty($yhtiorow['maksukehotus_cc_email'])) {
       $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
       $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
       $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
       $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
-      $sahkoposti_cc = $yhtiorow['maksukehotus_email'];
+      $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
     }
     else {
       $newfilename = $pdffilenimi;

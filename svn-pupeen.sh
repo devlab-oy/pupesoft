@@ -343,13 +343,13 @@ echo
 
 cd "${pupenextdir}"
 muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
-echo "${muutokset}" | grep 'down'
+echo "${muutokset}" | grep 'down' &> /dev/null
 
 if [[ $? -eq 1 ]]; then
   echo "${green}Tietokanta ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${green}Tarvittavat tietokantamuutokset: ${normal}"
-
+  echo
   echo "${muutokset}"
   echo
 
@@ -360,6 +360,7 @@ else
   else
     echo -n "${white}Tehdäänkö tietokantamuutokset (k/e)? ${normal}"
     read jatketaanko
+    echo
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then

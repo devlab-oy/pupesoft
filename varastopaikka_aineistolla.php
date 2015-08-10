@@ -8,9 +8,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "varastopaikka_aineistolla.php")  !== FALSE)
 if (!isset($tee) or (isset($varasto_valinta) and $varasto_valinta == '')) $tee = "";
 if (!isset($virheviesti)) $virheviesti = "";
 
+if (!isset($toim)) {
+  $toim = "";
+}
+else {
+  $toim = strtolower($toim);
+}
+
 if ($tee == '' and !isset($varasto_valinta)) $varasto_valinta = $kukarow['oletus_varasto'];
 
-if ($toim == "FOO") {
+if ($toim == "oletuspaikka") {
   if (!isset($kohdepaikasta_oletuspaikka)) {
     $kohdepaikasta_oletuspaikka = 'selected';
   }
@@ -42,6 +49,9 @@ if ($tee == "AJA") {
       }
 
       $kaikki_tiedostorivit = array_filter($kaikki_tiedostorivit);
+
+      reset($kaikki_tiedostorivit);
+      unset($tiedr);
 
       # Etsit‰‰n tuoteperheit‰ joilla on runko-tuotteita
       foreach ($kaikki_tiedostorivit as $rowkey => $tiedr) {
@@ -135,7 +145,7 @@ if ($tee == "AJA") {
           continue;
         }
 
-        if ($toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
+        if ($toim == "oletuspaikka" and !empty($kohdepaikasta_oletuspaikka)) {
 
           if (empty($tvrow['oletus'])) {
             echo "<font class='error'>";
@@ -261,7 +271,7 @@ if ($tee == "AJA") {
         $kutsuja = "varastopaikka_aineistolla.php";
         require "muuvarastopaikka.php";
 
-        if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN' and $toim == "FOO" and !empty($kohdepaikasta_oletuspaikka)) {
+        if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN' and $toim == "oletuspaikka" and !empty($kohdepaikasta_oletuspaikka)) {
           # P‰ivitet‰‰n oletuspaikka
           $tee = "MUUTA";
           $oletus = $minne;
@@ -367,7 +377,7 @@ if ($tee == 'VALITSE_TIEDOSTO' and $varasto_valinta != '') {
       <input type='hidden' name='tee' value='AJA'>
       <table>";
 
-  if ($toim == "FOO") {
+  if ($toim == "oletuspaikka") {
 
     $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
 

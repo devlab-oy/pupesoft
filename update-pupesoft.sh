@@ -353,7 +353,7 @@ echo
 ####################################################################################################
 
 cd "${pupenextdir}"
-muutokset=$(bundle exec rake db:migrate:status | grep 'down\|Migration ID')
+muutokset=$(cd "${pupenextdir}" && bundle exec rake db:migrate:status | grep 'down\|Migration ID')
 echo "${muutokset}" | grep 'down' &> /dev/null
 
 if [[ $? -eq 1 ]]; then

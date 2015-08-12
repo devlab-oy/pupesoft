@@ -308,7 +308,7 @@ fi
 
 # Jos meillä on todella vanha Linux, pitää mennä vanhalla therubyracer versiolla
 if [[ -f "/home/devlab/legacy_mode" ]]; then
-  sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "${pupenextdir}/Gemfile"
+  sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "/home/devlab/pupenext/Gemfile"
 fi
 
 # Run bundle + rake

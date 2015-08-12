@@ -306,13 +306,13 @@ if [[ "${jatketaanko}" = "k" ]]; then
   fi
 fi
 
+# Jos meillä on todella vanha Linux, pitää mennä vanhalla therubyracer versiolla
+if [[ -f "/home/devlab/legacy_mode" ]]; then
+  sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "${pupenextdir}/Gemfile"
+fi
+
 # Run bundle + rake
 if [[ ${bundle} = true ]]; then
-  # Jos meillä on todella vanha Linux, pitää mennä vanhalla therubyracer versiolla
-  if [[ -f "/home/devlab/legacy_mode" ]]; then
-    sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "${pupenextdir}/Gemfile"
-  fi
-
   cd "${pupenextdir}" &&
   bundle --quiet &&
   bundle exec rake css:write &&

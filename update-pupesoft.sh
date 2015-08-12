@@ -319,6 +319,16 @@ fi
 
 # Run bundle + rake
 if [[ ${bundle} = true ]]; then
+  # Katsotaan onko meillä Gemfile.lockissa mainittu bundler versio
+  bundled_with=$(tail -1 ${pupenextdir}/Gemfile.lock | egrep -o '[0-9].+$')
+  bundler_version=$(bundle -v | egrep -o '[0-9].+$')
+
+  # Päivitetään bundler oikeaan versioon
+  if [[ -n "${bundled_with}" && "${bundler_version}" != "${bundled_with}" ]]; then
+    gem install bundler -v ${bundled_with}
+  fi
+
+  # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
   cd "${pupenextdir}" &&
   bundle --quiet &&
   bundle exec rake css:write &&

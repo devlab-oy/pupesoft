@@ -51,8 +51,8 @@ function git_repo_uptodate {
 ####################################################################################################
 
 # Get absolute path of pupesoft install dir
-pupedir=$(cd $(dirname ${0}) && echo $(pwd)/$line)
-pupenextdir=${pupedir}/pupenext
+pupedir=$(cd $(dirname ${0}) && echo $(pwd))
+pupenextdir=/home/devlab/pupenext
 salasanat=${pupedir}/inc/salasanat.php
 branchfile="/home/devlab/pupe_branch"
 environment="production"
@@ -65,6 +65,12 @@ green=$(tput -Txterm-color setaf 2)
 red=$(tput -Txterm-color setaf 1)
 white=$(tput -Txterm-color setaf 7)
 normal=$(tput -Txterm-color sgr0)
+
+# Jos pupenext ei ole /home/devlab/pupenext hakemistossa,
+# tulee poikkeava polku antaa PUPENEXT_DIR environment muuttujassa
+if [[ -n "${PUPENEXT_DIR}" ]]; then
+  pupenextdir=${PUPENEXT_DIR}
+fi
 
 echo
 echo "${white}${underline}Tervetuloa ${hosti} Pupesoft-narupalveluun!${nounderline}${normal}"
@@ -308,7 +314,7 @@ fi
 
 # Jos meillä on todella vanha Linux, pitää mennä vanhalla therubyracer versiolla
 if [[ -f "/home/devlab/legacy_mode" ]]; then
-  sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "/home/devlab/pupenext/Gemfile"
+  sed -i "s/ *gem 'therubyracer'$/  gem 'therubyracer', '~> 0.11.0'/" "${pupenextdir}/Gemfile"
 fi
 
 # Run bundle + rake

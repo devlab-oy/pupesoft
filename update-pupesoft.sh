@@ -21,7 +21,7 @@ function git_repo_uptodate {
   fi
 
   # Do git fetch to get current status from origin
-  cd "${dir}" && git fetch origin --quiet
+  cd "${dir}" && git fetch origin --quiet 2>&1 > /dev/null
   EV1=$?
 
   # Get latest commit from local branch
@@ -216,6 +216,8 @@ if [[ $? -eq 0 ]]; then
 elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
 else
+  echo "${green}Uudempi Pupesoft versio saatavilla!${normal}"
+  echo
   echo -n "${white}Päivitetäänkö Pupesoft (k/e)? ${normal}"
   read jatketaanko
 fi
@@ -288,7 +290,9 @@ if [[ $? -eq 0 ]]; then
 elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
   jatketaanko="k"
 else
-  echo "HUOM: Tietokantamuutosten haku vaatii Pupenextin päivittämisen!"
+  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
+  echo "HUOM: Tietokantamuutosten tarkistus vaatii Pupenextin päivittämisen!"
+  echo
   echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
   read jatketaanko
 fi

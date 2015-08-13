@@ -275,8 +275,8 @@ while ($row = mysql_fetch_array($res)) {
     'kuluprosentti'        => $row['kuluprosentti'],
     'ean'                  => $row["eankoodi"],
     'osasto'               => $row["osasto"],
-    'try'                  => $row["try"],
-    'try_nimi'             => $row["try_nimi"],
+    'try'                  => 'Käsiteltävät',#$row["try"],
+    'try_nimi'             => 'Käsiteltävät',#$row["try_nimi"],
     'alv'                  => $row["alv"],
     'nakyvyys'             => $row["nakyvyys"],
     'nimi_swe'             => $row["nimi_swe"],
@@ -295,6 +295,7 @@ while ($row = mysql_fetch_array($res)) {
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
+/*
 if ($verkkokauppatyyppi == 'magento') {
 
   echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
@@ -628,7 +629,7 @@ while ($row = mysql_fetch_array($res)) {
     'hinta_veroton'      => $hinta_veroton,
   );
 }
-
+*/
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
 
 // Magentoon vain tuotteet joiden näkyvyys != ''
@@ -811,7 +812,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       'lyhytkuvaus'           => $alirow["lyhytkuvaus"],
       'tuotemassa'            => $alirow["tuotemassa"],
       'nakyvyys'              => $alirow["nakyvyys"],
-      'try_nimi'              => $alirow["try_nimi"],
+      'try_nimi'              => 'Käsiteltävät',#$alirow["try_nimi"],
       'nimi_swe'              => $alirow["nimi_swe"],
       'nimi_eng'              => $alirow["nimi_eng"],
       'campaign_code'         => $alirow["campaign_code"],
@@ -896,14 +897,14 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   }
-
+  /*
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
     $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
   }
-
+   */
   // Tuotteet (Simple)
   if (count($dnstuote) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
@@ -917,7 +918,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (configurable)\n";
   }
-
+  /*
   // Saldot
   if (count($dnstock) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
@@ -939,7 +940,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
   }
-
+  */
   $tuote_export_error_count = $magento_client->getErrorCount();
 
   if ($tuote_export_error_count != 0) {
@@ -950,7 +951,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   $time = round($time_end - $time_start);
 
   echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
-}
+}/*
 elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 
   if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
@@ -992,7 +993,7 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
     require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
   }
 }
-
+*/
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
 unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");

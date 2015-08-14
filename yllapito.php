@@ -19,16 +19,18 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+// Pupenext ylläpitonakymät aakkosjärjestyksessä
 $psx_ohjelmat = array(
-  "valuu" => "{$palvelin2}pupenext/currencies",
+  "kassalipas"        => "{$palvelin2}pupenext/cash_registers",
+  "kirjoittimet"      => "{$palvelin2}pupenext/printers",
+  "kustannuspaikka"   => "{$palvelin2}pupenext/qualifiers",
+  "maksuehto"         => "{$palvelin2}pupenext/terms_of_payments",
+  "pakkaamo"          => "{$palvelin2}pupenext/packing_areas",
   "rahdinkuljettajat" => "{$palvelin2}pupenext/carriers",
-  "kassalipas" => "{$palvelin2}pupenext/cash_registers",
-  "tili" => "{$palvelin2}pupenext/accounts",
-  "kustannuspaikka" => "{$palvelin2}pupenext/qualifiers",
-  "taso" => "{$palvelin2}pupenext/sum_levels",
-  "maksuehto" => "{$palvelin2}pupenext/terms_of_payments",
-  "kirjoittimet" => "{$palvelin2}pupenext/printers",
-  "tilikaudet" => "{$palvelin2}pupenext/fiscal_years",
+  "taso"              => "{$palvelin2}pupenext/sum_levels",
+  "tili"              => "{$palvelin2}pupenext/accounts",
+  "tilikaudet"        => "{$palvelin2}pupenext/fiscal_years",
+  "valuu"             => "{$palvelin2}pupenext/currencies",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -2277,7 +2279,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "vaihtoehtoiset_verkkolaskutunnukset" or
     $toim == "toimittajahinta" or
     $toim == "varaston_tulostimet" or
-    $toim == "pakkaamo" or
     $toim == "asiakaskommentti" or
     $toim == "yhteyshenkilo" or
     $toim == "autodata_tuote" or

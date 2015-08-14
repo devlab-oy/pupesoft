@@ -5,39 +5,54 @@ $useslave = 1;
 
 include '../inc/parametrit.inc';
 
+$nimi   = (isset($_REQUEST['nimi'])) ? $_REQUEST['nimi'] : '';
+$rekno  = (isset($_REQUEST['rekno'])) ? $_REQUEST['rekno'] : '';
+$eid    = (isset($_REQUEST['eid'])) ? $_REQUEST['eid'] : '';
+$asno   = (isset($_REQUEST['asno'])) ? $_REQUEST['asno'] : '';
+$valmno = (isset($_REQUEST['valmno'])) ? $_REQUEST['valmno'] : '';
+
+if (isset($_REQUEST['selected'])) {
+  $nimiselect   = (array_search('nimisearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $reknoselect  = (array_search('reknosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $eidselect    = (array_search('eidsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $asnoselect   = (array_search('asnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $valmnoselect = (array_search('valmnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $alkupvmselect  = (array_search('alkupvmsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $loppupvmselect = (array_search('loppupvmsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+}
+
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
 if ($tee == 'etsi') {
   echo "<table>";
+  $hakuehdot = '';
 
-  if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
-    $muu1 = "lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= ";
-    $muu2 = "$vvl-$kkl-$ppl";
+  if ($vva != '' and $kka != '' and $ppa != '' and $alkupvmselect !='') {
+    $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa' "; 
+  }
+  
+  if ($vvl != '' and $kkl != '' and $ppl != '' and $loppupvmselect != '') {
+    $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl' ";    
   }
 
-  if ($nimi != '') {
-    $muu1 = "lasku.nimi LIKE ";
-    $muu2 = "%".$nimi."%";
+  if ($nimi != '' and $nimiselect != '') {
+    $hakuehdot .= " AND lasku.nimi LIKE '%".$nimi."%'";
   }
 
-  if ($rekno != '') {
-    $muu1 = "tyomaarays.rekno LIKE ";
-    $muu2 = "%".$rekno."%";
+  if ($rekno != '' and $reknoselect != '') {
+    $hakuehdot .= " AND tyomaarays.rekno LIKE '%".$rekno."%'";
   }
 
-  if ($eid != '') {
-    $muu1 = "lasku.tunnus = ";
-    $muu2 = $eid;
+  if ($eid != '' and $eidselect != '') {
+    $hakuehdot .= " AND lasku.tunnus = '$eid'";
   }
 
-  if ($asno != '') {
-    $muu1 = "asiakas.asiakasnro = ";
-    $muu2 = $asno;
+  if ($asno != '' and $asnoselect != '') {
+    $hakuehdot .= " AND asiakas.asiakasnro = '$asno'";
   }
 
-  if ($valmno != '') {
-    $muu1 = "tyomaarays.valmnro LIKE ";
-    $muu2 = "%".$valmno."%";
+  if ($valmno != '' and $valmnoselect != '') {
+    $hakuehdot .= " AND tyomaarays.valmnro LIKE '%".$valmno."%'";
   }
 
   $squery = "SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
@@ -47,7 +62,7 @@ if ($tee == 'etsi') {
              WHERE lasku.yhtio      = '$kukarow[yhtio]'
              and lasku.tila         in ('A','L','N')
              and lasku.tilaustyyppi = 'A'
-             and $muu1 '$muu2'
+             $hakuehdot
              ORDER BY lasku.tunnus desc";
   $sresult = pupe_query($squery);
 
@@ -97,8 +112,11 @@ if ($tee == 'etsi') {
   }
 }
 
-echo "<table><tr><form method='post'><input type='hidden' name='tee' value='etsi'>";
+echo "<form method='post'><input type='hidden' name='tee' value='etsi'>";
+echo "<table><tr>";
 echo "<th colspan='4'>".t("Hae työmääräykset väliltä").":</th>";
+echo "<th>".t("Rajaus").":</th>";
+echo "</tr>";
 
 if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -107,34 +125,47 @@ if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d");
 
-echo "<tr>
-  <th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-  <td><input type='text' name='ppa' value='$ppa' size='3'></td>
-  <td><input type='text' name='kka' value='$kka' size='3'></td>
-  <td><input type='text' name='vva' value='$vva' size='5'></td>
-  </tr>\n
-  <tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-  <td><input type='text' name='ppl' value='$ppl' size='3'></td>
-  <td><input type='text' name='kkl' value='$kkl' size='3'></td>
-  <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-echo "<td class='back'><input type='submit' value='Hae'></td></form></tr>";
+echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>";
+echo "<td><input type='text' name='ppa' value='$ppa' size='3'></td>";
+echo "<td><input type='text' name='kka' value='$kka' size='3'></td>";
+echo "<td><input type='text' name='vva' value='$vva' size='5'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='alkupvmsearch' $alkupvmselect></td>";
+echo "</tr>";
 
+echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>";
+echo "<td><input type='text' name='ppl' value='$ppl' size='3'></td>";
+echo "<td><input type='text' name='kkl' value='$kkl' size='3'></td>";
+echo "<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='loppupvmsearch' $loppupvmselect></td>";
+echo "</tr>";
 
-echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
-  <th>".t("Asiakkaan nimi").":</th><td colspan='3'><input type='text' name='nimi' size='35'></td>
-  <td class='back'><input type='submit' value='Hae'></td></form></tr>";
-echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
-  <th>".t("Rekno").":</th><td colspan='3'><input type='text' name='rekno' size='35'></td>
-  <td class='back'><input type='submit' value='Hae'></td></form></tr>";
-echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
-  <th>".t("Työmääräysno").":</th><td colspan='3'><input type='text' name='eid' size='35'></td>
-  <td class='back'><input type='submit' value='Hae'></td></form></tr>";
-echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
-  <th>".t("Asiakasnumero").":</th><td colspan='3'><input type='text' name='asno' size='35'></td>
-  <td class='back'><input type='submit' value='Hae'></td></form></tr>";
-echo "<tr><form method='post'><input type='hidden' name='tee' value='etsi'>
-  <th>".t("Sarjanumero").":</th><td colspan='3'><input type='text' name='valmno' size='35'></td>
-  <td class='back'><input type='submit' value='Hae'></td></form></tr>";
+echo "<tr>";
+echo "<th>".t("Asiakkaan nimi").":</th><td colspan='3'><input type='text' name='nimi' size='35' value='$nimi'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='nimisearch' $nimiselect></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Rekno").":</th><td colspan='3'><input type='text' name='rekno' size='35' value='$rekno'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='reknosearch' $reknoselect></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Työmääräysno").":</th><td colspan='3'><input type='text' name='eid' size='35' value='$eid'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='eidsearch' $eidselect></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Asiakasnumero").":</th><td colspan='3'><input type='text' name='asno' size='35' value='$asno'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='asnosearch' $asnoselect></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Sarjanumero").":</th><td colspan='3'><input type='text' name='valmno' size='35' value='$valmno'></td>";
+echo "<td><input type='checkbox' name='selected[]' value='valmnosearch' $valmnoselect></td>";
+echo "</tr>";
+
 echo "</table>";
+echo "<input type='submit' value='Hae'>";
+echo "</form>";
 
 require "../inc/footer.inc";

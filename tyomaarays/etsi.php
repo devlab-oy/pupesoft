@@ -17,8 +17,6 @@ if (isset($_REQUEST['selected'])) {
   $eidselect    = (array_search('eidsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $asnoselect   = (array_search('asnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $valmnoselect = (array_search('valmnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
-  $alkupvmselect  = (array_search('alkupvmsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
-  $loppupvmselect = (array_search('loppupvmsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
 }
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
@@ -27,11 +25,11 @@ if ($tee == 'etsi') {
   echo "<table>";
   $hakuehdot = '';
 
-  if ($vva != '' and $kka != '' and $ppa != '' and $alkupvmselect !='') {
+  if ($vva != '' and $kka != '' and $ppa != '') {
     $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa' "; 
   }
   
-  if ($vvl != '' and $kkl != '' and $ppl != '' and $loppupvmselect != '') {
+  if ($vvl != '' and $kkl != '' and $ppl != '') {
     $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl' ";    
   }
 
@@ -129,14 +127,14 @@ echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='ppa' value='$ppa' size='3'></td>";
 echo "<td><input type='text' name='kka' value='$kka' size='3'></td>";
 echo "<td><input type='text' name='vva' value='$vva' size='5'></td>";
-echo "<td><input type='checkbox' name='selected[]' value='alkupvmsearch' $alkupvmselect></td>";
+echo "<td></td>";
 echo "</tr>";
 
 echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>";
 echo "<td><input type='text' name='ppl' value='$ppl' size='3'></td>";
 echo "<td><input type='text' name='kkl' value='$kkl' size='3'></td>";
 echo "<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-echo "<td><input type='checkbox' name='selected[]' value='loppupvmsearch' $loppupvmselect></td>";
+echo "<td></td>";
 echo "</tr>";
 
 echo "<tr>";

@@ -6474,14 +6474,14 @@ if ($tee == '') {
                 <input type='hidden' name='orig_tila' value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
 
-                <label>Näytetään kate
+                <label>".t("Näytetään kate")."
                   <input type='radio'
                          name='naytetaan_kate'
                          value='K'
                          onclick='submit()'{$kate_sel["K"]}>
                 </label>
 
-                <label>Ei näytetä katetta
+                <label>".t("Ei näytetä katetta")."
                   <input type='radio'
                          name='naytetaan_kate'
                          value='E'

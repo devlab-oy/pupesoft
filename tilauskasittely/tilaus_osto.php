@@ -131,6 +131,40 @@ if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
   enable_ajax();
 }
 
+if ($tee == 'lisaa_aiemmalle_riville') {
+  $params = array(
+    "tilausnumero" => $tilausnumero,
+    "tuoteno"      => $lisattava["tuoteno"]
+  );
+
+  list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
+
+  $query = "UPDATE tilausrivi
+            SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
+                varattu = varattu + '{$lisattava['kpl']}'
+            WHERE yhtio     = '{$kukarow['yhtio']}'
+            AND tyyppi      = 'O'
+            AND otunnus     = '{$kukarow["kesken"]}'
+            AND uusiotunnus = 0
+            AND laskutettu  = ''
+            AND tunnus      = '{$ensimmainen_tilausrivi}'";
+  $tru_result = pupe_query($query);
+
+  if ($tru_result) {
+    $query = "DELETE
+              FROM tilausrivi
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              AND tyyppi      = 'O'
+              AND otunnus     = '{$kukarow["kesken"]}'
+              AND uusiotunnus = 0
+              AND laskutettu  = ''
+              AND tunnus      = '{$viimeinen_tilausrivi}'";
+    $trd_result = pupe_query($query);
+  }
+
+  $tee = 'AKTIVOI';
+}
+
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
 if (count($_POST) == 0 and $from == "") {
   $tila        = '';
@@ -1950,3 +1984,31 @@ if (!empty($tuoteno) and empty($kpl)) {
 }
 
 require "inc/footer.inc";
+
+/**
+ * @param array $params
+ *
+ * @return array Ensimm‰inen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisess‰ tilauksella
+ */
+function hae_eka_ja_vika_tilausrivi($params) {
+  global $kukarow;
+
+  $tilausnumero = $params['tilausnumero'];
+  $tuoteno      = $params['tuoteno'];
+
+  $query = "SELECT min(tunnus) AS eka,
+            max(tunnus)        AS vika
+            FROM tilausrivi
+            WHERE yhtio     = '{$kukarow["yhtio"]}'
+            AND otunnus     = '{$tilausnumero}'
+            AND tuoteno     = '{$tuoteno}'
+            AND uusiotunnus = 0
+            AND laskutettu  = ''
+            AND tyyppi      = 'O'";
+
+  $result = pupe_query($query);
+
+  $tunnukset = mysql_fetch_assoc($result);
+
+  return array($tunnukset["eka"], $tunnukset["vika"]);
+}

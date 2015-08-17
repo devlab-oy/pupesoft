@@ -14,8 +14,6 @@ if (!$php_cli) {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-die ("Tämän skriptin ajo ei ole mahdollista tässä branchissa");
-
 $pupe_root_polku = dirname(dirname(__FILE__));
 
 require "{$pupe_root_polku}/inc/connect.inc";
@@ -32,14 +30,6 @@ cron_log();
 pupesoft_flock($lock_params);
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_customers.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_customer_groups.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_sales_orders.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_product_stocks.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_shops.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_specific_prices.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -59,7 +49,7 @@ else {
 
 $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
-if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia" and $verkkokauppatyyppi != "presta") {
+if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
   die ("Et antanut verkkokaupan tyyppiä.\n");
 }
 
@@ -135,7 +125,6 @@ $query = "SELECT
             AND tuote.tuotetyyppi    NOT in ('A','B')
             AND tuote.tuoteno       != ''
             AND tuote.nakyvyys      != ''
-            AND tuote.tuoteno IN ('+1','+10','+11','+12')
             $muutoslisa
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
@@ -1002,10 +991,6 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
   if (count($dnslajitelma) > 0) {
     require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
   }
-}
-elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
-  $presta_client = new PrestaClient($presta_url, $presta_api_key);
-  $presta_client->sync_products($dnstuote);
 }
 
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)

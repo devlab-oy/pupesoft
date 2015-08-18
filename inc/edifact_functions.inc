@@ -353,7 +353,7 @@ function hylky_lusaus_parametrit($parametrit) {
             JOIN lasku
               ON lasku.yhtio = lasku.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila = 'T'
+              AND lasku.alatila IN ('T','X')
               AND lasku.tunnus = tilausrivi.otunnus
             JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto
@@ -777,7 +777,7 @@ function laskutusraportti_parametrit($konttiviite) {
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila = 'W'
-            AND lasku.alatila = 'U'
+            AND lasku.alatila IN ('U','A','B','D')
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             GROUP BY lasku.tunnus";
   $result = pupe_query($query);
@@ -797,7 +797,7 @@ function laskutusraportti_parametrit($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = tilausrivi.yhtio
               AND lasku.tila = 'W'
-              AND lasku.alatila = 'U'
+              AND lasku.alatila IN ('U','A','B','D')
               AND lasku.tunnus = tilausrivi.otunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.asiakkaan_tilausnumero = '{$konttiviite}'";
@@ -1550,7 +1550,7 @@ function kasittele_bookkaussanoma($edi_data) {
       $update_query = "UPDATE lasku SET
                        sisviesti1 = '{$ohje}',
                        toimaika   = '{$lahtopvm}',
-                       alatila    = 'A',
+                       alatila    = 'A'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND lasku.tila = 'W'
                        AND lasku.alatila IN ('B')

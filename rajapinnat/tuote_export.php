@@ -275,8 +275,8 @@ while ($row = mysql_fetch_array($res)) {
     'kuluprosentti'        => $row['kuluprosentti'],
     'ean'                  => $row["eankoodi"],
     'osasto'               => $row["osasto"],
-    'try'                  => 'Käsiteltävät',#$row["try"],
-    'try_nimi'             => 'Käsiteltävät',#$row["try_nimi"],
+    'try'                  => $row["try"],
+    'try_nimi'             => $row["try_nimi"],
     'alv'                  => $row["alv"],
     'nakyvyys'             => $row["nakyvyys"],
     'nimi_swe'             => $row["nimi_swe"],
@@ -292,6 +292,7 @@ while ($row = mysql_fetch_array($res)) {
     'mainosteksti'         => $row['mainosteksti'],
     'myynti_era'           => $row['myynti_era']
   );
+
 }
 
 // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
@@ -812,7 +813,7 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       'lyhytkuvaus'           => $alirow["lyhytkuvaus"],
       'tuotemassa'            => $alirow["tuotemassa"],
       'nakyvyys'              => $alirow["nakyvyys"],
-      'try_nimi'              => 'Käsiteltävät',#$alirow["try_nimi"],
+      'try_nimi'              => $alirow["try_nimi"],
       'nimi_swe'              => $alirow["nimi_swe"],
       'nimi_eng'              => $alirow["nimi_eng"],
       'campaign_code'         => $alirow["campaign_code"],
@@ -896,6 +897,10 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // Default on: YES
   if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  }
+
+  if (isset($magento_universal_tuoteryhma) and !empty($magento_universal_tuoteryhma)) {
+    $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
   }
   /*
   // lisaa_kategoriat

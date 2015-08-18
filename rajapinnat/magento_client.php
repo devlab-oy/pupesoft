@@ -112,6 +112,11 @@ class MagentoClient {
   private $_sisaanluvun_esto = "YES";
 
   /**
+   * Asetetaanko uusille tuotteille aina sama tuoteryhmä ja poistetaan try tuotepäivityksestä
+   */
+  private $_universal_tuoteryhma = "";
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -264,10 +269,18 @@ class MagentoClient {
       }
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
+      
+      $tuoteryhmayliajo = $this->_universal_tuoteryhma;
+      $tuoteryhmanimi   = $tuote['try_nimi'];
+
+      // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
+      if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+        $tuoteryhmanimi = $tuoteryhmayliajo;
+      }
 
       // Etsitään kategoria_id tuoteryhmällä
       if ($selected_category == 'tuoteryhma') {
-        $category_ids[] = $this->findCategory(utf8_encode($tuote['try_nimi']), $category_tree['children']);
+        $category_ids[] = $this->findCategory(utf8_encode($tuoteryhmanimi), $category_tree['children']);
       }
       else {
         // Etsitään kategoria_id:t tuotepuun tuotepolulla
@@ -575,9 +588,17 @@ class MagentoClient {
       // Erikoishinta
       $tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];
 
+      $tuoteryhmayliajo = $this->_universal_tuoteryhma;
+      $tuoteryhmanimi = $tuotteet[0]['try_nimi'];
+
+      // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
+      if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+        $tuoteryhmanimi = $tuoteryhmayliajo;
+      }
+
       // Etsitään kategoria_id tuoteryhmällä
       if ($selected_category == 'tuoteryhma') {
-        $category_ids[] = $this->findCategory($tuotteet[0]['try_nimi'], $category_tree['children']);
+        $category_ids[] = $this->findCategory($tuoteryhmanimi, $category_tree['children']);
       }
       else {
         // Etsitään kategoria_id:t tuotepuun tuotepolulla
@@ -1784,6 +1805,15 @@ class MagentoClient {
    */
   public function setSisaanluvunEsto($sisaanluvun_esto) {
     $this->_sisaanluvun_esto = $sisaanluvun_esto;
+  }
+
+  /**
+   * Asetetaanko uudet tuotteet aina samaan kategoriaan
+   * ja estetään tuotepäivityksessä tuoteryhmän päivitys
+   * Oletus tyhja 
+   */
+  public function setUniversalTuoteryhma($universal_tuoteryhma) {
+    $this->_universal_tuoteryhma = $universal_tuoteryhma;
   }
 
   /**

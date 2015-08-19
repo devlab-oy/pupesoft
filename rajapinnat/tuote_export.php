@@ -898,10 +898,19 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   }
-
+  
+  // Halutaanko merkata kaikki uudet tuotteet aina samaan tuoteryhmään ja
+  // estää tuoteryhmän yliajo tuotepäivityksessä
   if (isset($magento_universal_tuoteryhma) and !empty($magento_universal_tuoteryhma)) {
     $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
   }
+
+  // Aktivoidaanko asiakas luonnin yhteydessä Magentoon
+  //   HUOM! Vaatii Magenton customointia
+  if (isset($magento_asiakas_aktivointi) and !empty($magento_asiakas_aktivointi)) {
+    $magento_client->setAsiakasAktivointi(true);
+  }
+
   /*
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {

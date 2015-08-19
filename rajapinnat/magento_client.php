@@ -117,6 +117,11 @@ class MagentoClient {
   private $_universal_tuoteryhma = "";
 
   /**
+   * Aktivoidaanko asiakas luonnin yhteydessä Magentoon
+   */
+  private $_asiakkaan_aktivointi = false;
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -1577,6 +1582,14 @@ class MagentoClient {
                     AND rooli        = 'Magento'
                     AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
           pupe_query($query);
+
+          // Uutta asiakasta luodessa lähetetään aina aktivointiviesti Magentoon jos ominaisuus on päällä
+          if ($this->_asiakkaan_aktivointi) {            
+            $result = $this->asiakkaanAktivointi($asiakas['yhtio'], $asiakas['yhenk_tunnus']);
+            if ($result) {
+              $this->log("Yhteyshenkilön: '{$asiakas['yhenk_tunnus']}' Magentoasiakas: {$asiakas['magento_tunnus']} aktivoitu " . print_r($asiakas_data, true));
+            }
+          }
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1817,6 +1830,15 @@ class MagentoClient {
   }
 
   /**
+   * Aktivoidaanko asiakas luonnin yhteydessä Magentoon
+   * Oletus false
+   */
+  public function setAsiakasAktivointi($asiakas_aktivointi) {
+    $tila = $asiakas_aktivointi ? true : false;
+    $this->_asiakkaan_aktivointi = $tila;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -1832,6 +1854,49 @@ class MagentoClient {
    */
   public function getErrorCount() {
     return $this->_error_count;
+  }
+
+  /**
+   * Kuittaa asiakkaan aktivoiduksi Magentossa
+   *   HUOM! Vaatii räätälöidyn Magenton
+   *
+   * @param yhtio, yhteyshenkilön tunnus
+   * @return boolean reply (onnistuiko toiminto)
+   */
+  public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
+    $reply = false;
+
+    // Haetaan yhteyshenkilön tiedot
+    try {
+      $query = "SELECT
+                email, 
+                ulkoinen_asiakasnumero id
+                FROM
+                yhteyshenkilo
+                WHERE yhtio = '{$yhtio}'
+                AND rooli   = 'Magento'
+                AND tunnus = '{$yhteyshenkilon_tunnus}'
+                AND email != ''
+                AND ulkoinen_asiakasnumero != ''
+                LIMIT 1";
+      $result = pupe_query($query);
+      $yhenkrow = mysql_fetch_assoc($result);
+
+      // Haetaan Magentosta asiakkaan website_id..
+      $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $yhenkrow['id']);
+
+      // Aktivoidaan asiakas Magentoon
+      $reply = $this->_proxy->call(
+                 $this->_session,
+                 'activate_customer.activateBusinessCustomer',
+                 array('customerEmail' => $yhenkrow['email'], 'websiteCode' => $magentocustomer['website_id']));
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Tietokantayhteys on poikki.", $e);
+    }
+
+    return $reply;
   }
 
   /**

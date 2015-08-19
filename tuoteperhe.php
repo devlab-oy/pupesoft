@@ -1479,7 +1479,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         }
         else {
-          echo "<td class='back' colspan='4'></td>";
+          echo "<td class='back' colspan='7'></td>";
         }
 
         if ($toim != "VSUUNNITTELU") {

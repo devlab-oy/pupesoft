@@ -424,6 +424,7 @@ class MagentoClient {
         try {
 
           $sticky_kategoriat = $this->_sticky_kategoriat;
+          $tuoteryhmayliajo = $this->_universal_tuoteryhma;
 
           // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
           $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
@@ -439,8 +440,12 @@ class MagentoClient {
             }
           }
 
-          $this->_proxy->call($this->_session, 'catalog_product.update',
+          // Ei muuteta tuoteryhmiä jos yliajo on päällä
+          if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+            $tuote_data['categories'] = $current_categories;
+          }
 
+          $this->_proxy->call($this->_session, 'catalog_product.update',
             array(
               $tuote['tuoteno'], // sku
               $tuote_data)

@@ -911,6 +911,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setAsiakasAktivointi(true);
   }
 
+  // Aktivoidaanko asiakaskohtaiset tuotehinnat
+  //   HUOM! Vaatii Magenton customointia
+  if (isset($magento_asiakaskohtaiset_tuotehinnat) and !empty($magento_asiakaskohtaiset_tuotehinnat)) {
+    $magento_client->setAsiakaskohtaisetTuotehinnat(true);
+  }
+
   /*
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {

@@ -122,6 +122,11 @@ class MagentoClient {
   private $_asiakkaan_aktivointi = false;
 
   /**
+   * Siirretäänkö asiakaskohtaiset tuotehinnat Magentoon
+   */
+  private $_asiakaskohtaiset_tuotehinnat = false;
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -543,6 +548,11 @@ class MagentoClient {
 
       // Lisätään kuvat Magentoon
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+
+      // Lisätään tuotteen asiakaskohtaiset tuotehinnat
+      if($this->_asiakaskohtaiset_tuotehinnat) {
+        $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);
+      }
 
       // Lisätään tuote countteria
       $count++;
@@ -1844,6 +1854,15 @@ class MagentoClient {
   }
 
   /**
+   * Siirretäänkö asiakaskohtaiset tuotehinnat Magentoon
+   * Oletus false
+   */
+  public function setAsiakaskohtaisetTuotehinnat($asiakaskohtaiset_tuotehinnat) {
+    $tila = $asiakaskohtaiset_tuotehinnat ? true : false;
+    $this->_asiakaskohtaiset_tuotehinnat = $tila;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -1902,6 +1921,129 @@ class MagentoClient {
     }
 
     return $reply;
+  }
+
+  /**
+   * Hakee ja siirtää tuotteen asiakaskohtaiset hinnat Magentoon
+   *   HUOM! Vaatii räätälöidyn Magenton
+   *
+   * @param tuotenumero, magenton tuotenumero
+   * @return jotain randomii
+   */
+  public function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
+    global $kukarow;
+
+    $reply = false;
+    $asiakaskohtainenhintadata = array();
+
+    try {
+      // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
+      $asiakkaat_per_yhteyshenkilö = hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
+
+      foreach ($asiakkaat_per_yhteyshenkilö as $asiakas) {
+        // Haetaan jokaisen asiakkaan tuotehinta ja muut tarvittavat parametrit
+        $asiakaskohtainenhintadata[] = hae_asiakaskohtainen_data($asiakas, $tuotenumero);
+      }
+
+      // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
+      $reply = $this->_proxy->call($this->_session, $magento_tuotenumero, 'price_per_customer.setPriceForCustomersPerProduct',
+        $asiakaskohtainenhintadata);
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Tietokantayhteys on poikki.", $e);
+    }
+
+    return $reply;
+  }
+
+  private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
+    $asiakkaat_per_yhteyshenkilo = array();
+
+    $query = "SELECT asiakas.tunnus asiakastunnus, 
+              yhteyshenkilo.email asiakas_email, 
+              yhteyshenkilo.ulkoinen_asiakasnumero 
+              FROM yhteyshenkilo
+              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio 
+                AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
+              WHERE yhteyshenkilo.yhtio = '{$yhtio}'
+                AND yhteyshenkilo.rooli = 'Magento'
+                AND yhteyshenkilo.email != ''
+                AND yhteyshenkilo.ulkoinen_asiakasnumero != ''";
+    $result = pupe_query($query);
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $asiakasdata = array(
+        'asiakastunnus'         => $rivi['asiakastunnus'],
+        'asiakas_email'         => $rivi['asiakas_email'],
+        'magento_asiakastunnus' => $rivi['ulkoinen_asiakasnumero']
+      );
+      $asiakkaat_per_yhteyshenkilo[] = $asiakasdata;
+    }
+
+    return $asiakkaat_per_yhteyshenkilo;
+  }
+
+  private function hae_asiakaskohtainen_data($asiakas, $tuotenumero) {
+    global $yhtiorow, $kukarow;
+    #$asiakas['asiakastunnus'];
+    #$asiakas['asiakas_email'];
+    #$asiakas['ulkoinen_asiakasnumero'];
+
+    // Haetaan asiakas
+    $query  = "SELECT *
+               FROM asiakas
+               WHERE yhtio='{$kukarow['yhtio']}'
+               AND tunnus='{$asiakas['asiakastunnus']}'";
+    $result = pupe_query($query);
+    $asiakasrow = mysql_fetch_array($result);
+
+    // Haetaan kurssi
+    $query = "SELECT kurssi
+              FROM valuu
+              WHERE nimi = '{$asiakasrow['valkoodi']}'
+              and yhtio  = '{$kukarow['yhtio']}'";
+    $asres = pupe_query($query);
+    $kurssi = mysql_fetch_assoc($asres);
+
+    // Feikataan laskurow
+    $laskurow = array();
+    $laskurow["ytunnus"]        = $asiakasrow["ytunnus"];
+    $laskurow["liitostunnus"]   = $asiakasrow["tunnus"];
+    $laskurow["vienti"]         = $asiakasrow["vienti"];
+    $laskurow["alv"]            = $asiakasrow["alv"];
+    $laskurow["valkoodi"]       = $asiakasrow["valkoodi"];
+    $laskurow["vienti_kurssi"]  = $kurssi;
+    $laskurow["maa"]            = $asiakasrow["maa"];
+    $laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
+
+    // Haetaan tuotteen tiedot
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tuotenumero}'";
+    $result = pupe_query($query);
+    $tuote = mysql_fetch_assoc($result);
+
+    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, 'N');
+
+    /*if ($netto != '') {
+      $kokonaisale = 0;
+      $maara = $yhtiorow['myynnin_alekentat'];
+      
+      for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+        $kokonaisale *= (1 - $ale["ale{$alepostfix}"] / 100);
+      }
+
+      $hinta = round(($hinta * ($kokonaisale / 100)), 2);
+    }*/
+
+    // Haetaan Magentosta asiakkaan website_id..
+    $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['ulkoinen_asiakasnumero']);
+
+    return array('customerEmail' => $asiakas['asiakas_email'], 
+                 'websiteCode' => $magentocustomer['website_id'],
+                 'price' => $hinta);
   }
 
   /**

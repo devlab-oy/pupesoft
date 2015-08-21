@@ -967,7 +967,7 @@ if ($tee == 'E' or $tee == 'F') {
             ifnull(h5.nimi, lasku.hyvak5) hyvak5_nimi,
             ifnull(ma.nimi, lasku.maksaja) maksaja_nimi,
             yriti.nimi maksajanpankkitili,
-            yriti.tilino maksajanpankkitilinro
+            yriti.iban maksajanpankkitilinro
             FROM lasku
             LEFT JOIN yriti ON (lasku.yhtio = yriti.yhtio and maksu_tili = yriti.tunnus)
             LEFT JOIN kuka la ON (lasku.yhtio = la.yhtio and lasku.laatija = la.kuka)

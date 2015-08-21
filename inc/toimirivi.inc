@@ -19,7 +19,7 @@ if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan
 
 if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti
 
-  $query = "SELECT nimi, tilino, tunnus
+  $query = "SELECT nimi, iban, tunnus
             FROM yriti
             WHERE yhtio  = '$kukarow[yhtio]'
             and kaytossa = ''";
@@ -37,7 +37,7 @@ if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus
     if ($trow[$i] == $vrow['tunnus']) {
       $sel = "selected";
     }
-    $ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi] ($vrow[tilino])";
+    $ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi] ($vrow[iban])";
   }
 
   $ulos .= "</select></td>";

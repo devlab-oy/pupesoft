@@ -82,8 +82,8 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
   # Haetaan kaikki Prestashopista kaikkien tuotteiden prestaid:t/tuotenumerot
   $all_products = $presta_products->all_skus();
 
-  # Huom!!! Editoitu hakemaan vain pieni ote kuvista alkuun
-  $all_products = array_slice($all_products, 0, 10);
+  # Huom!!! Editoi tätä jos haluat hakea vain pienen otteen tuotekuvista aluksi
+  #$all_products = array_slice($all_products, 0, 10);
 
   foreach ($all_products as $product_id => $pupe_product_code) {
     # Haetaan tuotteen kuvatiedot tuote kerrallaan

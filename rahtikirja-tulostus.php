@@ -137,7 +137,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
   elseif ($avainrow["selitetark_2"] == "3") {
     $kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
   }
-  elseif ($toitarow['tulostustapa'] == 'H') {
+  elseif ($toitarow['tulostustapa'] == 'H' or $unifaun_era_vainkollitarra) {
     $kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
   }
   elseif (strpos($toitarow['rahtikirja'], 'pdf') === false) {

@@ -54,15 +54,11 @@ class PrestaCategories extends PrestaClient {
     //Nodes are in parent -> deepest level children order
     foreach ($ancestors as $node_nimi) {
       $filter['name'] = $node_nimi;
-      $category = $this->all($display, $filter);
+      $categories = $this->all($display, $filter);
 
       //@TODO if many categories with the name is found, we have a problem...
       //We simply take the first one
-      //Hackhack logic for indentifying this situation
-      //(count on categories.category wont work)
-      if (!isset($category['id'])) {
-        $category = $category[0];
-      }
+      $category = $categories[0];
 
       if (empty($parents)) {
         $parents[] = $category['id'];

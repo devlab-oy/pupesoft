@@ -59,6 +59,10 @@ ini_set("max_execution_time", 0);
 
 $tuotexxxx = true;
 if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  $presta_products->sync_products(array());
+  
+  die();
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
   $presta_orders->transfer_orders_to_pupesoft();
   

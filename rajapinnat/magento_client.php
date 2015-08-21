@@ -1598,13 +1598,6 @@ class MagentoClient {
                     AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
           pupe_query($query);
 
-          // Uutta asiakasta luodessa lähetetään aina aktivointiviesti Magentoon jos ominaisuus on päällä
-          if ($this->_asiakkaan_aktivointi) {            
-            $result = $this->asiakkaanAktivointi($asiakas['yhtio'], $asiakas['yhenk_tunnus']);
-            if ($result) {
-              $this->log("Yhteyshenkilön: '{$asiakas['yhenk_tunnus']}' Magentoasiakas: {$asiakas['magento_tunnus']} aktivoitu " . print_r($asiakas_data, true));
-            }
-          }
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1623,6 +1616,15 @@ class MagentoClient {
             ));
 
           $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
+
+          // Lähetetään aktivointiviesti Magentoon jos ominaisuus on päällä sekä yhteyshenkilölle
+          // on merkattu magentokuittaus
+          if ($this->_asiakkaan_aktivointi and aktivoidaankoAsiakas($asiakas['tunnus'], $asiakas['magento_tunnus'])) {            
+            $result = $this->asiakkaanAktivointi($asiakas['yhtio'], $asiakas['yhenk_tunnus']);
+            if ($result) {
+              $this->log("Yhteyshenkilön: '{$asiakas['yhenk_tunnus']}' Magentoasiakas: {$asiakas['magento_tunnus']} aktivoitu " . print_r($asiakas_data, true));
+            }
+          }
         }
         catch (Exception $e) {
           $this->_error_count++;
@@ -1909,6 +1911,13 @@ class MagentoClient {
       // Haetaan Magentosta asiakkaan website_id..
       $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $yhenkrow['id']);
 
+      // Merkataan aktivointikuittaus tehdyksi
+      $putsausquery = "UPDATE yhteyshenkilo
+                       SET aktivointikuittaus = ''
+                       WHERE yhtio = '{$yhtio}'
+                       AND tunnus = '{$yhteyshenkilon_tunnus}'";
+      pupe_query($putsausquery);
+
       // Aktivoidaan asiakas Magentoon
       $reply = $this->_proxy->call(
                  $this->_session,
@@ -2044,6 +2053,29 @@ class MagentoClient {
     return array('customerEmail' => $asiakas['asiakas_email'], 
                  'websiteCode' => $magentocustomer['website_id'],
                  'price' => $hinta);
+  }
+
+  /**
+   * Tarkistaa onko tämä asiakkaan yhteyshenkilö merkattu kuitattavaksi
+   *
+   * @param asiakastunnus, asiakkaan magentotunnus(yhteyshenkilo.ulkoinen_asiakasnumero)
+   * @return true/false
+   */
+  private function aktivoidaankoAsiakas($asiakastunnus, $asiakkaan_magentotunnus) {
+    global $kukarow;
+    
+    $query = "SELECT yhteyshenkilo.aktivointikuittaus tieto
+              FROM yhteyshenkilo 
+              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio 
+                AND yhteyshenkilo.liitostunnus = asiakas.tunnus
+                AND asiakas.tunnus = '{$asiakastunnus}')
+              WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+                AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$asiakkaan_magentotunnus}'";
+    $result = pupe_query($query);
+    $vastausrivi = mysql_fetch_assoc($result);
+
+    $vastaus = empty($vastausrivi['tieto']);
+    return $vastaus;
   }
 
   /**

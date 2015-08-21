@@ -19,14 +19,18 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+// Pupenext ylläpitonakymät aakkosjärjestyksessä
 $psx_ohjelmat = array(
-  "valuu" => "{$palvelin2}pupenext/currencies",
-  "kassalipas" => "{$palvelin2}pupenext/cash_registers",
-  "tili" => "{$palvelin2}pupenext/accounts",
-  "taso" => "{$palvelin2}pupenext/sum_levels",
-  "maksuehto" => "{$palvelin2}pupenext/terms_of_payments",
-  "kirjoittimet" => "{$palvelin2}pupenext/printers",
-  "tilikaudet" => "{$palvelin2}pupenext/fiscal_years",
+  "kassalipas"        => "{$palvelin2}pupenext/cash_registers",
+  "kirjoittimet"      => "{$palvelin2}pupenext/printers",
+  "kustannuspaikka"   => "{$palvelin2}pupenext/qualifiers",
+  "maksuehto"         => "{$palvelin2}pupenext/terms_of_payments",
+  "pakkaamo"          => "{$palvelin2}pupenext/packing_areas",
+  "rahdinkuljettajat" => "{$palvelin2}pupenext/carriers",
+  "taso"              => "{$palvelin2}pupenext/sum_levels",
+  "tili"              => "{$palvelin2}pupenext/accounts",
+  "tilikaudet"        => "{$palvelin2}pupenext/fiscal_years",
+  "valuu"             => "{$palvelin2}pupenext/currencies",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -1403,7 +1407,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo "</form>";
   }
 
-  if ($toim == "asiakas" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
+  if ($toim == "asiakas" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>
         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1605,7 +1609,6 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
       ($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
       ($toim == "yriti" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
-      ($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
       ($toim == "toimitustavan_lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
 
@@ -2257,7 +2260,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "puun_alkio" or
     $toim == "toimitustavan_lahdot" or
     $toim == "pakkauskoodit" or
-    $toim == "rahdinkuljettajat" or
     $toim == "keraysvyohyke" or
     $toim == "avainsana" or
     $toim == "pakkaus" or
@@ -2277,7 +2279,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "vaihtoehtoiset_verkkolaskutunnukset" or
     $toim == "toimittajahinta" or
     $toim == "varaston_tulostimet" or
-    $toim == "pakkaamo" or
     $toim == "asiakaskommentti" or
     $toim == "yhteyshenkilo" or
     $toim == "autodata_tuote" or

@@ -19,10 +19,6 @@ if (mysql_field_name($result, $i) == "pakkaus") {
 }
 
 if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
-
-  $sel = '';
-  if ($trow[$i] != '') $sel[$trow[$i]] = 'SELECTED';
-
   $ulos = "<td><select name='$nimi'>";
 
   $query = "SELECT *
@@ -32,7 +28,11 @@ if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
   $rahdinkuljettajat_res = pupe_query($query);
 
   while ($rahdinkuljettajat_row = mysql_fetch_assoc($rahdinkuljettajat_res)) {
-    $ulos .= "<option value='{$rahdinkuljettajat_row['koodi']}'>{$rahdinkuljettajat_row['nimi']}</option>";
+
+    $sel = '';
+    if ($trow[$i] == $rahdinkuljettajat_row['koodi']) $sel = 'SELECTED';
+
+    $ulos .= "<option value='{$rahdinkuljettajat_row['koodi']}' $sel>{$rahdinkuljettajat_row['nimi']}</option>";
   }
 
   $ulos .= "</select></td>";

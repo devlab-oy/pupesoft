@@ -1886,7 +1886,7 @@ elseif ($toim == 'YLLAPITO') {
   }
 
   $query = "SELECT lasku.tunnus tilaus,
-            lasku.asiakkaan_tilausnumero 'asiak. tilno',
+            lasku.asiakkaan_tilausnumero 'asiak_tilno',
             $asiakasstring asiakas,
             lasku.luontiaika,
             if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
@@ -1914,7 +1914,7 @@ elseif ($toim == 'YLLAPITO') {
             GROUP BY 1,2,3,4,5,6
             $mt_order_by
             $rajaus";
-
+            echo "1917: $query <br><br>";
   // haetaan tilausten arvo
   if ($kukarow['hinnat'] == 0) {
     $sumquery = "SELECT

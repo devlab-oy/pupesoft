@@ -1762,9 +1762,10 @@ if ($tee == 'N' or $tee == 'E') {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote use index (tuoteno_index)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            WHERE tuote.yhtio     = '$kukarow[yhtio]'
             and tuote.tuoteno $oper '$tuoteno'
             and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+            and tuote.tuotetyyppi not in ('A','B')
             ORDER BY tuote.tuoteno $suun
             LIMIT 1";
   $result = pupe_query($query);
@@ -2144,8 +2145,14 @@ if ($tee == 'Z') {
     echo "<tr>";
     echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
 
-    if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
-      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=tuote&tunnus={$tuoterow["tunnus"]}&lopetus=$tkysy_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' /></a>";
+    $tuotehallintaoikeus = tarkista_oikeus('yllapito.php', 'tuote%', 1, true);
+
+    if ($tuotehallintaoikeus) {
+      echo "&nbsp;&nbsp;
+            <a href='{$palvelin2}yllapito.php?toim={$tuotehallintaoikeus["alanimi"]}&tunnus={$tuoterow["tunnus"]}&lopetus={$tkysy_lopetus}'>
+              <img src='{$palvelin2}pics/lullacons/document-properties.png'
+                   alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' />
+            </a>";
     }
 
     //haetaan orginaalit

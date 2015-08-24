@@ -1013,7 +1013,8 @@ if ($tee2 == '') {
             GROUP_CONCAT(DISTINCT if(lasku.comments!='',lasku.comments, NULL) SEPARATOR '\n') comments,
             GROUP_CONCAT(DISTINCT if(lasku.sisviesti2!='',lasku.sisviesti2, NULL) SEPARATOR '\n') sisviesti2,
             GROUP_CONCAT(DISTINCT if(tilausrivi.kommentti!='',tilausrivi.kommentti, NULL) SEPARATOR '\n') kommentti,
-            lasku.mapvm
+            lasku.mapvm,
+            round(sum(tuotemassa * (tilausrivi.kpl + tilausrivi.varattu))) AS tilauksen_paino
             FROM lasku
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
@@ -1022,6 +1023,7 @@ if ($tee2 == '') {
               {$tilausrivi_tuoteno_join})
             LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
             LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
+            LEFT JOIN tuote ON tuote.yhtio = lasku.yhtio AND tuote.tuoteno = tilausrivi.tuoteno
             WHERE
             lasku.$logistiikka_yhtiolisa
             and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
@@ -1067,6 +1069,7 @@ if ($tee2 == '') {
 
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</a></th>";
+    echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tilauksen_paino'; document.forms['find'].submit();\">".t("Paino")."</a></th>";
 
     if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</a></th>";
@@ -1182,6 +1185,7 @@ if ($tee2 == '') {
 
       echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
+      echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";

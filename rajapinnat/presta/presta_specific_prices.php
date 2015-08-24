@@ -59,15 +59,15 @@ class PrestaSpecificPrices extends PrestaClient {
 
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
-    $xml->specific_price->reduction = $specific_price['hinta_muutos'];
+    $xml->specific_price->reduction = 0;
     $xml->specific_price->id_shop = $this->shop['id'];
     $xml->specific_price->id_cart = 0;
     $xml->specific_price->id_currency = 0;
     $xml->specific_price->id_country = 0;
 
     //Price == -1 if Leave base price is checked. Otherwise its the given price.
-    //Pupe -> presta we allways use the calculated price difference (hinta_muutos)
-    $xml->specific_price->price = -1;
+    //To use reduction amounts rather than fixed price enter hinta_muutos as reduction and -1 as price
+    $xml->specific_price->price = $specific_price['customer_price'];
 
     return $xml;
   }

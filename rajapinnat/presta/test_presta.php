@@ -212,6 +212,7 @@ function hae_asiakashinnat() {
   //voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. N‰in pit‰‰kin koska yhteyshenkilo
   //on prestassa asiakas.
   $query = "SELECT asiakashinta.*,
+            asiakashinta.hinta customer_price,
             (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id

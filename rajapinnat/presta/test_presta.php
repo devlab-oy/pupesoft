@@ -154,7 +154,8 @@ function hae_asiakkaat1() {
             ON ( avainsana.yhtio = asiakas.yhtio
               AND avainsana.selite = asiakas.ryhma
               AND avainsana.laji = 'ASIAKASRYHMA' )
-            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'";
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+            AND yhteyshenkilo.rooli = 'Presta'";
   $result = pupe_query($query);
 
   $asiakkaat = array();

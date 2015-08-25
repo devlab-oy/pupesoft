@@ -31,6 +31,7 @@ $psx_ohjelmat = array(
   "tili"              => "{$palvelin2}pupenext/accounts",
   "tilikaudet"        => "{$palvelin2}pupenext/fiscal_years",
   "valuu"             => "{$palvelin2}pupenext/currencies",
+  "yriti"             => "{$palvelin2}pupenext/bank_accounts",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {

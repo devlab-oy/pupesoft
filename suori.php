@@ -388,7 +388,6 @@ if ($tee == 'V') {
             lukko            = '',
             laatija          = '$kukarow[kuka]',
             laadittu         = now()";
-echo "387 $query <br><br>";
   $xresult = pupe_query($query);
 
   $query = "UPDATE lasku set

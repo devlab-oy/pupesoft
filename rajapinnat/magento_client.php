@@ -1949,6 +1949,10 @@ class MagentoClient {
       // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
       $asiakkaat_per_yhteyshenkilö = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
 
+      if (count($asiakkaat_per_yhteyshenkilö) < 1) {
+        return false;
+      }
+
       foreach ($asiakkaat_per_yhteyshenkilö as $asiakas) {
         // Haetaan jokaisen asiakkaan tuotehinta ja muut tarvittavat parametrit
         $asiakaskohtainenhintadata[] = $this->hae_asiakaskohtainen_data($asiakas, $tuotenumero);

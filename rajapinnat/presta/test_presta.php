@@ -461,6 +461,12 @@ function hae_tuotteet() {
         'saldo'                => $myytavissa,
         'images'               => hae_tuotekuvat($row['tunnus']),
     );
+
+    if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {
+      foreach ($lukitut_tuotekentat as $lukittu_kentta) {
+        unset($dnstuote[$lukittu_kentta]);
+      }
+    }
   }
 
   return $dnstuote;

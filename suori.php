@@ -4,9 +4,13 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
-if ($tee == 'V') {
+if ($tee == 'V' and isset($summa) and isset($summa_valuutassa)) {
   $summa = str_replace(",", ".", $summa);
   $summa_valuutassa = str_replace(",", ".", $summa_valuutassa);
+}
+else {
+  $summa = NULL;
+  $summa_valutuassa = NULL;
 }
 
 if ($tee == 'W') {
@@ -54,14 +58,9 @@ if ($tee == 'V') {
   else {
     $laskurow = mysql_fetch_assoc($result);
   }
-
+echo "57 summa $summa summa_valuutassa $summa_valuutassa <br><br>";
   if ($summa != "" and $summa_valuutassa != "") {
     echo "<font class='error'>".t("Syötä summa vain joko kotivaluutassa tai valuutassa")."!</font><br><br>";
-    $tee = "W";
-    $summa = $summa_valuutassa = "";
-  }
-  elseif ($summa == "" and $summa_valuutassa == "") {
-    echo "<font class='error'>".t("Syötä summa joko kotivaluutassa tai valuutassa")."!</font><br><br>";
     $tee = "W";
     $summa = $summa_valuutassa = "";
   }
@@ -90,9 +89,9 @@ if ($tee == 'V') {
     }
   }
 }
-
+echo "88 tee $tee <br><br>";
 if ($tee == 'V') {
-
+echo "90 {$laskurow["valkoodi"]}  summa $summa laskurowSumma {$laskurow["summa"]} <br> rahasumma_valuutassa $rahasumma_valuutassa <br><br>";
   //Lasketaan kursssi
   if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
 
@@ -124,11 +123,11 @@ if ($tee == 'V') {
     }
     $rahasumma_valuutassa = (float) $summa;
   }
-
+echo "122 rahasumma_valuutassa $rahasumma_valuutassa <br><br>";
   $rahasumma = (float) $summa; // summa kotivaluutassa
   $kurssi    = (float) $kurssi; // kurssi
-
-  if ($rahasumma == 0 and $laskurow["summa"] != 0) {
+echo "125 "; var_dump($summa); echo " ! "; var_dump($summa_valuutassa); echo "<br><br>";
+  if ($rahasumma == 0 and !is_null($summa) and !is_null($summa_valuutassa)) {//and $laskurow["summa"] != 0
     echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
     $tee = 'W';
   }
@@ -389,6 +388,7 @@ if ($tee == 'V') {
             lukko            = '',
             laatija          = '$kukarow[kuka]',
             laadittu         = now()";
+echo "387 $query <br><br>";
   $xresult = pupe_query($query);
 
   $query = "UPDATE lasku set

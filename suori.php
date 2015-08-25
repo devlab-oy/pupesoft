@@ -58,7 +58,7 @@ if ($tee == 'V') {
   else {
     $laskurow = mysql_fetch_assoc($result);
   }
-echo "57 summa $summa summa_valuutassa $summa_valuutassa <br><br>";
+
   if ($summa != "" and $summa_valuutassa != "") {
     echo "<font class='error'>".t("Syötä summa vain joko kotivaluutassa tai valuutassa")."!</font><br><br>";
     $tee = "W";
@@ -89,9 +89,9 @@ echo "57 summa $summa summa_valuutassa $summa_valuutassa <br><br>";
     }
   }
 }
-echo "88 tee $tee <br><br>";
+
 if ($tee == 'V') {
-echo "90 {$laskurow["valkoodi"]}  summa $summa laskurowSumma {$laskurow["summa"]} <br> rahasumma_valuutassa $rahasumma_valuutassa <br><br>";
+
   //Lasketaan kursssi
   if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
 
@@ -123,11 +123,11 @@ echo "90 {$laskurow["valkoodi"]}  summa $summa laskurowSumma {$laskurow["summa"]
     }
     $rahasumma_valuutassa = (float) $summa;
   }
-echo "122 rahasumma_valuutassa $rahasumma_valuutassa <br><br>";
+
   $rahasumma = (float) $summa; // summa kotivaluutassa
   $kurssi    = (float) $kurssi; // kurssi
-echo "125 "; var_dump($summa); echo " ! "; var_dump($summa_valuutassa); echo "<br><br>";
-  if ($rahasumma == 0 and !is_null($summa) and !is_null($summa_valuutassa)) {//and $laskurow["summa"] != 0
+
+  if ($rahasumma == 0 and !is_null($summa) and !is_null($summa_valuutassa)) {
     echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
     $tee = 'W';
   }

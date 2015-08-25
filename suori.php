@@ -60,6 +60,11 @@ if ($tee == 'V') {
     $tee = "W";
     $summa = $summa_valuutassa = "";
   }
+  elseif ($summa == "" and $summa_valuutassa == "") {
+    echo "<font class='error'>".t("Syötä summa joko kotivaluutassa tai valuutassa")."!</font><br><br>";
+    $tee = "W";
+    $summa = $summa_valuutassa = "";
+  }
 
   $haettu_kurssi = "";
 

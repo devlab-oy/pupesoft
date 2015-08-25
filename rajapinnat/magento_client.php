@@ -1619,7 +1619,7 @@ class MagentoClient {
 
           // Lähetetään aktivointiviesti Magentoon jos ominaisuus on päällä sekä yhteyshenkilölle
           // on merkattu magentokuittaus
-          if ($this->_asiakkaan_aktivointi and aktivoidaankoAsiakas($asiakas['tunnus'], $asiakas['magento_tunnus'])) {            
+          if ($this->_asiakkaan_aktivointi and $this->aktivoidaankoAsiakas($asiakas['tunnus'], $asiakas['magento_tunnus'])) {            
             $result = $this->asiakkaanAktivointi($asiakas['yhtio'], $asiakas['yhenk_tunnus']);
             if ($result) {
               $this->log("Yhteyshenkilön: '{$asiakas['yhenk_tunnus']}' Magentoasiakas: {$asiakas['magento_tunnus']} aktivoitu " . print_r($asiakas_data, true));
@@ -1947,11 +1947,11 @@ class MagentoClient {
 
     try {
       // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
-      $asiakkaat_per_yhteyshenkilö = hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
+      $asiakkaat_per_yhteyshenkilö = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
 
       foreach ($asiakkaat_per_yhteyshenkilö as $asiakas) {
         // Haetaan jokaisen asiakkaan tuotehinta ja muut tarvittavat parametrit
-        $asiakaskohtainenhintadata[] = hae_asiakaskohtainen_data($asiakas, $tuotenumero);
+        $asiakaskohtainenhintadata[] = $this->hae_asiakaskohtainen_data($asiakas, $tuotenumero);
       }
 
       // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon

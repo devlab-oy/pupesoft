@@ -895,7 +895,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
                   FROM oikeu
                   WHERE yhtio = '$kukarow[yhtio]'
                   and kuka    = '$kukarow[kuka]'
-                  and nimi    = 'sanakirja.php'
+                  and nimi    = 'pupenext/dictionaries'
                   and alanimi = ''";
         $ksres = pupe_query($query);
 

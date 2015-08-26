@@ -21,18 +21,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 
 // Pupenext ylläpitonakymät aakkosjärjestyksessä
 $psx_ohjelmat = array(
-  "kassalipas"        => "{$palvelin2}pupenext/cash_registers",
-  "kirjoittimet"      => "{$palvelin2}pupenext/printers",
-  "kustannuspaikka"   => "{$palvelin2}pupenext/qualifiers",
-  "maksuehto"         => "{$palvelin2}pupenext/terms_of_payments",
-  "pakkaamo"          => "{$palvelin2}pupenext/packing_areas",
-  "pakkaus"           => "{$palvelin2}pupenext/packages",
-  "rahdinkuljettajat" => "{$palvelin2}pupenext/carriers",
-  "taso"              => "{$palvelin2}pupenext/sum_levels",
-  "tili"              => "{$palvelin2}pupenext/accounts",
-  "tilikaudet"        => "{$palvelin2}pupenext/fiscal_years",
-  "valuu"             => "{$palvelin2}pupenext/currencies",
-  "yriti"             => "{$palvelin2}pupenext/bank_accounts",
+  "kassalipas"         => "{$palvelin2}pupenext/cash_registers",
+  "kirjoittimet"       => "{$palvelin2}pupenext/printers",
+  "kustannuspaikka"    => "{$palvelin2}pupenext/qualifiers",
+  "maksuehto"          => "{$palvelin2}pupenext/terms_of_payments",
+  "pakkaamo"           => "{$palvelin2}pupenext/packing_areas",
+  "pakkaus"            => "{$palvelin2}pupenext/packages",
+  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details",
+  "rahdinkuljettajat"  => "{$palvelin2}pupenext/carriers",
+  "taso"               => "{$palvelin2}pupenext/sum_levels",
+  "tili"               => "{$palvelin2}pupenext/accounts",
+  "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
+  "valuu"              => "{$palvelin2}pupenext/currencies",
+  "yriti"              => "{$palvelin2}pupenext/bank_accounts",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {

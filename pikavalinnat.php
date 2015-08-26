@@ -170,7 +170,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
 echo "<tr>";
 echo "<td><select name='skriptit[]'><option value=''>".t("Valitse ohjelma")."</option>";
-echo "<option value='LASKIN' $sel>Pupesoft-laskin</option>";
+echo "<option value='LASKIN'>Pupesoft-laskin</option>";
 
 while ($oikeurow = mysql_fetch_assoc($oikeures)) {
   echo "<option value='$oikeurow[sovellus]###$oikeurow[nimi]###$oikeurow[alanimi]'>$oikeurow[sovellus] --> $oikeurow[nimitys]</option>";

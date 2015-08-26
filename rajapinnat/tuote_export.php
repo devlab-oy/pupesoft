@@ -963,7 +963,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (configurable)\n";
   }
-  /*
+
   // Saldot
   if (count($dnstock) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
@@ -985,7 +985,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
   }
-  */
+
   $tuote_export_error_count = $magento_client->getErrorCount();
 
   if ($tuote_export_error_count != 0) {

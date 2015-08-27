@@ -1851,7 +1851,7 @@ class MagentoClient {
    * Oletus false
    */
   public function setAsiakasAktivointi($asiakas_aktivointi) {
-    $tila = $asiakas_aktivointi ? true : false;
+    $tila = $asiakas_aktivointi ? $asiakas_aktivointi : false;
     $this->_asiakkaan_aktivointi = $tila;
   }
 
@@ -1908,9 +1908,6 @@ class MagentoClient {
       $result = pupe_query($query);
       $yhenkrow = mysql_fetch_assoc($result);
 
-      // Haetaan Magentosta asiakkaan website_id..
-      $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $yhenkrow['id']);
-
       // Merkataan aktivointikuittaus tehdyksi
       $putsausquery = "UPDATE yhteyshenkilo
                        SET aktivointikuittaus = ''
@@ -1922,11 +1919,11 @@ class MagentoClient {
       $reply = $this->_proxy->call(
                  $this->_session,
                  'activate_customer.activateBusinessCustomer',
-                 array('customerEmail' => $yhenkrow['email'], 'websiteCode' => $magentocustomer['website_id']));
+                 array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
     }
     catch (Exception $e) {
       $this->_error_count++;
-      $this->log("Virhe! Tietokantayhteys on poikki.", $e);
+      $this->log("Virhe! Asiakkaan aktivointi epäonnistui.", $e);
     }
 
     return $reply;
@@ -1947,24 +1944,24 @@ class MagentoClient {
 
     try {
       // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
-      $asiakkaat_per_yhteyshenkilö = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
+      $asiakkaat_per_yhteyshenkilo = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
 
-      if (count($asiakkaat_per_yhteyshenkilö) < 1) {
+      if (count($asiakkaat_per_yhteyshenkilo) < 1) {
         return false;
       }
 
-      foreach ($asiakkaat_per_yhteyshenkilö as $asiakas) {
+      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         // Haetaan jokaisen asiakkaan tuotehinta ja muut tarvittavat parametrit
         $asiakaskohtainenhintadata[] = $this->hae_asiakaskohtainen_data($asiakas, $tuotenumero);
       }
 
       // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
-      $reply = $this->_proxy->call($this->_session, $magento_tuotenumero, 'price_per_customer.setPriceForCustomersPerProduct',
-        $asiakaskohtainenhintadata);
+      $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
+        array($magento_tuotenumero, $asiakaskohtainenhintadata));
     }
     catch (Exception $e) {
       $this->_error_count++;
-      $this->log("Virhe! Tietokantayhteys on poikki.", $e);
+      $this->log("Virhe!", $e);
     }
 
     return $reply;
@@ -1999,9 +1996,6 @@ class MagentoClient {
 
   private function hae_asiakaskohtainen_data($asiakas, $tuotenumero) {
     global $yhtiorow, $kukarow;
-    #$asiakas['asiakastunnus'];
-    #$asiakas['asiakas_email'];
-    #$asiakas['ulkoinen_asiakasnumero'];
 
     // Haetaan asiakas
     $query  = "SELECT *
@@ -2038,7 +2032,7 @@ class MagentoClient {
     $result = pupe_query($query);
     $tuote = mysql_fetch_assoc($result);
 
-    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, 'N');
+    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, 'N', '', '');
 
     /*if ($netto != '') {
       $kokonaisale = 0;
@@ -2052,11 +2046,12 @@ class MagentoClient {
     }*/
 
     // Haetaan Magentosta asiakkaan website_id..
-    $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['ulkoinen_asiakasnumero']);
+    $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);
 
     return array('customerEmail' => $asiakas['asiakas_email'], 
                  'websiteCode' => $magentocustomer['website_id'],
-                 'price' => $hinta);
+                 'price' => $hinta,
+                 'delete' => 0);
   }
 
   /**
@@ -2078,7 +2073,7 @@ class MagentoClient {
     $result = pupe_query($query);
     $vastausrivi = mysql_fetch_assoc($result);
 
-    $vastaus = empty($vastausrivi['tieto']);
+    $vastaus = !empty($vastausrivi['tieto']);
     return $vastaus;
   }
 

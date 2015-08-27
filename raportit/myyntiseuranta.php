@@ -2855,7 +2855,7 @@ else {
 
                   if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-                  if (isset($worksheet)) {
+                  if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
                     $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
                   }
                 }

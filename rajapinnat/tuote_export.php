@@ -933,7 +933,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // Aktivoidaanko asiakas luonnin yhteydessä Magentoon
   //   HUOM! Vaatii Magenton customointia
   if (isset($magento_asiakas_aktivointi) and !empty($magento_asiakas_aktivointi)) {
-    $magento_client->setAsiakasAktivointi(true);
+    $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   }
 
   // Aktivoidaanko asiakaskohtaiset tuotehinnat
@@ -942,14 +942,13 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setAsiakaskohtaisetTuotehinnat(true);
   }
 
-  /*
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
     $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
   }
-   */
+
   // Tuotteet (Simple)
   if (count($dnstuote) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
@@ -972,7 +971,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   }
 
   // Poistetaan tuotteet jota ei ole kaupassa
-  if (count($kaikki_tuotteet) > 0) {
+  if (count($kaikki_tuotteet) > 0 and !isset($magento_esta_tuotepoistot)) {
     echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
     // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);

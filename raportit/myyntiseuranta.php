@@ -1117,7 +1117,7 @@ else {
           else {
             $select .= "{$etuliite}.ytunnus ytunnus, ";
             $select .= "{$ytgfe}{$etuliite}.toim_ovttunnus{$ytgft} toim_ovttunnus, ";
-            $select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' ,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)){$ytgft} nimi, ";
+            $select .= "{$ytgfe}concat_ws('<br>',concat_ws(' ',{$etuliite}.nimi,{$etuliite}.nimitark),if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws(' ',{$etuliite}.toim_nimi,{$etuliite}.toim_nimitark),NULL)){$ytgft} nimi, ";
             $select .= "{$ytgfe}concat_ws('<br>',{$etuliite}.postitp,if({$etuliite}.toim_postitp!='' and {$etuliite}.postitp!={$etuliite}.toim_postitp,{$etuliite}.toim_postitp,NULL)){$ytgft} postitp, ";
           }
 

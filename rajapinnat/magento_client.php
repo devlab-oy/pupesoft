@@ -1860,7 +1860,7 @@ class MagentoClient {
    * Oletus false
    */
   public function setAsiakaskohtaisetTuotehinnat($asiakaskohtaiset_tuotehinnat) {
-    $tila = $asiakaskohtaiset_tuotehinnat ? true : false;
+    $tila = $asiakaskohtaiset_tuotehinnat ? $asiakaskohtaiset_tuotehinnat : false;
     $this->_asiakaskohtaiset_tuotehinnat = $tila;
   }
 
@@ -1958,6 +1958,7 @@ class MagentoClient {
       // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
       $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
         array($magento_tuotenumero, $asiakaskohtainenhintadata));
+        $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -2049,7 +2050,7 @@ class MagentoClient {
     $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);
 
     return array('customerEmail' => $asiakas['asiakas_email'], 
-                 'websiteCode' => $magentocustomer['website_id'],
+                 'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
                  'price' => $hinta,
                  'delete' => 0);
   }

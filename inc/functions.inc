@@ -25317,6 +25317,9 @@ if (!function_exists('hyllysiirto')) {
     if (!isset($params['poikkeavalaskutuspvm'])) $_poikkeavalaskutuspvm = '';
     else $_poikkeavalaskutuspvm = $params['poikkeavalaskutuspvm'];
 
+    if (!isset($params['kohdepaikasta_oletuspaikka'])) $kohdepaikasta_oletuspaikka = "";
+    else $kohdepaikasta_oletuspaikka = $params['kohdepaikasta_oletuspaikka'];
+
     if ($error) return false;
 
     if ($lisavaruste == "LISAVARUSTE") {

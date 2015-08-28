@@ -310,6 +310,8 @@ if ($tee == 'MUUTA') {
   else {
     $tee = 'M';
   }
+
+  if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 }
 
 // Siirret‰‰n saldo, jos se on viel‰ olemassa
@@ -572,6 +574,7 @@ if ($tee == 'N') {
   }
 
   if (!isset($_poikkeavalaskutuspvm)) $_poikkeavalaskutuspvm = "";
+  if (!isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = "";
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
@@ -587,6 +590,7 @@ if ($tee == 'N') {
       'selite' => !isset($selite) ? '' : $selite,
       'tun' => !isset($tun) ? 0 : $tun,
       'poikkeavalaskutuspvm' => $_poikkeavalaskutuspvm,
+      'kohdepaikasta_oletuspaikka' => $kohdepaikasta_oletuspaikka,
     );
 
     hyllysiirto($params);

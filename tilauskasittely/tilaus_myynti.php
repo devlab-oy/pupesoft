@@ -3645,7 +3645,7 @@ if ($tee == '') {
 
       echo "<td>
               <input id='myyjanro_id' name='myyjanro' size='8' value='{$myyjanumero}' {$required}
-                     {$state}> " . t("tai");
+                     {$state}> " . t("tai")." ";
       echo "<select id='myyja_id' name='myyja' {$state}>";
       echo $options;
       echo "</select></td></tr>";
@@ -6388,7 +6388,7 @@ if ($tee == '') {
       if ($oikeus_nahda_kate and $kukarow["extranet"] == "") {
         $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
         $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
-
+        
         echo t("Tilausrivin kate").":<br>";
         echo "<form method='post'>
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -6428,7 +6428,7 @@ if ($tee == '') {
 
         $style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
 
-        echo "&nbsp;&nbsp;&nbsp;<span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
+        echo "<br><br>".t("Sähköinen tilausliitäntä").": <span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
         echo "<div id='div_color_tooltip' class='popup' style='width: 300px; line-height: 15px; height: 60px;'>";
         echo "<table>";
         echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>", t("kysytty määrä löytyy"), "</span></td></tr>";

@@ -995,7 +995,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   $time = round($time_end - $time_start);
 
   echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
-}/*
+}
 elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
 
   if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
@@ -1037,7 +1037,7 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
     require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
   }
 }
-*/
+
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
 unset($link);
 $link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");

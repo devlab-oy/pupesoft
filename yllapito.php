@@ -121,14 +121,14 @@ if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
-$al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
+$al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
 
 if ($alias_set != '') {
   if ($rajattu_nakyma != '') {
     $al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
   }
   else {
-    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') and nakyvyys != '' ";
+    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = 'Default') and nakyvyys != '' ";
   }
 }
 

@@ -126,7 +126,6 @@ $query = "SELECT
             AND tuote.tuotetyyppi    NOT in ('A','B')
             AND tuote.tuoteno       != ''
             AND tuote.nakyvyys      != ''
-            AND tuote.tuoteno IN ('testituote')
             $muutoslisa
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);

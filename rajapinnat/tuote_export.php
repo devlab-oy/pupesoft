@@ -80,6 +80,7 @@ if (mysql_num_rows($datetime_checkpoint_res) != 1) {
 if (!isset($magento_ajolista)) {
   $magento_ajolista = array(
     'tuotteet',
+    'lajitelmatuotteet',
     'tuoteryhmat',
     'asiakkaat',
     'hinnastot',
@@ -653,7 +654,7 @@ if (in_array('hinnastot', $magento_ajolista)) {
   }
 }
 
-if (in_array('tuotteet', $magento_ajolista)) {
+if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
 

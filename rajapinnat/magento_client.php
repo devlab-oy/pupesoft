@@ -1278,6 +1278,7 @@ class MagentoClient {
   private function get_option_id($name, $value) {
 
     $name = utf8_encode($name);
+    $value = utf8_encode($value);
     $attribute_list = $this->getAttributeList();
     $attribute_id = '';
 

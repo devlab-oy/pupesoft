@@ -243,6 +243,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "rekisteritiedot" :
       $pakolliset   = array("REKNO", "MAA");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $saakopoistaa = TRUE;
       break;
     case "sanakirja" :
       $pakolliset   = array("FI");

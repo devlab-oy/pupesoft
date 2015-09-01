@@ -40,7 +40,18 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->reference = $product['tuoteno'];
     $xml->product->supplier_reference = $product['tuoteno'];
+
     $xml->product->price = $product['myyntihinta'];
+    $xml->product->wholesale_price = $product['myyntihinta'];
+
+    $xml->product->width  = $product['tuoteleveys'];
+    $xml->product->height = $product['tuotekorkeus'];
+    $xml->product->depth  = $product['tuotesyvyys'];
+    $xml->product->weight = $product['tuotemassa'];
+
+    $xml->product->description = $product['kuvaus'];
+    $xml->product->description_short = $product['lyhytkuvaus'];
+
     $xml->product->available_for_order = 1;
     $xml->product->active = 1;
 

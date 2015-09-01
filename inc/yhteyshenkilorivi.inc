@@ -83,3 +83,10 @@ if (mysql_field_name($result, $i) == "oletusyhteyshenkilo") {
   $ulos .= "</select></td>";
   $jatko = 0;
 }
+
+if (mysql_field_name($result, $i) == "salasanan_resetointi") {
+  if (!isset($presta_api_key)) {
+    $tyyppi = 0;
+    $jatko = 0;
+  }
+}

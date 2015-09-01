@@ -36,6 +36,11 @@ class PrestaCustomers extends PrestaClient {
       $xml->customer->email = 'test@example.com';
     }
 
+    if (!empty($customer['salasanan_resetointi'])) {
+      $xml->customer->passwd = $customer['salasanan_resetointi'];
+      $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
+    }
+
     $xml->customer->active = 1;
 
     if (!empty($customer['presta_customergroup_id'])) {
@@ -100,6 +105,20 @@ class PrestaCustomers extends PrestaClient {
               SET ulkoinen_asiakasnumero = {$presta_id}
               WHERE yhtio = '{$yhtio}'
               AND tunnus = {$pupesoft_id}";
+    pupe_query($query);
+
+    return true;
+  }
+
+  private function confirm_password_reset($contact_id, $yhtio) {
+    if (empty($contact_id) or empty($yhtio)) {
+      return false;
+    }
+    
+    $query = "UPDATE yhteyshenkilo
+              SET salasanan_resetointi = ''
+              WHERE yhtio = '{$yhtio}'
+              AND tunnus = {$contact_id}";
     pupe_query($query);
 
     return true;

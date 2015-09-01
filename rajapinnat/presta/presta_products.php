@@ -7,6 +7,11 @@ class PrestaProducts extends PrestaClient {
 
   const RESOURCE = 'products';
 
+  /**
+   * Ohitettavien tuoteparametrien lista
+   */
+  private $_removable_fields = array();
+
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
@@ -52,6 +57,13 @@ class PrestaProducts extends PrestaClient {
       }
 
       $xml->product->id_category_default = $default_category_id;
+    }
+
+    $removables = $this->_removable_fields;
+    if (isset($removables) and count($removables) > 0) {
+      foreach($removables as $element) {
+        unset($xml->product->$element);
+      }
     }
 
     return $xml;
@@ -130,6 +142,10 @@ class PrestaProducts extends PrestaClient {
 
     return $existing_products;
   }
+
+  public function set_removable_fields($fields) {
+    $this->_removable_fields = $fields;
+  }  
 
   /**
    *

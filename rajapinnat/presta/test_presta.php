@@ -79,6 +79,9 @@ if ($request['action'] == 'sync') {
   if ($ok and in_array('tuotteet', $synkronoi)) {
     $tuotteet = hae_tuotteet();
     $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+    if (isset($presta_ohita_tuoteparametrit) and count($presta_ohita_tuoteparametrit) > 0) {
+      $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
+    }
     $ok = $presta_products->sync_products($tuotteet);
   }
 

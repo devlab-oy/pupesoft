@@ -943,6 +943,11 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
   }
 
+  // Poistetaanko/yliajetaanko Magenton default-tuoteparametrej‰
+  if (isset($magento_poista_defaultit) and !empty($magento_poista_defaultit)) {
+    $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

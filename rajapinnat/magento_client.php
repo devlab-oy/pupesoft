@@ -127,6 +127,11 @@ class MagentoClient {
   private $_asiakaskohtaiset_tuotehinnat = false;
 
   /**
+   * Magenton default-tuoteparametrien yliajo
+   */
+  private $_magento_poistadefaultit = array();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -387,6 +392,16 @@ class MagentoClient {
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
       );
+
+      $poista_defaultit = $this->_magento_poistadefaultit;
+
+      // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
+      // tai jos ne halutaan korvata additional_attributesin mukana
+      if (count($poista_defaultit) > 0) {
+        foreach ($poista_defaultit as $poistettava_key) {
+          unset($tuote_data[$poistettava_key]);
+        }
+      }
 
       // Lisätään tai päivitetään tuote
 
@@ -690,6 +705,16 @@ class MagentoClient {
         'additional_attributes' => array('multi_data' => $configurable_multi_data),
         'associated_skus'       => $lapsituotteet_array,
       );
+
+      $poista_defaultit = $this->_magento_poistadefaultit;
+
+      // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
+      // tai jos ne halutaan korvata additional_attributesin mukana
+      if (count($poista_defaultit) > 0) {
+        foreach ($poista_defaultit as $poistettava_key) {
+          unset($configurable[$poistettava_key]);
+        }
+      }
 
       try {
 
@@ -1866,6 +1891,14 @@ class MagentoClient {
   }
 
   /**
+   * Poistetaanko/yliajetaanko Magenton default-tuoteparametrejä
+   * Oletus tyhja array
+   */
+  public function setPoistaDefaultTuoteparametrit(array $poistettavat) {
+    $this->_magento_poistadefaultit = $poistettavat;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -2034,18 +2067,17 @@ class MagentoClient {
     $result = pupe_query($query);
     $tuote = mysql_fetch_assoc($result);
 
-    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, 'N', '', '');
+    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, '', '', '');
 
-    /*if ($netto != '') {
-      $kokonaisale = 0;
+    if ($netto == '') {
+      $kokonaisale = 1;
       $maara = $yhtiorow['myynnin_alekentat'];
-      
+
       for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
         $kokonaisale *= (1 - $ale["ale{$alepostfix}"] / 100);
       }
-
-      $hinta = round(($hinta * ($kokonaisale / 100)), 2);
-    }*/
+      $hinta = round(($hinta * $kokonaisale), 2);
+    }
 
     // Haetaan Magentosta asiakkaan website_id..
     $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);

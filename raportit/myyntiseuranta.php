@@ -3287,7 +3287,7 @@ else {
                 }
 
                 if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
-                  if ($ken_lask >= $data_start_index and is_numeric($row[$ken_nimi])) {
+                  if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
                     }

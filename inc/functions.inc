@@ -21283,7 +21283,12 @@ if (!function_exists("suuntalavan_tuotteet")) {
     $uusiotunnus_chk_res = pupe_query($query);
     $uusiotunnus_chk_row = mysql_fetch_assoc($uusiotunnus_chk_res);
 
-    $uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+    if (mysql_num_rows($uusiotunnus_chk_res) > 0) {
+      $uusiotunnuslisa = "tilausrivi.uusiotunnus IN ({$uusiotunnus_chk_row['keikkatunnus']})";
+    }
+    else {
+      $uusiotunnuslisa = '';
+    }
 
     // Haku tuotenumerolla
     $tuoteno = mysql_real_escape_string($tuoteno);

@@ -42,7 +42,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->supplier_reference = $product['tuoteno'];
 
     $xml->product->price = $product['myyntihinta'];
-    $xml->product->wholesale_price = $product['myyntihinta'];
+    #$xml->product->wholesale_price = $product['myyntihinta'];
 
     // Vaatii features-osion
     #$xml->product->width  = $product['tuoteleveys'];
@@ -59,7 +59,8 @@ class PrestaProducts extends PrestaClient {
     $xml->product->name->language[0] = $product['nimi'];
     $xml->product->name->language[1] = $product['nimi'];
 
-    $xml->product->description->language = $product['kuvaus'];
+    $xml->product->description = utf8_encode($product['kuvaus']);
+    $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
     if (!empty($product['tuotepuun_nodet'])) {
       foreach ($product['tuotepuun_nodet'] as $category_ancestors) {

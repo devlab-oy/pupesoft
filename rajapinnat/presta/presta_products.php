@@ -42,7 +42,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->supplier_reference = $product['tuoteno'];
 
     $xml->product->price = $product['myyntihinta'];
-    #$xml->product->wholesale_price = $product['myyntihinta'];
+    $xml->product->wholesale_price = $product['myyntihinta'];
 
     // Vaatii features-osion
     #$xml->product->width  = $product['tuoteleveys'];

@@ -122,6 +122,9 @@ if ($tee == "AJA") {
           list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varasto_valinta, '', $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso);
 
           if ($kpl == "X" or $kpl > $myytavissa) $tiedr[1] = $myytavissa;
+          if ($yhtiorow['paivita_oletuspaikka'] == 'M' and ($kpl == "X" or $kpl > $saldo)) {
+            $tiedr[1] = $saldo;
+          }
         }
 
         // Tarkistetaan onko annettu lähdevarastopaikka valitussa varastossa
@@ -290,7 +293,7 @@ if ($tee == "AJA") {
 
           $kutsuja = "varastopaikka_aineistolla.php";
           require "muuvarastopaikka.php";
-          
+
           unset($halyraja2);
           unset($tilausmaara2);
         }

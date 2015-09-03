@@ -96,19 +96,18 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 $dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma =
   $kaikki_tuotteet = $individual_tuotteet = array();
 
-if ($ajetaanko_kaikki == "NO") {
-  $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
-            OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
-            OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-            )";
-}
-else {
-  $muutoslisa = "";
-}
-
 echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 
 if (in_array('tuotteet', $magento_ajolista)) {
+  if ($ajetaanko_kaikki == "NO") {
+    $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
+              OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+              OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+              )";
+  }
+  else {
+    $muutoslisa = "";
+  }
 
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
 

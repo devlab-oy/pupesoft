@@ -1942,18 +1942,18 @@ class MagentoClient {
       $result = pupe_query($query);
       $yhenkrow = mysql_fetch_assoc($result);
 
+      // Aktivoidaan asiakas Magentoon
+      $reply = $this->_proxy->call(
+                 $this->_session,
+                 'activate_customer.activateBusinessCustomer',
+                 array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
+
       // Merkataan aktivointikuittaus tehdyksi
       $putsausquery = "UPDATE yhteyshenkilo
                        SET aktivointikuittaus = ''
                        WHERE yhtio = '{$yhtio}'
                        AND tunnus = '{$yhteyshenkilon_tunnus}'";
       pupe_query($putsausquery);
-
-      // Aktivoidaan asiakas Magentoon
-      $reply = $this->_proxy->call(
-                 $this->_session,
-                 'activate_customer.activateBusinessCustomer',
-                 array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
     }
     catch (Exception $e) {
       $this->_error_count++;

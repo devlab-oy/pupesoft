@@ -1265,9 +1265,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $ostohinta       = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $ostohintatiedot[0]));
             $valuutta        = $ostohintatiedot[3];
 
-            echo "<td align='right'>{$ostohinta} {$valuutta}</td>";
+            echo "<td align='right'>{$ostohinta}</td>";
 
-            $worksheet->writeString($excelrivi, $excelsarake++, "{$ostohinta} {$valuutta}", $style);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $ostohinta, $style);
           }
 
           if ($toim != "VSUUNNITTELU") {

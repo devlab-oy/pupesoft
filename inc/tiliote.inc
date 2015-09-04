@@ -744,7 +744,14 @@ case 'T00':
 
     if ($yritirow["hyvak"] != "") {
       if ($silent == "") {
-        echo t("Vastuussa")." '$yritirow[hyvak]'.<br>\n";
+        $query = "SELECT nimi
+                  FROM kuka
+                  WHERE yhtio = '{$yritirow['yhtio']}'
+                  and kuka = '{$yritirow['hyvak']}'";
+        $nimires = pupe_query($query);
+        $nimirow = mysql_fetch_assoc($nimires);
+        
+        echo t("Vastuussa").": $nimirow[nimi].<br>\n";
       }
     }
 

@@ -1030,6 +1030,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Ostohinta"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoh.val"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
@@ -1265,9 +1266,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $ostohinta       = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $ostohintatiedot[0]));
             $valuutta        = $ostohintatiedot[3];
 
-            echo "<td align='right'>{$ostohinta}</td>";
+            echo "<td align='right'>{$ostohinta} {$valuutta}</td>";
 
             $worksheet->writeNumber($excelrivi, $excelsarake++, $ostohinta, $style);
+            $worksheet->writeString($excelrivi, $excelsarake++, $valuutta, $style);
           }
 
           if ($toim != "VSUUNNITTELU") {
@@ -1495,7 +1497,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
           }
 
-          $_yhteensa = round($resyht, 6);
+          $_yhteensa = round($resyht, 7);
           echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
         }
       }

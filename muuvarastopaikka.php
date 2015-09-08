@@ -510,7 +510,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] > $myytavissa and $kutsuja != "vastaanota.php") {
+      if ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirt‰‰. Saldo ei riitt‰nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }

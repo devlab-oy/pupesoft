@@ -1481,7 +1481,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         }
         else {
-          $colspan = 4;
+          $colspan = 5;
           if (!empty($resepti_kentat)) {
             $colspan += count($resepti_kentat);
           }

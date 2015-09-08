@@ -947,6 +947,11 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
   }
 
+  // Poistetaanko/yliajetaanko Magenton default-asiakasparametrej‰
+  if (isset($magento_poista_asiakasdefaultit) and !empty($magento_poista_asiakasdefaultit)) {
+    $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

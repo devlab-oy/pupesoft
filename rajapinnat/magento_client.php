@@ -132,6 +132,11 @@ class MagentoClient {
   private $_magento_poistadefaultit = array();
 
   /**
+   * Magenton default-tuoteparametrien yliajo
+   */
+  private $_magento_poista_asiakasdefaultit = array();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -1633,6 +1638,16 @@ class MagentoClient {
       // Asiakas on jo olemassa, päivitetään
       else {
         try {
+          
+          $poista_asiakas_defaultit = $this->_magento_poista_asiakasdefaultit;
+
+          // Jos halutaan ohittaa asiakasparametreja, poistetaan ne ennen paivitysta
+          if (count($poista_asiakas_defaultit) > 0) {
+            foreach ($poista_asiakas_defaultit as $poistettava_key) {
+              unset($asiakas_data[$poistettava_key]);
+            }
+          }
+
           $result = $this->_proxy->call(
             $this->_session,
             'customer.update',
@@ -1896,6 +1911,14 @@ class MagentoClient {
    */
   public function setPoistaDefaultTuoteparametrit(array $poistettavat) {
     $this->_magento_poistadefaultit = $poistettavat;
+  }
+
+  /**
+   * Poistetaanko/yliajetaanko Magenton asiakkaan default-parametrejä
+   * Oletus tyhja array
+   */
+  public function setPoistaDefaultAsiakasparametrit(array $poistettavat_asiakasparamit) {
+    $this->_magento_poista_asiakasdefaultit = $poistettavat_asiakasparamit;
   }
 
   /**

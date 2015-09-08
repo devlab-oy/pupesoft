@@ -1497,7 +1497,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
           }
 
-          $_yhteensa = round($resyht, 7);
+          $_yhteensa = round($resyht, 6);
           echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
         }
       }

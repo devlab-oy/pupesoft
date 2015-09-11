@@ -512,6 +512,10 @@ else {
 $result = pupe_query($query);
 $selkukarow = mysql_fetch_assoc($result);
 
+if (mysql_num_rows($result) > 0) {
+  $selkuka = $selkukarow["tunnus"];
+}
+
 //muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 if ($tee == 'MUUTA') {
 
@@ -623,6 +627,7 @@ if ($tee == 'MUUTA') {
     $query = "SELECT nimi, kuka, tunnus
               FROM kuka
               WHERE tunnus = '{$selkuka}'";
+
     $result = pupe_query($query);
     $selkukarow = mysql_fetch_assoc($result);
 

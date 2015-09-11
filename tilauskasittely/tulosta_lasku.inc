@@ -771,7 +771,7 @@ if (!function_exists('rivi_lasku')) {
     if ($kieli != $yhtiorow["kieli"]) {
       $row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
 
-      if ($laskutyyppi != 18) {
+      if ($laskutyyppi != 18 and $laskutyyppi != 6) {
         $row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
       }
 
@@ -1163,7 +1163,7 @@ if (!function_exists('rivi_original')) {
 
       $kommentit = explode("\n", trim($row["kommentti"]));
 
-      if ($laskutyyppi != 18 and $row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and !preg_match("/".t("Tilaus", $kieli).":? ".$row["otunnus"]."/", $row["kommentti"])) {
+      if ($laskutyyppi != 18 and $laskutyyppi != 6 and $row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and !preg_match("/".t("Tilaus", $kieli).":? ".$row["otunnus"]."/", $row["kommentti"])) {
         $pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
         $kala = $kala - 10;
       }

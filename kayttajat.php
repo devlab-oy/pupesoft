@@ -627,7 +627,6 @@ if ($tee == 'MUUTA') {
     $query = "SELECT nimi, kuka, tunnus
               FROM kuka
               WHERE tunnus = '{$selkuka}'";
-
     $result = pupe_query($query);
     $selkukarow = mysql_fetch_assoc($result);
 

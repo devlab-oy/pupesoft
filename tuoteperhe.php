@@ -1479,7 +1479,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         }
         else {
-          echo "<td class='back' colspan='4'></td>";
+          $colspan = 4;
+          if (!empty($resepti_kentat)) {
+            $colspan += count($resepti_kentat);
+          }
+          echo "<td class='back' colspan='{$colspan}'></td>";
         }
 
         if ($toim != "VSUUNNITTELU") {

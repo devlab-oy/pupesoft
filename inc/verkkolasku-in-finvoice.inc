@@ -170,6 +170,8 @@ if (count($tuotetiedot) > 0) {
       }
 
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
+      $rtuoteno[$i]["riviinfo"] = preg_replace("/ {2,}/", " " ,xml_string($tuotetieto->ArticleName));
+
       $rtuoteno[$i]["rivihinta"] = round(xml_float($tuotetieto->RowVatExcludedAmount), 2);
       $rtuoteno[$i]["rivihinta_verolli"] = round(xml_float($tuotetieto->RowAmount), 2);
 

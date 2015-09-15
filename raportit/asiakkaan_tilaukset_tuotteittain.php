@@ -356,7 +356,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
       echo "<tr class='aktiivi'>";
 
-      $lopetus .= $palvelin2;
+      $lopetus = $palvelin2;
       $lopetus .= "raportit/asiakkaan_tilaukset_tuotteittain.php";
       $lopetus .= "////tee=$tee";
       $lopetus .= "//toim=$toim";
@@ -369,8 +369,6 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
       $lopetus .= "//tuoteno=".urlencode($tuoteno);
       $lopetus .= "//ytunnus=$ytunnus";
       $lopetus .= "//asiakasid=$asiakasid";
-      $lopetus .= "//jarj=".mysql_field_name($result, $i).$pvmtapa_url;
-      $lopetus .= "//toim=MYYNTI";
 
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 

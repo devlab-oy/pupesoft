@@ -39,16 +39,19 @@ if ($toim == "tuotteen_toimittajat") {
 
 // Pupenext ylläpitonakymät aakkosjärjestyksessä
 $psx_ohjelmat = array(
-  "kassalipas"        => "{$palvelin2}pupenext/cash_registers",
-  "kirjoittimet"      => "{$palvelin2}pupenext/printers",
-  "kustannuspaikka"   => "{$palvelin2}pupenext/qualifiers",
-  "maksuehto"         => "{$palvelin2}pupenext/terms_of_payments",
-  "pakkaamo"          => "{$palvelin2}pupenext/packing_areas",
-  "rahdinkuljettajat" => "{$palvelin2}pupenext/carriers",
-  "taso"              => "{$palvelin2}pupenext/sum_levels",
-  "tili"              => "{$palvelin2}pupenext/accounts",
-  "tilikaudet"        => "{$palvelin2}pupenext/fiscal_years",
-  "valuu"             => "{$palvelin2}pupenext/currencies",
+  "kassalipas"         => "{$palvelin2}pupenext/cash_registers",
+  "kirjoittimet"       => "{$palvelin2}pupenext/printers",
+  "kustannuspaikka"    => "{$palvelin2}pupenext/qualifiers",
+  "maksuehto"          => "{$palvelin2}pupenext/terms_of_payments",
+  "pakkaamo"           => "{$palvelin2}pupenext/packing_areas",
+  "pakkaus"            => "{$palvelin2}pupenext/packages",
+  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details",
+  "rahdinkuljettajat"  => "{$palvelin2}pupenext/carriers",
+  "taso"               => "{$palvelin2}pupenext/sum_levels",
+  "tili"               => "{$palvelin2}pupenext/accounts",
+  "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
+  "valuu"              => "{$palvelin2}pupenext/currencies",
+  "yriti"              => "{$palvelin2}pupenext/bank_accounts",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -136,14 +139,14 @@ if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
-$al_lisa = " and selitetark_2 = '' and nakyvyys != '' ";
+$al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
 
 if ($alias_set != '') {
   if ($rajattu_nakyma != '') {
     $al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
   }
   else {
-    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') and nakyvyys != '' ";
+    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = 'Default') and nakyvyys != '' ";
   }
 }
 
@@ -2171,7 +2174,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "pakkaus" or ($toim == "avainsana" and $from != "yllapito"))) {
+  if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or ($toim == "avainsana" and $from != "yllapito"))) {
 
     if (isset($perhe) and $perhe > 0) {
       $la_tunnus = $perhe;
@@ -2182,10 +2185,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if ($toim == "toimitustapa") {
       $laji = "TOIMTAPAKV";
-      $urilisa = "&haku[3]=@$tunnus";
-    }
-    elseif ($toim == "pakkaus") {
-      $laji = "PAKKAUSKV";
       $urilisa = "&haku[3]=@$tunnus";
     }
     elseif ($toim == "avainsana") {
@@ -2213,12 +2212,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
     if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
-    }
-  }
-
-  if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'pakkaus') {
-    if (($toikrow = tarkista_oikeus("yllapito.php", "pakkauskoodit%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2299,7 +2292,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "pakkauskoodit" or
     $toim == "keraysvyohyke" or
     $toim == "avainsana" or
-    $toim == "pakkaus" or
     $toim == "asiakasalennus" or
     $toim == "asiakashinta" or
     $toim == "perusalennus" or

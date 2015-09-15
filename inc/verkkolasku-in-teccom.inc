@@ -53,7 +53,8 @@ $ei_oteta_kulua_pois = FALSE;
 if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
   $laskuttajan_toimittajanumero = "123312";
 }
-elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" or strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
+elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" or strtoupper($laskuttajan_toimittajanumero) == "AA_FI"
+  or strtoupper($laskuttajan_toimittajanumero) == "AA_FI_BA") {
   $laskuttajan_toimittajanumero = "123067";
 
   // Tarkistusnumero

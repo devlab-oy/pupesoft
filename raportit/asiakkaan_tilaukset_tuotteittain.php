@@ -356,6 +356,22 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
       echo "<tr class='aktiivi'>";
 
+      $lopetus .= $palvelin2;
+      $lopetus .= "raportit/asiakkaan_tilaukset_tuotteittain.php";
+      $lopetus .= "////tee=$tee";
+      $lopetus .= "//toim=$toim";
+      $lopetus .= "//ppl=$ppl";
+      $lopetus .= "//vvl=$vvl";
+      $lopetus .= "//kkl=$kkl";
+      $lopetus .= "//ppa=$ppa";
+      $lopetus .= "//vva=$vva";
+      $lopetus .= "//kka=$kka";
+      $lopetus .= "//tuoteno=".urlencode($tuoteno);
+      $lopetus .= "//ytunnus=$ytunnus";
+      $lopetus .= "//asiakasid=$asiakasid";
+      $lopetus .= "//jarj=".mysql_field_name($result, $i).$pvmtapa_url;
+      $lopetus .= "//toim=MYYNTI";
+
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 
         if (mysql_field_name($result, $i) == 'kerattyaika' or mysql_field_name($result, $i) == 'toimaika' or mysql_field_name($result, $i) == 'tuloutettu' or mysql_field_name($result, $i) == 'Käsittelyyn') {
@@ -370,7 +386,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
           }
         }
         elseif (mysql_field_name($result, $i) == 'tuoteno') {
-          echo "<$ero valign='top' $class><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></$ero>";
+          echo "<$ero valign='top' $class><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."&lopetus=$lopetus'>$row[$i]</a></$ero>";
         }
         elseif (mysql_field_name($result, $i) == 'kate') {
           if ($row["var"] == "P") {

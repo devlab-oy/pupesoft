@@ -6,7 +6,8 @@ else exit;
 
 echo "<font class='head'>".t("Muokkaa pikavalintoja").":</font><hr>";
 
-$kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
+$kuvakkeet_img = array (
+  "Kalenteri"    => "calendar.png",
   "Crm"          => "crm-2.png",
   "Crm-sydän"    => "crm.png",
   "Lisää_useita" => "icon-add-multiple.png",
@@ -22,7 +23,8 @@ $kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
   "Vähennä"      => "icon-vahenna.png",
   "Myynti"       => "myynti.png",
   "Neula"        => "pin.png",
-  "Ratas"        => "ratas.png");
+  "Ratas"        => "ratas.png",
+  "Laskin"       => "calc.png");
 
 if ($tee == "tallenna") {
   foreach ($skriptit as $i => $skripti) {
@@ -129,6 +131,13 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
   echo "<tr>";
   echo "<td><select name='skriptit[]'><option value=''>".t("Valitse ohjelma")."</option>";
 
+  $sel = "";
+  if (isset($skripti) and $skripti == "LASKIN") {
+    $sel = "SELECTED";
+  }
+
+  echo "<option value='LASKIN' $sel>Pupesoft-laskin</option>";
+
   while ($oikeurow = mysql_fetch_assoc($oikeures)) {
     $sel = "";
     if (isset($skripti) and $skripti == $oikeurow["sovellus"]."###".$oikeurow["nimi"]."###".$oikeurow["alanimi"]) {
@@ -161,6 +170,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
 echo "<tr>";
 echo "<td><select name='skriptit[]'><option value=''>".t("Valitse ohjelma")."</option>";
+echo "<option value='LASKIN'>Pupesoft-laskin</option>";
 
 while ($oikeurow = mysql_fetch_assoc($oikeures)) {
   echo "<option value='$oikeurow[sovellus]###$oikeurow[nimi]###$oikeurow[alanimi]'>$oikeurow[sovellus] --> $oikeurow[nimitys]</option>";

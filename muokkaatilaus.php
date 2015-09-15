@@ -285,6 +285,11 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
 $toim = strtoupper($toim);
 
+if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+  $pika_oikeu = tarkista_oikeus('tilaus_myynti.php', 'PIKATILAUS');
+  $rivi_oikeu = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
+}
+
 if ($toim == "" or $toim == "SUPER" or $toim == "KESKEN") {
   $otsikko = t("myyntitilausta");
 }
@@ -544,11 +549,28 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
       // tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
       if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
-        $aputoim1 = "RIVISYOTTO";
-        $aputoim2 = "PIKATILAUS";
 
-        $lisa1 = t("Rivisyöttöön");
-        $lisa2 = t("Pikatilaukseen");
+        if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
+          $aputoim1 = "PIKATILAUS";
+          $aputoim2 = "";
+
+          $lisa1 = t("Pikatilaukseen");
+          $lisa2 = "";
+        }
+        elseif (isset($pika_oikeu) and !$pika_oikeu and $rivi_oikeu) {
+          $aputoim1 = "RIVISYOTTO";
+          $aputoim2 = "";
+
+          $lisa1 = t("Rivisyöttöön");
+          $lisa2 = "";
+        }
+        else {
+          $aputoim1 = "RIVISYOTTO";
+          $aputoim2 = "PIKATILAUS";
+
+          $lisa1 = t("Rivisyöttöön");
+          $lisa2 = t("Pikatilaukseen");
+        }
       }
       elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
         $aputoim1 = "VALMISTAASIAKKAALLE";
@@ -670,7 +692,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
       echo "</select></td>";
 
-      if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA')) {
         echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
       }
 
@@ -1886,7 +1908,7 @@ elseif ($toim == 'YLLAPITO') {
   }
 
   $query = "SELECT lasku.tunnus tilaus,
-            lasku.asiakkaan_tilausnumero 'asiak. tilno',
+            lasku.asiakkaan_tilausnumero 'asiak_tilno',
             $asiakasstring asiakas,
             lasku.luontiaika,
             if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
@@ -2698,11 +2720,27 @@ if (mysql_num_rows($result) != 0) {
 
       // tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
       if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
-        $aputoim1 = "RIVISYOTTO";
-        $aputoim2 = "PIKATILAUS";
+        if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
+          $aputoim1 = "PIKATILAUS";
+          $aputoim2 = "";
 
-        $lisa1 = t("Rivisyöttöön");
-        $lisa2 = t("Pikatilaukseen");
+          $lisa1 = t("Pikatilaukseen");
+          $lisa2 = "";
+        }
+        elseif (isset($pika_oikeu) and !$pika_oikeu and $rivi_oikeu) {
+          $aputoim1 = "RIVISYOTTO";
+          $aputoim2 = "";
+
+          $lisa1 = t("Rivisyöttöön");
+          $lisa2 = "";
+        }
+        else {
+          $aputoim1 = "RIVISYOTTO";
+          $aputoim2 = "PIKATILAUS";
+
+          $lisa1 = t("Rivisyöttöön");
+          $lisa2 = t("Pikatilaukseen");
+        }
       }
       elseif (($whiletoim == "VALMISTUS" or $whiletoim == "VALMISTUSSUPER" or $whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] == "V" and $row["tilaustyyppi"] == "V") {
         $aputoim1 = "VALMISTAASIAKKAALLE";
@@ -2912,10 +2950,8 @@ if (mysql_num_rows($result) != 0) {
 
       $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
 
-      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
-
+      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
         echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
-
       }
 
       echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";

@@ -243,6 +243,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "rekisteritiedot" :
       $pakolliset   = array("REKNO", "MAA");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $saakopoistaa = TRUE;
       break;
     case "sanakirja" :
       $pakolliset   = array("FI");
@@ -439,7 +440,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
                 WHERE yhtio      = '{$kukarow["yhtio"]}'
                 AND laji         = 'MYSQLALIAS'
                 AND selite       LIKE '$table.%'
-                AND selitetark_2 = ''";
+                AND selitetark_2 = 'Default'";
       $result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($result)) {

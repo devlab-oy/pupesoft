@@ -267,7 +267,8 @@ if ($handle = opendir($teccomkansio)) {
         if (strtoupper($tavarantoimittajanumero) == "ELRING") {
           $tavarantoimittajanumero = "123312";
         }
-        elseif (strtoupper($tavarantoimittajanumero) == "BOSCH" or strtoupper($tavarantoimittajanumero) == "AA_FI") {
+        elseif (strtoupper($tavarantoimittajanumero) == "BOSCH" or strtoupper($tavarantoimittajanumero) == "AA_FI"
+          or strtoupper($tavarantoimittajanumero) == "AA_FI_BA") {
           $tavarantoimittajanumero = "123067";
         }
         elseif (strtoupper($tavarantoimittajanumero) == "NISSENS") {

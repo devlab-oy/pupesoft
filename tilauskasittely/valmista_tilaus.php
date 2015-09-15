@@ -1364,8 +1364,16 @@ if (!isset($from_kaikkikorj)) {
         }
       }
 
+      $lopetus = $palvelin2;
+      $lopetus .= "tilauskasittely/valmista_tilaus.php";
+      $lopetus .= "////toim=$toim";
+      $lopetus .= "//tee=$tee";
+      $lopetus .= "//tulin=$tulin";
+      $lopetus .= "//valmistettavat=$valmistettavat";
+      $lopetus .= "//otunnus=$row[Tilaus]";
+
       echo "<td class='$class' valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
-      echo "<td class='$class' valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a></td>";
+      echo "<td class='$class' valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$lopetus'>$prow[tuoteno]</a></td>";
       echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";
 
       if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {

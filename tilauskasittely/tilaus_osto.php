@@ -1984,31 +1984,3 @@ if (!empty($tuoteno) and empty($kpl)) {
 }
 
 require "inc/footer.inc";
-
-/**
- * @param array $params
- *
- * @return array Ensimmäinen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisessä tilauksella
- */
-function hae_eka_ja_vika_tilausrivi($params) {
-  global $kukarow;
-
-  $tilausnumero = $params['tilausnumero'];
-  $tuoteno      = $params['tuoteno'];
-
-  $query = "SELECT min(tunnus) AS eka,
-            max(tunnus)        AS vika
-            FROM tilausrivi
-            WHERE yhtio     = '{$kukarow["yhtio"]}'
-            AND otunnus     = '{$tilausnumero}'
-            AND tuoteno     = '{$tuoteno}'
-            AND uusiotunnus = 0
-            AND laskutettu  = ''
-            AND tyyppi      = 'O'";
-
-  $result = pupe_query($query);
-
-  $tunnukset = mysql_fetch_assoc($result);
-
-  return array($tunnukset["eka"], $tunnukset["vika"]);
-}

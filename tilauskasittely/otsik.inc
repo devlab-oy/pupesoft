@@ -1,7 +1,9 @@
 <?php
 
-function pupe_strtoupper(&$item, $key) {
-  $item = strtoupper($item);
+if (!function_exists("pupe_strtoupper")) {
+  function pupe_strtoupper(&$item, $key) {
+    $item = strtoupper($item);
+  }
 }
 
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -320,7 +322,9 @@ if (isset($jatka) and $asiakasid != "") {
       );
       $toimitustavat = hae_toimitustavat($params);
       $toimitustavat_selitteet = array_column($toimitustavat, 'selite');
+
       array_walk($toimitustavat_selitteet, "pupe_strtoupper");
+
       if (!in_array(strtoupper($toimitustapa), $toimitustavat_selitteet)) {
         echo "<font class='error'>".t("VIRHE: Varaston toimipaikalla ei ole valittua toimitustapaa")."!</font><br>";
         $tee = "OTSIK";

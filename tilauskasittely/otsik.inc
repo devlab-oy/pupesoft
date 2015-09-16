@@ -42,6 +42,20 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
         }
       }
 
+      function lisaa_tarkiste() {
+        var viite = document.getElementById('kasinsyotetty_viite').value
+
+        // Generoidaan viitenumeron tarkiste
+        var ind1, ind2 = 0, sum = 0, kerr = [ 7, 3, 1 ];
+
+        for (ind1 = viite.length; ind1--; ind2++) {
+          sum += (viite.charCodeAt(ind1) - 48) * kerr[ind2 % 3];
+        }
+
+        tarkiste = (1000 - sum) % 10;
+
+        document.getElementById('kasinsyotetty_viite').value=viite+tarkiste
+      }
       //-->
       </script>";
 }
@@ -1694,7 +1708,8 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($yhtiorow["viitteen_kasinsyotto"] != "") {
       $vasen_sarake[$vasen] = "<td>".t("Viitenumero").":</td><td>";
-      $vasen_sarake[$vasen] .= "<input type='text' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
+      $vasen_sarake[$vasen] .= "<input type='text' id='kasinsyotetty_viite' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
+      $vasen_sarake[$vasen] .= "<a href='' onclick='lisaa_tarkiste(); return false;'><img src='{$palvelin2}pics/lullacons/add.png'>".t("Lisää tarkiste")."</a>";
       $vasen_sarake[$vasen] .= "</td>";
       $vasen++;
     }

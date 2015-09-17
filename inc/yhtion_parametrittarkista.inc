@@ -41,6 +41,11 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
+    // Poistetaan spacet
+    if ($fieldname == "finvoice_senderpartyid" or $fieldname == "finvoice_senderintermediator") {
+      $t[$i] = str_replace(" ", "", $t[$i]);
+    }
+
     if ($fieldname == "kuvapankki_polku") {
       if ($t[$i] != "" and !is_writable($t[$i]."/".$kukarow['yhtio'])) {
         $virhe[$i] = "<font class='error'>Kansiossa ei ole kirjoitusoikeutta!<br></font>";

@@ -1571,11 +1571,16 @@ echo "<script type='text/javascript'>
           $('#tuotteen_tilaukset').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
-                toimipaikka = $('#toimipaikka option:selected').val();
+                toimipaikka = $('#toimipaikka option:selected').val();";
 
-            $(this).val('".t("Päivitä")."');
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  echo "   $('#tuotteen_tilaukset_img').attr('src', '{$palvelin2}pics/facelift/refresh.png');";
+}
+else {
+  echo "   $(this).val('".t("Päivitä")."');";
+}
 
-            $('#tuotteen_tilaukset_container').html('<img src=\"'+_src+'\" /><br />');
+echo "     $('#tuotteen_tilaukset_container').html('<img src=\"'+_src+'\" /><br />');
 
             $.ajax({
               async: false,
@@ -1600,11 +1605,16 @@ echo "<script type='text/javascript'>
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
                 raportointi_tyyppi = $('.raportti_tyyppi:checked').val(),
                 yksikko = $('#yksikko').val(),
-                toimipaikka = $('#toimipaikka option:selected').val();
+                toimipaikka = $('#toimipaikka option:selected').val();";
 
-            $(this).val('".t("Päivitä")."');
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  echo "    $('#raportointi_img').attr('src', '{$palvelin2}pics/facelift/refresh.png');";
+}
+else {
+  echo "    $(this).val('".t("Päivitä")."');";
+}
 
-            $('#raportointi_container').html('<img src=\"'+_src+'\" /><br />');
+echo"       $('#raportointi_container').html('<img src=\"'+_src+'\" /><br />');
 
             $.ajax({
               async: false,
@@ -1636,11 +1646,16 @@ echo "<script type='text/javascript'>
                 tilalehinta = $('#tilalehinta:checked').val(),
                 kokonaissaldo_tapahtumalle = $('#kokonaissaldo_tapahtumalle').val(),
                 toimipaikka = $('#toimipaikka option:selected').val(),
-                sarjanumero_kpl = $('#sarjanumero_kpl').val();
+                sarjanumero_kpl = $('#sarjanumero_kpl').val();";
 
-            $(this).val('".t("Päivitä")."');
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  echo "    $('#tapahtumat_img').attr('src', '{$palvelin2}pics/facelift/refresh.png');";
+}
+else {
+  echo "    $(this).val('".t("Päivitä")."');";
+}
 
-            if (tilalehinta) {
+echo"       if (tilalehinta) {
               $('#tapahtumalaji_header').attr('colspan', 6);
               $('#tilalehinta_hearder').show();
             }
@@ -1683,10 +1698,16 @@ echo "<script type='text/javascript'>
                 sarjanumeroseuranta = $('#sarjanumeroseuranta').val(),
                 _tp_kasittely = $('#_tp_kasittely').val(),
                 toimipaikka = $('#toimipaikka option:selected').val(),
-                saldoaikalisa = $('#saldoaikalisa').val();
+                saldoaikalisa = $('#saldoaikalisa').val();";
 
-            $(this).val('".t("Päivitä")."');
-            $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />');
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  echo "    $('#varastopaikat_img').attr('src', '{$palvelin2}pics/facelift/refresh.png');";
+}
+else {
+  echo "    $(this).val('".t("Päivitä")."');";
+}
+
+echo"       $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />');
 
             $.ajax({
               async: false,
@@ -1762,9 +1783,10 @@ if ($tee == 'N' or $tee == 'E') {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote use index (tuoteno_index)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            WHERE tuote.yhtio     = '$kukarow[yhtio]'
             and tuote.tuoteno $oper '$tuoteno'
             and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+            and tuote.tuotetyyppi not in ('A','B')
             ORDER BY tuote.tuoteno $suun
             LIMIT 1";
   $result = pupe_query($query);
@@ -2144,8 +2166,20 @@ if ($tee == 'Z') {
     echo "<tr>";
     echo "<td style='font-weight:bold;'>$tuoterow[tuoteno]";
 
-    if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
-      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=tuote&tunnus={$tuoterow["tunnus"]}&lopetus=$tkysy_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' /></a>";
+    $tuotehallintaoikeus = tarkista_oikeus('yllapito.php', 'tuote%', 1, true);
+
+    if ($tuotehallintaoikeus) {
+      echo "&nbsp;&nbsp;
+            <a href='{$palvelin2}yllapito.php?toim={$tuotehallintaoikeus["alanimi"]}&tunnus={$tuoterow["tunnus"]}&lopetus={$tkysy_lopetus}'>";
+
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "<img style='height:15px;' src='{$palvelin2}pics/facelift/jakoavain.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' />";
+      }
+      else {
+        echo "<img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotteen tietoja"), "' />";
+      }
+
+      echo "</a>";
     }
 
     //haetaan orginaalit
@@ -2567,13 +2601,36 @@ if ($tee == 'Z') {
       echo "<font class='message'>".t("Varastopaikat")."</font>";
 
       if (tarkista_oikeus('muuvarastopaikka.php', '', 1)) {
-        echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' /></a>";
+        echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'>";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<img style='height:15px;' src='{$palvelin2}pics/facelift/jakoavain.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' />";
+        }
+        else {
+          echo "<img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' />";
+        }
+
+        echo "</a>";
       }
       elseif (tarkista_oikeus('muuvarastopaikka.php', 'OLETUSVARASTO', 1)) {
-        echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?toim=OLETUSVARASTO&tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' /></a>";
+        echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?toim=OLETUSVARASTO&tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'>";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<img style='height:15px;' src='{$palvelin2}pics/facelift/jakoavain.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' />";
+        }
+        else {
+          echo "<img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' />";
+        }
+
+        echo "</a>";
       }
 
-      echo "&nbsp;&nbsp;<input type='button' id='varastopaikat' value='", t("Näytä"), "' />";
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "&nbsp;&nbsp;<a id='varastopaikat'><img id='varastopaikat_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+      }
+      else {
+        echo "&nbsp;&nbsp;<input type='button' id='varastopaikat' value='", t("Näytä"), "' />";
+      }
 
       echo "<hr>";
 
@@ -2592,14 +2649,30 @@ if ($tee == 'Z') {
       echo "<font class='message'>".t("Korvaavat tuotteet")."</font>";
 
       if (tarkista_oikeus('korvaavat.php', '', 1)) {
-        echo "&nbsp;&nbsp;<a href='{$palvelin2}korvaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta korvaavuusketjuja"), "' /></a>";
+        echo "&nbsp;&nbsp;<a href='{$palvelin2}korvaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'>";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<img style='height:15px;' src='{$palvelin2}pics/facelift/jakoavain.png' alt='", t("Muokkaa"), "' title='", t("Muuta korvaavuusketjuja"), "' />";
+        }
+        else {
+          echo "<img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta korvaavuusketjuja"), "' />";
+        }
+
+        echo "</a>";
         echo "&nbsp;&nbsp;";
       }
 
       echo "<hr>";
 
       echo "<div id='korvaavat_container'>";
-      echo "<input type='button' id='korvaavat' value='", t("Näytä"), "' />";
+
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "&nbsp;&nbsp;<a id='korvaavat'><img id='korvaavat_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+      }
+      else {
+        echo "&nbsp;&nbsp;<input type='button' id='korvaavat' value='", t("Näytä"), "' />";
+      }
+
       echo "</div>";
     }
 
@@ -2613,13 +2686,29 @@ if ($tee == 'Z') {
       echo "<font class='message'>".t("Vastaavat tuotteet")."</font>";
 
       if (tarkista_oikeus('vastaavat.php', '', 1)) {
-        echo "&nbsp;&nbsp;<a href='{$palvelin2}vastaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta vastaavuusvuusketjuja"), "' /></a>";
+        echo "&nbsp;&nbsp;<a href='{$palvelin2}vastaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'>";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<img style='height:15px;' src='{$palvelin2}pics/facelift/jakoavain.png' alt='", t("Muokkaa"), "' title='", t("Muuta vastaavuusvuusketjuja"), "' />";
+        }
+        else {
+          echo "<img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta vastaavuusvuusketjuja"), "' />";
+        }
+
+        echo "</a>";
       }
 
       echo "<hr>";
 
       echo "<div id='vastaavat_container'>";
-      echo "<input type='button' id='vastaavat' value='", t("Näytä"), "' />";
+
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "&nbsp;&nbsp;<a id='vastaavat'><img id='vastaavat_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+      }
+      else {
+        echo "&nbsp;&nbsp;<input type='button' id='vastaavat' value='", t("Näytä"), "' />";
+      }
+
       echo "</div>";
     }
 
@@ -2688,7 +2777,14 @@ if ($tee == 'Z') {
 
     // Varastosaldot ja paikat
     echo "<font class='message'>".t("Tuotteen tilaukset")."</font>";
-    echo "&nbsp;&nbsp;<input type='button' id='tuotteen_tilaukset' value='", t("Näytä"), "' />";
+
+    if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+      echo "&nbsp;&nbsp;<a id='tuotteen_tilaukset'><img id='tuotteen_tilaukset_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+    }
+    else {
+      echo "&nbsp;&nbsp;<input type='button' id='tuotteen_tilaukset' value='", t("Näytä"), "' />";
+    }
+
     echo "<input type='hidden' id='tuoteno' value='{$tuoteno}' />";
     echo "<input type='hidden' id='yksikko' value='{$tuoterow['yksikko']}' />";
     echo "<input type='hidden' id='sarjanumeroseuranta' value='{$tuoterow['sarjanumeroseuranta']}' />";
@@ -2723,9 +2819,16 @@ if ($tee == 'Z') {
         <input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
         <font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
         (<input type='radio' class='raportti_tyyppi' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
-        <input type='radio' class='raportti_tyyppi' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
-        &nbsp;&nbsp;<input type='button' id='raportointi' value='", t("Näytä"), "' />
-        </form><hr>";
+        <input type='radio' class='raportti_tyyppi' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "&nbsp;&nbsp;<a id='raportointi'><img id='raportointi_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+        }
+        else {
+          echo "&nbsp;&nbsp;<input type='button' id='raportointi' value='", t("Näytä"), "' />";
+        }
+
+        echo "</form><hr>";
 
       echo "<div id='raportointi_container'>";
       echo "</div>";
@@ -2892,9 +2995,24 @@ if ($tee == 'Z') {
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
       echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
       echo "<input type='hidden' name='raportti' value='$raportti'>";
+      echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'>";
 
-      echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";
-      echo "&nbsp;&nbsp;<input type='button' id='tapahtumat' value='", t("Näytä"), "' />";
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "<img style='height:20px;' src='{$palvelin2}pics/facelift/nuolet_ylos.png' />";
+      }
+      else {
+        echo "<img src='pics/lullacons/arrow-double-up-green.png' />";
+      }
+
+      echo "</a>";
+
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "&nbsp;&nbsp;<a id='tapahtumat'><img id='tapahtumat_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+      }
+      else {
+        echo "&nbsp;&nbsp;<input type='button' id='tapahtumat' value='", t("Näytä"), "' />";
+      }
+
       echo "<hr />";
       echo "<table>";
 

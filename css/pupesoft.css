@@ -225,3 +225,7 @@ table.responsive td input[type=text] {
   box-sizing: border-box;
   margin: 0;
 }
+
+.del {
+  text-decoration: line-through;
+}

@@ -310,6 +310,8 @@ if ($tee == 'MUUTA') {
   else {
     $tee = 'M';
   }
+
+  if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 }
 
 // Siirretään saldo, jos se on vielä olemassa
@@ -508,7 +510,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] > $myytavissa and $kutsuja != "vastaanota.php") {
+      if ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirtää. Saldo ei riittänyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
@@ -572,6 +574,7 @@ if ($tee == 'N') {
   }
 
   if (!isset($_poikkeavalaskutuspvm)) $_poikkeavalaskutuspvm = "";
+  if (!isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = "";
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
@@ -587,6 +590,7 @@ if ($tee == 'N') {
       'selite' => !isset($selite) ? '' : $selite,
       'tun' => !isset($tun) ? 0 : $tun,
       'poikkeavalaskutuspvm' => $_poikkeavalaskutuspvm,
+      'kohdepaikasta_oletuspaikka' => $kohdepaikasta_oletuspaikka,
     );
 
     hyllysiirto($params);
@@ -1152,7 +1156,7 @@ if ($tee == 'M') {
       }
 
       $chk = $poistoteksti = "";
-      
+
       if ($saldorow["poistettava"] != "") {
         $chk = "CHECKED";
         $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla, eikä tuotepaikalle ole avoimia rivejä").")";
@@ -1168,7 +1172,7 @@ if ($tee == 'M') {
             <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
       }
       else {
-        
+
         if ($saldorow["poistettava"] != "") {
           $poistoteksti .= "<br>(".t("Voit myös poistaa tuotepaikan tästä heti").")";
         }

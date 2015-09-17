@@ -28,7 +28,7 @@ if ($tee == "NAYTATILAUS") {
   $query = "SELECT sarjanumero, tuoteno
             FROM sarjanumeroseuranta
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus IN ({$valitut_sarjat})";
+            AND tunnus  IN ({$valitut_sarjat})";
 
   $sarja_result = pupe_query($query);
 
@@ -1533,6 +1533,16 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
 }
 echo "</form>";
 echo "</table>";
+
+//Kursorinohjaus
+if ($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
+  $formi  = "sarjaformi";
+  $kentta = "sarjanumero";
+}
+else {
+  $formi  = "haku";
+  $kentta = "sarjanumero_haku";
+}
 
 if ($toiminto == '') {
   $sarjanumero = '';

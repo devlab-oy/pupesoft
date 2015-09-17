@@ -79,13 +79,37 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
   list($goso, $go, $golisa) = explode("###", $skripti);
 
-  $skriptilisa = "?goso=$goso&go=$go";
+  if ($goso == "LASKIN") {
+    echo "<script>
+    $(document).ready(function (e) {
+      $('#avaa_laskin').click(function (e) {
 
-  if (!empty($golisa)) {
-    $skriptilisa .= "?toim=".$golisa;
+        var mouseX = window.screenX+e.pageX+40;
+        var mouseY = window.screenY+e.pageY;
+        var w_height = 360;
+
+        var ua = navigator.userAgent.toLowerCase();
+
+        if (ua.indexOf('safari') != -1 && ua.indexOf('chrome') <= -1) {
+          w_height = 400;
+        }
+
+        var laskin = window.open('{$palvelin2}CalcSS3', 'Pupesoft-laskin' ,'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,left='+mouseX+',top='+mouseY+',width=280,height='+w_height);
+        laskin.focus();
+      });
+    });</script>";
+
+    echo "<td class='ylapalkki'><img id='avaa_laskin' src='{$palvelin2}pics/facelift/icons/$kuvake'><br><a>$teksti</a></td>";
   }
+  else {
+    $skriptilisa = "?goso=$goso&go=$go";
 
-  echo "<td class='ylapalkki'><a class='puhdas' target='_top' href='{$palvelin2}$skriptilisa'><img src='{$palvelin2}pics/facelift/icons/$kuvake'><br>$teksti</a></td>";
+    if (!empty($golisa)) {
+      $skriptilisa .= "?toim=".$golisa;
+    }
+
+    echo "<td class='ylapalkki'><a class='puhdas' target='_top' href='{$palvelin2}$skriptilisa'><img src='{$palvelin2}pics/facelift/icons/$kuvake'><br>$teksti</a></td>";
+  }
 }
 
 echo "<td style='padding: 0px; text-align: center;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";

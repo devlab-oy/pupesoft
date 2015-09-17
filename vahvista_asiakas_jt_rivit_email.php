@@ -327,6 +327,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
 }
 
+
 /**
  * L‰hett‰‰ generoidut emailit
  *
@@ -393,8 +394,10 @@ function laheta_sahkoposti($email, $body) {
   pupesoft_sahkoposti($parametrit);
 }
 
+
 /**
- * @param array $params
+ *
+ * @param array   $params
  *
  * @return array Yhteyshenkilon tiedot
  */
@@ -410,15 +413,15 @@ function hae_tilauksen_yhteyshenkilo($params = array()) {
     $query = "SELECT eposti AS email
               FROM kuka
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = '{$myyja}'";
+              AND tunnus  = '{$myyja}'";
     $result = pupe_query($query);
   }
   else {
     $query = "SELECT email
               FROM yhteyshenkilo
-              WHERE yhtio = '{$kukarow["yhtio"]}'
+              WHERE yhtio      = '{$kukarow["yhtio"]}'
               AND liitostunnus = '{$liitostunnus}'
-              AND nimi = '{$tilausyhteyshenkilo}'";
+              AND nimi         = '{$tilausyhteyshenkilo}'";
     $result = pupe_query($query);
   }
 

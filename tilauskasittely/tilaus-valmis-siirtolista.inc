@@ -446,6 +446,9 @@ else {
         $tilauksia++;
       }
     }
+    else  {
+      $splitatut = NULL;
+    }
 
     // tyhjennetään muuttujat
     $varasto   = '';

@@ -1105,12 +1105,12 @@ else {
             $select .= "{$ytgfe}{$etuliite}.postino{$ytgft} postino, ";
             $select .= "{$ytgfe}{$etuliite}.postitp{$ytgft} postitp, ";
             $select .= "{$ytgfe}{$etuliite}.maa{$ytgft} maa, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws('<br>',{$etuliite}.toim_nimi),concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws('<br>',{$etuliite}.toim_nimitark),concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_osoite,{$etuliite}.osoite){$ytgft} toim_osoite, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_postino,{$etuliite}.postino){$ytgft} toim_postino, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_postitp,{$etuliite}.postitp){$ytgft} toim_postitp, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,concat_ws('<br>',{$etuliite}.toim_nimi),concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,concat_ws('<br>',{$etuliite}.toim_nimitark),concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_osoite,{$etuliite}.osoite){$ytgft} toim_osoite, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_postino,{$etuliite}.postino){$ytgft} toim_postino, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_postitp,{$etuliite}.postitp){$ytgft} toim_postitp, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
             $select .= "{$ytgfe}if(asiakas.puhelin!='',asiakas.puhelin,asiakas.gsm){$ytgft} puhelin, ";
             $select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
           }
@@ -2855,7 +2855,7 @@ else {
 
                   if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-                  if (isset($worksheet)) {
+                  if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
                     $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
                   }
                 }
@@ -3287,7 +3287,7 @@ else {
                 }
 
                 if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
-                  if ($ken_lask >= $data_start_index and is_numeric($row[$ken_nimi])) {
+                  if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
                     }
@@ -3489,7 +3489,7 @@ else {
 
               if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-              if (isset($worksheet)) {
+              if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
                 $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
               }
             }
@@ -3544,7 +3544,7 @@ else {
 
             if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-            if (isset($worksheet)) {
+            if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
             }
           }

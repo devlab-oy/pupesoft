@@ -1,7 +1,13 @@
 <?php
 
-//käyttöliittymä
+$tamascripti = FALSE;
+
 if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
+  $tamascripti = TRUE;
+}
+
+//käyttöliittymä
+if ($tamascripti) {
 
   //* Tämä skripti käyttää slave-tietokantapalvelinta *//
   $useslave = 1;
@@ -11,12 +17,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
   echo "<font class='head'>".t("Muistuta käyttäjiä hyväksynnässä olevista ostolaskuista")."</font><hr>";
 }
 
-if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee == "LAHETA") {
+if (!$tamascripti or $tee == "LAHETA") {
 
-  $maara = 0;
+  $maara   = 0;
   $laskuja = 0;
+  $veposti = "";
+  $meili   = "";
 
-  echo "<br>".t("Lähetetään käyttäjille muistutukset hyväksynnästä")."...<br>";
+  if ($tamascripti) {
+    echo "<br>".t("Lähetetään käyttäjille muistutukset hyväksynnästä")."...<br>";
+  }
 
   $query = "SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti
             FROM lasku, valuu, kuka
@@ -29,6 +39,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee ==
 
   while ($trow = mysql_fetch_array($result)) {
     $laskuja++;
+
     if ($trow['eposti'] != $veposti) {
       if ($veposti != '') {
         $meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
@@ -44,17 +55,20 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee ==
     $meili .= "Eräpäivä: " . $trow['erpcm'] . "\n";
     $meili .= "Summa: " .$yhtiorow["valkoodi"]." ".$trow['summa'] . "\n\n";
   }
+
   if ($meili != '') {
     $meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
     $tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus laskujen hyväksynnästä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
     $maara++;
   }
-
-  echo "<br><br><font class='message'>".t("Lähetettiin")." $maara ".t("muistutusta. Muistutettuja laskuja")." $laskuja ".t("kappaletta").".</font><hr>";
+  
+  if ($tamascripti) {
+    echo "<br><br><font class='message'>".t("Lähetettiin")." $maara ".t("muistutusta. Muistutettuja laskuja")." $laskuja ".t("kappaletta").".</font><hr>";
+  }
 }
 
 //käyttöliittymä
-if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  !== FALSE) {
+if ($tamascripti) {
 
   echo "  <br><br>
       <form method='post'>

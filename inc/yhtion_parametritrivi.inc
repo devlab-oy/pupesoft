@@ -385,6 +385,22 @@ if ($fieldname == "tilausvahvistustyyppi") {
   $jatko = 0;
 } //Jamppa säätää
 
+if ($fieldname == "tilausvahvistus_tilausnumero") {
+
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu       = $trow[$i];
+  $sel       = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>" . t("Tilausvahvistukseen tulee tilausnumero") . "</option>";
+  $ulos .= "<option value = '1' $sel[1]>" . t("Tilausvahvistukseen tulee asiakkaan tilausnumero, jos se on annettu") . "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_lahetys") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -469,6 +485,23 @@ if ($fieldname == "ostotilaukseen_toimittajan_toimaika") {
   $ulos .= "<option value = '0' $sel[0]>".t("Ei käytetä");
   $ulos .= "<option value = '1' $sel[1]>".t("Ehdottaa toimitusaikaa");
   $ulos .= "<option value = '2' $sel[2]>".t("Laittaa automaattisesti toimitusajan");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ostotilaus_saman_tuotteen_lisays") {
+
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $apu       = $trow[$i];
+  $sel       = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Sama tuote voidaan lisätä ostotilaukselle useaan kertaan");
+  $ulos .= "<option value = 'V' $sel[V]>" . t("Saman tuotteen lisäyksestä ostotilaukselle useaan kertaan varoitetaan");
+  $ulos .= "<option value = 'E' $sel[E]>" . t("Saman tuotteen lisäys ostotilaukselle useaan kertaan estetään");
 
   $ulos .= "</select></td>";
 
@@ -2977,6 +3010,7 @@ if ($fieldname == "livetuotehaku_tilauksella") {
 
   $ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Käytössä")."</option>";
+  $ulos .= "<option value = 'J' $sel[J]>".t("Käytössä extranetissä ja normimyynnissä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2992,7 +3026,22 @@ if ($fieldname == "livetuotehaku_poistetut") {
 
   $ulos .= "<option value = ''>".t("Poistuvia/poistettuja tuotteita ei näytetä")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Poistuvat tuotteet näytetään")."</option>";
+  $ulos .= "<option value = 'P' $sel[P]>".t("Kaikki tuotteet näytetään")."</option>";
   $ulos .= "<option value = 'Y' $sel[Y]>".t("Poistuvat tuotteet näytetään sekä epäkurantit korostetaan")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "poistetut_lisays") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Ei anneta lisätä poistettuja tuotteita ostotilauksella, eikä extranetissä") . "</option>";
+  $ulos .= "<option value = 'P' $sel[P]>" . t("Annetaan lisätä poistettuja tuotteita ostotilauksella ja extranetissä, jolloin poistetut voi korvata korvaavilla tuotteilla") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

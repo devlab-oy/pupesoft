@@ -68,3 +68,7 @@ ul.list-unstyled {
   list-style: none;
   padding-left: 20px;
 }
+
+.del {
+  text-decoration: line-through;
+}

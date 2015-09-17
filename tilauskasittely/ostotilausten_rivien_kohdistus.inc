@@ -1968,7 +1968,7 @@ if ($tila == '') {
     echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
     echo "<span class='saldo_{$id}' style='display:none;'></span>";
 
-    if ($rivirow["sarjanumeroseuranta"] != "") {
+    if ($rivirow["sarjanumeroseuranta"] != "" and $rivirow["sarjanumeroseuranta"] != "T") {
       if ($rivirow["siskpl"] < 0) {
         $tunken = "sarjanumeroseuranta.myyntirivitunnus";
         $tunind = "yhtio_myyntirivi";

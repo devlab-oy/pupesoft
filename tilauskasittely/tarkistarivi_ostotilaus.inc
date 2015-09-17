@@ -14,6 +14,36 @@ $query = "SELECT *
 $rarresult = pupe_query($query);
 $trow = mysql_fetch_assoc($rarresult);
 
+//
+// Tarkistetaan, että tuotetta ei ole vielä lisätty tilaukselle, jos niin valittu yhtiön
+// parametreissä
+
+if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] != "") {
+  $params = array(
+    "tilausnumero" => $laskurow["tunnus"],
+    "tuoteno"      => $trow["tuoteno"]
+  );
+
+  list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
+
+  if ($ensimmainen_tilausrivi != $viimeinen_tilausrivi and $prow['tunnus'] == $viimeinen_tilausrivi) {
+    $varaosavirhe .= t("HUOM: Tuote löytyy jo tilaukselta") . "!<br>";
+    $varaosavirhe .= "<form method='post'>
+                        <input type='hidden' name='lopetus' value='{$lopetus}'>
+                        <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+                        <input type='hidden' name='lisattava[tuoteno]' value='{$trow['tuoteno']}'>
+                        <input type='hidden' name='lisattava[kpl]' value='{$prow['tilattu']}'>
+                        <input type='hidden' name='tee' value='lisaa_aiemmalle_riville'>
+                        <input type='submit' value='" . t("Lisää") . " {$prow['tilattu']} {$prow['toim_yksikko']}'>
+                      </form>";
+
+    if ($yhtiorow["ostotilaus_saman_tuotteen_lisays"] == "E") {
+      $riviok++;
+      $tilausok++;
+    }
+  }
+}
+
 if (mysql_num_rows($rarresult) == 0) {
   $varaosavirhe .= t("VIRHE: Tuotetta ei löydy")."!<br>";
   $riviok++;

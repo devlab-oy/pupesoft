@@ -38,18 +38,37 @@ $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
 // jos siirtolistan varasto on setattu ja on laaja toimipaikkak‰sittely,
 // tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+  $_varasto = $laskurow["varasto"];
 
-  $query = "SELECT toimipaikka
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$laskurow['varasto']}";
-  $_tp_res = pupe_query($query);
-  $_tp_row = mysql_fetch_assoc($_tp_res);
+  if ($_varasto == 0) {
+    //haetaan kaikkien tilausrivien varastopaikat
+    $query = "SELECT tilausrivi.hyllyalue,
+              tilausrivi.hyllynro
+              FROM tilausrivi
+              WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
+              AND tilausrivi.yhtio      = '$kukarow[yhtio]'
+              AND tilausrivi.hyllyalue != ''
+              AND tilausrivi.tyyppi    != 'D'
+              LIMIT 1";
+    $_row = mysql_fetch_assoc(pupe_query($query));
 
-  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
-    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
-    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    // Mihin varastoon
+    $_varasto = kuuluukovarastoon($_row["hyllyalue"], $_row["hyllynro"]);
+  }
+
+  if ($_varasto != 0) {
+    $query = "SELECT toimipaikka
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = {$_varasto}";
+    $_tp_res = pupe_query($query);
+    $_tp_row = mysql_fetch_assoc($_tp_res);
+
+    if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+      $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    }
   }
 }
 
@@ -426,6 +445,9 @@ else {
         $splitatut[] = $row['tunnus'];
         $tilauksia++;
       }
+    }
+    else  {
+      $splitatut = NULL;
     }
 
     // tyhjennet‰‰n muuttujat

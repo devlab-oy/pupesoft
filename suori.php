@@ -4,9 +4,13 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
-if ($tee == 'V') {
+if ($tee == 'V' and isset($summa) and isset($summa_valuutassa)) {
   $summa = str_replace(",", ".", $summa);
   $summa_valuutassa = str_replace(",", ".", $summa_valuutassa);
+}
+else {
+  $summa = NULL;
+  $summa_valutuassa = NULL;
 }
 
 if ($tee == 'W') {
@@ -123,7 +127,7 @@ if ($tee == 'V') {
   $rahasumma = (float) $summa; // summa kotivaluutassa
   $kurssi    = (float) $kurssi; // kurssi
 
-  if ($rahasumma == 0 and $laskurow["summa"] != 0) {
+  if ($rahasumma == 0 and !is_null($summa) and !is_null($summa_valuutassa)) {
     echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
     $tee = 'W';
   }

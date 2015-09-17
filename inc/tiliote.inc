@@ -750,7 +750,7 @@ case 'T00':
                   and kuka = '{$yritirow['hyvak']}'";
         $nimires = pupe_query($query);
         $nimirow = mysql_fetch_assoc($nimires);
-        
+
         echo t("Vastuussa").": $nimirow[nimi].<br>\n";
       }
     }
@@ -1170,6 +1170,11 @@ case 'T11':
 
   // Nordea Viro häkki
   if ($yhtiorow['maa'] == "EE" and $koodi == '705' and $kuittikoodi != "E" and stripos($arvo, "REFERENCE PAYMENT") !== FALSE) {
+    $kuittikoodi = "E";
+  }
+
+  // SEB häkki
+  if ($koodi == '705' and $kuittikoodi != "E" and $koodiselite == "INCOMING BATCH WITH REFERENCES") {
     $kuittikoodi = "E";
   }
 

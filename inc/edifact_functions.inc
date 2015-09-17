@@ -1737,6 +1737,15 @@ function kasittele_bookkaussanoma($edi_data) {
                          AND tilausrivitunnus = '{$lisatty_tun}'";
         pupe_query($update_query);
       }
+
+      if (count($rullat) > 0) {
+        $query = "UPDATE lasku SET
+                  alatila = 'A'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$tunnus}'";
+
+        pupe_query($query);
+      }
     }
   }
   else {

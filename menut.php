@@ -616,7 +616,7 @@ if ($tee == "") {
     $dirikka = getcwd();
 
     foreach ($yhtiot as $yhtio) {
-      echo "<td class='back' valign='top'>";
+      echo "<td class='back ptop'>";
 
       $rows = array();
 

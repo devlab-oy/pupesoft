@@ -97,7 +97,7 @@ if ($kollityht > 0) {
       $yhres = pupe_query($query);
 
       if (mysql_num_rows($yhres) == 0) {
-        $query = "SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
+        $query = "SELECT '2' O, '' nimi, '' titteli, email, toim_puh puh, gsm, fax
                   FROM asiakas
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  = '{$laskurow['liitostunnus']}'";

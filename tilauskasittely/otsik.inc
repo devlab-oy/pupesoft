@@ -771,12 +771,9 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
-                 $puhlisa
-                 asiakas.tunnus liitostunnus,
-                 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
-                 if(asiakas.gsm != '', asiakas.gsm,
-                   if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+                  $puhlisa
+                  asiakas.tunnus liitostunnus,
+                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 
@@ -833,10 +830,7 @@ if ($tila == "" and !isset($jatka)) {
     if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
       $toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
-      $toimasiakas_query = "SELECT *,
-                            if(asiakas.gsm != '', asiakas.gsm,
-                              if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                                if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+      $toimasiakas_query = "SELECT *
                             FROM asiakas
                             WHERE yhtio = '{$kukarow["yhtio"]}'
                             AND tunnus  = '{$toim_asiakasid}'";
@@ -1443,8 +1437,8 @@ if ($tila == "" and !isset($jatka)) {
             <td valign='top'>".t("Kotipuhelin")."</td>
             <td>$srow[puhelin]</td></tr>";
         echo "<tr>
-            <td valign='top'>".t("Työpuhelin").": </td>
-            <td>$srow[fax]</td></tr>";
+            <td valign='top'>".t("Toimituspuhelin").": </td>
+            <td>$srow[toim_puh]</td></tr>";
         echo "<tr>
             <td valign='top'>&nbsp;</td>
             <td></td></tr>";

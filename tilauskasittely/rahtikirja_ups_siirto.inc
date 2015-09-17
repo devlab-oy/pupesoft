@@ -97,10 +97,9 @@ if ($kollityht > 0) {
               LEFT(lasku.maa, 30) maa,
               LEFT(lasku.postino, 9) postino,
               LEFT(lasku.postitp, 30) postitp,
-              LEFT(asiakas.puhelin, 15) puhelin,
+              LEFT(lasku.toim_puh, 15) toim_puh,
               LEFT(asiakas.gsm, 15) gsm,
               LEFT(asiakas.tyopuhelin, 15) tyopuhelin,
-              LEFT(asiakas.fax, 15) fax,
               LEFT(asiakas.email, 50) email,
               LEFT(lasku.yhtio_nimi, 35) yhtio_nimi,
               LEFT(lasku.toimitustapa, 25) toimitustapa
@@ -173,13 +172,13 @@ if ($kollityht > 0) {
     $countryterritory       = $shipto->addChild('CountryTerritory', $ups_laskurow['toim_maa']); // max 30 merkkiä, R
     $postalcode          = $shipto->addChild('PostalCode', $ups_laskurow['toim_postino']); // max 9 merkkiä, C (riippuu maasta)
     $cityortown          = $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['toim_postitp'])); // max 30 merkkiä, R
-    $telephone          = $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
+    $telephone          = $ups_laskurow['toim_puh'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['toim_puh']) :
     ($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
       ($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
     //    $stateprovincecounty     = $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
     //    $address2          = $shipto->addChild('Address2', ''); // max 35 merkkiä, O
     //    $address3          = $shipto->addChild('Address3', ''); // max 35 merkkiä, O
-    //    $faxnumber          = $shipto->addChild('FaxNumber', $ups_laskurow['fax']); // max 15 merkkiä, O
+    //    $faxnumber          = $shipto->addChild('FaxNumber', ''); // max 15 merkkiä, O
     //    $emailaddress        = $shipto->addChild('EmailAddress', $ups_laskurow['email']); // max 50 merkkiä, O
     //    $taxidnumber        = $shipto->addChild('TaxIDNumber', ''); // max 15 merkkiä, O
     //    $receiverupsaccountnumber   = $shipto->addChild('ReceiverUpsAccountNumber', ''); // max 10 merkkiä, O

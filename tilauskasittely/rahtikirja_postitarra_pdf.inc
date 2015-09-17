@@ -230,12 +230,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18, 197, $postirow["yhtio_osoite"], $firstpage, $norm);
   $pdf->draw_text(18, 188, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"], $firstpage, $norm);
 
-  $pdf->draw_text(18, 180, "Vastaanottaja Addressat To       puh.", $firstpage, $pieni);
-  $pdf->draw_text(120, 180, $rakir_row["toim_puh"], $firstpage, $pieni);
-  $pdf->draw_text(18, 170, $rakir_row["toim_nimi"], $firstpage, $iso);
-  $pdf->draw_text(18, 160, $rakir_row["toim_nimitark"], $firstpage, $iso);
-  $pdf->draw_text(18, 150, $rakir_row["toim_osoite"], $firstpage, $iso);
-  $pdf->draw_text(18, 130, strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $isobold);
+  $pdf->draw_text(18,  180,  "Vastaanottaja Addressat To       puh.",   $firstpage, $pieni);
+  $pdf->draw_text(120, 180,  $postirow["toim_puh"],               $firstpage, $pieni);
+  $pdf->draw_text(18,  170,  $rakir_row["toim_nimi"],             $firstpage, $iso);
+  $pdf->draw_text(18,  160,  $rakir_row["toim_nimitark"],         $firstpage, $iso);
+  $pdf->draw_text(18,  150,  $rakir_row["toim_osoite"],           $firstpage, $iso);
+  $pdf->draw_text(18,  130,  strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $isobold);
 
   // viivakoodin alapuolella vasen laita
   $oikpos = $pdf->strlen("$keltainen $kuljetus $keku", $pienibold);

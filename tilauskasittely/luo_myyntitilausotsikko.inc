@@ -4,10 +4,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
   function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '', $eilahe_osatoim = '', $toimitustapa = '') {
     global $kukarow, $yhtiorow, $session;
 
-    $query  = "SELECT *,
-               if(asiakas.gsm != '', asiakas.gsm,
-                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                   if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+    $query  = "SELECT *
                FROM asiakas
                WHERE yhtio = '$kukarow[yhtio]'
                and tunnus  = '$asiakasid'";

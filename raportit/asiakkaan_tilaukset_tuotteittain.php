@@ -337,6 +337,20 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
     $rivihintasumma = 0;
     $kate_yht      = 0;
 
+    $lopetus = $palvelin2;
+    $lopetus .= "raportit/asiakkaan_tilaukset_tuotteittain.php";
+    $lopetus .= "////tee=$tee";
+    $lopetus .= "//toim=$toim";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//tuoteno=".urlencode($tuoteno);
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//asiakasid=$asiakasid";
+
     while ($row = mysql_fetch_array($result)) {
 
       $excelsarake = 0;
@@ -355,20 +369,6 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
       }
 
       echo "<tr class='aktiivi'>";
-
-      $lopetus = $palvelin2;
-      $lopetus .= "raportit/asiakkaan_tilaukset_tuotteittain.php";
-      $lopetus .= "////tee=$tee";
-      $lopetus .= "//toim=$toim";
-      $lopetus .= "//ppl=$ppl";
-      $lopetus .= "//vvl=$vvl";
-      $lopetus .= "//kkl=$kkl";
-      $lopetus .= "//ppa=$ppa";
-      $lopetus .= "//vva=$vva";
-      $lopetus .= "//kka=$kka";
-      $lopetus .= "//tuoteno=".urlencode($tuoteno);
-      $lopetus .= "//ytunnus=$ytunnus";
-      $lopetus .= "//asiakasid=$asiakasid";
 
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 

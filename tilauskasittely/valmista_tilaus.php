@@ -1130,6 +1130,14 @@ if (!isset($from_kaikkikorj)) {
         <input type='hidden' name='valmistettavat' value='$valmistettavat'>
         <input type='hidden' name='toim'  value='$toim'>";
 
+    $lopetus = $palvelin2;
+    $lopetus .= "tilauskasittely/valmista_tilaus.php";
+    $lopetus .= "////toim=$toim";
+    $lopetus .= "//tee=$tee";
+    $lopetus .= "//tulin=$tulin";
+    $lopetus .= "//valmistettavat=$valmistettavat";
+    $lopetus .= "//otunnus=$row[Tilaus]";
+
     while ($prow = mysql_fetch_assoc($presult)) {
 
       $class = '';
@@ -1363,14 +1371,6 @@ if (!isset($from_kaikkikorj)) {
           $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim'>".t("E:nro")."</a>)";
         }
       }
-
-      $lopetus = $palvelin2;
-      $lopetus .= "tilauskasittely/valmista_tilaus.php";
-      $lopetus .= "////toim=$toim";
-      $lopetus .= "//tee=$tee";
-      $lopetus .= "//tulin=$tulin";
-      $lopetus .= "//valmistettavat=$valmistettavat";
-      $lopetus .= "//otunnus=$row[Tilaus]";
 
       echo "<td class='$class' valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
       echo "<td class='$class' valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$lopetus'>$prow[tuoteno]</a></td>";

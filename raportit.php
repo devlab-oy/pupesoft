@@ -57,7 +57,9 @@ if (substr($toim, -4) == '_OKP') {
 // Livesearch jutut
 enable_ajax();
 
-if (!isset($excel))      $excel = "";
+js_popup();
+
+if (!isset($excel)) $excel = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 
 if ($livesearch_tee == "TILIHAKU") {

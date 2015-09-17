@@ -134,10 +134,10 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
       if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
 
-        $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
-        $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
-        $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
-        $lavametri[$i]  = str_replace(',', '.', $lavametri[$i]);
+        $kilot[$i] = str_replace(',', '.', $kilot[$i]);
+        $kollit[$i] = str_replace(',', '.', $kollit[$i]);
+        $kuutiot[$i] = str_replace(',', '.', $kuutiot[$i]);
+        $lavametri[$i] = str_replace(',', '.', $lavametri[$i]);
 
         // katotaan ollaanko syötetty useampia kiloja
         $kiloja = explode('/', $kilot[$i]);
@@ -640,10 +640,10 @@ if ($tee == 'add') {
         // ja insertataan vaan jos se on erisuurta ku nolla (näin voidaan nollalla tai spacella tyhjentää kenttiä)
         if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
 
-          $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
-          $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
-          $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
-          $lavametri[$i]  = str_replace(',', '.', $lavametri[$i]);
+          $kilot[$i] = str_replace(',', '.', $kilot[$i]);
+          $kollit[$i] = str_replace(',', '.', $kollit[$i]);
+          $kuutiot[$i] = str_replace(',', '.', $kuutiot[$i]);
+          $lavametri[$i] = str_replace(',', '.', $lavametri[$i]);
 
           if ($rakirno == '') {
             $query = "SELECT max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and (otsikkonro='$otsikkonro' or otsikkonro='0')";

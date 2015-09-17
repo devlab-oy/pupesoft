@@ -897,7 +897,16 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   echo "<input type='hidden' name='var' value='$var'>";
 
   if ($ulos == '') {
-    echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
+    if ($yhtiorow["livetuotehaku_tilauksella"] == "J") {
+      echo "<td valign='top'>" .
+        livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno) .
+        "</td>";
+    }
+    else {
+      echo "<td valign='top'>
+              <input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'>
+            </td>";
+    }
   }
   else {
     echo "<td valign='top'>$ulos</td>";

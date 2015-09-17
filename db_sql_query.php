@@ -57,7 +57,7 @@ else {
               WHERE yhtio      = '$kukarow[yhtio]'
               and laji         = 'MYSQLALIAS'
               and selite       like '{$table}.%'
-              and selitetark_2 = ''
+              and selitetark_2 = 'Default'
               and selitetark_3 = 'PAKOLLINEN'";
     $al_res = pupe_query($query);
 

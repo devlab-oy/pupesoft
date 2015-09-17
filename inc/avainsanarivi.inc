@@ -1280,7 +1280,7 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
     $sel[$valittu] = " selected";
   }
 
-  $ulos .= "<option value='A'{$sel["A"]}>Apix";
+  $ulos .= "<option value='apix'{$sel["apix"]}>Apix";
 
   $ulos .= "</select>";
 

@@ -2766,8 +2766,10 @@ else {
 
             $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
+            $liitteet = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
+
             // Laitetaan lasku lähetysjonoon
-            $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli);
+            $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);
           }
         }
       }

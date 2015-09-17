@@ -1053,7 +1053,7 @@ if (!function_exists("maventa_invoice_put_file")) {
 }
 
 if (!function_exists("apix_queue")) {
-  function apix_queue($apix_finvoice, $apix_invoicenum, $kieli) {
+  function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     $apix_ulos = "";
@@ -1079,6 +1079,12 @@ if (!function_exists("apix_queue")) {
       // Siirret‰‰n faili apixtemppiin
       if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apix_invoicenum.pdf")) {
         $apix_ulos .= "APIX tmpmove Apix_invoice_$apix_invoicenum.pdf feilas!";
+      }
+
+      foreach ($liitteet as $filename => $data) {
+        file_put_contents("{$apix_tmpdirnimi}/{$filename}", $data);
+        exec("cd {$apix_tmpdirnimi} && zip {$filename}.zip {$filename}");
+        exec("rm {$apix_tmpdirnimi}/{$filename}");
       }
 
       // Tehd‰‰n apixzippi
@@ -1188,6 +1194,44 @@ if (!function_exists("apix_invoice_put_file")) {
     }
 
     return $apix_ulos;
+  }
+}
+
+if (!function_exists("hae_liitteet_verkkolaskuun")) {
+  function hae_liitteet_verkkolaskuun($verkkolaskuoperaattori, $tilausnumerot) {
+    global $kukarow;
+
+    $liitetiedostotyypit_result = t_avainsana("TIL-LITETY", "", "AND selitetark_2 LIKE '%{$verkkolaskuoperaattori}%'");
+
+    $kayttotarkoitukset = array();
+
+    while ($liitetiedostotyyppi = mysql_fetch_assoc($liitetiedostotyypit_result)) {
+      $kayttotarkoitukset[] = "'{$liitetiedostotyyppi["selite"]}'";
+    }
+
+    $kayttotarkoitukset = implode(",", $kayttotarkoitukset);
+
+    $query = "SELECT filename, data
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND liitos = 'lasku'
+              AND liitostunnus IN ({$tilausnumerot})
+              AND kayttotarkoitus IN ({$kayttotarkoitukset})";
+
+    $result = pupe_query($query);
+
+    $liitetiedostot = array();
+
+    while ($liitetiedosto = mysql_fetch_assoc($result)) {
+      $filename    = $liitetiedosto["filename"];
+      $filename    = explode(".", $filename);
+      $filename[0] = "{$filename[0]}-" . md5(uniqid(rand(), true));
+      $filename    = implode(".", $filename);
+
+      $liitetiedostot[$filename] = $liitetiedosto["data"];
+    }
+
+    return $liitetiedostot;
   }
 }
 

@@ -1114,7 +1114,7 @@ if ($tee == 'P' or $tee == 'E') {
       </script>";
 
   if ($yhtiorow['skannatut_laskut_polku'] != '' and $nayta_skannattu_lasku != "") {
-    echo "<table><tr><td class='back'>";
+    echo "<table><tr><td class='back ptop'>";
   }
 
   if ($toimittajaid > 0) {
@@ -1167,13 +1167,13 @@ if ($tee == 'P' or $tee == 'E') {
 
     $fakta = "";
     if (trim($trow["fakta"]) != "") {
-      $fakta = "<br><br><font class='message'>$trow[fakta]</font>";
+      $fakta = "<br><br><div style='font-weight: bold;'>$trow[fakta]</div>";
     }
 
     echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
     echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-    echo "<table><tr><td valign='top' style='padding: 0px;'>";
+    echo "<table><tr><td class='ptop' style='padding: 0px;'>";
     echo "<table>";
     echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
     echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
@@ -1190,7 +1190,7 @@ if ($tee == 'P' or $tee == 'E') {
     echo "</td>";
 
     // eri tilitiedot riippuen onko suomalainen vai ei
-    echo "<td valign='top' style='padding: 0px;'>";
+    echo "<td class='ptop' style='padding: 0px;'>";
     echo "<table>";
     echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 

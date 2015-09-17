@@ -771,7 +771,7 @@ if (!function_exists('rivi_lasku')) {
     if ($kieli != $yhtiorow["kieli"]) {
       $row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
 
-      if ($laskutyyppi != 18 and $laskutyyppi != 6) {
+      if ($laskutyyppi != 18) {
         $row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
       }
 

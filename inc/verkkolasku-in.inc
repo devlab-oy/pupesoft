@@ -1388,12 +1388,12 @@ if (!function_exists("verkkolasku_in")) {
       else {
 
         // Tehdään rivikohtaiset tiliöinnit
-        $i                = 0;
-        $totsumma             = 0;
-        $totsumma_valuutassa      = 0;
-        $maksimisumma            = 0;
-        $kustp              = $oletuskust;
-        $kohde              = $oletuskohde;
+        $i                   = 0;
+        $totsumma            = 0;
+        $totsumma_valuutassa = 0;
+        $maksimisumma        = 0;
+        $kustp               = $oletuskust;
+        $kohde               = $oletuskohde;
         $projekti            = $oletusprojekti;
 
         $count_rtuoteno = count($rtuoteno);
@@ -1405,7 +1405,7 @@ if (!function_exists("verkkolasku_in")) {
             $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? $rtuoteno[$i]["riviinfo"] : "";
             $tuote = isset($rtuoteno[$i]["tuoteno"]) ? $rtuoteno[$i]["tuoteno"] : "";
 
-            $query = "SELECT tilino, kustp
+            $query = "SELECT tilino, kustp, alv
                       FROM tiliointisaanto
                       WHERE ttunnus = '$trow[tunnus]'
                       and tyyppi    = 't'
@@ -1418,7 +1418,7 @@ if (!function_exists("verkkolasku_in")) {
             // Sopiva sääntöä ei löytynyt
             if (mysql_num_rows($result) == 0) {
 
-              $query = "SELECT tilino, kustp
+              $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
                         WHERE ttunnus = '$trow[tunnus]'
                         and tyyppi    = 't'
@@ -1445,12 +1445,24 @@ if (!function_exists("verkkolasku_in")) {
                 $tiliointirow = mysql_fetch_assoc($result);
                 $tili = $tiliointirow['tilino'];
                 if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
+
+                // Tiliöintisäännön mukaan meillä ei ole oikeutta vähentää rivin verot.
+                if (!empty($tiliointirow['alv']) and !empty($rtuoteno[$i]["rivihinta_verolli"])) {
+                  $rtuoteno[$i]["alv"] = "0";
+                  $rtuoteno[$i]["rivihinta"] = $rtuoteno[$i]["rivihinta_verolli"];
+                }
               }
             }
             else {
               $tiliointirow = mysql_fetch_assoc($result);
               $tili = $tiliointirow['tilino'];
               if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
+
+              // Tiliöintisäännön mukaan meillä ei ole oikeutta vähentää rivin verot.
+              if (!empty($tiliointirow['alv']) and !empty($rtuoteno[$i]["rivihinta_verolli"])) {
+                $rtuoteno[$i]["alv"] = "0";
+                $rtuoteno[$i]["rivihinta"] = $rtuoteno[$i]["rivihinta_verolli"];
+              }
             }
 
             if ($vrow["kurssi"] != 1) {

@@ -2131,7 +2131,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $omakustprajaus = " and kustannuspaikka.tunnus = {$kukarow["osasto"]} ";
     }
 
-    $query = "SELECT tunnus, nimi, koodi, isa_tarkenne
+    $query = "SELECT tunnus, nimi, koodi, ifnull(isa_tarkenne, 0) as isa_tarkenne
               FROM kustannuspaikka
               WHERE yhtio   = '$kukarow[yhtio]'
               {$omakustprajaus}

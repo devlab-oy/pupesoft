@@ -516,8 +516,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ($phpnimi == 'tilaus_myynti.php') {
-      if (isset($tilausrivi_alvillisuus)) {
-        setcookie('tilausrivi_alvillisuus', $tilausrivi_alvillisuus, time()+60*60*24*90, "/");
+      if (!empty($_POST["tilausrivi_alvillisuus"])) {
+        setcookie('tilausrivi_alvillisuus', $_POST["tilausrivi_alvillisuus"], time()+60*60*24*90, "/");
       }
       if (isset($lajit)) {
         setcookie("avainsanalaji_keksi", urlencode(serialize($lajit)), strtotime('+90 days'), "/");

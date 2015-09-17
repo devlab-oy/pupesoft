@@ -403,6 +403,8 @@ if (!function_exists("tee_jt_tilaus")) {
             $fieldname == 'maksettu' or
             $fieldname == 'maa_maara' or
             $fieldname == 'kuljetusmuoto' or
+            $fieldname == 'vakisin_kerays' or
+            $fieldname == 'siirtolistan_vastaanotto' or
             $fieldname == 'kauppatapahtuman_luonne' or
             $fieldname == 'sisamaan_kuljetus' or
             $fieldname == 'sisamaan_kuljetusmuoto' or

@@ -22012,7 +22012,7 @@ if (!function_exists('paivita_oletuspaikka')) {
       elseif ($yhtiorow['paivita_oletuspaikka'] == 'M') {
         $wherelisa = "";
         $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
-        $tyyppilisa = "AND t.tyyppi IN ('O','L','G')";
+        $tyyppilisa = "AND t.tyyppi IN ('O','L')";
       }
       else {
         $wherelisa = "AND t.uusiotunnus = '0'";
@@ -22042,6 +22042,25 @@ if (!function_exists('paivita_oletuspaikka')) {
       $return["paivitetyt_ostorivit"] = mysql_affected_rows();
 
       if ($yhtiorow['paivita_oletuspaikka'] == 'M') {
+
+        // P‰ivitet‰‰n siirtorivien l‰hdepaikka
+        $query = "UPDATE tilausrivi AS t
+                  JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila = 'G' and lasku.alatila not in ('V','D','X'))
+                  SET t.hyllyalue  = '{$hylly['hyllyalue']}',
+                  t.hyllynro       = '{$hylly['hyllynro']}',
+                  t.hyllyvali      = '{$hylly['hyllyvali']}',
+                  t.hyllytaso      = '{$hylly['hyllytaso']}'
+                  WHERE t.yhtio    = '{$kukarow['yhtio']}'
+                  AND t.tuoteno    = '{$tuoteno}'
+                  AND t.hyllyalue  = '{$oletusrow['hyllyalue']}'
+                  AND t.hyllynro   = '{$oletusrow['hyllynro']}'
+                  AND t.hyllytaso  = '{$oletusrow['hyllytaso']}'
+                  AND t.hyllyvali  = '{$oletusrow['hyllyvali']}'
+                  AND t.tyyppi     = 'G'
+                  AND t.kpl        = '0'
+                  AND t.varattu   != '0'";
+        $result = pupe_query($query);
+
         // P‰ivitet‰‰n siirtorivien kohdepaikka
         $query = "UPDATE tilausrivin_lisatiedot AS tt
                   JOIN tilausrivi AS t ON (t.yhtio = tt.yhtio AND
@@ -31541,6 +31560,36 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     }
 
     return $palautettava;
+  }
+}
+
+if (!function_exists("hae_eka_ja_vika_tilausrivi")) {
+  /**
+   * @param array $params
+   *
+   * @return array Ensimm‰inen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisess‰ tilauksella
+   */
+  function hae_eka_ja_vika_tilausrivi($params) {
+    global $kukarow;
+
+    $tilausnumero = $params['tilausnumero'];
+    $tuoteno      = $params['tuoteno'];
+
+    $query = "SELECT min(tunnus) AS eka,
+              max(tunnus)        AS vika
+              FROM tilausrivi
+              WHERE yhtio     = '{$kukarow["yhtio"]}'
+              AND otunnus     = '{$tilausnumero}'
+              AND tuoteno     = '{$tuoteno}'
+              AND uusiotunnus = 0
+              AND laskutettu  = ''
+              AND tyyppi      = 'O'";
+
+    $result = pupe_query($query);
+
+    $tunnukset = mysql_fetch_assoc($result);
+
+    return array($tunnukset["eka"], $tunnukset["vika"]);
   }
 }
 

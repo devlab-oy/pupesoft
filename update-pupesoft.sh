@@ -10,6 +10,8 @@ function parse_salasanat {
   | tail -1
 }
 
+KALA=""
+
 function git_repo_uptodate {
   dir=$1
   branch=$2

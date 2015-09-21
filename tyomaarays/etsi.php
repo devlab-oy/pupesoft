@@ -5,18 +5,14 @@ $useslave = 1;
 
 include '../inc/parametrit.inc';
 
-$nimi   = (isset($_REQUEST['nimi'])) ? $_REQUEST['nimi'] : '';
-$rekno  = (isset($_REQUEST['rekno'])) ? $_REQUEST['rekno'] : '';
-$eid    = (isset($_REQUEST['eid'])) ? $_REQUEST['eid'] : '';
-$asno   = (isset($_REQUEST['asno'])) ? $_REQUEST['asno'] : '';
-$valmno = (isset($_REQUEST['valmno'])) ? $_REQUEST['valmno'] : '';
-
 if (isset($_REQUEST['selected'])) {
   $nimiselect   = (array_search('nimisearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $reknoselect  = (array_search('reknosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $eidselect    = (array_search('eidsearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $asnoselect   = (array_search('asnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
   $valmnoselect = (array_search('valmnosearch', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $komm1select = (array_search('komm1search', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
+  $komm2select = (array_search('komm2search', $_REQUEST['selected']) !== false) ? 'CHECKED' : '';
 }
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
@@ -35,7 +31,7 @@ if ($tee == 'etsi') {
 
   // Näissä hakuehdoissa haetaan samalla tiedolla mahdollisesti useasta sarakkeesta
   if ($hakuteksti != '' and ($nimiselect != '' or $reknoselect != '' or $eidselect != ''
-    or $asnoselect != '' or $valmnoselect != '')) {
+    or $asnoselect != '' or $valmnoselect != '' or $komm1select != '' or $komm2select != '')) {
     
     $hakuehdot .= " AND ( 'konditionaaliset_hakuehdot' ";
 
@@ -57,6 +53,14 @@ if ($tee == 'etsi') {
     
     if ($valmnoselect != '') {
       $hakuehdot .= " OR tyomaarays.valmnro LIKE '%".$hakuteksti."%' ";
+    }
+
+    if ($komm1select != '') {
+      $hakuehdot .= " OR tyomaarays.komm1 LIKE '%".$hakuteksti."%' ";
+    }
+
+    if ($komm2select != '') {
+      $hakuehdot .= " OR tyomaarays.komm2 LIKE '%".$hakuteksti."%' ";
     }
 
     $hakuehdot .= " ) ";
@@ -166,6 +170,14 @@ echo "</tr>";
 
 echo "<tr>";
 echo "<th>".t("Sarjanumero").":</th><td colspan='3'><input type='checkbox' name='selected[]' value='valmnosearch' $valmnoselect></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Työn kuvaus").":</th><td colspan='3'><input type='checkbox' name='selected[]' value='komm1search' $komm1select></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Toimenpiteet").":</th><td colspan='3'><input type='checkbox' name='selected[]' value='komm2search' $komm2select></td>";
 echo "</tr>";
 
 echo "</table>";

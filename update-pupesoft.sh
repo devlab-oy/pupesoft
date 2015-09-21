@@ -68,6 +68,7 @@ pupedir=$(cd $(dirname ${0}) && echo $(pwd))
 pupenextdir=/home/devlab/pupenext
 salasanat=${pupedir}/inc/salasanat.php
 branchfile="/home/devlab/pupe_branch"
+branchfilepupenext="/home/devlab/pupenext_branch"
 environment="production"
 jatketaan=
 bundle=false
@@ -290,8 +291,15 @@ echo
 # Setataan rails env
 export RAILS_ENV=${environment}
 
+# Onko spessubranchi käytössä?
+if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+  pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
+else
+  pupenextbranch="master"
+fi
+
 # Katsotaan onko git hakemistossa muutoksia
-git_repo_uptodate ${pupenextdir} master
+git_repo_uptodate ${pupenextdir} ${pupenextbranch}
 
 # Skipataan, jos ei ole muutoksia
 if [[ $? -eq 0 ]]; then
@@ -310,8 +318,8 @@ if [[ "${jatketaanko}" = "k" ]]; then
   # Update app with git
   cd "${pupenextdir}" &&
   git checkout . &&
-  git checkout master &&
-  git pull origin master &&
+  git checkout ${pupenextbranch} &&
+  git pull origin ${pupenextbranch} &&
   git remote prune origin
 
   # Save git exit status

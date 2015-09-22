@@ -47,10 +47,10 @@ function git_repo_uptodate {
 }
 
 function git_log_update {
-  PUPESOFTHEAD=$1
-  PUPENEXTHEAD=$2
+  PUPESOFTHASH=$1
+  PUPENEXTHASH=$2
 
-  ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${PUPESOFTHEAD}', hash_pupenext='${PUPENEXTHEAD}', ip='${USER_IP}', date=now()" &> /dev/null
+  ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${PUPESOFTHASH}', hash_pupenext='${PUPENEXTHASH}', ip='${USER_IP}', date=now()" &> /dev/null
 
   # Informoidaan käyttäjiä päivityksestä
   while read -r line
@@ -80,7 +80,7 @@ red=$(tput -Txterm-color setaf 1)
 white=$(tput -Txterm-color setaf 7)
 normal=$(tput -Txterm-color sgr0)
 
-# Logataan mitä päivtettiin ja mihin versioon
+# Logataan mitä päivitettiin ja mihin versioon
 PUPESOFT_NEWHASH=""
 PUPENEXT_NEWHASH=""
 

@@ -379,7 +379,7 @@ if ($verkkokauppa == "") {
         <input type='hidden' name='aktivoinnista' value='true'>
         <input type='hidden' name='tee' value='AKTIVOI'>
         <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-        <input type='submit' value='".t("347 Takaisin tilaukselle")."'>
+        <input type='submit' value='".t("Takaisin tilaukselle")."'>
         </form><br><br>";
   }
   elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $laskurow["tila"] != "K" and $toim_kutsu != "" and $toim_kutsu != "EXTENNAKKO") {
@@ -402,7 +402,7 @@ if ($verkkokauppa == "") {
         <input type='hidden' name='toim' value='$toim_kutsu'>
         <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
         <input type='hidden' name='tyojono' value='$tyojono'>
-        <input type='submit' value='".t("371 Takaisin tilaukselle")."'>
+        <input type='submit' value='".t("Takaisin tilaukselle")."'>
         </form><br><br>";
   }
   elseif ($toim_kutsu == "EXTENNAKKO" and $kukarow["extranet"] != "") {
@@ -412,7 +412,7 @@ if ($verkkokauppa == "") {
         <input type='hidden' name='tilausnumero' value='$tilausnumero'>
         <input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
         <input type='hidden' name='action' value='nayta_tarjous'>
-        <input type='submit' value='".t("381 Takaisin tilaukselle")."'>
+        <input type='submit' value='".t("Takaisin tilaukselle")."'>
         </form><br><br>";
   }
 }

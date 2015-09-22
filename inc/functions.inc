@@ -10696,6 +10696,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
         $tuoteperheetyhdessa = TRUE;
       }
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '13') !== FALSE) {
+      $naytatvale = 13; // jos meill‰ on tilausvahvistuksessa 13, niin n‰ytet‰‰n tilausrivi.hinta ja ei alennuksia
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
       $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {

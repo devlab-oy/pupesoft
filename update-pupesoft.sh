@@ -238,6 +238,9 @@ else
   echo
   echo -n "${white}Päivitetäänkö Pupesoft (k/e)? ${normal}"
   read jatketaanko
+
+  # Päivitetään luettu arvo myös jatketaan-muuttujaan, niin pupenext seuraa käsi kädessä
+  jatketaan=$jatketaanko
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
@@ -304,14 +307,10 @@ git_repo_uptodate ${pupenextdir} ${pupenextbranch}
 # Skipataan, jos ei ole muutoksia
 if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
-elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
+elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
 else
-  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
-  echo "HUOM: Tietokantamuutosten tarkistus vaatii Pupenextin päivittämisen!"
-  echo
-  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
-  read jatketaanko
+  jatketaanko=$jatketaan
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then

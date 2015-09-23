@@ -187,6 +187,15 @@ if (isset($vierow)) {
   elseif ($vierow["tila"] == "A") {
     $toim_kutsu = "TYOMAARAYS";
   }
+  elseif ($vierow["tila"] == "R") {
+    $toim_kutsu = "PROJEKTI";
+  }
+  elseif ($vierow["tila"] == "S") {
+    $toim_kutsu = "SIIRTOTYOMAARAYS";
+  }
+  elseif ($vierow["tilaustyyppi"] == "0") {
+    $toim_kutsu = "YLLAPITO";
+  }
 }
 
 if (isset($vierow) and $vierow["maa"] != "") {

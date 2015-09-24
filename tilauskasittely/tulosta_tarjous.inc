@@ -1145,7 +1145,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       if (mysql_num_rows($kuva_res) != 0) {
         $kuva_row = mysql_fetch_assoc($kuva_res);
 
-        $image = $pdf_tarjous->jfif_embed($kuva_row['data']);
+        $image = $pdf_tarjous->png_embed($kuva_row['data']);
         $pdf_tarjous->image_place($image, $kala-5, 25, $page_tarjous[$sivu]);
 
         $kuva_height = $kuva_row['image_height'];

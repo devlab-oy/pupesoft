@@ -3383,6 +3383,7 @@ if ($fieldname == "tarjoustyyppi") {
   $ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty tarjouspohja");
   $ulos .= "<option value = '3' $sel[3]>".t("Lyhyt tarjouspohja");
   $ulos .= "<option value = '4' $sel[4]>".t("Tarjouspohja, jossa ainoastaan nettohinnat");
+  $ulos .= "<option value = '5' $sel[5]>".t("Tiivistetty tarjouspohja");
   $ulos .= "</select></td>";
 
   $jatko = 0;

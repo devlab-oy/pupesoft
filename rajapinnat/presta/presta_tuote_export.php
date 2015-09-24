@@ -63,7 +63,8 @@ $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 $ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
 
 if (isset($argv[4])) {
-  $synkronoi = trim($argv[4]);
+  $synkronoi = explode(',',$argv[4]);
+  $synkronoi = array_flip($synkronoi);
 }
 elseif (isset($synkronoi_prestaan) and count($synkronoi_prestaan) > 0) {
   $synkronoi = $synkronoi_prestaan;

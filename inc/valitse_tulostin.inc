@@ -173,6 +173,9 @@ if ($toim == "TILAUSVAHVISTUS"
       $tuoteperheetyhdessa = TRUE;
     }
   }
+  elseif (strpos($row2['tilausvahvistus'], '13') !== FALSE) {
+    $naytatvale = 13; // jos meill‰ on tilausvahvistuksessa 13, niin n‰ytet‰‰n tilausrivi.hinta ja ei alennuksia
+  }
   elseif (strpos($row2['tilausvahvistus'], '10') !== FALSE) {
     $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa kymppi, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
@@ -246,6 +249,7 @@ if ($toim == "TILAUSVAHVISTUS"
   echo "<option value = '10' $tvsel[10]>".t("N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
   echo "<option value = '11' $tvsel[11]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
   echo "<option value = '12' $tvsel[12]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi, ale-1, ja erikoisale")."</option>";
+  echo "<option value = '13' {$tvsel[13]}>".t("N‰ytet‰‰n tilausrivin rivihinta, ei alennuksia")."</option>";
   echo "</select></td></tr>";
 }
 

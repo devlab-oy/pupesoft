@@ -1148,16 +1148,16 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
         $image = $pdf_tarjous->jfif_embed($kuva_row['data']);
         $pdf_tarjous->image_place($image, $kala-5, 25, $page_tarjous[$sivu]);
 
-        $kuva_height = $thumb_size_y;
+        $kuva_height = $kuva_row['image_height'];
       }
 
-      $pdf_tarjous->draw_text(25 + $kuva_width, $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);
-      $pdf_tarjous->draw_text(25 + $kuva_width, $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(25 + $kuva_row['image_width'], $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(25 + $kuva_row['image_width'], $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
 
       $kala -= 20;
 
       if (trim($row["perhe_kommentti"]) != '') {
-        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 25 + $kuva_width, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 25 + $kuva_row['image_width'], 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
         $kala = $pohja - $rivinkorkeus - 10;
       }
       else {

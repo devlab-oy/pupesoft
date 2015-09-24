@@ -491,7 +491,8 @@ if (!function_exists('alku_lahete')) {
       if (  ($base_lahetetyyppi == "tulosta_lahete.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
-          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_tilausrivihinta_eialennuksia.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])
           and $GLOBALS['eta_yhtio'] != ''
@@ -1898,6 +1899,22 @@ if (!function_exists('rivi_lahete')) {
       elseif ($base_lahetetyyppi == "tulosta_lahete_tilausrivihinta_eialennuksia.inc") {
         $return['row']['rivihinta'] = $row['rivihinta'] = hintapyoristys($row['hinta'] * $row['tilkpl']);
         $return['row']['hinta'] = hintapyoristys($row['hinta']);
+
+        if ($yhtiorow['alv_kasittely'] == '') {
+          $return["summa"] += $row['rivihinta'];
+          $return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+        }
+        else {
+          $return["summa"] += ($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+          $return["arvo"]  += $row['rivihinta'];
+
+          // Verollinen lähetetyyppi, lisätään alvit rivihintoihin
+          if (strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+            $return['row']['hinta']   = hintapyoristys($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+            $return['row']['rivihinta'] = hintapyoristys($row['rivihinta'] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
+          }
+        }
+
         $return = rivi_tilausrivihinta_eialennuksia_lahete($return);
       }
       elseif ($base_lahetetyyppi == "tulosta_lahete_eialeja.inc") {

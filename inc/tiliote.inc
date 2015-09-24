@@ -1177,13 +1177,15 @@ case 'T11':
   if ($koodi == '705' and $kuittikoodi != "E" and $koodiselite == "INCOMING BATCH WITH REFERENCES") {
     $kuittikoodi = "E";
   }
-
+#echo "1180: $koodi, $koodiselite, $kuittikoodi, $maksuviite, $erialla <br><br>";
   // Swedbank Viro häkki
-  if ($yhtiorow['maa'] == "EE" and $koodi == '710' and $koodiselite == "DOMESTIC CREDIT TRANSFER" and $kuittikoodi != "E" and (int) $maksuviite > 0) {
+  if ($yhtiorow['maa'] == "EE" and $koodi == '710' and 
+    ($koodiselite == "DOMESTIC CREDIT TRANSFER" or $koodiselite == "SEPA CREDIT TRANSFER")
+    and $kuittikoodi != "E" and (int) $maksuviite > 0) {
     $kuittikoodi = "E";
     $erialla     = "VIITEAINEISTO";
   }
-
+#echo "1188: $koodi, $koodiselite, $kuittikoodi, $maksuviite, $erialla <br><br>";
   // Swedbank Viro häkki
   if ($yhtiorow['maa'] == "EE" and $koodi == '770' and $koodiselite == "INTERNATIONAL PAYMENT" and $kuittikoodi != "E" and (int) $maksuviite > 0) {
     $kuittikoodi = "E";

@@ -993,14 +993,16 @@ if (!function_exists('rivi_otsikot_lahete')) {
       $pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,    $thispage, $rectparam);
       $pdf->draw_rectangle($kala+30, 40,  $kala+10, 140,   $thispage, $rectparam);
       $pdf->draw_rectangle($kala+30, 140, $kala+10, 420,   $thispage, $rectparam);
+      $pdf->draw_rectangle($kala+30, 370, $kala+10, 420,   $thispage, $rectparam);
       $pdf->draw_rectangle($kala+30, 420, $kala+10, 470,   $thispage, $rectparam);
       $pdf->draw_rectangle($kala+30, 470, $kala+10, 520,   $thispage, $rectparam);
       $pdf->draw_rectangle($kala+30, 520, $kala+10, 580,   $thispage, $rectparam);
       $pdf->draw_text(25,  $kala+15, "#",              $thispage, $norm);
       $pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),  $thispage, $norm);
       $pdf->draw_text(145, $kala+15, t("Tuotenimi", $kieli),    $thispage, $norm);
-      $pdf->draw_text(425, $kala+15, t("Tilattu", $kieli),    $thispage, $norm);
-      $pdf->draw_text(475, $kala+15, t("Toimitus", $kieli),    $thispage, $norm);
+      $pdf->draw_text(375, $kala+15, t("Tilattu", $kieli),    $thispage, $norm);
+      $pdf->draw_text(425, $kala+15, t("Toimitus", $kieli),    $thispage, $norm);
+      $pdf->draw_text(475, $kala+15, t("Yks.hinta", $kieli),    $thispage, $norm);
       $pdf->draw_text(525, $kala+15, t("Hinta", $kieli),    $thispage, $norm);
     }
     elseif ($base_lahetetyyppi == "tulosta_lahete_eialeja.inc") {
@@ -1895,6 +1897,7 @@ if (!function_exists('rivi_lahete')) {
       }
       elseif ($base_lahetetyyppi == "tulosta_lahete_tilausrivihinta_eialennuksia.inc") {
         $return['row']['rivihinta'] = $row['rivihinta'] = hintapyoristys($row['hinta'] * $row['tilkpl']);
+        $return['row']['hinta'] = hintapyoristys($row['hinta']);
         $return = rivi_tilausrivihinta_eialennuksia_lahete($return);
       }
       elseif ($base_lahetetyyppi == "tulosta_lahete_eialeja.inc") {
@@ -2703,10 +2706,13 @@ if (!function_exists('rivi_tilausrivihinta_eialennuksia_lahete')) {
     $omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
     $oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
-    $pdf->draw_text(465-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
+    $pdf->draw_text(415-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
-    $oikpos = $pdf->strlen($row["varattu"], $norm);
-    $pdf->draw_text(515-$oikpos, $kala, $row["varattu"],                 $thispage, $norm);
+    $oikpos = $pdf->strlen($row['varattu'], $norm);
+    $pdf->draw_text(465-$oikpos, $kala, $row['varattu'],                 $thispage, $norm);
+
+    $oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
+    $pdf->draw_text(515-$oikpos, $kala, hintapyoristys($row["hinta"]),         $thispage, $norm);
 
     $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
     $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]),         $thispage, $norm);

@@ -1471,11 +1471,31 @@ if ($kasitellaan_tiedosto) {
           $query = "DELETE LOW_PRIORITY FROM $table_mysql ";
         }
 
+        $asiakashinta_liitos_count = 0;
+        $asiakashinta_liitos_virhe = "";
+        $asiakas_liitokset = array("ASIAKAS", "YTUNNUS", "ASIAKAS_RYHMA", "ASIAKAS_SEGMENTTI",
+                                   "PIIRI");
+
         foreach ($taulunotsikot[$taulu] as $r => $otsikko) {
 
           //  N‰it‰ ei koskaan lis‰t‰
           if (is_array($apu_sarakkeet) and in_array($otsikko, $apu_sarakkeet)) {
             continue;
+          }
+
+          if ($table_mysql == "asiakashinta") {
+            if (in_array($otsikko, $asiakas_liitokset) and
+                !empty($taulunrivit[$taulu][$eriviindex][$r])
+            ) {
+              if ($asiakashinta_liitos_count > 0) {
+                $asiakashinta_liitos_virhe = "<font class='error'>" .
+                                             t("Valitse vain asiakas, ytunnus, asiakasryhm‰, " .
+                                               "asiakassegmentti tai piiri") . "!</font> ";
+                $hylkaa++;
+              }
+
+              $asiakashinta_liitos_count++;
+            }
           }
 
           if ($r != $postoiminto) {
@@ -2220,7 +2240,7 @@ if ($kasitellaan_tiedosto) {
             $result = pupe_query($tarq);
           }
           else {
-            lue_data_echo(t("Virhe rivill‰").": $rivilaskuri <font class='error'>".t("Tarkista rivin ehdot ja sis‰‰nluvun asetukset")."!</font><br>");
+            lue_data_echo(t("Virhe rivill‰").": $rivilaskuri <font class='error'>".t("Tarkista rivin ehdot ja sis‰‰nluvun asetukset")."!</font> {$asiakashinta_liitos_virhe}<br>");
           }
         }
         else {

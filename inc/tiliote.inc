@@ -948,7 +948,9 @@ case 'T10':
 
       // Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
       // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
-      if (substr($tdrow2peek['tieto'], 187, 1) > $omataso and $tdr2tunn == 'T10') {
+      if ((substr($tdrow2peek['tieto'], 187, 1) > $omataso and $tdr2tunn == 'T10')
+        or ($yhtiorow['maa'] == "EE" and (strtoupper(trim($koodiselite)) == "DOMESTIC CREDIT TRANSFER" 
+        or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER"))) {
         $kuittikoodi = "E";
         $erialla     = "E";
       }
@@ -957,7 +959,9 @@ case 'T10':
     }
   }
 
-  if ($kuittikoodi == "E" and $koodi == "710" and strtoupper(trim($koodiselite)) == "PANO") {
+  if ($kuittikoodi == "E" and $koodi == "710" and (strtoupper(trim($koodiselite)) == "PANO"
+    or ($yhtiorow['maa'] == "EE" and (strtoupper(trim($koodiselite)) == "DOMESTIC CREDIT TRANSFER" 
+    or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER")))) {
 
     $query = "SELECT *
               FROM tiliotedata

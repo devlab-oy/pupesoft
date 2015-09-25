@@ -1034,6 +1034,22 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
     $rivinkorkeus = 12;
 
+    if ($yhtiorow['tarjoustyyppi'] == 5) {
+      $query = "SELECT liitetiedostot.*
+                FROM tuote
+                JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
+                  AND liitetiedostot.liitostunnus = tuote.tunnus
+                  AND liitetiedostot.liitos = 'tuote'
+                  AND liitetiedostot.kayttotarkoitus = 'TK')
+                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                AND tuote.tuoteno = '{$row['tuoteno']}'";
+      $kuva_res = pupe_query($query);
+
+      if (mysql_num_rows($kuva_res) != 0) {
+        $kala -= 20;
+      }
+    }
+
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow['tarjoustyyppi'] != 5) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       $kala = $pohja - $rivinkorkeus;
@@ -1134,15 +1150,19 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                 JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
                   AND liitetiedostot.liitostunnus = tuote.tunnus
                   AND liitetiedostot.liitos = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TH')
+                  AND liitetiedostot.kayttotarkoitus = 'TK')
                 WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                 AND tuote.tuoteno = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);
 
       if (mysql_num_rows($kuva_res) != 0) {
         $kuva_row = mysql_fetch_assoc($kuva_res);
+
         $image = $pdf_tarjous->jfif_embed($kuva_row['data']);
-        $pdf_tarjous->image_place($image, $kala-5, 25, $page_tarjous[$sivu]);
+
+        $_scale = 44 / $kuva_row['image_width'];
+
+        $pdf_tarjous->image_place($image, $kala-42, 25, $page_tarjous[$sivu], array('scale' => $_scale));
       }
 
       $pdf_tarjous->draw_text(80, $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);

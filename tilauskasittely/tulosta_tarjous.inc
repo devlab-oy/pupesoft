@@ -9,7 +9,7 @@ else {
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
   if (@include_once "viivakoodi/Barcode.php") {
-  }
+}
   else {
     include_once "Barcode.php";
   }
@@ -687,8 +687,8 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 
     }
     elseif ($yhtiorow['tarjoustyyppi'] == 5) {
-      $pdf_tarjous->draw_text(90,  $kala+15, t("Tuotenumero", $kieli),  $page_tarjous, $boldi);
-      $pdf_tarjous->draw_text(90,  $kala+5, t("Tuotenimi", $kieli),    $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(80,  $kala+15, t("Tuotenumero", $kieli),  $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(80,  $kala+5, t("Tuotenimi", $kieli),    $page_tarjous, $boldi);
       $pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),      $page_tarjous, $boldi);
       $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $boldi);
       $pdf_tarjous->draw_text(450, $kala + 15, t("Alennus", $kieli), $page_tarjous, $boldi);
@@ -1139,25 +1139,19 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                 AND tuote.tuoteno = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);
 
-      $kuva_width = $kuva_height = 0;
-      $kuva_width = $thumb_size_x;
-
       if (mysql_num_rows($kuva_res) != 0) {
         $kuva_row = mysql_fetch_assoc($kuva_res);
-
-        $image = $pdf_tarjous->png_embed($kuva_row['data']);
+        $image = $pdf_tarjous->jfif_embed($kuva_row['data']);
         $pdf_tarjous->image_place($image, $kala-5, 25, $page_tarjous[$sivu]);
-
-        $kuva_height = $kuva_row['image_height'];
       }
 
-      $pdf_tarjous->draw_text(25 + $kuva_row['image_width'], $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);
-      $pdf_tarjous->draw_text(25 + $kuva_row['image_width'], $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(80, $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(80, $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
 
       $kala -= 20;
 
       if (trim($row["perhe_kommentti"]) != '') {
-        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 25 + $kuva_row['image_width'], 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
         $kala = $pohja - $rivinkorkeus - 10;
       }
       else {
@@ -1599,6 +1593,50 @@ if (!function_exists('loppu_tarjous')) {
           }
 
           $kuha = $_y;
+        }
+        else {
+
+          $kuha -= 24;
+
+          $veroteksti = "";
+
+          if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+            if ($laskurow["vienti"] != "") {
+              $veroteksti = ""; // Laitetaan tyhjänä
+            }
+            elseif ($kaanteinen_verotus === TRUE) {
+              $veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
+            }
+            elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+              $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+            }
+            elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
+              $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+            }
+            elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
+              if ($yhtiorow['alv_kasittely'] != '') {
+                $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+              }
+              else {
+                $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+              }
+            }
+            else {
+              if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+                $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+              }
+              else {
+                $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+              }
+            }
+          }
+
+          if ($yhtiorow["tarjoustyyppi"] != 3 and $laskurow["rahtivapaa"] == "") {
+            $pdf_tarjous->draw_text(30,  $kuha, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
+          }
+          else {
+            $pdf_tarjous->draw_text(30,  $kuha, $veroteksti, $page_tarjous[$sivu], $norm);
+          }
         }
 
         if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {

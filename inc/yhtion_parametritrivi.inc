@@ -4417,6 +4417,19 @@ if ($fieldname == 'paivita_oletuspaikka') {
   $jatko = 0;
 }
 
+if ($fieldname == 'tilaukselle_mittatiedot') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'M' => '', 'A' => '');
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella ei n‰ytet‰ mittatietojen yhteenvetoa")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto sek‰ asiakasosasto")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'tarkenteiden_prioriteetti') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

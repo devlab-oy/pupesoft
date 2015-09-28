@@ -199,7 +199,7 @@ function git_log($repo, $edveto_hash, $taveto_hash) {
 // ja haetaan omaan kantaan githubin pulkkarien tiedot
 $query  = "SELECT max(date) haettu
            FROM git_paivitykset
-           WHERE hash = 'github_api_request' ";
+           WHERE hash = 'github_api_request'";
 $apires = pupe_query($query);
 $apirow = mysql_fetch_assoc($apires);
 

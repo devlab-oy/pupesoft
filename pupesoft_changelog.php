@@ -1,9 +1,5 @@
 <?php
 
-#alter table git_pulkkarit add column repository varchar(20) not null default 'pupesoft' after id;
-#alter table git_paivitykset add column repository varchar(20) not null default 'pupesoft' after hash;
-#alter table git_paivitykset add column hash_pupenext varchar(50) not null default '' after hash;
-
 // Kutsutaanko CLI:stä
 $php_cli = (php_sapi_name() == 'cli');
 
@@ -92,7 +88,7 @@ function hae_pulkkarit($updatedtime, $repo, $url) {
 
     // Tägätään apikutsun aikaleima
     $query  = "INSERT INTO git_paivitykset
-               SET hash = 'github_api_request',
+               SET hash_pupesoft = 'github_api_request',
                repository = '$repo',
                date = now()";
     pupe_query($query);
@@ -199,7 +195,7 @@ function git_log($repo, $edveto_hash, $taveto_hash) {
 // ja haetaan omaan kantaan githubin pulkkarien tiedot
 $query  = "SELECT max(date) haettu
            FROM git_paivitykset
-           WHERE hash = 'github_api_request'";
+           WHERE hash_pupesoft = 'github_api_request'";
 $apires = pupe_query($query);
 $apirow = mysql_fetch_assoc($apires);
 
@@ -229,8 +225,6 @@ if ($haetaanpulkkarit) {
     $updatedtime = strtotime("2 month ago");
   }
 
-  $updatedtime = strtotime("2 month ago");
-
   hae_pulkkarit($updatedtime, "pupesoft", "https://api.github.com/repos/devlab-oy/pupesoft");
   hae_pulkkarit($updatedtime, "pupenext", "https://api.github.com/repos/devlab-oy/pupenext");
 }
@@ -250,7 +244,7 @@ else {
 // ja näytetään ruudulla päivityksessä tulleet uudet ominaisuudet
 $query  = "SELECT *
            FROM git_paivitykset
-           WHERE hash != 'github_api_request'
+           WHERE hash_pupesoft != 'github_api_request'
            ORDER BY id DESC
            LIMIT $limit";
 $vetores = pupe_query($query);
@@ -272,12 +266,12 @@ if (mysql_num_rows($vetores)) {
 
   foreach ($vedot as $i => $veto) {
 
-    if (!empty($veto["hash"])) $taveto_hash = $veto["hash"];
+    if (!empty($veto["hash_pupesoft"])) $taveto_hash = $veto["hash_pupesoft"];
     if (!empty($veto["hash_pupenext"])) $taveto_hash_pupenext = $veto["hash_pupenext"];
 
     if (isset($vedot[$i+1])) {
-      if (!empty($vedot[$i+1]["hash"])) {
-        $edveto_hash = $vedot[$i+1]["hash"];
+      if (!empty($vedot[$i+1]["hash_pupesoft"])) {
+        $edveto_hash = $vedot[$i+1]["hash_pupesoft"];
       }
       if (!empty($vedot[$i+1]["hash_pupenext"])) {
         $edveto_hash_pupenext = $vedot[$i+1]["hash_pupenext"];
@@ -299,7 +293,7 @@ if (mysql_num_rows($vetores)) {
         continue;
       }
 
-      echo "$query<tr><th>";
+      echo "<tr><th>";
       if (!$php_cli) echo "<img style='float:left;' class='nayta_rivit' id='HEAD' src='{$palvelin2}pics/lullacons/switch.png' /> ";
       echo t("Tulossa olevat ominaisuudet").":</th></tr>";
       echo "<tr><td class='back' style='padding:0px;'><table id='table_HEAD'>";
@@ -331,7 +325,7 @@ if (mysql_num_rows($vetores)) {
 
       echo "<tr><th>";
       if (!$php_cli) echo "<img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />";
-      echo "Pupesoft-".t("päivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
+      echo t("Päivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
       echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='$display_h'>";
     }
 
@@ -357,15 +351,15 @@ if (mysql_num_rows($vetores)) {
           $title     = ltrim($title, " *");
           $class     = "spec";
           $fclass    = "message";
-          $titlelisa = t("Uusi ominaisuus");
+          $titlelisa = t("Uusi %s ominaisuus", "", $repo);
         }
         else {
           $class     = "";
           $fclass    = "";
-          $titlelisa = t("Pienkehitys");
+          $titlelisa = ucfirst($repo)."-".t("pienkehitys");
         }
 
-        echo "<td class='$class' style='width: 100%;'><font class='message'>$repo $titlelisa</font>: <font class='$fclass'>$title</font></td>";
+        echo "<td class='$class' style='width: 100%;'><font class='message'>$titlelisa</font>: <font class='$fclass'>$title</font></td>";
         echo "<td class='$class' style='width: 100%;'><a target='pulkkari' href='https://github.com/devlab-oy/pupesoft/pull/$pulrow[id]'>$pulrow[id]</a></td>";
         echo "</tr>";
         echo "<tr><td colspan='3' style='width: 100%;'><pre style='white-space: pre-wrap;'>$body</pre>";
@@ -373,7 +367,7 @@ if (mysql_num_rows($vetores)) {
         $files = unserialize($pulrow['files']);
 
         if (count($files)) {
-          echo "<br>Päivitetyt ohjelmat:<br><table>";
+          echo "<br>".t("Päivitetyt ohjelmat").":<br><table>";
 
           foreach ($files as $file) {
             list($sovellus, $filenimi, $nimitys) = $file;

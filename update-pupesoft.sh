@@ -50,7 +50,7 @@ function git_log_update {
   PUPESOFTHASH=$1
   PUPENEXTHASH=$2
 
-  ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${PUPESOFTHASH}', hash_pupenext='${PUPENEXTHASH}', ip='${USER_IP}', date=now()" &> /dev/null
+  ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash_pupesoft='${PUPESOFTHASH}', hash_pupenext='${PUPENEXTHASH}', ip='${USER_IP}', date=now()" &> /dev/null
 
   # Informoidaan käyttäjiä päivityksestä
   while read -r line

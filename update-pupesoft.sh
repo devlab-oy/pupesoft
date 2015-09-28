@@ -46,6 +46,19 @@ function git_repo_uptodate {
   fi
 }
 
+function git_log_update {
+  PUPESOFTHASH=$1
+  PUPENEXTHASH=$2
+
+  ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash_pupesoft='${PUPESOFTHASH}', hash_pupenext='${PUPENEXTHASH}', ip='${USER_IP}', date=now()" &> /dev/null
+
+  # Informoidaan käyttäjiä päivityksestä
+  while read -r line
+  do
+    php pupesoft_changelog.php ${line}
+  done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
+}
+
 ####################################################################################################
 #### Preparation ###################################################################################
 ####################################################################################################
@@ -55,6 +68,7 @@ pupedir=$(cd $(dirname ${0}) && echo $(pwd))
 pupenextdir=/home/devlab/pupenext
 salasanat=${pupedir}/inc/salasanat.php
 branchfile="/home/devlab/pupe_branch"
+branchfilepupenext="/home/devlab/pupenext_branch"
 environment="production"
 jatketaan=
 bundle=false
@@ -65,6 +79,10 @@ green=$(tput -Txterm-color setaf 2)
 red=$(tput -Txterm-color setaf 1)
 white=$(tput -Txterm-color setaf 7)
 normal=$(tput -Txterm-color sgr0)
+
+# Logataan mitä päivitettiin ja mihin versioon
+PUPESOFT_NEWHASH=""
+PUPENEXT_NEWHASH=""
 
 # Jos pupenext ei ole /home/devlab/pupenext hakemistossa,
 # tulee poikkeava polku antaa PUPENEXT_DIR environment muuttujassa
@@ -220,6 +238,9 @@ else
   echo
   echo -n "${white}Päivitetäänkö Pupesoft (k/e)? ${normal}"
   read jatketaanko
+
+  # Päivitetään luettu arvo myös jatketaan-muuttujaan, niin pupenext seuraa käsi kädessä
+  jatketaan=$jatketaanko
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
@@ -241,15 +262,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     fi
 
     # Get new head
-    NEW_HEAD=$(git rev-parse HEAD)
-
-    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', date=now()" &> /dev/null
-
-    # Informoidaan käyttäjiä päivityksestä
-    while read -r line
-    do
-      php pupesoft_changelog.php ${line}
-    done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
+    PUPESOFT_NEWHASH=$(git rev-parse HEAD)
   fi
 
   if [[ ${STATUS} -eq 0 ]]; then
@@ -281,28 +294,31 @@ echo
 # Setataan rails env
 export RAILS_ENV=${environment}
 
+# Onko spessubranchi käytössä?
+if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+  pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
+else
+  pupenextbranch="master"
+fi
+
 # Katsotaan onko git hakemistossa muutoksia
-git_repo_uptodate ${pupenextdir} master
+git_repo_uptodate ${pupenextdir} ${pupenextbranch}
 
 # Skipataan, jos ei ole muutoksia
 if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
-elif [[ ! -z "${jatketaan}" && ("${jatketaan}" = "auto" || "${jatketaan}" = "autopupe") ]]; then
+elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
 else
-  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
-  echo "HUOM: Tietokantamuutosten tarkistus vaatii Pupenextin päivittämisen!"
-  echo
-  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
-  read jatketaanko
+  jatketaanko=$jatketaan
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
   # Update app with git
   cd "${pupenextdir}" &&
   git checkout . &&
-  git checkout master &&
-  git pull origin master &&
+  git checkout ${pupenextbranch} &&
+  git pull origin ${pupenextbranch} &&
   git remote prune origin
 
   # Save git exit status
@@ -311,6 +327,9 @@ if [[ "${jatketaanko}" = "k" ]]; then
   # Päivitys onnistui, bundlataan
   if [[ ${STATUS} -eq 0 ]]; then
     bundle=true
+
+    # Get new head
+    PUPENEXT_NEWHASH=$(git rev-parse HEAD)
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"
   fi
@@ -360,6 +379,11 @@ elif [[ "${jatketaanko}" = "skip" ]]; then
   echo "${green}Pupenext ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${red}Pupenextiä ei päivitetty!${normal}"
+fi
+
+# Jos jompi kumpi päivitettiin, niin tallennetaan kantaan
+if [[ $PUPESOFT_NEWHASH ]] || [[ $PUPENEXT_NEWHASH ]]; then
+  git_log_update "$PUPESOFT_NEWHASH" "$PUPENEXT_NEWHASH"
 fi
 
 echo

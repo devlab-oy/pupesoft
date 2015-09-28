@@ -52,6 +52,9 @@ function git_log_update {
 
   ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash_pupesoft='${PUPESOFTHASH}', hash_pupenext='${PUPENEXTHASH}', ip='${USER_IP}', date=now()" &> /dev/null
 
+  # Siirrytään pupekansioon
+  cd ${pupedir}
+
   # Informoidaan käyttäjiä päivityksestä
   while read -r line
   do

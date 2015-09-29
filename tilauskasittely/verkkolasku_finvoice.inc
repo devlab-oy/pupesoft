@@ -837,7 +837,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
         xml_add("InvoiceUrlText",                     "file://Apix_invoice_$lasrow[laskunro].pdf",  $tootfinvoice);
 
         if ($liitteita) {
-          xml_add('InvoiceUrlText', "file://Apix_attachments.zip", $tootfinvoice);
+          xml_add('InvoiceUrlText', "file://Apix_attachments_{$lasrow["laskunro"]}.zip", $tootfinvoice);
         }
       }
       else {

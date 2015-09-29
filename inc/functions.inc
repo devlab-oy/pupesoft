@@ -1090,7 +1090,7 @@ if (!function_exists("apix_queue")) {
           file_put_contents("{$attachment_dir}/{$filename}", $data);
         }
 
-        exec("cd {$apix_tmpdirnimi}; zip Apix_attachments.zip attachments/*;");
+        exec("cd {$apix_tmpdirnimi}; zip Apix_attachments_{$apix_invoicenum}.zip attachments/*;");
 
         exec("rm -rf {$attachment_dir}");
       }

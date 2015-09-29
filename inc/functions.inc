@@ -1209,6 +1209,8 @@ if (!function_exists("hae_liitteet_verkkolaskuun")) {
       $kayttotarkoitukset[] = "'{$liitetiedostotyyppi["selite"]}'";
     }
 
+    if (empty($kayttotarkoitukset)) return array();
+
     $kayttotarkoitukset = implode(",", $kayttotarkoitukset);
 
     $query = "SELECT filename, data

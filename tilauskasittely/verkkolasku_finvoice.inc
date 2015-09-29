@@ -777,7 +777,7 @@ if (!function_exists('finvoice_rivi')) {
 }
 
 if (!function_exists('finvoice_lasku_loppu')) {
-  function finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteet = array()) {
+  function finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita = false) {
     global $yhtiorow, $err_finvoice;
 
     if ($err_finvoice == 0) {
@@ -830,13 +830,13 @@ if (!function_exists('finvoice_lasku_loppu')) {
       if ($yhtiorow["verkkolasku_lah"] == "apix") {
         xml_add("InvoiceUrlNameText",                   "APIX_PDFFILE",                  $tootfinvoice);
 
-        if (!empty($liitteet)) {
+        if ($liitteita) {
           xml_add('InvoiceUrlNameText', 'APIX_ATTACHMENT', $tootfinvoice);
         }
 
         xml_add("InvoiceUrlText",                     "file://Apix_invoice_$lasrow[laskunro].pdf",  $tootfinvoice);
 
-        if (!empty($liitteet)) {
+        if ($liitteita) {
           xml_add('InvoiceUrlText', "file://Apix_attachments.zip", $tootfinvoice);
         }
       }

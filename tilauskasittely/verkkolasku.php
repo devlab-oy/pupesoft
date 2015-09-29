@@ -2571,9 +2571,10 @@ else {
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
             elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-              $liitteet = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
+              $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
+              $liitteita = !empty($liitteet);
 
-              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteet);
+              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
 
               if ($yhtiorow["verkkolasku_lah"] == "apix") {
                 //Nämä menee verkkolaskuputkeen

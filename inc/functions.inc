@@ -29468,13 +29468,13 @@ if (!function_exists('osatoimitus')) {
       $_osatoimitus_myyntitilaus = (
         $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
         and $kukarow["kesken"] == 0
-        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA"))
       );
     }
     else {
       $_osatoimitus_myyntitilaus = (
         $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
-        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA"))
       );
     }
 

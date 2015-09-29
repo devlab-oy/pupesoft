@@ -1081,11 +1081,17 @@ if (!function_exists("apix_queue")) {
         $apix_ulos .= "APIX tmpmove Apix_invoice_$apix_invoicenum.pdf feilas!";
       }
 
+      $attachment_dir = "{$apix_tmpdirnimi}/attachments";
+
+      mkdir($attachment_dir);
+
       foreach ($liitteet as $filename => $data) {
-        file_put_contents("{$apix_tmpdirnimi}/{$filename}", $data);
-        exec("cd {$apix_tmpdirnimi} && zip {$filename}.zip {$filename}");
-        exec("rm {$apix_tmpdirnimi}/{$filename}");
+        file_put_contents("{$attachment_dir}/{$filename}", $data);
       }
+
+      exec("cd {$apix_tmpdirnimi}; zip Apix_attachments.zip attachments/*;");
+
+      exec("rm -rf {$attachment_dir}");
 
       // Tehd‰‰n apixzippi
       exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");

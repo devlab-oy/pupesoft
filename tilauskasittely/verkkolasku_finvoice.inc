@@ -830,14 +830,14 @@ if (!function_exists('finvoice_lasku_loppu')) {
       if ($yhtiorow["verkkolasku_lah"] == "apix") {
         xml_add("InvoiceUrlNameText",                   "APIX_PDFFILE",                  $tootfinvoice);
 
-        for ($i = 0; $i < count($liitteet); $i++) {
+        if (!empty($liitteet)) {
           xml_add('InvoiceUrlNameText', 'APIX_ATTACHMENT', $tootfinvoice);
         }
 
         xml_add("InvoiceUrlText",                     "file://Apix_invoice_$lasrow[laskunro].pdf",  $tootfinvoice);
 
-        foreach ($liitteet as $filename => $data) {
-          xml_add('InvoiceUrlText', "file://{$filename}.zip", $tootfinvoice);
+        if (!empty($liitteet)) {
+          xml_add('InvoiceUrlText', "file://Apix_attachments.zip", $tootfinvoice);
         }
       }
       else {

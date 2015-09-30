@@ -14,7 +14,7 @@ if ($tee == 'etsi') {
   if ($vva != '' and $kka != '' and $ppa != '') {
     $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa' "; 
   }
-  
+
   if ($vvl != '' and $kkl != '' and $ppl != '') {
     $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl' ";    
   }
@@ -48,16 +48,16 @@ if ($tee == 'etsi') {
   }
 
   if ($hakuteksti != '') {
-      $hakuehdot .= " AND ( 'konditionaaliset_hakuehdot' ";
-      $hakuehdot .= " OR lasku.nimi LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR tyomaarays.rekno LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR tyomaarays.valmnro LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR tyomaarays.komm1 LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " OR tyomaarays.komm2 LIKE '%".$hakuteksti."%' ";
-      $hakuehdot .= " ) ";
-    }
+    $hakuehdot .= " AND ( 'konditionaaliset_hakuehdot' ";
+    $hakuehdot .= " OR lasku.nimi LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.rekno LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.valmnro LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.komm1 LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.komm2 LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " ) ";
+  }
 
   $squery = "SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
              FROM lasku

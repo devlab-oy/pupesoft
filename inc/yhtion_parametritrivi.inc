@@ -1477,18 +1477,22 @@ if ($fieldname == "lasku_tulostin") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  while ($kirow=mysql_fetch_array($kires)) {
+  while ($kirow = mysql_fetch_array($kires)) {
     if ($kirow["tunnus"]==$trow[$i]) $select='SELECTED';
     else $select = '';
 
     $ulos .= "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
   }
 
+  if ($trow[$i] == -88) $select = 'SELECTED';
+  else $select = '';
+
+  $ulos .= "<option value='-88' $select>".t("PDF Ruudulle")."</option>";
+
   if ($trow[$i] == -99) $select = 'SELECTED';
   else $select = '';
 
   $ulos .= "<option value='-99' $select>".t("Asiakkaan sähköpostiin")."</option>";
-
   $ulos .= "</select></td>";
 
   $jatko = 0;

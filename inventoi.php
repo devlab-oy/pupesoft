@@ -264,13 +264,14 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
   $ots .= sprintf('%-18.14s', t("Paikka"));
   $ots .= sprintf('%-21.21s', t("Tuoteno"));
   $ots .= sprintf('%-21.21s', t("Toim.Tuoteno"));
-  $ots .= sprintf('%-33.31s', t("Nimitys"));
+  $ots .= sprintf('%-26.23s', t("Nimitys"));
   $ots .= sprintf('%-10.10s', t("Hyllyssä"));
   $ots .= sprintf('%-10.10s', t("Laskettu"));
+  $ots .= sprintf('%-7.5s', t("Vapaa"));
   $ots .= sprintf('%-5.5s', t("Yks."));
   $ots .= sprintf('%-10.10s', t("Poikkeama"));
-  $ots .= sprintf('%-10.10s', t("Poik. EUR"));
-  $ots .= sprintf('%-6.6s', "#");
+  $ots .= sprintf('%-8.8s', t("Poik.EUR"));
+  $ots .= sprintf('%-5.5s', str_pad("#", 5, " ", STR_PAD_LEFT));
 
   $ots .= "\n";
   $ots .= "__________________________________________________________________________________";
@@ -305,9 +306,10 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $prn .= sprintf('%-18.14s', $_paikka);
     $prn .= sprintf('%-21.20s', $row['tuoteno']);
     $prn .= sprintf('%-21.20s', $row['toim_tuoteno']);
-    $prn .= sprintf('%-33.31s', $row['nimitys']);
+    $prn .= sprintf('%-26.23s', $row['nimitys']);
     $prn .= sprintf('%-10.09s', $row['hyllyssa']);
     $prn .= sprintf('%-10.09s', $row['laskettu']);
+    $prn .= sprintf('%-7.5s', "_____");
     $prn .= sprintf('%-6.6s', $row['yksikko']);
 
     $_poikkeama = $row['laskettu'] - $row['hyllyssa'];
@@ -316,10 +318,10 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $_poikkeama_yht += $_poikkeama;
     $_poikkeama_yht_eur += $_poikkeama_eur;
 
-    $prn .= sprintf('%-10.10s', $_poikkeama);
-    $prn .= round($_poikkeama_eur, 1);
+    $prn .= sprintf('%-9.7s', $_poikkeama);
+    $prn .= sprintf('%-8.6s',round($_poikkeama_eur, 1));
 
-    $prn .= sprintf('%-5.5s', $row['rivinro']);
+    $prn .= sprintf('%-5.5s', str_pad($row['rivinro'], 5, " ", STR_PAD_LEFT));
 
     $prn .= "\n";
     $prn .= "____________________________________________________________________________";

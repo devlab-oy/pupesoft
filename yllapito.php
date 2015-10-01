@@ -17,6 +17,7 @@ else {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
+  echo "<script src='yllapito.js'></script>";
 }
 
 //Huom ennen t‰t‰ rivi‰ ei saa olla mit‰‰n echoja!

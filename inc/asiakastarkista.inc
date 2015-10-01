@@ -256,8 +256,11 @@ if (!function_exists("asiakastarkista")) {
 
     if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
 
-      // Tarkistetaan sähköpostiosoite
-      $email_virhe = tarkista_email($t[$i]);
+      $email_virhe = "";
+      // Tarkistetaan sähköpostiosoite (jos ei olla Virossa)
+      if ($yhtiorow["maa"] != "EE") {
+        $email_virhe = tarkista_email($t[$i]);
+      }
 
       if ($email_virhe != "") {
         $virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";

@@ -494,7 +494,7 @@ if ($tila == 'R') {
   }
   else {
     $pvm = date("Y-m-d", mktime(0, 0, 0, $kk, $pp, $vv));
-    if ($pvm < $trow['erpcm']) {
+    if ($pvm < $trow['tapvm']) {
       echo "<font class='error'>".t("Eräpvm on ennen laskunpäiväystä")." $pvm, $trow[tapvm]</font><br>";
       $tee = 'E';
       $tila = '';

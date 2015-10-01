@@ -1454,9 +1454,20 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
 
-  $osto_rahti    = str_replace(",", ".", trim($osto_rahti));
-  $osto_kulu    = str_replace(",", ".", trim($osto_kulu));
-  $osto_rivi_kulu    = str_replace(",", ".", trim($osto_rivi_kulu));
+  // Tehdään pistemuutos vaan, jos on setattu
+  // koska muuten setataan kyseiset muuttujan tyhjiksi
+  // ja sit failataan myöhemmin muuten.
+  if (isset($osto_rahti)) {
+    $osto_rahti = str_replace(",", ".", trim($osto_rahti));
+  }
+
+  if (isset($osto_kulu)) {
+    $osto_kulu = str_replace(",", ".", trim($osto_kulu));
+  }
+
+  if (isset($osto_rivi_kulu)) {
+    $osto_rivi_kulu = str_replace(",", ".", trim($osto_rivi_kulu));
+  }
 
   if (isset($osto_rahti) and ((trim($osto_rahti) != '' and !is_numeric($osto_rahti)) or trim($osto_rahti) == '')) {
     echo "<font class='error'>", t("Vaihto-omaisuuslaskun rahtikulu ei ole numeerinen"), " {$osto_rahti}</font><br>";

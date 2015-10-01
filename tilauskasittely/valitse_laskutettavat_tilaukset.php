@@ -301,7 +301,7 @@ if ($tee == 'TOIMITA') {
       $katlisa = "";
     }
 
-    //ja p‰ivitet‰‰n laskujen otsikot laskutusjonoon
+    // ja p‰ivitet‰‰n laskujen otsikot laskutusjonoon
     $query = "UPDATE lasku
               set alatila = 'D'
               $katlisa
@@ -309,9 +309,9 @@ if ($tee == 'TOIMITA') {
               and yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
-    $tee       = "TARKISTA";
-    $laskutakaikki   = "KYLLA";
-    $silent       = "VIENTI";
+    $tee           = "TARKISTA";
+    $laskutakaikki = "KYLLA";
+    $silent        = "VIENTI";
 
     require "verkkolasku.php";
 
@@ -389,7 +389,7 @@ if ($tee == 'TOIMITA') {
     echo "<br><br>";
   }
   $laskutettavat  = "";
-  $tee       = "";
+  $tee            = "";
 }
 
 if ($tee == "VALITSE") {
@@ -662,7 +662,7 @@ if ($tee == "VALITSE") {
       echo "<td>$row[toimitustapa] $rahti_hinta</td>";
       echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
 
-      //Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupotitiot kerralla
+      //Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupositiot kerralla
       if ($jaksotettuja) {
         if ($row["jaksotettu"] > 0) {
           $query = "SELECT
@@ -679,7 +679,7 @@ if ($tee == "VALITSE") {
         }
 
         if ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and !in_array($row["jaksotettu"], $maksu_positiot)) {
-          //Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
+          // Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
           $maksu_positiot[] = $row["jaksotettu"];
 
           echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
@@ -886,6 +886,7 @@ if ($tee == "VALITSE") {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
 
+      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
       echo "</select></td></tr>";
 
       if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {

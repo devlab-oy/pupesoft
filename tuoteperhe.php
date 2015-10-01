@@ -1030,6 +1030,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Ostohinta"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoh.val"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
@@ -1267,7 +1268,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
             echo "<td align='right'>{$ostohinta} {$valuutta}</td>";
 
-            $worksheet->writeString($excelrivi, $excelsarake++, "{$ostohinta} {$valuutta}", $style);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $ostohinta, $style);
+            $worksheet->writeString($excelrivi, $excelsarake++, $valuutta, $style);
           }
 
           if ($toim != "VSUUNNITTELU") {
@@ -1479,7 +1481,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         }
         else {
-          $colspan = 4;
+          $colspan = 5;
           if (!empty($resepti_kentat)) {
             $colspan += count($resepti_kentat);
           }

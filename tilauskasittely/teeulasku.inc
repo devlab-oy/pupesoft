@@ -502,7 +502,7 @@ else {
 }
 
 // jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
-if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
+if (count($montakotilausta) > 1 and $laskutyyppi != 1 and $laskutyyppi != 6) {
 
   if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
   else $pjat_sortlisa = "";

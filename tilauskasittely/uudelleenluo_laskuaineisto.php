@@ -60,8 +60,11 @@ if (isset($tee) and $tee == "apix_siirto") {
 
       $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
+      $tilausnumero = hae_tilausnumero($invoice_number[1]);
+      $liitteet     = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+
       // Laitetaan lasku l‰hetysjonoon
-      echo apix_queue($apix_finvoice, $invoice_number[1], $kieli);
+      echo apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);
     }
   }
 }
@@ -813,7 +816,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-        finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
+        $tilausnumero                  = hae_tilausnumero($lasrow["laskunro"]);
+        $liitteet[$lasrow["laskunro"]] = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+        $liitteita                     = !empty($liitteet[$lasrow["laskunro"]]);
+
+        finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
 
         if ($yhtiorow["verkkolasku_lah"] == "apix") {
           $tulostettavat_apix[] = $lasrow["laskunro"];
@@ -964,6 +971,20 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlasku.pdf")) {
             echo "APIX tmpmove Apix_invoice_$apixlasku.pdf feilas!";
           }
+
+          if (!empty($liitteet[$apixlasku])) {
+            $attachment_dir = "{$apix_tmpdirnimi}/attachments";
+
+            mkdir($attachment_dir);
+
+            foreach ($liitteet[$apixlasku] as $filename => $data) {
+              file_put_contents("{$attachment_dir}/{$filename}", $data);
+            }
+
+            exec("cd {$attachment_dir}; zip ../Apix_attachments_{$apixlasku}.zip *;");
+
+            exec("rm -rf {$attachment_dir}");
+          }
         }
 
         // Tehd‰‰n apixzippi
@@ -1104,3 +1125,20 @@ if (!isset($tee) or $tee == "") {
 }
 
 if (!isset($tee) or $tee != "NAYTATILAUS") require "inc/footer.inc";
+
+function hae_tilausnumero($laskunro) {
+  global $kukarow;
+
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE laskunro = {$laskunro}
+            AND yhtio = '{$kukarow["yhtio"]}'
+            AND tila = 'L'
+            AND alatila = 'X'";
+
+  $tilausnumero = pupe_query($query);
+  $tilausnumero = mysql_fetch_assoc($tilausnumero);
+  $tilausnumero = $tilausnumero["tunnus"];
+
+  return $tilausnumero;
+}

@@ -49,7 +49,8 @@ $header .= "toimituspvm;";
 $header .= "tuoteno;";
 $header .= "määrä;";
 $header .= "rivihinta;";
-$header .= "rivikate";
+$header .= "rivikate;";
+$header .= "kehahin";
 $header .= "\n";
 
 fwrite($fp, $header);
@@ -62,7 +63,8 @@ $query = "SELECT lasku.laskunro,
           tilausrivi.tuoteno,
           tilausrivi.kpl,
           tilausrivi.rivihinta,
-          tilausrivi.kate
+          tilausrivi.kate,
+          round((tilausrivi.kate-tilausrivi.rivihinta)*-1/tilausrivi.kpl, 2) keha
           FROM tilausrivi
           INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno           = tilausrivi.tuoteno
@@ -74,7 +76,7 @@ $query = "SELECT lasku.laskunro,
             AND asiakas.myynninseuranta = '')
           WHERE tilausrivi.yhtio        = '{$yhtio}'
           AND tilausrivi.tyyppi         = 'L'
-          AND tilausrivi.laskutettuaika >= '2012-01-01'
+          AND tilausrivi.laskutettuaika >= '2015-06-01'
           ORDER BY lasku.laskunro,
           tilausrivi.tuoteno";
 $res = pupe_query($query);
@@ -95,7 +97,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$row['kpl']};";
   $rivi .= "{$row['rivihinta']};";
-  $rivi .= "{$row['kate']}";
+  $rivi .= "{$row['kate']};";
+  $rivi .= "{$row['keha']}";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

@@ -338,6 +338,7 @@ else {
               lasku AS ux_otsikko WRITE,
               lasku WRITE,
               laskun_lisatiedot WRITE,
+              liitetiedostot READ,
               maat READ,
               maksuehto READ,
               pakkaus READ,
@@ -2570,7 +2571,10 @@ else {
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
             elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
+              $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
+              $liitteita = !empty($liitteet);
+
+              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
 
               if ($yhtiorow["verkkolasku_lah"] == "apix") {
                 //Nämä menee verkkolaskuputkeen
@@ -2767,7 +2771,7 @@ else {
             $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
             // Laitetaan lasku lähetysjonoon
-            $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli);
+            $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);
           }
         }
       }

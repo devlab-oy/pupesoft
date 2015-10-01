@@ -43,7 +43,7 @@ while ($tables = mysql_fetch_row($tabresult)) {
           $nullornot = " NOT NULL";
         }
 
-        $sql .= "MODIFY $fields[0] $fields[1] CHARACTER SET utf8 COLLATE utf8_unicode_ci{$nullornot} DEFAULT '$fields[4]', ";
+        $sql .= "MODIFY `$fields[0]` $fields[1] CHARACTER SET utf8 COLLATE utf8_unicode_ci{$nullornot} DEFAULT '$fields[4]', ";
       }
     }
 

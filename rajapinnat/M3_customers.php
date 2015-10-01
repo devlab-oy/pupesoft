@@ -40,7 +40,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/customers_{$yhtio}_".date("Y-m-d_His").".csv";
+$filepath = "/tmp/customers_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -1485,6 +1485,7 @@ fclose($fp);
 
 if (!empty($tallenna_polku)) {
   rename($filepath, $tallenna_polku."/".basename($filepath));
+  chown($tallenna_polku."/".basename($filepath), fileowner($tallenna_polku));
 }
 
 echo "Valmis.\n";

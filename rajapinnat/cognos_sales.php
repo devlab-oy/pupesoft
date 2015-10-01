@@ -40,7 +40,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/sales_{$yhtio}_".date("Y-m-d_His").".csv";
+$filepath = "/tmp/sales_{$yhtio}_".date("Y-m-d").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -100,8 +100,7 @@ $query = "SELECT lasku.laskunro,
           AND lasku.tila    = 'L'
           AND lasku.alatila = 'X'
           {$rajaus}
-          ORDER BY lasku.tapvm, lasku.laskunro, tilausrivi.tuoteno
-          LIMIT 100";
+          ORDER BY lasku.tapvm, lasku.laskunro, tilausrivi.tuoteno";
 $res = pupe_query($query);
 
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
@@ -159,6 +158,7 @@ fclose($fp);
 
 if (!empty($tallenna_polku)) {
   rename($filepath, $tallenna_polku."/".basename($filepath));
+  chown($tallenna_polku."/".basename($filepath), fileowner($tallenna_polku));
 }
 
 echo "Valmis.\n";

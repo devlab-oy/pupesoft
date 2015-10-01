@@ -232,7 +232,7 @@ function generoi_where_ehdot($request_params) {
   if (!empty($request_params['ppa']) and !empty($request_params['kka']) and !empty($request_params['vva']) and !empty($request_params['ppl']) and !empty($request_params['kkl']) and !empty($request_params['vvl'])) {
     $where .= "lasku.yhtio = '{$kukarow['yhtio']}'
     AND (lasku.tapvm >= '{$request_params['vva']}-{$request_params['kka']}-{$request_params['ppa']}'
-      AND lasku.tapvm < '{$request_params['vvl']}-{$request_params['kkl']}-{$request_params['ppl']}') ";
+      AND lasku.tapvm <= '{$request_params['vvl']}-{$request_params['kkl']}-{$request_params['ppl']}') ";
   }
 
   if (!empty($request_params['ajotapa'])) {

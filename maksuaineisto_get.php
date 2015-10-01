@@ -79,4 +79,7 @@ if ($fileget !== FALSE) {
   $quote = ftp_raw($conn_id, "rcmd clrpfm file({$pankkiaineiston_haku["viite_file"]})");
 }
 
+// Poistetaan haettu tiedosto palvelimelta ettei haeta ja lueta sis‰‰n samaa aineistoa
+ftp_delete($conn_id, $pankkiaineiston_haku["viite_file"]);
+
 ftp_close($conn_id);

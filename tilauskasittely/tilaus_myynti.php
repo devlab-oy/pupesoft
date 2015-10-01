@@ -3456,7 +3456,7 @@ if ($tee == '') {
       echo "<td>";
       echo "<span id='hae_asiakasta_spani'>";
 
-      if ($kukarow["extranet"] == "") {
+      if ($kukarow["extranet"] == "" and $laskurow["tila"] != "G" and $laskurow["tila"] != "S") {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
         echo " <a id='hae_asiakasta_linkki'>";
 
@@ -6446,7 +6446,7 @@ if ($tee == '') {
       if ($oikeus_nahda_kate and $kukarow["extranet"] == "") {
         $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
         $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
-        
+
         echo t("Tilausrivin kate").":<br>";
         echo "<form method='post'>
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>

@@ -163,21 +163,6 @@ if (!function_exists("asiakashintatarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == 'piiri') {
-
-      $rajlask = 0;
-
-      if ($chasiakas_ryhma != '') $rajlask++;
-      if ($chytunnus != '') $rajlask++;
-      if ($chpiiri != '') $rajlask++;
-      if ($chsegmentti > 0) $rajlask++;
-      if ($chastunn > 0) $rajlask++;
-
-      if ($rajlask > 1 or $rajlask == 0) {
-        $virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhmä, asiakassegmentti tai piiri!");
-      }
-    }
-
     if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
       $virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
     }
@@ -231,6 +216,18 @@ if (!function_exists("asiakashintatarkista")) {
     }
 
     if (($chasiakas_ryhma != '' or $chytunnus != '' or $chpiiri != '' or $chsegmentti != '' or $chastunn != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus' and (!isset($trow["luedata_toiminto"]) or $trow["luedata_toiminto"] != "POISTA")) {
+
+      $rajlask = 0;
+
+      if ($chasiakas_ryhma != '') $rajlask++;
+      if ($chytunnus != '') $rajlask++;
+      if ($chpiiri != '') $rajlask++;
+      if ($chsegmentti > 0) $rajlask++;
+      if ($chastunn > 0) $rajlask++;
+
+      if ($rajlask > 1 or $rajlask == 0) {
+        $virhe[$i] = t("Valitse vain asiakas, ytunnus, asiakasryhmä, asiakassegmentti tai piiri!");
+      }
 
       $and = '';
 

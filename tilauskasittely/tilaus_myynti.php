@@ -3298,7 +3298,7 @@ if ($tee == '') {
       echo "<td>";
       echo "<span id='hae_asiakasta_spani'>";
 
-      if ($kukarow["extranet"] == "") {
+      if ($kukarow["extranet"] == "" and $laskurow["tila"] != "G" and $laskurow["tila"] != "S") {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
         echo " <a id='hae_asiakasta_linkki'>";
 

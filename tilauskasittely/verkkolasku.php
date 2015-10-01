@@ -2935,24 +2935,26 @@ else {
       }
 
       if ($yhtiorow['lasku_tulostin'] == -88 or (isset($valittu_tulostin) and $valittu_tulostin == "-88")) {
+        // Tämä näytetään vain kun laksutetaan käsin.
+        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+          js_openFormInNewWindow();
 
-        js_openFormInNewWindow();
+          foreach ($tulostettavat as $lasku) {
 
-        foreach ($tulostettavat as $lasku) {
+            $query = "SELECT laskunro
+                      FROM lasku
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$lasku'";
+            $laresult = pupe_query($query);
+            $laskurow = mysql_fetch_assoc($laresult);
 
-          $query = "SELECT laskunro
-                    FROM lasku
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and tunnus  = '$lasku'";
-          $laresult = pupe_query($query);
-          $laskurow = mysql_fetch_assoc($laresult);
-
-          echo "<br><form id='tulostakopioform_$lasku' name='tulostakopioform_$lasku' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
-              <input type='hidden' name='otunnus' value='$lasku'>
-              <input type='hidden' name='toim' value='LASKU'>
-              <input type='hidden' name='tee' value='NAYTATILAUS'>
-              <input type='submit' value='".t("Näytä lasku").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('tulostakopioform_$lasku', ''); return false;\"></form><br>";
-          }
+            echo "<br><form id='tulostakopioform_$lasku' name='tulostakopioform_$lasku' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+                <input type='hidden' name='otunnus' value='$lasku'>
+                <input type='hidden' name='toim' value='LASKU'>
+                <input type='hidden' name='tee' value='NAYTATILAUS'>
+                <input type='submit' value='".t("Näytä lasku").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('tulostakopioform_$lasku', ''); return false;\"></form><br>";
+            }
+        }
       }
       elseif (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "")) {
         // jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille/sähköpostiin

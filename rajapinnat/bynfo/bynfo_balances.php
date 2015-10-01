@@ -16,6 +16,12 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
+$tallenna_polku = "";
+
+if (!empty($argv[2])) {
+  $tallenna_polku = realpath($argv[2]);
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -34,7 +40,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/balances_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/balances_{$yhtio}_".date("Y-m-d_His").".csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -103,5 +109,9 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+if (!empty($tallenna_polku)) {
+  rename($filepath, $tallenna_polku."/".basename($filepath));
+}
 
 echo "Valmis.\n";

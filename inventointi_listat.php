@@ -1377,7 +1377,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       if ($yhtiorow['laaja_inventointilista'] != "") {
         $prn .= sprintf('%-7.7s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");
-        $prn .= sprintf('%-5.5s', $rivinro);
+        $prn .= sprintf('%-5.5s', str_pad($rivinro, 5, " ", STR_PAD_LEFT));
       }
       else {
         $prn .= sprintf('%-13.13s', "{$hylrow['ennpois']}/{$hylrow['keratty']}");

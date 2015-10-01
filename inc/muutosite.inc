@@ -1796,6 +1796,61 @@ if ($tila == 'ostolasku_kulut') {
 
       require "inc/teetiliointi.inc";
     }
+
+    if (count($laskun_kulut)) {
+      
+      if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
+        $alv_tili = $yhtiorow["alv"];
+      }  
+      
+      $query = "SELECT tapvm, sum(summa) summa
+                from tiliointi
+                where yhtio = '{$kukarow['yhtio']}'
+                and ltunnus = '{$tunnus}'
+                and tilino = '{$alv_tili}'
+                and korjattu != ''
+                group by 1
+                order by 1 desc";
+      $old_alv_chk_res = pupe_query($query);
+      $old_alv_chk_row = mysql_fetch_assoc($old_alv_chk_res);
+      
+      $query = "SELECT sum(summa) summa
+                from tiliointi
+                where yhtio = '{$kukarow['yhtio']}'
+                and ltunnus = '{$tunnus}'
+                and tilino = '{$alv_tili}'
+                and korjattu = ''";
+      $new_alv_chk_res = pupe_query($query);
+      $new_alv_chk_row = mysql_fetch_assoc($new_alv_chk_res);
+      
+      if (mysql_num_rows($old_alv_chk_res) > 0 and mysql_num_rows($new_alv_chk_res) > 0) {
+
+        $old_alv = (int) $old_alv_chk_row['summa'] * 10000;
+        $new_alv = (int) $new_alv_chk_row['summa'] * 10000;
+      
+        if ($old_alv != $new_alv) {
+          $alvin_ero = $old_alv_chk_row['summa'] - $new_alv_chk_row['summa'];
+          $kulu_tili = $yhtiorow[key($laskun_kulut)];
+          
+          $query = "SELECT *
+                    from tiliointi
+                    where yhtio = '{$kukarow['yhtio']}'
+                    and ltunnus = '{$tunnus}'
+                    and tilino = '{$kulu_tili}'
+                    and korjattu = ''";
+          $kulu_chk_res = pupe_query($query);
+          $kulu_chk_row = mysql_fetch_assoc($kulu_chk_res);
+          
+          $kulu_chk_row['summa'] += $alvin_ero;
+          
+          $query = "UPDATE tiliointi SET
+                    summa = '{$kulu_chk_row['summa']}'
+                    where yhtio = '{$kukarow['yhtio']}'
+                    and tunnus = '{$kulu_chk_row['tunnus']}'";
+          $upd_kulut = pupe_query($query);
+        }
+      }      
+    }
   }
 }
 

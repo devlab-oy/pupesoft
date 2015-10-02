@@ -563,12 +563,6 @@ class MagentoClient {
         }
       }
 
-      // Haetaan tuotekuvat Pupesoftista
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
-      // Lis‰t‰‰n kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-
       // Lis‰t‰‰n tuotteen asiakaskohtaiset tuotehinnat
       if($this->_asiakaskohtaiset_tuotehinnat) {
         $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);
@@ -1991,7 +1985,7 @@ class MagentoClient {
    *   HUOM! Vaatii r‰‰t‰lˆidyn Magenton
    *
    * @param tuotenumero, magenton tuotenumero
-   * @return jotain randomii
+   * @return true/false
    */
   public function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
     global $kukarow;
@@ -2023,6 +2017,67 @@ class MagentoClient {
     }
 
     return $reply;
+  }
+
+  /**
+   * Hakee ja siirt‰‰ tuotteiden kuvat Magentoon
+   *
+   * @param array tuotteet
+   */
+  public function lisaa_tuotteiden_kuvat($tuotteet) {
+    global $kukarow, $yhtiorow;
+
+    foreach ($tuotteet as $tuote) {
+      // numeerisesta sku_+N
+      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno']; 
+
+      // Haetaan tuotteen tunnus Magentosta
+      $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
+      $product_id = $result['product_id'];
+
+      // Haetaan tuotteen kuvat Pupesta
+      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);  
+
+      if (count($tuotekuvat) > 0 and !empty($product_id)) {
+        // Lisataan tuotteen kuvat Magentoon
+        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+      }
+    }
+  }
+
+  /**
+   * Hakee verkkokauppatuotteet Pupesta
+   *
+   * @param array tuotteet
+   */
+  public function hae_kaikki_tuotteet() {
+    global $kukarow, $yhtiorow;
+
+    // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit‰‰ olla Magentossa
+    $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
+              FROM tuote
+              LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+              AND tuote.tuoteno             = tuotteen_avainsanat.tuoteno
+              AND tuotteen_avainsanat.laji  = 'parametri_variaatio'
+              AND trim(tuotteen_avainsanat.selite) != '')
+              WHERE tuote.yhtio             = '{$kukarow["yhtio"]}'
+              AND tuote.status             != 'P'
+              AND tuote.tuotetyyppi         NOT in ('A','B')
+              AND tuote.tuoteno            != ''
+              AND tuote.nakyvyys           != ''";
+    $res = pupe_query($query);
+
+    // Kaikki tuotenumerot arrayseen
+    while ($row = mysql_fetch_array($res)) {
+      $kaikki_tuotteet[] = $row['tuoteno'];
+
+      if ($row['configurable_tuoteno'] == "") $individual_tuotteet[$row['tuoteno']] = $row['tuoteno'];
+      if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
+    }
+
+    $kaikki_tuotteet = array_unique($kaikki_tuotteet);
+
+    return $kaikki_tuotteet;
   }
 
   private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {

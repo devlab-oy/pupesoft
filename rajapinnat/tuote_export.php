@@ -80,6 +80,7 @@ if (mysql_num_rows($datetime_checkpoint_res) != 1) {
 if (!isset($magento_ajolista)) {
   $magento_ajolista = array(
     'tuotteet',
+    'tuotekuvat',
     'lajitelmatuotteet',
     'tuoteryhmat',
     'asiakkaat',
@@ -465,6 +466,7 @@ if (in_array('tuotteet', $magento_ajolista)) {
     $kaikki_tuotteet = array_unique($kaikki_tuotteet);
   }
 }
+
 if (in_array('saldot', $magento_ajolista)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
 
@@ -1121,6 +1123,15 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
+  }
+
+  // Päivitetään tuotekuvat
+  if (in_array('tuotekuvat', $magento_ajolista)) {
+    echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekuvat\n";
+    // haetaan kaikki tuotteet
+    $kaikki_tuotteet = $magento_client->hae_kaikki_tuotteet();
+    $magento_client->lisaa_tuotteiden_kuvat($kaikki_tuotteet);
+    echo date("d.m.Y @ G:i:s")." - Päivitettiin tuotekuvat\n";
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();

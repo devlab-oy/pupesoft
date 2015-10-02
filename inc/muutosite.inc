@@ -1811,7 +1811,6 @@ if ($tila == 'ostolasku_kulut') {
                 and korjattu != ''
                 group by 1
                 order by 1 asc";
-echo "1814: $query <br><br>";
       $old_alv_chk_res = pupe_query($query);
       $old_alv_chk_row = mysql_fetch_assoc($old_alv_chk_res);
       
@@ -1823,12 +1822,12 @@ echo "1814: $query <br><br>";
                 and korjattu = ''";
       $new_alv_chk_res = pupe_query($query);
       $new_alv_chk_row = mysql_fetch_assoc($new_alv_chk_res);
-echo "1825: $alv_tili, $old_alv_chk_row[summa], $new_alv_chk_row[summa], $satu1, $satu2 <br><br>";      
+      
       if (mysql_num_rows($old_alv_chk_res) > 0 and mysql_num_rows($new_alv_chk_res) > 0) {
 
         $old_alv = (int) ($old_alv_chk_row['summa'] * 10000);
         $new_alv = (int) ($new_alv_chk_row['summa'] * 10000);
-echo "1828: $alv_tili, $old_alv_chk_row[summa], $new_alv_chk_row[summa], $old_alv, $new_alv <br><br>";      
+      
         if ($old_alv != $new_alv) {
           $alvin_ero = $old_alv_chk_row['summa'] - $new_alv_chk_row['summa'];
           
@@ -1838,7 +1837,6 @@ echo "1828: $alv_tili, $old_alv_chk_row[summa], $new_alv_chk_row[summa], $old_al
                     and ltunnus = '{$tunnus}'
                     and tilino IN ('{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
                     and korjattu = ''";
-echo "1842: $query <br><br>";
           $kulu_chk_res = pupe_query($query);
           $kulu_chk_row = mysql_fetch_assoc($kulu_chk_res);
           
@@ -1848,7 +1846,6 @@ echo "1842: $query <br><br>";
                     summa = '{$kulu_chk_row['summa']}'
                     where yhtio = '{$kukarow['yhtio']}'
                     and tunnus = '{$kulu_chk_row['tunnus']}'";
-echo "1852: $query <br><br>";
           $upd_kulut = pupe_query($query);
 
           list($_tunnus, ) = explode(',', $new_alv_chk_row['tunnukset']);

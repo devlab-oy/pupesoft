@@ -1857,7 +1857,6 @@ if ($tila == 'ostolasku_kulut') {
                     and tilino  = '{$alv_tili}'
                     and korjattu = ''
                     and tunnus = '{$_tunnus}'";
-echo "1852: $query <br><br>";
           $upd_kulut = pupe_query($query);
         }
       }      

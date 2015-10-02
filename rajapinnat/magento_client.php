@@ -2024,7 +2024,7 @@ class MagentoClient {
    *
    * @param array tuotteet
    */
-  public function lisaa_tuotteiden_kuvat($tuotteet) {
+  public function lisaa_tuotteiden_kuvat(array $tuotteet) {
     global $kukarow, $yhtiorow;
 
     foreach ($tuotteet as $tuote) {
@@ -2048,10 +2048,13 @@ class MagentoClient {
   /**
    * Hakee verkkokauppatuotteet Pupesta
    *
-   * @param array tuotteet
+   * @return array(0 => array kaikki_tuotenumerot, 1 => array individual_tuotenumerot)
    */
   public function hae_kaikki_tuotteet() {
     global $kukarow, $yhtiorow;
+
+    $individual_tuotteet = array();
+    $kaikki_tuotteet = array();
 
     // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit‰‰ olla Magentossa
     $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
@@ -2077,7 +2080,7 @@ class MagentoClient {
 
     $kaikki_tuotteet = array_unique($kaikki_tuotteet);
 
-    return $kaikki_tuotteet;
+    return array($kaikki_tuotteet, $individual_tuotteet);
   }
 
   private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {

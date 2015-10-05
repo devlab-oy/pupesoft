@@ -563,6 +563,12 @@ class MagentoClient {
         }
       }
 
+      // Haetaan tuotekuvat Pupesoftista
+      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
+
+      // Lisätään kuvat Magentoon
+      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if($this->_asiakaskohtaiset_tuotehinnat) {
         $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);

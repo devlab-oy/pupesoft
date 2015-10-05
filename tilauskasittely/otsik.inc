@@ -1810,6 +1810,10 @@ if ($tila == "" and !isset($jatka)) {
         $keraysvko = "";
       }
 
+      if ($srow["kerayspvm"] < date("Y-m-d")) {
+        $keraysvko = "";
+      }
+
       $vasen_sarake[$vasen] .= t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>";
 
       $vasen_sarake[$vasen] .= "<select name='keraysvkopva'>";
@@ -1903,6 +1907,10 @@ if ($tila == "" and !isset($jatka)) {
         $toimvko = date("W", strtotime($srow["toimaika"]));
       }
       else {
+        $toimvko = "";
+      }
+
+      if ($srow["toimaika"] < date("Y-m-d")) {
         $toimvko = "";
       }
 

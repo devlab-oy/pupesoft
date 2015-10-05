@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirretään saldot Bynfoon
+ * Siirretään saldot
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//

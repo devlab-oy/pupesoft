@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirretään myynnit Cognos:iin
+ * Siirretään myynnit
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -25,7 +25,7 @@ if (!empty($argv[2])) {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -59,7 +59,7 @@ $header .= "Item quantity;";
 $header .= "Turnover in local currency;";
 $header .= "Standard costs in local currency;";
 $header .= "Customer name;";
-$header .= "Sales man name;";
+$header .= "Sales man name";
 $header .= "\n";
 
 fwrite($fp, $header);
@@ -76,7 +76,7 @@ if ($datetime_checkpoint != "") {
 
 // Haetaan tapahtumat
 $query = "SELECT lasku.laskunro,
-          asiakas.asiakasnro,
+          if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
           asiakas.maa,
           lasku.myyja,
           asiakas.piiri,
@@ -130,19 +130,19 @@ while ($row = mysql_fetch_assoc($res)) {
 
   $osre = t_avainsana("PIIRI", "", "and avainsana.selite  = '{$row['piiri']}'");
   $osrow = mysql_fetch_assoc($osre);
-  $rivi .= "{$row['piiri']} {$osrow['selitetark']};";
+  $rivi .= pupesoft_csvstring($row['piiri']." ".$osrow['selitetark']).";";
 
   $osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '{$row['osasto']}'");
   $osrow = mysql_fetch_assoc($osre);
-  $rivi .= "{$row['osasto']} {$osrow['selitetark']};";
+  $rivi .= pupesoft_csvstring($row['osasto']." ".$osrow['selitetark']).";";
   $rivi .= "{$row['asiakasnro']};";
   $rivi .= "{$row['laskunro']};";
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$row['kpl']};";
   $rivi .= "{$row['rivihinta']};";
   $rivi .= "{$row['keha']};";
-  $rivi .= "{$row['nimi']};";
-  $rivi .= "{$myyrow['nimi']}";
+  $rivi .= pupesoft_csvstring($row['nimi']).";";
+  $rivi .= pupesoft_csvstring($myyrow['nimi']);
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

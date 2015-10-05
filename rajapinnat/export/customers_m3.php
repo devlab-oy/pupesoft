@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirretään asiakastiedot M3:seen
+ * Siirretään asiakastiedot
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -25,7 +25,7 @@ if (!empty($argv[2])) {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -283,6 +283,7 @@ fwrite($fp, $header);
 
 // Haetaan asiakkaat
 $query = "SELECT asiakas.*,
+          if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
           if(asiakas.gsm != '', asiakas.gsm,
             if(asiakas.puhelin != '', asiakas.puhelin, '')) AS puhelin,
           kustannuspaikka.nimi AS kustannuspaikka

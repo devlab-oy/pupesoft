@@ -16,10 +16,10 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
-$tallenna_polku = "";
+$scp_siirto = "";
 
 if (!empty($argv[2])) {
-  $tallenna_polku = realpath($argv[2]);
+  $scp_siirto = $argv[2];
 }
 
 ini_set("memory_limit", "5G");
@@ -156,9 +156,12 @@ while ($row = mysql_fetch_assoc($res)) {
 
 fclose($fp);
 
-if (!empty($tallenna_polku)) {
-  rename($filepath, $tallenna_polku."/".basename($filepath));
-  chown($tallenna_polku."/".basename($filepath), fileowner($tallenna_polku));
+if (!empty($scp_siirto)) {
+  // Pakataan tiedosto
+  system("zip {$filepath}.zip $filepath");
+
+  // Siirretään toiselle palvelimelle
+  system("scp {$filepath}.zip $scp_siirto");
 }
 
 echo "Valmis.\n";

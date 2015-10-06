@@ -1810,10 +1810,6 @@ if ($tila == "" and !isset($jatka)) {
         $keraysvko = "";
       }
 
-      if ($srow["kerayspvm"] < date("Y-m-d")) {
-        $keraysvko = "";
-      }
-
       $vasen_sarake[$vasen] .= t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>";
 
       $vasen_sarake[$vasen] .= "<select name='keraysvkopva'>";
@@ -1907,10 +1903,6 @@ if ($tila == "" and !isset($jatka)) {
         $toimvko = date("W", strtotime($srow["toimaika"]));
       }
       else {
-        $toimvko = "";
-      }
-
-      if ($srow["toimaika"] < date("Y-m-d")) {
         $toimvko = "";
       }
 
@@ -3667,11 +3659,17 @@ if (isset($jatka)) {
 
   if ($toimvko != '') {
 
-    $nyvuosi  = date("Y");
+    $toimvkolaskulla = date("W", strtotime($apuro["toimaika"]));
+    $toimvkopvalaskulla = $apuro["toimvko"];
 
     $toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 
-    if ($toimvko < $nyviikko) {
+    $nyvuosi  = date("Y");
+
+    // Jos mikään ei ole muuttunut, niin ei tehdä vuosisiirtoa,
+    // muuten menneisyyden päivämäärä siirtyy seuraavalla vuodelle automaattisesti
+    // vaika siihen ei koskisi
+    if ($toimvko < $nyviikko and ($toimvkolaskulla != $toimvko or $toimvkopvalaskulla != $toimvkopva)) {
       $nyvuosi += 1;
     }
 
@@ -3690,11 +3688,17 @@ if (isset($jatka)) {
 
   if ($keraysvko != '') {
 
-    $nyvuosi = date("Y");
+    $keraysvkolaskulla = date("W", strtotime($apuro["kerayspvm"]));
+    $keraysvkopvalaskulla = $apuro["keraysvko"];
 
     $keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
-    if ($keraysvko < $nyviikko) {
+    $nyvuosi = date("Y");
+
+    // Jos mikään ei ole muuttunut, niin ei tehdä vuosisiirtoa,
+    // muuten menneisyyden päivämäärä siirtyy seuraavalla vuodelle automaattisesti
+    // vaika siihen ei koskisi
+    if ($keraysvko < $nyviikko and ($keraysvkolaskulla != $keraysvko or $keraysvkopvalaskulla != $keraysvkopva)) {
       $nyvuosi += 1;
     }
 

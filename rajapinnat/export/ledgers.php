@@ -40,35 +40,52 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/ledgers_{$yhtio}_".date("Y-m-d").".csv";
+$filepath1 = "/tmp/accounts_receivable_{$yhtio}_".date("Y-m-d").".csv";
 
-if (!$fp = fopen($filepath, 'w+')) {
-  die("Tiedoston avaus ep‰onnistui: $filepath\n");
+if (!$fp1 = fopen($filepath1, 'w+')) {
+  die("Tiedoston avaus ep‰onnistui: $filepath1\n");
+}
+
+$filepath2 = "/tmp/accounts_payable_{$yhtio}_".date("Y-m-d").".csv";
+
+if (!$fp2 = fopen($filepath2, 'w+')) {
+  die("Tiedoston avaus ep‰onnistui: $filepath2\n");
 }
 
 // Otsikkotieto
-$header  = "Invoice type;";
-$header .= "Invoice number;";
+$header  = "Invoice number;";
 $header .= "Invoice date;";
-$header .= "Customer/Supplier;";
+$header .= "Customer;";
 $header .= "Name;";
-$header .= "Open amount;";
+$header .= "Open amount $yhtiorow[valkoodi];";
+$header .= "Open amount in invoice currency;";
+$header .= "Currency;";
 $header .= "Due date;";
-$header .= "Invoice number;";
+$header .= "Cash discount due date;";
+$header .= "Cash discount amount $yhtiorow[valkoodi];";
+$header .= "Cash discount amount in invoice currency;";
 $header .= "Payer";
 $header .= "\n";
 
-fwrite($fp, $header);
+fwrite($fp1, $header);
+
+$header = str_replace("Customer;", "Supplier;", $header);
+fwrite($fp2, $header);
 
 // Haetaan avoimet myyntilaskut
 $query = "(SELECT
           'SALESINVOICE' tyyppi,
           lasku.laskunro,
           lasku.tapvm,
+          if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
           if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
           concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
           lasku.erpcm,
-          sum(tiliointi.summa) avoinsaldo
+          lasku.valkoodi,
+          if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
+          if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
+          sum(tiliointi.summa) avoinsaldo,
+          sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa
           FROM lasku use index (yhtio_tila_mapvm)
           JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
           JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
@@ -82,7 +99,7 @@ $query = "(SELECT
           and lasku.tapvm > '0000-00-00'
           and lasku.tila = 'U'
           and lasku.alatila = 'X'
-          GROUP BY 1,2,3,4,5,6)
+          GROUP BY 1,2,3,4,5,6,7,8,9)
 
           UNION
 
@@ -90,10 +107,15 @@ $query = "(SELECT
           'SUPPLIERINVOICE' tyyppi,
           if(lasku.laskunro > 0, lasku.laskunro, if(lasku.viite!='', lasku.viite, lasku.viesti)) laskunro,
           lasku.tapvm,
+          if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
           if(toimi.toimittajanro in ('0',''), toimi.ytunnus, toimi.toimittajanro) asiakasnro,
           concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
           lasku.erpcm,
-          tiliointi.summa * -1 avoinsaldo
+          lasku.valkoodi,
+          if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
+          if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
+          tiliointi.summa * -1 avoinsaldo,
+          lasku.summa laskuavoinsaldo_valuutassa
           FROM lasku use index (yhtio_tila_tapvm)
           JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
           JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio
@@ -107,7 +129,7 @@ $query = "(SELECT
           and lasku.tapvm > '0000-00-00'
           and tila in ('H','Y','M','P','Q'))
 
-          ORDER BY erpcm, laskunro";
+          ORDER BY tyyppi, erpcm, laskunro";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -118,18 +140,26 @@ echo "Reskontrarivej‰ {$rows} kappaletta.\n";
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['tyyppi']};";
-  $rivi .= "{$row['laskunro']};";
+  $rivi  = pupesoft_csvstring($row['laskunro']).";";
   $rivi .= "{$row['tapvm']};";
-  $rivi .= "{$row['asiakasnro']};";
+  $rivi .= pupesoft_csvstring($row['asiakasnro']).";";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= "{$row['avoinsaldo']};";
+  $rivi .= "{$row['laskuavoinsaldo_valuutassa']};";
+  $rivi .= "{$row['valkoodi']};";
   $rivi .= "{$row['erpcm']};";
-  $rivi .= "{$row['laskunro']};";
+  $rivi .= "{$row['kapvm']};";
+  $rivi .= "{$row['kasumma']};";
+  $rivi .= "{$row['kasumma_valuutassa']};";
   $rivi .= ";";
   $rivi .= "\n";
 
-  fwrite($fp, $rivi);
+  if ($row['tyyppi'] == "SALESINVOICE") {
+    fwrite($fp1, $rivi);
+  }
+  else {
+    fwrite($fp2, $rivi);
+  }
 
   $k_rivi++;
 
@@ -138,14 +168,16 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 }
 
-fclose($fp);
+fclose($fp1);
+fclose($fp2);
 
 if (!empty($scp_siirto)) {
   // Pakataan tiedosto
-  system("zip {$filepath}.zip $filepath");
+  system("zip {$filepath1}.zip $filepath1");
+  system("zip {$filepath2}.zip $filepath2");
 
   // Siirret‰‰n toiselle palvelimelle
-  system("scp {$filepath}.zip $scp_siirto");
+  system("scp {$filepath1}.zip {$filepath2}.zip $scp_siirto");
 }
 
 echo "Valmis.\n";

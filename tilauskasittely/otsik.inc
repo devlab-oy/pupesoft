@@ -3667,7 +3667,7 @@ if (isset($jatka)) {
     $nyvuosi  = date("Y");
 
     // Jos mik‰‰n ei ole muuttunut, niin ei tehd‰ vuosisiirtoa,
-    // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalla vuodelle automaattisesti
+    // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($toimvko < $nyviikko and ($toimvkolaskulla != $toimvko or $toimvkopvalaskulla != $toimvkopva)) {
       $nyvuosi += 1;
@@ -3696,7 +3696,7 @@ if (isset($jatka)) {
     $nyvuosi = date("Y");
 
     // Jos mik‰‰n ei ole muuttunut, niin ei tehd‰ vuosisiirtoa,
-    // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalla vuodelle automaattisesti
+    // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($keraysvko < $nyviikko and ($keraysvkolaskulla != $keraysvko or $keraysvkopvalaskulla != $keraysvkopva)) {
       $nyvuosi += 1;

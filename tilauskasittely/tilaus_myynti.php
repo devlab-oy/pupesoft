@@ -10158,6 +10158,13 @@ if ($tee == '') {
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
         }
 
+        if (1==1) {
+          echo "<br>";
+          echo "<input type='submit' name='tee_100_ennakkolasku' value='$painike_txt ja luo 100% ennakkomaksu'>";
+        }
+
+
+
         if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
           and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '')) {
 

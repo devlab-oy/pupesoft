@@ -120,14 +120,14 @@ if ($luottoraja_chk or $erapaiva_chk) {
 if ($luottoraja_chk or $erapaiva_chk) {
 
   // Parametrejä saatanat.php:lle
-  $sytunnus       = $laskurow['ytunnus'];
+  $sytunnus        = $laskurow['ytunnus'];
   $sliitostunnus   = $laskurow['liitostunnus'];
-  $eiliittymaa    = "ON";
+  $eiliittymaa     = "ON";
   $luottorajavirhe = "";
-  $jvvirhe      = "";
-  $ylivito      = 0;
-  $trattavirhe    = "";
-  $laji        = "MA";
+  $jvvirhe         = "";
+  $ylivito         = 0;
+  $trattavirhe     = "";
+  $laji            = "MA";
   $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
   ob_start();
@@ -183,6 +183,15 @@ elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], a
 else {
   $luottorajavirhe_ylivito_valmis = true;
 }
+
+// Luodaan sadanprossan ennakkolasku
+if (!empty($tee_100_ennakkolasku)) {
+
+  echo "LETS DO ENNAKKOLASKU!";
+
+  tee_100_ennakkolasku($laskurow['tunnus']);
+}
+
 
 // Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)

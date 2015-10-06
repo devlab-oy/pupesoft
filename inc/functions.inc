@@ -30863,6 +30863,99 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
   }
 }
 
+if (!function_exists("tee_100_ennakkolasku")) {
+  function tee_100_ennakkolasku($tilaus, $toim="") {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+
+    $jaksquery = "DELETE
+                  FROM maksupositio
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$tilaus'";
+    pupe_query($jaksquery);
+
+    $jaksquery = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND jaksotettu != ''
+                  AND kaytossa = ''
+                  ORDER BY tunnus
+                  LIMIT 1";
+    $jaksres = pupe_query($jaksquery);
+    $jaksrow = mysql_fetch_assoc($jaksres);
+
+    // Luodaan maksusoppari jos sit‰ ei viel‰ ole:
+    $query = "UPDATE lasku SET
+              jaksotettu = tunnus,
+              maksuehto = '{$jaksrow['tunnus']}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tilaus}'
+              AND tila    = 'N'
+              AND jaksotettu = 0";
+    pupe_query($query);
+
+    $query  = "SELECT *
+               FROM lasku
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '{$tilaus}'";
+    $laskures = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($laskures);
+
+    // liitet‰‰n kaikki rivit makssoppariin
+    $maksusoppari_silent = TRUE;
+    $tila = "lisaa_kaikki_jaksotukseen";
+
+    require("{$pupe_root_polku}/tilauskasittely/maksusopimus.inc");
+
+    $tila = "uusi";
+    require("{$pupe_root_polku}/tilauskasittely/maksusopimus.inc");
+    $ennakko = $lisatty_maksupositio;
+
+    $tila = "uusi";
+    require("{$pupe_root_polku}/tilauskasittely/maksusopimus.inc");
+    $loppu = $lisatty_maksupositio;
+
+    $jaksquery = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND rel_pvm = '14'
+                  AND kaytossa = ''
+                  AND kassa_relpvm = 0
+                  ORDER BY tunnus
+                  LIMIT 1";
+    $maksres = pupe_query($jaksquery);
+    $maksrow = mysql_fetch_assoc($maksres);
+
+    $kuvares = t_avainsana("LASKUKUVAUS");
+
+    $ennakkokuvaus = mysql_fetch_assoc($kuvares);
+
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    $loppukuvaus = mysql_fetch_assoc($kuvares);
+
+    $summa   = "";
+    $osuus   = 100;
+    $tila    = "tallenna";
+    $mehto   = $maksrow['tunnus'];
+    $erpcmvv = "";
+    $erpcmkk = "";
+    $erpcmpp = "";
+    $kuvaus  = $ennakkokuvaus["selitetark"];
+    $maksupositio = $ennakko;
+    require("{$pupe_root_polku}/tilauskasittely/maksusopimus.inc");
+
+    $summa   = "";
+    $osuus   = 0;
+    $tila    = "tallenna";
+    $mehto   = $maksrow['tunnus'];
+    $erpcmvv = "";
+    $erpcmkk = "";
+    $erpcmpp = "";
+    $kuvaus  = $loppukuvaus["selitetark"];
+    $maksupositio = $loppu;
+    require("{$pupe_root_polku}/tilauskasittely/maksusopimus.inc");
+  }
+}
+
 if (!function_exists("tiliointi_tarkistus")) {
   function tiliointi_tarkistus($tiliointi_tarkistus, $kustp_tark, $kohde_tark, $projekti_tark) {
 

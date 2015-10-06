@@ -173,8 +173,8 @@ fclose($fp2);
 
 if (!empty($scp_siirto)) {
   // Pakataan tiedosto
-  system("zip {$filepath1}.zip $filepath1");
-  system("zip {$filepath2}.zip $filepath2");
+  system("zip -j {$filepath1}.zip $filepath1");
+  system("zip -j {$filepath2}.zip $filepath2");
 
   // Siirret‰‰n toiselle palvelimelle
   system("scp {$filepath1}.zip {$filepath2}.zip $scp_siirto");

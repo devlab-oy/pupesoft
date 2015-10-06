@@ -618,7 +618,7 @@ fclose($fp);
 
 if (!empty($scp_siirto)) {
   // Pakataan tiedosto
-  system("zip {$filepath}.zip $filepath");
+  system("zip -j {$filepath}.zip $filepath");
 
   // Siirret‰‰n toiselle palvelimelle
   system("scp {$filepath}.zip $scp_siirto");

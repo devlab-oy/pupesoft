@@ -12,11 +12,11 @@ if ($tee == 'etsi') {
   $hakuehdot = '';
 
   if ($vva != '' and $kka != '' and $ppa != '') {
-    $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa' "; 
+    $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' ";
   }
 
   if ($vvl != '' and $kkl != '' and $ppl != '') {
-    $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl' ";    
+    $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
   }
 
   if ($nimi != '') {
@@ -38,7 +38,7 @@ if ($tee == 'etsi') {
   if ($valmno != '') {
     $hakuehdot .= " AND tyomaarays.valmnro LIKE '%".$valmno."%'";
   }
-  
+
   if ($komm1 != '') {
     $hakuehdot .= " AND tyomaarays.komm1 LIKE '%".$komm1."%' ";
   }
@@ -48,8 +48,7 @@ if ($tee == 'etsi') {
   }
 
   if ($hakuteksti != '') {
-    $hakuehdot .= " AND ( 'konditionaaliset_hakuehdot' ";
-    $hakuehdot .= " OR lasku.nimi LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " AND ( lasku.nimi LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR tyomaarays.rekno LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";

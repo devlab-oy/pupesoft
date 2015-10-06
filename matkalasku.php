@@ -2477,7 +2477,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
     $nimitys_array[0] = $trow["nimitys"];
     $varri_array[0]    = 0;
     $selite_array[0]  = "$trow[tuoteno] - $trow[nimitys] $kpl kpl á ".(float) $hinta;
-
   }
 
   $selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";

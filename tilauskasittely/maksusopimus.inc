@@ -5,16 +5,19 @@ if (empty($maksusoppari_silent)) {
 }
 
 // Jotta osataan hakea oikeat tilaukset laitetaan tilat talteen
-if ($toim == "TARJOUS") {
-  $sallitut_tilat = "'T'";
-}
-else {
-  $sallitut_tilat = "'L','G','E','V','W','N','A'";
+function maksusop_sallitut_tilat () {
+  if (!empty($GLOBALS["toim"]) and $GLOBALS["toim"] == "TARJOUS") {
+    return "'T'";
+  }
+  else {
+    return "'L','G','E','V','W','N','A'";
+  }
 }
 
-$query_ale_lisa = generoi_alekentta('M');
+function maksusopimus_lisaa_kaikki_jaksotukseen($laskurow) {
+  global $yhtiorow, $kukarow;
 
-if ($tila == "lisaa_kaikki_jaksotukseen") {
+  $maksusop_sallitut_tilat = maksusop_sallitut_tilat();
 
   if ($laskurow["jaksotettu"] == 0) {
     echo "<font class='error'>".t("Lasku ei osa maksusopimusta")."</font>";
@@ -26,7 +29,7 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
               WHERE yhtio     = '$kukarow[yhtio]'
               and if (tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
               and jaksotettu  = 0
-              and tila        in ($sallitut_tilat)
+              and tila        in ($maksusop_sallitut_tilat)
               and alatila    != 'X'";
     $result = pupe_query($query);
 
@@ -36,7 +39,7 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
                 SET jaksotettu = '$laskurow[jaksotettu]'
                 WHERE yhtio      = '$kukarow[yhtio]'
                 and vanhatunnus  = '$laskurow[vanhatunnus]'
-                and tila         IN ($sallitut_tilat)
+                and tila         IN ($maksusop_sallitut_tilat)
                 and alatila     != 'X'";
       $result = pupe_query($query);
     }
@@ -46,12 +49,12 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
               FROM lasku
               WHERE yhtio     = '$kukarow[yhtio]'
               and jaksotettu  = '$laskurow[jaksotettu]'
-              and tila        IN ($sallitut_tilat)
+              and tila        IN ($maksusop_sallitut_tilat)
               and alatila    != 'X'";
     $result = pupe_query($query);
     $posrow = mysql_fetch_array($result);
 
-    $ltunnukset  = $posrow["tunnukset"];
+    $ltunnukset = $posrow["tunnukset"];
 
     $query = "UPDATE tilausrivi
               SET jaksotettu = '$laskurow[jaksotettu]'
@@ -61,13 +64,17 @@ if ($tila == "lisaa_kaikki_jaksotukseen") {
   }
 }
 
-if ($tila == "uusi") {
+function maksusopimus_uusi($laskurow) {
+  global $yhtiorow, $kukarow;
+
+  $maksusop_sallitut_tilat = maksusop_sallitut_tilat();
+
   if ($laskurow["jaksotettu"] == 0) {
     $query = "UPDATE lasku
               SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
               WHERE yhtio  = '$kukarow[yhtio]'
               and if(tunnusnippu = 0,tunnus=$laskurow[tunnus],tunnusnippu=$laskurow[tunnusnippu])
-              and tila     in ($sallitut_tilat)
+              and tila     in ($maksusop_sallitut_tilat)
               and alatila != 'X'";
     $result = pupe_query($query);
 
@@ -85,7 +92,7 @@ if ($tila == "uusi") {
                 SET jaksotettu = '$laskurow[jaksotettu]'
                 WHERE yhtio      = '$kukarow[yhtio]'
                 and vanhatunnus  = '$laskurow[vanhatunnus]'
-                and tila         IN ($sallitut_tilat)
+                and tila         IN ($maksusop_sallitut_tilat)
                 and alatila     != 'X'";
       $result = pupe_query($query);
 
@@ -93,7 +100,7 @@ if ($tila == "uusi") {
                 FROM lasku
                 WHERE yhtio     = '$kukarow[yhtio]'
                 and jaksotettu  = '$laskurow[jaksotettu]'
-                and tila        IN ($sallitut_tilat)
+                and tila        IN ($maksusop_sallitut_tilat)
                 and alatila    != 'X'";
       $result = pupe_query($query);
       $posrow = mysql_fetch_array($result);
@@ -118,9 +125,16 @@ if ($tila == "uusi") {
             luonut  = '$kukarow[kuka]'";
   $result = pupe_query($query);
   $lisatty_maksupositio = mysql_insert_id($GLOBALS["masterlink"]);
+
+  return array($laskurow, $lisatty_maksupositio);
 }
 
-if ($tila == "tallenna") {
+function maksusopimus_tallenna($laskurow, $maksupositio, $summa, $osuus, $mehto, $lisatiedot, $kuvaus, $ohje, $erpcmvv = "", $erpcmkk = "",  $erpcmpp = "") {
+  global $yhtiorow, $kukarow;
+
+  $maksusop_sallitut_tilat = maksusop_sallitut_tilat();
+
+  $query_ale_lisa = generoi_alekentta('M');
 
   $query = "SELECT
             sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
@@ -128,7 +142,7 @@ if ($tila == "tallenna") {
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
             WHERE lasku.yhtio    = '$kukarow[yhtio]'
-            and lasku.tila       IN ($sallitut_tilat)
+            and lasku.tila       IN ($maksusop_sallitut_tilat)
             and lasku.jaksotettu = '$laskurow[jaksotettu]'";
   $result = pupe_query($query);
   $rivrow = mysql_fetch_array($result);
@@ -149,10 +163,6 @@ if ($tila == "tallenna") {
             and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
   $result = pupe_query($query);
   $tuoterow = mysql_fetch_array($result);
-
-  if ($summa != 0 and $yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A" and $tuoterow["alv"] != 0) {
-    $summa = sprintf('%.2f', $summa / (1 + $tuoterow["alv"] / 100));
-  }
 
   if ($yhtiorow["alv_kasittely"] == '') {
     $laskunsumma = $rivrow["jaksotettavaa_verolli"];
@@ -220,7 +230,10 @@ if ($tila == "tallenna") {
   $erpcmvv = "";
 }
 
-if ($tila == "poista") {
+function maksusopimus_poista($laskurow, $maksupositio) {
+  global $yhtiorow, $kukarow;
+
+  $maksusop_sallitut_tilat = maksusop_sallitut_tilat();
 
   $query = "DELETE
             FROM maksupositio
@@ -257,9 +270,31 @@ if ($tila == "poista") {
               and otunnus    in ($jaksorow[tunnukset])";
     $result = pupe_query($query);
   }
+
+  return $laskurow;
+}
+
+if ($tila == "lisaa_kaikki_jaksotukseen") {
+  maksusopimus_lisaa_kaikki_jaksotukseen($laskurow);
+}
+
+if ($tila == "uusi") {
+  list($laskurow, $lisatty_maksupositio) = maksusopimus_uusi($laskurow);
+}
+
+if ($tila == "tallenna") {
+  maksusopimus_tallenna($laskurow, $maksupositio, $summa, $osuus, $mehto, $lisatiedot, $kuvaus, $ohje, $erpcmvv, $erpcmkk,  $erpcmpp);
+}
+
+if ($tila == "poista") {
+  $laskurow = maksusopimus_poista($laskurow, $maksupositio);
 }
 
 if (empty($maksusoppari_silent)) {
+
+  $query_ale_lisa = generoi_alekentta('M');
+  $maksusop_sallitut_tilat = maksusop_sallitut_tilat();
+
   // Maksopositiot
   $query = "SELECT *
             FROM maksuehto
@@ -318,7 +353,7 @@ if (empty($maksusoppari_silent)) {
               JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
               WHERE lasku.yhtio    = '$kukarow[yhtio]'
               and lasku.jaksotettu = '$laskurow[jaksotettu]'
-              and lasku.tila       IN ($sallitut_tilat)
+              and lasku.tila       IN ($maksusop_sallitut_tilat)
               and lasku.jaksotettu > 0
               GROUP by lasku.jaksotettu";
     $result = pupe_query($query);
@@ -395,7 +430,7 @@ if (empty($maksusoppari_silent)) {
 
           echo "<td>$i</td>";
           echo "<td><input type='text' size ='7' name='osuus' value='$row[osuus]'></td>";
-          echo "<td><select name='mehto'>";
+          echo "<td><select name='mehto' style='margin-bottom: 5px;'>";
 
           while ($prow = mysql_fetch_array($mresult)) {
             if ($row["maksuehto"] == $prow["tunnus"]) $sel = "SELECTED";
@@ -407,7 +442,7 @@ if (empty($maksusoppari_silent)) {
           echo "</select><br>";
 
           // otetaan erpcm kannasta jos mitään ei ole syötetty ruudulle
-          if ($row["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
+          if ($row["erpcm"] != "" and empty($erpcmpp) and empty($ercpmkk) and empty($erpcmvv) and empty($erpcm_virhe)) {
             list($erpcmvv, $erpcmkk, $erpcmpp) = explode('-', $row["erpcm"]);
           }
 
@@ -432,12 +467,7 @@ if (empty($maksusoppari_silent)) {
           $tuoteresult = pupe_query($query);
           $tuoterow = mysql_fetch_array($tuoteresult);
 
-          if ($yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A") {
-            $row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)), 2);
-          }
-          else {
-            $row["summa"] = round($row["summa"], 2);
-          }
+          $row["summa"] = round($row["summa"], 2);
 
           echo "<td align ='right'><input style='text-align:right' type='text' size='10'  name='summa' value='".sprintf('%.2f', $row["summa"])."'></td>";
           echo "</tr>";

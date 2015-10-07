@@ -1,9 +1,9 @@
 <?php
 
-if ($_REQUEST["naytetaan_kate"]) {
+if (!empty($_REQUEST["naytetaan_kate"])) {
   setcookie("katteen_nayttaminen", $_REQUEST["naytetaan_kate"]);
 }
-elseif ($_COOKIE["katteen_nayttaminen"]) {
+elseif (!empty($_COOKIE["katteen_nayttaminen"])) {
   $_REQUEST["naytetaan_kate"] = $_COOKIE["katteen_nayttaminen"];
 }
 
@@ -39,7 +39,7 @@ $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
     and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
       or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
 
-$naytetaanko_kate = ($naytetaan_kate != "E" and $oikeus_nahda_kate);
+$naytetaanko_kate = ((empty($naytetaan_kate) or $naytetaan_kate != "E") and $oikeus_nahda_kate);
 
 if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" or
     ($kukarow["dynaaminen_kassamyynti"] == "" and
@@ -10158,12 +10158,25 @@ if ($tee == '') {
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
         }
 
-        if (1==1) {
-          echo "<br>";
-          echo "<input type='submit' name='tee_100_ennakkolasku' value='$painike_txt ja luo 100% ennakkomaksu'>";
+        if (!empty($yhtiorow["ennakkolasku_myyntitilaukselta"]) and !empty($yhtiorow["ennakkomaksu_tuotenumero"])) {
+
+          $query = "SELECT yhtio
+                    FROM maksupositio
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND otunnus = '$laskurow[jaksotettu]'
+                    LIMIT 1";
+          $jaksoresult = pupe_query($query);
+
+          if (mysql_num_rows($jaksoresult) == 0) {
+            echo "<br><br>";
+            echo "<input type='submit' name='tee_100_ennakkolasku' value='Ennakkolasku ja $painike_txt'>";
+
+            if ($yhtiorow["ennakkolasku_myyntitilaukselta"] == "B") {
+              echo "<br>";
+              echo "<input type='submit' name='tee_sis_100_ennakkolasku' value='Sisäinen ennakkolasku ja $painike_txt'>";
+            }
+          }
         }
-
-
 
         if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
           and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '')) {

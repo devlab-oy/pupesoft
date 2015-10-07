@@ -4237,6 +4237,20 @@ if ($fieldname == 'maksusopimus_toimitus') {
   $jatko = 0;
 }
 
+if ($fieldname == 'ennakkolasku_myyntitilaukselta') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array_fill_keys(array('K', 'E', 'J', 'F', 'L', 'M'), '');
+  $sel[$trow[$i]] = " SELECTED";
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei voi tehdä ennakkolaskua pikanäppäimellä")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella voi tehdä ennakkolaskun pikanäppäimellä")."</option>";
+  $ulos .= "<option value = 'B' {$sel['B']}>".t("Myyntitilauksella voi tehdä ennakkolaskun ja sisäisen ennakklaskun pikanäppäimellä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'tositteen_tilioinnit') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

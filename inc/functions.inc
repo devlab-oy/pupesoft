@@ -30986,6 +30986,8 @@ if (!function_exists("tee_ennakkolasku")) {
 
     $ennakkolasku = ennakkolaskuta($jaks_alkup_tilaus);
 
+    $kasiviite = "";
+
     if ($ennakkolasku > 0) {
 
       // Ennakkolasku on sisäinen, ei lähetetä asiakkaalle
@@ -30994,6 +30996,16 @@ if (!function_exists("tee_ennakkolasku")) {
                    SET sisainen = 'o'
                    WHERE tunnus  = '{$ennakkolasku}'";
         pupe_query($query);
+      }
+
+      // Jos alkuperäisellä tilauksella on käsinsyötetty viite niin kopsataan se ennakkolaskulle
+      if (!empty($laskurow["viite"])) {
+        $query  = "UPDATE lasku
+                   SET viite = '{$laskurow["viite"]}'
+                   WHERE tunnus  = '{$ennakkolasku}'";
+        pupe_query($query);
+
+        $kasiviite = ", viite = '' ";
       }
 
       $tee              = "TARKISTA";
@@ -31008,6 +31020,7 @@ if (!function_exists("tee_ennakkolasku")) {
     // Päivitetään alkuperäiselle tilaukselle "jaksotettu" maksuehto
     $jaksquery = "UPDATE lasku
                   SET maksuehto = '{$jaksrow['tunnus']}'
+                  {$kasiviite}
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND tunnus  = '{$jaks_alkup_tilaus}'";
     pupe_query($jaksquery);

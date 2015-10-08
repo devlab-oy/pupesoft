@@ -60,7 +60,13 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
 
-      if ($row['kpl'] > 0) {
+      $query2 = "SELECT Pankkitiedostot
+                 FROM yhtion_parametrit
+                 WHERE yhtio = '{$kukarow['yhtio']}'";
+      $result2 = pupe_query($query2);
+      $row2 = mysql_fetch_assoc($result2);
+
+      if ($row['kpl'] > 0 and $t[$i] != $row2["Pankkitiedostot"]) {
         $virhe[$i]  = "<font class='error'>";
         $virhe[$i] .= t("Et voi vahtaa luontitapaa, koska sinulla on poimittuja laskuja!");
         $virhe[$i] .= "<br></font>";

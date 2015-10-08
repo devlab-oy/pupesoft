@@ -10158,7 +10158,7 @@ if ($tee == '') {
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
         }
 
-        if (!empty($yhtiorow["ennakkolasku_myyntitilaukselta"]) and !empty($yhtiorow["ennakkomaksu_tuotenumero"])) {
+        if ($kateinen == '' and !empty($yhtiorow["ennakkolasku_myyntitilaukselta"]) and !empty($yhtiorow["ennakkomaksu_tuotenumero"])) {
 
           $query = "SELECT yhtio
                     FROM maksupositio

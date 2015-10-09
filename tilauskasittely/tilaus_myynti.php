@@ -8925,9 +8925,9 @@ if ($tee == '') {
 
         if ($toim != 'SIIRTOLISTA') {
 
-          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and !in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
 
-            if (!$yhtiorow['joku_vitun_parametri'] == 'A') {
+            if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
               echo "<tr>$jarjlisa
                   <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
                   <th colspan='5' align='right'>".t("Asiakasosasto").":</th>

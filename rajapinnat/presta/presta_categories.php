@@ -111,11 +111,11 @@ class PrestaCategories extends PrestaClient {
       $xml->category->is_root_category = 0;
     }
 
-    $link_rewrite = $this->saniteze_link_rewrite($category['node_nimi']);
+    $link_rewrite = utf8_encode($this->saniteze_link_rewrite($category['node_nimi']));
     $xml->category->link_rewrite->language[0] = $link_rewrite;
     $xml->category->link_rewrite->language[1] = $link_rewrite;
-    $xml->category->name->language[0] = $category['node_nimi'];
-    $xml->category->name->language[1] = $category['node_nimi'];
+    $xml->category->name->language[0] = utf8_encode($category['node_nimi']);
+    $xml->category->name->language[1] = utf8_encode($category['node_nimi']);
 
     return $xml;
   }

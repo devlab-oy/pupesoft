@@ -1365,6 +1365,66 @@ if (isset($tyhjenna)) {
   $rekisterinumero    = "";
 }
 
+if (!empty($valitse_tuotteetasiakashinnastoon)) {
+  echo "<font class='head'>{$otsikko}</font><hr><br>";
+  echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+      <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
+      <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+      <input type='hidden' name='mista' value='$mista'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='lopetus' value='$lopetus'>
+      <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+      <input type='hidden' name='projektilla' value='$projektilla'>
+      <input type='hidden' name='orig_tila' value='$orig_tila'>
+      <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+
+  echo "<table>";
+  echo "<tr><td>";
+
+  if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
+    $mahdolliset_liitokset = array(
+      "liitostunnus" => "Asiakkaan tunnuksella",
+      "ytunnus"      => "Y-tunnuksella"
+    );
+
+    if (!empty($asiakasrow["ryhma"])) {
+      $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhm‰lle";
+    }
+
+    if (!empty($asiakasrow["piiri"])) {
+      $mahdolliset_liitokset["piiri"] = "Piirille";
+    }
+
+    echo t("Liitos").":</td><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+
+    foreach ($mahdolliset_liitokset as $liitos => $teksti) {
+      echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
+    }
+
+    echo "</select>";
+    echo "</td></tr>";
+    echo "<tr><td>";
+  }
+
+  echo t("Loppup‰iv‰m‰‰r‰")."</td><td>";
+  echo t("PV")," <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
+  echo t("KK")," <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
+  echo t("VVVV")," <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
+
+  echo "</td></tr>";
+  echo "<tr><td colspan='2' class='back'>";
+
+  echo "<input type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
+
+  echo "</td></tr>";
+  echo "</table>";
+
+  echo "</form>";
+
+  include "inc/footer.inc";
+  exit;
+}
+
 if ($tee == "VALMIS"
   and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE"))
   and $kateinen != ''
@@ -2311,11 +2371,18 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       $liitoslisa = "asiakas = '{$laskurow["liitostunnus"]}'";
     }
 
+    $asiakas_hinta_loppupv = (int) $asiakas_hinta_loppupv;
+    $asiakas_hinta_loppukk = (int) $asiakas_hinta_loppukk;
+    $asiakas_hinta_loppuvv = (int) $asiakas_hinta_loppuvv;
+
+    $loppupaivamaaralisa = "loppupvm = '{$asiakas_hinta_loppuvv}-{$asiakas_hinta_loppukk}-$asiakas_hinta_loppupv'";
+
     $query = "SELECT *
               FROM asiakashinta
               where yhtio  = '$kukarow[yhtio]'
               and tuoteno  = '$tilausrivi[tuoteno]'
               and {$liitoslisa}
+              and {$loppupaivamaaralisa}
               and hinta    = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys])
               and valkoodi = '$laskurow[valkoodi]'";
     $chk_result = pupe_query($query);
@@ -2325,6 +2392,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                 yhtio      = '$kukarow[yhtio]',
                 tuoteno    = '$tilausrivi[tuoteno]',
                 {$liitoslisa},
+                {$loppupaivamaaralisa},
                 hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                 valkoodi   = '$laskurow[valkoodi]',
                 alkupvm    = now(),
@@ -2935,7 +3003,7 @@ if ($tee == '') {
 
     if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-          <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
+          <input type='hidden' name='valitse_tuotteetasiakashinnastoon' value='x'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value='$mista'>
           <input type='hidden' name='toim' value='$toim'>
@@ -2944,34 +3012,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-
-      $style = $yhtiorow["myynti_asiakhin_tallenna"] == "V" ? "style='margin-left:10px;'" : "";
-
-      echo "<input {$style} type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
-
-      if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
-        $mahdolliset_liitokset = array(
-          "liitostunnus" => "Asiakkaan tunnuksella",
-          "ytunnus"      => "Y-tunnuksella"
-        );
-
-        if (!empty($asiakasrow["ryhma"])) {
-          $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhm‰lle";
-        }
-
-        if (!empty($asiakasrow["piiri"])) {
-          $mahdolliset_liitokset["piiri"] = "Piirille";
-        }
-
-        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
-
-        foreach ($mahdolliset_liitokset as $liitos => $teksti) {
-          echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
-        }
-
-        echo "</select>";
-      }
-
+      echo "<input type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
       echo "</form>";
     }
 

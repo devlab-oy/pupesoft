@@ -238,18 +238,11 @@ if ($toim == "TILAUSVAHVISTUS"
   $tvsel[$naytatvale] = "SELECTED";
 
   echo "<tr><th>".t("Tyyppi")."</th><td><select name='seltvtyyppi'>";
-  echo "<option value = '1' $tvsel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
-  echo "<option value = '2' $tvsel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
-  echo "<option value = '3' $tvsel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
-  echo "<option value = '4' $tvsel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
-  echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
-  echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
-  echo "<option value = '7' $tvsel[7]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi")."</option>";
-  echo "<option value = '8' $tvsel[8]>".t("N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi")."</option>";
-  echo "<option value = '10' $tvsel[10]>".t("N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
-  echo "<option value = '11' $tvsel[11]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
-  echo "<option value = '12' $tvsel[12]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi, ale-1, ja erikoisale")."</option>";
-  echo "<option value = '13' {$tvsel[13]}>".t("N‰ytet‰‰n tilausrivin rivihinta, ei alennuksia")."</option>";
+
+  foreach (pupesoft_tilausvahvistustyypit() as $tv_tyyppi => $tv_selite) {
+    echo "<option value = '$tv_tyyppi' $tvsel[$tv_tyyppi]>".t($tv_selite)."</option>";
+  }
+
   echo "</select></td></tr>";
 }
 

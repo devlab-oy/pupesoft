@@ -19559,6 +19559,82 @@ if (!function_exists("tee_keraysera")) {
   }
 }
 
+if (!function_exists("pupesoft_lahetetyypit")) {
+  function pupesoft_lahetetyypit() {
+
+    //$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";  # Verolliset hinnat
+    //$lahetetyyppi = "perhe_".$lahetetyyppi;                          # Perheet yhdess‰, vain is‰t n‰ytet‰‰n
+    //$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi;                  # Perheet n‰ytet‰‰n, mutta hinnat summataan is‰lle
+
+    return array(
+      "tulosta_lahete_eiale_eihinta.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia",
+      "tulosta_lahete_eiale_eihinta_iso.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia (V‰lj‰t rivit)",
+      "tulosta_lahete_eialehintoja.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia",
+      "tulosta_lahete_eialeja.inc" => "N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰",
+      "tulosta_lahete_hae_hinnat.inc" => "Haetaan hinnat toisesta pupesta",
+      "rivi_viivakoodi_lahete_ean13.inc" => "RIVI_VIIVAKOODI_LAHETE_EAN13",
+      "tulosta_lahete.inc" => "N‰ytet‰‰n asiakkaan hinta ja alennus",
+      "tulosta_lahete_asiakviivakoodi.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia, Asiakkaan tuotekoodi tulostetaan viivakoodina",
+      "tulosta_lahete_brutto.inc" => "N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta).",
+      "tulosta_lahete_custom.inc" => "TULOSTA_LAHETE_CUSTOM",
+      "tulosta_lahete_ean.inc" => "N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi",
+      "tulosta_lahete_ean_eiale.inc" => "N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi",
+      "tulosta_lahete_tilausrivihinta_eialennuksia.inc" => "TULOSTA_LAHETE_TILAUSRIVIHINTA_EIALENNUKSIA",
+      "tulosta_lahete_viivakoodi.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia, EAN-koodi tulostetaan viivakoodina.",
+      "tulosta_lahete_viivakoodi_ale1.inc" => "TULOSTA_LAHETE_VIIVAKOODI_ALE1",
+      "tulosta_lahete_viivakoodi_ean13.inc" => "L‰hete asiakashinnoilla, EAN-koodi tulostetaan viivakoodina EAN-13",
+      "tulosta_lahete_viivakoodi_osh.inc" => "N‰ytet‰‰n OSH-hinta, Yks. nettohinta ja viivakoodi",
+      "tulosta_lahete_viivakoodi_ykshinta_normaali.inc" => "N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina.",
+      "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc" => "N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia.",
+    );
+  }
+}
+
+if (!function_exists("pupesoft_laskutyypit")) {
+  function pupesoft_laskutyypit() {
+    return array(
+      99 => "Normaali laskupohja",
+      2  => "Normaali laskupohja (Tuoteperheet yhdistetty)",
+      5  => "Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)",
+      6  => "Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)",
+      7  => "Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)",
+      1  => "Pelkistetty laskupohja 1",
+      3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
+      4  => "Pelkistetty laskupohja 3",
+      8  => "Ruotsin laskupohja",
+      10 => "Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)",
+      12 => "Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)",
+      13 => "Nettohinnat, ei alennuksia, ei verollisia hintoja",
+      14 => "Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)",
+      15 => "SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja",
+      16 => "SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)",
+      17 => "Normaali laskupohja (lihavoidut ja kursivoidut tekstit)",
+      18 => "Normaali laskupohja (nimitykset rivitettyn‰)",
+      19 => "Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)",
+      20 => "Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)",
+    );
+  }
+}
+
+if (!function_exists("pupesoft_tilausvahvistustyypit")) {
+  function pupesoft_tilausvahvistustyypit() {
+    return array(
+      "1"  => "N‰ytet‰‰n asiakkaan hinta ja alennus",
+      "2"  => "N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰",
+      "3"  => "Ei n‰ytet‰ hintoja eik‰ alennuksia",
+      "4"  => "N‰ytet‰‰n asiakkaan hinta",
+      "5"  => "Haetaan hinnat toisesta pupesta",
+      "6"  => "N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja",
+      "7"  => "N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi",
+      "8"  => "N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi",
+      "10" => "N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina",
+      "11" => "N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia",
+      "12" => "N‰ytet‰‰n asiakkaan hinta, viivakoodi, ale-1, ja erikoisale",
+      "13" => "N‰ytet‰‰n tilausrivin rivihinta, ei alennuksia",
+    );
+  }
+}
+
 if (!function_exists("pupesoft_lahetetyyppi")) {
   function pupesoft_lahetetyyppi($laskutunnus, $asiakastunnus = 0) {
     global $kukarow;
@@ -19648,34 +19724,11 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       $lahetetyyppi = pupesoft_lahetetyyppi($otunnus, $laskurow['liitostunnus']);
     }
 
-    // Testausta varten.....
-    //$lahetetyyppi = "tulosta_lahete.inc";           # N‰ytet‰‰n asiakkaan hinta ja alennus
-    //$lahetetyyppi = "tulosta_lahete_ean.inc";
-    //$lahetetyyppi = "tulosta_lahete_brutto.inc";       # N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta)
-    //$lahetetyyppi = "tulosta_lahete_eialeja.inc";       # N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";     # Ei n‰ytet‰ hintoja eik‰ alennuksia, EAN-koodi tulostetaan viivakoodina
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-    //$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-    //$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";   # Ei n‰ytet‰ hintoja eik‰ alennuksia
-    //$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-    //$lahetetyyppi = "tulosta_lahete_custom.inc";
-    //$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";   # Ei n‰ytet‰ hintoja eik‰ alennuksia
-    //$lahetetyyppi = "perhe_tulosta_lahete.inc";       # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰)
-    //$lahetetyyppi = "perhe_tulosta_lahete_verollinen.inc"; # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰, Verolliset hinnat)
-
-    //$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";  # Verolliset hinnat
-    //$lahetetyyppi = "perhe_".$lahetetyyppi;               # Perheet yhdess‰, vain is‰t n‰ytet‰‰n
-    //$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi;           # PErheet‰ n‰ytet‰‰n, mutta hinnat summataan is‰lle
-
     if (@include "tilauskasittely/tulosta_lahete.inc");
     else require "tulosta_lahete.inc";
 
     // katotaan miten halutaan sortattavan
     // haetaan asiakkaan tietojen takaa sorttaustiedot
-
     $order_sorttaus = '';
 
     $asiakas_apu_query = "SELECT lahetteen_jarjestys,

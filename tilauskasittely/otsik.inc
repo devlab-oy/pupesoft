@@ -2519,25 +2519,11 @@ if ($tila == "" and !isset($jatka)) {
 
     $vasen_sarake[$vasen] = "<td>".t("Laskutyyppi").":</td>";
     $vasen_sarake[$vasen] .= "<td><select name='laskutyyppi' style='max-width: 300px' >";
-
     $vasen_sarake[$vasen] .= "<option value = '-9'>".t("Oletus")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi ja asiakaskommentti)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
-    //$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettynä)")."</option>";
-    $vasen_sarake[$vasen] .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat isätuotteella, lapsituotteet näytetään ilman hintoja)")."</option>";
+
+    foreach (pupesoft_laskutyypit() as $ltyynumero => $ltyyteksti) {
+      $vasen_sarake[$vasen] .= "<option value = '$ltyynumero' $sel[$ltyynumero]>".t($ltyyteksti)."</option>";
+    }
 
     $vasen_sarake[$vasen] .= "</select></td>";
     $vasen++;

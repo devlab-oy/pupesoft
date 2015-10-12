@@ -96,19 +96,34 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", $rivi);
 
-        $toimitrow = array();
-        $toimitrow["toimitustapa"] = FALSE;
+        $laskurow = array();
+        $laskurow["toimitustapa"] = FALSE;
 
         // Jos on mittoihin perustuvat ker‰yser‰t k‰ytˆss‰
         // tuohon kentt‰‰n tallennetaan eranumero ja SSCC tiedot
         // eik‰ laskun tunnusta
         // ei siis ole j‰rke‰ yritt‰‰ etsi‰ lasku n‰ill‰ tiedoilla
         if ($yhtiorow['kerayserat'] != 'K') {
-          $query = "SELECT toimitustapa
+          $query = "SELECT asiakas.*, maksuehto.*, rahtisopimukset.*, lasku.*,
+                    IF(lasku.toim_email != '', lasku.toim_email,
+                    IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
                     FROM lasku
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$eranumero_sscc}'";
-          $toimitrow = mysql_fetch_assoc(pupe_query($query));
+                    LEFT JOIN asiakas ON (
+                      asiakas.yhtio  = lasku.yhtio AND
+                      asiakas.tunnus = lasku.liitostunnus)
+                    LEFT JOIN maksuehto ON (
+                      lasku.yhtio     = maksuehto.yhtio AND
+                      lasku.maksuehto = maksuehto.tunnus)
+                    LEFT JOIN rahtikirjat ON (
+                      rahtikirjat.yhtio = lasku.yhtio AND
+                      rahtikirjat.otsikkonro = lasku.tunnus)
+                    LEFT JOIN rahtisopimukset ON (
+                      lasku.ytunnus            = rahtisopimukset.ytunnus AND
+                      rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
+                      rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus  = '{$eranumero_sscc}'";
+          $laskurow = mysql_fetch_assoc(pupe_query($query));
         }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
@@ -116,7 +131,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
         // Palautussanomasta etunollaat puuttuu, joten lis‰t‰‰n ne t‰ss‰
         // DPD:hen ei tule ylim‰‰r‰isi‰ nollia lis‰t‰.
-        if (is_numeric($sscc_ulkoinen) and stripos($toimitrow["toimitustapa"], "DPD") === FALSE) {
+        if (is_numeric($sscc_ulkoinen) and stripos($laskurow["toimitustapa"], "DPD") === FALSE) {
           $sscc_ulkoinen = "00".$sscc_ulkoinen;
         }
 
@@ -167,6 +182,36 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     AND sscc      = '{$sscc}'
                     AND nro       = '{$eranumero}'";
           $upd_res = pupe_query($query);
+
+          $query = "SELECT *
+                    FROM kerayserat
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                    AND sscc      = '{$sscc}'
+                    AND nro       = '{$eranumero}'";
+          $ker_res = pupe_query($query);
+          $ker_row = mysql_fetch_assoc($ker_res);
+
+          $query = "SELECT asiakas.*, maksuehto.*, rahtisopimukset.*, lasku.*,
+                    IF(lasku.toim_email != '', lasku.toim_email,
+                    IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
+                    FROM lasku
+                    LEFT JOIN asiakas ON (
+                      asiakas.yhtio  = lasku.yhtio AND
+                      asiakas.tunnus = lasku.liitostunnus)
+                    LEFT JOIN maksuehto ON (
+                      lasku.yhtio     = maksuehto.yhtio AND
+                      lasku.maksuehto = maksuehto.tunnus)
+                    LEFT JOIN rahtikirjat ON (
+                      rahtikirjat.yhtio = lasku.yhtio AND
+                      rahtikirjat.otsikkonro = lasku.tunnus)
+                    LEFT JOIN rahtisopimukset ON (
+                      lasku.ytunnus            = rahtisopimukset.ytunnus AND
+                      rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
+                      rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus = '{$ker_row['otunnus']}'";
+          $laskures = pupe_query($query);
+          $laskurow = mysql_fetch_assoc($laskures);
         }
         else {
           $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
@@ -176,7 +221,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $query = "SELECT *
                       FROM toimitustapa
                       WHERE yhtio = '$kukarow[yhtio]'
-                      AND selite  = '{$toimitrow['toimitustapa']}'";
+                      AND selite  = '{$laskurow['toimitustapa']}'";
             $toimitustapa_res = pupe_query($query);
             $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
@@ -251,6 +296,57 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                            viesti         = ''";
                 pupe_query($query);
               }
+            }
+          }
+        }
+
+        if ($laskurow['toimitusvahvistus'] != '') {
+
+          if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+            $desadv_version = "una";
+            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+          }
+          elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+            $desadv_version = "fi0089";
+            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+          }
+          else {
+            $desadv_version = "";
+          }
+
+          if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
+
+            $rakir_row = $laskurow;
+
+            if ($toimitustapa_row["tulostustapa"] == 'L') {
+              $_rahtiwherelisa = "AND otsikkonro = 0 and rahtikirjanro = '$eranumero_sscc'";
+            }
+            else {
+              $_rahtiwherelisa = "AND otsikkonro = '{$eranumero_sscc}'";
+            }
+
+            $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
+                      GROUP_CONCAT(distinct rahtikirjat.otsikkonro) otunnus
+                      FROM rahtikirjat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      {$_rahtiwherelisa}";
+            $tunnukset_res = pupe_query($query);
+            $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
+
+            $otunnukset = $tunnukset_row['otunnus'];
+            $tunnukset = $tunnukset_row['rtunnus'];
+
+            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+              // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan t‰m‰n j‰lkeen
+              $tmp_laskurow = $laskurow;
+
+              $myynti_vai_osto = 'M';
+            }
+
+            require "tilauskasittely/{$laskurow['toimitusvahvistus']}";
+
+            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+              $laskurow = $tmp_laskurow;
             }
           }
         }

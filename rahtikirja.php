@@ -2516,6 +2516,10 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         $kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
       }
 
+      if (!empty($kukarow['rahtikirjatulostin'])) {
+        $kirjoitin_tunnus = $kukarow['rahtikirjatulostin'];
+      }
+
       $query = "SELECT *
                 FROM kirjoittimet
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -3073,6 +3077,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       if ($prirow['printteri3'] != '') {
         $oslappu_printteri = $prirow['printteri3'];
       }
+    }
+
+    # Haetaan lähetetulostin käyttäjän takaa
+    if (!empty($kukarow['lahetetulostin'])) {
+      $lahete_printteri = $kukarow['lahetetulostin'];
     }
 
     $query = "SELECT *

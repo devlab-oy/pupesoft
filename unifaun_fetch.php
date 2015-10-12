@@ -319,14 +319,16 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $rakir_row = $laskurow;
 
             if ($toimitustapa_row["tulostustapa"] == 'L') {
-              $_rahtiwherelisa = "AND otsikkonro = 0 and rahtikirjanro = '$eranumero_sscc'";
+              $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.rahtikirjanro = '$eranumero_sscc'";
+              $_select_otunnus = "rahtikirjat.pakkaustieto_tunnukset";
             }
             else {
-              $_rahtiwherelisa = "AND otsikkonro = '{$eranumero_sscc}'";
+              $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = '{$eranumero_sscc}'";
+              $_select_otunnus = "rahtikirjat.otsikkonro";
             }
 
             $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
-                      GROUP_CONCAT(distinct rahtikirjat.otsikkonro) otunnus
+                      GROUP_CONCAT(distinct $_select_otunnus) otunnus
                       FROM rahtikirjat
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       {$_rahtiwherelisa}";

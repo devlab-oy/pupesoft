@@ -1053,7 +1053,7 @@ if (!function_exists("maventa_invoice_put_file")) {
 }
 
 if (!function_exists("apix_queue")) {
-  function apix_queue($apix_finvoice, $apix_invoicenum, $kieli) {
+  function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     $apix_ulos = "";
@@ -1079,6 +1079,20 @@ if (!function_exists("apix_queue")) {
       // Siirretään faili apixtemppiin
       if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apix_invoicenum.pdf")) {
         $apix_ulos .= "APIX tmpmove Apix_invoice_$apix_invoicenum.pdf feilas!";
+      }
+
+      if (!empty($liitteet)) {
+        $attachment_dir = "{$apix_tmpdirnimi}/attachments";
+
+        mkdir($attachment_dir);
+
+        foreach ($liitteet as $filename => $data) {
+          file_put_contents("{$attachment_dir}/{$filename}", $data);
+        }
+
+        exec("cd {$apix_tmpdirnimi}; zip Apix_attachments_{$apix_invoicenum}.zip attachments/*;");
+
+        exec("rm -rf {$attachment_dir}");
       }
 
       // Tehdään apixzippi
@@ -1188,6 +1202,46 @@ if (!function_exists("apix_invoice_put_file")) {
     }
 
     return $apix_ulos;
+  }
+}
+
+if (!function_exists("hae_liitteet_verkkolaskuun")) {
+  function hae_liitteet_verkkolaskuun($verkkolaskuoperaattori, $tilausnumerot) {
+    global $kukarow;
+
+    $liitetiedostotyypit_result = t_avainsana("TIL-LITETY", "", "AND selitetark_2 LIKE '%{$verkkolaskuoperaattori}%'");
+
+    $kayttotarkoitukset = array();
+
+    while ($liitetiedostotyyppi = mysql_fetch_assoc($liitetiedostotyypit_result)) {
+      $kayttotarkoitukset[] = "'{$liitetiedostotyyppi["selite"]}'";
+    }
+
+    if (empty($kayttotarkoitukset)) return array();
+
+    $kayttotarkoitukset = implode(",", $kayttotarkoitukset);
+
+    $query = "SELECT filename, data
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND liitos = 'lasku'
+              AND liitostunnus IN ({$tilausnumerot})
+              AND kayttotarkoitus IN ({$kayttotarkoitukset})";
+
+    $result = pupe_query($query);
+
+    $liitetiedostot = array();
+
+    while ($liitetiedosto = mysql_fetch_assoc($result)) {
+      $filename    = $liitetiedosto["filename"];
+      $filename    = explode(".", $filename);
+      $filename[0] = "{$filename[0]}-" . md5(uniqid(rand(), true));
+      $filename    = implode(".", $filename);
+
+      $liitetiedostot[$filename] = $liitetiedosto["data"];
+    }
+
+    return $liitetiedostot;
   }
 }
 
@@ -29414,13 +29468,13 @@ if (!function_exists('osatoimitus')) {
       $_osatoimitus_myyntitilaus = (
         $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
         and $kukarow["kesken"] == 0
-        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA"))
       );
     }
     else {
       $_osatoimitus_myyntitilaus = (
         $_yhtiorow['myyntitilaus_osatoimitus'] == 'E'
-        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))
+        and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA"))
       );
     }
 
@@ -30806,6 +30860,172 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists("vapauta_maksusopimus")) {
+  function vapauta_maksusopimus($maksusoppari) {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+
+    // Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
+    $query = "SELECT maksupositio.otunnus,
+              sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
+              count(*) yhteensa_kpl
+              FROM maksupositio
+              LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio
+                  AND maksupositio.uusiotunnus = uusiolasku.tunnus)
+              LEFT JOIN lasku uusiolasku_ux ON (uusiolasku_ux.yhtio = uusiolasku.yhtio
+                  AND uusiolasku_ux.tila       = 'U'
+                  AND uusiolasku_ux.alatila    = 'X'
+                  AND uusiolasku_ux.laskunro   = uusiolasku.laskunro)
+              WHERE maksupositio.yhtio         = '{$kukarow['yhtio']}'
+              AND maksupositio.otunnus         = '{$maksusoppari}'
+              GROUP BY 1
+              HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
+              ORDER BY 1, maksupositio.tunnus";
+    $posres = pupe_query($query);
+
+    if (mysql_num_rows($posres)) {
+
+      $silent = 'Nyt hiljaa, hiljaa hiivitään näin Kardemumman yössä';
+      $vapauta_tilaus_keraykseen = true;
+      $kukarow['kesken'] = $maksusoppari;
+
+      $query = "UPDATE lasku SET
+                alatila     = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$maksusoppari}'";
+      pupe_query($query);
+
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$maksusoppari}'";
+      $laskures = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($laskures);
+
+      require 'tilauskasittely/tilaus-valmis.inc';
+    }
+  }
+}
+
+
+if (!function_exists("tee_ennakkolasku")) {
+  function tee_ennakkolasku($jaks_alkup_tilaus, $sisainen = FALSE) {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+
+    // Otetaan sopparin tiedot talteen jos sellanen on olemassa.
+    $jaksquery = "SELECT *
+                  FROM maksupositio
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$jaks_alkup_tilaus'";
+    $sopres = pupe_query($jaksquery);
+    $soprow = mysql_fetch_assoc($sopres);
+
+    // Poistetaan käsin syötetty, tai vanha, soppari.
+    $jaksquery = "DELETE
+                  FROM maksupositio
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$jaks_alkup_tilaus'";
+    pupe_query($jaksquery);
+
+    // Päivitetään tilaukselle "jaksotettu" maksuehto
+    $jaksquery = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND jaksotettu != ''
+                  AND kaytossa = ''
+                  ORDER BY tunnus
+                  LIMIT 1";
+    $jaksres = pupe_query($jaksquery);
+
+    if (mysql_num_rows($jaksres) == 0) {
+      echo t("VIRHE: Jaksotettavaa maksuehtoa ei löydy")."!<br>";
+      return 0;
+    }
+
+    $jaksrow = mysql_fetch_assoc($jaksres);
+
+    // Luodaan maksusoppari jos sitä ei vielä ole:
+    $query  = "SELECT *
+               FROM lasku
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '{$jaks_alkup_tilaus}'";
+    $laskures = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($laskures);
+
+    $maksusoppari_silent = TRUE;
+    require_once "{$pupe_root_polku}/tilauskasittely/maksusopimus.inc";
+
+    // Lisätään kaksi positiota
+    list($laskurow, $ennakko) = maksusopimus_uusi($laskurow);
+    list($laskurow, $loppu)   = maksusopimus_uusi($laskurow);
+
+    // Liitetään kaikki rivit maksusoppariin
+    maksusopimus_lisaa_kaikki_jaksotukseen($laskurow);
+
+    // Haetaan laskujen kuvaukset
+    $kuvares = t_avainsana("LASKUKUVAUS");
+
+    $ennakkokuvaus = mysql_fetch_assoc($kuvares);
+
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    $loppukuvaus = mysql_fetch_assoc($kuvares);
+
+    if (!empty($soprow["maksuehto"])) {
+      $mehto = $soprow["maksuehto"];
+    }
+    else {
+      $mehto = $laskurow["maksuehto"];
+    }
+
+    maksusopimus_tallenna($laskurow, $ennakko, "", 100, $mehto, "", $ennakkokuvaus["selitetark"], "", "", "",  "");
+    maksusopimus_tallenna($laskurow, $loppu, "", 0, $mehto, "", $loppukuvaus["selitetark"], "", "", "",  "");
+
+    require_once "{$pupe_root_polku}/maksusopimus_laskutukseen.php";
+
+    $ennakkolasku = ennakkolaskuta($jaks_alkup_tilaus);
+
+    $kasiviite = "";
+
+    if ($ennakkolasku > 0) {
+
+      // Ennakkolasku on sisäinen, ei lähetetä asiakkaalle
+      if ($sisainen) {
+        $query  = "UPDATE lasku
+                   SET sisainen = 'o'
+                   WHERE tunnus  = '{$ennakkolasku}'";
+        pupe_query($query);
+      }
+
+      // Jos alkuperäisellä tilauksella on käsinsyötetty viite niin kopsataan se ennakkolaskulle
+      if (!empty($laskurow["viite"])) {
+        $query  = "UPDATE lasku
+                   SET viite = '{$laskurow["viite"]}'
+                   WHERE tunnus  = '{$ennakkolasku}'";
+        pupe_query($query);
+
+        $kasiviite = ", viite = '' ";
+      }
+
+      $tee              = "TARKISTA";
+      $laskutakaikki    = "KYLLA";
+      $silent           = "VIENTI";
+      $laskutettavat    = $ennakkolasku;
+      $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
+
+      require "verkkolasku.php";
+    }
+
+    // Päivitetään alkuperäiselle tilaukselle "jaksotettu" maksuehto
+    $jaksquery = "UPDATE lasku
+                  SET maksuehto = '{$jaksrow['tunnus']}'
+                  {$kasiviite}
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '{$jaks_alkup_tilaus}'";
+    pupe_query($jaksquery);
+
+    return $jaksrow['tunnus'];
   }
 }
 

@@ -1266,3 +1266,23 @@ if ($_selite and $avain_sel["RESEPTI_KENTAT"] == "SELECTED") {
 
   $jatko = 0;
 }
+
+if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
+  $ulos = "<th><label for='valitut_operaattorit'>" . t("Verkkolaskuoperaattorit") . "</label></th>";
+
+  $ulos .= "<td><input type='hidden' id='verkkolaskuoperaattorit' name='{$nimi}'>";
+
+  $ulos .= "<select id='valitut_operaattorit' name='valitut_operaattorit[]' multiple>";
+
+  $valitut = explode(",", $trow[$i]);
+
+  foreach ($valitut as $valittu) {
+    $sel[$valittu] = " selected";
+  }
+
+  $ulos .= "<option value='apix'{$sel["apix"]}>Apix";
+
+  $ulos .= "</select>";
+
+  $jatko = 0;
+}

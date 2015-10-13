@@ -1,9 +1,9 @@
 <?php
 
-if ($_REQUEST["naytetaan_kate"]) {
+if (!empty($_REQUEST["naytetaan_kate"])) {
   setcookie("katteen_nayttaminen", $_REQUEST["naytetaan_kate"]);
 }
-elseif ($_COOKIE["katteen_nayttaminen"]) {
+elseif (!empty($_COOKIE["katteen_nayttaminen"])) {
   $_REQUEST["naytetaan_kate"] = $_COOKIE["katteen_nayttaminen"];
 }
 
@@ -39,7 +39,7 @@ $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
     and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y"
       or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")));
 
-$naytetaanko_kate = ($naytetaan_kate != "E" and $oikeus_nahda_kate);
+$naytetaanko_kate = ((empty($naytetaan_kate) or $naytetaan_kate != "E") and $oikeus_nahda_kate);
 
 if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" or
     ($kukarow["dynaaminen_kassamyynti"] == "" and
@@ -3298,7 +3298,7 @@ if ($tee == '') {
       echo "<td>";
       echo "<span id='hae_asiakasta_spani'>";
 
-      if ($kukarow["extranet"] == "") {
+      if ($kukarow["extranet"] == "" and $laskurow["tila"] != "G" and $laskurow["tila"] != "S") {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
         echo " <a id='hae_asiakasta_linkki'>";
 
@@ -6388,7 +6388,7 @@ if ($tee == '') {
       if ($oikeus_nahda_kate and $kukarow["extranet"] == "") {
         $kate_sel["K"] = (!isset($naytetaan_kate) or $naytetaan_kate == "K") ? " checked" : "";
         $kate_sel["E"] = $naytetaan_kate == "E" ? " checked" : "";
-        
+
         echo t("Tilausrivin kate").":<br>";
         echo "<form method='post'>
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -10156,6 +10156,26 @@ if ($tee == '') {
           $lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : " & ".t("Tee tilauksesta ostotilaus");
 
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
+        }
+
+        if ($kateinen == '' and !empty($yhtiorow["ennakkolasku_myyntitilaukselta"]) and !empty($yhtiorow["ennakkomaksu_tuotenumero"])) {
+
+          $query = "SELECT yhtio
+                    FROM maksupositio
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND otunnus = '$laskurow[jaksotettu]'
+                    LIMIT 1";
+          $jaksoresult = pupe_query($query);
+
+          if (mysql_num_rows($jaksoresult) == 0) {
+            echo "<br><br>";
+            echo "<input type='submit' name='tee_100_ennakkolasku' value='Ennakkolasku ja $painike_txt'>";
+
+            if ($yhtiorow["ennakkolasku_myyntitilaukselta"] == "B") {
+              echo "<br>";
+              echo "<input type='submit' name='tee_sis_100_ennakkolasku' value='Sisäinen ennakkolasku ja $painike_txt'>";
+            }
+          }
         }
 
         if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))

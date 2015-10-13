@@ -173,9 +173,6 @@ if ($toim == "TILAUSVAHVISTUS"
       $tuoteperheetyhdessa = TRUE;
     }
   }
-  elseif (strpos($row2['tilausvahvistus'], '13') !== FALSE) {
-    $naytatvale = 13; // jos meill‰ on tilausvahvistuksessa 13, niin n‰ytet‰‰n tilausrivi.hinta ja ei alennuksia
-  }
   elseif (strpos($row2['tilausvahvistus'], '10') !== FALSE) {
     $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa kymppi, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {

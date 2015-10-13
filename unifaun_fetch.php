@@ -212,6 +212,13 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     AND lasku.tunnus = '{$ker_row['otunnus']}'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
+
+          $query = "SELECT *
+                    FROM toimitustapa
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND selite  = '{$laskurow['toimitustapa']}'";
+          $toimitustapa_res = pupe_query($query);
+          $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
         }
         else {
           $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
@@ -300,6 +307,26 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           }
         }
 
+        if ($toimitustapa_row["tulostustapa"] == 'L') {
+          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.rahtikirjanro = '$eranumero_sscc'";
+          $_select_otunnus = "rahtikirjat.pakkaustieto_tunnukset";
+        }
+        else {
+          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = '{$eranumero_sscc}'";
+          $_select_otunnus = "rahtikirjat.otsikkonro";
+        }
+
+        $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
+                  GROUP_CONCAT(distinct $_select_otunnus) otunnus
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  {$_rahtiwherelisa}";
+        $tunnukset_res = pupe_query($query);
+        $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
+
+        $otunnukset = $tunnukset_row['otunnus'];
+        $tunnukset = $tunnukset_row['rtunnus'];
+
         if ($laskurow['toimitusvahvistus'] != '') {
 
           if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
@@ -318,26 +345,6 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
             $rakir_row = $laskurow;
 
-            if ($toimitustapa_row["tulostustapa"] == 'L') {
-              $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.rahtikirjanro = '$eranumero_sscc'";
-              $_select_otunnus = "rahtikirjat.pakkaustieto_tunnukset";
-            }
-            else {
-              $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = '{$eranumero_sscc}'";
-              $_select_otunnus = "rahtikirjat.otsikkonro";
-            }
-
-            $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
-                      GROUP_CONCAT(distinct $_select_otunnus) otunnus
-                      FROM rahtikirjat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      {$_rahtiwherelisa}";
-            $tunnukset_res = pupe_query($query);
-            $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
-
-            $otunnukset = $tunnukset_row['otunnus'];
-            $tunnukset = $tunnukset_row['rtunnus'];
-
             if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
               // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
               $tmp_laskurow = $laskurow;
@@ -350,6 +357,27 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
               $laskurow = $tmp_laskurow;
             }
+          }
+        }
+
+        // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
+        $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+
+        if ($_magento_kaytossa) {
+          $query = "SELECT asiakkaan_tilausnumero
+                    FROM lasku
+                    WHERE yhtio                 = '{$kukarow['yhtio']}'
+                    AND tunnus                  IN ({$otunnukset})
+                    AND laatija                 = 'Magento'
+                    AND asiakkaan_tilausnumero != ''";
+          $mageres = pupe_query($query);
+
+          while ($magerow = mysql_fetch_assoc($mageres)) {
+            $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
+            $magento_api_rak = $rahtikirjanro;
+            $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+
+            require "magento_toimita_tilaus.php";
           }
         }
       }

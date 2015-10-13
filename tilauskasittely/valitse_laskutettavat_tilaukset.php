@@ -339,9 +339,9 @@ if ($tee == 'TOIMITA') {
           $laskutettavat = ennakkolaskuta($postun);
 
           if ($laskutettavat > 0) {
-            $tee       = "TARKISTA";
-            $laskutakaikki   = "KYLLA";
-            $silent       = "VIENTI";
+            $tee           = "TARKISTA";
+            $laskutakaikki = "KYLLA";
+            $silent        = "VIENTI";
 
             require "verkkolasku.php";
           }

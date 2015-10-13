@@ -1379,7 +1379,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
       <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
   echo "<table>";
-  echo "<tr><td>";
+  echo "<tr><th>";
 
   if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
     $mahdolliset_liitokset = array(
@@ -1395,7 +1395,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
       $mahdolliset_liitokset["piiri"] = "Piirille";
     }
 
-    echo t("Liitos").":</td><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+    echo t("Liitos").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
 
     foreach ($mahdolliset_liitokset as $liitos => $teksti) {
       echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
@@ -1403,15 +1403,15 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
 
     echo "</select>";
     echo "</td></tr>";
-    echo "<tr><td>";
+    echo "<tr><th>";
   }
 
-  echo t("Loppup‰iv‰m‰‰r‰")."</td><td>";
+  echo t("Loppup‰iv‰m‰‰r‰")."</th><td>";
   echo t("PV")," <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
   echo t("KK")," <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
   echo t("VVVV")," <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
 
-  echo "</td></tr>";
+  echo "</td><td class='back'>".t("J‰t‰ loppup‰iv‰m‰‰r‰ tyhj‰ksi jos haluat, ett‰ hinnat ovat voimassa toistaiseksi")."</td></tr>";
   echo "<tr><td colspan='2' class='back'>";
 
   echo "<input type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";

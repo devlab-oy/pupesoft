@@ -57,6 +57,8 @@ default:
 echo json_encode($alehinta);
 
 function alehinta_asiakas($asiakas, $tuote) {
+  global $yhtiorow;
+
   $tuote = "SELECT *
             FROM tuote
             WHERE tunnus = {$tuote}";
@@ -81,18 +83,25 @@ function alehinta_asiakas($asiakas, $tuote) {
   $hinta = "";
   $ale   = array();
 
-  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+
+  $kokonaisale = 1;
+  $maara       = $yhtiorow['myynnin_alekentat'];
+
+  for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+    $kokonaisale *= (1 - $ale["ale{$alepostfix}"] / 100);
+  }
+
+  $hinta = round(($hinta * $kokonaisale), $yhtiorow["hintapyoristys"]);
 
   return array(
-    "price"        => $hinta,
-    "netto"        => $netto,
-    "ale"          => $ale,
-    "alehinta_alv" => $alehinta_alv,
-    "alehinta_val" => $alehinta_val,
+    "hinta" => $hinta,
   );
 }
 
 function alehinta_asiakasryhma($asiakasryhma, $tuote) {
+  global $yhtiorow;
+
   $tuote = "SELECT *
             FROM tuote
             WHERE tunnus = {$tuote}";
@@ -106,13 +115,18 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
   $hinta    = "";
   $ale      = array();
 
-  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
+  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
+
+  $kokonaisale = 1;
+  $maara       = $yhtiorow['myynnin_alekentat'];
+
+  for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
+    $kokonaisale *= (1 - $ale["ale{$alepostfix}"] / 100);
+  }
+
+  $hinta = round(($hinta * $kokonaisale), $yhtiorow["hintapyoristys"]);
 
   return array(
-    "price"        => $hinta,
-    "netto"        => $netto,
-    "ale"          => $ale,
-    "alehinta_alv" => $alehinta_alv,
-    "alehinta_val" => $alehinta_val,
+    "hinta" => $hinta,
   );
 }

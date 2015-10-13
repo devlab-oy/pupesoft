@@ -47,6 +47,9 @@ switch ($kohdetyyppi) {
 case "asiakas":
   $alehinta = alehinta_asiakas($kohde, $tuote);
   break;
+case "asiakasryhma":
+  $alehinta = alehinta_asiakasryhma($kohde, $tuote);
+  break;
 default:
   die ("Kohdetyyppi on virheellinen");
 }
@@ -78,9 +81,38 @@ function alehinta_asiakas($asiakas, $tuote) {
   $hinta = "";
   $ale   = array();
 
-  list($hinta, , , ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
   return array(
-    "price" => $hinta,
+    "price"        => $hinta,
+    "netto"        => $netto,
+    "ale"          => $ale,
+    "alehinta_alv" => $alehinta_alv,
+    "alehinta_val" => $alehinta_val,
+  );
+}
+
+function alehinta_asiakasryhma($asiakasryhma, $tuote) {
+  $tuote = "SELECT *
+            FROM tuote
+            WHERE tunnus = {$tuote}";
+
+  $tuote = pupe_query($tuote);
+  $tuote = mysql_fetch_assoc($tuote);
+
+  $laskurow = array();
+  $kpl      = 1;
+  $netto    = "";
+  $hinta    = "";
+  $ale      = array();
+
+  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
+
+  return array(
+    "price"        => $hinta,
+    "netto"        => $netto,
+    "ale"          => $ale,
+    "alehinta_alv" => $alehinta_alv,
+    "alehinta_val" => $alehinta_val,
   );
 }

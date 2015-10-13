@@ -143,9 +143,10 @@ if ($tee == 'GO') {
     echo "<br><br>";
 
     foreach ($files as $file) {
-
+      echo "File: $file Alkupituus: $alkupituus \n";
       $polku = substr($file, $alkupituus);
       list($taulu, $toiminto, $kuva) = explode("/", $polku, 3);
+      echo "Taulu: $taulu Toiminto: $toiminto Kuva: $kuva \n";
 
       if (strtolower($taulu) != 'tuote') {
         echo "<font class='message'>Toistaiseksi voidaan vaan lukea tuotekuvia!</font>";

@@ -1330,7 +1330,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa       += $prow["rivihinta"];
-        $paino_yhteensa   += $prow['tuotetilavuus'];
+        $paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
+        $tilavuus_yhteensa   += ($prow["tilattu"]*$prow["tuotetilavuus"]);
 
         $class = "";
 

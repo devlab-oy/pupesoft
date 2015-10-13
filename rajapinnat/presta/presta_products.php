@@ -118,7 +118,7 @@ class PrestaProducts extends PrestaClient {
             $id = array_search($product['tuoteno'], $existing_products);
             $response = $this->update($id, $product);
             // TEMP disabloidaan tämä kuvakonversioon asti
-            #$this->delete_product_images($id);
+            $this->delete_product_images($id);
           }
           else {
             $response = $this->create($product);
@@ -130,7 +130,7 @@ class PrestaProducts extends PrestaClient {
             $presta_stock->create_or_update($id, $product['saldo']);
           }
           // TEMP disabloidaan tämä kuvakonversioon asti
-          #$this->create_product_images($id, $product['images']);
+          $this->create_product_images($id, $product['images']);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions

@@ -54,7 +54,7 @@ class PrestaCategories extends PrestaClient {
     $display = $filter = $parents = array();
     //Nodes are in parent -> deepest level children order
     foreach ($ancestors as $node_nimi) {
-      $filter['name'] = $node_nimi;
+      $filter['name'] = utf8_encode($node_nimi);
       $categories = $this->all($display, $filter);
 
       //@TODO if many categories with the name is found, we have a problem...

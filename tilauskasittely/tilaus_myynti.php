@@ -8689,6 +8689,9 @@ if ($tee == '') {
       $kate_ulkomaa      = 0;  // Ulkomaan toimitusten kate yhtiön valuutassa
       $kate_ulkomaa_eieri    = 0;  // Ulkomaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
 
+      $tilauksen_tuotemassa = 0;
+      $tilauksen_tuotetilavuus = 0;
+
       if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAVARASTOON") {
         // Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)
         $alvquery = "SELECT IF(ISNULL(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
@@ -8768,6 +8771,7 @@ if ($tee == '') {
                      tilausrivi.tunnus,
                      tilausrivi.varattu+tilausrivi.jt varattu,
                      tilausrivin_lisatiedot.osto_vai_hyvitys,
+                     tuote.tuotemassa, (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
                      {$lisat}
                      FROM tilausrivi
                      JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -8850,6 +8854,10 @@ if ($tee == '') {
             }
 
             if ($arow['varattu'] > 0) {
+
+              $tilauksen_tuotemassa += $arow['varattu'] * $arow['tuotemassa'];
+              $tilauksen_tuotetilavuus += $arow['varattu'] * $arow['tuotetilavuus'];
+
               if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
                 $summa_kotimaa      += $arow["rivihinta"]+$arow["alv"];
                 $summa_kotimaa_eieri  += $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
@@ -8907,7 +8915,41 @@ if ($tee == '') {
           $ulkom_huom = "";
         }
 
+        // Etsitään asiakas
+        $query = "SELECT laskunsummapyoristys, osasto
+                  FROM asiakas
+                  WHERE tunnus = '$laskurow[liitostunnus]'
+                  and yhtio    = '$kukarow[yhtio]'";
+        $asres = pupe_query($query);
+        $asrow = mysql_fetch_assoc($asres);
+
         if ($toim != 'SIIRTOLISTA') {
+
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
+
+            if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Asiakasosasto").":</th>
+                  <td class='spec' colspan='3' align='center'>{$asrow['osasto']}</td>";
+            }
+
+            echo "<tr>$jarjlisa
+                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
+                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
+            echo "<td></td>";
+            echo "<td class='spec'>KG</td>";
+            echo "</tr>";
+            echo "<tr>$jarjlisa
+                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
+                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
+            echo "<td></td>";
+            echo "<td class='spec'>M3</td>";
+            echo "</tr>";
+          }
+
           if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
             echo "<tr>$jarjlisa
                 <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
@@ -9051,14 +9093,6 @@ if ($tee == '') {
 
           $summa = $arvo+$alvinmaara;
         }
-
-        // Etsitään asiakas
-        $query = "SELECT laskunsummapyoristys
-                  FROM asiakas
-                  WHERE tunnus = '$laskurow[liitostunnus]'
-                  and yhtio    = '$kukarow[yhtio]'";
-        $asres = pupe_query($query);
-        $asrow = mysql_fetch_assoc($asres);
 
         //Käsin syötetty summa johon lasku pyöristetään
         if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {

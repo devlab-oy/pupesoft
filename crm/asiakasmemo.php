@@ -7,6 +7,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
     $asiakasid   = $yllapidontunnus;
   }
+
+  if (!isset($nayta_kaikki_merkinnat)) {
+    $nayta_kaikki_merkinnat = $_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" ? array(1,2) : array();
+  }
 }
 
 echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
@@ -786,12 +790,30 @@ if ($ytunnus != '') {
       echo "<br>";
     }
 
+    $_chk_if = (!empty($nayta_kaikki_merkinnat) and is_array($nayta_kaikki_merkinnat));
+    $_chk = ($_chk_if and count($nayta_kaikki_merkinnat) > 1) ? 'checked' : '';
+
+    echo "<form method='POST'>";
+    echo "<input type='hidden' name='tee' value=''>";
+    echo "<input type='hidden' name='yhtunnus'   value='$yhtunnus'>";
+    echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
+    echo "<input type='hidden' name='lopetus'   value='$lopetus'>";
+    echo "<input type='hidden' name='asiakasid'   value='$asiakasid'>";
+    echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
+    echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='submit();' {$_chk}>";
+    echo " ",t("Näytä kaikkien käyttäjien merkinnät");
+    echo "</form>";
+
+    echo "<br><br>";
+
     ///* Haetaan memosta sisalto asiakkaan kohdalta *///
     echo "<table width='620'>";
 
     if ($naytapoistetut == '') {
       $lisadel = " and left(kalenteri.tyyppi,7) != 'DELETED'";
     }
+
+    $kayttajalisa = empty($_chk) ? "and kalenteri.kuka = '{$kukarow['kuka']}'" : "";
 
     $query = "SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
               if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
@@ -805,6 +827,7 @@ if ($ytunnus != '') {
               LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
               WHERE kalenteri.liitostunnus = '$asiakasid'
               $lisadel
+              {$kayttajalisa}
               and kalenteri.yhtio          = '$kukarow[yhtio]' ";
 
     if ($yhtunnus > 0) {

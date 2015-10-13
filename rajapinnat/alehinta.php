@@ -6,12 +6,16 @@ if (php_sapi_name() != 'cli') {
 }
 
 $yhtio       = trim($argv[1]);
-$kohdetyyppi = trim($argv[2]);
-$kohde       = trim($argv[3]);
-$tuote       = trim($argv[4]);
+$kuka        = trim($argv[2]);
+$kohdetyyppi = trim($argv[3]);
+$kohde       = trim($argv[4]);
+$tuote       = trim($argv[5]);
 
 if ($yhtio == '') {
   die ("Et antanut yhtiötä!\n");
+}
+elseif ($kuka == '') {
+  die ("Et antanut käyttäjää!\n");
 }
 elseif ($kohdetyyppi == '') {
   die ("Et antanut kohdetyyppiä!\n");
@@ -31,12 +35,13 @@ require "../inc/connect.inc";
 require "../inc/functions.inc";
 
 $yhtio       = mysql_real_escape_string($yhtio);
+$kuka        = mysql_real_escape_string($kuka);
 $kohde       = mysql_real_escape_string($kohde);
 $kohdetyyppi = mysql_real_escape_string($kohdetyyppi);
 $tuote       = mysql_real_escape_string($tuote);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
-$kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+$kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);
 
 switch ($kohdetyyppi) {
 case "asiakas":
@@ -76,6 +81,6 @@ function alehinta_asiakas($asiakas, $tuote) {
   list($hinta, , , ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
   return array(
-    "hinta" => $hinta,
+    "price" => $hinta,
   );
 }

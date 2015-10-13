@@ -423,6 +423,9 @@ else {
           $osuma = true;
         }
 
+        $_hintakentta = t_avainsana("ASIAKASHINNASTO");
+        if ($_hintakentta == "") $_hintakentta = 'myyntihinta';
+
         if ((float) $hinta == 0) {
           $hinta = $rrow["myyntihinta"];
         }
@@ -443,15 +446,21 @@ else {
 
         if ($yhtiorow["alv_kasittely"] == "") {
           // Hinnat sis‰lt‰v‰t arvonlis‰veron
-          $verollinen         = $rrow["myyntihinta"];
-          $veroton         = round(($rrow["myyntihinta"]/(1+$rrow['alv']/100)), 2);
-          $asiakashinta_veroton    = round(($asiakashinta/(1+$lis_alv/100)), 2);
-          $asiakashinta_verollinen = $asiakashinta;
+          $verollinen               = $rrow[$_hintakentta];
+          $veroton                  = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
+          $asiakashinta_veroton     = round(($asiakashinta/(1+$lis_alv/100)), 2);
+          $asiakashinta_verollinen  = $asiakashinta;
         }
         else {
-          // Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero
-          $verollinen        = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)), 2);
-          $veroton         = $rrow["myyntihinta"];
+          if ($_hintakentta == 'MYYMALAHINTA') {
+            $verollinen             = $rrow[$_hintakentta];
+            $veroton                = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
+          }
+          else {
+            // Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero
+            $verollinen             = round(($rrow[$_hintakentta]*(1+$rrow['alv']/100)), 2);
+            $veroton                = $rrow[$_hintakentta];
+          }
           $asiakashinta_veroton    = $asiakashinta;
           $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
         }

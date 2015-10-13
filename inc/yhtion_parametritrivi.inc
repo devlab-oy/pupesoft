@@ -1458,18 +1458,22 @@ if ($fieldname == "lasku_tulostin") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  while ($kirow=mysql_fetch_array($kires)) {
+  while ($kirow = mysql_fetch_array($kires)) {
     if ($kirow["tunnus"]==$trow[$i]) $select='SELECTED';
     else $select = '';
 
     $ulos .= "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
   }
 
+  if ($trow[$i] == -88) $select = 'SELECTED';
+  else $select = '';
+
+  $ulos .= "<option value='-88' $select>".t("PDF Ruudulle")."</option>";
+
   if ($trow[$i] == -99) $select = 'SELECTED';
   else $select = '';
 
   $ulos .= "<option value='-99' $select>".t("Asiakkaan sähköpostiin")."</option>";
-
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3364,6 +3368,7 @@ if ($fieldname == "tarjoustyyppi") {
   $ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty tarjouspohja");
   $ulos .= "<option value = '3' $sel[3]>".t("Lyhyt tarjouspohja");
   $ulos .= "<option value = '4' $sel[4]>".t("Tarjouspohja, jossa ainoastaan nettohinnat");
+  $ulos .= "<option value = '5' $sel[5]>".t("Kuvallinen tarjouspohja");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4208,6 +4213,20 @@ if ($fieldname == 'maksusopimus_toimitus') {
 
   $ulos .= "<option value = ''>".t("Tilauksen voi toimittaa vaikka ennakkolaskuja ei ole maksettu")."</option>";
   $ulos .= "<option value = 'X' {$sel}>".t("Tilauksen voi toimittaa vasta kun ennakkolaskut on maksettu")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'ennakkolasku_myyntitilaukselta') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array_fill_keys(array('K', 'E', 'J', 'F', 'L', 'M'), '');
+  $sel[$trow[$i]] = " SELECTED";
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei voi tehdä ennakkolaskua pikanäppäimellä")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella voi tehdä ennakkolaskun pikanäppäimellä")."</option>";
+  $ulos .= "<option value = 'B' {$sel['B']}>".t("Myyntitilauksella voi tehdä ennakkolaskun ja sisäisen ennakklaskun pikanäppäimellä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

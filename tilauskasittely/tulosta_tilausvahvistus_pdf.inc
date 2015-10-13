@@ -45,9 +45,6 @@ elseif ($naytatvale == 11) {
 elseif ($naytatvale == 12) {
   $lahetetyyppi .= "tulosta_lahete_viivakoodi_ale1.inc";
 }
-elseif ($naytatvale == 13) {
-  $lahetetyyppi .= "tulosta_lahete_tilausrivihinta_eialennuksia.inc";
-}
 else {
   $lahetetyyppi .= "tulosta_lahete.inc";
 }
@@ -55,23 +52,6 @@ else {
 if ($verollisethinnat) {
   $lahetetyyppi = substr($lahetetyyppi, 0, -4) . "_verollinen.inc";
 }
-
-//Testausta varten.....
-//$lahetetyyppi = "tulosta_lahete.inc";
-//$lahetetyyppi = "tulosta_lahete_ean.inc";
-//$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
-//$lahetetyyppi = "tulosta_lahete_brutto.inc";
-//$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-//$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-//$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-//$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-//$lahetetyyppi = "tulosta_lahete_custom.inc";
-//$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 
 require "tulosta_lahete.inc";
 

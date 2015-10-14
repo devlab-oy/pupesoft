@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirretään asiakastiedot M3:seen
+ * Siirretään asiakastiedot
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -16,10 +16,16 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
+$scp_siirto = "";
+
+if (!empty($argv[2])) {
+  $scp_siirto = $argv[2];
+}
+
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -277,6 +283,7 @@ fwrite($fp, $header);
 
 // Haetaan asiakkaat
 $query = "SELECT asiakas.*,
+          if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
           if(asiakas.gsm != '', asiakas.gsm,
             if(asiakas.puhelin != '', asiakas.puhelin, '')) AS puhelin,
           kustannuspaikka.nimi AS kustannuspaikka
@@ -1476,5 +1483,13 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+if (!empty($scp_siirto)) {
+  // Pakataan tiedosto
+  system("zip -j {$filepath}.zip $filepath");
+
+  // Siirretään toiselle palvelimelle
+  system("scp {$filepath}.zip $scp_siirto");
+}
 
 echo "Valmis.\n";

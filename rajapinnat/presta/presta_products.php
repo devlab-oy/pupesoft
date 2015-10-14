@@ -12,6 +12,9 @@ class PrestaProducts extends PrestaClient {
    */
   private $_removable_fields = array();
 
+  // Päivitetäänkö tuotekuvat
+  private $_image_sync = true;
+
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
@@ -113,14 +116,17 @@ class PrestaProducts extends PrestaClient {
       $this->schema = $this->get_empty_schema();
       $existing_products = $this->all_skus();
 
+      $images_activated = $this->_image_sync;
       foreach ($products as $product) {
         //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
             $response = $this->update($id, $product);
-            // TEMP disabloidaan tämä kuvakonversioon asti
-            $this->delete_product_images($id);
+            // Poistetaan tuotekuvat vain jos kuvasiirto on aktivoitu
+            if ($images_activated) {
+              $this->delete_product_images($id);
+            }
           }
           else {
             $response = $this->create($product);
@@ -131,8 +137,10 @@ class PrestaProducts extends PrestaClient {
             $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
             $presta_stock->create_or_update($id, $product['saldo']);
           }
-          // TEMP disabloidaan tämä kuvakonversioon asti
-          $this->create_product_images($id, $product['images']);
+          // Lisätään tuotekuvat vain jos kuvasiirto on aktivoitu
+          if ($images_activated) { 
+            $this->create_product_images($id, $product['images']);
+          }
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
@@ -159,7 +167,13 @@ class PrestaProducts extends PrestaClient {
 
   public function set_removable_fields($fields) {
     $this->_removable_fields = $fields;
-  }  
+  }
+
+  public function set_image_sync($status) {
+    if (!empty($status)) {
+      $this->_image_sync = false;
+    }
+  }
 
   /**
    *

@@ -9,7 +9,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   }
 
   if (!isset($nayta_kaikki_merkinnat)) {
-    $nayta_kaikki_merkinnat = $_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" ? array(1,2) : array();
+    $nayta_kaikki_merkinnat = $_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" ? array('default',1) : array();
   }
 }
 
@@ -791,7 +791,7 @@ if ($ytunnus != '') {
     }
 
     $_chk_if = (!empty($nayta_kaikki_merkinnat) and is_array($nayta_kaikki_merkinnat));
-    $_chk = ($_chk_if and count($nayta_kaikki_merkinnat) > 1) ? 'checked' : '';
+    $_merkinnat_chk = ($_chk_if and count($nayta_kaikki_merkinnat) > 1) ? 'checked' : '';
 
     echo "<form method='POST'>";
     echo "<input type='hidden' name='tee' value=''>";
@@ -799,8 +799,9 @@ if ($ytunnus != '') {
     echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
     echo "<input type='hidden' name='lopetus'   value='$lopetus'>";
     echo "<input type='hidden' name='asiakasid'   value='$asiakasid'>";
+    echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
     echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
-    echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='submit();' {$_chk}>";
+    echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='this.form.submit();' {$_merkinnat_chk}>";
     echo " ",t("Näytä kaikkien käyttäjien merkinnät");
     echo "</form>";
 
@@ -813,7 +814,7 @@ if ($ytunnus != '') {
       $lisadel = " and left(kalenteri.tyyppi,7) != 'DELETED'";
     }
 
-    $kayttajalisa = empty($_chk) ? "and kalenteri.kuka = '{$kukarow['kuka']}'" : "";
+    $kayttajalisa = empty($_merkinnat_chk) ? "and kalenteri.kuka = '{$kukarow['kuka']}'" : "";
 
     $query = "SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo,
               if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,

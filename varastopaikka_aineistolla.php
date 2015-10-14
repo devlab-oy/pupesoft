@@ -54,7 +54,17 @@ if ($tee == "AJA") {
       unset($tiedr);
 
       # Etsit‰‰n tuoteperheit‰ joilla on runko-tuotteita
-      foreach ($kaikki_tiedostorivit as $rowkey => $tiedr) {
+      foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
+        // Indeksit:
+        $tuoteno       = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);              // 0 - Tuotenumero
+        $kpl         = $tiedr[1] = str_replace(",", ".", pupesoft_cleanstring($tiedr[1]));  // 1 - M‰‰r‰
+        $lahdevarastopk   = $tiedr[2] = str_replace(" ", "", pupesoft_cleanstring($tiedr[2]));  // 2 - L‰hdevarastopaikka
+        $kohdevarastopk   = $tiedr[3] = str_replace(" ", "", pupesoft_cleanstring($tiedr[3]));  // 3 - Kohdevarastopaikka
+        $kom         = $tiedr[4] = pupesoft_cleanstring($tiedr[4]);              // 4 - Kommentti
+        $poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", strtoupper(pupesoft_cleanstring($tiedr[5])));  // 5 - Poistetaanko l‰hdevarastopaikka
+
+        if ($poistetaanko_lahde != 'X') $tiedr[5] = '';
+
         $query = "SELECT *
                   FROM tuoteperhe
                   WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -72,12 +82,12 @@ if ($tee == "AJA") {
       // Siivous ja validitytsekit
       foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
         // Indeksit:
-        $tuoteno       = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);              // 0 - Tuotenumero
-        $kpl         = $tiedr[1] = str_replace(",", ".", pupesoft_cleanstring($tiedr[1]));  // 1 - M‰‰r‰
-        $lahdevarastopk   = $tiedr[2] = str_replace(" ", "", pupesoft_cleanstring($tiedr[2]));  // 2 - L‰hdevarastopaikka
-        $kohdevarastopk   = $tiedr[3] = str_replace(" ", "", pupesoft_cleanstring($tiedr[3]));  // 3 - Kohdevarastopaikka
-        $kom         = $tiedr[4] = pupesoft_cleanstring($tiedr[4]);              // 4 - Kommentti
-        $poistetaanko_lahde = $tiedr[5] = str_replace(" ", "", strtoupper(pupesoft_cleanstring($tiedr[5])));  // 5 - Poistetaanko l‰hdevarastopaikka
+        $tuoteno       = $tiedr[0];
+        $kpl         = $tiedr[1];
+        $lahdevarastopk   = $tiedr[2];
+        $kohdevarastopk   = $tiedr[3];
+        $kom         = $tiedr[4];
+        $poistetaanko_lahde = $tiedr[5];
 
         if ($poistetaanko_lahde != 'X') $tiedr[5] = '';
 

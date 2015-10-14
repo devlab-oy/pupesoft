@@ -1014,8 +1014,8 @@ if ($avain_sel["ASIAKASHINNASTO"] == "SELECTED" and $_selite) {
   $sel = $trow[$i] == 'MYYMALAHINTA' ? "selected" : "";
 
   $ulos = "<td><select name = '{$nimi}'>";
-  $ulos .= "<option value = 'MYYNTIHINTA'>".t("Myyntihinta")."</option>";
-  $ulos .= "<option value = 'MYYMALAHINTA' {$sel}>".t("Myymälähinta")."</option>";
+  $ulos .= "<option value = 'myyntihinta'>".t("Myyntihinta")."</option>";
+  $ulos .= "<option value = 'myymalahinta' {$sel}>".t("Myymälähinta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

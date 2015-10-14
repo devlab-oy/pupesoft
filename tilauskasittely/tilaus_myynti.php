@@ -1365,6 +1365,66 @@ if (isset($tyhjenna)) {
   $rekisterinumero    = "";
 }
 
+if (!empty($valitse_tuotteetasiakashinnastoon)) {
+  echo "<font class='head'>{$otsikko}</font><hr><br>";
+  echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+      <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
+      <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+      <input type='hidden' name='mista' value='$mista'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='lopetus' value='$lopetus'>
+      <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+      <input type='hidden' name='projektilla' value='$projektilla'>
+      <input type='hidden' name='orig_tila' value='$orig_tila'>
+      <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+
+  echo "<table>";
+  echo "<tr><th>";
+
+  if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
+    $mahdolliset_liitokset = array(
+      "liitostunnus" => "Asiakkaan tunnuksella",
+      "ytunnus"      => "Y-tunnuksella"
+    );
+
+    if (!empty($asiakasrow["ryhma"])) {
+      $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhm‰lle";
+    }
+
+    if (!empty($asiakasrow["piiri"])) {
+      $mahdolliset_liitokset["piiri"] = "Piirille";
+    }
+
+    echo t("Liitos").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+
+    foreach ($mahdolliset_liitokset as $liitos => $teksti) {
+      echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
+    }
+
+    echo "</select>";
+    echo "</td></tr>";
+    echo "<tr><th>";
+  }
+
+  echo t("Loppup‰iv‰m‰‰r‰")."</th><td>";
+  echo t("PV")," <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
+  echo t("KK")," <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
+  echo t("VVVV")," <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
+
+  echo "</td><td class='back'>".t("J‰t‰ loppup‰iv‰m‰‰r‰ tyhj‰ksi jos haluat, ett‰ hinnat ovat voimassa toistaiseksi")."</td></tr>";
+  echo "<tr><td colspan='2' class='back'>";
+
+  echo "<input type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
+
+  echo "</td></tr>";
+  echo "</table>";
+
+  echo "</form>";
+
+  include "inc/footer.inc";
+  exit;
+}
+
 if ($tee == "VALMIS"
   and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE"))
   and $kateinen != ''
@@ -2311,11 +2371,18 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       $liitoslisa = "asiakas = '{$laskurow["liitostunnus"]}'";
     }
 
+    $asiakas_hinta_loppupv = (int) $asiakas_hinta_loppupv;
+    $asiakas_hinta_loppukk = (int) $asiakas_hinta_loppukk;
+    $asiakas_hinta_loppuvv = (int) $asiakas_hinta_loppuvv;
+
+    $loppupaivamaaralisa = "loppupvm = '{$asiakas_hinta_loppuvv}-{$asiakas_hinta_loppukk}-$asiakas_hinta_loppupv'";
+
     $query = "SELECT *
               FROM asiakashinta
               where yhtio  = '$kukarow[yhtio]'
               and tuoteno  = '$tilausrivi[tuoteno]'
               and {$liitoslisa}
+              and {$loppupaivamaaralisa}
               and hinta    = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys])
               and valkoodi = '$laskurow[valkoodi]'";
     $chk_result = pupe_query($query);
@@ -2325,6 +2392,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                 yhtio      = '$kukarow[yhtio]',
                 tuoteno    = '$tilausrivi[tuoteno]',
                 {$liitoslisa},
+                {$loppupaivamaaralisa},
                 hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                 valkoodi   = '$laskurow[valkoodi]',
                 alkupvm    = now(),
@@ -2935,7 +3003,7 @@ if ($tee == '') {
 
     if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-          <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
+          <input type='hidden' name='valitse_tuotteetasiakashinnastoon' value='x'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value='$mista'>
           <input type='hidden' name='toim' value='$toim'>
@@ -2944,34 +3012,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-
-      $style = $yhtiorow["myynti_asiakhin_tallenna"] == "V" ? "style='margin-left:10px;'" : "";
-
-      echo "<input {$style} type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
-
-      if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
-        $mahdolliset_liitokset = array(
-          "liitostunnus" => "Asiakkaan tunnuksella",
-          "ytunnus"      => "Y-tunnuksella"
-        );
-
-        if (!empty($asiakasrow["ryhma"])) {
-          $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhm‰lle";
-        }
-
-        if (!empty($asiakasrow["piiri"])) {
-          $mahdolliset_liitokset["piiri"] = "Piirille";
-        }
-
-        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
-
-        foreach ($mahdolliset_liitokset as $liitos => $teksti) {
-          echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
-        }
-
-        echo "</select>";
-      }
-
+      echo "<input type='submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>";
       echo "</form>";
     }
 
@@ -8689,6 +8730,9 @@ if ($tee == '') {
       $kate_ulkomaa      = 0;  // Ulkomaan toimitusten kate yhtiˆn valuutassa
       $kate_ulkomaa_eieri    = 0;  // Ulkomaan toimitusten kate yhtiˆn valuutassa ilman erikoisalennusta
 
+      $tilauksen_tuotemassa = 0;
+      $tilauksen_tuotetilavuus = 0;
+
       if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAVARASTOON") {
         // Laskeskellaan tilauksen loppusummaa (mit‰tˆidyt ja raaka-aineet eiv‰t kuulu jengiin)
         $alvquery = "SELECT IF(ISNULL(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
@@ -8768,6 +8812,7 @@ if ($tee == '') {
                      tilausrivi.tunnus,
                      tilausrivi.varattu+tilausrivi.jt varattu,
                      tilausrivin_lisatiedot.osto_vai_hyvitys,
+                     tuote.tuotemassa, (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
                      {$lisat}
                      FROM tilausrivi
                      JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -8850,6 +8895,10 @@ if ($tee == '') {
             }
 
             if ($arow['varattu'] > 0) {
+
+              $tilauksen_tuotemassa += $arow['varattu'] * $arow['tuotemassa'];
+              $tilauksen_tuotetilavuus += $arow['varattu'] * $arow['tuotetilavuus'];
+
               if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
                 $summa_kotimaa      += $arow["rivihinta"]+$arow["alv"];
                 $summa_kotimaa_eieri  += $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
@@ -8907,7 +8956,41 @@ if ($tee == '') {
           $ulkom_huom = "";
         }
 
+        // Etsit‰‰n asiakas
+        $query = "SELECT laskunsummapyoristys, osasto
+                  FROM asiakas
+                  WHERE tunnus = '$laskurow[liitostunnus]'
+                  and yhtio    = '$kukarow[yhtio]'";
+        $asres = pupe_query($query);
+        $asrow = mysql_fetch_assoc($asres);
+
         if ($toim != 'SIIRTOLISTA') {
+
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
+
+            if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Asiakasosasto").":</th>
+                  <td class='spec' colspan='3' align='center'>{$asrow['osasto']}</td>";
+            }
+
+            echo "<tr>$jarjlisa
+                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
+                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
+            echo "<td></td>";
+            echo "<td class='spec'>KG</td>";
+            echo "</tr>";
+            echo "<tr>$jarjlisa
+                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
+                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
+            echo "<td></td>";
+            echo "<td class='spec'>M3</td>";
+            echo "</tr>";
+          }
+
           if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
             echo "<tr>$jarjlisa
                 <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
@@ -9051,14 +9134,6 @@ if ($tee == '') {
 
           $summa = $arvo+$alvinmaara;
         }
-
-        // Etsit‰‰n asiakas
-        $query = "SELECT laskunsummapyoristys
-                  FROM asiakas
-                  WHERE tunnus = '$laskurow[liitostunnus]'
-                  and yhtio    = '$kukarow[yhtio]'";
-        $asres = pupe_query($query);
-        $asrow = mysql_fetch_assoc($asres);
 
         //K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
         if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {

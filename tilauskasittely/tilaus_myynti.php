@@ -9389,8 +9389,7 @@ if ($tee == '') {
           }
 
           if ($naytetaan_tilausvahvistusnappi or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
-            echo "  <th colspan='2' nowrap>".t("Näytä").":</th>
-                <td colspan='2' nowrap>
+            echo "<td colspan='4' style='text-align: center;' nowrap>
                 <form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
                 <input type='hidden' name='otunnus' value='$tilausnumero'>
                 <input type='hidden' name='projektilla' value='$projektilla'>

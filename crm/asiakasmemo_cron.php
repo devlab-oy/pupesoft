@@ -40,7 +40,9 @@ $query = "SELECT kalenteri.*,
           LEFT JOIN lasku ON (lasku.yhtio = kalenteri.yhtio AND lasku.tunnus = kalenteri.otunnus)
           LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
           WHERE kalenteri.yhtio = '{$yhtio}'
-          AND kalenteri.tyyppi = 'Muistutus'";
+          AND kalenteri.tyyppi = 'Muistutus'
+          AND kalenteri.kuittaus = 'K'
+          AND LEFT(kalenteri.pvmalku, 10) < CURDATE()";
 $res = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($res)) {

@@ -23,6 +23,8 @@ if (@include "inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+ini_set("memory_limit", "2G");
+
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";

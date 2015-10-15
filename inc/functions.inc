@@ -1496,6 +1496,22 @@ if (!function_exists("tuoteperhe_myytavissa")) {
   }
 }
 
+if (!function_exists("var_kaannos")) {
+  function var_kaannos($var) {
+    
+    switch ($var) {
+    case "J":
+      return t("Jälkitoimitus");
+    case "H":
+      return t("Hyväksy");
+    case "P":
+      return t("Puute");
+    default:
+      return "";
+    }
+  }
+}
+
 if (!function_exists("saldo_myytavissa")) {
   function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 

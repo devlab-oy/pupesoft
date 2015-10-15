@@ -6332,7 +6332,7 @@ if ($tee == '') {
       $sarakkeet++;
     }
 
-    $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
+    $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Tila")."</th>";
     $sarakkeet += 3;
 
     if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
@@ -7899,15 +7899,15 @@ if ($tee == '') {
           }
         }
 
+        $var_temp = var_kaannos($row['var']);
+
         if ($row['var'] == 'J' and $row['jt_manual'] == 'K') {
-          $var_temp = $row['var'] . " - ".t("Manuaalinen");
+          $var_temp = $var_temp . " - ".t("Manuaalinen");
         }
         elseif ($laskurow["tila"] != 'G' and $row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
-          $var_temp = $row['var'] . " - ".t("Muiden mukana");
+          $var_temp = $var_temp . " - ".t("Muiden mukana");
         }
         else {
-          $var_temp = $row['var'];
-
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J') {
             $var_temp = $var_temp." - ".t("heti");
           }

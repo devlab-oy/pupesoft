@@ -467,7 +467,13 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO' :
     // Verkkokauppassa asiakkaan antama tilausnumero
-    $ot_verkkokauppa_tilausviesti .= " / ".t("Tilausnro").": ".$tieto;
+    $viestilisa = '';
+    if (!empty($ot_verkkokauppa_tilausviesti)) {
+      $viestilisa = " / ";
+    }
+    if (!empty($tieto)) {      
+      $ot_verkkokauppa_tilausviesti .= $viestilisa.t("Tilausnro").": ".$tieto;
+    }
     break;
 
   case 'OSTOTIL.OT_VERKKOKAUPPA_KOHDE' :

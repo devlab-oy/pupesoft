@@ -74,11 +74,12 @@ if ($tee == "AJA") {
         $runkoresult = pupe_query($query);
 
         while ($runkorow = mysql_fetch_assoc($runkoresult)) {
-          $tiedr[0] = $runkorow['tuoteno'];
-          $kaikki_tiedostorivit[] = $tiedr;
+          $tiedr_tmp = $tiedr;
+          $tiedr_tmp[0] = $runkorow['tuoteno'];
+          $kaikki_tiedostorivit[] = $tiedr_tmp;
         }
       }
-
+      echo var_dump($kaikki_tiedostorivit);
       // Siivous ja validitytsekit
       foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
         // Indeksit:

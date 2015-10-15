@@ -79,7 +79,7 @@ if ($tee == "AJA") {
           $kaikki_tiedostorivit[] = $tiedr_tmp;
         }
       }
-      echo var_dump($kaikki_tiedostorivit);
+
       // Siivous ja validitytsekit
       foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
         // Indeksit:

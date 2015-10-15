@@ -1602,17 +1602,9 @@ if (!function_exists('loppu_tarjous')) {
         $vakioteksti_row = mysql_fetch_assoc($result);
         $vakioteksti = $vakioteksti_row['selitetark'];
 
-        if ($vakioteksti == "") {
-          $vakioteksti = "";
-
+        if (empty($vakioteksti)) {
           if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
-            if ($laskurow["vienti"] != "") {
-              $vakioteksti = ""; // Laitetaan tyhj‰n‰
-            }
-            elseif ($kaanteinen_verotus === TRUE) {
-              $vakioteksti = ""; // En keksi mit‰‰n mit‰ t‰ss‰ tapauksessa pit‰isi kirjottaa :/
-            }
-            elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+            if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
               $vakioteksti = t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)." ";
             }
             elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
@@ -1636,7 +1628,7 @@ if (!function_exists('loppu_tarjous')) {
             }
           }
 
-          if ($yhtiorow["tarjoustyyppi"] != 3 and $laskurow["rahtivapaa"] == "") {
+          if ($laskurow["rahtivapaa"] == "") {
             $vakioteksti .= t("Lis‰ksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli);
           }
         }

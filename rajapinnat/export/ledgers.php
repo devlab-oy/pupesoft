@@ -64,7 +64,9 @@ $header .= "Due date;";
 $header .= "Cash discount due date;";
 $header .= "Cash discount amount $yhtiorow[valkoodi];";
 $header .= "Cash discount amount in invoice currency;";
-$header .= "Payer";
+$header .= "Payer;";
+$header .= "Reference number;";
+$header .= "Reference text";
 $header .= "\n";
 
 fwrite($fp1, $header);
@@ -76,6 +78,8 @@ fwrite($fp2, $header);
 $query = "(SELECT
           'SALESINVOICE' tyyppi,
           lasku.laskunro,
+          lasku.viite,
+          lasku.viesti,
           lasku.tapvm,
           if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
           if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
@@ -99,13 +103,15 @@ $query = "(SELECT
           and lasku.tapvm > '0000-00-00'
           and lasku.tila = 'U'
           and lasku.alatila = 'X'
-          GROUP BY 1,2,3,4,5,6,7,8,9)
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
 
           UNION
 
           (SELECT
           'SUPPLIERINVOICE' tyyppi,
           if(lasku.laskunro > 0, lasku.laskunro, if(lasku.viite!='', lasku.viite, lasku.viesti)) laskunro,
+          lasku.viite,
+          lasku.viesti,
           lasku.tapvm,
           if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
           if(toimi.toimittajanro in ('0',''), toimi.ytunnus, toimi.toimittajanro) asiakasnro,
@@ -152,6 +158,12 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['kasumma']};";
   $rivi .= "{$row['kasumma_valuutassa']};";
   $rivi .= ";";
+  $rivi .= pupesoft_csvstring($row['viite']).";";
+
+  if (empty($row['viite'])) {
+    $rivi .= pupesoft_csvstring($row['viesti']);
+  }
+
   $rivi .= "\n";
 
   if ($row['tyyppi'] == "SALESINVOICE") {
@@ -172,12 +184,8 @@ fclose($fp1);
 fclose($fp2);
 
 if (!empty($scp_siirto)) {
-  // Pakataan tiedosto
-  system("zip -j {$filepath1}.zip $filepath1");
-  system("zip -j {$filepath2}.zip $filepath2");
-
   // Siirret‰‰n toiselle palvelimelle
-  system("scp {$filepath1}.zip {$filepath2}.zip $scp_siirto");
+  system("scp {$filepath1} {$filepath2} $scp_siirto");
 }
 
 echo "Valmis.\n";

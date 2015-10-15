@@ -326,6 +326,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
+  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['asiakkaan_tilausnumero'] = $myyntitilaus["asiakkaan_tilausnumero"];
 }
 
 

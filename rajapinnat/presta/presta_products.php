@@ -42,7 +42,8 @@ class PrestaProducts extends PrestaClient {
     unset($xml->product->position_in_category);
 
     $xml->product->reference = $product['tuoteno'];
-    $xml->product->supplier_reference = $product['tuoteno'];
+    $xml->product->supplier_reference = $product['tuoteno']; 
+    $xml->product->ean13 = $product['ean'];
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];

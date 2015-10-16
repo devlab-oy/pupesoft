@@ -58,11 +58,11 @@ class PrestaProducts extends PrestaClient {
     $xml->product->show_price = 1;
     $xml->product->unit_price = 1;
 
-    $link_rewrite = $this->saniteze_link_rewrite($product['nimi']);
+    $link_rewrite = utf8_encode($this->saniteze_link_rewrite($product['nimi']));
     $xml->product->link_rewrite->language[0] = $link_rewrite;
     $xml->product->link_rewrite->language[1] = $link_rewrite;
-    $xml->product->name->language[0] = $product['nimi'];
-    $xml->product->name->language[1] = $product['nimi'];
+    $xml->product->name->language[0] = utf8_encode($product['nimi']);
+    $xml->product->name->language[1] = utf8_encode($product['nimi']);
 
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);

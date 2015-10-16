@@ -161,12 +161,21 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow["sisviesti1"]   = $asiakasrow["sisviesti1"];
 
       if ($tnimi != '') {
+        $osoitelappurow["nimi"]     = $tnimi;
+        $osoitelappurow["nimitark"] = $tnimitark;
+        $osoitelappurow["osoite"]   = $tosoite;
+        $osoitelappurow["postino"]  = $tpostino;
+        $osoitelappurow["postitp"]  = $tpostitp;
+        $osoitelappurow["toim_puh"] = $tpuh;
+        $osoitelappurow["maa"]      = $tmaa;
+
         $osoitelappurow["toim_postino"]  = $tpostino;
         $osoitelappurow["toim_nimi"]     = $tnimi;
         $osoitelappurow["toim_nimitark"] = $tnimitark;
         $osoitelappurow["toim_postitp"]  = $tpostitp;
-        $osoitelappurow["toim_osoite"]   = $tosoite;
         $osoitelappurow["toim_maa"]      = $tmaa;
+        $osoitelappurow["toim_osoite"]   = $tosoite;
+        $kuljetusohjeet                  = $viesti;
       }
       elseif ($asiakasrow["toim_nimi"] != '') {
         $osoitelappurow["toim_postino"]  = $asiakasrow["toim_postino"];
@@ -200,6 +209,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow["toim_postitp"]  = $tpostitp;
       $osoitelappurow["toim_maa"]      = $tmaa;
       $osoitelappurow["toim_osoite"]   = $tosoite;
+      $kuljetusohjeet                  = $viesti;
     }
 
     $osoitelappurow["toimitustapa"]  = $data['toimitustapa'][0];

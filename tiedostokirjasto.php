@@ -22,6 +22,12 @@ if ($toim == "LAATU") {
   $aihealueet  = hae_aihealueet();
   $toimittajat = "";
 }
+elseif ($toim == "LUVAT_JA_LISENSSIT") {
+  $otsikko     = "Tiedostokirjasto";
+  $ylaotsikko  = "Luvat ja lisenssit";
+  $aihealueet  = hae_aihealueet();
+  $toimittajat = "";
+}
 else {
   $otsikko     = "Tiedostokirjasto";
   $ylaotsikko  = "Toimittajat";

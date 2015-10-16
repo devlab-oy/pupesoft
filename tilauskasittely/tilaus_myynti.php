@@ -3001,7 +3001,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K','V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='valitse_tuotteetasiakashinnastoon' value='x'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>

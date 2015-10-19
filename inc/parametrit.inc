@@ -490,6 +490,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
+    if ($phpnimi == "asiakasmemo.php") {
+      if (isset($tallenna_keksiin) and isset($nayta_kaikki_merkinnat)) {
+        $_COOKIE["pupesoft_asiakasmemo"] = count($nayta_kaikki_merkinnat) > 1 ? "nayta_kaikki_merkinnat" : "vain_omat";
+        setcookie("pupesoft_asiakasmemo", $_COOKIE["pupesoft_asiakasmemo"], time()+60*60*24*90, "/");
+      }
+    }
+
     // Tuoteperhe
     if ($phpnimi == "tuoteperhe.php") {
       // Muistetaan keräyksen ohituksen valinta

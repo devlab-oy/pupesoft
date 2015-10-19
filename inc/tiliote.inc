@@ -950,7 +950,8 @@ case 'T10':
       // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
       if ($tdr2tunn == 'T10' and (substr($tdrow2peek['tieto'], 187, 1) > $omataso
         or ($yhtiorow['maa'] == "EE" and $maksuviite != '' and (strtoupper(trim($koodiselite)) == "DOMESTIC CREDIT TRANSFER"
-        or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER")))) {
+        or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER"
+        or strtoupper(trim($koodiselite)) == "NOT DEFINED")))) {
         $kuittikoodi = "E";
         $erialla     = "E";
       }
@@ -1182,7 +1183,8 @@ case 'T11':
 
   // Swedbank Viro häkki
   if ($yhtiorow['maa'] == "EE" and $koodi == '710' and
-    ($koodiselite == "DOMESTIC CREDIT TRANSFER" or $koodiselite == "SEPA CREDIT TRANSFER")
+    ($koodiselite == "DOMESTIC CREDIT TRANSFER" or $koodiselite == "SEPA CREDIT TRANSFER"
+      or $koodiselite == "NOT DEFINED")
     and $kuittikoodi != "E" and (int) $maksuviite > 0) {
     $kuittikoodi = "E";
     $erialla     = "VIITEAINEISTO";

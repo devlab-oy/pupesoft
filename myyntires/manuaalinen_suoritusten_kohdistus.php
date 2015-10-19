@@ -463,6 +463,7 @@ if ($tila == 'tee_kohdistus') {
   // haetaan laskujen tiedot
   $laskujen_summa = 0;
   $laskut = array();
+  $maksusopparit = array();
 
   if ($osasuoritus == 1) {
     //*** Tässä hoidetaan osasuoritus ***
@@ -777,7 +778,8 @@ if ($tila == 'tee_kohdistus') {
                 yhtio_maa,
                 yhtio_ovttunnus,
                 yhtio_kotipaikka,
-                yhtio_toimipaikka
+                yhtio_toimipaikka,
+                jaksotettu
                 FROM lasku
                 WHERE tunnus IN ($laskutunnukset)
                 and yhtio    = '$kukarow[yhtio]'
@@ -818,7 +820,8 @@ if ($tila == 'tee_kohdistus') {
                 yhtio_maa,
                 yhtio_ovttunnus,
                 yhtio_kotipaikka,
-                yhtio_toimipaikka
+                yhtio_toimipaikka,
+                jaksotettu
                 FROM lasku
                 WHERE tunnus IN ($laskutunnuksetkale)
                 AND yhtio    = '$kukarow[yhtio]'
@@ -1298,8 +1301,23 @@ if ($tila == 'tee_kohdistus') {
                           kohdistuspvm   = NOW(),
                           kirjauspvm     = '{$laskun_maksupvm}'";
         $kohdistus_result = pupe_query($kohdistus_qry);
-      }
 
+        // Vapautetaan holdissa olevat tilaukset, jos niillä on maksupositioita ja ennakkolaskut ovat maksettu
+        // Holdissa olevat tilaukset ovat tilassa N B
+        if ($yhtiorow['maksusopimus_toimitus'] == 'X' and $lasku["jaksotettu"] < 0) {
+          $query = "SELECT tunnus
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '".($lasku['jaksotettu'] * -1)."'
+                    AND tila    = 'N'
+                    AND alatila = 'B'";
+          $pos_chk_result = pupe_query($query);
+
+          if (mysql_num_rows($pos_chk_result)) {
+            $maksusopparit[] = $lasku['jaksotettu'] * -1;
+          }
+        }
+      }
 
       // Myyntisaamiset (suorituksen summa * -1)
       $query = "SELECT *
@@ -1467,7 +1485,14 @@ if ($tila == 'tee_kohdistus') {
   $query = "UNLOCK TABLES";
   $result = pupe_query($query);
 
-  $tila      = "suorituksenvalinta";
+  // Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
+  if (count($maksusopparit)) {
+    foreach ($maksusopparit as $soppari) {
+      vapauta_maksusopimus($soppari);
+    }
+  }
+
+  $tila  = "suorituksenvalinta";
   $asiakas_tunnus = $suoritus["asiakas_tunnus"];
 }
 

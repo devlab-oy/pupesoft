@@ -10863,6 +10863,9 @@ if (!function_exists("laheta_tilausvahvistus")) {
         $tuoteperheetyhdessa = TRUE;
       }
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '13') !== FALSE) {
+      $naytatvale = 13; // jos meill‰ on tilausvahvistuksessa 13, niin n‰ytet‰‰n tilausrivi.hinta ja ei alennuksia
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
       $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -19669,6 +19672,80 @@ if (!function_exists("tee_keraysera")) {
   }
 }
 
+if (!function_exists("pupesoft_lahetetyypit")) {
+  function pupesoft_lahetetyypit() {
+
+    //$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";  # Verolliset hinnat
+    //$lahetetyyppi = "perhe_".$lahetetyyppi;                          # Perheet yhdess‰, vain is‰t n‰ytet‰‰n
+    //$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi;                  # Perheet n‰ytet‰‰n, mutta hinnat summataan is‰lle
+
+    return array(
+      "tulosta_lahete.inc" => "N‰ytet‰‰n asiakkaan hinta ja alennus",
+      "tulosta_lahete_asiakviivakoodi.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia. Asiakkaan tuotekoodi viivakoodina",
+      "tulosta_lahete_brutto.inc" => "N‰ytet‰‰n tuotteen myym‰l‰hinta, tai asiakkaan hinta jos myym‰l‰hinta puuttuu. Ilman alennuksia",
+      "tulosta_lahete_custom.inc" => "N‰ytet‰‰n asiakkaan rivihinta, modifioitu tulostuspohja",
+      "tulosta_lahete_ean.inc" => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina",
+      "tulosta_lahete_ean_eiale.inc" => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia. Tuotteen EAN viivakoodina",
+      "tulosta_lahete_eiale_eihinta.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia",
+      "tulosta_lahete_eiale_eihinta_iso.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia (V‰lj‰t rivit)",
+      "tulosta_lahete_eialehintoja.inc" => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia",
+      "tulosta_lahete_eialeja.inc" => "N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰",
+      "tulosta_lahete_hae_hinnat.inc" => "Haetaan hinnat toisesta pupesta",
+      "tulosta_lahete_tilausrivihinta_eialennuksia.inc" => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia",
+      "tulosta_lahete_viivakoodi.inc" => "Ei n‰ytet‰ hintoja eik‰ alennuksia. Tuotteen EAN viivakoodina",
+      "tulosta_lahete_viivakoodi_ale1.inc" => "N‰ytet‰‰n asiakkaan hinta, vain Ale1 ja erikoisalennus. Tuotteen EAN viivakoodina",
+      "tulosta_lahete_viivakoodi_ean13.inc" => "N‰ytet‰‰n asiakkaan hinta. Alennukset laskettuna hintaan. Tuotteen EAN EAN13-viivakoodina",
+      "tulosta_lahete_viivakoodi_osh.inc" => "N‰ytet‰‰n tuotteen myyntihinta ja asiakkaan hinta. Alennukset laskettuna hintaan. Tuotteen EAN viivakoodina",
+      "tulosta_lahete_viivakoodi_ykshinta_normaali.inc" => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina. JT-rivit normaaleina",
+      "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc" => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia. Tuotteen EAN viivakoodina. JT-rivit normaaleina",
+    );
+  }
+}
+
+if (!function_exists("pupesoft_laskutyypit")) {
+  function pupesoft_laskutyypit() {
+    return array(
+      99 => "Normaali laskupohja",
+      2  => "Normaali laskupohja (Tuoteperheet yhdistetty)",
+      5  => "Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)",
+      6  => "Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)",
+      7  => "Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)",
+      1  => "Pelkistetty laskupohja 1",
+      3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
+      4  => "Pelkistetty laskupohja 3",
+      8  => "Ruotsin laskupohja",
+      10 => "Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)",
+      12 => "Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)",
+      13 => "Nettohinnat, ei alennuksia, ei verollisia hintoja",
+      14 => "Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)",
+      15 => "SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja",
+      16 => "SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)",
+      17 => "Normaali laskupohja (lihavoidut ja kursivoidut tekstit)",
+      18 => "Normaali laskupohja (nimitykset rivitettyn‰)",
+      19 => "Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)",
+      20 => "Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)",
+    );
+  }
+}
+
+if (!function_exists("pupesoft_tilausvahvistustyypit")) {
+  function pupesoft_tilausvahvistustyypit() {
+    return array(
+      "1"  => "N‰ytet‰‰n asiakkaan hinta ja alennus",
+      "2"  => "N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰",
+      "3"  => "Ei n‰ytet‰ hintoja eik‰ alennuksia",
+      "4"  => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia",
+      "5"  => "Haetaan hinnat toisesta pupesta",
+      "6"  => "N‰ytet‰‰n asiakkaan rivihinta, modifioitu tulostuspohja",
+      "7"  => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina",
+      "8"  => "N‰ytet‰‰n asiakkaan hinta, ilman alennuksia. Tuotteen EAN viivakoodina",
+      "10" => "N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina",
+      "11" => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina. JT-rivit normaaleina",
+      "12" => "N‰ytet‰‰n asiakkaan hinta, vain Ale1 ja erikoisalennus. Tuotteen EAN viivakoodina",
+    );
+  }
+}
+
 if (!function_exists("pupesoft_lahetetyyppi")) {
   function pupesoft_lahetetyyppi($laskutunnus, $asiakastunnus = 0) {
     global $kukarow;
@@ -19758,34 +19835,11 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       $lahetetyyppi = pupesoft_lahetetyyppi($otunnus, $laskurow['liitostunnus']);
     }
 
-    // Testausta varten.....
-    //$lahetetyyppi = "tulosta_lahete.inc";           # N‰ytet‰‰n asiakkaan hinta ja alennus
-    //$lahetetyyppi = "tulosta_lahete_ean.inc";
-    //$lahetetyyppi = "tulosta_lahete_brutto.inc";       # N‰ytet‰‰n tuotteen myym‰l‰hinta/(asiakkaan hinta)
-    //$lahetetyyppi = "tulosta_lahete_eialeja.inc";       # N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";     # Ei n‰ytet‰ hintoja eik‰ alennuksia, EAN-koodi tulostetaan viivakoodina
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-    //$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-    //$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-    //$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";   # Ei n‰ytet‰ hintoja eik‰ alennuksia
-    //$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-    //$lahetetyyppi = "tulosta_lahete_custom.inc";
-    //$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";   # Ei n‰ytet‰ hintoja eik‰ alennuksia
-    //$lahetetyyppi = "perhe_tulosta_lahete.inc";       # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰)
-    //$lahetetyyppi = "perhe_tulosta_lahete_verollinen.inc"; # N‰ytet‰‰n asiakkaan hinta ja alennus (Tuoteperheet yhdess‰, Verolliset hinnat)
-
-    //$lahetetyyppi = substr($lahetetyyppi, 0, -4)."_verollinen.inc";  # Verolliset hinnat
-    //$lahetetyyppi = "perhe_".$lahetetyyppi;               # Perheet yhdess‰, vain is‰t n‰ytet‰‰n
-    //$lahetetyyppi = "hinnat_isalla_".$lahetetyyppi;           # PErheet‰ n‰ytet‰‰n, mutta hinnat summataan is‰lle
-
     if (@include "tilauskasittely/tulosta_lahete.inc");
     else require "tulosta_lahete.inc";
 
     // katotaan miten halutaan sortattavan
     // haetaan asiakkaan tietojen takaa sorttaustiedot
-
     $order_sorttaus = '';
 
     $asiakas_apu_query = "SELECT lahetteen_jarjestys,
@@ -31268,6 +31322,172 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists("vapauta_maksusopimus")) {
+  function vapauta_maksusopimus($maksusoppari) {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+
+    // Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
+    $query = "SELECT maksupositio.otunnus,
+              sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
+              count(*) yhteensa_kpl
+              FROM maksupositio
+              LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio
+                  AND maksupositio.uusiotunnus = uusiolasku.tunnus)
+              LEFT JOIN lasku uusiolasku_ux ON (uusiolasku_ux.yhtio = uusiolasku.yhtio
+                  AND uusiolasku_ux.tila       = 'U'
+                  AND uusiolasku_ux.alatila    = 'X'
+                  AND uusiolasku_ux.laskunro   = uusiolasku.laskunro)
+              WHERE maksupositio.yhtio         = '{$kukarow['yhtio']}'
+              AND maksupositio.otunnus         = '{$maksusoppari}'
+              GROUP BY 1
+              HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
+              ORDER BY 1, maksupositio.tunnus";
+    $posres = pupe_query($query);
+
+    if (mysql_num_rows($posres)) {
+
+      $silent = 'Nyt hiljaa, hiljaa hiivit‰‰n n‰in Kardemumman yˆss‰';
+      $vapauta_tilaus_keraykseen = true;
+      $kukarow['kesken'] = $maksusoppari;
+
+      $query = "UPDATE lasku SET
+                alatila     = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$maksusoppari}'";
+      pupe_query($query);
+
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$maksusoppari}'";
+      $laskures = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($laskures);
+
+      require 'tilauskasittely/tilaus-valmis.inc';
+    }
+  }
+}
+
+
+if (!function_exists("tee_ennakkolasku")) {
+  function tee_ennakkolasku($jaks_alkup_tilaus, $sisainen = FALSE) {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+
+    // Otetaan sopparin tiedot talteen jos sellanen on olemassa.
+    $jaksquery = "SELECT *
+                  FROM maksupositio
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$jaks_alkup_tilaus'";
+    $sopres = pupe_query($jaksquery);
+    $soprow = mysql_fetch_assoc($sopres);
+
+    // Poistetaan k‰sin syˆtetty, tai vanha, soppari.
+    $jaksquery = "DELETE
+                  FROM maksupositio
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND otunnus = '$jaks_alkup_tilaus'";
+    pupe_query($jaksquery);
+
+    // P‰ivitet‰‰n tilaukselle "jaksotettu" maksuehto
+    $jaksquery = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND jaksotettu != ''
+                  AND kaytossa = ''
+                  ORDER BY tunnus
+                  LIMIT 1";
+    $jaksres = pupe_query($jaksquery);
+
+    if (mysql_num_rows($jaksres) == 0) {
+      echo t("VIRHE: Jaksotettavaa maksuehtoa ei lˆydy")."!<br>";
+      return 0;
+    }
+
+    $jaksrow = mysql_fetch_assoc($jaksres);
+
+    // Luodaan maksusoppari jos sit‰ ei viel‰ ole:
+    $query  = "SELECT *
+               FROM lasku
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '{$jaks_alkup_tilaus}'";
+    $laskures = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($laskures);
+
+    $maksusoppari_silent = TRUE;
+    require_once "{$pupe_root_polku}/tilauskasittely/maksusopimus.inc";
+
+    // Lis‰t‰‰n kaksi positiota
+    list($laskurow, $ennakko) = maksusopimus_uusi($laskurow);
+    list($laskurow, $loppu)   = maksusopimus_uusi($laskurow);
+
+    // Liitet‰‰n kaikki rivit maksusoppariin
+    maksusopimus_lisaa_kaikki_jaksotukseen($laskurow);
+
+    // Haetaan laskujen kuvaukset
+    $kuvares = t_avainsana("LASKUKUVAUS");
+
+    $ennakkokuvaus = mysql_fetch_assoc($kuvares);
+
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    $loppukuvaus = mysql_fetch_assoc($kuvares);
+
+    if (!empty($soprow["maksuehto"])) {
+      $mehto = $soprow["maksuehto"];
+    }
+    else {
+      $mehto = $laskurow["maksuehto"];
+    }
+
+    maksusopimus_tallenna($laskurow, $ennakko, "", 100, $mehto, "", $ennakkokuvaus["selitetark"], "", "", "",  "");
+    maksusopimus_tallenna($laskurow, $loppu, "", 0, $mehto, "", $loppukuvaus["selitetark"], "", "", "",  "");
+
+    require_once "{$pupe_root_polku}/maksusopimus_laskutukseen.php";
+
+    $ennakkolasku = ennakkolaskuta($jaks_alkup_tilaus);
+
+    $kasiviite = "";
+
+    if ($ennakkolasku > 0) {
+
+      // Ennakkolasku on sis‰inen, ei l‰hetet‰ asiakkaalle
+      if ($sisainen) {
+        $query  = "UPDATE lasku
+                   SET sisainen = 'o'
+                   WHERE tunnus  = '{$ennakkolasku}'";
+        pupe_query($query);
+      }
+
+      // Jos alkuper‰isell‰ tilauksella on k‰sinsyˆtetty viite niin kopsataan se ennakkolaskulle
+      if (!empty($laskurow["viite"])) {
+        $query  = "UPDATE lasku
+                   SET viite = '{$laskurow["viite"]}'
+                   WHERE tunnus  = '{$ennakkolasku}'";
+        pupe_query($query);
+
+        $kasiviite = ", viite = '' ";
+      }
+
+      $tee              = "TARKISTA";
+      $laskutakaikki    = "KYLLA";
+      $silent           = "VIENTI";
+      $laskutettavat    = $ennakkolasku;
+      $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
+
+      require "verkkolasku.php";
+    }
+
+    // P‰ivitet‰‰n alkuper‰iselle tilaukselle "jaksotettu" maksuehto
+    $jaksquery = "UPDATE lasku
+                  SET maksuehto = '{$jaksrow['tunnus']}'
+                  {$kasiviite}
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '{$jaks_alkup_tilaus}'";
+    pupe_query($jaksquery);
+
+    return $jaksrow['tunnus'];
   }
 }
 

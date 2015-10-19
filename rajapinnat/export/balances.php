@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Siirretään saldot Bynfoon
+ * Siirretään saldot
 */
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -14,6 +14,12 @@ if (php_sapi_name() != 'cli') {
 
 if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
+}
+
+$scp_siirto = "";
+
+if (!empty($argv[2])) {
+  $scp_siirto = $argv[2];
 }
 
 ini_set("memory_limit", "5G");
@@ -103,5 +109,10 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 fclose($fp);
+
+if (!empty($scp_siirto)) {
+  // Siirretään toiselle palvelimelle
+  system("scp {$filepath} $scp_siirto");
+}
 
 echo "Valmis.\n";

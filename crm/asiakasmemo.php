@@ -7,13 +7,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
     $asiakasid   = $yllapidontunnus;
   }
+}
 
-  if (!isset($nayta_kaikki_merkinnat)) {
-    $nayta_kaikki_merkinnat = array();
+if (!isset($nayta_kaikki_merkinnat)) {
+  $nayta_kaikki_merkinnat = array();
 
-    if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
-      $nayta_kaikki_merkinnat = array('default',1);
-    }
+  if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
+    $nayta_kaikki_merkinnat = array('default',1);
   }
 }
 
@@ -797,17 +797,23 @@ if ($ytunnus != '') {
     $_chk_if = (!empty($nayta_kaikki_merkinnat) and is_array($nayta_kaikki_merkinnat));
     $_merkinnat_chk = ($_chk_if and count($nayta_kaikki_merkinnat) > 1) ? 'checked' : '';
 
-    echo "<form method='POST'>";
-    echo "<input type='hidden' name='tee' value=''>";
-    echo "<input type='hidden' name='yhtunnus'   value='$yhtunnus'>";
-    echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
-    echo "<input type='hidden' name='lopetus'   value='$lopetus'>";
-    echo "<input type='hidden' name='asiakasid'   value='$asiakasid'>";
-    echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+      echo "<form method='POST'>";
+      echo "<input type='hidden' name='tee' value=''>";
+      echo "<input type='hidden' name='yhtunnus'   value='$yhtunnus'>";
+      echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
+      echo "<input type='hidden' name='lopetus'   value='$lopetus'>";
+      echo "<input type='hidden' name='asiakasid'   value='$asiakasid'>";
+      echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+    }
+
     echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
     echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='this.form.submit();' {$_merkinnat_chk}>";
     echo " ",t("Näytä kaikkien käyttäjien merkinnät");
-    echo "</form>";
+
+    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+      echo "</form>";
+    }
 
     echo "<br><br>";
 

@@ -617,18 +617,20 @@ if (!function_exists('uusi_sivu_tarjous')) {
       $pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]),       $page_tarjous, $norm);
 
       //viivakoodi
-      $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+      if (class_exists("Image_Barcode")) {
+        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-      imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+        imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
-      $fh = fopen($nimi, "r");
-      $data = fread($fh, filesize($nimi));
-      fclose($fh);
+        $fh = fopen($nimi, "r");
+        $data = fread($fh, filesize($nimi));
+        fclose($fh);
 
-      $image = $pdf_tarjous->jfif_embed($data);
-      $pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
+        $image = $pdf_tarjous->jfif_embed($data);
+        $pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
 
-      system("rm -f $nimi");
+        system("rm -f $nimi");
+      }
     }
 
     $kala = 715;
@@ -1145,16 +1147,6 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
     if ($naytetaanko_tuoteno == '') $kala = $kala - $rivinkorkeus;
 
     if ($yhtiorow['tarjoustyyppi'] == 5) {
-      $query = "SELECT liitetiedostot.*
-                FROM tuote
-                JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
-                  AND liitetiedostot.liitostunnus = tuote.tunnus
-                  AND liitetiedostot.liitos = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK')
-                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-                AND tuote.tuoteno = '{$row['tuoteno']}'";
-      $kuva_res = pupe_query($query);
-
       if (mysql_num_rows($kuva_res) != 0) {
         $kuva_row = mysql_fetch_assoc($kuva_res);
 
@@ -1165,7 +1157,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
         $_left = 25 + (($max_imagesize - $_scale * $kuva_row['image_width']) / 2);
 
-        $pdf_tarjous->image_place($image, $kala-20, $_left, $page_tarjous[$sivu], array('scale' => $_scale));
+        $pdf_tarjous->image_place($image, $kala-15, $_left, $page_tarjous[$sivu], array('scale' => $_scale));
       }
 
       $pdf_tarjous->draw_text(80, $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);

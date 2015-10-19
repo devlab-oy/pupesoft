@@ -1602,66 +1602,51 @@ if (!function_exists('loppu_tarjous')) {
         $vakioteksti_row = mysql_fetch_assoc($result);
         $vakioteksti = $vakioteksti_row['selitetark'];
 
-        if ($vakioteksti != "") {
-          $_y = $kuha - 60;
-
-          if (strlen($vakioteksti) > 110) {
-            $vakioteksti = wordwrap($vakioteksti, 110, "\n");
-            foreach (explode("\n", $vakioteksti) as $teksi) {
-              $pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
-              $_y = $_y - 10;
-            }
-          }
-          else {
-            $pdf_tarjous->draw_text(30,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
-          }
-
-          $kuha = $_y;
-        }
-        else {
-
-          $kuha -= 24;
-
-          $veroteksti = "";
-
+        if (empty($vakioteksti)) {
           if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
-            if ($laskurow["vienti"] != "") {
-              $veroteksti = ""; // Laitetaan tyhjänä
-            }
-            elseif ($kaanteinen_verotus === TRUE) {
-              $veroteksti = ""; // En keksi mitään mitä tässä tapauksessa pitäisi kirjottaa :/
-            }
-            elseif (trim($verolliset_verottomat_hinnat) == 'verolliset') {
-              $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+            if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+              $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
             }
             elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
-              $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+              $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
             }
             elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
               if ($yhtiorow['alv_kasittely'] != '') {
-                $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+                $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
               }
               else {
-                $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+                $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
               }
             }
             else {
               if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
-                $veroteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+                $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
               }
               else {
-                $veroteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+                $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
               }
             }
           }
 
-          if ($yhtiorow["tarjoustyyppi"] != 3 and $laskurow["rahtivapaa"] == "") {
-            $pdf_tarjous->draw_text(30,  $kuha, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
-          }
-          else {
-            $pdf_tarjous->draw_text(30,  $kuha, $veroteksti, $page_tarjous[$sivu], $norm);
+          if ($laskurow["rahtivapaa"] == "") {
+            $vakioteksti .= t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli);
           }
         }
+
+        $_y = $kuha - 60;
+
+        if (strlen($vakioteksti) > 110) {
+          $vakioteksti = wordwrap($vakioteksti, 110, "\n");
+          foreach (explode("\n", $vakioteksti) as $teksi) {
+            $pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
+            $_y = $_y - 10;
+          }
+        }
+        else {
+          $pdf_tarjous->draw_text(30,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
+        }
+
+        $kuha = $_y;
 
         if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
           $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
@@ -2334,8 +2319,9 @@ if (!function_exists('alvierittely')) {
 
     $pdf_tarjous->draw_text(550, $varakala, $laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
 
-    if ($yhtiorow['tarjoustyyppi'] == 1) {
-      $kala -= 20;
+    if ($yhtiorow['tarjoustyyppi'] == 1 or $yhtiorow['tarjoustyyppi'] == 5) {
+
+      if ($yhtiorow['tarjoustyyppi'] == 1) $kala -= 20;
 
       //$yhtiorow['alv_kasittely'] == ''         - Verolliset myyntihinnat
       //$yhtiorow['alv_kasittely'] != ''         - Verottomat myyntihinnat

@@ -1,4 +1,9 @@
 <?php
+
+require '../inc/cookie_functions.inc';
+
+handle_cookie("toimittamattomat", "find_submit");
+
 require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
@@ -727,7 +732,23 @@ elseif ($tee == '') {
   // tehdään etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)").": <input type='text' name='etsi'><input type='submit' class='hae_btn' value='".t("Etsi")."'></form>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<th><label for='etsi'>" . t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)") . ":</label></th>";
+  echo "<td><input type='text' name='etsi' id='etsi'></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<th><label for='toimittamattomat'>" . t("Näytä myös toimittamattomat / keskeneräiset tilaukset") . "</label></th>";
+
+  $checked = isset($toimittamattomat) && $toimittamattomat == 1 ? " checked" : "";
+
+  echo "<td><input type='checkbox' name='toimittamattomat' id='toimittamattomat' value='1' {$checked}/></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='" . t("Etsi") . "' name='find_submit'></td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</form>";
 
   $haku='';
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";

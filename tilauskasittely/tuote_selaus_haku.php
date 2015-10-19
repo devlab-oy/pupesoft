@@ -339,7 +339,7 @@ if (!empty($variaatio)) {
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
 
     piirra_hinta($tuote, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-      $lisatiedot);
+      $lisatiedot, $asiakashinnat, $laskurow);
 
     $yhtiot = hae_yhtiot();
 
@@ -498,6 +498,14 @@ if ($saldotonrajaus != '') {
 }
 else {
   $saldotoncheck = "";
+}
+
+if ($asiakashinnat != '') {
+  $asiakashinnatcheck = "CHECKED";
+  $ulisa .= "&asiakashinnat=checked";
+}
+else {
+  $asiakashinnatcheck = "";
 }
 
 if (!isset($lisatiedot)) {
@@ -708,6 +716,11 @@ if ($verkkokauppa == "") {
     echo "<th>".t("Näytä vain saldolliset tuotteet")."</th>";
     echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
     echo "</tr>";
+    if ($laskurow['tila'] == 'N' and $kukarow['kesken'] != 0) {
+      echo "<th>".t("Näytä asiakkaan hinnoilla")."</th>";
+      echo "<td><input type='checkbox' name='asiakashinnat' $asiakashinnatcheck></td>";
+      echo "</tr>";
+    }
   }
 
   echo "</table><br/>";
@@ -1633,7 +1646,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
 
       piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-        $lisatiedot);
+        $lisatiedot, $asiakashinnat, $laskurow);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
@@ -2408,7 +2421,7 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
 }
 
 function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-  $lisatiedot) {
+  $lisatiedot, $asiakashinnat, $laskurow) {
   global $kukarow, $yhtiorow, $verkkokauppa;
 
   if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
@@ -2455,6 +2468,16 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
             " $oleasrow[valkoodi]";
         }
       }
+    }
+    elseif ($kukarow["extranet"] == "" and $asiakashinnat == 'on') {
+      list($hinta,
+        $netto,
+        $ale_kaikki,
+        $alehinta_alv,
+        $alehinta_val) = alehinta($laskurow, $row, 1, '', '', '');
+
+      $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
+      $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";
     }
     else {
       $query = "SELECT DISTINCT valkoodi,

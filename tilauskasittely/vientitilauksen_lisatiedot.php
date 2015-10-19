@@ -754,13 +754,19 @@ elseif ($tee == '') {
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
+  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N' AND alatila = 'A'))";
+  }
+  else {
+    $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";
+  }
+
   //listataan laskuttamattomat tilausket
   $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
             maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
-            and tila    = 'L'
-            and alatila in ('B','D','E')
+            {$tilaehto}
             AND vienti  in ('K','E')
             $haku
             ORDER by 5,6,7,8,9,10,11,12,13,14";

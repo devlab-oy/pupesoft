@@ -9,7 +9,11 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   }
 
   if (!isset($nayta_kaikki_merkinnat)) {
-    $nayta_kaikki_merkinnat = $_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" ? array('default',1) : array();
+    $nayta_kaikki_merkinnat = array();
+
+    if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
+      $nayta_kaikki_merkinnat = array('default',1);
+    }
   }
 }
 

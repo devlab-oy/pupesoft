@@ -312,8 +312,15 @@ if (!function_exists('alku')) {
 
     $laskutyyppi == 17 ? $rivi_ind-- : $rivi_ind++;
 
-    $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli),                 $page_lasku[$sivu], $pieni);
-    if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"],   $page_lasku[$sivu], $boldi);
+    if ($toim == 'PROFORMA' and $laskutyyppi == 20) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Proformalasku", $kieli), $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["tunnus"], $page_lasku[$sivu], $boldi);
+    }
+    else {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli), $page_lasku[$sivu], $pieni);
+      if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"], $page_lasku[$sivu], $boldi);
+    }
+
     $rivi_ind = $laskutyyppi == 17 ? $rivi_ind + 2 : $rivi_ind + 1;
 
     if (!in_array($laskutyyppi, array(8, 20)) and !kyseessa_eramaksu($laskurow)) {

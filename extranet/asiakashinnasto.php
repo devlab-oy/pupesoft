@@ -455,6 +455,29 @@ else {
         $verollinen        = 0;
         $asiakashinta_veroton    = 0;
         $asiakashinta_verollinen = 0;
+        
+        // jos suositushintoja esim Ruotsiin, niin haetaan ne hinnastoista (ei koske asiakkaan hintoja)
+        // 17. hinnasto.hinta tuotteen bruttohinta hinnastosta asiakkaan valuutassa
+       $query =  "  SELECT *
+                    FROM hinnasto
+                    WHERE yhtio   = '$kukarow[yhtio]'
+                    and tuoteno   = '$rrow[tuoteno]'
+                    and tuoteno  != ''
+                    and laji      = ''
+                    and valkoodi  in ('$laskurow[valkoodi]','')
+                    and maa       in ('$laskurow[maa]','')
+                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                    and ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
+                    ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+                    LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) > 0) {
+          $hrow                  = mysql_fetch_assoc($hresult);
+          $rrow["myyntihinta"]   = $hrow["hinta"];
+          $rrow['alv']           = $hrow["alv"];
+          $rrow["myymalahinta"]  = round($rrow["myyntihinta"] * (1 + ($rrow['alv'] / 100)),2);
+        }
 
         if ($yhtiorow["alv_kasittely"] == "") {
           // Hinnat sisältävät arvonlisäveron

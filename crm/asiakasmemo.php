@@ -804,14 +804,10 @@ if ($ytunnus != '') {
       echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
       echo "<input type='hidden' name='lopetus'   value='$lopetus'>";
       echo "<input type='hidden' name='asiakasid'   value='$asiakasid'>";
-    }
-
-    echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
-    echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
-    echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='this.form.submit();' {$_merkinnat_chk}>";
-    echo " ",t("Näytä kaikkien käyttäjien merkinnät");
-
-    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+      echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
+      echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
+      echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='this.form.submit();' {$_merkinnat_chk}>";
+      echo " ",t("Näytä kaikkien käyttäjien merkinnät");
       echo "</form>";
     }
 

@@ -7,13 +7,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
     $asiakasid   = $yllapidontunnus;
   }
-}
 
-if (!isset($nayta_kaikki_merkinnat)) {
-  $nayta_kaikki_merkinnat = array();
+  if (!isset($nayta_kaikki_merkinnat)) {
+    $nayta_kaikki_merkinnat = array();
 
-  if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
-    $nayta_kaikki_merkinnat = array('default',1);
+    if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
+      $nayta_kaikki_merkinnat = array('default',1);
+    }
   }
 }
 

@@ -87,6 +87,9 @@ case "L":
   case "D":
     $alatila = "Toimitettu";
     break;
+  case "G":
+    $alatila = "Odottaa asiakkaan suoritusta";
+    break;
   case "J":
     $alatila = "Odottaa loppulaskutusta";
     break;

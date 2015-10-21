@@ -5,12 +5,6 @@ $useslave = 1;
 
 include '../inc/parametrit.inc';
 
-$nimi   = (isset($_REQUEST['nimi'])) ? $_REQUEST['nimi'] : '';
-$rekno  = (isset($_REQUEST['rekno'])) ? $_REQUEST['rekno'] : '';
-$eid    = (isset($_REQUEST['eid'])) ? $_REQUEST['eid'] : '';
-$asno   = (isset($_REQUEST['asno'])) ? $_REQUEST['asno'] : '';
-$valmno = (isset($_REQUEST['valmno'])) ? $_REQUEST['valmno'] : '';
-
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
 if ($tee == 'etsi') {
@@ -18,11 +12,11 @@ if ($tee == 'etsi') {
   $hakuehdot = '';
 
   if ($vva != '' and $kka != '' and $ppa != '') {
-    $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa' "; 
+    $hakuehdot .= "AND lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' ";
   }
-  
+
   if ($vvl != '' and $kkl != '' and $ppl != '') {
-    $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl' ";    
+    $hakuehdot .= " AND lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
   }
 
   if ($nimi != '') {
@@ -43,6 +37,25 @@ if ($tee == 'etsi') {
 
   if ($valmno != '') {
     $hakuehdot .= " AND tyomaarays.valmnro LIKE '%".$valmno."%'";
+  }
+
+  if ($komm1 != '') {
+    $hakuehdot .= " AND tyomaarays.komm1 LIKE '%".$komm1."%' ";
+  }
+
+  if ($komm2 != '') {
+    $hakuehdot .= " AND tyomaarays.komm2 LIKE '%".$komm2."%' ";
+  }
+
+  if ($hakuteksti != '') {
+    $hakuehdot .= " AND ( lasku.nimi LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.rekno LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.valmnro LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.komm1 LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR tyomaarays.komm2 LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " ) ";
   }
 
   $squery = "SELECT lasku.*, tyomaarays.*, lasku.tunnus laskutunnus
@@ -127,23 +140,43 @@ echo "<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Asiakkaan nimi").":</th><td colspan='3'><input type='text' name='nimi' size='35' value='$nimi'></td>";
+echo "<th>".t("Hae kaikista kentistä").":</th>";
+echo "<td colspan='3'><input type='text' name='hakuteksti' size='35' value='{$hakuteksti}'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Rekno").":</th><td colspan='3'><input type='text' name='rekno' size='35' value='$rekno'></td>";
+echo "<th>".t("Asiakkaan nimi").":</th>";
+echo "<td colspan='3'><input type='text' name='nimi' size='35' value='{$nimi}' ></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Työmääräysno").":</th><td colspan='3'><input type='text' name='eid' size='35' value='$eid'></td>";
+echo "<th>".t("Rekno").":</th>";
+echo "<td colspan='3'><input type='text' name='rekno' size='35' value='{$rekno}'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Asiakasnumero").":</th><td colspan='3'><input type='text' name='asno' size='35' value='$asno'></td>";
+echo "<th>".t("Työmääräysno").":</th>";
+echo "<td colspan='3'><input type='text' name='eid' size='35' value='{$eid}'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Sarjanumero").":</th><td colspan='3'><input type='text' name='valmno' size='35' value='$valmno'></td>";
+echo "<th>".t("Asiakasnumero").":</th>";
+echo "<td colspan='3'><input type='text' name='asno' size='35' value='{$asno}'></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Sarjanumero").":</th>";
+echo "<td colspan='3'><input type='text' name='valmno' size='35' value='{$valmno}'></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Työn kuvaus").":</th>";
+echo "<td colspan='3'><input type='text' name='komm1' size='35' value='{$komm1}'></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Toimenpiteet").":</th>";
+echo "<td colspan='3'><input type='text' name='komm2' size='35' value='{$komm2}'></td>";
 echo "</tr>";
 
 echo "</table>";

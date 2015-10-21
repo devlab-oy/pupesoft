@@ -755,7 +755,7 @@ elseif ($tee == '') {
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
   if (isset($toimittamattomat) and $toimittamattomat == 1) {
-    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N' AND alatila = 'A'))";
+    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
   }
   else {
     $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";

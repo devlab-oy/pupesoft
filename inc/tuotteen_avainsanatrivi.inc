@@ -33,18 +33,25 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
   $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("hinnastoryhmittely")."</option>";
 
+  // Tuotteiden avainsanojen laji
+  // N‰m‰ on dynaamisia ja k‰ytet‰‰n ainoastaan raporteissa/erikoistapauksissa, johon erikseen hardcoodattu sovittu arvo.
   $sresult = t_avainsana("TUOTEULK");
 
   while ($srow = mysql_fetch_array($sresult)) {
     $ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
   }
 
+  // Tuotteen parametri.
+  // K‰ytet‰‰n "tuote-export" -raportissa, "monivalintalaatikot" -listauksessa
+  // sek‰ "myyntier‰t ja tuotetetiedot" -n‰kym‰ss‰ (jos se on enabloitu myyntitilaukselle)
   $vresult = t_avainsana("PARAMETRI");
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
   }
 
+  // Tuotteen lis‰tieto.
+  // K‰ytet‰‰n ainoastaan "hae ja selaa tuotteita" -n‰kym‰ss‰.
   $lresult = t_avainsana("LISATIETO");
 
   while ($lrow = mysql_fetch_assoc($lresult)) {

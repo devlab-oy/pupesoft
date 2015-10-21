@@ -1214,6 +1214,7 @@ if (isset($ajax)) {
               lasku.tila laskutila,
               lasku.alatila,
               lasku.tilaustyyppi,
+              lasku.label,
               tilausrivi.var,
               lasku2.laskunro as keikkanro,
               lasku2.tunnus AS keikkatunnus,
@@ -1386,7 +1387,23 @@ if (isset($ajax)) {
           $_return .= "<td valign='top' class='tooltip' id='{$id}'>";
         }
         else {
-          $_return .= "<td>";
+
+          $label_color = "";
+          if (isset($jtrow['label']) and $jtrow['label'] != '') {
+            $label_query = "SELECT selite
+                            FROM avainsana
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus  = {$jtrow['label']}
+                            AND laji    = 'label'";
+            $label_result = pupe_query($label_query);
+
+            if (mysql_num_rows($label_result) == 1) {
+              $label_row = mysql_fetch_assoc($label_result);
+              $label_color = " class='aktiivi' style = 'background-color: {$label_row['selite']};'";
+            }
+          }
+
+          $_return .= "<td{$label_color}>";
         }
 
         $_return .= "<a href=\"javascript:lataaiframe('{$laskutunnus}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim={$tyyppi_url}&tee=NAYTATILAUS&tunnus={$laskutunnus}&ohje=off');\">{$laskutunnus}</a>$keikka";

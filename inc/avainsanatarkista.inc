@@ -163,6 +163,20 @@ if (!function_exists("avainsanatarkista")) {
           $virhe[$i] = t("Saldovahvistuksen nimi pitää olla uniikki");
         }
       }
+
+      if ($tem_laji == "ASIAKASHINNASTO") {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND selite             = '{$tem_selite}'
+                  AND laji               = '{$tem_laji}'
+                  AND tunnus            != '{$tunnus}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Asiakashinnaston parametri löytyy jo");
+        }
+      }
     }
 
     if (mysql_field_name($result, $i) == "selitetark") {

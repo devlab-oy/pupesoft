@@ -89,7 +89,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   }
 
   if ($ulos == '') {
-    if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+    if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
       echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno)."</td>";
     }
     else {
@@ -334,7 +334,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   if ($ulos == '') {
-    if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+    if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
       // Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
       echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
     }
@@ -674,7 +674,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   if ($ulos == '') {
-    if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+    if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
       // Laitetaan $tila "submit" parametriin, joten jos siellä on jotain ei submitata (valmistuksessa)
       echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200, $tuoteno, $tila)."</td>";
     }

@@ -32,6 +32,7 @@ if (!isset($kerayseran_numero)) $kerayseran_numero = "";
 if (!isset($kerayseran_tilaukset)) $kerayseran_tilaukset = "";
 if (!isset($toimipaikka)) $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
 
+$kaikkilomakepohjat = FALSE;
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 if ($toim == "OSOITELAPPU") {
@@ -1345,6 +1346,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     $tulostimet[0] = 'VAK_ADR';
   }
 
+  if ($kukarow['kuka'] == "admin" and $kappaleet === "POHJAT") {
+    $kaikkilomakepohjat = TRUE;
+    $kappaleet = 1;
+  }
+
   if ($toim != "OSOITELAPPU" and $kappaleet > 0) {
     foreach ($tulostimet as $tulostin) {
       if ($komento[$tulostin] != 'email' and substr($komento[$tulostin], 0, 12) != 'asiakasemail') {
@@ -1568,16 +1574,38 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif (@include_once "tulosta_lasku.inc");
       else exit;
 
-      tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
+      if ($kaikkilomakepohjat) {
 
-      if ($tee != 'NAYTATILAUS') {
-        echo t("Lasku tulostuu")."...<br>";
-        $tee = '';
+        $laskut = array();
+
+        foreach(pupesoft_laskutyypit() as $sellaskutyyppi => $sellaskutyyppiteksti) {
+          $laskut[] = array($sellaskutyyppi, "$sellaskutyyppiteksti ($sellaskutyyppi)");
+        }
+
+        foreach($laskut as $lasku) {
+          $sellaskutyyppi = $lasku[0]."##".$lasku[1];
+
+          tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "", $sellaskutyyppi);
+
+          if ($tee != 'NAYTATILAUS') {
+            echo t("Lasku tulostuu")."...<br>";
+            $tee = '';
+          }
+        }
+      }
+      else {
+        tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
+
+        if ($tee != 'NAYTATILAUS') {
+          echo t("Lasku tulostuu")."...<br>";
+          $tee = '';
+        }
       }
     }
 
     $tilausvahvistus_onkin_kerayslista = '';
     $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
+
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";
@@ -1595,17 +1623,46 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $laskurow['tilausvahvistus'] = $seltvtyyppi;
       }
 
-      $params_tilausvahvistus = array(
-        'tee'            => $tee,
-        'toim'            => $toim,
-        'kieli'            => $kieli,
-        'komento'          => $komento,
-        'laskurow'          => $laskurow,
-        'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-        'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-      );
+      if ($kaikkilomakepohjat) {
 
-      laheta_tilausvahvistus($params_tilausvahvistus);
+        $tilausvahvistukset = array();
+
+        foreach(pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
+          $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti ($seltvtyyppi)", "");
+          $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti. Ei rivihintaa. ($seltvtyyppi)", "ei_rivihintaa");
+        }
+
+        foreach($tilausvahvistukset as $tilva) {
+          $laskurow['tilausvahvistus'] = $tilva[0];
+          $laskurow['lahetepohjateksti'] = $tilva[1];
+          $naytetaanko_rivihinta = $tilva[2];
+
+          $params_tilausvahvistus = array(
+            'tee'            => $tee,
+            'toim'            => $toim,
+            'kieli'            => $kieli,
+            'komento'          => $komento,
+            'laskurow'          => $laskurow,
+            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+            'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+          );
+
+          laheta_tilausvahvistus($params_tilausvahvistus);
+        }
+      }
+      else {
+        $params_tilausvahvistus = array(
+          'tee'            => $tee,
+          'toim'            => $toim,
+          'kieli'            => $kieli,
+          'komento'          => $komento,
+          'laskurow'          => $laskurow,
+          'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+          'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+        );
+
+        laheta_tilausvahvistus($params_tilausvahvistus);
+      }
 
       $tee = '';
     }
@@ -1927,21 +1984,53 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $koontilahete_tilausrivit = 0;
       }
 
-      $params = array(
-        'laskurow'          => $laskurow,
-        'sellahetetyyppi'       => $sellahetetyyppi,
-        'extranet_tilausvahvistus'   => $extranet_tilausvahvistus,
-        'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-        'tee'            => $tee,
-        'toim'            => $toim,
-        'komento'           => $komento,
-        'lahetekpl'          => "",
-        'kieli'           => $kieli,
-        'koontilahete'        => $koontilahete,
-        'koontilahete_tilausrivit'  => $koontilahete_tilausrivit,
-      );
+      if ($kaikkilomakepohjat) {
 
-      pupesoft_tulosta_lahete($params);
+        $lahetteet = array();
+
+        foreach(pupesoft_lahetetyypit() as $sellahetetyyppi => $sellahetetyyppiteksti) {
+          $lahetteet[] = array($sellahetetyyppi, "$sellahetetyyppiteksti ($sellahetetyyppi)", "");
+        }
+
+        foreach($lahetteet as $lahete) {
+          $sellahetetyyppi = $lahete[0];
+          $laskurow['lahetepohjateksti'] = $lahete[1];
+          $naytetaanko_rivihinta = $lahete[2];
+
+          $params = array(
+            'laskurow'                 => $laskurow,
+            'sellahetetyyppi'          => $sellahetetyyppi,
+            'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+            'tee'                      => $tee,
+            'toim'                     => $toim,
+            'komento'                  => $komento,
+            'lahetekpl'                => "",
+            'kieli'                    => $kieli,
+            'koontilahete'             => $koontilahete,
+            'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+          );
+
+          pupesoft_tulosta_lahete($params);
+        }
+      }
+      else {
+        $params = array(
+          'laskurow'                 => $laskurow,
+          'sellahetetyyppi'          => $sellahetetyyppi,
+          'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+          'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+          'tee'                      => $tee,
+          'toim'                     => $toim,
+          'komento'                  => $komento,
+          'lahetekpl'                => "",
+          'kieli'                    => $kieli,
+          'koontilahete'             => $koontilahete,
+          'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+        );
+
+        pupesoft_tulosta_lahete($params);
+      }
 
       $tee = '';
     }

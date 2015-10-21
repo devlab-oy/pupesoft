@@ -13,6 +13,8 @@ if ($yhtiorow["viitemaksujen_kohdistus_sallittu_heitto"] > 0 and $yhtiorow["viit
   $Viitemaksujen_kohdistus_sallittu_heitto = $yhtiorow["viitemaksujen_kohdistus_sallittu_heitto"];
 }
 
+$maksusopparit = array();
+
 echo "<font class='message'>".t("Automaattikohdistetaan viitemaksuja").": $yhtiorow[nimi]</font><br>\n";
 
 $query = "SELECT
@@ -36,6 +38,7 @@ $query = "SELECT
           lasku.kasumma_valuutassa kasumma_valuutassa,
           lasku.valkoodi laskuvaluutta,
           lasku.vienti_kurssi laskukurssi,
+          lasku.jaksotettu,
           yhtio.myynninkassaale alennustili,
           yhtio.myyntisaamiset myyntisaamiset,
           yhtio.konsernimyyntisaamiset konsernimyyntisaamiset,
@@ -379,14 +382,30 @@ while ($row = mysql_fetch_assoc($suorires)) {
       }
     }
 
-    //Merkit‰‰n lasku maksetuksi
+    // Merkit‰‰n lasku maksetuksi
     $query = "UPDATE lasku
               SET mapvm = '$row[kirjpvm]'
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[laskutunnus]'";
     pupe_query($query);
 
-    //Ja suoritus kirjatuksi
+    // Vapautetaan holdissa olevat tilaukset, jos niill‰ on maksupositioita ja ennakkolaskut ovat maksettu
+    // Holdissa olevat tilaukset ovat tilassa N B
+    if ($yhtiorow['maksusopimus_toimitus'] == 'X' and $row["jaksotettu"] < 0) {
+      $query = "SELECT tunnus
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '".($row['jaksotettu'] * -1)."'
+                AND tila    = 'N'
+                AND alatila = 'B'";
+      $pos_chk_result = pupe_query($query);
+
+      if (mysql_num_rows($pos_chk_result)) {
+        $maksusopparit[] = $row['jaksotettu'] * -1;
+      }
+    }
+
+    // Ja suoritus kirjatuksi
     $query = "UPDATE suoritus
               SET kohdpvm = '$row[kirjpvm]',
               ltunnus     = '$row[laskutunnus]'
@@ -523,5 +542,12 @@ while ($row = mysql_fetch_assoc($suorires)) {
   }
   else {
     echo "<font class='error'>VIRHE: Tositteen otsikkoa ei saatu luotua!</font><br>\n";
+  }
+}
+
+// Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
+if (count($maksusopparit)) {
+  foreach ($maksusopparit as $soppari) {
+    vapauta_maksusopimus($soppari);
   }
 }

@@ -217,6 +217,10 @@ else {
         $yhtiorow_eta = $yhtiorow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
       }
 
+      $_asiakashinnasto_res = t_avainsana("ASIAKASHINNASTO");
+      $_asiakashinnasto_row = mysql_fetch_assoc($_asiakashinnasto_res);
+      $_hintakentta = $_asiakashinnasto_row['selite'];
+
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
@@ -261,20 +265,29 @@ else {
         $worksheet->writeString($excelrivi, $excelsarake, t("Yksikkˆ", $hinkieli), $format_bold);
         $excelsarake++;
 
+        if ($_hintakentta == 'myymalahinta') {
+          $_hintaotsikko      = t("Veroton suositushinta", $hinkieli);
+          $_hintaotsikko_ver  = t("Verollinen suositushinta", $hinkieli);
+        }
+        else {
+          $_hintaotsikko      = t("Veroton Myyntihinta", $hinkieli);
+          $_hintaotsikko_ver  = t("Verollinen Myyntihinta", $hinkieli);
+        }
+
         if (!$tuoteryhmaosasto) {
           $worksheet->writeString($excelrivi, $excelsarake, t("Status", $hinkieli), $format_bold);
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, t("Aleryhm‰", $hinkieli), $format_bold);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, $_hintaotsikko, $format_bold);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, $_hintaotsikko_ver, $format_bold);
           $excelsarake++;
         }
         else {
-          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, $_hintaotsikko, $format_bold);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, $_hintaotsikko_ver, $format_bold);
           $excelsarake++;
         }
 
@@ -423,6 +436,8 @@ else {
           $osuma = true;
         }
 
+        if ($_hintakentta == "") $_hintakentta = 'myyntihinta';
+
         if ((float) $hinta == 0) {
           $hinta = $rrow["myyntihinta"];
         }
@@ -443,15 +458,21 @@ else {
 
         if ($yhtiorow["alv_kasittely"] == "") {
           // Hinnat sis‰lt‰v‰t arvonlis‰veron
-          $verollinen         = $rrow["myyntihinta"];
-          $veroton         = round(($rrow["myyntihinta"]/(1+$rrow['alv']/100)), 2);
-          $asiakashinta_veroton    = round(($asiakashinta/(1+$lis_alv/100)), 2);
-          $asiakashinta_verollinen = $asiakashinta;
+          $verollinen               = $rrow[$_hintakentta];
+          $veroton                  = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
+          $asiakashinta_veroton     = round(($asiakashinta/(1+$lis_alv/100)), 2);
+          $asiakashinta_verollinen  = $asiakashinta;
         }
         else {
-          // Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero
-          $verollinen        = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)), 2);
-          $veroton         = $rrow["myyntihinta"];
+          if ($_hintakentta == 'myymalahinta') {
+            $verollinen             = $rrow[$_hintakentta];
+            $veroton                = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
+          }
+          else {
+            // Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero
+            $verollinen             = round(($rrow[$_hintakentta]*(1+$rrow['alv']/100)), 2);
+            $veroton                = $rrow[$_hintakentta];
+          }
           $asiakashinta_veroton    = $asiakashinta;
           $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
         }

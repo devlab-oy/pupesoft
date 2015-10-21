@@ -292,6 +292,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON")     $ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>          ".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  $ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>  ".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASHINNASTO")  $ulos .= "<option value='ASIAKASHINNASTO' {$avain_sel['ASIAKASHINNASTO']}>  ".t("Asiakashinnaston svh hinta-kenttä")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMIT_TKIRJAST") $ulos .= "<option value='TOIMIT_TKIRJAST' {$avain_sel['TOIMIT_TKIRJAST']}>".t("Tiedostokirjastossa näkyvä toimittaja")."</option>";
@@ -1003,6 +1004,18 @@ if ($avain_sel["DPAVAINSANALAJI"] == "SELECTED" and $_selitetark_2) {
   $ulos = "<td><select name = '{$nimi}'>";
   $ulos .= "<option value = 'ASIAKAS'>".t("Asiakas")."</option>";
   $ulos .= "<option value = 'TUOTE' {$sel}>".t("Tuote")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["ASIAKASHINNASTO"] == "SELECTED" and $_selite) {
+
+  $sel = $trow[$i] == 'MYYMALAHINTA' ? "selected" : "";
+
+  $ulos = "<td><select name = '{$nimi}'>";
+  $ulos .= "<option value = 'myyntihinta'>".t("Myyntihinta")."</option>";
+  $ulos .= "<option value = 'myymalahinta' {$sel}>".t("Myymälähinta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

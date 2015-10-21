@@ -744,14 +744,16 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
     }
 
-    if (!is_array($arow)) {
-      $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
+    $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
+
+    if (!is_array($arow) and !empty($ovt_tunnus)) {
 
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
+                and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
 
@@ -762,14 +764,12 @@ while ($tietue = fgets($fd)) {
       }
     }
 
-    if (!is_array($arow) and !empty($ovt_tunnus)) {
-
+    if (!is_array($arow)) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
-                and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
 

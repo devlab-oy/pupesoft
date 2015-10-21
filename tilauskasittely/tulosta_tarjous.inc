@@ -1452,6 +1452,7 @@ if (!function_exists('loppu_tarjous')) {
 
         if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and $kala-165 <= 60) {
           list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
+
           $sivu++;
 
           $query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";

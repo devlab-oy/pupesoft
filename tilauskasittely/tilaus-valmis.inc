@@ -48,6 +48,24 @@ if ($laskurow['jaksotettu'] > 0) {
   $laskurow["jtkielto"] = "Y";
 }
 
+// Luodaan sadanprossan ennakkolasku
+if (!empty($tee_100_ennakkolasku) or !empty($tee_sis_100_ennakkolasku)) {
+
+  $sisainen = FALSE;
+
+  if (!empty($tee_sis_100_ennakkolasku)) {
+    $sisainen = TRUE;
+  }
+
+  $maksuehto = tee_ennakkolasku($laskurow['tunnus'], $sisainen);
+
+  if ($maksuehto) {
+    $laskurow['maksuehto'] = $maksuehto;
+  }
+
+  $lopetus="";
+}
+
 // päivitetään vanhatunnus ja vähän muutakin laskulle
 $query  = "UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
            WHERE yhtio     = '$kukarow[yhtio]'
@@ -120,14 +138,14 @@ if ($luottoraja_chk or $erapaiva_chk) {
 if ($luottoraja_chk or $erapaiva_chk) {
 
   // Parametrejä saatanat.php:lle
-  $sytunnus       = $laskurow['ytunnus'];
+  $sytunnus        = $laskurow['ytunnus'];
   $sliitostunnus   = $laskurow['liitostunnus'];
-  $eiliittymaa    = "ON";
+  $eiliittymaa     = "ON";
   $luottorajavirhe = "";
-  $jvvirhe      = "";
-  $ylivito      = 0;
-  $trattavirhe    = "";
-  $laji        = "MA";
+  $jvvirhe         = "";
+  $ylivito         = 0;
+  $trattavirhe     = "";
+  $laji            = "MA";
   $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
   ob_start();
@@ -240,7 +258,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     }
   }
 
-  //tarkastetaan onko myyntitilaus naitettu ostoon.
+  // Tarkastetaan onko myyntitilaus naitettu ostoon.
   $query = "SELECT group_concat(DISTINCT tilausrivi.otunnus) ostotilaukset
             FROM tilausrivin_lisatiedot
             JOIN tilausrivi
@@ -814,9 +832,9 @@ else {
         //laskutetaan koko tilaus heti jos se on sisainen lasku
         // tai maksuehto vaihdettu käteismyynniksi
         $laskutettavat  = $laskurow["tunnus"];
-        $tee       = "TARKISTA";
-        $laskutakaikki   = "KYLLA";
-        $silent       = "VIENTI";
+        $tee            = "TARKISTA";
+        $laskutakaikki  = "KYLLA";
+        $silent         = "VIENTI";
 
         if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
           $valittu_tulostin = $kukarow["kirjoitin"];

@@ -60,7 +60,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
 
-      if ($row['kpl'] > 0) {
+      if ($row['kpl'] > 0 and $t[$i] != $trow["pankkitiedostot"]) {
         $virhe[$i]  = "<font class='error'>";
         $virhe[$i] .= t("Et voi vahtaa luontitapaa, koska sinulla on poimittuja laskuja!");
         $virhe[$i] .= "<br></font>";

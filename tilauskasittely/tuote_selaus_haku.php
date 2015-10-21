@@ -125,11 +125,18 @@ $laskurow = mysql_fetch_assoc($result);
 // +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
 // -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
 // eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+
+// Otetaan samassa queryss‰ selville mink‰ tyyppinen tilaus on k‰ytt‰j‰ll‰ ollut kesken
+// niin ettei esimerkiksi vied‰ k‰ytt‰j‰‰ myyntitilaukselle jos h‰nell‰ on ollut varastosiirto kesken
 $kieltolisa = "";
 unset($vierow);
 
 if ($kukarow["kesken"] > 0) {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+  $query  = "SELECT
+             if (toim_maa != '', toim_maa, maa) maa,
+             tila,
+             liitostunnus,
+             tilaustyyppi
              FROM lasku
              WHERE yhtio = '$kukarow[yhtio]'
              and tunnus  = '$kukarow[kesken]'";
@@ -153,6 +160,42 @@ elseif ($kukarow["extranet"] != "") {
              and tunnus  = '$kukarow[oletus_asiakas]'";
   $vieres = pupe_query($query);
   $vierow = mysql_fetch_assoc($vieres);
+}
+
+// Katsotaan t‰ss‰, ett‰ vied‰‰n k‰ytt‰j‰ oikeaan paikaan sen mukaan millainen tilaus h‰nell‰ on kesken
+if (isset($vierow)) {
+  if ($vierow["tila"] == "G") {
+    $toim_kutsu = "SIIRTOLISTA";
+  }
+  elseif ($vierow["tila"] == "V") {
+    if ($vierow["liitostunnus"] == "999999999") {
+      $toim_kutsu = "VALMISTAVARASTOON";
+    }
+    else {
+      $toim_kutsu = "VALMISTAASIAKKAALLE";
+    }
+  }
+  elseif ($vierow["tila"] == "T") {
+    $toim_kutsu = "TARJOUS";
+  }
+  elseif ($vierow["tila"] == "C") {
+    $toim_kutsu = "REKLAMAATIO";
+  }
+  elseif ($vierow["tilaustyyppi"] == "E") {
+    $toim_kutsu = "ENNAKKO";
+  }
+  elseif ($vierow["tila"] == "A") {
+    $toim_kutsu = "TYOMAARAYS";
+  }
+  elseif ($vierow["tila"] == "R") {
+    $toim_kutsu = "PROJEKTI";
+  }
+  elseif ($vierow["tila"] == "S") {
+    $toim_kutsu = "SIIRTOTYOMAARAYS";
+  }
+  elseif ($vierow["tilaustyyppi"] == "0") {
+    $toim_kutsu = "YLLAPITO";
+  }
 }
 
 if (isset($vierow) and $vierow["maa"] != "") {

@@ -2446,8 +2446,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
         $selite_array[0]  = trim("$trow[tuoteno] - $trow[nimitys] á ".(float) $trow["myyntihinta"]);
       }
 
-      $selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
-      $selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
     }
     else {
       $errori .= "<font class='error'>".t("VIRHE: Päivärahalle on annettava alku ja loppuaika")."</font><br>";

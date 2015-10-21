@@ -9,7 +9,7 @@ else {
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
   if (@include_once "viivakoodi/Barcode.php") {
-  }
+}
   else {
     include_once "Barcode.php";
   }
@@ -126,6 +126,129 @@ if (!function_exists('alku_tarjous')) {
       $pdf_tarjous->draw_text(50, 652, t("Sähköposti", $kieli), $page_tarjous[$sivu], $boldi);
       $pdf_tarjous->draw_text(150, 652, $myyrow['eposti'], $page_tarjous[$sivu], $norm);
 
+    }
+    elseif ($yhtiorow['tarjoustyyppi'] == 5) {
+      $pdf_tarjous->draw_text(310, 815, t("Tarjous", $kieli),     $page_tarjous[$sivu], $iso);
+      $pdf_tarjous->draw_text(310, 803, t("Sivu", $kieli),     $page_tarjous[$sivu], $norm);
+
+      //Vasen sarake
+      //$pdf_tarjous->draw_rectangle(737, 20,  674, 300, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(30, 770, t("Ostaja", $kieli),   $page_tarjous[$sivu], $pieni_boldi);
+      $pdf_tarjous->draw_text(30, 758, $laskurow["nimi"],       $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 748, $laskurow["nimitark"],      $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 738, $laskurow["osoite"],       $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 728, $laskurow["postino"]." ".$laskurow["postitp"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 718, $laskurow["maa"],         $page_tarjous[$sivu], $norm);
+
+      //$pdf_tarjous->draw_rectangle(674, 20,  611, 300, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(30, 697, t("Toimitusosoite", $kieli),   $page_tarjous[$sivu], $pieni_boldi);
+      $pdf_tarjous->draw_text(30, 685, $laskurow["toim_nimi"],     $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 675, $laskurow["toim_nimitark"],   $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 665, $laskurow["toim_osoite"],     $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 655, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(30, 645, $laskurow["toim_maa"],     $page_tarjous[$sivu], $norm);
+
+      //Oikea sarake
+      $pdf_tarjous->draw_rectangle(780, 300, 654, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_rectangle(780, 300, 654, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_rectangle(780, 420, 758, 580, $page_tarjous[$sivu], $rectparam);
+
+      if ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"]) {
+        $pdf_tarjous->draw_text(310, 772, t("Tilausnumero/Tarjous", $kieli),           $page_tarjous[$sivu], $pieni);
+        $pdf_tarjous->draw_text(310, 761, $laskurow["tunnusnippu"]."/".$laskurow["tunnus"],    $page_tarjous[$sivu], $boldi);
+      }
+      else {
+        $pdf_tarjous->draw_text(310, 772, t("Tarjous", $kieli),   $page_tarjous[$sivu], $pieni);
+        $pdf_tarjous->draw_text(310, 761, $laskurow["tunnus"],    $page_tarjous[$sivu], $boldi);
+      }
+
+      $pdf_tarjous->draw_text(430, 772, t("Toimitusaika", $kieli),   $page_tarjous[$sivu], $pieni);
+
+      $useita = "EI";
+
+      if ($laskurow["nippu"] > 0) {
+        $query = "SELECT distinct(toimaika)
+                  FROM tilausrivi
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and otunnus   IN ($laskurow[nippu])
+                  and toimaika != '0000-00-00'";
+        $toimaikares = pupe_query($query);
+
+        if (mysql_num_rows($toimaikares) > 1) {
+          $useita = "JOO";
+        }
+      }
+
+      if ($laskurow['toimaika'] == '0000-00-00') {
+        $naytetaanko_toimitusaika = false;
+      }
+      else {
+        $naytetaanko_toimitusaika = true;
+      }
+
+      if ($useita == "JOO") {
+        $pdf_tarjous->draw_text(430, 761, t("Useita", $kieli),   $page_tarjous[$sivu], $norm);
+      }
+      elseif ($laskurow["toimvko"] != '') {
+
+        $DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
+
+        $taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
+
+        if ($laskurow['toimvko'] != '7') {
+          $taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
+        }
+
+        if ($naytetaanko_toimitusaika == true) {
+          $pdf_tarjous->draw_text(430, 761, $taika,                 $page_tarjous[$sivu], $norm);
+        }
+      }
+      else {
+        if ($naytetaanko_toimitusaika == true) {
+          $pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]),   $page_tarjous[$sivu], $norm);
+        }
+      }
+
+      $pdf_tarjous->draw_rectangle(758, 300, 737, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_rectangle(758, 420, 737, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(310, 750, t("Asiakkaan Y-tunnus", $kieli),                   $page_tarjous[$sivu], $pieni);
+      $pdf_tarjous->draw_text(310, 740, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),  $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(430, 750, t("Päiväys", $kieli),                       $page_tarjous[$sivu], $pieni);
+      $pdf_tarjous->draw_text(430, 740, tv1dateconv($laskurow["muutospvm"]),                 $page_tarjous[$sivu], $norm);
+
+
+      $pdf_tarjous->draw_rectangle(737, 300, 716, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(310, 729, t("Myyjä", $kieli),                         $page_tarjous[$sivu], $pieni);
+
+      //etsitään myyjän nimi
+      $query  = "SELECT nimi
+                 from kuka
+                 where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+      $myyresult = pupe_query($query);
+      $myyrow = mysql_fetch_array($myyresult);
+
+      $pdf_tarjous->draw_text(310, 719, $myyrow["nimi"],                     $page_tarjous[$sivu], $norm);
+
+      $pdf_tarjous->draw_rectangle(716, 300, 695, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli),     $page_tarjous[$sivu], $pieni);
+
+      //etsitään löytyykö rahtisopimusta
+      $rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
+      $pdf_tarjous->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".$rahtirow["rahtisopimus"],     $page_tarjous[$sivu], $norm);
+
+      $pdf_tarjous->draw_rectangle(695, 300, 674, 580, $page_tarjous[$sivu], $rectparam);
+      $pdf_tarjous->draw_text(310, 687, t("Toimitusehto", $kieli),     $page_tarjous[$sivu], $pieni);
+
+      $toimehto = t_avainsana("TOIMEHTO", $kieli, " and concat(selite,' ',selitetark) = '{$laskurow["toimitusehto"]}'", "", "", "selitetark");
+      if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
+      else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
+
+      $pdf_tarjous->draw_text(310, 677, $toimehto, $page_tarjous[$sivu], $norm);
+
+      $pdf_tarjous->draw_rectangle(674, 300, 654, 580, $page_tarjous[$sivu], $rectparam);
+
+      $pdf_tarjous->draw_text(310, 667, t("Maksuehto", $kieli),  $page_tarjous[$sivu], $pieni);
+      $pdf_tarjous->draw_text(310, 657, $laskurow["maksuehto"],  $page_tarjous[$sivu], $norm);
     }
     else {
       $pdf_tarjous->draw_text(310, 815, t("Tarjous", $kieli),     $page_tarjous[$sivu], $iso);
@@ -494,18 +617,20 @@ if (!function_exists('uusi_sivu_tarjous')) {
       $pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]),       $page_tarjous, $norm);
 
       //viivakoodi
-      $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+      if (class_exists("Image_Barcode")) {
+        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-      imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+        imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
-      $fh = fopen($nimi, "r");
-      $data = fread($fh, filesize($nimi));
-      fclose($fh);
+        $fh = fopen($nimi, "r");
+        $data = fread($fh, filesize($nimi));
+        fclose($fh);
 
-      $image = $pdf_tarjous->jfif_embed($data);
-      $pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
+        $image = $pdf_tarjous->jfif_embed($data);
+        $pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
 
-      system("rm -f $nimi");
+        system("rm -f $nimi");
+      }
     }
 
     $kala = 715;
@@ -562,6 +687,16 @@ if (!function_exists('tarjous_rivi_otsikot')) {
         $pdf_tarjous->draw_text(498, $kala+5, $alv,              $page_tarjous, $boldi);
       }
 
+    }
+    elseif ($yhtiorow['tarjoustyyppi'] == 5) {
+      $pdf_tarjous->draw_text(80,  $kala+15, t("Tuotenumero", $kieli),  $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(80,  $kala+5, t("Tuotenimi", $kieli),    $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),      $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(450, $kala + 15, t("Alennus", $kieli), $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(498, $kala + 15, t("Alv", $kieli), $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(537, $kala + 15, t("Rivihinta", $kieli), $page_tarjous, $boldi);
+      $pdf_tarjous->draw_text(537, $kala + 5, $alv, $page_tarjous, $boldi);
     }
     else {
 
@@ -897,11 +1032,27 @@ if (!function_exists('rivi_tarjous')) {
 
 if (!function_exists('tarjous_rivi_hinta_ale')) {
   function tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $row, $hinnat, $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $sivu = 1, $naytetaanko_tuoteno = '') {
-    global $yhtiorow, $kukarow, $norm, $pieni, $boldi;
+    global $yhtiorow, $kukarow, $norm, $pieni, $boldi, $thumb_size_x, $thumb_size_y;
 
     $rivinkorkeus = 12;
 
-    if (trim($row["perhe_kommentti"]) != '') {
+    if ($yhtiorow['tarjoustyyppi'] == 5) {
+      $query = "SELECT liitetiedostot.*
+                FROM tuote
+                JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
+                  AND liitetiedostot.liitostunnus = tuote.tunnus
+                  AND liitetiedostot.liitos = 'tuote'
+                  AND liitetiedostot.kayttotarkoitus = 'TK')
+                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                AND tuote.tuoteno = '{$row['tuoteno']}'";
+      $kuva_res = pupe_query($query);
+
+      if (mysql_num_rows($kuva_res) != 0) {
+        $kala -= 15;
+      }
+    }
+
+    if (trim($row["perhe_kommentti"]) != '' and $yhtiorow['tarjoustyyppi'] != 5) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       $kala = $pohja - $rivinkorkeus;
     }
@@ -929,7 +1080,11 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       }
     }
 
-    if ($naytetaanko_tuoteno == '') $pdf_tarjous->draw_text(25, $kala, $row["tuoteno"], $page_tarjous[$sivu], $norm);
+    if ($naytetaanko_tuoteno == '') {
+      if ($yhtiorow['tarjoustyyppi'] != 5) {
+        $pdf_tarjous->draw_text(25, $kala, $row["tuoteno"], $page_tarjous[$sivu], $norm);
+      }
+    }
 
     if ($naytetaanko_rivihinta == 'kokonaan_ilman_hintoja') {
       $oikpos = $pdf_tarjous->strlen($row["varattu"], $norm);
@@ -991,11 +1146,41 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
     if ($naytetaanko_tuoteno == '') $kala = $kala - $rivinkorkeus;
 
-    $pdf_tarjous->draw_text(25, $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
+    if ($yhtiorow['tarjoustyyppi'] == 5) {
+      if (mysql_num_rows($kuva_res) != 0) {
+        $kuva_row = mysql_fetch_assoc($kuva_res);
 
-    $kala = $kala - $rivinkorkeus;
+        $image = $pdf_tarjous->jfif_embed($kuva_row['data']);
+        $max_imagesize = 43;
 
-    if ($row["kommentti"] != '') {
+        $_scale = $kuva_row['image_width'] > $kuva_row['image_height'] ? $max_imagesize / $kuva_row['image_width'] : $max_imagesize / $kuva_row['image_height'];
+
+        $_left = 25 + (($max_imagesize - $_scale * $kuva_row['image_width']) / 2);
+
+        $pdf_tarjous->image_place($image, $kala-15, $_left, $page_tarjous[$sivu], array('scale' => $_scale));
+      }
+
+      $pdf_tarjous->draw_text(80, $kala + 10, $row["tuoteno"], $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(80, $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
+
+      $kala -= $rivinkorkeus;
+
+      if ($row["kommentti"] != '') {
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 80, 60, 575, $row["kommentti"], $page_tarjous[$sivu], $norm);
+        $kala = $pohja - $rivinkorkeus;
+      }
+
+      if (trim($row["perhe_kommentti"]) != '') {
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 575, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+        $kala = $pohja - $rivinkorkeus - 10;
+      }
+    }
+    else {
+      $pdf_tarjous->draw_text(25, $kala, $row["nimitys"], $page_tarjous[$sivu], $norm);
+      $kala = $kala - $rivinkorkeus;
+    }
+
+    if ($row["kommentti"] != '' and $yhtiorow['tarjoustyyppi'] != 5) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"], $page_tarjous[$sivu], $norm);
       $kala = $pohja - $rivinkorkeus;
     }
@@ -1384,6 +1569,153 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(270, $kala-263, t("Ostajan allekirjoitus ja nimenselvennys"), $page_tarjous[$sivu], $boldi);
         }
 
+      }
+      elseif ($yhtiorow['tarjoustyyppi'] == 5) {
+        if ($kala > 0) {
+          $kuha = $kala-35;
+        }
+        else {
+          $kuha = 168;
+        }
+
+        $pdf_tarjous->draw_text(30,  $kuha, t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$sivu], $boldi);
+
+        list($page_tarjous, $sivu, $kuha) = alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet, '', $verolliset_verottomat_hinnat, $kuha-10);
+
+        if ($kuha-165 <= 140) {
+          list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
+
+          $sivu++;
+
+          $query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+          $asiakas_res = pupe_query($query);
+          $asiakasrow = mysql_fetch_assoc($asiakas_res);
+
+          list($page_tarjous[$sivu], $kuha) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
+
+          $yhteystiedot_len = $pdf_tarjous->strlen("$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $pieni);
+          $pdf_tarjous->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, "$y_nimi, $y_osoite, $y_postino $y_postitp, $y_maa", $page_tarjous[$sivu], $pieni);
+
+          $yhteystiedot_len = $pdf_tarjous->strlen($y_www, $pieni);
+          $pdf_tarjous->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $page_tarjous[$sivu], $pieni);
+
+          $kala += 36;
+        }
+
+        $result = t_avainsana('TARJOUS_VAKIOTE', $kieli);
+        $vakioteksti_row = mysql_fetch_assoc($result);
+        $vakioteksti = $vakioteksti_row['selitetark'];
+
+        if (empty($vakioteksti)) {
+          if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+            if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+              $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+            }
+            elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
+              $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+            }
+            elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
+              if ($yhtiorow['alv_kasittely'] != '') {
+                $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+              }
+              else {
+                $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+              }
+            }
+            else {
+              if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+                $vakioteksti = t("Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $kieli)." ";
+              }
+              else {
+                $vakioteksti = t("Hinnat sisältävät arvonlisäveron.", $kieli)." ";
+              }
+            }
+          }
+
+          if ($laskurow["rahtivapaa"] == "") {
+            $vakioteksti .= t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli);
+          }
+        }
+
+        $_y = $kuha - 60;
+
+        if (strlen($vakioteksti) > 110) {
+          $vakioteksti = wordwrap($vakioteksti, 110, "\n");
+          foreach (explode("\n", $vakioteksti) as $teksi) {
+            $pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
+            $_y = $_y - 10;
+          }
+        }
+        else {
+          $pdf_tarjous->draw_text(30,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
+        }
+
+        $kuha = $_y;
+
+        if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
+          $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+              substr($laskurow["olmapvm"], 8, 2),
+              substr($laskurow["olmapvm"], 0, 4)));
+          $tkka = date("m", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+              substr($laskurow["olmapvm"], 8, 2),
+              substr($laskurow["olmapvm"], 0, 4)));
+          $tppa = date("d", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+              substr($laskurow["olmapvm"], 8, 2),
+              substr($laskurow["olmapvm"], 0, 4)));
+        }
+        else {
+          $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+              substr($laskurow["muutospvm"], 8, 2) +
+              $yhtiorow["tarjouksen_voimaika"],
+              substr($laskurow["muutospvm"], 0, 4)));
+          $tkka = date("m", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+              substr($laskurow["muutospvm"], 8, 2) +
+              $yhtiorow["tarjouksen_voimaika"],
+              substr($laskurow["muutospvm"], 0, 4)));
+          $tppa = date("d", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+              substr($laskurow["muutospvm"], 8, 2) +
+              $yhtiorow["tarjouksen_voimaika"],
+              substr($laskurow["muutospvm"], 0, 4)));
+        }
+
+        $voimassa = tv1dateconv($tvva . "-" . $tkka . "-" . $tppa);
+
+        $pdf_tarjous->draw_text(30, $kuha,
+          t("Tarjous on voimassa %s saakka", $kieli, $voimassa) . ". " .
+          t("Maksuehtomme on", $kieli) . " " .
+          trim($laskurow["maksuehto"]) . ".", $page_tarjous[$sivu],
+          $norm);
+
+        $kuha -= 30;
+
+        $pdf_tarjous->draw_text(30, $kuha,
+          t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
+            "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
+
+        $kuha -= 30;
+
+        $pdf_tarjous->draw_text(30, $kuha, t("Kunnioittavasti", $kieli) . ",",
+          $page_tarjous[$sivu], $boldi);
+
+        $query  = "SELECT *
+                   from kuka
+                   where tunnus = '$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+        $myyresult = pupe_query($query);
+
+        if (mysql_num_rows($myyresult) == 1) {
+          $myyrow = mysql_fetch_array($myyresult);
+        }
+        else {
+          $myyrow = $kukarow;
+        }
+
+        $kuha -= 10;
+
+        $pdf_tarjous->draw_text(30, $kuha, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
+        $pdf_tarjous->draw_text(217, $kuha, t("Puh", $kieli) . ": " . $myyrow['puhno'],
+          $page_tarjous[$sivu], $boldi);
+        $pdf_tarjous->draw_text(404, $kuha, "Email: $myyrow[eposti]", $page_tarjous[$sivu],
+          $boldi);
       }
       else {
 
@@ -1850,7 +2182,7 @@ if (!function_exists('tulosta_tarjous')) {
 
 if (!function_exists('alvierittely')) {
   function alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet=0, $kassa_ale = '', $verolliset_verottomat_hinnat, $kala) {
-    global $yhtiorow, $kukarow, $toim, $rectparam, $norm, $pieni, $summa, $arvo, $kieli, $boldi, $kala;
+    global $yhtiorow, $kukarow, $toim, $rectparam, $norm, $pieni, $summa, $arvo, $kieli, $boldi;
 
     if ($kala <= 150) {
 
@@ -1877,7 +2209,7 @@ if (!function_exists('alvierittely')) {
       $pdf_tarjous->draw_text(350, $kala, t("Kassa-alennuksella", $kieli), $page_tarjous[$sivu], $boldi);
     }
 
-    if ($toim == 'PROFORMA' or $yhtiorow['tarjoustyyppi'] == 1) {
+    if ($toim == 'PROFORMA' or in_array($yhtiorow['tarjoustyyppi'], array(1,5))) {
       $where = " otunnus in ($laskurow[tunnus]) ";
     }
     else {
@@ -1964,7 +2296,7 @@ if (!function_exists('alvierittely')) {
         $pdf_tarjous->draw_text(550, $kala, ($alvrow["alv"]*1)."%", $page_tarjous[$sivu], $boldi);
       }
 
-      $kala -= 10;
+      $kala -= 30;
     }
 
     //loppusummat vain vikalle sivulle
@@ -1991,8 +2323,9 @@ if (!function_exists('alvierittely')) {
 
     $pdf_tarjous->draw_text(550, $varakala, $laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
 
-    if ($yhtiorow['tarjoustyyppi'] == 1) {
-      $kala -= 20;
+    if ($yhtiorow['tarjoustyyppi'] == 1 or $yhtiorow['tarjoustyyppi'] == 5) {
+
+      if ($yhtiorow['tarjoustyyppi'] == 1) $kala -= 20;
 
       //$yhtiorow['alv_kasittely'] == ''         - Verolliset myyntihinnat
       //$yhtiorow['alv_kasittely'] != ''         - Verottomat myyntihinnat
@@ -2028,7 +2361,14 @@ if (!function_exists('alvierittely')) {
       }
     }
 
-    $pdf_tarjous->draw_text(350, $kala, t("Lasku yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
+    if ($yhtiorow['tarjoustyyppi'] == 5) {
+      $_lasku_vai_tarjoustxt = "Tarjous";
+    }
+    else {
+      $_lasku_vai_tarjoustxt = "Lasku";
+    }
+
+    $pdf_tarjous->draw_text(350, $kala, t("{$_lasku_vai_tarjoustxt} yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
 
     if ($toim == 'PROFORMA') {
       $summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
@@ -2090,7 +2430,7 @@ if (!function_exists('alvierittely')) {
       }
     }
 
-    if ($yhtiorow['tarjoustyyppi'] == 1) {
+    if ($yhtiorow['tarjoustyyppi'] == 1 or $yhtiorow['tarjoustyyppi'] == 5) {
       $pdf_tarjous->draw_text(350, $kala+20, t("Verollinen arvo yhteensä", $kieli).":", $page_tarjous[$sivu], $boldi);
 
       $oikpos = $pdf_tarjous->strlen(sprintf('%.2f', $total_uudet), $boldi);

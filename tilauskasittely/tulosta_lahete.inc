@@ -84,6 +84,14 @@ if (!function_exists('alku_lahete')) {
 
     tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
+    if (!empty($laskurow['lahetepohjateksti'])) {
+      $redboldi["height"] = 8;
+      $redboldi["font"]   = "Times-Bold";
+      $redboldi["fillcolor"]  = $pdf->get_color("red");
+
+      $pdf->draw_text(30, 832, $laskurow['lahetepohjateksti'], $thispage, $redboldi);
+    }
+
     if ($tyyppi == "TILAUSVAHVISTUS") {
       $kerarow["kerattyaika"] = date("Y-m-d");
     }

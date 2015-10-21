@@ -7,33 +7,57 @@ if (@!include_once 'pdflib/phppdflib.class.php') {
 require_once "barcode/barcode.php";
 require_once "barcode/c128cobject.php";
 
-$rectparam["width"]   = 0.3;
 
-$norm["height"]     = 10;
-$norm["font"]       = "Times-Roman";
+if (!function_exists('lasku_fontit')) {
+  function lasku_fontit() {
+    $rectparam["width"]   = 0.3;
 
-$norm_italic["height"]   = 10;
-$norm_italic["font"]  = "Times-Italic";
+    $norm["height"]     = 10;
+    $norm["font"]       = "Times-Roman";
 
-$pieni["height"]     = 8;
-$pieni["font"]       = "Times-Roman";
+    $norm_italic["height"]   = 10;
+    $norm_italic["font"]  = "Times-Italic";
 
-$boldi["height"]     = 10;
-$boldi["font"]       = "Times-Bold";
+    $pieni["height"]     = 8;
+    $pieni["font"]       = "Times-Roman";
 
-$pieni_boldi["height"]   = 8;
-$pieni_boldi["font"]   = "Times-Bold";
+    $boldi["height"]     = 10;
+    $boldi["font"]       = "Times-Bold";
 
-$iso["height"]       = 14;
-$iso["font"]       = "Helvetica-Bold";
+    $pieni_boldi["height"]   = 8;
+    $pieni_boldi["font"]   = "Times-Bold";
+
+    $iso["height"]       = 14;
+    $iso["font"]       = "Helvetica-Bold";
+
+    return array("rectparam"   => $rectparam,
+                 "norm"        => $norm,
+                 "norm_italic" => $norm_italic,
+                 "pieni"       => $pieni,
+                 "boldi"       => $boldi,
+                 "pieni_boldi" => $pieni_boldi,
+                 "iso"         => $iso);
+  }
+}
 
 if (!function_exists('alku')) {
   function alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $norm_italic, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $page_lasku[$sivu] = $pdf_lasku->new_page("a4");
 
     tulosta_logo_pdf($pdf_lasku, $page_lasku[$sivu], $laskurow);
+
+    if (!empty($laskurow['laskupohjateksti'])) {
+      $redboldi["height"] = 8;
+      $redboldi["font"]   = "Times-Bold";
+      $redboldi["fillcolor"]  = $pdf_lasku->get_color("red");
+
+      $pdf_lasku->draw_text(30, 832, $laskurow['laskupohjateksti'], $page_lasku[$sivu], $redboldi);
+    }
 
     //Otsikko
     if ($laskurow["vienti"] == "") {
@@ -539,19 +563,6 @@ if (!function_exists('alku')) {
       $komm .= "\n";
     }
 
-    if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
-      //jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
-      if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
-        $laskutyyppi = $asiakasrow['laskutyyppi'];
-      }
-      else {
-        $laskutyyppi = $yhtiorow['laskutyyppi'];
-      }
-    }
-    else {
-      $laskutyyppi = $laskurow['laskutyyppi'];
-    }
-
     if ($laskutyyppi == 1 or $laskutyyppi == 4 or $laskutyyppi == 6 or $laskutyyppi == 8) {
       $query     = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
                     FROM lasku
@@ -620,7 +631,7 @@ if (!function_exists('alku')) {
       }
     }
 
-    list($page_lasku[$sivu], $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala);
+    list($page_lasku[$sivu], $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala, $laskutyyppi);
 
     return array($page_lasku, $sivu, $kala);
   }
@@ -628,7 +639,10 @@ if (!function_exists('alku')) {
 
 if (!function_exists('uusi_sivu')) {
   function uusi_sivu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $alvierittely = '') {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $thispage = $pdf_lasku->new_page("a4");
 
@@ -708,7 +722,7 @@ if (!function_exists('uusi_sivu')) {
     $kala = 735;
 
     if ($alvierittely == '') {
-      list($thispage, $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala);
+      list($thispage, $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi);
     }
 
     return array($thispage, $kala);
@@ -717,7 +731,10 @@ if (!function_exists('uusi_sivu')) {
 
 if (!function_exists('rivi_lasku')) {
   function rivi_lasku($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     if ($laskutyyppi == 10 or $laskutyyppi == 12) {
       $row["hinta"]            = 0;
@@ -877,21 +894,11 @@ if (!function_exists('rivi_lasku')) {
 }
 
 if (!function_exists('rivi_otsikot')) {
-  function rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+  function rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi) {
+    global $yhtiorow, $kukarow;
 
-    if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
-      //jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
-      if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
-        $laskutyyppi = $asiakasrow['laskutyyppi'];
-      }
-      else {
-        $laskutyyppi = $yhtiorow['laskutyyppi'];
-      }
-    }
-    else {
-      $laskutyyppi = $laskurow['laskutyyppi'];
-    }
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     //Laskurivien otsikkotiedot
     if ($laskutyyppi == 1 or $laskutyyppi == 4 or $laskutyyppi == 8) {
@@ -992,7 +999,10 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
   function lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $kala = $kala - 10;
 
@@ -1013,13 +1023,15 @@ if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
     $pdf_lasku->draw_text(35, $kala, $tullinimike_ja_alkuperamaa_text, $thispage, $pieni);
 
     return $kala;
-
   }
 }
 
 if (!function_exists('rivi_original')) {
   function rivi_original($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
+    global $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $kuinka_alhaalla_kaytiin_nimitys = $kuinka_alhaalla_kaytiin_tuoteno = $kala;
 
@@ -1249,7 +1261,10 @@ if (!function_exists('rivi_original')) {
 
 if (!function_exists('rivi_plain')) {
   function rivi_plain($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
+    global $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     //Nimitys
     list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 180, $pdf_lasku, $norm);
@@ -1379,7 +1394,10 @@ if (!function_exists('rivi_plain')) {
 
 if (!function_exists('rivi_plain_2')) {
   function rivi_plain_2($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
+    global $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     //Tuoteno
     list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 100, $pdf_lasku, $norm);
@@ -1516,7 +1534,10 @@ if (!function_exists('rivi_plain_2')) {
 
 if (!function_exists('rivi_viro')) {
   function rivi_viro($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
+    global $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     // Nimitys
     list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 170, $pdf_lasku, $norm);
@@ -1687,7 +1708,10 @@ if (!function_exists('rivi_viro')) {
 
 if (!function_exists('rivi_perhe')) {
   function rivi_perhe($laskurow, $asiakasrow, $row, $kieli, $pdf_lasku, $thispage, $kala, $laskutyyppi, $toim, $summa, $arvo, $kurssi) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso, $tullinimike_ja_alkuperamaa;
+    global $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $lisataa = 0;
 
@@ -1788,7 +1812,10 @@ if (!function_exists('rivi_perhe')) {
 
 if (!function_exists('loppu')) {
   function loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page, $vientikala, $laskutyyppi, $vikasivu = "") {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0 and $vikasivu != "" and function_exists("imagecreate") and $laskurow["vienti"] == "" and strtoupper($laskurow["maa"]) == strtoupper($yhtiorow["maa"])) {
       $piirra_viivakoodi = true;
@@ -2178,7 +2205,10 @@ if (!function_exists('loppu')) {
 
 if (!function_exists('alvierittely')) {
   function alvierittely($laskurow, $asiakasrow, $kieli, $pdf_lasku, $thispage, $toim, $kala, $summa, $arvo, $kassa_ale = '', $yhteensamaara=0) {
-    global $yhtiorow, $kukarow, $rectparam, $norm, $pieni, $boldi, $pieni_boldi, $iso;
+    global $yhtiorow, $kukarow;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     $kassa_ale_lisa = '';
     $kassa_ale_lisateksti = '';
@@ -2546,6 +2576,9 @@ if (!function_exists('alvierittely')) {
 if (!function_exists('PalautaPankkiviivakoodi')) {
   function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
 
+    // Fonttimuuttujat
+    extract(lasku_fontit());
+
     if ($versio == '2') {
       $pankkitili = $tilinumero;
       include "inc/pankkitilinoikeellisuus.php";
@@ -2622,8 +2655,11 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
 }
 
 if (!function_exists("tulosta_lasku")) {
-  function tulosta_lasku($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $saatekirje = "") {
+  function tulosta_lasku($lasku, $kieli = "", $tee = "", $toim = "", $valittu_tulostin = "", $valittu_kopio_tulostin = "", $saatekirje = "", $sellaskutyyppi = "") {
     global $kukarow, $yhtiorow, $tulosta_lasku_kpl;
+
+    // Fonttimuuttujat
+    extract(lasku_fontit());
 
     if (substr($lasku, 0, 6) == "LASKU:") {
       $lasku = substr($lasku, 6);
@@ -2719,7 +2755,14 @@ if (!function_exists("tulosta_lasku")) {
       $where  = " and tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
     }
 
-    if ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
+    if (!empty($sellaskutyyppi)) {
+      $laskutyyppi = $sellaskutyyppi;
+
+      if (strpos($sellaskutyyppi, "##") !== FALSE) {
+        list($laskutyyppi, $laskurow['laskupohjateksti']) = explode("##", $laskutyyppi);
+      }
+    }
+    elseif ($laskurow['laskutyyppi'] == -9 or $laskurow['laskutyyppi'] == 0) {
       //jos laskulta löytyvät laskutyyppi on Oletus käytetään asiakkaan tai yhtiön oletus laskutyyppiä
       if (isset($asiakasrow['laskutyyppi']) and $asiakasrow['laskutyyppi'] != -9) {
         $laskutyyppi = $asiakasrow['laskutyyppi'];

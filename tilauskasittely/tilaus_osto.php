@@ -1250,6 +1250,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.yksikko,
               tuotteen_toimittajat.toim_yksikko,
               tuote.tuotemassa,
+              (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
               tuotteen_toimittajat.ostohinta,
@@ -1304,6 +1305,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       $yhteensa         = 0;
       $paino_yhteensa     = 0;
+      $tilavuus_yhteensa = 0;
       $nettoyhteensa       = 0;
       $eimitatoi         = '';
       $lask           = mysql_num_rows($presult);
@@ -1329,6 +1331,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa       += $prow["rivihinta"];
         $paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
+        $tilavuus_yhteensa   += ($prow["tilattu"]*$prow["tuotetilavuus"]);
 
         $class = "";
 
@@ -1863,6 +1866,12 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <td colspan='3' class='spec'>".t("Tilauksen paino").":</td>
           <td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
           <td class='spec'>kg</td>
+          </tr>";
+      echo "  <tr>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t("Tilauksen tilavuus").":</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $tilavuus_yhteensa)."</td>
+          <td class='spec'>m3</td>
           </tr>";
 
       echo "</table>";

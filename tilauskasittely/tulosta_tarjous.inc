@@ -537,16 +537,16 @@ if (!function_exists('alku_tarjous')) {
     if (class_exists("Image_Barcode") and $yhtiorow['tarjoustyyppi'] == 0) {
       //viivakoodi
       $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-    
+
       imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
-    
+
       $fh = fopen($nimi, "r");
       $data = fread($fh, filesize($nimi));
       fclose($fh);
-    
+
       $image = $pdf_tarjous->jfif_embed($data);
       $pdf_tarjous->image_place($image, 805, 440, $page_tarjous[$sivu]);
-    
+
       system("rm -f $nimi");
     }
 
@@ -619,16 +619,16 @@ if (!function_exists('uusi_sivu_tarjous')) {
       //viivakoodi
       if (class_exists("Image_Barcode")) {
         $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-      
+
         imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
-      
+
         $fh = fopen($nimi, "r");
         $data = fread($fh, filesize($nimi));
         fclose($fh);
-      
+
         $image = $pdf_tarjous->jfif_embed($data);
         $pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
-      
+
         system("rm -f $nimi");
       }
     }
@@ -1506,9 +1506,9 @@ if (!function_exists('loppu_tarjous')) {
 
           // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
           if ($kala-253 <= 230) {
-            
+
             list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
-echo "1511 total_uudet $total_uudet <br><br>";
+
             $sivu++;
 
             $query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
@@ -1571,13 +1571,13 @@ echo "1511 total_uudet $total_uudet <br><br>";
         }
 
         $pdf_tarjous->draw_text(30,  $kuha, t("1569 Tarjoamme teille yll‰olevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$sivu], $boldi);
-echo "1574 total_uudet $total_uudet <br><br>";
+
         list($page_tarjous, $sivu, $kuha) = alvierittely($pdf_tarjous, $page_tarjous, $sivu, $laskurow, $total_uudet, '', $verolliset_verottomat_hinnat, $kuha-10);
-echo "1576 total_uudet $total_uudet <br><br>";
+
         if ($kuha-165 <= 140) {
-echo "1578 total_uudet $total_uudet <br><br>";          
+
           list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
-echo "1580 total_uudet $total_uudet <br><br>";
+
           $sivu++;
 
           $query = "SELECT * FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
@@ -1722,7 +1722,7 @@ echo "1580 total_uudet $total_uudet <br><br>";
         if ($vikanrivin_sivu != $sivu and $naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and
           $naytetaanko_yhteissummarivi != "E"
         ) {
-echo "1725 total_uudet $total_uudet <br><br>";          
+echo "1725 total_uudet $total_uudet <br><br>";
           $pdf_tarjous->draw_text(30,  74, t("1720 Tarjoamme teille yll‰olevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$vikanrivin_sivu], $boldi);
           $oikpos = $pdf_tarjous->strlen(sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $boldi);
           $pdf_tarjous->draw_text(380-$oikpos, 74, sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$vikanrivin_sivu], $boldi);
@@ -1731,7 +1731,7 @@ echo "1725 total_uudet $total_uudet <br><br>";
         if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and
           $naytetaanko_yhteissummarivi != "E"
         ) {
-echo "1734 total_uudet $total_uudet <br><br>";          
+echo "1734 total_uudet $total_uudet <br><br>";
           $pdf_tarjous->draw_text(30,  $kuha,  t("1728 Tarjoamme teille yll‰olevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$sivu], $boldi);
 
           $oikpos = $pdf_tarjous->strlen(sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $boldi);
@@ -2141,7 +2141,7 @@ echo "2042 Q $query <br><br>";
 
     $total_uudet  = $total;
     $total_vanhat = $total - $total_uudet;
-    
+
     if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
       $total_uudet = hintapyoristys(laskuval($total_uudet, $laskurow["vienti_kurssi"]));
       $total_vanhat = hintapyoristys(laskuval($total_vanhat, $laskurow["vienti_kurssi"]));

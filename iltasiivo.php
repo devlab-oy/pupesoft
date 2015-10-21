@@ -274,47 +274,8 @@ $query = "SELECT DISTINCT jaksotettu
 $pos_chk_result = pupe_query($query);
 
 while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
-
-  $query = "SELECT maksupositio.otunnus,
-            sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
-            count(*) yhteensa_kpl
-            FROM maksupositio
-            LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio
-                AND maksupositio.uusiotunnus = uusiolasku.tunnus)
-            LEFT JOIN lasku uusiolasku_ux ON (uusiolasku_ux.yhtio = uusiolasku.yhtio
-                AND uusiolasku_ux.tila       = 'U'
-                AND uusiolasku_ux.alatila    = 'X'
-                AND uusiolasku_ux.laskunro   = uusiolasku.laskunro)
-            WHERE maksupositio.yhtio         = '{$kukarow['yhtio']}'
-            AND maksupositio.otunnus         = '{$pos_chk_row['jaksotettu']}'
-            GROUP BY 1
-            HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
-            ORDER BY 1, maksupositio.tunnus";
-  $posres = pupe_query($query);
-
-  if (mysql_num_rows($posres) != 0) {
-
-    $silent = 'Nyt hiljaa, hiljaa hiivitään näin Kardemumman yössä';
-    $vapauta_tilaus_keraykseen = true;
-    $kukarow['kesken'] = $pos_chk_row['jaksotettu'];
-
-    $query = "UPDATE lasku SET
-              alatila     = ''
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$pos_chk_row['jaksotettu']}'";
-    pupe_query($query);
-
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$pos_chk_row['jaksotettu']}'";
-    $laskures = pupe_query($query);
-    $laskurow = mysql_fetch_assoc($laskures);
-
-    require 'tilauskasittely/tilaus-valmis.inc';
-
-    $laskuri++;
-  }
+  vapauta_maksusopimus($pos_chk_row['jaksotettu']);
+  $laskuri++;
 }
 
 if ($laskuri > 0) {

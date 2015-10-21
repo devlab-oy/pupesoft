@@ -8,15 +8,15 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
   // tallennetaan rahtikirja
   $clean = array(
-    'yhtio'            => $kukarow['yhtio'],
-    'merahti'          => (isset($_POST['merahti']) and $_POST['merahti'] == '1') ? 'K' : 'E',
-    'toimitustapa'     => strip_tags($_POST['toimitustapa']),
-    'otsikkonro'       => null, //tunnus,
-    'viitelah'         => strip_tags($_POST['viitelah']),
-    'viitevas'         => strip_tags($_POST['viitevas']),
-    'rahtisopimus'     => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
+    'yhtio'          => $kukarow['yhtio'],
+    'merahti'        => (isset($_POST['merahti']) and $_POST['merahti'] == '1') ? 'K' : 'E',
+    'toimitustapa'   => strip_tags($_POST['toimitustapa']),
+    'otsikkonro'     => null, //tunnus,
+    'viitelah'       => strip_tags($_POST['viitelah']),
+    'viitevas'       => strip_tags($_POST['viitevas']),
+    'rahtisopimus'   => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
     'viesti'         => strip_tags($_POST['viesti']),
-    'tulostuspaikka'  => strip_tags($_POST['varasto']),
+    'tulostuspaikka' => strip_tags($_POST['varasto']),
   );
 
   $count = 0;
@@ -120,8 +120,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   if (isset($tulostakopio)) {
     $osoitelappurow = unserialize($data['tyhjanrahtikirjan_otsikkotiedot'][0]);
 
-    $varasto     = $data['tulostuspaikka'][0];
-    $toimitustapa  = $data['toimitustapa'][0];
+    $varasto      = $data['tulostuspaikka'][0];
+    $toimitustapa = $data['toimitustapa'][0];
     $tulostin     = $kopiotulostin;
 
     if ($varasto == 0) {
@@ -161,12 +161,21 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow["sisviesti1"]   = $asiakasrow["sisviesti1"];
 
       if ($tnimi != '') {
+        $osoitelappurow["nimi"]     = $tnimi;
+        $osoitelappurow["nimitark"] = $tnimitark;
+        $osoitelappurow["osoite"]   = $tosoite;
+        $osoitelappurow["postino"]  = $tpostino;
+        $osoitelappurow["postitp"]  = $tpostitp;
+        $osoitelappurow["toim_puh"] = $tpuh;
+        $osoitelappurow["maa"]      = $tmaa;
+
         $osoitelappurow["toim_postino"]  = $tpostino;
         $osoitelappurow["toim_nimi"]     = $tnimi;
         $osoitelappurow["toim_nimitark"] = $tnimitark;
         $osoitelappurow["toim_postitp"]  = $tpostitp;
-        $osoitelappurow["toim_osoite"]   = $tosoite;
         $osoitelappurow["toim_maa"]      = $tmaa;
+        $osoitelappurow["toim_osoite"]   = $tosoite;
+        $osoitelappurow["viesti"]        = $viesti;
       }
       elseif ($asiakasrow["toim_nimi"] != '') {
         $osoitelappurow["toim_postino"]  = $asiakasrow["toim_postino"];
@@ -200,6 +209,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow["toim_postitp"]  = $tpostitp;
       $osoitelappurow["toim_maa"]      = $tmaa;
       $osoitelappurow["toim_osoite"]   = $tosoite;
+      $osoitelappurow["viesti"]        = $viesti;
     }
 
     $osoitelappurow["toimitustapa"]  = $data['toimitustapa'][0];
@@ -225,13 +235,13 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     if (mysql_num_rows($alhire) == 1) {
       $apualvrow = mysql_fetch_assoc($alhire);
 
-      $osoitelappurow['yhtio_nimi']     = $apualvrow["nimi"];
-      $osoitelappurow['yhtio_nimitark']  = $apualvrow["nimitark"];
-      $osoitelappurow['yhtio_osoite']    = $apualvrow["osoite"];
-      $osoitelappurow['yhtio_postino']  = $apualvrow["postino"];
-      $osoitelappurow['yhtio_postitp']  = $apualvrow["postitp"];
-      $osoitelappurow["yhtio_maa"]        = $apualvrow["maa"];
-      $osoitelappurow['yhtio_toimipaikka']= $apualvrow["tunnus"];
+      $osoitelappurow['yhtio_nimi']        = $apualvrow["nimi"];
+      $osoitelappurow['yhtio_nimitark']    = $apualvrow["nimitark"];
+      $osoitelappurow['yhtio_osoite']      = $apualvrow["osoite"];
+      $osoitelappurow['yhtio_postino']     = $apualvrow["postino"];
+      $osoitelappurow['yhtio_postitp']     = $apualvrow["postitp"];
+      $osoitelappurow["yhtio_maa"]         = $apualvrow["maa"];
+      $osoitelappurow['yhtio_toimipaikka'] = $apualvrow["tunnus"];
     }
   }
 
@@ -273,6 +283,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
     $kirjoitin   = $k['komento'];
     $tulostuskpl = $kollityht;
+
+    $kuljetusohjeet = $osoitelappurow["viesti"];
 
     include "tilauskasittely/$toitarow[rahtikirja]";
 

@@ -146,7 +146,8 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
             lasku.liitostunnus,
             lasku.tilausyhteyshenkilo,
             lasku.ohjelma_moduli,
-            lasku.myyja
+            lasku.myyja,
+            lasku.asiakkaan_tilausnumero
             FROM lasku
             JOIN asiakas
             ON ( asiakas.yhtio = lasku.yhtio
@@ -325,6 +326,7 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
+  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['asiakkaan_tilausnumero'] = $myyntitilaus["asiakkaan_tilausnumero"];
 }
 
 
@@ -343,6 +345,11 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
     $body .= t("Seuraavien tuotteiden toimitusaika on muuttunut", $asiakas_sahkoposti['kieli']).'.<br/><br/>';
     foreach ($asiakas_sahkoposti['tilaukset'] as $tilaustunnus => $tilaus) {
       $body .= t('Tilaus', $asiakas_sahkoposti['kieli']).": {$tilaustunnus}"."<br/>";
+
+      if (!empty($tilaus["asiakkaan_tilausnumero"])) {
+        $body .= t('Tilausnumeronne', $asiakas_sahkoposti['kieli']) . ": {$tilaus["asiakkaan_tilausnumero"]}" . "<br/>";
+      }
+
       $body .= "<table border=1>";
       $body .= "<tr>";
       $body .= "<td>".t("Tuoteno", $asiakas_sahkoposti['kieli'])."</td>";

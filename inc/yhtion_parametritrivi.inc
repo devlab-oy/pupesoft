@@ -1,6 +1,5 @@
 <?php
 
-
 if (isset($ytp_fieldname) and $ytp_fieldname != "") {
   $fieldname = $ytp_fieldname;
 }
@@ -282,25 +281,10 @@ if ($fieldname == "laskutyyppi") {
   $sel = array();
   $sel[$apu] = "selected";
 
-  $ulos .= "<option value = '99' $sel[99]>".t("Normaali laskupohja")."</option>";
-  $ulos .= "<option value = '2'  $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)")."</option>";
-  $ulos .= "<option value = '5'  $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
-  $ulos .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)")."</option>";
-  $ulos .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)")."</option>";
-  $ulos .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
-  //$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
-  $ulos .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
-  $ulos .= "<option value = '8'  $sel[8]>".t("Ruotsin laskupohja")."</option>";
-  $ulos .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
-  $ulos .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
-  $ulos .= "<option value = '13' $sel[13]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
-  $ulos .= "<option value = '14' $sel[14]>".t("Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
-  $ulos .= "<option value = '15' $sel[15]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja")."</option>";
-  $ulos .= "<option value = '16' $sel[16]>".t("SVH, Nettohinnat, ei alennuksia, ei verollisia hintoja (Tuoteperheet yhdistetty)")."</option>";
-  $ulos .= "<option value = '17' {$sel[17]}>".t("Normaali laskupohja (lihavoidut ja kursivoidut tekstit)")."</option>";
-  $ulos .= "<option value = '18' {$sel[18]}>".t("Normaali laskupohja (nimitykset rivitettyn‰)")."</option>";
-  $ulos .= "<option value = '19' {$sel[19]}>".t("Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)")."</option>";
-  $ulos .= "<option value = '20' {$sel[20]}>".t("Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)")."</option>";
+  foreach (pupesoft_laskutyypit() as $ltyynumero => $ltyyteksti) {
+    $ulos .= "<option value = '$ltyynumero' $sel[$ltyynumero]>".t($ltyyteksti)."</option>";
+  }
+
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -374,12 +358,9 @@ if ($fieldname == "tilausvahvistustyyppi") {
   $sel = array();
   $sel[$apu] = "selected";
 
-  $ulos .= "<option value = '1' $sel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
-  $ulos .= "<option value = '2' $sel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
-  $ulos .= "<option value = '3' $sel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
-  $ulos .= "<option value = '4' $sel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
-  //$ulos .= "<option value = '5' $sel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
-  $ulos .= "<option value = '6' $sel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
+  foreach(pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
+    $ulos .= "<option value = '$seltvtyyppi' $sel[$seltvtyyppi]>".t($seltvtyyppiteksti)."</option>";
+  }
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -4431,6 +4412,19 @@ if ($fieldname == 'paivita_oletuspaikka') {
   $ulos .= "<option value = ''>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ostoriveille")."</option>";
   $ulos .= "<option value = 'S' {$sel['S']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille.")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("P‰ivitet‰‰n uusi oletuspaikka avoimille ja saapumisiin liitetyille ostoriveille, myyntiriveille ja siirtoriveille.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'tilaukselle_mittatiedot') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'M' => '', 'A' => '');
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella ei n‰ytet‰ mittatietojen yhteenvetoa")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto sek‰ asiakasosasto")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

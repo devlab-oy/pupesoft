@@ -490,6 +490,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
+    if ($phpnimi == "asiakasmemo.php" or $phpnimi == "tilaus_myynti.php") {
+      if (isset($tallenna_keksiin) and isset($nayta_kaikki_merkinnat)) {
+        $_COOKIE["pupesoft_asiakasmemo"] = count($nayta_kaikki_merkinnat) > 1 ? "nayta_kaikki_merkinnat" : "vain_omat";
+        setcookie("pupesoft_asiakasmemo", $_COOKIE["pupesoft_asiakasmemo"], time()+60*60*24*90, "/");
+      }
+    }
+
     // Tuoteperhe
     if ($phpnimi == "tuoteperhe.php") {
       // Muistetaan keräyksen ohituksen valinta
@@ -728,7 +735,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
-        echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
+        echo "<link rel='stylesheet' type='text/css' href='{$pupesoft_scheme}fonts.googleapis.com/css?family=Lato:400,700' >";
 
         echo "<style type='text/css'>\n";
         echo $yhtiorow['active_css'];

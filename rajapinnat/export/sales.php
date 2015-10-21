@@ -157,11 +157,8 @@ while ($row = mysql_fetch_assoc($res)) {
 fclose($fp);
 
 if (!empty($scp_siirto)) {
-  // Pakataan tiedosto
-  system("zip -j {$filepath}.zip $filepath");
-
   // Siirret‰‰n toiselle palvelimelle
-  system("scp {$filepath}.zip $scp_siirto");
+  system("scp {$filepath} $scp_siirto");
 }
 
 echo "Valmis.\n";

@@ -455,15 +455,18 @@ else {
         $verollinen        = 0;
         $asiakashinta_veroton    = 0;
         $asiakashinta_verollinen = 0;
-        
+
         // jos suositushintoja esim Ruotsiin, niin haetaan ne hinnastoista (ei koske asiakkaan hintoja)
         // 17. hinnasto.hinta tuotteen bruttohinta hinnastosta asiakkaan valuutassa
+        if ($_hintakentta == "myymalahinta") $_laji = "K";
+        else $_laji = "";
+
        $query =  "  SELECT *
                     FROM hinnasto
                     WHERE yhtio   = '$kukarow[yhtio]'
                     and tuoteno   = '$rrow[tuoteno]'
                     and tuoteno  != ''
-                    and laji      = ''
+                    and laji      = '{$_laji}'
                     and valkoodi  in ('$laskurow[valkoodi]','')
                     and maa       in ('$laskurow[maa]','')
                     and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -473,10 +476,16 @@ else {
         $hresult = pupe_query($query);
 
         if (mysql_num_rows($hresult) > 0) {
-          $hrow                  = mysql_fetch_assoc($hresult);
-          $rrow["myyntihinta"]   = $hrow["hinta"];
-          $rrow['alv']           = $hrow["alv"];
-          $rrow["myymalahinta"]  = round($rrow["myyntihinta"] * (1 + ($rrow['alv'] / 100)),2);
+          $hrow                   = mysql_fetch_assoc($hresult);
+
+          $rrow['alv']            = $hrow["alv"];
+
+          if ($_laji == "K") {
+            $rrow["myymalahinta"] = $hrow["hinta"];
+          }
+          else {
+            $rrow["myyntihinta"]  = $hrow["hinta"];
+          }
         }
 
         if ($yhtiorow["alv_kasittely"] == "") {

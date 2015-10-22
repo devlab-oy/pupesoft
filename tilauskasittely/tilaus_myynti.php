@@ -2134,7 +2134,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
 
   // Laitetaan Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa.
-  $laskurow = palauta_intrastat_tiedot($laskurow, $varasto, TRUE);
+  $laskurow = palauta_intrastat_tiedot($laskurow, $laskurow['varasto'], TRUE);
 
   $tee           = '';
   $tilausnumero  = '';

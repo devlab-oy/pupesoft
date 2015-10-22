@@ -1011,7 +1011,7 @@ if ($avain_sel["DPAVAINSANALAJI"] == "SELECTED" and $_selitetark_2) {
 
 if ($avain_sel["ASIAKASHINNASTO"] == "SELECTED" and $_selite) {
 
-  $sel = $trow[$i] == 'MYYMALAHINTA' ? "selected" : "";
+  $sel = $trow[$i] == 'myymalahinta' ? "selected" : "";
 
   $ulos = "<td><select name = '{$nimi}'>";
   $ulos .= "<option value = 'myyntihinta'>".t("Myyntihinta")."</option>";

@@ -442,13 +442,17 @@ else {
           $hinta = $rrow["myyntihinta"];
         }
 
+        if ($laskurow['valkoodi'] != $alehinta_val) {
+          $hinta = $hinta / $kurssi["kurssi"];
+        }
+
         if ($netto == "") {
           $alennukset = generoi_alekentta_php($hinnat, 'M', 'kerto');
 
           $asiakashinta = hintapyoristys($hinta * $alennukset);
         }
         else {
-          $asiakashinta = $hinta;
+          $asiakashinta = hintapyoristys($hinta);
         }
 
         $veroton         = 0;
@@ -467,17 +471,17 @@ else {
                     and tuoteno   = '$rrow[tuoteno]'
                     and tuoteno  != ''
                     and laji      = '{$_laji}'
-                    and valkoodi  in ('$laskurow[valkoodi]','')
+                    and valkoodi  = '{$laskurow['valkoodi']}'
                     and maa       in ('$laskurow[maa]','')
                     and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                     and ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
-                    ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+                    ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa DESC
                     LIMIT 1";
         $hresult = pupe_query($query);
 
-        if (mysql_num_rows($hresult) > 0) {
-          $hrow                   = mysql_fetch_assoc($hresult);
+        if (mysql_num_rows($hresult) == 1) {
 
+          $hrow                   = mysql_fetch_assoc($hresult);
           $rrow['alv']            = $hrow["alv"];
 
           if ($_laji == "K") {
@@ -485,6 +489,12 @@ else {
           }
           else {
             $rrow["myyntihinta"]  = $hrow["hinta"];
+          }
+        }
+        else {
+          if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+            $rrow["myymalahinta"] = hintapyoristys($rrow["myymalahinta"] / $kurssi["kurssi"]);
+            $rrow["myyntihinta"]  = hintapyoristys($rrow["myyntihinta"]  / $kurssi["kurssi"]);
           }
         }
 

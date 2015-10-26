@@ -202,9 +202,7 @@ else {
     $rresult = pupe_query($query);
 
     if (mysql_num_rows($rresult) == 0) {
-
       $osuma = false;
-
     }
     else {
 
@@ -305,9 +303,11 @@ else {
         else {
           $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen asiakashinta", $hinkieli), $format_bold);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton asiakashinta ", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton asiakashinta", $hinkieli), $format_bold);
           $excelsarake++;
         }
+
+        $worksheet->writeString($excelrivi, $excelsarake, t("Valuutta", $hinkieli), $format_bold);
         $excelrivi++;
       }
 
@@ -380,14 +380,14 @@ else {
           $alehinrrow = $rrow;
         }
 
-        //haetaan asiakkaan oma hinta
-        $laskurow["ytunnus"]     = $asiakasrow["ytunnus"];
+        // Haetaan asiakkaan oma hinta
+        $laskurow["ytunnus"]        = $asiakasrow["ytunnus"];
         $laskurow["liitostunnus"]   = $asiakasrow["tunnus"];
-        $laskurow["vienti"]     = $asiakasrow["vienti"];
-        $laskurow["alv"]       = $asiakasrow["alv"];
-        $laskurow["valkoodi"]    = $asiakasrow["valkoodi"];
-        $laskurow["vienti_kurssi"]  = $kurssi;
-        $laskurow["maa"]      = $asiakasrow["maa"];
+        $laskurow["vienti"]         = $asiakasrow["vienti"];
+        $laskurow["alv"]            = $asiakasrow["alv"];
+        $laskurow["valkoodi"]       = $asiakasrow["valkoodi"];
+        $laskurow["vienti_kurssi"]  = $kurssi['kurssi'];
+        $laskurow["maa"]            = $asiakasrow["maa"];
         $laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
 
         $palautettavat_kentat = "hinta,netto,alehinta_alv,alehinta_val,hintaperuste,aleperuste";
@@ -419,6 +419,12 @@ else {
 
         list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
+        if ((float) $hinta == 0) {
+          $hinta = $rrow["myyntihinta"];
+        }
+
+        $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+
         $onko_asiakkaalla_alennuksia = FALSE;
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -437,14 +443,6 @@ else {
         }
 
         if ($_hintakentta == "") $_hintakentta = 'myyntihinta';
-
-        if ((float) $hinta == 0) {
-          $hinta = $rrow["myyntihinta"];
-        }
-
-        if ($laskurow['valkoodi'] != $alehinta_val) {
-          $hinta = $hinta / $kurssi["kurssi"];
-        }
 
         if ($netto == "") {
           $alennukset = generoi_alekentta_php($hinnat, 'M', 'kerto');
@@ -465,7 +463,7 @@ else {
         if ($_hintakentta == "myymalahinta") $_laji = "K";
         else $_laji = "";
 
-       $query =  "  SELECT *
+        $query =  " SELECT *
                     FROM hinnasto
                     WHERE yhtio   = '$kukarow[yhtio]'
                     and tuoteno   = '$rrow[tuoteno]'
@@ -481,8 +479,8 @@ else {
 
         if (mysql_num_rows($hresult) == 1) {
 
-          $hrow                   = mysql_fetch_assoc($hresult);
-          $rrow['alv']            = $hrow["alv"];
+          $hrow = mysql_fetch_assoc($hresult);
+          $rrow['alv'] = $hrow["alv"];
 
           if ($_laji == "K") {
             $rrow["myymalahinta"] = $hrow["hinta"];
@@ -491,11 +489,9 @@ else {
             $rrow["myyntihinta"]  = $hrow["hinta"];
           }
         }
-        else {
-          if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
-            $rrow["myymalahinta"] = hintapyoristys($rrow["myymalahinta"] / $kurssi["kurssi"]);
-            $rrow["myyntihinta"]  = hintapyoristys($rrow["myyntihinta"]  / $kurssi["kurssi"]);
-          }
+        elseif ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+          $rrow["myymalahinta"] = hintapyoristys($rrow["myymalahinta"] / $kurssi["kurssi"]);
+          $rrow["myyntihinta"]  = hintapyoristys($rrow["myyntihinta"]  / $kurssi["kurssi"]);
         }
 
         if ($yhtiorow["alv_kasittely"] == "") {
@@ -580,6 +576,10 @@ else {
           $excelsarake++;
           $worksheet->writeNumber($excelrivi, $excelsarake, hintapyoristys($asiakashinta_veroton));
           $excelsarake++;
+
+          $worksheet->writeString($excelrivi, $excelsarake, $laskurow['valkoodi']);
+          $excelsarake++;
+
           $excelrivi++;
         }
 

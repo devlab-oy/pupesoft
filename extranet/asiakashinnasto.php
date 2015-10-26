@@ -222,12 +222,15 @@ else {
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
-      require_once 'inc/ProgressBar.class.php';
+      if (@require_once "inc/ProgressBar.class.php");
+      elseif (@require_once "ProgressBar.class.php");
+
       $bar = new ProgressBar();
       $elements = mysql_num_rows($rresult); // total number of elements to process
       $bar->initialize($elements); // print the empty bar
 
-      include 'inc/pupeExcel.inc';
+      if (@include "inc/pupeExcel.inc");
+      elseif (@include "pupeExcel.inc");
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);

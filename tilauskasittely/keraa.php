@@ -3690,6 +3690,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $sel_lahete[$tp_tulostin] = "SELECTED";  // laskuprintteri
         }
 
+        # Haetaan lähetetulostin käyttäjän takaa
+        if (!empty($kukarow['lahetetulostin'])) {
+          $sel_lahete = array();
+          $sel_lahete[$kukarow['lahetetulostin']] = 'selected';
+        }
+
         if (strpos($tila, 'G') !== false) {
           $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
         }

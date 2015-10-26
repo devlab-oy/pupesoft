@@ -92,6 +92,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
       $fh = fopen($ftpget_dest[$operaattori]."/".$file, "r") or die ("Tiedoston avaus epäonnistui!");
 
+      $otunnukset_arr = $tunnukset_arr = $laskurowt = $toimitustaparowt = array();
+
       while ($rivi = fgets($fh)) {
 
         list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", $rivi);
@@ -124,6 +126,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                     AND lasku.tunnus  = '{$eranumero_sscc}'";
           $laskurow = mysql_fetch_assoc(pupe_query($query));
+          $laskurowt[] = $laskurow;
         }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
@@ -213,12 +216,16 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
 
+          $laskurowt[] = $laskurow;
+
           $query = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND selite  = '{$laskurow['toimitustapa']}'";
           $toimitustapa_res = pupe_query($query);
           $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+          $toimitustaparowt[] = $toimitustapa_row;
         }
         else {
           $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
@@ -231,6 +238,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                       AND selite  = '{$laskurow['toimitustapa']}'";
             $toimitustapa_res = pupe_query($query);
             $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+            $toimitustaparowt[] = $toimitustapa_row;
 
             // koontierätulostuksessa pikkuisen eri tavalla kuin muissa
             if ($toimitustapa_row["tulostustapa"] == 'L') {
@@ -317,15 +326,21 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         }
 
         $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
-                  GROUP_CONCAT(distinct $_select_otunnus) otunnus
+                  GROUP_CONCAT(distinct {$_select_otunnus}) otunnus
                   FROM rahtikirjat
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   {$_rahtiwherelisa}";
         $tunnukset_res = pupe_query($query);
         $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
 
-        $otunnukset = $tunnukset_row['otunnus'];
-        $tunnukset = $tunnukset_row['rtunnus'];
+        $otunnukset_arr[] = $tunnukset_row['otunnus'];
+        $tunnukset_arr[] = $tunnukset_row['rtunnus'];
+      }
+
+      foreach ($laskurowt as $key => $laskurow) {
+        $toimitustapa_row = $toimitustaparowt[$key];
+        $otunnukset = $otunnukset_arr[$key];
+        $tunnukset = $tunnukset_arr[$key];
 
         if ($laskurow['toimitusvahvistus'] != '') {
 

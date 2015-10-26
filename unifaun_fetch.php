@@ -333,7 +333,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
       }
 
       foreach ($otunnukset_arr as $key => $otunnukset) {
-        $laskurow = $laskurowt[$key]
+        $laskurow = $laskurowt[$key];
         $toimitustapa_row = $toimitustaparowt[$key];
         $tunnukset = $tunnukset_arr[$key];
 

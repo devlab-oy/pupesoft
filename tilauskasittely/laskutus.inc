@@ -2,10 +2,6 @@
 
 // tarvitaan $kukarow['kesken'] jossa on laskutettava tilaus
 // ja $laskpp $laskkk $laskvv jos halutaan m‰‰ritell‰ poikkeava laskutuspvm
-
-// alter table yhtion_parametrit add column myyntilaskujen_kurssipaiva int(1) not null default 0 after ostolaskujen_kurssipaiva;
-$lopetus = "";
-
 $tulos_ulos_laskutus = "";
 
 // jos erisuuri kun nollaa tai tyhj‰‰ niin k‰ytet‰‰n laskutuspvm:‰‰
@@ -98,8 +94,6 @@ else {
       }
 
       $valres = pupe_query($query);
-
-      echo "$query<br>";
 
       if ($valrow = mysql_fetch_assoc($valres)) {
         // Kurssi lˆytyi ja se vaihtuu

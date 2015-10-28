@@ -35,7 +35,7 @@ else {
   $orow = mysql_fetch_assoc($laskutusres);
 
   // Tsekataan valuuttakurssi kuntoon
-  if (trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+  if (!empty($yhtiorow['myyntilaskujen_kurssipaiva']) and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
     $valpaiva = "";
 
@@ -92,7 +92,6 @@ else {
                   ORDER BY kurssipvm DESC
                   LIMIT 1";
       }
-
       $valres = pupe_query($query);
 
       if ($valrow = mysql_fetch_assoc($valres)) {

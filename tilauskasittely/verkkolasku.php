@@ -164,6 +164,10 @@ else {
       // Korjataan vuosilukua
       if ($laskvv < 1000) $laskvv += 2000;
 
+      // Etunollat mukaan
+      $laskkk = sprintf('%02d', $laskkk);
+      $laskpp = sprintf('%02d', $laskpp);
+
       // Katotaan ensin, että se on ollenkaan validi
       if (checkdate($laskkk, $laskpp, $laskvv)) {
 
@@ -378,6 +382,8 @@ else {
               yhtion_parametrit READ,
               yhtion_toimipaikat READ,
               tilausrivin_lisatiedot AS tl READ,
+              valuu READ,
+              valuu_historia READ,
               varastopaikat AS v_lahdevarasto READ,
               varastopaikat AS v_kohdevarasto READ,
               korvaavat_kiellot READ,

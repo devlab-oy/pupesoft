@@ -707,7 +707,12 @@ if (!function_exists('tarjous_rivi_otsikot')) {
         $pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),      $page_tarjous, $norm);
 
         if (trim($naytetaanko_rivihinta) == '') {
-          $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $norm);
+          if ($yhtiorow["tarjoustyyppi"] == 4) {
+            $pdf_tarjous->draw_text(380, $kala + 15, t("Hinta/kpl", $kieli), $page_tarjous, $norm);
+          }
+          else {
+            $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $norm);
+          }
         }
 
         if ($yhtiorow["tarjoustyyppi"] != 4) {
@@ -1088,8 +1093,15 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
     }
 
     if ($naytetaanko_rivihinta == '') {
-      $oikpos = $pdf_tarjous->strlen(hintapyoristys($row["hinta"]), $norm);
-      $pdf_tarjous->draw_text(420-$oikpos, $kala, hintapyoristys($row["hinta"]), $page_tarjous[$sivu], $norm);
+      if ($yhtiorow["tarjoustyyppi"] == 4) {
+        $hinta = hintapyoristys($row["rivihinta"] / $row["varattu"]);
+      }
+      else {
+        $hinta = hintapyoristys($row["hinta"]);
+      }
+
+      $oikpos = $pdf_tarjous->strlen($hinta, $norm);
+      $pdf_tarjous->draw_text(420 - $oikpos, $kala, $hinta, $page_tarjous[$sivu], $norm);
     }
 
     $ed_ale = array();

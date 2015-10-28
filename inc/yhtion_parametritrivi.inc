@@ -541,6 +541,24 @@ if ($fieldname == "ostolaskujen_kurssipaiva") {
   $jatko = 0;
 }
 
+if ($fieldname == "myyntilaskujen_kurssipaiva") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = (int) $trow[$i];
+  $sel = array("0" => "", "1" => "", "2" => "", "3" => "");
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>".t("Myyntilaskun valuuttakurssi tilauksen luontipäivän mukaan");
+  $ulos .= "<option value = '1' $sel[1]>".t("Myyntilaskun valuuttakurssi tilauksen toimituspäivän mukaan");
+  $ulos .= "<option value = '2' $sel[2]>".t("Myyntilaskun valuuttakurssi laskun päiväyksen mukaan");
+  $ulos .= "<option value = '3' $sel[3]>".t("Myyntilaskun valuuttakurssi laskutushetken mukaan");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 
 if ($fieldname == "tyomaaraystyyppi") {
 

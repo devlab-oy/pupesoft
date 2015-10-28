@@ -5021,7 +5021,7 @@ if ($tee == '') {
         //Tuotetta ei löydy, aravataan muutamia muuttujia
         $trow["alv"] = $laskurow["alv"];
       }
-"5024 rivitunnus $rivitunnus <br><br>";
+
       if ($tuoteno != '' and $kpl != 0) {
         require 'lisaarivi.inc';
       }

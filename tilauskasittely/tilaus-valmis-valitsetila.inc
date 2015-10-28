@@ -370,6 +370,52 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
     pupe_query($query);
   }
 
+  $query = "SELECT tilausrivi.kerattyaika,
+            tilausrivi.toimitettuaika
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+            WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+            AND tilausrivi.otunnus = '{$laskurow["tunnus"]}'
+            AND tilausrivi.kerattyaika != '0000-00-00 00:00:00'
+            AND tuote.ei_saldoa = ''
+            ORDER BY tilausrivi.toimitettuaika DESC
+            LIMIT 1";
+  $kerattyja = pupe_query($query);
+
+  if (mysql_num_rows($kerattyja) > 0) {
+    $kerattyjarow = mysql_fetch_assoc($kerattyja);
+
+    $tila = 'L';
+    $alatila = 'C';
+
+    // P‰ivitet‰‰n samalla kaikki uudetkin rivit ker‰tyiksi
+    $query = "UPDATE tilausrivi
+                SET keratty = '$kukarow[kuka]', kerattyaika = now()
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and otunnus  = '$laskurow[tunnus]'
+                and keratty  = ''
+                and var      not in ('P','J','O','S')
+                and tyyppi  != 'D'";
+    $result = pupe_query($query);
+
+    if ($kerattyjarow["toimitettuaika"] != "0000-00-00 00:00:00") {
+      $tila = 'L';
+      $alatila = 'D';
+
+      // P‰ivitet‰‰n samalla kaikki uudetkin rivit toimitetuiksi
+      $query = "UPDATE tilausrivi
+                SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and otunnus     = '$laskurow[tunnus]'
+                and keratty    != ''
+                and toimitettu  = ''
+                and var         not in ('P','J','O','S')
+                and tyyppi     != 'D'";
+      $result = pupe_query($query);
+
+    }
+  }
+
   $query  = "UPDATE lasku SET
              tila        = '{$tila}',
              alatila     = '{$alatila}'

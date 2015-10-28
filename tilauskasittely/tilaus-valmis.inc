@@ -210,7 +210,7 @@ $_luottoraja_ylitys =  (in_array($yhtiorow["luottorajan_ylitys"], array("J", "K"
 if ($_keratty_toimitettu and $_luottoraja_ylitys) {
   $_keratty_ja_parametri = FALSE;
 }
-#echo "207 ",var_dump($_keratty_toimitettu, $_luottoraja_ylitys, $_keratty_ja_parametri),"<br><br>"; exit;
+
 // Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''

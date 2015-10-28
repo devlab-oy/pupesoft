@@ -124,6 +124,9 @@ else {
           pupe_query($query);
         }
       }
+      else {
+        $tulos_ulos_laskutus .=  "<font class='error'>".t("VIRHE: päivälle %s ei löytynyt valuuttakurssia", "", $valpaiva)." $orow[valkoodi]!";
+      }
     }
   }
 

@@ -5325,7 +5325,7 @@ if ($tee == '') {
       echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"), "</font>";
 
       if ($yhtiorow['luottorajan_ylitys'] != '') {
-        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
+        echo "<font class='error'>, ", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
         echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font><br />";
       }
@@ -5333,31 +5333,13 @@ if ($tee == '') {
       $_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
       $_luottoraja_ylitys =  (in_array($yhtiorow["luottorajan_ylitys"], array("J", "K", "L", "M")));
 
-
       if ($_keratty_toimitettu and $_luottoraja_ylitys) {
-        echo "<font class='error'> ", t("Et voi lisätä rivejä, kun luottoraja ylittyisi ja tilaus on jo kerätty ja/tai toimitettu"), "!";
+        echo "<font class='error'>", t("Tilaus oli jo kertätty ja/tai toimitettu"), "!";
+        echo " ", t("Uusia rivejä ei voi luottorajan ylityttyä lisätä"), "!";
         echo "</font><br />";
-
-        $uusin_rivi = "SELECT tunnus
-                       FROM tilausrivi
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND kerattyaika = '0000-00-00 00:00:00'
-                       AND tyyppi != 'D'
-                       ORDER BY tilausrivi.laadittu DESC
-                       LIMIT 1";
-        $rivi = mysql_fetch_assoc(pupe_query($uusin_rivi));
-
-        if ($rivi["tunnus"] > 0) {
-          $query = "UPDATE tilausrivi
-                    SET tyyppi = 'D'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$rivi['tunnus']}'";
-          pupe_query($query);
-        }
-
       }
 
-      if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
+      if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M" or ($_keratty_toimitettu and $_luottoraja_ylitys)) {
         $muokkauslukko = 'LUKOSSA';
         $_luottoraja_ylivito = true;
       }
@@ -5450,31 +5432,13 @@ if ($tee == '') {
           $_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
           $_luottoraja_ylitys =  (in_array($yhtiorow["luottorajan_ylitys"], array("J", "K", "L", "M")));
 
-
           if ($_keratty_toimitettu and $_luottoraja_ylitys) {
-            echo "<font class='error'> ", t("Et voi lisätä rivejä, kun luottoraja ylittyisi ja tilaus on jo kerätty ja/tai toimitettu"), "!";
+            echo "<font class='error'>", t("Tilaus oli jo kertätty ja/tai toimitettu"), "!";
+            echo " ", t("Uusia rivejä ei voi luottorajan ylityttyä lisätä"), "!";
             echo "</font><br />";
-
-            $uusin_rivi = "SELECT tunnus
-                           FROM tilausrivi
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND kerattyaika = '0000-00-00 00:00:00'
-                           AND tyyppi != 'D'
-                           ORDER BY tilausrivi.laadittu DESC
-                           LIMIT 1";
-            $rivi = mysql_fetch_assoc(pupe_query($uusin_rivi));
-
-            if ($rivi["tunnus"] > 0) {
-              $query = "UPDATE tilausrivi
-                        SET tyyppi = 'D'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$rivi['tunnus']}'";
-              pupe_query($query);
-            }
-
           }
 
-          if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
+          if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M" or ($_keratty_toimitettu and $_luottoraja_ylitys)) {
             $muokkauslukko = 'LUKOSSA';
             $_luottoraja_ylivito = true;
           }

@@ -202,6 +202,15 @@ else {
   $luottorajavirhe_ylivito_valmis = true;
 }
 
+$_keratty_ja_parametri = TRUE;
+
+$_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
+$_luottoraja_ylitys =  (in_array($yhtiorow["luottorajan_ylitys"], array("J", "K", "L", "M")));
+
+if ($_keratty_toimitettu and $_luottoraja_ylitys) {
+  $_keratty_ja_parametri = FALSE;
+}
+#echo "207 ",var_dump($_keratty_toimitettu, $_luottoraja_ylitys, $_keratty_ja_parametri),"<br><br>"; exit;
 // Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
@@ -223,7 +232,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   // Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
   $lopetus = "";
 }
-elseif ($luottorajavirhe != '' or $ylivito > 0) {
+elseif (($luottorajavirhe != '' or $ylivito > 0) and $_keratty_ja_parametri) {
 
   // nollataan toimitustavan_lahto
   $toimitustavan_lahto_update = "";

@@ -914,7 +914,14 @@ if ($tee == "VALITSE") {
 
       if ($toim == "VIENTI") {
         echo "<tr><th>", t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
-        echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
+        echo "<td colspan='3'>";
+        echo "<select name='tullinimike_ja_alkuperamaa'>";
+        echo "<option value=''>" . t("Ei tulosteta") . "</option>";
+        echo "<option value='A'>" . t("Tulosta tullinimike ja alkuperämaa") . "</option>";
+        echo "<option value='B'>" . t("Tulosta vain tullinimike") . "</option>";
+        echo "<option value='C'>" . t("Tulosta tullinimike ja alkuperämaa (Kotimaan tuotantoa)") . "</option>";
+        echo "</select>";
+        echo "</td></tr>";
       }
 
       if (!$kaytetaan_maksupaatetta) {

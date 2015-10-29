@@ -202,9 +202,7 @@ else {
     $rresult = pupe_query($query);
 
     if (mysql_num_rows($rresult) == 0) {
-
       $osuma = false;
-
     }
     else {
 
@@ -224,12 +222,15 @@ else {
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
-      require_once 'inc/ProgressBar.class.php';
+      if (@require_once "inc/ProgressBar.class.php");
+      elseif (@require_once "ProgressBar.class.php");
+
       $bar = new ProgressBar();
       $elements = mysql_num_rows($rresult); // total number of elements to process
       $bar->initialize($elements); // print the empty bar
 
-      include 'inc/pupeExcel.inc';
+      if (@include "inc/pupeExcel.inc");
+      elseif (@include "pupeExcel.inc");
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -305,9 +306,11 @@ else {
         else {
           $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen asiakashinta", $hinkieli), $format_bold);
           $excelsarake++;
-          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton asiakashinta ", $hinkieli), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake, t("Veroton asiakashinta", $hinkieli), $format_bold);
           $excelsarake++;
         }
+
+        $worksheet->writeString($excelrivi, $excelsarake, t("Valuutta", $hinkieli), $format_bold);
         $excelrivi++;
       }
 
@@ -380,14 +383,14 @@ else {
           $alehinrrow = $rrow;
         }
 
-        //haetaan asiakkaan oma hinta
-        $laskurow["ytunnus"]     = $asiakasrow["ytunnus"];
+        // Haetaan asiakkaan oma hinta
+        $laskurow["ytunnus"]        = $asiakasrow["ytunnus"];
         $laskurow["liitostunnus"]   = $asiakasrow["tunnus"];
-        $laskurow["vienti"]     = $asiakasrow["vienti"];
-        $laskurow["alv"]       = $asiakasrow["alv"];
-        $laskurow["valkoodi"]    = $asiakasrow["valkoodi"];
-        $laskurow["vienti_kurssi"]  = $kurssi;
-        $laskurow["maa"]      = $asiakasrow["maa"];
+        $laskurow["vienti"]         = $asiakasrow["vienti"];
+        $laskurow["alv"]            = $asiakasrow["alv"];
+        $laskurow["valkoodi"]       = $asiakasrow["valkoodi"];
+        $laskurow["vienti_kurssi"]  = $kurssi['kurssi'];
+        $laskurow["maa"]            = $asiakasrow["maa"];
         $laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
 
         $palautettavat_kentat = "hinta,netto,alehinta_alv,alehinta_val,hintaperuste,aleperuste";
@@ -419,6 +422,12 @@ else {
 
         list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
+        if ((float) $hinta == 0) {
+          $hinta = $rrow["myyntihinta"];
+        }
+
+        $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+
         $onko_asiakkaalla_alennuksia = FALSE;
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -438,23 +447,55 @@ else {
 
         if ($_hintakentta == "") $_hintakentta = 'myyntihinta';
 
-        if ((float) $hinta == 0) {
-          $hinta = $rrow["myyntihinta"];
-        }
-
         if ($netto == "") {
           $alennukset = generoi_alekentta_php($hinnat, 'M', 'kerto');
 
           $asiakashinta = hintapyoristys($hinta * $alennukset);
         }
         else {
-          $asiakashinta = $hinta;
+          $asiakashinta = hintapyoristys($hinta);
         }
 
         $veroton         = 0;
         $verollinen        = 0;
         $asiakashinta_veroton    = 0;
         $asiakashinta_verollinen = 0;
+
+        // jos suositushintoja esim Ruotsiin, niin haetaan ne hinnastoista (ei koske asiakkaan hintoja)
+        // 17. hinnasto.hinta tuotteen bruttohinta hinnastosta asiakkaan valuutassa
+        if ($_hintakentta == "myymalahinta") $_laji = "K";
+        else $_laji = "";
+
+        $query =  " SELECT *
+                    FROM hinnasto
+                    WHERE yhtio   = '$kukarow[yhtio]'
+                    and tuoteno   = '$rrow[tuoteno]'
+                    and tuoteno  != ''
+                    and laji      = '{$_laji}'
+                    and valkoodi  = '{$laskurow['valkoodi']}'
+                    and maa       in ('$laskurow[maa]','')
+                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                    and ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
+                    ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa DESC
+                    LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) == 1) {
+
+          $hrow = mysql_fetch_assoc($hresult);
+          $rrow['alv'] = $hrow["alv"];
+
+          if ($_laji == "K") {
+            $rrow["myymalahinta"] = $hrow["hinta"];
+          }
+          else {
+            $rrow["myyntihinta"]  = $hrow["hinta"];
+          }
+        }
+        elseif ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+          $rrow["myymalahinta"] = hintapyoristys($rrow["myymalahinta"] / $kurssi["kurssi"]);
+          $rrow["myyntihinta"]  = hintapyoristys($rrow["myyntihinta"]  / $kurssi["kurssi"]);
+        }
 
         if ($yhtiorow["alv_kasittely"] == "") {
           // Hinnat sisältävät arvonlisäveron
@@ -538,6 +579,10 @@ else {
           $excelsarake++;
           $worksheet->writeNumber($excelrivi, $excelsarake, hintapyoristys($asiakashinta_veroton));
           $excelsarake++;
+
+          $worksheet->writeString($excelrivi, $excelsarake, $laskurow['valkoodi']);
+          $excelsarake++;
+
           $excelrivi++;
         }
 

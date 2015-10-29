@@ -127,7 +127,7 @@ if (!isset($nayta_pdf) and isset($livesearch_tee) and $livesearch_tee == "TUOTEH
   exit;
 }
 
-if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (!isset($nayta_pdf) and in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 

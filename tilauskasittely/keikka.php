@@ -82,7 +82,7 @@ if ($onkolaajattoimipaikat and isset($otunnus)) {
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
-if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 

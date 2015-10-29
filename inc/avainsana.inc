@@ -31,6 +31,7 @@ $mysqlaliasarray['VALMISTUSLINJA']['selitetark_2']   = "Päiväkapasiteetti sekunn
 
 $mysqlaliasarray['TOIMVAHVISTUS']['selite']         = "Toimitusvahvistuksen tiedoston nimi";
 $mysqlaliasarray['TOIMVAHVISTUS']['selitetark']    = "Toimitusvahvistuksen nimi";
+$mysqlaliasarray['TOIMVAHVISTUS']['selitetark_2']    = "Toimitusvahvistus tyyppi";
 
 $mysqlaliasarray['OSTOTIL_TILTYYP']['selite']       = "Ostotilauksen tilaustyyppi";
 $mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark']   = "Ostotilauksen tilaustyypin nimi";

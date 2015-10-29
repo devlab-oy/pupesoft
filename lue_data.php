@@ -2567,6 +2567,11 @@ if (!$cli and !isset($api_kentat)) {
   // Tiettyjen taulujen spessuvalinnat
   require "inc/luedata_ja_dataimport_spessuvalinnat.inc";
 
+  echo "  <tr><th>".t("Valitse tiedosto").":</th>
+        <td><input name='userfile' type='file'></td>
+      <td class='back'><input type='submit' name='laheta' value='".t("L‰het‰")."'></td>
+      </tr>";
+
   // Taulujen pakolliset sarakkeet ym kuvauksia.
   require "inc/pakolliset_sarakkeet.inc";
 
@@ -2575,27 +2580,63 @@ if (!$cli and !isset($api_kentat)) {
     $_taulu = array_shift($taulut);
   }
 
-  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu);
+  if (substr($_taulu, 0, 10) == 'puun_alkio') {
+    $_taulu_query = "puun_alkio";
+  }
+  else {
+    $_taulu_query = $_taulu;
+  }
 
-  echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
-  echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";
+  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu_query);
+
+  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
+  echo "<td><ul><li>".strtolower(implode("</li><li>", $pakolliset))."</li></ul></td></tr>";
 
   if (!empty($wherelliset)) {
-    echo "  <tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
-    echo "  <td>".strtolower(implode(", ", $wherelliset))."</td></tr>";
+    echo "<tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
+    echo "<td><ul><li>".strtolower(implode("</li><li>", $wherelliset))."</li></ul></td></tr>";
   }
 
   if (!empty($kielletyt)) {
-    echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
-    echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
+    echo "<tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
+    echo "<td><ul><li>".strtolower(implode("</li><li>", $kielletyt))."</li></ul></td></tr>";
   }
 
-  echo "  <tr><th>".t("Valitse tiedosto").":</th>
-        <td><input name='userfile' type='file'></td>
-      <td class='back'><input type='submit' name='laheta' value='".t("L‰het‰")."'></td>
-      </tr>
+  $_ei_olemassa = array('todo');
 
-      </table>
+  if (!in_array($_taulu_query, $_ei_olemassa)) {
+    $query = "DESC {$_taulu_query}";
+    $_res = pupe_query($query);
+
+    $_kentat = array();
+
+    while ($_row = mysql_fetch_assoc($_res)) {
+      if (in_array($_row['Field'], array('tunnus','yhtio'))) {
+        continue;
+      }
+
+      if (!in_array(strtoupper($_row['Field']), $pakolliset) and !in_array(strtoupper($_row['Field']), $wherelliset) and !in_array(strtoupper($_row['Field']), $kielletyt)) {
+        $_kentat[] = $_row['Field'];
+      }
+    }
+
+    if (!empty($_kentat)) {
+      echo "<tr>";
+      echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
+      echo "<td>";
+      echo "<ul>";
+      echo "<li>";
+
+      echo implode("</li><li>", $_kentat);
+
+      echo "</li>";
+      echo "</ul>";
+      echo "</td>";
+      echo "</tr>";
+    }
+  }
+
+  echo "</table>
     </form>
     <br>";
 }

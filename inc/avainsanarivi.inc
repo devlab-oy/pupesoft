@@ -298,6 +298,8 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMIT_TKIRJAST") $ulos .= "<option value='TOIMIT_TKIRJAST' {$avain_sel['TOIMIT_TKIRJAST']}>".t("Tiedostokirjastossa n‰kyv‰ toimittaja")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "AIHEAL_LAATUAS")  $ulos .= "<option value='AIHEAL_LAATUAS' {$avain_sel['AIHEAL_LAATUAS']}>" . t("Laatuasiakirjaselaimessa n‰ytett‰v‰ aihealue") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_LAATUAS")  $ulos .= "<option value='LITETY_LAATUAS' {$avain_sel['LITETY_LAATUAS']}>" . t("Laatuasiakirjaselaimessa n‰ytett‰v‰ tiedostotyyppi") . "</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "AIHEAL_LUVLIS")  $ulos .= "<option value='AIHEAL_LUVLIS' {$avain_sel['AIHEAL_LUVLIS']}>" . t("Luvat ja lisenssit selaimessa n‰ytett‰v‰ aihealue") . "</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LITETY_LUVLIS")  $ulos .= "<option value='LITETY_LUVLIS' {$avain_sel['LITETY_LUVLIS']}>" . t("Luvat ja lisenssit selaimessa n‰ytett‰v‰ tiedostotyyppi") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOP_LAITLUET")    $ulos .= "<option value='SOP_LAITLUET' {$avain_sel['SOP_LAITLUET']}>" . t("Sopimuksen laiteluettelon valinnaisen sarakkeen tuotekoodi") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR")  $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
@@ -958,6 +960,20 @@ if ($avain_sel["LITETY_LAATUAS"] == "SELECTED" and $_selite) {
   $jatko = 0;
 }
 
+if ($avain_sel["LITETY_LUVLIS"] == "SELECTED" and $_selite) {
+  $vresult = t_avainsana("AIHEAL_LUVLIS");
+
+  $ulos = "<td><select name = '{$nimi}'>";
+
+  while ($row = mysql_fetch_assoc($vresult)) {
+    $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]}</option>";
+  }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
   $query = "SELECT toimi.tunnus,
             toimi.nimi
@@ -1011,7 +1027,7 @@ if ($avain_sel["DPAVAINSANALAJI"] == "SELECTED" and $_selitetark_2) {
 
 if ($avain_sel["ASIAKASHINNASTO"] == "SELECTED" and $_selite) {
 
-  $sel = $trow[$i] == 'MYYMALAHINTA' ? "selected" : "";
+  $sel = $trow[$i] == 'myymalahinta' ? "selected" : "";
 
   $ulos = "<td><select name = '{$nimi}'>";
   $ulos .= "<option value = 'myyntihinta'>".t("Myyntihinta")."</option>";

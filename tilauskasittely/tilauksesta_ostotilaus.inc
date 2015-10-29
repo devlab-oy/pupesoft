@@ -215,7 +215,8 @@ if (!function_exists("tilauksesta_ostotilaus")) {
               and toim_maa    = '{$toim_maa}'
               and varasto     = '{$oletusostovarasto}'
               and ohjausmerkki   = '{$ohjausmerkki}'
-              and tilaustyyppi  = '$tilaustyyppi'";
+              and tilaustyyppi  = '$tilaustyyppi'
+              and vanhatunnus   = '{$myytilrow['yhtio_toimipaikka']}'";
             break;
           case '2':
           case '3':

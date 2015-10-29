@@ -1803,7 +1803,7 @@ if ($tila == 'ostolasku_kulut') {
         $alv_tili = $yhtiorow["alv"];
       }  
       
-      $query = "SELECT substring(laadittu, 1, 10), sum(summa) summa
+      $query = "SELECT laadittu, sum(summa) summa
                 from tiliointi
                 where yhtio = '{$kukarow['yhtio']}'
                 and ltunnus = '{$tunnus}'

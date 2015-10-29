@@ -998,7 +998,7 @@ if (!function_exists('rivi_otsikot')) {
 }
 
 if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
-  function lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli) {
+  function lisaa_tullinimike_ja_alkuperamaa($tullinimike_ja_alkuperamaa, $row, $pdf_lasku, $thispage, $kala, $kieli) {
     global $yhtiorow, $kukarow;
 
     // Fonttimuuttujat
@@ -1007,18 +1007,39 @@ if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
     $kala = $kala - 10;
 
     // Haetaan tullinimike ja alkuperämaa
-    $query = "SELECT alkuperamaa
+    $query = "SELECT alkuperamaa,
+              if (jarjestys = 0, 9999, jarjestys) sorttaus
               FROM tuotteen_toimittajat
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tuoteno = '{$row['tuoteno']}'
-              ORDER BY jarjestys ASC
+              ORDER BY sorttaus
               LIMIT 1";
     $alkuperamaa_res = pupe_query($query);
     $alkuperamaa_row = mysql_fetch_assoc($alkuperamaa_res);
 
     $tullinimike_ja_alkuperamaa_text = t("Tullinimike", $kieli).": {$row["tullinimike"]}";
 
-    if ($alkuperamaa_row['alkuperamaa'] != '') $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$alkuperamaa_row['alkuperamaa']}";
+    if ($tullinimike_ja_alkuperamaa == "A") {
+      // Tsekataan onko tämä valmiste
+      $query = "SELECT tunnus
+                FROM tuoteperhe
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND isatuoteno = '{$row['tuoteno']}'
+                LIMIT 1";
+      $alkuperamaa_res = pupe_query($query);
+
+      if (mysql_num_rows($alkuperamaa_res)) {
+        // Valmisteet ovat kotimaan tuotantoa
+        $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$yhtiorow['maa']}";
+      }
+      elseif ($alkuperamaa_row['alkuperamaa'] != '') {
+        $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$alkuperamaa_row['alkuperamaa']}";
+      }
+    }
+    elseif ($tullinimike_ja_alkuperamaa == "C") {
+      // Kaikki tuotteet ovat kotimaan tuotantoa
+      $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$yhtiorow['maa']}";
+    }
 
     $pdf_lasku->draw_text(35, $kala, $tullinimike_ja_alkuperamaa_text, $thispage, $pieni);
 
@@ -1230,7 +1251,7 @@ if (!function_exists('rivi_original')) {
     }
 
     if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-      $kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
+      $kala = lisaa_tullinimike_ja_alkuperamaa($tullinimike_ja_alkuperamaa, $row, $pdf_lasku, $thispage, $kala, $kieli);
     }
 
     if ($laskutyyppi == 18 and $kala >= $kuinka_alhaalla_kaytiin_tuoteno) {
@@ -1367,7 +1388,7 @@ if (!function_exists('rivi_plain')) {
     }
 
     if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-      $kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
+      $kala = lisaa_tullinimike_ja_alkuperamaa($tullinimike_ja_alkuperamaa, $row, $pdf_lasku, $thispage, $kala, $kieli);
     }
 
     $kala = $kala - 15;
@@ -1507,7 +1528,7 @@ if (!function_exists('rivi_plain_2')) {
     }
 
     if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-      $kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
+      $kala = lisaa_tullinimike_ja_alkuperamaa($tullinimike_ja_alkuperamaa, $row, $pdf_lasku, $thispage, $kala, $kieli);
     }
 
     $kala = $kala - 15;
@@ -1681,7 +1702,7 @@ if (!function_exists('rivi_viro')) {
     }
 
     if ($tullinimike_ja_alkuperamaa != '' and $row['tullinimike'] != '') {
-      $kala = lisaa_tullinimike_ja_alkuperamaa($row, $pdf_lasku, $thispage, $kala, $kieli);
+      $kala = lisaa_tullinimike_ja_alkuperamaa($tullinimike_ja_alkuperamaa, $row, $pdf_lasku, $thispage, $kala, $kieli);
     }
 
     $kala = $kala - 15;

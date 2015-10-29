@@ -1369,8 +1369,15 @@ if ($tee == '') {
 
     mysql_data_seek($kires, 0);
 
+    $sel_tulostin = "";
+
+    if (!empty($kukarow['rahtikirjatulostin'])) {
+      $sel_tulostin = $kukarow['rahtikirjatulostin'];
+    }
+
     while ($kirow = mysql_fetch_assoc($kires)) {
-      echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+      $selected = $sel_tulostin == $kirow['tunnus'] ? "selected" : "";
+      echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]' {$selected}>$kirow[kirjoitin]</option>";
     }
 
     echo "</select></td></tr>";

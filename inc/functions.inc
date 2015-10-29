@@ -8860,7 +8860,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 }
 
 if (!function_exists("livesearch_asiakkaantilausnumero")) {
-  function livesearch_asiakkaantilausnumero($toim) {
+  function livesearch_asiakkaantilausnumero($toim, $hakukentta = "asiakkaan_tilausnumero") {
     global $yhtiorow, $kukarow, $palvelin2;
 
     pupeslave_start();
@@ -8913,11 +8913,18 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and asiakkaan_tilausnumero like ('$haku%') ";
+        $haku_query .= "and {$hakukentta} like ('$haku%') ";
       }
 
-      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika, tunnus
-                FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+      if ($hakukentta != "asiakkaan_tilausnumero") {
+        $_index = "";
+      }
+      else {
+        $_index = "use index (yhtio_asiakkaan_tilausnumero)";
+      }
+
+      $query = "SELECT tunnus, {$hakukentta}, nimi, luontiaika, tunnus
+                FROM lasku $_index
                 WHERE tila in ('L','U','N','R','E','D')
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
@@ -8953,7 +8960,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
           echo "\"
                 style='padding:2px;'>
                 <span class='livesearch_rivispan_{$hakuid}'>
-                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+                <font style='font-weight:bold'>$row[$hakukentta]</font> &raquo; $row[nimi] - $laadittu
                 </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;

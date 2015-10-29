@@ -3111,7 +3111,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
-      echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
+      echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
     }
 
     $oslappkpl = $oslappkpl_keraysera != 0 ? $oslappkpl_keraysera : $yhtiorow['oletus_rahtikirja_oslappkpl'];
@@ -3162,7 +3162,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
     }
 
-    echo "<input type='text' size='4' name='oslappkpl' id='oslapcheck' value='$oslappkpl' {$disabled} />";
+    echo "<input type='text' maxlength='2' size='4' name='oslappkpl' id='oslapcheck' value='$oslappkpl' {$disabled} />";
 
     if ($oslappkpl_hidden != 0) {
       echo "<input type='hidden' name='oslappkpl' id='oslapcheck2' value='{$oslappkpl_hidden}' />";
@@ -3185,7 +3185,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
-      echo "</select> ".t("Kpl").": <input type='text' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
+      echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
     }
 
     if ($vakrow['vaktuotteet_imdg'] != '') {
@@ -3205,7 +3205,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       if (!isset($dgdkpl)) $dgdkpl = 1;
 
-      echo "</select> ", t("Kpl"), ": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
+      echo "</select> ", t("Kpl"), ": <input type='text' maxlength='2' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
     }
 
     if ($vakrow['vaktuotteet'] != '') {

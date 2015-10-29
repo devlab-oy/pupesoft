@@ -706,7 +706,10 @@ if (!function_exists('tarjous_rivi_otsikot')) {
       else {
         $pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),      $page_tarjous, $norm);
 
-        if ($yhtiorow["tarjoustyyppi"] != 4) {
+        if ($yhtiorow["tarjoustyyppi"] == 4) {
+          $pdf_tarjous->draw_text(380, $kala + 15, t("Hinta/kpl", $kieli), $page_tarjous, $norm);
+        }
+        else {
           $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $norm);
           $pdf_tarjous->draw_text(450, $kala + 15, t("Alennus", $kieli), $page_tarjous, $norm);
         }
@@ -1084,9 +1087,16 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       $pdf_tarjous->draw_text(355-$oikpos, $kala, $row["varattu"], $page_tarjous[$sivu], $norm);
     }
 
-    if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and $yhtiorow["tarjoustyyppi"] != 4) {
-      $oikpos = $pdf_tarjous->strlen(hintapyoristys($row["hinta"]), $norm);
-      $pdf_tarjous->draw_text(420-$oikpos, $kala, hintapyoristys($row["hinta"]), $page_tarjous[$sivu], $norm);
+    if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+      if ($yhtiorow["tarjoustyyppi"] == 4) {
+        $hinta = hintapyoristys($row["rivihinta"] / $row["varattu"]);
+      }
+      else {
+        $hinta = hintapyoristys($row["hinta"]);
+      }
+
+      $oikpos = $pdf_tarjous->strlen($hinta, $norm);
+      $pdf_tarjous->draw_text(420 - $oikpos, $kala, $hinta, $page_tarjous[$sivu], $norm);
     }
 
     $ed_ale = array();
@@ -1330,7 +1340,15 @@ if (!function_exists('loppu_tarjous')) {
 
     if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
       // haetaan toimipaikan tiedot
-      $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+      $alhqur = "SELECT
+                   puhelin,
+                   fax,
+                   email,
+                   www,
+                   vat_numero
+                 FROM yhtion_toimipaikat
+                 WHERE yhtio='$laskurow[yhtio]'
+                 AND tunnus='$laskurow[yhtio_toimipaikka]'";
       $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
@@ -1341,6 +1359,10 @@ if (!function_exists('loppu_tarjous')) {
         $y_fax      = $alhiro['fax'];
         $y_email    = $alhiro['email'];
         $y_www      = $alhiro['www'];
+
+        if (!empty($alhiro['vat_numero'])) {
+          $y_vatnumero = $alhiro['vat_numero'];
+        }
       }
     }
 

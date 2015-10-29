@@ -3690,6 +3690,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $sel_lahete[$tp_tulostin] = "SELECTED";  // laskuprintteri
         }
 
+        # Haetaan lähetetulostin käyttäjän takaa
+        if (!empty($kukarow['lahetetulostin'])) {
+          $sel_lahete = array();
+          $sel_lahete[$kukarow['lahetetulostin']] = 'selected';
+        }
+
         if (strpos($tila, 'G') !== false) {
           $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
         }
@@ -3712,7 +3718,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
         }
 
-        echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'>";
+        echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'>";
         echo "<input type='hidden' name='valittu_uista' value='1' />";
 
         if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
@@ -3762,7 +3768,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
         }
 
-        echo "</select> ".t("Kpl").": <input type='text' size='4' name='vakadrkpl' value='$vakadrkpl'>";
+        echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='vakadrkpl' value='$vakadrkpl'>";
         echo "</tr>";
       }
 
@@ -3831,7 +3837,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
-        echo "<input type='text' size='4' name='oslappkpl' value='$oslappkpl' {$disabled}>";
+        echo "<input type='text' maxlength='2' size='4' name='oslappkpl' value='$oslappkpl' {$disabled}>";
 
         if ($oslappkpl_hidden != 0) {
           echo "<input type='hidden' name='oslappkpl' value='{$oslappkpl_hidden}' />";

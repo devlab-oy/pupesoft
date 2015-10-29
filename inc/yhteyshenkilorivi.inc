@@ -90,3 +90,21 @@ if (mysql_field_name($result, $i) == "salasanan_resetointi") {
     $jatko = 0;
   }
 }
+
+if (mysql_field_name($result, $i) == "aktivointikuittaus") {
+
+   $sel = "";
+   if ($trow[$i] != "") $sel = "SELECTED";
+
+  if (isset($magento_asiakas_aktivointi)) {
+    $ulos = "<td><select name='$nimi'>";
+    $ulos .= "<option value='' >".t("Ei")."</option>";
+    $ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
+  else {
+    $tyyppi = 0;
+    $jatko = 0;
+  }
+}

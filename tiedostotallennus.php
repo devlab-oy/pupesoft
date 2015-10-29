@@ -13,6 +13,7 @@ require_once "tiedostofunkkarit.inc";
 echo "<font class='head'>" . t('Tiedostojen tallennus') . "</font>";
 echo "<hr>";
 
+$toim                 = isset($toim) ? strtoupper($toim) : "";
 $tee                  = isset($tee) ? $tee : "";
 $selite               = isset($selite) ? $selite : "";
 $aihealue             = isset($aihealue) ? $aihealue : "";
@@ -56,7 +57,7 @@ if ($tee == "tallenna_tiedosto" and !empty($aihealue)) {
 }
 
 if ($tee == "") {
-  $aihealueet = hae_aihealueet();
+  $aihealueet = hae_aihealueet($toim);
   $params     = array(
     "tiedoston_tyyppi" => $tiedostotyyppi,
     "aihealue"         => $aihealue
@@ -76,7 +77,9 @@ if ($tee == "") {
 }
 
 function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
-  $tiedostotyypit = tiedostotyypit($valittu_aihealue);
+  global $toim;
+
+  $tiedostotyypit = tiedostotyypit($valittu_aihealue, $toim);
 
   echo "<form method='post' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='tallenna_tiedosto'>";

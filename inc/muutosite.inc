@@ -1803,14 +1803,14 @@ if ($tila == 'ostolasku_kulut') {
         $alv_tili = $yhtiorow["alv"];
       }  
       
-      $query = "SELECT substring(laadittu, 1, 10), substring(laadittu, 11),  sum(summa) summa
+      $query = "SELECT laadittu, sum(summa) summa
                 from tiliointi
                 where yhtio = '{$kukarow['yhtio']}'
                 and ltunnus = '{$tunnus}'
                 and tilino = '{$alv_tili}'
                 and korjattu != ''
-                group by 1,2
-                order by 1,2 asc";
+                group by 1
+                order by 1 asc";
       $old_alv_chk_res = pupe_query($query);
       $old_alv_chk_row = mysql_fetch_assoc($old_alv_chk_res);
       

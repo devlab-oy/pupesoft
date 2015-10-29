@@ -350,6 +350,8 @@ if ($tee == 'UUSI') {
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
+              lahetetulostin                = '{$lahetetulostin}',
+              rahtikirjatulostin            = '{$rahtikirjatulostin}',
               kassalipas_otto               = '{$kassalipas_otto}',
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
@@ -586,6 +588,8 @@ if ($tee == 'MUUTA') {
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
               kuittitulostin                = '{$kuittitulostin}',
+              lahetetulostin                = '{$lahetetulostin}',
+              rahtikirjatulostin            = '{$rahtikirjatulostin}',
               oletus_asiakas                = '{$oletus_asiakas}',
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
@@ -1130,6 +1134,56 @@ if ($tee == 'MUUTA') {
           echo "<option " .
             "value='{$kuittitulostin_rivi['tunnus']}' {$sel}>{$kuittitulostin_rivi['kirjoitin']}" .
             "</option>";
+        }
+
+        echo "</select></td></tr>";
+
+        echo "<tr><th align='left'>", t("Lähetetulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='lahetetulostin'>" .
+          "<option value=''>" . t("Ei lähetetulostinta") .
+          "</option>";
+
+        $query  = "SELECT tunnus, kirjoitin
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
+        $result = pupe_query($query);
+
+        while ($rivi = mysql_fetch_assoc($result)) {
+          $sel = '';
+
+          if ($rivi['tunnus'] == $krow["lahetetulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
+        }
+
+        echo "</select></td></tr>";
+
+        echo "<tr><th align='left'>", t("Rahtikirjatulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='rahtikirjatulostin'>" .
+          "<option value=''>" . t("Ei rahtikirjatulostinta") .
+          "</option>";
+
+        $query  = "SELECT tunnus, kirjoitin
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
+        $result = pupe_query($query);
+
+        while ($rivi = mysql_fetch_assoc($result)) {
+          $sel = '';
+
+          if ($rivi['tunnus'] == $krow["rahtikirjatulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
         }
 
         echo "</select></td></tr>";

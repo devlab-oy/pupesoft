@@ -331,6 +331,29 @@ elseif ($astilnro != '') {
     $asiakasid = $row["liitostunnus"];
   }
 }
+elseif ($tilausviite != '') {
+  $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
+            FROM lasku
+            WHERE tunnus = '$tilausviite'
+            and $logistiikka_yhtiolisa";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+
+  if ($row["laskunro"] > 0) {
+    $laskunro = $row["laskunro"];
+  }
+  else {
+    $otunnus = $row["tunnus"];
+  }
+  $ytunnus   = $row["ytunnus"];
+
+  if ($cleantoim == 'OSTO') {
+    $toimittajaid = $row["liitostunnus"];
+  }
+  else {
+    $asiakasid = $row["liitostunnus"];
+  }
+}
 
 if ($ytunnus != '') {
   // Pikku scripti formin tyhjentämiseen
@@ -777,7 +800,7 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
     echo "</td>";
 
     echo "<tr><th>".t("Tilausviite")."</th><td>";
-    echo livesearch_kentta("asiaktilaus", "TILAUSVIITE", "astilnro", 170, $astilnro);
+    echo livesearch_kentta("asiaktilaus", "TILAUSVIITE", "tilausviite", 170, $tilausviite);
     echo "</td>";
   }
 

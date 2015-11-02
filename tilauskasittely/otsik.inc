@@ -3802,7 +3802,17 @@ if (isset($jatka)) {
   }
 
   if ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus != '') {
-    $tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
+    $yhtishaku = "SELECT nimi
+                  FROM yhteyshenkilo
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tunnus = '{$yhteyshenkilo_tilaus}' ";
+    $yhtis = pupe_query($yhtishaku);
+
+    if ($yhtisrow = mysql_fetch_assoc($yhtis)) {
+      $tilausyhteyshenkilo = $yhtisrow["nimi"];
+    } else {
+      $tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
+    }
   }
 
   // haetaan maksuehdoen tiedot tarkastuksia varten

@@ -34,8 +34,8 @@ function hae_toimittajat_selectiin() {
 function tiedostotyypit($aihealue = "", $toim = "") {
   global $kukarow;
 
-  if ($aihealue and $toim) {
-    if ($toim == 'LUVAT_JA_LISENSSIT') {
+  if ($aihealue) {
+    if (isset($toim) and $toim == 'LUVAT_JA_LISENSSIT') {
       $avainsanat = t_avainsana("LITETY_LUVLIS", "", "AND selite = '{$aihealue}'");
     }
     else {

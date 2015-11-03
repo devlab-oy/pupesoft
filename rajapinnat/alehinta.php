@@ -85,6 +85,9 @@ function alehinta_asiakas($asiakas, $tuote) {
 
   list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
+  $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+  $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];
 
@@ -95,7 +98,9 @@ function alehinta_asiakas($asiakas, $tuote) {
   $hinta = round(($hinta * $kokonaisale), $yhtiorow["hintapyoristys"]);
 
   return array(
-    "hinta" => $hinta,
+    "hinta"         => $hinta,
+    "hinta_peruste" => $hinta_peruste,
+    "ale_peruste"   => $ale_peruste,
   );
 }
 
@@ -117,6 +122,9 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
 
   list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
 
+  $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+  $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];
 
@@ -127,6 +135,8 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
   $hinta = round(($hinta * $kokonaisale), $yhtiorow["hintapyoristys"]);
 
   return array(
-    "hinta" => $hinta,
+    "hinta"         => $hinta,
+    "hinta_peruste" => $hinta_peruste,
+    "ale_peruste"   => $ale_peruste,
   );
 }

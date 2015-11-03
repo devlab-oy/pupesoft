@@ -240,7 +240,7 @@ function Vaihda_toimenpide_modal() {
     modal: true,
     buttons: {
       "Vaihda": function() {
-        var toimenpiteen_vaihto = vaihda_toimenpide($('*[data-dv-vaihdettava-rivi-tunnus]').val(), $('*[data-dv-tuoteno-autocomplete]').val());
+        var toimenpiteen_vaihto = vaihda_toimenpide($('*[data-dv-vaihdettava-rivi-tunnus]').val(), $('*[data-dv-tuoteno-autocomplete]').val(), $('*[data-dv-hinta]').val());
         toimenpiteen_vaihto.done(function(){
           dialog.dialog("close");
           $('#refresh_form').submit();
@@ -258,7 +258,7 @@ function Vaihda_toimenpide_modal() {
   });
 }
 
-function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno) {
+function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno, uuden_rivin_hinta) {
   return $.ajax({
     async: true,
     dataType: 'json',
@@ -266,7 +266,8 @@ function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno) {
     url: 'tilaus_myynti.php?toim=TYOMAARAYS&no_head=yes&ajax_toiminto=true&action="vaihda_toimenpide"',
     data: {
       vaihdettava_rivi: vaihdettava_rivi,
-      uuden_rivin_tuoteno: uuden_rivin_tuoteno
+      uuden_rivin_tuoteno: uuden_rivin_tuoteno,
+      uuden_rivin_hinta: uuden_rivin_hinta
     }
   });
 }

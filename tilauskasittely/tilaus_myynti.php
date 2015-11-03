@@ -155,7 +155,9 @@ if ($yhtiorow['laite_huolto'] == 'X' and isset($ajax_toiminto)) {
         'laite_tunnus'      => $_laite_tunnus,
         'toim_aika'         => $_vaihdettava_rivi['toim_aika'],
         'toimitettu'        => $_vaihdettava_rivi['toimitettu'],
+        'hinta'             => $uuden_rivin_hinta
     );
+
     $tilausrivi_tunnus = luo_tilausrivi($params);
     $uusi_tilausrivi = hae_tilausrivi($tilausrivi_tunnus);
     $uuden_rivin_huoltosykli = hae_rivin_huoltosykli($_laite_tunnus, $uusi_tilausrivi['tuoteno']);
@@ -341,8 +343,11 @@ if ($yhtiorow['laite_huolto'] == 'X') {
   echo "<div id='vaihda_toimenpide_dialog' style='display:none;' title='".t('Vaihda toimenpide tuote')."'>";
   echo "<label for='tuotenumero'>Tuotenumero</label>";
   echo "<br/>";
-  echo "<br/>";
   echo "<input data-dv-tuoteno-autocomplete type='text' style='width: 90%;'/>";
+  echo "<br/>";
+  echo "<label for='hinta'>Poikkeava hinta</label>";
+  echo "<br/>";
+  echo "<input data-dv-hinta type='text' style='width: 20%;'/>";
   echo "</div>";
   echo "<form id='refresh_form' method='POST' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
   echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -2837,7 +2842,7 @@ if ($tee == '') {
   }
 
   // jos asiakasnumero on annettu
-  if ($laskurow["liitostunnus"] <> 0) {
+  if ($yhtiorow['laite_huolto'] == '' and $laskurow["liitostunnus"] <> 0) {
     if ($yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "SIIRTOLISTA", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
       $jarjlisa = "<td class='back' style='width:10px; padding:0px; margin:0px;'></td>";
     }
@@ -3346,7 +3351,7 @@ if ($tee == '') {
   $myyntikielto = '';
 
   // jos asiakasnumero on annettu
-  if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
+  if ($yhtiorow['laite_huolto'] == '' and $laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
     $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma, toimitustapa
               FROM asiakas
@@ -8169,7 +8174,7 @@ if ($tee == '') {
             ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT'))) {
 
             $_laite_huolto_ja_muokkaus_lukko = ($yhtiorow['laite_huolto'] == 'X' and $row['positio'] == 'X');
-            if (empty($muokkauslukko_rivi) and !$_luottoraja_ylivito) {
+            if ($yhtiorow['laite_huolto'] == '' and empty($muokkauslukko_rivi) and !$_luottoraja_ylivito) {
               $onclick = "";
               if ($_laite_huolto_ja_muokkaus_lukko) {
                 $onclick = "onclick=\"return confirm('".t("Toimenpiteen muokkaaminen ei vaikuta automaattiseen työmääräyksen generointiin")."')\"";
@@ -8201,7 +8206,7 @@ if ($tee == '') {
               $poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
             }
 
-            if (!$_laite_huolto_ja_muokkaus_lukko) {
+            if ($yhtiorow['laite_huolto'] == '' and !$_laite_huolto_ja_muokkaus_lukko) {
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>

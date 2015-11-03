@@ -308,33 +308,18 @@ elseif ($laskunro > 0) {
   }
 }
 //astilnro kentässä on laskun tunnus, jotta livesearch hakukentän ID olisi yksilöllinen
-elseif ($astilnro != '') {
+elseif ($astilnro != '' or $tilausviite != '') {
+  $_haku = "";
+
+  if ($astilnro != '') {
+    $_haku = $astilnro;
+  } else {
+    $_haku = $tilausviite;
+  }
+
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
             FROM lasku
-            WHERE tunnus = '$astilnro'
-            and $logistiikka_yhtiolisa";
-  $result = pupe_query($query);
-  $row = mysql_fetch_assoc($result);
-
-  if ($row["laskunro"] > 0) {
-    $laskunro = $row["laskunro"];
-  }
-  else {
-    $otunnus = $row["tunnus"];
-  }
-  $ytunnus   = $row["ytunnus"];
-
-  if ($cleantoim == 'OSTO') {
-    $toimittajaid = $row["liitostunnus"];
-  }
-  else {
-    $asiakasid = $row["liitostunnus"];
-  }
-}
-elseif ($tilausviite != '') {
-  $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
-            FROM lasku
-            WHERE tunnus = '$tilausviite'
+            WHERE tunnus = '$_haku'
             and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);

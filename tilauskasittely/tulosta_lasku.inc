@@ -31,12 +31,12 @@ if (!function_exists('lasku_fontit')) {
     $iso["font"]       = "Helvetica-Bold";
 
     return array("rectparam"   => $rectparam,
-                 "norm"        => $norm,
-                 "norm_italic" => $norm_italic,
-                 "pieni"       => $pieni,
-                 "boldi"       => $boldi,
-                 "pieni_boldi" => $pieni_boldi,
-                 "iso"         => $iso);
+      "norm"        => $norm,
+      "norm_italic" => $norm_italic,
+      "pieni"       => $pieni,
+      "boldi"       => $boldi,
+      "pieni_boldi" => $pieni_boldi,
+      "iso"         => $iso);
   }
 }
 
@@ -1030,7 +1030,7 @@ if (!function_exists('lisaa_tullinimike_ja_alkuperamaa')) {
       // Tsekataan onko tämä valmiste
       $query = "SELECT tunnus
                 FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
                 AND isatuoteno = '{$row['tuoteno']}'
                 LIMIT 1";
       $alkuperamaa_res = pupe_query($query);
@@ -2086,7 +2086,7 @@ if (!function_exists('loppu')) {
       $query = "SELECT vat_numero
                 FROM yhtion_toimipaikat
                 WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tunnus = '{$laskurow["yhtio_toimipaikka"]}'";
+                AND tunnus  = '{$laskurow["yhtio_toimipaikka"]}'";
 
       $toimipaikka_result = pupe_query($query);
 

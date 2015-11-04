@@ -289,7 +289,7 @@ class MagentoClient {
       }
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
-      
+
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;
       $tuoteryhmanimi   = $tuote['try_nimi'];
 
@@ -570,7 +570,7 @@ class MagentoClient {
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
-      if($this->_asiakaskohtaiset_tuotehinnat) {
+      if ($this->_asiakaskohtaiset_tuotehinnat) {
         $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);
       }
 
@@ -1638,7 +1638,7 @@ class MagentoClient {
       // Asiakas on jo olemassa, päivitetään
       else {
         try {
-          
+
           $poista_asiakas_defaultit = $this->_magento_poista_asiakasdefaultit;
 
           // Jos halutaan ohittaa asiakasparametreja, poistetaan ne ennen paivitysta
@@ -1660,7 +1660,7 @@ class MagentoClient {
 
           // Lähetetään aktivointiviesti Magentoon jos ominaisuus on päällä sekä yhteyshenkilölle
           // on merkattu magentokuittaus
-          if ($this->_asiakkaan_aktivointi and $this->aktivoidaankoAsiakas($asiakas['tunnus'], $asiakas['magento_tunnus'])) {            
+          if ($this->_asiakkaan_aktivointi and $this->aktivoidaankoAsiakas($asiakas['tunnus'], $asiakas['magento_tunnus'])) {
             $result = $this->asiakkaanAktivointi($asiakas['yhtio'], $asiakas['yhenk_tunnus']);
             if ($result) {
               $this->log("Yhteyshenkilön: '{$asiakas['yhenk_tunnus']}' Magentoasiakas: {$asiakas['magento_tunnus']} aktivoitu " . print_r($asiakas_data, true));
@@ -1881,7 +1881,7 @@ class MagentoClient {
   /**
    * Asetetaanko uudet tuotteet aina samaan kategoriaan
    * ja estetään tuotepäivityksessä tuoteryhmän päivitys
-   * Oletus tyhja 
+   * Oletus tyhja
    */
   public function setUniversalTuoteryhma($universal_tuoteryhma) {
     $this->_universal_tuoteryhma = $universal_tuoteryhma;
@@ -1943,7 +1943,7 @@ class MagentoClient {
    * Kuittaa asiakkaan aktivoiduksi Magentossa
    *   HUOM! Vaatii räätälöidyn Magenton
    *
-   * @param yhtio, yhteyshenkilön tunnus
+   * @param yhtio,  yhteyshenkilön tunnus
    * @return boolean reply (onnistuiko toiminto)
    */
   public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
@@ -1952,14 +1952,14 @@ class MagentoClient {
     // Haetaan yhteyshenkilön tiedot
     try {
       $query = "SELECT
-                email, 
+                email,
                 ulkoinen_asiakasnumero id
                 FROM
                 yhteyshenkilo
-                WHERE yhtio = '{$yhtio}'
-                AND rooli   = 'Magento'
-                AND tunnus = '{$yhteyshenkilon_tunnus}'
-                AND email != ''
+                WHERE yhtio                 = '{$yhtio}'
+                AND rooli                   = 'Magento'
+                AND tunnus                  = '{$yhteyshenkilon_tunnus}'
+                AND email                  != ''
                 AND ulkoinen_asiakasnumero != ''
                 LIMIT 1";
       $result = pupe_query($query);
@@ -1967,15 +1967,15 @@ class MagentoClient {
 
       // Aktivoidaan asiakas Magentoon
       $reply = $this->_proxy->call(
-                 $this->_session,
-                 'activate_customer.activateBusinessCustomer',
-                 array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
+        $this->_session,
+        'activate_customer.activateBusinessCustomer',
+        array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
 
       // Merkataan aktivointikuittaus tehdyksi
       $putsausquery = "UPDATE yhteyshenkilo
                        SET aktivointikuittaus = ''
                        WHERE yhtio = '{$yhtio}'
-                       AND tunnus = '{$yhteyshenkilon_tunnus}'";
+                       AND tunnus  = '{$yhteyshenkilon_tunnus}'";
       pupe_query($putsausquery);
     }
     catch (Exception $e) {
@@ -2015,7 +2015,7 @@ class MagentoClient {
       // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
       $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
         array($magento_tuotenumero, $asiakaskohtainenhintadata));
-        $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
+      $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -2028,21 +2028,21 @@ class MagentoClient {
   /**
    * Hakee ja siirtää tuotteiden kuvat Magentoon
    *
-   * @param array tuotteet
+   * @param array   tuotteet
    */
   public function lisaa_tuotteiden_kuvat(array $tuotteet) {
     global $kukarow, $yhtiorow;
 
     foreach ($tuotteet as $tuote) {
       // numeerisesta sku_+N
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno']; 
+      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
       // Haetaan tuotteen tunnus Magentosta
       $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
       $product_id = $result['product_id'];
 
       // Haetaan tuotteen kuvat Pupesta
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);  
+      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
       if (count($tuotekuvat) > 0 and !empty($product_id)) {
         // Lisataan tuotteen kuvat Magentoon
@@ -2092,15 +2092,15 @@ class MagentoClient {
   private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
     $asiakkaat_per_yhteyshenkilo = array();
 
-    $query = "SELECT asiakas.tunnus asiakastunnus, 
-              yhteyshenkilo.email asiakas_email, 
-              yhteyshenkilo.ulkoinen_asiakasnumero 
+    $query = "SELECT asiakas.tunnus asiakastunnus,
+              yhteyshenkilo.email asiakas_email,
+              yhteyshenkilo.ulkoinen_asiakasnumero
               FROM yhteyshenkilo
-              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio 
-                AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
-              WHERE yhteyshenkilo.yhtio = '{$yhtio}'
-                AND yhteyshenkilo.rooli = 'Magento'
-                AND yhteyshenkilo.email != ''
+              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
+                AND yhteyshenkilo.liitostunnus            = asiakas.tunnus)
+              WHERE yhteyshenkilo.yhtio                   = '{$yhtio}'
+                AND yhteyshenkilo.rooli                   = 'Magento'
+                AND yhteyshenkilo.email                  != ''
                 AND yhteyshenkilo.ulkoinen_asiakasnumero != ''";
     $result = pupe_query($query);
 
@@ -2169,10 +2169,10 @@ class MagentoClient {
     // Haetaan Magentosta asiakkaan website_id..
     $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);
 
-    return array('customerEmail' => $asiakas['asiakas_email'], 
-                 'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-                 'price' => $hinta,
-                 'delete' => 0);
+    return array('customerEmail' => $asiakas['asiakas_email'],
+      'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+      'price' => $hinta,
+      'delete' => 0);
   }
 
   /**
@@ -2183,13 +2183,13 @@ class MagentoClient {
    */
   private function aktivoidaankoAsiakas($asiakastunnus, $asiakkaan_magentotunnus) {
     global $kukarow;
-    
+
     $query = "SELECT yhteyshenkilo.aktivointikuittaus tieto
-              FROM yhteyshenkilo 
-              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio 
-                AND yhteyshenkilo.liitostunnus = asiakas.tunnus
-                AND asiakas.tunnus = '{$asiakastunnus}')
-              WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+              FROM yhteyshenkilo
+              JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
+                AND yhteyshenkilo.liitostunnus           = asiakas.tunnus
+                AND asiakas.tunnus                       = '{$asiakastunnus}')
+              WHERE yhteyshenkilo.yhtio                  = '{$kukarow['yhtio']}'
                 AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$asiakkaan_magentotunnus}'";
     $result = pupe_query($query);
     $vastausrivi = mysql_fetch_assoc($result);

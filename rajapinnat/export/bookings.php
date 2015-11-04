@@ -80,59 +80,59 @@ if ($datetime_checkpoint != "") {
 
 // Haetaan tiliöinnit
 $query = "(SELECT
-          'ADD' tyyppi,
-          tiliointi.laatija,
-          tiliointi.laadittu,
-          tiliointi.ltunnus,
-          tiliointi.tilino,
-          k1.nimi kustp,
-          k2.nimi kohde,
-          k3.nimi projekti,
-          tiliointi.tapvm,
-          tiliointi.summa,
-          tiliointi.selite,
-          tiliointi.vero,
-          tiliointi.korjattu,
-          if(tiliointi.korjausaika=0, '', tiliointi.korjausaika) korjausaika,
-          lasku.tila,
-          lasku.alatila,
-          lasku.tunnus
-          FROM tiliointi
-          LEFT JOIN kustannuspaikka as k1 ON (k1.yhtio = tiliointi.yhtio AND k1.tunnus = tiliointi.kustp)
-          LEFT JOIN kustannuspaikka as k2 ON (k2.yhtio = tiliointi.yhtio AND k2.tunnus = tiliointi.kohde)
-          LEFT JOIN kustannuspaikka as k3 ON (k3.yhtio = tiliointi.yhtio AND k3.tunnus = tiliointi.projekti)
-          JOIN lasku on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus)
-          WHERE tiliointi.yhtio = '{$yhtio}'
-          {$rajaus1}
-          AND korjattu = '')
+           'ADD' tyyppi,
+           tiliointi.laatija,
+           tiliointi.laadittu,
+           tiliointi.ltunnus,
+           tiliointi.tilino,
+           k1.nimi kustp,
+           k2.nimi kohde,
+           k3.nimi projekti,
+           tiliointi.tapvm,
+           tiliointi.summa,
+           tiliointi.selite,
+           tiliointi.vero,
+           tiliointi.korjattu,
+           if(tiliointi.korjausaika=0, '', tiliointi.korjausaika) korjausaika,
+           lasku.tila,
+           lasku.alatila,
+           lasku.tunnus
+           FROM tiliointi
+           LEFT JOIN kustannuspaikka as k1 ON (k1.yhtio = tiliointi.yhtio AND k1.tunnus = tiliointi.kustp)
+           LEFT JOIN kustannuspaikka as k2 ON (k2.yhtio = tiliointi.yhtio AND k2.tunnus = tiliointi.kohde)
+           LEFT JOIN kustannuspaikka as k3 ON (k3.yhtio = tiliointi.yhtio AND k3.tunnus = tiliointi.projekti)
+           JOIN lasku on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus)
+           WHERE tiliointi.yhtio = '{$yhtio}'
+           {$rajaus1}
+           AND korjattu          = '')
 
-          UNION
+           UNION
 
-          (SELECT
-          'DELETE' tyyppi,
-          tiliointi.laatija,
-          tiliointi.laadittu,
-          tiliointi.ltunnus,
-          tiliointi.tilino,
-          k1.nimi kustp,
-          k2.nimi kohde,
-          k2.nimi projekti,
-          tiliointi.tapvm,
-          tiliointi.summa,
-          tiliointi.selite,
-          tiliointi.vero,
-          tiliointi.korjattu,
-          if(tiliointi.korjausaika=0, '', tiliointi.korjausaika) korjausaika,
-          lasku.tila,
-          lasku.alatila,
-          lasku.tunnus
-          FROM tiliointi
-          LEFT JOIN kustannuspaikka as k1 ON (k1.yhtio = tiliointi.yhtio AND k1.tunnus = tiliointi.kustp)
-          LEFT JOIN kustannuspaikka as k2 ON (k2.yhtio = tiliointi.yhtio AND k2.tunnus = tiliointi.kohde)
-          LEFT JOIN kustannuspaikka as k3 ON (k3.yhtio = tiliointi.yhtio AND k3.tunnus = tiliointi.projekti)
-          JOIN lasku on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus)
-          WHERE tiliointi.yhtio = '{$yhtio}'
-          {$rajaus2})";
+           (SELECT
+           'DELETE' tyyppi,
+           tiliointi.laatija,
+           tiliointi.laadittu,
+           tiliointi.ltunnus,
+           tiliointi.tilino,
+           k1.nimi kustp,
+           k2.nimi kohde,
+           k2.nimi projekti,
+           tiliointi.tapvm,
+           tiliointi.summa,
+           tiliointi.selite,
+           tiliointi.vero,
+           tiliointi.korjattu,
+           if(tiliointi.korjausaika=0, '', tiliointi.korjausaika) korjausaika,
+           lasku.tila,
+           lasku.alatila,
+           lasku.tunnus
+           FROM tiliointi
+           LEFT JOIN kustannuspaikka as k1 ON (k1.yhtio = tiliointi.yhtio AND k1.tunnus = tiliointi.kustp)
+           LEFT JOIN kustannuspaikka as k2 ON (k2.yhtio = tiliointi.yhtio AND k2.tunnus = tiliointi.kohde)
+           LEFT JOIN kustannuspaikka as k3 ON (k3.yhtio = tiliointi.yhtio AND k3.tunnus = tiliointi.projekti)
+           JOIN lasku on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus)
+           WHERE tiliointi.yhtio = '{$yhtio}'
+           {$rajaus2})";
 $res = pupe_query($query);
 
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s');

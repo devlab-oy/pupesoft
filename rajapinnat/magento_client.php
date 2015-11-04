@@ -1956,10 +1956,10 @@ class MagentoClient {
                 ulkoinen_asiakasnumero id
                 FROM
                 yhteyshenkilo
-                WHERE yhtio = '{$yhtio}'
-                AND rooli   = 'Magento'
-                AND tunnus = '{$yhteyshenkilon_tunnus}'
-                AND email != ''
+                WHERE yhtio                 = '{$yhtio}'
+                AND rooli                   = 'Magento'
+                AND tunnus                  = '{$yhteyshenkilon_tunnus}'
+                AND email                  != ''
                 AND ulkoinen_asiakasnumero != ''
                 LIMIT 1";
       $result = pupe_query($query);
@@ -1975,7 +1975,7 @@ class MagentoClient {
       $putsausquery = "UPDATE yhteyshenkilo
                        SET aktivointikuittaus = ''
                        WHERE yhtio = '{$yhtio}'
-                       AND tunnus = '{$yhteyshenkilon_tunnus}'";
+                       AND tunnus  = '{$yhteyshenkilon_tunnus}'";
       pupe_query($putsausquery);
     }
     catch (Exception $e) {
@@ -2097,10 +2097,10 @@ class MagentoClient {
               yhteyshenkilo.ulkoinen_asiakasnumero
               FROM yhteyshenkilo
               JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
-                AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
-              WHERE yhteyshenkilo.yhtio = '{$yhtio}'
-                AND yhteyshenkilo.rooli = 'Magento'
-                AND yhteyshenkilo.email != ''
+                AND yhteyshenkilo.liitostunnus            = asiakas.tunnus)
+              WHERE yhteyshenkilo.yhtio                   = '{$yhtio}'
+                AND yhteyshenkilo.rooli                   = 'Magento'
+                AND yhteyshenkilo.email                  != ''
                 AND yhteyshenkilo.ulkoinen_asiakasnumero != ''";
     $result = pupe_query($query);
 
@@ -2187,9 +2187,9 @@ class MagentoClient {
     $query = "SELECT yhteyshenkilo.aktivointikuittaus tieto
               FROM yhteyshenkilo
               JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
-                AND yhteyshenkilo.liitostunnus = asiakas.tunnus
-                AND asiakas.tunnus = '{$asiakastunnus}')
-              WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+                AND yhteyshenkilo.liitostunnus           = asiakas.tunnus
+                AND asiakas.tunnus                       = '{$asiakastunnus}')
+              WHERE yhteyshenkilo.yhtio                  = '{$kukarow['yhtio']}'
                 AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$asiakkaan_magentotunnus}'";
     $result = pupe_query($query);
     $vastausrivi = mysql_fetch_assoc($result);

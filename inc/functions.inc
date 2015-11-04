@@ -1223,9 +1223,9 @@ if (!function_exists("hae_liitteet_verkkolaskuun")) {
 
     $query = "SELECT filename, data
               FROM liitetiedostot
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND liitos = 'lasku'
-              AND liitostunnus IN ({$tilausnumerot})
+              WHERE yhtio         = '{$kukarow["yhtio"]}'
+              AND liitos          = 'lasku'
+              AND liitostunnus    IN ({$tilausnumerot})
               AND kayttotarkoitus IN ({$kayttotarkoitukset})";
 
     $result = pupe_query($query);
@@ -30993,9 +30993,9 @@ if (!function_exists("tee_ennakkolasku")) {
     // P‰ivitet‰‰n tilaukselle "jaksotettu" maksuehto
     $jaksquery = "SELECT *
                   FROM maksuehto
-                  WHERE yhtio = '$kukarow[yhtio]'
+                  WHERE yhtio     = '$kukarow[yhtio]'
                   AND jaksotettu != ''
-                  AND kaytossa = ''
+                  AND kaytossa    = ''
                   ORDER BY tunnus
                   LIMIT 1";
     $jaksres = pupe_query($jaksquery);
@@ -31055,7 +31055,7 @@ if (!function_exists("tee_ennakkolasku")) {
       if ($sisainen) {
         $query  = "UPDATE lasku
                    SET sisainen = 'o'
-                   WHERE tunnus  = '{$ennakkolasku}'";
+                   WHERE tunnus = '{$ennakkolasku}'";
         pupe_query($query);
       }
 
@@ -31063,7 +31063,7 @@ if (!function_exists("tee_ennakkolasku")) {
       if (!empty($laskurow["viite"])) {
         $query  = "UPDATE lasku
                    SET viite = '{$laskurow["viite"]}'
-                   WHERE tunnus  = '{$ennakkolasku}'";
+                   WHERE tunnus = '{$ennakkolasku}'";
         pupe_query($query);
 
         $kasiviite = ", viite = '' ";

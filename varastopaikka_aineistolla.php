@@ -67,9 +67,9 @@ if ($tee == "AJA") {
 
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND isatuoteno = '{$tiedr[0]}'
-                  AND tyyppi = 'P'
+                  WHERE yhtio       = '{$kukarow["yhtio"]}'
+                  AND isatuoteno    = '{$tiedr[0]}'
+                  AND tyyppi        = 'P'
                   AND ohita_kerays != ''";
         $runkoresult = pupe_query($query);
 

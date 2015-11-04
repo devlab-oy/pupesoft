@@ -747,7 +747,7 @@ case 'T00':
         $query = "SELECT nimi
                   FROM kuka
                   WHERE yhtio = '{$yritirow['yhtio']}'
-                  and kuka = '{$yritirow['hyvak']}'";
+                  and kuka    = '{$yritirow['hyvak']}'";
         $nimires = pupe_query($query);
         $nimirow = mysql_fetch_assoc($nimires);
 

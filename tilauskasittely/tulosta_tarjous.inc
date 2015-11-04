@@ -1032,11 +1032,11 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       $query = "SELECT liitetiedostot.*
                 FROM tuote
                 JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
-                  AND liitetiedostot.liitostunnus = tuote.tunnus
-                  AND liitetiedostot.liitos = 'tuote'
+                  AND liitetiedostot.liitostunnus    = tuote.tunnus
+                  AND liitetiedostot.liitos          = 'tuote'
                   AND liitetiedostot.kayttotarkoitus = 'TK')
-                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-                AND tuote.tuoteno = '{$row['tuoteno']}'";
+                WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
+                AND tuote.tuoteno                    = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);
 
       if (mysql_num_rows($kuva_res) != 0) {
@@ -1341,11 +1341,11 @@ if (!function_exists('loppu_tarjous')) {
     if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT
-                   puhelin,
-                   fax,
-                   email,
-                   www,
-                   vat_numero
+                 puhelin,
+                 fax,
+                 email,
+                 www,
+                 vat_numero
                  FROM yhtion_toimipaikat
                  WHERE yhtio='$laskurow[yhtio]'
                  AND tunnus='$laskurow[yhtio_toimipaikka]'";

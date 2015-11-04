@@ -149,7 +149,7 @@ if (!function_exists("hae_hintamuutoksia_sisaltavat_tuotenumerot")) {
 
     $query1 = "SELECT group_concat('\'',tuoteno,'\'') muuttuneet_tuotenot
                FROM asiakashinta
-               WHERE yhtio = '{$kukarow['yhtio']}'
+               WHERE yhtio   = '{$kukarow['yhtio']}'
                AND muutospvm >= '{$datetime_checkpoint}'
                AND tuoteno !=''";
     $result1 = pupe_query($query1);
@@ -158,7 +158,7 @@ if (!function_exists("hae_hintamuutoksia_sisaltavat_tuotenumerot")) {
 
     $query2 = "SELECT group_concat('\'',tuoteno,'\'') muuttuneet_tuotenot
                FROM asiakasalennus
-               WHERE yhtio = '{$kukarow['yhtio']}'
+               WHERE yhtio   = '{$kukarow['yhtio']}'
                AND muutospvm >= '{$datetime_checkpoint}'
                AND tuoteno !=''";
     $result2 = pupe_query($query2);
@@ -179,7 +179,7 @@ if (!function_exists("hae_hintamuutoksia_sisaltavat_tuoteryhmat")) {
 
     $query3 = "SELECT group_concat('\'',ryhma,'\'') muuttuneet_ryhmat
                FROM asiakashinta
-               WHERE yhtio = '{$kukarow['yhtio']}'
+               WHERE yhtio   = '{$kukarow['yhtio']}'
                AND muutospvm >= '{$datetime_checkpoint}'
                AND ryhma !=''";
     $result3 = pupe_query($query3);
@@ -188,7 +188,7 @@ if (!function_exists("hae_hintamuutoksia_sisaltavat_tuoteryhmat")) {
 
     $query4 = "SELECT group_concat('\'',ryhma,'\'') muuttuneet_ryhmat
                FROM asiakasalennus
-               WHERE yhtio = '{$kukarow['yhtio']}'
+               WHERE yhtio   = '{$kukarow['yhtio']}'
                AND muutospvm >= '{$datetime_checkpoint}'
                AND ryhma !=''";
     $result4 = pupe_query($query4);
@@ -197,7 +197,7 @@ if (!function_exists("hae_hintamuutoksia_sisaltavat_tuoteryhmat")) {
 
     $query5 = "SELECT group_concat('\'',ryhma,'\'') muuttuneet_ryhmat
                FROM perusalennus
-               WHERE yhtio = '{$kukarow['yhtio']}'
+               WHERE yhtio   = '{$kukarow['yhtio']}'
                AND muutospvm >= '{$datetime_checkpoint}'
                AND ryhma !=''";
     $result5 = pupe_query($query5);

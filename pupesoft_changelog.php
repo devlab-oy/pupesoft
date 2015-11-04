@@ -90,7 +90,7 @@ function hae_pulkkarit($updatedtime, $repo, $url) {
     $query  = "INSERT INTO git_paivitykset
                SET hash_pupesoft = 'github_api_request',
                repository = '$repo',
-               date = now()";
+               date       = now()";
     pupe_query($query);
 
     foreach ($pulkkarit as $pulkkari) {
@@ -336,7 +336,7 @@ if (mysql_num_rows($vetores)) {
         $query  = "SELECT *
                    FROM git_pulkkarit
                    WHERE repository = '$repo'
-                   AND id = $pullid";
+                   AND id           = $pullid";
         $pulres = pupe_query($query);
         $pulrow = mysql_fetch_assoc($pulres);
 

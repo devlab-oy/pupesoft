@@ -967,37 +967,45 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
- * @param array   $params
+ * @param array $params
+ *
  * @return array
  */
 function generoi_private_key_ja_csr($params = array()) {
   global $kukarow, $yhtiorow;
 
-  $company_name = empty($params['company_name']) ? $yhtiorow['nimi'] : $params['company_name'];
-  $customer_id  = empty($params['customer_id']) ? '' : $params['customer_id'];
-  $key_bits     = empty($params['key_bits']) ? 2048 : $params['key_bits'];
-  $email        = empty($params['email']) ? "" : $params['email'];
+  $company_name = empty($params['company_name']) ? "" : $params['company_name'];
+  $customer_id  = empty($params['customer_id'])  ? "" : $params['customer_id'];
+  $pankki       = empty($params['pankki'])       ? "" : $params['pankki'];
+
+  $key_bits = 2048;
+
+  $csr_info = array(
+    "countryName" => $yhtiorow["maa"],
+  );
+
+  switch ($pankki) {
+  case "nordea":
+    $key_bits = 1024;
+
+    $csr_info["commonName"]   = $company_name;
+    $csr_info["serialNumber"] = $customer_id;
+    break;
+  case "op":
+    $csr_info["commonName"] = $customer_id;
+    break;
+  default:
+    $csr_info["commonName"]       = $yhtiorow['nimi'];
+    $csr_info["emailAddress"]     = $yhtiorow["email"];
+    $csr_info["localityName"]     = $yhtiorow["kotipaikka"];
+    $csr_info["organizationName"] = $yhtiorow['nimi'];
+  }
 
   $key_config = array(
     "digest_alg"       => "sha1",
     "private_key_bits" => $key_bits,
-    "private_key_type" => OPENSSL_KEYTYPE_RSA
+    "private_key_type" => OPENSSL_KEYTYPE_RSA,
   );
-
-  $csr_info = array(
-    "countryName"      => $yhtiorow["maa"],
-    "localityName"     => $yhtiorow["kotipaikka"],
-    "organizationName" => $company_name,
-    "commonName"       => $company_name
-  );
-
-  if (!empty($email)) {
-    $csr_info["emailAddress"] = $email;
-  }
-
-  if (!empty($customer_id)) {
-    $csr_info["serialNumber"] = $customer_id;
-  }
 
   $key = openssl_pkey_new($key_config);
   $csr = openssl_csr_new($csr_info, $key);
@@ -1007,7 +1015,7 @@ function generoi_private_key_ja_csr($params = array()) {
 
   return array(
     "private_key" => $private_key,
-    "csr"         => $csrout
+    "csr"         => $csrout,
   );
 }
 

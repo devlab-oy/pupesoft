@@ -570,7 +570,7 @@ class MagentoClient {
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
-      if($this->_asiakaskohtaiset_tuotehinnat) {
+      if ($this->_asiakaskohtaiset_tuotehinnat) {
         $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);
       }
 
@@ -1943,7 +1943,7 @@ class MagentoClient {
    * Kuittaa asiakkaan aktivoiduksi Magentossa
    *   HUOM! Vaatii räätälöidyn Magenton
    *
-   * @param yhtio, yhteyshenkilön tunnus
+   * @param yhtio,  yhteyshenkilön tunnus
    * @return boolean reply (onnistuiko toiminto)
    */
   public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
@@ -1967,9 +1967,9 @@ class MagentoClient {
 
       // Aktivoidaan asiakas Magentoon
       $reply = $this->_proxy->call(
-                 $this->_session,
-                 'activate_customer.activateBusinessCustomer',
-                 array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
+        $this->_session,
+        'activate_customer.activateBusinessCustomer',
+        array($yhenkrow['email'], $this->_asiakkaan_aktivointi));
 
       // Merkataan aktivointikuittaus tehdyksi
       $putsausquery = "UPDATE yhteyshenkilo
@@ -2015,7 +2015,7 @@ class MagentoClient {
       // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
       $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
         array($magento_tuotenumero, $asiakaskohtainenhintadata));
-        $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
+      $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -2028,7 +2028,7 @@ class MagentoClient {
   /**
    * Hakee ja siirtää tuotteiden kuvat Magentoon
    *
-   * @param array tuotteet
+   * @param array   tuotteet
    */
   public function lisaa_tuotteiden_kuvat(array $tuotteet) {
     global $kukarow, $yhtiorow;
@@ -2170,9 +2170,9 @@ class MagentoClient {
     $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);
 
     return array('customerEmail' => $asiakas['asiakas_email'],
-                 'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-                 'price' => $hinta,
-                 'delete' => 0);
+      'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+      'price' => $hinta,
+      'delete' => 0);
   }
 
   /**

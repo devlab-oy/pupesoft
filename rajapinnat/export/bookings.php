@@ -155,7 +155,7 @@ while ($row = mysql_fetch_assoc($res)) {
   // tehd‰‰n selv‰kielinen tila/alatila
   require "inc/laskutyyppi.inc";
 
-  if (in_array($row["tila"], array("H","Y","M","P","Q"))) {
+  if (in_array($row["tila"], array("H", "Y", "M", "P", "Q"))) {
     $laskutyyppi = "Ostolasku ".$laskutyyppi;
   }
 

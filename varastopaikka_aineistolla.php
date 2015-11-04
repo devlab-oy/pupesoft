@@ -53,7 +53,7 @@ if ($tee == "AJA") {
       reset($kaikki_tiedostorivit);
       unset($tiedr);
 
-      # Etsit‰‰n tuoteperheit‰ joilla on runko-tuotteita
+      // Etsit‰‰n tuoteperheit‰ joilla on runko-tuotteita
       foreach ($kaikki_tiedostorivit as $rowkey => &$tiedr) {
         // Indeksit:
         $tuoteno       = $tiedr[0] = pupesoft_cleanstring($tiedr[0]);              // 0 - Tuotenumero
@@ -164,10 +164,10 @@ if ($tee == "AJA") {
           if (empty($tvrow['oletus'])) {
             echo "<font class='error'>";
             echo t("Tuotteen %s l‰hdevarastopaikka %s %s %s %s ei ole oletuspaikka",
-                    "",
-                    $tuoteno,
-                    $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso
-                  );
+              "",
+              $tuoteno,
+              $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso
+            );
             echo "!</font><br>";
             $virhe = 1;
             continue;
@@ -177,11 +177,11 @@ if ($tee == "AJA") {
             echo "<font class='error'>";
             echo t("Tuotteen %s l‰hdevarastopaikka %s %s %s %s ja
                     kohdevarastopaikka %s %s %s %s ei sijaitse samassa varastossa",
-                    "",
-                    $tuoteno,
-                    $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso,
-                    $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso
-                  );
+              "",
+              $tuoteno,
+              $lhyllyalue, $lhyllynro, $lhyllyvali, $lhyllytaso,
+              $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso
+            );
             echo "!</font><br>";
             $virhe = 1;
             continue;
@@ -286,7 +286,7 @@ if ($tee == "AJA") {
         require "muuvarastopaikka.php";
 
         if ($tee == 'MEGALOMAANINEN_ONNISTUMINEN' and $toim == "oletuspaikka" and !empty($kohdepaikasta_oletuspaikka)) {
-          # P‰ivitet‰‰n oletuspaikka
+          // P‰ivitet‰‰n oletuspaikka
           $tee = "MUUTA";
           $oletus = $minne;
 
@@ -298,7 +298,7 @@ if ($tee == "AJA") {
           $mista_chk_res = pupe_query($qry);
           $mista_chk_row = mysql_fetch_assoc($mista_chk_res);
 
-          # Siirret‰‰n h‰lytysrajat
+          // Siirret‰‰n h‰lytysrajat
           $halyraja2[$minne] = $mista_chk_row['halytysraja'];
           $tilausmaara2[$minne] = $mista_chk_row['tilausmaara'];
 
@@ -399,11 +399,11 @@ if ($tee == 'VALITSE_TIEDOSTO' and $varasto_valinta != '') {
     $sel = $kohdepaikasta_oletuspaikka ? "selected" : "";
 
     echo "<tr>";
-    echo "<th>",t("Kohdepaikasta tehd‰‰n oletuspaikka"),"<br>(",t("Siirret‰‰n samalla avoimet tilausrivit uudelle oletuspaikalle"),")</th>";
+    echo "<th>", t("Kohdepaikasta tehd‰‰n oletuspaikka"), "<br>(", t("Siirret‰‰n samalla avoimet tilausrivit uudelle oletuspaikalle"), ")</th>";
     echo "<td>";
     echo "<select name='kohdepaikasta_oletuspaikka'>";
-    echo "<option value=''>",t("Ei"),"</option>";
-    echo "<option value='x' {$sel}>",t("Kyll‰"),"</option>";
+    echo "<option value=''>", t("Ei"), "</option>";
+    echo "<option value='x' {$sel}>", t("Kyll‰"), "</option>";
     echo "</select>";
     echo "</td>";
     echo "</tr>";

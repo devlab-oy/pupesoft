@@ -77,7 +77,7 @@ function github_api($url) {
 
 // Haetaan pulkkareita githubista
 function hae_pulkkarit($updatedtime, $repo, $url) {
-  GLOBAL $kukarow;
+  global $kukarow;
 
   $page = 1;
 
@@ -165,7 +165,7 @@ function hae_pulkkarit($updatedtime, $repo, $url) {
 
 // Parsitaan git-logista kahden narustavedon väliset mergetykset
 function git_log($repo, $edveto_hash, $taveto_hash) {
-  GLOBAL $pupe_root_polku;
+  global $pupe_root_polku;
 
   $pulkkarit = array();
 
@@ -330,7 +330,7 @@ if (mysql_num_rows($vetores)) {
     }
 
     if ($pull_ids != "") {
-      foreach(explode(",",$pull_ids) as $pull) {
+      foreach (explode(",", $pull_ids) as $pull) {
         list($repo, $pullid) = explode("#", $pull);
 
         $query  = "SELECT *

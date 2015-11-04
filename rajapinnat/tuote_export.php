@@ -97,12 +97,12 @@ if (!function_exists("tee_querylisa_resultista")) {
 
     $poimitut = '';
 
-    # $tulokset = array(
-    #   [0] => array ("muuttuneet_tuotenumerot" => "'3','4'"),
-    #   [1] => array ("muuttuneet_tuotenumerot" => "'12','24'"´),
-    #   [2] => array ("muuttuneet_tuotenumerot" => "'5'" )
-    # );
-    # -> 3','4','12','24','5'
+    // $tulokset = array(
+    //   [0] => array ("muuttuneet_tuotenumerot" => "'3','4'"),
+    //   [1] => array ("muuttuneet_tuotenumerot" => "'12','24'"´),
+    //   [2] => array ("muuttuneet_tuotenumerot" => "'5'" )
+    // );
+    // -> 3','4','12','24','5'
 
     if (isset($tulokset[0][$tyyppi]) and !empty($tulokset[0][$tyyppi])) {
       $poimitut = $tulokset[0][$tyyppi];
@@ -126,15 +126,15 @@ if (!function_exists("tee_querylisa_resultista")) {
     }
 
     if (!empty($poimitut)) {
-     if ($tyyppi == 'muuttuneet_tuotenot') {
-       $result = " AND tuote.tuoteno IN ($poimitut) ";
-     }
-     elseif($tyyppi == 'muuttuneet_ryhmat') {
-       $result = " AND tuote.aleryhma IN ($poimitut) ";
-     }
-     else {
-       $result = '';
-     }
+      if ($tyyppi == 'muuttuneet_tuotenot') {
+        $result = " AND tuote.tuoteno IN ($poimitut) ";
+      }
+      elseif ($tyyppi == 'muuttuneet_ryhmat') {
+        $result = " AND tuote.aleryhma IN ($poimitut) ";
+      }
+      else {
+        $result = '';
+      }
     }
 
     return $result;
@@ -941,8 +941,8 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
         $tuotepuun_nodet[] = $breadcrumbs;
       }
 
-     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-     $query = "SELECT
+      // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
+      $query = "SELECT
                *
                FROM hinnasto
                WHERE yhtio   = '{$kukarow['yhtio']}'

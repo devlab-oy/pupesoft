@@ -64,7 +64,7 @@ if ($tee == "") {
     echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
   }
   elseif ($toim == "LUVAT_JA_LISENSSIT" and empty($aihealueet)) {
-     echo "<font class='error'>" . t("Lupia ja lisenssejä ei ole vielä lisätty") . "</font>";
+    echo "<font class='error'>" . t("Lupia ja lisenssejä ei ole vielä lisätty") . "</font>";
   }
   elseif ($toim == "" and empty($toimittajat)) {
     echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";

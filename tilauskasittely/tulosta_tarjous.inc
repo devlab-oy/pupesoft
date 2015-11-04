@@ -2208,7 +2208,7 @@ if (!function_exists('alvierittely')) {
       $pdf_tarjous->draw_text(350, $kala, t("Kassa-alennuksella", $kieli), $page_tarjous[$sivu], $boldi);
     }
 
-    if ($toim == 'PROFORMA' or in_array($yhtiorow['tarjoustyyppi'], array(1,5))) {
+    if ($toim == 'PROFORMA' or in_array($yhtiorow['tarjoustyyppi'], array(1, 5))) {
       $where = " otunnus in ($laskurow[tunnus]) ";
     }
     else {

@@ -31,12 +31,12 @@ if (!function_exists('lasku_fontit')) {
     $iso["font"]       = "Helvetica-Bold";
 
     return array("rectparam"   => $rectparam,
-                 "norm"        => $norm,
-                 "norm_italic" => $norm_italic,
-                 "pieni"       => $pieni,
-                 "boldi"       => $boldi,
-                 "pieni_boldi" => $pieni_boldi,
-                 "iso"         => $iso);
+      "norm"        => $norm,
+      "norm_italic" => $norm_italic,
+      "pieni"       => $pieni,
+      "boldi"       => $boldi,
+      "pieni_boldi" => $pieni_boldi,
+      "iso"         => $iso);
   }
 }
 

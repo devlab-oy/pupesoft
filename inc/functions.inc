@@ -31845,8 +31845,11 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
 }
 
 if (!function_exists("hae_eka_ja_vika_tilausrivi")) {
+
+
   /**
-   * @param array $params
+   *
+   * @param array   $params
    *
    * @return array Ensimmäinen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisessä tilauksella
    */

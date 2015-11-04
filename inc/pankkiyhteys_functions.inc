@@ -972,11 +972,12 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * @return array
  */
 function generoi_private_key_ja_csr($params = array()) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $csr_config;
 
-  $company_name = empty($params['company_name']) ? "" : $params['company_name'];
-  $customer_id  = empty($params['customer_id'])  ? "" : $params['customer_id'];
-  $pankki       = empty($params['pankki'])       ? "" : $params['pankki'];
+  $company_name = empty($params['company_name']) ? ""   : $params['company_name'];
+  $customer_id  = empty($params['customer_id'])  ? ""   : $params['customer_id'];
+  $pankki       = empty($params['pankki'])       ? ""   : $params['pankki'];
+  $csr_config   = empty($csr_config)             ? null : $csr_config;
 
   $key_bits = 2048;
 
@@ -1008,7 +1009,7 @@ function generoi_private_key_ja_csr($params = array()) {
   );
 
   $key = openssl_pkey_new($key_config);
-  $csr = openssl_csr_new($csr_info, $key);
+  $csr = openssl_csr_new($csr_info, $key, $csr_config);
 
   openssl_pkey_export($key, $private_key);
   openssl_csr_export($csr, $csrout);

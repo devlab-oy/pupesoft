@@ -2838,14 +2838,14 @@ if ($tee == 'Z') {
         (<input type='radio' class='raportti_tyyppi' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
         <input type='radio' class='raportti_tyyppi' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")";
 
-        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
-          echo "&nbsp;&nbsp;<a id='raportointi'><img id='raportointi_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
-        }
-        else {
-          echo "&nbsp;&nbsp;<input type='button' id='raportointi' value='", t("Näytä"), "' />";
-        }
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        echo "&nbsp;&nbsp;<a id='raportointi'><img id='raportointi_img' style='height: 20px;' src='{$palvelin2}pics/facelift/nuolet_alas.png' /></a>";
+      }
+      else {
+        echo "&nbsp;&nbsp;<input type='button' id='raportointi' value='", t("Näytä"), "' />";
+      }
 
-        echo "</form><hr>";
+      echo "</form><hr>";
 
       echo "<div id='raportointi_container'>";
       echo "</div>";

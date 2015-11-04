@@ -1107,6 +1107,10 @@ function tuetut_pankit() {
       "nimi"       => "Danske Bank",
       "lyhyt_nimi" => "danske"
     ),
+    "OKOYFIHH" => array(
+      "nimi"       => "OP",
+      "lyhyt_nimi" => "op",
+    ),
   );
 }
 

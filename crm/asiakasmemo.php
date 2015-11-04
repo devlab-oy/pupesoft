@@ -13,7 +13,7 @@ if (!isset($nayta_kaikki_merkinnat)) {
   $nayta_kaikki_merkinnat = array();
 
   if ($_COOKIE["pupesoft_asiakasmemo"] == "nayta_kaikki_merkinnat" or !isset($_COOKIE["pupesoft_asiakasmemo"])) {
-    $nayta_kaikki_merkinnat = array('default',1);
+    $nayta_kaikki_merkinnat = array('default', 1);
   }
 }
 
@@ -829,7 +829,7 @@ if ($ytunnus != '' and $tee == '') {
   echo "<input type='hidden' name='kaytiin_otsikolla' value='' id='ka_ot_h'>";
   echo "<input type='hidden' name='nayta_kaikki_merkinnat[]' value='default'>";
   echo "<input type='checkbox' name='nayta_kaikki_merkinnat[]' onchange='document.getElementById(\"ka_ot_h\").value=\"NOJOO!\"; this.form.submit();' {$_merkinnat_chk}>";
-  echo " ",t("Näytä kaikkien käyttäjien merkinnät");
+  echo " ", t("Näytä kaikkien käyttäjien merkinnät");
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "</form>";

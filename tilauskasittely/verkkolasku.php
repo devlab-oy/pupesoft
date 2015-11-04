@@ -2959,7 +2959,7 @@ else {
                 <input type='hidden' name='toim' value='LASKU'>
                 <input type='hidden' name='tee' value='NAYTATILAUS'>
                 <input type='submit' value='".t("Näytä lasku").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('tulostakopioform_$lasku', ''); return false;\"></form><br>";
-            }
+          }
         }
       }
       elseif (($yhtiorow['lasku_tulostin'] > 0 or $yhtiorow['lasku_tulostin'] == -99) or (isset($valittu_tulostin) and $valittu_tulostin != "")) {

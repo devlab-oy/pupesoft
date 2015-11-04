@@ -97,15 +97,22 @@ $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // Jos maksuehto on käteinen, sallitaan luottorajan ylitys
 // samma på erapaivan_ylityksen_raja
+
+// Jos tilaus on jo kerätty/toimitettu, niin ei pysäytetä sitä vaikka sitä muokataankin
+$_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
+
 $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L", "M"))
     or (in_array($yhtiorow["luottorajan_ylitys"], array("E", "F"))
       and ($kukarow["extranet"] != ""
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
+  and !$_keratty_toimitettu
   and $tilausvalmis_asiakas_row['luottoraja'] != 0
   and $maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
   and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE) ? 1 : 0;
 
-$erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
+$erapaiva_chk   =  ($maksuehtorow['kateinen'] == ''
+  and empty($maksuehtorow['jv'])
+  and !$_keratty_toimitettu
   and (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K", "J", "L", "M"))
     or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
       and ($kukarow["extranet"] != ""
@@ -202,15 +209,6 @@ else {
   $luottorajavirhe_ylivito_valmis = true;
 }
 
-$_keraamaton_ja_parametri = TRUE;
-
-$_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
-$_luottoraja_ylitys =  (in_array($yhtiorow["luottorajan_ylitys"], array("J", "K", "L", "M")));
-
-if ($_keratty_toimitettu and $_luottoraja_ylitys) {
-  $_keraamaton_ja_parametri = FALSE;
-}
-
 // Jos ennakkolaskun automatisointi on päällä (asiakas > yhtiön oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
@@ -232,7 +230,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   // Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
   $lopetus = "";
 }
-elseif (($luottorajavirhe != '' or $ylivito > 0) and $_keraamaton_ja_parametri) {
+elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
   // nollataan toimitustavan_lahto
   $toimitustavan_lahto_update = "";

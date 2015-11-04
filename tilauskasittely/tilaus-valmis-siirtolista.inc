@@ -446,7 +446,7 @@ else {
         $tilauksia++;
       }
     }
-    else  {
+    else {
       $splitatut = NULL;
     }
 

@@ -4,6 +4,42 @@ $(document).ready(function() {
     $('#kaikkyht').submit();
   });
 
+  $('#varastopaikat_container > td').on('click', '#varastopaikat_button', function() {
+    var _src = '../pics/loading_blue_small.gif',
+        sarjanumeroseuranta = $('#sarjanumeroseuranta').val(),
+        toim_maa = $('#toim_maa').val(),
+        tuoteno = $('#tuoteno').val(),
+        yksikko = $('#yksikko').val(),
+        saldoaikalisa = $('#saldoaikalisa').val(),
+        palvelin2 = $('#palvelin2');
+
+    $('#varastopaikat_container > td').html('<img src=\"'+_src+'\" />');
+
+    $.ajax({
+      type: 'POST',
+      dataType: 'JSON',
+      data: {
+        ajax_toiminto: 'varastopaikat',
+        no_head: 'yes',
+        ohje: 'off',
+        tuoteno: $('#tuoteno').val(),
+        sarjanumeroseuranta: sarjanumeroseuranta,
+        toim_maa: toim_maa,
+        tuoteno: tuoteno,
+        yksikko: yksikko,
+        saldoaikalisa: saldoaikalisa
+      },
+      success: function(data) {
+        $('#varastopaikat_container').after(data);
+        $('#varastopaikat_container').remove();
+      }
+    });
+  });
+
+  if ($('#myyntitilaus_saldolistaus').val() == '') {
+    $('#varastopaikat_button').trigger('click');
+  }
+
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');
     $(this).closest('form').submit();

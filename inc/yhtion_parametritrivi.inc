@@ -2270,6 +2270,18 @@ if ($fieldname == "tuotekysely") {
   $jatko = 0;
 }
 
+if ($fieldname == "myyntitilaus_saldolistaus") {
+
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Myyntitilauksen saldolistaus oletuksena auki")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Myyntitilauksen saldolistaus oletuksena kiinni")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oslapp_rakir_logo") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

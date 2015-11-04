@@ -141,7 +141,7 @@ if ($tee == 'lisaa_aiemmalle_riville') {
 
   $query = "UPDATE tilausrivi
             SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
-                varattu = varattu + '{$lisattava['kpl']}'
+                varattu     = varattu + '{$lisattava['kpl']}'
             WHERE yhtio     = '{$kukarow['yhtio']}'
             AND tyyppi      = 'O'
             AND otunnus     = '{$kukarow["kesken"]}'

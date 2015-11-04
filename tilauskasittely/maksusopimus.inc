@@ -5,7 +5,7 @@ if (empty($maksusoppari_silent)) {
 }
 
 // Jotta osataan hakea oikeat tilaukset laitetaan tilat talteen
-function maksusop_sallitut_tilat () {
+function maksusop_sallitut_tilat() {
   if (!empty($GLOBALS["toim"]) and $GLOBALS["toim"] == "TARJOUS") {
     return "'T'";
   }

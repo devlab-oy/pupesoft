@@ -61,7 +61,7 @@ if (!$tamascripti or $tee == "LAHETA") {
     $tulos = mail($veposti, mb_encode_mimeheader(t("Muistutus laskujen hyväksynnästä"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
     $maara++;
   }
-  
+
   if ($tamascripti) {
     echo "<br><br><font class='message'>".t("Lähetettiin")." $maara ".t("muistutusta. Muistutettuja laskuja")." $laskuja ".t("kappaletta").".</font><hr>";
   }

@@ -93,8 +93,8 @@ if (mysql_field_name($result, $i) == "salasanan_resetointi") {
 
 if (mysql_field_name($result, $i) == "aktivointikuittaus") {
 
-   $sel = "";
-   if ($trow[$i] != "") $sel = "SELECTED";
+  $sel = "";
+  if ($trow[$i] != "") $sel = "SELECTED";
 
   if (isset($magento_asiakas_aktivointi)) {
     $ulos = "<td><select name='$nimi'>";

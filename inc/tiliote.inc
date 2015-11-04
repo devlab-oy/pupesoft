@@ -747,7 +747,7 @@ case 'T00':
         $query = "SELECT nimi
                   FROM kuka
                   WHERE yhtio = '{$yritirow['yhtio']}'
-                  and kuka = '{$yritirow['hyvak']}'";
+                  and kuka    = '{$yritirow['hyvak']}'";
         $nimires = pupe_query($query);
         $nimirow = mysql_fetch_assoc($nimires);
 
@@ -949,10 +949,10 @@ case 'T10':
       // Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
       // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
       if ($tdr2tunn == 'T10' and (substr($tdrow2peek['tieto'], 187, 1) > $omataso
-        or ($yhtiorow['maa'] == "EE" and $maksuviite != '' 
-          and ($koodi == '710' and (strtoupper(trim($koodiselite)) == "DOMESTIC CREDIT TRANSFER"
-                               or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER"
-                               or strtoupper(trim($koodiselite)) == "NOT DEFINED"))))) {
+          or ($yhtiorow['maa'] == "EE" and $maksuviite != ''
+            and ($koodi == '710' and (strtoupper(trim($koodiselite)) == "DOMESTIC CREDIT TRANSFER"
+                or strtoupper(trim($koodiselite)) == "SEPA CREDIT TRANSFER"
+                or strtoupper(trim($koodiselite)) == "NOT DEFINED"))))) {
         $kuittikoodi = "E";
         $erialla     = "E";
       }

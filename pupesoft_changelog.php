@@ -77,7 +77,7 @@ function github_api($url) {
 
 // Haetaan pulkkareita githubista
 function hae_pulkkarit($updatedtime, $repo, $url) {
-  GLOBAL $kukarow;
+  global $kukarow;
 
   $page = 1;
 
@@ -90,7 +90,7 @@ function hae_pulkkarit($updatedtime, $repo, $url) {
     $query  = "INSERT INTO git_paivitykset
                SET hash_pupesoft = 'github_api_request',
                repository = '$repo',
-               date = now()";
+               date       = now()";
     pupe_query($query);
 
     foreach ($pulkkarit as $pulkkari) {
@@ -165,7 +165,7 @@ function hae_pulkkarit($updatedtime, $repo, $url) {
 
 // Parsitaan git-logista kahden narustavedon väliset mergetykset
 function git_log($repo, $edveto_hash, $taveto_hash) {
-  GLOBAL $pupe_root_polku;
+  global $pupe_root_polku;
 
   $pulkkarit = array();
 
@@ -330,13 +330,13 @@ if (mysql_num_rows($vetores)) {
     }
 
     if ($pull_ids != "") {
-      foreach(explode(",",$pull_ids) as $pull) {
+      foreach (explode(",", $pull_ids) as $pull) {
         list($repo, $pullid) = explode("#", $pull);
 
         $query  = "SELECT *
                    FROM git_pulkkarit
                    WHERE repository = '$repo'
-                   AND id = $pullid";
+                   AND id           = $pullid";
         $pulres = pupe_query($query);
         $pulrow = mysql_fetch_assoc($pulres);
 

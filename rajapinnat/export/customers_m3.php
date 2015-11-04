@@ -1444,7 +1444,7 @@ while ($row = mysql_fetch_assoc($res)) {
   // OKRGTM
   // Entry time
   // 103926
-  $rivi .= substr(str_replace(array(" ","-",":"), "", $row['luontiaika']), 8, 6).";";
+  $rivi .= substr(str_replace(array(" ", "-", ":"), "", $row['luontiaika']), 8, 6).";";
 
   // OKLMDT
   // Change date

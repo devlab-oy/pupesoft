@@ -254,7 +254,7 @@ else {
 
   echo "<table><tr><td valign='top' class='back'>";
 
-  $query  = "SHOW tables FROM $dbkanta";
+  $query  = "SHOW tables FROM `$dbkanta`";
   $result =  pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {

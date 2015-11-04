@@ -76,66 +76,66 @@ fwrite($fp2, $header);
 
 // Haetaan avoimet myyntilaskut
 $query = "(SELECT
-          'SALESINVOICE' tyyppi,
-          lasku.laskunro,
-          lasku.viite,
-          lasku.viesti,
-          lasku.tapvm,
-          if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
-          if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
-          concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
-          lasku.erpcm,
-          lasku.valkoodi,
-          if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
-          if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
-          sum(tiliointi.summa) avoinsaldo,
-          sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa
-          FROM lasku use index (yhtio_tila_mapvm)
-          JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-          JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
-            and lasku.tunnus = tiliointi.ltunnus
-            and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
-            and tiliointi.korjattu = ''
-            and tiliointi.tapvm <= current_date)
-          WHERE lasku.yhtio = '{$yhtio}'
-          and lasku.mapvm = '0000-00-00'
-          and lasku.tapvm <= current_date
-          and lasku.tapvm > '0000-00-00'
-          and lasku.tila = 'U'
-          and lasku.alatila = 'X'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
+           'SALESINVOICE' tyyppi,
+           lasku.laskunro,
+           lasku.viite,
+           lasku.viesti,
+           lasku.tapvm,
+           if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
+           if(asiakas.asiakasnro in ('0',''), asiakas.ytunnus, asiakas.asiakasnro) asiakasnro,
+           concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
+           lasku.erpcm,
+           lasku.valkoodi,
+           if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
+           if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
+           sum(tiliointi.summa) avoinsaldo,
+           sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa
+           FROM lasku use index (yhtio_tila_mapvm)
+           JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+           JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
+             and lasku.tunnus       = tiliointi.ltunnus
+             and tiliointi.tilino   in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]')
+             and tiliointi.korjattu = ''
+             and tiliointi.tapvm    <= current_date)
+           WHERE lasku.yhtio        = '{$yhtio}'
+           and lasku.mapvm          = '0000-00-00'
+           and lasku.tapvm          <= current_date
+           and lasku.tapvm          > '0000-00-00'
+           and lasku.tila           = 'U'
+           and lasku.alatila        = 'X'
+           GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
 
-          UNION
+           UNION
 
-          (SELECT
-          'SUPPLIERINVOICE' tyyppi,
-          if(lasku.laskunro > 0, lasku.laskunro, if(lasku.viite!='', lasku.viite, lasku.viesti)) laskunro,
-          lasku.viite,
-          lasku.viesti,
-          lasku.tapvm,
-          if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
-          if(toimi.toimittajanro in ('0',''), toimi.ytunnus, toimi.toimittajanro) asiakasnro,
-          concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
-          lasku.erpcm,
-          lasku.valkoodi,
-          if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
-          if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
-          tiliointi.summa * -1 avoinsaldo,
-          lasku.summa laskuavoinsaldo_valuutassa
-          FROM lasku use index (yhtio_tila_tapvm)
-          JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
-          JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio
-            and lasku.tunnus = tiliointi.ltunnus
-            and lasku.tapvm = tiliointi.tapvm
-            and tiliointi.tilino IN ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
-            and tiliointi.korjattu = '' )
-          WHERE lasku.yhtio = '{$yhtio}'
-          and mapvm = '0000-00-00'
-          and lasku.tapvm <= current_date
-          and lasku.tapvm > '0000-00-00'
-          and tila in ('H','Y','M','P','Q'))
+           (SELECT
+           'SUPPLIERINVOICE' tyyppi,
+           if(lasku.laskunro > 0, lasku.laskunro, if(lasku.viite!='', lasku.viite, lasku.viesti)) laskunro,
+           lasku.viite,
+           lasku.viesti,
+           lasku.tapvm,
+           if(lasku.kapvm=0, '', lasku.kapvm) kapvm,
+           if(toimi.toimittajanro in ('0',''), toimi.ytunnus, toimi.toimittajanro) asiakasnro,
+           concat_ws(' ', lasku.nimi, lasku.nimitark) nimi,
+           lasku.erpcm,
+           lasku.valkoodi,
+           if(lasku.kasumma=0, '', lasku.kasumma) kasumma_valuutassa,
+           if(lasku.kasumma=0, '', round(lasku.kasumma * lasku.vienti_kurssi, 2)) kasumma,
+           tiliointi.summa * -1 avoinsaldo,
+           lasku.summa laskuavoinsaldo_valuutassa
+           FROM lasku use index (yhtio_tila_tapvm)
+           JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
+           JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio=tiliointi.yhtio
+             and lasku.tunnus       = tiliointi.ltunnus
+             and lasku.tapvm        = tiliointi.tapvm
+             and tiliointi.tilino   IN ('$yhtiorow[ostovelat]','$yhtiorow[konserniostovelat]')
+             and tiliointi.korjattu = '' )
+           WHERE lasku.yhtio        = '{$yhtio}'
+           and mapvm                = '0000-00-00'
+           and lasku.tapvm          <= current_date
+           and lasku.tapvm          > '0000-00-00'
+           and tila                 in ('H','Y','M','P','Q'))
 
-          ORDER BY tyyppi, erpcm, laskunro";
+           ORDER BY tyyppi, erpcm, laskunro";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

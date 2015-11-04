@@ -3079,7 +3079,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
     }
 
-    # Haetaan lähetetulostin käyttäjän takaa
+    // Haetaan lähetetulostin käyttäjän takaa
     if (!empty($kukarow['lahetetulostin'])) {
       $lahete_printteri = $kukarow['lahetetulostin'];
     }

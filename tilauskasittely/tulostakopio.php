@@ -1578,11 +1578,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         $laskut = array();
 
-        foreach(pupesoft_laskutyypit() as $sellaskutyyppi => $sellaskutyyppiteksti) {
+        foreach (pupesoft_laskutyypit() as $sellaskutyyppi => $sellaskutyyppiteksti) {
           $laskut[] = array($sellaskutyyppi, "$sellaskutyyppiteksti ($sellaskutyyppi)");
         }
 
-        foreach($laskut as $lasku) {
+        foreach ($laskut as $lasku) {
           $sellaskutyyppi = $lasku[0]."##".$lasku[1];
 
           tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "", $sellaskutyyppi);
@@ -1627,12 +1627,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         $tilausvahvistukset = array();
 
-        foreach(pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
+        foreach (pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
           $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti ($seltvtyyppi)", "");
           $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti. Ei rivihintaa. ($seltvtyyppi)", "ei_rivihintaa");
         }
 
-        foreach($tilausvahvistukset as $tilva) {
+        foreach ($tilausvahvistukset as $tilva) {
           $laskurow['tilausvahvistus'] = $tilva[0];
           $laskurow['lahetepohjateksti'] = $tilva[1];
           $naytetaanko_rivihinta = $tilva[2];
@@ -1988,11 +1988,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         $lahetteet = array();
 
-        foreach(pupesoft_lahetetyypit() as $sellahetetyyppi => $sellahetetyyppiteksti) {
+        foreach (pupesoft_lahetetyypit() as $sellahetetyyppi => $sellahetetyyppiteksti) {
           $lahetteet[] = array($sellahetetyyppi, "$sellahetetyyppiteksti ($sellahetetyyppi)", "");
         }
 
-        foreach($lahetteet as $lahete) {
+        foreach ($lahetteet as $lahete) {
           $sellahetetyyppi = $lahete[0];
           $laskurow['lahetepohjateksti'] = $lahete[1];
           $naytetaanko_rivihinta = $lahete[2];

@@ -319,7 +319,7 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
     $_poikkeama_yht_eur += $_poikkeama_eur;
 
     $prn .= sprintf('%-9.7s', $_poikkeama);
-    $prn .= sprintf('%-8.6s',round($_poikkeama_eur, 1));
+    $prn .= sprintf('%-8.6s', round($_poikkeama_eur, 1));
 
     $prn .= sprintf('%-5.5s', str_pad($row['rivinro'], 5, " ", STR_PAD_LEFT));
 

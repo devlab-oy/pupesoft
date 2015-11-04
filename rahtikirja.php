@@ -448,6 +448,29 @@ if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_
   }
 }
 
+if ($tee == 'add' and isset($muutos) and $muutos == 'yes') {
+  // Varmistetaan, että tilaukset on vielä oikeassa tilassa
+  if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
+    $tunnuslisa = $tunnukset;
+  }
+  else {
+    $tunnuslisa = $otsikkonro;
+  }
+
+  $query = "SELECT lasku.tunnus
+            FROM lasku
+            JOIN toimitustapa use index (selite_index) ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tunnus IN ({$tunnuslisa})
+            AND (lasku.alatila in ('B','E') or (lasku.alatila = 'D' and toimitustapa.tulostustapa = 'H'))";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != count(explode(',', $tunnuslisa))) {
+    echo "<br><br><font class='error'> ".t("VIRHE: Muokattava tilaus ei ole enää oikeassa tilassa")."! </font><br>";
+    exit;
+  }
+}
+
 // lisätään syötetty kama rahtikirja-tauluun
 if ($tee == 'add') {
   $apu = 0; //apumuuttuja

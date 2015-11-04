@@ -27,6 +27,9 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Pupeasennuksen root polku, toimitusvahvistuksia varten
+  $pupe_root_polku = dirname(dirname(FILE));
+
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
@@ -310,11 +313,14 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         }
 
         if ($toimitustapa_row["tulostustapa"] == 'L') {
-          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.rahtikirjanro = '$eranumero_sscc'";
+          // rahtikirjanro ei ole enää sama ylempien muutoksien jäljiltä, joten haetaan pakkaustieto_tunnuksista
+          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.pakkaustieto_tunnukset like '%{$eranumero_sscc}%'";
           $_select_otunnus = "rahtikirjat.pakkaustieto_tunnukset";
         }
         else {
-          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = '{$eranumero_sscc}'";
+          // rahtikirjanro ei ole enää sama ylempien muutoksien jäljiltä, joten haetaan otsikkonro:lla, mutta myös rahtikirjanro:lla,
+          // koska halutaan kaikki saman rahtikirjan tilaukset (nekin joihin Unifaun ei päivittänyt tietoa)
+          $_rahtiwherelisa = "AND (rahtikirjat.otsikkonro = '{$eranumero_sscc}') or (rahtikirjat.rahtikirjanro = '{$eranumero_sscc}')";
           $_select_otunnus = "rahtikirjat.otsikkonro";
         }
 
@@ -335,6 +341,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
       foreach ($otunnukset_arr as $key => $otunnukset) {
         $laskurow = $laskurowt[$key];
         $toimitustapa_row = $toimitustaparowt[$key];
+        $toitarow = $toimitustapa_row;
         $tunnukset = $tunnukset_arr[$key];
 
         if ($laskurow['toimitusvahvistus'] != '') {

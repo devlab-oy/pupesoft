@@ -35,7 +35,7 @@ function tiedostotyypit($aihealue = "", $toim = "") {
   global $kukarow;
 
   if ($aihealue) {
-    if (isset($toim) and $toim == 'LUVAT_JA_LISENSSIT') {
+    if ($toim == 'LUVAT_JA_LISENSSIT') {
       $avainsanat = t_avainsana("LITETY_LUVLIS", "", "AND selite = '{$aihealue}'");
     }
     else {

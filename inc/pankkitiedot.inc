@@ -101,7 +101,7 @@ if (!function_exists("pankkitiedot")) {
         break;
       }
       break;
-    case (4) : 
+    case (4) :
       switch ($rahalaitoskoodi3) {
         case (470) :
         case (471) :

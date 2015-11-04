@@ -23,7 +23,7 @@ if (!isset($synkronointi_tyyppi)) {
 }
 
 // Varmistetaan, että kaikki muuttujat on kunnossa
-if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas) 
+if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas)
   or empty($magento_tax_class_id) or empty($verkkokauppa_saldo_varasto)) {
   die("Magento parametrit puuttuu, ohjelmaa ei voida ajaa.");
 }
@@ -145,7 +145,7 @@ if ($request['action'] == 'sync') {
   if (in_array('poista_ylimaaraiset', $synkronoi)) {
     echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
     $tuotenumerot = $magento_client->hae_kaikki_tuotteet();
-    $kaikki_tuotteet = $tuotenumerot[0]; 
+    $kaikki_tuotteet = $tuotenumerot[0];
     exit;
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
@@ -515,7 +515,7 @@ function hae_tuotteet() {
 
 function hae_configurable_tuotteet() {
   global $kukarow, $yhtiorow;
-  
+
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
   $dnslajitelma = array();
 
@@ -719,9 +719,9 @@ function hae_saldot() {
                 AND tuote.tuoteno     != ''
                 AND tuote.nakyvyys    != '')
               WHERE tapahtuma.yhtio    = '{$kukarow["yhtio"]}')
-  
+
               UNION
-  
+
               (SELECT tilausrivi.tuoteno,
               tuote.eankoodi
               FROM tilausrivi
@@ -732,9 +732,9 @@ function hae_saldot() {
                 AND tuote.tuoteno     != ''
                 AND tuote.nakyvyys    != '')
               WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}')
-  
+
               UNION
-  
+
               (SELECT tuote.tuoteno,
               tuote.eankoodi
               FROM tuote
@@ -748,7 +748,7 @@ function hae_saldot() {
 
   while ($row = mysql_fetch_assoc($result)) {
     list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
-  
+
     $dnstock[] = array(
       'tuoteno'     => $row["tuoteno"],
       'ean'         => $row["eankoodi"],

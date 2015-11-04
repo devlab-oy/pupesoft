@@ -918,7 +918,9 @@ if ($tee == 'tulosta') {
         }
       }
 
-      if ($rakir_row['toimitusvahvistus'] != '' and !$_onko_unifaun) {
+      $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
+
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
 
         if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
           $desadv_version = "una";

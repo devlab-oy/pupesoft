@@ -258,6 +258,9 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $rakir_res = pupe_query($query);
             $rakir_row = mysql_fetch_assoc($rakir_res);
 
+            $rakirno = "";
+            $sscculk = "";
+
             if (!empty($rakir_row['tunnus'])) {
 
               $rakirno = trim($rakir_row['rahtikirjanro']);
@@ -336,6 +339,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $tunnukset_arr[$tunnukset_row['otunnus']] = $tunnukset_row['rtunnus'];
         $toimitustaparowt[$tunnukset_row['otunnus']] = $toimitustapa_row;
         $laskurowt[$tunnukset_row['otunnus']] = $laskurow;
+        $sscc_ulk_arr[$tunnukset_row['otunnus']] = $sscculk ? $sscculk : $sscc_ulkoinen;
       }
 
       foreach ($otunnukset_arr as $key => $otunnukset) {
@@ -344,7 +348,12 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $toitarow = $toimitustapa_row;
         $tunnukset = $tunnukset_arr[$key];
 
-        if ($laskurow['toimitusvahvistus'] != '') {
+        // sscc_ulkoinen magentoa varten
+        $sscc_ulkoinen = $sscc_ulk_arr[$key];
+
+        $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
+
+        if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
 
           if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
             $desadv_version = "una";
@@ -391,7 +400,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
           while ($magerow = mysql_fetch_assoc($mageres)) {
             $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
-            $magento_api_rak = $rahtikirjanro;
+            $magento_api_rak = $sscc_ulkoinen;
             $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
 
             require "magento_toimita_tilaus.php";

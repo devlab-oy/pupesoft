@@ -358,7 +358,7 @@ if ($fieldname == "tilausvahvistustyyppi") {
   $sel = array();
   $sel[$apu] = "selected";
 
-  foreach(pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
+  foreach (pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
     $ulos .= "<option value = '$seltvtyyppi' $sel[$seltvtyyppi]>".t($seltvtyyppiteksti)."</option>";
   }
 

@@ -39,8 +39,8 @@ $query = "SELECT kalenteri.*,
           LEFT JOIN kuka ON (kuka.yhtio = kalenteri.yhtio AND kuka.kuka = kalenteri.kuka)
           LEFT JOIN lasku ON (lasku.yhtio = kalenteri.yhtio AND lasku.tunnus = kalenteri.otunnus)
           LEFT JOIN kuka AS kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-          WHERE kalenteri.yhtio = '{$yhtio}'
-          AND kalenteri.tyyppi = 'Muistutus'
+          WHERE kalenteri.yhtio  = '{$yhtio}'
+          AND kalenteri.tyyppi   = 'Muistutus'
           AND kalenteri.kuittaus = 'K'
           AND LEFT(kalenteri.pvmalku, 10) < CURDATE()";
 $res = pupe_query($query);
@@ -54,7 +54,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $query = "SELECT *
             FROM asiakas
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$row['liitostunnus']}'";
+            AND tunnus  = '{$row['liitostunnus']}'";
   $asiakasres = pupe_query($query);
   $asiakasrow = mysql_fetch_assoc($asiakasres);
 

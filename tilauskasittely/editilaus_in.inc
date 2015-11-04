@@ -471,7 +471,7 @@ while ($tietue = fgets($fd)) {
     if (!empty($ot_verkkokauppa_tilausviesti)) {
       $viestilisa = " / ";
     }
-    if (!empty($tieto)) {      
+    if (!empty($tieto)) {
       $ot_verkkokauppa_tilausviesti .= $viestilisa.t("Tilausnro").": ".$tieto;
     }
     break;

@@ -2610,7 +2610,7 @@ if (!$cli and !isset($api_kentat)) {
     $_kentat = array();
 
     while ($_row = mysql_fetch_assoc($_res)) {
-      if (in_array($_row['Field'], array('tunnus','yhtio'))) {
+      if (in_array($_row['Field'], array('tunnus', 'yhtio'))) {
         continue;
       }
 
@@ -2621,7 +2621,7 @@ if (!$cli and !isset($api_kentat)) {
 
     if (!empty($_kentat)) {
       echo "<tr>";
-      echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
+      echo "<td class='tumma'>", t("Sarakkeet joita saa aineistossa kertoa"), ":</td>";
       echo "<td>";
       echo "<ul>";
       echo "<li>";

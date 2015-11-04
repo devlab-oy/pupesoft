@@ -83,7 +83,7 @@ function alehinta_asiakas($asiakas, $tuote) {
   $hinta = "";
   $ale   = array();
 
-  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+  list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];
@@ -115,7 +115,7 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
   $hinta    = "";
   $ale      = array();
 
-  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
+  list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
 
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];

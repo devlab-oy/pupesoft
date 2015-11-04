@@ -730,10 +730,10 @@ if (isset($tunnus) and $tunnus > 0) {
 
   if ($tyyppi == 't') {
     $sel = !empty($alv) ? "selected" : "";
-    
+
     echo "<td><select name='alv'>";
     echo "<option value=''>", t("Oletusverotiliöinti"), "</option>";
-    echo "<option value='X' {$sel}>", t("Ei vähennettävää veroa"), "</option>";  
+    echo "<option value='X' {$sel}>", t("Ei vähennettävää veroa"), "</option>";
     echo "</select></td>";
   }
 

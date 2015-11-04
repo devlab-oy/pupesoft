@@ -506,6 +506,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
       echo "<input type='hidden' name='var' value='$var'>";
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       $query = "SELECT *
                 FROM yhtion_toimipaikat
@@ -642,6 +643,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='lasku_yhtio'    value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
       echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       if (isset($yhtiotoimipaikka)) echo "<input type='hidden' name='yhtiotoimipaikka'  value='{$yhtiotoimipaikka}' />";
       if (isset($tilaustyyppi)) echo "<input type='hidden' name='tilaustyyppi'  value='{$tilaustyyppi}' />";
@@ -718,6 +720,7 @@ if ($monta != 1) {
       echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
       echo "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       echo "<input type='hidden' name='tilaustyyppi'     value='{$tilaustyyppi}' />";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       if (is_array($varastosta)) {
         foreach ($varastosta as $varatunnu) {
@@ -790,6 +793,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
     echo "<input type='hidden' name='var' value='$var'>";
     echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
+    echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
     echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
     echo "</form>";
   }
@@ -815,6 +819,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='myyjanro'         value='$myyjanro'>";
     echo "<input type='hidden' name='tuoteno'          value='$tuoteno'>";
     echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
+    echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
     if (is_array($varastosta)) {
       foreach ($varastosta as $varatunnu) {

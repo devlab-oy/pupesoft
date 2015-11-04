@@ -300,7 +300,7 @@ if (!$enarimatch) {
                   ON (asiakaskommentti.yhtio = tuote.yhtio
                   AND asiakaskommentti.tuoteno = tuote.tuoteno
                   AND asiakaskommentti.ytunnus = '{$asiakasrow["ytunnus"]}')
-                WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                WHERE tuote.yhtio              = '{$kukarow["yhtio"]}'
                 AND asiakaskommentti.kommentti = '{$tuoteno}'
                 {$poistetulisa}
                 LIMIT 1";

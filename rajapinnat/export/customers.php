@@ -311,8 +311,8 @@ fwrite($fp, $header);
 // Haetaan asiakkaat
 $query = "SELECT *
           FROM asiakas
-          WHERE asiakas.yhtio = '{$yhtio}'
-          AND asiakas.laji NOT IN ('P','R')
+          WHERE asiakas.yhtio         = '{$yhtio}'
+          AND asiakas.laji            NOT IN ('P','R')
           AND asiakas.myynninseuranta = ''
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
@@ -537,7 +537,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $query = "SELECT nimi
             FROM kuka
             WHERE yhtio = '{$yhtio}'
-            AND myyja = '$row[myyjanro]'";
+            AND myyja   = '$row[myyjanro]'";
   $masres = pupe_query($query);
   $masrow = mysql_fetch_assoc($masres);
 
@@ -569,7 +569,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
   $query = "SELECT nimi
             FROM kustannuspaikka
-            WHERE yhtio = '{$yhtio}'
+            WHERE yhtio   = '{$yhtio}'
             and kaytossa != 'E'
             and tyyppi    = 'K'
             and tunnus    = '$row[kustannuspaikka]'";

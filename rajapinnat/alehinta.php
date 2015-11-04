@@ -83,7 +83,7 @@ function alehinta_asiakas($asiakas, $tuote) {
   $hinta = "";
   $ale   = array();
 
-  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
+  list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
   $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
   $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);
@@ -120,7 +120,7 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
   $hinta    = "";
   $ale      = array();
 
-  list($hinta, , $ale, ,) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
+  list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
 
   $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
   $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);

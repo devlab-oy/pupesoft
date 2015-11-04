@@ -3690,7 +3690,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $sel_lahete[$tp_tulostin] = "SELECTED";  // laskuprintteri
         }
 
-        # Haetaan lähetetulostin käyttäjän takaa
+        // Haetaan lähetetulostin käyttäjän takaa
         if (!empty($kukarow['lahetetulostin'])) {
           $sel_lahete = array();
           $sel_lahete[$kukarow['lahetetulostin']] = 'selected';

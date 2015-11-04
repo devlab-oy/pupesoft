@@ -90,15 +90,15 @@ $query = "SELECT lasku.laskunro,
           round((tilausrivi.kate-tilausrivi.rivihinta)*-1, 2) keha
           FROM lasku
           INNER JOIN tilausrivi ON (lasku.yhtio = tilausrivi.yhtio
-            AND lasku.tunnus            = tilausrivi.otunnus
-            AND tilausrivi.tyyppi       = 'L')
+            AND lasku.tunnus      = tilausrivi.otunnus
+            AND tilausrivi.tyyppi = 'L')
           INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno           = tilausrivi.tuoteno)
+            AND tuote.tuoteno     = tilausrivi.tuoteno)
           INNER JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-            AND asiakas.tunnus          = lasku.liitostunnus)
-          WHERE lasku.yhtio = '{$yhtio}'
-          AND lasku.tila    = 'L'
-          AND lasku.alatila = 'X'
+            AND asiakas.tunnus    = lasku.liitostunnus)
+          WHERE lasku.yhtio       = '{$yhtio}'
+          AND lasku.tila          = 'L'
+          AND lasku.alatila       = 'X'
           {$rajaus}
           ORDER BY lasku.tapvm, lasku.laskunro, tilausrivi.tuoteno";
 $res = pupe_query($query);
@@ -120,7 +120,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $query  = "SELECT nimi
              from kuka
              where tunnus = '$row[myyja]'
-             and yhtio = '{$yhtio}'";
+             and yhtio    = '{$yhtio}'";
   $myyres = pupe_query($query);
   $myyrow = mysql_fetch_assoc($myyres);
 

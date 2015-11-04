@@ -586,7 +586,7 @@ if (!function_exists("tee_jt_tilaus")) {
       ///* Tässä meillä on otsikko hallussa se on $id muuttujassa*///
 
       $kpl[$tunnukset] = str_replace(",", ".", $kpl["$tunnukset"]);
-  
+
       // Tässä haarassa käyttäjä on syöttänyt jonkun kappalemäärän
       if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $loput[$tunnukset] == 'VAKISIN') {
 

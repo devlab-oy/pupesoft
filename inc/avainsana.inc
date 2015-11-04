@@ -48,4 +48,3 @@ $mysqlaliasarray['RELEX_TUOTEPAR']['selitetark']     = "Operaattori";
 $mysqlaliasarray['RELEX_TUOTEPAR']['selitetark_2']   = "Arvo";
 
 $mysqlaliasarray['ASIAKASHINNASTO']['selite']         = "Käytetäänkö myyntihinnan tilalla myymälähintaa";
-

@@ -1565,9 +1565,9 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   }
 
   echo t("Loppup‰iv‰m‰‰r‰")."</th><td>";
-  echo t("PV")," <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
-  echo t("KK")," <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
-  echo t("VVVV")," <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
+  echo t("PV"), " <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
+  echo t("KK"), " <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
+  echo t("VVVV"), " <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
 
   echo "</td><td class='back'>".t("J‰t‰ loppup‰iv‰m‰‰r‰ tyhj‰ksi jos haluat, ett‰ hinnat ovat voimassa toistaiseksi")."</td></tr>";
   echo "<tr><td colspan='2' class='back'>";
@@ -3162,7 +3162,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K','V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K', 'V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='valitse_tuotteetasiakashinnastoon' value='x'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -9023,7 +9023,7 @@ if ($tee == '') {
 
         if ($toim != 'SIIRTOLISTA') {
 
-          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A'))) {
 
             if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
               echo "<tr>$jarjlisa

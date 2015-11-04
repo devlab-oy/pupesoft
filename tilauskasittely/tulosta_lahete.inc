@@ -3512,11 +3512,11 @@ if (!function_exists('loppu_lahete')) {
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
         $alhqur = "SELECT
-                     puhelin,
-                     fax,
-                     email,
-                     www,
-                     vat_numero
+                   puhelin,
+                   fax,
+                   email,
+                   www,
+                   vat_numero
                    FROM yhtion_toimipaikat
                    WHERE yhtio='$laskurow[yhtio]'
                    AND tunnus='$laskurow[yhtio_toimipaikka]'";

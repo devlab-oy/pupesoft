@@ -223,8 +223,8 @@ $query = "SELECT toimi.*,
           LEFT JOIN kustannuspaikka as k1 ON (k1.yhtio = toimi.yhtio AND k1.tunnus = toimi.kustannuspaikka)
           LEFT JOIN kustannuspaikka as k2 ON (k2.yhtio = toimi.yhtio AND k2.tunnus = toimi.kohde)
           LEFT JOIN kustannuspaikka as k3 ON (k3.yhtio = toimi.yhtio AND k3.tunnus = toimi.projekti)
-          WHERE toimi.yhtio = '{$yhtio}'
-          AND toimi.tyyppi != 'P'
+          WHERE toimi.yhtio  = '{$yhtio}'
+          AND toimi.tyyppi  != 'P'
           ORDER BY toimi.tunnus";
 $res = pupe_query($query);
 

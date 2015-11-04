@@ -1132,9 +1132,9 @@ function hae_tilausnumero($laskunro) {
   $query = "SELECT tunnus
             FROM lasku
             WHERE laskunro = {$laskunro}
-            AND yhtio = '{$kukarow["yhtio"]}'
-            AND tila = 'L'
-            AND alatila = 'X'";
+            AND yhtio      = '{$kukarow["yhtio"]}'
+            AND tila       = 'L'
+            AND alatila    = 'X'";
 
   $tilausnumero = pupe_query($query);
   $tilausnumero = mysql_fetch_assoc($tilausnumero);

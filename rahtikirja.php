@@ -448,6 +448,29 @@ if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_
   }
 }
 
+if ($tee == 'add' and isset($muutos) and $muutos == 'yes') {
+  // Varmistetaan, että tilaukset on vielä oikeassa tilassa
+  if ($yhtiorow['kerayserat'] == 'K' and strpos($tunnukset, ',') !== FALSE) {
+    $tunnuslisa = $tunnukset;
+  }
+  else {
+    $tunnuslisa = $otsikkonro;
+  }
+
+  $query = "SELECT lasku.tunnus
+            FROM lasku
+            JOIN toimitustapa use index (selite_index) ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tunnus IN ({$tunnuslisa})
+            AND (lasku.alatila in ('B','E') or (lasku.alatila = 'D' and toimitustapa.tulostustapa = 'H'))";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != count(explode(',', $tunnuslisa))) {
+    echo "<br><br><font class='error'> ".t("VIRHE: Muokattava tilaus ei ole enää oikeassa tilassa")."! </font><br>";
+    exit;
+  }
+}
+
 // lisätään syötetty kama rahtikirja-tauluun
 if ($tee == 'add') {
   $apu = 0; //apumuuttuja
@@ -2516,6 +2539,10 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         $kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
       }
 
+      if (!empty($kukarow['rahtikirjatulostin'])) {
+        $kirjoitin_tunnus = $kukarow['rahtikirjatulostin'];
+      }
+
       $query = "SELECT *
                 FROM kirjoittimet
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -3075,6 +3102,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
     }
 
+    // Haetaan lähetetulostin käyttäjän takaa
+    if (!empty($kukarow['lahetetulostin'])) {
+      $lahete_printteri = $kukarow['lahetetulostin'];
+    }
+
     $query = "SELECT *
               FROM kirjoittimet
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -3102,7 +3134,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
-      echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
+      echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
     }
 
     $oslappkpl = $oslappkpl_keraysera != 0 ? $oslappkpl_keraysera : $yhtiorow['oletus_rahtikirja_oslappkpl'];
@@ -3153,7 +3185,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
     }
 
-    echo "<input type='text' size='4' name='oslappkpl' id='oslapcheck' value='$oslappkpl' {$disabled} />";
+    echo "<input type='text' maxlength='2' size='4' name='oslappkpl' id='oslapcheck' value='$oslappkpl' {$disabled} />";
 
     if ($oslappkpl_hidden != 0) {
       echo "<input type='hidden' name='oslappkpl' id='oslapcheck2' value='{$oslappkpl_hidden}' />";
@@ -3176,7 +3208,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
-      echo "</select> ".t("Kpl").": <input type='text' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
+      echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
     }
 
     if ($vakrow['vaktuotteet_imdg'] != '') {
@@ -3196,7 +3228,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       if (!isset($dgdkpl)) $dgdkpl = 1;
 
-      echo "</select> ", t("Kpl"), ": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
+      echo "</select> ", t("Kpl"), ": <input type='text' maxlength='2' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
     }
 
     if ($vakrow['vaktuotteet'] != '') {

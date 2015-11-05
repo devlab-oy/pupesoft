@@ -467,7 +467,13 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO' :
     // Verkkokauppassa asiakkaan antama tilausnumero
-    $ot_verkkokauppa_tilausviesti .= " / ".t("Tilausnro").": ".$tieto;
+    $viestilisa = '';
+    if (!empty($ot_verkkokauppa_tilausviesti)) {
+      $viestilisa = " / ";
+    }
+    if (!empty($tieto)) {
+      $ot_verkkokauppa_tilausviesti .= $viestilisa.t("Tilausnro").": ".$tieto;
+    }
     break;
 
   case 'OSTOTIL.OT_VERKKOKAUPPA_KOHDE' :
@@ -740,16 +746,14 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
     }
 
-    $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-
-    if (!is_array($arow) and !empty($ovt_tunnus)) {
+    if (!is_array($arow)) {
+      $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
-                and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
 
@@ -760,12 +764,14 @@ while ($tietue = fgets($fd)) {
       }
     }
 
-    if (!is_array($arow)) {
+    if (!is_array($arow) and !empty($ovt_tunnus)) {
+
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
+                and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
 
@@ -2118,7 +2124,7 @@ while ($tietue = fgets($fd)) {
           }
 
           // jos tullaan magentosta ja alennus on tiedossa
-          if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
+          if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
             $ale1 = $editilaus_alennus;
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {

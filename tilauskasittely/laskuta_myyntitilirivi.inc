@@ -92,7 +92,6 @@ if ($tilatapa == "PAIVITA") {
             break;
           case 'kpl':
           case 'tilkpl':
-          case 'varattu':
             $values .= ", '$erotus'";
             break;
           case 'kate_korjattu':

@@ -13,6 +13,11 @@ if ($livesearch_tee == 'ASIAKKAANTILAUSNUMERO') {
   exit;
 }
 
+if ($livesearch_tee == 'TILAUSVIITE') {
+  livesearch_asiakkaantilausnumero($toim, "viesti");
+  exit;
+}
+
 // Enaboidaan ajax kikkare
 enable_ajax();
 
@@ -303,10 +308,18 @@ elseif ($laskunro > 0) {
   }
 }
 //astilnro kentässä on laskun tunnus, jotta livesearch hakukentän ID olisi yksilöllinen
-elseif ($astilnro != '') {
+elseif ($astilnro != '' or $tilausviite != '') {
+  $_haku = "";
+
+  if ($astilnro != '') {
+    $_haku = $astilnro;
+  } else {
+    $_haku = $tilausviite;
+  }
+
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
             FROM lasku
-            WHERE tunnus = '$astilnro'
+            WHERE tunnus = '$_haku'
             and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -769,6 +782,10 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
   if ($cleantoim == "MYYNTI") {
     echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>";
     echo livesearch_kentta("asiaktilaus", "ASIAKKAANTILAUSNUMERO", "astilnro", 170, $astilnro);
+    echo "</td>";
+
+    echo "<tr><th>".t("Tilausviite")."</th><td>";
+    echo livesearch_kentta("asiaktilaus", "TILAUSVIITE", "tilausviite", 170, $tilausviite);
     echo "</td>";
   }
 

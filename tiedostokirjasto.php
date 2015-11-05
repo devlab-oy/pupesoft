@@ -19,7 +19,13 @@ $tee            = isset($tee) ? $tee : "";
 if ($toim == "LAATU") {
   $otsikko     = "Laatu-asiakirjat";
   $ylaotsikko  = "Aihealueet";
-  $aihealueet  = hae_aihealueet();
+  $aihealueet  = hae_aihealueet($toim);
+  $toimittajat = "";
+}
+elseif ($toim == "LUVAT_JA_LISENSSIT") {
+  $otsikko     = "Luvat ja lisenssit";
+  $ylaotsikko  = "Aihealueet";
+  $aihealueet  = hae_aihealueet($toim);
   $toimittajat = "";
 }
 else {
@@ -57,6 +63,9 @@ if ($tee == "") {
   if ($toim == "LAATU" and empty($aihealueet)) {
     echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
   }
+  elseif ($toim == "LUVAT_JA_LISENSSIT" and empty($aihealueet)) {
+    echo "<font class='error'>" . t("Lupia ja lisenssejä ei ole vielä lisätty") . "</font>";
+  }
   elseif ($toim == "" and empty($toimittajat)) {
     echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";
   }
@@ -76,7 +85,7 @@ function piirra_formi($params) {
     isset($params["valittu_tiedostotyyppi"]) ? $params["valittu_tiedostotyyppi"] : "";
   $valittu_toimittaja     =
     isset($params["valittu_toimittaja"]) ? $params["valittu_toimittaja"] : "";
-  $tiedostotyypit         = tiedostotyypit($valittu_aihealue);
+  $tiedostotyypit         = tiedostotyypit($valittu_aihealue, $toim);
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='hae_tiedostot'>";

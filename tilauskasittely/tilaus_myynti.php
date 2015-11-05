@@ -1407,9 +1407,9 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   }
 
   echo t("Loppup‰iv‰m‰‰r‰")."</th><td>";
-  echo t("PV")," <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
-  echo t("KK")," <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
-  echo t("VVVV")," <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
+  echo t("PV"), " <input type='text' name='asiakas_hinta_loppupv' value='' size='3'> ";
+  echo t("KK"), " <input type='text' name='asiakas_hinta_loppukk' value='' size='3'> ";
+  echo t("VVVV"), " <input type='text' name='asiakas_hinta_loppuvv' value='' size='5'>";
 
   echo "</td><td class='back'>".t("J‰t‰ loppup‰iv‰m‰‰r‰ tyhj‰ksi jos haluat, ett‰ hinnat ovat voimassa toistaiseksi")."</td></tr>";
   echo "<tr><td colspan='2' class='back'>";
@@ -2132,6 +2132,9 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   require 'tilauksesta_varastosiirto.inc';
 
   tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
+
+  // Laitetaan Intrastat-tiedot kuntoon, muuten laskujen ketjutus ei onnaa.
+  $laskurow = palauta_intrastat_tiedot($laskurow, $laskurow['varasto'], TRUE);
 
   $tee           = '';
   $tilausnumero  = '';
@@ -3001,7 +3004,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K','V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K', 'V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='valitse_tuotteetasiakashinnastoon' value='x'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -8962,7 +8965,7 @@ if ($tee == '') {
 
         if ($toim != 'SIIRTOLISTA') {
 
-          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO','PIKATILAUS','TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M','A'))) {
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A'))) {
 
             if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
               echo "<tr>$jarjlisa
@@ -10543,7 +10546,7 @@ if ($tee == '') {
     echo "</tr>";
 
     if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
-      echo "  <tr>
+      echo "  <tr>$jarjlisa
             <td align='left' class='back ptop'>
             <form action='tulostakopio.php' method='post' name='tulostakopio'>
             <input type='hidden' name='otunnus' value='$tilausnumero'>
@@ -10573,20 +10576,23 @@ if ($tee == '') {
             }
         </SCRIPT>";
 
-      echo "<tr><td align='left' class='back ptop'>
-          <form name='muuta_ennakoksi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return veri_fyi();'>
-          <input type='hidden' name='toim' value='$toim'>
-          <input type='hidden' name='lopetus' value='$lopetus'>
-          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-          <input type='hidden' name='projektilla' value='$projektilla'>
-          <input type='hidden' name='tee' value='MUUTA_EXT_ENNAKKO'>
-          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-          <input type='hidden' name='mista' value = '$mista'>
-          <input type='hidden' name='orig_tila' value = '$orig_tila'>
-          <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-          <input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
-          <input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
-          </form></td></tr>";
+      echo "<tr>$jarjlisa
+            <td align='left' class='back ptop'>
+            <form name='muuta_ennakoksi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return veri_fyi();'>
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+            <input type='hidden' name='projektilla' value='$projektilla'>
+            <input type='hidden' name='tee' value='MUUTA_EXT_ENNAKKO'>
+            <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+            <input type='hidden' name='mista' value = '$mista'>
+            <input type='hidden' name='orig_tila' value = '$orig_tila'>
+            <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+            <input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
+            <input type='submit' value='* ".t("Muuta %s normaaliksi ennakkotilaukseksi", "", $otsikko)."*'>
+            </form>
+            </td>
+            </tr>";
     }
 
     if ($kukarow['extranet'] == ""
@@ -10597,9 +10603,28 @@ if ($tee == '') {
     ) {
 
       if (!isset($piirtele_valikko)) {
-        echo "  <tr>
+        echo "<tr>$jarjlisa
+              <td align='left' class='back ptop'>
+              <form name='excel_tuote_rapsa' method='post'>
+              <input type='hidden' name='lopetus' value='$lopetus'>
+              <input type='hidden' name='otunnus' value='$tilausnumero'>
+              <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+              <input type='hidden' name='mista' value = '$mista'>
+              <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+              <input type='hidden' name='toim' value='$toim'>
+              <input type='hidden' name='tee' value='$tee'>
+              <input type='hidden' name='naantali' value='KIVAPAIKKA'>
+              <input type='submit' name='piirtele_valikko' value='".t("Tuotetiedot")."'>
+              </form>
+              </td>
+            </tr>";
+      }
+    }
+
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
+      echo "<tr>$jarjlisa
             <td align='left' class='back ptop'>
-            <form name='excel_tuote_rapsa' method='post'>
+            <form name='excel_laiteluettelo' method='post'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='otunnus' value='$tilausnumero'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -10607,30 +10632,11 @@ if ($tee == '') {
             <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
             <input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='tee' value='$tee'>
-            <input type='hidden' name='naantali' value='KIVAPAIKKA'>
-            <input type='submit' name='piirtele_valikko' value='".t("Tuotetiedot")."'>
+            <input type='hidden' name='naantali' value='EIENAA'>
+            <input type='submit' name='piirtele_laiteluettelo' value='".t("Laiteluettelo")."'>
             </form>
             </td>
           </tr>";
-      }
-    }
-
-    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
-      echo "  <tr>
-          <td align='left' class='back ptop'>
-          <form name='excel_laiteluettelo' method='post'>
-          <input type='hidden' name='lopetus' value='$lopetus'>
-          <input type='hidden' name='otunnus' value='$tilausnumero'>
-          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-          <input type='hidden' name='mista' value = '$mista'>
-          <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-          <input type='hidden' name='toim' value='$toim'>
-          <input type='hidden' name='tee' value='$tee'>
-          <input type='hidden' name='naantali' value='EIENAA'>
-          <input type='submit' name='piirtele_laiteluettelo' value='".t("Laiteluettelo")."'>
-          </form>
-          </td>
-        </tr>";
     }
 
     echo "</table>";

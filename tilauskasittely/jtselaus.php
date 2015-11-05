@@ -1746,13 +1746,13 @@ if ($tee == "JATKA") {
               else {
                 $query = "SELECT sum(jt $lisavarattu) jt, count(*) kpl
                           FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                          WHERE yhtio         = '$kukarow[yhtio]'
+                          WHERE yhtio        = '$kukarow[yhtio]'
                           and tyyppi         in ('L','G')
-                          and tuoteno         = '$jtrow[tuoteno]'
+                          and tuoteno        = '$jtrow[tuoteno]'
                           and jt $lisavarattu > 0
-                          and kpl             = 0
-                          and laskutettuaika  = 0
-                          and var             = 'J'";
+                          and kpl            = 0
+                          and laskutettuaika = 0
+                          and var            = 'J'";
               }
 
               $juresult = pupe_query($query);

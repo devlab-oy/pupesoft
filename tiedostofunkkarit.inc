@@ -31,11 +31,16 @@ function hae_toimittajat_selectiin() {
   return false;
 }
 
-function tiedostotyypit($aihealue = "") {
+function tiedostotyypit($aihealue = "", $toim = "") {
   global $kukarow;
 
   if ($aihealue) {
-    $avainsanat = t_avainsana("LITETY_LAATUAS", "", "AND selite = '{$aihealue}'");
+    if ($toim == 'LUVAT_JA_LISENSSIT') {
+      $avainsanat = t_avainsana("LITETY_LUVLIS", "", "AND selite = '{$aihealue}'");
+    }
+    else {
+      $avainsanat = t_avainsana("LITETY_LAATUAS", "", "AND selite = '{$aihealue}'");
+    }
 
     $tiedostotyypit = array();
 
@@ -52,7 +57,6 @@ function tiedostotyypit($aihealue = "") {
               AND laji    = 'LITETY_TKIRJAST'";
 
     $result = pupe_query($query);
-
     $tiedostotyypit = array();
 
     while ($tiedostotyyppi = mysql_fetch_assoc($result)) {
@@ -116,8 +120,13 @@ function hae_tiedostot($params) {
   return $tiedostot;
 }
 
-function hae_aihealueet() {
-  $avainsanat = t_avainsana("AIHEAL_LAATUAS");
+function hae_aihealueet($toim = '') {
+  if ($toim == 'LUVAT_JA_LISENSSIT') {
+    $avainsanat = t_avainsana("AIHEAL_LUVLIS");
+  }
+  else {
+    $avainsanat = t_avainsana("AIHEAL_LAATUAS");
+  }
 
   $aihealueet = array();
 

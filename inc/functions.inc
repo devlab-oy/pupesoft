@@ -1223,9 +1223,9 @@ if (!function_exists("hae_liitteet_verkkolaskuun")) {
 
     $query = "SELECT filename, data
               FROM liitetiedostot
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND liitos = 'lasku'
-              AND liitostunnus IN ({$tilausnumerot})
+              WHERE yhtio         = '{$kukarow["yhtio"]}'
+              AND liitos          = 'lasku'
+              AND liitostunnus    IN ({$tilausnumerot})
               AND kayttotarkoitus IN ({$kayttotarkoitukset})";
 
     $result = pupe_query($query);
@@ -8860,7 +8860,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
 }
 
 if (!function_exists("livesearch_asiakkaantilausnumero")) {
-  function livesearch_asiakkaantilausnumero($toim) {
+  function livesearch_asiakkaantilausnumero($toim, $hakukentta = "asiakkaan_tilausnumero") {
     global $yhtiorow, $kukarow, $palvelin2;
 
     pupeslave_start();
@@ -8913,11 +8913,18 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and asiakkaan_tilausnumero like ('$haku%') ";
+        $haku_query .= "and {$hakukentta} like ('$haku%') ";
       }
 
-      $query = "SELECT tunnus, asiakkaan_tilausnumero, nimi, luontiaika, tunnus
-                FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+      if ($hakukentta != "asiakkaan_tilausnumero") {
+        $_index = "";
+      }
+      else {
+        $_index = "use index (yhtio_asiakkaan_tilausnumero)";
+      }
+
+      $query = "SELECT tunnus, {$hakukentta}, nimi, luontiaika, tunnus
+                FROM lasku $_index
                 WHERE tila in ('L','U','N','R','E','D')
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
@@ -8953,7 +8960,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
           echo "\"
                 style='padding:2px;'>
                 <span class='livesearch_rivispan_{$hakuid}'>
-                <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+                <font style='font-weight:bold'>$row[$hakukentta]</font> &raquo; $row[nimi] - $laadittu
                 </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
@@ -31002,9 +31009,9 @@ if (!function_exists("tee_ennakkolasku")) {
     // P‰ivitet‰‰n tilaukselle "jaksotettu" maksuehto
     $jaksquery = "SELECT *
                   FROM maksuehto
-                  WHERE yhtio = '$kukarow[yhtio]'
+                  WHERE yhtio     = '$kukarow[yhtio]'
                   AND jaksotettu != ''
-                  AND kaytossa = ''
+                  AND kaytossa    = ''
                   ORDER BY tunnus
                   LIMIT 1";
     $jaksres = pupe_query($jaksquery);
@@ -31064,7 +31071,7 @@ if (!function_exists("tee_ennakkolasku")) {
       if ($sisainen) {
         $query  = "UPDATE lasku
                    SET sisainen = 'o'
-                   WHERE tunnus  = '{$ennakkolasku}'";
+                   WHERE tunnus = '{$ennakkolasku}'";
         pupe_query($query);
       }
 
@@ -31072,7 +31079,7 @@ if (!function_exists("tee_ennakkolasku")) {
       if (!empty($laskurow["viite"])) {
         $query  = "UPDATE lasku
                    SET viite = '{$laskurow["viite"]}'
-                   WHERE tunnus  = '{$ennakkolasku}'";
+                   WHERE tunnus = '{$ennakkolasku}'";
         pupe_query($query);
 
         $kasiviite = ", viite = '' ";
@@ -31854,8 +31861,11 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
 }
 
 if (!function_exists("hae_eka_ja_vika_tilausrivi")) {
+
+
   /**
-   * @param array $params
+   *
+   * @param array   $params
    *
    * @return array Ensimm‰inen ja viimeinen tilausrivi annetulla tuotenumerolla kyseisess‰ tilauksella
    */

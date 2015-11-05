@@ -15,9 +15,21 @@ else {
 
   echo "<font class='head'>", t("Budjetin ylläpito"), "</font><hr>";
 
-  if (is_array($luvut)) {
+  if (is_array($luvut) and $tallenna_submit != '') {
     $paiv = 0;
     $lisaa = 0;
+    
+    if (!isset($vkustp) and $kustp != '') {
+      $vkustp = $kustp;
+    }
+
+    if (!isset($vkohde) and $kohde != '') {
+      $vkohde = $kohde;
+    }
+
+    if (!isset($vproj) and $proj != '') {
+      $vproj = $proj;
+    }
 
     foreach ($luvut as $u_taso => $rivit) {
       foreach ($rivit as $u_tili => $solut) {
@@ -249,7 +261,8 @@ else {
 
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' VALUE='".t("Näytä/Tallenna")."'>";
+  echo "<input type='submit' name='nayta_submit' VALUE='".t("Näytä")."'>";
+  echo "<input type='submit' name='tallenna_submit'  VALUE='".t("Tallenna")."'>";
   echo "<br><br>";
 
   $excelsarake = 0;
@@ -544,8 +557,11 @@ else {
     echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
     echo "<input type='hidden' name='tee'    value = 'file'>";
     echo "<input type='hidden' name='vkustp' value = '$kustp'>";
+    echo "<input type='hidden' name='kustp' value = '$kustp'>";
     echo "<input type='hidden' name='vkohde' value = '$kohde'>";
+    echo "<input type='hidden' name='kohde' value = '$kohde'>";
     echo "<input type='hidden' name='vproj'  value = '$proj'>";
+    echo "<input type='hidden' name='proj'  value = '$proj'>";
     echo "<input type='hidden' name='tyyppi' value = '$cleantyyppi'>";
     echo "<input type='hidden' name='tkausi' value = '$tkausi'>";
     echo "<input type='hidden' name='rtaso'  value = '$rtaso'>";

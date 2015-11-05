@@ -1014,7 +1014,7 @@ if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and isset($js_open_y
   elseif ($toim == "yhteyshenkilo") {
     $kentta = "nimi";
 
-    if ($tee == "tek_kaup") {
+    if ($js_open_yp == "yhteyshenkilo_tekninen" or $js_open_yp == "yhteyshenkilo_kaupallinen") {
       $kentta = "tunnus";
     }
     $query = "SELECT $kentta value, nimi text

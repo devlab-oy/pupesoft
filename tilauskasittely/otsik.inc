@@ -1998,7 +1998,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen_sarake[$vasen] .= "</select> ";
 
       if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
-        $vasen_sarake[$vasen] .= " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&tee=tek_kaup&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+        $vasen_sarake[$vasen] .= " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tekninen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
       }
 
       $vasen_sarake[$vasen] .= "</td>";
@@ -2047,7 +2047,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen_sarake[$vasen] .= "</select> ";
 
       if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
-        $vasen_sarake[$vasen] .= " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&tee=tek_kaup&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
+        $vasen_sarake[$vasen] .= " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_kaupallinen','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
       }
 
       $vasen_sarake[$vasen] .= "</td>";

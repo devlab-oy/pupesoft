@@ -28,7 +28,7 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/functions.inc";
 
   // Pupeasennuksen root polku, toimitusvahvistuksia varten
-  $pupe_root_polku = dirname(dirname(FILE));
+  $pupe_root_polku = dirname(dirname(__FILE__));
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -109,6 +109,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // eikä laskun tunnusta
         // ei siis ole järkeä yrittää etsiä lasku näillä tiedoilla
         if ($yhtiorow['kerayserat'] != 'K') {
+
+          $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
+          if (!is_numeric($eranumero_sscc)) continue;
+
           $query = "SELECT asiakas.*, maksuehto.*, rahtisopimukset.*, lasku.*,
                     IF(lasku.toim_email != '', lasku.toim_email,
                     IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
@@ -226,7 +230,6 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
         }
         else {
-          $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
           if (!empty($eranumero_sscc)) {
 

@@ -1512,8 +1512,6 @@ if (!function_exists("saldo_myytavissa")) {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
 
-      #echo "$pvm: $myytavissa<br>";
-
       $query  = " SELECT distinct tuoteno, kerayspvm
                   FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
                   WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
@@ -1526,10 +1524,7 @@ if (!function_exists("saldo_myytavissa")) {
       $kerres = pupe_query($query);
 
       while ($kerrow = mysql_fetch_assoc($kerres)) {
-
         list( , , $myyta) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $kerrow['kerayspvm'], $era, FALSE);
-
-        #echo "$kerrow[kerayspvm]: $myytavissa<br>";
 
         if ($myyta < $myytavissa) {
           $myytavissa = $myyta;

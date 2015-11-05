@@ -1012,7 +1012,12 @@ if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and isset($js_open_y
     $otsikrow = mysql_fetch_assoc($otsikres);
   }
   elseif ($toim == "yhteyshenkilo") {
-    $query = "SELECT tunnus value, nimi text
+    $kentta = "nimi";
+
+    if ($js_open_yp == "yhteyshenkilo_tekninen" or $js_open_yp == "yhteyshenkilo_kaupallinen") {
+      $kentta = "tunnus";
+    }
+    $query = "SELECT $kentta value, nimi text
               FROM yhteyshenkilo
               WHERE tunnus = '$tmp_tuote_tunnus'
               and tyyppi   = 'A'

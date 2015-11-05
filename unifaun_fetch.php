@@ -144,9 +144,14 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $sscc_ulkoinen = "00".$sscc_ulkoinen;
         }
 
+        $rakirno = "";
+        $sscculk = "";
+
         if ($yhtiorow['kerayserat'] == 'K') {
 
           list($eranumero, $sscc) = explode("_", $eranumero_sscc);
+
+          if (empty($eranumero)) continue;
 
           // Jos paketilla on jo ulkoinen sscc, l‰hetet‰‰n discardParcel-sanoma
           $query = "SELECT *
@@ -260,9 +265,6 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                       LIMIT 1";
             $rakir_res = pupe_query($query);
             $rakir_row = mysql_fetch_assoc($rakir_res);
-
-            $rakirno = "";
-            $sscculk = "";
 
             if (!empty($rakir_row['tunnus'])) {
 

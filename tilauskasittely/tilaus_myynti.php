@@ -6184,7 +6184,7 @@ if ($tee == '') {
       }
     }
 
-    if ($yhtiorow["saldo_kasittely"] == "T") {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       if ($laskurow["kerayspvm"] != '0000-00-00') {
         $saldoaikalisa = date("Y-m-d");
       }

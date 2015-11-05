@@ -827,7 +827,7 @@ if ($tee == "JATKA") {
     $lisavarattu = "";
   }
 
-  if ($yhtiorow["saldo_kasittely"] == "T") {
+  if (!empty($yhtiorow["saldo_kasittely"])) {
     $saldoaikalisa = date("Y-m-d");
   }
   else {
@@ -1285,7 +1285,7 @@ if ($tee == "JATKA") {
             foreach ($varastosta as $vara) {
 
               $jt_saldopvm = "";
-              if ($yhtiorow["saldo_kasittely"] != "") $jt_saldopvm = date("Y-m-d");
+              if (!empty($yhtiorow["saldo_kasittely"])) $jt_saldopvm = date("Y-m-d");
 
               list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
@@ -2314,7 +2314,7 @@ if ($tee == "JATKA") {
 
                     $jt_saldopvm = "";
 
-                    if ($yhtiorow["saldo_kasittely"] != "") {
+                    if (!empty($yhtiorow["saldo_kasittely"])) {
                       $jt_saldopvm = date("Y-m-d");
                     }
 

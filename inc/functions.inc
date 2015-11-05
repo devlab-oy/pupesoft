@@ -1497,11 +1497,49 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 }
 
 if (!function_exists("saldo_myytavissa")) {
-  function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
+  function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '', $tulevaisuuteen = TRUE) {
 
     // T‰m‰ funktio palauttaa myyt‰viss‰ olevan saldon sallituista varastoista (tyyppi='')
     // Laskuttamattomia hyvityksi‰ ei katsota myyt‰viksi vaan ne pit‰‰ laskuttaa ennenkuin n‰kyv‰t t‰‰ll‰ (varattu > 0)
     global $kukarow, $yhtiorow;
+
+    // Myyt‰viss‰m‰‰r‰ lasketaan ker‰yspvm:n mukaan niin, ett‰ tulevat tapahtumat vaikuttavat t‰m‰n hetken myyt‰viss‰m‰‰r‰‰n
+    if ($yhtiorow["saldo_kasittely"] == "U" and $tulevaisuuteen) {
+
+      if (empty($pvm)) {
+        $pvm = date("Y-m-d");
+      }
+
+      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
+
+      #echo "$pvm: $myytavissa<br>";
+
+      $query  = " SELECT distinct tuoteno, kerayspvm
+                  FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
+                  WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                  and tilausrivi.tyyppi in ('L','E','G','V','W','M','O')
+                  and tilausrivi.varattu + tilausrivi.jt != 0
+                  and tilausrivi.tuoteno = '$tuoteno'
+                  and tilausrivi.kerayspvm > '$pvm'
+                  and tilausrivi.var != 'P'
+                  ORDER BY kerayspvm";
+      $kerres = pupe_query($query);
+
+      while ($kerrow = mysql_fetch_assoc($kerres)) {
+
+        list( , , $myyta) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $kerrow['kerayspvm'], $era, FALSE);
+
+        #echo "$kerrow[kerayspvm]: $myytavissa<br>";
+
+        if ($myyta < $myytavissa) {
+          $myytavissa = $myyta;
+        }
+      }
+
+      $myytavissa =  $myytavissa < 0 ? 0 : $myytavissa;
+
+      return array($saldo, $hyllyssa, $myytavissa, TRUE);
+    }
 
     $varaako_jt_saldoa = "";
 
@@ -28216,7 +28254,7 @@ if (!function_exists('varaston_tuotepaikkojen_saldo')) {
       $varastopaikat = "  AND tuotepaikat.varasto IN ('".implode("','", $varastot)."')";
     }
 
-    if ($yhtiorow["saldo_kasittely"] == "T") {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       $saldoaikalisa = date("Y-m-d");
     }
     else {

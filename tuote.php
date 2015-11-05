@@ -1265,11 +1265,11 @@ if (isset($ajax)) {
 
       while ($jtrow = mysql_fetch_assoc($jtresult)) {
 
-        list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"], '', FALSE);
-
-        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and ($myyta < $myynyt or $myynyt === FALSE)) {
+        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and (($yhtiorow["saldo_kasittely"] == "U" and $myyta < $myynyt) or $myynyt === FALSE)) {
           $myynyt = $myyta;
         }
+
+        list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"], '', FALSE);
 
         $jtrow["myytavissa"] = $myyta;
 

@@ -1423,7 +1423,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo "</form>";
   }
 
-  if ($toim == "asiakas" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
+  if ($toim == "asiakas" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>
         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1625,8 +1625,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
       ($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
       ($toim == "yriti" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
-      ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
-      ($toim == "toimitustavan_lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
+      ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
 
       $fontlisa1 = "<font style='text-decoration: line-through'>";
       $fontlisa2 = "</font>";
@@ -2255,7 +2254,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "auto_vari_korvaavat" or
     $toim == "autoid_lisatieto" or
     $toim == "puun_alkio" or
-    $toim == "toimitustavan_lahdot" or
     $toim == "pakkauskoodit" or
     $toim == "keraysvyohyke" or
     $toim == "avainsana" or
@@ -2264,7 +2262,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "perusalennus" or
     $toim == "yhteensopivuus_tuote" or
     $toim == "yhteensopivuus_tuote_lisatiedot" or
-    $toim == "toimitustavat_toimipaikat" or
     $toim == "hinnasto" or
     $toim == "rahtimaksut" or
     $toim == "rahtisopimukset" or

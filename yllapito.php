@@ -33,6 +33,7 @@ $psx_ohjelmat = array(
   "taso"               => "{$palvelin2}pupenext/sum_levels",
   "tili"               => "{$palvelin2}pupenext/accounts",
   "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
+  "toimitustapa"       => "{$palvelin2}pupenext/delivery_methods",
   "valuu"              => "{$palvelin2}pupenext/currencies",
   "yriti"              => "{$palvelin2}pupenext/bank_accounts",
 );

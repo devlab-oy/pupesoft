@@ -33,7 +33,7 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= "\n";
 
-  $query = "SELECT rahtikirjanro
+  $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
             FROM rahtikirjat
             WHERE tunnus IN ({$tunnukset})
             AND yhtio    = '{$kukarow['yhtio']}'";

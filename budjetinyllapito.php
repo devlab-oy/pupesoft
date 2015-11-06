@@ -15,7 +15,7 @@ else {
 
   echo "<font class='head'>", t("Budjetin ylläpito"), "</font><hr>";
 
-  if (is_array($luvut) and $tallenna_submit != '') {
+  if (is_array($luvut)) {
     $paiv = 0;
     $lisaa = 0;
 
@@ -249,8 +249,7 @@ else {
 
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' name='nayta_submit' VALUE='".t("Näytä")."'>";
-  echo "<input type='submit' name='tallenna_submit'  VALUE='".t("Tallenna")."'>";
+  echo "<input type='submit' VALUE='".t("Näytä/Tallenna")."'>";
   echo "<br><br>";
 
   $excelsarake = 0;

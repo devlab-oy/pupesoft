@@ -28970,10 +28970,9 @@ if (!function_exists('hae_toimitustavan_toimipaikat')) {
                 tt.tunnus AS toimitustavat_toimipaikat_tunnus
                 FROM yhtion_toimipaikat AS yt
                 JOIN toimitustavat_toimipaikat AS tt
-                ON ( tt.yhtio = yt.yhtio
-                  AND tt.toimipaikka_tunnus  = yt.tunnus
+                ON (tt.toimipaikka_tunnus = yt.tunnus
                   AND tt.toimitustapa_tunnus = '{$toimitustapa_tunnus}')
-                WHERE yt.yhtio               = '{$kukarow['yhtio']}'";
+                WHERE yt.yhtio = '{$kukarow['yhtio']}'";
     $result   = pupe_query($query);
 
     $toimipaikat = array();
@@ -29001,8 +29000,7 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
                 if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
                 FROM toimitustapa AS t
                 LEFT JOIN toimitustavat_toimipaikat AS tt
-                ON ( tt.yhtio = t.yhtio
-                  AND tt.toimitustapa_tunnus = t.tunnus )
+                ON (tt.toimitustapa_tunnus = t.tunnus)
                 WHERE t.yhtio                = '{$kukarow['yhtio']}'
                 AND tt.tunnus IS NULL";
     $result   = pupe_query($query);
@@ -29017,8 +29015,7 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
               if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
               FROM toimitustapa AS t
               JOIN toimitustavat_toimipaikat AS tt
-              ON ( tt.yhtio = t.yhtio
-                AND tt.toimitustapa_tunnus = t.tunnus
+              ON (tt.toimitustapa_tunnus = t.tunnus
                 AND tt.toimipaikka_tunnus  = {$toimipaikka_tunnus})
               WHERE t.yhtio                = '{$kukarow['yhtio']}'";
 

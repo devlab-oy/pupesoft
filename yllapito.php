@@ -2157,7 +2157,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or ($toim == "avainsana" and $from != "yllapito"))) {
+  if ($trow["tunnus"] > 0 and $errori == '' and $toim == "avainsana" and $from != "yllapito") {
 
     if (isset($perhe) and $perhe > 0) {
       $la_tunnus = $perhe;
@@ -2166,11 +2166,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $la_tunnus = $tunnus;
     }
 
-    if ($toim == "toimitustapa") {
-      $laji = "TOIMTAPAKV";
-      $urilisa = "&haku[3]=@$tunnus";
-    }
-    elseif ($toim == "avainsana") {
+    if ($toim == "avainsana") {
       $laji = $al_laji;
       $urilisa = "&haku[8]=@$la_tunnus";
     }
@@ -2186,22 +2182,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
-    if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavan_lahdot%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
-    }
-  }
-
   if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
     if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
-    }
-  }
-
-  if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
-    if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavat_toimipaikat%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<br>";
-      echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2280,7 +2263,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "perusalennus" or
     $toim == "yhteensopivuus_tuote" or
     $toim == "yhteensopivuus_tuote_lisatiedot" or
-    ($toim == "toimitustapa" and $poistolukko == "") or
     $toim == "toimitustavat_toimipaikat" or
     $toim == "hinnasto" or
     $toim == "rahtimaksut" or

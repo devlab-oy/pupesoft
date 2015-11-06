@@ -878,7 +878,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           echo "<div class='ohje'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
         elseif (!empty($oikeurow['usermanualurl'])) {
-          echo "<div class='ohje'><a target='_blank' href='{$oikeurow['usermanualurl']}'>".t("OHJE")."</a></div>";
+          echo "<div class='ohje'><a href='#' onclick=\"window.open('{$oikeurow['usermanualurl']}', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100'); return false;\">".t("OHJE")."</a></div>";
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {

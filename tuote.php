@@ -1202,11 +1202,18 @@ if (isset($ajax)) {
       $toimipaikkarajaus = " and ((lasku.yhtio_toimipaikka = '{$toimipaikka}' and tilausrivi.tyyppi != 'O') OR (lasku.vanhatunnus = '{$toimipaikka}' and tilausrivi.tyyppi = 'O'))";
     }
 
+    if ($yhtiorow["saldo_kasittely"] == "U") {
+      $qpvm = "if(tilausrivi.tyyppi='O', tilausrivi.toimaika, tilausrivi.kerayspvm) pvm,";
+    }
+    else {
+      $qpvm = "tilausrivi.toimaika pvm,";
+    }
+
     // Tilausrivit tälle tuotteelle
     $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
               lasku.tunnus,
               (tilausrivi.varattu+tilausrivi.jt) kpl,
-              tilausrivi.toimaika pvm,
+              {$qpvm}
               tilausrivi.laadittu,
               varastopaikat.nimitys varasto,
               tilausrivi.tyyppi,
@@ -1278,10 +1285,6 @@ if (isset($ajax)) {
 
       if ($myynyt === FALSE) {
         $myynyt = $myyta;
-      }
-
-      if ($yhtiorow["saldo_kasittely"] == "U" and $myynyt < 0) {
-        $myynyt = 0;
       }
 
       foreach ($jtrows as $jtrow) {

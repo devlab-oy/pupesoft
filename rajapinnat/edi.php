@@ -81,7 +81,18 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     //Onko tilaus maksettu = processing vai jälkvaatimus = pending_cashondelivery_asp
     $edi_order .= "OSTOTIL.OT_MAKSETTU:".$order['status']."\n";
-    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
+
+    $maksuehto = strip_tags($order['payment']['method']);
+    // Jos on asetettu maksuehtojen ohjaus, tarkistetaan korvataanko Magentosta tullut maksuehto
+    if (isset($magento_maksuehto_ohjaus) and count($magento_maksuehto_ohjaus) > 0) {
+      foreach ($magento_maksuehto_ohjaus as $key => $array) {
+        if (in_array($maksuehto, $array) and !empty($key)) {
+          $maksuehto = $key;
+        }
+      }
+    }
+
+    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";

@@ -149,7 +149,7 @@ if ($luokka != "") {
   $tuote_join_array = array('TK', 'TM', 'TP', 'TR', 'TV');
 
   if (in_array($abcchar, $asiakas_join_array)) {
-    $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
+    $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus and asiakas.abc_raportointi = '') ";
   }
   elseif (in_array($abcchar, $tuote_join_array)) {
     $analyysin_join = " JOIN tuote USING (yhtio, tuoteno) ";

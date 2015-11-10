@@ -1179,6 +1179,18 @@ if ($fieldname == 'myynninseuranta') {
   $jatko = 0;
 }
 
+if ($fieldname == 'abc_raportointi') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  $sel = trim($trow[$i]) == 'E' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon ABC-asiakasraportoinnissa")."</option>";
+  $ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon ABC-asiakasraportoinnissa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'maksusopimus_toimitus') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 

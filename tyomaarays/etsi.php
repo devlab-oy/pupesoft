@@ -77,7 +77,9 @@ if ($tee == 'etsi') {
         <th>".t("Päivämäärä").":</th>
         <th>".t("Työn kuvaus / Toimenpiteet").":</th>
         <th>".t("Muokkaa").":</th>
+        <th>".t("Monista").":</th>
         <th>".t("Tulosta").":</th>
+        <th>".t("Uusi").":</th>
        </tr>";
 
     while ($row = mysql_fetch_array($sresult)) {
@@ -95,8 +97,18 @@ if ($tee == 'etsi') {
             <input type='hidden' name='toim' value='TYOMAARAYS'>
             <input type='hidden' name='tilausnumero' value='$row[laskutunnus]'>
             <input type='submit' value = '".t("Muokkaa")."'></form></td>";
+        echo "<td valign='top'>
+            <form method='post' action='../monistalasku.php'>
+            <input type='hidden' name='toim' value='TYOMAARAYS'>
+            <input type='hidden' name='monistettavat[{$row['laskutunnus']}]' value='MONISTA'>
+            <input type='hidden' name='tee' value='MONISTA'>
+            <input type='hidden' name='kklkm' value='1'>
+            <input type='hidden' name='asiakasid' value='{$row['liitostunnus']}'>
+            <input type='hidden' name='ytunnus' value='{$row['ytunnus']}'>
+            <input type='submit' value = '".t("Monista")."'></form></td>";
       }
       else {
+        echo "<td></td>";
         echo "<td></td>";
       }
 
@@ -105,6 +117,12 @@ if ($tee == 'etsi') {
           <input type='hidden' name='otunnus' value='$row[laskutunnus]'>
           <input type='hidden' name='toim' value='TYOMAARAYS'>
           <input type='submit' value = '".t("Tulosta")."'></form></td>";
+
+      echo "<td valign='top'><form action = '../tilauskasittely/tilaus_myynti.php' method='post'>
+          <input type='hidden' name='toim' value='TYOMAARAYS'>
+          <input type='hidden' name='tee' value='OTSIK'>
+          <input type='hidden' name='nimi' value='{$row['nimi']}'>
+          <input type='submit' value = '".t("Uusi")."'></form></td>";
 
       echo " </tr>";
     }

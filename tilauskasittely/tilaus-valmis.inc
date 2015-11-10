@@ -97,15 +97,22 @@ $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 // Jos maksuehto on k‰teinen, sallitaan luottorajan ylitys
 // samma pÂ erapaivan_ylityksen_raja
+
+// Jos tilaus on jo ker‰tty/toimitettu, niin ei pys‰ytet‰ sit‰ vaikka sit‰ muokataankin
+$_keratty_toimitettu = ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array("B", "C", "D", "E")));
+
 $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L", "M"))
     or (in_array($yhtiorow["luottorajan_ylitys"], array("E", "F"))
       and ($kukarow["extranet"] != ""
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
+  and !$_keratty_toimitettu
   and $tilausvalmis_asiakas_row['luottoraja'] != 0
   and $maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
   and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE) ? 1 : 0;
 
-$erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
+$erapaiva_chk   =  ($maksuehtorow['kateinen'] == ''
+  and empty($maksuehtorow['jv'])
+  and !$_keratty_toimitettu
   and (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K", "J", "L", "M"))
     or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
       and ($kukarow["extranet"] != ""

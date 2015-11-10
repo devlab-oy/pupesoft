@@ -336,6 +336,14 @@ if ($toiminto == "tulosta_hintalaput") {
   $toiminto = "";
 }
 
+if ($toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
+  $saapumisnro = $otunnus;
+
+  require "saapuminen_ulkoiseen_jarjestelmaan.php";
+
+  $toiminto = "kohdista";
+}
+
 // syötetään keikan lisätietoja
 if ($toiminto == "lisatiedot") {
   require "ostotilauksen_lisatiedot.inc";

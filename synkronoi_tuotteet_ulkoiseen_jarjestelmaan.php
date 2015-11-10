@@ -47,7 +47,7 @@ if (mysql_num_rows($res) > 0) {
 
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'MaterialMaster');
-    $messageheader->addChild('Sender', 'Makia');
+    $messageheader->addChild('Sender', $yhtiorow['nimi']);
     $messageheader->addChild('Receiver', 'Posten');
 
     $iteminformation = $xml->addChild('ItemInformation');

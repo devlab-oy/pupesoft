@@ -83,11 +83,18 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
   $all_products = $presta_products->all_skus();
 
   # Huom!!! Editoi tätä jos haluat hakea vain pienen otteen tuotekuvista aluksi
-  #$all_products = array_slice($all_products, 0, 10);
+  #$limitti = 20;
 
+  $counter = 0;
   foreach ($all_products as $product_id => $pupe_product_code) {
+    $counter++;
+    if (isset($limitti) and $counter > $limitti) {
+      die ("\nLimitti saavutettu");
+    }
+
     # Haetaan tuotteen kuvatiedot tuote kerrallaan
     $url = $presta_url ."/api/images/products/$product_id";
+    echo "$counter Haetaan $url \n";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_USERPWD, $presta_api_key.':');

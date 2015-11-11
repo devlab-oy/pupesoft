@@ -1498,10 +1498,10 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
 if (!function_exists("var_kaannos")) {
   function var_kaannos($var) {
-    
+
     switch ($var) {
     case "J":
-      return t("Jälkitoimitus");
+      return t("Jälkitoim");
     case "H":
       return t("Hyväksy");
     case "P":

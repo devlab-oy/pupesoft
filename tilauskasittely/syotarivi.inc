@@ -371,7 +371,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<option value='O' $selo>".t("Optio")."</option>";
   }
   echo "<option value=''>".t("Oletus")."</option>";
-  echo "<option value='J' $selj>".t("JT")."</option>";
+  echo "<option value='J' $selj>".t("Jälkitoim")."</option>";
   echo "<option value='H' $selh>".t("Hyväksy")."</option>";
   echo "<option value='P' $selp>".t("Puute")."</option>";
 

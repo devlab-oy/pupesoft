@@ -7916,7 +7916,7 @@ if ($tee == '') {
           }
         }
 
-        echo "<td $classvar align='center'>$var_temp&nbsp;";
+        echo "<td $classvar>$var_temp";
 
         if (!empty($row['korvamerkinta'])) {
 
@@ -7927,7 +7927,7 @@ if ($tee == '') {
             $luokka = 'tooltip';
           }
 
-          echo "<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$row['tunnus']}_info'>";
+          echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$row['tunnus']}_info'>";
           echo "<div id='div_{$row['tunnus']}_info' class='popup'>";
           echo $row['korvamerkinta'];
           echo "</div>";

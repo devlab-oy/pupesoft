@@ -290,6 +290,7 @@ if (!empty($variaatio)) {
             tuote.nimitys,
             tuote.osasto,
             tuote.myyntihinta,
+            tuote.myymalahinta,
             tuote.yhtio
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
@@ -470,6 +471,9 @@ if (strlen($ojarj) > 0) {
   elseif ($ojarj == 'nettohinta') {
     $jarjestys = 'tuote.nettohinta';
   }
+  elseif ($ojarj == 'myymalahinta') {
+    $jarjestys = 'tuote.myymalahinta';
+  }
   elseif ($ojarj == 'aleryhma') {
     $jarjestys = 'tuote.aleryhma';
   }
@@ -498,6 +502,10 @@ if ($saldotonrajaus != '') {
 }
 else {
   $saldotoncheck = "";
+}
+
+if (!isset($asiakashinnat)) {
+  $asiakashinnat = '';
 }
 
 if ($asiakashinnat != '') {
@@ -716,7 +724,7 @@ if ($verkkokauppa == "") {
     echo "<th>".t("Näytä vain saldolliset tuotteet")."</th>";
     echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
     echo "</tr>";
-    if ($laskurow['tila'] == 'N' and $kukarow['kesken'] != 0) {
+    if (in_array($laskurow['tila'], array('N','T')) and $kukarow['kesken'] != 0) {
       echo "<th>".t("Näytä asiakkaan hinnoilla")."</th>";
       echo "<td><input type='checkbox' name='asiakashinnat' $asiakashinnatcheck></td>";
       echo "</tr>";
@@ -1240,7 +1248,19 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=osasto$ulisa'>".t("Osasto")."<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=try$ulisa'>".t("Try")."</th>";
 
         if ($kukarow['hinnat'] >= 0) {
-          echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
+
+          $_otsikkolisa = "";
+          $_hintalinkki = "<a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort={$sort}&ojarj=hinta$ulisa'>";
+
+          if ($asiakashinnat != '') {
+            echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort={$sort}&ojarj=myymalahinta{$ulisa}'>".t("Myymalahinta");
+            echo "<th>".t("As.Bruttohinta");
+            echo "<br/>".t("As.Alennukset");
+            $_otsikkolisa = "As.";
+            $_hinta_linkki = "";
+          }
+
+          echo "<th>{$_hintalinkki}".t("{$_otsikkolisa}Hinta");
 
           if ($lisatiedot != "" and $kukarow["extranet"] == "") {
             echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
@@ -2469,7 +2489,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         }
       }
     }
-    elseif ($kukarow["extranet"] == "" and $asiakashinnat == 'on') {
+    elseif ($kukarow["extranet"] == "" and $asiakashinnat != '') {
       list($hinta,
         $netto,
         $ale_kaikki,
@@ -2477,7 +2497,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         $alehinta_val) = alehinta($laskurow, $row, 1, '', '', '');
 
       $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
-      $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";
+      $myyntihinta         = hintapyoristys($myyntihinta_echotus / $laskurow["vienti_kurssi"]) . " $laskurow[valkoodi]";
     }
     else {
       $query = "SELECT DISTINCT valkoodi,
@@ -2515,6 +2535,50 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
             " $hintarow[valkoodi]";
         }
       }
+    }
+
+    if ($asiakashinnat != '') {
+
+      // katotaan onko tuotteelle hinnastossa "myymälähintaa", laji K
+      $query = "SELECT *
+                FROM hinnasto
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND tuoteno  = '$row[tuoteno]'
+                AND valkoodi = '$laskurow[valkoodi]'
+                AND maa      = '$laskurow[maa]'
+                AND laji     = 'K'
+                AND (
+                  (alkupvm <= current_date and if(loppupvm = '0000-00-00',
+                                                  '9999-12-31',
+                                                  loppupvm) >= current_date)
+                  or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
+                AND ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
+                ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999), minkpl
+                LIMIT 1";
+
+      $hintaresult = pupe_query($query);
+
+      while ($hintarow = mysql_fetch_assoc($hintaresult)) {
+        $as_myymalahinta .= "<br>$hintarow[maa]: " .
+          hintapyoristys($hintarow["hinta"]) .
+          " $hintarow[valkoodi]";
+      }
+
+      if ($laskurow["valkoodi"] != $yhtiorow["valkoodi"]) {
+        $hinta = $hinta / $laskurow["vienti_kurssi"];
+      }
+
+      echo "<td>".hintapyoristys($row['myymalahinta']) . " " . $yhtiorow["valkoodi"];
+      echo $as_myymalahinta;
+      echo "</td><td>".hintapyoristys($hinta) . " " . $laskurow["valkoodi"];
+
+      foreach ($ale_kaikki as $key => $val) {
+
+        if (substr($key, 3, 1) > $yhtiorow['oston_alekentat']) continue;
+        $_alet .= "<br>{$val}%";
+      }
+      echo $_alet;
+      echo "</td>";
     }
 
     echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";

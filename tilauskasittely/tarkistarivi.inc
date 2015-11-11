@@ -92,6 +92,22 @@ if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOT
   }
 }
 
+if (in_array($toim, array('PIKATILAUS','RIVISYOTTO')) and $kukarow['extranet'] == '' and $row['var'] == 'J' and $row['jt'] != 0) {
+  $query = "SELECT *
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$row['tuoteno']}'
+            AND tyyppi = 'L'
+            AND var = 'J'
+            AND jt != 0
+            AND tunnus != '{$row['tunnus']}'";
+  $chk_res = pupe_query($query);
+
+  if (mysql_num_rows($chk_res) != 0) {
+    $varaosavirhe .= t("HUOM: tuotetta on jo jälkitoimituksessa")."<br>";
+  }
+}
+
 if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
   $riviok++;

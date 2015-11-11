@@ -1531,8 +1531,6 @@ if (!function_exists("saldo_myytavissa")) {
         }
       }
 
-      $myytavissa =  $myytavissa < 0 ? 0 : $myytavissa;
-
       return array($saldo, $hyllyssa, $myytavissa, TRUE);
     }
 
@@ -1544,7 +1542,7 @@ if (!function_exists("saldo_myytavissa")) {
       $tyyppi = "";
     }
     elseif ($tyyppi == "JTSPEC2" and $yhtiorow["varaako_jt_saldoa"] != "") {
-      // JT-rivit varaavat saldoa, mutta nyt ei halutaan huomioida VAIN tulevaisuudessa toimitettavat JT-rivit
+      // JT-rivit varaavat saldoa, mutta nyt halutaan huomioida VAIN tulevaisuudessa toimitettavat JT-rivit
       $varaako_jt_saldoa = " and (tilausrivi.var != 'J' or (tilausrivi.var = 'J' and tilausrivi.kerayspvm > CURDATE())) ";
       $tyyppi = "";
     }

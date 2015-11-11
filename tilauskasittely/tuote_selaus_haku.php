@@ -724,7 +724,7 @@ if ($verkkokauppa == "") {
     echo "<th>".t("Näytä vain saldolliset tuotteet")."</th>";
     echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
     echo "</tr>";
-    if (in_array($laskurow['tila'], array('N','T')) and $kukarow['kesken'] != 0) {
+    if (in_array($laskurow['tila'], array('N','T')) and $kukarow['kesken'] != 0 and $kukarow['hinnat'] == 0) {
       echo "<th>".t("Näytä asiakkaan hinnoilla")."</th>";
       echo "<td><input type='checkbox' name='asiakashinnat' $asiakashinnatcheck></td>";
       echo "</tr>";
@@ -1252,7 +1252,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           $_otsikkolisa = "";
           $_hintalinkki = "<a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort={$sort}&ojarj=hinta$ulisa'>";
 
-          if ($asiakashinnat != '') {
+          if ($asiakashinnat != '' and $kukarow["extranet"] == "" and $kukarow['hinnat'] == 0) {
             echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort={$sort}&ojarj=myymalahinta{$ulisa}'>".t("Myymalahinta");
             echo "<th>".t("As.Bruttohinta");
             echo "<br/>".t("As.Alennukset");
@@ -2489,7 +2489,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         }
       }
     }
-    elseif ($kukarow["extranet"] == "" and $asiakashinnat != '') {
+    elseif ($asiakashinnat != '' and $kukarow["extranet"] == "" and $kukarow['hinnat'] == 0) {
       list($hinta,
         $netto,
         $ale_kaikki,
@@ -2537,7 +2537,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
       }
     }
 
-    if ($asiakashinnat != '') {
+    if ($asiakashinnat != '' and $kukarow["extranet"] == "" and $kukarow['hinnat'] == 0) {
 
       // katotaan onko tuotteelle hinnastossa "myymälähintaa", laji K
       $query = "SELECT *

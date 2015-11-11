@@ -570,6 +570,44 @@ if ($upd == 1) {
       }
     }
 
+    if ($onko_tama_insert and $toim == "tuote") {
+      $query = "SELECT *
+                FROM valuu
+                WHERE yhtio = '{$kukarow["yhtio"]}'";
+
+      $valuu_result = pupe_query($query);
+
+      while ($valuu = mysql_fetch_assoc($valuu_result)) {
+        if ($valuu["hinnastokurssi"] > 0) {
+          $query = "SELECT tunnus
+                    FROM hinnasto
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    AND tuoteno = '{$t["tuoteno"]}'";
+
+          $hinnasto_result = pupe_query($query);
+
+          if (mysql_num_rows($hinnasto_result) == 0) {
+            $hinta = $t["myyntihinta"] * $valuu["hinnastokurssi"];
+
+            var_dump(get_defined_vars());
+
+            $query = "INSERT INTO hinnasto
+                      SET yhtio      = '{$kukarow["yhtio"]}',
+                          tuoteno    = '{$t["tuoteno"]}',
+                          hinta      = '{$hinta}',
+                          maa        = '{$valuu["country"]}',
+                          valkoodi   = '{$valuu["nimi"]}',
+                          laatija    = '{$kukarow["kuka"]}',
+                          luontiaika = NOW(),
+                          muutospvm  = NOW(),
+                          muuttaja   = '{$kukarow["kuka"]}'";
+
+            pupe_query($query);
+          }
+        }
+      }
+    }
+
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
       $query = "SELECT *

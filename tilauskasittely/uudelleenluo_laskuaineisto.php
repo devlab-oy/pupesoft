@@ -940,48 +940,6 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $ftpfile = realpath($nimifinvoice);
       $renameftpfile = $nimifinvoice_delivered;
 
-      function libxml_display_error($error)
-      {
-          $return = "<br/>\n";
-          switch ($error->level) {
-              case LIBXML_ERR_WARNING:
-                  $return .= "<b>Warning $error->code</b>: ";
-                  break;
-              case LIBXML_ERR_ERROR:
-                  $return .= "<b>Error $error->code</b>: ";
-                  break;
-              case LIBXML_ERR_FATAL:
-                  $return .= "<b>Fatal Error $error->code</b>: ";
-                  break;
-          }
-          $return .= trim($error->message);
-          if ($error->file) {
-              $return .=    " in <b>$error->file</b>";
-          }
-          $return .= " on line <b>$error->line</b>\n";
-
-          return $return;
-      }
-
-      function libxml_display_errors() {
-          $errors = libxml_get_errors();
-          foreach ($errors as $error) {
-              print libxml_display_error($error);
-          }
-          libxml_clear_errors();
-      }
-
-      // Enable user error handling
-      libxml_use_internal_errors(true);
-
-      $xml = new DOMDocument();
-      $xml->load($ftpfile);
-
-      if (!$xml->schemaValidate("../datain/Finvoice2.01.xsd")) {
-          print '<b>DOMDocument::schemaValidate() Generated Errors!</b>';
-          libxml_display_errors();
-      }
-
       // t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
       echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
 

@@ -395,7 +395,14 @@ else {
 
     //Haetaan tarvittavat funktiot aineistojen tekoa varten
     require "verkkolasku_elmaedi.inc";
-    require "verkkolasku_finvoice.inc";
+
+    if ($yhtiorow["finvoice_versio"] == "2") {
+      require "verkkolasku_finvoice_201.inc";
+    }
+    else {
+      require "verkkolasku_finvoice.inc";
+    }
+
     require "verkkolasku_pupevoice.inc";
 
     // haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa t‰n‰‰n (t‰t‰ resulttia k‰ytet‰‰n alhaalla lis‰‰)

@@ -136,6 +136,13 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
     $excelsarake++;
   }
 
+  if ($toim == "MAA") {
+    $worksheet->writeString($excelrivi, $excelsarake, $row['nimi']);
+    $excelsarake++;
+
+    if ($rivimaara < $maxrivimaara) echo "<tr><td>{$row['nimi']}</td>";
+  }
+
   if ($toim == "MYYJA") {
     $worksheet->writeString($excelrivi, $excelsarake, "{$row['myyja']} {$row['nimi']}");
     $excelsarake++;
@@ -383,8 +390,14 @@ elseif ($toim == "MYYJA") {
   $budj_taulu = "budjetti_myyja";
   $budj_sarak = "myyjan_tunnus";
 }
+elseif ($toim == "MAA") {
+  echo "<font class='head'>", t("Maiden myyntitavoitteet"), "</font><hr>";
+
+  $budj_taulu = "budjetti_maa";
+  $budj_sarak = "maa_id";
+}
 else {
-  echo "<font class='error'>", t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS tai MYYJA"), ".</font>";
+  echo "<font class='error'>", t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS, MYYJA tai MAA"), ".</font>";
   exit;
 }
 
@@ -428,6 +441,9 @@ elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp
   // Huomaa n‰m‰ jos muutat excel-failin sarakkeita!!!!
   if ($toim == "TUOTE" or $toim == "MYYJA") {
     $lukualku = 2;
+  }
+  elseif ($toim == "MAA") {
+    $lukualku = 1;
   }
   elseif ($toim == "TOIMITTAJA") {
     $lukualku = 3;
@@ -689,7 +705,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
             }
 
             // Toimittaja ja asiakasbudjetti tehd‰‰n aina euroissa
-            if ($toim == "TOIMITTAJA") {
+            if ($toim == "TOIMITTAJA" or $toim == "MAA") {
               $tall_summa = $solu;
             }
             elseif ($toim == "ASIAKAS" or $toim == "MYYJA") {
@@ -1037,6 +1053,27 @@ if ($tee == "") {
     echo "</td></tr>";
   }
 
+  if ($toim == "MAA") {
+    // Tuoteosasto tai ryhm‰tason budjetti.
+    echo "<tr>";
+    echo "<th>", t("Anna kokonaistavoitteet valituille maille"), "</th>";
+
+    $scheck = ($summabudjetti != "") ? "CHECKED": "";
+    echo "<td><input type='checkbox' name='summabudjetti' {$scheck}></td>";
+    echo "</tr>";
+
+    echo "<tr><th>", t("Maa"), "</th><td>";
+
+    $mulselprefix = "maa";
+    $monivalintalaatikot = array('maa');
+    $monivalintalaatikot_normaali = array();
+    $piirra_otsikot = false;
+
+    require "tilauskasittely/monivalintalaatikot.inc";
+
+    echo "</td></tr>";
+  }
+
   if ($toim == "ASIAKAS") {
 
     // Tuoteosasto tai ryhm‰tason budjetti.
@@ -1213,6 +1250,11 @@ if ($submit_button != "") {
     $tee = "";
   }
 
+  if ($toim == "MAA" and $lisa_dynaaminen["maa"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+    echo "<font class='error'>".t("On valittava maa")."!";
+    $tee = "";
+  }
+
   // Kokonaisbudjetti-tarkastukset
   if (($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA") and $summabudjetti == "on") {
     if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
@@ -1267,6 +1309,10 @@ if ($tee == "AJA_RAPORTTI") {
     $worksheet->write($excelrivi, $excelsarake, t("Myyj‰n tunnus"), $format_bold);
     $excelsarake++;
   }
+  elseif ($toim == "MAA") {
+    $worksheet->write($excelrivi, $excelsarake, t("Maan tunnus"), $format_bold);
+    $excelsarake++;
+  }
 
   if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA") {
     $worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
@@ -1306,6 +1352,9 @@ if ($tee == "AJA_RAPORTTI") {
     }
     elseif ($toim == "MYYJA") {
       $lisa = " and kuka.tunnus in ({$liitostunnukset}) ";
+    }
+    elseif ($toim == "MAA") {
+      $lisa = " maat.tunnus in ({$liitostunnukset}) ";
     }
 
     $lisa_parametri  = "";
@@ -1359,6 +1408,14 @@ if ($tee == "AJA_RAPORTTI") {
               FROM toimi
               WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
               $lisa";
+  }
+  elseif ($toim == "MAA") {
+
+    $where_maa_lisa = !empty($lisa) ? "WHERE {$lisa}" : "";
+
+    $query = "SELECT DISTINCT koodi, nimi, MIN(tunnus) maa_id
+              FROM maat
+              {$where_maa_lisa}";
   }
   elseif ($toim == "ASIAKAS") {
 
@@ -1471,6 +1528,9 @@ if ($tee == "AJA_RAPORTTI") {
   }
   elseif ($toim == "TOIMITTAJA") {
     if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Toimittaja"), "</th>";
+  }
+  elseif ($toim == "MAA") {
+    if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Maa"), "</th>";
   }
   elseif ($toim == "ASIAKAS") {
     if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Asiakas"), "</th>";

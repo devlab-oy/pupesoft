@@ -642,6 +642,53 @@ else {
       <td class='back'>", t("(Toimii vain jos listaat laskuittain)"), "</td>
       </tr>";
 
+    if (isset($vertailubu)) {
+      switch ($vertailubu) {
+      case 'asbu':
+        $sel_asbu = 'selected';
+        break;
+      case 'asbuos':
+        $sel_asbuos = 'selected';
+        break;
+      case 'asbury':
+        $sel_asbury = 'selected';
+        break;
+      case 'tubu':
+        $sel_tubu = 'selected';
+        break;
+      case 'mybu':
+        $sel_mybu = 'selected';
+        break;
+      case 'mybuos':
+        $sel_mybuos = 'selected';
+        break;
+      case 'mybury':
+        $sel_mybury = 'selected';
+        break;
+      case 'mabu':
+        $sel_mabu = 'selected';
+        break;
+      case 'mabuos':
+        $sel_mabuos = 'selected';
+        break;
+      case 'mabury':
+        $sel_mabury = 'selected';
+        break;
+      }
+    }
+    else {
+      $sel_asbu = '';
+      $sel_asbuos = '';
+      $sel_asbury = '';
+      $sel_tubu = '';
+      $sel_mybu = '';
+      $sel_mybuos = '';
+      $sel_mybury = '';
+      $sel_mabu = '';
+      $sel_mabuos = '';
+      $sel_mabury = '';
+    }
+
     echo "<tr>
     <th>", t("Tavoitevertailu"), "</th>";
     echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
@@ -652,6 +699,9 @@ else {
     echo "<option value='mybu'    {$sel_mybu}>", t("Myyj‰tavoitteet"), "</option>";
     echo "<option value='mybuos' {$sel_mybuos}>", t("Myyj‰-Osastotavoitteet"), "</option>";
     echo "<option value='mybury' {$sel_mybury}>", t("Myyj‰-Tuoteryhm‰tavoitteet"), "</option>";
+    echo "<option value='mabu'   {$sel_mabu}>", t("Maatavoitteet"), "</option>";
+    echo "<option value='mabuos' {$sel_mabuos}>", t("Maa-Osastotavoitteet"), "</option>";
+    echo "<option value='mabury' {$sel_mabury}>", t("Maa-Tuoteryhm‰tavoitteet"), "</option>";
     echo "</select></td>
     </tr>";
 
@@ -1298,6 +1348,8 @@ else {
           $order  .= "lasku.maa,";
           $gluku++;
 
+          $select .= "(select MIN(maat.tunnus) from maat where maat.koodi=lasku.maa) maalista, ";
+
           if ($rajaus[$i] != "") {
             $lisa .= " and lasku.maa='{$rajaus[$i]}' ";
           }
@@ -1771,6 +1823,22 @@ else {
         // siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
         if ($myyjagroups > 1) {
           echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
+          $tee = '';
+        }
+      }
+
+      if ($vertailubu == "mabu") {
+        // N‰ytet‰‰n myyj‰tavoitteet:
+
+        //siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        if ($asiakasgroups > 0 or $tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
+          $tee = '';
+        }
+
+        // ei voi groupata muiden kuin myyjien tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan mybury)
+        if ($vertailubu == "mabu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
           $tee = '';
         }
       }
@@ -2518,12 +2586,33 @@ else {
 
             if (isset($vertailubu) and
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
+              ($vertailubu == "mabu") or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
               (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
 
               if ($vertailubu == "tubu") {
                 $budj_taulu = "budjetti_tuote";
                 $bulisa = " and tuoteno  in ({$row['tuotelista']}) ";
+              }
+              elseif ($vertailubu == "mabu") {
+                $budj_taulu = "budjetti_maa";
+                $bulisa = " and maa_id in ({$row['maalista']}) ";
+
+                if ($vertailubu == "mabuos" and $tuosagroups > 0) {
+                  $bulisa .= " and osasto = '{$row['osasto']}' ";
+                }
+                elseif ($vertailubu == "mabuos") {
+                  $bulisa .= " and osasto != '' ";
+                }
+                elseif ($vertailubu == "mabury" and $turyhgroups > 0) {
+                  $bulisa .= " and try = '{$row['tuoteryhm‰']}' ";
+                }
+                elseif ($vertailubu == "mabury") {
+                  $bulisa .= " and try != '' ";
+                }
+                else {
+                  $bulisa .= " and try = '' and osasto = '' ";
+                }
               }
               elseif ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 

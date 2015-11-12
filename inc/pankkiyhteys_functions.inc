@@ -784,6 +784,26 @@ function sepa_file_type_check($bank, $file_type) {
     }
   }
 
+  // OP-muunnokset
+  if ($bank == "op") {
+    // Konekielinen tiliote
+    if ($file_type == "TITO") {
+      $file_type = "TI";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "KTL") {
+      $file_type = "TL";
+    }
+    // XML maksuaineisto
+    if ($file_type == "NDCORPAYS") {
+      $file_type = "pain.001.001.02";
+    }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "NDCORPAYL") {
+      $file_type = "pain.002.001.02";
+    }
+  }
+
   return $file_type;
 }
 // Sertifikaatti / salausfunktiot

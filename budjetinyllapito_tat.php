@@ -1339,6 +1339,10 @@ if ($tee == "AJA_RAPORTTI") {
     $lisa .= " and tuote.tuoteno = '$tuoteno' ";
   }
 
+  if ($toim == "MAA") {
+    $grouppaus = " group by 1";
+  }
+
   if (isset($liitostunnukset) and $liitostunnukset != "") {
     // Excelistä tulleet asiakkaat ylikirjaavaat muut rajaukset
     if ($toim == "TUOTE") {
@@ -1415,7 +1419,8 @@ if ($tee == "AJA_RAPORTTI") {
 
     $query = "SELECT DISTINCT koodi, nimi, MIN(tunnus) maa_id
               FROM maat
-              {$where_maa_lisa}";
+              {$where_maa_lisa}
+              {$grouppaus}";
   }
   elseif ($toim == "ASIAKAS") {
 

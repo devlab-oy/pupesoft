@@ -2325,19 +2325,22 @@ if ($kasitellaan_tiedosto) {
             // Itse lue_datan p‰ivitysquery
             $iresult = pupe_query($query);
 
+            // Haetaan tunnus ja luodaan syncrow
+            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              $syncrow = array();
+              $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
+            }
+            else {
+              $syncrow = mysql_fetch_array($syncres);
+              $tunnus  = $syncrow["tunnus"];
+            }
+
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
-                $syncrow = array();
-                $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
-              }
-              else {
-                $syncrow = mysql_fetch_array($syncres);
-                $tunnus  = $syncrow["tunnus"];
-              }
-
               synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
             }
+
+            generoi_hinnastot($tunnus);
 
             // tehd‰‰n ep‰kunrattijutut
             if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {

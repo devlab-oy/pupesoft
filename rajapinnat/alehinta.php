@@ -85,8 +85,11 @@ function alehinta_asiakas($asiakas, $tuote) {
 
   list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale);
 
-  $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
-  $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+  preg_match("/XXXHINTAPERUSTE:([0-9]*)/", $GLOBALS["ale_peruste"], $hinta_peruste);
+  $hinta_peruste = $hinta_peruste[1];
+
+  preg_match("/XXXALEPERUSTE:([0-9]*)/", $GLOBALS["ale_peruste"], $ale_peruste);
+  $ale_peruste = $ale_peruste[1];
 
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];
@@ -122,8 +125,11 @@ function alehinta_asiakasryhma($asiakasryhma, $tuote) {
 
   list($hinta, , $ale, , ) = alehinta($laskurow, $tuote, $kpl, $netto, $hinta, $ale, '', '', '', $asiakasryhma);
 
-  $hinta_peruste = teksti_valista("XXXHINTAPERUSTE:", " ", $GLOBALS["ale_peruste"]);
-  $ale_peruste   = teksti_valista("XXXALEPERUSTE:", " ", $GLOBALS["ale_peruste"]);
+  preg_match("/XXXHINTAPERUSTE:([0-9]*)/", $GLOBALS["ale_peruste"], $hinta_peruste);
+  $hinta_peruste = $hinta_peruste[1];
+
+  preg_match("/XXXALEPERUSTE:([0-9]*)/", $GLOBALS["ale_peruste"], $ale_peruste);
+  $ale_peruste = $ale_peruste[1];
 
   $kokonaisale = 1;
   $maara       = $yhtiorow['myynnin_alekentat'];

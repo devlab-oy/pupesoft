@@ -22142,7 +22142,7 @@ if (!function_exists('paivita_oletuspaikka')) {
       }
       elseif ($yhtiorow['paivita_oletuspaikka'] == 'M') {
         $wherelisa = "";
-        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O') and lasku.alatila != 'X')";
+        $joinlisa = "JOIN lasku ON (lasku.yhtio = t.yhtio AND lasku.tunnus = t.otunnus AND lasku.tila IN ('N','O','L') and lasku.alatila != 'X')";
         $tyyppilisa = "AND t.tyyppi IN ('O','L')";
       }
       else {

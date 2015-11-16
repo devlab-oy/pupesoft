@@ -118,7 +118,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
       <th align='left'>".t("M‰‰r‰")."</th>";
 
   if ($variaaritorivi_osto !== TRUE) {
-    echo "<th align='left'>".t("Var")."</th>";
+    echo "<th align='left'>".t("Tila")."</th>";
   }
 
   echo "<th align='left'>".t("Hinta")."</th>";

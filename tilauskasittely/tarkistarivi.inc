@@ -433,6 +433,14 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
 
   $varaosavirhe .= $mimyhuom."<br>";
 }
+else {
+
+   if ($trow['myynti_era'] > 0 and $trow['myynti_era'] != $kpl_st and $yhtiorow['myyntiera_pyoristys'] != 'K') {
+     
+     $mimyhuom = t("HUOM: Tuotteella on myyntierä"). " " . $trow['myynti_era'];
+     $varaosakommentti .= $mimyhuom."<br>";
+   }
+}
 
 //Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
 $paikat  = "";

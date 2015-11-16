@@ -426,7 +426,7 @@ if ($tee == 'KARHUA') {
   echo "<tr>";
   echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
 
-  if ($asiakastiedot["karhu_email"] != "") {
+  if ($asiakastiedot["karhu_email"] != "" or $asiakastiedot["email"] != "" or $asiakastiedot["lasku_email"] != "") {
     echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.email_laheta.click();' value='".t('Lähetä sähköposti')."'></td>";
   }
 
@@ -567,7 +567,7 @@ if ($tee == 'KARHUA') {
 
   echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
 
-  if ($asiakastiedot["karhu_email"] != "") {
+  if ($asiakastiedot["karhu_email"] != "" or $asiakastiedot["email"] != "" or $asiakastiedot["lasku_email"] != "") {
     echo "<input type='submit' name='email_laheta' value='".t('Lähetä sähköposti')."'>";
   }
 

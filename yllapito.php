@@ -570,7 +570,7 @@ if ($upd == 1) {
       }
     }
 
-    if ($onko_tama_insert and $toim == "tuote") {
+    if ($toim == "tuote") {
       generoi_hinnastot($tunnus);
     }
 

@@ -31990,27 +31990,37 @@ if (!function_exists('generoi_hinnastot')) {
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND tuoteno = '{$tuote["tuoteno"]}'
                 AND valkoodi = '{$valuu["nimi"]}'";
-
       $hinnasto_result = pupe_query($query);
 
-      if (mysql_num_rows($hinnasto_result) == 0) {
-        $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
+      $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
 
+      if (mysql_num_rows($hinnasto_result) == 0) {
         $alv = t_avainsana('AUT_HIN_ALV', '', "AND selite = '{$valuu["country"]}'", '', '',
                            'selitetark');
 
         $query = "INSERT INTO hinnasto SET
-                  alv        = '{$alv}',
-                  hinta      = '{$hinta}',
-                  laatija    = '{$kukarow["kuka"]}',
-                  luontiaika = NOW(),
-                  maa        = '{$valuu["country"]}',
-                  muutospvm  = NOW(),
-                  muuttaja   = '{$kukarow["kuka"]}',
-                  tuoteno    = '{$tuote["tuoteno"]}',
-                  valkoodi   = '{$valuu["nimi"]}',
-                  yhtio      = '{$kukarow["yhtio"]}'";
+                    alv        = '{$alv}',
+                    hinta      = '{$hinta}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = NOW(),
+                    maa        = '{$valuu["country"]}',
+                    muutospvm  = NOW(),
+                    muuttaja   = '{$kukarow["kuka"]}',
+                    tuoteno    = '{$tuote["tuoteno"]}',
+                    valkoodi   = '{$valuu["nimi"]}',
+                    yhtio      = '{$kukarow["yhtio"]}'";
 
+        pupe_query($query);
+      }
+      else {
+        $tunnus = mysql_fetch_assoc($hinnasto_result);
+        $tunnus = $tunnus["tunnus"];
+
+        $query = "UPDATE hinnasto SET
+                    hinta     = '{$hinta}',
+                    muutospvm = NOW(),
+                    muuttaja  = '{$kukarow["kuka"]}'
+                  WHERE tunnus = '{$tunnus}'";
         pupe_query($query);
       }
     }

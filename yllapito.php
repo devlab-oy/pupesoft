@@ -571,39 +571,48 @@ if ($upd == 1) {
     }
 
     if ($onko_tama_insert and $toim == "tuote") {
-      $query = "SELECT *
+      $query = "SELECT hinnastokurssi,
+                       country,
+                       nimi
                 FROM valuu
-                WHERE yhtio = '{$kukarow["yhtio"]}'";
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND hinnastokurssi > 0
+                AND country IS NOT NULL";
 
       $valuu_result = pupe_query($query);
 
       while ($valuu = mysql_fetch_assoc($valuu_result)) {
-        if ($valuu["hinnastokurssi"] > 0) {
-          $query = "SELECT tunnus
-                    FROM hinnasto
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tuoteno = '{$t["tuoteno"]}'";
+        $query = "SELECT tunnus
+                  FROM hinnasto
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tuoteno = '{$t["tuoteno"]}'
+                  AND valkoodi = '{$valuu["nimi"]}'";
 
-          $hinnasto_result = pupe_query($query);
+        $hinnasto_result = pupe_query($query);
 
-          if (mysql_num_rows($hinnasto_result) == 0) {
-            $hinta = $t["myyntihinta"] * $valuu["hinnastokurssi"];
+        if (mysql_num_rows($hinnasto_result) == 0) {
+          $query = "SELECT myyntihinta,
+                           tuoteno
+                    FROM tuote
+                    WHERE tunnus = '{$tunnus}'";
 
-            var_dump(get_defined_vars());
+          $tuote = pupe_query($query);
+          $tuote = mysql_fetch_assoc($tuote);
 
-            $query = "INSERT INTO hinnasto
-                      SET yhtio      = '{$kukarow["yhtio"]}',
-                          tuoteno    = '{$t["tuoteno"]}',
-                          hinta      = '{$hinta}',
-                          maa        = '{$valuu["country"]}',
-                          valkoodi   = '{$valuu["nimi"]}',
-                          laatija    = '{$kukarow["kuka"]}',
-                          luontiaika = NOW(),
-                          muutospvm  = NOW(),
-                          muuttaja   = '{$kukarow["kuka"]}'";
+          $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
 
-            pupe_query($query);
-          }
+          $query = "INSERT INTO hinnasto
+                    SET yhtio      = '{$kukarow["yhtio"]}',
+                        tuoteno    = '{$tuote["tuoteno"]}',
+                        hinta      = '{$hinta}',
+                        maa        = '{$valuu["country"]}',
+                        valkoodi   = '{$valuu["nimi"]}',
+                        laatija    = '{$kukarow["kuka"]}',
+                        luontiaika = NOW(),
+                        muutospvm  = NOW(),
+                        muuttaja   = '{$kukarow["kuka"]}'";
+
+          pupe_query($query);
         }
       }
     }

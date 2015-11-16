@@ -379,7 +379,24 @@ if ($tee == 'KARHUA') {
   echo "<table>";
   echo "<tr><th>".t("Edellinen maksukehotus väh").".</th><td>$kpvm_aikaa ".t("päivää sitten").".</td></tr>";
   echo "<tr><th>".t("Eräpäivästä väh").".</th><td>$lpvm_aikaa ".t("päivää").".</td></tr>";
-  echo "<tr><th>".t("Sähköposti")."</th><td>$asiakastiedot[karhu_email]</td></tr>";
+
+  echo "<tr><th>".t("Sähköposti")."</th>";
+  echo "<td>";
+  # Annetaan käyttäjän valita asiakkaan takaa löytyvä sähköpostiosoite jos on useita
+  echo "<select name='karhu_email'>";
+  $email_vaihtoehdot = '';
+  if (!empty($asiakastiedot['karhu_email'])) {
+    $email_vaihtoehdot .= "<option value = '{$asiakastiedot['karhu_email']}'>".$asiakastiedot['karhu_email']."</option>";
+  }
+  if (!empty($asiakastiedot['lasku_email'])) {
+    $email_vaihtoehdot .= "<option value = '{$asiakastiedot['lasku_email']}'>".$asiakastiedot['lasku_email']."</option>";
+  }
+  if (!empty($asiakastiedot['email'])) {
+    $email_vaihtoehdot .= "<option value = '{$asiakastiedot['email']}'>".$asiakastiedot['email']."</option>";
+  }
+  echo $email_vaihtoehdot;
+  echo "</select>";    
+  echo "</td></tr>";
   echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 
   $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
@@ -547,7 +564,6 @@ if ($tee == 'KARHUA') {
   echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
   echo "<input name='kirjoitin' type='hidden' value='$kirjoitin'>";
   echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
-  echo "<input name='karhu_email' type='hidden' value='{$asiakastiedot["karhu_email"]}'>";
   echo "<input type='hidden' name='karhuttavatfile' value='$karhuttavatfile'>";
 
   echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";

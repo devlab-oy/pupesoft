@@ -62,6 +62,22 @@ if ($fieldname == "verkkolasku_lah") {
   $jatko = 0;
 }
 
+if ($fieldname == "finvoice_versio") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = "";
+
+  if ($trow[$i] == '2') {
+    $sel = "selected";
+  }
+
+  $ulos .= "<option value = ''>".t("Finvoice 1.2");
+  $ulos .= "<option value = '2' $sel>".t("Finvoice 2.01");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "verkkolasku_vienti") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -535,6 +551,24 @@ if ($fieldname == "ostolaskujen_kurssipaiva") {
   $ulos .= "<option value = '0' $sel[0]>".t("Ostolaskun valuuttakurssi syöttöpäivämäärän mukaan");
   $ulos .= "<option value = '1' $sel[1]>".t("Ostolaskun valuuttakurssi kirjauspäivämäärän mukaan");
   $ulos .= "<option value = '2' $sel[2]>".t("Ostolaskun valuuttakurssi laskun päiväyksen mukaan");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "myyntilaskujen_kurssipaiva") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = (int) $trow[$i];
+  $sel = array("0" => "", "1" => "", "2" => "", "3" => "");
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>".t("Myyntilaskun valuuttakurssi tilauksen luontipäivän mukaan");
+  $ulos .= "<option value = '1' $sel[1]>".t("Myyntilaskun valuuttakurssi tilauksen toimituspäivän mukaan");
+  $ulos .= "<option value = '2' $sel[2]>".t("Myyntilaskun valuuttakurssi laskun päiväyksen mukaan");
+  $ulos .= "<option value = '3' $sel[3]>".t("Myyntilaskun valuuttakurssi laskutushetken mukaan");
 
   $ulos .= "</select></td>";
 

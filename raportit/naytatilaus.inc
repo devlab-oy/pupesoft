@@ -1005,7 +1005,7 @@ else {
   echo "  <th>".t("Tuotenumero")."</th>
       <th>".t("Til. M‰‰r‰")."</th>
       <th>".t("M‰‰r‰")."</th>
-      <th>".t("Var")."</th>
+      <th>".t("Tila")."</th>
       <th>".t("Netto")."</th>";
 
   $kurssilisa = "";
@@ -1519,7 +1519,10 @@ else {
     }
 
     echo "<td $classvar align='center' valign='top'>";
-    echo $row['var'] . "&nbsp;";
+
+    $var_temp = var_kaannos($row['var']);
+
+    echo $var_temp . "&nbsp;";
     if (!empty($row['korvamerkinta'])) {
       if ($row['korvamerkinta'] == '.') {
         $luokka = '';

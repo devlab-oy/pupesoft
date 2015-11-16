@@ -56,7 +56,8 @@ if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
 
-// ennakoissa ei setata jt_huomioi_pvm (sitä ei myöskään käyttöliittymässä näytetä)
+// ennakoissa ei setata jt_huomioi_pvm automaattisesti
+// jt:ssä setataan (sitä ei myöskään näytetä käyttöliittymässä kys. parametrillä)
 if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO') {
   $jt_huomioi_pvm = "on";
 }
@@ -2855,8 +2856,7 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
       <td><input type='checkbox' name='suoratoimit' $sel></td>
       </tr>";
 
-  // ei näytetä optiota ennakoissa jos saldo_kasittely U
-  if ($yhtiorow["saldo_kasittely"] != 'U' and $toim != 'ENNAKKO') {
+  if ($yhtiorow["saldo_kasittely"] != 'U' or $toim == 'ENNAKKO') {
 
     if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
 

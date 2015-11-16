@@ -56,6 +56,11 @@ if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
 
+// ennakoissa ei setata jt_huomioi_pvm (sit‰ ei myˆsk‰‰n k‰yttˆliittym‰ss‰ n‰ytet‰)
+if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO') {
+  $jt_huomioi_pvm = "on";
+}
+
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -1317,6 +1322,10 @@ if ($tee == "JATKA") {
                   $jt_saldopvm = date("Y-m-d");
                 }
 
+                if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                  $jt_saldopvm = $jtrow['ttoimaika'];
+                }
+
                 foreach ($varastosta as $vara) {
                   list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
@@ -1351,6 +1360,10 @@ if ($tee == "JATKA") {
 
             if (!empty($yhtiorow["saldo_kasittely"])) {
               $jt_saldopvm = date("Y-m-d");
+            }
+
+            if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+              $jt_saldopvm = $jtrow['ttoimaika'];
             }
 
             foreach ($varastosta as $vara) {
@@ -2244,6 +2257,10 @@ if ($tee == "JATKA") {
                   $jt_saldopvm = date("Y-m-d");
                 }
 
+                if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                  $jt_saldopvm = $jtrow['ttoimaika'];
+                }
+
                 foreach ($varastosta as $vara) {
                   list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
@@ -2389,6 +2406,10 @@ if ($tee == "JATKA") {
 
                     if (!empty($yhtiorow["saldo_kasittely"])) {
                       $jt_saldopvm = date("Y-m-d");
+                    }
+
+                    if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                      $jt_saldopvm = $jtrow['ttoimaika'];
                     }
 
                     foreach ($varastosta as $vara) {
@@ -2834,12 +2855,16 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
       <td><input type='checkbox' name='suoratoimit' $sel></td>
       </tr>";
 
-  if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
+  // ei n‰ytet‰ optiota ennakoissa jos saldo_kasittely U
+  if ($yhtiorow["saldo_kasittely"] != 'U' and $toim != 'ENNAKKO') {
 
-  echo "  <tr>
-      <th>".t("Huomioi p‰iv‰m‰‰r‰t j‰lkitilauksissa")."</th>
-      <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
-      </tr>";
+    if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
+
+    echo "  <tr>
+        <th>".t("Huomioi p‰iv‰m‰‰r‰t j‰lkitilauksissa")."</th>
+        <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
+        </tr>";
+  }
 
   echo "</table>
 

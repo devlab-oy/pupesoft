@@ -31962,3 +31962,57 @@ if (!function_exists("hae_tuoteperhe")) {
     return $tuoteperhe;
   }
 }
+
+if (!function_exists('generoi_hinnastot')) {
+  function generoi_hinnastot($tuote_tunnus) {
+    global $kukarow;
+
+    $query = "SELECT myyntihinta,
+                     tuoteno
+              FROM tuote
+              WHERE tunnus = '{$tuote_tunnus}'";
+
+    $tuote = pupe_query($query);
+    $tuote = mysql_fetch_assoc($tuote);
+
+    $query = "SELECT hinnastokurssi,
+                     country,
+                     nimi
+              FROM valuu
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND hinnastokurssi > 0
+              AND country IS NOT NULL";
+    $valuu_result = pupe_query($query);
+
+    while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $query = "SELECT tunnus
+                FROM hinnasto
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tuoteno = '{$tuote["tuoteno"]}'
+                AND valkoodi = '{$valuu["nimi"]}'";
+
+      $hinnasto_result = pupe_query($query);
+
+      if (mysql_num_rows($hinnasto_result) == 0) {
+        $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
+
+        $alv = t_avainsana('AUT_HIN_ALV', '', "AND selite = '{$valuu["country"]}'", '', '',
+                           'selitetark');
+
+        $query = "INSERT INTO hinnasto SET
+                  alv        = '{$alv}',
+                  hinta      = '{$hinta}',
+                  laatija    = '{$kukarow["kuka"]}',
+                  luontiaika = NOW(),
+                  maa        = '{$valuu["country"]}',
+                  muutospvm  = NOW(),
+                  muuttaja   = '{$kukarow["kuka"]}',
+                  tuoteno    = '{$tuote["tuoteno"]}',
+                  valkoodi   = '{$valuu["nimi"]}',
+                  yhtio      = '{$kukarow["yhtio"]}'";
+
+        pupe_query($query);
+      }
+    }
+  }
+}

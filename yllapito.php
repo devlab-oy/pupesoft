@@ -601,16 +601,20 @@ if ($upd == 1) {
 
           $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
 
-          $query = "INSERT INTO hinnasto
-                    SET yhtio      = '{$kukarow["yhtio"]}',
-                        tuoteno    = '{$tuote["tuoteno"]}',
-                        hinta      = '{$hinta}',
-                        maa        = '{$valuu["country"]}',
-                        valkoodi   = '{$valuu["nimi"]}',
-                        laatija    = '{$kukarow["kuka"]}',
-                        luontiaika = NOW(),
-                        muutospvm  = NOW(),
-                        muuttaja   = '{$kukarow["kuka"]}'";
+          $alv = t_avainsana('AUT_HIN_ALV', '', "AND selite = '{$valuu["country"]}'", '', '',
+                             'selitetark');
+
+          $query = "INSERT INTO hinnasto SET
+                    alv        = '{$alv}',
+                    hinta      = '{$hinta}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = NOW(),
+                    maa        = '{$valuu["country"]}',
+                    muutospvm  = NOW(),
+                    muuttaja   = '{$kukarow["kuka"]}',
+                    tuoteno    = '{$tuote["tuoteno"]}',
+                    valkoodi   = '{$valuu["nimi"]}',
+                    yhtio      = '{$kukarow["yhtio"]}'";
 
           pupe_query($query);
         }

@@ -858,7 +858,12 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   // Tuotanto
   $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-  require 'tilauskasittely/verkkolasku_finvoice.inc';
+  if ($yhtiorow["finvoice_versio"] == "2") {
+    require "tilauskasittely/verkkolasku_finvoice_201.inc";
+  }
+  else {
+    require "tilauskasittely/verkkolasku_finvoice.inc";
+  }
 
   $finvoice_file_path = "$pupe_root_polku/dataout/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
   $tootfinvoice    = fopen($finvoice_file_path, 'w');

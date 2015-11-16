@@ -31964,8 +31964,19 @@ if (!function_exists("hae_tuoteperhe")) {
 }
 
 if (!function_exists('generoi_hinnastot')) {
+  /**
+   * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi ja maa
+   *
+   * @param int $tuote_tunnus Tuotteen tunnus
+   *
+   * @return bool Luotiinko tai päivitettinkö hinnasto
+   */
   function generoi_hinnastot($tuote_tunnus) {
     global $kukarow;
+
+    if (!is_numeric($tuote_tunnus)) {
+      return false;
+    }
 
     $query = "SELECT myyntihinta,
                      tuoteno
@@ -32010,7 +32021,7 @@ if (!function_exists('generoi_hinnastot')) {
                     valkoodi   = '{$valuu["nimi"]}',
                     yhtio      = '{$kukarow["yhtio"]}'";
 
-        pupe_query($query);
+        return pupe_query($query);
       }
       else {
         $tunnus = mysql_fetch_assoc($hinnasto_result);
@@ -32021,8 +32032,10 @@ if (!function_exists('generoi_hinnastot')) {
                     muutospvm = NOW(),
                     muuttaja  = '{$kukarow["kuka"]}'
                   WHERE tunnus = '{$tunnus}'";
-        pupe_query($query);
+        return pupe_query($query);
       }
     }
+
+    return false;
   }
 }

@@ -21,6 +21,8 @@ if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
 
+if (!isset($tullaan_takaisin)) $tullaan_takaisin = '';
+
 echo "<font class='head'>".t("Myöhässä olevat myyntitilaukset")."</font><hr>";
 
 if (!isset($tee) or ($tee != "NAYTATILAUS" and $tee != 'MUOKKAATILAUS')) {
@@ -32,6 +34,11 @@ if (!isset($tee) or ($tee != "NAYTATILAUS" and $tee != 'MUOKKAATILAUS')) {
     $myopp = date("j");
     $myokk = date("n");
     $myovv = date("Y");
+  }
+
+  if ($tullaan_takaisin == 'myyntitilaus' and !empty($se_tuoteryhma) and !empty($se_kustannuspaikka)) {
+    $mul_tuoteryhma = unserialize(base64_decode($se_tuoteryhma));
+    $mul_kustannuspaikka = unserialize(base64_decode($se_kustannuspaikka));
   }
 
   echo "<form name=asiakas method='post' autocomplete='off'>";
@@ -314,11 +321,14 @@ if ($tee == "HAE") {
     echo "<tr><td class='back'><font class='message'>", t("Yhtään tilausta ei löytynyt"), "!</font></td></tr>";
   }
 
+  $_url = "{$palvelin2}tilauskasittely/tilaus_myynti.php";
+
   $lopetus  = "{$palvelin2}raportit/myohassa_olevat.php////tee=HAE";
   $lopetus .= "//kayta_ostotilausta={$kayta_ostotilausta}";
   $lopetus .= "//myopp={$myopp}//myokk={$myokk}//myovv={$myovv}";
   $lopetus .= "//toimittajaid={$toimittajaid}";
   $lopetus .= "//se_tuoteryhma={$se_tuoteryhma}//se_kustannuspaikka={$se_kustannuspaikka}";
+  $lopetus .= "//tullaan_takaisin=myyntitilaus";
 
   while ($tulrow = mysql_fetch_array($result)) {
 
@@ -395,8 +405,34 @@ if ($tee == "HAE") {
         echo "<td align='right'>$myohastyneet_row[varattu]</td>";
         echo "<td>";
         echo "<a href='#' onclick=\"window.open('$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">$myohastyneet_row[tunnus]</a>";
+
         echo "<br>";
-        echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?tee=&toim=RIVISYOTTO&kaytiin_otsikolla=NOJOO!&orig_tila={$myohastyneet_row['tila']}&orig_alatila={$myohastyneet_row['alatila']}&tilausnumero={$myohastyneet_row['tunnus']}&lopetus={$lopetus}'>",t("Muokkaa"),"</a>";
+
+        $_laskutettu_chk = ($myohastyneet_row["tila"] == 'L' and $myohastyneet_row["alatila"] != 'X');
+
+        if (tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO') and $_laskutettu_chk) {
+          $_params = array(
+            "tee=",
+            "toim=RIVISYOTTO",
+            "kaytiin_otsikolla=NOJOO!",
+            "orig_tila={$myohastyneet_row['tila']}",
+            "orig_alatila={$myohastyneet_row['alatila']}",
+            "tilausnumero={$myohastyneet_row['tunnus']}",
+            "lopetus={$lopetus}",
+          );
+
+          echo "<a href='{$_url}?",implode('&', $_params),"'>",t("Muokkaa"),"</a>";
+          echo "<br>";
+        }
+
+        $laskutyyppi = $myohastyneet_row["tila"];
+        $alatila     = $myohastyneet_row["alatila"];
+
+        //tehdään selväkielinen tila/alatila
+        require "inc/laskutyyppi.inc";
+
+        echo "{$laskutyyppi} {$alatila}";
+
         echo "</td>";
         echo "<td>$myohastyneet_row[ytunnus]</td>";
         echo "<td>$myohastyneet_row[nimi]</td>";

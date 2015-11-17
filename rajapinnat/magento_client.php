@@ -357,7 +357,8 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
-          // Kieliversiot ja kauppakohtaiset_hinnat poimitaan talteen koska niit‰ k‰ytet‰‰n toisaalla
+          // Kieliversiot ja kauppakohtaiset_hinnat sek‰ kauppakohtaiset_verokannat
+          // poimitaan talteen koska niit‰ k‰ytet‰‰n toisaalla
           if ($key == 'kieliversiot') {
             $tuetut_kieliversiot = $erikoisparametri['arvo'];
             continue;
@@ -2169,6 +2170,7 @@ class MagentoClient {
       // Tuotteen hinta t‰lle asiakkaalle
       $hinta = 0;
       $kpl = 1;
+      unset($row);
 
       $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
                  FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)

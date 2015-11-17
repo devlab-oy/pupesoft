@@ -2148,15 +2148,14 @@ class MagentoClient {
   }
 
   private function hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero) {
-    global $yhtiorow, $kukarow;
+    global $kukarow;
     // Haetaan annettujen Magentoasiakkaiden hinnat annetulle tuotteelle
     $asiakaskohtaiset_hinnat_data = array();
 
-    // Tuotteen vertailuhinta, jos asiakaskohtainen hinta ei eroa tästä niin ei suotta
-    // anneta sitä Magentoon
+    // Haetaan tuotteen tiedot
     $query = "SELECT *
               FROM tuote
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               AND tuoteno = '{$tuotenumero}'";
     $result = pupe_query($query);
     $tuoterow = mysql_fetch_assoc($result);

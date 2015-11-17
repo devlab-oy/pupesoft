@@ -6,6 +6,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   if ($toim != "REKLAMAATIO") {
     $tulostimet[0] = "Työmääräys";
+    array_unshift($tulostimet, "Huoltosaate");
     require_once "tyomaarays/tulosta_tyomaarays.inc";
   }
   else {

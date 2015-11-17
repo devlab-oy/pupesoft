@@ -159,7 +159,6 @@ if (count($tuotetiedot) > 0) {
     $rtuoteno[$i]["tuoteno"] = current(array_filter($tuote_elementit));
 
     if ($rtuoteno[$i]["tuoteno"] != "") {
-
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
@@ -174,7 +173,14 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
       $rtuoteno[$i]["riviinfo"] = preg_replace("/ {2,}/", " " , xml_string($tuotetieto->ArticleName));
 
-      $rtuoteno[$i]["rivihinta"] = round(xml_float($tuotetieto->RowVatExcludedAmount), 2);
+      // Lista elementeistä prioriteettijärjestyksessä, josta veroton rivihinta voi riviltä löytyä
+      $rivihinta_elementit = array(
+        round(xml_float($tuotetieto->RowVatExcludedAmount), 2),
+        round(xml_float($tuotetieto->SubInvoiceRow->SubRowAmount), 2),
+      );
+
+      // Otetaan eka arvo, joka ei ole FALSE (0, null ja empty string on false)
+      $rtuoteno[$i]["rivihinta"] = current(array_filter($rivihinta_elementit));
       $rtuoteno[$i]["rivihinta_verolli"] = round(xml_float($tuotetieto->RowAmount), 2);
 
       $rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];

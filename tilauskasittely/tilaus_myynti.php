@@ -130,6 +130,11 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
   exit;
 }
 
+if (isset($livesearch_tee) and $livesearch_tee == "TUOTEMERKKIHAKU") {
+  livesearch_tuotemerkkihaku();
+  exit;
+}
+
 enable_ajax();
 
 $tilauskaslisa = "";

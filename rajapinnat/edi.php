@@ -48,6 +48,7 @@ class Edi {
     $edi_order .= "*RS OSTOTIL\n";
     $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
 
+    $vaihtoehtoinen_ovt = '';
     //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $edi_store = str_replace("\n", " ", $order['store_name']);
@@ -61,13 +62,11 @@ class Edi {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }
       }
-      // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin yliajetaan $ovt_tunnus
-      if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
-        $ovt_tunnus = $vaihtoehtoinen_ovt;
-      }
     }
+
+    $valittu_ovt_tunnus = (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
-    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$valittu_ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";

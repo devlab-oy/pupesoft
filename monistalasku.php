@@ -676,7 +676,7 @@ if ($tee == "ETSILASKU") {
             echo "<th>", t("Tuotenumero"), "</th>";
             echo "<th>", t("Til. M‰‰r‰"), "</th>";
             echo "<th>", t("M‰‰r‰"), "</th>";
-            echo "<th>", t("Var"), "</th>";
+            echo "<th>", t("Tila"), "</th>";
             echo "<th>", t("Netto"), "</th>";
 
             if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>", t("Svh"), "</th>";
@@ -751,7 +751,8 @@ if ($tee == "ETSILASKU") {
 
               echo "<td align='right' valign='top' nowrap>{$kpl_ruudulle}</td>";
 
-              echo "<td>{$nayta_rivit_row['var']}</td>";
+              $var_temp = var_kaannos($nayta_rivit_row['var']);
+              echo "<td>{$var_temp}</td>";
               echo "<td>{$nayta_rivit_row['netto']}</td>";
 
               $query = "SELECT *

@@ -867,25 +867,18 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<noscript>Your browser does not support Javascript!</noscript>\n";
 
       if (basename($phpnimi) != 'indexvas.php' and (!isset($_GET["ohje"]) or $_GET["ohje"] != "off")) {
-        if (isset($toim) and $toim != '') {
-          if (basename($phpnimi) == 'varauskalenteri.php') {
-            $urltoim = "";
-          }
-          else {
+        if (!empty($ohjewiki_url)) {
+          $urltoim = "";
+
+          if (!empty($toim)) {
             $urltoim = "/".$toim;
           }
-        }
-        else {
-          $urltoim = "";
-        }
-
-        if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
-          $urltoim = "/EXTRANET";
-        }
-
-        if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
+
           echo "<div class='ohje'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
+        }
+        elseif (!empty($oikeurow['usermanualurl'])) {
+          echo "<div class='ohje'><a href='#' onclick=\"window.open('{$oikeurow['usermanualurl']}', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100'); return false;\">".t("OHJE")."</a></div>";
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {

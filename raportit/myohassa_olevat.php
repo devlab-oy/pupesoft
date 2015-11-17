@@ -321,6 +321,8 @@ if ($tee == "HAE") {
     echo "<tr><td class='back'><font class='message'>", t("Yhtään tilausta ei löytynyt"), "!</font></td></tr>";
   }
 
+  $_onko_oikeus = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
+
   $_url = "{$palvelin2}tilauskasittely/tilaus_myynti.php";
 
   $lopetus  = "{$palvelin2}raportit/myohassa_olevat.php////tee=HAE";
@@ -408,9 +410,10 @@ if ($tee == "HAE") {
 
         echo "<br>";
 
-        $_laskutettu_chk = ($myohastyneet_row["tila"] == 'L' and $myohastyneet_row["alatila"] != 'X');
+        $_laskutettu_chk = ($myohastyneet_row["tila"] == 'N');
+        $_laskutettu_chk = ($_laskutettu_chk or ($myohastyneet_row["tila"] == 'L' and $myohastyneet_row["alatila"] != 'X'));
 
-        if (tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO') and $_laskutettu_chk) {
+        if ($_onko_oikeus and $_laskutettu_chk) {
           $_params = array(
             "tee=",
             "toim=RIVISYOTTO",

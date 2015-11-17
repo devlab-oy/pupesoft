@@ -148,13 +148,15 @@ $rivien_summa_yhteensa = 0;
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
 
-    // tuotekoodi
-    if (empty($tuotetieto->ArticleIdentifier)) {
-      $rtuoteno[$i]["tuoteno"] = xml_string($tuotetieto->ArticleName);
-    }
-    else {
-      $rtuoteno[$i]["tuoteno"] = xml_string($tuotetieto->ArticleIdentifier);
-    }
+    // Lista elementeistä prioriteettijärjestyksessä, josta tuotetieto voi riviltä löytyä
+    $tuote_elementit = array(
+      xml_string($tuotetieto->ArticleIdentifier),
+      xml_string($tuotetieto->ArticleName),
+      xml_string($tuotetieto->SubInvoiceRow->SubArticleName),
+    );
+
+    // Otetaan eka arvo, joka ei ole FALSE (null ja empty string on false)
+    $rtuoteno[$i]["tuoteno"] = current(array_filter($tuote_elementit));
 
     if ($rtuoteno[$i]["tuoteno"] != "") {
 

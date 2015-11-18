@@ -1422,7 +1422,7 @@ if (!function_exists("verkkolasku_in")) {
             $result = pupe_query($query);
 
             // Sopiva sääntöä ei löytynyt, etsitään wildcard haku info kentällä kuvauksesta
-            if (mysql_num_rows($result) != 1) {
+            if (mysql_num_rows($result) != 1 and $rinfo != "") {
               $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
                         WHERE ttunnus = '$trow[tunnus]'
@@ -1437,7 +1437,7 @@ if (!function_exists("verkkolasku_in")) {
             }
 
             // Sopiva sääntöä ei löytynyt, etsitään wildcard haku tuotteella kuvauksesta
-            if (mysql_num_rows($result) != 1) {
+            if (mysql_num_rows($result) != 1 and $tuote != "") {
               $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
                         WHERE ttunnus = '$trow[tunnus]'

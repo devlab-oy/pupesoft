@@ -346,7 +346,7 @@ if (!$enarimatch) {
         $ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
       }
 
-      if ($yhtiorow["saldo_kasittely"] == "T") {
+      if (!empty($yhtiorow["saldo_kasittely"])) {
         $saldoaikalisa = date("Y-m-d");
       }
       else {

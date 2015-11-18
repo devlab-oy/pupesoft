@@ -832,10 +832,13 @@ if ($fieldname == "saldo_kasittely") {
   elseif ($trow[$i] == "T") {
     $sel2 = "selected";
   }
+  elseif ($trow[$i] == "U") {
+    $sel3 = "selected";
+  }
 
-
-  $ulos .= "<option value = ''  $sel1>".t("Myyt‰viss‰-kpl ajasta riippumaton")."</option>";
-  $ulos .= "<option value = 'T' $sel2>".t("Myyt‰viss‰-kpl lasketaan ker‰yspvm:n mukaan")."</option>";
+  $ulos .= "<option value = ''  $sel1>".t("Myyt‰viss‰m‰‰r‰ ajasta riippumaton")."</option>";
+  $ulos .= "<option value = 'T' $sel2>".t("Myyt‰viss‰m‰‰r‰ lasketaan ker‰yspvm:n mukaan")."</option>";
+  $ulos .= "<option value = 'U' $sel3>".t("Myyt‰viss‰m‰‰r‰ lasketaan ker‰yspvm:n mukaan niin, ett‰ tulevat tapahtumat vaikuttavat t‰m‰n hetken myyt‰viss‰m‰‰r‰‰n")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -1436,21 +1436,6 @@ if (!function_exists("verkkolasku_in")) {
               $result = pupe_query($query);
             }
 
-            // Sopiva sääntöä ei löytynyt, etsitään wildcard haku tuotteella kuvauksesta
-            if (mysql_num_rows($result) != 1 and $tuote != "") {
-              $query = "SELECT tilino, kustp, alv
-                        FROM tiliointisaanto
-                        WHERE ttunnus = '$trow[tunnus]'
-                        and tyyppi    = 't'
-                        and yhtio     = '$yhtio'
-                        and kuvaus    like '%$tuote%'
-                        and kuvaus    != ''
-                        and tilino    not in ('0','')
-                        order by tunnus
-                        limit 1";
-              $result = pupe_query($query);
-            }
-
             // Löytyi sääntö
             if (mysql_num_rows($result) == 1) {
               $tiliointirow = mysql_fetch_assoc($result);

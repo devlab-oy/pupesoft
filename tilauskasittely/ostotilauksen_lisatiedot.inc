@@ -24,7 +24,7 @@ else {
 
 if ($tee == "update") {
 
-  if (isset($vienti_kurssi) and $vienti_kurssi >= 0) {
+  if ($yhtiorow['jalkilaskenta_kuluperuste'] == "VS" and isset($vienti_kurssi) and $vienti_kurssi >= 0) {
     $query  = " UPDATE lasku SET
                 vienti_kurssi = '{$vienti_kurssi}'
                 WHERE tunnus  = '$otunnus'

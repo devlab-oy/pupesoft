@@ -24,6 +24,17 @@ else {
 
 if ($tee == "update") {
 
+  if (isset($vienti_kurssi) and $vienti_kurssi >= 0) {
+    $query  = " UPDATE lasku SET
+                vienti_kurssi = '{$vienti_kurssi}'
+                WHERE tunnus  = '$otunnus'
+                AND yhtio     = '$kukarow[yhtio]'
+                AND tila      = 'K'
+                AND alatila  != 'X'";
+    $result = pupe_query($query);
+    $laskurow['vienti_kurssi'] = $vienti_kurssi;
+  }
+
   list (, , , , , , , , $llrow, , , , , , , ) = tsekit($laskurow, 0, 0);
 
   // Tsekki tehdään vain jos vaihto-omaisuus laskuja on liitetty saapumiseen!
@@ -383,6 +394,9 @@ if ($tee == "") {
   echo "<tr><th valign='top'>".t("Veroton")." ".t("Pyöristysero").":</th><td valign='top'><input type='text' id='pyoristys_erot' name='pyoristys_erot' value='$laskurow[pyoristys_erot]'></td><td colspan='2' valign='top' nowrap>".t("Pyöristyseron ALV").": ".alv_popup('pyoristys_erot_alv', $laskurow["pyoristys_erot_alv"])."</td><td class='back'>$pyoristusero_lisatiedot</td></tr>";
   echo "<tr><th valign='top'>".t("Arvioitu kuluprosentti").":</th><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
   echo "<tr><th valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</th><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
+  if ($yhtiorow['jalkilaskenta_kuluperuste'] == "VS" and $laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+    echo "<tr><th valign='top'>".t("Kurssi").":</th><td valign='top' colspan='3'><input type='text' name='vienti_kurssi' value='$laskurow[vienti_kurssi]'> n.nn %</td></tr>";
+  }
   echo "<tr><th valign='top'>".t("Erikoisalennus").":</th><td valign='top' colspan='3'><input type='text' name='erikoisale_saapuminen' value='$laskurow[erikoisale_saapuminen]'></td></tr>";
 
   if ($laskurow["toimaika"] != '0000-00-00') {

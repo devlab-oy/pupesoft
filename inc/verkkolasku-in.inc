@@ -1467,16 +1467,10 @@ if (!function_exists("verkkolasku_in")) {
               }
             }
             else {
+              // Ei löytynyt sääntöä, katsotaan onko meillä tilinumero laskulla
+              // muuten oletustili ja kustp, joka on asetettu loopin alussa
               if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
                 $tili = $rtuoteno[$i]["tilinumero"];
-              }
-              elseif ($oletustili > 0) {
-                // Toimittajan oletustili
-                $tili = $oletustili;
-              }
-              else {
-                // Yleinen kulutili
-                $tili = $yhtiorow['muutkulut'];
               }
             }
 

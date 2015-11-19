@@ -242,6 +242,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='G'{$sel['G']}>".t("Geodis Wilson")."</option>";
   $ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
   $ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
+  $ulos .= "<option value='L'{$sel['L']}>".t("Logmaster")."</option>";
   $ulos .= "</select>";
 
   $ulos .= "</td>";

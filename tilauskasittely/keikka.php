@@ -59,7 +59,7 @@ if (!isset($mobiili_keikka))   $mobiili_keikka = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
-$onkoulkoinenjarjestelma = (!empty($ftp_posten_logistik_host) and !empty($ftp_posten_logistik_user) and !empty($ftp_posten_logistik_pass) and !empty($ftp_posten_logistik_path));
+$onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -337,7 +337,7 @@ if ($toiminto == "tulosta_hintalaput") {
   $toiminto = "";
 }
 
-if ($onkoulkoinenjarjestelma and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
+if ($onkologmaster and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
   $saapumisnro = $otunnus;
 
   require "saapuminen_ulkoiseen_jarjestelmaan.php";

@@ -59,6 +59,13 @@ else {
   }
 }
 
+$ftp_chk = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user));
+$ftp_chk = ($ftp_chk and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
+
+if (!$ftp_chk) {
+  die ("FTP-tiedot ovat puutteelliset!\n");
+}
+
 # Tarvitaan:
 # $saapumisnro
 # ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
@@ -168,11 +175,9 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 }
 
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
-$ftp_chk = (!empty($ftp_posten_logistik_host) and !empty($ftp_posten_logistik_user));
-$ftp_chk = ($ftp_chk and !empty($ftp_posten_logistik_pass) and !empty($ftp_posten_logistik_path));
 
 if ($xml_chk and $ftp_chk) {
-  $filename = "/dataout/inbound_delivery_".md5(uniqid()).".xml";
+  $filename = "/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
 
   if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
 
@@ -183,10 +188,10 @@ if ($xml_chk and $ftp_chk) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
     }
 
-    $ftphost = $ftp_posten_logistik_host;
-    $ftpuser = $ftp_posten_logistik_user;
-    $ftppass = $ftp_posten_logistik_pass;
-    $ftppath = $ftp_posten_logistik_path;
+    $ftphost = $ftp_logmaster_host;
+    $ftpuser = $ftp_logmaster_user;
+    $ftppass = $ftp_logmaster_pass;
+    $ftppath = $ftp_logmaster_path;
     $ftpfile = realpath($filename);
 
     require "inc/ftp-send.inc";

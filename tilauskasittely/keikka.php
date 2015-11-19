@@ -1243,7 +1243,22 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
         echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
       }
       if ($onkologmaster) {
-        echo "<td valign='top'>{$row['sisviesti3']}</td>";
+        echo "<td valign='top'>";
+
+        switch ($row['sisviesti3']) {
+        case 'ei_vie_varastoon':
+          echo "<font class='error'>";
+          echo t("Odottaa kuittausta");
+          echo "</font>";
+          break;
+        case 'ok_vie_varastoon':
+          echo "<font class='ok'>";
+          echo t("Kuittaus saapunut");
+          echo "</font>";
+          break;
+        }
+
+        echo "</td>";
       }
       echo "<td valign='top'>$row[laskunro]</td>";
 

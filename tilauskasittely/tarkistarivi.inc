@@ -98,13 +98,18 @@ $_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
 
 if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '' and $_onko_jt) {
   $query = "SELECT *
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$row['tuoteno']}'
-            AND tyyppi = 'L'
-            AND var = 'J'
-            AND jt != 0
-            AND tunnus != '{$row['tunnus']}'";
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi = 'L'
+              AND tilausrivi.var = 'J'
+              AND tilausrivi.jt != 0
+              AND tilausrivi.tunnus != '{$row['tunnus']}'
+            )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+            AND lasku.tila = 'N'";
   $chk_res = pupe_query($query);
 
   if (mysql_num_rows($chk_res) != 0) {

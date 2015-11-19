@@ -86,6 +86,13 @@ if ($handle = opendir($path)) {
           }
         }
 
+        $query = "UPDATE lasku SET
+                  sisviesti3 = 'ok_vie_varastoon'
+                  WHERE yhtio = '{$yhtio}'
+                  AND tila = 'K'
+                  AND laskunro = '{$saapumisnro}'";
+        $updres = pupe_query($query);
+
         rename($path.$file, $path."done/".$file);
       }
     }

@@ -6,8 +6,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   if ($toim != "REKLAMAATIO") {
     $tulostimet[0] = "Työmääräys";
-    array_unshift($tulostimet, "Huoltosaate");
+    $tulostimet[1] = "Huoltosaate";
     require_once "tyomaarays/tulosta_tyomaarays.inc";
+    require_once "tyomaarays/tulosta_huoltosaate.inc";
   }
   else {
     if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
@@ -73,6 +74,10 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     }
     elseif (isset($komento["Takuu"]) and $komento["Takuu"] != "email") {
       $komento["Takuu"] .= " -# $kappaleet ";
+    }
+
+    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "email" and $tyomtyyppi != 'Z') {
+      $komento["Huoltosaate"] .= " -# {$kappaleet} ";
     }
   }
 
@@ -204,6 +209,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         "tots"        => 0,
         "tyyppi"          => $tyyppi, );
 
+      $params_huoltosaate = $params_tyomaarays;
+
       // Aloitellaan lomakkeen teko
       $params_tyomaarays = tyomaarays_alku($params_tyomaarays);
 
@@ -229,6 +236,49 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
       //tulostetaan sivu
       tyomaarays_print_pdf($params_tyomaarays);
+
+      if (!empty($tulostimet[1]) and $tulostimet[1] == "Huoltosaate") {
+        $query = "SELECT *
+                  FROM tyomaarays
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$laskurow['tunnus']}'";
+        $tyomaaraysres = pupe_query($query);
+        $tyomaaraysrow = mysql_fetch_assoc($tyomaaraysres);
+
+        $params_huoltosaate['tyomaaraysrow'] = $tyomaaraysrow;
+
+        $query = "SELECT tilausrivi.tuoteno,
+                  sarjanumeroseuranta.sarjanumero,
+                  tilausrivi.alv
+                  FROM tilausrivi
+                  LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
+                      and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'L'
+                  AND tilausrivi.varattu != 0";
+        $tuotenores = pupe_query($query);
+        $tuotenorow = mysql_fetch_assoc($tuotenores);
+
+        $params_huoltosaate['tuotenorow'] = $tuotenorow;
+        $params_huoltosaate['komento'] = $komento['Huoltosaate'];
+
+        // Aloitellaan lomakkeen teko
+        $params_huoltosaate = huoltosaate_alku($params_huoltosaate);
+
+        // Ekan sivun otsikot
+        $params_huoltosaate['kala'] -= $params_huoltosaate['rivinkorkeus'] * 2;
+        $params_huoltosaate = huoltosaate_rivi_otsikot($params_huoltosaate);
+
+        mysql_data_seek($riresult, 0);
+
+        while ($row = mysql_fetch_assoc($riresult)) {
+          $params_huoltosaate["row"] = $row;
+          $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
+        }
+
+        $params_huoltosaate["tots"] = 1;
+        $params_huoltosaate = huoltosaate_loppu($params_huoltosaate);
+      }
     }
   }
   else {

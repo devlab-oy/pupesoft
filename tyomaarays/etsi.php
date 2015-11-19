@@ -129,7 +129,18 @@ if ($tee == 'etsi') {
     echo "</table><br>";
   }
   else {
-    echo t("Yhtään työmääräystä ei löytynyt annetuilla ehdoilla")."!<br>";
+    echo t("Yhtään työmääräystä ei löytynyt annetuilla ehdoilla")."!";
+
+    echo "&nbsp;&nbsp;&nbsp;&nbsp;";
+    echo "<form action = '../tilauskasittely/tilaus_myynti.php' method='post'>
+        <input type='hidden' name='toim' value='TYOMAARAYS'>
+        <input type='hidden' name='tee' value='OTSIK'>";
+    if (!empty($nimi)) {
+      echo "<input type='hidden' name='nimi' value='{$nimi}'>";
+    }
+    echo "<input type='submit' value = '".t("Tee uusi työmääräys")."'></form>";
+
+    echo "<br><br>";
   }
 }
 

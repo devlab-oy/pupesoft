@@ -2432,7 +2432,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $pres = t_avainsana("PIIRI");
 
-    $vasen_sarake[$vasen] .= "<select name='piiri'>";
+    $vasen_sarake[$vasen] .= "<select name='piiri'><option value=' '>".t("Ei piiriä")."</option>";
 
     while ($prow = mysql_fetch_assoc($pres)) {
       $chk = "";

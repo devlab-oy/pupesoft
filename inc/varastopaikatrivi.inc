@@ -234,7 +234,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $sel = array();
   $sel[$trow[$i]] = " selected";
 
-  $ulos .= "<select name='{$nimi}'>";
+  $ulos .= "<select name='{$nimi}' onchange='submit();'>";
   $ulos .= "<option value=''>".t("Ei käytössä")."</option>";
   $ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
   $ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";
@@ -245,7 +245,20 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='L'{$sel['L']}>".t("Logmaster")."</option>";
   $ulos .= "</select>";
 
+  $ulkoinen_jarjestelma = $trow[$i];
+
   $ulos .= "</td>";
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma_nimi") {
+  if ($ulkoinen_jarjestelma == 'L') {
+    $ulos = "<td><input type='text' name='{$nimi}' value = '{$trow[$i]}'></td>";
+  }
+  else {
+    $tyyppi = 0;
+  }
+
   $jatko = 0;
 }
 

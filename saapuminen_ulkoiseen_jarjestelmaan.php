@@ -195,6 +195,13 @@ if ($xml_chk and $ftp_chk) {
     $ftpfile = realpath($filename);
 
     require "inc/ftp-send.inc";
+
+    $query = "UPDATE lasku SET
+              sisviesti3 = 'ei_vie_varastoon'
+              WHERE yhtio = '{$yhtio}'
+              AND tila = 'K'
+              AND tunnus = '{$saapumisnro}'";
+    $updres = pupe_query($query);
   }
   else {
 

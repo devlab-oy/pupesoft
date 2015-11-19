@@ -109,6 +109,7 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '' and $_onko_jt)
             )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus != '{$laskurow['tunnus']}'
             AND lasku.tila = 'N'";
   $chk_res = pupe_query($query);
 

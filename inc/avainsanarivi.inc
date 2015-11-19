@@ -94,6 +94,7 @@ if ($_selitetark_2 and
     $avain_sel['SARJANUMERON_LI'] == "SELECTED" or
     $avain_sel['SQLDBQUERY'] == "SELECTED" or
     $avain_sel['TOIMEHTO'] == "SELECTED" or
+    $avain_sel['TOIMVAHVISTUS'] == "SELECTED" or
     $avain_sel['TOIMTAPAKV'] == "SELECTED" or
     $avain_sel['TRY'] == "SELECTED" or
     $avain_sel['TYOM_PRIORIT'] == "SELECTED" or
@@ -893,6 +894,22 @@ if ($avain_sel["TOIMEHTO"] == "SELECTED" and $_selitetark_3) {
   $ulos .= "<option value='VASTAANOTTAJAN_SOPIMUS' $sel2>".t("K‰ytet‰‰n vastaanottajan rahtisopimusta")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
+}
+
+if ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_2 and $trow[$i-2] == "toimitusvahvistus_email.inc") {
+
+  $sel = $trow[$i] == 'eihintaa' ? "selected" : "";
+
+  $ulos = "<td><select name = '{$nimi}'>";
+  $ulos .= "<option value = ''>".t("N‰ytet‰‰n hinta")."</option>";
+  $ulos .= "<option value = 'eihintaa' {$sel}>".t("Ei n‰ytet‰ hintaa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+elseif ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_2 and $trow[$i-2] != "toimitusvahvistus_email.inc") {
+  $tyyppi = 0;
+  $jatko  = 0;
 }
 
 if ($avain_sel["TOIMEHTO"] == "SELECTED" and $_selitetark_4) {

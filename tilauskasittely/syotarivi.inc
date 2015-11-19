@@ -38,7 +38,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 
   echo "  <th align='left'>".t("Tuotenumero")."</th>
       <th align='left'>".t("M‰‰r‰")."</th>
-      <th align='left'>".t("Var")."</th>";
+      <th align='left'>".t("Tila")."</th>";
 
   if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
 
@@ -275,7 +275,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
   echo "  <th align='left'>".t("Tuoteno")."</th>
       <th align='left'>".t("M‰‰r‰")."</th>
-      <th align='left'>".t("Var")."</th>";
+      <th align='left'>".t("Tila")."</th>";
 
   if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
 
@@ -371,7 +371,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<option value='O' $selo>".t("Optio")."</option>";
   }
   echo "<option value=''>".t("Oletus")."</option>";
-  echo "<option value='J' $selj>".t("JT")."</option>";
+  echo "<option value='J' $selj>".t("J‰lkitoim")."</option>";
   echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
   echo "<option value='P' $selp>".t("Puute")."</option>";
 

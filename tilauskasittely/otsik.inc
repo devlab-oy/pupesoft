@@ -3042,6 +3042,9 @@ if ($tila == "" and !isset($jatka)) {
       echo "  <tr>
           <td>".t("Sisäiset kommentit")." 2:</td><td colspan='3'><textarea name='sopimus_lisatietoja2' rows='6' cols='50'>$srow[sopimus_lisatietoja2]</textarea></td>
           </tr>";
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        echo "<tr><td>".t("Sopimusnumero")."</td><td colspan='3'><input type='text' name='sopimus_numero' size='30' value='{$srow['sopimus_numero']}'></td></tr>";
+      }
     }
 
     echo "</table><br>";
@@ -4516,7 +4519,8 @@ if (isset($jatka)) {
       $sopimus_info = '';
       if ($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
         $sopimus_info = "sopimus_lisatietoja      = '$sopimus_lisatietoja',
-                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2', ";
+                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2',
+                         sopimus_numero           = '$sopimus_numero', ";
       }
 
       $query3 .= "laskun_lisatiedot SET

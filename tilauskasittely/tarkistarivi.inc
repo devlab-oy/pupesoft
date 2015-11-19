@@ -465,7 +465,7 @@ if (
     $saako_hyvaksya++;
   }
 
-  if ($yhtiorow["saldo_kasittely"] == "T") {
+  if (!empty($yhtiorow["saldo_kasittely"])) {
     $saldoaikalisa = $row["kerayspvm"];
   }
   else {

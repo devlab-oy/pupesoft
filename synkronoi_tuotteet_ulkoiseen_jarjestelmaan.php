@@ -56,6 +56,7 @@ else {
       echo "<font class='message'>", t("Yhteensä %d kappaletta", "", mysql_num_rows($res)), "</font><br /><br />";
 
       echo "<form action='' method='post'>";
+      echo "<input type='hidden' name='ulkoinen_jarjestelma' value='{$ulkoinen_jarjestelma}' />";
       echo "<table>";
       echo "<tr><td class='back' colspan='2'>";
       echo "<input type='submit' name='tee' value='", t("Lähetä"), "' />";

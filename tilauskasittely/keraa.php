@@ -3466,7 +3466,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                   $laskurow["varasto"] == $alkurow["varasto"] or
                   ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
-                if ($yhtiorow["saldo_kasittely"] == "T") {
+                if (!empty($yhtiorow["saldo_kasittely"])) {
                   $saldoaikalisa = date("Y-m-d");
                 }
                 else {

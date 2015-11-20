@@ -54,6 +54,10 @@ if (!isset($tee) or ($tee != "NAYTATILAUS" and $tee != 'MUOKKAATILAUS')) {
 
   echo "<tr><th>", t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"), "</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
 
+  $vain_korvamerkityt_check = isset($vain_korvamerkityt) ? " checked='checked'" : '';
+
+  echo "<tr><th>", t("Vain korvamerkityt tuotteet"), "</th><td><input type='checkbox' name='vain_korvamerkityt'{$vain_korvamerkityt_check}></td></tr>";
+
   if (!isset($ytunnus)) {
     $ytunnus = '';
   }
@@ -194,6 +198,7 @@ if ($tee == "HAE") {
     echo "<th>", t("Osto Toimitusaika"), "</th>";
     echo "<th>",t("Osto Vahvistettu"),"</th>";
     echo "<th>", t("Tilattu"), "</th>";
+    echo "<th>",t("Tila"),"</th>";
   }
   else {
     echo "<th>".t("Ytunnus")."</th>";
@@ -206,7 +211,7 @@ if ($tee == "HAE") {
     echo "<th>".t("Yksikkˆ")."</th>";
     echo "<th>".t("Arvo")."</th>";
     echo "<th>".t("Myyt‰viss‰")."</th>";
-    echo "<th><a href='?tee=JARJESTA&haku=toimaika&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>".t("Toimitusaika")."</a></th>";
+    echo "<th><a href='?tee=JARJESTA&haku=toimaika&vain_korvamerkityt={$vain_korvamerkityt}&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>".t("Toimitusaika")."</a></th>";
     echo "<th>".t("Tila")."</th>";
   }
   echo "</tr>";
@@ -240,6 +245,8 @@ if ($tee == "HAE") {
         $worksheet->write($excelrivi, $excelsarake, t("Osto Vahvistettu"), $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Tilattu"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Tila"), $format_bold);
       }
       else {
         $worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
@@ -296,25 +303,32 @@ if ($tee == "HAE") {
     $selectlisa = ", group_concat(tilausrivi.tunnus) tunnukset, sum(tilausrivi.varattu+tilausrivi.jt) myydyt";
   }
 
+  $wherelisa = "";
+
+  if (!empty($vain_korvamerkityt)) {
+    $wherelisa = " and trlt.korvamerkinta != '' ";
+  }
+
   $query = "SELECT lasku.toimaika,
             tilausrivi.tuoteno,
             trlt.korvamerkinta,
             tilausrivi.tunnus AS tilausrivitunnus
-            $selectlisa
+            {$selectlisa}
             FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila IN ('L','N') and lasku.toimaika <= '$myovv-$myokk-$myopp')
             JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             JOIN tilausrivin_lisatiedot AS trlt ON (trlt.yhtio = lasku.yhtio AND trlt.tilausrivitunnus = tilausrivi.tunnus)
-            $toimjoin
-            WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+            {$toimjoin}
+            WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
             and tilausrivi.tyyppi         != 'D'
             and tilausrivi.laskutettuaika  = '0000-00-00'
             and tilausrivi.toimitettuaika  = '0000-00-00'
             and tilausrivi.var            != 'P'
-            $lisa
+            {$wherelisa}
+            {$lisa}
             group by lasku.toimaika, tilausrivi.tuoteno
-            ORDER BY lasku.toimaika $suunta";
+            ORDER BY lasku.toimaika {$suunta}";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -329,6 +343,7 @@ if ($tee == "HAE") {
   $lopetus .= "//kayta_ostotilausta={$kayta_ostotilausta}";
   $lopetus .= "//myopp={$myopp}//myokk={$myokk}//myovv={$myovv}";
   $lopetus .= "//toimittajaid={$toimittajaid}";
+  $lopetus .= "//vain_korvamerkityt={$vain_korvamerkityt}";
   $lopetus .= "//se_tuoteryhma={$se_tuoteryhma}//se_kustannuspaikka={$se_kustannuspaikka}";
   $lopetus .= "//tullaan_takaisin=myyntitilaus";
 
@@ -408,12 +423,12 @@ if ($tee == "HAE") {
         echo "<td>";
         echo "<a href='#' onclick=\"window.open('$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">$myohastyneet_row[tunnus]</a>";
 
-        echo "<br>";
-
         $_laskutettu_chk = ($myohastyneet_row["tila"] == 'N');
         $_laskutettu_chk = ($_laskutettu_chk or ($myohastyneet_row["tila"] == 'L' and $myohastyneet_row["alatila"] != 'X'));
 
         if ($_onko_oikeus and $_laskutettu_chk) {
+          echo "<br>";
+
           $_params = array(
             "tee=",
             "toim=RIVISYOTTO",
@@ -425,16 +440,7 @@ if ($tee == "HAE") {
           );
 
           echo "<a href='{$_url}?",implode('&', $_params),"'>",t("Muokkaa"),"</a>";
-          echo "<br>";
         }
-
-        $laskutyyppi = $myohastyneet_row["tila"];
-        $alatila     = $myohastyneet_row["alatila"];
-
-        //tehd‰‰n selv‰kielinen tila/alatila
-        require "inc/laskutyyppi.inc";
-
-        echo "{$laskutyyppi} {$alatila}";
 
         echo "</td>";
         echo "<td>$myohastyneet_row[ytunnus]</td>";
@@ -488,6 +494,15 @@ if ($tee == "HAE") {
           echo "<td>{$_vahvistettu}</td>";
 
           echo "<td align='right'>$ostovarattu</td>";
+
+          $laskutyyppi = $myohastyneet_row["tila"];
+          $alatila     = $myohastyneet_row["alatila"];
+
+          //tehd‰‰n selv‰kielinen tila/alatila
+          require "inc/laskutyyppi.inc";
+
+          echo "<td>{$laskutyyppi} {$alatila}</td>";
+
           echo "</tr>";
 
           if (isset($worksheet)) {
@@ -496,6 +511,8 @@ if ($tee == "HAE") {
             $worksheet->write($excelrivi, $excelsarake, $_vahvistettu, $format_bold);
             $excelsarake++;
             $worksheet->write($excelrivi, $excelsarake, $ostovarattu, $format_bold);
+            $excelsarake++;
+            $worksheet->write($excelrivi, $excelsarake, "{$laskutyyppi} {$alatila}", $format_bold);
           }
 
           $i++;

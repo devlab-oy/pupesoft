@@ -3234,6 +3234,17 @@ if ($tee == '') {
     }
   }
 
+  $_tm_saldoaikalisa = "";
+
+  if (!empty($yhtiorow["saldo_kasittely"])) {
+    if ($laskurow["kerayspvm"] != '0000-00-00') {
+      $_tm_saldoaikalisa = $laskurow["kerayspvm"];
+    }
+    else {
+      $_tm_saldoaikalisa = date("Y-m-d");
+    }
+  }
+
   if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
 
     echo "<form id='hae_asiakasta_formi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
@@ -5814,14 +5825,14 @@ if ($tee == '') {
           if (mysql_num_rows($varresult) > 0) {
 
             // katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
-            list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
+            list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], 'ORVOT', '', '', '', '', '', '', '', $_tm_saldoaikalisa);
             $orvot *= -1;
 
             while ($saldorow = mysql_fetch_assoc($varresult)) {
 
               if (!isset($saldorow["era"])) $saldorow["era"] = "";
 
-              list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $saldorow["era"]);
+              list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"], $_tm_saldoaikalisa, $saldorow["era"]);
 
               //  Listataan vain varasto jo se ei ole kielletty
               if ($sallittu === TRUE) {
@@ -6204,18 +6215,6 @@ if ($tee == '') {
       else {
         $rivino = $rivilaskuri+1;
       }
-    }
-
-    if ($yhtiorow["saldo_kasittely"] == "T") {
-      if ($laskurow["kerayspvm"] != '0000-00-00') {
-        $saldoaikalisa = date("Y-m-d");
-      }
-      else {
-        $saldoaikalisa = date("Y-m-d");
-      }
-    }
-    else {
-      $saldoaikalisa = "";
     }
 
     $vak_chk_array = array();
@@ -6962,7 +6961,7 @@ if ($tee == '') {
         }
         elseif ($yhtiorow["puute_jt_oletus"] == "H") {
           //  Tarkastetaan saldo ja informoidaan k‰ytt‰j‰‰
-          list(, , $tsek_myytavissa) = saldo_myytavissa($trow["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+          list(, , $tsek_myytavissa) = saldo_myytavissa($trow["tuoteno"], '', '', '', '', '', '', '', '', $_tm_saldoaikalisa);
 
           if ($tsek_myytavissa < 0) {
             $class = " class='ptop spec' ";
@@ -8229,23 +8228,31 @@ if ($tee == '') {
                 </form>";
           }
 
-          if ($row["var"] == "J" and !$_luottoraja_ylivito and (($row["ei_saldoa"] != "" or $selpaikkamyytavissa >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
+          // Jos JT-rivit varaa saldoa, niin ei anneta t‰n kysisen rivin syˆd‰ omaa saldoaan.
+          if ($yhtiorow["varaako_jt_saldoa"] != "") {
+            $_jt_tm_lisavarattu = $kpl_ruudulle;
+          }
+          else {
+            $_jt_tm_lisavarattu = 0;
+          }
+
+          if ($row["var"] == "J" and !$_luottoraja_ylivito and (($row["ei_saldoa"] != "" or ($selpaikkamyytavissa+$_jt_tm_lisavarattu) >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='toimita'>
-                <input type='hidden' name='toim'       value = '$toim'>
-                <input type='hidden' name='lopetus'     value = '$lopetus'>
-                <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
-                <input type='hidden' name='projektilla'   value = '$projektilla'>
-                <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
-                <input type='hidden' name='mista'       value = '$mista'>
-                <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
-                <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
-                <input type='hidden' name='rivilaadittu'  value = '$row[laadittu]'>
+                <input type='hidden' name='toim'         value = '$toim'>
+                <input type='hidden' name='lopetus'      value = '$lopetus'>
+                <input type='hidden' name='ruutulimit'   value = '$ruutulimit'>
+                <input type='hidden' name='projektilla'  value = '$projektilla'>
+                <input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+                <input type='hidden' name='mista'        value = '$mista'>
+                <input type='hidden' name='rivitunnus'   value = '$row[tunnus]'>
+                <input type='hidden' name='ale_peruste'  value = '$row[ale_peruste]'>
+                <input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
                 <input type='hidden' name='menutila'     value = '$menutila'>
-                <input type='hidden' name='orig_tila'     value = '$orig_tila'>
-                <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='hidden' name='tila'       value = 'MUUTA'>
-                <input type='hidden' name='tapa'       value = 'POISJTSTA'>
-                <input type='submit' value='".t("Toimita")."'>
+                <input type='hidden' name='orig_tila'    value = '$orig_tila'>
+                <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+                <input type='hidden' name='tila'         value = 'MUUTA'>
+                <input type='hidden' name='tapa'         value = 'POISJTSTA'>
+                <input type='submit' value = '".t("Toimita")."'>
                 </form> ";
           }
 

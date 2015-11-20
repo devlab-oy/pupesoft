@@ -7768,8 +7768,12 @@ if ($tee == '') {
                     ORDER BY laite.tunnus";
           $res = pupe_query($query);
           $sarjanumerotres = mysql_fetch_assoc($res);
-          echo "<br><br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']} <br>";
-
+          echo "<br>";
+          if (!empty($sarjanumerotres['sarjanumerot'])) {
+            echo "<br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']}<br>";
+            echo "<a href='{$palvelin2}kopioi_laitteita.php?toiminto=KOPIOI&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Kopioi laitteita</a>";
+          }
+          echo "<br>";
           echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
         }
 

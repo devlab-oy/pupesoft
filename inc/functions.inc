@@ -32037,8 +32037,12 @@ if (!function_exists('generoi_hinnastot')) {
       $hinta = $tuote["myyntihinta"] * $valuu["hinnastokurssi"];
 
       if (mysql_num_rows($hinnasto_result) == 0) {
-        $alv = t_avainsana('AUT_HIN_ALV', '', "AND selite = '{$valuu["country"]}'", '', '',
-                           'selitetark');
+        $alv = t_avainsana('ALVULK',
+                           '',
+                           "AND selitetark = 'o' AND selitetark_2 = '{$valuu["country"]}'",
+                           '',
+                           '',
+                           'selite');
 
         $query = "INSERT INTO hinnasto SET
                     alv        = '{$alv}',

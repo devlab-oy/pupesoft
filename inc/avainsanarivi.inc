@@ -183,7 +183,6 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA")     $ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>      ".t("Tuoteryhmän tai tuotestatuksen oletuspaikka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI")     $ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>      ".t("Tuotteen elinkaarityyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOPIOITUOTE") $ulos .= "<option value='KOPIOITUOTE' {$avain_sel['KOPIOITUOTE']}>      ".t("Kopioi tuote parametri")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "AUT_HIN_ALV") $ulos .= "<option value='AUT_HIN_ALV' {$avain_sel['AUT_HIN_ALV']}>" . t("Automaattisen hinnaston ALV") . "</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -1329,27 +1328,7 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
 
   $ulos .= "<option value='apix'{$sel["apix"]}>Apix";
 
-  $ulos .= "</select></td>";
+  $ulos .= "</select>";
 
-  $jatko = 0;
-}
-
-if ($avain_sel["AUT_HIN_ALV"] == "SELECTED" and $_selite) {
-  $ulos = "<td><select name='{$nimi}'>";
-
-  $query = "SELECT DISTINCT
-              koodi,
-              nimi
-            FROM maat
-            WHERE koodi <> ''
-            AND nimi <> ''
-            ORDER BY nimi";
-  $maat_result = pupe_query($query);
-
-  while ($maa = mysql_fetch_assoc($maat_result)) {
-    $ulos .= "<option value='{$maa["koodi"]}'>{$maa["nimi"]}";
-  }
-
-  $ulos .= "</select></td>";
   $jatko = 0;
 }

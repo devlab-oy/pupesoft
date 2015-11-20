@@ -336,7 +336,7 @@ if ($tee == "HAE") {
 
     list(, , $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
 
-    if ($yhtiorow['saldo_kasittely'] != '') {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       list(, , $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
     }
 
@@ -530,7 +530,7 @@ if ($tee == "HAE") {
       echo "<td align='right'>$tulrow[myydyt]</td>";
       echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";
       echo "<td align='right'>".hintapyoristys($tulrow["arvo"])."</td>";
-      if ($yhtiorow['saldo_kasittely'] != '') {
+      if (!empty($yhtiorow["saldo_kasittely"])) {
         echo "<td align='right'>$myytavissa ($myytavissa_tul)</td>";
       }
       else {
@@ -585,7 +585,7 @@ if ($tee == "HAE") {
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, hintapyoristys($tulrow["arvo"]), $format_bold);
         $excelsarake++;
-        if ($yhtiorow['saldo_kasittely'] != '') {
+        if (!empty($yhtiorow["saldo_kasittely"])) {
           $worksheet->write($excelrivi, $excelsarake, $myytavissa ."(".$myytavissa_tul.")", $format_bold);
           $excelsarake++;
         }

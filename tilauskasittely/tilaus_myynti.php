@@ -126,6 +126,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
   echo json_encode($data);
   exit;
 }
+
 if ($yhtiorow['laite_huolto'] == 'X' and isset($ajax_toiminto)) {
   require_once('inc/laite_huolto_functions.inc');
   if ($action == 'vaihda_toimenpide') {
@@ -886,6 +887,27 @@ if ((int) $kukarow["kesken"] > 0) {
   }
 
   $laskurow = mysql_fetch_assoc($result);
+
+  // Lasketaan toimenpidetuotteiden määrä laskuriville laitehuoltoa varten
+  if ($yhtiorow['laite_huolto'] == 'X') {
+
+    $tpidequery = "SELECT count(*) tuotteita, group_concat(tilausrivi.tunnus) tunnukset
+                   FROM tilausrivi
+                   JOIN tuote 
+                     ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno) 
+                   WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                     AND tilausrivi.otunnus = '{$kukarow['kesken']}'
+                     AND tuote.tuotetyyppi = 'K'";
+    $tpideresult = pupe_query($tpidequery);
+    $tpiderow = mysql_fetch_assoc($tpideresult);
+
+    $laskurow['toimenpidetuotteet_lkm'] = $tpiderow['tuotteita'];
+
+    // Jos ollaan poistamassa yksi näistä toimenpideriveistä niin otetaan se huomioon
+    if ($tapa == 'POISTA' and strpos($tpiderow['tunnukset'], $kukarow['kesken']) !== FALSE) {
+      $laskurow['toimenpidetuotteet_lkm'] -= 1;
+    }
+  }
 
   if ($maksupaate_kassamyynti and isset($maksupaatetapahtuma)) {
     if ($maksupaatetapahtuma) {
@@ -8206,7 +8228,10 @@ if ($tee == '') {
               $poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
             }
 
-            if ($yhtiorow['laite_huolto'] == '' and !$_laite_huolto_ja_muokkaus_lukko) {
+            // Näytetään poista nappi laitehuollossa vain silloin kun sen painaminen ei johda virheeseen
+            $toimenpide_lkm = isset($laskurow['toimenpidetuotteet_lkm']) ? $laskurow['toimenpidetuotteet_lkm'] : 0;
+            $voiko_poistaa_toimenpiteen = $toimenpide_lkm > 2 ? true : false;
+            if (!$_laite_huolto_ja_muokkaus_lukko and (($tuotetyyppi == 1 and $voiko_poistaa_toimenpiteen) or $tuotetyyppi != 1)) {
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>

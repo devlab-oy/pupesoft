@@ -3589,6 +3589,20 @@ if (!function_exists('loppu_lahete')) {
     $yhteystiedot_len = $pdf->strlen($yhteystiedot_teksti, $pieni);
     $yhteystiedot_len_www = $pdf->strlen($y_www, $pieni);
 
+
+    $query  = "SELECT pankkiyhteystiedot.*, maksuehto.*
+               FROM maksuehto
+               LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio = maksuehto.yhtio and pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
+               WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+               and maksuehto.tunnus  = '{$laskurow["maksuehto"]}'";
+    $result = pupe_query($query);
+    $masrow = mysql_fetch_assoc($result);
+
+    if ($masrow["pankkinimi1"] != "") {
+      $y_iban  = $masrow["pankkiiban1"];
+      $y_swift = $masrow["pankkiswift1"];
+    }
+
     if ($base_lahetetyyppi == "tulosta_lahete_custom.inc") {
       $pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
       $pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);

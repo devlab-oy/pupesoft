@@ -51,7 +51,7 @@ function echo_piirra_kopiointi_formi($request = array()) {
 function echo_piirra_laiterivit($kopioitavat_laitteet) {
   echo "<table>";
   foreach ($kopioitavat_laitteet as $laite) {
-    echo "<tr><td>";
+    echo "<tr><td style='border: 1px solid black;'>";
     echo "<input type='checkbox' name='kopioitavat_laitteet[]'  value='{$laite['tunnus']}'/>";
     echo "{$laite['sarjanro']}<br>({$laite['tuotenro']})";
     echo "</td></tr>";
@@ -64,7 +64,7 @@ function echo_piirra_sopimusrivit($kohdesopimusrivit) {
   echo "<table>";
   foreach ($kohdesopimusrivit as $sopimusrivi) {
     if ($sopimusrivi['tunnus'] == $request['tilausrivin_tunnus']) continue;
-    echo "<tr><td>";
+    echo "<tr><td style='border: 1px solid black;'>";
     echo "<input type='checkbox' name='valitut_kohderivit[]'  value='{$sopimusrivi['tunnus']}'/>";
     echo "{$sopimusrivi['tuoteno']}";
     piirra_sopimusrivin_laitteet($sopimusrivi['tunnus']);

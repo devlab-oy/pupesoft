@@ -4262,7 +4262,7 @@ if (!function_exists('print_pdf_lahete')) {
           else {
             echo t("Lähete tulostuu")."...<br>";
 
-            $kutsu = t("Lähete", $kieli)." ".$laskurow["tunnus"]);
+            $kutsu = t("Lähete", $kieli)." ".$laskurow["tunnus"];
 
             if (isset($koontilahete) and $koontilahete != 0) {
               $content_body .= t("Tilausnumero", $kieli).": ";

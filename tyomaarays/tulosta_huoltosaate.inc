@@ -180,7 +180,7 @@ if (!function_exists('huoltosaate_rivi')) {
       $return = compact(array_keys($params));
 
       $return = huoltosaate_loppu($return);
-      $params = huoltosaate_uusi_sivu($return);
+      $params = huoltosaate_alku($return);
 
       // Luodaan muuttujat
       extract($params);
@@ -190,5 +190,41 @@ if (!function_exists('huoltosaate_rivi')) {
     else {
       $uudehko = "";
     }
+
+    $pdf->draw_text(50, $kala, $row["tuoteno"], $thispage, $norm);
+    $pdf->draw_text(125, $kala, $row["kommentti"], $thispage, $norm);
+    $pdf->draw_text(250, $kala, $row["varattu"], $thispage, $norm);
+    $pdf->draw_text(325, $kala, hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $thispage, $norm);
+
+    $kala -= 20;
+
+    // Luodaan palautettavat
+    $return = compact(array_keys($params));
+
+    return $return;
+  }
+}
+
+if (!function_exists('huoltosaate_loppu')) {
+  function huoltosaate_loppu($params) {
+    global $yhtiorow, $kukarow;
+
+    // Luodaan muuttujat
+    extract($params);
+
+    $yhteensa_len = $pdf->strlen($yhteensa, $norm);
+
+    $pdf->draw_text(325, $kala, t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
+
+    $pdf->draw_rectangle($kala, 50,  $kala, 320, $thispage, $rectparam);
+    $pdf->draw_rectangle($kala, 325,  $kala, 325+$yhteensa_len, $thispage, $rectparam);
+
+    $pdf->draw_text(50, $kala, t("Yhteensä" $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
+    $pdf->draw_text(325+$yhteensa_len, $kala, "{$yhteensa},-", $thispage, $norm);
+
+    // Luodaan palautettavat
+    $return = compact(array_keys($params));
+
+    return $return;
   }
 }

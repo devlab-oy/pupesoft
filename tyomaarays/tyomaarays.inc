@@ -271,12 +271,16 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
         mysql_data_seek($riresult, 0);
 
+        $yhteensa = 0;
+
         while ($row = mysql_fetch_assoc($riresult)) {
+          $yhteensa += $row['rivihinta'];
           $params_huoltosaate["row"] = $row;
           $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
         }
 
         $params_huoltosaate["tots"] = 1;
+        $params_huoltosaate["yhteensa"] = $yhteensa;
         $params_huoltosaate = huoltosaate_loppu($params_huoltosaate);
       }
     }

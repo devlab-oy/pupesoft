@@ -22,12 +22,13 @@ if (!function_exists('huoltosaate_alku')) {
 
     $page[$sivu] = $thispage;
 
-    $merkkiavainsanatunnus = t_avainsana('TUOTEMERKKI', '', "and selite = '{$tyomaaraysrow['merkki']}'", '', '', "tunnus");
+    $merkkiavainsanares = t_avainsana('TUOTEMERKKI', '', "and selite = '{$tyomaaraysrow['merkki']}'");
+    $merkkiavainsanarow = mysql_fetch_assoc($merkkiavainsanares);
 
     $query = "SELECT *
               FROM liitetiedostot
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND liitostunnus = '{$merkkiavainsanatunnus}'
+              AND liitostunnus = '{$merkkiavainsanarow['tunnus']}'
               and liitos = 'avainsana'";
     $liiteres = pupe_query($query);
     $liite = mysql_fetch_assoc($liiteres);
@@ -77,10 +78,23 @@ if (!function_exists('huoltosaate_alku')) {
       }
 
       $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
-      #return $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]);
+    }
+    else {
+      $pdf->draw_text(50, 815, $merkkiavainsanarow['selitetark'], $thispage, $iso);
     }
 
-    $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $norm);
+    if (!empty($merkkiavainsanarow['selitetark_2'])) {
+
+      $_oikea_yla_x = 815;
+
+      foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2']) as $oikea_yla_teksti)) {
+        $pdf->draw_text(410, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $norm);
+        $_oikea_yla_x -= 10;
+      }
+    }
+    else {
+      $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $norm);
+    }
 
     $pdf->draw_text(250, 715, t("Huoltosaate", $kieli), $thispage, $norm);
 
@@ -147,5 +161,34 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
     $return = compact(array_keys($params));
 
     return $return;
+  }
+}
+
+if (!function_exists('huoltosaate_rivi')) {
+  function huoltosaate_rivi($params) {
+    global $yhtiorow, $kukarow;
+
+    // Luodaan muuttujat
+    extract($params);
+
+    // jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+    if ($kala < 95) {
+      $sivu++;
+      $uudehko = "ON";
+
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+
+      $return = huoltosaate_loppu($return);
+      $params = huoltosaate_uusi_sivu($return);
+
+      // Luodaan muuttujat
+      extract($params);
+
+      $page[$sivu] = $thispage;
+    }
+    else {
+      $uudehko = "";
+    }
   }
 }

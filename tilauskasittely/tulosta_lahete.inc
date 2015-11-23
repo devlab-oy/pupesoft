@@ -1515,8 +1515,8 @@ if (!function_exists('rivi_lahete')) {
 
           // lasketaan isätuotteen riville lapsien hinnat yhteen
           $query = "SELECT
-                    round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
-                    round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
+                    round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
+                    round(round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
                     GROUP_CONCAT(CONCAT(tilausrivi.tuoteno, '¡!¡!', tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) perheen_tuotteet
                     FROM tilausrivi
                     JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1528,12 +1528,11 @@ if (!function_exists('rivi_lahete')) {
           $riresult = pupe_query($query);
           $perherow = mysql_fetch_assoc($riresult);
 
-          $row["hinta"]     = $perherow["hinta"];
-          $row["rivihinta"]   = $perherow["rivihinta"];
-
-          $row['myyntihinta']     = 0;
-          $row['brutto_rivihinta']   = 0;
-          $myyntihinta_temp       = 0;
+          $row["hinta"]            = $perherow["hinta"];
+          $row["rivihinta"]        = $perherow["rivihinta"];
+          $row['myyntihinta']      = 0;
+          $row['brutto_rivihinta'] = 0;
+          $myyntihinta_temp        = 0;
 
           foreach (explode(",", $perherow['perheen_tuotteet']) as $perhetuote) {
 

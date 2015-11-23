@@ -4246,7 +4246,7 @@ if (!function_exists('print_pdf_lahete')) {
               $subjnumero = $tilausnumero;
             }
 
-            $kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);
+            $kutsu = t("Tilausvahvistus", $kieli)." ".$subjnumero;
 
             $content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
             $content_body .= t("Tilausnumeronne on", $kieli)." $subjnumero\n\n";
@@ -4257,12 +4257,12 @@ if (!function_exists('print_pdf_lahete')) {
           elseif ($tyyppi == "YLLAPITOSOPIMUS") {
             echo t("Ylläpitosopimus tulostuu")."...<br>";
 
-            $kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Ylläpitosopimus", $kieli)." ".$laskurow["tunnus"];
           }
           else {
             echo t("Lähete tulostuu")."...<br>";
 
-            $kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Lähete", $kieli)." ".$laskurow["tunnus"]);
 
             if (isset($koontilahete) and $koontilahete != 0) {
               $content_body .= t("Tilausnumero", $kieli).": ";
@@ -4297,6 +4297,7 @@ if (!function_exists('print_pdf_lahete')) {
           Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
           */
           $kutsu2 = "";
+
           if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
 
             $rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);

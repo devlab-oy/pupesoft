@@ -87,7 +87,7 @@ if (!function_exists('huoltosaate_alku')) {
 
       $_oikea_yla_x = 815;
 
-      foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2']) as $oikea_yla_teksti)) {
+      foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
         $pdf->draw_text(410, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $norm);
         $_oikea_yla_x -= 10;
       }
@@ -219,7 +219,7 @@ if (!function_exists('huoltosaate_loppu')) {
     $pdf->draw_rectangle($kala, 50,  $kala, 320, $thispage, $rectparam);
     $pdf->draw_rectangle($kala, 325,  $kala, 325+$yhteensa_len, $thispage, $rectparam);
 
-    $pdf->draw_text(50, $kala, t("Yhteensä" $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
+    $pdf->draw_text(50, $kala, t("Yhteensä", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
     $pdf->draw_text(325+$yhteensa_len, $kala, "{$yhteensa},-", $thispage, $norm);
 
     // Luodaan palautettavat

@@ -1,11 +1,5 @@
 <?php
 
-/*
-Set mode for GitHub highlighting
--*- mode: php;-*-
-vim: set filetype=php:
-*/
-
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 

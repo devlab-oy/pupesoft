@@ -1088,6 +1088,13 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
   }
 
+  // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
+  if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
+    echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
+    $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
+    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
+  }
+
   // Tuotteet (Simple)
   if (count($dnstuote) > 0) {
     echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
@@ -1115,13 +1122,6 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
-  }
-
-  // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
-  if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
-    $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();

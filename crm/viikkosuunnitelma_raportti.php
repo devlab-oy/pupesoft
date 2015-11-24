@@ -360,7 +360,7 @@ if ($tee == '') {
 
           echo "<th>", t("Edustaja"), "</th>";
           if ($nayta_sarake) echo "<th>", t("Yhtio"), "</th>";
-          echo "<th>", t("Tapa"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("Tapa"), "</th>";
           echo "<th>", t("Paikka"), "</th>";
           echo "<th>", t("Postino"), "</th>";
           echo "<th>", t("Asiakas"), "</th>";
@@ -381,7 +381,7 @@ if ($tee == '') {
             echo "<tr>";
             echo "<td>{$divirivi['kukanimi']}</td>";
             if ($nayta_sarake) echo "<td>{$divirivi['yhtio']}</td>";
-            echo "<td>{$divirivi['aselitetark']}</td>";
+            if ($nayta_sarake) echo "<td>{$divirivi['aselitetark']}</td>";
             echo "<td>{$divirivi['postitp']}</td>";
             echo "<td>{$divirivi['postino']}</td>";
             echo "<td>{$divirivi['ytunnus']}</td>";
@@ -411,7 +411,7 @@ if ($tee == '') {
 
       $worksheet->write($excelrivi, $excelsarake++, t("Edustaja"),  $format_bold);
       if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Yhtio"),    $format_bold);
-      $worksheet->write($excelrivi, $excelsarake++, t("Tapa"),    $format_bold);
+      if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, t("Tapa"),    $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Paikka"),    $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Postino"),    $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Asiakas"),    $format_bold);
@@ -433,7 +433,7 @@ if ($tee == '') {
         echo "<tr>";
         echo "<th>".t("Edustaja")."</th>";
         if ($nayta_sarake) echo "<th>".t("Yhtio")."</th>";
-        echo "<th>".t("Tapa")."</th>";
+        if ($nayta_sarake) echo "<th>".t("Tapa")."</th>";
         echo "<th>".t("Paikka")."</th>";
         echo "<th>".t("Postino")."</th>";
         echo "<th>".t("Asiakas")."</th>";
@@ -478,7 +478,7 @@ if ($tee == '') {
 
         $worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);
         if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, $row["yhtio"]);
-        $worksheet->write($excelrivi, $excelsarake++, $row["aselitetark"]);
+        if ($nayta_sarake) $worksheet->write($excelrivi, $excelsarake++, $row["aselitetark"]);
         $worksheet->write($excelrivi, $excelsarake++, $row["postitp"]);
         $worksheet->write($excelrivi, $excelsarake++, $row["postino"]);
         $worksheet->write($excelrivi, $excelsarake++, $row["ytunnus"]);
@@ -499,7 +499,7 @@ if ($tee == '') {
           echo "<tr>";
           echo "<td>{$row["kukanimi"]}</td>";
           if ($nayta_sarake) echo "<td>{$row["yhtio"]}</td>";
-          echo "<td>{$row["aselitetark"]}</td>";
+          if ($nayta_sarake) echo "<td>{$row["aselitetark"]}</td>";
           echo "<td>{$row["postitp"]}</td>";
           echo "<td>{$row["postino"]}</td>";
           echo "<td>{$row["ytunnus"]}</td>";

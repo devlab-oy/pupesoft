@@ -1070,7 +1070,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
     }
 
-    if ($yhtiorow["saldo_kasittely"] == "T") {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       $saldoaikalisa = date("Y-m-d");
     }
     else {

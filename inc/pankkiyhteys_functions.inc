@@ -1002,41 +1002,49 @@ function generoi_private_key_ja_csr($params = array()) {
   $key_bits = 2048;
 
   $csr_info = array(
-    "countryName" => $yhtiorow["maa"],
+    "C={$yhtiorow["maa"]}",
   );
 
   switch ($pankki) {
   case "nordea":
     $key_bits = 1024;
 
-    $csr_info["commonName"]   = $company_name;
-    $csr_info["serialNumber"] = $customer_id;
+    $csr_info[] = "CN={$company_name}";
+    $csr_info[] = "serialNumber={$customer_id}";
     break;
   case "op":
-    $csr_info["commonName"] = $customer_id;
+    $csr_info[] = "CN={$customer_id}";
     break;
   default:
-    $csr_info["commonName"]       = $yhtiorow['nimi'];
-    $csr_info["emailAddress"]     = $yhtiorow["email"];
-    $csr_info["localityName"]     = $yhtiorow["kotipaikka"];
-    $csr_info["organizationName"] = $yhtiorow['nimi'];
+    $csr_info[] = "CN={$yhtiorow['nimi']}";
+    $csr_info[] = "emailAddress={$yhtiorow["email"]}";
+    $csr_info[] = "L={$yhtiorow["kotipaikka"]}";
+    $csr_info[] = "O={$yhtiorow['nimi']}";
   }
 
-  $key_config = array(
-    "digest_alg"       => "sha1",
-    "private_key_bits" => $key_bits,
-    "private_key_type" => OPENSSL_KEYTYPE_RSA,
-  );
+  $csr_dir  = "/tmp/csr";
+  $key_path = "{$csr_dir}/key.pem";
+  $csr_path = "{$csr_dir}/csr.pem";
 
-  $key = openssl_pkey_new($key_config);
-  $csr = openssl_csr_new($csr_info, $key, $csr_config);
+  $subject = "/" . implode("/", $csr_info);
 
-  openssl_pkey_export($key, $private_key);
-  openssl_csr_export($csr, $csrout);
+  $command = escapeshellcmd("openssl req -nodes -newkey rsa:{$key_bits} " .
+                            "-keyout {$key_path} " .
+                            "-out {$csr_path} " .
+                            "-subj '{$subject}'");
+
+  mkdir($csr_dir);
+
+  system($command);
+
+  $private_key = file_get_contents($key_path);
+  $csr         = file_get_contents($csr_path);
+
+  system(escapeshellcmd("rm -rf {$csr_dir}"));
 
   return array(
     "private_key" => $private_key,
-    "csr"         => $csrout,
+    "csr"         => $csr,
   );
 }
 

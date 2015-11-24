@@ -10,8 +10,8 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 
 // Pupeasennuksen root
-#$pupe_root_polku = dirname(dirname(__FILE__));
-$pupe_root_polku = "/Users/satu/Dropbox/Sites/pupesoft/";
+$pupe_root_polku = dirname(__FILE__);
+#$pupe_root_polku = "/Users/satu/Dropbox/Sites/pupesoft/";
 
 if (!isset($argv[1]) or !isset($argv[2]) or !isset($argv[3])) {
   echo utf8_encode("VIRHE: pakollisia parametreja puuttu!")."\n";
@@ -23,11 +23,6 @@ $yhtio = $argv[1];
 $tp = $argv[2];
 $ytunnus = $argv[3];
 $kpl = 0;
-// Toimittajat joilla korjattavia laskuja
-// HL GROUP OY  01087312
-// KAHA OY AB   08607173
-// KOIVUNEN OY 01101110   
-
 
 $korjaa = FALSE;
 $kukamuuttaa = "kulukorj";
@@ -64,7 +59,7 @@ if (!isset($kukarow)) {
 }
 
 // haetaan halutut varastotaphtumat
-$query  = "SELECT laskunro, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI, 
+$query  = "SELECT laskunro, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI,
       osto_rahti, osto_kulu, osto_rivi_kulu, nimi, ytunnus, yhtio_toimipaikka
            FROM lasku
            WHERE yhtio            = '$kukarow[yhtio]'
@@ -86,10 +81,10 @@ if (mysql_num_rows($result) > 0) {
                 and korjattu != ''
                 group by 1
                 order by 1 asc";
-    
+
     $old_alv_chk_res = pupe_query($query);
     $old_alv_chk_row = mysql_fetch_assoc($old_alv_chk_res);
-    
+
     $query = "SELECT sum(summa) summa, group_concat(tunnus) tunnukset
               from tiliointi
               where yhtio  = '{$kukarow['yhtio']}'
@@ -97,7 +92,7 @@ if (mysql_num_rows($result) > 0) {
               and tilino   = '{$yhtiorow['alv']}'
               and korjattu = ''
               and summa_valuutassa != 0";
-  
+
     $new_alv_chk_res = pupe_query($query);
     $new_alv_chk_row = mysql_fetch_assoc($new_alv_chk_res);
 
@@ -108,7 +103,7 @@ if (mysql_num_rows($result) > 0) {
 
       if ($old_alv != $new_alv) {
         $alvin_ero = round($old_alv_chk_row['summa'] - $new_alv_chk_row['summa'], 2);
-        
+
         $query = "SELECT *
                   from tiliointi
                   where yhtio  = '{$kukarow['yhtio']}'
@@ -120,11 +115,11 @@ if (mysql_num_rows($result) > 0) {
 
         $kulu_chk_row['summa'] -= $alvin_ero;
         list($_tunnus, ) = explode(',', $new_alv_chk_row['tunnukset']);
-echo utf8_encode("$laskurow[laskunro], $laskurow[tapvm], $laskurow[tunnus], $laskurow[nimi], $laskurow[yhtio_toimipaikka], $old_alv_chk_row[summa], $new_alv_chk_row[summa], $_tunnus, ero: $alvin_ero")."\n";    
+echo utf8_encode("$laskurow[laskunro], $laskurow[tapvm], $laskurow[tunnus], $laskurow[nimi], $laskurow[yhtio_toimipaikka], $old_alv_chk_row[summa], $new_alv_chk_row[summa], $_tunnus, ero: $alvin_ero")."\n";
         $kpl += $kpl;
-        
-        kopioitiliointi($kulu_chk_row['tunnus'], $kukamuuttaa);        
-       
+
+        kopioitiliointi($kulu_chk_row['tunnus'], $kukamuuttaa);
+
         $query = "UPDATE tiliointi SET
                   summa       = '{$kulu_chk_row['summa']}',
                   laadittu    = now(),
@@ -146,11 +141,11 @@ echo utf8_encode("$laskurow[laskunro], $laskurow[tapvm], $laskurow[tunnus], $las
                   and tilino   = '{$yhtiorow['alv']}'
                   and korjattu = ''
                   and tunnus   = '{$_tunnus}'";
-        $upd_kulut = pupe_query($query);        
+        $upd_kulut = pupe_query($query);
       }
-    }   
+    }
   }
-    
+
   echo utf8_encode("Korjattuja laskuja yhteensä: $kpl")."\n";
   echo "\n";
   flush();

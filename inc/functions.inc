@@ -31993,3 +31993,57 @@ if (!function_exists("hae_tuoteperhe")) {
     return $tuoteperhe;
   }
 }
+
+if (!function_exists('generoi_hinnastot')) {
+  /**
+   * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi
+   *
+   * @param int $tuote_tunnus Tuotteen tunnus
+   *
+   * @return bool Luotiinko tai päivitettinkö hinnasto
+   */
+  function generoi_hinnastot($tuote_tunnus) {
+    global $kukarow;
+
+    if (!is_numeric($tuote_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT myyntihinta, tuoteno
+              FROM tuote
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = '{$tuote_tunnus}'";
+    $tuote = pupe_query($query);
+
+    if (mysql_num_rows($tuote) != 1) {
+      return false;
+    }
+
+    $tuote = mysql_fetch_assoc($tuote);
+
+    $query = "SELECT hinnastokurssi, nimi
+              FROM valuu
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND hinnastokurssi > 0";
+    $valuu_result = pupe_query($query);
+
+    while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
+
+      $query = "INSERT INTO hinnasto SET
+                alkupvm    = NOW(),
+                hinta      = '{$hinta}',
+                laatija    = '{$kukarow["kuka"]}',
+                luontiaika = NOW(),
+                muutospvm  = NOW(),
+                muuttaja   = '{$kukarow["kuka"]}',
+                selite     = 'Generoitu hinnasto',
+                tuoteno    = '{$tuote["tuoteno"]}',
+                valkoodi   = '{$valuu["nimi"]}',
+                yhtio      = '{$kukarow["yhtio"]}'";
+      return pupe_query($query);
+    }
+
+    return false;
+  }
+}

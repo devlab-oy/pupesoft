@@ -1215,9 +1215,10 @@ function hae_maksusuoritukset($maksurow, $linkki) {
   // haetaan vielä mahdolliset luottotappiot ja echotaan
   $qry6 = "SELECT round(SUM(summa*(1+vero/100)), 2) as summa, tapvm
            FROM tiliointi
-           WHERE yhtio = '{$kukarow['yhtio']}'
-           AND ltunnus = '{$maksurow['tunnus']}'
-           AND tilino  = '{$yhtiorow['luottotappiot']}'";
+           WHERE yhtio  = '{$kukarow['yhtio']}'
+           AND ltunnus  = '{$maksurow['tunnus']}'
+           AND tilino   = '{$yhtiorow['luottotappiot']}'
+           AND korjattu = ''";
   $res6 = pupe_query($qry6);
   $row6 = mysql_fetch_assoc($res6);
 

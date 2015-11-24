@@ -2325,16 +2325,22 @@ if ($kasitellaan_tiedosto) {
             // Itse lue_datan päivitysquery
             $iresult = pupe_query($query);
 
+            // Haetaan tunnus, jos oli INSERT
+            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
+            }
+
+            generoi_hinnastot($tunnus);
+
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
-                $syncrow = array();
-                $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
-              }
-              else {
-                $syncrow = mysql_fetch_array($syncres);
-                $tunnus  = $syncrow["tunnus"];
-              }
+            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              $syncrow = array();
+            }
+            else {
+              $syncrow = mysql_fetch_array($syncres);
+              $tunnus  = $syncrow["tunnus"];
+            }
 
               synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
             }

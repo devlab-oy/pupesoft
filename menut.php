@@ -24,7 +24,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
     $lisa = "";
   }
 
-  $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
+  $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden, max(usermanualurl) usermanualurl
             FROM oikeu
             WHERE yhtio   in ($yht)
             and kuka      = ''
@@ -45,7 +45,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
   $jarj  = 0;
   $jarj2 = 0;
 
-  while ($row = mysql_fetch_array($result)) {
+  while ($row = mysql_fetch_assoc($result)) {
 
     if ($edsovellus != $row["sovellus"]) {
       $jarj  = 0;
@@ -66,22 +66,22 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
     }
 
     foreach ($syncyhtiot as $uusiyhtio) {
-      $query = "INSERT into oikeu
-                SET
-                kuka       = '',
-                profiili   = '',
-                sovellus   = '$row[sovellus]',
-                nimi       = '$row[nimi]',
-                alanimi    = '$row[alanimi]',
-                nimitys    = '$row[nimitys]',
-                jarjestys  = '$jarj',
-                jarjestys2 = '$jarj2',
-                hidden     = '$row[hidden]',
-                yhtio      = '$uusiyhtio',
-                laatija    = '{$kukarow['kuka']}',
-                luontiaika = now(),
-                muutospvm  = now(),
-                muuttaja   = '{$kukarow['kuka']}'";
+      $query = "INSERT into oikeu SET
+                kuka          = '',
+                profiili      = '',
+                sovellus      = '$row[sovellus]',
+                nimi          = '$row[nimi]',
+                alanimi       = '$row[alanimi]',
+                nimitys       = '$row[nimitys]',
+                jarjestys     = '$jarj',
+                jarjestys2    = '$jarj2',
+                hidden        = '$row[hidden]',
+                usermanualurl = '$row[usermanualurl]',
+                yhtio         = '$uusiyhtio',
+                laatija       = '{$kukarow['kuka']}',
+                luontiaika    = now(),
+                muutospvm     = now(),
+                muuttaja      = '{$kukarow['kuka']}'";
       $insresult = pupe_query($query);
 
       //päivitettän käyttäjien oikeudet
@@ -98,10 +98,10 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
       $updresult = pupe_query($query);
     }
 
-    $edsovellus   = $row["sovellus"];
-    $edjarjoikea   = $row["jarjestys"];
-    $ednimi     = $row["nimi"];
-    $adalan     = $row["alanimi"];
+    $edsovellus  = $row["sovellus"];
+    $edjarjoikea = $row["jarjestys"];
+    $ednimi      = $row["nimi"];
+    $adalan      = $row["alanimi"];
   }
 }
 
@@ -137,14 +137,15 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
     if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {
 
       $row = array();
-      $row["sovellus"]   = $rivi[0];
-      $row["nimi"]     = $rivi[1];
-      $row["alanimi"]   = $rivi[2];
-      $row["nimitys"]   = $rivi[3];
-      $row["jarjestys"]   = (int) $rivi[4];
-      $row["jarjestys2"]   = (int) $rivi[5];
-      $row["hidden"]     = $rivi[6];
-      $row["tunnus"]     = $rivi[7];
+      $row["sovellus"]      = $rivi[0];
+      $row["nimi"]          = $rivi[1];
+      $row["alanimi"]       = $rivi[2];
+      $row["nimitys"]       = $rivi[3];
+      $row["jarjestys"]     = (int) $rivi[4];
+      $row["jarjestys2"]    = (int) $rivi[5];
+      $row["hidden"]        = $rivi[6];
+      $row["tunnus"]        = $rivi[7];
+      $row["usermanualurl"] = $rivi[8];
 
       $rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
     }
@@ -164,7 +165,7 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
     $lisa = "";
   }
 
-  $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys)-1 jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
+  $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys)-1 jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden, max(usermanualurl) usermanualurl
             FROM oikeu
             WHERE yhtio in ($yht)
             and kuka    = ''
@@ -173,7 +174,7 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
             ORDER BY sovellus, jarjestys, jarjestys2";
   $result = pupe_query($query);
 
-  while ($row = mysql_fetch_array($result)) {
+  while ($row = mysql_fetch_assoc($result)) {
     if (!array_key_exists($row["sovellus"].$row["nimi"].$row["alanimi"], $rows)) {
       $rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
     }
@@ -223,23 +224,23 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0 and $row["sovellus"] != "") {
-        $query = "INSERT into oikeu
-                  SET
-                  kuka       = '',
-                  profiili   = '',
-                  sovellus   = '$row[sovellus]',
-                  nimi       = '$row[nimi]',
-                  alanimi    = '$row[alanimi]',
-                  nimitys    = '$row[nimitys]',
-                  jarjestys  = '$jarj',
-                  jarjestys2 = '$jarj2',
-                  hidden     = '$row[hidden]',
-                  yhtio      = '$yhtio',
-                  laatija    = '{$kukarow['kuka']}',
-                  luontiaika = now(),
-                  muutospvm  = now(),
-                  muuttaja   = '{$kukarow['kuka']}'";
-        $insresult = pupe_query($query);
+        $query = "INSERT into oikeu SET
+                  kuka          = '',
+                  profiili      = '',
+                  sovellus      = '$row[sovellus]',
+                  nimi          = '$row[nimi]',
+                  alanimi       = '$row[alanimi]',
+                  nimitys       = '$row[nimitys]',
+                  jarjestys     = '$jarj',
+                  jarjestys2    = '$jarj2',
+                  hidden        = '$row[hidden]',
+                  usermanualurl = '$row[usermanualurl]',
+                  yhtio         = '$yhtio',
+                  laatija       = '{$kukarow['kuka']}',
+                  luontiaika    = now(),
+                  muutospvm     = now(),
+                  muuttaja      = '{$kukarow['kuka']}'";
+        pupe_query($query);
         $insid = mysql_insert_id($GLOBALS["masterlink"]);
 
         if (isset($synkronoireferenssialapaivita)) {
@@ -252,30 +253,36 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
                     and sovellus   = '$row[sovellus]'
                     and jarjestys  >= $jarj
                     and tunnus    != $insid";
-          $updresult = pupe_query($query);
+          pupe_query($query);
         }
       }
 
+      $jarjlisa = "";
+
       // päivitettän käyttäjien oikeudet
       if (!isset($synkronoireferenssialapaivita)) {
-        $query = "UPDATE oikeu
-                  SET nimitys  = '$row[nimitys]',
-                  jarjestys    = '$jarj',
-                  jarjestys2   = '$jarj2',
-                  muutospvm    = now(),
-                  muuttaja     = '{$kukarow['kuka']}'
-                  WHERE yhtio  = '$yhtio'
-                  and sovellus = '$row[sovellus]'
-                  and nimi     = '$row[nimi]'
-                  and alanimi  = '$row[alanimi]'";
-        $updresult = pupe_query($query);
+        $jarjlisa = " jarjestys     = '$jarj',
+                      jarjestys2    = '$jarj2', ";
       }
+
+      $query = "UPDATE oikeu
+                SET nimitys   = '$row[nimitys]',
+                {$jarjlisa}
+                hidden        = '$row[hidden]',
+                usermanualurl = '$row[usermanualurl]',
+                muutospvm     = now(),
+                muuttaja      = '{$kukarow['kuka']}'
+                WHERE yhtio  = '$yhtio'
+                and sovellus = '$row[sovellus]'
+                and nimi     = '$row[nimi]'
+                and alanimi  = '$row[alanimi]'";
+      pupe_query($query);
     }
 
-    $edsovellus   = $row["sovellus"];
-    $edjarjoikea   = $row["jarjestys"];
-    $ednimi     = $row["nimi"];
-    $adalan     = $row["alanimi"];
+    $edsovellus  = $row["sovellus"];
+    $edjarjoikea = $row["jarjestys"];
+    $ednimi      = $row["nimi"];
+    $adalan      = $row["alanimi"];
   }
 }
 
@@ -289,7 +296,7 @@ if ($tee == "PAIVITAJARJETYS") {
 
     if (mysql_num_rows($result) == 1) {
 
-      $row = mysql_fetch_array($result);
+      $row = mysql_fetch_assoc($result);
 
       //päivitetään uudet menun tiedot kaikille käyttäjille
       $query = "UPDATE oikeu
@@ -337,22 +344,23 @@ if ($tee == "PAIVITA") {
 
     if (mysql_num_rows($result) == 1) {
 
-      $row = mysql_fetch_array($result);
+      $row = mysql_fetch_assoc($result);
 
       $yht = str_replace(",", "','", $yht);
       $yht = "'".$yht."'";
 
       //päivitetään uudet menun tiedot kaikille käyttäjille
-      $query = "UPDATE oikeu
-                SET sovellus = '$sove',
-                nimi           = '$nimi',
-                alanimi        = '$alanimi',
-                nimitys        = '$nimitys',
-                jarjestys      = '$jarjestys',
-                jarjestys2     = '$jarjestys2',
-                hidden         = '$hidden',
-                muutospvm      = now(),
-                muuttaja       = '{$kukarow['kuka']}'
+      $query = "UPDATE oikeu SET
+                sovellus      = '$sove',
+                nimi          = '$nimi',
+                alanimi       = '$alanimi',
+                nimitys       = '$nimitys',
+                jarjestys     = '$jarjestys',
+                jarjestys2    = '$jarjestys2',
+                hidden        = '$hidden',
+                usermanualurl = '$usermanualurl',
+                muutospvm     = now(),
+                muuttaja      = '{$kukarow['kuka']}'
                 WHERE
                 sovellus       = '$row[sovellus]'
                 and nimi       = '$row[nimi]'
@@ -385,24 +393,24 @@ if ($tee == "PAIVITA") {
       $yhtiot[$yhtio] = $yhtio;
 
       if ($yhtio != "REFERENSSI") {
-        $query = "INSERT into oikeu
-                  SET
-                   kuka      = '',
-                  sovellus   = '$sove',
-                  nimi       = '$nimi',
-                  alanimi    = '$alanimi',
-                  paivitys   = '',
-                  lukittu    = '',
-                  nimitys    = '$nimitys',
-                  jarjestys  = '$jarjestys',
-                  jarjestys2 = '$jarjestys2',
-                  profiili   = '',
-                  yhtio      = '$yhtio',
-                  hidden     = '$hidden',
-                  laatija    = '{$kukarow['kuka']}',
-                  luontiaika = now(),
-                  muutospvm  = now(),
-                  muuttaja   = '{$kukarow['kuka']}'";
+        $query = "INSERT into oikeu SET
+                  kuka          = '',
+                  sovellus      = '$sove',
+                  nimi          = '$nimi',
+                  alanimi       = '$alanimi',
+                  paivitys      = '',
+                  lukittu       = '',
+                  nimitys       = '$nimitys',
+                  jarjestys     = '$jarjestys',
+                  jarjestys2    = '$jarjestys2',
+                  profiili      = '',
+                  yhtio         = '$yhtio',
+                  hidden        = '$hidden',
+                  usermanualurl = '$usermanualurl',
+                  laatija       = '{$kukarow['kuka']}',
+                  luontiaika    = now(),
+                  muutospvm     = now(),
+                  muuttaja      = '{$kukarow['kuka']}'";
         $result = pupe_query($query);
         $num = mysql_affected_rows();
 
@@ -424,26 +432,28 @@ if ($tee == "MUUTA") {
   if ($tunnus > 0) {
     $query  = "SELECT *
                from oikeu
-               where tunnus='$tunnus'";
+               where tunnus = '$tunnus'";
     $result = pupe_query($query);
-    $row = mysql_fetch_array($result);
+    $row = mysql_fetch_assoc($result);
 
-    $sove    = $row['sovellus'];
-    $nimi    = $row['nimi'];
-    $alanimi  = $row['alanimi'];
-    $nimitys  = $row['nimitys'];
-    $jarjestys  = $row['jarjestys'];
-    $jarjestys2  = $row['jarjestys2'];
-    $hidden    = $row['hidden'];
+    $sove          = $row['sovellus'];
+    $nimi          = $row['nimi'];
+    $alanimi       = $row['alanimi'];
+    $nimitys       = $row['nimitys'];
+    $jarjestys     = $row['jarjestys'];
+    $jarjestys2    = $row['jarjestys2'];
+    $hidden        = $row['hidden'];
+    $usermanualurl = $row['usermanualurl'];
   }
   else {
-    $sove    = "";
-    $nimi    = "";
-    $alanimi  = "";
-    $nimitys  = "";
-    $jarjestys  = "";
-    $jarjestys2  = "";
-    $hidden    = "";
+    $sove          = "";
+    $nimi          = "";
+    $alanimi       = "";
+    $nimitys       = "";
+    $jarjestys     = "";
+    $jarjestys2    = "";
+    $hidden        = "";
+    $usermanualurl = "";
   }
 
   echo "<table>
@@ -463,6 +473,7 @@ if ($tee == "MUUTA") {
   }
 
   echo "  <tr><th>".t("Piilossa")."</th><td><input type='checkbox' name='hidden' value='H' $chk></td></tr>
+      <tr><th>".t("Ohje")."</th><td><input type='text' name='usermanualurl' value='$usermanualurl'></td></tr>
       <tr><th>".t("Kopioi")."</th><td><input type='checkbox' name='kopioi'></td></tr>
       </table>
       <br>
@@ -489,7 +500,7 @@ if ($tee == 'POISTA') {
 
   if (mysql_num_rows($result) == 1) {
 
-    $row = mysql_fetch_array($result);
+    $row = mysql_fetch_assoc($result);
 
     $yarray = explode(",", $yht);
 
@@ -537,7 +548,7 @@ if ($tee == "") {
 
   $sovyhtiot = "";
 
-  while ($prow = mysql_fetch_array($result)) {
+  while ($prow = mysql_fetch_assoc($result)) {
 
     if ($yhtiot[$prow["yhtio"]] != "") {
       $chk = "CHECKED";
@@ -572,7 +583,7 @@ if ($tee == "") {
 
   echo "<option value=''>".t("Näytä kaikki").":</option>";
 
-  while ($orow = mysql_fetch_array($result)) {
+  while ($orow = mysql_fetch_assoc($result)) {
     $sel = '';
     if ($sovellus == $orow["sovellus"]) {
       $sel = "SELECTED";
@@ -649,14 +660,15 @@ if ($tee == "") {
           $rivi = explode("\t", trim($rivi));
 
           if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {
-            $rows[$lask]["sovellus"]   = $rivi[0];
-            $rows[$lask]["nimi"]     = $rivi[1];
-            $rows[$lask]["alanimi"]   = $rivi[2];
-            $rows[$lask]["nimitys"]   = $rivi[3];
-            $rows[$lask]["jarjestys"]   = (int) $rivi[4];
-            $rows[$lask]["jarjestys2"]   = (int) $rivi[5];
-            $rows[$lask]["hidden"]     = $rivi[6];
-            $rows[$lask]["tunnus"]     = $rivi[7];
+            $rows[$lask]["sovellus"]      = $rivi[0];
+            $rows[$lask]["nimi"]          = $rivi[1];
+            $rows[$lask]["alanimi"]       = $rivi[2];
+            $rows[$lask]["nimitys"]       = $rivi[3];
+            $rows[$lask]["jarjestys"]     = (int) $rivi[4];
+            $rows[$lask]["jarjestys2"]    = (int) $rivi[5];
+            $rows[$lask]["hidden"]        = $rivi[6];
+            $rows[$lask]["tunnus"]        = $rivi[7];
+            $rows[$lask]["usermanualurl"] = $rivi[8];
           }
 
           $lask++;
@@ -669,7 +681,7 @@ if ($tee == "") {
         echo "<input type='hidden' name='sovellus' value='$sovellus'>";
         echo "<input type='hidden' name='yht' value='$yht'>";
 
-        $query  = "SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, hidden, tunnus
+        $query  = "SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, hidden, usermanualurl, tunnus
                    from oikeu
                    where kuka = ''
                    and yhtio  = '$yhtio'";
@@ -683,15 +695,16 @@ if ($tee == "") {
 
         $lask = 0;
 
-        while ($prow = mysql_fetch_array($result)) {
-          $rows[$lask]["sovellus"]   = $prow["sovellus"];
-          $rows[$lask]["nimi"]     = $prow["nimi"];
-          $rows[$lask]["alanimi"]   = $prow["alanimi"];
-          $rows[$lask]["nimitys"]   = $prow["nimitys"];
-          $rows[$lask]["jarjestys"]   = $prow["jarjestys"];
-          $rows[$lask]["jarjestys2"]   = $prow["jarjestys2"];
-          $rows[$lask]["hidden"]     = $prow["hidden"];
-          $rows[$lask]["tunnus"]     = $prow["tunnus"];
+        while ($prow = mysql_fetch_assoc($result)) {
+          $rows[$lask]["sovellus"]      = $prow["sovellus"];
+          $rows[$lask]["nimi"]          = $prow["nimi"];
+          $rows[$lask]["alanimi"]       = $prow["alanimi"];
+          $rows[$lask]["nimitys"]       = $prow["nimitys"];
+          $rows[$lask]["jarjestys"]     = $prow["jarjestys"];
+          $rows[$lask]["jarjestys2"]    = $prow["jarjestys2"];
+          $rows[$lask]["hidden"]        = $prow["hidden"];
+          $rows[$lask]["tunnus"]        = $prow["tunnus"];
+          $rows[$lask]["usermanualurl"] = $prow["usermanualurl"];
 
           $lask++;
         }
@@ -702,14 +715,15 @@ if ($tee == "") {
       $vsove = "";
 
       foreach ($rows as $row) {
-        $tunnus   = $row['tunnus'];
-        $sove    = $row['sovellus'];
-        $nimi    = $row['nimi'];
-        $alanimi  = $row['alanimi'];
-        $nimitys  = $row['nimitys'];
-        $jarjestys  = $row['jarjestys'];
-        $jarjestys2  = $row['jarjestys2'];
-        $hidden    = $row['hidden'];
+        $tunnus        = $row['tunnus'];
+        $sove          = $row['sovellus'];
+        $nimi          = $row['nimi'];
+        $alanimi       = $row['alanimi'];
+        $nimitys       = $row['nimitys'];
+        $jarjestys     = $row['jarjestys'];
+        $jarjestys2    = $row['jarjestys2'];
+        $hidden        = $row['hidden'];
+        $usermanualurl = $row['usermanualurl'];
 
         if ($vsove != $sove) {
           echo "<tr><td class='back' colspan='4'><br></td></tr>\n";
@@ -720,6 +734,7 @@ if ($tee == "") {
               <th nowrap>".t("J1")."</th>
               <th nowrap>".t("J2")."</th>
               <th nowrap>".t("Piilossa")."</th>
+              <th nowrap>".t("Ohje")."</th>
             </tr>\n";
         }
 
@@ -746,8 +761,8 @@ if ($tee == "") {
           echo "<td nowrap>".t($nimitys)."</td>";
           echo "<td nowrap><input type='text' size='4' value='$jarjestys' DISABLED></td>";
           echo "<td nowrap><input type='text' size='4' value='$jarjestys2' DISABLED></td>";
-          echo "<td nowrap>$hidden</td></tr>\n";
-          echo "</form>";
+          echo "<td nowrap>$hidden</td>";
+          echo "<td nowrap>$usermanualurl</td>";
         }
         else {
           echo "<a href='$PHP_SELF?tee=MUUTA&tunnus=$tunnus&yht=$yht&sovellus=$sovellus'>$mordor1$nimi$mordor2</a></td>";
@@ -756,7 +771,10 @@ if ($tee == "") {
           echo "<td nowrap><input type='text' size='4' name='jarjestys[$tunnus]' value='$jarjestys'></td>";
           echo "<td nowrap><input type='text' size='4' name='jarjestys2[$tunnus]' value='$jarjestys2'></td>";
           echo "<td nowrap>$hidden</td>";
+          echo "<td nowrap>$usermanualurl</td>";
         }
+
+        echo "</tr>\n";
 
         $vsove = $sove;
       }

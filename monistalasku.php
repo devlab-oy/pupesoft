@@ -615,6 +615,10 @@ if ($tee == "ETSILASKU") {
           echo "<input type='checkbox' name='korjaarahdit[{$row['tilaus']}]' value='on' {$sel}> ".t("Laske rahtiveloitus uudestaan")."<br>";
         }
 
+        echo "<input type='checkbox'
+                     name='sailyta_rivikommentit[{$row['tilaus']}]'
+                     value='on'>" . t('S‰ilyt‰ rivikommentit') . "<br>";
+
         if ($toim == '') {
 
           $display_none = "style='display:none;'";
@@ -676,7 +680,7 @@ if ($tee == "ETSILASKU") {
             echo "<th>", t("Tuotenumero"), "</th>";
             echo "<th>", t("Til. M‰‰r‰"), "</th>";
             echo "<th>", t("M‰‰r‰"), "</th>";
-            echo "<th>", t("Var"), "</th>";
+            echo "<th>", t("Tila"), "</th>";
             echo "<th>", t("Netto"), "</th>";
 
             if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>", t("Svh"), "</th>";
@@ -751,7 +755,8 @@ if ($tee == "ETSILASKU") {
 
               echo "<td align='right' valign='top' nowrap>{$kpl_ruudulle}</td>";
 
-              echo "<td>{$nayta_rivit_row['var']}</td>";
+              $var_temp = var_kaannos($nayta_rivit_row['var']);
+              echo "<td>{$var_temp}</td>";
               echo "<td>{$nayta_rivit_row['netto']}</td>";
 
               $query = "SELECT *
@@ -1743,10 +1748,18 @@ if ($tee == 'MONISTA') {
             $rvalues .= ", NULL";
             break;
           case 'kommentti':
-            if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
-              $rvalues .= ", '{$rivirow['kommentti']}'";
-            }
-            elseif ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '' and count($palautus) > 0) {
+            if (($toim == 'SOPIMUS' or
+                $toim == 'TARJOUS' or
+                $toim == 'TYOMAARAYS' or
+                $toim == 'TILAUS' or
+                $toim == 'OSTOTILAUS' or
+                $toim == 'ENNAKKOTILAUS') or
+                ($toim == '' and
+                 $kumpi == 'REKLAMA' and
+                 isset($kaytetaanhyvityshintoja[$lasku]) and
+                 $kaytetaanhyvityshintoja[$lasku] != '' and
+                 count($palautus) > 0) or
+                $sailyta_rivikommentit[$lasku] == "on") {
               $rvalues .= ", '{$rivirow['kommentti']}'";
             }
             else {

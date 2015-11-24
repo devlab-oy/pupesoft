@@ -4,16 +4,17 @@
  * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
  * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
  *
- * @param int     $laskunro
- * @param int     $tulostimen_tunnus
- * @param array   $params
- *  Esimerkki config parametreistä arvoina defaultit:
- *    array(
- *      "header_teksti"      => false,
- *      "footer_teksti"      => false,
- *      "avaa_lipas_lopuksi" => true,
- *      "kateinen"           => false
- *    );
+ * @param int   $laskunro
+ * @param int   $tulostimen_tunnus
+ * @param array $params
+ *
+ *        Esimerkki config parametreistä arvoina defaultit:
+ *        array(
+ *          "header_teksti"      => false,
+ *          "footer_teksti"      => false,
+ *          "avaa_lipas_lopuksi" => true,
+ *          "kateinen"           => 0
+ *        );
  *
  * @return bool
  */
@@ -28,15 +29,17 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
-  $kateinen           = empty($params["kateinen"]) ? false : hintapyoristys($params["kateinen"]);
+  $kateinen           = empty($params["kateinen"]) ? 0 : hintapyoristys($params["kateinen"]);
   $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"] !== false;
 
   list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
   $lasku = hae_myyntilasku($laskunro);
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
+  $yhteensa_num        = $yhteensa;
+  $maksupaatesumma_num = $maksupaatesumma;
 
-  if ($kateinen) {
+  if ($kateinen != 0) {
     $takaisin = $kateinen - $loppusumma + $maksupaatesumma;
     $takaisin = hintapyoristys($takaisin);
   }
@@ -63,7 +66,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Arvojen asettelu spritfillä ja muu asettelu
   $yhteensa_left = 32 - strlen($lasku["valkoodi"]);
-  $yhteensa = sprintf("%{$yhteensa_left}.{$yhteensa_left}s", $yhteensa);
+  $yhteensa      = sprintf("%{$yhteensa_left}.{$yhteensa_left}s", $yhteensa);
 
   if ($pyoristys) {
     $pyoristys  = sprintf("%33.33s", $pyoristys);
@@ -80,6 +83,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     if (isset($takaisin)) {
       $takaisin = sprintf("%34.34s", $takaisin);
     }
+  }
+  elseif ($maksupaatesumma_num < $yhteensa_num) {
+    $kateinen = sprintf("%34.34s", number_format($yhteensa_num - $maksupaatesumma_num, 2));
   }
 
   $verorivit = array();
@@ -159,9 +165,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   foreach ($verorivit as $verorivi) {
     $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
-      "{$verorivi['netto']}" .
-      "{$verorivi['vero']}" .
-      "{$verorivi['brutto']}\n";
+                      "{$verorivi['netto']}" .
+                      "{$verorivi['vero']}" .
+                      "{$verorivi['brutto']}\n";
   }
 
   $kuitin_teksti .= "\n";
@@ -178,9 +184,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= t("Kuittinumero", $asiakkaan_kieli) . ": {$lasku['laskunro']}\n\n";
 
   $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
-    ": " .
-    implode(", ", $tilausnumerot) .
-    "\n\n";
+                    ": " .
+                    implode(", ", $tilausnumerot) .
+                    "\n\n";
 
   $kuitin_teksti .= date("d.m.Y H:i:s");
 
@@ -400,4 +406,22 @@ function tulostimen_tyyppi($tulostimen_tunnus) {
   $result = mysql_fetch_assoc($result);
 
   return $result["mediatyyppi"];
+}
+
+function receipt_dump($dumpattava) {
+  $dumpattava = str_replace("\x1C\x70\x01\x10", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x69", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x61\x00", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x61\x01", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x45\x01", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x45\x00", "", $dumpattava);
+  $dumpattava = str_replace("\x1B\x70\x00\n\n", "", $dumpattava);
+
+  $style = "background: white;" .
+           "margin-left: auto;" .
+           "margin-right: auto;" .
+           "width: 333px;" .
+           "padding: 20px;";
+
+  echo "<pre style='{$style}'>" . htmlentities($dumpattava, ENT_IGNORE) . "</pre>";
 }

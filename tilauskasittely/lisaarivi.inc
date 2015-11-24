@@ -340,7 +340,7 @@ if ($kerayspvm != "0000-00-00" and !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v
 }
 
 // Jos yhtiön saldokäsittely on ajasta riippuvainen
-if ($yhtiorow["saldo_kasittely"] == "T") {
+if (!empty($yhtiorow["saldo_kasittely"])) {
   $saldoaikalisa = $kerayspvm;
 }
 else {

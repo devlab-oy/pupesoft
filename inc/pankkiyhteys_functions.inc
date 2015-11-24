@@ -992,12 +992,11 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * @return array
  */
 function generoi_private_key_ja_csr($params = array()) {
-  global $kukarow, $yhtiorow, $csr_config;
+  global $kukarow, $yhtiorow;
 
   $company_name = empty($params['company_name']) ? ""   : $params['company_name'];
   $customer_id  = empty($params['customer_id'])  ? ""   : $params['customer_id'];
   $pankki       = empty($params['pankki'])       ? ""   : $params['pankki'];
-  $csr_config   = empty($csr_config)             ? null : $csr_config;
 
   $key_bits = 2048;
 

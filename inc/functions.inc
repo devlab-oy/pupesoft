@@ -13569,13 +13569,13 @@ if (!function_exists("laskutuspaiva")) {
     }
     elseif ($mika == 'keski') {
       // Keskimmäinen
-      $keskipaiva = date('N', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+      $keskipaiva = date('N', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
 
       if ($arki and $keskipaiva > 5) {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2)+(8-$keskipaiva), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2)+(8-$keskipaiva), date('Y')));
       }
       else {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
       }
     }
     elseif ($mika == 'vika') {

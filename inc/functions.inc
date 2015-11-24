@@ -32028,38 +32028,21 @@ if (!function_exists('generoi_hinnastot')) {
     $valuu_result = pupe_query($query);
 
     while ($valuu = mysql_fetch_assoc($valuu_result)) {
-      $query = "SELECT tunnus
-                FROM hinnasto
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tuoteno = '{$tuote["tuoteno"]}'
-                AND valkoodi = '{$valuu["nimi"]}'";
-      $hinnasto_result = pupe_query($query);
-
       $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
 
-      if (mysql_num_rows($hinnasto_result) == 0) {
-        $query = "INSERT INTO hinnasto SET
-                  hinta      = '{$hinta}',
-                  laatija    = '{$kukarow["kuka"]}',
-                  luontiaika = NOW(),
-                  muutospvm  = NOW(),
-                  muuttaja   = '{$kukarow["kuka"]}',
-                  tuoteno    = '{$tuote["tuoteno"]}',
-                  valkoodi   = '{$valuu["nimi"]}',
-                  yhtio      = '{$kukarow["yhtio"]}'";
-        return pupe_query($query);
-      }
-      else {
-        $tunnus = mysql_fetch_assoc($hinnasto_result);
-        $tunnus = $tunnus["tunnus"];
+      $query = "INSERT INTO hinnasto SET
+                alkupvm    = NOW(),
+                hinta      = '{$hinta}',
+                laatija    = '{$kukarow["kuka"]}',
+                luontiaika = NOW(),
+                muutospvm  = NOW(),
+                muuttaja   = '{$kukarow["kuka"]}',
+                selite     = 'Generoitu hinnasto',
+                tuoteno    = '{$tuote["tuoteno"]}',
+                valkoodi   = '{$valuu["nimi"]}',
+                yhtio      = '{$kukarow["yhtio"]}'";
 
-        $query = "UPDATE hinnasto SET
-                  hinta     = '{$hinta}',
-                  muutospvm = NOW(),
-                  muuttaja  = '{$kukarow["kuka"]}'
-                  WHERE tunnus = '{$tunnus}'";
-        return pupe_query($query);
-      }
+      return pupe_query($query);
     }
 
     return false;

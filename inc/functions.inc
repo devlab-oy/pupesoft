@@ -32041,7 +32041,6 @@ if (!function_exists('generoi_hinnastot')) {
                 tuoteno    = '{$tuote["tuoteno"]}',
                 valkoodi   = '{$valuu["nimi"]}',
                 yhtio      = '{$kukarow["yhtio"]}'";
-
       return pupe_query($query);
     }
 

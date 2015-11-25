@@ -93,10 +93,9 @@ if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOT
 }
 
 $_onko_myynti = in_array($toim, array('PIKATILAUS','RIVISYOTTO'));
-$_onko_jt = ($row['var'] == 'J' and $row['jt'] != 0);
 $_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
 
-if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '' and $_onko_jt) {
+if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
   $query = "SELECT *
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio

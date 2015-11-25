@@ -15,7 +15,7 @@ $tyom_parametrit = array(
 );
 
 $request = array(
-  'toiminto' => isset($_REQUEST['tyom_toiminto']) ? $_REQUEST['tyom_toiminto'] : '',
+  'tyom_toiminto' => isset($_REQUEST['tyom_toiminto']) ? $_REQUEST['tyom_toiminto'] : '',
   'laite_tunnus' => isset($_REQUEST['laite_tunnus']) ? $_REQUEST['laite_tunnus'] : '',
   'tyom_tunnus' => isset($_REQUEST['tyom_tunnus']) ? $_REQUEST['tyom_tunnus'] : '',
   'tyom_parametrit' => $tyom_parametrit
@@ -77,6 +77,10 @@ function hae_kayttajan_tyomaaraykset() {
   global $kukarow;
 
   $tyomaaraykset = array();
+
+  if ($kukarow['oletus_asiakas'] == '') {
+    return $tyomaaraykset;
+  }
 
   $query = "SELECT
             lasku.tunnus,
@@ -212,11 +216,26 @@ function piirra_edit_tyomaaraysrivi($request) {
 function tallenna_tyomaarays($request) {
   global $kukarow;
 
+  // Haetaan oletusasiakkuus
+  $query = "SELECT asiakas.*
+            FROM asiakas 
+            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+            AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+  $result = pupe_query($query);
+  $asiakastiedot = mysql_fetch_assoc($result);
+
   // Luodaan uusi lasku
   $query  = "INSERT INTO lasku
              SET yhtio = '{$kukarow['yhtio']}',
              luontiaika = now(),
              laatija = '{$kukarow['kuka']}',
+             nimi = '{$asiakastiedot['nimi']}',
+             nimitark = '{$asiakastiedot['nimitark']}',
+             osoite = '{$asiakastiedot['osoite']}',
+             postino = '{$asiakastiedot['postino']}',
+             postitp = '{$asiakastiedot['postitp']}',
+             maa = '{$asiakastiedot['maa']}',
+             ytunnus = '{$asiakastiedot['ytunnus']}',
              liitostunnus = '{$kukarow['oletus_asiakas']}',
              tilaustyyppi = 'A',
              tila = 'A',

@@ -97,20 +97,20 @@ if ($tee == 'etsi') {
             <input type='hidden' name='toim' value='TYOMAARAYS'>
             <input type='hidden' name='tilausnumero' value='$row[laskutunnus]'>
             <input type='submit' value = '".t("Muokkaa")."'></form></td>";
-        echo "<td valign='top'>
-            <form method='post' action='../monistalasku.php'>
-            <input type='hidden' name='toim' value='TYOMAARAYS'>
-            <input type='hidden' name='monistettavat[{$row['laskutunnus']}]' value='MONISTA'>
-            <input type='hidden' name='tee' value='MONISTA'>
-            <input type='hidden' name='kklkm' value='1'>
-            <input type='hidden' name='asiakasid' value='{$row['liitostunnus']}'>
-            <input type='hidden' name='ytunnus' value='{$row['ytunnus']}'>
-            <input type='submit' value = '".t("Monista")."'></form></td>";
       }
       else {
         echo "<td></td>";
-        echo "<td></td>";
       }
+
+      echo "<td valign='top'>
+          <form method='post' action='../monistalasku.php'>
+          <input type='hidden' name='toim' value='TYOMAARAYS'>
+          <input type='hidden' name='monistettavat[{$row['laskutunnus']}]' value='MONISTA'>
+          <input type='hidden' name='tee' value='MONISTA'>
+          <input type='hidden' name='kklkm' value='1'>
+          <input type='hidden' name='asiakasid' value='{$row['liitostunnus']}'>
+          <input type='hidden' name='ytunnus' value='{$row['ytunnus']}'>
+          <input type='submit' value = '".t("Monista")."'></form></td>";
 
       echo "<td valign='top'><form action = '../tilauskasittely/tulostakopio.php' method='post'>
           <input type='hidden' name='tee' value = 'ETSILASKU'>

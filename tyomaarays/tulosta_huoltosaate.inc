@@ -89,7 +89,7 @@ if (!function_exists('huoltosaate_alku')) {
 
       foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
         $pdf->draw_text(410, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $norm);
-        $_oikea_yla_x -= 10;
+        $_oikea_yla_x -= 12;
       }
     }
     else {
@@ -110,7 +110,7 @@ if (!function_exists('huoltosaate_alku')) {
     $pdf->draw_text(410, 634, $laskurow["nimitark"],  $thispage, $norm);
     $pdf->draw_text(410, 624, t("Puh.", $kieli)." {$laskurow['puh']}", $thispage, $norm);
 
-    $pdf->draw_text(50, 604, t("Pvm", $kieli).": {$tyomaaraysrow['luvattu']}", $thispage, $norm);
+    $pdf->draw_text(50, 584, t("Pvm", $kieli).": {$tyomaaraysrow['luvattu']}", $thispage, $norm);
 
     $query = "SELECT *
               FROM asiakas
@@ -119,11 +119,13 @@ if (!function_exists('huoltosaate_alku')) {
     $asiakasres = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($asiakasres);
 
-    $pdf->draw_text(50, 594, t("Asiakasnumero", $kieli).": {$asiakasrow['asiakasnro']}", $thispage, $norm);
-    $pdf->draw_text(50, 584, t("Asiakkaan s.posti", $kieli).": {$asiakasrow['email']}", $thispage, $norm);
+    $pdf->draw_text(50, 574, t("Asiakasnumero", $kieli).": {$asiakasrow['asiakasnro']}", $thispage, $norm);
+    $pdf->draw_text(50, 564, t("Asiakkaan s.posti", $kieli).": {$asiakasrow['email']}", $thispage, $norm);
 
-    $pdf->draw_text(50, 564, t("Tuotekoodi", $kieli).": {$tuotenorow['tuoteno']}", $thispage, $norm);
-    $pdf->draw_text(50, 544, t("Sarjanumero", $kieli).": {$tuotenorow['sarjanumero']}", $thispage, $norm);
+    $pdf->draw_text(50, 544, t("Tuotekoodi", $kieli).": {$tuotenorow['tuoteno']}", $thispage, $norm);
+    $pdf->draw_text(50, 534, t("Sarjanumero", $kieli).": {$tyomaaraysrow['valmnro']}", $thispage, $norm);
+
+    $kala = 504;
 
     // Luodaan palautettavat
     $return = compact(array_keys($params));
@@ -132,8 +134,8 @@ if (!function_exists('huoltosaate_alku')) {
   }
 }
 
-if (!function_exists('tyomaarays_rivi_otsikot')) {
-  function tyomaarays_rivi_otsikot($params) {
+if (!function_exists('huoltosaate_rivi_otsikot')) {
+  function huoltosaate_rivi_otsikot($params) {
     global $yhtiorow, $kukarow;
 
     // Luodaan muuttujat
@@ -142,18 +144,21 @@ if (!function_exists('tyomaarays_rivi_otsikot')) {
     $kala -= 20;
 
     $otsikko = t("Suoritetut toimentpiteet", $kieli);
-    $pdf->draw_text(50,  $kala, $otsikko, $thispage, $norm);
-    $otsikko_len = $pdf->strlen($otsikko, $iso);
-
-    $pdf->draw_rectangle($kala, 50,  $kala, 40+$otsikko_len, $thispage, $rectparam);
+    $pdf->draw_text(50,  $kala, $otsikko.":", $thispage, $norm);
+    $otsikko_len = $pdf->strlen($otsikko, $norm);
+    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 50+$otsikko_len, $thispage, $rectparam);
 
     $kala -= 20;
 
     $pdf->draw_text(50,  $kala, t("Koodi", $kieli),  $thispage, $norm);
     $pdf->draw_text(125, $kala, t("Työnkuvaus", $kieli),    $thispage, $norm);
-    $pdf->draw_text(250, $kala, t("Kpl", $kieli),    $thispage, $norm);
-    $pdf->draw_text(325, $kala, t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
-    $pdf->draw_rectangle($kala, 50,  $kala, 350, $thispage, $rectparam);
+    $pdf->draw_text(350, $kala, t("Kpl", $kieli),    $thispage, $norm);
+
+    $otsikko = t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%";
+    $oikpos = $pdf->strlen($otsikko, $norm);
+
+    $pdf->draw_text(540-$oikpos, $kala, $otsikko, $thispage, $norm);
+    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 540, $thispage, $rectparam);
 
     $kala -= 20;
 
@@ -192,10 +197,20 @@ if (!function_exists('huoltosaate_rivi')) {
     }
 
     $pdf->draw_text(50, $kala, $row["tuoteno"], $thispage, $norm);
-    $pdf->draw_text(125, $kala, $row["kommentti"], $thispage, $norm);
-    $pdf->draw_text(250, $kala, $row["varattu"], $thispage, $norm);
-    $pdf->draw_text(325, $kala, hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $thispage, $norm);
 
+    $_oikea_yla_x = $kala;
+
+    foreach(explode("\n", trim($row["kommentti"])) as $komm) {
+      $pdf->draw_text(125, $_oikea_yla_x, $komm, $thispage, $norm);
+      $_oikea_yla_x -= 12;
+    }
+
+    $pdf->draw_text(350, $kala, $row["varattu"], $thispage, $norm);
+
+    $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $norm);
+    $pdf->draw_text(540-$oikpos, $kala, hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $thispage, $norm);
+
+    $kala = $_oikea_yla_x;
     $kala -= 20;
 
     // Luodaan palautettavat
@@ -212,19 +227,63 @@ if (!function_exists('huoltosaate_loppu')) {
     // Luodaan muuttujat
     extract($params);
 
-    $yhteensa_len = $pdf->strlen($yhteensa, $norm);
-
-    $pdf->draw_text(325, $kala, t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
-
-    $pdf->draw_rectangle($kala, 50,  $kala, 320, $thispage, $rectparam);
-    $pdf->draw_rectangle($kala, 325,  $kala, 325+$yhteensa_len, $thispage, $rectparam);
+    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 540, $thispage, $rectparam);
 
     $pdf->draw_text(50, $kala, t("Yhteensä", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$tuotenorow['alv']}%", $thispage, $norm);
-    $pdf->draw_text(325+$yhteensa_len, $kala, "{$yhteensa},-", $thispage, $norm);
+
+    $oikpos = $pdf->strlen("{$yhteensa},-", $norm);
+    $pdf->draw_text(540-$oikpos, $kala, "{$yhteensa},-", $thispage, $norm);
 
     // Luodaan palautettavat
     $return = compact(array_keys($params));
 
     return $return;
+  }
+}
+
+if (!function_exists('huoltosaate_print_pdf')) {
+  function huoltosaate_print_pdf($params) {
+    global $yhtiorow, $kukarow;
+
+    // Luodaan muuttujat
+    extract($params);
+
+    //keksitään uudelle failille joku varmasti uniikki nimi:
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    $pdffilenimi = "/tmp/Huoltosaate-".md5(uniqid(mt_rand(), true)).".pdf";
+
+    //kirjoitetaan pdf faili levylle..
+    $fh = fopen($pdffilenimi, "w");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+    fclose($fh);
+
+    // itse print komento...
+    if ($komento == 'email') {
+      $liite = $pdffilenimi;
+
+      $kutsu = t("Työmääräys", $kieli)." $laskurow[tunnus]";
+
+      if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+        $kutsu .= ", ".trim($laskurow["nimi"]);
+      }
+
+      echo t("Työmääräys tulostuu")."...<br>";
+
+      if ($kukarow["extranet"] == '') {
+        require "inc/sahkoposti.inc";
+      }
+      else {
+        require "sahkoposti.inc";
+      }
+    }
+    elseif ($tee == 'NAYTATILAUS' or $komento == "PDF_RUUDULLE") {
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
+    elseif ($komento != '' and $komento != 'edi') {
+      echo t("Työmääräys tulostuu")."...<br>";
+      $line = exec("$komento $pdffilenimi", $output, $returnvalue);
+    }
   }
 }

@@ -261,12 +261,12 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
         $params_huoltosaate['tuotenorow'] = $tuotenorow;
         $params_huoltosaate['komento'] = $komento['Huoltosaate'];
+        $params_huoltosaate['rectparam']['width'] = 0.3;
 
         // Aloitellaan lomakkeen teko
         $params_huoltosaate = huoltosaate_alku($params_huoltosaate);
 
         // Ekan sivun otsikot
-        $params_huoltosaate['kala'] -= $params_huoltosaate['rivinkorkeus'] * 2;
         $params_huoltosaate = huoltosaate_rivi_otsikot($params_huoltosaate);
 
         mysql_data_seek($riresult, 0);
@@ -282,6 +282,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $params_huoltosaate["tots"] = 1;
         $params_huoltosaate["yhteensa"] = $yhteensa;
         $params_huoltosaate = huoltosaate_loppu($params_huoltosaate);
+
+        //tulostetaan sivu
+        huoltosaate_print_pdf($params_huoltosaate);
       }
     }
   }

@@ -1921,7 +1921,8 @@ elseif ($toim == 'YLLAPITO') {
             lasku.varasto,
             tunnusnippu,
             group_concat(tilausrivi.tunnus) tilausrivitunnukset,
-            sopimus_loppupvm
+            sopimus_loppupvm,
+            laskun_lisatiedot.sopimus_numero
             FROM lasku use index (tila_index)
             JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -2517,6 +2518,9 @@ if (mysql_num_rows($result) != 0) {
                 }
               }
             }
+          }
+          if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $row['sopimus_numero'] != '') {
+            echo "<br>".t('Sopimusnumero').": {$row['sopimus_numero']}";
           }
           echo "</td>";
         }

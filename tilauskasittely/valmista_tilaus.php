@@ -1272,7 +1272,7 @@ if (!isset($from_kaikkikorj)) {
               $laskurow["varasto"] == $alkurow["varasto"] or
               ($alkurow["hyllyalue"] == $prow["hyllyalue"] and $alkurow["hyllynro"] == $prow["hyllynro"] and $alkurow["hyllyvali"] == $prow["hyllyvali"] and $alkurow["hyllytaso"] == $prow["hyllytaso"]))) {
 
-            if ($yhtiorow["saldo_kasittely"] == "T") {
+            if (!empty($yhtiorow["saldo_kasittely"])) {
               $saldoaikalisa = date("Y-m-d");
             }
             else {

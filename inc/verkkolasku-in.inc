@@ -1399,8 +1399,10 @@ if (!function_exists("verkkolasku_in")) {
         $count_rtuoteno = count($rtuoteno);
 
         for ($i = 0; $i < $count_rtuoteno; $i++) {
+          $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
+          $kustp = $oletuskust;
+
           if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
-            $kustp = $oletuskust;
 
             $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? $rtuoteno[$i]["riviinfo"] : "";
             $tuote = isset($rtuoteno[$i]["tuoteno"]) ? $rtuoteno[$i]["tuoteno"] : "";
@@ -1412,56 +1414,48 @@ if (!function_exists("verkkolasku_in")) {
                       and yhtio     = '$yhtio'
                       and mintuote  <= '$tuote'
                       and maxtuote  >= '$tuote'
-                      and tilino    not in ('0','')";
+                      and mintuote  != ''
+                      and maxtuote  != ''
+                      and tilino    not in ('0','')
+                      order by tunnus
+                      limit 1";
             $result = pupe_query($query);
 
-            // Sopiva sääntöä ei löytynyt
-            if (mysql_num_rows($result) == 0) {
-
+            // Sopiva sääntöä ei löytynyt, etsitään wildcard haku info kentällä kuvauksesta
+            if (mysql_num_rows($result) != 1 and $rinfo != "") {
               $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
                         WHERE ttunnus = '$trow[tunnus]'
                         and tyyppi    = 't'
                         and yhtio     = '$yhtio'
                         and kuvaus    like '%$rinfo%'
-                        and tilino    not in ('0','')";
+                        and kuvaus    != ''
+                        and tilino    not in ('0','')
+                        order by tunnus
+                        limit 1";
               $result = pupe_query($query);
-
-              // Hmm, mikään sääntö ei kelpaa
-              if (mysql_num_rows($result) == 0) {
-                if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
-                  $tili = $rtuoteno[$i]["tilinumero"];
-                }
-                elseif ($oletustili > 0) {
-                  // Toimittajan oletustili
-                  $tili = $oletustili;
-                }
-                else {
-                  // Yleinen kulutili
-                  $tili = $yhtiorow['muutkulut'];
-                }
-              }
-              else {
-                $tiliointirow = mysql_fetch_assoc($result);
-                $tili = $tiliointirow['tilino'];
-                if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
-
-                // Tiliöintisäännön mukaan meillä ei ole oikeutta vähentää rivin verot.
-                if (!empty($tiliointirow['alv']) and !empty($rtuoteno[$i]["rivihinta_verolli"])) {
-                  $rtuoteno[$i]["alv"] = "0";
-                  $rtuoteno[$i]["rivihinta"] = $rtuoteno[$i]["rivihinta_verolli"];
-                }
-              }
             }
-            else {
+
+            // Löytyi sääntö
+            if (mysql_num_rows($result) == 1) {
               $tiliointirow = mysql_fetch_assoc($result);
+
               $tili = $tiliointirow['tilino'];
-              if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
+
+              // jos ei haluttu oletuskustannuspaikkaa
+              if ($tiliointirow['kustp'] != 999999999) $kustp = $tiliointirow['kustp'];
 
               // Tiliöintisäännön mukaan meillä ei ole oikeutta vähentää rivin verot.
               if (!empty($tiliointirow['alv']) and !empty($rtuoteno[$i]["rivihinta_verolli"])) {
                 $rtuoteno[$i]["alv"] = "0";
                 $rtuoteno[$i]["rivihinta"] = $rtuoteno[$i]["rivihinta_verolli"];
+              }
+            }
+            else {
+              // Ei löytynyt sääntöä, katsotaan onko meillä tilinumero laskulla
+              // muuten oletustili ja kustp, joka on asetettu loopin alussa
+              if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
+                $tili = $rtuoteno[$i]["tilinumero"];
               }
             }
 

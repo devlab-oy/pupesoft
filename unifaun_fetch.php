@@ -27,6 +27,9 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Pupeasennuksen root polku, toimitusvahvistuksia varten
+  $pupe_root_polku = dirname(dirname(__FILE__));
+
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
@@ -92,23 +95,44 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
       $fh = fopen($ftpget_dest[$operaattori]."/".$file, "r") or die ("Tiedoston avaus epäonnistui!");
 
+      $otunnukset_arr = $tunnukset_arr = $laskurowt = $toimitustaparowt = array();
+
       while ($rivi = fgets($fh)) {
 
         list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", $rivi);
 
-        $toimitrow = array();
-        $toimitrow["toimitustapa"] = FALSE;
+        $laskurow = array();
+        $laskurow["toimitustapa"] = FALSE;
 
         // Jos on mittoihin perustuvat keräyserät käytössä
         // tuohon kenttään tallennetaan eranumero ja SSCC tiedot
         // eikä laskun tunnusta
         // ei siis ole järkeä yrittää etsiä lasku näillä tiedoilla
         if ($yhtiorow['kerayserat'] != 'K') {
-          $query = "SELECT toimitustapa
+
+          $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
+          if (!is_numeric($eranumero_sscc)) continue;
+
+          $query = "SELECT asiakas.*, maksuehto.*, rahtisopimukset.*, lasku.*,
+                    IF(lasku.toim_email != '', lasku.toim_email,
+                    IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
                     FROM lasku
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$eranumero_sscc}'";
-          $toimitrow = mysql_fetch_assoc(pupe_query($query));
+                    LEFT JOIN asiakas ON (
+                      asiakas.yhtio  = lasku.yhtio AND
+                      asiakas.tunnus = lasku.liitostunnus)
+                    LEFT JOIN maksuehto ON (
+                      lasku.yhtio     = maksuehto.yhtio AND
+                      lasku.maksuehto = maksuehto.tunnus)
+                    LEFT JOIN rahtikirjat ON (
+                      rahtikirjat.yhtio = lasku.yhtio AND
+                      rahtikirjat.otsikkonro = lasku.tunnus)
+                    LEFT JOIN rahtisopimukset ON (
+                      lasku.ytunnus            = rahtisopimukset.ytunnus AND
+                      rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
+                      rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus  = '{$eranumero_sscc}'";
+          $laskurow = mysql_fetch_assoc(pupe_query($query));
         }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
@@ -116,13 +140,18 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
         // Palautussanomasta etunollaat puuttuu, joten lisätään ne tässä
         // DPD:hen ei tule ylimääräisiä nollia lisätä.
-        if (is_numeric($sscc_ulkoinen) and stripos($toimitrow["toimitustapa"], "DPD") === FALSE) {
+        if (is_numeric($sscc_ulkoinen) and stripos($laskurow["toimitustapa"], "DPD") === FALSE) {
           $sscc_ulkoinen = "00".$sscc_ulkoinen;
         }
+
+        $rakirno = "";
+        $sscculk = "";
 
         if ($yhtiorow['kerayserat'] == 'K') {
 
           list($eranumero, $sscc) = explode("_", $eranumero_sscc);
+
+          if (empty($eranumero)) continue;
 
           // Jos paketilla on jo ulkoinen sscc, lähetetään discardParcel-sanoma
           $query = "SELECT *
@@ -167,16 +196,52 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     AND sscc      = '{$sscc}'
                     AND nro       = '{$eranumero}'";
           $upd_res = pupe_query($query);
+
+          $query = "SELECT *
+                    FROM kerayserat
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                    AND sscc      = '{$sscc}'
+                    AND nro       = '{$eranumero}'";
+          $ker_res = pupe_query($query);
+          $ker_row = mysql_fetch_assoc($ker_res);
+
+          $query = "SELECT asiakas.*, maksuehto.*, rahtisopimukset.*, lasku.*,
+                    IF(lasku.toim_email != '', lasku.toim_email,
+                    IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
+                    FROM lasku
+                    LEFT JOIN asiakas ON (
+                      asiakas.yhtio  = lasku.yhtio AND
+                      asiakas.tunnus = lasku.liitostunnus)
+                    LEFT JOIN maksuehto ON (
+                      lasku.yhtio     = maksuehto.yhtio AND
+                      lasku.maksuehto = maksuehto.tunnus)
+                    LEFT JOIN rahtikirjat ON (
+                      rahtikirjat.yhtio = lasku.yhtio AND
+                      rahtikirjat.otsikkonro = lasku.tunnus)
+                    LEFT JOIN rahtisopimukset ON (
+                      lasku.ytunnus            = rahtisopimukset.ytunnus AND
+                      rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
+                      rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus = '{$ker_row['otunnus']}'";
+          $laskures = pupe_query($query);
+          $laskurow = mysql_fetch_assoc($laskures);
+
+          $query = "SELECT *
+                    FROM toimitustapa
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND selite  = '{$laskurow['toimitustapa']}'";
+          $toimitustapa_res = pupe_query($query);
+          $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
         }
         else {
-          $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
           if (!empty($eranumero_sscc)) {
 
             $query = "SELECT *
                       FROM toimitustapa
                       WHERE yhtio = '$kukarow[yhtio]'
-                      AND selite  = '{$toimitrow['toimitustapa']}'";
+                      AND selite  = '{$laskurow['toimitustapa']}'";
             $toimitustapa_res = pupe_query($query);
             $toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
 
@@ -252,6 +317,98 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                 pupe_query($query);
               }
             }
+          }
+        }
+
+        if ($toimitustapa_row["tulostustapa"] == 'L') {
+          // rahtikirjanro ei ole enää sama ylempien muutoksien jäljiltä, joten haetaan pakkaustieto_tunnuksista
+          $_rahtiwherelisa = "AND rahtikirjat.otsikkonro = 0 and rahtikirjat.pakkaustieto_tunnukset like '%{$eranumero_sscc}%'";
+          $_select_otunnus = "rahtikirjat.pakkaustieto_tunnukset";
+        }
+        else {
+          // rahtikirjanro ei ole enää sama ylempien muutoksien jäljiltä, joten haetaan otsikkonro:lla, mutta myös rahtikirjanro:lla,
+          // koska halutaan kaikki saman rahtikirjan tilaukset (nekin joihin Unifaun ei päivittänyt tietoa)
+          $_rahtiwherelisa = "AND (rahtikirjat.otsikkonro = '{$eranumero_sscc}') or (rahtikirjat.rahtikirjanro = '{$eranumero_sscc}')";
+          $_select_otunnus = "rahtikirjat.otsikkonro";
+        }
+
+        $query = "SELECT GROUP_CONCAT(distinct rahtikirjat.tunnus) rtunnus,
+                  GROUP_CONCAT(distinct {$_select_otunnus}) otunnus
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  {$_rahtiwherelisa}";
+        $tunnukset_res = pupe_query($query);
+        $tunnukset_row = mysql_fetch_assoc($tunnukset_res);
+
+        $otunnukset_arr[$tunnukset_row['otunnus']] = $tunnukset_row['otunnus'];
+        $tunnukset_arr[$tunnukset_row['otunnus']] = $tunnukset_row['rtunnus'];
+        $toimitustaparowt[$tunnukset_row['otunnus']] = $toimitustapa_row;
+        $laskurowt[$tunnukset_row['otunnus']] = $laskurow;
+        $sscc_ulk_arr[$tunnukset_row['otunnus']] = $sscculk ? $sscculk : $sscc_ulkoinen;
+      }
+
+      foreach ($otunnukset_arr as $key => $otunnukset) {
+        $laskurow = $laskurowt[$key];
+        $toimitustapa_row = $toimitustaparowt[$key];
+        $toitarow = $toimitustapa_row;
+        $tunnukset = $tunnukset_arr[$key];
+
+        // sscc_ulkoinen magentoa varten
+        $sscc_ulkoinen = $sscc_ulk_arr[$key];
+
+        $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
+
+        if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
+
+          if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+            $desadv_version = "una";
+            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+          }
+          elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+            $desadv_version = "fi0089";
+            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+          }
+          else {
+            $desadv_version = "";
+          }
+
+          if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
+
+            $rakir_row = $laskurow;
+
+            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+              // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
+              $tmp_laskurow = $laskurow;
+
+              $myynti_vai_osto = 'M';
+            }
+
+            require "tilauskasittely/{$laskurow['toimitusvahvistus']}";
+
+            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+              $laskurow = $tmp_laskurow;
+            }
+          }
+        }
+
+        // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
+        $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+
+        if ($_magento_kaytossa) {
+          $query = "SELECT asiakkaan_tilausnumero
+                    FROM lasku
+                    WHERE yhtio                 = '{$kukarow['yhtio']}'
+                    AND tunnus                  IN ({$otunnukset})
+                    AND laatija                 = 'Magento'
+                    AND asiakkaan_tilausnumero != ''";
+          $mageres = pupe_query($query);
+
+          while ($magerow = mysql_fetch_assoc($mageres)) {
+            $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
+            $magento_api_rak = $sscc_ulkoinen;
+            $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+
+            require "magento_toimita_tilaus.php";
           }
         }
       }

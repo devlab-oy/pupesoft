@@ -353,9 +353,14 @@ if (!function_exists("tee_jt_tilaus")) {
             $query .= "varasto=0,";
           }
           // keräysaika ja toimitusaikaan now
-          elseif ($fieldname == 'kerayspvm' or
-            $fieldname == 'toimaika') {
-            $query .= $fieldname."=now(),";
+          elseif ($fieldname == 'kerayspvm' or $fieldname == 'toimaika') {
+
+              if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+              }
+              else {
+                $query .= $fieldname."=now(),";
+              }
           }
           // Katotaan oisko käsinsyötetty eräpäivämäärä
           elseif ($fieldname == 'erpcm') {
@@ -652,6 +657,15 @@ if (!function_exists("tee_jt_tilaus")) {
 
             if ($toim == "ENNAKKO") {
               $lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin, 2);
+              
+              if ($yhtiorow["saldo_kasittely"] == 'U') {
+                $toimaika = $lisataanrow['toimaika'];
+                $kerayspvm = $lisataanrow['kerayspvm'];
+              }
+              else {
+                $toimaika = "";
+                $kerayspvm = "";
+              }
             }
             else {
               $lisataanrow_kpl = round($lisataanrow["jt"] * $isa_kerroin, 2);

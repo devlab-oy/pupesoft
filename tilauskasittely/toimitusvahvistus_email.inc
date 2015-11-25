@@ -12,7 +12,15 @@ if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_r
 
 if ($toimitusvahvistus_email_lahetys) {
 
-  $body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n".t("Tuotenumero")." ".t("M‰‰r‰")." ".t("Nimitys")." ".t("Hinta")."\n";
+  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", '', '', '', '', "selitetark_2");
+  if ($_toimvahvistus == "eihintaa") {
+    $_hinta = "";
+  }
+  else {
+    $_hinta = " ".t("Hinta");
+  }
+
+  $body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n".t("Tuotenumero")." ".t("M‰‰r‰")." ".t("Nimitys").$_hinta."\n";
 
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -28,12 +36,20 @@ if ($toimitusvahvistus_email_lahetys) {
   $rivi_loop_res = pupe_query($query);
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
-    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} {$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}\n";
+    
+    if ($_toimvahvistus == "eihintaa") {
+      $_hinta = "";
+    }
+    else {
+      $_hinta = "{$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}";
+    }
+    
+    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n";
   }
 
   $body .= "\n";
 
-  $query = "SELECT rahtikirjanro
+  $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
             FROM rahtikirjat
             WHERE tunnus IN ({$tunnukset})
             AND yhtio    = '{$kukarow['yhtio']}'";

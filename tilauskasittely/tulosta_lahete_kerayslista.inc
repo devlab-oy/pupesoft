@@ -978,7 +978,7 @@ if (!function_exists('rivi_kerayslista')) {
 
           if (mysql_num_rows($sresult) > 0) {
             while ($saldorow = mysql_fetch_assoc($sresult)) {
-              if ($yhtiorow["saldo_kasittely"] == "T") {
+              if (!empty($yhtiorow["saldo_kasittely"])) {
                 $saldoaikalisa = date("Y-m-d");
               }
               else {

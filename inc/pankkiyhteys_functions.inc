@@ -802,7 +802,7 @@ function sepa_file_type_check($bank, $file_type) {
       $file_type = "pain.001.001.02";
     }
     // Maksuaineiston palautesanoma
-    if ($file_type == "NDCORPAYL") {
+    if ($file_type == "C2BN") {
       $file_type = "pain.002.001.02";
     }
   }

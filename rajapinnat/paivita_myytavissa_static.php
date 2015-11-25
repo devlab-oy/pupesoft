@@ -110,7 +110,7 @@ else {
              AND tuote.status      != 'P'
              AND tuote.tuotetyyppi  NOT in ('A','B')
              AND tuote.tuoteno     != ''
-             AND tuote.nakyvyys    != ''";
+             AND tuote.hinnastoon  != ''";
 }
 
 $result = pupe_query($query);

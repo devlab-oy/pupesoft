@@ -1,4 +1,9 @@
 <?php
+
+require '../inc/cookie_functions.inc';
+
+handle_cookie("toimittamattomat", "find_submit");
+
 require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
@@ -727,19 +732,41 @@ elseif ($tee == '') {
   // tehdään etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)").": <input type='text' name='etsi'><input type='submit' class='hae_btn' value='".t("Etsi")."'></form>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<th><label for='etsi'>" . t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)") . ":</label></th>";
+  echo "<td><input type='text' name='etsi' id='etsi'></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<th><label for='toimittamattomat'>" . t("Näytä myös toimittamattomat / keskeneräiset tilaukset") . "</label></th>";
+
+  $checked = isset($toimittamattomat) && $toimittamattomat == 1 ? " checked" : "";
+
+  echo "<td><input type='checkbox' name='toimittamattomat' id='toimittamattomat' value='1' {$checked}/></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='" . t("Etsi") . "' name='find_submit'></td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</form>";
 
   $haku='';
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+
+  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
+  }
+  else {
+    $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";
+  }
 
   //listataan laskuttamattomat tilausket
   $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
             maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
-            and tila    = 'L'
-            and alatila in ('B','D','E')
+            {$tilaehto}
             AND vienti  in ('K','E')
             $haku
             ORDER by 5,6,7,8,9,10,11,12,13,14";

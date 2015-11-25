@@ -499,6 +499,7 @@ if (!function_exists('alku_lahete')) {
       if (  ($base_lahetetyyppi == "tulosta_lahete.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_eialehintoja.inc"
           or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])

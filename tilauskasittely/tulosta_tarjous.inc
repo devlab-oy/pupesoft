@@ -707,7 +707,7 @@ if (!function_exists('tarjous_rivi_otsikot')) {
         $pdf_tarjous->draw_text(330, $kala+15, t("Määrä", $kieli),      $page_tarjous, $norm);
 
         if ($yhtiorow["tarjoustyyppi"] == 4) {
-          $pdf_tarjous->draw_text(380, $kala + 15, t("Hinta/kpl", $kieli), $page_tarjous, $norm);
+          $pdf_tarjous->draw_text(380, $kala + 15, t("Hinta / Yksikkö", $kieli), $page_tarjous, $norm);
         }
         else {
           $pdf_tarjous->draw_text(380, $kala + 15, t("Yks.hinta", $kieli), $page_tarjous, $norm);

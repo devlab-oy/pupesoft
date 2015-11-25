@@ -1,5 +1,8 @@
 <?php
 
+define('SEPA_ENVIRONMENT', 'production');
+define('SEPA_ADDRESS'    , 'https://sepa.devlab.fi/api');
+
 // Käyttöliittymän funktiot
 
 /**
@@ -428,9 +431,9 @@ function sepa_download_file_list($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "status"                      => $status,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
+    "url" => SEPA_ADDRESS . "/{$bank}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -494,10 +497,10 @@ function sepa_download_files($params) {
         "target_id"                   => $target_id,
         "file_type"                   => $file_type,
         "file_reference"              => $viite,
-        "environment"                 => 'production',
+        "environment"                 => SEPA_ENVIRONMENT,
         "status"                      => 'NEW',
       ),
-      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
+      "url" => SEPA_ADDRESS . "/{$bank}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -569,9 +572,9 @@ function sepa_upload_file($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "content"                     => $maksuaineisto,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
+    "url"     => SEPA_ADDRESS . "/{$bank}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -608,11 +611,11 @@ function sepa_get_certificate($params) {
     "data" => array(
       "pin" => $pin,
       "customer_id" => $customer_id,
-      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => SEPA_ENVIRONMENT,
       "signing_csr" => base64_encode($signing_csr),
       "encryption_csr" => base64_encode($encryption_csr),
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
+    "url" => SEPA_ADDRESS . "/{$bank}/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -650,9 +653,9 @@ function sepa_get_bank_certificate($params) {
     "method" => "POST",
     "data" => array(
       "customer_id" => $customer_id,
-      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_bank_certificate",
+    "url" => SEPA_ADDRESS . "/{$bank}/get_bank_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -692,9 +695,9 @@ function sepa_get_user_info($params) {
       "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
       "customer_id"                 => $pankkiyhteys["customer_id"],
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
+    "url" => SEPA_ADDRESS . "/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"

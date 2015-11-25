@@ -57,24 +57,24 @@ default:
 echo json_encode($alehinta);
 
 function alehinta_asiakas($asiakas, $tuote) {
-  global $yhtiorow;
+  global $yhtiorow, $kukarow;
 
   $tuote = "SELECT *
             FROM tuote
             WHERE tunnus = {$tuote}";
-
   $tuote = pupe_query($tuote);
   $tuote = mysql_fetch_assoc($tuote);
 
   $asiakas = "SELECT *
               FROM asiakas
               WHERE tunnus = {$asiakas}";
-
   $asiakas = pupe_query($asiakas);
   $asiakas = mysql_fetch_assoc($asiakas);
 
   $laskurow = array(
     "liitostunnus" => $asiakas["tunnus"],
+    "maa"          => '',
+    "valkoodi"     => '',
     "ytunnus"      => $asiakas["ytunnus"],
   );
 

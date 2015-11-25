@@ -16,6 +16,8 @@ piirra_kayttajan_laitteet();
 
 function piirra_kayttajan_laitteet() {
 
+  echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
+
   $naytettavat_laitteet = hae_kayttajan_laitteet();
   if (count($naytettavat_laitteet) > 0) {
     echo "<form name ='laiteformi'>";
@@ -71,18 +73,18 @@ function hae_kayttajan_laitteet() {
 
 function piirra_headerit() {
   $headerit = array(
-    "nro",
-    "valmistaja",
-    "malli",
-    "sarjanumero",
-    "tuotenumero",
-    "sla",
-    "sd_sla",
-    "vc",
-    "vc end",
-    "lcm info",
-    "ip",
-    "mac"
+    t("Nro"),
+    t("Valmistaja"),
+    t("Malli"),
+    t("Sarjanumero"),
+    t("Tuotenumero"),
+    t("Sla"),
+    t("Sd sla"),
+    t("Vc"),
+    t("Vc end"),
+    t("Lcm info"),
+    t("Ip"),
+    t("Mac")
   );
   foreach ($headerit as $header) {
     echo "<th>{$header}</th>";

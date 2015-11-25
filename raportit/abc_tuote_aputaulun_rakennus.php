@@ -111,13 +111,13 @@ if ($tee == 'YHTEENVETO') {
               FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
               $tuotejoin
               LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.abc_raportointi != '')
+              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.abc_raportointi = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         = 'V'
               AND tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00'
               AND tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-              HAVING asiakastunnukset = 0";
+              HAVING asiakastunnukset > 0";
     $rivires = pupe_query($query);
 
     $abctyypit = array("kulutus");
@@ -160,13 +160,13 @@ if ($tee == 'YHTEENVETO') {
               FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
               $tuotejoin
               LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.abc_raportointi != '')
+              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.abc_raportointi = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         in ('L','O')
               AND tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
               AND tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
-              HAVING asiakastunnukset = 0";
+              HAVING asiakastunnukset > 0";
     $rivires = pupe_query($query);
 
     $abctyypit = array("kate", "kpl", "rivia", "summa");

@@ -121,7 +121,7 @@ if ($tee == 'etsi') {
       echo "<td valign='top'><form action = '../tilauskasittely/tilaus_myynti.php' method='post'>
           <input type='hidden' name='toim' value='TYOMAARAYS'>
           <input type='hidden' name='tee' value='OTSIK'>
-          <input type='hidden' name='nimi' value='{$row['nimi']}'>
+          <input type='hidden' name='asiakasid' value='{$row['liitostunnus']}'>
           <input type='submit' value = '".t("Uusi")."'></form></td>";
 
       echo " </tr>";

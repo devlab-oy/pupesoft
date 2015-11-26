@@ -890,6 +890,9 @@ if ($kasitellaan_tiedosto) {
       elseif ($eiyhtiota == "TRIP") {
         $valinta   = " tunnus > 0 ";
       }
+      elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+        $valinta = "1 = 1";
+      }
 
       if ($table_mysql == 'tullinimike' and $tulli_ei_kielta != "") {
         $taulunrivit[$taulu][$eriviindex][] = "FI";
@@ -1453,6 +1456,9 @@ if ($kasitellaan_tiedosto) {
           elseif ($eiyhtiota == "TRIP") {
             $query = "INSERT LOW_PRIORITY into {$table_mysql} SET laatija='$kukarow[kuka]', luontiaika=now() ";
           }
+          elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+            $query = "INSERT LOW_PRIORITY into {$table_mysql} SET ";
+          }
         }
 
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
@@ -1464,6 +1470,9 @@ if ($kasitellaan_tiedosto) {
           }
           elseif ($eiyhtiota == "TRIP") {
             $query = "UPDATE LOW_PRIORITY {$table_mysql} SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
+          }
+          elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+            $query = "UPDATE LOW_PRIORITY {$table_mysql} SET ";
           }
         }
 
@@ -1979,6 +1988,9 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
+              elseif ($table_mysql == 'customers_users' and $otsikko == 'USER_ID') {
+                $query .= " $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
+              }
               elseif ($eilisataeikamuuteta == "") {
                 $query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
               }
@@ -2449,6 +2461,7 @@ if (!$cli and !isset($api_kentat)) {
     'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
     'avainsana'                       => 'Avainsanat',
     'budjetti'                        => 'Budjetti',
+    'customers_users'                 => 'Extranet käyttäjien multiasiakkuus',
     'dynaaminen_puu_avainsanat'      => 'Dynaamisen puun avainsanat',
     'etaisyydet'                      => 'Etäisyydet varastosta',
     'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',

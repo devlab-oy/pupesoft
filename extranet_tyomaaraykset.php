@@ -7,7 +7,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
   'asiakkaan_tilausnumero' => isset($_REQUEST['asiakkaan_tilausnumero']) ? $_REQUEST['asiakkaan_tilausnumero'] : '', 
-  'merkki' => isset($_REQUEST['merkki']) ? $_REQUEST['merkki'] : '',
+  'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '', 
+  'malli' => isset($_REQUEST['malli']) ? $_REQUEST['malli'] : '',
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
   'tuotenro' => isset($_REQUEST['tuotenro']) ? $_REQUEST['tuotenro'] : '',
   'sla' => isset($_REQUEST['sla']) ? $_REQUEST['sla'] : '',
@@ -18,6 +19,7 @@ $request = array(
   'tyom_toiminto' => isset($_REQUEST['tyom_toiminto']) ? $_REQUEST['tyom_toiminto'] : '',
   'laite_tunnus' => isset($_REQUEST['laite_tunnus']) ? $_REQUEST['laite_tunnus'] : '',
   'tyom_tunnus' => isset($_REQUEST['tyom_tunnus']) ? $_REQUEST['tyom_tunnus'] : '',
+  'nayta_poistetut' => isset($_REQUEST['nayta_poistetut']) ? $_REQUEST['nayta_poistetut'] : '',
   'tyom_parametrit' => $tyom_parametrit
 );
 
@@ -35,22 +37,19 @@ if (isset($avaa_tyomaarays_nappi)) {
   require "asiakasvalinta.inc";
 #}
 
-if ($tyom_toiminto == '') {
+if ($request['tyom_toiminto'] == '') {
   piirra_kayttajan_tyomaaraykset();
 }
-elseif ($tyom_toiminto == 'UUSI') {
+elseif ($request['tyom_toiminto'] == 'UUSI') {
   uusi_tyomaarays_formi($laite_tunnus);
 }
-elseif ($tyom_toiminto == 'MUOKKAA') {
-  muokkaa_tyomaarays_formi();
-}
-elseif ($tyom_toiminto == 'TALLENNA') {
+elseif ($request['tyom_toiminto'] == 'TALLENNA') {
   tallenna_tyomaarays();
 }
 
 function piirra_kayttajan_tyomaaraykset() {
   echo "<font class='head'>".t("Työmääräykset")."</font><hr>";
-
+  piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
@@ -74,12 +73,16 @@ function piirra_kayttajan_tyomaaraykset() {
 }
 
 function hae_kayttajan_tyomaaraykset() {
-  global $kukarow;
+  global $kukarow, $request;
 
   $tyomaaraykset = array();
 
   if ($kukarow['oletus_asiakas'] == '') {
     return $tyomaaraykset;
+  }
+  $alatila = " AND lasku.alatila != 'X' ";
+  if (!empty($request['nayta_poistetut'])) {
+    $alatila = " AND lasku.alatila = 'X' ";
   }
 
   $query = "SELECT
@@ -127,7 +130,7 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro) 
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila     in ('A','L','N','S','C')
-            AND lasku.alatila != 'X'
+            {$alatila}
             AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
             ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), a2.selitetark, lasku.toimaika";
@@ -142,9 +145,9 @@ function hae_kayttajan_tyomaaraykset() {
 
 function piirra_tyomaaraysheaderit() {
   $headers = array(
-    t('Viite')."<br>".t('Asiakkaan tilausnumero'),
+    t('Tilaus')."<br>".t('Asiakkaan tilausnumero'),
     t('Luontiaika'),
-    t('Valmistaja'),
+    t('Valmistaja')."<br>".t('Malli'),
     t('Valmnro')."<br>".t('Tuotenro'),
     t('SLA'),
     t('Luvattu'),
@@ -163,7 +166,7 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<tr style='background-color: {$tyomaarays['tyostatusvari']};'>";
   echo "<td>{$tyomaarays['tunnus']} <br> {$tyomaarays['asiakkaan_tilausnumero']}</td>";
   echo "<td>{$tyomaarays['luontiaika']}</td>";
-  echo "<td>{$tyomaarays['merkki']}</td>";
+  echo "<td>{$tyomaarays['valmistaja']} <br> {$tyomaarays['malli']}</td>";
   echo "<td>{$tyomaarays['valmnro']} <br> {$tyomaarays['mallivari']}</td>";
   echo "<td>{$tyomaarays['sla']}</td>";
   echo "<td>".tv1dateconv($tyomaarays['luvattu'])."</td>";
@@ -182,9 +185,28 @@ function piirra_luo_tyomaarays() {
   echo "</form>";
 }
 
+function piirra_nayta_aktiiviset_poistetut() {
+  global $request;
+  echo "<br>";
+  echo "<form name='uusi_tyomaarays_button'>";
+  if (!empty($request['nayta_poistetut'])) {
+    echo "<input type='hidden' name='nayta_poistetut' value=''>";
+    echo "<input type='submit' value='".t('Näytä aktiiviset')."'>";
+  }
+  else {
+    echo "<input type='hidden' name='nayta_poistetut' value='JOO'>";
+    echo "<input type='submit' value='".t('Näytä vanhat')."'>";
+  }
+  echo "</form>";
+  echo "<br><br>";
+}
+
 function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<font class='head'>".t("Uusi työmääräys")."</font><hr>";
-
+  // Jos ollaan tultu laiterekisteristä ja halutaan tehdä työmääräys tietylle laitteelle
+  if (!empty($laite_tunnus)) {
+    $request['tyom_parametrit'] = hae_laitteen_parametrit($laite_tunnus);
+  }
   echo "<form name ='uusi_tyomaarays_form'>";
   echo "<table>";
   echo "<tr>";
@@ -200,16 +222,17 @@ function uusi_tyomaarays_formi($laite_tunnus) {
 }
 
 function piirra_edit_tyomaaraysrivi($request) {
-  echo "<td><input type='text' name='asiakkaan_tilausnumero' value=''></td>";
+  echo "<td><input type='text' name='asiakkaan_tilausnumero' value='{$request['tyom_parametrit']['asiakkaan_tilausnumero']}'></td>";
   echo "<td></td>";
-  echo "<td><input type='text' name='merkki' value=''></td>";
-  echo "<td><input type='text' name='valmnro' value=''>";
-  echo "<br><br><input type='text' name='tuotenro' value=''></td>";
-  echo "<td><input type='text' name='sla' value=''></td>";
+  echo "<td><input type='text' name='valmistaja' value='{$request['tyom_parametrit']['valmistaja']}'>";
+  echo "<br><br><input type='text' name='malli' value='{$request['tyom_parametrit']['malli']}'></td>";
+  echo "<td><input type='text' name='valmnro' value='{$request['tyom_parametrit']['valmnro']}'>";
+  echo "<br><br><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuoteno']}'></td>";
+  echo "<td><input type='text' name='sla' size='3' value='{$request['tyom_parametrit']['sla']}' disabled=true></td>";
   echo "<td></td>";
   echo "<td></td>";
   echo "<td></td>"; 
-  echo "<td><textarea cols='40' rows='5' name='komm1'></textarea></td>";
+  echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   echo "<td></td>";
 }
 
@@ -258,4 +281,33 @@ function tallenna_tyomaarays($request) {
              valmnro = '{$request['tyom_parametrit']['valmnro']}',
              merkki = '{$request['tyom_parametrit']['merkki']}'";
   $result  = pupe_query($query); 
+}
+
+function hae_laitteen_parametrit($laite_tunnus) {
+  global $kukarow;
+
+  $laiteparametrit = array();
+
+  $query = "SELECT
+            laite.*,
+            avainsana.selitetark valmistaja,
+            tuote.tuotemerkki malli
+            FROM laite
+            LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio
+            AND tuote.tuoteno = laite.tuoteno)
+            LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
+            AND avainsana.laji = 'TRY'
+            AND avainsana.selite = tuote.try)
+            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tunnus = '{$laite_tunnus}'";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+
+  $laiteparametrit['valmistaja'] = $row['valmistaja'];
+  $laiteparametrit['malli'] = $row['malli'];
+  $laiteparametrit['valmnro'] = $row['sarjanro'];
+  $laiteparametrit['tuoteno'] = $row['tuoteno'];
+  $laiteparametrit['sla'] = $row['sla'];
+
+  return $laiteparametrit;
 }

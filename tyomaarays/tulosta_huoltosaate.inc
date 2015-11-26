@@ -111,7 +111,7 @@ if (!function_exists('huoltosaate_alku')) {
     $pdf->draw_text(410, 634, $laskurow["nimitark"],  $thispage, $norm);
     $pdf->draw_text(410, 624, t("Puh.", $kieli)." {$laskurow['puh']}", $thispage, $norm);
 
-    $pdf->draw_text(50, 584, t("Pvm", $kieli).": {$tyomaaraysrow['luvattu']}", $thispage, $norm);
+    $pdf->draw_text(50, 584, t("Pvm", $kieli).": ".tv1dateconv($tyomaaraysrow['luvattu']), $thispage, $norm);
 
     $query = "SELECT *
               FROM asiakas
@@ -197,13 +197,20 @@ if (!function_exists('huoltosaate_rivi')) {
       $uudehko = "";
     }
 
-    $pdf->draw_text(50, $kala, $row["tuoteno"], $thispage, $norm);
+    list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 70, $pdf, $norm);
+    $pdf->draw_text(50, $kala, $ff_string, $thispage, $ff_font);
 
     $_oikea_yla_x = $kala;
 
     foreach(explode("\n", trim($row["kommentti"])) as $komm) {
-      $pdf->draw_text(125, $_oikea_yla_x, $komm, $thispage, $norm);
-      $_oikea_yla_x -= 12;
+
+      $komm = wordwrap($komm, 65, "\n", true);
+
+      foreach(explode("\n", trim($komm)) as $kommentti) {
+        list($ff_string, $ff_font) = pdf_fontfit($kommentti, 220, $pdf, $norm);
+        $pdf->draw_text(125, $_oikea_yla_x, $ff_string, $thispage, $ff_font);
+        $_oikea_yla_x -= 12;
+      }
     }
 
     $pdf->draw_text(350, $kala, $row["varattu"], $thispage, $norm);

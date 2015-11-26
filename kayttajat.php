@@ -1713,7 +1713,7 @@ if ($tee == 'MUUTA') {
       echo "</td></tr>";
     }
 
-    if ($toim == 'extranet' and $kukarow['multi_asiakkuus'] != '') {
+    if ($toim == 'extranet' and $krow['multi_asiakkuus'] != '') {
       echo "<tr><th>".t('K‰ytt‰j‰‰n liitetyt asiakkuudet')."</th>";
 
       $query = "SELECT asiakas.nimi 

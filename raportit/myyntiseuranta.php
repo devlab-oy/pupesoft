@@ -1827,16 +1827,16 @@ else {
         }
       }
 
-      if ($vertailubu == "mabu") {
-        // N‰ytet‰‰n myyj‰tavoitteet:
+      if ($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") {
+        // N‰ytet‰‰n maatavoitteet:
 
-        //siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        //siin‰ tapauksessa ei voi groupata muiden kuin maiden mukaan
         if ($asiakasgroups > 0 or $tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
           echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
           $tee = '';
         }
 
-        // ei voi groupata muiden kuin myyjien tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan mybury)
+        // ei voi groupata muiden kuin maiden tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan mybury)
         if ($vertailubu == "mabu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
           echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
           $tee = '';
@@ -2586,7 +2586,7 @@ else {
 
             if (isset($vertailubu) and
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
-              ($vertailubu == "mabu") or
+              (($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
               (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
 
@@ -2594,7 +2594,7 @@ else {
                 $budj_taulu = "budjetti_tuote";
                 $bulisa = " and tuoteno  in ({$row['tuotelista']}) ";
               }
-              elseif ($vertailubu == "mabu") {
+              elseif ($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") {
                 $budj_taulu = "budjetti_maa";
                 $bulisa = " and maa_id in ({$row['maalista']}) ";
 

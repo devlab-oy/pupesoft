@@ -1831,7 +1831,7 @@ else {
         // N‰ytet‰‰n maatavoitteet:
 
         //siin‰ tapauksessa ei voi groupata muiden kuin maiden mukaan
-        if ($asiakasgroups > 0 or $tuotegroups > 0 or $laskugroups > 0 or $muutgroups > 0) {
+        if ($asiakasgroups > 0 or $tuotegroups > 0 or $muutgroups > 0) {
           echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
           $tee = '';
         }

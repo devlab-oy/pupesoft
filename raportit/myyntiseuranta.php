@@ -668,12 +668,6 @@ else {
       case 'mabu':
         $sel_mabu = 'selected';
         break;
-      case 'mabuos':
-        $sel_mabuos = 'selected';
-        break;
-      case 'mabury':
-        $sel_mabury = 'selected';
-        break;
       }
     }
     else {
@@ -685,8 +679,6 @@ else {
       $sel_mybuos = '';
       $sel_mybury = '';
       $sel_mabu = '';
-      $sel_mabuos = '';
-      $sel_mabury = '';
     }
 
     echo "<tr>
@@ -700,8 +692,6 @@ else {
     echo "<option value='mybuos' {$sel_mybuos}>", t("Myyjä-Osastotavoitteet"), "</option>";
     echo "<option value='mybury' {$sel_mybury}>", t("Myyjä-Tuoteryhmätavoitteet"), "</option>";
     echo "<option value='mabu'   {$sel_mabu}>", t("Maatavoitteet"), "</option>";
-    echo "<option value='mabuos' {$sel_mabuos}>", t("Maa-Osastotavoitteet"), "</option>";
-    echo "<option value='mabury' {$sel_mabury}>", t("Maa-Tuoteryhmätavoitteet"), "</option>";
     echo "</select></td>
     </tr>";
 
@@ -1827,7 +1817,7 @@ else {
         }
       }
 
-      if ($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") {
+      if ($vertailubu == "mabu") {
         // Näytetään maatavoitteet:
 
         //siinä tapauksessa ei voi groupata muiden kuin maiden mukaan
@@ -2586,7 +2576,7 @@ else {
 
             if (isset($vertailubu) and
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
-              (($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") and !empty($row['maalista'])) or
+              ($vertailubu == "mabu" and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
               (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") or (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") or (isset($row["myyjä"]) and $row["myyjä"] != "")))) {
 
@@ -2594,25 +2584,9 @@ else {
                 $budj_taulu = "budjetti_tuote";
                 $bulisa = " and tuoteno  in ({$row['tuotelista']}) ";
               }
-              elseif ($vertailubu == "mabu" or $vertailubu == "mabuos" or $vertailubu == "mabury") {
+              elseif ($vertailubu == "mabu") {
                 $budj_taulu = "budjetti_maa";
                 $bulisa = " and maa_id in ({$row['maalista']}) ";
-
-                if ($vertailubu == "mabuos" and $tuosagroups > 0) {
-                  $bulisa .= " and osasto = '{$row['osasto']}' ";
-                }
-                elseif ($vertailubu == "mabuos") {
-                  $bulisa .= " and osasto != '' ";
-                }
-                elseif ($vertailubu == "mabury" and $turyhgroups > 0) {
-                  $bulisa .= " and try = '{$row['tuoteryhmä']}' ";
-                }
-                elseif ($vertailubu == "mabury") {
-                  $bulisa .= " and try != '' ";
-                }
-                else {
-                  $bulisa .= " and try = '' and osasto = '' ";
-                }
               }
               elseif ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 
@@ -2800,10 +2774,14 @@ else {
             echo "<table><tr>";
 
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") echo "<th>", t($ken_nimi), "</th>";
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                echo "<th>", t($ken_nimi), "</th>";
+              }
+
               if ($ken_nimi == 'asiakasosasto') {
                 echo "<th>".t('Asiakkaittain')."</th>";
               }
+
               if ($ken_nimi == 'tuoteosasto') {
                 echo "<th>".t('Tuotteittain')."</th>";
               }
@@ -2815,7 +2793,9 @@ else {
           if (isset($worksheet)) {
             $excelsarake=0;
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              }
             }
 
             if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and isset($asiakas_tunnukset_sarja)) {
@@ -3375,7 +3355,7 @@ else {
                   $row[$ken_nimi] = $varaston_saldo;
                 }
 
-                if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
                   if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";

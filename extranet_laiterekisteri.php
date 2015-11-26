@@ -105,5 +105,6 @@ function piirra_laiterivi($laite) {
   echo "<td>{$laite['kommentti']}</td>";
   echo "<td>{$laite['ip_osoite']}</td>";
   echo "<td>{$laite['mac_osoite']}</td>";
+  echo "<td class='back'><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi työmääräys')."</a></td>";
   echo "</tr>";
 }

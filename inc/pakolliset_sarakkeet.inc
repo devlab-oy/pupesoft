@@ -430,6 +430,8 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "customers_users" :
       $pakolliset = array("USER_ID", "CUSTOMER_ID");
+      $kielletyt    = array("YHTIO"); 
+      $eiyhtiota    = "EITUNNUSTAKAAN";
       $saakopoistaa = TRUE;
       break;  
     default :

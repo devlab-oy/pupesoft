@@ -88,7 +88,8 @@ if (!function_exists('huoltosaate_alku')) {
       $_oikea_yla_x = 815;
 
       foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
-        $pdf->draw_text(410, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $norm);
+        $oikpos = $pdf->strlen($oikea_yla_teksti, $norm);
+        $pdf->draw_text(540-$oikpos, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $norm);
         $_oikea_yla_x -= 12;
       }
     }
@@ -96,7 +97,7 @@ if (!function_exists('huoltosaate_alku')) {
       $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $norm);
     }
 
-    $pdf->draw_text(250, 715, t("Huoltosaate", $kieli), $thispage, $norm);
+    $pdf->draw_text(275, 715, t("Huoltosaate", $kieli), $thispage, $norm);
 
     $pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), $thispage, $pieni);
     $pdf->draw_text(50, 644, $laskurow["toim_nimi"],      $thispage, $norm);
@@ -122,7 +123,7 @@ if (!function_exists('huoltosaate_alku')) {
     $pdf->draw_text(50, 574, t("Asiakasnumero", $kieli).": {$asiakasrow['asiakasnro']}", $thispage, $norm);
     $pdf->draw_text(50, 564, t("Asiakkaan s.posti", $kieli).": {$asiakasrow['email']}", $thispage, $norm);
 
-    $pdf->draw_text(50, 544, t("Tuotekoodi", $kieli).": {$tuotenorow['tuoteno']}", $thispage, $norm);
+    $pdf->draw_text(50, 544, t("Tuotekoodi", $kieli).": {$tyomaaraysrow['koodi']}", $thispage, $norm);
     $pdf->draw_text(50, 534, t("Sarjanumero", $kieli).": {$tyomaaraysrow['valmnro']}", $thispage, $norm);
 
     $kala = 504;

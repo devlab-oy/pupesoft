@@ -289,7 +289,7 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
       $classi = preg_replace("/[^0-9]/", "", $row[$budj_sarak].$ostry_ind);
 
       if ($rivimaara < $maxrivimaara) {
-        if ($grouppaus != "") {
+        if ($grouppaus != "" and !empty($passaan)) {
           if ($haen == "try" and $passaan == "yksi") {
             echo "<input type='text' class = '{$classi}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='' size='10'>";
             echo "<input type='hidden' name = 'poikkeus' value='totta'>";
@@ -313,7 +313,7 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
         for ($a = 1; $a < $org_sar; $a++) {
           $ik = $rajataulu[$a];
 
-          if ($grouppaus != "") {
+          if ($grouppaus != "" and !empty($passaan)) {
             if ($haen == "try" and $passaan == "yksi") {
               echo "<input type='hidden' id = '{$classi}_{$ik}' name = 'luvut[{$row["try"]}][{$ik}][{$ostry_ind}]' value='{$nro}' size='10'>";
             }

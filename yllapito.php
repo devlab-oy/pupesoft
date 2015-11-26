@@ -570,6 +570,10 @@ if ($upd == 1) {
       }
     }
 
+    if ($toim == "tuote") {
+      generoi_hinnastot($tunnus);
+    }
+
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
       $query = "SELECT *

@@ -3898,7 +3898,7 @@ if (!function_exists("alehinta")) {
     // Jos meillä on lasku menossa ulkomaille
     // Tietyissä tapauksissa yhtiorow maa voi olla sama kuin laskun maa, mutta vat_numerosta tiedetään,
     // että ollaan verovelsollisia tähä maahan
-    if ($yhtiorow["vat_numero"] != "" or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
+    if ((isset($yhtiorow["vat_numero"]) and $yhtiorow["vat_numero"] != "") or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
 
       // tutkitaan ollaanko siellä alv-rekisteröity
       $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
@@ -13569,13 +13569,13 @@ if (!function_exists("laskutuspaiva")) {
     }
     elseif ($mika == 'keski') {
       // Keskimmäinen
-      $keskipaiva = date('N', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+      $keskipaiva = date('N', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
 
       if ($arki and $keskipaiva > 5) {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2)+(8-$keskipaiva), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2)+(8-$keskipaiva), date('Y')));
       }
       else {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
       }
     }
     elseif ($mika == 'vika') {
@@ -31991,5 +31991,59 @@ if (!function_exists("hae_tuoteperhe")) {
     }
 
     return $tuoteperhe;
+  }
+}
+
+if (!function_exists('generoi_hinnastot')) {
+  /**
+   * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi
+   *
+   * @param int $tuote_tunnus Tuotteen tunnus
+   *
+   * @return bool Luotiinko tai päivitettinkö hinnasto
+   */
+  function generoi_hinnastot($tuote_tunnus) {
+    global $kukarow;
+
+    if (!is_numeric($tuote_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT myyntihinta, tuoteno
+              FROM tuote
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = '{$tuote_tunnus}'";
+    $tuote = pupe_query($query);
+
+    if (mysql_num_rows($tuote) != 1) {
+      return false;
+    }
+
+    $tuote = mysql_fetch_assoc($tuote);
+
+    $query = "SELECT hinnastokurssi, nimi
+              FROM valuu
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND hinnastokurssi > 0";
+    $valuu_result = pupe_query($query);
+
+    while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
+
+      $query = "INSERT INTO hinnasto SET
+                alkupvm    = NOW(),
+                hinta      = '{$hinta}',
+                laatija    = '{$kukarow["kuka"]}',
+                luontiaika = NOW(),
+                muutospvm  = NOW(),
+                muuttaja   = '{$kukarow["kuka"]}',
+                selite     = 'Generoitu hinnasto',
+                tuoteno    = '{$tuote["tuoteno"]}',
+                valkoodi   = '{$valuu["nimi"]}',
+                yhtio      = '{$kukarow["yhtio"]}'";
+      return pupe_query($query);
+    }
+
+    return false;
   }
 }

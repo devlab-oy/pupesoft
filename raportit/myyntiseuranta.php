@@ -3465,7 +3465,7 @@ else {
               $ken_lask = 0;
 
               foreach ($row as $ken_nimi => $kentta) {
-                if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
                   if ($ken_lask < $data_start_index) {
                     $valisummat[$ken_nimi] = "";
                     $totsummat[$ken_nimi]  = "";

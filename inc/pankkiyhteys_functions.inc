@@ -1045,15 +1045,20 @@ function generoi_private_key_ja_csr($params = array()) {
   pclose($handle);
 
 
-  $command        = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
-  $descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
-  $handle         = proc_open($command, $descriptorspec, $pipes);
+  $command = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w")
+  );
+  $handle = proc_open($command, $descriptorspec, $pipes);
 
   if (is_resource($handle)) {
     fwrite($pipes[0], $passphrase);
     fclose($pipes[0]);
+
     $private_key =  stream_get_contents($pipes[1]);
     fclose($pipes[1]);
+
     proc_close($handle);
   }
 

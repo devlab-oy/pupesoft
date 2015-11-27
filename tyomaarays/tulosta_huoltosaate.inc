@@ -80,7 +80,12 @@ if (!function_exists('huoltosaate_alku')) {
       $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
     }
     else {
-      $pdf->draw_text(50, 815, $merkkiavainsanarow['selitetark'], $thispage, $iso);
+      if (!empty($merkkiavainsanarow['selitetark'])) {
+        $pdf->draw_text(50, 815, $merkkiavainsanarow['selitetark'], $thispage, $iso);
+      }
+      else {
+        $pdf->draw_text(50, 815, $merkkiavainsanarow['selite'], $thispage, $iso);
+      }
     }
 
     if (!empty($merkkiavainsanarow['selitetark_2'])) {

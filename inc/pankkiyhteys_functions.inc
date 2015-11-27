@@ -1026,22 +1026,38 @@ function generoi_private_key_ja_csr($params = array()) {
 
   $csr_dir  = sys_get_temp_dir() . uniqid('csr-', true);
 
-  $key_path = "{$csr_dir}/key.pem";
-  $csr_path = "{$csr_dir}/csr.pem";
-
-  $subject = "/" . implode("/", $csr_info);
-
-  $command = escapeshellcmd("openssl req -nodes -newkey rsa:{$key_bits} " .
-                            "-keyout {$key_path} " .
-                            "-out {$csr_path} " .
-                            "-subj '{$subject}'");
+  $key_path   = "{$csr_dir}/key.pem";
+  $csr_path   = "{$csr_dir}/csr.pem";
+  $subject    = "/" . implode("/", $csr_info);
+  $passphrase = openssl_random_pseudo_bytes(100);
+  $command    = escapeshellcmd("openssl req " .
+                               "-newkey rsa:{$key_bits} " .
+                               "-passout stdin " .
+                               "-keyout {$key_path} " .
+                               "-out {$csr_path} " .
+                               "-subj '{$subject}'");
 
   mkdir($csr_dir);
 
-  system($command);
+  $handle = popen($command, "w");
 
-  $private_key = file_get_contents($key_path);
-  $csr         = file_get_contents($csr_path);
+  fwrite($handle, $passphrase);
+  pclose($handle);
+
+
+  $command        = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
+  $descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
+  $handle         = proc_open($command, $descriptorspec, $pipes);
+
+  if (is_resource($handle)) {
+    fwrite($pipes[0], $passphrase);
+    fclose($pipes[0]);
+    $private_key =  stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    proc_close($handle);
+  }
+
+  $csr = file_get_contents($csr_path);
 
   system(escapeshellcmd("rm -rf {$csr_dir}"));
 

@@ -1044,7 +1044,6 @@ function generoi_private_key_ja_csr($params = array()) {
   fwrite($handle, $passphrase);
   pclose($handle);
 
-
   $command = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
   $descriptorspec = array(
     0 => array("pipe", "r"),

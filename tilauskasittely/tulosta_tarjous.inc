@@ -1856,7 +1856,9 @@ if (!function_exists('loppu_tarjous')) {
             t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
               "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
 
-          $pdf_tarjous->draw_text(30, $kuha - 80, t("Kunnioittavasti", $kieli) . ",",
+          $sanavalinta = $yhtiorow["tarjoustyyppi"] == 4 ? "Yhteistyöterveisin" : "Kunnioittavasti";
+
+          $pdf_tarjous->draw_text(30, $kuha - 80, t($sanavalinta, $kieli) . ",",
             $page_tarjous[$sivu], $boldi);
         }
 

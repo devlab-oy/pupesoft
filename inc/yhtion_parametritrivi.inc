@@ -4709,6 +4709,24 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $jatko = 0;
 }
 
+if ($fieldname == "pdf_ruudulle_kieli") {
+  $sel = $trow[$i] == "A" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena yhtiön kielellä");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena asiakkaan kielellä");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausrivin_kateraja") {
   $ulos = "<td><input type='number' min='0' max='100' name='{$nimi}' value='{$trow[$i]}'></td>";
 

@@ -1,5 +1,8 @@
 <?php
 
+define('SEPA_ENVIRONMENT', 'production');
+define('SEPA_ADDRESS'    , 'https://sepa.devlab.fi/api');
+
 // Käyttöliittymän funktiot
 
 /**
@@ -428,9 +431,9 @@ function sepa_download_file_list($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "status"                      => $status,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
+    "url" => SEPA_ADDRESS . "/{$bank}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -494,10 +497,10 @@ function sepa_download_files($params) {
         "target_id"                   => $target_id,
         "file_type"                   => $file_type,
         "file_reference"              => $viite,
-        "environment"                 => 'production',
+        "environment"                 => SEPA_ENVIRONMENT,
         "status"                      => 'NEW',
       ),
-      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
+      "url" => SEPA_ADDRESS . "/{$bank}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -569,9 +572,9 @@ function sepa_upload_file($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "content"                     => $maksuaineisto,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
+    "url"     => SEPA_ADDRESS . "/{$bank}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -608,11 +611,11 @@ function sepa_get_certificate($params) {
     "data" => array(
       "pin" => $pin,
       "customer_id" => $customer_id,
-      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => SEPA_ENVIRONMENT,
       "signing_csr" => base64_encode($signing_csr),
       "encryption_csr" => base64_encode($encryption_csr),
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
+    "url" => SEPA_ADDRESS . "/{$bank}/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -650,9 +653,9 @@ function sepa_get_bank_certificate($params) {
     "method" => "POST",
     "data" => array(
       "customer_id" => $customer_id,
-      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_bank_certificate",
+    "url" => SEPA_ADDRESS . "/{$bank}/get_bank_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -692,9 +695,9 @@ function sepa_get_user_info($params) {
       "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
       "customer_id"                 => $pankkiyhteys["customer_id"],
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
+    "url" => SEPA_ADDRESS . "/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -781,6 +784,26 @@ function sepa_file_type_check($bank, $file_type) {
     // Maksuaineiston palautesanoma
     if ($file_type == "NDCORPAYL") {
       $file_type = "C2BN";
+    }
+  }
+
+  // OP-muunnokset
+  if ($bank == "op") {
+    // Konekielinen tiliote
+    if ($file_type == "TITO") {
+      $file_type = "TI";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "KTL") {
+      $file_type = "TL";
+    }
+    // XML maksuaineisto
+    if ($file_type == "NDCORPAYS") {
+      $file_type = "pain.001.001.02";
+    }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "C2BN") {
+      $file_type = "pain.002.001.02";
     }
   }
 
@@ -967,47 +990,84 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
- * @param array   $params
+ * @param array $params
+ *
  * @return array
  */
 function generoi_private_key_ja_csr($params = array()) {
   global $kukarow, $yhtiorow;
 
-  $company_name = empty($params['company_name']) ? $yhtiorow['nimi'] : $params['company_name'];
-  $customer_id  = empty($params['customer_id']) ? '' : $params['customer_id'];
-  $key_bits     = empty($params['key_bits']) ? 2048 : $params['key_bits'];
-  $email        = empty($params['email']) ? "" : $params['email'];
+  $company_name = empty($params['company_name']) ? ""   : $params['company_name'];
+  $customer_id  = empty($params['customer_id'])  ? ""   : $params['customer_id'];
+  $pankki       = empty($params['pankki'])       ? ""   : $params['pankki'];
 
-  $key_config = array(
-    "digest_alg"       => "sha1",
-    "private_key_bits" => $key_bits,
-    "private_key_type" => OPENSSL_KEYTYPE_RSA
-  );
+  $key_bits = 2048;
 
   $csr_info = array(
-    "countryName"      => $yhtiorow["maa"],
-    "localityName"     => $yhtiorow["kotipaikka"],
-    "organizationName" => $company_name,
-    "commonName"       => $company_name
+    "C={$yhtiorow["maa"]}",
   );
 
-  if (!empty($email)) {
-    $csr_info["emailAddress"] = $email;
+  switch ($pankki) {
+  case "nordea":
+    $key_bits = 1024;
+
+    $csr_info[] = "CN={$company_name}";
+    $csr_info[] = "serialNumber={$customer_id}";
+    break;
+  case "op":
+    $csr_info[] = "CN={$customer_id}";
+    break;
+  default:
+    $csr_info[] = "CN={$yhtiorow['nimi']}";
+    $csr_info[] = "emailAddress={$yhtiorow["email"]}";
+    $csr_info[] = "L={$yhtiorow["kotipaikka"]}";
+    $csr_info[] = "O={$yhtiorow['nimi']}";
   }
 
-  if (!empty($customer_id)) {
-    $csr_info["serialNumber"] = $customer_id;
+  $csr_dir  = sys_get_temp_dir() . uniqid('csr-', true);
+
+  $key_path   = "{$csr_dir}/key.pem";
+  $csr_path   = "{$csr_dir}/csr.pem";
+  $subject    = "/" . implode("/", $csr_info);
+  $passphrase = openssl_random_pseudo_bytes(100);
+  $command    = escapeshellcmd("openssl req " .
+                               "-newkey rsa:{$key_bits} " .
+                               "-passout stdin " .
+                               "-keyout {$key_path} " .
+                               "-out {$csr_path} " .
+                               "-subj '{$subject}'");
+
+  mkdir($csr_dir);
+
+  $handle = popen($command, "w");
+
+  fwrite($handle, $passphrase);
+  pclose($handle);
+
+  $command = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w")
+  );
+  $handle = proc_open($command, $descriptorspec, $pipes);
+
+  if (is_resource($handle)) {
+    fwrite($pipes[0], $passphrase);
+    fclose($pipes[0]);
+
+    $private_key =  stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+
+    proc_close($handle);
   }
 
-  $key = openssl_pkey_new($key_config);
-  $csr = openssl_csr_new($csr_info, $key);
+  $csr = file_get_contents($csr_path);
 
-  openssl_pkey_export($key, $private_key);
-  openssl_csr_export($csr, $csrout);
+  system(escapeshellcmd("rm -rf {$csr_dir}"));
 
   return array(
     "private_key" => $private_key,
-    "csr"         => $csrout
+    "csr"         => $csr,
   );
 }
 
@@ -1106,6 +1166,10 @@ function tuetut_pankit() {
     "DABAFIHH" => array(
       "nimi"       => "Danske Bank",
       "lyhyt_nimi" => "danske"
+    ),
+    "OKOYFIHH" => array(
+      "nimi"       => "OP",
+      "lyhyt_nimi" => "op",
     ),
   );
 }

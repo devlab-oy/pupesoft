@@ -120,7 +120,11 @@ verkkokauppa/ostoskori.inc
 verkkokauppa/ostoskori.php
 verkkokauppa/tyhjenna_ostoskorit.php
 tiedostokirjasto.php
-tiedostofunkkarit.inc"
+tiedostofunkkarit.inc
+asiakasvalinta.inc
+extranet_tyomaaraykset.php
+extranet_laiterekisteri.php
+tyomaarays/tulosta_tyomaarays.inc"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

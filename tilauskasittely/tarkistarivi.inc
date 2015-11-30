@@ -96,6 +96,14 @@ $_onko_myynti = in_array($toim, array('PIKATILAUS','RIVISYOTTO'));
 $_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
 
 if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
+
+  if ($yhtiorow["varaako_jt_saldoa"] != "") {
+    $lisavarattu = " + tilausrivi.varattu";
+  }
+  else {
+    $lisavarattu = "";
+  }
+
   $query = "SELECT *
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
@@ -103,7 +111,7 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
               AND tilausrivi.tuoteno = '{$row['tuoteno']}'
               AND tilausrivi.tyyppi = 'L'
               AND tilausrivi.var = 'J'
-              AND tilausrivi.jt != 0
+              AND tilausrivi.jt {$lisavarattu} > 0
               AND tilausrivi.tunnus != '{$row['tunnus']}'
             )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'

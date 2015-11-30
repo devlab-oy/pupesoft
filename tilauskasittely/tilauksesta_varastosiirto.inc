@@ -306,7 +306,9 @@ if (!function_exists('luo_varastosiirtorivi')) {
       ${'ale'.$alepostfix} = "";
     }
 
-    $toim = 'SIIRTOLISTA';
+    if ($varastosiirtotyyppi == "G") {
+      $toim = 'SIIRTOLISTA';
+    }
 
     require 'lisaarivi.inc';
 

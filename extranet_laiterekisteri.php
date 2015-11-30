@@ -90,6 +90,8 @@ function piirra_headerit() {
 }
 
 function piirra_laiterivi($laite) {
+  global $palvelin2;
+
   echo "<tr>";
   echo "<td>{$laite['tunnus']}</td>";
   echo "<td>{$laite['valmistaja']}</td>";

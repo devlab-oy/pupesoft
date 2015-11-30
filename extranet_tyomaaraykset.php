@@ -1,7 +1,7 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
-  require "inc/parametrit.inc";
+  require "parametrit.inc";
 }
 
 $tyom_parametrit = array(
@@ -24,7 +24,7 @@ $request = array(
 );
 
 
-#if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
 
 if (isset($avaa_tyomaarays_nappi)) {
   // Tallennetaan työmääräys järjestelmään
@@ -33,9 +33,7 @@ if (isset($avaa_tyomaarays_nappi)) {
   unset($request['tyom_parametrit']);
 }
 
-#if ($kukarow['multi_asiakkuus'] != '') {
-  require "asiakasvalinta.inc";
-#}
+require "asiakasvalinta.inc";
 
 if ($request['tyom_toiminto'] == '') {
   piirra_kayttajan_tyomaaraykset();
@@ -116,7 +114,9 @@ function hae_kayttajan_tyomaaraykset() {
             tyomaarays.mallivari,
             tyomaarays.merkki,
             tyomaarays.luvattu,
-            laite.sla
+            laite.sla,
+            a6.selitetark valmistaja,
+            tuote.tuotemerkki malli
             FROM lasku
             JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
             JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
@@ -128,7 +128,9 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
             LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
             LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
-            LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro) 
+            LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
+            LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio and tuote.tuoteno = laite.tuoteno)
+            LEFT JOIN avainsana a6 ON (a6.yhtio = tuote.yhtio and a6.laji = 'TRY' and a6.selite = tuote.try) 
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila     in ('A','L','N','S','C')
             {$alatila}
@@ -322,7 +324,7 @@ function hae_laitteen_parametrit($laite_tunnus) {
 function email_tyomaarayskopio($request) {
   global $kukarow;
 
-  require_once "tyomaarays/tulosta_tyomaarays.inc";
+  require_once "tulosta_tyomaarays.inc";
 
   //Tehdään joini
   $query = "SELECT tyomaarays.*, lasku.*

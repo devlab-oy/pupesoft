@@ -1,16 +1,14 @@
 <?php
 
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_laiterekisteri.php") !== FALSE) {
-  require "inc/parametrit.inc";
+  require "parametrit.inc";
 }
 
 $request = array();
 
-#if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
 
-#if ($kukarow['multi_asiakkuus'] != '') {
-  require "asiakasvalinta.inc";
-#}
+require "asiakasvalinta.inc";
 
 piirra_kayttajan_laitteet();
 

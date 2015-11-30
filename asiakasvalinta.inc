@@ -1,5 +1,7 @@
 <?php
 
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+
 if (isset($toiminto) and $toiminto == 'vaihda_oletusasiakkuus' and $asiakasvalinta != '') {
   paivita_kayttajan_oletusasiakkuus($asiakasvalinta);
 }
@@ -9,9 +11,18 @@ piirra_multiasiakkuusdropdown();
 function piirra_multiasiakkuusdropdown() {
   global $kukarow;
 
-#  if ($kukarow['multi_asiakkuus'] == '' or $kukarow['oletus_asiakas'] = '') {
-#    return;
-#  }
+  // Haetaan käyttäjän asiakkuudet
+  $query = "SELECT asiakas.tunnus, asiakas.nimi 
+            FROM customers_users 
+            JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+            WHERE user_id = '{$kukarow['tunnus']}'";
+  $multiresult = pupe_query($query);
+
+  // Jos ei ole linkattu mitään asiakkaita, ei piirretä mitään
+  if (mysql_num_rows($multiresult) == 0 and empty($kukarow['oletus_asiakas'])) {
+    return;
+  }
+
   // Haetaan oletusasiakkuus
   $query = "SELECT asiakas.*
             FROM asiakas 
@@ -27,20 +38,13 @@ function piirra_multiasiakkuusdropdown() {
   echo "<td><select name='asiakasvalinta' value='{$kukarow['oletus_asiakas']}' onchange='submit();'>";
   echo "<option value='' selected>".t("Oletusasiakkuus")."</option>";
 
-  // Haetaan käyttäjän asiakkuudet
-  $query = "SELECT asiakas.tunnus,
-            asiakas.nimi
-            FROM customers_users
-            JOIN asiakas ON (asiakas.tunnus = customers_users.customer_id) 
-            WHERE customers_users.user_id = '{$kukarow['tunnus']}'";
-  $result = pupe_query($query);
-
-  while ($multirow = mysql_fetch_assoc($result)) {
+  while ($multirow = mysql_fetch_assoc($multiresult)) {
     echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi']."</option>";
   }
-  
+
   echo "</select>";
-    echo "</td>";
+  echo "</td>";
+
   if (isset($row['nimi'])) {
     echo "<td class='back'>".$row['nimi']."</td>";
   }

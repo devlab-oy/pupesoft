@@ -109,7 +109,7 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
             AND lasku.tunnus != '{$laskurow['tunnus']}'
-            AND (lasku.tila = 'N' OR (laksu.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D')))";
+            AND (lasku.tila = 'N' OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D','X')))";
   $chk_res = pupe_query($query);
 
   if (mysql_num_rows($chk_res) != 0) {

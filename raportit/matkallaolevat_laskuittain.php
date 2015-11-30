@@ -207,7 +207,7 @@ if ($alisa != "" and $llisa != "") {
 
         // Milloin rivit on viety saldoille keskim‰‰rin
         $query = "SELECT
-                  DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
+                  if (laskutettuaika != '0000-00-00', DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d'), laskutettuaika) AS laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}

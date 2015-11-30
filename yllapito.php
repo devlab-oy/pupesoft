@@ -1396,7 +1396,6 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
         <input type = 'hidden' name = 'lopetus_muut' value = '$lopetus_muut'>
-        <input type = 'hidden' name = 'tuote_tunnus' value = '$tuote_tunnus'>
         <input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
   }
 

@@ -497,7 +497,7 @@ else {
 if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
     $kpl > 0 and
     (($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) or $trow['minimi_era'] > 0) and
-    ((in_array($rivityyppi, array('L','E')) and $yhtiorow['myyntiera_pyoristys'] == 'K') or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S' and (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P','K'))))) and
+    (((in_array($rivityyppi, array('L','E')) and in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S')) and (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P','K')))) and
     $rivitunnus == 0 and
     (in_array($toim, array('RIVISYOTTO','PIKATILAUS','ENNAKKO','EXTRANET','SIIRTOLISTA')) or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))
     ) {

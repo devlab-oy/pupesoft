@@ -102,7 +102,8 @@ if (!function_exists('huoltosaate_alku')) {
       $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $norm);
     }
 
-    $pdf->draw_text(275, 715, t("Huoltosaate", $kieli), $thispage, $norm);
+    $otsikko_len = $pdf->strlen(t("Huoltosaate", $kieli), $iso);
+    $pdf->draw_text((595 / 2) - ($otsikko_len / 2), 715, t("Huoltosaate", $kieli), $thispage, $iso);
 
     $pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), $thispage, $pieni);
     $pdf->draw_text(50, 644, $laskurow["toim_nimi"],      $thispage, $norm);
@@ -131,7 +132,57 @@ if (!function_exists('huoltosaate_alku')) {
     $pdf->draw_text(50, 544, t("Tuotekoodi", $kieli).": {$tyomaaraysrow['koodi']}", $thispage, $norm);
     $pdf->draw_text(50, 534, t("Sarjanumero", $kieli).": {$tyomaaraysrow['valmnro']}", $thispage, $norm);
 
-    $kala = 504;
+    $kala = 514;
+
+    if (!empty($tyomaaraysrow['komm1'])) {
+      $otsikko = t("Työnkuvaus", $kieli);
+      $pdf->draw_text(50, $kala, "{$otsikko}:", $thispage, $norm);
+      $otsikko_len = $pdf->strlen($otsikko, $norm);
+      $pdf->draw_rectangle($kala-2, 50, $kala-2, 50+$otsikko_len, $thispage, $rectparam);
+
+      $kala -= 15;
+
+      $_oikea_yla_x = $kala;
+
+      foreach(explode("\n", trim($tyomaaraysrow['komm1'])) as $komm) {
+
+        $komm = wordwrap($komm, 140, "\n", true);
+
+        foreach(explode("\n", trim($komm)) as $kommentti) {
+          list($ff_string, $ff_font) = pdf_fontfit($kommentti, 595, $pdf, $pieni);
+          $pdf->draw_text(50, $_oikea_yla_x, $ff_string, $thispage, $ff_font);
+          $_oikea_yla_x -= 12;
+        }
+      }
+
+      $kala = $_oikea_yla_x - 12;
+    }
+
+    if (!empty($tyomaaraysrow['komm2'])) {
+      $otsikko = t("Toimenpiteet", $kieli);
+      $pdf->draw_text(50, $kala, "{$otsikko}:", $thispage, $norm);
+      $otsikko_len = $pdf->strlen($otsikko, $norm);
+      $pdf->draw_rectangle($kala-2, 50, $kala-2, 50+$otsikko_len, $thispage, $rectparam);
+
+      $kala -= 15;
+
+      $_oikea_yla_x = $kala;
+
+      foreach(explode("\n", trim($tyomaaraysrow['komm2'])) as $komm) {
+
+        $komm = wordwrap($komm, 140, "\n", true);
+
+        foreach(explode("\n", trim($komm)) as $kommentti) {
+          list($ff_string, $ff_font) = pdf_fontfit($kommentti, 595, $pdf, $pieni);
+          $pdf->draw_text(50, $_oikea_yla_x, $ff_string, $thispage, $ff_font);
+          $_oikea_yla_x -= 12;
+        }
+      }
+
+      $kala = $_oikea_yla_x;
+    }
+
+    $kala -= 10;
 
     // Luodaan palautettavat
     $return = compact(array_keys($params));
@@ -146,13 +197,6 @@ if (!function_exists('huoltosaate_rivi_otsikot')) {
 
     // Luodaan muuttujat
     extract($params);
-
-    $kala -= 20;
-
-    $otsikko = t("Suoritetut toimentpiteet", $kieli);
-    $pdf->draw_text(50,  $kala, $otsikko.":", $thispage, $norm);
-    $otsikko_len = $pdf->strlen($otsikko, $norm);
-    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 50+$otsikko_len, $thispage, $rectparam);
 
     $kala -= 20;
 

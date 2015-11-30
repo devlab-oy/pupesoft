@@ -80,8 +80,20 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
     $vrow = mysql_fetch_array($vres);
 
     $mista = !empty($mista) ? $mista : $apu['laji'];
+    
+    if (!empty($lopetus) and !empty($lopetus_muut)) {
+      // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+      $lopetus = $lopetus."/SPLIT/".$lopetus_muut;
+    }
+    elseif (empty($lopetus) and !empty($lopetus_muut)) {
+      // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+      $lopetus = $palvelin2;
+      $lopetus .= "yllapito.php?toim=tuote";
+      $lopetus .= "//tunnus={$tuote_tunnus}";
+      $lopetus = $lopetus_muut."/SPLIT/".$lopetus;
+    }
 
-    $ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$mista}&liitos=".urlencode($apu['liitos'])."&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}' target='mainframe'>".t('Valitse segmentit')."</a><br />\n";
+    $ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$mista}&liitos=".urlencode($apu['liitos'])."&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}&lopetus=$lopetus' target='mainframe'>".t('Valitse segmentit')."</a><br />\n";
     $ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
   }
 

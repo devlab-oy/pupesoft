@@ -241,7 +241,7 @@ if ($del == 1) {
             FROM $toim
             WHERE tunnus = '$tunnus'";
   $result = pupe_query($query);
-  $trow = mysql_fetch_array($result);
+  $trow = mysql_fetch_assoc($result);
 
   $query = "DELETE from $toim
             WHERE tunnus='$tunnus'";
@@ -1394,6 +1394,8 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
+        <input type = 'hidden' name = 'lopetus_muut' value = '$lopetus_muut'>
+        <input type = 'hidden' name = 'tuote_tunnus' value = '$tuote_tunnus'>
         <input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
   }
 
@@ -1652,6 +1654,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           else {
             echo "&lopetus=$lopetus";
           }
+
+          echo "&lopetus_muut=$lopetus_muut";
+          echo "&tuote_tunnus=$tuote_tunnus";
 
           echo "'>";
 
@@ -2216,7 +2221,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&tuote_tunnus={$trow["tunnus"]}&lopetus_muut=$lopetus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

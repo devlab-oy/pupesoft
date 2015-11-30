@@ -306,6 +306,8 @@ if (!function_exists('luo_varastosiirtorivi')) {
       ${'ale'.$alepostfix} = "";
     }
 
+    $toim = 'SIIRTOLISTA';
+
     require 'lisaarivi.inc';
 
     return $lisatyt_rivit1;

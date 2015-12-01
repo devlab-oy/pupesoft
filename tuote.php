@@ -2528,7 +2528,7 @@ if ($tee == 'Z') {
     echo "<th>".t("Syvyys")."</th>";
     echo "<th>".t("Paino")."</th>";
     echo "<th>".t("Ostoehdotus")."</th>";
-    echo "<th></th>";
+    echo "<th>".t("Tuotteen lisätiedot")."</th>";
     echo "</tr>";
 
     echo "<tr>";
@@ -2537,7 +2537,21 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[tuotesyvyys] m</td>";
     echo "<td>$tuoterow[tuotemassa] kg</td>";
     echo "<td>$tuoterow[ostoehdotus]</td>";
-    echo "<td></td>";
+    echo "<td>";
+
+    $lisatiedot = tuotteen_lisatiedot($tuoterow["tuoteno"]);
+
+    if (count($lisatiedot) > 0) {
+      echo "<ul>";
+
+      foreach ($lisatiedot as $lisatieto) {
+        echo "<li>{$lisatiedot["kentta"]} &raquo; {$lisatiedot["selite"]}</li>";
+      }
+
+      echo "</ul>";
+    }
+
+    echo "</td>";
     echo "</tr>";
 
     echo "</table><br>";

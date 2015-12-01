@@ -3,7 +3,7 @@
 require "../inc/parametrit.inc";
 
 $tuoteno      = isset($tuoteno)      ? $tuoteno                    : null;
-$varastot     = isset($varastot)     ? explode(",", $varastot)     : null;
+$varastot     = isset($varastot)     ? explode(",", $varastot)     : 0;
 $yksikko      = isset($yksikko)      ? $yksikko                    : null;
 $tilattu      = isset($tilattu)      ? $tilattu                    : null;
 $varattu      = isset($varattu)      ? $varattu                    : null;
@@ -40,8 +40,12 @@ if ($paikka !== null) {
   echo "<li>", t("Hälytysraja"), ": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
 }
 
-echo "<li>" . t("Keskihinta") . ": {$keskihinta} {$valuutta}</li>
-      <li>" . t("Ostohinta") . ": {$ostohinta} {$valuutta}</li>";
+echo "<li>" . t("Keskihinta") . ": {$keskihinta} {$valuutta}</li>";
+
+if ($ostohinta) {
+  echo "<li>" . t("Ostohinta") . ": {$ostohinta} {$valuutta}</li>";
+}
+
 echo "</ul>";
 
 

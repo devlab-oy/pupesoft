@@ -33,6 +33,8 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+js_popup();
+
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
   or $kukarow["naytetaan_katteet_tilauksella"] == "B"
   or ($kukarow["naytetaan_katteet_tilauksella"] == ""
@@ -6179,6 +6181,7 @@ if ($tee == '') {
     else {
       $kehahin_select = " round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) ";
     }
+
     // Tilausrivit
     $query  = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
                if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
@@ -6192,6 +6195,8 @@ if ($tee == '') {
                tuote.vakkoodi,
                tilausrivi.ale_peruste,
                tuote.tunnus as tuote_tunnus,
+               concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+               tuote.kehahin,
                $kommentti_select
                $sorttauskentta
                FROM tilausrivi use index (yhtio_otunnus)
@@ -7639,7 +7644,17 @@ if ($tee == '') {
         }
 
         if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
-          echo "<td $class><a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$row[tuoteno]</a>";
+          echo "<td $class>
+                  <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
+                     class='tooltip'
+                     data-content-url='tuotetiedot.php" .
+                       "?tuoteno={$row["tuoteno"]}" .
+                       "&yksikko={$row["yksikko"]}" .
+                       "&tilattu={$row["tilkpl"]}" .
+                       "&varattu={$row["varattu"]}" .
+                       "&paikka={$row["paikka"]}" .
+                       "&keskihinta={$row["kehahin"]}" .
+                       "&valuutta={$row["valuutta"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";

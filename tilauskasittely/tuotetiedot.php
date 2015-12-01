@@ -43,3 +43,19 @@ if ($paikka !== null) {
 echo "<li>" . t("Keskihinta") . ": {$keskihinta} {$valuutta}</li>
       <li>" . t("Ostohinta") . ": {$ostohinta} {$valuutta}</li>";
 echo "</ul>";
+
+
+$lisatiedot = tuotteen_lisatiedot($tuoteno);
+
+if (count($lisatiedot) > 0) {
+  echo "<h3>" . t('Tuotteen lisätiedot') . "</h3>";
+
+  echo "<ul>";
+
+  foreach ($lisatiedot as $lisatieto) {
+    echo "<li>{$lisatiedot["kentta"]} &raquo; {$lisatiedot["selite"]}</li>";
+  }
+
+  echo "</ul>";
+}
+

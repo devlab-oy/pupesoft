@@ -7660,7 +7660,9 @@ if ($tee == '') {
                        "&varattu={$row["varattu"]}" .
                        "&paikka={$row["paikka"]}" .
                        "&keskihinta={$row["kehahin"]}" .
-                       "&valuutta={$row["valuutta"]}'>$row[tuoteno]</a>";
+                       "&valuutta={$row["valuutta"]}" .
+                       "&varasto={$laskurow["varasto"]}" .
+                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";

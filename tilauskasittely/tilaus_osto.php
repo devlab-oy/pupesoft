@@ -1445,30 +1445,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           // tehd‰‰n pop-up divi jos keikalla on kommentti...
           if ($prow["tunnus"] != "") {
-
-            $_varastot = array($laskurow['varasto']);
-
-            if ($laskurow['vanhatunnus'] != 0) {
-
-              $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
-                         FROM varastopaikat
-                         WHERE yhtio      = '{$kukarow['yhtio']}'
-                         AND tyyppi      != 'P'
-                         AND toimipaikka  = '{$laskurow['vanhatunnus']}'";
-              $vares = pupe_query($query);
-              $varow = mysql_fetch_assoc($vares);
-
-              $saldo = $hyllyssa = $myytavissa = 0;
-
-              if (!empty($varow['tunnukset'])) {
-                $_varastot_tmp = explode(",", $varow['tunnukset']);
-                $_varastot = array_merge($_varastot, $_varastot_tmp);
-              }
-            }
-
             if ($toim != "HAAMU") {
-              $varastot = implode(",", $_varastot);
-
               echo "<td valign='top' $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
@@ -1476,14 +1453,15 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                          data-content-url='?toim={$toim}" .
                            "&ajax_popup=true" .
                            "&tuoteno={$prow["tuoteno"]}" .
-                           "&varastot={$varastot}" .
+                           "&varasto={$laskurow["varasto"]}" .
                            "&yksikko={$prow["yksikko"]}" .
                            "&tilattu={$prow["tilattu"]}" .
                            "&varattu={$prow["varattukpl"]}" .
                            "&paikka={$prow["paikka"]}" .
                            "&keskihinta={$prow["keskihinta"]}" .
                            "&valuutta={$prow["valuutta"]}" .
-                           "&ostohinta={$prow["ostohinta"]}'>$prow[tuoteno]</a>";
+                           "&ostohinta={$prow["ostohinta"]}" .
+                           "&vanhatunnus={$laskurow["vanhatunnus"]}'>$prow[tuoteno]</a>";
             }
             else {
               echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";

@@ -1,7 +1,7 @@
 <?php
 
 $tuoteno      = isset($tuoteno)      ? $tuoteno                    : null;
-$varastot     = isset($varastot)     ? explode(",", $varastot)     : 0;
+$varasto      = isset($varasto)      ? $varasto                    : null;
 $yksikko      = isset($yksikko)      ? $yksikko                    : null;
 $tilattu      = isset($tilattu)      ? $tilattu                    : null;
 $varattu      = isset($varattu)      ? $varattu                    : null;
@@ -9,10 +9,31 @@ $paikka       = isset($paikka)       ? $paikka                     : null;
 $keskihinta   = isset($keskihinta)   ? $keskihinta                 : null;
 $valuutta     = isset($valuutta)     ? $valuutta                   : null;
 $ostohinta    = isset($ostohinta)    ? $ostohinta                  : null;
+$vanhatunnus  = isset($vanhatunnus)  ? $vanhatunnus                : 0;
 
-list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $varastot);
+$_varastot = array($varasto);
+
+if ($vanhatunnus != 0) {
+  $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+                   FROM varastopaikat
+                   WHERE yhtio      = '{$kukarow['yhtio']}'
+                   AND tyyppi      != 'P'
+                   AND toimipaikka  = '{$vanhatunnus}'";
+  $vares = pupe_query($query);
+  $varow = mysql_fetch_assoc($vares);
+
+  $saldo = $hyllyssa = $myytavissa = 0;
+
+  if (!empty($varow['tunnukset'])) {
+    $_varastot_tmp = explode(",", $varow['tunnukset']);
+    $_varastot     = array_merge($_varastot, $_varastot_tmp);
+  }
+}
+
+list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $_varastot);
 
 $pop_yks = t_avainsana("Y", "", "and avainsana.selite='{$yksikko}'", "", "", "selite");
+
 echo "<ul>";
 echo "<li>" . t("Saldo") . ": {$saldo} {$pop_yks}</li>
       <li>" . t("Hyllyssä") . ": {$hyllyssa} {$pop_yks}</li>

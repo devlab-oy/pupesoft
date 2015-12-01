@@ -11,6 +11,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
   else {
     echo "<font class='head'>".t("JT rivit")."</font><hr>";
   }
+
+  if (function_exists("js_popup")) {
+    echo js_popup(-100);
+  }
 }
 
 if (!isset($asiakasid)) $asiakasid = "";
@@ -51,10 +55,6 @@ if (!isset($myyja)) $myyja = "";
 if (!isset($automaattinen_poiminta)) $automaattinen_poiminta = "";
 if (!isset($mista_tullaan)) $mista_tullaan = "";
 if (!isset($jt_tyyppi)) $jt_tyyppi = "";
-
-if (function_exists("js_popup")) {
-  echo js_popup(-100);
-}
 
 // ennakoissa ei setata jt_huomioi_pvm automaattisesti
 // jt:ssä setataan (sitä ei myöskään näytetä käyttöliittymässä kys. parametrillä)
@@ -773,7 +773,7 @@ if ($tee == "JATKA") {
     $tuotelisa .= " and tuote.osasto = '$tuoteosasto' ";
   }
 
-  if ($ei_tehdastoimitus_tuotteita != "") {
+  if (!empty($ei_tehdastoimitus_tuotteita)) {
     $tuotelisa .= " and tuote.status != 'T' ";
   }
 

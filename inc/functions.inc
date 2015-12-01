@@ -11314,34 +11314,34 @@ if (!function_exists("jt_toimita")) {
     if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
 
     if ($automaattinen_poiminta != '') {
-      $asiakasno         = $toimittaja;
-      $toimittaja        = "";
-      $asiakasid        = $toimittajaid;
-      $toimittajaid      = "";
-      $asiakasmaa       = "";
-      $jarj           = "luontiaika";
-      $tilaus          = "";
-      $toimi          = "";
-      $suoratoimit      = "";
-      $tilaus_on_jo      = "KYLLA";
+      $asiakasno            = $toimittaja;
+      $toimittaja           = "";
+      $asiakasid            = $toimittajaid;
+      $toimittajaid         = "";
+      $asiakasmaa           = "";
+      $jarj                 = "luontiaika";
+      $tilaus               = "";
+      $toimi                = "";
+      $suoratoimit          = "";
+      $tilaus_on_jo         = "KYLLA";
       $suoratoimitus_rivit  = array();
       $suoratoimitus_paikat = array();
       $from_varastoon_inc   = "";
-      $jt_huomioi_pvm      = $huomioi_pvm;
+      $jt_huomioi_pvm       = $huomioi_pvm;
     }
     else {
-      $asiakasno         = "";
-      $asiakasid        = "";
-      $asiakasmaa       = "";
-      $jarj           = "luontiaika";
-      $tilaus          = "";
-      $toimi          = "";
-      $suoratoimit      = "";
-      $tilaus_on_jo      = "";
+      $asiakasno            = "";
+      $asiakasid            = "";
+      $asiakasmaa           = "";
+      $jarj                 = "luontiaika";
+      $tilaus               = "";
+      $toimi                = "";
+      $suoratoimit          = "";
+      $tilaus_on_jo         = "";
       $suoratoimitus_rivit  = $jtrivit;
       $suoratoimitus_paikat = $jtrivit_paikat;
       $from_varastoon_inc   = "varastoon.inc";
-      $jt_huomioi_pvm      = $huomioi_pvm;
+      $jt_huomioi_pvm       = $huomioi_pvm;
     }
 
     if (!@include 'jtselaus.php') {

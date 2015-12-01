@@ -46,66 +46,70 @@ jQuery.fn.tooltip = function(allowHtml, className){
   this.each(function() {
 
     $(this).mousemove(function(e){
-      var x = getMouseX(e) + 20;
-      var y = getMouseY(e) + 20;
-
-      // get content id from element and fetch text from the div
-      var content_id = $(this).attr('id');
-      var content = $('#div_'+content_id).html();
-
-      var div_height = $('#div_'+content_id).height();
-      var div_width = $('#div_'+content_id).width();
-
-      var window_width = $(window).width();
-      var window_height = $(window).height();
-
-      var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-      var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-
-      //  Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-      if (div_height != null && div_width != null && x != null && y != null) {
-        //  Riittääkö leveys
-        if (((x - scrollX) + div_width + 30) > window_width) {
-          //  Siirretään tämä ihan oikeaan laitaan..
-          x = window_width - div_width - 30 + scrollX;
-        }
-
-        if ((y - scrollY) + div_height > window_height) {
-          y -= (div_height);
-        }
-
-        //  Oikea laita on kuitenkin aina tärkein!
-        if (x < 10) {
-          x = 10;
-        }
-        if (y < 10) {
-          y = 10;
-        }
-      }
-
-      toolTipShow(e, x, y);
-
-      //update the content
-      if (allowHtml) {
-        toolTip.html(content);
-      }
-      else {
-        toolTip.text(content);
-      }
-
-      //remove all classes for the tipBox before add a new one and to avoid the 'append class'
-      toolTip.removeClass();
-
-      //set class if specified
-      if (className) {
-        toolTip.addClass(className);
-      }
+      showPopup(e);
     });
 
     $(this).mouseout(function(){
       toolTipHide();
     });
   });
+
+  function showPopup(e) {
+    var x = getMouseX(e) + 20;
+    var y = getMouseY(e) + 20;
+
+    // get content id from element and fetch text from the div
+    var content_id = $(e.target).attr('id');
+    var content = $('#div_'+content_id).html();
+
+    var div_height = $('#div_'+content_id).height();
+    var div_width = $('#div_'+content_id).width();
+
+    var window_width = $(window).width();
+    var window_height = $(window).height();
+
+    var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+    var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+
+    //  Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+    if (div_height != null && div_width != null && x != null && y != null) {
+      //  Riittääkö leveys
+      if (((x - scrollX) + div_width + 30) > window_width) {
+        //  Siirretään tämä ihan oikeaan laitaan..
+        x = window_width - div_width - 30 + scrollX;
+      }
+
+      if ((y - scrollY) + div_height > window_height) {
+        y -= (div_height);
+      }
+
+      //  Oikea laita on kuitenkin aina tärkein!
+      if (x < 10) {
+        x = 10;
+      }
+      if (y < 10) {
+        y = 10;
+      }
+    }
+
+    toolTipShow(e, x, y);
+
+    //update the content
+    if (allowHtml) {
+      toolTip.html(content);
+    }
+    else {
+      toolTip.text(content);
+    }
+
+    //remove all classes for the tipBox before add a new one and to avoid the 'append class'
+    toolTip.removeClass();
+
+    //set class if specified
+    if (className) {
+      toolTip.addClass(className);
+    }
+  }
 };
 
 $(function(){

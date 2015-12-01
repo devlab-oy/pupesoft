@@ -1464,7 +1464,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                            "&vanhatunnus={$laskurow["vanhatunnus"]}'>$prow[tuoteno]</a>";
             }
             else {
-              echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
+              echo "<td valign='top' $class>
+                      <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
+                         class='tooltip'
+                         id='$prow[tunnus]'
+                         data-content-url='?toim={$toim}" .
+                           "&ajax_popup=true" .
+                           "&tuoteno={$prow["tuoteno"]}" .
+                           "&varasto={$laskurow["varasto"]}" .
+                           "&yksikko={$prow["yksikko"]}" .
+                           "&tilattu={$prow["tilattu"]}" .
+                           "&varattu={$prow["varattukpl"]}" .
+                           "&paikka={$prow["paikka"]}" .
+                           "&keskihinta={$prow["keskihinta"]}" .
+                           "&valuutta={$prow["valuutta"]}" .
+                           "&ostohinta={$prow["ostohinta"]}" .
+                           "&vanhatunnus={$laskurow["vanhatunnus"]}'>$prow[tuoteno]</a>";
             }
 
           }

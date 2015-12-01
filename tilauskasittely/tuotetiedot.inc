@@ -1,7 +1,5 @@
 <?php
 
-require "../inc/parametrit.inc";
-
 $tuoteno      = isset($tuoteno)      ? $tuoteno                    : null;
 $varastot     = isset($varastot)     ? explode(",", $varastot)     : 0;
 $yksikko      = isset($yksikko)      ? $yksikko                    : null;

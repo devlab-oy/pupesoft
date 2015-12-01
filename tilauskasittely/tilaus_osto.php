@@ -16,6 +16,11 @@ if (isset($_REQUEST["tee"])) {
 
 require "../inc/parametrit.inc";
 
+if (isset($ajax_popup)) {
+  require "tuotetiedot.inc";
+  exit;
+}
+
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
 
 if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
@@ -1468,16 +1473,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
                          id='$prow[tunnus]'
-                         data-content-url='tuotetiedot.php" .
-                   "?tuoteno={$prow["tuoteno"]}" .
-                   "&varastot={$varastot}" .
-                   "&yksikko={$prow["yksikko"]}" .
-                   "&tilattu={$prow["tilattu"]}" .
-                   "&varattu={$prow["varattukpl"]}" .
-                   "&paikka={$prow["paikka"]}" .
-                   "&keskihinta={$prow["keskihinta"]}" .
-                   "&valuutta={$prow["valuutta"]}" .
-                   "&ostohinta={$prow["ostohinta"]}'>$prow[tuoteno]</a>";
+                         data-content-url='?toim={$toim}" .
+                           "&ajax_popup=true" .
+                           "&tuoteno={$prow["tuoteno"]}" .
+                           "&varastot={$varastot}" .
+                           "&yksikko={$prow["yksikko"]}" .
+                           "&tilattu={$prow["tilattu"]}" .
+                           "&varattu={$prow["varattukpl"]}" .
+                           "&paikka={$prow["paikka"]}" .
+                           "&keskihinta={$prow["keskihinta"]}" .
+                           "&valuutta={$prow["valuutta"]}" .
+                           "&ostohinta={$prow["ostohinta"]}'>$prow[tuoteno]</a>";
             }
             else {
               echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";

@@ -33,6 +33,11 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (isset($ajax_popup)) {
+  require "tuotetiedot.inc";
+  exit;
+}
+
 js_popup();
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
@@ -7647,8 +7652,9 @@ if ($tee == '') {
           echo "<td $class>
                   <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
                      class='tooltip'
-                     data-content-url='tuotetiedot.php" .
-                       "?tuoteno={$row["tuoteno"]}" .
+                     data-content-url='?toim={$toim}" .
+                       "&ajax_popup=true" .
+                       "&tuoteno={$row["tuoteno"]}" .
                        "&yksikko={$row["yksikko"]}" .
                        "&tilattu={$row["tilkpl"]}" .
                        "&varattu={$row["varattu"]}" .

@@ -44,23 +44,31 @@ jQuery.fn.tooltip = function(allowHtml, className){
 
   //events for each element
   this.each(function() {
+    var contentUrl = $(this).data('contentUrl');
+    var content_id = $(this).attr('id');
 
-    $(this).mousemove(function(e){
-      showPopup(e);
-    });
+    if (contentUrl) {
+      $(this).on('mouseenter', function (e) {
+        $.get(contentUrl, function (data) {
+          showPopup(e, data, content_id);
+        });
+      });
+    } else {
+      var content = $('#div_'+content_id).html();
+
+      $(this).mousemove(function(e){
+        showPopup(e, content, content_id);
+      });
+    }
 
     $(this).mouseout(function(){
       toolTipHide();
     });
   });
 
-  function showPopup(e) {
+  function showPopup(e, content, content_id) {
     var x = getMouseX(e) + 20;
     var y = getMouseY(e) + 20;
-
-    // get content id from element and fetch text from the div
-    var content_id = $(e.target).attr('id');
-    var content = $('#div_'+content_id).html();
 
     var div_height = $('#div_'+content_id).height();
     var div_width = $('#div_'+content_id).width();

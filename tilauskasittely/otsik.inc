@@ -2973,6 +2973,39 @@ if ($tila == "" and !isset($jatka)) {
 
           echo "</select></td>";
         }
+        elseif ($kentta == "vastuuhenkilo") {
+
+          $oletus_kuka = '';
+          // Tarkistetaan, onko valitulle työjonolle asetettu oletusvastuuhenkilö,
+          // jos ei ole vielä valittu vastuuhenkilöä
+          if (empty($srow[$kentta]) and isset($srow['tyojono'])) {
+             $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
+             $oletus_row = mysql_fetch_assoc($oletus_result);
+             $oletus_kuka = $oletus_row['selitetark_4'];
+          }
+
+          $query = "SELECT *
+                    FROM kuka
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND aktiivinen = 1
+                    and extranet   = ''
+                    ORDER BY nimi";
+          $result = pupe_query($query);
+
+          echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";            
+          echo "<option value=''>".t("Valitse")."</option>";
+
+          while ($row = mysql_fetch_assoc($result)) {
+            $sel = "";
+
+            if ($row['kuka'] == $srow[$kentta] or ($oletus_kuka != '' and $oletus_kuka == $row['kuka'])) {
+              $sel = 'selected';
+            }
+
+            echo "<option value='{$row['kuka']}' $sel>{$row['nimi']}</option>";
+          }
+          echo "</select></td>";
+        }
         elseif ($kentta == "merkki") {
 
           echo "<td>$al_row[selitetark]:</td><td>";
@@ -4445,6 +4478,7 @@ if (isset($jatka)) {
             komm1       = '$komm1',
             komm2       = '$komm2',
             suorittaja     = '$suorittaja',
+            vastuuhenkilo  = '$vastuuhenkilo',
             viite       = '$viite',
             prioriteetti  = '$prioriteetti',
             jalleenmyyja   = '$jalleenmyyja',

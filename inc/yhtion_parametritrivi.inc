@@ -824,6 +824,19 @@ if ($fieldname == "puute_jt_kerataanko") {
   $jatko = 0;
 }
 
+if ($fieldname == "myynti_jt_huom") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei ilmoiteta käyttäjälle jos tuotetta on jo jälkitoimituksessa")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella ilmoitetaan käyttäjälle jos tuotetta on jo jälkitoimituksessa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "saldo_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

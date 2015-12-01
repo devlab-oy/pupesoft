@@ -1462,11 +1462,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             }
 
             if ($toim != "HAAMU") {
+              $varastot = implode(",", $_varastot);
+
               echo "<td valign='top' $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
                          id='$prow[tunnus]'
-                         data-content-url='tuotetiedot.php'>$prow[tuoteno]</a>";
+                         data-content-url='tuotetiedot.php" .
+                   "?tuoteno={$prow["tuoteno"]}" .
+                   "&varastot={$varastot}" .
+                   "&yksikko={$prow["yksikko"]}" .
+                   "&tilattu={$prow["tilattu"]}" .
+                   "&varattu={$prow["varattukpl"]}" .
+                   "&paikka={$prow["paikka"]}" .
+                   "&keskihinta={$prow["keskihinta"]}" .
+                   "&valuutta={$prow["valuutta"]}" .
+                   "&ostohinta={$prow["ostohinta"]}'>$prow[tuoteno]</a>";
             }
             else {
               echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";

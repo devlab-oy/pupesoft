@@ -5782,7 +5782,7 @@ if (!function_exists("alehinta")) {
                   ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
         $hresult = pupe_query($query);
 
-        list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Kaikkien tuotteiden alennus");
+        list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Kaikkien tuotteiden asiakaskohtainen alennus");
       }
 
       // 12. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)

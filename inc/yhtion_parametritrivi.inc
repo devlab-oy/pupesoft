@@ -4772,3 +4772,17 @@ if ($fieldname == "viitemaksujen_oikaisut") {
 
   $jatko = 0;
 }
+
+if ($fieldname == "laskun_kanavointitidon_syotto") {
+  $apu = $trow[$i];
+  $sel = array($apu => " selected");
+
+  $ulos = "<td>
+             <select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+               <option value='0'>".t("Laskun kanavointitietoa ei voi syöttää käsin")."
+               <option value='1'{$sel["1"]}>".t("Laskun kanavointitiedon voi syöttää käsin ylläpitosopimukselle")."
+             </select>
+           </td>";
+
+  $jatko = 0;
+}

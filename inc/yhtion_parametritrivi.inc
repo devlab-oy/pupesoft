@@ -2256,16 +2256,21 @@ if ($fieldname == "viitteen_kasinsyotto") {
 
   $sel1="";
   $sel2="";
+  $sel3="";
 
   if ($trow[$i] == "") {
     $sel1 = "selected";
   }
-  else {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
+  }
+  else {
+    $sel3 = "selected";
   }
 
   $ulos .= "<option value=''  $sel1>".t("Viitettä ei saa syöttää käsin")."</option>";
   $ulos .= "<option value='X' $sel2>".t("Viitteen saa syöttää käsin")."</option>";
+  $ulos .= "<option value='Y' $sel3>".t("Viitteen saa syöttää käsin ylläpitosopimuksille")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

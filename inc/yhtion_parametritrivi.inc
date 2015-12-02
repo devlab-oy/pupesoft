@@ -3618,16 +3618,12 @@ if ($fieldname == "myyntiera_pyoristys" ) {
 
   $sela = $selb = "";
 
-  if ($trow[$i] == 'K') {
-    $selb = "selected";
-  }
-  else {
-    $sela = "selected";
-  }
+  $sel = array($trow[$i] => 'selected') + array('','K','S');
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' ' $sela>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
-        <option value = 'K' $selb>".t("Myyntirivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+        <option value = ' '>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
       </select></td>";
 
   $jatko = 0;

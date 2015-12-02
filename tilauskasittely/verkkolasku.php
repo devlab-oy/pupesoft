@@ -462,11 +462,11 @@ else {
     // alustetaan muuttujia
     $laskutus_esto_saldot = array();
 
+    $query_ale_lisa = generoi_alekentta('M');
+
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
     if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
-
-      $query_ale_lisa = generoi_alekentta('M');
 
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -910,6 +910,47 @@ else {
     if (isset($tulos_ulos_ehtosplit) and $tulos_ulos_ehtosplit != '' and $silent == "") {
       $tulos_ulos .= "<br>\n".t("Tilauksia joilla on moniehto-maksuehto").":<br>\n";
       $tulos_ulos .= $tulos_ulos_ehtosplit;
+    }
+
+    if ($php_cli and !empty($yhtiorow['koontilaskut_alarajasumma'])) {
+
+      // Tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kuin alhaalla) rivi ~1243
+      $query = "SELECT
+                if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+                if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V'))  or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
+                group_concat(lasku.tunnus) tunnukset
+                FROM lasku
+                LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+                LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
+                where lasku.yhtio = '{$kukarow['yhtio']}'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                {$lasklisa}
+                GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
+                lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+                lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+                lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi, lasku.laskutyyppi,
+                laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
+                {$ketjutus_group}";
+      $alaraja_res = pupe_query($query);
+
+      while ($alaraja_row = mysql_fetch_assoc($alaraja_res)) {
+        $query = "SELECT ROUND(SUM(tilausrivi.hinta * IF('{$yhtiorow['alv_kasittely']}' != '' AND tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'L'
+                  AND tilausrivi.otunnus IN ({$alaraja_row['tunnukset']})
+                  AND tilausrivi.varattu != 0
+                  HAVING summa >= '{$yhtiorow['koontilaskut_alarajasumma']}'";
+        $alarajasumma_chk_res = pupe_query($query);
+        $alarajasumma_chk_row = mysql_fetch_assoc($alarajasumma_chk_res);
+
+        if (empty($alarajasumma_chk_row['summa'])) {
+          $lasklisa .= " and lasku.tunnus NOT IN ({$alaraja_row['tunnukset']}) ";
+        }
+      }
     }
 
     //haetaan kaikki laskutettavat tilaukset uudestaan, nyt meill‰ on maksuehtosplittaukset tehty

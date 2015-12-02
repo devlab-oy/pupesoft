@@ -92,6 +92,39 @@ if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOT
   }
 }
 
+$_onko_myynti = in_array($toim, array('PIKATILAUS','RIVISYOTTO'));
+$_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
+
+if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
+
+  if ($yhtiorow["varaako_jt_saldoa"] != "") {
+    $lisavarattu = " + tilausrivi.varattu";
+  }
+  else {
+    $lisavarattu = "";
+  }
+
+  $query = "SELECT *
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi = 'L'
+              AND tilausrivi.var = 'J'
+              AND tilausrivi.jt {$lisavarattu} > 0
+              AND tilausrivi.tunnus != '{$row['tunnus']}'
+            )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus != '{$laskurow['tunnus']}'
+            AND (lasku.tila = 'N' OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D','X')))";
+  $chk_res = pupe_query($query);
+
+  if (mysql_num_rows($chk_res) != 0) {
+    $varaosavirhe .= t("HUOM: tuotetta on jo jälkitoimituksessa")."<br>";
+  }
+}
+
 if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
   $riviok++;

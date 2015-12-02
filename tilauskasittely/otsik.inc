@@ -3056,6 +3056,26 @@ if ($tila == "" and !isset($jatka)) {
       if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
         echo "<tr><td>".t("Sopimusnumero")."</td><td colspan='3'><input type='text' name='sopimus_numero' size='30' value='{$srow['sopimus_numero']}'></td></tr>";
       }
+
+      if ($yhtiorow["laskun_kanavointitidon_syotto"] == 1 && $toim == "YLLAPITO") {
+        $sel                   = array();
+        $sel[$laskurow["chn"]] = " selected";
+
+        echo "<tr>";
+        echo "<td>" . t("Laskun kanavointitieto") . "</td>";
+        echo "<td colspan='3'><select name='chn'>";
+        echo "<option value='100' {$sel['100']}>" . hae_chn_teksti('100') . "</option>";
+        echo "<option value='010' {$sel['010']}>" . hae_chn_teksti('010') . "</option>";
+        echo "<option value='020' {$sel['020']}>" . hae_chn_teksti('020') . "</option>";
+        echo "<option value='030' {$sel['030']}>" . hae_chn_teksti('030') . "</option>";
+        echo "<option value='111' {$sel['111']}>" . hae_chn_teksti('111') . "</option>";
+        echo "<option value='112' {$sel['112']}>" . hae_chn_teksti('112') . "</option>";
+        echo "<option value='666' {$sel['666']}>" . hae_chn_teksti('666') . "</option>";
+        echo "<option value='667' {$sel['667']}>" . hae_chn_teksti('667') . "</option>";
+        echo "<option value='999' {$sel['999']}>" . hae_chn_teksti('999') . "</option>";
+        echo "</select></td>";
+        echo "</tr>";
+      }
     }
 
     echo "</table><br>";
@@ -3935,7 +3955,8 @@ if (isset($jatka)) {
   if ($laskutuskielto != '') {
     $chn = '999';
   }
-  elseif ($liitostunnus != "") {
+  elseif ($liitostunnus != "" &&
+          !($yhtiorow["laskun_kanavointitidon_syotto"] == 1 && !empty($chn)) && $toim == "YLLAPITO") {
     $chn = $asiarow['chn'];
 
     if ($chn == '') {

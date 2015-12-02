@@ -411,8 +411,19 @@ if (isset($jatka)) {
   }
 }
 
+switch ($yhtiorow["viitteen_kasinsyotto"]) {
+case "Y":
+  $viitten_kasinsyotto_sallittu = $toim == "YLLAPITO";
+  break;
+case "X":
+  $viitten_kasinsyotto_sallittu = true;
+  break;
+default:
+  $viitten_kasinsyotto_sallittu = false;
+}
+
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
+if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -1715,7 +1726,7 @@ if ($tila == "" and !isset($jatka)) {
     $oikea_sarake[$oikea] .= "</td>";
     $oikea++;
 
-    if ($yhtiorow["viitteen_kasinsyotto"] != "") {
+    if ($viitten_kasinsyotto_sallittu) {
       $vasen_sarake[$vasen] = "<td>".t("Viitenumero").":</td><td>";
       $vasen_sarake[$vasen] .= "<input type='text' id='kasinsyotetty_viite' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
       $vasen_sarake[$vasen] .= "<a href='' onclick='lisaa_tarkiste(); return false;'><img src='{$palvelin2}pics/lullacons/add.png'>".t("Lisää tarkiste")."</a>";

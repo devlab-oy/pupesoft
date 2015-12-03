@@ -2856,7 +2856,7 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
       <td><input type='checkbox' name='suoratoimit' $sel></td>
       </tr>";
 
-  if ($jt_huomioi_pvm != '' or $yhtiorow["saldo_kasittely"] == 'U') $sel = 'CHECKED';
+  if ($jt_huomioi_pvm != '' or ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO')) $sel = 'CHECKED';
 
   echo "  <tr>
       <th>".t("Huomioi p‰iv‰m‰‰r‰t j‰lkitilauksissa")."</th>

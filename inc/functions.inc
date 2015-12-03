@@ -16446,7 +16446,7 @@ if (!function_exists("tuotteen_lisatiedot")) {
               AND tuotteen_avainsanat.tuoteno  = '$tuoteno'
               AND tuotteen_avainsanat.laji     LIKE 'lisatieto_%'
               AND tuotteen_avainsanat.selite  != ''
-              ORDER BY tuotteen_avainsanat.selite";
+              ORDER BY avainsana.jarjestys, tuotteen_avainsanat.selite";
     $parares = pupe_query($query);
 
     // Jos tuotteelle ei löydy parametrejä

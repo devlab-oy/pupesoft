@@ -4769,7 +4769,7 @@ if ($fieldname == "viitemaksujen_oikaisut") {
   $jatko = 0;
 }
 
-if ($fieldname == "laskun_kanavointitidon_syotto") {
+if ($fieldname == "laskun_kanavointitiedon_syotto") {
   $apu = $trow[$i];
   $sel = array($apu => " selected");
 

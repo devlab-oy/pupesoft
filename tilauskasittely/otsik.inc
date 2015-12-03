@@ -3057,7 +3057,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<tr><td>".t("Sopimusnumero")."</td><td colspan='3'><input type='text' name='sopimus_numero' size='30' value='{$srow['sopimus_numero']}'></td></tr>";
       }
 
-      if ($yhtiorow["laskun_kanavointitidon_syotto"] == 1 && $toim == "YLLAPITO") {
+      if ($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && $toim == "YLLAPITO") {
         $sel                   = array();
         $sel[$laskurow["chn"]] = " selected";
 
@@ -3956,7 +3956,7 @@ if (isset($jatka)) {
     $chn = '999';
   }
   elseif ($liitostunnus != "" &&
-          !($yhtiorow["laskun_kanavointitidon_syotto"] == 1 && !empty($chn)) && $toim == "YLLAPITO") {
+          !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn)) && $toim == "YLLAPITO") {
     $chn = $asiarow['chn'];
 
     if ($chn == '') {

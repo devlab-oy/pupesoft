@@ -76,7 +76,7 @@ if (count($lisatiedot) > 0) {
   echo "<ul>";
 
   foreach ($lisatiedot as $lisatieto) {
-    echo "<li>{$lisatiedot["kentta"]} &raquo; {$lisatiedot["selite"]}</li>";
+    echo "<li>{$lisatieto["kentta"]} &raquo; {$lisatieto["selite"]}</li>";
   }
 
   echo "</ul>";

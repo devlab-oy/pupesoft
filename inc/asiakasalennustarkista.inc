@@ -172,7 +172,7 @@ if (!function_exists("asiakasalennustarkista")) {
     if ($chryhma == '**') {
       // Jos on syötetty tuote kaikki tuotteet-"ryhmän" lisäksi
       if ($chtuoteno != '' and mysql_field_name($result, $i) == 'ryhma') {
-        $virhe[$i] = t("Alennusryhmävalintaa ei liittää tuotteeseen!");
+        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää tuotteeseen!");
       }
       // Asiakasvalinta pakollinen kaikki tuotteet-"ryhmälle"
       if ($chastunn == '' and mysql_field_name($result, $i) == 'asiakas') {
@@ -181,6 +181,14 @@ if (!function_exists("asiakasalennustarkista")) {
       // Jos on syötetty ytunnus kaikki tuotteet-"ryhmän" lisäksi
       if ($chytunnus != '' and mysql_field_name($result, $i) == 'ytunnus') {
         $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää y-tunnukseen!");
+      }
+      // Jos on syötetty piiri kaikki tuotteet-"ryhmän" lisäksi
+      if ($chpiiri != '' and mysql_field_name($result, $i) == 'piiri') {
+        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää piiriin!");
+      }
+      // Jos on syötetty asiakas_segmentti kaikki tuotteet-"ryhmän" lisäksi 
+      if ($chsegmentti != '' and mysql_field_name($result, $i) == 'asiakas_segmentti') {
+        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää asiakas-segmenttiin!");
       }
     }
 

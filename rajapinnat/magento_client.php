@@ -1399,6 +1399,12 @@ class MagentoClient {
     // Pitää ensin poistaa kaikki tuotteen kuvat Magentosta
     $magento_pictures = $this->listaa_tuotekuvat($product_id);
 
+    // Ei poisteta tuotekuvia Magentosta jos ei ole mitään tilalle
+    if (count($tuotekuvat) == 0) {
+      $this->log("Ei poistettu kuvia tuotteelta " . print_r($product_id, true));
+      return false;
+    }
+
     // Poistetaan kuvat
     foreach ($magento_pictures as $file) {
       $this->poista_tuotekuva($product_id, $file);

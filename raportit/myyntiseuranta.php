@@ -118,6 +118,7 @@ else {
 
     echo "<br>\n\n\n";
     echo "<form method='post' action='myyntiseuranta.php'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
     echo "<input type='hidden' name='tee' value='go'>";
     echo "<input type='hidden' name='kaikki_parametrit_serialisoituna' value=''>";
 
@@ -217,7 +218,10 @@ else {
       echo "<input type='hidden' name='yhtiot[]' value='{$kukarow['yhtio']}'>";
     }
 
-    $noautosubmit = TRUE;
+    if (!$toim == "AUTOSUBMIT") {
+      $noautosubmit = true;
+    }
+
     $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA", "KUSTP", "KOHDE", "PROJEKTI");
     $monivalintalaatikot_normaali = array();
 
@@ -2990,7 +2994,7 @@ else {
                   }
                   $asiakasosasto_temp = $row[$ken_nimi];
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on piiri, haetaan sen nimi
@@ -3027,7 +3031,7 @@ else {
                     $serialisoitavat_muuttujat["ruksit"][30] = "tuote";
                   }
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -3060,7 +3064,7 @@ else {
 
                   $tuoteosasto_temp = $row[$ken_nimi];
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -3087,7 +3091,7 @@ else {
                     $serialisoitavat_muuttujat["ruksit"][30] = "tuote";
                   }
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on myyjä, haetaan sen nimi
@@ -3406,7 +3410,7 @@ else {
                           unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
                         }
 
-                        echo "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a>";
+                        echo "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a>";
                         echo "</td>";
                       }
                       elseif ($ken_nimi == 'tuoteosasto') {
@@ -3424,7 +3428,7 @@ else {
                         }
 
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
-                        echo "<td><a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a></td>";
+                        echo "<td><a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a></td>";
                       }
                       else {
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
@@ -3632,6 +3636,7 @@ else {
             echo "<table>";
             echo "<tr><th>", t("Tallenna tulos"), ":</th>";
             echo "<form method='post' class='multisubmit'>";
+            echo "<input type='hidden' name='toim' value='{$toim}'>";
             echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
             echo "<input type='hidden' name='kaunisnimi' value='".t('Myynninseuranta').".xlsx'>";
             echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";

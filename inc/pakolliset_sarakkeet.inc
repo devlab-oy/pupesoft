@@ -312,6 +312,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $pakolliset  = array("VARASTO_POSTINO", "POSTINO", "KM", "POSTITP");
       $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $wherelliset = array("VARASTO_POSTINO", "POSTINO");
+      $saakopoistaa = TRUE;
       break;
     case "abc_parametrit" :
       $pakolliset  = array("TYYPPI", "LUOKKA");

@@ -33,12 +33,14 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-if (isset($ajax_popup)) {
-  require "tuotetiedot.inc";
-  exit;
-}
+if ($kukarow['extranet'] == '') {
+  if (isset($ajax_popup)) {
+    require "tuotetiedot.inc";
+    exit;
+  }
 
-js_popup();
+  js_popup();
+}
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
   or $kukarow["naytetaan_katteet_tilauksella"] == "B"

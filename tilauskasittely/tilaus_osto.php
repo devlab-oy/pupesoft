@@ -16,7 +16,7 @@ if (isset($_REQUEST["tee"])) {
 
 require "../inc/parametrit.inc";
 
-if (isset($ajax_popup)) {
+if ($kukarow['extranet'] == '' && isset($ajax_popup)) {
   require "tuotetiedot.inc";
   exit;
 }

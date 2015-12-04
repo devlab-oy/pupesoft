@@ -57,8 +57,8 @@ if (!isset($mista_tullaan)) $mista_tullaan = "";
 if (!isset($jt_tyyppi)) $jt_tyyppi = "";
 
 // ennakoissa ei setata jt_huomioi_pvm automaattisesti
-// jt:ssä setataan (sitä ei myöskään näytetä käyttöliittymässä kys. parametrillä)
-if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO') {
+// jälkkäreissä setataan jos ei tulla jtselauksen kautta
+if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO' and strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") === FALSE) {
   $jt_huomioi_pvm = "on";
 }
 
@@ -2856,15 +2856,12 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
       <td><input type='checkbox' name='suoratoimit' $sel></td>
       </tr>";
 
-  if ($yhtiorow["saldo_kasittely"] != 'U' or $toim == 'ENNAKKO') {
+  if ($jt_huomioi_pvm != '' or ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO')) $sel = 'CHECKED';
 
-    if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
-
-    echo "  <tr>
-        <th>".t("Huomioi päivämäärät jälkitilauksissa")."</th>
-        <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
-        </tr>";
-  }
+  echo "  <tr>
+      <th>".t("Huomioi päivämäärät jälkitilauksissa")."</th>
+      <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
+      </tr>";
 
   echo "</table>
 

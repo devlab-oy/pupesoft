@@ -59,7 +59,7 @@ if (isset($isizelogo) and is_array($isizelogo)) {
 }
 
 echo "<td style='width: 1px; padding: 0; margin: 0; padding-left: 15px;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";
-echo "<td style='padding-left: 15px;'>$yhtiorow[nimi]<br>$kukarow[nimi]</td>";
+echo "<td style='padding-left: 15px;'><div id='firmadiv'><span id='firmaspan' style='white-space: nowrap;'>$yhtiorow[nimi]<br>$kukarow[nimi]</span></div></td>";
 echo "<td class='ylapalkki'><a class='puhdas' target='_top' href='{$palvelin2}'><img src='{$palvelin2}pics/facelift/icons/icon-home.png'><br>".t("Etusivu")."</a></td>";
 
 $query = "SELECT *
@@ -129,7 +129,22 @@ else {
 
 echo "
   <script>
+      $( window ).resize(function() {
+        if ($('#firmadiv').width() < ($('#firmaspan').width()+10)) {
+          $('#firmaspan').hide();
+        }
+
+        if ($('#firmadiv').width() > ($('#firmaspan').width()+10)) {
+          $('#firmaspan').show();
+        }
+      });
+
       $(document).ready(function(){
+
+        if ($('#firmadiv').width() < ($('#firmaspan').width()+10)) {
+          $('#firmaspan').hide();
+        }
+
         $('#maaginen_yla').click(function(){
            if (parent.document.getElementsByTagName('frameset')[0].rows=='90,*') {
              parent.document.getElementsByTagName('frameset')[0].rows='20,*';

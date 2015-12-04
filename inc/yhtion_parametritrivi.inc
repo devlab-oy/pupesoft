@@ -62,6 +62,22 @@ if ($fieldname == "verkkolasku_lah") {
   $jatko = 0;
 }
 
+if ($fieldname == "finvoice_versio") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = "";
+
+  if ($trow[$i] == '2') {
+    $sel = "selected";
+  }
+
+  $ulos .= "<option value = ''>".t("Finvoice 1.2");
+  $ulos .= "<option value = '2' $sel>".t("Finvoice 2.01");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "verkkolasku_vienti") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -335,6 +351,11 @@ if ($fieldname == "koontilaskut_yhdistetaan") {
   $jatko = 0;
 }
 
+if ($fieldname == "koontilaskut_alarajasumma") {
+  $ulos = "<td><input type='text' name='{$nimi}' value = '{$trow[$i]}'></td>";
+  $jatko = 0;
+}
+
 if ($fieldname == "koontilahete_kollitiedot") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -535,6 +556,24 @@ if ($fieldname == "ostolaskujen_kurssipaiva") {
   $ulos .= "<option value = '0' $sel[0]>".t("Ostolaskun valuuttakurssi syˆttˆp‰iv‰m‰‰r‰n mukaan");
   $ulos .= "<option value = '1' $sel[1]>".t("Ostolaskun valuuttakurssi kirjausp‰iv‰m‰‰r‰n mukaan");
   $ulos .= "<option value = '2' $sel[2]>".t("Ostolaskun valuuttakurssi laskun p‰iv‰yksen mukaan");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "myyntilaskujen_kurssipaiva") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = (int) $trow[$i];
+  $sel = array("0" => "", "1" => "", "2" => "", "3" => "");
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>".t("Myyntilaskun valuuttakurssi tilauksen luontip‰iv‰n mukaan");
+  $ulos .= "<option value = '1' $sel[1]>".t("Myyntilaskun valuuttakurssi tilauksen toimitusp‰iv‰n mukaan");
+  $ulos .= "<option value = '2' $sel[2]>".t("Myyntilaskun valuuttakurssi laskun p‰iv‰yksen mukaan");
+  $ulos .= "<option value = '3' $sel[3]>".t("Myyntilaskun valuuttakurssi laskutushetken mukaan");
 
   $ulos .= "</select></td>";
 
@@ -785,6 +824,19 @@ if ($fieldname == "puute_jt_kerataanko") {
   $jatko = 0;
 }
 
+if ($fieldname == "myynti_jt_huom") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei ilmoiteta k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella ilmoitetaan k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "saldo_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -798,10 +850,13 @@ if ($fieldname == "saldo_kasittely") {
   elseif ($trow[$i] == "T") {
     $sel2 = "selected";
   }
+  elseif ($trow[$i] == "U") {
+    $sel3 = "selected";
+  }
 
-
-  $ulos .= "<option value = ''  $sel1>".t("Myyt‰viss‰-kpl ajasta riippumaton")."</option>";
-  $ulos .= "<option value = 'T' $sel2>".t("Myyt‰viss‰-kpl lasketaan ker‰yspvm:n mukaan")."</option>";
+  $ulos .= "<option value = ''  $sel1>".t("Myyt‰viss‰m‰‰r‰ ajasta riippumaton")."</option>";
+  $ulos .= "<option value = 'T' $sel2>".t("Myyt‰viss‰m‰‰r‰ lasketaan ker‰yspvm:n mukaan")."</option>";
+  $ulos .= "<option value = 'U' $sel3>".t("Myyt‰viss‰m‰‰r‰ lasketaan ker‰yspvm:n mukaan niin, ett‰ tulevat tapahtumat vaikuttavat t‰m‰n hetken myyt‰viss‰m‰‰r‰‰n")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3563,16 +3618,12 @@ if ($fieldname == "myyntiera_pyoristys" ) {
 
   $sela = $selb = "";
 
-  if ($trow[$i] == 'K') {
-    $selb = "selected";
-  }
-  else {
-    $sela = "selected";
-  }
+  $sel = array($trow[$i] => 'selected') + array('','K','S');
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' ' $sela>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'K' $selb>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+        <option value = ' '>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
       </select></td>";
 
   $jatko = 0;
@@ -4681,6 +4732,24 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
   $ulos .= "<option value = 'K' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "pdf_ruudulle_kieli") {
+  $sel = $trow[$i] == "A" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena yhtiˆn kielell‰");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena asiakkaan kielell‰");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

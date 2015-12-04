@@ -805,6 +805,10 @@ if ($upd == 1) {
       }
     }
 
+    if ($toim == "tuote") {
+      generoi_hinnastot($tunnus);
+    }
+
     if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
       $query = "SELECT *
@@ -1254,7 +1258,12 @@ if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and isset($js_open_y
     $otsikrow = mysql_fetch_assoc($otsikres);
   }
   elseif ($toim == "yhteyshenkilo") {
-    $query = "SELECT tunnus value, nimi text
+    $kentta = "nimi";
+
+    if ($js_open_yp == "yhteyshenkilo_tekninen" or $js_open_yp == "yhteyshenkilo_kaupallinen") {
+      $kentta = "tunnus";
+    }
+    $query = "SELECT $kentta value, nimi text
               FROM yhteyshenkilo
               WHERE tunnus = '$tmp_tuote_tunnus'
               and tyyppi   = 'A'
@@ -1631,6 +1640,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
   $result = pupe_query($query);
 
   if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
+
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 
     if (isset($liitostunnus)) echo "&liitostunnus={$liitostunnus}";
@@ -1645,6 +1655,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
+        <input type = 'hidden' name = 'lopetus_muut' value = '$lopetus_muut'>
         <input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
   }
 
@@ -2514,6 +2525,14 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   // Ylläpito.php:n formi kiinni vasta tässä
   echo "</form>";
 
+  $lopetus_muut  = $palvelin2;
+  $lopetus_muut .= "yllapito.php?toim=$toim";
+  $lopetus_muut .= "//tunnus=$trow[tunnus]";
+
+  if (!empty($lopetus)) {
+    $lopetus_muut = "$lopetus/SPLIT/$lopetus_muut";
+  }
+
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhtio") {
     echo "<iframe id='yhtion_toimipaikat_iframe' name='yhtion_toimipaikat_iframe' src='yllapito.php?toim=yhtion_toimipaikat&from=yllapito&ohje=off&haku[4]=@$trow[yhtio]&lukitse_avaimeen=$trow[yhtio]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
   }
@@ -2541,11 +2560,11 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote&mista=asiakas%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&mista=asiakas&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@{$trow['tunnus']}&lukitse_avaimeen={$trow['tunnus']}' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&mista=asiakas&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@{$trow['tunnus']}&lukitse_avaimeen={$trow['tunnus']}&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
       echo "<br />";
     }
 
@@ -2648,7 +2667,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK", $toimi_array)) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

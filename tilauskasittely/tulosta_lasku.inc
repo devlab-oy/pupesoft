@@ -312,8 +312,15 @@ if (!function_exists('alku')) {
 
     $laskutyyppi == 17 ? $rivi_ind-- : $rivi_ind++;
 
-    $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli),                 $page_lasku[$sivu], $pieni);
-    if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"],   $page_lasku[$sivu], $boldi);
+    if ($toim == 'PROFORMA' and $laskutyyppi == 20) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Proformalasku", $kieli), $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["tunnus"], $page_lasku[$sivu], $boldi);
+    }
+    else {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli), $page_lasku[$sivu], $pieni);
+      if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"], $page_lasku[$sivu], $boldi);
+    }
+
     $rivi_ind = $laskutyyppi == 17 ? $rivi_ind + 2 : $rivi_ind + 1;
 
     if (!in_array($laskutyyppi, array(8, 20)) and !kyseessa_eramaksu($laskurow)) {
@@ -496,6 +503,11 @@ if (!function_exists('alku')) {
 
     if (trim($laskurow['sisviesti1']) != '') {
       $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
+    }
+
+    // Lisätään kommenttiin sopimus_numero se on asetettu ja laiterekisteri käytössä
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $laskurow['sopimus_numero'] != '') {
+      $komm .= "\n".t('Sopimus').": {$laskurow['sopimus_numero']}";
     }
 
     // Tutkitaan onko tämä työmääräys
@@ -2715,6 +2727,16 @@ if (!function_exists("tulosta_lasku")) {
 
     $laresult = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laresult);
+
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+      $query = "SELECT * 
+                FROM laskun_lisatiedot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'";
+      $lisresult = pupe_query($query);
+      $lisarow = mysql_fetch_assoc($lisresult);
+      $laskurow['sopimus_numero'] = $lisarow['sopimus_numero'];
+    }
 
     if ($toim == 'PROFORMA') {
       $asiakas_apu_query = "SELECT *

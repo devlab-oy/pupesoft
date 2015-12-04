@@ -1047,7 +1047,7 @@ else {
 if ($toim == '' and $naytetaanko_saldot == 'kylla') {
   echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=ei&toimipaikka={$toimipaikka}'>" . t("Piilota saldot keräypäivänä") . "</a>";
 }
-elseif ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '') {
+elseif (!empty($yhtiorow["saldo_kasittely"]) and $toim == '') {
   echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=kylla&toimipaikka={$toimipaikka}'>" .t("Näytä saldot keräyspäivänä") . "</a>";
 }
 
@@ -1921,7 +1921,8 @@ elseif ($toim == 'YLLAPITO') {
             lasku.varasto,
             tunnusnippu,
             group_concat(tilausrivi.tunnus) tilausrivitunnukset,
-            sopimus_loppupvm
+            sopimus_loppupvm,
+            laskun_lisatiedot.sopimus_numero
             FROM lasku use index (tila_index)
             JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
@@ -2206,7 +2207,7 @@ if (mysql_num_rows($result) != 0) {
   // Jos yhtiönparametri saldo_kasittely on asetettu tilaan
   // "myytävissä-kpl lasketaan keräyspäivän mukaan", näytetään onko tuotteita saldoilla
   // syötettynä keräyspäivänä.
-  if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
+  if (!empty($yhtiorow["saldo_kasittely"]) and $toim == '' and $naytetaanko_saldot == 'kylla') {
     echo "<th>".t("Riittääkö saldot keräyspäivänä")."?</th>";
   }
 
@@ -2517,6 +2518,9 @@ if (mysql_num_rows($result) != 0) {
                 }
               }
             }
+          }
+          if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $row['sopimus_numero'] != '') {
+            echo "<br>".t('Sopimusnumero').": {$row['sopimus_numero']}";
           }
           echo "</td>";
         }
@@ -2865,7 +2869,7 @@ if (mysql_num_rows($result) != 0) {
 
       // Tarkastetaan riittääkö saldo keräyspäivänä.
       // Haetaan ensin tilauksen tilausrivit ja tarkistetaan jokaisen tuotteen saldot erikseen.
-      if ($yhtiorow['saldo_kasittely'] == 'T' and $toim == '' and $naytetaanko_saldot == 'kylla') {
+      if (!empty($yhtiorow["saldo_kasittely"]) and $toim == '' and $naytetaanko_saldot == 'kylla') {
         $_query = "SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tilkpl, tilausrivi.kerayspvm, tilausrivi.yksikko
                    FROM tilausrivi
                    JOIN tuote ON (tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa = '')

@@ -1496,12 +1496,59 @@ if (!function_exists("tuoteperhe_myytavissa")) {
   }
 }
 
+if (!function_exists("var_kaannos")) {
+  function var_kaannos($var) {
+
+    switch ($var) {
+    case "J":
+      return t("Jälkitoim");
+    case "H":
+      return t("Hyväksy");
+    case "P":
+      return t("Puute");
+    default:
+      return "";
+    }
+  }
+}
+
 if (!function_exists("saldo_myytavissa")) {
-  function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
+  function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '', $tulevaisuuteen = TRUE) {
 
     // Tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
     // Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
     global $kukarow, $yhtiorow;
+
+    // Myytävissämäärä lasketaan keräyspvm:n mukaan niin, että tulevat tapahtumat vaikuttavat tämän hetken myytävissämäärään
+    if ($yhtiorow["saldo_kasittely"] == "U" and $tulevaisuuteen) {
+
+      if (empty($pvm)) {
+        $pvm = date("Y-m-d");
+      }
+
+      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
+
+      $query  = " SELECT distinct tuoteno, kerayspvm
+                  FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
+                  WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                  and tilausrivi.tyyppi in ('L','E','G','V','W','M','O')
+                  and tilausrivi.varattu + tilausrivi.jt != 0
+                  and tilausrivi.tuoteno = '$tuoteno'
+                  and tilausrivi.kerayspvm > '$pvm'
+                  and tilausrivi.var != 'P'
+                  ORDER BY kerayspvm";
+      $kerres = pupe_query($query);
+
+      while ($kerrow = mysql_fetch_assoc($kerres)) {
+        list( , , $myyta) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $kerrow['kerayspvm'], $era, FALSE);
+
+        if ($myyta < $myytavissa) {
+          $myytavissa = $myyta;
+        }
+      }
+
+      return array($saldo, $hyllyssa, $myytavissa, TRUE);
+    }
 
     $varaako_jt_saldoa = "";
 
@@ -1511,7 +1558,7 @@ if (!function_exists("saldo_myytavissa")) {
       $tyyppi = "";
     }
     elseif ($tyyppi == "JTSPEC2" and $yhtiorow["varaako_jt_saldoa"] != "") {
-      // JT-rivit varaavat saldoa, mutta nyt ei halutaan huomioida VAIN tulevaisuudessa toimitettavat JT-rivit
+      // JT-rivit varaavat saldoa, mutta nyt halutaan huomioida VAIN tulevaisuudessa toimitettavat JT-rivit
       $varaako_jt_saldoa = " and (tilausrivi.var != 'J' or (tilausrivi.var = 'J' and tilausrivi.kerayspvm > CURDATE())) ";
       $tyyppi = "";
     }
@@ -3851,7 +3898,7 @@ if (!function_exists("alehinta")) {
     // Jos meillä on lasku menossa ulkomaille
     // Tietyissä tapauksissa yhtiorow maa voi olla sama kuin laskun maa, mutta vat_numerosta tiedetään,
     // että ollaan verovelsollisia tähä maahan
-    if ($yhtiorow["vat_numero"] != "" or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
+    if ((isset($yhtiorow["vat_numero"]) and $yhtiorow["vat_numero"] != "") or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
 
       // tutkitaan ollaanko siellä alv-rekisteröity
       $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
@@ -9473,6 +9520,95 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
   }
 }
 
+if (!function_exists('livesearch_tuotemerkkihaku')) {
+  function livesearch_tuotemerkkihaku() {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      if (empty($kukarow['kieli'])) {
+        $kieli = $yhtiorow['kieli'];
+      }
+      else {
+        $kieli = $kukarow['kieli'];
+      }
+
+      $query = "SELECT selite,
+                selitetark
+                FROM avainsana
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND laji       = 'TUOTEMERKKI'
+                AND kieli      = '{$kieli}'
+                AND selitetark LIKE '%{$haku}%'";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='tuotemerkki_valinta_$row[selite]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'tuotemerkki_valinta_' && aEls[iEl].id != 'tuotemerkki_valinta_$row[selite]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='$row[selite]';";
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
+                style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
+                <font style='font-weight:bold'>{$row['selite']} - {$row['selitetark']}</font>
+                </span>
+              </div><div name='selectValues$hakuid' id='$row[selite]'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result). " ", t("tuotemerkkiä"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei tuotemerkkiä").".</font></div>";
+      }
+
+      livesearch_trimmaa_leveys($hakuid);
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+
+    pupeslave_stop();
+  }
+}
+
 if (!function_exists("livesearch_kayttajahaku")) {
   function livesearch_kayttajahaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -11380,34 +11516,34 @@ if (!function_exists("jt_toimita")) {
     if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
 
     if ($automaattinen_poiminta != '') {
-      $asiakasno         = $toimittaja;
-      $toimittaja        = "";
-      $asiakasid        = $toimittajaid;
-      $toimittajaid      = "";
-      $asiakasmaa       = "";
-      $jarj           = "luontiaika";
-      $tilaus          = "";
-      $toimi          = "";
-      $suoratoimit      = "";
-      $tilaus_on_jo      = "KYLLA";
+      $asiakasno            = $toimittaja;
+      $toimittaja           = "";
+      $asiakasid            = $toimittajaid;
+      $toimittajaid         = "";
+      $asiakasmaa           = "";
+      $jarj                 = "luontiaika";
+      $tilaus               = "";
+      $toimi                = "";
+      $suoratoimit          = "";
+      $tilaus_on_jo         = "KYLLA";
       $suoratoimitus_rivit  = array();
       $suoratoimitus_paikat = array();
       $from_varastoon_inc   = "";
-      $jt_huomioi_pvm      = $huomioi_pvm;
+      $jt_huomioi_pvm       = $huomioi_pvm;
     }
     else {
-      $asiakasno         = "";
-      $asiakasid        = "";
-      $asiakasmaa       = "";
-      $jarj           = "luontiaika";
-      $tilaus          = "";
-      $toimi          = "";
-      $suoratoimit      = "";
-      $tilaus_on_jo      = "";
+      $asiakasno            = "";
+      $asiakasid            = "";
+      $asiakasmaa           = "";
+      $jarj                 = "luontiaika";
+      $tilaus               = "";
+      $toimi                = "";
+      $suoratoimit          = "";
+      $tilaus_on_jo         = "";
       $suoratoimitus_rivit  = $jtrivit;
       $suoratoimitus_paikat = $jtrivit_paikat;
       $from_varastoon_inc   = "varastoon.inc";
-      $jt_huomioi_pvm      = $huomioi_pvm;
+      $jt_huomioi_pvm       = $huomioi_pvm;
     }
 
     if (!@include 'jtselaus.php') {
@@ -13635,13 +13771,13 @@ if (!function_exists("laskutuspaiva")) {
     }
     elseif ($mika == 'keski') {
       // Keskimmäinen
-      $keskipaiva = date('N', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+      $keskipaiva = date('N', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
 
       if ($arki and $keskipaiva > 5) {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2)+(8-$keskipaiva), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2)+(8-$keskipaiva), date('Y')));
       }
       else {
-        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, date('m'), round(date('t')/2), date('Y')));
+        $seuraavalaskutus = date('Y-m-d', mktime(0, 0, 0, (date('m')+$seuraava_kk), round(date('t')/2), date('Y')));
       }
     }
     elseif ($mika == 'vika') {
@@ -28439,7 +28575,7 @@ if (!function_exists('varaston_tuotepaikkojen_saldo')) {
       $varastopaikat = "  AND tuotepaikat.varasto IN ('".implode("','", $varastot)."')";
     }
 
-    if ($yhtiorow["saldo_kasittely"] == "T") {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       $saldoaikalisa = date("Y-m-d");
     }
     else {
@@ -32368,5 +32504,59 @@ if (!function_exists("hae_tuoteperhe")) {
     }
 
     return $tuoteperhe;
+  }
+}
+
+if (!function_exists('generoi_hinnastot')) {
+  /**
+   * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi
+   *
+   * @param int $tuote_tunnus Tuotteen tunnus
+   *
+   * @return bool Luotiinko tai päivitettinkö hinnasto
+   */
+  function generoi_hinnastot($tuote_tunnus) {
+    global $kukarow;
+
+    if (!is_numeric($tuote_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT myyntihinta, tuoteno
+              FROM tuote
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus = '{$tuote_tunnus}'";
+    $tuote = pupe_query($query);
+
+    if (mysql_num_rows($tuote) != 1) {
+      return false;
+    }
+
+    $tuote = mysql_fetch_assoc($tuote);
+
+    $query = "SELECT hinnastokurssi, nimi
+              FROM valuu
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND hinnastokurssi > 0";
+    $valuu_result = pupe_query($query);
+
+    while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
+
+      $query = "INSERT INTO hinnasto SET
+                alkupvm    = NOW(),
+                hinta      = '{$hinta}',
+                laatija    = '{$kukarow["kuka"]}',
+                luontiaika = NOW(),
+                muutospvm  = NOW(),
+                muuttaja   = '{$kukarow["kuka"]}',
+                selite     = 'Generoitu hinnasto',
+                tuoteno    = '{$tuote["tuoteno"]}',
+                valkoodi   = '{$valuu["nimi"]}',
+                yhtio      = '{$kukarow["yhtio"]}'";
+      return pupe_query($query);
+    }
+
+    return false;
   }
 }

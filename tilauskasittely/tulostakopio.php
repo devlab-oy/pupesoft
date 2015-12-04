@@ -24,13 +24,14 @@ if (!isset($laskunro)) $laskunro = "";
 if (!isset($ytunnus)) $ytunnus = "";
 if (!isset($lopetus)) $lopetus = "";
 if (!isset($toim) or $toim == "") $toim = "LASKU";
-if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];
 if (!isset($tila)) $tila = "";
 if (!isset($tunnus)) $tunnus = "";
 if (!isset($laskunroloppu)) $laskunroloppu = "";
 if (!isset($kerayseran_numero)) $kerayseran_numero = "";
 if (!isset($kerayseran_tilaukset)) $kerayseran_tilaukset = "";
 if (!isset($toimipaikka)) $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+
+if (empty($kieli) and $yhtiorow['pdf_ruudulle_kieli'] == "") $kieli = $yhtiorow['kieli'];
 
 $kaikkilomakepohjat = FALSE;
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
@@ -658,6 +659,7 @@ if ($tee == "ETSILASKU") {
   }
 
   if ($toim == "LASKU" or $toim == "VIENTILASKU") {
+
     //myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
     $where1 .= " lasku.tila = 'U' ";
 
@@ -1399,6 +1401,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
+    if (empty($kieli)) {
+      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $kielires = pupe_query($query);
+      $kielirow = mysql_fetch_assoc($kielires);
+
+      $kieli = $kielirow['kieli'];
+    }
+
     if ($toim == "TARJOUS") {
       if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
         $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
@@ -1956,7 +1967,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     }
 
     if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
-
       if ($toim == "KOONTILAHETE") {
 
         $query = "SELECT lasku.*,

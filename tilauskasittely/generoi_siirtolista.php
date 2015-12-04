@@ -365,7 +365,14 @@ if (!$php_cli) {
 
   echo "<tr><th>", t("Jätä siirtolista kesken"), ":</th><td><input type='checkbox' name = 'kesken' value='X' {$c}></td></tr>";
   echo "<tr><th>", t("Siirrä myös tuoteperheen lapsituotteet"), ":</th><td><input type='checkbox' name = 'lapsituotteet' value='X' {$lapsituote_chk}></td></tr>";
-  echo "<tr><th>", t("Huomioi siirrettävän tuotteen myyntierä"), ":</th><td><input type='checkbox' name = 'myyntiera' value='X' {$myyntiera_chk}></td></tr>";
+
+  if ($yhtiorow['myyntiera_pyoristys'] != 'S') {
+    echo "<tr><th>", t("Huomioi siirrettävän tuotteen myyntierä"), ":</th><td><input type='checkbox' name = 'myyntiera' value='X' {$myyntiera_chk}></td></tr>";
+  }
+  else {
+    $myyntiera = "";
+  }
+
   echo "<tr><th>", t("Rivejä per siirtolista (tyhjä = 20)"), ":</th><td><input type='text' size='8' value='{$olliriveja}' name='olliriveja'></td></tr>";
   echo "<tr><th>", t("Ei siirretä jos tarve on suurempi tai yhtä suuri kuin saatavilla oleva määrä"), "</th>";
   echo "<td><input type='checkbox' name='ei_siirreta_jos_tarve_ylittyy' value='X' {$ei_siirreta_jos_tarve_ylittyy_chk} /></td></tr>";

@@ -11,6 +11,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
   else {
     echo "<font class='head'>".t("JT rivit")."</font><hr>";
   }
+
+  if (function_exists("js_popup")) {
+    echo js_popup(-100);
+  }
 }
 
 if (!isset($asiakasid)) $asiakasid = "";
@@ -52,13 +56,9 @@ if (!isset($automaattinen_poiminta)) $automaattinen_poiminta = "";
 if (!isset($mista_tullaan)) $mista_tullaan = "";
 if (!isset($jt_tyyppi)) $jt_tyyppi = "";
 
-if (function_exists("js_popup")) {
-  echo js_popup(-100);
-}
-
 // ennakoissa ei setata jt_huomioi_pvm automaattisesti
-// jt:ssä setataan (sitä ei myöskään näytetä käyttöliittymässä kys. parametrillä)
-if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO') {
+// jälkkäreissä setataan jos ei tulla jtselauksen kautta
+if ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO' and strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") === FALSE) {
   $jt_huomioi_pvm = "on";
 }
 
@@ -773,7 +773,7 @@ if ($tee == "JATKA") {
     $tuotelisa .= " and tuote.osasto = '$tuoteosasto' ";
   }
 
-  if ($ei_tehdastoimitus_tuotteita != "") {
+  if (!empty($ei_tehdastoimitus_tuotteita)) {
     $tuotelisa .= " and tuote.status != 'T' ";
   }
 
@@ -2856,15 +2856,12 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
       <td><input type='checkbox' name='suoratoimit' $sel></td>
       </tr>";
 
-  if ($yhtiorow["saldo_kasittely"] != 'U' or $toim == 'ENNAKKO') {
+  if ($jt_huomioi_pvm != '' or ($yhtiorow["saldo_kasittely"] == 'U' and $toim != 'ENNAKKO')) $sel = 'CHECKED';
 
-    if ($jt_huomioi_pvm != '') $sel = 'CHECKED';
-
-    echo "  <tr>
-        <th>".t("Huomioi päivämäärät jälkitilauksissa")."</th>
-        <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
-        </tr>";
-  }
+  echo "  <tr>
+      <th>".t("Huomioi päivämäärät jälkitilauksissa")."</th>
+      <td><input type='checkbox' name='jt_huomioi_pvm' $sel></td>
+      </tr>";
 
   echo "</table>
 

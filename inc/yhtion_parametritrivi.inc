@@ -351,6 +351,11 @@ if ($fieldname == "koontilaskut_yhdistetaan") {
   $jatko = 0;
 }
 
+if ($fieldname == "koontilaskut_alarajasumma") {
+  $ulos = "<td><input type='text' name='{$nimi}' value = '{$trow[$i]}'></td>";
+  $jatko = 0;
+}
+
 if ($fieldname == "koontilahete_kollitiedot") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -814,6 +819,19 @@ if ($fieldname == "puute_jt_kerataanko") {
   $ulos .= "<option value = 'P' $sel[P]>".t("Puuterivit ker‰t‰‰n")."</option>";
   $ulos .= "<option value = 'J' $sel[J]>".t("JT-rivit ker‰t‰‰n")."</option>";
   $ulos .= "<option value = 'Q' $sel[Q]>".t("Puuterivit ja JT-rivit ker‰t‰‰n")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "myynti_jt_huom") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei ilmoiteta k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella ilmoitetaan k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3600,16 +3618,12 @@ if ($fieldname == "myyntiera_pyoristys" ) {
 
   $sela = $selb = "";
 
-  if ($trow[$i] == 'K') {
-    $selb = "selected";
-  }
-  else {
-    $sela = "selected";
-  }
+  $sel = array($trow[$i] => 'selected') + array('','K','S');
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' ' $sela>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'K' $selb>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+        <option value = ' '>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
       </select></td>";
 
   $jatko = 0;
@@ -4706,6 +4720,24 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
   $ulos .= "<option value = 'K' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "pdf_ruudulle_kieli") {
+  $sel = $trow[$i] == "A" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena yhtiˆn kielell‰");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= t("PDF-lomakkeet avataan ruudulle oletuksena asiakkaan kielell‰");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

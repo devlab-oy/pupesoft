@@ -18,7 +18,7 @@ if (!function_exists("perusalennustarkista")) {
                    and ryhma   = '".trim($t[$i])."'";
         $chkressiresult = pupe_query($query);
 
-        if (mysql_num_rows($chkressiresult) > 0) {
+        if (mysql_num_rows($chkressiresult) > 0 or trim($t[$i]) == '**') {
           $virhe[$i] = t("Alennusryhm‰ on jo perustettu j‰rjestelm‰‰n");
         }
       }

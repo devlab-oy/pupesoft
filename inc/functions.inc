@@ -5763,6 +5763,28 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Asiakaspiirin tuotealeryhmän alennus");
       }
 
+      // 11,5. tuote.aleryhmŠ == ** (kaikki tuotteet) asiakas.tunnus aleprosentti
+      if (jatka_ale($ale)) {
+        $query = "SELECT alennus, alennuslaji
+                  FROM asiakasalennus USE INDEX (yhtio_asiakas_ryhma)
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and piiri    = ''
+                  and ryhma    = '**'
+                  and ytunnus  = ''
+                  and asiakas  > 0
+                  and asiakas_ryhma = ''
+                  and asiakas_segmentti = ''
+                  and tuoteno = ''
+                  and (minkpl = 0 or (minkpl <= $kpl and monikerta = '') or (mod($kpl, minkpl) = 0 and monikerta != ''))
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  and alennus  >= 0
+                  and alennus  <= 100
+                  ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
+        $hresult = pupe_query($query);
+
+        list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Kaikkien tuotteiden asiakaskohtainen alennus");
+      }
+
       // 12. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
       if (!isset($ale["ale1"])) {
 

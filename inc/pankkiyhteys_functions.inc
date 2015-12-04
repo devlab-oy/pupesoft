@@ -1024,8 +1024,7 @@ function generoi_private_key_ja_csr($params = array()) {
     $csr_info[] = "O={$yhtiorow['nimi']}";
   }
 
-  $csr_dir  = sys_get_temp_dir() . uniqid('csr-', true);
-
+  $csr_dir    = "/tmp/" . uniqid('csr-', true);
   $key_path   = "{$csr_dir}/key.pem";
   $csr_path   = "{$csr_dir}/csr.pem";
   $subject    = "/" . implode("/", $csr_info);

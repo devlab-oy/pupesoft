@@ -22,7 +22,6 @@ $debug = empty($debug) ? 0 : 1;
 $tuetut_pankit = tuetut_pankit();
 
 if ($tee == 'paivita_hae_saldo') {
-
   $hae_saldo = isset($hae_saldo) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET

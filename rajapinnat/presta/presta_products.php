@@ -48,11 +48,10 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
 
-    // Vaatii features-osion
-    #$xml->product->width  = $product['tuoteleveys'];
-    #$xml->product->height = $product['tuotekorkeus'];
-    #$xml->product->depth  = $product['tuotesyvyys'];
-    #$xml->product->weight = $product['tuotemassa'];
+    $xml->product->width  = str_replace(",", ".", $product['tuoteleveys']);
+    $xml->product->height = str_replace(",", ".", $product['tuotekorkeus']);
+    $xml->product->depth  = str_replace(",", ".", $product['tuotesyvyys']);
+    $xml->product->weight = str_replace(",", ".", $product['tuotemassa']);
 
     $xml->product->available_for_order = 1;
     $xml->product->active = 1;

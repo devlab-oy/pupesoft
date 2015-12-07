@@ -1201,10 +1201,11 @@ function hae_tilin_saldo($params) {
 
   if ($pankkiyhteys['bic'] != 'OKOYFIHH') return false;
 
-  $tilinumero = substr($pankkiyhteys['tilino'], -8);
+  $konttorinumero = substr($pankkiyhteys['tilino'], 0, 6);
+  $tilinumero     = substr($pankkiyhteys['tilino'], -8);
 
   $params["file_type"]     = "TP1 1SS";
-  $params["maksuaineisto"] = base64_encode("$\$TP1 1SS 123456 {$tilinumero} X");
+  $params["maksuaineisto"] = base64_encode("$\$TP1 1SS {$konttorinumero} {$tilinumero} X");
 
   $response         = sepa_upload_file($params);
   $saldo_vastaus    = $response['content'];

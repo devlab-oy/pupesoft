@@ -532,7 +532,8 @@ if ($tee == "") {
       echo "<input type='hidden' name='tee' value='paivita_hae_saldo'>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
       $checked = $pankkiyhteys['hae_saldo'] == 1 ? ' checked' : '';
-      echo "<input type='checkbox' name='hae_saldo' value='1'{$checked} onchange='this.form.submit()'>";
+      $disabled = $pankkiyhteys['pankki'] != 'OKOYFIHH' ? ' disabled' : '';
+      echo "<input type='checkbox' name='hae_saldo' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
       echo "</form>";
       echo "</td>";
 

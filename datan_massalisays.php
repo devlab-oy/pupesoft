@@ -143,6 +143,7 @@ if ($tee == 'GO') {
     echo "<br><br>";
 
     foreach ($files as $file) {
+
       $polku = substr($file, $alkupituus);
       list($taulu, $toiminto, $kuva) = explode("/", $polku, 3);
 

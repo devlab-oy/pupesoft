@@ -1189,7 +1189,7 @@ function hae_tilin_saldo($params) {
 
   if (empty($params['pankkiyhteys_tunnus'])) return false;
 
-  $query = "SELECT bic, tilino
+  $query = "SELECT bic, tilino, hae_saldo
             FROM pankkiyhteys
             JOIN yriti ON (yriti.yhtio = pankkiyhteys.yhtio
               AND yriti.bic = pankkiyhteys.pankki)
@@ -1199,6 +1199,7 @@ function hae_tilin_saldo($params) {
   $result = pupe_query($query);
   $pankkiyhteys = mysql_fetch_assoc($result);
 
+  if ($pankkiyhteys['hae_saldo'] != 1) return false;
   if ($pankkiyhteys['bic'] != 'OKOYFIHH') return false;
 
   $konttorinumero = substr($pankkiyhteys['tilino'], 0, 6);

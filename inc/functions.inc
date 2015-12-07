@@ -5763,14 +5763,14 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Asiakaspiirin tuotealeryhmän alennus");
       }
 
-      // 11,5. tuote.aleryhmŠ == ** (kaikki tuotteet) asiakas.tunnus aleprosentti
+      // 11,5. tuote.aleryhmä == ** (kaikki tuotteet) asiakas.tunnus aleprosentti
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakas_ryhma)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and piiri    = ''
                   and ryhma    = '**'
-                  and ytunnus  = ''
+                  and asiakas  = '$laskurow[liitostunnus]'
                   and asiakas  > 0
                   and asiakas_ryhma = ''
                   and asiakas_segmentti = ''

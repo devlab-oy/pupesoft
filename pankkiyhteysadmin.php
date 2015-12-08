@@ -21,6 +21,17 @@ $debug = empty($debug) ? 0 : 1;
 
 $tuetut_pankit = tuetut_pankit();
 
+if ($tee == 'paivita_hae_saldo') {
+  $hae_saldo = isset($hae_saldo) ? 1 : 0;
+
+  $query = "UPDATE pankkiyhteys SET
+            hae_saldo = {$hae_saldo}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$pankkiyhteys_tunnus}";
+  pupe_query($query);
+
+  $tee = "";
+}
 // Poistetaan pankkiyhteys
 if ($tee == "poista") {
   $query = "DELETE
@@ -497,6 +508,7 @@ if ($tee == "") {
     echo "<tr>";
     echo "<th>" . t("Pankki") . "</th>";
     echo "<th>" . t("Asiakastunnus") . "</th>";
+    echo "<th>" . t("Hae saldo") . "</th>";
     echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
     echo "<th></th>";
     echo "<th></th>";
@@ -514,6 +526,16 @@ if ($tee == "") {
 
       echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
       echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+
+      echo "<td>";
+      echo "<form>";
+      echo "<input type='hidden' name='tee' value='paivita_hae_saldo'>";
+      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+      $checked = $pankkiyhteys['hae_saldo'] == 1 ? ' checked' : '';
+      $disabled = $pankkiyhteys['pankki'] != 'OKOYFIHH' ? ' disabled' : '';
+      echo "<input type='checkbox' name='hae_saldo' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
+      echo "</form>";
+      echo "</td>";
 
       echo "<td>";
 

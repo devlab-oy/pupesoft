@@ -170,6 +170,30 @@ if ($tee == "valitse") {
   echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
   echo "<br><br>";
 
+  $saldo = hae_tilin_saldo(array(
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana
+  ));
+
+  if ($saldo) {
+    echo "<table>";
+    echo "<thead>";
+    echo "<tr>";
+    echo "<th>";
+    echo t("Tilin saldo");
+    echo "</th>";
+    echo "</tr>";
+    echo "</thead>";
+    echo "<tbody>";
+    echo "<tr>";
+    echo "<td>";
+    echo "{$saldo['saldo']} {$saldo["valuutta"]}";
+    echo "</td>";
+    echo "</tr>";
+    echo "</tbody>";
+    echo "</table>";
+  }
+
   echo "<table>";
   echo "<tr>";
   echo "<td class='back' style='vertical-align:top;'>";

@@ -1176,3 +1176,67 @@ function tuetut_pankit() {
 function parameter($param) {
   return empty($param) ? '' : $param;
 }
+
+/**
+ * Palauttaa tilin saldon. Toimii toistaiseksi ainoastaan OP:n kanssa
+ *
+ * @param array $params
+ *
+ * @return array|bool Saldo ja valuutta tai false, jos jokin meni vikaan
+ */
+function hae_tilin_saldo($params) {
+  global $kukarow;
+
+  if (empty($params['pankkiyhteys_tunnus'])) return false;
+
+  $query = "SELECT bic, tilino, hae_saldo
+            FROM pankkiyhteys
+            JOIN yriti ON (yriti.yhtio = pankkiyhteys.yhtio
+              AND yriti.bic = pankkiyhteys.pankki)
+            WHERE pankkiyhteys.yhtio = '{$kukarow["yhtio"]}'
+            AND pankkiyhteys.tunnus = {$params['pankkiyhteys_tunnus']}
+            LIMIT 1";
+  $result = pupe_query($query);
+  $pankkiyhteys = mysql_fetch_assoc($result);
+
+  if ($pankkiyhteys['hae_saldo'] != 1) return false;
+  if ($pankkiyhteys['bic'] != 'OKOYFIHH') return false;
+
+  $konttorinumero = substr($pankkiyhteys['tilino'], 0, 6);
+  $tilinumero     = substr($pankkiyhteys['tilino'], -8);
+
+  $params["file_type"]     = "TP1 1SS";
+  $params["maksuaineisto"] = base64_encode("$\$TP1 1SS {$konttorinumero} {$tilinumero} X");
+
+  $response         = sepa_upload_file($params);
+  $saldo_vastaus    = $response['content'];
+
+  if (empty($saldo_vastaus)) return false;
+
+  $saldo_vastaus = base64_decode($saldo_vastaus);
+
+  $saldo_kentat = array(
+    "tietueen_jarjestysnumero"  => substr($saldo_vastaus, 0, 1),
+    "vastaustyyppi"             => substr($saldo_vastaus, 1, 1),
+    "varalla"                   => substr($saldo_vastaus, 2, 3),
+    "tapahtumakonttorin_numero" => substr($saldo_vastaus, 5, 6),
+    "paatenumero"               => substr($saldo_vastaus, 11, 2),
+    "tapahtumanumero"           => substr($saldo_vastaus, 13, 4),
+    "tilinomistajan_nimi"       => substr($saldo_vastaus, 17, 15),
+    "konttorinumero"            => substr($saldo_vastaus, 32, 6),
+    "tilinumero"                => substr($saldo_vastaus, 38, 8),
+    "paivamaara"                => substr($saldo_vastaus, 46, 6),
+    "saldo"                     => substr($saldo_vastaus, 52, 11),
+    "saldon_etumerkki"          => substr($saldo_vastaus, 63, 1),
+    "luottoraja"                => substr($saldo_vastaus, 64, 11),
+    "luottorajan_etumerkki"     => substr($saldo_vastaus, 75, 1),
+    "nostovara"                 => substr($saldo_vastaus, 76, 11),
+    "nostovaran_etumerkki"      => substr($saldo_vastaus, 87, 1),
+    "rahayksikon_koodi"         => substr($saldo_vastaus, 88, 1),
+  );
+
+  return array(
+    "saldo"    => (float) ($saldo_kentat["saldo"] / 100),
+    "valuutta" => $saldo_kentat["rahayksikon_koodi"] == 1 ? "EUR" : null
+  );
+}

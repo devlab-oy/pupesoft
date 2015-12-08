@@ -308,7 +308,9 @@ if (!$enarimatch) {
       $row = pupe_query($query);
       $row = mysql_fetch_assoc($row);
 
-      $rows[$row["tuoteno"]] = $row;
+      if (!empty($row)) {
+        $rows[$row["tuoteno"]] = $row;
+      }
     }
 
     if (count($rows) >  200) {

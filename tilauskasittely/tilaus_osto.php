@@ -16,6 +16,11 @@ if (isset($_REQUEST["tee"])) {
 
 require "../inc/parametrit.inc";
 
+if ($kukarow['extranet'] == '' && isset($ajax_popup)) {
+  require "tuotetiedot.inc";
+  exit;
+}
+
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
 
 if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot') {
@@ -1440,63 +1445,32 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           // tehd‰‰n pop-up divi jos keikalla on kommentti...
           if ($prow["tunnus"] != "") {
-
-            $_varastot = array($laskurow['varasto']);
-
-            if ($laskurow['vanhatunnus'] != 0) {
-
-              $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
-                         FROM varastopaikat
-                         WHERE yhtio      = '{$kukarow['yhtio']}'
-                         AND tyyppi      != 'P'
-                         AND toimipaikka  = '{$laskurow['vanhatunnus']}'";
-              $vares = pupe_query($query);
-              $varow = mysql_fetch_assoc($vares);
-
-              $saldo = $hyllyssa = $myytavissa = 0;
-
-              if (!empty($varow['tunnukset'])) {
-                $_varastot_tmp = explode(",", $varow['tunnukset']);
-                $_varastot = array_merge($_varastot, $_varastot_tmp);
-              }
-            }
-
-            list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"], '', $_varastot);
-
-            $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$prow[yksikko]'", "", "", "selite");
-
-            echo "<div id='div_$prow[tunnus]' class='popup' style='width: 400px;'>";
-            echo "<ul>";
-            echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss‰").": $hyllyssa $pop_yks</li><li>".t("Myyt‰viss‰").": $myytavissa $pop_yks</li>";
-            echo "<li>".t("Tilattu").": $prow[tilattu] $pop_yks</li><li>".t("Varattu").": $prow[varattukpl] $pop_yks</li>";
-
-            if ($prow['paikka'] != '') {
-
-              list($_hyllyalue, $_hyllynro, $_hyllyvali, $_hyllytaso) = explode(" ", $prow['paikka']);
-
-              $query = "SELECT halytysraja
-                        FROM tuotepaikat
-                        WHERE yhtio   = '{$kukarow['yhtio']}'
-                        AND tuoteno   = '{$prow['tuoteno']}'
-                        AND hyllyalue = '{$_hyllyalue}'
-                        AND hyllynro  = '{$_hyllynro}'
-                        AND hyllyvali = '{$_hyllyvali}'
-                        AND hyllytaso = '{$_hyllytaso}'";
-              $halyraja_chk_res = pupe_query($query);
-              $halyraja_chk_row = mysql_fetch_assoc($halyraja_chk_res);
-
-              echo "<li>", t("H‰lytysraja"), ": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
-            }
-
-            echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
-            echo "</ul>";
-            echo "</div>";
-
             if ($toim != "HAAMU") {
-              echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
+              $parametrit = "?toim={$toim}" .
+                            "&ajax_popup=true" .
+                            "&tuoteno={$prow["tuoteno"]}" .
+                            "&varasto={$laskurow["varasto"]}" .
+                            "&yksikko={$prow["yksikko"]}" .
+                            "&tilattu={$prow["tilattu"]}" .
+                            "&varattu={$prow["varattukpl"]}" .
+                            "&paikka={$prow["paikka"]}" .
+                            "&keskihinta={$prow["keskihinta"]}" .
+                            "&valuutta={$prow["valuutta"]}" .
+                            "&ostohinta={$prow["ostohinta"]}" .
+                            "&vanhatunnus={$laskurow["vanhatunnus"]}";
+
+              echo "<td valign='top' $class>
+                      <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
+                         class='tooltip'
+                         id='$prow[tunnus]'
+                         data-content-url='{$parametrit}'>$prow[tuoteno]</a>";
             }
             else {
-              echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='tooltip' id='$prow[tunnus]'>$prow[tuoteno]</a>";
+              echo "<td valign='top' $class>
+                      <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
+                         class='tooltip'
+                         id='$prow[tunnus]'
+                         data-content-url='{$parametrit}'>$prow[tuoteno]</a>";
             }
 
           }

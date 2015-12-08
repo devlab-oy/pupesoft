@@ -13,6 +13,8 @@ if (empty($tilausrivi) or empty($saapuminen)) {
   exit("Virheelliset parametrit (tilausrivi: $tilausrivi, saapuminen: $saapuminen");
 }
 
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
+
 // Virheet
 $errors = array();
 
@@ -36,39 +38,46 @@ if (!empty($tilausrivi['uusiotunnus'])) {
 
 if (empty($tullaan)) $tullaan = '';
 
+$sscchaku = !empty($sscc) ? "and suuntalavat.sscc = '".mysql_escape_string($sscc)."'" : "";
+
 // Etsit‰‰n sopivat suuntalavat
 $query = "(SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
            FROM suuntalavat
            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$saapuminen}')
            WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
            AND (suuntalavat.keraysvyohyke = '{$tilausrivi['keraysvyohyke']}' OR suuntalavat.usea_keraysvyohyke = 'K')
-           AND suuntalavat.tila               IN ('', 'S', 'P'))
-           UNION
-           (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
-           FROM suuntalavat
-           WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
-           AND suuntalavat.tila               IN ('', 'S', 'P')
-           AND suuntalavat.tunnus             = '{$tilausrivi['suuntalava']}')
+           AND suuntalavat.tila               = ''
+           {$sscchaku})
            UNION
            (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
            FROM suuntalavat
            WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
            AND suuntalavat.keraysvyohyke      = '{$tilausrivi['keraysvyohyke']}'
            AND suuntalavat.tila               = ''
-           AND suuntalavat.kaytettavyys       = 'L')
+           AND suuntalavat.kaytettavyys       = 'L'
+           {$sscchaku})
            UNION
            (SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
            FROM suuntalavat
            WHERE suuntalavat.yhtio            = '{$kukarow['yhtio']}'
            AND suuntalavat.usea_keraysvyohyke = 'K'
-           AND suuntalavat.tila               IN ('', 'S', 'P')
-           AND suuntalavat.kaytettavyys       = 'L')
+           AND suuntalavat.tila               = ''
+           AND suuntalavat.kaytettavyys       = 'L'
+           {$sscchaku})
            ORDER BY sscc, tunnus";
-
 $suuntalavat_res = pupe_query($query);
 
 if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
   if (empty($suuntalava)) $errors[] = t("Valitse suuntalava");
+
+  if (!empty($sscc) and $submit == "hae") {
+    if (mysql_num_rows($suuntalavat_res) == 1) {
+      $_chk_row = mysql_fetch_assoc($suuntalavat_res);
+      $suuntalava = $_chk_row['tunnus'];
+      $submit = "ok";
+      $errors = array();
+    }
+  }
 
   // Rivi suuntalavalle
   if (($submit == 'ok' or $submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') and count($errors) == 0) {
@@ -129,7 +138,7 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
     }
 
     // Kaikki ok
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$url}?ostotilaus={$tilausrivi['otunnus']}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}'>";
     exit();
   }
 }
@@ -144,6 +153,7 @@ $url = array (
   'alusta_tunnus' => $alusta_tunnus,
   'liitostunnus' => $liitostunnus,
   'ennaltakohdistettu' => $ennaltakohdistettu,
+  'saapumisnro_haku' => $saapumisnro_haku,
 );
 
 if (!is_numeric($hyllytetty)) {
@@ -168,6 +178,7 @@ echo "<div class='main'>
 <input type='hidden' name='tullaan' value='{$tullaan}' />
 <input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />
 <input type='hidden' name='liitostunnus' value='{$liitostunnus}' />
+<input type='hidden' name='saapumisnro_haku' value='{$saapumisnro_haku}' />
 
 <table>
     <tr>
@@ -176,7 +187,7 @@ echo "<div class='main'>
             <input type='text' id='sscc' name='sscc' value='$hae'/>
         </td>
         <td>
-            <button name='submit' class='button' value='hae' onclick='submit();'>", t("Etsi"), "</button>
+            <button name='submit' id='hakunappi' class='button' value='hae' onclick='submit();'>", t("Etsi"), "</button>
         </td>
     </tr>
 </table>
@@ -238,3 +249,33 @@ foreach ($errors as $error) {
   echo $error."</br>";
 }
 echo "</div>";
+
+// Autofocus opera mobileen
+echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
+echo "<script type='text/javascript'>
+
+  $(document).ready(function() {
+    $('#sscc').on('keyup', function() {
+      // Autosubmit vain jos on syˆtetty tarpeeksi pitk‰ viivakoodi
+      if ($('#sscc').val().length > 6) {
+        document.getElementById('hakunappi').click();
+      }
+    });
+  });
+
+  function doFocus() {
+          var focusElementId = 'alusta';
+          var textBox = document.getElementById(focusElementId);
+          textBox.focus();
+      }
+
+  function clickButton() {
+     document.getElementById('myHiddenButton').click();
+  }
+
+  if(!document.getElementById('saapumiset')) {
+       setTimeout('clickButton()', 500);
+  }
+
+</script>
+";

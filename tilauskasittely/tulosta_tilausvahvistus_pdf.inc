@@ -53,23 +53,6 @@ if ($verollisethinnat) {
   $lahetetyyppi = substr($lahetetyyppi, 0, -4) . "_verollinen.inc";
 }
 
-//Testausta varten.....
-//$lahetetyyppi = "tulosta_lahete.inc";
-//$lahetetyyppi = "tulosta_lahete_ean.inc";
-//$lahetetyyppi = "tulosta_lahete_ean_eiale.inc";
-//$lahetetyyppi = "tulosta_lahete_brutto.inc";
-//$lahetetyyppi = "tulosta_lahete_eialeja.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"; # Näytetään asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc"; # Näytetään asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_osh.inc";
-//$lahetetyyppi = "tulosta_lahete_asiakviivakoodi.inc";
-//$lahetetyyppi = "tulosta_lahete_viivakoodi_ean13.inc";
-//$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
-//$lahetetyyppi = "tulosta_lahete_hae_hinnat.inc";
-//$lahetetyyppi = "tulosta_lahete_custom.inc";
-//$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
-
 require "tulosta_lahete.inc";
 
 if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
@@ -156,7 +139,9 @@ if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
             min(tilausrivi.tunnus) tunnus,
             sum(tilausrivi.tilkpl) tilkpl,
             sum(round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]')) ovhhinta,
-            sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]')) rivihinta
+            sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]')) rivihinta,
+            max(tuote.sarjanumeroseuranta) sarjanumeroseuranta,
+            max(trim(eankoodi)) eankoodi
             FROM tilausrivi
             JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
             JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -179,7 +164,8 @@ else {
             {$jtsort_lisa}
             if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
             if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-            tuote.sarjanumeroseuranta
+            tuote.sarjanumeroseuranta,
+            trim(eankoodi) eankoodi
             FROM tilausrivi
             JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
             JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus

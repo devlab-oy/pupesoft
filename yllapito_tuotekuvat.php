@@ -48,7 +48,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 
 echo "<font class='head'>", t("Tuotekuvien ylläpito"), "</font><hr>";
 
-echo "<form method='post'>";
+echo "<form method='post' action='yllapito_tuotekuvat.php'>";
 echo "<table>";
 echo "<input type='hidden' name='tee' value='LISTAA'>";
 
@@ -784,8 +784,8 @@ if ($tee == 'LISTAA') {
       $onsubmit = '';
     }
 
-    echo "<form method='post' {$onsubmit}>";
-    echo "<table cellpadding='2' cellspacing='2'>";
+    echo "<form method='post' action='yllapito_tuotekuvat.php' {$onsubmit}>";
+    echo "<table>";
 
     echo "<tr>";
     echo "<td valign='top' align='left' colspan='10' class='back'>";

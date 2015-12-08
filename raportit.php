@@ -36,10 +36,30 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+$cleantoim = $toim;
+
+// Rajataanko rappari n‰ytt‰m‰‰n vain Omaa KustannusPaikkaa
+if (substr($toim, -4) == '_OKP') {
+  // k‰ytt‰j‰n osasto kertoo oletuskustannuspaikan
+  $vainomakustp = TRUE;
+
+  if (empty($kukarow["osasto"])) {
+    echo "<br><br>".t("K‰ytt‰j‰tiedoistasi puuttuu osasto")."!<br>";
+    require "inc/footer.inc";
+    exit;
+  }
+
+  $mul_kustp    = array();
+  $mul_kustp[]  = $kukarow["osasto"];
+  $cleantoim    = substr($toim, 0, -4);
+}
+
 // Livesearch jutut
 enable_ajax();
 
-if (!isset($excel))      $excel = "";
+js_popup();
+
+if (!isset($excel)) $excel = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 
 if ($livesearch_tee == "TILIHAKU") {
@@ -55,7 +75,7 @@ if ($excel == "YES") {
   $excelrivi   = 0;
 }
 
-require "inc/".$toim.".inc";
+require "inc/{$cleantoim}.inc";
 
 if (isset($worksheet) and $excelrivi > 0) {
   $excelnimi = $worksheet->close();

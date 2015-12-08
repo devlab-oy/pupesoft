@@ -127,15 +127,15 @@ if (!function_exists('alku_valm')) {
       $pdf->draw_text(430, 750, t("Päiväys", $kieli),        $thispage, $pieni);
       $pdf->draw_text(430, 740, tv1dateconv(date("Y-m-d")),     $thispage, $norm);
 
-
       $pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
       $pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 729, t("Myyjä", $kieli),     $thispage, $pieni);
 
       //etsitään myyjän nimi
-      $query  = "  select nimi
-            from kuka
-            where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+      $query  = "SELECT nimi
+                 FROM kuka
+                 WHERE tunnus = '$laskurow[myyja]'
+                 AND yhtio    = '$kukarow[yhtio]'";
       $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 
@@ -144,9 +144,21 @@ if (!function_exists('alku_valm')) {
       $pdf->draw_text(430, 729, t("Tilauspvm", $kieli),                 $thispage, $pieni);
       $pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"),     $thispage, $norm);
 
+      $ttapae = $laskurow["toimitustapa"];
+
+      //etsitään löytyykö rahtisopimusta
+      $rahtirow = hae_rahtisopimusnumero($ttapae, $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
+
+      if ($rahtirow["rahtisopimus"] != "") {
+        $ttapae .= " / ".$rahtirow["rahtisopimus"];
+      }
+      if ($laskurow["rahtivapaa"] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
+        $ttapae .= " / ". t("Rahtivapaa", $kieli);
+      }
+
       $pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
-      $pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
-      $pdf->draw_text(310, 698, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli), $thispage, $boldi);
+      $pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
+      $pdf->draw_text(310, 698, $ttapae, $thispage, $boldi);
 
       $pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 687, t("Toimitusehto", $kieli),   $thispage, $pieni);

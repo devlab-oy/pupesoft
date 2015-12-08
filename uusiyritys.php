@@ -127,7 +127,7 @@ if ($tila == 'ulkonako') {
       $row = mysql_fetch_assoc($result);
       $query = "  UPDATE yhtion_parametrit SET ";
 
-      $alakopsaa = array(  "tunnus",
+      $alakopsaa = array("tunnus",
         "yhtio",
         "finvoice_senderpartyid",
         "finvoice_senderintermediator",
@@ -145,9 +145,9 @@ if ($tila == 'ulkonako') {
         "muutospvm",
         "muuttaja",
         "css",
+        "css_classic",
         "css_extranet",
-        "css_verkkokauppa",
-        "css_pieni");
+        "css_verkkokauppa");
 
       foreach ($row as $ind => $val) {
         if (!in_array($ind, $alakopsaa)) {
@@ -157,8 +157,8 @@ if ($tila == 'ulkonako') {
 
       $query = substr($query, 0, -1);
 
-      $query .= "  WHERE tunnus = '$yht_row[tunnus]'
-            AND yhtio = '$yhtio'";
+      $query .= " WHERE tunnus = '$yht_row[tunnus]'
+                  AND yhtio = '$yhtio'";
       $result = pupe_query($query);
     }
   }
@@ -166,7 +166,10 @@ if ($tila == 'ulkonako') {
 
 if ($tila == 'perusta') {
   if ($fromyhtio != '') {
-    $query = "SELECT css, css_extranet, css_verkkokauppa, css_pieni
+    $query = "SELECT css,
+              css_classic,
+              css_extranet,
+              css_verkkokauppa
               from yhtion_parametrit
               where yhtio = '$fromyhtio'";
     $result = pupe_query($query);
@@ -187,9 +190,9 @@ if ($tila == 'perusta') {
 
       $query = "UPDATE yhtion_parametrit SET
                 css              = '$uusiyhtiorow[css]',
+                css_classic      = '$uusiyhtiorow[css_classic]',
                 css_extranet     = '$uusiyhtiorow[css_extranet]',
-                css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]',
-                css_pieni        = '$uusiyhtiorow[css_pieni]'
+                css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]'
                 WHERE tunnus     = '$yht_row[tunnus]'
                 AND yhtio        = '$yhtio'";
       $result = pupe_query($query);
@@ -399,6 +402,7 @@ if ($tila == 'avainsana') {
                   selitetark_2 = '$trow[selitetark_2]',
                   selitetark_3 = '$trow[selitetark_3]',
                   kieli        = '$trow[kieli]',
+                  nakyvyys     = '$trow[nakyvyys]',
                   yhtio        = '$yhtio'";
         $rresult = pupe_query($query);
       }
@@ -414,7 +418,6 @@ if ($tila == 'kirjoitin') {
     while ($row = mysql_fetch_array($kukar)) {
       $query = "INSERT INTO kirjoittimet SET
                 yhtio         = '$yhtio',
-                fax           = '$row[fax]',
                 kirjoitin     = '$row[kirjoitin]',
                 komento       = '$row[komento]',
                 merkisto      = '$row[merkisto]',
@@ -446,12 +449,8 @@ if ($tila == 'maksuehto') {
                 kassa_relpvm       = '$row[kassa_relpvm]',
                 kassa_abspvm       = '$row[kassa_abspvm]',
                 kassa_alepros      = '$row[kassa_alepros]',
-                osamaksuehto1      = '$row[osamaksuehto1]',
-                osamaksuehto2      = '$row[osamaksuehto2]',
-                summanjakoprososa2 = '$row[summanjakoprososa2]',
                 jv                 = '$row[jv]',
                 kateinen           = '$row[kateinen]',
-                suoraveloitus      = '$row[suoraveloitus]',
                 factoring          = '$row[factoring]',
                 pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
                 itsetulostus       = '$row[itsetulostus]',

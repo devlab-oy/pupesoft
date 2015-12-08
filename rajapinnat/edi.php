@@ -14,7 +14,7 @@ class Edi {
 
     // require 'magento_salasanat.php' muuttujat
     global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
-    global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
+    global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
 
     if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
     if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrejä puuttuu\n");
@@ -47,8 +47,26 @@ class Edi {
     $edi_order .= "*MS ".$order['increment_id']."\n";
     $edi_order .= "*RS OSTOTIL\n";
     $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
+
+    $vaihtoehtoinen_ovt = '';
+    //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
+    if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
+      $edi_store = str_replace("\n", " ", $order['store_name']);
+      foreach ($verkkokauppa_erikoiskasittely as $verkkokauppaparametrit) {
+        // $verkkokauppaparametrit[0] - Verkkokaupan nimi
+        // $verkkokauppaparametrit[1] - Editilaus_tilaustyyppi
+        // $verkkokauppaparametrit[2] - Tilaustyyppilisa
+        // $verkkokauppaparametrit[3] - Myyjanumero
+        // $verkkokauppaparametrit[4] - Vaihtoehtoinen ovttunnus
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
+          $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
+        }
+      }
+    }
+
+    $valittu_ovt_tunnus = (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
-    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$valittu_ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
@@ -62,7 +80,18 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     //Onko tilaus maksettu = processing vai jälkvaatimus = pending_cashondelivery_asp
     $edi_order .= "OSTOTIL.OT_MAKSETTU:".$order['status']."\n";
-    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
+
+    $maksuehto = strip_tags($order['payment']['method']);
+    // Jos on asetettu maksuehtojen ohjaus, tarkistetaan korvataanko Magentosta tullut maksuehto
+    if (isset($magento_maksuehto_ohjaus) and count($magento_maksuehto_ohjaus) > 0) {
+      foreach ($magento_maksuehto_ohjaus as $key => $array) {
+        if (in_array($maksuehto, $array) and !empty($key)) {
+          $maksuehto = $key;
+        }
+      }
+    }
+
+    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
@@ -122,8 +151,6 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:".$order['customer_email']."\n";
     $edi_order .= "*RE OSTOTIL\n";
 
-    //$items = $order->getItemsCollection();
-
     $i = 1;
     foreach ($order['items'] as $item) {
       $product_id = $item['product_id'];
@@ -160,14 +187,23 @@ class Edi {
         // Rivin alennusprosentti
         $alennusprosentti = $_item['discount_percent'];
 
+        // Rivin alennusmäärä
+        $alennusmaara = $_item['base_discount_amount'];
+
+        // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu euromääräistä alennusta
+        if ($alennusprosentti == 0 and $alennusmaara > 0) {
+          // Lasketaan alennusmäärä alennusprosentiksi
+          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 6);
+        }
+
         // Verokanta
         $alvprosentti = $_item['tax_percent'];
 
         // Verollinen rivihinta
-        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_verollinen = round(($verollinen_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         // Veroton rivihinta
-        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 2);
+        $rivihinta_veroton = round(($veroton_hinta * $kpl) * (1 - $alennusprosentti / 100), 6);
 
         $edi_order .= "*RS OSTOTILRIV $i\n";
         $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
@@ -179,26 +215,16 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:$kpl\n";
 
         // Verottomat hinnat
+        $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
         $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
         $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
         $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
-        $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
 
         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
         $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
-
-        //$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product_id);
-
-
-        //if ($stock->getQty() - $item->getQtyOrdered() <= 0 && $stock->getBackorders() != 0) {
-        //  $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:1\n";
-        //}
-        //else {
         $edi_order .= "OSTOTILRIV.OTR_SALLITAANJT:0\n";
-        //}
-
         $edi_order .= "*RE  OSTOTILRIV $i\n";
         $i++;
       }
@@ -236,8 +262,9 @@ class Edi {
     $edi_order .= "*ME\n";
     $edi_order .= "*IE";
 
-    $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
-
+    if (!PUPE_UNICODE) {
+      $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
+    }
     $filename = $magento_api_ht_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
     file_put_contents($filename, $edi_order);
 

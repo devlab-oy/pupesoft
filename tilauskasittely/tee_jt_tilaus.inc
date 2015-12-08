@@ -238,6 +238,19 @@ if (!function_exists("tee_jt_tilaus")) {
                          AND laskun_lisatiedot.laskutus_postitp  = '$lisatiedot_row[laskutus_postitp]'
                          AND laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'";
         }
+        elseif ($otsikkorivi["tila"] == 'G' and $yhtiorow["jt_siirtolistojen_yhdistaminen"] == 'K') {
+          // Ollaan vapauttamassa siirtolistaa,
+          // katsotaan halutaanko välttämättä uusi otsikko aina
+          // vai saako siirtolistoja yhdistää jos voi
+          // Kuitenkin niin, että mahdollisuuksien mukaan ei eroteta samalla siirtolistalla olleita rivejä
+          // - tämä tehdään vanhan siirtolistanumeron mukaan
+          $lisatjoin = "JOIN tilausrivi
+                          ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+                        JOIN tilausrivin_lisatiedot
+                          ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)";
+
+          $lisatehdot = "AND tilausrivin_lisatiedot.vanha_otunnus = {$otsikkorivi["tunnus"]}";
+        }
 
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
@@ -334,10 +347,20 @@ if (!function_exists("tee_jt_tilaus")) {
           elseif ($fieldname == 'laatija') {
             $query .= "laatija='$kukarow[kuka]',";
           }
+          // varasto
+          elseif ($fieldname == 'varasto') {
+            // Nollataan varasto, koska alkuperäisen tilauksen varastolla ei ole uudella otsikolla virkaa.
+            $query .= "varasto=0,";
+          }
           // keräysaika ja toimitusaikaan now
-          elseif ($fieldname == 'kerayspvm' or
-            $fieldname == 'toimaika') {
-            $query .= $fieldname."=now(),";
+          elseif ($fieldname == 'kerayspvm' or $fieldname == 'toimaika') {
+
+              if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+              }
+              else {
+                $query .= $fieldname."=now(),";
+              }
           }
           // Katotaan oisko käsinsyötetty eräpäivämäärä
           elseif ($fieldname == 'erpcm') {
@@ -385,6 +408,8 @@ if (!function_exists("tee_jt_tilaus")) {
             $fieldname == 'maksettu' or
             $fieldname == 'maa_maara' or
             $fieldname == 'kuljetusmuoto' or
+            $fieldname == 'vakisin_kerays' or
+            $fieldname == 'siirtolistan_vastaanotto' or
             $fieldname == 'kauppatapahtuman_luonne' or
             $fieldname == 'sisamaan_kuljetus' or
             $fieldname == 'sisamaan_kuljetusmuoto' or
@@ -565,6 +590,8 @@ if (!function_exists("tee_jt_tilaus")) {
 
       ///* Tässä meillä on otsikko hallussa se on $id muuttujassa*///
 
+      $kpl[$tunnukset] = str_replace(",", ".", $kpl["$tunnukset"]);
+
       // Tässä haarassa käyttäjä on syöttänyt jonkun kappalemäärän
       if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $loput[$tunnukset] == 'VAKISIN') {
 
@@ -630,6 +657,15 @@ if (!function_exists("tee_jt_tilaus")) {
 
             if ($toim == "ENNAKKO") {
               $lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin, 2);
+              
+              if ($yhtiorow["saldo_kasittely"] == 'U') {
+                $toimaika = $lisataanrow['toimaika'];
+                $kerayspvm = $lisataanrow['kerayspvm'];
+              }
+              else {
+                $toimaika = "";
+                $kerayspvm = "";
+              }
             }
             else {
               $lisataanrow_kpl = round($lisataanrow["jt"] * $isa_kerroin, 2);

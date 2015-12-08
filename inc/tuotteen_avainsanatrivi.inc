@@ -25,27 +25,33 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
   $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
   $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhm‰")."</option>";
-  $ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
-  $ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
   $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lis‰t‰ EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
   $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
+  $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("hinnastoryhmittely")."</option>";
 
+  // Tuotteiden avainsanojen laji
+  // N‰m‰ on dynaamisia ja k‰ytet‰‰n ainoastaan raporteissa/erikoistapauksissa, johon erikseen hardcoodattu sovittu arvo.
   $sresult = t_avainsana("TUOTEULK");
 
   while ($srow = mysql_fetch_array($sresult)) {
     $ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
   }
 
+  // Tuotteen parametri.
+  // K‰ytet‰‰n "tuote-export" -raportissa, "monivalintalaatikot" -listauksessa
+  // sek‰ "myyntier‰t ja tuotetetiedot" -n‰kym‰ss‰ (jos se on enabloitu myyntitilaukselle)
   $vresult = t_avainsana("PARAMETRI");
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
   }
 
+  // Tuotteen lis‰tieto.
+  // K‰ytet‰‰n ainoastaan "hae ja selaa tuotteita" -n‰kym‰ss‰.
   $lresult = t_avainsana("LISATIETO");
 
   while ($lrow = mysql_fetch_assoc($lresult)) {
@@ -174,24 +180,7 @@ if (mysql_field_name($result, $i) == "selite") {
 }
 
 if (mysql_field_name($result, $i) == "selitetark") {
-
-  if ($tem_laji == "pakkauskoko2" or $tem_laji == "pakkauskoko3") {
-    $vresult = t_avainsana("Y");
-    $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if (strtoupper($trow[$i]) == strtoupper($vrow["selite"]) and $vrow["selite"] != "") {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
-    }
-    $ulos .= "</select></td>";
-    $jatko = 0;
-  }
-  else {
-    $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
-  }
+  $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 }
 
 if (mysql_field_name($result, $i) == "kieli") {

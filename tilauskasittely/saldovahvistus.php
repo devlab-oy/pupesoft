@@ -19,13 +19,13 @@ require 'myyntires/paperitiliote_saldovahvistus.php';
 require 'inc/pupeExcel.inc';
 
 if ($tee == 'lataa_tiedosto') {
-  $filepath = "/tmp/".$tmpfilenimi;
+  $filepath = "/tmp/" . $tmpfilenimi;
   if (file_exists($filepath)) {
     readfile($filepath);
     unlink($filepath);
   }
   else {
-    echo "<font class='error'>".t("Tiedostoa ei ole olemassa")."</font>";
+    echo "<font class='error'>" . t("Tiedostoa ei ole olemassa") . "</font>";
   }
   exit;
 }
@@ -36,24 +36,18 @@ if ($ajax_request) {
       $lasku_tunnukset_key = implode('', $saldovahvistus_rivi['lasku_tunnukset']);
       if ($lisays == 'true') {
         $saldovahvistusrivi = array(
-          'laskun_avoin_paiva'   => $saldovahvistus_rivi['laskun_avoin_paiva'],
-          'saldovahvistus_viesti'   => $saldovahvistus_rivi['saldovahvistus_viesti'],
-          'lasku_tunnukset'     => $saldovahvistus_rivi['lasku_tunnukset'],
+          'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
+          'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
+          'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
           'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
         );
         lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
-
-        echo true;
       }
       else {
         unset($_SESSION['valitut_laskut'][$lasku_tunnukset_key]);
-
-        echo true;
       }
     }
   }
-
-  echo false;
 
   exit;
 }
@@ -64,7 +58,15 @@ if (!isset($nayta_pdf)) {
 }
 
 if ($nayta_pdf != 1) {
-  echo "<font class='head'>".t("Saldovahvistus")."</font><hr>";
+  echo "<font class='head'>" . t("Saldovahvistus") . "</font><hr>";
+}
+
+if (!isset($avoin_saldo_rajaus)) {
+  $avoin_saldo_rajaus = "";
+}
+
+if (!isset($lahetettavat_laskut)) {
+  $lahetettavat_laskut = array();
 }
 
 if (!isset($pp)) {
@@ -85,51 +87,99 @@ else {
 }
 
 $request = array(
-  'tee'           => $tee,
-  'ryhmittely_tyyppi'     => $ryhmittely_tyyppi,
-  'ryhmittely_arvo'     => $ryhmittely_arvo,
-  'pp'           => $pp,
-  'kk'           => $kk,
-  'vv'           => $vv,
-  'paiva'           => $paiva,
-  'saldovahvistus_viesti'   => $saldovahvistus_viesti,
-  'lasku_tunnukset'     => $lasku_tunnukset,
-  'tallenna_exceliin'     => $tallenna_exceliin,
+  'tee'                                   => $tee,
+  'ryhmittely_tyyppi'                     => $ryhmittely_tyyppi,
+  'saldovahvistus_rivi_ryhmittely_tyyppi' => $saldovahvistus_rivi_ryhmittely_tyyppi,
+  'ryhmittely_arvo'                       => $ryhmittely_arvo,
+  'pp'                                    => $pp,
+  'kk'                                    => $kk,
+  'vv'                                    => $vv,
+  'paiva'                                 => $paiva,
+  'saldovahvistus_viesti'                 => $saldovahvistus_viesti,
+  'lasku_tunnukset'                       => $lasku_tunnukset,
+  'tallenna_exceliin'                     => $tallenna_exceliin,
+  'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
+  'lahetettavat_laskut'                   => $lahetettavat_laskut,
 );
+
+$t = array(
+  "email" => t("Email puuttuu"),
+  "nayta_pdf" => t("Näytä pdf"),
+  "tulosta_pdf" => t("Tulosta pdf"),
+  "kohdistamaton" => t('Kohdistamaton suoritus'),
+);
+
+$request["t"] = $t;
 
 $request['laskut'] = array();
 $request['valitut_laskut'] = array();
 
 $request['ryhmittely_tyypit'] = array(
-  'ytunnus'   => t('Ytunnus'),
+  'ytunnus'    => t('Ytunnus'),
   'asiakasnro' => t('Asiakasnumero'),
 );
 
 $request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
 
-if ($nayta_pdf != 1) {
+if ($request['tee'] == 'poista_valinnat') {
+  unset($_SESSION['valitut_laskut']);
+}
+
+if ($nayta_pdf != 1 and $request['tee'] != 'laheta_sahkopostit') {
   echo_kayttoliittyma($request);
 
   echo "<br/>";
   echo "<br/>";
 }
 
-if (!empty($_SESSION['valitut_laskut'])) {
+if (count($request['lahetettavat_laskut']) > 0 and !empty($_SESSION['valitut_laskut']) and $request['tee'] == 'laheta_sahkopostit') {
+  $lasku_tunnukset_temp = $request['lasku_tunnukset'];
+
+  foreach ($request['lahetettavat_laskut'] as $_id) {
+    if (array_key_exists($_id, $_SESSION['valitut_laskut'])) {
+      $valittu_lasku = $_SESSION['valitut_laskut'][$_id];
+
+      $request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
+      $request['ryhmittely_tyyppi_temp'] = $valittu_lasku['ryhmittely_tyyppi'];
+
+      $_req = $request;
+      $_req['paiva'] = $valittu_lasku['laskun_avoin_paiva'];
+
+      $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($_req, true);
+      $lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
+      $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
+      $request['valitut_laskut'][$_id] = $lasku_temp;
+    }
+  }
+
+  $request['lasku_tunnukset'] = $lasku_tunnukset_temp;
+  unset($request['ryhmittely_tyyppi_temp']);
+}
+// Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,
+// jos käyttäjä vierailee toisissa softissa ja palaa tähän softaan myöhemmin
+elseif (!empty($_SESSION['valitut_laskut'])) {
   $lasku_tunnukset_temp = $request['lasku_tunnukset'];
   foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
     $request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
     $request['ryhmittely_tyyppi_temp'] = $valittu_lasku['ryhmittely_tyyppi'];
-    $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
+
+    $_req = $request;
+    $_req['paiva'] = $valittu_lasku['laskun_avoin_paiva'];
+
+    $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($_req, true);
     $lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
     $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
     $request['valitut_laskut'][] = $lasku_temp;
   }
+
   $request['lasku_tunnukset'] = $lasku_tunnukset_temp;
+  unset($request['ryhmittely_tyyppi_temp']);
 }
 
 //Echotaan saldovahvistukset, kun tehdään käyttöliittymästä haku
 //tai jos sessioon on tallennettu saldovahvistusrivejä edellisellä hakukerroilla ja ollaan välissä käyty jossain muussa ohjelmassa.
-if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut']) and $request['tee'] == '')) {
+if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut']) and $request['tee'] == 'valitut_laskut_haettu')) {
+
   js_openFormInNewWindow();
   if ($request['tee'] == 'aja_saldovahvistus') {
     $request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
@@ -159,8 +209,18 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     $laskut['saldovahvistus_viesti'] = $laskut['saldovahvistus_viesti'][0];
     $laskut['laskun_avoin_paiva'] = $request['paiva'];
   }
+
+  if ($request['ryhmittely_tyyppi'] == 'ytunnus') {
+    $boss = true;
+  }
+  else {
+    $boss = false;
+  }
+
+  $laskut['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
+
   //Valittu saldovahvistusviesti
-  $pdf_filepath = hae_saldovahvistus_pdf($laskut);
+  $pdf_filepath = hae_saldovahvistus_pdf($laskut, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);
@@ -168,32 +228,39 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   elseif ($request['tee'] == 'tulosta_saldovahvistus_pdf') {
     $kirjoitin_komento = hae_kayttajan_kirjoitin();
 
-    exec($kirjoitin_komento['komento'].' '.$pdf_filepath);
+    exec($kirjoitin_komento['komento'] . ' ' . $pdf_filepath);
   }
 
   //unset, jotta käyttöliittymään tulisi rajausten mukaiset laskut.
   unset($request['lasku_tunnukset']);
 
-  echo_kayttoliittyma($request);
-
   $request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
   echo_saldovahvistukset($request);
 }
 elseif ($request['tee'] == 'laheta_sahkopostit') {
-  list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request);
-  unset($_SESSION['valitut_laskut']);
+  list($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt) = generoi_saldovahvistus_sahkopostit($request);
+
+  echo_kayttoliittyma($request);
 
   echo "<br/>";
   echo "<br/>";
-  echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
+  echo '<font class="message">' . $lahetetyt_count . ' ' . t('sähköpostia lähetetty') . '</font>';
   if ($ei_lahetetty_count > 0) {
-    echo "<br/>";
+    echo "<br />";
     echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+
+    if (count($ei_lahetetyt) > 0) {
+      echo "<br /><br />";
+
+      foreach ($ei_lahetetyt as $ei_lahetetty_nimi) {
+        echo "<font class='message'>";
+        echo t("Asiakkaan %s sähköpostin lähettäminen epäonnistui", "", $ei_lahetetty_nimi);
+        echo "</font><br />";
+      }
+    }
   }
 }
-elseif ($request['tee'] == 'poista_valinnat') {
-  unset($_SESSION['valitut_laskut']);
-}
+
 ?>
 <style>
   tr.border_bottom td {
@@ -208,6 +275,11 @@ elseif ($request['tee'] == 'poista_valinnat') {
   $(document).ready(function() {
     bind_saldovahvistus_rivi_valinta_checkbox_click();
     bind_valitse_kaikki_checkbox_click();
+    bind_valitse_kaikki_lahetettavaksi();
+    bind_valitse_lahetettavaksi();
+    $('#valitse_kaikki_lahetettavaksi').attr('checked', 'checked');
+    $('#valitse_kaikki_lahetettavaksi').trigger('click');
+    $('#valitse_kaikki_lahetettavaksi').attr('checked', 'checked');
   });
 
   function bind_saldovahvistus_rivi_valinta_checkbox_click() {
@@ -235,6 +307,51 @@ elseif ($request['tee'] == 'poista_valinnat') {
 
       saldovahvistus_rivit.push(saldovahvistus_rivi);
       tallenna_sessioon(saldovahvistus_rivit, lisays);
+    });
+  }
+
+  function add_ids(that, $_id) {
+    if ($(that).is(':checked')) {
+      $_hidden = $('<input type=\'hidden\' />');
+      $_hidden.attr('name', 'lahetettavat_laskut[]');
+      $_hidden.attr('class', $_id);
+      $_hidden.attr('value', $_id);
+      $('#lahetysformi').append($_hidden);
+    }
+    else {
+      $('.' + $_id).each(function() {
+        $(this).remove();
+      });
+    }
+  }
+
+  function bind_valitse_lahetettavaksi() {
+    $('.saldovahvistus_rivi_sahkoposti_valinta').on('click', function() {
+      $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+
+      add_ids(this, $_id);
+    });
+  }
+
+  function bind_valitse_kaikki_lahetettavaksi() {
+    $('#valitse_kaikki_lahetettavaksi').on('click', function() {
+      var $table = $(this).parent().parent().parent().parent(),
+          $_checkboxes = $table.find('.saldovahvistus_rivi_sahkoposti_valinta');
+
+      if ($(this).is(':checked')) {
+        $_checkboxes.each(function() {
+          $(this).attr('checked', 'checked');
+          $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+          add_ids(this, $_id);
+        });
+      }
+      else {
+        $_checkboxes.each(function() {
+          $(this).removeAttr('checked');
+          $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+          add_ids(this, $_id);
+        });
+      }
     });
   }
 
@@ -281,11 +398,6 @@ elseif ($request['tee'] == 'poista_valinnat') {
         saldovahvistus_rivit: saldovahvistus_rivit
       },
       url: 'saldovahvistus.php'
-    }).done(function(data) {
-      if (console && console.log) {
-        console.log('AJAX success');
-        console.log(data);
-      }
     });
   }
 
@@ -316,19 +428,20 @@ function echo_saldovahvistukset($request) {
 
   //  echo "<table class='display'>";
 
-  pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 6, 9, false, false, true)));
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th>".t('Päivämäärä')."</th>";
-  echo "<th>".t('Ytunnus')."</th>";
-  echo "<th>".t('Asiakasnumero')."</th>";
-  echo "<th>".t('Nimi')."</th>";
-  echo "<th>".t('Saldo')."</th>";
-  echo "<th>".t('Viesti')."</th>";
-  echo "<th class='hidden'></th>";
+  echo "<th>" . t('Päivämäärä') . "</th>";
+  echo "<th>" . t('Ytunnus') . "</th>";
+  echo "<th>" . t('Asiakasnumero') . "</th>";
+  echo "<th>" . t('Nimi') . "</th>";
+  echo "<th>" . t('Saldo') . "</th>";
+  echo "<th>" . t('Viesti') . "</th>";
+  echo "<th>", t("Muistissa"), "</th>";
+  echo "<th>", t("Lähetä"), "</th>";
   echo "<th class='hidden'></th>";
   echo "</tr>";
 
@@ -340,6 +453,7 @@ function echo_saldovahvistukset($request) {
   echo "<td><input type='text' class='search_field' name='search_saldo'></td>";
   echo "<td><input type='text' class='search_field' name='search_viesti'></td>";
   echo "<td><input type='checkbox' id='valitse_kaikki' CHECKED /></td>";
+  echo "<td><input type='checkbox' id='valitse_kaikki_lahetettavaksi' /></td>";
   echo "<td class='hidden'></td>";
   echo "</tr>";
 
@@ -354,6 +468,20 @@ function echo_saldovahvistukset($request) {
     if ($i == $kpl) {
       $viimeinen = true;
     }
+
+    if (!empty($request['avoin_saldo_rajaus'])) {
+
+      $_rajaus = (float) $request['avoin_saldo_rajaus'];
+      $_avoin_summa = $lasku['avoin_saldo_summa'];
+
+      $_pos = ($_rajaus > 0 and $_avoin_summa < $_rajaus);
+      $_neg = ($_rajaus < 0 and $_avoin_summa > $_rajaus);
+
+      if ($_pos or $_neg) {
+        continue;
+      }
+    }
+
     echo_saldovahvistus_rivi($lasku, $request, false, $viimeinen);
     $i++;
   }
@@ -366,14 +494,20 @@ function echo_saldovahvistukset($request) {
 
   echo "</table>";
 
-  echo "<form method='POST' action = ''>";
+  echo "<form id='lahetysformi' method='POST' action = ''>";
   echo "<input type='hidden' name='tee' value='laheta_sahkopostit' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='submit' value='".t('Lähetä saldovahvistukset asiakkaille')."' />";
   echo "</form><br><br>";
 
   echo "<form method='POST' action=''>";
   echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
   echo "</form>";
 }
@@ -381,7 +515,7 @@ function echo_saldovahvistukset($request) {
 function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = false, $viimeinen = false) {
   global $kukarow, $yhtiorow, $palvelin2;
 
-  $lopetus = $palvelin2."tilauskasittely/saldovahvistus.php////tee={$request['tee']}//ryhmittely_tyyppi={$request['ryhmittely_tyyppi']}//ryhmittely_arvo={$request['ryhmittely_arvo']}//pp={$request['pp']}//kk={$request['kk']}//vv={$request['vv']}//saldovahvistus_viesti={$request['saldovahvistus_viesti']}";
+  $lopetus = $palvelin2 . "tilauskasittely/saldovahvistus.php////tee={$request['tee']}//ryhmittely_tyyppi={$request['ryhmittely_tyyppi']}//ryhmittely_arvo={$request['ryhmittely_arvo']}//pp={$request['pp']}//kk={$request['kk']}//vv={$request['vv']}//saldovahvistus_viesti={$request['saldovahvistus_viesti']}";
 
   $tr_class = "";
   if ($viimeinen) {
@@ -411,7 +545,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   $asiakasnumerot_string = "";
   foreach ($saldovahvistusrivi['asiakasnumerot'] as $asiakasnumero) {
     $asiakasnumero['asiakasnumero'] = "<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus={$asiakasnumero['asiakas_tunnus']}&lopetus={$lopetus}'>{$asiakasnumero['asiakasnumero']}</a>";
-    $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'].' / ';
+    $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'] . ' / ';
     if ($i != 0 and $i % 10 == 0) {
       $asiakasnumerot_string = substr($asiakasnumerot_string, 0, -3);
       $asiakasnumerot_string .= '<br/>';
@@ -437,7 +571,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo $saldovahvistusrivi['saldovahvistus_viesti'];
   if ($saldovahvistusrivi['asiakas']['talhal_email'] == '') {
     echo "<br/>";
-    echo "<font class='error'>".t('Email puuttuu')."</font>";
+    echo "<font class='error'>{$request["t"]["email"]}</font>";
   }
   echo "</td>";
 
@@ -445,14 +579,25 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' CHECKED />";
   echo "</td>";
 
+  $_id = implode('', $saldovahvistusrivi['lasku_tunnukset']);
+
+  echo "<td>";
+  echo "<input type='hidden' class='saldovahvistus_rivi_sahkoposti_valinta_id' value='{$_id}' />";
+  echo "<input type='checkbox' class='saldovahvistus_rivi_sahkoposti_valinta' />";
+  echo "</td>";
+
   // .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
   echo "<td class='back nayta_pdf_td'>";
-  echo "<form method='POST' action='' id='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' name='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' autocomplete='off'>";
-  echo "<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
+  echo "<form method='POST' action='' id='{$_id}' name='{$_id}' autocomplete='off'>";
+  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('{$_id}', '{$_id}'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
+  echo "<input type='hidden' name='saldovahvistus_rivi_ryhmittely_tyyppi' value='{$saldovahvistusrivi['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
   foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
     echo "<input type='hidden' class='lasku_tunnus' name='lasku_tunnukset[]' value='{$lasku_tunnus}' />";
@@ -462,9 +607,13 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<br/>";
 
   echo "<form method='POST' action=''>";
-  echo "<input type='submit' value='".t('Tulosta pdf')."' />";
+  echo "<input type='submit' value='{$request["t"]["tulosta_pdf"]}' />";
   echo "<input type='hidden' name='tee' value='tulosta_saldovahvistus_pdf' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
+  echo "<input type='hidden' name='saldovahvistus_rivi_ryhmittely_tyyppi' value='{$saldovahvistusrivi['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
   foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {
@@ -490,7 +639,7 @@ function echo_kayttoliittyma($request) {
   echo "<table>";
 
   echo "<tr>";
-  echo "<th>".t('Ryhmittely').":</th>";
+  echo "<th>" . t('Ryhmittely') . ":</th>";
   echo "<td>";
   echo "<select name='ryhmittely_tyyppi'>";
   $sel = "";
@@ -504,12 +653,12 @@ function echo_kayttoliittyma($request) {
   echo "</select>";
   echo "<input type='text' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}'/>";
 
-  echo '('.t('tyhjä').' = '.t('saat kaikki ytunnukset').')';
+  echo '(' . t('tyhjä') . ' = ' . t('saat kaikki ytunnukset') . ')';
   echo "</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Päivämäärä').":</th>";
+  echo "<th>" . t('Päivämäärä') . ":</th>";
   echo "<td>";
   echo "<input type='text' name='pp' size='3' value='{$request['pp']}' />";
   echo "<input type='text' name='kk' size='3' value='{$request['kk']}' />";
@@ -518,7 +667,7 @@ function echo_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>".t('Saldovahvistuksen viesti').":</th>";
+  echo "<th>" . t('Saldovahvistuksen viesti') . ":</th>";
   echo "<td>";
   echo "<select name='saldovahvistus_viesti'>";
   $sel = "";
@@ -534,6 +683,13 @@ function echo_kayttoliittyma($request) {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<th>".t('Avoin saldo rajaus').":</th>";
+  echo "<td>";
+  echo "<input type='text' name='avoin_saldo_rajaus' value='{$request['avoin_saldo_rajaus']}' />";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<th>".t('Tallenna exceliin')."</th>";
   echo "<td>";
   $chk = "";
@@ -544,8 +700,27 @@ function echo_kayttoliittyma($request) {
   echo "</td>";
   echo "</tr>";
   echo "</table>";
-  echo "<input type='submit' value='".t('Aja')."' />";
+  echo "<input type='submit' value='" . t('Aja') . "' />";
   echo "</form>";
+
+  if (!empty($_SESSION['valitut_laskut'])) {
+    echo "<form method='POST' action=''>";
+    echo "<input type='hidden' name='tee' value='valitut_laskut_haettu' />";
+    echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+    echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+    echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
+    echo "<input type='submit' value='".t("Hae kerätyt saldovahvistusrivit (%d kpl)", "", count($_SESSION['valitut_laskut']))."' />";
+    echo "</form>";
+
+
+    echo "<form method='POST' action=''>";
+    echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+    echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+    echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+    echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
+    echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
+    echo "</form>";
+  }
 }
 
 function generoi_custom_excel_tiedosto($request) {
@@ -588,7 +763,7 @@ function generoi_custom_excel_tiedosto($request) {
 
     $asiakasnumerot_string = "";
     foreach ($valittu_rivi['asiakasnumerot'] as $asiakasnumero) {
-      $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'].' / ';
+      $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'] . ' / ';
     }
     $asiakasnumerot_string = substr($asiakasnumerot_string, 0, -3);
 
@@ -620,7 +795,7 @@ function generoi_custom_excel_tiedosto($request) {
 
     $asiakasnumerot_string = "";
     foreach ($saldovahvistusrivi['asiakasnumerot'] as $asiakasnumero) {
-      $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'].' / ';
+      $asiakasnumerot_string .= $asiakasnumero['asiakasnumero'] . ' / ';
     }
     $asiakasnumerot_string = substr($asiakasnumerot_string, 0, -3);
 

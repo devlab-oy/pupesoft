@@ -1,4 +1,5 @@
-<?PHP
+<?php
+
 // puun_alkiorivi.inc
 
 $ulos = "";
@@ -60,28 +61,28 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
     $alkio_nimi = '';
 
     if (trim($trow[$i]) != '') {
-      $query = "  SELECT nimi
-            FROM dynaaminen_puu
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji   = '{$apu['laji']}'
-            AND tunnus   = '{$trow[$i]}'";
+      $query = "SELECT nimi
+                FROM dynaaminen_puu
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji   = '{$apu['laji']}'
+                AND tunnus   = '{$trow[$i]}'";
       $vres = pupe_query($query);
       $nimirow = mysql_fetch_assoc($vres);
       $alkio_nimi = $nimirow['nimi'];
     }
 
-    $query = "  SELECT group_concat(distinct puun_tunnus) nodet
-          FROM puun_alkio
-          WHERE yhtio = '{$kukarow["yhtio"]}'
-          and liitos  = '{$apu["liitos"]}'
-          and kieli  = '{$apu["kieli"]}'
-          and laji  = '{$apu["laji"]}'";
+    $query = "SELECT group_concat(distinct puun_tunnus) nodet
+              FROM puun_alkio
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              and liitos  = '{$apu["liitos"]}'
+              and kieli  = '{$apu["kieli"]}'
+              and laji  = '{$apu["laji"]}'";
     $vres = pupe_query($query);
     $vrow = mysql_fetch_array($vres);
 
     $mista = !empty($mista) ? $mista : $apu['laji'];
 
-    $ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$mista}&liitos=".urlencode($apu['liitos'])."&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}' target='main'>".t('Valitse segmentit')."</a><br />\n";
+    $ulos = "<td><a href='{$palvelin2}dynaaminen_puu.php?toim={$apu['laji']}&tee=valitsesegmentti&mista={$mista}&liitos=".urlencode($apu['liitos'])."&puun_tunnus={$vrow["nodet"]}&kieli={$apu['kieli']}&lopetus=$lopetus_muut' target='mainframe'>".t('Valitse segmentit')."</a><br />\n";
     $ulos .= "<br /><input type='hidden' name='$nimi' value='{$trow[$i]}' /> {$trow[$i]} {$alkio_nimi}</td>\n";
   }
 

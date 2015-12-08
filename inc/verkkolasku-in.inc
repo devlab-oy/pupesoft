@@ -558,7 +558,10 @@ if (!function_exists("verkkolasku_in")) {
       $viite  = str_replace(" ", "", $laskun_pankkiviite); // Poistetaan viitteestä kaikki välilyönnit
       $viite  = str_replace("N/A", "", $viite); // Poistetaan viitteestä N/A tieto, mikäli joistakin skannauspalvelusta sellainen tulee
 
-      if ($laskuttajan_valkoodi != "") {
+      if ($yhtiorow['ostolaskujen_oletusvaluutta'] == 'T' and !empty($trow['oletus_valkoodi'])) {
+        $valkoodi = $trow['oletus_valkoodi'];
+      }
+      elseif ($laskuttajan_valkoodi != "") {
         $valkoodi = $laskuttajan_valkoodi;
       }
       elseif ($trow['oletus_valkoodi'] != '') {
@@ -1241,9 +1244,13 @@ if (!function_exists("verkkolasku_in")) {
       // Onko laskuriveillä useita alv-verokantoja?
       $ealvi = array_unique($ealvi);
 
-      // Katsotaan alv laskuerittelystä
+      // Katsotaan alv laskuerittelystä, rieveillä ei siis ollut tietoa verokannoista
       if (count($ealvi) == 1 and $ealvi[0] == "") {
         $ealvi = array($lisavat[0]);
+      }
+      elseif (count($ealvi) > 1 and $ealvi[0] == "") {
+        // Shiftataan eka tyhjä elementti pois, niin jäljelle jää riveiltä luetut tiedot
+        array_shift($ealvi);
       }
 
       // Tehdän pelkät oletustiliöinnit
@@ -1381,69 +1388,75 @@ if (!function_exists("verkkolasku_in")) {
       else {
 
         // Tehdään rivikohtaiset tiliöinnit
-        $i                = 0;
-        $totsumma             = 0;
-        $totsumma_valuutassa      = 0;
-        $maksimisumma            = 0;
-        $kustp              = $oletuskust;
-        $kohde              = $oletuskohde;
+        $i                   = 0;
+        $totsumma            = 0;
+        $totsumma_valuutassa = 0;
+        $maksimisumma        = 0;
+        $kustp               = $oletuskust;
+        $kohde               = $oletuskohde;
         $projekti            = $oletusprojekti;
 
         $count_rtuoteno = count($rtuoteno);
 
         for ($i = 0; $i < $count_rtuoteno; $i++) {
+          $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
+          $kustp = $oletuskust;
+
           if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
-            $kustp = $oletuskust;
 
             $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? $rtuoteno[$i]["riviinfo"] : "";
             $tuote = isset($rtuoteno[$i]["tuoteno"]) ? $rtuoteno[$i]["tuoteno"] : "";
 
-            $query = "SELECT tilino, kustp
+            $query = "SELECT tilino, kustp, alv
                       FROM tiliointisaanto
                       WHERE ttunnus = '$trow[tunnus]'
                       and tyyppi    = 't'
                       and yhtio     = '$yhtio'
                       and mintuote  <= '$tuote'
                       and maxtuote  >= '$tuote'
-                      and tilino    not in ('0','')";
+                      and mintuote  != ''
+                      and maxtuote  != ''
+                      and tilino    not in ('0','')
+                      order by tunnus
+                      limit 1";
             $result = pupe_query($query);
 
-            // Sopiva sääntöä ei löytynyt
-            if (mysql_num_rows($result) == 0) {
-
-              $query = "SELECT tilino, kustp
+            // Sopiva sääntöä ei löytynyt, etsitään wildcard haku info kentällä kuvauksesta
+            if (mysql_num_rows($result) != 1 and $rinfo != "") {
+              $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
                         WHERE ttunnus = '$trow[tunnus]'
                         and tyyppi    = 't'
                         and yhtio     = '$yhtio'
                         and kuvaus    like '%$rinfo%'
-                        and tilino    not in ('0','')";
+                        and kuvaus    != ''
+                        and tilino    not in ('0','')
+                        order by tunnus
+                        limit 1";
               $result = pupe_query($query);
+            }
 
-              // Hmm, mikään sääntö ei kelpaa
-              if (mysql_num_rows($result) == 0) {
-                if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
-                  $tili = $rtuoteno[$i]["tilinumero"];
-                }
-                elseif ($oletustili > 0) {
-                  // Toimittajan oletustili
-                  $tili = $oletustili;
-                }
-                else {
-                  // Yleinen kulutili
-                  $tili = $yhtiorow['muutkulut'];
-                }
-              }
-              else {
-                $tiliointirow = mysql_fetch_assoc($result);
-                $tili = $tiliointirow['tilino'];
-                if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
+            // Löytyi sääntö
+            if (mysql_num_rows($result) == 1) {
+              $tiliointirow = mysql_fetch_assoc($result);
+
+              $tili = $tiliointirow['tilino'];
+
+              // jos ei haluttu oletuskustannuspaikkaa
+              if ($tiliointirow['kustp'] != 999999999) $kustp = $tiliointirow['kustp'];
+
+              // Tiliöintisäännön mukaan meillä ei ole oikeutta vähentää rivin verot.
+              if (!empty($tiliointirow['alv']) and !empty($rtuoteno[$i]["rivihinta_verolli"])) {
+                $rtuoteno[$i]["alv"] = "0";
+                $rtuoteno[$i]["rivihinta"] = $rtuoteno[$i]["rivihinta_verolli"];
               }
             }
             else {
-              $tiliointirow = mysql_fetch_assoc($result);
-              $tili = $tiliointirow['tilino'];
-              if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
+              // Ei löytynyt sääntöä, katsotaan onko meillä tilinumero laskulla
+              // muuten oletustili ja kustp, joka on asetettu loopin alussa
+              if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
+                $tili = $rtuoteno[$i]["tilinumero"];
+              }
             }
 
             if ($vrow["kurssi"] != 1) {
@@ -1799,8 +1812,8 @@ if (!function_exists("verkkolasku_in")) {
         $selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
         // Tallennetaan laskun XML liitetiedostoksi
-        $filesize = strlen($xmlstr);
-        $filename = array_pop(explode("/", $file));
+        $_tmfilename = explode("/", $file);
+        $filename = array_pop($_tmfilename);
         $xmlstr   = mysql_real_escape_string($xmlstr);
 
         if ($ebid == "FINVOICEXML" or $ebid == 'MAVENTAXML') {
@@ -1821,7 +1834,7 @@ if (!function_exists("verkkolasku_in")) {
                   selite          = '$selite',
                   kieli           = '$yhtiorow[kieli]',
                   filename        = '$filename',
-                  filesize        = '$filesize',
+                  filesize        = length(data),
                   filetype        = 'text/xml',
                   image_width     = '',
                   image_height    = '',
@@ -1851,9 +1864,6 @@ if (!function_exists("verkkolasku_in")) {
           if (substr($sisalto, 0, 4) == "%PDF") {
             // tallennetaan kuva
             $filename = $ebid.".pdf";
-
-            //filesize functio ei toimi koska ei ole oikea file.
-            $filesize = strlen($sisalto);
             $data  = mysql_real_escape_string($sisalto);
 
             // lisätään kuva
@@ -1865,7 +1875,7 @@ if (!function_exists("verkkolasku_in")) {
                       selite          = '$selite',
                       kieli           = '$yhtiorow[kieli]',
                       filename        = '$file',
-                      filesize        = '$filesize',
+                      filesize        = length(data),
                       filetype        = 'application/pdf',
                       image_width     = '',
                       image_height    = '',
@@ -1891,8 +1901,6 @@ if (!function_exists("verkkolasku_in")) {
               if (strtoupper(substr($liitefile, -4)) == ".PDF") {
 
                 $data = file_get_contents($liitefile);
-                $filesize = strlen($data);
-
                 $data = mysql_real_escape_string($data);
 
                 $filename = str_replace("maventa_{$match[2]}_maventa-", "", basename($liitefile));
@@ -1906,7 +1914,7 @@ if (!function_exists("verkkolasku_in")) {
                           selite          = '$selite',
                           kieli           = '$yhtiorow[kieli]',
                           filename        = '$filename',
-                          filesize        = '$filesize',
+                          filesize        = length(data),
                           filetype        = 'application/pdf',
                           image_width     = '',
                           image_height    = '',
@@ -1937,7 +1945,6 @@ if (!function_exists("verkkolasku_in")) {
 
               if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
 
-                $editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
                 $data  = mysql_real_escape_string($editilaus_laskulle_data);
 
                 $query = "INSERT INTO liitetiedostot SET
@@ -1948,7 +1955,7 @@ if (!function_exists("verkkolasku_in")) {
                           selite          = 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
                           kieli           = '$yhtiorow[kieli]',
                           filename        = '$path_parts[basename]',
-                          filesize        = '$editilaus_laskulle_filesize',
+                          filesize        = length(data),
                           filetype        = 'text',
                           image_width     = '',
                           image_height    = '',

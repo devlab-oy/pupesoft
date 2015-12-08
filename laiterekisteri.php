@@ -30,16 +30,20 @@ if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_lait
   // Poistetaan laite sopimusrivilt‰
   $query = "DELETE FROM laitteen_sopimukset
             WHERE laitteen_tunnus   = '{$poista_laite_sopimusrivilta}'
-            AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+            AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
+            AND yhtio               = '{$kukarow['yhtio']}'";
   pupe_query($query);
   $maara_paivitetty = true;
 }
-elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville)) {
+elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville) and count($lisaa_laite_sopimusriville) > 0) {
   // Lis‰t‰‰n laite sopimusriville
-  $query = "INSERT INTO laitteen_sopimukset
+  foreach ($lisaa_laite_sopimusriville as $laitetunnus) {
+    $query = "INSERT INTO laitteen_sopimukset
             SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
-            laitteen_tunnus = '{$lisaa_laite_sopimusriville}'";
-  pupe_query($query);
+            laitteen_tunnus = '{$laitetunnus}',
+            yhtio           = '{$kukarow['yhtio']}'";
+    pupe_query($query);
+  }
   $maara_paivitetty = true;
 }
 
@@ -51,7 +55,7 @@ if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
 if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_laite > 0) {
   // Tallennetaan muutokset laitteen tietoihin
   $kveri = "UPDATE laite
-            SET kommentti = '{$kommentti}',
+            SET kommentti                      = '{$kommentti}',
             sla                                = '{$sla}',
             sd_sla                             = '{$sd_sla}',
             lcm_info                           = '{$lcm_info}',
@@ -61,18 +65,23 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
             muutospvm                          = now(),
             muuttaja                           = '{$kukarow['kuka']}'
-            WHERE yhtio='{$kukarow['yhtio']}'
+            WHERE yhtio                        = '{$kukarow['yhtio']}'
             AND tunnus                         = '{$muokattava_laite}'";
   pupe_query($kveri);
   unset($toiminto);
 }
 elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero)
   and !isset($muokattava_laite)) {
-  // Tarkistetaan ettei laite/sarjanumeropari ole jo taulussa
+
+  // Jos syˆtet‰‰n sarjanumeroita mitk‰ eiv‰t ole sarjanumeroseurannassa
+  $uusilaite_sarjanumero = $uusilaite_sarjanumero == '' ? $valitse_sarjanumero : $uusilaite_sarjanumero;
+
+  // Tarkistetaan ettei tuote/sarjanumeropari ole jo taulussa
   $query = "SELECT *
             FROM laite
             WHERE tuoteno = '{$uusilaite_tuotenumero}'
-            AND sarjanro  = '{$uusilaite_sarjanumero}'";
+            AND sarjanro  = '{$uusilaite_sarjanumero}'
+            AND yhtio     = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   if (mysql_affected_rows() == 0) {
     // Lis‰t‰‰n uusi laite
@@ -145,7 +154,7 @@ if ($toiminto == "LINKKAA") {
   }
 
   // Uusi sarake mihin piirret‰‰n checkboxit
-  array_unshift($headerit, 'lis‰‰');
+  array_unshift($headerit, 'Valitse');
 
   // Valitut laitteet
   echo "<form>";
@@ -178,9 +187,9 @@ if ($toiminto == "LINKKAA") {
             avainsana.selitetark valmistaja,
             tuote.tuotemerkki malli
             FROM laite
-            JOIN tuote on tuote.yhtio = laite.yhtio
+            LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno                           = laite.tuoteno
-            JOIN avainsana on avainsana.yhtio = tuote.yhtio
+            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
@@ -212,7 +221,8 @@ if ($toiminto == "LINKKAA") {
   // Rajataan pois jo linkatut laitteet
   $kveri = "SELECT group_concat(DISTINCT laitteen_tunnus) sopimuksella
             FROM laitteen_sopimukset
-            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
+              AND yhtio               = '{$kukarow['yhtio']}'";
   $resu = pupe_query($kveri);
   $rivi = mysql_fetch_assoc($resu);
   if (!empty($rivi['sopimuksella'])) {
@@ -250,6 +260,9 @@ if (empty($toiminto) or $toiminto == 'LINKKAA') {
 }
 echo "</thead>";
 
+if (empty($toiminto) or $toiminto == 'LINKKAA') {
+  echo "<br><input type='submit' name='linkkaus' value='Liit‰ valitut laitteet'/><br><br>";
+}
 // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
 $query = "SELECT
           laite.*,
@@ -258,9 +271,9 @@ $query = "SELECT
           if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyll‰','Ei') sopimusrivi,
           group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
           FROM laite
-          JOIN tuote on tuote.yhtio = laite.yhtio
+          LEFT JOIN tuote on tuote.yhtio = laite.yhtio
             AND tuote.tuoteno    = laite.tuoteno
-          JOIN avainsana on avainsana.yhtio = tuote.yhtio
+          LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
             AND avainsana.laji   = 'TRY'
             AND avainsana.selite = tuote.try
           LEFT JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
@@ -335,9 +348,9 @@ elseif ($toiminto == 'UUSILAITE') {
     $esiv_valmistaja = $rivikka['valmistaja'];
     $esiv_malli = $rivikka['malli'];
     $esiv_sopimus = "Ei";
+    if (empty($rivikka['sarjanumero'])) $rivikka['sarjanumero'] = $valitse_sarjanumero;
     echo "<input type='hidden' name='uusilaite_myyntirivitunnus' value ='{$rivikka['myyntirivitunnus']}'/>";
     echo "<input type='hidden' name='uusilaite_sarjanumero' value ='{$rivikka['sarjanumero']}'/>";
-    echo "<input type='hidden' name='uusilaite_tuotenumero' value ='{$rivikka['tuoteno']}'/>";
   }
   echo "<td></td>";
   echo "<td>{$esiv_sopimus}</td>";
@@ -348,7 +361,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo livesearch_kentta("laiterekisteriformi", "SARJANUMEROHAKU", "valitse_sarjanumero", 140, $valitse_sarjanumero, '', '', '', 'ei_break_all');
   echo "</td>";
 
-  echo "<td>{$esiv_tuotenumero}</td>";
+  echo "<td><input type='text' name='uusilaite_tuotenumero' value='{$esiv_tuotenumero}'/></td>";
   echo "<td></td><td></td>";
   echo "<td><input type='text' name='sla'/></td>";
   echo "<td><input type='text' name='sd_sla'/></td>";
@@ -373,7 +386,7 @@ else {
 
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
-      echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville'  value='{$rowi['tunnus']}' onclick='submit();'/></td>";
+      echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville[]'  value='{$rowi['tunnus']}'/></td>";
       echo "<td>{$rowi['tunnus']}</td>";
     }
     else {
@@ -392,7 +405,8 @@ else {
                 tilausrivin_lisatiedot.sopimus_loppuu
                 FROM tilausrivi
                 JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-                WHERE tilausrivi.tunnus IN ({$rowi['sopimusrivin_tunnukset']})";
+                WHERE tilausrivi.tunnus IN ({$rowi['sopimusrivin_tunnukset']})
+                AND tilausrivi.yhtio    = '{$kukarow['yhtio']}'";
       $ressi = pupe_query($kveri);
 
       $ed_sop_tun = '';
@@ -427,6 +441,7 @@ else {
 
           $asiakas .= $lassurivi['toim_nimi']."<br>";
           $asiakas .= $lassurivi['toim_postitp']."<br>";
+          $asiakas .= $lassurivi['asiakkaan_tilausnumero']."<br>";
           $asiakas .= "<br><br>";
         }
 

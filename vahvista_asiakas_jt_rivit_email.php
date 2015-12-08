@@ -143,7 +143,11 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   //Haetaan kaikki myyntilaskut joiden asiakkaan jt_toimitusaika_email_vahvistus on Käytetään yhtiön oletus parametriä tai saa lähettää sähköposteja
   $query = "SELECT lasku.tunnus,
             lasku.nimi,
-            lasku.liitostunnus
+            lasku.liitostunnus,
+            lasku.tilausyhteyshenkilo,
+            lasku.ohjelma_moduli,
+            lasku.myyja,
+            lasku.asiakkaan_tilausnumero
             FROM lasku
             JOIN asiakas
             ON ( asiakas.yhtio = lasku.yhtio
@@ -163,6 +167,7 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   while ($myyntitilaus = mysql_fetch_assoc($result)) {
     $myyntitilaus['tilausrivit'] = hae_myyntitilausrivit($myyntitilaus['tunnus']);
     $myyntitilaus['asiakas'] = hae_myyntitilauksen_asiakas($myyntitilaus['liitostunnus']);
+    $myyntitilaus['tilausyhteyshenkilo'] = hae_tilauksen_yhteyshenkilo($myyntitilaus);
     $myyntitilaukset[] = $myyntitilaus;
   }
 
@@ -313,7 +318,15 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['kieli'] = $kieli;
-  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $myyntitilaus['asiakas']['email'];
+
+  $mailiosoite = $myyntitilaus['asiakas']['email'];
+
+  if (!empty($myyntitilaus["tilausyhteyshenkilo"])) {
+    $mailiosoite .= ", {$myyntitilaus["tilausyhteyshenkilo"]["email"]}";
+  }
+
+  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $mailiosoite;
+  $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['asiakkaan_tilausnumero'] = $myyntitilaus["asiakkaan_tilausnumero"];
 }
 
 
@@ -332,6 +345,11 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
     $body .= t("Seuraavien tuotteiden toimitusaika on muuttunut", $asiakas_sahkoposti['kieli']).'.<br/><br/>';
     foreach ($asiakas_sahkoposti['tilaukset'] as $tilaustunnus => $tilaus) {
       $body .= t('Tilaus', $asiakas_sahkoposti['kieli']).": {$tilaustunnus}"."<br/>";
+
+      if (!empty($tilaus["asiakkaan_tilausnumero"])) {
+        $body .= t('Tilausnumeronne', $asiakas_sahkoposti['kieli']) . ": {$tilaus["asiakkaan_tilausnumero"]}" . "<br/>";
+      }
+
       $body .= "<table border=1>";
       $body .= "<tr>";
       $body .= "<td>".t("Tuoteno", $asiakas_sahkoposti['kieli'])."</td>";
@@ -381,4 +399,38 @@ function laheta_sahkoposti($email, $body) {
     "body"     => $body,
   );
   pupesoft_sahkoposti($parametrit);
+}
+
+
+/**
+ *
+ * @param array   $params
+ *
+ * @return array Yhteyshenkilon tiedot
+ */
+function hae_tilauksen_yhteyshenkilo($params = array()) {
+  global $kukarow;
+
+  $ohjelma_moduli      = $params['ohjelma_moduli'];
+  $myyja               = $params['myyja'];
+  $liitostunnus        = $params['liitostunnus'];
+  $tilausyhteyshenkilo = $params['tilausyhteyshenkilo'];
+
+  if ($ohjelma_moduli == 'EXTRANET') {
+    $query = "SELECT eposti AS email
+              FROM kuka
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus  = '{$myyja}'";
+    $result = pupe_query($query);
+  }
+  else {
+    $query = "SELECT email
+              FROM yhteyshenkilo
+              WHERE yhtio      = '{$kukarow["yhtio"]}'
+              AND liitostunnus = '{$liitostunnus}'
+              AND nimi         = '{$tilausyhteyshenkilo}'";
+    $result = pupe_query($query);
+  }
+
+  return mysql_fetch_assoc($result);
 }

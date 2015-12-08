@@ -30,6 +30,8 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
+$ajotext = "";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -39,7 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  $paiva_ajo = TRUE;
+
+  if (strtoupper($argv[2]) == 'WEEKLY') {
+    $weekly_ajo = TRUE;
+    $ajotext = "weekly_";
+  }
+  else {
+    $paiva_ajo = TRUE;
+  }
 }
 
 // Yhtiˆ
@@ -58,7 +67,7 @@ if (@include "inc/tecdoc.inc") {
 
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/product_replacement_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_replacement_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $filepath\n");
@@ -74,8 +83,14 @@ fwrite($fp, $header);
 
 $korvaavatrajaus = "";
 
-// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
-if ($paiva_ajo) {
+// Haetaan aika jolloin t‰m‰ skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_REPL_CRON");
+
+// Otetaan mukaan vain edellisen ajon j‰lkeen muuttuneet
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $korvaavatrajaus = " AND korvaavat.luontiaika > '$datetime_checkpoint' ";
+}
+elseif ($paiva_ajo) {
   $korvaavatrajaus = " AND korvaavat.luontiaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
@@ -88,10 +103,13 @@ $query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           {$tuoterajaus}";
 $res = pupe_query($query);
 
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_REPL_CRON", date('Y-m-d H:i:s'));
+
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);
 
-echo "Korvaavusketjuja {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex Korvaavusketjuja {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
@@ -103,7 +121,6 @@ while ($row = mysql_fetch_assoc($res)) {
              JOIN tuote on (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
              WHERE korvaavat.yhtio = '{$yhtio}'
              AND korvaavat.id      = '{$row['id']}'
-             {$korvaavatrajaus}
              ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $kresult = pupe_query($kquery);
 
@@ -126,16 +143,12 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
@@ -144,4 +157,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relext korvaavat valmis.\n";

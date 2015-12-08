@@ -24,19 +24,19 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
         // tilausrivi pit‰‰ olla jo kohdistettu
         $query = "SELECT tunnus
                   FROM asn_sanomat
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND laji       = 'asn'
-                  AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'
-                  AND status     = 'X'";
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND laji    = 'asn'
+                  AND MATCH (tilausrivi) AGAINST ('{$tilausrivirow['tunnus']}' IN BOOLEAN MODE)
+                  AND status  = 'X'";
         $chk_res = pupe_query($query);
 
         // tilausrivi ei saa olla jo kohdistettu
         $query = "SELECT tunnus
                   FROM asn_sanomat
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND laji       = '{$lajilisa}'
-                  AND status     = ''
-                  AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND laji    = '{$lajilisa}'
+                  AND status  = ''
+                  AND MATCH (tilausrivi) AGAINST ('{$tilausrivirow['tunnus']}' IN BOOLEAN MODE)";
         $chk_res2 = pupe_query($query);
 
         if (mysql_num_rows($chk_res) != 0 and mysql_num_rows($chk_res2) == 0) {
@@ -50,10 +50,10 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
             // is‰ pit‰‰ olla jo kohdistettu
             $query = "SELECT tunnus
                       FROM asn_sanomat
-                      WHERE yhtio    = '{$kukarow['yhtio']}'
-                      AND laji       = 'asn'
-                      AND tilausrivi LIKE '%{$tilausrivirow['perheid']}%'
-                      AND status     = 'X'";
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND laji    = 'asn'
+                      AND MATCH (tilausrivi) AGAINST ('{$tilausrivirow['perheid']}' IN BOOLEAN MODE)
+                      AND status  = 'X'";
             $chk_res3 = pupe_query($query);
 
             if (mysql_num_rows($chk_res3) != 0) {
@@ -72,10 +72,10 @@ if (!function_exists("teccom_kaytettavat_tilausrivit")) {
         // tilausrivi ei saa olla jo kohdistettu
         $query = "SELECT tunnus
                   FROM asn_sanomat
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND laji       = '{$lajilisa}'
-                  AND status     = 'X'
-                  AND tilausrivi LIKE '%{$tilausrivirow['tunnus']}%'";
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND laji    = '{$lajilisa}'
+                  AND status  = 'X'
+                  AND MATCH (tilausrivi) AGAINST ('{$tilausrivirow['tunnus']}' IN BOOLEAN MODE)";
         $chk_res = pupe_query($query);
 
         if (mysql_num_rows($chk_res) == 0) {
@@ -1376,9 +1376,9 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
             // tilausrivi ei saa olla jo kohdistettu
             $query = "SELECT tunnus
                       FROM asn_sanomat
-                      WHERE yhtio    = '{$kukarow['yhtio']}'
-                      AND laji       = '{$lajilisa}'
-                      AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'";
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND laji    = '{$lajilisa}'
+                      AND MATCH (tilausrivi) AGAINST ('{$kokeiltiin['tunnus']}' IN BOOLEAN MODE)";
             $chk_res = pupe_query($query);
 
             if (mysql_num_rows($chk_res) != 0 or in_array($kokeiltiin['tunnus'], $kaytettavat_tilausrivit)) continue;
@@ -1388,10 +1388,10 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
             if ($kokeiltiin['asn_sanomat'] == 'K') {
               $query = "SELECT tunnus
                         FROM asn_sanomat
-                        WHERE yhtio    = '{$kukarow['yhtio']}'
-                        AND laji       = 'asn'
-                        AND tilausrivi LIKE '%{$kokeiltiin['tunnus']}%'
-                        AND status     = 'X'";
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND laji    = 'asn'
+                        AND MATCH (tilausrivi) AGAINST ('{$kokeiltiin['tunnus']}' IN BOOLEAN MODE)
+                        AND status  = 'X'";
               $chk_res = pupe_query($query);
 
               if (mysql_num_rows($chk_res) == 0) {
@@ -1407,10 +1407,10 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
                   // is‰ pit‰‰ olla jo kohdistettu
                   $query = "SELECT tunnus
                             FROM asn_sanomat
-                            WHERE yhtio    = '{$kukarow['yhtio']}'
-                            AND laji       = 'asn'
-                            AND tilausrivi LIKE '%{$kokeiltiin['perheid']}%'
-                            AND status     = 'X'";
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND laji    = 'asn'
+                            AND MATCH (tilausrivi) AGAINST ('{$kokeiltiin['perheid']}' IN BOOLEAN MODE)
+                            AND status  = 'X'";
                   $chk_res = pupe_query($query);
 
                   if (mysql_num_rows($chk_res) == 0) {

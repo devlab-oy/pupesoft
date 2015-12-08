@@ -13,6 +13,7 @@ if (!isset($errors)) $errors = array();
 if (!isset($viivakoodi)) $viivakoodi = "";
 if (!isset($_viivakoodi)) $_viivakoodi = "";
 if (!isset($orig_tilausten_lukumaara)) $orig_tilausten_lukumaara = 0;
+if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
 
 $sort_by_direction_tuoteno     = (!isset($sort_by_direction_tuoteno) or $sort_by_direction_tuoteno == 'asc') ? 'desc' : 'asc';
 $sort_by_direction_otunnus     = (!isset($sort_by_direction_otunnus) or $sort_by_direction_otunnus == 'asc') ? 'desc' : 'asc';
@@ -22,14 +23,16 @@ $sort_by_direction_hylly    = (!isset($sort_by_direction_hylly) or $sort_by_dire
 $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $viivakoodi;
 
 $params = array();
+$saapumisnro_haku_lisa = "";
 
 // Joku parametri tarvii olla setattu.
-if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
+if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '' or $saapumisnro_haku != '') {
 
   if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
 
   if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
   if ($ostotilaus != '')   $params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
+  if ($saapumisnro_haku != '') $saapumisnro_haku_lisa = "AND lasku.laskunro = '{$saapumisnro_haku}'";
 
   // Viivakoodi case
   if ($viivakoodi != '') {
@@ -103,9 +106,28 @@ if (isset($sort_by)) {
   }
 }
 
+if (!empty($saapumisnro_haku_lisa)) {
+  $where_lisa = "AND lasku.tila = 'K'
+                 AND lasku.alatila = ''
+                 {$saapumisnro_haku_lisa}";
+  $join_lisa = "AND tilausrivi.uusiotunnus=lasku.tunnus
+                AND tilausrivi.suuntalava = 0";
+  $lasku_join_lisa = "JOIN lasku AS lasku_osto ON (lasku_osto.yhtio = tilausrivi.yhtio
+                      AND lasku_osto.tunnus = tilausrivi.otunnus
+                      AND lasku_osto.tila = 'O' AND lasku_osto.alatila = 'A')";
+  $select_lisa = "lasku_osto.tunnus AS ostotilaus,";
+}
+else {
+  $where_lisa = "AND ((lasku.tila = 'K' AND lasku.alatila = '') or (lasku.tila='O' AND lasku.alatila ='A'))";
+  $join_lisa = "AND tilausrivi.otunnus=lasku.tunnus
+                AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)";
+  $lasku_join_lisa = "";
+  $select_lisa = "lasku.tunnus as ostotilaus,";
+}
+
 // Haetaan ostotilaukset
 $query = "SELECT
-          lasku.tunnus as ostotilaus,
+          {$select_lisa}
           lasku.liitostunnus,
           tilausrivi.tunnus,
           tilausrivi.otunnus,
@@ -120,18 +142,20 @@ $query = "SELECT
           tuotteen_toimittajat.liitostunnus,
           IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
           FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-            AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio
+            AND tilausrivi.tyyppi='O'
+            AND tilausrivi.varattu != 0
+            {$join_lisa}
+          {$lasku_join_lisa}
           JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
           JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
             AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
             AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
           LEFT JOIN tilausrivin_lisatiedot
           ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-          WHERE lasku.tila          = 'O'
-          AND lasku.alatila         = 'A'
-          AND lasku.yhtio='{$kukarow['yhtio']}'
+          WHERE lasku.yhtio='{$kukarow['yhtio']}'
           AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+          {$where_lisa}
           {$query_lisa}
           ORDER BY {$orderby} {$ascdesc}
           ";
@@ -150,7 +174,7 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
   $query_lisa = " AND ".implode($params, " AND ");
 
   $query = "SELECT
-            lasku.tunnus as ostotilaus,
+            {$select_lisa}
             lasku.liitostunnus,
             tilausrivi.tunnus,
             tilausrivi.otunnus,
@@ -165,18 +189,20 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
             tuotteen_toimittajat.liitostunnus,
             IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
             FROM lasku
-            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-              AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+            JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio
+              AND tilausrivi.tyyppi='O'
+              AND tilausrivi.varattu != 0
+              {$join_lisa}
+            {$lasku_join_lisa}
             JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
             JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
               AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
               AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
             LEFT JOIN tilausrivin_lisatiedot
             ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-            WHERE lasku.tila          = 'O'
-            AND lasku.alatila         = 'A'
-            AND lasku.yhtio='{$kukarow['yhtio']}'
+            WHERE lasku.yhtio='{$kukarow['yhtio']}'
             AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+            {$where_lisa}
             {$query_lisa}
             ORDER BY {$orderby} {$ascdesc}
             ";
@@ -199,12 +225,13 @@ if (isset($submit)) {
     $url_array['ostotilaus'] = $ostotilaus;
     $url_array['tilausrivi'] = $tilausrivi;
     $url_array['saapuminen'] = $saapuminen;
+    $url_array['saapumisnro_haku'] = $saapumisnro_haku;
 
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
 
     break;
   case 'cancel':
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}&saapumisnro_haku={$saapumisnro_haku}'>";
     exit;
   default:
     echo "Virhe";
@@ -214,7 +241,7 @@ if (isset($submit)) {
 
 // Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
+  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&saapumisnro_haku={$saapumisnro_haku}&virhe'>";
   exit();
 }
 
@@ -226,6 +253,7 @@ if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakood
   $url_array['saapuminen'] = $saapuminen;
   $url_array['manuaalisesti_syotetty_ostotilausnro'] = empty($manuaalisesti_syotetty_ostotilausnro) ? 0 : 1;
   $url_array['tilausten_lukumaara'] = $tilausten_lukumaara;
+  $url_array['saapumisnro_haku'] = $saapumisnro_haku;
 
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
   exit();
@@ -247,14 +275,20 @@ else {
 }
 
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
-$url_lisa .= "&backsaapuminen={$backsaapuminen}";
+$url_lisa .= $url_lisa ? "&" : "?";
+$url_lisa .= "backsaapuminen={$backsaapuminen}";
+$url_lisa .= "&saapumisnro_haku={$saapumisnro_haku}";
 
 //## UI ###
 echo "<div class='header'>
   <button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
   <h1>", t("USEITA TILAUKSIA"), "</h1></div>";
 
-$viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli  = "?tuotenumero=".urlencode($tuotenumero);
+$viivakoodi_formi_urli .= "&ostotilaus={$ostotilaus}";
+$viivakoodi_formi_urli .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
+$viivakoodi_formi_urli .= "&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
+$viivakoodi_formi_urli .= "&saapumisnro_haku={$saapumisnro_haku}";
 
 echo "<div class='main'>
 
@@ -272,14 +306,14 @@ echo "<div class='main'>
 <table>
 <tr>";
 
-$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
+$url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&saapumisnro_haku={$saapumisnro_haku}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
   echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>", t("Ostotilaus"), "</a>&nbsp;";
   echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
 }
-if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
+if ($tuotenumero == '' and $viivakoodi == '' and ($ostotilaus != '' or $saapumisnro_haku != '')) {
   echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>", t("Tuoteno"), "</a>&nbsp;";
   echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
@@ -327,7 +361,9 @@ while ($row = mysql_fetch_assoc($result)) {
       'tilausten_lukumaara' => $tilausten_lukumaara,
       'viivakoodi' => $viivakoodi,
       'tuotenumero' => $tuotenumero,
-      'ennaltakohdistettu' => $ennaltakohdistettu, )
+      'ennaltakohdistettu' => $ennaltakohdistettu,
+      'saapumisnro_haku' => $saapumisnro_haku
+    )
   );
 
   echo "<tr>";
@@ -335,7 +371,7 @@ while ($row = mysql_fetch_assoc($result)) {
   if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
     echo "<td><a href='hyllytys.php?{$url}'>{$row['otunnus']}</a></td>";
   }
-  if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
+  if ($tuotenumero == '' and $viivakoodi == '' and ($ostotilaus != '' or $saapumisnro_haku != '')) {
     echo "<td><a href='hyllytys.php?{$url}'>{$row['tuoteno']}</a></td>";
   }
   echo "

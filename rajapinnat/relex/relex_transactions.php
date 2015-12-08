@@ -92,29 +92,8 @@ fwrite($fp, $header);
 $tapahtumarajaus = "";
 $kerivirajaus    = " AND tilausrivi.kerattyaika > 0 ";
 
-pupemaster_start();
-
-$datetime_checkpoint_res = t_avainsana("RELEX_TRAN_CRON");
-
-if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  $query = "DELETE FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji    = 'RELEX_TRAN_CRON'";
-  pupe_query($query);
-
-  $query = "INSERT INTO avainsana SET
-            yhtio = '{$kukarow['yhtio']}',
-            laji  = 'RELEX_TRAN_CRON'";
-  pupe_query($query);
-
-  $datetime_checkpoint = "";
-}
-else {
-  $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-  $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
-}
-
-pupemaster_stop();
+// Haetaan aika jolloin t‰m‰ skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_TRAN_CRON");
 
 // Otetaan mukaan vain edellisen ajon j‰lkeen tehdyt tapahtumat
 if ($paiva_ajo and $datetime_checkpoint != "") {
@@ -228,21 +207,13 @@ else {
   $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
 }
 
-pupemaster_start();
-
-// P‰ivitet‰‰n timestamppi talteen jolloin tuotteet on haettu
-$query = "UPDATE avainsana SET
-          selite      = '{$datetime_checkpoint_uusi}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji    = 'RELEX_TRAN_CRON'";
-pupe_query($query);
-
-pupemaster_stop();
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_TRAN_CRON", $datetime_checkpoint_uusi);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);
 
-echo "Tapahtumarivej‰ {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex Tapahtumarivej‰ {$rows} kappaletta.\n";
 
 $relex_transactions = array();
 
@@ -357,10 +328,6 @@ foreach ($relex_transactions as $row) {
   fwrite($fp, $rivi);
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
@@ -375,4 +342,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relext tapahtumat valmis.\n";

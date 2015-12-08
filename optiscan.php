@@ -170,10 +170,12 @@ elseif ($sanoma == "GetPicks") {
   // Napataan kukarow ja yhtorow
   $yhtiorow = hae_yhtion_parametrit("artr");
   $kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
+  $otunnukset = '';
 
   // Katsotaan onko käyttäjällä jo keräyserä keräyksessä
   // Jos on useampi, niin napataan vain yksi erä kerrallaan
-  $query = "SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
+  $query = "SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit,
+            GROUP_CONCAT(distinct otunnus) AS otunnukset, min(otunnus) kerayslistatunnus
             FROM kerayserat
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laatija        = '{$kukarow['kuka']}'
@@ -275,6 +277,43 @@ elseif ($sanoma == "GetPicks") {
     $kpl_arr = explode(",", $kerattavat_rivit_row['tilausrivit']);
     $kpl    = count($kpl_arr);
     $n      = 1;
+
+    if ($kerattavat_rivit_row['otunnukset'] != '' and $otunnukset == '') {
+
+      // jos keräyserä jäänyt vaiheeseen ja kerääjä ottaa sen uusiksi
+      // päivitetään myyntitilauksen tilat kohdalleen
+      $query = "UPDATE lasku SET
+                tila        = 'L',
+                alatila     = 'A',
+                lahetepvm   = now(),
+                hyvak3      = '{$kukarow['kuka']}',
+                h3time      = now(),
+                kerayslista = '{$kerattavat_rivit_row['kerayslistatunnus']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
+                AND tila    = 'N'
+                AND alatila in ('A', 'KA')
+                AND hyvak3  = ''
+                AND h3time  = '0000-00-00 00:00:00'";
+      pupe_query($query);
+
+      if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+        // ja siirtolistan tilat kohdalleen
+        $query = "UPDATE lasku SET
+                  alatila     = 'A',
+                  lahetepvm   = now(),
+                  hyvak3      = '{$kukarow['kuka']}',
+                  h3time      = now(),
+                  kerayslista = '{$kerattavat_rivit_row['kerayslistatunnus']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
+                  AND tila    = 'G'
+                  AND alatila in ('J', 'KJ')
+                  AND hyvak3  = ''
+                  AND h3time  = '0000-00-00 00:00:00'";
+        pupe_query($query);
+      }
+    }
 
     // haetaan keräysvyöhykkeen takaa keräysjärjestys
     $query = "SELECT keraysjarjestys
@@ -693,11 +732,32 @@ elseif ($sanoma == "StopAssignment") {
       if (isset($lahete_tulostus_paperille) and $lahete_tulostus_paperille > 0) $print_array[] = "{$lahete_tulostus_paperille} lähetettä";
       if (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 0) $print_array[] = "{$lahete_tulostus_paperille_vak} vak/adr {$dokumenttiteksti}";
 
+      $query = "SELECT asav.avainsana
+                FROM kerayserat
+                JOIN lasku ON (lasku.yhtio = kerayserat.yhtio
+                  AND lasku.tunnus      = kerayserat.otunnus)
+                JOIN asiakkaan_avainsanat AS asav ON (asav.yhtio = lasku.yhtio
+                  AND asav.liitostunnus = lasku.liitostunnus
+                  AND asav.laji         = 'OPTISCAN_KERAYSKOMMENTTI')
+                WHERE kerayserat.yhtio  = '{$kukarow['yhtio']}'
+                AND kerayserat.nro      = '{$nro}'";
+      $avainsanares = pupe_query($query);
+
       if (count($print_array) == 0) {
         $response = "99,Lähetteitä ei tulosteta\r\n\r\n";
       }
       else {
-        $response = "99,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}\r\n\r\n";
+        $response  = "99,".implode(" ja ", $print_array)." tulostuu kirjoittimelta{$laheteprintterinimi}";
+
+        if (mysql_num_rows($avainsanares) > 0) {
+          $avainsanarow = mysql_fetch_assoc($avainsanares);
+
+          if (!empty($avainsanarow['avainsana'])) {
+            $response .= " {$avainsanarow['avainsana']}";
+          }
+        }
+
+        $response .= "\r\n\r\n";
       }
     }
   }

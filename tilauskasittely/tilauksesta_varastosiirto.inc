@@ -265,7 +265,7 @@ if (!function_exists('hae_toimitustapa')) {
 }
 
 if (!function_exists('luo_varastosiirtorivi')) {
-  function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $varastosiirtotyyppi = 'N') {
+  function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $varastosiirtotyyppi = 'N', $perhekielto = 1) {
     global $kukarow, $yhtiorow;
 
     $trow = hae_tuote($tilausrivi['tuoteno']);
@@ -281,7 +281,6 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $hinta            = "";
     $netto            = "";
     $korvaavakielto   = 1;
-    $perhekielto      = 1;
     $orvoteikiinnosta = "EITOD";
 
     // Generoiduille listoille ei laiteta väkisin
@@ -307,6 +306,10 @@ if (!function_exists('luo_varastosiirtorivi')) {
       ${'ale'.$alepostfix} = "";
     }
 
+    if ($varastosiirtotyyppi == "G") {
+      $toim = 'SIIRTOLISTA';
+    }
+
     require 'lisaarivi.inc';
 
     return $lisatyt_rivit1;
@@ -330,6 +333,9 @@ if (!function_exists('luo_varastosiirto')) {
     if ($varastosiirtotyyppi == "G") {
       $comments   = t("Relex-varastosiirto");
       $viesti     = t("Relex-varastosiirto");
+
+      $_kohdevarasto = hae_varasto($kohdevaraston_tunnus);
+      $viesti .= " - {$_kohdevarasto['nimitys']}";
     }
     else {
       $comments   = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";

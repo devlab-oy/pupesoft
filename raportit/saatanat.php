@@ -176,6 +176,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   $kustpmuuttuja    = "";
   $saatavat_yhtio    = $kukarow['yhtio'];
   $eta_asiakaslisa  = '';
+  $indeksi1 = $indeksi2 = "yhtio_tila_mapvm";
 
   if ($sanimi != '') {
     $generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
@@ -183,6 +184,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
   if (($eiliittymaa == 'ON' and !empty($sliitostunnus) and $yhtiorow["myyntitilaus_saatavat"] == "") or ($eiliittymaa != 'ON' and !empty($sliitostunnus))) {
     $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+    $indeksi2 = "yhtio_tila_liitostunnus_tapvm";
   }
   elseif (!empty($sytunnus)) {
 
@@ -222,6 +224,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     }
 
     $generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
+    $indeksi2 = "yhtio_tila_liitostunnus_tapvm";
   }
 
   if ($yli != 0) {
@@ -295,26 +298,56 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
   }
 
+  $query = "(SELECT GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(tiliointi.summa_valuutassa),2) avoimia
+             FROM lasku use index ({$indeksi1})
+             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+             {$luottolisa}
+             WHERE lasku.yhtio = '{$saatavat_yhtio}'
+             and lasku.mapvm   > '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   > '0000-00-00'
+             and lasku.tila    = 'U'
+             and lasku.alatila = 'X'
+             {$generoitumuuttuja}
+             {$salisa1}
+             {$having})
+             UNION
+             (SELECT GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(tiliointi.summa_valuutassa),2) avoimia
+             FROM lasku use index ({$indeksi2})
+             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+             {$luottolisa}
+             WHERE lasku.yhtio = '{$saatavat_yhtio}'
+             and lasku.mapvm   = '0000-00-00'
+             and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   > '0000-00-00'
+             and lasku.tila    = 'U'
+             and lasku.alatila = 'X'
+             {$generoitumuuttuja}
+             {$salisa1}
+             {$having})";
+  $result = pupe_query($query);
+
+  $_tunnukset = "";
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $_tunnukset = trim($_tunnukset) != "" ? "{$_tunnukset},{$row['tunnukset']}" : $row['tunnukset'];
+  }
+
+  if (empty($_tunnukset)) $_tunnukset = "''";
+
   $query = "SELECT
             {$selecti},
             {$summalisa}
             min(lasku.liitostunnus) litu,
             min(lasku.tunnus) latunnari
-            FROM lasku use index (yhtio_tila_mapvm)
+            FROM lasku
             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
             {$luottolisa}
             WHERE lasku.yhtio = '{$saatavat_yhtio}'
-            and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
-            and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
-            and lasku.tapvm   > '0000-00-00'
-            and lasku.tila    = 'U'
-            and lasku.alatila = 'X'
-            {$generoitumuuttuja}
-            {$salisa1}
+            and lasku.tunnus  IN ({$_tunnukset})
             GROUP BY {$grouppauslisa}
             {$having}
             ORDER BY 1,2,3";
-
   $result = pupe_query($query);
 
   $saatavat_yhteensa       = array();

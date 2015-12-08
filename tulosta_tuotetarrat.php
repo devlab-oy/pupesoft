@@ -2,6 +2,7 @@
 
 if ($_REQUEST['malli'] == 'PDF24' or
   $_REQUEST['malli'] == 'PDF40' or
+  $_REQUEST['malli'] == 'PDF' or
   $_REQUEST['malli'] == 'Hintalappu PDF' and
   (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {
@@ -10,6 +11,7 @@ if ($_REQUEST['malli'] == 'PDF24' or
 }
 
 require "inc/parametrit.inc";
+require "inc/pupenext_functions.inc";
 
 // $toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan
 // tulostetaan suoraan tuoteno viivakoodiin
@@ -100,7 +102,7 @@ if ($ulos != "") {
   echo "<table><tr>";
   echo "<td>".t("Valitse listasta").":</td>";
   echo "<td>$ulos</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
   echo "</tr></table>";
   echo "</form>";
 }
@@ -156,7 +158,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
     require_once "pdflib/phppdflib.class.php";
 
-    if ($malli == 'PDF24' or $malli == 'PDF40') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
       //PDF parametrit
       if (!isset($pdf)) {
         $pdf = new pdffile;
@@ -176,7 +178,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
           elseif ($malli == 'Intermec') {
             require "inc/tulosta_tuotetarrat_intermec.inc";
           }
-          elseif ($malli == 'PDF24' or $malli == 'PDF40') {
+          elseif ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
             require "inc/tulosta_tuotetarrat_pdf.inc";
           }
         }
@@ -186,7 +188,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       }
     }
 
-    if ($malli == 'PDF24' or $malli == 'PDF40') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
       //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -240,7 +242,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "2" : "4";
+  $colspan = $toim == 'HINTA' ? "2" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -253,6 +255,7 @@ if (!isset($nayta_pdf)) {
   if ($toim != 'HINTA') {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
+    echo "<th><label for='viivakoodityyppi_1'>" . t("Viivakoodityyppi") . "</label></th>";
   }
 
   if ($uusean!= '') {
@@ -295,6 +298,7 @@ if (!isset($nayta_pdf)) {
     $pohjat[] = 'Zebra_tuote';
     $pohjat[] = 'PDF24';
     $pohjat[] = 'PDF40';
+    $pohjat[] = 'PDF';
 
     echo "<td><select name='malli'>";
     echo "<option value=''>" . t("Ei mallia") . "</option>";
@@ -310,6 +314,13 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<td>";
+    echo "<select id='viivakoodityyppi_1' name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
   }
 
   if ($uusean != '') {
@@ -317,7 +328,7 @@ if (!isset($nayta_pdf)) {
     echo "<td><input type='text' name='uuseankoodi' size='13' maxlength='13' value='$uuseankoodi'></td>";
   }
 
-  echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Tulosta")."'></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";
@@ -404,8 +415,19 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<tr>";
+    echo "<th><label for='viivakoodityyppi_2'>" . t("Viivakoodityyppi") . "</label></th>";
+    echo "<td>";
+    echo "<select id='viivakoodityyppi_2' name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
     echo
-    "<tr><td class='back'></td><td class='back'><input type='Submit' value='" .
+    "<tr><td class='back'></td><td class='back'><input type='submit' value='" .
       t("Tulosta tarrat") .
       "'></td>";
     echo "</tr>";

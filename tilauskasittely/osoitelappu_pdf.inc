@@ -178,6 +178,22 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
   }
 }
 
+$kuljetusliike_sscc = false;
+$expansion_code = "";
+
+if (!empty($yhtiorow['ean'])) {
+  $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+  if ($_selitetark == '') {
+    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+  }
+
+  if ($_selitetark != '') {
+    $expansioncode = $_selitetark;
+    $kuljetusliike_sscc = true;
+  }
+}
+
 $kirjainlisa = '';
 
 for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
@@ -192,6 +208,9 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
   if (isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
     $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
+  }
+  elseif ($kuljetusliike_sscc) {
+    $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $tulostuskpl);
   }
   else {
     // tehdään SSCC :
@@ -433,7 +452,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",              $firstpage, $otsik);
   }
   else {
-    $pdf->draw_text(mm_pt(38),  mm_pt(112), substr($asiakasrow['puhelin'], 0, 15),    $firstpage, $kirj);
+    $pdf->draw_text(mm_pt(38),  mm_pt(112), substr($laskurow['toim_puh'], 0, 15),    $firstpage, $kirj);
     $pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",        $firstpage, $otsik);
     $pdf->draw_text(mm_pt(97), mm_pt(112), pdf_substr($laskurow["toimitustapa"], mm_pt(65), $pdf, $kirj),  $firstpage, $kirj);
   }

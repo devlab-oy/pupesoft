@@ -458,19 +458,24 @@ if ($tee != '') {
 
     $select_varasto = (int) $select_varasto;
 
-    $querykieli = "SELECT kirjoittimet.kirjoitin, keraysvyohyke.tunnus, keraysvyohyke.printteri8, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
+    $querykieli = "SELECT DISTINCT kirjoittimet.tunnus as kir_tunnus,
+                   kirjoittimet.kirjoitin,
+                   group_concat(keraysvyohyke.printteri8) printteri8,
+                   group_concat(keraysvyohyke.printteri0) printteri0
                    FROM kirjoittimet
-                   JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
-                   WHERE kirjoittimet.yhtio  = '{$kukarow['yhtio']}'
-                   AND kirjoittimet.komento != 'EDI'
-                   GROUP BY 1,2,3,4,5
-                   ORDER BY kirjoittimet.kirjoitin";
+                    JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
+                    WHERE kirjoittimet.yhtio  = '{$kukarow['yhtio']}'
+                    AND kirjoittimet.komento != 'EDI'
+                    GROUP BY 1,2
+                    ORDER BY kirjoittimet.kirjoitin";
     $kires = pupe_query($querykieli);
 
     while ($kirow = mysql_fetch_assoc($kires)) {
 
       $sel = "";
-      if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri8']) {
+      $_printterit = explode(",", $kirow['printteri8']);
+
+      if (in_array($kirow['kir_tunnus'], $_printterit)) {
         $sel = " selected";
       }
 
@@ -495,7 +500,9 @@ if ($tee != '') {
       while ($kirow = mysql_fetch_assoc($kires)) {
 
         $sel = "";
-        if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri0']) {
+        $_printterit = explode(",", $kirow['printteri0']);
+
+        if (in_array($kirow['kir_tunnus'], $_printterit)) {
           $sel = " selected";
         }
 
@@ -852,7 +859,7 @@ if ($tee != '') {
                       kerayserat.tunnus AS rivitunnus,
                       kerayserat.pakkausnro,
                       tilausrivi.tuoteno,
-                      TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi,
+                      IFNULL(TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)), TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark))) asiakasnimi,
                       if (kerayserat.kerattyaika = '0000-00-00 00:00:00', kerayserat.kpl, kerayserat.kpl_keratty) kpl,
                       lasku.liitostunnus,
                       CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) hyllypaikka,
@@ -860,7 +867,7 @@ if ($tee != '') {
                       FROM kerayserat
                       JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
                       JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+                      LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                       WHERE kerayserat.yhtio    = '{$kukarow['yhtio']}'
                       AND kerayserat.nro        = '{$kerayserat_row['nro']}'
                       AND kerayserat.pakkausnro = '{$rivit_row['pakkausnro']}'

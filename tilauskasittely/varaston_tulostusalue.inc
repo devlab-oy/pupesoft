@@ -20,10 +20,14 @@ if (mysql_num_rows($turesult) > 0) {
   $lis     = "";
   $kirjoitin  = "";
 
+  if (!isset($printterinro)) {
+    $printterinro = 0;
+  }
+
   while ($turow = mysql_fetch_array($turesult)) {
     $lis .= "  sum(if(
           concat(rpad(upper('$turow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$turow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')) and
-          concat(rpad(upper('$turow[loppuhyllyalue]') ,5,'0'),lpad(upper('$turow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')),1,0)) '$turow[printteri0]',";
+          concat(rpad(upper('$turow[loppuhyllyalue]') ,5,'0'),lpad(upper('$turow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')),1,0)) '".$turow["printteri{$printterinro}"]."',";
     $pri++;
   }
 

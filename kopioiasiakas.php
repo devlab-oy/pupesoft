@@ -147,7 +147,7 @@ if ($tee == "edit") {
       echo "</td>";
     }
 
-    if ($tyyppi > 0) {
+    if ($tyyppi > 0 and !empty($virhe[$i])) {
       echo "<td class='back'><font class='error'>$virhe[$i]</font></td></tr>\n";
     }
   }
@@ -243,7 +243,7 @@ if ($tee == '') {
   echo "<br><input type='text' name = 'haku[asiakasnro]' value = '$haku[asiakasnro]'>";
   echo "</th>";
 
-  echo "<td valign='bottom' class='back'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
+  echo "<td valign='bottom' class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form></tr>";
 
   while ($trow = mysql_fetch_assoc($result)) {
     echo "<tr>";

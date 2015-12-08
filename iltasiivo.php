@@ -274,47 +274,8 @@ $query = "SELECT DISTINCT jaksotettu
 $pos_chk_result = pupe_query($query);
 
 while ($pos_chk_row = mysql_fetch_assoc($pos_chk_result)) {
-
-  $query = "SELECT maksupositio.otunnus,
-            sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
-            count(*) yhteensa_kpl
-            FROM maksupositio
-            LEFT JOIN lasku uusiolasku ON (maksupositio.yhtio = uusiolasku.yhtio
-                AND maksupositio.uusiotunnus = uusiolasku.tunnus)
-            LEFT JOIN lasku uusiolasku_ux ON (uusiolasku_ux.yhtio = uusiolasku.yhtio
-                AND uusiolasku_ux.tila       = 'U'
-                AND uusiolasku_ux.alatila    = 'X'
-                AND uusiolasku_ux.laskunro   = uusiolasku.laskunro)
-            WHERE maksupositio.yhtio         = '{$kukarow['yhtio']}'
-            AND maksupositio.otunnus         = '{$pos_chk_row['jaksotettu']}'
-            GROUP BY 1
-            HAVING (yhteensa_kpl - laskutettu_ux_kpl) = 1
-            ORDER BY 1, maksupositio.tunnus";
-  $posres = pupe_query($query);
-
-  if (mysql_num_rows($posres) != 0) {
-
-    $silent = 'Nyt hiljaa, hiljaa hiivit‰‰n n‰in Kardemumman yˆss‰';
-    $vapauta_tilaus_keraykseen = true;
-    $kukarow['kesken'] = $pos_chk_row['jaksotettu'];
-
-    $query = "UPDATE lasku SET
-              alatila     = ''
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$pos_chk_row['jaksotettu']}'";
-    pupe_query($query);
-
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$pos_chk_row['jaksotettu']}'";
-    $laskures = pupe_query($query);
-    $laskurow = mysql_fetch_assoc($laskures);
-
-    require 'tilauskasittely/tilaus-valmis.inc';
-
-    $laskuri++;
-  }
+  vapauta_maksusopimus($pos_chk_row['jaksotettu']);
+  $laskuri++;
 }
 
 if ($laskuri > 0) {
@@ -464,13 +425,14 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
   $query = "SELECT lasku.tunnus laskutunnus
             FROM lasku
             JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                AND kuka.kuka      = lasku.laatija
-                AND kuka.extranet != '')
-            WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
-            AND lasku.tila         = 'N'
-            AND lasku.alatila      = ''
-            AND lasku.clearing     NOT IN ('EXTENNAKKO','EXTTARJOUS')
-            AND lasku.luontiaika   < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
+                AND kuka.kuka       = lasku.laatija
+                AND kuka.extranet  != '')
+            WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+            AND lasku.tila          = 'N'
+            AND lasku.alatila       = ''
+            AND lasku.tilaustyyppi != 'H'
+            AND lasku.clearing      NOT IN ('EXTENNAKKO','EXTTARJOUS')
+            AND lasku.luontiaika    < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -540,6 +502,19 @@ if (table_exists('suorituskykyloki')) {
   if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri rivi‰ suorituskykylokista.");
 }
 
+// Poistetaan poistettujen k‰ytt‰jien oikeudet
+$query = "DELETE oikeu
+          FROM oikeu
+          LEFT JOIN kuka ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
+          WHERE oikeu.yhtio   = '{$kukarow['yhtio']}'
+          AND oikeu.kuka     != ''
+          AND oikeu.profiili  = ''
+          AND kuka.tunnus is null";
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen k‰ytt‰jien k‰yttˆoikeuksia.");
+
 // Dellataan rogue oikeudet
 $query = "DELETE o1.*
           FROM oikeu o1
@@ -551,7 +526,10 @@ $query = "DELETE o1.*
           WHERE o1.yhtio     = '{$kukarow['yhtio']}'
           AND o1.kuka       != ''
           AND o2.tunnus is null";
-$result = pupe_query($query);
+pupe_query($query);
+$del = mysql_affected_rows();
+
+$iltasiivo .= is_log("Poistettiin $del poistettujen ohjelmien k‰yttˆoikeuksia.");
 
 // Merkataan myyntitilit valmiiksi, jos niill‰ ei ole yht‰‰n k‰sittelem‰ttˆmi‰ rivej‰
 $query = "SELECT lasku.tunnus,
@@ -655,7 +633,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($valmkorj > 0) {
-  $iltasiivo .= is_log("Merkattiin $valmkorj vaˆmistustilausta takaisin alkuper‰isille alatiloille.");
+  $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuper‰isille alatiloille.");
 }
 
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
@@ -692,16 +670,19 @@ if ($yhtiorow['kerayserat'] == 'K') {
   $query = "SELECT tuotepaikat.tunnus
             FROM tuotepaikat
             JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tuotepaikat.yhtio
-              AND varaston_hyllypaikat.hyllyalue      = tuotepaikat.hyllyalue
-              AND varaston_hyllypaikat.hyllynro       = tuotepaikat.hyllynro
-              AND varaston_hyllypaikat.hyllyvali      = tuotepaikat.hyllyvali
-              AND varaston_hyllypaikat.hyllytaso      = tuotepaikat.hyllytaso
-              AND varaston_hyllypaikat.reservipaikka  = 'K')
-            WHERE tuotepaikat.yhtio                   = '{$kukarow['yhtio']}'
-            AND tuotepaikat.saldo                     = 0
-            AND tuotepaikat.oletus                    = ''
-            AND tuotepaikat.poistettava              != 'D'
-            AND tuotepaikat.inventointilista_aika='0000-00-00 00:00:00'";
+              AND varaston_hyllypaikat.hyllyalue          = tuotepaikat.hyllyalue
+              AND varaston_hyllypaikat.hyllynro           = tuotepaikat.hyllynro
+              AND varaston_hyllypaikat.hyllyvali          = tuotepaikat.hyllyvali
+              AND varaston_hyllypaikat.hyllytaso          = tuotepaikat.hyllytaso
+              AND varaston_hyllypaikat.reservipaikka      = 'K')
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '{$kukarow['yhtio']}'
+            AND tuotepaikat.saldo                         = 0
+            AND tuotepaikat.oletus                        = ''
+            AND tuotepaikat.poistettava                  != 'D'
+            AND inventointilistarivi.tunnus IS NULL";
   $tuotepaikat = pupe_query($query);
 
   // Poistetaan lˆydetyt rivit ja tehd‰‰n tapahtuma
@@ -748,7 +729,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = {$poistettava_tuotepaikka['tunnus']}
               AND saldo   = 0";
-    $result2 = pupe_query($query);
+    pupe_query($query);
     $poistettu++;
   }
 
@@ -784,12 +765,26 @@ $avoimet_rivit = array();
 // Jos on poistettavia, haetaan avoimet
 if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
 
-  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat, valmistukset)
+  // Haetaan avoimet tilausrivit arrayseen (myynti & osto)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
-            WHERE yhtio        = '{$kukarow['yhtio']}'
-            AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O','G','V','W','M')";
+            WHERE yhtio         = '{$kukarow['yhtio']}'
+            AND laskutettuaika  = '0000-00-00'
+            AND tyyppi          IN ('L','O')
+            AND var            != 'P'";
+  $avoinrivi_result = pupe_query($query);
+
+  while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+    $avoimet_rivit[] = $avoinrivi['id'];
+  }
+
+  // Haetaan avoimet tilausrivit arrayseen (valmistukset & siirtolistat)
+  $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
+            FROM tilausrivi
+            WHERE yhtio         = '{$kukarow['yhtio']}'
+            AND toimitettuaika  = '0000-00-00 00:00:00'
+            AND tyyppi          IN ('V','W','M','G')
+            AND var            != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -800,9 +795,10 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   $query = "SELECT CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali) AS id
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
-            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
-            AND tilausrivi.laskutettuaika = '0000-00-00'
-            AND tilausrivi.tyyppi         = 'G'";
+            WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+            AND tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
+            AND tilausrivi.tyyppi          = 'G'
+            AND var                       != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -853,6 +849,17 @@ while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 
 if ($poistettu > 0) {
   $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
+}
+
+if ($php_cli) {
+
+  $argv[2] = 'CLI_TUOTTEETTOMAT';
+
+  require "varastopaikkojen_siivous.php";
+
+  if ($poistettu > 0) {
+    $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei en‰‰ ole.");
+  }
 }
 
 /**

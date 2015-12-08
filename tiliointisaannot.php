@@ -15,10 +15,6 @@ echo "<font class='head'>".t("Toimittajan tiliöintisäännöt")."</font><hr>";
 
 if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 
-  if ($tee == 'S') { // S = selaussanahaku
-    $lisat = "and selaus like '%" . $nimi . "%'";
-  }
-
   if ($tee == 'N') { // N = nimihaku
     $lisat = "and nimi like '%" . $nimi . "%'";
   }
@@ -84,20 +80,21 @@ if ($tee == 'P') {
   }
 
   $tiliointirow = mysql_fetch_assoc($result);
-  $mintuote  = $tiliointirow['mintuote'];
-  $maxtuote  = $tiliointirow['maxtuote'];
-  $kuvaus    = $tiliointirow['kuvaus'];
-  $kuvaus2  = $tiliointirow['kuvaus2'];
-  $tilino    = $tiliointirow['tilino'];
-  $kustp    = $tiliointirow['kustp'];
+  $mintuote    = $tiliointirow['mintuote'];
+  $maxtuote    = $tiliointirow['maxtuote'];
+  $kuvaus      = $tiliointirow['kuvaus'];
+  $kuvaus2     = $tiliointirow['kuvaus2'];
+  $tilino      = $tiliointirow['tilino'];
+  $kustp       = $tiliointirow['kustp'];
   $toimipaikka = $tiliointirow['toimipaikka'];
-  $hyvak1    = $tiliointirow['hyvak1'];
-  $hyvak2    = $tiliointirow['hyvak2'];
-  $hyvak3    = $tiliointirow['hyvak3'];
-  $hyvak4    = $tiliointirow['hyvak4'];
-  $hyvak5    = $tiliointirow['hyvak5'];
-  $vienti    = $tiliointirow['vienti'];
-  $ok     = 1;
+  $hyvak1      = $tiliointirow['hyvak1'];
+  $hyvak2      = $tiliointirow['hyvak2'];
+  $hyvak3      = $tiliointirow['hyvak3'];
+  $hyvak4      = $tiliointirow['hyvak4'];
+  $hyvak5      = $tiliointirow['hyvak5'];
+  $vienti      = $tiliointirow['vienti'];
+  $alv         = $tiliointirow['alv'];
+  $ok          = 1;
 
   $query = "DELETE from tiliointisaanto WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
@@ -110,7 +107,7 @@ if ($tee == 'U') {
             WHERE yhtio  = '$kukarow[yhtio]'
             and tyyppi  != 'P'
             $lisat
-            ORDER BY selaus";
+            ORDER BY ".poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -255,6 +252,7 @@ if ($tee == 'U') {
             '$kuvaus2',
             '$tilino',
             '$kustp',
+            '{$alv}',
             '{$toimipaikka}',
             '$hyvak1',
             '$hyvak2',
@@ -280,7 +278,6 @@ if (isset($tunnus) and $tunnus > 0) {
               AND liitos          = 'lasku'
               AND tunnus          = '$liitetiedosto'
               AND kayttotarkoitus = '$kayttotyyppi'";
-
     $tulokset = pupe_query($query);
     $tulosrivi = mysql_fetch_assoc($tulokset);
     $xmlstr = $tulosrivi['data'];
@@ -300,7 +297,6 @@ if (isset($tunnus) and $tunnus > 0) {
     }
     else {
       require "inc/verkkolasku-in-pupevoice.inc";
-
     }
   }
 
@@ -382,7 +378,7 @@ if (isset($tunnus) and $tunnus > 0) {
   // Näytetään vanhat säännöt muutosta varten
   if ($tyyppi == 't') {
     $query = "SELECT tiliointisaanto.tunnus, tiliointisaanto.mintuote, tiliointisaanto.maxtuote, tiliointisaanto.kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero,
-              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.kustp, tiliointisaanto.vienti
+              if(tiliointisaanto.kustp = 999999999, tiliointisaanto.kustp, kustannuspaikka.nimi) Kustannuspaikka {$toimipaikka_select_lisa}, tiliointisaanto.alv, tiliointisaanto.kustp, tiliointisaanto.vienti
               FROM tiliointisaanto
               LEFT JOIN tili ON tili.yhtio = tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
               LEFT JOIN kustannuspaikka ON tiliointisaanto.yhtio = kustannuspaikka.yhtio and tiliointisaanto.kustp = kustannuspaikka.tunnus
@@ -490,6 +486,14 @@ if (isset($tunnus) and $tunnus > 0) {
           echo "<td></td>";
         }
       }
+      elseif ($kennimi == 'alv') {
+        if ($tiliointirow[$kennimi] != "") {
+          echo "<td>".t("Ei vähennettävää veroa")."</td>";
+        }
+        else {
+          echo "<td></td>";
+        }
+      }
       elseif ($kennimi == 'Kustannuspaikka' and $tiliointirow['kustp'] == 999999999) {
         echo "<td>", t("Oletus kustannuspaikka"), "</td>";
       }
@@ -497,6 +501,7 @@ if (isset($tunnus) and $tunnus > 0) {
         echo "<td>$tiliointirow[$kennimi]</td>";
       }
     }
+
     if ($tyyppi != 't') {
       echo "<td>";
 
@@ -554,26 +559,27 @@ if (isset($tunnus) and $tunnus > 0) {
         <input type='hidden' name='tila' value='$tila'>
         <input type='hidden' name='liitetiedosto' value='$liitetiedosto'>
         <input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>
-        <input type='Submit' value = '".t("Muuta tiliöintisääntöä")."'>
+        <input type='submit' value = '".t("Muuta tiliöintisääntöä")."'>
       </td></tr></form>";
   }
 
   // Annetaan mahdollisuus tehdä uusi tiliöinti
   if (!isset($ok) or $ok != 1) {
     // Annetaan tyhjät tiedot, jos rivi oli virheetön
-    $maxtuote  = '';
-    $mintuote  = '';
-    $kuvaus    = '';
-    $kuvaus2  = '';
-    $kustp    = '';
+    $maxtuote    = '';
+    $mintuote    = '';
+    $kuvaus      = '';
+    $kuvaus2     = '';
+    $kustp       = '';
     $toimipaikka = '';
-    $tilino    = '';
-    $hyvak1    = '';
-    $hyvak2    = '';
-    $hyvak3    = '';
-    $hyvak4    = '';
-    $hyvak5    = '';
-    $vienti    = '';
+    $tilino      = '';
+    $hyvak1      = '';
+    $hyvak2      = '';
+    $hyvak3      = '';
+    $hyvak4      = '';
+    $hyvak5      = '';
+    $vienti      = '';
+    $alv         = '';
   }
 
   $query = "SELECT tunnus, nimi
@@ -722,6 +728,15 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select></td>";
   }
 
+  if ($tyyppi == 't') {
+    $sel = !empty($alv) ? "selected" : "";
+
+    echo "<td><select name='alv'>";
+    echo "<option value=''>", t("Oletusverotiliöinti"), "</option>";
+    echo "<option value='X' {$sel}>", t("Ei vähennettävää veroa"), "</option>";
+    echo "</select></td>";
+  }
+
   if ($tyyppi != 't') {
 
     $vientidefault = '';
@@ -773,7 +788,7 @@ if (isset($tunnus) and $tunnus > 0) {
         </td>";
   }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";
+  echo "<td class='back'><input type='submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";
   echo "</tr></form></table>";
 }
 else {
@@ -783,7 +798,6 @@ else {
       <td>".t("Valitse toimittaja")."</td>
       <td><input type = 'text' name = 'nimi'></td>
       <td><select name='tee'><option value = 'N'>".t("Toimittajan nimi")."
-      <option value = 'S'>".t("Toimittajan selaussana")."
       <option value = 'Y'>".t("Y-tunnus")."
       </select>
       </td>

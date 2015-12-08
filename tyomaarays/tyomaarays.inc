@@ -6,7 +6,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   if ($toim != "REKLAMAATIO") {
     $tulostimet[0] = "Tyˆm‰‰r‰ys";
+    $tulostimet[1] = "Huoltosaate";
     require_once "tyomaarays/tulosta_tyomaarays.inc";
+    require_once "tyomaarays/tulosta_huoltosaate.inc";
   }
   else {
     if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
@@ -72,6 +74,10 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     }
     elseif (isset($komento["Takuu"]) and $komento["Takuu"] != "email") {
       $komento["Takuu"] .= " -# $kappaleet ";
+    }
+
+    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "email" and $tyomtyyppi != 'Z') {
+      $komento["Huoltosaate"] .= " -# {$kappaleet} ";
     }
   }
 
@@ -203,6 +209,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         "tots"        => 0,
         "tyyppi"          => $tyyppi, );
 
+      $params_huoltosaate = $params_tyomaarays;
+
       // Aloitellaan lomakkeen teko
       $params_tyomaarays = tyomaarays_alku($params_tyomaarays);
 
@@ -228,6 +236,56 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
       //tulostetaan sivu
       tyomaarays_print_pdf($params_tyomaarays);
+
+      if (!empty($tulostimet[1]) and $tulostimet[1] == "Huoltosaate") {
+        $query = "SELECT *
+                  FROM tyomaarays
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$laskurow['tunnus']}'";
+        $tyomaaraysres = pupe_query($query);
+        $tyomaaraysrow = mysql_fetch_assoc($tyomaaraysres);
+
+        $params_huoltosaate['tyomaaraysrow'] = $tyomaaraysrow;
+
+        $query = "SELECT tilausrivi.tuoteno,
+                  sarjanumeroseuranta.sarjanumero,
+                  tilausrivi.alv
+                  FROM tilausrivi
+                  LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
+                      and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'L'
+                  AND tilausrivi.varattu != 0";
+        $tuotenores = pupe_query($query);
+        $tuotenorow = mysql_fetch_assoc($tuotenores);
+
+        $params_huoltosaate['tuotenorow'] = $tuotenorow;
+        $params_huoltosaate['komento'] = $komento['Huoltosaate'];
+        $params_huoltosaate['rectparam']['width'] = 0.3;
+
+        // Aloitellaan lomakkeen teko
+        $params_huoltosaate = huoltosaate_alku($params_huoltosaate);
+
+        // Ekan sivun otsikot
+        $params_huoltosaate = huoltosaate_rivi_otsikot($params_huoltosaate);
+
+        mysql_data_seek($riresult, 0);
+
+        $yhteensa = 0;
+
+        while ($row = mysql_fetch_assoc($riresult)) {
+          $yhteensa += $row['rivihinta'];
+          $params_huoltosaate["row"] = $row;
+          $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
+        }
+
+        $params_huoltosaate["tots"] = 1;
+        $params_huoltosaate["yhteensa"] = $yhteensa;
+        $params_huoltosaate = huoltosaate_loppu($params_huoltosaate);
+
+        //tulostetaan sivu
+        huoltosaate_print_pdf($params_huoltosaate);
+      }
     }
   }
   else {
@@ -346,25 +404,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
 
 if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 
-  $query  = "UPDATE lasku
-             SET tila = 'L'
-             WHERE tunnus = '$laskurow[tunnus]'
-             and tila     = 'C'
-             and yhtio    = '$kukarow[yhtio]'";
-  $result = pupe_query($query);
-
-  // Katotaan lˆytyykˆ tilausrivej‰
-  $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.asiakkaan_positio
-            FROM tilausrivi
-            LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-            WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
-            AND tilausrivi.otunnus  = '$laskurow[tunnus]'
-            AND tilausrivi.tyyppi  != 'D'
-            ORDER BY tilausrivin_lisatiedot.asiakkaan_positio";
-  $keres = pupe_query($query);
-
-  // Yht‰‰n rivi‰ ei ole
-  if (mysql_num_rows($keres) == 0) {
+  if (!tee_palautustilaus($laskurow)) {
     $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
     $result = pupe_query($query);
 
@@ -373,36 +413,17 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
     $result = pupe_query($query);
   }
   else {
-
-    // Luodaan toimittajalle palautettavat jos niit‰ on
-    $palautettavat = array();
-
-    while ($kerow = mysql_fetch_assoc($keres)) {
-      if ($kerow['asiakkaan_positio'] > 0) $palautettavat[$kerow['asiakkaan_positio']] .= $kerow['tunnus'].",";
-    }
-
-    if (count($palautettavat) > 0) {
-      require "tilauskasittely/tilauksesta_myyntitilaus.inc";
-
-      foreach ($palautettavat as $asiakas => $rivit) {
-        $rivitlisa = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
-
-        $tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
-        if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
-
-        // P‰ivitet‰‰n rivit tilatuiksi
-        $query  = "UPDATE tilausrivin_lisatiedot
-                   SET asiakkaan_positio = asiakkaan_positio*-1
-                   WHERE yhtio          = '$kukarow[yhtio]'
-                   AND tilausrivitunnus in (".substr($rivit, 0, -1).")";
-        $result = pupe_query($query);
-      }
-    }
+    $query  = "UPDATE lasku
+               SET tila = 'L'
+               WHERE tunnus = '$laskurow[tunnus]'
+               and tila     = 'C'
+               and yhtio    = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
 
     require "tilauskasittely/tilaus-valmis.inc";
-  }
 
-  $tee = "";
+    $tee = "";
+  }
 }
 
 if ($toim == "SIIRTOTYOMAARAYS" and $tee == 'VALMIS') {

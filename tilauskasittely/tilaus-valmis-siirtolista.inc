@@ -38,18 +38,37 @@ $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 
 // jos siirtolistan varasto on setattu ja on laaja toimipaikkak‰sittely,
 // tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+  $_varasto = $laskurow["varasto"];
 
-  $query = "SELECT toimipaikka
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$laskurow['varasto']}";
-  $_tp_res = pupe_query($query);
-  $_tp_row = mysql_fetch_assoc($_tp_res);
+  if ($_varasto == 0) {
+    //haetaan kaikkien tilausrivien varastopaikat
+    $query = "SELECT tilausrivi.hyllyalue,
+              tilausrivi.hyllynro
+              FROM tilausrivi
+              WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
+              AND tilausrivi.yhtio      = '$kukarow[yhtio]'
+              AND tilausrivi.hyllyalue != ''
+              AND tilausrivi.tyyppi    != 'D'
+              LIMIT 1";
+    $_row = mysql_fetch_assoc(pupe_query($query));
 
-  if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
-    $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
-    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    // Mihin varastoon
+    $_varasto = kuuluukovarastoon($_row["hyllyalue"], $_row["hyllynro"]);
+  }
+
+  if ($_varasto != 0) {
+    $query = "SELECT toimipaikka
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = {$_varasto}";
+    $_tp_res = pupe_query($query);
+    $_tp_row = mysql_fetch_assoc($_tp_res);
+
+    if ($_tp_row['toimipaikka'] != $laskurow['yhtio_toimipaikka']) {
+      $kukarow['toimipaikka'] = $_tp_row['toimipaikka'];
+      $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+    }
   }
 }
 
@@ -125,8 +144,12 @@ else {
     //tyhjennet‰‰n laskun varastokentt‰, siell‰ oli tieto varastoon optimoinnista mutta nyt se kertoo mihin varastoon l‰hete kuuluu laittaa
     $laskurow['varasto'] = 0;
 
-    //Toimitustava hetier‰ tarvitaan
-    $query = "SELECT tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+    //Toimitustavan hetier‰ ja vaihtoehtoinen vak toimitustapa tarvitaan
+    $query = "SELECT tulostustapa,
+              vaihtoehtoinen_vak_toimitustapa
+              FROM toimitustapa
+              WHERE yhtio='{$kukarow["yhtio"]}'
+              AND selite='{$laskurow["toimitustapa"]}'";
     $result = pupe_query($query);
     $totarowx = mysql_fetch_array($result);
 
@@ -151,6 +174,19 @@ else {
       $sorttaus = " sorttauskentta ";
     }
 
+    $vakit_eri_tilaukselle = $totarowx["vaihtoehtoinen_vak_toimitustapa"] != "";
+
+    if ($vakit_eri_tilaukselle) {
+      $tuote_select = "tuote.vakkoodi AS vakkoodi,";
+      $tuote_join = "JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+                         AND tuote.yhtio = tilausrivi.yhtio)";
+      $sorttaus = "tuote.vakkoodi, {$sorttaus}";
+    }
+    else {
+      $tuote_select = "";
+      $tuote_join = "";
+    }
+
     //haetaan kaikkien tilausrivien varastopaikat
     $query = "SELECT tilausrivi.otunnus,
               tilausrivi.tunnus,
@@ -159,6 +195,7 @@ else {
               tilausrivi.hyllyvali,
               tilausrivi.hyllytaso,
               $kerayserat_select
+              {$tuote_select}
               concat( rpad(upper(tilausrivi.hyllyalue), 5, '0'),
                       lpad(upper(tilausrivi.hyllynro), 5, '0'),
                       lpad(upper(tilausrivi.hyllyvali), 5, '0'),
@@ -166,6 +203,7 @@ else {
               ) sorttauskentta
               FROM tilausrivi
               $kerayserat_join
+              {$tuote_join}
               WHERE tilausrivi.otunnus  = '$laskurow[tunnus]'
               and tilausrivi.yhtio      = '$kukarow[yhtio]'
               and tilausrivi.hyllyalue != ''
@@ -184,6 +222,8 @@ else {
     if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
       $toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
     }
+
+    $splitattu_vakiksi = false;
 
     while ($row = mysql_fetch_assoc($result)) {
 
@@ -243,7 +283,7 @@ else {
           and $toim != "SIIRTOTYOMAARAYS"
           and $toim != "VALMISTAASIAKKAALLE"
           and $toim != "VALMISTAVARASTOON"
-        )
+        ) or ($vakit_eri_tilaukselle and $row["vakkoodi"] != "" and !$splitattu_vakiksi)
       ) {
         //Koska ollaan t‰‰ll‰‰ olaan juuri splittaamassa tilaus, eli halutaan tulostaa kaikkien splittauksessa syntyvien varastosiirojen siirtolistat
         $splitattiin = TRUE;
@@ -259,6 +299,11 @@ else {
 
         $fields = "yhtio";
         $values = "'$kukarow[yhtio]'";
+
+        if ($vakit_eri_tilaukselle and $row["vakkoodi"] != "") {
+          $splitattu_vakiksi = true;
+          $split_toimitustapa = $totarowx["vaihtoehtoinen_vak_toimitustapa"];
+        }
 
         // Ei monisteta tunnusta
         for ($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
@@ -282,6 +327,14 @@ else {
             break;
           case 'toimitustavan_lahto':
             $values .= ", '$toimitustavan_lahto_arvo'";
+            break;
+          case 'toimitustapa':
+            if (isset($split_toimitustapa)) {
+              $values .= ", '$split_toimitustapa'";
+            }
+            else {
+              $values .= ", '" . $laskurow[$fieldname] . "'";
+            }
             break;
           case 'kate_korjattu':
             $values .= ", NULL";
@@ -392,6 +445,9 @@ else {
         $splitatut[] = $row['tunnus'];
         $tilauksia++;
       }
+    }
+    else {
+      $splitatut = NULL;
     }
 
     // tyhjennet‰‰n muuttujat
@@ -504,6 +560,29 @@ else {
         }
       }
       else {
+        // Jos yhtiˆn parametreiss‰ on ker‰yser‰t A tarkistetaan asiakkaan takaa
+        if ($yhtiorow['kerayserat'] == 'A') {
+          // Haetaan kerayseratieto asiakkaan takaa
+          $query = "SELECT kerayserat
+                    FROM asiakas
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['liitostunnus']}'";
+          $asrow = mysql_fetch_assoc(pupe_query($query));
+        }
+
+        // Poistetaan vanhat ker‰yser‰t kun palautetaan tilaus takaisin tulostusjonoon,
+        // jottei ker‰yseri‰ luotaisi joka kerta vaan lis‰‰ ja lis‰‰,
+        // kun palautetaan tilaus takaisin tulostusjonoon
+        if ($yhtiorow['kerayserat'] == 'K'
+          or $yhtiorow['kerayserat'] == 'P'
+          or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
+
+          $query = "DELETE FROM kerayserat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus = '{$laskurow['tunnus']}'";
+          pupe_query($query);
+        }
+
         //Laitetaan lista tulostusjonoon
         $query = "UPDATE lasku
                   SET alatila = 'J'

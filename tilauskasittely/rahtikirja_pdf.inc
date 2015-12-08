@@ -353,7 +353,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->draw_rectangle(711, 60, 689, 300,                      $firstpage, $rectparam);
     $pdf->draw_text(65,  692,  $rakir_row["osoite"],                $firstpage, $kirj);
     $pdf->draw_rectangle(689, 60, 667, 300,                      $firstpage, $rectparam);
-    $pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"]."  ".$rakir_row["maa"]."    ".$rakir_row["puhelin"],  $firstpage, $kirj);
+    $pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"]."  ".$rakir_row["maa"]."    ".$rakir_row["toim_puh"],  $firstpage, $kirj);
 
     //toimitusosoite
     $pdf->draw_rectangle(667, 60, 645, 300,                      $firstpage, $rectparam);
@@ -464,17 +464,26 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   for ($rakir_i = 0; $rakir_i < 100; $rakir_i++) {
 
     $pdf->draw_text(62, $rakir_i_kala, $lotsikot[$rakir_i], $firstpage, $kirj);
-    if ($astilnrot[$rakir_i] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
+
     $pdf->draw_text(143, $rakir_i_kala, $kollit[$rakir_i]."  ". $pakkaus[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(206, $rakir_i_kala, trim($pakkauskuvaus[$rakir_i]." ".$pakkauskuvaustark[$rakir_i]), $firstpage, $kirj);
 
     $pdf->draw_text(422, $rakir_i_kala, $kilot[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(486, $rakir_i_kala, $kuutiot[$rakir_i], $firstpage, $kirj);
 
+    if ($astilnrot[$rakir_i] != '') {
+      $rakir_i_kala-= 10;
+      $pdf->draw_text(62, $rakir_i_kala, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
+    }
+
     $alempiteksti = trim($vakit[$rakir_i]." ".$lisatiedot[$rakir_i]);
 
     if ($alempiteksti != "") {
-      $rakir_i_kala-= 10;
+
+      if ($astilnrot[$rakir_i] == '') {
+        $rakir_i_kala-= 10;
+      }
+
       list($ff_string, $ff_font) = pdf_fontfit($alempiteksti, 360, $pdf, $kirj);
       $pdf->draw_text(206, $rakir_i_kala, $ff_string, $firstpage, $ff_font);
     }

@@ -194,6 +194,19 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(540, 614, "/", $thispage, $norm);
     $pdf->draw_text(550, 614, date("Y"), $thispage, $norm);
 
+    if ($tyyppi == "Q") {
+      $pdf->draw_text(310, 600, t("Työmääräyksen hinnat sisältävät arvonlisäveron"), $thispage, $pieni);
+    }
+    elseif ($tyyppi == "A" or $tyyppi == "") {
+
+      if ($yhtiorow['alv_kasittely'] != '') {
+        $pdf->draw_text(310, 600, t("Työmääräyksen hinnat ovat nettohintoja joihin lisätään arvonlisävero."), $thispage, $pieni);
+      }
+      else {
+        $pdf->draw_text(310, 600, t("Työmääräyksen hinnat sisältävät arvonlisäveron"), $thispage, $pieni);
+      }
+    }
+
     $kala  = 575;
 
     //Täysin dynaaminen osio
@@ -772,7 +785,7 @@ if (!function_exists('tyomaarays_rivi')) {
       elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
         $sarjanutunnus = "ostorivitunnus";
       }
-      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'G')) {
         $sarjanutunnus = "myyntirivitunnus";
       }
       elseif ($row["varattu"]+$row["kpl"] < 0) {

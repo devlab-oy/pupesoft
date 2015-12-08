@@ -13,6 +13,11 @@ if ($livesearch_tee == 'ASIAKKAANTILAUSNUMERO') {
   exit;
 }
 
+if ($livesearch_tee == 'TILAUSVIITE') {
+  livesearch_asiakkaantilausnumero($toim, "viesti");
+  exit;
+}
+
 // Enaboidaan ajax kikkare
 enable_ajax();
 
@@ -70,7 +75,7 @@ $til = "";
 if ($cleantoim == 'MYYNTI') {
   echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 
-  $til = " tila in ('L','U','N','R','E','D') ";
+  $til = " tila in ('L','U','N','R','E','D','G') ";
 }
 if ($cleantoim == 'VALMISTUSMYYNTI') {
   echo "<font class='head'>".t("Asiakkaan tilaukset ja valmistukset").":</font><hr>";
@@ -144,7 +149,18 @@ if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro ==
 }
 
 if ($tee == 'NAYTATILAUS') {
-  echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  $query = "SELECT tila
+            FROM lasku
+            WHERE tunnus = $tunnus
+            AND $logistiikka_yhtiolisa";
+  $_tila = mysql_fetch_assoc(pupe_query($query));
+
+  if ($_tila["tila"] != "U") {
+    echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  }
+  else {
+    echo "<font class='head'>".t("Lasku").":</font><hr>";
+  }
 
   require "naytatilaus.inc";
 
@@ -292,10 +308,18 @@ elseif ($laskunro > 0) {
   }
 }
 //astilnro kentässä on laskun tunnus, jotta livesearch hakukentän ID olisi yksilöllinen
-elseif ($astilnro != '') {
+elseif ($astilnro != '' or $tilausviite != '') {
+  $_haku = "";
+
+  if ($astilnro != '') {
+    $_haku = $astilnro;
+  } else {
+    $_haku = $tilausviite;
+  }
+
   $query = "SELECT laskunro, ytunnus, liitostunnus, tunnus, asiakkaan_tilausnumero, nimi
             FROM lasku
-            WHERE tunnus = '$astilnro'
+            WHERE tunnus = '$_haku'
             and $logistiikka_yhtiolisa";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -410,13 +434,8 @@ if ($ytunnus != '') {
     $summaselli = " lasku.summa, ";
   }
 
-  if ($kukarow['resoluutio'] == 'I') {
-    $summaselli .= " lasku.viesti tilausviite, ";
-  }
-
-  if ($kukarow['resoluutio'] == 'I') {
-    $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
-  }
+  $summaselli .= " lasku.viesti tilausviite, ";
+  $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
 
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
     if ($laskunro > 0) {
@@ -539,25 +558,14 @@ if ($ytunnus != '') {
 
   if (mysql_num_rows($result) > 0) {
 
-    if ($kukarow['resoluutio'] == 'I') {
-      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
-      }
-      else {
-        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
-      }
+    if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+      pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
     }
     else {
-      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
-      }
-      else {
-        pupe_DataTables(array(array($pupe_DataTables, 8, 9)));
-      }
+      pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
     }
 
     echo "<br>";
-
     echo "<table class='display dataTable' id='$pupe_DataTables'>";
     echo "<thead>";
     echo "<tr>";
@@ -775,11 +783,15 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
     echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td>";
     echo livesearch_kentta("asiaktilaus", "ASIAKKAANTILAUSNUMERO", "astilnro", 170, $astilnro);
     echo "</td>";
+
+    echo "<tr><th>".t("Tilausviite")."</th><td>";
+    echo livesearch_kentta("asiaktilaus", "TILAUSVIITE", "tilausviite", 170, $tilausviite);
+    echo "</td>";
   }
 
   echo "</table>";
 
-  echo "<br><input type='submit' value='".t("Etsi")."'>";
+  echo "<br><input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";
 }
 else {

@@ -41,6 +41,11 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
+    // Poistetaan spacet
+    if ($fieldname == "finvoice_senderpartyid" or $fieldname == "finvoice_senderintermediator") {
+      $t[$i] = str_replace(" ", "", $t[$i]);
+    }
+
     if ($fieldname == "kuvapankki_polku") {
       if ($t[$i] != "" and !is_writable($t[$i]."/".$kukarow['yhtio'])) {
         $virhe[$i] = "<font class='error'>Kansiossa ei ole kirjoitusoikeutta!<br></font>";
@@ -55,7 +60,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
 
-      if ($row['kpl'] > 0) {
+      if ($row['kpl'] > 0 and $t[$i] != $trow["pankkitiedostot"]) {
         $virhe[$i]  = "<font class='error'>";
         $virhe[$i] .= t("Et voi vahtaa luontitapaa, koska sinulla on poimittuja laskuja!");
         $virhe[$i] .= "<br></font>";
@@ -92,21 +97,6 @@ if (!function_exists("yhtion_parametrittarkista")) {
         if (mysql_num_rows($xyresult) == 0) {
           $virhe[$i] = t("Tuotetta ei löydy!")." / ".t("Tuote pitää olla saldoton!");
         }
-      }
-    }
-
-    if ($fieldname == "maksuehto_tuotenumero") {
-
-      $tuote = trim($t[$i]);
-
-      $query = "SELECT *
-                from maksuehto
-                where yhtio             = '$kukarow[yhtio]'
-                and summanjakoprososa2 != 0";
-      $xyresult = pupe_query($query);
-
-      if (mysql_num_rows($xyresult) != 0 and $tuote=='') {
-        $virhe[$i] = t("Yhtiölla on moniehto-maksuehtoja, maksuehto_tuotenumero on syötettävä!");
       }
     }
 
@@ -230,6 +220,23 @@ if (!function_exists("yhtion_parametrittarkista")) {
         //tai "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi"
         //ja kerayserät on päällä
         $virhe[$i] = t("Keräyserät ei voi olla päällä jos lähete halutaan tulostaa automaattisesti") . "!";
+      }
+    }
+
+    if ($fieldname == "raaka_aine_tiliointi") {
+      // Tarkistetaan, että sekä, raaka-ainevarasto ja raaka-ainevarastonmuutos tilit ovat olemassa
+      $query = "SELECT COUNT(*) AS tilien_maara
+                FROM tili
+                WHERE tili.yhtio = '{$kukarow['yhtio']}'
+                AND tili.tilino  IN ('{$yhtiorow['raaka_ainevarasto']}',
+                                    '{$yhtiorow['raaka_ainevarastonmuutos']}')";
+
+      $result = pupe_query($query);
+      $tilien_maara = mysql_fetch_assoc($result);
+      $tilien_maara = $tilien_maara['tilien_maara'];
+
+      if ($tilien_maara != 2) {
+        $virhe[$i] = t("Raaka-ainetilejä ei ole määritelty oikein");
       }
     }
 

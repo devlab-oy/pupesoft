@@ -11,6 +11,16 @@ else {
   $toimpriolisa = " ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
 }
 
+if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+  $raaka_aine_tiliointi_lisa = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
+    "'normaalituote') tuotetyyppi,";
+  $raaka_aine_tiliointi_group = ",15";
+}
+else {
+  $raaka_aine_tiliointi_lisa = "";
+  $raaka_aine_tiliointi_group = "";
+}
+
 // Tehtaan tiliointiaineisto suoraan sql:lla
 $query = "SELECT tilausrivi.alv alv,
           if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino, '') != '',           tuotteen_alv.tilino,           if({$toimpriolisa} ifnull(yhtion_toimipaikat.tilino, '') != '',         yhtion_toimipaikat.tilino,           if(ifnull(tuote.tilino, '') != '',           tuote.tilino,           if(ifnull(asiakas.tilino, '') != '',           asiakas.tilino,         if(ifnull(yhtion_toimipaikat.tilino, '') != '',         yhtion_toimipaikat.tilino,           yhtio.myynti))))) tilino,
@@ -26,6 +36,7 @@ $query = "SELECT tilausrivi.alv alv,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,
           if(ifnull(yhtion_toimipaikat.toim_alv, '') != '', yhtion_toimipaikat.toim_alv, yhtio.alv) alvtilino,
+          {$raaka_aine_tiliointi_lisa}
           sum(tilausrivi.rivihinta) summa,
           sum(tilausrivi.rivihinta_valuutassa) summa_valuutassa,
           sum(tilausrivi.kate) kate,
@@ -42,7 +53,7 @@ $query = "SELECT tilausrivi.alv alv,
           WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
           AND tilausrivi.tyyppi        = 'L'
           AND tilausrivi.yhtio         = '$kukarow[yhtio]'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14";
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14{$raaka_aine_tiliointi_group}";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {
@@ -134,7 +145,7 @@ else {
                 lukko            = '1',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
 
       $vastasumma += $tiliointisumma;
       $vastasumma_valuutassa += $tiliointisumma_valuutassa;
@@ -238,7 +249,7 @@ else {
                 lukko            = '$lukko',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
       $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
       $lukko = "";
@@ -262,7 +273,7 @@ else {
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now(),
                   aputunnus        = '$isa'";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
       }
 
       // Jos maksetaan k‰teisell‰ ja meill‰ on kassa-alennusta, niin kirjataan ne t‰ss‰ (samalle kustannuspaikalle ku myynti)
@@ -288,7 +299,7 @@ else {
                   lukko            = '$lukko',
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
         $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
         if ($xrow["alv"] != 0) {
@@ -318,7 +329,7 @@ else {
                     laatija          = '$kukarow[kuka]',
                     laadittu         = now(),
                     aputunnus        = $isa";
-          $laskutusres = pupe_query($query);
+          pupe_query($query);
         }
       }
     }
@@ -351,11 +362,21 @@ else {
       // Toissijaisesti kokeillaan viel‰ varasto-tilin oletuskustannuspaikkaa
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
+      if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
+        $xrow["tuotetyyppi"] == "raaka-aine") {
+        $tilinumero = $yhtiorow["raaka_ainevarasto"];
+        $muutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+      }
+      else {
+        $tilinumero = $yhtiorow["varasto"];
+        $muutostili = $yhtiorow["varastonmuutos"];
+      }
+
       //Kirjataan 'varasto'-tilille
       $query = "INSERT into tiliointi set
                 yhtio            = '$kukarow[yhtio]',
                 ltunnus          = '$tunnus',
-                tilino           = '$yhtiorow[varasto]',
+                tilino           = '{$tilinumero}',
                 kustp            = '{$kustp_ins}',
                 kohde            = '{$kohde_ins}',
                 projekti         = '{$projekti_ins}',
@@ -368,7 +389,7 @@ else {
                 lukko            = '',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
 
       $tiliointisumma = $tiliointisumma * -1;
       $tiliointisumma_valuutassa = $tiliointisumma_valuutassa * -1;
@@ -377,7 +398,7 @@ else {
       $query = "INSERT into tiliointi set
                 yhtio            = '$kukarow[yhtio]',
                 ltunnus          = '$tunnus',
-                tilino           = '$yhtiorow[varastonmuutos]',
+                tilino           = '{$muutostili}',
                 kustp            = '{$kustp_ins}',
                 kohde            = '{$kohde_ins}',
                 projekti         = '{$projekti_ins}',
@@ -390,7 +411,7 @@ else {
                 lukko            = '',
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
-      $laskutusres = pupe_query($query);
+      pupe_query($query);
     }
   }
 
@@ -507,17 +528,20 @@ else {
                   lukko            = '1',
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
-        $laskutusres = pupe_query($query);
+        pupe_query($query);
 
         $loppusumma += $arvo;
         $loppusumma_valuutassa += $arvo_valuutassa;
 
         // P‰ivitet‰‰n laskulle
         if ($tili == "laskulle" and $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+          // P‰ivitet‰‰n myyntilaskulle "popvm"-jotta me saadaan osittain k‰teisell‰ maksetut laskut
+          // n‰kym‰‰n k‰teismyynnit-raportissa oikealla p‰iv‰ll‰ vaikka mapvm on nolla
           $query = "UPDATE lasku
                     SET saldo_maksettu = (summa - $arvo),
                     saldo_maksettu_valuutassa = (summa_valuutassa  - $arvo_valuutassa),
-                    mapvm                     = 0
+                    mapvm                     = 0,
+                    popvm                     = '$tapvm 00:00:00'
                     WHERE tunnus              = '$lasku[tunnus]'
                     AND yhtio                 = '$kukarow[yhtio]'";
           pupe_query($query);
@@ -544,7 +568,7 @@ else {
               lukko            = '1',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
-    $laskutusres = pupe_query($query);
+    pupe_query($query);
   }
 
   // Kirjataan pyoristykset, jos niita on
@@ -570,7 +594,7 @@ else {
               lukko            = '',
               laatija          = '$kukarow[kuka]',
               laadittu         = now()";
-    $laskutusres = pupe_query($query);
+    pupe_query($query);
   }
 
   $vastasumma = 0;

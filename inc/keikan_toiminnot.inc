@@ -204,9 +204,9 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
     // Jos löytyy, poistetaan kohdistus
     $query = "SELECT *
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND laji       in ('tec','mav')
-              AND tilausrivi LIKE '%{$valittutunnus}%'";
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    in ('tec','mav')
+              AND MATCH (tilausrivi) AGAINST ('{$valittutunnus}' IN BOOLEAN MODE)";
     $chk_exist_res = pupe_query($query);
 
     if (mysql_num_rows($chk_exist_res) > 0) {
@@ -377,11 +377,27 @@ elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
 
   // saapuminen
   $otunnus = (int) $_POST['otunnus'];
+  $keikan_otunnus = (int) $_POST['keikan_otunnus'];
 
   $suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
   $suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
+  $toimittajaid = (int) $_POST['toimittajaid'];
 
   $data = kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $suuntalavan_tunnus, $suoratoimitusrivi);
+
+  if (empty($otunnus)) {
+    $otunnus = $keikan_otunnus;
+  }
+
+  $kulurow = saapumisen_laskut($laskurow);
+  list(
+    $hintarow,
+    $valitutrivit,
+    $alvit,
+    $alvti
+  ) = paivita_saapumisen_summa($laskurow, $kulurow, $toimittajaid, $otunnus);
+
+  $data['laskunsumma'] = $hintarow['hinta'];
 
   echo json_encode($data);
 }
@@ -497,6 +513,18 @@ elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
   $rivi['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='$rivi[yksikko]'", "", "", "selite");
 
   echo json_encode($rivi);
+}
+elseif ($_POST['ajax_toiminto'] == 'hae_saldo_myytavissa') {
+  $_tuoteno = $_POST['id'];
+  $_varasto = (int) $_POST['varasto'];
+
+  list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($_tuoteno, "", $_varasto);
+
+  echo json_encode(array(
+      'saldo' => $saldo,
+      'hyllyssa' => $hyllyssa,
+      'myytavissa' => $myytavissa,
+    ));
 }
 elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
   $otunnus      = $_POST['otunnus'];

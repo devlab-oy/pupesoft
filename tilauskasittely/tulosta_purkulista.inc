@@ -531,6 +531,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
     while ($row = mysql_fetch_array($result)) {
 
+      if (!isset($row['sscc'])) $row['sscc'] = "";
+
       if ($mista == "vastaanota" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K' and $row['otunnus'] != $laskurow['tunnus']) {
 
         $query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";

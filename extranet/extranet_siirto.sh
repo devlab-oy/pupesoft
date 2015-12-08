@@ -51,7 +51,8 @@ js
 pdflib
 pics
 validation
-viivakoodi"
+viivakoodi
+css"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
 CONTENT="extranet/*"
@@ -69,7 +70,6 @@ inc/hinnastoriviautomaster.inc
 inc/hinnastorivifutur.inc
 inc/hinnastorivitab.inc
 inc/hinnastorivivienti.inc
-inc/jquery-ui-extranet.css
 inc/jquery-ui.js
 inc/jquery.min.js
 inc/laskutyyppi.inc
@@ -79,6 +79,9 @@ inc/pupeExcel.inc
 inc/sahkoposti.inc
 inc/tuotehaku.inc
 indexvas.php
+index.php
+ylaframe.php
+pikavalinnat.php
 korvaavat.class.php
 raportit/asiakasinfo.php
 raportit/naytatilaus.inc
@@ -116,7 +119,8 @@ verkkokauppa/ostoskori-kysely.php
 verkkokauppa/ostoskori.inc
 verkkokauppa/ostoskori.php
 verkkokauppa/tyhjenna_ostoskorit.php
-tiedostokirjasto.php"
+tiedostokirjasto.php
+tiedostofunkkarit.inc"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

@@ -258,7 +258,7 @@ if (!function_exists("alku")) {
 
 if (!function_exists("rivi")) {
   function rivi($firstpage, $summa, $korko) {
-    global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
+    global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhutunnus, $karhukertanro;
 
     // siirrytäänkö uudelle sivulle?
     if ($kala < 153) {
@@ -271,6 +271,33 @@ if (!function_exists("rivi")) {
     $row['korko'] = ($row['summa'] >= 0) ? $row['korko'] : 0.0;
 
     $pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],  $firstpage, $norm);
+
+    if (!empty($karhutunnus)) {
+      $query = "SELECT count(distinct ktunnus) ktun
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+                WHERE ltunnus = {$row['tunnus']}
+                AND ktunnus   <= $karhutunnus";
+      $karhukertares = pupe_query($query);
+      $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+      $karhukertanro = $karhukertarow["ktun"];
+
+      $query = "SELECT
+                max(karhukierros.pvm) as kpvm
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+                WHERE ltunnus = {$row['tunnus']}
+                AND ktunnus   < $karhutunnus";
+      $karhukertares = pupe_query($query);
+      $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+      $karhuedpvm = $karhukertarow["kpvm"];
+    }
+    else {
+      $karhukertanro = $row["karhuttu"] + 1;
+      $karhuedpvm = $row["kpvm"];
+    }
 
     if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
 
@@ -289,7 +316,7 @@ if (!function_exists("rivi")) {
         $pdf->draw_text(460-$oikpos, $kala, $row["summa"],        $firstpage, $norm);
       }
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(295, $kala, tv1dateconv($row["kpvm"]),       $firstpage, $norm);
+        $pdf->draw_text(295, $kala, tv1dateconv($karhuedpvm),       $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(385-$oikpos, $kala, $karhukertanro,       $firstpage, $norm);
       }
@@ -316,19 +343,11 @@ if (!function_exists("rivi")) {
         $pdf->draw_text(500-$oikpos, $kala, $row["summa"]." ".$row["valkoodi"],        $firstpage, $norm);
       }
 
-      if ($karhukertanro == "") {
-        $karhukertanro = $row["karhuttu"] + 1;
-      }
-
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),   $firstpage, $norm);
+        $pdf->draw_text(365, $kala, tv1dateconv($karhuedpvm),   $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(560-$oikpos, $kala, $karhukertanro,   $firstpage, $norm);
       }
-    }
-
-    if ($karhukertanro == "") {
-      $karhukertanro = $row["karhuttu"] + 1;
     }
 
     $kala = $kala - 13;
@@ -337,9 +356,11 @@ if (!function_exists("rivi")) {
 
     if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
       $summa += $row["summa_valuutassa"];
-    } else {
+    }
+    else {
       $summa += $row["summa"];
     }
+
     $korko += $row["korko"];
 
     $palautus = array(
@@ -543,22 +564,11 @@ else {
 
 if ($nayta_pdf == 1 and $karhutunnus != '') {
   $karhutunnus = mysql_real_escape_string($karhutunnus);
-  $kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
-
-  $query = "SELECT count(distinct ktunnus) ktun
-            FROM karhu_lasku
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
-            WHERE ltunnus in ($ltunnukset)
-            AND ktunnus   <= $karhutunnus";
-  $karhukertares = pupe_query($query);
-  $karhukertarow = mysql_fetch_assoc($karhukertares);
-
-  $karhukertanro = $karhukertarow["ktun"];
+  $kjoinlisa   = " and kl.ktunnus = '$karhutunnus' ";
   $ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 }
 else {
-  $kjoinlisa = "";
-  $karhukertanro = "";
+  $kjoinlisa   = "";
   $ikalaskenta = " TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, ";
 }
 
@@ -582,7 +592,7 @@ $query = "SELECT l.tunnus,
           and l.yhtio    = '$kukarow[yhtio]'
           and l.tila     = 'U'
           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-          ORDER BY l.erpcm";
+          ORDER BY l.erpcm, l.laskunro";
 $result = pupe_query($query);
 
 //otetaan maksuehto- ja asiakastiedot ekalta laskulta
@@ -669,7 +679,7 @@ if (!isset($karhuviesti)) {
   $query = "SELECT count(*) kpl
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
-            GROUP BY ltunnus;";
+            GROUP BY ltunnus";
   $res = pupe_query($query);
   $r = 0;
 
@@ -848,7 +858,12 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   // Tuotanto
   $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
-  require 'tilauskasittely/verkkolasku_finvoice.inc';
+  if ($yhtiorow["finvoice_versio"] == "2") {
+    require "tilauskasittely/verkkolasku_finvoice_201.inc";
+  }
+  else {
+    require "tilauskasittely/verkkolasku_finvoice.inc";
+  }
 
   $finvoice_file_path = "$pupe_root_polku/dataout/karhu_$kukarow[yhtio]_".date("Ymd")."_".$laskutiedot['laskunro'].".xml";
   $tootfinvoice    = fopen($finvoice_file_path, 'w');
@@ -865,6 +880,7 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
             WHERE tunnus in ($ltunnukset)
             and yhtio    = '$kukarow[yhtio]'
             and tila     = 'U'
+            order by laskunro desc
             LIMIT 1";
   $result_temp = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result_temp);
@@ -1028,7 +1044,7 @@ if ($tee_pdf != 'tulosta_karhu') {
 if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and $_REQUEST['maventa_laheta'] != 'Lähetä Maventaan') {
   if (function_exists("pupesoft_sahkoposti") and !empty($laheta_karhuemail_myyjalle)) {
 
-    $polkupyora = pathinfo($pdffilenimi);
+    $pathinfo = pathinfo($pdffilenimi);
     $params = array(
       "to"     => $laheta_karhuemail_myyjalle,
       "subject"  => t("Maksukehotuskopio"),
@@ -1036,22 +1052,50 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
       "attachements" => array(0   => array(
           "filename"    => $pdffilenimi,
           "newfilename"  => "",
-          "ctype"      => $polkupyora['extension'],
+          "ctype"      => $pathinfo['extension'],
         )
       )
     );
-    $jou = pupesoft_sahkoposti($params);
-    if ($jou) echo t("Maksukehotuskopio lähetettiin myyjälle").": {$laheta_karhuemail_myyjalle}...\n<br>";
+
+    if (pupesoft_sahkoposti($params)) echo t("Maksukehotuskopio lähetettiin myyjälle").": {$laheta_karhuemail_myyjalle}...\n<br>";
   }
+
   if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
-    $liite       = $pdffilenimi;
-    $kutsu       = t("Maksukehotus", $kieli);
-    $komento     = "asiakasemail".$_REQUEST['karhu_email'];
-    $content_body = $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n";
 
-    echo t("Maksukehotus lähetetään osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+    if (!empty($yhtiorow['maksukehotus_cc_email'])) {
+      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
+      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
+      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
+      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
+      $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
+    }
+    else {
+      $newfilename = $pdffilenimi;
+      $sahkoposti_cc = "";
+    }
 
-    require "inc/sahkoposti.inc";
+    $pathinfo = pathinfo($pdffilenimi);
+    $params = array(
+      "to"     => $_REQUEST['karhu_email'],
+      "cc" => $sahkoposti_cc,
+      "subject"  => t("Maksukehotus", $kieli),
+      "ctype"    => "text",
+      "body" => $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n",
+      "attachements" => array(0   => array(
+          "filename"    => $pdffilenimi,
+          "newfilename"  => $newfilename,
+          "ctype"      => $pathinfo['extension'],
+        )
+      )
+    );
+
+    if (pupesoft_sahkoposti($params)) {
+      echo t("Maksukehotus lähetetään osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+
+      if (!empty($sahkoposti_cc)) {
+        echo t("Maksukehotuskopio lähetetään myös osoitteeseen").": {$sahkoposti_cc}...\n<br>";
+      }
+    }
   }
   else {
     $kirjoitin = $kirjoitin == 0 ? $kukarow['kirjoitin'] : $kirjoitin;

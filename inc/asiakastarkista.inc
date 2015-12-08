@@ -61,6 +61,34 @@ if (!function_exists("asiakastarkista")) {
       if ($ytunnus == "") {
         $virhe[$i] = t("Y-tunnus puuttuu")."!";
       }
+      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+
+        $qry = "SELECT luottoraja
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$ytunnus}'";
+        $res = pupe_query($qry);
+
+        if (mysql_num_rows($res) > 0) {
+          if ($alias_set != "PROSPEKTI") {
+            $t['luottoraja'] = mysql_result($res, 0);
+          }
+          elseif ($asiak_laji == "" and $alias_set == "PROSPEKTI") {
+            // Päivitetään prospektien luottoraja,
+            // mutta vasta kun tehdään prospektista normiasiakas
+            $_luottoraja = mysql_result($res, 0);
+            $qry = "UPDATE asiakas
+                    SET luottoraja = '{$_luottoraja}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '$tunnus'";
+            pupe_query($qry);
+          }
+        }
+      }
+    }
+
+    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja']) and $alias_set != "PROSPEKTI") {
+      $t[$i] = $t['luottoraja'];
     }
 
     if (mysql_field_name($result, $i) == "ytunnus" and $yhtiorow['asiakkaan_tarkenne'] == 'B') {
@@ -228,8 +256,11 @@ if (!function_exists("asiakastarkista")) {
 
     if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
 
-      // Tarkistetaan sähköpostiosoite
-      $email_virhe = tarkista_email($t[$i]);
+      $email_virhe = "";
+      // Tarkistetaan sähköpostiosoite (jos ei olla Virossa)
+      if ($yhtiorow["maa"] != "EE") {
+        $email_virhe = tarkista_email($t[$i]);
+      }
 
       if ($email_virhe != "") {
         $virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";

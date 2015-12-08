@@ -81,7 +81,12 @@ if ($tee == 'LISAA') {
       echo $retval;
     }
     else {
+      $uusi_filu = muuta_kuvan_koko(0, 130, "thumb", "tmp", "userfile");
       $kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
+
+      if ($uusi_filu != "") {
+        unlink($uusi_filu);
+      }
     }
 
     $uutinen = nl2br(strip_tags($uutinen, '<a>'));
@@ -242,7 +247,7 @@ if ($tee == "SYOTA") {
       if ($rivi["kieli"] == $sanakirja_kieli or ($rivi["kieli"] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
       if (in_array($sanakirja_kieli, $lang)) $sel = "CHECKED";
 
-      echo "<input type='checkbox' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
+      echo "<input type='radio' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
     }
     elseif ($tunnus > 0) {
       if ($rivi["kieli"] == $sanakirja_kieli) $sel = "CHECKED";
@@ -375,96 +380,6 @@ if ($tee == "POISTA") {
   $tee = "";
 }
 
-if ($tee == "PRINTTAA") {
-
-  echo "
-    <script language=\"JavaScript\">
-    <!--
-          function printtaa() {
-        window.print();
-        window.location = \"$PHP_SELF?toim=$toim\";
-          }
-    //-->
-    </script>";
-
-  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-            from kalenteri
-            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-            where tyyppi='$tyyppi'
-            and kalenteri.yhtio='$kukarow[yhtio]'
-            and kalenteri.tunnus='$tun'";
-  $result = pupe_query($query);
-  $row = mysql_fetch_array($result);
-
-  /*
-  toimittaja = kuka
-  paivays    = pvmalku
-  otsikko    = kentta01
-  uutinen    = kentta02
-  kuvaurl    = kentta03
-  */
-
-  $kuvaurl = "";
-
-  if ($row["kentta03"] != "") {
-    $kuvaurl = "<img src='view.php?id=$row[kentta03]' width='130'>";
-  }
-
-  if ($yhtiorow["logo"] != '' and $kuvaurl == '') {
-    $kuvaurl = "<img src='$yhtiorow[logo]' width='130'>";
-  }
-
-  if ($kuvaurl == '') {
-    $kuvaurl = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
-  }
-
-  $otsikko        = $row["kentta01"];
-  $uutinen        = $row["kentta02"];
-  $paivays        = $row["pvmalku"];
-  $toimittaja     = $row["kuka"];
-
-  echo "<TITLE>$otsikko - $paivays</TITLE>
-    <BODY BGCOLOR='#FFFFFF' TEXT='#000000' LINK='#336699' VLINK='#336699' ALINK='#336699' onLoad='printtaa();'>
-
-    <CENTER>
-    <BR><BR>
-
-    <TABLE CELLSPACING='0' CELLPADDING='5' WIDTH='400' BORDER='1' BORDERCOLOR='#000000' BGCOLOR='#FFFFFF'><TR><TD colspan=2>
-        <FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='+2'>
-            <B>$otsikko</B><BR>
-        </FONT>
-        <HR COLOR='GRAY'>
-
-        <TABLE BORDER='0' CELLSPACING='5' CELLPADDING='4'><TR>
-            <TD VALIGN='TOP'>
-                $kuvaurl
-            </TD><TD VALIGN='TOP'>
-                <FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='-1'>
-                $uutinen
-                </FONT>
-            </TD>
-        </TR></TABLE>
-
-    </TD></TR>
-
-    <TR><TD VALIGN=middle bgcolor='#000000'>
-        <FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
-        <B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-        <B><SMALL>&nbsp;".t("P‰iv‰m‰‰r‰").": ".tv1dateconv($paivays, "PITKA")."</SMALL></B>
-        </FONT>
-    <!--
-      </TD><TD ALIGN=right bgcolor='#000000'>
-      <IMG SRC='print.gif' WIDTH='21' HEIGHT='21' BORDER='0' ALT='".t("tulosta uutinen")."'>&nbsp;
-      <IMG SRC='koti.gif' WIDTH='21' HEIGHT='21' BORDER='0' ALT='".t("koti")."'>&nbsp;
-    -->
-    </TD></TR></TABLE>
-
-    </CENTER>
-    </BODY>
-
-    ";
-}
-
 if ($tee == '') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
@@ -532,45 +447,7 @@ if ($tee == '') {
       $kuva = "";
 
       if ($uutinen["kentta03"] != "") {
-
-        $query  = "SELECT *
-                   from liitetiedostot
-                   where tunnus = '$uutinen[kentta03]'";
-        $lisatietores = pupe_query($query);
-
-        if (mysql_num_rows($lisatietores) > 0) {
-          $lisatietorow = mysql_fetch_array($lisatietores);
-
-          if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
-            // Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
-            $nimi1 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-            $fh = fopen($nimi1, "w");
-            if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus ep‰onnistui $nimi1");
-            fclose($fh);
-
-            $nimi2 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-            // Haetaan kuvan v‰riprofiili
-            exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
-
-            $colorspace = "sRGB";
-            if ($identify[0] != "") $colorspace = $identify[0];
-
-            passthru("nice -n 20 convert -resize 130x -quality 90 -colorspace $colorspace -strip \"$nimi1\" \"$nimi2\"", $palautus);
-
-            // Tallennetaa skeilattu kuva
-            $ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);
-
-            //dellataan tmp filet kuleksimasta
-            system("rm -f $nimi1 $nimi2");
-
-            $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-          }
-          else {
-            $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-          }
-        }
+        $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
       }
 
       if ((int) $yhtiorow["logo"] > 0 and $kuva == '') {
@@ -586,7 +463,12 @@ if ($tee == '') {
       }
 
       if ($kuva == '') {
-        $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
+        }
+        else {
+          $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
+        }
       }
 
       if ($uutinen['nimi'] == "") {
@@ -630,7 +512,7 @@ if ($tee == '') {
       echo "  <tr><td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td></tr>
           <tr>
           <td valign='top' align='center' width='140'><br>$kuva<br><br></td>
-          <td valign='top'>$uutinen[kentta02]</font><br><a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a></td>
+          <td valign='top'>$uutinen[kentta02]</font></td>
           </tr>";
 
       echo "<tr><th colspan='2'>";

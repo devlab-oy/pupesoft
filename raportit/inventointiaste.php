@@ -1126,7 +1126,7 @@ function echo_kayttoliittyma($request) {
 
   echo "</table>";
 
-  echo "<input type='submit' value='".t("Hae")."' onclick='return tarkista();' />";
+  echo "<input type='submit' class='hae_btn' value='".t("Hae")."' onclick='return tarkista();' />";
 
   echo "</form>";
 }
@@ -1226,31 +1226,6 @@ function parsi_paivat(&$request) {
     $request['alku_aika'] = $request['vva'].'-'.$request['kka'].'-'.$request['ppa'];
     $request['loppu_aika'] = date('Y-m-d', strtotime($request['vvl'].'-'.$request['kkl'].'-'.$request['ppl'] . ' + 1 day'));
   }
-}
-
-function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
-
-  global $kukarow, $yhtiorow;
-
-  $ei_huomioida_lisa = "";
-
-  if ($huomioidaanko) {
-
-    $chk_res = t_avainsana('INVASTEPAIKKA');
-
-    if (mysql_num_rows($chk_res) > 0) {
-
-      $ei_huomioida_lisa = array();
-
-      while ($chk_row = mysql_fetch_assoc($chk_res)) {
-        $ei_huomioida_lisa[] = $chk_row['selite'];
-      }
-
-      $ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
-    }
-  }
-
-  return $ei_huomioida_lisa;
 }
 
 function hae_inventoitavien_lukumaara(&$request, $aikavali_tyyppi = '') {

@@ -14,7 +14,12 @@ $norm["height"] = 8;
 $norm["font"] = "Helvetica";
 
 // tehdään pdf:n uusi sivu
-$firstpage = $pdf->new_page("a4");
+if ($malli != 'PDF') {
+  $firstpage = $pdf->new_page("a4");
+}
+else {
+  $firstpage = $pdf->new_page('4.9x3cm');
+}
 
 // A4 pointteina 595x842
 
@@ -26,6 +31,14 @@ if ($malli == 'PDF40') {
   $mm_pt = 35;
   $y = 292;
 }
+elseif ($malli == 'PDF') {
+  $x = 1;
+  $riville = 1;
+  $leveys = 456;
+  $kappalemaara = 2;
+  $mm_pt = 48;
+  $y = 25;
+}
 else {
   $x = 15;
   $riville = 3;
@@ -35,13 +48,24 @@ else {
   $y = 285;
 }
 
-$koodi = $toim == 'YKS' ? 'tuoteno' : 'eankoodi';
+if ($toim == 'YKS') {
+  $koodi = 'tuoteno';
+}
+elseif ($toim == "SARJA") {
+  $koodi = 'sarjanumero';
+}
+else {
+  $koodi = 'eankoodi';
+}
 
 for ($i = 1; $i < $kappalemaara; $i++) {
 
   $nimitys1 = $nimitys2 = '';
 
-  if ($pdf->strlen($eankoodirow['nimitys'], $norm) >= mm_pt($mm_pt)) {
+  if ($toim == "SARJA") {
+    $pdf->draw_text(mm_pt($x), mm_pt($y), t("Tuotenumero") . ": $eankoodirow[tuoteno]", $firstpage, $norm);
+  }
+  elseif ($pdf->strlen($eankoodirow['nimitys'], $norm) >= mm_pt($mm_pt)) {
     list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt($mm_pt), $pdf, $norm);
 
     $nimitys1 = substr($eankoodirow['nimitys'], 0, strlen($ff_string));
@@ -72,11 +96,30 @@ for ($i = 1; $i < $kappalemaara; $i++) {
     $pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
   }
 
-  if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== FALSE) {
-    $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
+  if (isset($viivakoodityyppi) and $viivakoodityyppi == "viivakoodi") {
+    if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
+      $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
+    }
+    elseif ($koodi == "sarjanumero") {
+      $data = viivakoodi($sarjarow["sarjanumero"], "codabar", $leveys, 100, "zz");
+    }
+    else {
+      $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");
+    }
   }
   else {
-    $data = viivakoodi($eankoodirow["$koodi"], "codabar", $leveys, 100, "zz");
+    $qr_params = array(
+      "format" => "jpg",
+      "size" => 10,
+      "height" => 400
+    );
+
+    if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
+      $data = qr_koodi($eankoodirow['eankoodi'], $qr_params);
+    }
+    else {
+      $data = qr_koodi($eankoodirow[$koodi], $qr_params);
+    }
   }
 
   $image = $pdf->jfif_embed($data);

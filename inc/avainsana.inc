@@ -31,6 +31,7 @@ $mysqlaliasarray['VALMISTUSLINJA']['selitetark_2']   = "Päiväkapasiteetti sekunn
 
 $mysqlaliasarray['TOIMVAHVISTUS']['selite']         = "Toimitusvahvistuksen tiedoston nimi";
 $mysqlaliasarray['TOIMVAHVISTUS']['selitetark']    = "Toimitusvahvistuksen nimi";
+$mysqlaliasarray['TOIMVAHVISTUS']['selitetark_2']    = "Toimitusvahvistus tyyppi";
 
 $mysqlaliasarray['OSTOTIL_TILTYYP']['selite']       = "Ostotilauksen tilaustyyppi";
 $mysqlaliasarray['OSTOTIL_TILTYYP']['selitetark']   = "Ostotilauksen tilaustyypin nimi";
@@ -46,3 +47,5 @@ $mysqlaliasarray['KERAYSERA_TK']['selitetark']     = "Varasto";
 $mysqlaliasarray['RELEX_TUOTEPAR']['selite']         = "Tuote-kenttä";
 $mysqlaliasarray['RELEX_TUOTEPAR']['selitetark']     = "Operaattori";
 $mysqlaliasarray['RELEX_TUOTEPAR']['selitetark_2']   = "Arvo";
+
+$mysqlaliasarray['ASIAKASHINNASTO']['selite']         = "Käytetäänkö myyntihinnan tilalla myymälähintaa";

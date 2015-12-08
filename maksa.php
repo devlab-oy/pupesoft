@@ -972,7 +972,7 @@ else {
   }
 
   echo "<tr>";
-  echo "<td valign='top'>$yritirow[nimi]</td>";
+  echo "<td class='ptop'>$yritirow[nimi]</td>";
 
   $fontlisa1 = "";
   $fontlisa2 = "";
@@ -982,13 +982,13 @@ else {
     $fontlisa2 = "</font>";
   }
 
-  echo "<td valign='top' align='right'>$fontlisa1$yritirow[maksulimitti] $yritirow[valkoodi]$maksulimiittikoti";
+  echo "<td class='ptop' align='right'>$fontlisa1$yritirow[maksulimitti] $yritirow[valkoodi]$maksulimiittikoti";
   if ($yritirow["tilinylitys"] != "") echo " (".t("Tilinylitys sallittu").")";
   echo "$fontlisa2</td>";
-  echo "<td valign='top'>";
+  echo "<td class='ptop'>";
   echo "<form action = 'maksa.php' method='post'>";
   echo "<input type='hidden' name = 'tee' value='X'>";
-  echo "<input type='Submit' value='".t("Vaihda maksutili‰")."'>";
+  echo "<input type='submit' value='".t("Vaihda maksutili‰")."'>";
   echo "</form>";
   echo "</td>";
 
@@ -1006,24 +1006,24 @@ else {
   $result = pupe_query($query);
   $sumrow = mysql_fetch_assoc($result);
 
-  echo "<td valign='top' align='right'>$sumrow[kaikkien_eraantyneiden_laskujen_summa] $yhtiorow[valkoodi] ($sumrow[laskuja_yhteensa_kpl])";
+  echo "<td class='ptop' align='right'>$sumrow[kaikkien_eraantyneiden_laskujen_summa] $yhtiorow[valkoodi] ($sumrow[laskuja_yhteensa_kpl])";
 
   if ($sumrow['kaikkien_eraantyneiden_laskujen_summa'] > 0 and ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti'] >= $sumrow["kaikkien_eraantyneiden_laskujen_summa"])) {
     echo "<form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='NK'>
       <input type='hidden' name = 'tili' value='$oltilrow[oletustili]'>
-      <input type='Submit' value='".t('Poimi kaikki er‰‰ntyneet')."'>
+      <input type='submit' value='".t('Poimi kaikki er‰‰ntyneet')."'>
       </form>";
   }
 
   echo "</td>";
-  echo "<td valign='top' align='right'>$sumrow[tanaan_eraantyvien_laskujen_summa] $yhtiorow[valkoodi] ($sumrow[tanaan_eraantyvia_laskuja_yhteensa_kpl])";
+  echo "<td class='ptop' align='right'>$sumrow[tanaan_eraantyvien_laskujen_summa] $yhtiorow[valkoodi] ($sumrow[tanaan_eraantyvia_laskuja_yhteensa_kpl])";
 
   if ($sumrow['tanaan_eraantyvien_laskujen_summa'] > 0 and ($yritirow["tilinylitys"] != "" or $yritirow['maksulimitti'] >= $sumrow["tanaan_eraantyvien_laskujen_summa"])) {
     echo "<form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='NT'>
       <input type='hidden' name = 'tili' value='$oltilrow[oletustili]'>
-      <input type='Submit' value='".t('Poimi kaikki t‰n‰‰n er‰‰ntyv‰t')."'>
+      <input type='submit' value='".t('Poimi kaikki t‰n‰‰n er‰‰ntyv‰t')."'>
       </form>";
   }
   echo "</td>";
@@ -1082,15 +1082,15 @@ if ($tee == 'DM') {
 
     echo "<thead>
         <tr>
-        <th valign='top'>".t("Nimi")."</th>
-        <th valign='top'>".t("Tilinumero")."</th>
-        <th valign='top'>".t("Er‰pvm")." / ".t("Maksupvm")."</th>
-        <th valign='top' nowrap>".t("Kassa-ale")."</th>
-        <th valign='top'>".t("Summa")."</th>
-        <th valign='top'>".t("Laskunro")."</th>
-        <th valign='top'>".t("Maksutili")."</th>
-        <th valign='top'>".t("Viite")." / ".t("Viesti")."</th>
-        <th valign='top'>".t("Ebid")."</th>
+        <th class='ptop'>".t("Nimi")."</th>
+        <th class='ptop'>".t("Tilinumero")."</th>
+        <th class='ptop'>".t("Er‰pvm")." / ".t("Maksupvm")."</th>
+        <th class='ptop' nowrap>".t("Kassa-ale")."</th>
+        <th class='ptop'>".t("Summa")."</th>
+        <th class='ptop'>".t("Laskunro")."</th>
+        <th class='ptop'>".t("Maksutili")."</th>
+        <th class='ptop'>".t("Viite")." / ".t("Viesti")."</th>
+        <th class='ptop'>".t("Ebid")."</th>
         <th style='display:none;'></th>
         </tr>
         <tr>
@@ -1126,7 +1126,7 @@ if ($tee == 'DM') {
       $hyvitysresult = pupe_query($query);
       $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 
-      echo "<td valign='top'>";
+      echo "<td class='ptop'>";
       echo "<a name='$trow[tunnus]' href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=DM//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a>";
 
       // jos toimittajalle on maksuvalmiita hyvityksi‰, niin tehd‰‰n alertti!
@@ -1141,12 +1141,12 @@ if ($tee == 'DM') {
 
       echo "</td>";
 
-      echo "<td valign='top'>$trow[ultilno]<br>$trow[swift]</td>";
+      echo "<td class='ptop'>$trow[ultilno]<br>$trow[swift]</td>";
 
-      echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
+      echo "<td class='ptop'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";
 
       if ($trow['kapvm'] != '0000-00-00') {
-        echo "<td valign='top' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
+        echo "<td class='ptop' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
 
         if ($trow["kale"] != "") {
           echo t("K‰ytet‰‰n")."<br>";
@@ -1162,10 +1162,10 @@ if ($tee == 'DM') {
         echo "</td>";
       }
       else {
-        echo "<td valign='top' align='right' nowrap></td>";
+        echo "<td class='ptop' align='right' nowrap></td>";
       }
 
-      echo "<td valign='top' align='right' nowrap>$trow[ysumma] $yhtiorow[valkoodi]<br>";
+      echo "<td class='ptop' align='right' nowrap>$trow[ysumma] $yhtiorow[valkoodi]<br>";
 
       $summa += $trow["maksettava_ysumma"];
 
@@ -1177,9 +1177,9 @@ if ($tee == 'DM') {
       }
 
       echo "</td>";
-      echo "<td valign='top'>$trow[laskunro]</td>";
-      echo "<td valign='top'>$trow[tilinimi]<br>$trow[tilino]</td>";
-      echo "<td valign='top'>$trow[viite] $trow[viesti]";
+      echo "<td class='ptop'>$trow[laskunro]</td>";
+      echo "<td class='ptop'>$trow[tilinimi]<br>$trow[tilino]</td>";
+      echo "<td class='ptop'>$trow[viite] $trow[viesti]";
 
       if ($trow["vanhatunnus"] != 0) {
         $query = "SELECT summa, valkoodi
@@ -1204,7 +1204,7 @@ if ($tee == 'DM') {
       echo "</td>";
 
       // tehd‰‰n lasku linkki
-      echo "<td nowrap valign='top'>";
+      echo "<td nowrap class='ptop'>";
       $lasku_urlit = ebid($trow['tunnus'], true);
 
       if (count($lasku_urlit) == 0) {
@@ -1222,11 +1222,11 @@ if ($tee == 'DM') {
 
       echo "</td>";
 
-      echo "<td class='back' valign='top'>
+      echo "<td class='back ptop'>
           <form action = 'maksa.php' method='post'>
           <input type='hidden' name = 'tee' value='DP'>
           <input type='hidden' name = 'lasku' value='$trow[peru]'>
-          <input type='Submit' value='".t('Poista aineistosta')."'>
+          <input type='submit' value='".t('Poista aineistosta')."'>
           </form></td>";
 
       echo "</tr>";
@@ -1241,10 +1241,10 @@ if ($tee == 'DM') {
     echo "<table>";
 
     foreach ($valsumma as $val => $sum) {
-      echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteens‰")."</th><td valign='top' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
+      echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteens‰")."</th><td class='ptop' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
     }
 
-    echo "<tr><th colspan='3'>".t("Kaikki")." ".t("laskut")." ".t("yhteens‰")."</th><td valign='top' align='right'>".sprintf('%.2f', $summa)." $yhtiorow[valkoodi]</td></tr>";
+    echo "<tr><th colspan='3'>".t("Kaikki")." ".t("laskut")." ".t("yhteens‰")."</th><td class='ptop' align='right'>".sprintf('%.2f', $summa)." $yhtiorow[valkoodi]</td></tr>";
 
     echo "</table>";
   }
@@ -1312,16 +1312,16 @@ if ($tee == 'S') {
 
     echo "<thead>
         <tr>
-        <th valign='top'>".t("Nimi")."</th>
-        <th valign='top'>".t("Tilinumero")."</th>
-        <th valign='top'>".t("Er‰pvm")."</th>
-        <th valign='top' nowrap>".t("Kassa-ale")."</th>
-        <th valign='top'>".t("Summa")."</th>
-        <th valign='top'>".t("Laskunro")."</th>
-        <th valign='top'>".t("Viite")." / ".t("Viesti")."</th>
-        <th valign='top'>".t("Ebid")."</th>
-        <th valign='top'>".t("Maksatus")."</th>
-        <th valign='top'>".t("Lis‰tieto")."</th>
+        <th class='ptop'>".t("Nimi")."</th>
+        <th class='ptop'>".t("Tilinumero")."</th>
+        <th class='ptop'>".t("Er‰pvm")."</th>
+        <th class='ptop' nowrap>".t("Kassa-ale")."</th>
+        <th class='ptop'>".t("Summa")."</th>
+        <th class='ptop'>".t("Laskunro")."</th>
+        <th class='ptop'>".t("Viite")." / ".t("Viesti")."</th>
+        <th class='ptop'>".t("Ebid")."</th>
+        <th class='ptop'>".t("Maksatus")."</th>
+        <th class='ptop'>".t("Lis‰tieto")."</th>
         <th style='display:none;'></th>
         </tr>
         <tr>
@@ -1358,7 +1358,7 @@ if ($tee == 'S') {
       $hyvitysresult = pupe_query($query);
       $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 
-      echo "<td valign='top'>";
+      echo "<td class='ptop'>";
       echo "<a name='$trow[tunnus]' href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a>";
 
       // jos toimittajalle on maksuvalmiita hyvityksi‰, niin tehd‰‰n alertti!
@@ -1372,9 +1372,9 @@ if ($tee == 'S') {
       }
 
       echo "</td>";
-      echo "<td valign='top'>$trow[ultilno]<br>$trow[swift]</td>";
+      echo "<td class='ptop'>$trow[ultilno]<br>$trow[swift]</td>";
 
-      echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']);
+      echo "<td class='ptop'>".pupe_DataTablesEchoSort($trow['erpcm']);
 
       // er‰p‰iv‰ punasella jos se on er‰‰ntynyt
       if ((int) str_replace("-", "", $trow['erpcm']) < (int) date("Ymd")) {
@@ -1387,7 +1387,7 @@ if ($tee == 'S') {
       echo "</td>";
 
       if ($trow['kapvm'] != '0000-00-00') {
-        echo "<td valign='top' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
+        echo "<td class='ptop' align='right' nowrap>".pupe_DataTablesEchoSort($trow['kapvm']);
         echo tv1dateconv($trow['kapvm'])."<br>";
         echo "$trow[ykasumma] $yhtiorow[valkoodi]<br>";
         if (strtoupper($trow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
@@ -1396,10 +1396,10 @@ if ($tee == 'S') {
         echo "</td>";
       }
       else {
-        echo "<td valign='top' align='right' nowrap></td>";
+        echo "<td class='ptop' align='right' nowrap></td>";
       }
 
-      echo "<td valign='top' align='right' nowrap>$trow[ysumma] $yhtiorow[valkoodi]<br>";
+      echo "<td class='ptop' align='right' nowrap>$trow[ysumma] $yhtiorow[valkoodi]<br>";
 
       $summa += $trow["ysumma"];
 
@@ -1416,8 +1416,8 @@ if ($tee == 'S') {
 
       echo "</td>";
 
-      echo "<td valign='top'>$trow[laskunro]</td>";
-      echo "<td valign='top'>$trow[viite] $trow[viesti]";
+      echo "<td class='ptop'>$trow[laskunro]</td>";
+      echo "<td class='ptop'>$trow[viite] $trow[viesti]";
 
       if ($trow["vanhatunnus"] != 0) {
         $query = "SELECT summa, valkoodi
@@ -1444,7 +1444,7 @@ if ($tee == 'S') {
       echo "</td>";
 
       // tehd‰‰n lasku linkki
-      echo "<td nowrap valign='top'>";
+      echo "<td nowrap class='ptop'>";
 
       $lasku_urlit = ebid($trow['tunnus'], true);
 
@@ -1473,7 +1473,7 @@ if ($tee == 'S') {
         }
 
         echo "<form action = 'maksa.php$kikkalisa' method='post'>";
-        echo "<td valign='top' nowrap>";
+        echo "<td class='ptop' nowrap>";
 
         $query = "SELECT maksukielto
                   FROM toimi
@@ -1493,11 +1493,11 @@ if ($tee == 'S') {
               <input type='hidden' name = 'kaikki' value='$kaikki'>
               <input type='hidden' name = 'nimihaku' value='$nimihaku'>
               <input type='hidden' name = 'tapa' value='$tapa'>
-              <input type='Submit' value='".t("Poimi lasku")."'>";
+              <input type='submit' value='".t("Poimi lasku")."'>";
         }
 
         echo "</td>";
-        echo "<td valign='top' nowrap>";
+        echo "<td class='ptop' nowrap>";
 
         if ($trow["ysumma"] != $trow["ykasumma"] and $trow['ysumma'] > 0) {
 
@@ -1546,7 +1546,7 @@ if ($tee == 'S') {
               <input type='hidden' name = 'kaikki' value='$kaikki'>
               <input type='hidden' name = 'nimihaku' value='$nimihaku'>
               <input type='hidden' name = 'tapa' value='$tapa'>
-              <input type='Submit' value='".t("Poista lasku")."'>
+              <input type='submit' value='".t("Poista lasku")."'>
               </form>
               </td>";
         }
@@ -1557,7 +1557,7 @@ if ($tee == 'S') {
       }
       else {
         // ei ollutkaan varaa!!
-        echo "<td></td><td valign='top'><font class='error'>".t("Tilin limitti ei riit‰")."!</font></td><td class='back'></td>";
+        echo "<td></td><td class='ptop'><font class='error'>".t("Tilin limitti ei riit‰")."!</font></td><td class='back'></td>";
       }
 
       echo "</tr>";
@@ -1573,10 +1573,10 @@ if ($tee == 'S') {
     echo "<table>";
 
     foreach ($valsumma as $val => $sum) {
-      echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteens‰")."</th><td valign='top' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
+      echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteens‰")."</th><td class='ptop' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
     }
 
-    echo "<tr><th colspan='3'>".t("Kaikki")." ".t("laskut")." ".t("yhteens‰")."</th><td valign='top' align='right'>".sprintf('%.2f', $summa)." $yhtiorow[valkoodi]</td></tr>";
+    echo "<tr><th colspan='3'>".t("Kaikki")." ".t("laskut")." ".t("yhteens‰")."</th><td class='ptop' align='right'>".sprintf('%.2f', $summa)." $yhtiorow[valkoodi]</td></tr>";
 
     echo "</table>";
 
@@ -1589,7 +1589,7 @@ if ($tee == 'S') {
         <input type='hidden' name = 'valuu' value='$valuu'>
         <input type='hidden' name = 'erapvm' value='$erapvm'>
         <input type='hidden' name = 'nimihaku' value='$nimihaku'>
-        <input type='Submit' value='".t('Poimi kaikki haetut veloituslaskut')."'>
+        <input type='submit' value='".t('Poimi kaikki haetut veloituslaskut')."'>
         </form><br>";
     }
 
@@ -1700,7 +1700,7 @@ if ($tee == 'V') {
 
   echo "<tr>";
   echo "<th>".t("Nimi")."</th><td><input type='text' name='nimihaku' size='15' value='$nimihaku'></td><td></td>";
-  echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 
@@ -1724,7 +1724,7 @@ if ($tee == 'V') {
       <td>
       <form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='DM'>
-      <input type='Submit' value='".t('N‰yt‰ jo poimitut laskut')."'>
+      <input type='submit' value='".t('N‰yt‰ jo poimitut laskut')."'>
       </form>
       </td></tr>";
   echo "</table>";

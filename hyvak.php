@@ -222,9 +222,10 @@ if ((int) $tunnus != 0) {
       $eka_hyvaksyja = $check_row['hyvak1'];
     }
 
-    // Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä
+    // Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä 
+    // Ei myöskään näytetä tiliöintejä, jos ei niin haluta
     if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
-      if ($kukarow['taso'] != 1) $kukarow['taso'] = 1;
+      if ($kukarow['taso'] != 1 and $kukarow['taso'] != 9) $kukarow['taso'] = 1;
     }
   }
 }
@@ -500,7 +501,7 @@ if ($tee == 'Z') {
       <input type='hidden' name = 'nayta' value='$nayta'>
       <input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
-  echo "  <td><input type='text' name='komm' size='25'><input type='Submit' value='".t("Pysäytä laskun kierto")."'></td>
+  echo "  <td><input type='text' name='komm' size='25'><input type='submit' value='".t("Pysäytä laskun kierto")."'></td>
       </form>
       </tr>
       </table>";
@@ -618,23 +619,63 @@ if ($tee == 'L') {
   echo "</font><br><br>";
 }
 
-if ($tee == 'H') {
-  // Lasku merkitään hyväksytyksi, tehdään timestamp ja päivitetään hyvaksyja_nyt
+// Tarkistetaan, että laskun kaikilla tiliöinneillä on kustannuspaikka, jos kyseessä on viimeinen
+// hyväksyjä. Tarkistetaan samalla, että lasku löytyy.
+if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
-            WHERE yhtio   = '$kukarow[yhtio]' and
-            tunnus        = '$tunnus' and
-            hyvaksyja_nyt = '$kukarow[kuka]'";
+            WHERE yhtio       = '{$kukarow["yhtio"]}'
+            AND tunnus        = '{$tunnus}'
+            AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+    echo "<font class = 'error'>" . t('Lasku kateissa') . "$tunnus</font>";
 
     require "inc/footer.inc";
     exit;
   }
 
   $laskurow = mysql_fetch_assoc($result);
+
+  if ($yhtiorow["tarkenteiden_tarkistus_hyvaksynnassa"] == "K") {
+    list($viimeinen_hyvaksyja_time,
+      $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
+
+    if ($laskurow[$tokaviimeinen_hyvaksyja_time] != "0000-00-00 00:00:00" and
+      $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
+    ) {
+      $ollaan_viimeinen_hyvaksyja = true;
+    }
+    else {
+      $ollaan_viimeinen_hyvaksyja = false;
+    }
+
+    if ($ollaan_viimeinen_hyvaksyja) {
+      $tarkistus_query = "SELECT distinct tili.tilino, tili.tiliointi_tarkistus, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
+                          FROM tiliointi
+                          JOIN tili USING (yhtio, tilino)
+                          WHERE tiliointi.yhtio   = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus   = {$laskurow["tunnus"]}
+                          AND tiliointi.korjattu  = ''
+                          AND tiliointi.lukko    != 1";
+      $tilioinnit_tsek = pupe_query($tarkistus_query);
+
+      while ($tilioinnit_row = mysql_fetch_assoc($tilioinnit_tsek)) {
+        $pakotsek = tiliointi_tarkistus($tilioinnit_row['tiliointi_tarkistus'], $tilioinnit_row['kustp'], $tilioinnit_row['kohde'], $tilioinnit_row['projekti']);
+
+        if (!empty($pakotsek)) {
+          echo "<font class='error'>".t("VIRHE: Tililtä %s puuttuu pakollisia tietoja", "", $tilioinnit_row['tilino']).": $pakotsek</font><br>";
+          $tee = "";
+        }
+      }
+    }
+  }
+}
+
+if ($tee == 'H') {
+  // Lasku merkitään hyväksytyksi, tehdään timestamp ja päivitetään hyvaksyja_nyt
 
   //  Kun tehdään matkalaskun ensimmäinen hyväksyntä..
   if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
@@ -855,13 +896,13 @@ if ($tee == 'U') {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace( ",", ".", $summa);
-  $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
-  $tositetila   = $laskurow["tila"];
-  $tositeliit   = $laskurow["liitostunnus"];
+  $summa         = str_replace( ",", ".", $summa);
+  $selausnimi    = 'tili'; // Minka niminen mahdollinen popup on?
+  $tositetila    = $laskurow["tila"];
+  $tositeliit    = $laskurow["liitostunnus"];
   $kustp_tark    = $kustp;
   $kohde_tark    = $kohde;
-  $projekti_tark  = $projekti;
+  $projekti_tark = $projekti;
 
   require "inc/tarkistatiliointi.inc";
 
@@ -1074,7 +1115,7 @@ if (strlen($tunnus) != 0) {
         <input type='hidden' name='tee' value='D'>
         <input type='hidden' name = 'nayta' value='$nayta'>
         <input type='hidden' name='tunnus' value = '$tunnus'>
-        <input type='Submit' value='".t("Poista lasku")."'>
+        <input type='submit' value='".t("Poista lasku")."'>
         </form></td>";
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
@@ -1146,7 +1187,7 @@ if (strlen($tunnus) != 0) {
 
   echo "  <tr>
       <td><input type='text' name='komm' value='' size='50'></td>
-      <td><input type='Submit' value='".t("Lisää kommentti")."'></td>
+      <td><input type='submit' value='".t("Lisää kommentti")."'></td>
       </tr>";
 
   echo "</form>";
@@ -1240,7 +1281,7 @@ if (strlen($tunnus) != 0) {
     }
 
     echo "  </td>
-        <td valign='top'><input type='Submit' value='".t("Muuta lista")."'></td>
+        <td valign='top'><input type='submit' value='".t("Muuta lista")."'></td>
         </tr></form>";
 
     echo "</table></td><td width='30px' class='back'></td>";
@@ -1411,7 +1452,7 @@ if (strlen($tunnus) != 0) {
         echo "<form method='post'>
             <input type='hidden' name = 'tunnus' value='$tunnus'>
             <input type='hidden' name = 'tee' value='H'>
-            <input type='Submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
+            <input type='submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
             </form><br>";
       }
       else {
@@ -1423,7 +1464,7 @@ if (strlen($tunnus) != 0) {
       echo "<form method='post'>
           <input type='hidden' name='tee' value='palauta'>
           <input type='hidden' name='tunnus' value='$tunnus'>
-          <input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
+          <input type='submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
           </form><br>";
     }
   }
@@ -1437,7 +1478,7 @@ if (strlen($tunnus) != 0) {
       echo "<form method='post'>
           <input type='hidden' name = 'tunnus' value='$tunnus'>
           <input type='hidden' name = 'tee' value='H'>
-          <td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+          <td class='back'><input type='submit' value='".t("Hyväksy lasku")."'></td>
           </form>";
     }
     else {
@@ -1447,7 +1488,7 @@ if (strlen($tunnus) != 0) {
     echo "<form method='post'>
         <input type='hidden' name='tee' value='Z'>
         <input type='hidden' name='tunnus' value='$tunnus'>
-        <td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>
+        <td class='back'><input type='submit' value='".t("Pysäytä laskun käsittely")."'></td>
         </form>";
 
     echo "</tr></table><br>";
@@ -1471,7 +1512,7 @@ if (strlen($tunnus) != 0) {
 
     if (is_array($liitteet) and count($liitteet) == 1) {
       echo "<input type='hidden' name = 'iframe_id' value='$liitteet[0]'>
-          <input type='Submit' value='".t("Avaa")."'>";
+          <input type='submit' value='".t("Avaa")."'>";
     }
     else {
       echo "<select name='iframe_id' onchange='submit();'>
@@ -1498,7 +1539,7 @@ if (strlen($tunnus) != 0) {
           <input type='hidden' name = 'tunnus' value='$tunnus'>
         <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name = 'nayta' value='$nayta'>
-          <input type='Submit' value='".t("Sulje lasku")."'>
+          <input type='submit' value='".t("Sulje lasku")."'>
         </form></td>";
   }
 
@@ -1721,7 +1762,7 @@ elseif ($kutsuja == "") {
             <input type='hidden' name='tee' value='Z'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='tunnus' value='$trow[tunnus]'>
-            <input type='Submit' value='".t("Lisää kommentti")."'>
+            <input type='submit' value='".t("Lisää kommentti")."'>
             </form>
           </td>";
       }
@@ -1732,7 +1773,7 @@ elseif ($kutsuja == "") {
             <input type='hidden' name='tee' value='D'>
             <input type='hidden' name='nayta' value='$nayta'>
             <input type='hidden' name='tunnus' value = '$trow[tunnus]'>
-            <input type='Submit' value='".t("Poista")."'>
+            <input type='submit' value='".t("Poista")."'>
             </form>
           </td>";
       }

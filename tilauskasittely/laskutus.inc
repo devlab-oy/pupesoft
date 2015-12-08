@@ -2,7 +2,6 @@
 
 // tarvitaan $kukarow['kesken'] jossa on laskutettava tilaus
 // ja $laskpp $laskkk $laskvv jos halutaan m‰‰ritell‰ poikkeava laskutuspvm
-
 $tulos_ulos_laskutus = "";
 
 // jos erisuuri kun nollaa tai tyhj‰‰ niin k‰ytet‰‰n laskutuspvm:‰‰
@@ -13,14 +12,18 @@ if ($poikkeava_pvm != '') {
 }
 else {
   // today
-  $laskutuspvm = date("Y-n-j");
-  $laskutus_tapahtumapvm = date("Y-n-j H:i:s");
+  $laskutuspvm = date("Y-m-d");
+  $laskutus_tapahtumapvm = date("Y-m-d H:i:s");
 }
 
 // Etsit‰‰n lasku
 $query = "SELECT *
           FROM lasku
-          WHERE tunnus = '$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and tila='L' and alatila!='V' and alatila!='X'";
+          WHERE tunnus = '$kukarow[kesken]'
+          and yhtio = '$kukarow[yhtio]'
+          and tila = 'L'
+          and alatila != 'V'
+          and alatila != 'X'";
 $laskutusres = pupe_query($query);
 
 if (mysql_num_rows($laskutusres) == 0) {
@@ -30,6 +33,102 @@ else {
 
   // tilaus lˆytyi kaikki hyvin....
   $orow = mysql_fetch_assoc($laskutusres);
+
+  // Tsekataan valuuttakurssi kuntoon
+  if (!empty($yhtiorow['myyntilaskujen_kurssipaiva']) and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+    $valpaiva = "";
+
+    if ($yhtiorow['myyntilaskujen_kurssipaiva'] == 3) {
+      // Valuuttakurssi laskutushetken mukaan, eli now()
+      $valpaiva = date("Y-m-d");
+    }
+    elseif ($yhtiorow['myyntilaskujen_kurssipaiva'] == 2) {
+      // Valuuttakurssi laskun p‰iv‰yksen mukaan
+      $valpaiva = $laskutuspvm;
+    }
+    elseif ($yhtiorow['myyntilaskujen_kurssipaiva'] == 1) {
+      // Valuuttakurssi tilauksen toimitusajan mukaan (valitaan se p‰iv‰ jollon suurin osa riveist‰ on toimitettu)
+      if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K') {
+        $toimitettuaikak = " if (keratty = 'saldoton' and toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+      }
+      elseif ($yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+        $toimitettuaikak = " if (toimaika != '0000-00-00', toimaika, toimitettuaika) ";
+      }
+      else {
+        $toimitettuaikak = " toimitettuaika ";
+      }
+
+      $query = "SELECT date_format($toimitettuaikak, '%Y-%m-%d') toimitettupaiva, count(*) maara
+                FROM tilausrivi
+                WHERE tilausrivi.otunnus = '$kukarow[kesken]'
+                and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                and tilausrivi.var       not in ('P','J','O','S')
+                and tilausrivi.tyyppi    = 'L'
+                GROUP BY toimitettupaiva
+                ORDER BY maara desc
+                LIMIT 1";
+      $toimaikares = pupe_query($query);
+
+      if ($toimaikarow = mysql_fetch_assoc($toimaikares)) {
+        $valpaiva = $toimaikarow["toimitettupaiva"];
+      }
+    }
+
+    if (!empty($valpaiva)) {
+      // Haetaan oikean p‰iv‰n kurssi
+      if ($valpaiva == date("Y-m-d")) {
+        $query = "SELECT kurssi
+                  FROM valuu
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND nimi = '$orow[valkoodi]'";
+      }
+      else {
+        $query = "SELECT kurssi
+                  FROM valuu_historia
+                  WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+                  AND valuutta       = '$orow[valkoodi]'
+                  AND kurssipvm     <= '$valpaiva'
+                  ORDER BY kurssipvm DESC
+                  LIMIT 1";
+      }
+      $valres = pupe_query($query);
+
+      if ($valrow = mysql_fetch_assoc($valres)) {
+        // Kurssi lˆytyi ja se vaihtuu
+        if (!empty($valrow['kurssi']) and $orow["vienti_kurssi"] != $valrow['kurssi']) {
+
+          // Korjataan tilausrivien hinnat, jotta laskun valuuttam‰‰r‰inen summa pysyy samana
+          $query = "SELECT tilausrivi.hinta, tilausrivi.tunnus
+                     FROM tilausrivi
+                     WHERE tilausrivi.otunnus = '$kukarow[kesken]'
+                     and tilausrivi.yhtio     = '$kukarow[yhtio]'";
+          $presult = pupe_query($query);
+
+          while ($trow = mysql_fetch_assoc($presult)) {
+            $hinta = round($trow['hinta'] / $orow["vienti_kurssi"] * $valrow['kurssi'], 6);
+
+            $query = "UPDATE tilausrivi
+                      SET hinta = '$hinta'
+                      WHERE tunnus = '$trow[tunnus]'
+                      and yhtio = '$kukarow[yhtio]'";
+            pupe_query($query);
+          }
+
+          $orow["vienti_kurssi"] = $valrow['kurssi'];
+
+          $query = "UPDATE lasku
+                    SET vienti_kurssi = '$valrow[kurssi]'
+                    WHERE tunnus = '$kukarow[kesken]'
+                    and yhtio = '$kukarow[yhtio]'";
+          pupe_query($query);
+        }
+      }
+      else {
+        $tulos_ulos_laskutus .=  "<font class='error'>".t("VIRHE: p‰iv‰lle %s ei lˆytynyt valuuttakurssia", "", $valpaiva)." $orow[valkoodi]!";
+      }
+    }
+  }
 
   // Etsit‰‰n tilausrivit
   $laskutuksen_tilausrivi_query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
@@ -724,7 +823,7 @@ else {
       }
 
       // lasketaan kate
-      if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
+      if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
         $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 
@@ -737,7 +836,7 @@ else {
         //tapahtuman otsikko
         $tapahtumattyyppi = "laskutus";
       }
-      elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
+      elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
         // Kate = 0
@@ -747,7 +846,7 @@ else {
         //tapahtuman otsikko
         $tapahtumattyyppi = "tulo";
       }
-      elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
+      elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
         //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
         //T‰h‰n hyvitysriviin liitetyt sarjanumerot
@@ -902,7 +1001,7 @@ else {
 
     $xrow = mysql_fetch_assoc($presult);
 
-    if ($xrow['abs_pvm'] == '0000-00-00' and $xrow["rel_pvm"] != 0) {
+    if ($xrow['abs_pvm'] === null and $xrow["rel_pvm"] != 0) {
       if (isset($erpcmlaskenta) and $erpcmlaskenta == "NOW") {
         $erapvm = "adddate(curdate(), interval $xrow[rel_pvm] day)";
       }
@@ -910,15 +1009,15 @@ else {
         $erapvm = "adddate('$laskutuspvm', interval $xrow[rel_pvm] day)";
       }
     }
-    elseif ($xrow['abs_pvm'] != '0000-00-00') {
+    elseif ($xrow['abs_pvm'] !== null) {
       $erapvm = "'$xrow[abs_pvm]'";
     }
     else {
       $erapvm = "'$laskutuspvm'";
     }
 
-    if ($xrow['kassa_abspvm'] != '0000-00-00' or $xrow["kassa_relpvm"] > 0) {
-      if ($xrow['kassa_abspvm'] == '0000-00-00') {
+    if ($xrow['kassa_abspvm'] !== null or $xrow["kassa_relpvm"] > 0) {
+      if ($xrow['kassa_abspvm'] === null) {
         $kassa_erapvm = "adddate('$laskutuspvm', interval $xrow[kassa_relpvm] day)";
       }
       else {

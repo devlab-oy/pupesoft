@@ -121,14 +121,34 @@ echo "<tr><th>".t("Näytä tuotteen nimitys ja arvonmuutos tulosteella")."</th>
 
 echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table><br><br><br>";
 
+if ($tee == "KORJAA" or $tee == "PERU") {
+  $tilino = $yhtiorow["varasto"];
+  $muutostilino = $yhtiorow["varastonmuutos"];
+
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+    $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["raaka_ainevarasto"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'," .
+      " '{$yhtiorow["varastonmuutos_inventointi"]}'";
+
+    if ($tuotetyyppi == "R") {
+      $tilino = $yhtiorow["raaka_ainevarasto"];
+      $muutostilino = $yhtiorow["raaka_ainevarastonmuutos"];
+    }
+  }
+  else {
+    $tilinot = "'{$yhtiorow["varasto"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["varastonmuutos_inventointi"]}'";
+  }
+}
+
 if ($tee == 'KORJAA') {
 
   $query = "SELECT lasku.tunnus tosite,
             t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
             t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2
             FROM lasku use index (yhtio_tila_tapvm)
-            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
-            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
+            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino IN ({$tilinot})
+            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino IN ({$muutostilinot})
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'X'
             and lasku.tapvm   = '$tapvm'
@@ -139,6 +159,20 @@ if ($tee == 'KORJAA') {
   $kpitorow = mysql_fetch_assoc($kpitores);
 
   if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0 and (float) $arvo != 0 and (float) $arvo != (float) $edarvo) {
+
+    if (preg_match("/^KORJATTU:/", $kpitorow["sel1"])) {
+      $selite = $kpitorow["sel1"];
+    }
+    else {
+      $selite = "KORJATTU: {$kpitorow["sel1"]}";
+    }
+
+    if (preg_match("/^KORJATTU:/", $kpitorow["sel2"])) {
+      $selite_2 = $kpitorow["sel2"];
+    }
+    else {
+      $selite_2 = "KORJATTU: {$kpitorow["sel2"]}";
+    }
 
     $arvo = (float) $arvo;
 
@@ -168,7 +202,7 @@ if ($tee == 'KORJAA') {
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$kpitorow[tosite]',
-              tilino   = '$yhtiorow[varasto]',
+              tilino   = '{$tilino}',
               kustp    = '$kpitorow[kustp1]',
               kohde    = '$kpitorow[kohde1]',
               projekti = '$kpitorow[projekti1]',
@@ -176,7 +210,7 @@ if ($tee == 'KORJAA') {
               summa    = '$arvo',
               vero     = 0,
               lukko    = '',
-              selite   = 'KORJATTU: $kpitorow[sel1]',
+              selite   = '{$selite}',
               laatija  = '$kukarow[kuka]',
               laadittu = now()";
     $result = pupe_query($query);
@@ -184,7 +218,7 @@ if ($tee == 'KORJAA') {
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$kpitorow[tosite]',
-              tilino   = '$yhtiorow[varastonmuutos]',
+              tilino   = '{$muutostilino}',
               kustp    = '$kpitorow[kustp2]',
               kohde    = '$kpitorow[kohde2]',
               projekti = '$kpitorow[projekti2]',
@@ -192,7 +226,7 @@ if ($tee == 'KORJAA') {
               summa    = $arvo * -1,
               vero     = 0,
               lukko    = '',
-              selite   = 'KORJATTU: $kpitorow[sel2]',
+              selite   = '{$selite_2}',
               laatija  = '$kukarow[kuka]',
               laadittu = now()";
     $result = pupe_query($query);
@@ -209,8 +243,8 @@ if ($tee == 'PERU') {
 
   $query = "SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
             FROM lasku use index (yhtio_tila_tapvm)
-            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
-            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
+            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino IN ({$tilinot})
+            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ({$muutostilinot})
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'X'
             and lasku.tapvm   = '$tapvm'
@@ -344,7 +378,7 @@ if ($tee == 'Y') {
     $lisa_vamu = "HAVING arvo != 0";
   }
 
-  $query = "SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko,
+  $query = "SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, tuote.tuotetyyppi,
             tuotepaikat.inventointiaika, tuotepaikat.inventointipoikkeama, tapahtuma.selite, tapahtuma.kpl, tapahtuma.tunnus ttunnus, tapahtuma.hinta,
             tuote.sarjanumeroseuranta, tapahtuma.laatija, tapahtuma.laadittu,
             (tapahtuma.hinta * tapahtuma.kpl) arvo,
@@ -393,9 +427,16 @@ if ($tee == 'Y') {
 
       echo "<tr><td colspan='5'>$tuoterow[selite]</td></tr>";
 
+      if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+        $varastotili = $yhtiorow["raaka_ainevarasto"];
+      }
+      else {
+        $varastotili = $yhtiorow["varasto"];
+      }
+
       $query = "SELECT sum(tiliointi.summa) summa
                 FROM lasku use index (yhtio_tila_tapvm)
-                JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '$yhtiorow[varasto]'
+                JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '{$varastotili}'
                 WHERE lasku.yhtio = '$kukarow[yhtio]'
                 and lasku.tila    = 'X'
                 and lasku.tapvm   = '$tuoterow[tapvm]'
@@ -443,6 +484,7 @@ if ($tee == 'Y') {
         echo "<input type='hidden' name='tapvm'     value='$tuoterow[tapvm]'>";
         echo "<input type='hidden' name='edarvo'     value='$kpitorow[summa]'>";
         echo "<input type='hidden' name='kpl'       value='$tuoterow[kpl]'>";
+        echo "<input type='hidden' name='tuotetyyppi' value='{$tuoterow["tuotetyyppi"]}'>";
         echo "<input type='text' size='15' name='arvo' value='".sprintf('%.2f', $kpitorow["summa"])."'>";
         echo "<input type='submit' name='valmis' value='".t("Korjaa")."'>";
         echo "</form>";
@@ -473,6 +515,7 @@ if ($tee == 'Y') {
         echo "<input type='hidden' name='ttunnus'     value='$tuoterow[ttunnus]'>";
         echo "<input type='hidden' name='tapvm'     value='$tuoterow[tapvm]'>";
         echo "<input type='hidden' name='kpl'       value='$tuoterow[kpl]'>";
+        echo "<input type='hidden' name='tuotetyyppi' value='{$tuoterow["tuotetyyppi"]}'>";
         echo "<input type='submit' name='valmis' value='".t("Peru")."'>";
         echo "</form>";
         echo "</td></tr>";
@@ -626,6 +669,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
   $worksheet->write($excelrivi, 7, t("Inv.pvm"),               $format_bold);
   $worksheet->write($excelrivi, 8, t("Varastonarvo ennen inventointia"),   $format_bold);
   $worksheet->write($excelrivi, 9, t("Arvonmuutos"),             $format_bold);
+  $worksheet->write($excelrivi, 10, t("Selite"),             $format_bold);
   $excelrivi++;
 
   while ($row = mysql_fetch_assoc($saldoresult)) {
@@ -638,6 +682,8 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
 
     $vararvo_ennen = round((float) $invkpl[1] * $row["hinta"], 2);
 
+    $row["selite"] = str_replace("<br>", " ", $row["selite"]);
+
     $worksheet->writeString($excelrivi, 0, $row["tuoteno"]);
     $worksheet->writeString($excelrivi, 1, t_tuotteen_avainsanat($row, 'nimitys'));
     $worksheet->writeString($excelrivi, 2, $row["toim_tuoteno"]);
@@ -648,6 +694,7 @@ if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {
     $worksheet->writeDate($excelrivi, 7, $row["inventointiaika"]);
     $worksheet->writeNumber($excelrivi, 8, $vararvo_ennen);
     $worksheet->writeNumber($excelrivi, 9, round($row["arvo"], 2));
+    $worksheet->writeString($excelrivi, 10, $row["selite"]);
 
     $excelrivi++;
   }

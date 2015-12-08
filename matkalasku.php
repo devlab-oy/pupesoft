@@ -804,7 +804,11 @@ if ($tee == "MUOKKAA") {
       $errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
     }
     else {
-      $errori = lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
+      $errori =
+        lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+        $hinta, $kommentti, $maa, $kustp, $kohde, $projekti,
+        "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm",
+        "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm");
     }
 
     if ($errori == "") {
@@ -1242,6 +1246,14 @@ if ($tee == "MUOKKAA") {
       $leveys = 80;
     }
     elseif ($tyyppi == "B") {
+      $alkumm = isset($alkumm) ? $alkumm : date("i");
+      $alkuhh = isset($alkuhh) ? $alkuhh : date("H");
+      $alkupp = isset($alkupp) ? $alkupp : date("d");
+
+      $loppumm = isset($loppumm) ? $loppumm : date("i");
+      $loppuhh = isset($loppuhh) ? $loppuhh : date("H");
+      $loppupp = isset($loppupp) ? $loppupp : date("d");
+
       $lisa = "";
       if ($maa != "" and $maa != $yhtiorow["maa"]) {
         $lisa = "<th>".t("Ulkomaan ALV")."</th>";
@@ -1319,6 +1331,29 @@ if ($tee == "MUOKKAA") {
     }
 
     echo "<td class='back'><input type='submit' name='lisaa' value='".t("Lis‰‰")."'></td></tr>";
+
+    if ($tyyppi == "B") {
+      echo "<tr>";
+      echo "<th colspan='2'>" . t("Alku") . "</th><th colspan='3'>" . t("Loppu") .
+        "</th>";
+      echo "</tr>";
+      echo "<tr>";
+      echo
+      "<td colspan='2'><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
+           <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
+           <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
+        ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
+           <input type='text' name='alkumm' value='{$alkumm}' size='3' maxlength='2'>&nbsp;</td>
+           <td colspan='3'>&nbsp;
+           <input type='text' name='loppupp' value='{$loppupp}' size='3' maxlength='2'>
+           <input type='text' name='loppukk' value='{$loppukk}' size='3' maxlength='2'>
+           <input type='text' name='loppuvv' value='{$loppuvv}' size='5' maxlength='4'> " .
+        t("klo") .
+        ":<input type='text' name='loppuhh' value='{$loppuhh}' size='3' maxlength='2'>:
+           <input type='text' name='loppumm' value='{$loppumm}' size='3' maxlength='2'>";
+      echo "</tr>";
+    }
+
     echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
     echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='4' cols='80'>".str_replace("<br>", "\n", $kommentti)."</textarea></td>";
 
@@ -1532,7 +1567,7 @@ if ($tee == "") {
   }
 
   echo "</td>";
-  echo "<td class='back'><input type='Submit' name='EI_ASIAKASTA_X' value='".t("Perusta")."'></td>";
+  echo "<td class='back'><input type='submit' name='EI_ASIAKASTA_X' value='".t("Perusta")."'></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";
@@ -1584,7 +1619,7 @@ if ($tee == "") {
   echo "<tr>";
   echo "<th>".t("Asiakas")."</th>";
   echo "<td><input type='text' size='20' name='ytunnus'></td>";
-  echo "<td class='back'><input type='Submit' value='".t("Perusta")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Perusta")."'></td>";
   echo "</tr>";
 
   echo "</table>";
@@ -1627,10 +1662,10 @@ if ($tee == "") {
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
       if ($kukarow["taso"] == 2) {
-        echo "<td class='back'><input type='Submit' value='".t("Muokkaa")."'></td>";
+        echo "<td class='back'><input type='submit' value='".t("Muokkaa")."'></td>";
       }
       else {
-        echo "<td class='back'><input type='Submit' value='".t("Tarkastele")."'></td>";
+        echo "<td class='back'><input type='submit' value='".t("Tarkastele")."'></td>";
       }
 
       echo "</form>";
@@ -1669,14 +1704,14 @@ if ($tee == "") {
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-      echo "<input type='Submit' value='".t("Muokkaa")."'>";
+      echo "<input type='submit' value='".t("Muokkaa")."'>";
       echo "</form></td>";
       echo "<td class='back'><form action='matkalasku.php' method='post' autocomplete='off'>";
       echo "<input type='hidden' name='tee' value='POISTA'>";
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-      echo "<input type='Submit' value='".t("Poista")."'>";
+      echo "<input type='submit' value='".t("Poista")."'>";
       echo "</form></td>";
       echo "</tr>";
     }
@@ -1768,7 +1803,7 @@ if ($tee == "") {
       echo "<td>$row[viite]</td>";
       echo "<td>$row[summa]</td>";
       echo "<td>".t($laskutyyppi)."</td>";
-      echo "<td class='back'><input type='Submit' value='".t("Tarkastele")."'></td>";
+      echo "<td class='back'><input type='submit' value='".t("Tarkastele")."'></td>";
       echo "</tr>";
       echo "</form>";
     }
@@ -2163,8 +2198,11 @@ function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilin
   return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", 0, "", "", $kommentti, "A", $kustp, $kohde, $projekti);
 }
 
-function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
-  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
+function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+  $hinta, $kommentti, $maa, $kustp, $kohde, $projekti, $alku, $loppu) {
+  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku,
+    $loppu, $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde,
+    $projekti);
 }
 
 function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
@@ -2199,33 +2237,33 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
   $selite_array  = array();
   $errori      = "";
 
+  list($alkupaiva, $alkuaika)      = explode(" ", $alku);
+  list($alkuvv, $alkukk, $alkupp)    = explode("-", $alkupaiva);
+  list($alkuhh, $alkumm)          = explode(":", $alkuaika);
+
+  list($loppupaiva, $loppuaika)      = explode(" ", $loppu);
+  list($loppuvv, $loppukk, $loppupp) = explode("-", $loppupaiva);
+  list($loppuhh, $loppumm)        = explode(":", $loppuaika);
+
+  /*
+    P‰iv‰rahoilla ratkaistaan p‰iv‰t
+    Samalla oletetaan ett‰ osap‰iv‰raha on aina P+tuoteno
+  */
+
+  //  Lasketaan tunnit
+  $alkupp = sprintf("%02d", $alkupp);
+  $alkukk = sprintf("%02d", $alkukk);
+  $alkuvv = (int) $alkuvv;
+  $alkuhh = sprintf("%02d", $alkuhh);
+  $alkumm = sprintf("%02d", $alkumm);
+
+  $loppupp = sprintf("%02d", $loppupp);
+  $loppukk = sprintf("%02d", $loppukk);
+  $loppuvv = (int) $loppuvv;
+  $loppuhh = sprintf("%02d", $loppuhh);
+  $loppumm = sprintf("%02d", $loppumm);
+
   if ($tyyppi == "A") {
-
-    list($alkupaiva, $alkuaika)      = explode(" ", $alku);
-    list($alkuvv, $alkukk, $alkupp)    = explode("-", $alkupaiva);
-    list($alkuhh, $alkumm)          = explode(":", $alkuaika);
-
-    list($loppupaiva, $loppuaika)      = explode(" ", $loppu);
-    list($loppuvv, $loppukk, $loppupp) = explode("-", $loppupaiva);
-    list($loppuhh, $loppumm)        = explode(":", $loppuaika);
-
-    /*
-      P‰iv‰rahoilla ratkaistaan p‰iv‰t
-      Samalla oletetaan ett‰ osap‰iv‰raha on aina P+tuoteno
-    */
-
-    //  Lasketaan tunnit
-    $alkupp = sprintf("%02d", $alkupp);
-    $alkukk = sprintf("%02d", $alkukk);
-    $alkuvv = (int) $alkuvv;
-    $alkuhh = sprintf("%02d", $alkuhh);
-    $alkumm = sprintf("%02d", $alkumm);
-
-    $loppupp = sprintf("%02d", $loppupp);
-    $loppukk = sprintf("%02d", $loppukk);
-    $loppuvv = (int) $loppuvv;
-    $loppuhh = sprintf("%02d", $loppuhh);
-    $loppumm = sprintf("%02d", $loppumm);
 
     if (($alkupp >= 1 and $alkupp <= 31) and ($alkukk >= 1 and $alkukk <= 12) and $alkuvv > 0 and ($alkuhh >= 0 and $alkuhh <= 24) and ($loppupp >= 1 and $loppupp <= 31) and ($loppukk >= 1 and $loppukk <= 12) and $loppuvv > 0 and ($loppuhh >= 0 and $loppuhh <= 24)) {
       $alku  = mktime($alkuhh, $alkumm, 0, $alkukk, $alkupp, $alkuvv);
@@ -2408,8 +2446,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
         $selite_array[0]  = trim("$trow[tuoteno] - $trow[nimitys] · ".(float) $trow["myyntihinta"]);
       }
 
-      $selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
-      $selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
     }
     else {
       $errori .= "<font class='error'>".t("VIRHE: P‰iv‰rahalle on annettava alku ja loppuaika")."</font><br>";
@@ -2442,6 +2478,9 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
     $varri_array[0]    = 0;
     $selite_array[0]  = "$trow[tuoteno] - $trow[nimitys] $kpl kpl · ".(float) $hinta;
   }
+
+  $selite_array[0] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
+  $selite_array[1] .= "<br>".t("Ajalla").": $alkupp.$alkukk.$alkuvv ".t("klo").". $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv ".t("klo").". $loppuhh:$loppumm";
 
   //  poistetan return carriage ja newline -> <br>
   $kommentti = str_replace("\n", "<br>", str_replace("\r", "", $kommentti));
@@ -2513,8 +2552,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
           if ($tyyppi == "B") {
             // Kulut vied‰‰n aina vain yhdelle riville (siksi $i = $kpl_array[$indeksi])
-            $_alkuaika  = date('Y-m-d H:i:s');
-            $_loppuaika = date('Y-m-d H:i:s');
+            $_alkuaika  = $alku ? $alku : date('Y-m-d H:i:s');
+            $_loppuaika = $loppu ? $loppu : date('Y-m-d H:i:s');
             $ins_kpl    = $kpl_array[$indeksi];
             $i         = $kpl_array[$indeksi];
           }

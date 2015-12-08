@@ -57,8 +57,8 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 
     $query = "SELECT
               tuote.tuoteno,
-              tuotepaikat.inventointilista,
-              tuotepaikat.inventointilista_aika,
+              inventointilistarivi.otunnus as inventointilista,
+              inventointilistarivi.aika as inventointilista_aika,
               concat(  lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
                   lpad(upper(tuotepaikat.hyllynro), 5, '0'),
                   lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
@@ -67,12 +67,15 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus      = tuotepaikat.varasto
-                AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}'
-                AND varastopaikat.tyyppi      = ''
+                AND varastopaikat.tunnus                   = tuotepaikat.varasto
+                AND varastopaikat.toimipaikka              = '{$kukarow['toimipaikka']}'
+                AND varastopaikat.tyyppi                   = ''
               )
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
-              WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
+              LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+                AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
+                AND inventointilistarivi.tila              = 'A')
+              WHERE tuotepaikat.yhtio                      = '{$kukarow['yhtio']}'
               AND $haku_ehto
               LIMIT 200";
     $result = pupe_query($query);
@@ -170,24 +173,73 @@ if ($tee == 'listat') {
   if (!isset($reservipaikka)) $reservipaikka = 'E';
 
   // Haetaan inventointilistat
-  $query = "SELECT DISTINCT(inventointilista) as lista,
-            count(tuoteno) as tuotteita,
-            concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
-            FROM tuotepaikat
-            JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
-                                          and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
-                                          and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
-                                          and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
-                                          and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
-            WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
-            and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
-            and inventointilista      > 0
-            and inventointilista_aika > '0000-00-00 00:00:00'
-            GROUP BY inventointilista_aika
-            ORDER BY inventointilista";
+  $query = "SELECT otunnus as lista
+            FROM inventointilistarivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tila    = 'A'
+            GROUP BY 1
+            ORDER BY 1";
   $result = pupe_query($query);
 
+  $parametrit_tarkistettu = false;
+  $listat = array();
+
   while ($row = mysql_fetch_assoc($result)) {
+
+    $query = "SELECT count(inventointilistarivi.tuoteno) as tuotteita,
+              concat_ws('-', min(inventointilistarivi.hyllyalue), max(inventointilistarivi.hyllyalue)) as hyllyvali
+              FROM inventointilistarivi
+              WHERE inventointilistarivi.yhtio = '{$kukarow['yhtio']}'
+              AND inventointilistarivi.otunnus = '{$row['lista']}'";
+    $_count_res = pupe_query($query);
+    $_count_row = mysql_fetch_assoc($_count_res);
+
+    $row['tuotteita'] = $_count_row['tuotteita'];
+    $row['hyllyvali'] = $_count_row['hyllyvali'];
+
+    $query = "SELECT inventointilistarivi.hyllyalue,
+              inventointilistarivi.hyllynro,
+              inventointilistarivi.hyllyvali,
+              inventointilistarivi.hyllytaso
+              FROM inventointilistarivi
+              WHERE inventointilistarivi.yhtio = '{$kukarow['yhtio']}'
+              AND inventointilistarivi.otunnus = '{$row['lista']}'";
+    $_chk_res = pupe_query($query);
+
+    while ($_chk_row = mysql_fetch_assoc($_chk_res)) {
+
+      if (!$parametrit_tarkistettu) {
+        $parametrit_tarkistettu = true;
+        $_varasto = kuuluukovarastoon($_chk_row['hyllyalue'], $_chk_row['hyllynro']);
+        $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
+      }
+
+      if ($onko_varaston_hyllypaikat_kaytossa) {
+
+        if (!empty($reservipaikka)) {
+          $options = array('reservipaikka' => $reservipaikka);
+        }
+        else {
+          $options = array();
+        }
+
+        $_chk = tarkista_varaston_hyllypaikka(
+          $_chk_row['hyllyalue'],
+          $_chk_row['hyllynro'],
+          $_chk_row['hyllyvali'],
+          $_chk_row['hyllytaso'],
+          $options
+        );
+
+        if (!$_chk) {
+          continue 2;
+        }
+      }
+      else {
+        break;
+      }
+    }
+
     $row['url'] = "?tee=laske&lista={$row['lista']}&reservipaikka={$reservipaikka}";
     $listat[] = $row;
   }
@@ -230,8 +282,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuotepaikat.hyllynro,
               tuotepaikat.hyllyvali,
               tuotepaikat.hyllytaso,
-              tuotepaikat.inventointilista,
-              tuotepaikat.inventointilista_naytamaara,
+              inventointilista.tunnus as inventointilista,
+              inventointilista.naytamaara as inventointilista_naytamaara,
               tuotepaikat.tyyppi,
                concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                      tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka,
@@ -239,17 +291,15 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                    lpad(upper(tuotepaikat.hyllynro), 5, '0'),
                    lpad(upper(tuotepaikat.hyllyvali), 5, '0'),
                    lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta
-               FROM tuotepaikat
-               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
-               JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
-                                             and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
-                                             and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
-                                             and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
-                                             and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
-               WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-               and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
-               AND inventointilista='{$lista}'
-               AND inventointilista_aika > '0000-00-00 00:00:00' # Inventoidut tuotteet on nollattu
+               FROM inventointilista
+               JOIN inventointilistarivi ON (inventointilistarivi.yhtio = inventointilista.yhtio
+                  AND inventointilistarivi.otunnus = inventointilista.tunnus)
+               JOIN tuote on (tuote.yhtio=inventointilistarivi.yhtio and tuote.tuoteno=inventointilistarivi.tuoteno)
+               JOIN tuotepaikat ON (tuotepaikat.yhtio = inventointilistarivi.yhtio
+                AND tuotepaikat.tunnus             = inventointilistarivi.tuotepaikkatunnus)
+               WHERE inventointilista.yhtio        = '{$kukarow['yhtio']}'
+               AND inventointilista.tunnus         = '{$lista}'
+               AND inventointilistarivi.tila       = 'A' # Inventoidut tuotteet on nollattu
                ORDER BY sorttauskentta, tuoteno
                LIMIT 1";
     $result = pupe_query($query);
@@ -267,6 +317,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuote.tuoteno,
               tuote.yksikko,
               tuotepaikat.tyyppi,
+              tuotepaikat.hyllyalue,
+              tuotepaikat.hyllynro,
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka
               FROM tuotepaikat
@@ -278,6 +330,9 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     $result = pupe_query($query);
   }
   $tuote = mysql_fetch_assoc($result);
+
+  $_varasto = kuuluukovarastoon($tuote['hyllyalue'], $tuote['hyllynro']);
+  $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
   // Haetaan sscc jos tyyppi
   if ($tuote['tyyppi'] == 'S') {
@@ -296,19 +351,20 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     $sscc = $suuntalava_sscc['sscc'];
   }
 
-  // Näytetäänkö apulaskuri
-  $query = "SELECT
-            count(tunnus) as monta
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuote['tuoteno']}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND (laji='pakkauskoko2' OR laji='pakkauskoko3')";
-  $pakkaukset = pupe_query($query);
-  $pakkaukset = mysql_fetch_assoc($pakkaukset);
+  $query = "SELECT tunnus
+            FROM tuotteen_toimittajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuote['tuoteno']}'
+            ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus
+            LIMIT 1";
+  $paatoimittaja_result = pupe_query($query);
+  $paatoimittaja_tunnus = mysql_fetch_assoc($paatoimittaja_result);
+
+  $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
 
   $apulaskuri_url = '';
   // Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
-  if ($pakkaukset['monta'] > 0) {
+  if (count($pakkaukset)) {
     $apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
         'tuotepaikka' => $tuotepaikka,
         'tuoteno' => $tuote['tuoteno'],
@@ -317,7 +373,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
   }
 
   // Jos varmistuskoodi kelpaa tai on keksissä tallessa
-  if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
+  if (!$onko_varaston_hyllypaikat_kaytossa or tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
     $title = t("Laske määrä");
     $query = "SELECT *
               FROM avainsana
@@ -376,27 +432,31 @@ if ($tee == 'apulaskuri') {
   $result = pupe_query($query);
   $p1 = mysql_fetch_assoc($result);
 
-  // Pakkaus2
-  $query = "SELECT
-            selite as myynti_era,
-            selitetark as yksikko
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuoteno}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND laji='pakkauskoko2'";
-  $result = pupe_query($query);
-  $p2 = mysql_fetch_assoc($result);
+  $query = "SELECT tunnus
+            FROM tuotteen_toimittajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuoteno}'
+            ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus
+            LIMIT 1";
+  $paatoimittaja_result = pupe_query($query);
+  $paatoimittaja_tunnus = mysql_fetch_assoc($paatoimittaja_result);
 
-  // Pakkaus3
-  $query = "SELECT
-            selite as myynti_era,
-            selitetark as yksikko
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuoteno}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND laji='pakkauskoko3'";
-  $result = pupe_query($query);
-  $p3 = mysql_fetch_assoc($result);
+  $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
+
+  // pientä kaunistelua, ei turhia desimaaleja
+  $p1['myynti_era'] = fmod($p1['myynti_era'], 1) ? $p1['myynti_era'] : round($p1['myynti_era']);
+
+  // laitetaan vain kaksi ensimmäistä pakkauskokoa apulaskuriin
+  $p2['myynti_era']   = $pakkaukset[0][0];
+  $p2['yksikko']      = $pakkaukset[0][1];
+
+  if (is_array($pakkaukset[1])) {
+    $p3['myynti_era']   = $pakkaukset[1][0];
+    $p3['yksikko']      = $pakkaukset[1][1];
+  }
+  else {
+    $p3 = array();
+  }
 
   $back = http_build_query(array('tee' => 'laske',
       'tuotepaikka' => $tuotepaikka,

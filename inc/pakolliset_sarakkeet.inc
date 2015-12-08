@@ -35,7 +35,18 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "tuotepaikat" :
       $pakolliset   = array("TUOTENO", "HYLLYALUE", "HYLLYNRO", "HYLLYVALI", "HYLLYTASO", "OLETUS");
-      $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "SALDO", "SALDO_VARATTU", "SALDOAIKA", "INVENTOINTIAIKA", "INVENTOINTIPOIKKEAMA", "INVENTOINTILISTA", "INVENTOINTILISTA_AIKA");
+      $kielletyt    = array(
+        "LAATIJA",
+        "LUONTIAIKA",
+        "MUUTTAJA",
+        "MUUTOSPVM",
+        "HYLLYPAIKKA",
+        "SALDO",
+        "SALDO_VARATTU",
+        "SALDOAIKA",
+        "INVENTOINTIAIKA",
+        "INVENTOINTIPOIKKEAMA",
+      );
       $joinattavat  = array("TUOTENO" => "tuote");
       $saakopoistaa = TRUE;
       break;
@@ -112,7 +123,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $wherelliset  = array("RYHMA");
       break;
     case "yhteyshenkilo" :
-      if (in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+      if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset = array("TYYPPI", "NIMI");
       }
       else {
@@ -187,11 +198,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "yhteensopivuus_tuote_sensori" :
       $pakolliset   = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-      $wherelliset  = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO");
+      $wherelliset  = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO", "SENSORIRYHMA");
       $saakopoistaa = TRUE;
       break;
     case "yhteensopivuus_tuote_sensori_lisatiedot" :
-      $pakolliset   = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS", "OTSIKKO", "ARVO", "KIELI");
+      $pakolliset   = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS");
+      $wherelliset  = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS", "OTSIKKO", "ARVO");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       // HUOM: tässä hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, tämä on spessukeissi....
       $joinattavat  = array("TUOTENO" => "yhteensopivuus_tuote_sensori");
@@ -231,6 +243,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "rekisteritiedot" :
       $pakolliset   = array("REKNO", "MAA");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $saakopoistaa = TRUE;
       break;
     case "sanakirja" :
       $pakolliset   = array("FI");
@@ -241,6 +254,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $pakolliset   = array("TUOTENO", "LIITOSTUNNUS");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "TEHDAS_SALDO_PAIVITETTY");
       $joinattavat  = array("TUOTENO" => "tuote");
+      $saakopoistaa = TRUE;
+      break;
+    case "tuotteen_toimittajat_pakkauskoot" :
+      $pakolliset   = array("TOIM_TUOTENO_TUNNUS");
+      $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $wherelliset  = array("PAKKAUSKOKO", "YKSIKKO");
       $saakopoistaa = TRUE;
       break;
     case "tuotteen_toimittajat_tuotenumerot" :
@@ -309,7 +328,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "DATA", "IMAGE_BITS", "IMAGE_CHANNELS", "IMAGE_HEIGHT", "IMAGE_WIDTH", "FILETYPE", "FILESIZE");
       break;
     case "asiakkaan_avainsanat" :
-      if (in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+      if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset  = array("LAJI", "AVAINSANA");
         $wherelliset = array("LAJI", "AVAINSANA");
       }
@@ -421,7 +440,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
                 WHERE yhtio      = '{$kukarow["yhtio"]}'
                 AND laji         = 'MYSQLALIAS'
                 AND selite       LIKE '$table.%'
-                AND selitetark_2 = ''";
+                AND selitetark_2 = 'Default'";
       $result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($result)) {

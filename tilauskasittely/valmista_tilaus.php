@@ -131,6 +131,10 @@ if (!function_exists("onkokaikkivalmistettu")) {
   function onkokaikkivalmistettu($valmkpllat) {
     global $kukarow, $tee, $valmistettavat;
 
+    // Oletetaan ett‰ tilaus on kokonaan valmistettu,
+    // alla tarkastetaan onko tilaus valmistettu kokonaan vai ei
+    $valmistettu = TRUE;
+
     //katotaan onko en‰‰ mit‰‰n valmistettavaa
     foreach ($valmkpllat as $rivitunnus => $tuoteno) {
       //Haetaan tilausrivi
@@ -146,40 +150,15 @@ if (!function_exists("onkokaikkivalmistettu")) {
       $query = "SELECT tunnus
                 FROM tilausrivi
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and otunnus        = '{$tilrivirow['otunnus']}'
                 and tyyppi         in ('W','M')
-                and tunnus         = perheid
+                AND tunnus         = $rivitunnus
                 and toimitettuaika = '0000-00-00 00:00:00'";
       $chkresult1 = pupe_query($query);
 
-      //eli tilaus on kokonaan valmistettu
-      if (mysql_num_rows($chkresult1) == 0) {
-        //Jos kyseess‰ on varastovalmistus
-        $query = "UPDATE lasku
-                  SET alatila  = 'V'
-                  WHERE yhtio      = '$kukarow[yhtio]'
-                  and tunnus       = $tilrivirow[otunnus]
-                  and tila         = 'V'
-                  and alatila      = 'C'
-                  and tilaustyyppi = 'W'";
-        $chkresult2 = pupe_query($query);
-
-        //Jos kyseess‰ on asiakaalle valmistus
-        $query = "UPDATE lasku
-                  SET tila  = 'L',
-                  alatila          = 'C'
-                  WHERE yhtio      = '$kukarow[yhtio]'
-                  and tunnus       = $tilrivirow[otunnus]
-                  and tila         = 'V'
-                  and alatila      = 'C'
-                  and tilaustyyppi = 'V'";
-        $chkresult2 = pupe_query($query);
-
-        $tee       = "";
-        $valmistettavat = "";
-      }
-      else {
-        $tee = "VALMISTA";
+      // Eli tilaus ei ole viel‰ kokonaan valmistettu, jos rivi lˆytyy
+      // ei siis tulla laittamaan valmistusta viel‰ valmiiksi
+      if (mysql_num_rows($chkresult1) != 0) {
+        $valmistettu = FALSE;
       }
 
       //jos rivit oli siirretty toiselta otsikolta niin siirret‰‰n ne nyt takaisin
@@ -228,6 +207,38 @@ if (!function_exists("onkokaikkivalmistettu")) {
         }
       }
     }
+
+    // Laitetaan valmistus valmis tilaan vain,
+    // jos kaikki on jo valmsitettu
+    if ($valmistettu) {
+      //Jos kyseess‰ on varastovalmistus
+      $query = "UPDATE lasku
+                SET alatila  = 'V'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tunnus       = $tilrivirow[otunnus]
+                and tila         = 'V'
+                and alatila      = 'C'
+                and tilaustyyppi = 'W'";
+      $chkresult2 = pupe_query($query);
+
+      //Jos kyseess‰ on asiakaalle valmistus
+      $query = "UPDATE lasku
+                SET tila  = 'L',
+                alatila          = 'C'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tunnus       = $tilrivirow[otunnus]
+                and tila         = 'V'
+                and alatila      = 'C'
+                and tilaustyyppi = 'V'";
+      $chkresult2 = pupe_query($query);
+
+      $tee       = "";
+      $valmistettavat = "";
+    }
+    else {
+      $tee = "VALMISTA";
+    }
+
   }
 }
 
@@ -333,7 +344,6 @@ if ($tee == "TEEVALMISTUS" and $era_new_paikka != "") {
 }
 
 if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 0) {
-
   //katotaan onko en‰‰ mit‰‰n valmistettavaa
   onkokaikkivalmistettu ($valmisteet_chk);
 }
@@ -465,7 +475,7 @@ if ($tee == 'TEEVALMISTUS') {
             echo "<font class='error'>".t("VIRHE: Negatiivista kappalem‰‰r‰‰ ei voi valmistaa")."!</font><br>";
             $tee = "VALMISTA";
           }
-          elseif (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "U", "V")) and $valmkpl != (int) $valmkpl) {
+          elseif (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "V")) and $valmkpl != (int) $valmkpl) {
             //  Tarkastetaan, ett‰ sarjanumeroseurattuja tuotteita valmistetaan tasam‰‰r‰.
             echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
             $tee = "VALMISTA";
@@ -488,7 +498,7 @@ if ($tee == 'TEEVALMISTUS') {
             // Tarkistetaan valmisteiden sarjanumerot
             if ($tilrivirow["sarjanumeroseuranta"] != "") {
               // katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ listalla
-              if (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+              if (in_array($tilrivirow["sarjanumeroseuranta"], array("S", "T", "V"))) {
 
                 $query = "SELECT count(*) kpl
                           FROM sarjanumeroseuranta
@@ -567,7 +577,7 @@ if ($tee == 'TEEVALMISTUS') {
                   //  Tarkistetaan raaka-aineiden sarjanumerot
                   if ($perherow["sarjanumeroseuranta"] != "") {
                     // katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ listalla
-                    if (in_array($perherow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+                    if (in_array($perherow["sarjanumeroseuranta"], array("S", "T", "V"))) {
 
                       $query = "SELECT count(*) kpl
                                 FROM sarjanumeroseuranta
@@ -710,14 +720,44 @@ if ($tee == 'TEEVALMISTUS') {
 
         $laskurow = mysql_fetch_assoc($result);
 
-        $query = "UPDATE tilausrivi
-                  SET varattu = '$tilkpl'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$rivitunnus'";
-        $updresult = pupe_query($query);
+        // Pit‰‰ tiet‰‰ onko tuote er‰numeroseurannassa,
+        // koska er‰numeroseurattavien tuotteiden rivim‰‰r‰‰ ei saa lis‰t‰
+        $query =  "SELECT tuote.sarjanumeroseuranta
+                   FROM tuote
+                   JOIN tilausrivi ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno)
+                   WHERE tuote.yhtio              = '{$kukarow['yhtio']}'
+                   AND tilausrivi.tunnus          = $rivitunnus
+                   AND tilausrivi.laskutettuaika != '0000-00-00'";
+        $_sarja = mysql_fetch_assoc(pupe_query($query));
 
-        $tee = "VALMISTA";
-        $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+        if (in_array($_sarja["sarjanumeroseuranta"], array("E", "G", "F"))) {
+          if ($tilkpl <= $edtilkpllat[$rivitunnus]) {
+            $query = "UPDATE tilausrivi
+                      SET varattu = '$tilkpl'
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$rivitunnus'";
+            $updresult = pupe_query($query);
+
+            $tee = "VALMISTA";
+            $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+          }
+          else {
+            $tee = "VALMISTA";
+            $virhe[$rivitunnus] .= "<font class='error'>".t("Er‰numerollisen tuotteen m‰‰r‰‰ ei saa lis‰t‰, jos rivi on jo k‰ytetty")."!</font>";
+          }
+
+        }
+        else {
+          $query = "UPDATE tilausrivi
+                    SET varattu = '$tilkpl'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$rivitunnus'";
+          $updresult = pupe_query($query);
+
+          $tee = "VALMISTA";
+          $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+
+        }
       }
     }
     else {
@@ -801,6 +841,17 @@ if ($tee == 'TEEVALMISTUS') {
                   and otunnus = '$row[tunnus]'
                   and tyyppi  in ('V','W','M')";
         $chkresult4 = pupe_query($query);
+
+        // P‰ivitet‰‰n er‰-/sarjanumerot laskutetuiksi, jotta ne poistuvat varastonarvosta oikein
+        $query = "UPDATE tilausrivi
+                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')
+                  SET tilausrivi.laskutettu = '$kukarow[kuka]',
+                  tilausrivi.laskutettuaika     = now()
+                  WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+                  AND tilausrivi.otunnus        = '$row[tunnus]'
+                  AND tilausrivi.tyyppi         = 'V'
+                  AND tilausrivi.laskutettuaika = '0000-00-00'";
+        $updresult = pupe_query($query);
       }
 
       echo "<br><br><font class='message'>Valmistus korjattu!</font><br>";
@@ -987,7 +1038,12 @@ if (!isset($from_kaikkikorj)) {
 
     $_jarj = $yhtiorow['tilauksen_jarjestys_suunta'];
 
-    //Haetaan valmistettavat valmisteet ja k‰ytett‰v‰t raaka-aineet
+    if (empty($row["Tilaus"]) or empty($valmistettavat)) {
+      echo "<font class='error'>".t("Yht‰‰n valmistettavaa tilausta/tuotetta ei lˆytynyt")."!</font>";
+      exit;
+    }
+
+    // Haetaan valmistettavat valmisteet ja k‰ytett‰v‰t raaka-aineet
     $query = "SELECT tilausrivi.nimitys,
               tilausrivi.tuoteno,
               tilkpl tilattu,
@@ -1074,6 +1130,14 @@ if (!isset($from_kaikkikorj)) {
         <input type='hidden' name='valmistettavat' value='$valmistettavat'>
         <input type='hidden' name='toim'  value='$toim'>";
 
+    $lopetus = $palvelin2;
+    $lopetus .= "tilauskasittely/valmista_tilaus.php";
+    $lopetus .= "////toim=$toim";
+    $lopetus .= "//tee=$tee";
+    $lopetus .= "//tulin=$tulin";
+    $lopetus .= "//valmistettavat=$valmistettavat";
+    $lopetus .= "//otunnus=$row[Tilaus]";
+
     while ($prow = mysql_fetch_assoc($presult)) {
 
       $class = '';
@@ -1114,7 +1178,7 @@ if (!isset($from_kaikkikorj)) {
 
       $sarjavalinta = "";
 
-      if (in_array($prow["sarjanumeroseuranta"], array("S", "T", "U", "V")) and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+      if (in_array($prow["sarjanumeroseuranta"], array("S", "T", "V")) and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
 
         if ($prow["tyyppi"] == "V") {
           $tunken = "myyntirivitunnus";
@@ -1132,7 +1196,7 @@ if (!isset($from_kaikkikorj)) {
         $sarjarow = mysql_fetch_assoc($sarjares);
 
         if ($sarjarow["kpl"] == abs($prow["valmistetaan"]+$prow["valmistettu"]+$prow["valmistettu_valmiiksi"])) {
-          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
+          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' class='green'>".t("S:nro ok")."</font></a>)";
         }
         else {
           $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim'>".t("S:nro")."</a>)";
@@ -1208,7 +1272,7 @@ if (!isset($from_kaikkikorj)) {
               $laskurow["varasto"] == $alkurow["varasto"] or
               ($alkurow["hyllyalue"] == $prow["hyllyalue"] and $alkurow["hyllynro"] == $prow["hyllynro"] and $alkurow["hyllyvali"] == $prow["hyllyvali"] and $alkurow["hyllytaso"] == $prow["hyllytaso"]))) {
 
-            if ($yhtiorow["saldo_kasittely"] == "T") {
+            if (!empty($yhtiorow["saldo_kasittely"])) {
               $saldoaikalisa = date("Y-m-d");
             }
             else {
@@ -1301,7 +1365,7 @@ if (!isset($from_kaikkikorj)) {
         }
 
         if ($sarjarow["kpl"] == abs($era_maara)) {
-          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' style='color:#00FF00;'>".t("E:nro ok")."</font></a>)";
+          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' class='green'>".t("E:nro ok")."</font></a>)";
         }
         else {
           $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim'>".t("E:nro")."</a>)";
@@ -1309,7 +1373,7 @@ if (!isset($from_kaikkikorj)) {
       }
 
       echo "<td class='$class' valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
-      echo "<td class='$class' valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a></td>";
+      echo "<td class='$class' valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$lopetus'>$prow[tuoteno]</a></td>";
       echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";
 
       if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
@@ -1567,7 +1631,7 @@ if (!isset($from_kaikkikorj)) {
       echo "<input type='text' name='etsi'>";
     }
 
-    echo "<input type='Submit' value='".t("Etsi")."'></form>";
+    echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form>";
 
     $haku = "";
     $laskuindex = "tila_index";

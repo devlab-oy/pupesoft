@@ -271,6 +271,7 @@ else {
     if ($ruksit[120] != '')     $ruk120chk         = "CHECKED";
     if ($ruksit[130] != '')     $ruk130chk         = "CHECKED";
     if ($ruksit[140] != '')     $ruk140chk         = "CHECKED";
+    if ($ruksit[150] != '')     $ruk150chk         = "CHECKED";
 
     if ($nimitykset != '')       $nimchk           = "CHECKED";
     if ($mitat != '')        $mitatchk        = "CHECKED";
@@ -478,6 +479,13 @@ else {
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
+      <th>", t("Listaa toimitusehdoittain"), "</th>
+      <td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
+      <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' {$ruk150chk}></td>
+      <td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
+      </tr>
+      <tr>
       <td class='back'><br></td>
       </tr>
       <tr><th valign='top'>", t("Tuotelista"), "<br>(", t("Rajaa näillä tuotteilla"), ")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
@@ -634,6 +642,45 @@ else {
       <td class='back'>", t("(Toimii vain jos listaat laskuittain)"), "</td>
       </tr>";
 
+    if (isset($vertailubu)) {
+      switch ($vertailubu) {
+      case 'asbu':
+        $sel_asbu = 'selected';
+        break;
+      case 'asbuos':
+        $sel_asbuos = 'selected';
+        break;
+      case 'asbury':
+        $sel_asbury = 'selected';
+        break;
+      case 'tubu':
+        $sel_tubu = 'selected';
+        break;
+      case 'mybu':
+        $sel_mybu = 'selected';
+        break;
+      case 'mybuos':
+        $sel_mybuos = 'selected';
+        break;
+      case 'mybury':
+        $sel_mybury = 'selected';
+        break;
+      case 'mabu':
+        $sel_mabu = 'selected';
+        break;
+      }
+    }
+    else {
+      $sel_asbu = '';
+      $sel_asbuos = '';
+      $sel_asbury = '';
+      $sel_tubu = '';
+      $sel_mybu = '';
+      $sel_mybuos = '';
+      $sel_mybury = '';
+      $sel_mabu = '';
+    }
+
     echo "<tr>
     <th>", t("Tavoitevertailu"), "</th>";
     echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
@@ -644,6 +691,7 @@ else {
     echo "<option value='mybu'    {$sel_mybu}>", t("Myyjätavoitteet"), "</option>";
     echo "<option value='mybuos' {$sel_mybuos}>", t("Myyjä-Osastotavoitteet"), "</option>";
     echo "<option value='mybury' {$sel_mybury}>", t("Myyjä-Tuoteryhmätavoitteet"), "</option>";
+    echo "<option value='mabu'   {$sel_mabu}>", t("Maatavoitteet"), "</option>";
     echo "</select></td>
     </tr>";
 
@@ -717,7 +765,7 @@ else {
         $row = mysql_fetch_assoc($result);
 
         // Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
           $query  = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
                      FROM sarjanumeroseuranta
                      LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -968,15 +1016,16 @@ else {
       $query_ale_lisa = generoi_alekentta('M');
 
       // HUOM: ", " (pilkku-space) stringiä käytetään vain sarakkeiden välillä, eli ole tarkkana concatissa ja muissa funkkareissa $select-muuttujassa
-      $select       = "";
-      $query        = "";
-      $group        = "";
-      $order        = "";
-      $gluku        = 0;
-      $varasto_join     = "";
-      $kantaasiakas_join   = "";
-      $maksuehto_join   = "";
+      $select            = "";
+      $query             = "";
+      $group             = "";
+      $order             = "";
+      $gluku             = 0;
+      $varasto_join      = "";
+      $kantaasiakas_join = "";
+      $maksuehto_join    = "";
       $toimtuoteno_join  = "";
+      $maksupvm_join     = "";
 
       // näitä käytetään queryssä
       $sel_osasto = "";
@@ -1096,13 +1145,13 @@ else {
             $select .= "{$ytgfe}{$etuliite}.postino{$ytgft} postino, ";
             $select .= "{$ytgfe}{$etuliite}.postitp{$ytgft} postitp, ";
             $select .= "{$ytgfe}{$etuliite}.maa{$ytgft} maa, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimi), concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimitark), concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite){$ytgft} toim_osoite, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino){$ytgft} toim_postino, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp){$ytgft} toim_postitp, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa){$ytgft} toim_maa, ";
-            $select .= "{$ytgfe}if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm){$ytgft} puhelin, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,concat_ws('<br>',{$etuliite}.toim_nimi),concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,concat_ws('<br>',{$etuliite}.toim_nimitark),concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_osoite,{$etuliite}.osoite){$ytgft} toim_osoite, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_postino,{$etuliite}.postino){$ytgft} toim_postino, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_postitp,{$etuliite}.postitp){$ytgft} toim_postitp, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
+            $select .= "{$ytgfe}if(asiakas.puhelin!='',asiakas.puhelin,asiakas.gsm){$ytgft} puhelin, ";
             $select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
           }
           else {
@@ -1289,6 +1338,8 @@ else {
           $order  .= "lasku.maa,";
           $gluku++;
 
+          $select .= "(select MIN(maat.tunnus) from maat where maat.koodi=lasku.maa) maalista, ";
+
           if ($rajaus[$i] != "") {
             $lisa .= " and lasku.maa='{$rajaus[$i]}' ";
           }
@@ -1469,9 +1520,24 @@ else {
             $lisa .= " and lasku.tunnus IN ({$rajaus[$i]}) ";
           }
 
-          if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
+          if ($laskutuspaiva != "" and strpos($select, "lasku.tapvm laskutuspvm, ") === FALSE) {
+            $select .= "lasku.tapvm laskutuspvm, ";
+          }
         }
         //**  Tilauksittain loppu **//
+
+        //**  Toimitusehdoittain start **//
+        if ($mukaan == "toimitusehdoittain") {
+          $group .= ",lasku.toimitusehto";
+          $select .= "lasku.toimitusehto, ";
+          $order  .= "lasku.toimitusehto,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and lasku.toimitusehto LIKE '%{$rajaus[$i]}%' ";
+          }
+        }
+        //**  Toimitusehdoittain loppu **//
       }
 
       // Näytetään tilausrivin kommentit ja groupataan tilausriveittäin
@@ -1491,8 +1557,18 @@ else {
       }
 
       if ($naytamaksupvm != "") {
-        $group .= ",lasku.mapvm";
-        $select .= "lasku.mapvm maksupvm, ";
+        // Maksupäivämäärä on varmasti tallennettu vain itse laskulle
+        // tilauksia haettaessa täytyy siis käydä katsomassa maksupvm laskulta
+        if ($ajotapa != "lasku") {
+          $maksupvm_join = "LEFT JOIN lasku AS UX ON (UX.yhtio = lasku.yhtio AND UX.laskunro = lasku.laskunro AND UX.tila = 'U')";
+          $group .= ",UX.mapvm";
+          $select .= "UX.mapvm maksupvm, ";
+        }
+        else {
+          $group .= ",lasku.mapvm";
+          $select .= "lasku.mapvm maksupvm, ";
+        }
+
         $gluku++;
         $muutgroups++;
       }
@@ -1737,6 +1813,22 @@ else {
         // siinä tapauksessa ei voi groupata muiden kuin myyjien mukaan
         if ($myyjagroups > 1) {
           echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyvä ryhmittely")."!</font><br>";
+          $tee = '';
+        }
+      }
+
+      if ($vertailubu == "mabu") {
+        // Näytetään maatavoitteet:
+
+        //siinä tapauksessa ei voi groupata muiden kuin maiden mukaan
+        if ($asiakasgroups > 0 or $tuotegroups > 0 or $muutgroups > 0) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyviä ryhmittelyjä ei voida valita kun näytetään maatavoitteet")."!</font><br>";
+          $tee = '';
+        }
+
+        // ei voi groupata muiden kuin maiden tietojen mukaan (paitsi tuoteryhmän mukaan kun valitaan mybury)
+        if ($vertailubu == "mabu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyviä ryhmittelyjä ei voida valita kun näytetään maatavoitteet")."!</font><br>";
           $tee = '';
         }
       }
@@ -2279,6 +2371,7 @@ else {
               {$maksuehto_join}
               {$toimtuoteno_join}
               {$lisa_parametri}
+              {$maksupvm_join}
               WHERE lasku.yhtio in ({$yhtio})
               and lasku.tila in ({$tila})";
 
@@ -2483,12 +2576,17 @@ else {
 
             if (isset($vertailubu) and
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
+              ($vertailubu == "mabu" and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
               (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") or (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") or (isset($row["myyjä"]) and $row["myyjä"] != "")))) {
 
               if ($vertailubu == "tubu") {
                 $budj_taulu = "budjetti_tuote";
                 $bulisa = " and tuoteno  in ({$row['tuotelista']}) ";
+              }
+              elseif ($vertailubu == "mabu") {
+                $budj_taulu = "budjetti_maa";
+                $bulisa = " and maa_id in ({$row['maalista']}) ";
               }
               elseif ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 
@@ -2528,7 +2626,7 @@ else {
                 $bulisa = " and asiakkaan_tunnus in ({$row['asiakaslista']}) ";
 
                 if ($vertailubu == "asbuos" and $tuosagroups > 0) {
-                  $bulisa .= " and osasto = '{$row['osasto']}' ";
+                  $bulisa .= " and osasto = '{$row['tuoteosasto']}' ";
                 }
                 elseif ($vertailubu == "asbuos") {
                   $bulisa .= " and osasto != '' ";
@@ -2676,10 +2774,14 @@ else {
             echo "<table><tr>";
 
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") echo "<th>", t($ken_nimi), "</th>";
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                echo "<th>", t($ken_nimi), "</th>";
+              }
+
               if ($ken_nimi == 'asiakasosasto') {
                 echo "<th>".t('Asiakkaittain')."</th>";
               }
+
               if ($ken_nimi == 'tuoteosasto') {
                 echo "<th>".t('Tuotteittain')."</th>";
               }
@@ -2691,7 +2793,9 @@ else {
           if (isset($worksheet)) {
             $excelsarake=0;
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              }
             }
 
             if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and isset($asiakas_tunnukset_sarja)) {
@@ -2820,8 +2924,8 @@ else {
 
                   if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-                  if (isset($worksheet)) {
-                    $worksheet->write($excelrivi, $excelsarake++, $vsum);
+                  if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
+                    $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
                   }
                 }
 
@@ -3220,7 +3324,7 @@ else {
 
                     if (mysql_num_rows($osre) > 0) {
                       while ($osrow = mysql_fetch_assoc($osre)) {
-                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='Sarjanumero'>{$osrow['sarjanumero']}</a><br>";
                       }
                     }
                   }
@@ -3231,7 +3335,7 @@ else {
                 if ($ken_nimi == "laskunumero") {
                   list($laskalk, $lasklop) = explode(":", $row[$ken_nimi]);
 
-                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='_top'>{$lasklop}</a>";
+                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='Asiakkaantilaukset'>{$lasklop}</a>";
                 }
 
                 // jos kyseessa on varastonarvo
@@ -3251,8 +3355,8 @@ else {
                   $row[$ken_nimi] = $varaston_saldo;
                 }
 
-                if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
-                  if ($ken_lask >= $data_start_index and is_numeric($row[$ken_nimi])) {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                  if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
                     }
@@ -3286,16 +3390,16 @@ else {
                         echo "<td>";
 
                         if ($serialisoitavat_muuttujat["ruksit"][$ken_nimi] != '' and
-                            $asiakasosasto_temp != "" and
-                            $ruksit["asiakasryhma"] != "") {
-                            $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
+                          $asiakasosasto_temp != "" and
+                          $ruksit["asiakasryhma"] != "") {
+                          $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
 
-                            if ($mul_asiakasryhma["asiakasryhmä"] != "") {
-                              unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
-                            }
-                            else {
-                              $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
-                            }
+                          if ($mul_asiakasryhma["asiakasryhmä"] != "") {
+                            unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+                          }
+                          else {
+                            $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
+                          }
                         }
                         elseif ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
                           unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
@@ -3361,7 +3465,7 @@ else {
               $ken_lask = 0;
 
               foreach ($row as $ken_nimi => $kentta) {
-                if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
                   if ($ken_lask < $data_start_index) {
                     $valisummat[$ken_nimi] = "";
                     $totsummat[$ken_nimi]  = "";
@@ -3370,7 +3474,7 @@ else {
                       $valisummat['asiakkaittain'] = "";
                       $totsummat['asiakkaittain']  = "";
                     }
-                    else if ($ken_nimi == 'tuoteosasto') {
+                    elseif ($ken_nimi == 'tuoteosasto') {
                       $valisummat['tuotteittain'] = "";
                       $totsummat['tuotteittain']  = "";
                     }
@@ -3454,8 +3558,8 @@ else {
 
               if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-              if (isset($worksheet)) {
-                $worksheet->write($excelrivi, $excelsarake++, $vsum);
+              if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
+                $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
               }
             }
 
@@ -3509,7 +3613,7 @@ else {
 
             if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
-            if (isset($worksheet)) {
+            if (isset($worksheet) and $vnim != "asiakkaittain" and $vnim != "tuotteittain") {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
             }
           }

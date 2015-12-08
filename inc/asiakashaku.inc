@@ -77,7 +77,10 @@ if ($kukarow["piirit"] != "") {
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
   // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
-  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi
+  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi,
+             if(asiakas.gsm != '', asiakas.gsm,
+               if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                 if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
              FROM asiakas
              JOIN yhtio on asiakas.yhtio=yhtio.yhtio
              WHERE asiakas.$konsyhtiot
@@ -93,11 +96,16 @@ elseif ($ytunnus != '') {
 
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi
+               concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi,
+               if(asiakas.gsm != '', asiakas.gsm,
+                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku
                JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                 AND asiakas.tunnus = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tunnus = '$ytunnus'";
+               and lasku.tunnus     = '$ytunnus'";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
   }
@@ -111,11 +119,16 @@ elseif ($ytunnus != '') {
     // kokeillaan ihan asiakkaan nimellä laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
                lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
+               concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi,
+                if(asiakas.gsm != '', asiakas.gsm,
+                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM lasku use index (asiakasnimi)
-               JOIN yhtio on lasku.yhtio=yhtio.yhtio
+               JOIN yhtio on lasku.yhtio = yhtio.yhtio
+               JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus  = lasku.liitostunnus)
                WHERE lasku.$konsyhtiot
-               and lasku.tila != 'D'
+               and lasku.tila      != 'D'
                and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)
                GROUP BY 1,2,3,4,5,6,7,8,9,10
                ORDER BY 1";
@@ -190,6 +203,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ytunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -198,6 +212,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakas.asiakasnro             = '$ytunnus'
                 and asiakas.asiakasnro             not in ('0','')
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -206,6 +221,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ovttunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -214,6 +230,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakas.toim_ovttunnus         = '$ytunnus'
                 and asiakas.toim_ovttunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '5' osuma
@@ -223,6 +240,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakkaan_avainsanat.avainsana = '$ytunnus'
                 and asiakkaan_avainsanat.avainsana!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 ORDER BY nimi";
     $result = pupe_query($query);
@@ -488,6 +506,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
       echo "<input type='hidden' name='var' value='$var'>";
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       $query = "SELECT *
                 FROM yhtion_toimipaikat
@@ -624,6 +643,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='lasku_yhtio'    value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
       echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       if (isset($yhtiotoimipaikka)) echo "<input type='hidden' name='yhtiotoimipaikka'  value='{$yhtiotoimipaikka}' />";
       if (isset($tilaustyyppi)) echo "<input type='hidden' name='tilaustyyppi'  value='{$tilaustyyppi}' />";
@@ -700,6 +720,7 @@ if ($monta != 1) {
       echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
       echo "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       echo "<input type='hidden' name='tilaustyyppi'     value='{$tilaustyyppi}' />";
+      echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
       if (is_array($varastosta)) {
         foreach ($varastosta as $varatunnu) {
@@ -772,6 +793,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
     echo "<input type='hidden' name='var' value='$var'>";
     echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
+    echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
     echo "<input type='submit' value='".t("Hae kaikista toimipaikoista")."'>";
     echo "</form>";
   }
@@ -797,6 +819,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='myyjanro'         value='$myyjanro'>";
     echo "<input type='hidden' name='tuoteno'          value='$tuoteno'>";
     echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
+    echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 
     if (is_array($varastosta)) {
       foreach ($varastosta as $varatunnu) {

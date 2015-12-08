@@ -310,13 +310,13 @@ if ($lisa_viestit != "") {
 }
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $comments);
-$viestit        = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $viestit);
-$sisviestit1      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit1);
-$sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $sisviestit2);
-$tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-$asiakkaan_tilausnumero  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-$kohde          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@", "/")."\r\n]/", "", $kohde);
+$comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $comments);
+$viestit        = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
+$sisviestit1      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit1);
+$sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit2);
+$tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $tilausyhteyshenkilo);
+$asiakkaan_tilausnumero  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
+$kohde          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $kohde);
 
 $fields = "yhtio";
 $values = "'$kukarow[yhtio]'";
@@ -502,7 +502,7 @@ else {
 }
 
 // jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
-if (count($montakotilausta) > 1 and $laskutyyppi != 1) {
+if (count($montakotilausta) > 1 and $laskutyyppi != 1 and $laskutyyppi != 6) {
 
   if ($yhtiorow["laskun_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
   else $pjat_sortlisa = "";

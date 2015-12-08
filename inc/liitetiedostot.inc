@@ -7,7 +7,7 @@ $otsikko_nappi   = "liite";
 $kentat = "tunnus, filetype liitedata, concat('<a href=\'view.php?id=', tunnus,'\' target=\'Attachment\'>','".t("Näytä liite")."','</a>') liite, selite, filename nimi, filesize koko, kieli, (SELECT selitetark from avainsana where avainsana.yhtio=liitetiedostot.yhtio and avainsana.laji like '%litety' and avainsana.selite=liitetiedostot.kayttotarkoitus LIMIT 1) Tyyppi, liitos liitos_hidden, liitostunnus liitostunnus_hidden";
 $hakukentat = "tunnus, filetype, filetype, selite, filesize, kieli, kayttotarkoitus, liitos, liitostunnus";
 
-$jarjestys  = "liitos, liitostunnus, jarjestys, tunnus";
+$jarjestys = "liitos, liitostunnus, jarjestys, tunnus";
 
 //  Oletuksena emme salli mitään!
 $uusilukko   = "ON";
@@ -18,7 +18,7 @@ if ($lukitse_laji == "") {
   $rajauslisa = " and liitetiedostot.tunnus = -1 ";
 }
 
-if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana" or $lukitse_laji == 'toimi') and $lukitse_avaimeen > 0) {
+if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $lukitse_laji == 'asiakas' or $lukitse_laji == "avainsana" or $lukitse_laji == 'toimi' or $lukitse_laji == 'sarjanumeroseuranta') and $lukitse_avaimeen > 0) {
   $uusilukko = "";
   $poistolukko   = "";
 }

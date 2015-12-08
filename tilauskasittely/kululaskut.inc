@@ -576,6 +576,9 @@ if ($silent == "") {
     elseif ($hakutapa == "V") {
       $sel3 = "SELECTED";
     }
+    elseif ($hakutapa == "L") {
+      $sel4 = "SELECTED";
+    }
 
     echo "<br><table>";
     echo "<tr>";
@@ -596,9 +599,10 @@ if ($silent == "") {
     echo "<option value='S' $sel1>".t("verollisella summalla")."</option>";
     echo "<option value='N' $sel2>".t("nimell‰")."</option>";
     echo "<option value='V' $sel3>".t("viitteell‰")."</option>";
+    echo "<option value='L' $sel4>".t("laskunumerolla")."</option>";
     echo "</SELECT></th>";
     echo "<td><input type='text' name='haku' value='$haku'></td>";
-    echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     if ($listaustapa == "liittamattomat") {
@@ -626,7 +630,7 @@ if ($silent == "") {
     echo "<option value='liitetyt' $sel2>".t("N‰yt‰ vain liitetyt")."</option>";
     echo "</select></th>";
     echo "<td>&nbsp;</td>";
-    echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {
@@ -712,6 +716,10 @@ if ($silent == "") {
     if ($hakutapa == "N") $lisa = " and lasku.nimi like '%$haku%'";
     if ($hakutapa == "V") $lisa = " and lasku.viite = '$haku'";
 
+    if ($hakutapa == "L") {
+      $lisa = " AND lasku.laskunro = '$haku'";
+    }
+
     //    if ($hakutapa == "" or $hakutapa != "N") {
     //      $lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
     //    }
@@ -785,6 +793,7 @@ if ($silent == "") {
           <th>".t("Summa")."</th>
           <th>".t("Veroton")."</th>
           <th>".t("Valuutta")."</th>
+          <th>".t("Laskunumero")."</th>
           <th>".t("Viite")."</th>
           <th>".t("Kuva")."</th>
           <th>".t("Vienti")."</th>
@@ -903,6 +912,7 @@ if ($silent == "") {
             <td align='right' valign='top' NOWRAP>".sprintf('%.2f', $verosumma)."</td>
             <td align='right' valign='top' NOWRAP>".sprintf('%.2f', $verotonsumma)."</td>
             <td valign='top'>$llrow[valkoodi]</td>
+            <td valign='top'>$llrow[laskunro]</td>
             <td valign='top'>$llrow[viite]</td>";
 
         // tehd‰‰n lasku linkki

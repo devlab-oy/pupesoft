@@ -1,4 +1,9 @@
 <?php
+
+require '../inc/cookie_functions.inc';
+
+handle_cookie("toimittamattomat", "find_submit");
+
 require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
@@ -28,7 +33,7 @@ if ($tapa == "tuonti" and $tee != "") {
     $ultilno = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
     $query = "UPDATE lasku
-              SET maa_maara            = '$maa_maara',
+              SET maa_maara                    = '$maa_maara',
               maa_lahetys                      = '$maa_lahetys',
               kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
               kuljetusmuoto                    = '$kuljetusmuoto',
@@ -40,6 +45,8 @@ if ($tapa == "tuonti" and $tee != "") {
               aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
               poistumistoimipaikka             = '$poistumistoimipaikka',
               poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
+              aiotut_rajatoimipaikat           = '$aiotut_rajatoimipaikat',
+              maaratoimipaikka                 = '$maaratoimipaikka',
               bruttopaino                      = '$bruttopaino',
               lisattava_era                    = '$lisattava_era',
               vahennettava_era                 = '$vahennettava_era',
@@ -253,7 +260,7 @@ elseif ($tee != "") {
       $ultilno = tarvitaanko_intrastat($varaston_row["maa"], $maa_maara);
 
       $query = "UPDATE lasku
-                SET maa_maara           = '$maa_maara',
+                SET maa_maara                  = '$maa_maara',
                 maa_lahetys                    = '$varaston_row[maa]',
                 kauppatapahtuman_luonne        = '$kauppatapahtuman_luonne',
                 kuljetusmuoto                  = '$kuljetusmuoto',
@@ -265,6 +272,8 @@ elseif ($tee != "") {
                 aktiivinen_kuljetus_kansallisuus= '$aktiivinen_kuljetus_kansallisuus',
                 poistumistoimipaikka           = '$poistumistoimipaikka',
                 poistumistoimipaikka_koodi     = '$poistumistoimipaikka_koodi',
+                aiotut_rajatoimipaikat         = '$aiotut_rajatoimipaikat',
+                maaratoimipaikka               = '$maaratoimipaikka',
                 bruttopaino                    = '$bruttopaino',
                 lisattava_era                  = '$lisattava_era',
                 vahennettava_era               = '$vahennettava_era',
@@ -551,13 +560,49 @@ elseif ($tee != "") {
     echo "<td><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]' style='width:300px;'></td>";
     echo "</tr>";
 
-    if ($laskurow["vienti"] == "K") {
-      echo "<tr>";
-      echo "<th>44.</th>";
-      echo "<th>".t("Lisätiedot")."</th>";
-      echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
-      echo "</tr>";
+    echo "<tr>";
+    echo "<th>44.</th>";
+    echo "<th>".t("Lisätiedot")."</th>";
+    echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>51.</th>";
+    echo "<th>" . t("Aiotut rajatoimipaikat (ja maat)") . "</th>";
+    echo "<td>";
+    echo "<select name='aiotut_rajatoimipaikat' style='width:300px;'>";
+    echo "<option>" . t("Ei valittu") . "</option>";
+
+    $aiotut_rajatoimipaikat = t_avainsana("RAJATOIMIPAIKAT");
+
+    while ($rajatoimipaikka = mysql_fetch_assoc($aiotut_rajatoimipaikat)) {
+      $sel = $rajatoimipaikka["selite"] == $laskurow["aiotut_rajatoimipaikat"] ? " selected" : "";
+
+      echo "<option{$sel} value='{$rajatoimipaikka["selite"]}'>{$rajatoimipaikka["selitetark"]}</option>";
     }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th>53.</th>";
+    echo "<th>" . t("Määrätoimipaikka (ja maa)") . "</th>";
+    echo "<td>";
+    echo "<select name='maaratoimipaikka' style='width:300px;'>";
+    echo "<option>" . t("Ei valittu") . "</option>";
+
+    $maaratoimipaikat = t_avainsana("MAARATOIMPAIKKA");
+
+    while ($maaratoimipaikka = mysql_fetch_assoc($maaratoimipaikat)) {
+      $sel = $maaratoimipaikka["selite"] == $laskurow["maaratoimipaikka"] ? " selected" : "";
+
+      echo "<option{$sel} value='{$maaratoimipaikka["selite"]}'>{$maaratoimipaikka["selitetark"]}</option>";
+    }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
 
     echo "</table>";
     echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";
@@ -608,7 +653,7 @@ if ($tee == '' and $toim == "MUOKKAA") {
   echo "</td>";
   echo "</tr>";
   echo "</table>";
-  echo "<br><input type='Submit' value='".t("Etsi")."'>";
+  echo "<br><input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form><br><br>";
 
   if (trim($etsi) != "") {
@@ -687,19 +732,41 @@ elseif ($tee == '') {
   // tehdään etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<th><label for='etsi'>" . t("Etsi tilausta (asiakkaan nimellä / tilausnumerolla)") . ":</label></th>";
+  echo "<td><input type='text' name='etsi' id='etsi'></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<th><label for='toimittamattomat'>" . t("Näytä myös toimittamattomat / keskeneräiset tilaukset") . "</label></th>";
+
+  $checked = isset($toimittamattomat) && $toimittamattomat == 1 ? " checked" : "";
+
+  echo "<td><input type='checkbox' name='toimittamattomat' id='toimittamattomat' value='1' {$checked}/></td>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='" . t("Etsi") . "' name='find_submit'></td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</form>";
 
   $haku='';
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+
+  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
+  }
+  else {
+    $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";
+  }
 
   //listataan laskuttamattomat tilausket
   $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
             maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
-            and tila    = 'L'
-            and alatila in ('B','D','E')
+            {$tilaehto}
             AND vienti  in ('K','E')
             $haku
             ORDER by 5,6,7,8,9,10,11,12,13,14";

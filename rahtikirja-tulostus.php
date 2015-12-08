@@ -56,10 +56,13 @@ if ($tee == 'tulosta') {
   }
 }
 
+$_onko_unifaun = ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
+$_onko_unifaun = ($_onko_unifaun or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
-  if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+  if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin != 'koonti_eratulostus_pakkaustiedot' and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka)) {
 
     $linkkilisa = '';
 
@@ -134,7 +137,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
   elseif ($avainrow["selitetark_2"] == "3") {
     $kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
   }
-  elseif ($toitarow['tulostustapa'] == 'H') {
+  elseif ($toitarow['tulostustapa'] == 'H' or $unifaun_era_vainkollitarra) {
     $kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
   }
   elseif (strpos($toitarow['rahtikirja'], 'pdf') === false) {
@@ -321,6 +324,10 @@ if ($tee == 'close_with_printer') {
     $res   = pupe_query($query);
   }
 
+  if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
+    require "tilauskasittely/rahtikirja_erittely_pdf.inc";
+  }
+
   require_once "inc/unifaun_send.inc";
 
   $query = "SELECT unifaun_nimi
@@ -364,7 +371,9 @@ if ($tee == 'tulosta') {
   }
 
   // haetaan kaikki distinct rahtikirjat..
-  $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+  $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark,
+            lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+            lasku.toim_puh,
             lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
             asiakas.toimitusvahvistus,
@@ -592,9 +601,24 @@ if ($tee == 'tulosta') {
         $groupby_lisa = "";
       }
 
+      if (strpos($toitarow["rahtikirja"], "unifaun") !== FALSE) {
+        $query = "SELECT min(rahtikirjanro) rahtikirjanro
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  IN ({$tunnukset})";
+        $rahtikirjanrores = pupe_query($query);
+        $rahtikirjanrorow = mysql_fetch_assoc($rahtikirjanrores);
+        $rahtikirjanro = $rahtikirjanrorow['rahtikirjanro'];
+      }
+
       $pakkaustieto_tunnukset = '';
 
-      if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+      $_tulostustapa = ($toitarow['tulostustapa'] == 'L');
+      $_paktiedot = ($toitarow['uudet_pakkaustiedot'] == 'K');
+      $_paktiedot = ($_paktiedot and $tultiin == 'koonti_eratulostus_pakkaustiedot');
+      $_paktiedot = ($_paktiedot and trim($pakkaustieto_rahtikirjanro) != '');
+
+      if ($_tulostustapa and $_paktiedot) {
         $query = "SELECT group_concat(tunnus) pakkaustieto_tunnukset
                   FROM rahtikirjat
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -650,7 +674,7 @@ if ($tee == 'tulosta') {
 
       $tulostuskpl = $kollityht;
 
-      if ($toitarow['tulostustapa'] == 'L' and $toitarow['uudet_pakkaustiedot'] == 'K' and $tultiin == 'koonti_eratulostus_pakkaustiedot' and trim($pakkaustieto_rahtikirjanro) != '') {
+      if ($_tulostustapa and $_paktiedot) {
         // merkataan rahtikirjat tulostetuksi..
         if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
           $query = "UPDATE rahtikirjat
@@ -659,6 +683,11 @@ if ($tee == 'tulosta') {
                     AND yhtio      = '$kukarow[yhtio]'
                     AND tulostettu = '0000-00-00 00:00:00'";
           $ures  = pupe_query($query);
+
+          if ($_onko_unifaun) {
+            require_once "inc/unifaun_send.inc";
+            @include "tilauskasittely/$toitarow[rahtikirja]";
+          }
         }
 
         // käytetään tästä alaspäin vanhoja tunnuksia
@@ -851,7 +880,7 @@ if ($tee == 'tulosta') {
       if (!isset($tee_varsinainen_tulostus) or (isset($tee_varsinainen_tulostus) and $tee_varsinainen_tulostus)) {
 
         // tulostetaan toimitustavan määrittelemä rahtikirja
-        if (@include "tilauskasittely/$toitarow[rahtikirja]") {
+        if (($_onko_unifaun and $_tulostustapa and $_paktiedot) or @include "tilauskasittely/$toitarow[rahtikirja]") {
 
           // Otetaan talteen tässä $rahtikirjanro talteen
           $rahtikirjanro_alkuperainen = $rahtikirjanro;
@@ -860,7 +889,7 @@ if ($tee == 'tulosta') {
             require "tilauskasittely/rahtikirja_pdf.inc";
           }
 
-          if ($toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
+          if (!$unifaun_era_vainkollitarra and $toitarow['erittely'] == 'k' and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
             require "tilauskasittely/rahtikirja_erittely_pdf.inc";
           }
 
@@ -889,7 +918,9 @@ if ($tee == 'tulosta') {
         }
       }
 
-      if ($rakir_row['toimitusvahvistus'] != '') {
+      $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
+
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
 
         if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
           $desadv_version = "una";
@@ -933,7 +964,7 @@ if ($tee == 'tulosta') {
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-      if ($_magento_kaytossa) {
+      if ($_magento_kaytossa and !$_onko_unifaun) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -1102,7 +1133,10 @@ if ($tee == 'tulosta') {
       $tee = "SKIPPAA";
     }
     elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
-      if ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+      if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
+        $tee = '';
+      }
+      elseif ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
         $tee = 'XXX';
       }
       else {
@@ -1258,7 +1292,7 @@ if ($tee == '') {
 
     echo "<table><tr><th valign='top'>", t("Etsi numerolla"), ":</th>";
     echo "<form method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
-    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='", t("Etsi"), "'>&nbsp;<input type='submit' id='resetti' name='resetti' value='", t("Tyhjennä"), "'></td>";
+    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' class='hae_btn' value = '".t("Etsi")."'>&nbsp;<input type='submit' id='resetti' name='resetti' value='", t("Tyhjennä"), "'></td>";
     echo "</form>";
     echo "</tr>";
 
@@ -1337,8 +1371,15 @@ if ($tee == '') {
 
     mysql_data_seek($kires, 0);
 
+    $sel_tulostin = "";
+
+    if (!empty($kukarow['rahtikirjatulostin'])) {
+      $sel_tulostin = $kukarow['rahtikirjatulostin'];
+    }
+
     while ($kirow = mysql_fetch_assoc($kires)) {
-      echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+      $selected = $sel_tulostin == $kirow['tunnus'] ? "selected" : "";
+      echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]' {$selected}>$kirow[kirjoitin]</option>";
     }
 
     echo "</select></td></tr>";
@@ -1408,7 +1449,7 @@ if ($tee == '') {
 
     echo "</tr><tr>";
     echo "<td valign='top' class='$class' id='sel_td'><div id='sel_rahtikirjat' $nayta_div>";
-    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>", t("Etsi numerolla"), ": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='", t("Etsi"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='", t("Näytä kaikki"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
+    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>", t("Etsi numerolla"), ": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' class='hae_btn' value = '".t("Etsi")."' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='", t("Näytä kaikki"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
 
     mysql_data_seek($result, 0);
 

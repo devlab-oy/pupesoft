@@ -23,12 +23,14 @@ if (@include "inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+ini_set("memory_limit", "2G");
+
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
+$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>DYNAAMINEN_TUOTE");
 
 if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
   require "tilauskasittely/monivalintalaatikot.inc";

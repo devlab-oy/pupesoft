@@ -61,9 +61,14 @@ if [ ! -d ${BACKUPDIR} ]; then
   exit
 fi
 
-TMPBACKUPDIR="/tmp/pupe_backup"
+# Jos /home:n alta löytyy tmp-kansio, niin käytetään sitä
+if [ -d "/home/tmp" ]; then
+  TMPBACKUPDIR="/home/tmp/pupe_backup"
+else
+  TMPBACKUPDIR="/tmp/pupe_backup"
+fi
 
-# Jos temppikansio löytyy, nin dellataan
+# Jos temppikansio löytyy, niin dellataan
 if [ -d ${TMPBACKUPDIR} ]; then
   rm -rf ${TMPBACKUPDIR}
 fi
@@ -190,82 +195,6 @@ if $MYSQLBACKUP; then
 
       # Siirretään pakattu backuppi backupkansioon
       mv -f ${TMPBACKUPDIR}/${FILENAME} ${BACKUPDIR}/${FILENAME}
-
-      # Tämän backupin binlog-info
-      binlog_new_log=$(< ${TMPBACKUPDIR}/backup-binlog.info)
-
-      # Tuorein binlog-info mikä meillä on tallella
-      tmp_filename=`ls ${BACKUPDIR}/backup-binlog* | sort -r | head -1`
-      binlog_last_log=$(< ${tmp_filename})
-
-      # Tehtävän binlog backupin nimi
-      binlog_backup="${DBKANTA}-binlog-${FILEDATE}.sql.bz2"
-
-      # Regex, jolla löydetään filenimi ja filepositio
-      binlog_regex="(mysql-bin\.[0-9]+).([0-9]+)"
-
-      # Kaivetaan tämän backupin binlog ja logipositio info-filestä
-      if [[ ${binlog_new_log} =~ ${binlog_regex} ]]; then
-        binlog_new_file=${BASH_REMATCH[1]}
-        binlog_new_position=${BASH_REMATCH[2]}
-      fi
-
-      # Kaivetaan edellisen backupin binlog ja logipositio info-filestä
-      if [[ ${binlog_last_log} =~ ${binlog_regex} ]]; then
-        binlog_last_file=${BASH_REMATCH[1]}
-        binlog_last_position=${BASH_REMATCH[2]}
-      fi
-
-      # Jos löydettiin kaikki muuttujat
-      if [[ ! -z ${binlog_new_file} && ! -z ${binlog_new_position} && ! -z ${binlog_last_file} && ! -z ${binlog_last_position} ]]; then
-
-        # Siirrytään MySQL hakemistoon
-        cd ${MYSQLPOLKU}
-
-        # Katsotaan kaikki binlog filet edellisen ja tämän backupin välistä
-        binlog_perl="print if (/^${binlog_last_file}\b/ .. /^${binlog_new_file}\b/)"
-        binlog_all=`ls mysql-bin.* | sort | perl -ne "${binlog_perl}" | perl -ne 'chomp and print "$_ "'`
-
-        # Jos löydettiin binlogifilet
-        if [[ ! -z ${binlog_all} ]]; then
-
-          # Tehdään binlogeista SQL-lausekkeita ja pakataan ne zippiin
-          mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${TMPBACKUPDIR}/${binlog_backup}
-
-          # Jos mysqlbinlogin teko onnistui
-          if [[ $? -eq 0 ]]; then
-            # Kopsataan tämän backupin logipositio paikalleen, että tiedetään ottaa tästä eteenpäin seuraavalla kerralla
-            mv -f ${TMPBACKUPDIR}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
-
-            echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-            echo ": Binlog bzip2 done."
-
-            # Salataan tiedosto
-            if [ ! -z "${SALAUSAVAIN}" ]; then
-              encrypt_file "${SALAUSAVAIN}" "${TMPBACKUPDIR}/${binlog_backup}"
-
-              if [[ ${ENCRYPT_EXIT} -eq 0 ]]; then
-                binlog_backup="${binlog_backup}.nc"
-              fi
-            fi
-
-            # Kopsataan tämän backupin logipositio paikalleen
-            mv -f ${TMPBACKUPDIR}/${binlog_backup} ${BACKUPDIR}/${binlog_backup}
-
-          else
-            # Jos pakkaus epäonnistui! Poistetaan rikkinäinen tiedosto.
-            rm -f ${TMPBACKUPDIR}/${binlog_backup}
-            echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-            echo ": Binlog bzip2 FAILED!"
-          fi
-        else
-          echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-          echo ": No binlogs found!"
-        fi
-      else
-        echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-        echo ": Binlog info not found!"
-      fi
     else
       # Jos pakkaus epäonnistui! Poistetaan rikkinäinen tiedosto.
       rm -f ${TMPBACKUPDIR}/${FILENAME}
@@ -417,7 +346,6 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
     # Siirretään tämä
     if $MYSQLBACKUP; then
       cp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTELOCALDIR}
-      cp ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}* ${REMOTELOCALDIR}
     fi
 
     cp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTELOCALDIR}
@@ -426,17 +354,30 @@ if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SAMBA" ]; then
   fi
 fi
 
-#Pidetäänkö kaikki backupit eri serverillä
+# Pidetäänkö kaikki backupit eri serverillä
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "SSH" ]; then
-  # Siirretään failit remoteserverille
-  if $MYSQLBACKUP; then
-    scp ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  REMOTESKEY=""
+
+  # Onko käyttäjätunnuksen mukana annettu ssh-avain?
+  # Muodossa "/home/kala/.ssh/id_rsa kayttajatunnus"
+  echo ${REMOTEUSER} | grep " " > /dev/null
+
+  if [[ $? = 0 ]]; then
+    KEYUSR=(${REMOTEUSER})
+
+    REMOTESKEY="-i ${KEYUSR[0]}"
+    REMOTEUSER=${KEYUSR[1]}
   fi
 
-  scp ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  # Siirretään failit remoteserverille
+  if $MYSQLBACKUP; then
+    scp ${REMOTESKEY} ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
+  fi
+
+  scp ${REMOTESKEY} ${BACKUPDIR}/linux-backup-${FILEDATE}* ${REMOTEUSER}@${REMOTEHOST}:${REMOTEREMDIR}
 
   # Siivotaan vanhat backupit pois remoteserveriltä
-  ssh ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -type f -mtime +${BACKUPPAIVAT} -delete";
+  ssh ${REMOTESKEY} ${REMOTEUSER}@${REMOTEHOST} "find ${REMOTEREMDIR} -type f -mtime +${BACKUPPAIVAT} -delete";
 
   # Pidetään master serverillä vain uusin backuppi
   BACKUPPAIVAT=1
@@ -445,7 +386,7 @@ fi
 #Siirretäänkö tuorein backuppi myös ftp-serverille jos sellainen on konffattu
 if [ ! -z "${EXTRABACKUP}" -a "${EXTRABACKUP}" == "FTP" ]; then
   if $MYSQLBACKUP; then
-    ncftpput -u ${REMOTEUSER} -p ${REMOTEPASS} ${REMOTEHOST} ${REMOTEREMDIR} ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}* ${BACKUPDIR}/${DBKANTA}-binlog-${FILEDATE}*
+    ncftpput -u ${REMOTEUSER} -p ${REMOTEPASS} ${REMOTEHOST} ${REMOTEREMDIR} ${BACKUPDIR}/${DBKANTA}-backup-${FILEDATE}*
   fi
 
   ncftpput -u ${REMOTEUSER} -p ${REMOTEPASS} ${REMOTEHOST} ${REMOTEREMDIR} ${BACKUPDIR}/linux-backup-${FILEDATE}*

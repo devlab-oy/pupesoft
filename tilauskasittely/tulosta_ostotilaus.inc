@@ -575,11 +575,11 @@ else {
       }
 
       $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(454, 55, $uytunnus, $thispage, $pieni);
+      $pdf->draw_text(479, 55, $uytunnus, $thispage, $pieni);
       $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(454, 45, $yhtiorow["kotipaikka"], $thispage, $pieni);
+      $pdf->draw_text(479, 45, $yhtiorow["kotipaikka"], $thispage, $pieni);
       $pdf->draw_text(404, 35,  t("Pankkiyhteys", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(454, 35,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"], $thispage, $pieni);
+      $pdf->draw_text(479, 35,  $yhtiorow["pankkinimi1"], $thispage, $pieni);
       $pdf->draw_text(404, 25, $yhtiorow["pankkiiban1"]." / ".$yhtiorow["pankkiswift1"], $thispage, $pieni);
 
       if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
@@ -630,7 +630,7 @@ else {
         fclose($fh);
 
         // itse print komento...
-        if ($komento["Ostotilaus"] == 'email') {
+        if ($komento["Ostotilaus"] == 'email' or substr($komento["Ostotilaus"], 0, 15) == 'toimittajaemail') {
           $liite = $pdffilenimi;
           $kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
 

@@ -52,7 +52,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='N' $chkn>".t("N-Nettohinta Myyntihinta")."</option>";
   $ulos .= "<option value='E' $chke>".t("E-Nettohinta Myyntihinta")."</option>";
   $ulos .= "<option value='O' $chko>".t("Ostohinta")."</option>";
-  $ulos .= "<option value='K' $chkk>".t("Informatiivinen selainhinta")."</option>";
+  $ulos .= "<option value='K' $chkk>".t("Informatiivinen hinta")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }

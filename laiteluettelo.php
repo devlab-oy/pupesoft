@@ -4,51 +4,51 @@ if (isset($_COOKIE['laiteluettelo_keksi'])) $valitut_sarakkeet = unserialize(url
 
 if (isset($_POST['piirtele_laiteluettelo'])) {
 
-  // Piirrell√§√§n laiteluettelo-valikko
+  // Piirrell‰‰n laiteluettelo-valikko
   echo "<br><br>";
 
-  // M√§√§ritell√§√§n jostain halutut kent√§t
-  $kiissit = array(
-    // Sopimuskohtaiset -pit√§isik√∂ erotella valikossa jotenkin?
-    "asiakastiedot",
-    "sopimus_lisatietoja",
-    "sopimus_lisatietoja2",
-    // Laite- ja palvelu(tilausrivi)kohtaiset
-    "laitteen_tunnus",
-    "sarjanro",
-    "tuoteno",
-    "tuotemerkki",
-    "valmistaja",
-    "sla",
-    "nimitys",
-    "palvelu_alkaa",
-    "palvelu_loppuu",
-    "hinta",
-    "palvelukohtainen_hinta",
-    "valmistajan_sopimusnumero",
-    "valmistajan_sopimus_paattymispaiva",
-  );
+  $ruksattavat_kentat = array();
+
+  // Haetaan avainsanoista laiteluettelon laitekohtaiset palveluhinnat
+  // sek‰ sopimuskohtaiset lis‰tyˆt hardcoded selitteell‰ "NAYTATYOT"
+  $res = t_avainsana("SOP_LAITLUET");
+  $lisatuotenumerot = '';
+
+  while ($avainsanarivi = mysql_fetch_assoc($res)) {
+    $ruksattavat_kentat[$avainsanarivi['selite']] = $avainsanarivi['selitetark'];
+    // Tallennetaan myˆs selectilisa
+    $lisatuotenumerot .= "'".$avainsanarivi['selite']."',";
+  }
+
+  $lisatuotenumerot = rtrim($lisatuotenumerot, ',');
+  $lisatuotenumerot = base64_encode($lisatuotenumerot);
 
   echo "<form name='aja_ja_tallenna' method='post'>";
-  echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
-  echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
+  echo "<table width='600'>";
+  echo "<tr><th>".t("Valitse laitekohtaiset sarakkeet")."</th></tr>";
 
   $secretcounter = 0;
   $eka_ajo = true;
 
-  foreach ($kiissit as $i => $selite) {
+  foreach ($ruksattavat_kentat as $key => $selite) {
+
     $nollaus = false;
     if ($secretcounter == 0) echo "<tr>";
     $tsekk = "";
 
     foreach ($valitut_sarakkeet as $osuma) {
-      if ($osuma == $selite) {
+      if ($osuma == $key) {
         $tsekk = "CHECKED";
         break;
       }
     }
 
-    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$selite}' $tsekk>{$selite}</td>";
+    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$key}' $tsekk>{$selite}";
+    if ($key == "NAYTATYOT") {
+      echo "<br><textarea rows='5' cols='40' maxlength='1000' name='hintahopinat' placeholder='".t("Vapaa teksti")."'>";
+      echo "</textarea>";
+    }
+    echo "</td>";
 
     if ($secretcounter == 2) {
       echo "</tr>";
@@ -69,6 +69,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
         <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
         <input type='hidden' name='toim' value='$toim'>
         <input type='hidden' name='naantali' value='EIENAA'>
+        <input type='hidden' name='lisatuotenumerot' value='$lisatuotenumerot'>
         <input type='submit' name='aja_ja_tallenna' value='".t("Valmis")."'>
         </td>
       </tr>";
@@ -76,8 +77,8 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   echo "</form>";
 }
 elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
-  // t√§√§ll√§ ajellaan rapsa ja tallennetaan henkseliin
-
+  // t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
+  $lisatuotenumerot = base64_decode($lisatuotenumerot);
   include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
@@ -85,126 +86,182 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $excelrivi    = 0;
   $excelsarake = 0;
 
-  $sopimuskohtaiset = array(
-    "asiakastiedot",
-    "sopimus_lisatietoja",
-    "sopimus_lisatietoja2"
-  );
-  // Haetaan sopimuskent√§t, tilausrivien(palveluiden) ja valittavat laitetiedot
+  // Haetaan sopimuksen laitteet
+  $query = "SELECT DISTINCT laitteen_sopimukset.laitteen_tunnus laitetunnus
+            FROM laitteen_sopimukset
+            JOIN lasku ON lasku.yhtio = laitteen_sopimukset.yhtio
+              AND lasku.tunnus
+            WHERE lasku.tunnus = '{$tilausnumero}'
+              AND lasku.yhtio  = '{$kukarow['yhtio']}'";
+  $laiteresult = pupe_query($query);
+
+  $query_ale_lisa = generoi_alekentta('M');
+
+  // Haetaan sopimuskohtaiset tiedot
   $query = "SELECT
             lasku.tunnus,
-            concat(lasku.toim_nimi,'\n',
-            lasku.toim_osoite,'\n',
-            lasku.toim_postitp) asiakastiedot,
-            laitteen_sopimukset.laitteen_tunnus,
-            laite.sla,
-            laite.sarjanro,
-            laite.tuoteno,
-            laite.valmistajan_sopimusnumero,
-            laite.valmistajan_sopimus_paattymispaiva,
-            tuote.tuotemerkki,
-            avainsana.selitetark valmistaja,
             tilausrivi.nimitys,
-            tilausrivi.hinta,
-            tilausrivi.netto,
-            laskun_lisatiedot.sopimus_lisatietoja,
-            laskun_lisatiedot.sopimus_lisatietoja2,
-            tilausrivin_lisatiedot.sopimus_alkaa palvelu_alkaa,
-            tilausrivin_lisatiedot.sopimus_loppuu palvelu_loppuu,
-            laskun_lisatiedot.sopimus_alkupvm,
-            laskun_lisatiedot.sopimus_loppupvm
-            FROM laitteen_sopimukset
-            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
-              AND tilausrivi.yhtio                        = '{$kukarow['yhtio']}'
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno                           = laite.tuoteno
-            JOIN avainsana ON avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji                          = 'TRY'
-              AND avainsana.selite                        = tuote.try
-            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio
-              AND lasku.tunnus                            = tilausrivi.otunnus
-            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
-              AND laskun_lisatiedot.otunnus               = lasku.tunnus
-            WHERE lasku.tunnus                            = '{$tilausnumero}'
-            ORDER BY laitteen_tunnus, nimitys";
-  $result = pupe_query($query);
+            round(tilausrivi.hinta * (tilausrivi.varattu) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta,
+            lasku.asiakkaan_tilausnumero,
+            lasku.alv,
+            concat(lasku.toim_nimi,'\n',lasku.toim_osoite,'\n',lasku.toim_postino,' ',
+              lasku.toim_postitp,'\n',lasku.toim_maa) toimitusosoite,
+            concat(lasku.nimi,'\n',lasku.osoite,'\n',lasku.postino,' ',
+              lasku.postitp,'\n',lasku.maa) laskutusosoite
+            FROM lasku
+            JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
+            WHERE lasku.tunnus = '{$tilausnumero}'
+              AND lasku.yhtio  = '{$kukarow['yhtio']}'";
+  $sopimuskohtaisetresult = pupe_query($query);
+  $sopimuskohtaisetrivi = mysql_fetch_assoc($sopimuskohtaisetresult);
 
-  $eka_ajo = true;
-  $eka_laiterivi = true;
-  $kokonaishinta = 0;
-  $lisainffot = '';
-  // Rustaillaan henkseliin kaikki valitut sarakkeet
-  while ($row = mysql_fetch_assoc($result)) {
+  // Alkuun yhteenvetorivit
+  $worksheet->write($excelrivi++, $excelsarake, t("Sopimusnumero").": ".$sopimuskohtaisetrivi['asiakkaan_tilausnumero'] , $format_bold);
+  $worksheet->write($excelrivi, $excelsarake, t("Tuote"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake+1, t("e / kk summa"), $format_bold);
+  $sopimus_alv = $sopimuskohtaisetrivi['alv'];
+  $laskutusosoite = $sopimuskohtaisetrivi['laskutusosoite'];
+  $toimitusosoite = $sopimuskohtaisetrivi['toimitusosoite'];
+  $excelrivi++;
 
-    // Sopimuskohtaiset kent√§t
-    if ($eka_ajo) {
-      // Defaultkent√§t:
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimusnumero"),       $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['tunnus']);
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimus alkaa"),       $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_alkupvm']);
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimus loppuu"),     $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_loppupvm']);
+  mysql_data_seek($sopimuskohtaisetresult, 0);
+  $totalvalue = 0;
+  while ($sopimusrivi = mysql_fetch_assoc($sopimuskohtaisetresult)) {
+    $worksheet->write($excelrivi, $excelsarake++, $sopimusrivi['nimitys']);
+    $value = str_replace(".", ",", hintapyoristys($sopimusrivi['rivihinta']));
+    $worksheet->write($excelrivi, $excelsarake++, $value);
+    $totalvalue += $sopimusrivi['rivihinta'];
+    $excelrivi++;
+    $excelsarake = 0;
+  }
 
-      // Valinnaiset sopimuskohtaiset kent√§t:
-      // Sopimuslisatietoja 1/2
-      // Asiakastiedot
-      foreach ($row as $key => $value) {
-        if (in_array($key, $sopimuskohtaiset) and in_array($key, $valitut_sarakkeet)) {
-          $worksheet->write($excelrivi, $excelsarake, t("{$key}"),     $format_bold);
-          $worksheet->write($excelrivi+1, $excelsarake++, $value);
-        }
-      }
-      $excelrivi+=3;
-      $excelsarake = 0;
-      $eka_ajo = false;
+  if (in_array("NAYTATYOT", $valitut_sarakkeet) and !empty($hintahopinat)) {
+    $lisatyosarakeq = "SELECT selitetark
+                       FROM avainsana
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND laji    = 'SOP_LAITLUET'
+                       AND selite  = 'NAYTATYOT'";
+    $lisatyosarakeres = pupe_query($lisatyosarakeq);
+    $lisatyosarakerivi = mysql_fetch_assoc($lisatyosarakeres);
+    $worksheet->write($excelrivi++, $excelsarake, $lisatyosarakerivi['selitetark'], $format_bold);
+    $worksheet->write($excelrivi++, $excelsarake, $hintahopinat);
+    $excelsarake = 0;
+  }
+
+  $worksheet->write($excelrivi, $excelsarake++, t("Yhteens‰").": (ALV {$sopimus_alv} %)", $format_bold);
+  $totalvalue = str_replace(".", ",", hintapyoristys($totalvalue));
+  $worksheet->write($excelrivi++, $excelsarake++, $totalvalue);
+  $excelsarake = 0;
+
+  $worksheet->write($excelrivi++, $excelsarake, t("Toimitusosoite").":", $format_bold);
+  $worksheet->write($excelrivi++, $excelsarake, $toimitusosoite);
+  $worksheet->write($excelrivi++, $excelsarake, t("Laskutusosoite").":", $format_bold);
+  $worksheet->write($excelrivi++, $excelsarake, $laskutusosoite);
+
+  $worksheet->write($excelrivi++, $excelsarake, t("Laitelista").":", $format_bold);
+
+  $worksheet->write($excelrivi, $excelsarake++, t("Laitevalmistaja"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Malli"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Sarjanumero"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Service Desk SLA"), $format_bold);
+
+  // Poistetaan 'NAYTATYOT' valituista sarakkeista ett‰ saadaan oikeat sarakkeet laitekohtaisille
+  // riveille resetoimalla arrayn indeksit
+  $valikey = array_search('NAYTATYOT', $valitut_sarakkeet);
+  unset($valitut_sarakkeet[$valikey]);
+  $valitut_sarakkeet = array_values($valitut_sarakkeet);
+
+  // Piirret‰‰n sarakeotsikot valituille sarakkeille
+  foreach ($valitut_sarakkeet as $key => $value) {
+    $sarakeotsikkoquery = "SELECT selitetark
+                           FROM avainsana
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           AND laji    = 'SOP_LAITLUET'
+                           AND selite  = '{$value}'";
+    $sarakeotsikkoresult = pupe_query($sarakeotsikkoquery);
+    $sarakeotsikkorivi = mysql_fetch_assoc($sarakeotsikkoresult);
+    $worksheet->write($excelrivi, $excelsarake++, $sarakeotsikkorivi['selitetark'], $format_bold);
+  }
+
+  $worksheet->write($excelrivi, $excelsarake++, t("LCC/LCM SLA"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("LCC P‰‰ttymisp‰iv‰"), $format_bold);
+
+  $excelrivi++;
+  $excelsarake = 0;
+
+  // Kirjoitetaan laiterivit
+  while ($row = mysql_fetch_assoc($laiteresult)) {
+
+    // Haetaan laitekohtaiset tiedot
+    $laitequery = "SELECT
+                   laite.*,
+                   avainsana.selitetark valmistaja,
+                   tuote.tuotemerkki malli
+                   FROM laite
+                   LEFT JOIN tuote on tuote.yhtio = laite.yhtio
+                     AND tuote.tuoteno    = laite.tuoteno
+                   LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
+                     AND avainsana.laji   = 'TRY'
+                     AND avainsana.selite = tuote.try
+                   WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+                   AND laite.tunnus       = '{$row['laitetunnus']}'";
+
+    $laiteres = pupe_query($laitequery);
+
+    $laiterow = mysql_fetch_assoc($laiteres);
+
+    $query_ale_lisa = generoi_alekentta('M');
+
+    // Haetaan laitteen palvelut joiden hinnat ovat laitteiden lukum‰‰r‰st‰ riippuvaisia
+    // ja ne on valittu k‰yttˆliittym‰st‰
+    $palveluquery = "SELECT
+                     tuoteno,
+                     nimitys,
+                     round(tilausrivi.hinta * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus                   = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno                  IN ({$lisatuotenumerot})
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                         FROM tuotteen_avainsanat
+                         WHERE yhtio                           = '{$kukarow['yhtio']}'
+                           AND tuoteno                         = tilausrivi.tuoteno
+                           AND laji                            = 'laatuluokka'
+                           AND selitetark                      = 'rivikohtainen');";
+    $palveluresult = pupe_query($palveluquery);
+
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistaja']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['malli']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sarjanro']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sd_sla']);
+
+    $hinnat_jarjestyksessa = array();
+    // Sortataan laiterivikohtaisten palveluiden hinnat
+    while ($rivi = mysql_fetch_assoc($palveluresult)) {
+      $oikea_sarake = array_search($rivi['tuoteno'], $valitut_sarakkeet);
+      if ($oikea_sarake === false) continue;
+      $hinnat_jarjestyksessa[$oikea_sarake] = hintapyoristys($rivi['hinta']);
     }
 
-    // Laite-/palvelukohtaiset valinnaiset kent√§t
-
-    // Laitetunnus
-    // Sarjanumero
-    // Tuotenumero
-    // Tuotemerkki
-    // Valmistaja
-    // SLA
-    // VC numero / End date
-
-    // Nimitys(palvelu)
-    // Palvelu alku/loppu
-    // Kplhinta
-
-    foreach ($row as $key => $value) {
-      if (in_array($key, $valitut_sarakkeet) and !in_array($key, $sopimuskohtaiset)) {
-
-        if (is_numeric($value) and $key == "hinta") {
-          $value = str_replace(".", ",", hintapyoristys($value))." ".t("e / kk");
-          // Jos laitteiden kappalem√§√§r√§ ei vaikuta palvelun hintaan
-          if ($row['netto'] != '') {
-            $value .= " **";
-            $lisainffot = "".t("** Palvelukohtainen hinta");
-          }
-        }
-
-        if ($eka_laiterivi) {
-          // Valittujen laiterivien headerit
-          $worksheet->write($excelrivi, $excelsarake, t("{$key}"),     $format_bold);
-          $worksheet->write($excelrivi+1, $excelsarake++, $value);
-        }
-        else {
-          $worksheet->write($excelrivi, $excelsarake++, $value);
-        }
-
+    $tracker = 0;
+    while ($tracker < count($valitut_sarakkeet)) {
+      if (array_key_exists($tracker, $hinnat_jarjestyksessa)) {
+        $worksheet->write($excelrivi, $excelsarake++, $hinnat_jarjestyksessa[$tracker]);
       }
+      else {
+        $worksheet->write($excelrivi, $excelsarake++, '');
+      }
+      $tracker++;
     }
+
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sla']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistajan_sopimus_paattymispaiva']);
+
     $excelsarake = 0;
     $excelrivi++;
-    $eka_laiterivi = false;
   }
-  $worksheet->write($excelrivi, $excelsarake, $lisainffot);
+
   $excelnimi = $worksheet->close();
 
   if (isset($excelnimi)) {
@@ -218,6 +275,6 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     echo "</table><br>";
   }
   else {
-    echo t("Tallennus ep√§onnistui")."!<br>";
+    echo t("Tallennus ep‰onnistui")."!<br>";
   }
 }

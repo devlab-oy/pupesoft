@@ -33,6 +33,7 @@ if ($tuoteno != "") {
             tuote.kohde,
             tuote.projekti,
             tuote.myyntihinta,
+            tuote.tuotetyyppi,
             round(if (tuote.epakurantti100pvm = '0000-00-00',
                 if (tuote.epakurantti75pvm = '0000-00-00',
                   if (tuote.epakurantti50pvm = '0000-00-00',
@@ -62,7 +63,7 @@ if ($tuoteno != "") {
     }
     $tee = "";
   }
-  elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'U', 'G'))) {
+  elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'G'))) {
 
     $sarjanumerolisa = "";
 
@@ -405,9 +406,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   switch ($tee) {
   case "peru" :
-    $set_kehahin = "kehahin   = '{$uusi_keskihankintahinta}',
-              muutospvm = now(),
-              muuttaja  = '{$kukarow["kuka"]}', ";
+    $set_kehahin = "kehahin = '{$uusi_keskihankintahinta}', ";
 
   case "pois" :
     $pvm25  = "0000-00-00";
@@ -508,7 +507,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     tuoteno    = '{$tuoterow["tuoteno"]}',
                     laji       = 'zeniorparts',
                     selite     = 'K',
-                    selitetark = '{$tuoterow["myyntihinta"]}'";
+                    selitetark = '{$tuoterow["myyntihinta"]}',
+                    laatija    = '{$kukarow["kuka"]}', 
+                    luontiaika = now()";
         $z_result = pupe_query($z_query);
       }
     }
@@ -536,7 +537,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             epakurantti25pvm  =  {$pvm25},
             epakurantti50pvm  =  {$pvm50},
             epakurantti75pvm  =  {$pvm75},
-            epakurantti100pvm =  {$pvm100}
+            epakurantti100pvm =  {$pvm100},
+            muutospvm         = now(),
+            muuttaja          = '{$kukarow["kuka"]}'
             WHERE yhtio       = '{$kukarow["yhtio"]}'
             AND  tuoteno      = '{$tuoterow["tuoteno"]}'";
   $result = pupe_query($query);
@@ -644,7 +647,14 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 // vaihdetaan tuotteen kehahinta
 if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
-  $query = "LOCK TABLES tuotepaikat WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tili READ";
+  $query = "LOCK TABLES
+            tuotepaikat WRITE,
+            tapahtuma WRITE,
+            tuote WRITE,
+            lasku WRITE,
+            tiliointi WRITE,
+            tili READ,
+            sanakirja READ";
   $lock = pupe_query($query);
 
   $query = "SELECT *
@@ -824,11 +834,21 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
   }
 
-  if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+    $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+  }
+  elseif ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
   }
   else {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+  }
+
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+    $varastotili = $yhtiorow["raaka_ainevarasto"];
+  }
+  else {
+    $varastotili = $yhtiorow["varasto"];
   }
 
   // tehd‰‰n kirjaukset per toimipaikka, kustannuspaikka tulee ensisijaisesti toimipaikan takaa
@@ -880,7 +900,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
       $query = "INSERT into tiliointi set
                 yhtio    = '$kukarow[yhtio]',
                 ltunnus  = '$laskuid',
-                tilino   = '$yhtiorow[varasto]',
+                tilino   = '{$varastotili}',
                 kustp    = '{$kustp_ins}',
                 kohde    = '{$kohde_ins}',
                 projekti = '{$projekti_ins}',
@@ -925,7 +945,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$laskuid',
-              tilino   = '$yhtiorow[varasto]',
+              tilino   = '{$varastotili}',
               kustp    = '{$kustp_ins}',
               kohde    = '{$kohde_ins}',
               projekti = '{$projekti_ins}',

@@ -110,6 +110,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
              tuote.kehahin bruttokehahin,
              tuote.luontiaika,
+             tuote.vihapvm,
              tuote.sarjanumeroseuranta,
              sum(tuotepaikat.saldo) saldo
              FROM tuote
@@ -117,7 +118,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              WHERE tuote.yhtio             = '$kukarow[yhtio]'
              AND tuote.ei_saldoa           = ''
              AND tuote.epakurantti100pvm   = '0000-00-00'
-             AND tuote.sarjanumeroseuranta NOT IN ('S','U','G')
+             AND tuote.sarjanumeroseuranta NOT IN ('S','G')
              GROUP BY 1,2,3,4,5,6,7,8,9,10
              HAVING saldo > 0
              ORDER BY tuoteno";
@@ -192,22 +193,37 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         ob_start();
       }
 
+      $_vaihda_kehahin_selite = t("Keskihankintahinnan muutos");
+
       // Haetaan tuotteen viimeisin tulo
+      // Eliminoidaan konversioiden alkusaldot ja kehahin muutokset selitteellä (epakurantti.inc ~664)
       $query  = "SELECT laadittu
                  FROM tapahtuma
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND laji    in ('tulo', 'valmistus')
                  AND tuoteno = '$epakurantti_row[tuoteno]'
                  AND selite  not like '%alkusaldo%'
+                 AND selite  not like 'Keskihankintahinnan muutos:%'
+                 AND selite  not like '{$_vaihda_kehahin_selite}:%'
                  ORDER BY laadittu DESC
-                 LIMIT 1;";
+                 LIMIT 1";
       $tapres = pupe_query($query);
 
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
 
-        if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
+        $_luontiaika            = substr($epakurantti_row["luontiaika"], 0, 10);
+        $_luontiaika_check      = ($_luontiaika != "0000-00-00");
+        $_vihapvm_check         = ($epakurantti_row["vihapvm"] != "0000-00-00");
+        $_luontiaika_konversio  = ($_luontiaika > $epakurantti_row["vihapvm"]);
+
+        if ($_luontiaika_check and $_vihapvm_check and $_luontiaika_konversio) {
+          // Jos ei löydy tuloa, laitetaan tuotteen vihapvm
+          // (mikäli se on pienempi kuin luontiaika, konversiotapauksia varten)
+          $tulorow = array("laadittu" => $epakurantti_row["vihapvm"]);
+        }
+        elseif ($_luontiaika_check) {
           // Jos ei löydy tuloa, laitetaan tuotteen luontiaika
-          $tulorow = array("laadittu" => substr($epakurantti_row["luontiaika"], 0, 10));
+          $tulorow = array("laadittu" => $_luontiaika);
         }
         else {
           // Jos ei löydy tuloa eikä tuotteen luontiaikaa, niin laitetaan jotain vanhaa
@@ -216,12 +232,14 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       }
 
       // Haetaan tuotteen viimeisin laskutus (ei huomioida hyvityksiä)
+      // Ei myöskään huomioida fuusioissa muodostuneita tapahtumia (rivitunnus 0 tai -1)
       $query  = "SELECT laadittu
                  FROM tapahtuma
-                 WHERE yhtio = '$kukarow[yhtio]'
-                 AND laji    in ('laskutus', 'kulutus')
-                 AND tuoteno = '$epakurantti_row[tuoteno]'
-                 AND kpl     < 0
+                 WHERE yhtio    = '$kukarow[yhtio]'
+                 AND laji       in ('laskutus', 'kulutus')
+                 AND tuoteno    = '$epakurantti_row[tuoteno]'
+                 AND kpl        < 0
+                 AND rivitunnus not in (0, -1)
                  ORDER BY laadittu DESC
                  LIMIT 1;";
       $tapres = pupe_query($query);

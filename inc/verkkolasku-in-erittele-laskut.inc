@@ -11,6 +11,13 @@ function erittele_laskut($file) {
 
   $poistettavat = array('/', '.', ':'); //Merkit, jotka poistetaan filenimestä
 
+  if (!PUPE_UNICODE) {
+    $xmlencoding = "ISO-8859-15";
+  }
+  else {
+    $xmlencoding = "UTF-8";
+  }
+
   if (stripos(file_get_contents($file), "Finvoice") !== FALSE) {
     foreach (file($file) as $ln) {
 
@@ -27,17 +34,16 @@ function erittele_laskut($file) {
 
         $ln = substr($ln, stripos($ln, "<Finvoice"));
 
-        //   lisätään varmasti oikeat DOCTYPE määritys
-        //  Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
-
+        // Lisätään varmasti oikeat DOCTYPE määritys
+        // Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
         if ($finvoiceversion >= 2) {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
+          $ln = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
         }
         elseif ($finvoiceversion == 1.3) {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice_1.3.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_1.3.xsl\"?>\n".$ln;
+          $ln = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice_1.3.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_1.3.xsl\"?>\n".$ln;
         }
         else {
-          $ln = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice.xsl\"?>\n".$ln;
+          $ln = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<!DOCTYPE Finvoice SYSTEM \"datain/Finvoice.dtd\">\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice.xsl\"?>\n".$ln;
         }
       }
 
@@ -98,79 +104,55 @@ function erittele_laskut($file) {
       }
     }
   }
+  else {
+    // Muut kuin finvoicelaskut
+    $xmldata = file_get_contents($file);
 
-  $xml = @simplexml_load_file($file);
-
-  if ($xml !== FALSE) {
-
-    $i = 1;
-
-    // Unikon laskuaineisto
-    if (isset($xml->LedgerJournalTable->LedgerJournalName) and $xml->LedgerJournalTable->LedgerJournalName == "ORAO") {
-
-      $vakio_alku = '<?xml version="1.0"?><LedgerJournal><LedgerJournalTable><LedgerJournalName>ORAO</LedgerJournalName><Name>Ostolaskut Unikosta</Name>';
-      $vakio_loppu = '</LedgerJournalTable></LedgerJournal>';
-
-      // Lisätään ekaan tiedostoon alkutagit
-      $xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
-      file_put_contents($laskut."/".$xmlnimi, $vakio_alku);
-
-      foreach ($xml->LedgerJournalTable->LedgerJournalTrans as $lasku) {
-
-        if ((string) $lasku->AccountType == "Vend" and $i > 1) {
-          // Kun toimittaja vaihtuu, kirjoitetaan lopputagit...
-          file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
-
-          // ...ja keksitään uusi tiedostonimi...
-          $xmlnimi = "ORAO-$i-".md5(uniqid(mt_rand(), true)).".xml";
-
-          // ...ja kirjotetaan sinne alkutagit
-          file_put_contents($laskut."/".$xmlnimi, $vakio_alku.$lasku->asXML());
-        }
-        else {
-          file_put_contents($laskut."/".$xmlnimi, $lasku->asXML(), FILE_APPEND);
-        }
-
-        $i++;
-      }
-
-      // Lisätään viimeiseen tiedostoon lopputagit
-      file_put_contents($laskut."/".$xmlnimi, $vakio_loppu, FILE_APPEND);
-      $luotiinlaskuja++;
+    // Varmistetaan, että <xml>-tagi löytyy aineistosta, jos ei niin lisätään
+    if (!preg_match("/\<\?xml[^\>]*/i", $xmldata)) {
+      $xmldata = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n".$xmldata;
+    }
+    elseif (!PUPE_UNICODE) {
+      // XML-tiedosto on konvertoitu ISO-8859-15-merkistöön, joten varmistetaan, että
+      // <xml>-tagissa kerrotaan tämä
+      $xmldata = preg_replace("/\<\?xml[^\>]*/i", "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?", $xmldata);
+    }
+    else {
+      // XML-tiedosto on konvertoitu UTF-8-merkistöön, joten varmistetaan, että
+      // <xml>-tagissa kerrotaan tämä
+      $xmldata = preg_replace("/\<\?xml[^\>]*/i", "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?", $xmldata);
     }
 
-    // Teccom laskuaineisto
-    if (isset($xml->Document) and isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
+    $xml = @simplexml_load_string($xmldata);
 
-      // Laitetaan teccomifile ensin talteen sellaisenaan
-      $path_parts = pathinfo($file);
+    if ($xml !== FALSE) {
 
-      // Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
-      $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
+      // Teccom laskuaineisto
+      if (isset($xml->Document) and isset($xml->Document->attributes()->Type) and $xml->Document->attributes()->Type == "Invoice") {
 
-      $filenimi = "teccominvoice_{$path_parts['basename']}";
-      copy($file, $origlaskut."/".$filenimi);
+        // Laitetaan teccomifile ensin talteen sellaisenaan
+        $path_parts = pathinfo($file);
 
-      $xmldata = file_get_contents($file);
+        // Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
+        $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
 
-      // poistetaan nonprintable merkit
-      $xmldata = preg_replace("/[^\x20-\xFF\n]/", "", $xmldata);
+        $filenimi = "teccominvoice_{$path_parts['basename']}";
+        copy($file, $origlaskut."/".$filenimi);
 
-      //  Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
-      $xmldata = preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata, 1);
+        // poistetaan nonprintable merkit
+        $xmldata = preg_replace("/[^\x20-\xFF\n]/", "", $xmldata);
 
-      // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
-      if (mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-        $xmldata = utf8_encode($xmldata);
+        // Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
+        $xmldata = preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata, 1);
+
+        $save = file_put_contents($file, $xmldata);
+        $path_parts = pathinfo($file);
+
+        // Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
+        $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
+
+        rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
       }
-
-      $save = file_put_contents($file, $xmldata);
-      $path_parts = pathinfo($file);
-
-      // Siivotaan vanha nimi, ettei nimi mee liian pitkäksi...
-      $path_parts["basename"] = preg_replace("/(teccominvoice_)/", "", $path_parts["basename"]);
-
-      rename($file, "{$laskut}/teccominvoice_{$path_parts['basename']}");
     }
   }
 

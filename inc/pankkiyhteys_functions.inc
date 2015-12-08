@@ -1,5 +1,8 @@
 <?php
 
+define('SEPA_ENVIRONMENT', 'production');
+define('SEPA_ADDRESS'    , 'https://sepa.devlab.fi/api');
+
 // Käyttöliittymän funktiot
 
 /**
@@ -428,9 +431,9 @@ function sepa_download_file_list($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "status"                      => $status,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
+    "url" => SEPA_ADDRESS . "/{$bank}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -494,10 +497,10 @@ function sepa_download_files($params) {
         "target_id"                   => $target_id,
         "file_type"                   => $file_type,
         "file_reference"              => $viite,
-        "environment"                 => 'production',
+        "environment"                 => SEPA_ENVIRONMENT,
         "status"                      => 'NEW',
       ),
-      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
+      "url" => SEPA_ADDRESS . "/{$bank}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -569,9 +572,9 @@ function sepa_upload_file($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "content"                     => $maksuaineisto,
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
+    "url"     => SEPA_ADDRESS . "/{$bank}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -608,11 +611,11 @@ function sepa_get_certificate($params) {
     "data" => array(
       "pin" => $pin,
       "customer_id" => $customer_id,
-      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+      "environment" => SEPA_ENVIRONMENT,
       "signing_csr" => base64_encode($signing_csr),
       "encryption_csr" => base64_encode($encryption_csr),
     ),
-    "url" => "https://sepa.devlab.fi/api/{$bank}/get_certificate",
+    "url" => SEPA_ADDRESS . "/{$bank}/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -626,11 +629,48 @@ function sepa_get_certificate($params) {
   }
 
   $return = array(
-    "bank_encryption_certificate" => base64_decode($response["bank_encryption_certificate"]),
-    "bank_root_certificate"       => base64_decode($response["bank_root_certificate"]),
-    "own_encryption_certificate"  => base64_decode($response["own_encryption_certificate"]),
-    "own_signing_certificate"     => base64_decode($response["own_signing_certificate"]),
-    "ca_certificate"              => base64_decode($response["ca_certificate"]),
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"]),
+    "own_encryption_certificate"  => base64_decode($response["ownEncryptionCertificate"]),
+    "own_signing_certificate"     => base64_decode($response["ownSigningCertificate"]),
+    "ca_certificate"              => base64_decode($response["caCertificate"]),
+  );
+
+  return $return;
+}
+
+function sepa_get_bank_certificate($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
+  $bank        = parameter($params["bank"]);
+  $customer_id = parameter($params["customer_id"]);
+
+  if (empty($bank) or empty($customer_id)) {
+    return false;
+  }
+
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "customer_id" => $customer_id,
+      "environment" => SEPA_ENVIRONMENT,
+    ),
+    "url" => SEPA_ADDRESS . "/{$bank}/get_bank_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
+    )
+  );
+
+  list($code, $response) = pupesoft_rest($parameters);
+
+  if (!vastaus_kunnossa($code)) {
+    return false;
+  }
+
+  $return = array(
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"])
   );
 
   return $return;
@@ -655,9 +695,9 @@ function sepa_get_user_info($params) {
       "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
       "customer_id"                 => $pankkiyhteys["customer_id"],
-      "environment"                 => 'production',
+      "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
+    "url" => SEPA_ADDRESS . "/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -747,6 +787,26 @@ function sepa_file_type_check($bank, $file_type) {
     }
   }
 
+  // OP-muunnokset
+  if ($bank == "op") {
+    // Konekielinen tiliote
+    if ($file_type == "TITO") {
+      $file_type = "TI";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "KTL") {
+      $file_type = "TL";
+    }
+    // XML maksuaineisto
+    if ($file_type == "NDCORPAYS") {
+      $file_type = "pain.001.001.02";
+    }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "C2BN") {
+      $file_type = "pain.002.001.02";
+    }
+  }
+
   return $file_type;
 }
 // Sertifikaatti / salausfunktiot
@@ -829,6 +889,43 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   return $pankki;
 }
 
+function pankkiyhteyden_paivamaarat($pankkiyhteys) {
+  // Loopataan certifikaattien expire datet
+  $certit = array(
+    "signing_certificate_valid_to" => "Allekirjoitus-sertifikaatti",
+    "encryption_certificate_valid_to" => "Salaus-sertifikaatti",
+    "bank_encryption_certificate_valid_to" => "Pankin salaus-sertifikaatti",
+    "bank_root_certificate_valid_to" => "Pankin juuri-sertifikaatti",
+    "ca_certificate_valid_to" => "Pankin CA-sertifikaatti",
+  );
+
+  $_today = date("Y-m-d h:i:s");
+  $_certit_ok = true;
+
+  foreach ($certit as $valid => $nimi) {
+    $_time = $pankkiyhteys[$valid];
+
+    // Nollaa jos meillä ei ole tätä serttiä
+    if ($_time == '') {
+      continue;
+    }
+
+    // Jos expire date tulevaisuudessa, niin hyvä
+    if ($_time > $_today) {
+      continue;
+    }
+
+    $_nimi = t($nimi);
+    $_time = tv1dateconv($_time);
+
+    echo "<font class='error'>{$_nimi} on vanhentunut!</font><br><br>";
+
+    $_certit_ok = false;
+  }
+
+  return $_certit_ok;
+}
+
 
 /**
  * Laitaa kaikki tietyntyyppiset tiedostot pankista ja
@@ -890,37 +987,87 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
 
 
 /**
- * Generoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
+ * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
+ *
+ * @param array $params
  *
  * @return array
  */
-function generoi_private_key_ja_csr() {
+function generoi_private_key_ja_csr($params = array()) {
   global $kukarow, $yhtiorow;
 
-  $key_config = array(
-    "digest_alg"       => "sha1",
-    "private_key_bits" => 2048,
-    "private_key_type" => OPENSSL_KEYTYPE_RSA
-  );
+  $company_name = empty($params['company_name']) ? ""   : $params['company_name'];
+  $customer_id  = empty($params['customer_id'])  ? ""   : $params['customer_id'];
+  $pankki       = empty($params['pankki'])       ? ""   : $params['pankki'];
+
+  $key_bits = 2048;
 
   $csr_info = array(
-    "countryName"      => $yhtiorow["maa"],
-    "localityName"     => $yhtiorow["kotipaikka"],
-    "organizationName" => $yhtiorow["nimi"],
-    "commonName"       => $yhtiorow["nimi"],
-    "emailAddress"     => $yhtiorow["email"]
+    "C={$yhtiorow["maa"]}",
   );
 
-  $key = openssl_pkey_new($key_config);
-  $csr = openssl_csr_new($csr_info, $key);
+  switch ($pankki) {
+  case "nordea":
+    $key_bits = 1024;
 
-  openssl_pkey_export($key, $private_key);
-  openssl_csr_export($csr, $csrout);
+    $csr_info[] = "CN={$company_name}";
+    $csr_info[] = "serialNumber={$customer_id}";
+    break;
+  case "op":
+    $csr_info[] = "CN={$customer_id}";
+    break;
+  default:
+    $csr_info[] = "CN={$yhtiorow['nimi']}";
+    $csr_info[] = "emailAddress={$yhtiorow["email"]}";
+    $csr_info[] = "L={$yhtiorow["kotipaikka"]}";
+    $csr_info[] = "O={$yhtiorow['nimi']}";
+  }
+
+  $csr_dir  = sys_get_temp_dir() . uniqid('csr-', true);
+
+  $key_path   = "{$csr_dir}/key.pem";
+  $csr_path   = "{$csr_dir}/csr.pem";
+  $subject    = "/" . implode("/", $csr_info);
+  $passphrase = openssl_random_pseudo_bytes(100);
+  $command    = escapeshellcmd("openssl req " .
+                               "-newkey rsa:{$key_bits} " .
+                               "-passout stdin " .
+                               "-keyout {$key_path} " .
+                               "-out {$csr_path} " .
+                               "-subj '{$subject}'");
+
+  mkdir($csr_dir);
+
+  $handle = popen($command, "w");
+
+  fwrite($handle, $passphrase);
+  pclose($handle);
+
+  $command = escapeshellcmd("openssl rsa -in {$key_path} -passin stdin");
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w")
+  );
+  $handle = proc_open($command, $descriptorspec, $pipes);
+
+  if (is_resource($handle)) {
+    fwrite($pipes[0], $passphrase);
+    fclose($pipes[0]);
+
+    $private_key =  stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+
+    proc_close($handle);
+  }
+
+  $csr = file_get_contents($csr_path);
+
+  system(escapeshellcmd("rm -rf {$csr_dir}"));
 
   return array(
     "private_key" => $private_key,
-    "csr"         => $csrout
+    "csr"         => $csr,
   );
 }
 
@@ -973,7 +1120,7 @@ function pura_salaus($salattu_data, $salasana) {
 
   // Tässä on "//NO_MB_OVERLOAD"-kommentti
   // jotta UTF8-konversio ei osu tähän riviin
-  $iv = substr($salattu_data_binaari, 0, $iv_size);  //NO_MB_OVERLOAD
+  $iv = substr($salattu_data_binaari, 0, $iv_size); //NO_MB_OVERLOAD
 
   // Tässä on "//NO_MB_OVERLOAD"-kommentti
   // jotta UTF8-konversio ei osu tähän riviin
@@ -1019,6 +1166,10 @@ function tuetut_pankit() {
     "DABAFIHH" => array(
       "nimi"       => "Danske Bank",
       "lyhyt_nimi" => "danske"
+    ),
+    "OKOYFIHH" => array(
+      "nimi"       => "OP",
+      "lyhyt_nimi" => "op",
     ),
   );
 }

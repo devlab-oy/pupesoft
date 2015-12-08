@@ -611,7 +611,9 @@ if ($ytunnus != '' and $tee == "") {
 
 if ($tee == "" and $ytunnus == "") {
 
-  $maksaja_haku = htmlentities($maksaja_haku);
+  if (empty($iframe)) {
+    $maksaja_haku = htmlentities($maksaja_haku);
+  }
 
   echo "<font class='message'>", t("Maksajan hakuinfo"), " ", asiakashakuohje(), "</font><br>";
   echo "<br>";
@@ -622,7 +624,7 @@ if ($tee == "" and $ytunnus == "") {
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
   echo "<input type='hidden' name='muutparametrit' value='$summa#$ppa#$kka#$vva#$mtili#$selite'>";
   echo "<br>";
-  echo "<input type='submit' value='".t("Etsi")."'>";
+  echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";
 
   $formi = "maksaja";

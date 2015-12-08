@@ -44,7 +44,7 @@ else {
   $kentat = "asiakas.tunnus::asiakas.nimi::asiakas.myyjanro::asiakas.ytunnus::asiakas.asiakasnro::if (asiakas.toim_postitp!='',asiakas.toim_postitp,asiakas.postitp)::asiakas.yhtio";
 }
 
-$jarjestys = 'selaus, nimi';
+$jarjestys = poista_osakeyhtio_lyhenne_mysql("nimi").", nimitark, ytunnus, tunnus";
 
 $array = explode("::", $kentat);
 $count = count($array);
@@ -52,7 +52,10 @@ $count = count($array);
 for ($i = 0; $i <= $count; $i++) {
   if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
     if ($array[$i] == "asiakas.nimi") {
-      $lisa .= " and (asiakas.nimi like '%".$haku[$i]."%' or asiakas.toim_nimi like '%".$haku[$i]."%')";
+      $lisa .= " AND (asiakas.nimi LIKE '%{$haku[$i]}%'
+                      OR asiakas.toim_nimi LIKE '%{$haku[$i]}%'
+                      OR asiakas.nimitark LIKE '%{$haku[$i]}%'
+                      OR asiakas.toim_nimitark LIKE '%{$haku[$i]}%')";
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     }
     else {
@@ -281,7 +284,7 @@ for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
   echo "</th>";
 }
 
-echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></tr>\n\n";
+echo "<td class='back'>&nbsp;&nbsp;<input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>\n\n";
 
 $kalalask = 1;
 

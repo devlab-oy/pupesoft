@@ -25,6 +25,8 @@ else {
   $kasittely_periaate = "asiakas.tunnus";
 }
 
+$paivitys_oikeus = tarkista_oikeus("luotonhallinta.php", '', 1);
+
 if (isset($edytunnus) and isset($ytunnus) and $edytunnus != $ytunnus) {
   unset($asiakasid);
 }
@@ -164,21 +166,22 @@ echo "<br />";
 echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee'    value = '3'>";
 
-echo t("tai"), "...";
-echo "<br />";
-echo "<br />";
+if ($paivitys_oikeus) {
+  echo t("tai"), "...";
+  echo "<br />";
+  echo "<br />";
 
-echo "<font class='message'>", t("P‰ivit‰ asiakkaiden luottotietoja tiedostosta"), "</font><br />";
-echo "<font class='info'>", t("Otsikot: ytunnus, asiakasnro, luottoraja"), "</font><br />";
-echo "<table>";
-echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("L‰het‰"), "' /></td></tr>";
-echo "</table>";
-echo "</form>";
-
+  echo "<font class='message'>", t("P‰ivit‰ asiakkaiden luottotietoja tiedostosta"), "</font><br />";
+  echo "<font class='info'>", t("Otsikot: ytunnus, asiakasnro, luottoraja"), "</font><br />";
+  echo "<table>";
+  echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("L‰het‰"), "' /></td></tr>";
+  echo "</table>";
+  echo "</form>";
+}
 echo "<br>";
 echo "<br>";
 
-if ($tee == "3") {
+if ($tee == "3" and $paivitys_oikeus) {
 
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
@@ -196,6 +199,13 @@ if ($tee == "3") {
     $cnt = 0;
 
     foreach ($excelrivit as $rivinumero => $rivi) {
+
+      // Tarkistetaan ett‰ tiedostossa ei ole ylim‰‰r‰isi‰ rivej‰
+      if ($rivi[3] != "") {
+        echo "<font class='error'>".t("Tiedostossa liikaa sarakkeita")." ! ".t("Tarkista tiedosto")."!</font><br />";
+        exit;
+      }
+
       $ytunnus  = mysql_real_escape_string(trim($rivi[0]));
       $asiakasnro  = trim($rivi[1]) != "" ? (int) trim($rivi[1]) : "";
       $luottoraja = (float) $rivi[2];
@@ -212,7 +222,7 @@ if ($tee == "3") {
                 {$asiakasnrolisa}";
       pupe_query($query);
 
-      $cnt++;
+      $cnt += mysql_affected_rows();
     }
 
     $plural = $cnt == 1 ? "rivi" : "rivi‰";
@@ -223,7 +233,7 @@ if ($tee == "3") {
 }
 
 // p‰ivitet‰‰n asiakkaat
-if ($tee == "2") {
+if ($tee == "2" and $paivitys_oikeus) {
 
   foreach ($luottoraja as $ytunnus => $summa) {
 
@@ -459,8 +469,14 @@ if ($tee == "1") {
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
 
-    echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
-    echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
+    if ($paivitys_oikeus) {
+      echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
+      echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
+    }
+    else {
+      echo "<td>$asiakasrow[luottoraja]</td>";
+      echo "<td>$asiakasrow[myyntikielto]</td>";
+    }
 
     if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
       echo "<td align='right'>1 - {$ulostulo}</td>";
@@ -475,11 +491,14 @@ if ($tee == "1") {
     echo "<input type='hidden' name='alkuperainen_myyntikielto[$asiakasrow[ytunnus]]' value='$asiakasrow[myyntikielto]'>";
   }
 
-  echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+  if ($paivitys_oikeus) {
+    echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+  }
+
   echo "</table>";
-
-  echo "<input type='submit' value='".t("P‰ivit‰ luottorajat")."'>";
-
+  if ($paivitys_oikeus) {
+    echo "<input type='submit' value='".t("P‰ivit‰ luottorajat")."'>";
+  }
   echo "</form>";
 }
 

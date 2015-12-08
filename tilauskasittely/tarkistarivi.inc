@@ -9,12 +9,13 @@ $varastot_array = sallitut_varastot($params);
 
 //sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
-$riviok               = 0;
-$saako_hyvaksya       = 0;
-$saako_jalkitoimittaa = 0;
-$vastaavattuotteet    = 0;
-$varaosavirhe         = "";
-$vastaavat_html       = "";
+$riviok                         = 0;
+$saako_hyvaksya                 = 0;
+$ei_saa_hyvaksya_kaikkia_riveja = 0;
+$saako_jalkitoimittaa           = 0;
+$vastaavattuotteet              = 0;
+$varaosavirhe                   = "";
+$vastaavat_html                 = "";
 
 pupeslave_start();
 
@@ -91,6 +92,39 @@ if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOT
   }
 }
 
+$_onko_myynti = in_array($toim, array('PIKATILAUS','RIVISYOTTO'));
+$_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
+
+if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
+
+  if ($yhtiorow["varaako_jt_saldoa"] != "") {
+    $lisavarattu = " + tilausrivi.varattu";
+  }
+  else {
+    $lisavarattu = "";
+  }
+
+  $query = "SELECT *
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi = 'L'
+              AND tilausrivi.var = 'J'
+              AND tilausrivi.jt {$lisavarattu} > 0
+              AND tilausrivi.tunnus != '{$row['tunnus']}'
+            )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus != '{$laskurow['tunnus']}'
+            AND (lasku.tila = 'N' OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D','X')))";
+  $chk_res = pupe_query($query);
+
+  if (mysql_num_rows($chk_res) != 0) {
+    $varaosavirhe .= t("HUOM: tuotetta on jo j‰lkitoimituksessa")."<br>";
+  }
+}
+
 if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: t‰m‰ on korvaava tuote, haluatko hyv‰ksy‰?")."<br>";
   $riviok++;
@@ -135,15 +169,36 @@ if (
   }
 }
 
-if ($row["varattu"] == 0 and in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
-  if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
-    // $varaosavirhe .= t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa")."! ($row[tilkpl] ".t("kpl").")<br/>";
-  }
-  else {
-    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
-  }
+$tilausrivin_kateraja = $yhtiorow["tilausrivin_kateraja"];
+$tilausrivin_kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
+
+if ($tilausrivin_kateraja > 0 and
+  $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK"
+) {
+  $varaosavirhe .= t("HUOM: Kate alhainen!")."<br>";
   $riviok++;
+  $ei_saa_hyvaksya_kaikkia_riveja++;
   $tilausok++;
+  $saako_hyvaksya++;
+}
+
+if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
+  if (($laskurow["tilaustyyppi"] != "H" and $row["varattu"] == 0) or
+    ($laskurow["tilaustyyppi"] == "H" and $row["tilkpl"] == 0)
+  ) {
+    if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
+      //    $varaosavirhe .=
+      //      t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa") .
+      //      "! ($row[tilkpl] " .
+      //      t("kpl") .
+      //      ")<br/>";
+    }
+    else {
+      $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!") . "<br>";
+    }
+    $riviok++;
+    $tilausok++;
+  }
 }
 
 if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J')) and $row["tyyppi"] != "E") {
@@ -171,6 +226,13 @@ if (in_array($row['var'], array('U', 'T', 'S')) and $meapurow['kateinen'] != '')
     $varaosavirhe .= t("VIRHE: Et voi tehd‰ varastosiirtoa, koska maksuehto on k‰teinen!")."<br>";
   }
 
+  $riviok++;
+  $tilausok++;
+}
+
+if ($row['var'] == 'U' and $meapurow['jv'] != '') {
+
+  $varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on j‰lkivaatimus!")."<br>";
   $riviok++;
   $tilausok++;
 }
@@ -347,22 +409,6 @@ if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != 
   }
 }
 
-if ($row["var"] == 'S') {
-  // otetaan maksuehto selville..
-  $query = "SELECT *
-            from maksuehto
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$laskurow[maksuehto]'";
-  $maksuehtoresult = pupe_query($query);
-  $maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
-
-  if ($maksuehtorow["jv"] != "") {
-    $varaosavirhe .= t("VIRHE: Et voi suoratoimittaa tuotetta jos maksuehtona on j‰lkivaatimus!")."<br>";
-    $riviok++;
-    $tilausok++;
-  }
-}
-
 // Otetaan oikea kappalem‰‰r‰ k‰sittelyyn
 if (in_array($row["var"], array('J', 'S', 'T', 'U'))) {
   // jos yhtiˆn parametreiss‰ jt-rivit varaavat saldoa, laitetaan "varattu kpl"-m‰‰r‰, muuten "jt kpl"-m‰‰r‰
@@ -383,7 +429,7 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
     $mimyhuom .= " minimier‰‰n";
   }
 
-  if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+  if ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) {
     if ($trow["minimi_era"] > 0) {
       $mimyhuom .= " tai";
     }
@@ -403,6 +449,14 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
   }
 
   $varaosavirhe .= $mimyhuom."<br>";
+}
+else {
+
+   if ($trow['myynti_era'] > 0 and $trow['myynti_era'] != $kpl_st and !in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) {
+
+     $mimyhuom = t("HUOM: Tuotteella on myyntier‰"). " " . $trow['myynti_era'];
+     $varaosakommentti .= $mimyhuom."<br>";
+   }
 }
 
 //T‰ss‰ on kaikki saldoihin ja varastopaikkoihin liittyv‰t tsekit, eli EI tehd‰ saldottomille tuotteille, eik‰ tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
@@ -444,7 +498,7 @@ if (
     $saako_hyvaksya++;
   }
 
-  if ($yhtiorow["saldo_kasittely"] == "T") {
+  if (!empty($yhtiorow["saldo_kasittely"])) {
     $saldoaikalisa = $row["kerayspvm"];
   }
   else {
@@ -487,7 +541,7 @@ if (
   }
 
   // Katotaan voidaanko t‰m‰ myyd‰ joltain toiselta paikalta
-  if (!in_array($row["var"], array('J', 'S', 'U', 'T', 'P')) and $kpl_st > 0 and in_array($trow["sarjanumeroseuranta"], array('E', 'F', 'G'))) {
+  if (!in_array($row["var"], array('J', 'S', 'T', 'P')) and $kpl_st > 0 and in_array($trow["sarjanumeroseuranta"], array('E', 'F', 'G'))) {
 
     $paikat .= "<option value='EIERAAVIELA#!°!#EIEI'>".t("Valitse er‰")."</option>";
     $paikatlask++;
@@ -857,7 +911,8 @@ if (
   if ($_siirtolista_myyntitilaukselta and
     $_ei_ole_takuu and
     !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO")) and
-    in_array($laskurow['tila'], array('N', 'T'))) {
+    in_array($laskurow['tila'], array('N', 'T')) and
+    in_array($laskurow['alatila'], array('', 'F'))) {
 
     $sel4 = "";
 
@@ -928,7 +983,7 @@ if (
   }
 
   if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+    $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -995,7 +1050,7 @@ elseif (
   }
 
   if ($paikat != "" and $paikatlask > 1) {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+    $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -1052,7 +1107,7 @@ elseif (
     $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel1>$title</option>";
   }
 
-  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+  $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
 }
 
 //  Onko t‰t‰ varattuna siirtolistalla?
@@ -1219,7 +1274,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 <input type='hidden' name='tila'         value = 'OOKOOAA'>
                 <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
                 <input type='hidden' name='naytetaan_vastaavat' value = 'true' />
-                <input style='float:right;' type='Submit' value='".t("N‰yt‰ vastaavat tuotteet")."'>
+                <input style='float:right;' type='submit' value='".t("N‰yt‰ vastaavat tuotteet")."'>
                 $lisa_huomautus
                 </form></th>";
       $vastaavat_html .= "</tr></table>";
@@ -1378,7 +1433,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                           <input type='hidden' name='menutila'     value = '$menutila'>
                           <input type='hidden' name='tila'       value = 'MUUTA'>
                           <input type='hidden' name='tapa'       value = 'MYYVASTAAVA'>
-                          <input type='Submit' value='".t("Tilaa tuote")."'>
+                          <input type='submit' value='".t("Tilaa tuote")."'>
                           </form>";
             }
 
@@ -1413,7 +1468,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                       <input type='hidden' name='menutila'     value = '$menutila'>
                       <input type='hidden' name='tila'       value = 'OOKOOAA'>
                       <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
-                      <input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
+                      <input type='submit' value='".t("Piilota vastaavat tuotteet")."'>
                       </form>";
           }
 

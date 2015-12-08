@@ -11,7 +11,7 @@ if (empty($tila)) {
 }
 
 //  Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
-if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
+if ($toim == "VALMISTAVARASTOON" and isset($jatka) and !empty($clearing) and !empty($varasto)) {
   //  Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
   $query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
   $abures = pupe_query($query);
@@ -22,15 +22,21 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
   $lahdev = mysql_fetch_array($abures);
 
   if ($lahdev["maa"] != $kohdev["maa"]) {
-    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!!!</font><br><br>";
-    $tila == "Muuta";
+    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!</font><br><br>";
+    $tila = "Muuta";
     unset($jatka);
   }
 }
 
 $laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+
 if ($toim == 'SIIRTOLISTA' and isset($jatka) and $laaja_toim_kasittely and $varasto == '') {
-  echo "<font class='error'>".t("L‰hdevarasto pit‰‰ valita")."!!!</font><br><br>";
+  echo "<br><font class='error'>".t("VIRHE: L‰hdevarasto on valittava")."!</font><br><br>";
+  unset($jatka);
+}
+
+if ($toim == 'SIIRTOLISTA' and isset($jatka) and $clearing == '') {
+  echo "<br><font class='error'>".t("VIRHE: Kohdevarasto on valittava")."!</font><br><br>";
   unset($jatka);
 }
 
@@ -51,8 +57,9 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
   }
 
-  if ((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
-    if (isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) {
+  if (!empty($kopioitava_otsikko) or $kukarow["kesken"] > 0) {
+
+    if (!empty($kopioitava_otsikko)) {
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
@@ -69,30 +76,35 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $tilausnumero     = 0;
 
     }
-    elseif ($kukarow["kesken"] != 0) {
+    elseif ($kukarow["kesken"] > 0) {
       $squery = "SELECT *, hyvaksynnanmuutos as luokka
                  FROM lasku
                  $qlisa
                  WHERE tunnus = '$kukarow[kesken]'";
     }
+
     $sresult = pupe_query($squery);
-    $srow = mysql_fetch_array($sresult);
+    $srow = mysql_fetch_assoc($sresult);
 
     // jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
-    $alatila="";
-    $ylatila="";
+    $alatila = "";
+    $ylatila = "";
 
-    //  Jos meill‰ on kopioitu otsikko, ei kopioida alatilaa!
-    if (isset($kopioitava_otsikko) and $kopioitava_otsikko == 0 and $srow['alatila'] != '') {
-      $alatila=$srow['alatila'];
+    //  Alatila setataan vain jos ei olla kopsaamassa!
+    if (empty($kopioitava_otsikko) and $srow['alatila'] != '') {
+      $alatila = $srow['alatila'];
     }
-    if ($srow['tila'] != '') $ylatila = $srow['tila'];
+
+    if ($srow['tila'] != '') {
+      $ylatila = $srow['tila'];
+    }
   }
 
   if (!isset($srow)) {
     $query = "SELECT *, hyvaksynnanmuutos as luokka FROM lasku LIMIT 1";
     $result = pupe_query($query);
     $srow = mysql_fetch_assoc($result);
+
     foreach ($srow as $key => $value) {
       $srow[$key] = '';
     }
@@ -131,14 +143,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       echo "<option value=''>".t("Valitse")."</option>";
     }
     else {
-      echo "<option value=''>".t("Siirr‰ kaikista")."</option>";
+      echo "<option value=0>".t("Siirr‰ kaikista")."</option>";
     }
   }
   elseif ($toim == "VALMISTAVARASTOON") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=0>".t("K‰yt‰ kaikista")."</option>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=0>".t("K‰yt‰ kaikista")."</option>";
   }
 
   while ($vrow = mysql_fetch_array($vtresult)) {
@@ -148,7 +160,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $sel = 'selected';
     }
 
-    if ($varasto < 1 and $vrow['tunnus'] == $srow["varasto"]) {
+    if (!is_numeric($varasto) and $varasto == "" and $vrow['tunnus'] == $srow["varasto"]) {
       $sel = 'selected';
     }
 
@@ -170,7 +182,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     }
 
     echo "<td><select name='clearing' onchange='submit()' >";
-    echo "<option value=''>".t("Valitse")."</option>";
+
+    if ($toim != "VALMISTAVARASTOON") {
+      echo "<option value=''>".t("Valitse")."</option>";
+    }
 
     $query  = "SELECT *
                FROM varastopaikat

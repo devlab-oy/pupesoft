@@ -42,8 +42,14 @@ if (!is_writable($pankkiaineiston_haku["local_dir"])) {
   exit;
 }
 
-// Avataan yhteys
-$conn_id = @ftp_connect($pankkiaineiston_haku["host"]);
+// Avataan yhteys, tarkistetaan onko portti setattu konffiin
+if (isset($pankkiaineiston_haku["port"]) and (int) $pankkiaineiston_haku["port"] > 0) {
+  $pankkiaineiston_haku["port"] = (int) $pankkiaineiston_haku["port"];
+  $conn_id = @ftp_connect($pankkiaineiston_haku["host"], $pankkiaineiston_haku["port"]);
+}
+else {
+  $conn_id = @ftp_connect($pankkiaineiston_haku["host"]);
+}
 
 if ($conn_id === FALSE) {
   echo "Yhteys epaonnistui {$pankkiaineiston_haku["host"]}!";
@@ -56,8 +62,6 @@ if ($login_result === FALSE) {
   echo "Login epaonnistui {$pankkiaineiston_haku["host"]}!";
   exit;
 }
-
-$quote = ftp_site($conn_id, "NAMEFMT 0");
 
 ftp_pasv($conn_id, true);
 
@@ -74,5 +78,8 @@ $fileget = @ftp_get($conn_id, $local_file, $pankkiaineiston_haku["viite_file"], 
 if ($fileget !== FALSE) {
   $quote = ftp_raw($conn_id, "rcmd clrpfm file({$pankkiaineiston_haku["viite_file"]})");
 }
+
+// Poistetaan haettu tiedosto palvelimelta ettei haeta ja lueta sis‰‰n samaa aineistoa
+ftp_delete($conn_id, $pankkiaineiston_haku["viite_file"]);
 
 ftp_close($conn_id);

@@ -15,23 +15,25 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-if (!isset($logistiikka_yhtio))   $logistiikka_yhtio = "";
+if (!isset($logistiikka_yhtio)) $logistiikka_yhtio = "";
 if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
-if (!isset($asiakasid))       $asiakasid = "";
-if (!isset($toimittajaid))       $toimittajaid = "";
-if (!isset($tee))           $tee = "";
-if (!isset($laskunro))         $laskunro = "";
-if (!isset($ytunnus))         $ytunnus = "";
-if (!isset($lopetus))         $lopetus = "";
-if (!isset($toim) or $toim == "")   $toim = "LASKU";
-if (!isset($kieli) or $kieli == "") $kieli = $yhtiorow["kieli"];
-if (!isset($tila))           $tila = "";
-if (!isset($tunnus))         $tunnus = "";
-if (!isset($laskunroloppu))     $laskunroloppu = "";
-if (!isset($kerayseran_numero))   $kerayseran_numero = "";
-if (!isset($kerayseran_tilaukset))   $kerayseran_tilaukset = "";
-if (!isset($toimipaikka))      $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
+if (!isset($asiakasid)) $asiakasid = "";
+if (!isset($toimittajaid)) $toimittajaid = "";
+if (!isset($tee)) $tee = "";
+if (!isset($laskunro)) $laskunro = "";
+if (!isset($ytunnus)) $ytunnus = "";
+if (!isset($lopetus)) $lopetus = "";
+if (!isset($toim) or $toim == "") $toim = "LASKU";
+if (!isset($tila)) $tila = "";
+if (!isset($tunnus)) $tunnus = "";
+if (!isset($laskunroloppu)) $laskunroloppu = "";
+if (!isset($kerayseran_numero)) $kerayseran_numero = "";
+if (!isset($kerayseran_tilaukset)) $kerayseran_tilaukset = "";
+if (!isset($toimipaikka)) $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : "";
 
+if (empty($kieli) and $yhtiorow['pdf_ruudulle_kieli'] == "") $kieli = $yhtiorow['kieli'];
+
+$kaikkilomakepohjat = FALSE;
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 if ($toim == "OSOITELAPPU") {
@@ -73,8 +75,11 @@ if ($tee == 'NAYTAHTML') {
   if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
     echo "<font class='head'>", t("Yhtiön"), " $yhtiorow[nimi] ", t("tilaus"), " $tunnus:</font><hr>";
   }
-  else {
+  elseif ($toim != "LASKU") {
     echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  }
+  else {
+    echo "<font class='head'>".t("Lasku").":</font><hr>";
   }
 
   require "raportit/naytatilaus.inc";
@@ -432,7 +437,7 @@ if ($tee != 'NAYTATILAUS') {
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>
-      <td class='back'><input type='submit' value='".t("Etsi")."'></td>";
+      <td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td>";
   echo "</table>";
   echo "</form><br>";
 }
@@ -462,7 +467,25 @@ if ($tee == "ETSILASKU") {
               and lasku.toim_postitp  = '$asiakasrow[toim_postitp]' ";
   }
 
+  $reklaprosessi = "";
+  // Pitkä prosessi aina reklamaation ja takuun käsittelyssä
   if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == 'U') {
+    $reklaprosessi = "PITKA";
+  }
+  // Lyhyt prosessi aina reklamaation ja takuun käsittelssä
+  elseif (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+    $reklaprosessi = "LYHYT";
+  }
+  // Pitkä prosessi vain reklamaation käsittelyssä (takuut lyhyellä)
+  elseif ($toim == "REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    $reklaprosessi = "PITKA";
+  }
+  // Lyhyt prosessi takuiden käisttelyssä (reklamaatiot pitkällä)
+  elseif ($toim == "TAKUU" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    $reklaprosessi = "LYHYT";
+  }
+
+  if ($reklaprosessi == "PITKA") {
     $where1 .= " lasku.tila in ('C','L') ";
 
     $where2 .= " and lasku.alatila in('C','D','X')";
@@ -475,7 +498,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
-  if (($toim == "REKLAMAATIO" or $toim == "TAKUU") and $yhtiorow['reklamaation_kasittely'] == '') {
+  if ($reklaprosessi == "LYHYT") {
 
     if ($toim == "TAKUU") {
       $where1 .= " lasku.tila in ('L','N','C') and lasku.tilaustyyppi = 'U' ";
@@ -636,6 +659,7 @@ if ($tee == "ETSILASKU") {
   }
 
   if ($toim == "LASKU" or $toim == "VIENTILASKU") {
+
     //myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
     $where1 .= " lasku.tila = 'U' ";
 
@@ -675,7 +699,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_tapvm) ";
   }
 
-  if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA" or $toim == "DGD") {
+  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD"))) {
     //myyntitilaus. Tulostetaan lähete.
     $where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -896,7 +920,7 @@ if ($tee == "ETSILASKU") {
     $laresult = pupe_query($query);
     $larow = mysql_fetch_assoc($laresult);
 
-    if ($larow["laskunro"] > 0 and $toim != 'DGD') {
+    if ($larow["laskunro"] > 0 and $toim != "DGD") {
       $where2 .= " and lasku.laskunro = '$larow[laskunro]' and lasku.tapvm='$larow[tapvm]' ";
 
       $where3 = "";
@@ -1324,6 +1348,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     $tulostimet[0] = 'VAK_ADR';
   }
 
+  if ($kukarow['kuka'] == "admin" and $kappaleet === "POHJAT") {
+    $kaikkilomakepohjat = TRUE;
+    $kappaleet = 1;
+  }
+
   if ($toim != "OSOITELAPPU" and $kappaleet > 0) {
     foreach ($tulostimet as $tulostin) {
       if ($komento[$tulostin] != 'email' and substr($komento[$tulostin], 0, 12) != 'asiakasemail') {
@@ -1371,6 +1400,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   $rrrresult = pupe_query($query);
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
+
+    if (empty($kieli)) {
+      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $kielires = pupe_query($query);
+      $kielirow = mysql_fetch_assoc($kielires);
+
+      $kieli = $kielirow['kieli'];
+    }
 
     if ($toim == "TARJOUS") {
       if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
@@ -1547,16 +1585,38 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif (@include_once "tulosta_lasku.inc");
       else exit;
 
-      tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
+      if ($kaikkilomakepohjat) {
 
-      if ($tee != 'NAYTATILAUS') {
-        echo t("Lasku tulostuu")."...<br>";
-        $tee = '';
+        $laskut = array();
+
+        foreach (pupesoft_laskutyypit() as $sellaskutyyppi => $sellaskutyyppiteksti) {
+          $laskut[] = array($sellaskutyyppi, "$sellaskutyyppiteksti ($sellaskutyyppi)");
+        }
+
+        foreach ($laskut as $lasku) {
+          $sellaskutyyppi = $lasku[0]."##".$lasku[1];
+
+          tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "", $sellaskutyyppi);
+
+          if ($tee != 'NAYTATILAUS') {
+            echo t("Lasku tulostuu")."...<br>";
+            $tee = '';
+          }
+        }
+      }
+      else {
+        tulosta_lasku($laskurow["tunnus"], $kieli, $tee, $toim, $komento["Lasku"], "", "");
+
+        if ($tee != 'NAYTATILAUS') {
+          echo t("Lasku tulostuu")."...<br>";
+          $tee = '';
+        }
       }
     }
 
     $tilausvahvistus_onkin_kerayslista = '';
     $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
+
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";
@@ -1574,17 +1634,46 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $laskurow['tilausvahvistus'] = $seltvtyyppi;
       }
 
-      $params_tilausvahvistus = array(
-        'tee'            => $tee,
-        'toim'            => $toim,
-        'kieli'            => $kieli,
-        'komento'          => $komento,
-        'laskurow'          => $laskurow,
-        'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-        'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-      );
+      if ($kaikkilomakepohjat) {
 
-      laheta_tilausvahvistus($params_tilausvahvistus);
+        $tilausvahvistukset = array();
+
+        foreach (pupesoft_tilausvahvistustyypit() as $seltvtyyppi => $seltvtyyppiteksti) {
+          $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti ($seltvtyyppi)", "");
+          $tilausvahvistukset[] = array($seltvtyyppi, "$seltvtyyppiteksti. Ei rivihintaa. ($seltvtyyppi)", "ei_rivihintaa");
+        }
+
+        foreach ($tilausvahvistukset as $tilva) {
+          $laskurow['tilausvahvistus'] = $tilva[0];
+          $laskurow['lahetepohjateksti'] = $tilva[1];
+          $naytetaanko_rivihinta = $tilva[2];
+
+          $params_tilausvahvistus = array(
+            'tee'            => $tee,
+            'toim'            => $toim,
+            'kieli'            => $kieli,
+            'komento'          => $komento,
+            'laskurow'          => $laskurow,
+            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+            'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+          );
+
+          laheta_tilausvahvistus($params_tilausvahvistus);
+        }
+      }
+      else {
+        $params_tilausvahvistus = array(
+          'tee'            => $tee,
+          'toim'            => $toim,
+          'kieli'            => $kieli,
+          'komento'          => $komento,
+          'laskurow'          => $laskurow,
+          'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+          'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
+        );
+
+        laheta_tilausvahvistus($params_tilausvahvistus);
+      }
 
       $tee = '';
     }
@@ -1595,7 +1684,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       require_once "tulosta_tarjous.inc";
 
-      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
+      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+        $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+        $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
 
       $tee = '';
     }
@@ -1876,7 +1967,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     }
 
     if ($toim == "LAHETE" or $toim == "KOONTILAHETE" or $toim == "PAKKALISTA") {
-
       if ($toim == "KOONTILAHETE") {
 
         $query = "SELECT lasku.*,
@@ -1904,26 +1994,70 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $koontilahete_tilausrivit = 0;
       }
 
-      $params = array(
-        'laskurow'          => $laskurow,
-        'sellahetetyyppi'       => $sellahetetyyppi,
-        'extranet_tilausvahvistus'   => $extranet_tilausvahvistus,
-        'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-        'tee'            => $tee,
-        'toim'            => $toim,
-        'komento'           => $komento,
-        'lahetekpl'          => "",
-        'kieli'           => $kieli,
-        'koontilahete'        => $koontilahete,
-        'koontilahete_tilausrivit'  => $koontilahete_tilausrivit,
-      );
+      if ($kaikkilomakepohjat) {
 
-      pupesoft_tulosta_lahete($params);
+        $lahetteet = array();
+
+        foreach (pupesoft_lahetetyypit() as $sellahetetyyppi => $sellahetetyyppiteksti) {
+          $lahetteet[] = array($sellahetetyyppi, "$sellahetetyyppiteksti ($sellahetetyyppi)", "");
+        }
+
+        foreach ($lahetteet as $lahete) {
+          $sellahetetyyppi = $lahete[0];
+          $laskurow['lahetepohjateksti'] = $lahete[1];
+          $naytetaanko_rivihinta = $lahete[2];
+
+          $params = array(
+            'laskurow'                 => $laskurow,
+            'sellahetetyyppi'          => $sellahetetyyppi,
+            'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+            'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+            'tee'                      => $tee,
+            'toim'                     => $toim,
+            'komento'                  => $komento,
+            'lahetekpl'                => "",
+            'kieli'                    => $kieli,
+            'koontilahete'             => $koontilahete,
+            'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+          );
+
+          pupesoft_tulosta_lahete($params);
+        }
+      }
+      else {
+        $params = array(
+          'laskurow'                 => $laskurow,
+          'sellahetetyyppi'          => $sellahetetyyppi,
+          'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+          'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+          'tee'                      => $tee,
+          'toim'                     => $toim,
+          'komento'                  => $komento,
+          'lahetekpl'                => "",
+          'kieli'                    => $kieli,
+          'koontilahete'             => $koontilahete,
+          'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+        );
+
+        pupesoft_tulosta_lahete($params);
+      }
 
       $tee = '';
     }
 
     if ($toim == "DGD") {
+
+      $query = "SELECT group_concat(DISTINCT otsikkonro) AS tunnukset
+                FROM rahtikirjat
+                WHERE yhtio                         = '{$kukarow["yhtio"]}'
+                AND rahtikirjanro                   = (SELECT rahtikirjanro
+                                     FROM rahtikirjat
+                                     WHERE yhtio    = '{$kukarow["yhtio"]}'
+                                     AND otsikkonro = '{$laskurow["tunnus"]}')";
+      $rahti_result = pupe_query($query);
+
+      $tunnukset = mysql_fetch_assoc($rahti_result);
+      $tunnukset = $tunnukset["tunnukset"];
 
       require_once "tilauskasittely/tulosta_dgd.inc";
 
@@ -1937,7 +2071,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'tee'      => $tee,
         'toim'      => $toim,
         'norm'      => $norm,
-        'otunnukset'  => $laskurow['tunnus'],
+        'otunnukset' => $tunnukset,
       );
 
       // Aloitellaan DGD:n teko

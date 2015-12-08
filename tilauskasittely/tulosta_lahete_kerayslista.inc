@@ -94,7 +94,12 @@ if (!function_exists('alku_kerayslista')) {
 
       tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-      if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+      $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0);
+      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X')));
+
+      $_ker_rek = ($_ker_chk or $_rek_chk);
+
+      if ($_ker_rek) {
 
         $query = "SELECT count(distinct liitostunnus) asiakkaita
                   FROM lasku
@@ -192,7 +197,7 @@ if (!function_exists('alku_kerayslista')) {
       else {
         list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
         $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),     $thispage, $pieni);
-        $pdf->draw_text(310, 782, $ff_string,              $thispage, $ff_font);
+        $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
       }
 
       $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
@@ -900,7 +905,7 @@ if (!function_exists('rivi_kerayslista')) {
         $kohderow   = mysql_fetch_assoc($kohderesult);
         $varastopaikkakohde = '';
 
-        if ($laskurow['varasto'] == $laskurow['clearing'] and $kohderow['kohde_hyllyalue'] != '' and $kohderow['kohde_hyllynro'] != '' and $kohderow['kohde_hyllyvali'] != '' and $kohderow['kohde_hyllytaso'] != '') {
+        if (($laskurow['varasto'] == $laskurow['clearing'] or $yhtiorow['varastosiirto_kohdepaikka'] == "K") and $kohderow['kohde_hyllyalue'] != '' and $kohderow['kohde_hyllynro'] != '' and $kohderow['kohde_hyllyvali'] != '' and $kohderow['kohde_hyllytaso'] != '') {
           $varastopaikkakohde = $kohderow["kohde_hyllyalue"] . " " . $kohderow["kohde_hyllynro"] . " " . $kohderow["kohde_hyllyvali"] . " " . $kohderow["kohde_hyllytaso"];
           $row['kommentti'] .= "\n".t("Vie paikalle", $kieli)." ".$varastopaikkakohde;
         }
@@ -973,7 +978,7 @@ if (!function_exists('rivi_kerayslista')) {
 
           if (mysql_num_rows($sresult) > 0) {
             while ($saldorow = mysql_fetch_assoc($sresult)) {
-              if ($yhtiorow["saldo_kasittely"] == "T") {
+              if (!empty($yhtiorow["saldo_kasittely"])) {
                 $saldoaikalisa = date("Y-m-d");
               }
               else {
@@ -1080,7 +1085,7 @@ if (!function_exists('rivi_kerayslista')) {
           elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
             $sarjanutunnus = "ostorivitunnus";
           }
-          elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+          elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'G')) {
             $sarjanutunnus = "myyntirivitunnus";
           }
           elseif ($row["varattu"]+$row["kpl"] < 0) {
@@ -1228,7 +1233,15 @@ if (!function_exists('loppu_kerayslista')) {
 
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
-        $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+        $alhqur = "SELECT
+                   puhelin,
+                   fax,
+                   email,
+                   www,
+                   vat_numero
+                   FROM yhtion_toimipaikat
+                   WHERE yhtio='$laskurow[yhtio]'
+                   AND tunnus='$laskurow[yhtio_toimipaikka]'";
         $alhire = pupe_query($alhqur);
 
         if (mysql_num_rows($alhire) == 1) {
@@ -1239,6 +1252,10 @@ if (!function_exists('loppu_kerayslista')) {
           $y_fax      = $alhiro['fax'];
           $y_email    = $alhiro['email'];
           $y_www      = $alhiro['www'];
+
+          if (!empty($alhiro['vat_numero'])) {
+            $y_vatnumero = $alhiro['vat_numero'];
+          }
         }
       }
 

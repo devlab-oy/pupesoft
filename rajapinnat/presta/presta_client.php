@@ -28,6 +28,13 @@ abstract class PrestaClient {
   protected $logger = null;
 
   public function __construct($url, $api_key) {
+    if (empty($url)) {
+      throw new Exception('Presta URL puuttuu');
+    }
+    if (empty($api_key)) {
+      throw new Exception('Presta API key puuttuu');
+    }
+
     $this->logger = new Logger('/tmp/presta_log.txt');
     $this->logger->set_date_format('Y-m-d H:i:s');
 
@@ -40,7 +47,7 @@ abstract class PrestaClient {
   }
 
   /**
-   * 
+   *
    * @return SimpleXMLElement
    * @throws Exception
    */
@@ -88,7 +95,7 @@ abstract class PrestaClient {
      *       ...
      * )
      * );
-     * 
+     *
      * Basically this means all the fetched records are one level too deep.
      * Remove the unnecessary level
      */
@@ -102,7 +109,7 @@ abstract class PrestaClient {
   }
 
   /**
-   * 
+   *
    * @param int $id
    * @return SimpleXMLElement
    * @throws Exception
@@ -141,6 +148,9 @@ abstract class PrestaClient {
     );
 
     try {
+      if (empty($this->schema)) {
+        $this->schema = $this->get_empty_schema();
+      }
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
       $response_xml = $this->ws->add($opt);
       //@TODO Resource IDENTIFIER to log message
@@ -166,7 +176,10 @@ abstract class PrestaClient {
   protected function update($id, array $resource) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id);
-    $xml = $this->generate_xml($resource, $existing_resource)->asXML();
+    if (empty($this->schema)) {
+      $this->schema = $this->get_empty_schema();
+    }
+    $xml = $this->generate_xml($resource, $existing_resource);
 
     return $this->update_xml($id, $xml);
   }
@@ -175,7 +188,7 @@ abstract class PrestaClient {
    * Updates given resource straight from the given xml
    * Xml needs to be in Presta format.
    * This is used for example in PrestaSalesOrders
-   * 
+   *
    * @param int $id
    * @param SimpleXMLElement $xml
    * @return array
@@ -184,19 +197,19 @@ abstract class PrestaClient {
   protected function update_xml($id, SimpleXMLElement $xml) {
     $opt = array(
         'id'       => $id,
-        'resource' => $this->resource_name()
+        'resource' => $this->resource_name(),
     );
 
     try {
-      $opt['putXml'] = $xml;
+      $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
       //@TODO Resource IDENTIFIER to log message
       $this->logger->log("Päivitettiin resurssi: " . $this->resource_name());
     }
     catch (Exception $e) {
       $msg = "Resurssin: "
-        . $this->resource_name()
-        . " {$id} päivittäminen epäonnistui";
+              . $this->resource_name()
+              . " {$id} päivittäminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -205,6 +218,8 @@ abstract class PrestaClient {
   }
 
   /**
+   * $display = array('id','name');
+   * $filter = array('name'=>'John');
    *
    * @param array $display Defines SELECT columns
    * @param array $filters adds WHERE statements. Needs to be key/value pair
@@ -237,8 +252,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Kaikkien resurssin "
-        . $resource
-        . " rivien haku epäonnistui";
+              . $resource
+              . " rivien haku epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -254,7 +269,7 @@ abstract class PrestaClient {
      *    )
      *  )
      * );
-     * 
+     *
      * Basically this means all the fetched records are two level too deep.
      * Remove the unnecessary levels
      */
@@ -299,13 +314,35 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: "
-        . $this->resource_name()
-        . " {$id} poistaminen epäonnistui";
+              . $this->resource_name()
+              . " {$id} poistaminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
 
     return $response_bool;
+  }
+
+  protected function delete_all() {
+    $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
+    $existing_resources = $this->all(array('id'));
+    $existing_resources = array_column($existing_resources, 'id');
+
+    foreach ($existing_resources as $id) {
+      if ($id == 1 and $this->resource_name() == 'categories') {
+        //Root category can not be deleted
+        continue;
+      }
+      try {
+        $this->delete($id);
+      }
+      catch (Exception $e) {
+
+      }
+    }
+
+    $this->logger->log('Kaikki ' . $this->resource_name() . ' poistettu');
+    $this->logger->log('---------End ' . $this->resource_name() . ' delete all---------');
   }
 
   /**
@@ -330,8 +367,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin:"
-        . $this->resource_name()
-        . " {$id} kuvan luonti epäonnistui";
+              . $this->resource_name()
+              . " {$id} kuvan luonti epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -367,10 +404,10 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: "
-        . $this->resource_name()
-        . " {$id} kuvien haku epäonnistui."
-        . " Jos kyseessä HTTP code 500 tarkoittaa se"
-        . ", että resurssille ei löytynyt kuvia.";
+              . $this->resource_name()
+              . " {$id} kuvien haku epäonnistui."
+              . " Jos kyseessä HTTP code 500 tarkoittaa se"
+              . ", että resurssille ei löytynyt kuvia.";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -395,8 +432,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: " . $this->resource_name() . " {$resouce_id}"
-        . " kuvan {$image_id} poistaminen epäonnistui"
-        . "url: {$opt['url']}";
+              . " kuvan {$image_id} poistaminen epäonnistui"
+              . "url: {$opt['url']}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -405,24 +442,24 @@ abstract class PrestaClient {
   }
 
   /**
-   * 
+   *
    * @return string
    */
-  protected function get_url() {
+  protected function url() {
     return $this->url;
   }
 
   /**
-   * 
+   *
    * @return string
    */
-  protected function get_api_key() {
+  protected function api_key() {
     return $this->api_key;
   }
 
   /**
    * Sanitezes string for presta link_rewrite column
-   * 
+   *
    * @param string $string
    * @return string
    */

@@ -74,6 +74,7 @@ else {
 }
 
 // Setataan muuttujat
+$lisa_haku_toimi         = "";
 $lisa_haku_osasto        = "";
 $lisa_haku_try           = "";
 $lisa_haku_tme           = "";
@@ -87,6 +88,7 @@ $lisa_haku_asiakasosasto = "";
 $lisa_haku_asiakasryhma  = "";
 $lisa_haku_asiakaspiiri  = "";
 $lisa_haku_toimipaikka   = "";
+$lisa_haku_maa   = "";
 $lisa_haku_kustp         = "";
 $lisa_haku_kohde         = "";
 $lisa_haku_projekti      = "";
@@ -128,6 +130,7 @@ else {
 }
 
 // Setataan muuttujat
+if (!isset($mul_toimi))         $mul_toimi = array();
 if (!isset($mul_osasto))        $mul_osasto = array();
 if (!isset($mul_try))           $mul_try = array();
 if (!isset($mul_tme))           $mul_tme = array();
@@ -192,8 +195,37 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 }
 
+$mul_toimi = array_filter($mul_toimi);
+
 // jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
-if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or trim($dynaaminen_check) != '') {
+if (count($mul_toimi) > 0 or count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or trim($dynaaminen_check) != '') {
+
+  if (count($mul_toimi) > 0) {
+    $toimittajat = '';
+
+    foreach ($mul_toimi as $toimittaja) {
+      $toimittajat .= "$toimittaja,";
+      $ulisa .= "&mul_toimi[]=".rawurlencode($toimittaja);
+    }
+
+    $toimittajat = trim(substr($toimittajat, 0, -1), ',');
+
+    $query = "SELECT group_concat(quote(tuoteno))
+              FROM tuotteen_toimittajat
+              WHERE yhtio      = '{$yhtiorow['yhtio']}'
+              AND liitostunnus IN ({$toimittajat})";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $tuotenumerot = mysql_result($result, 0);
+      if (trim($tuotenumerot) != '') {
+        $tuotenumerot = mysql_result($result, 0);
+        $lisa_haku_toimi = " and tuote.tuoteno in ($tuotenumerot) ";
+        $lisa .= " and tuote.tuoteno in ($tuotenumerot) ";
+      }
+    }
+  }
+
   if (count($mul_osasto) > 0) {
     $osastot = '';
 
@@ -598,6 +630,24 @@ if (count($mul_toimipaikka) > 0) {
   }
 }
 
+if (count($mul_maa) > 0) {
+  $maat = '';
+  foreach ($mul_maa as $maax) {
+    if (trim($maax) != '') {
+      $maax = trim(mysql_real_escape_string($maax));
+      $maat .= "'$maax',";
+      $ulisa .= "&mul_maa[]=".rawurlencode($maax);
+    }
+  }
+
+  $maat = substr($maat, 0, -1);
+
+  if (trim($maat) != '') {
+    $lisa_haku_maa = " maat.tunnus in ($maat)";
+    $lisa .= " maat.tunnus in ($maat) ";
+  }
+}
+
 if (count($mul_kustp) > 0) {
   $kustpt = '';
 
@@ -714,7 +764,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='clear: both;'><br></div>";
   }
 
-  if ($monivalintalaatikko == "osasto") {
+  if ($monivalintalaatikko == "toimi") {
+
     if (isset($monivalinta_tuotteet)) {
       $query = "SELECT DISTINCT avainsana.selite,
                 $kieli_selitetark,
@@ -731,14 +782,13 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 ORDER BY avainsana.selitetark";
     }
     else {
-      $query = "SELECT DISTINCT avainsana.selite,
-                $kieli_selitetark
-                FROM avainsana
-                WHERE avainsana.yhtio = '$kukarow[yhtio]'
-                and avainsana.laji    = 'OSASTO'
-                and avainsana.kieli   in ('$yhtiorow[kieli]', '')
-                $avainlisa
-                $orderlisa";
+      $query = "SELECT toimi.nimi, toimi.tunnus
+                FROM toimi
+                RIGHT JOIN tuotteen_toimittajat AS tt
+                ON tt.yhtio = toimi.yhtio
+                AND tt.liitostunnus = toimi.tunnus
+                WHERE toimi.yhtio   = '$kukarow[yhtio]'
+                GROUP BY toimi.nimi";
     }
     $sresult = pupe_query($query);
 
@@ -756,26 +806,114 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($sresult) > 1) {
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
+
+      if (in_array("toimi", $monivalintalaatikot_normaali)) {
+        $multiple_lisa = "";
+      }
+
+      echo "<div class='monivalintadiv'><table valign='top'>";
+
+      if ($piirra_otsikot) {
+        echo "<tr><th>";
+
+        echo t("Toimittaja");
+
+        echo "</th></tr>";
+      }
+
+      echo "<tr><td nowrap style='padding:0px'><select name='mul_toimi[]' $multiple_lisa $autosubmit>";
+      echo "<option value=''>".t("Ei valintaa")."</option>";
+
+      while ($sxrow = mysql_fetch_assoc($sresult)) {
+        $sel = '';
+
+        if (count($mul_toimi) > 0) {
+          if (in_array(strtolower(trim($sxrow['tunnus'])), $mul_toimi)) {
+            $sel = 'SELECTED';
+          }
+        }
+
+        echo "<option value='".strtolower($sxrow['tunnus'])."' $sel>";
+
+        echo "$sxrow[nimi]</option>";
+      }
+
+      echo "</select></td>";
+      echo "</tr>";
+
+      echo "</table></div>";
+    }
+  }
+
+  if ($monivalintalaatikko == "osasto") {
+    if (isset($monivalinta_tuotteet)) {
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark,
+                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND avainsana.selite = tuote.osasto AND avainsana.laji = 'OSASTO' AND avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                AND tuote.tuoteno in ($monivalinta_tuotteet)
+                GROUP BY 1,2
+                HAVING naytetaanko > 0
+                ORDER BY avainsana.selitetark";
+    }
+    elseif ($lisa_haku_toimi == "") {
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark
+                FROM avainsana
+                WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                and avainsana.laji    = 'OSASTO'
+                and avainsana.kieli   in ('$yhtiorow[kieli]', '')
+                $avainlisa
+                $orderlisa";
+    }
+    else {
+      $query = "SELECT distinct avainsana.selite,
+                $kieli_selitetark
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.osasto = avainsana.selite and avainsana.laji = 'OSASTO' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                $orderlisa";
+    }
+    $sresult = pupe_query($query);
+
+    if (mysql_num_rows($sresult) == 0) {
+      $query = "SELECT DISTINCT tuote.osasto selite, tuote.osasto selitetark
+                FROM tuote
+                WHERE tuote.yhtio  = '$kukarow[yhtio]'
+                and tuote.osasto  != ''
+                $lisa_haku_toimi
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY 1, 2";
+      $sresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($sresult) > 1) {
+
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("osasto", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
       }
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Osasto");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -826,6 +964,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -835,7 +974,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 HAVING naytetaanko > 0
                 ORDER BY avainsana.selitetark";
     }
-    elseif ($lisa_haku_osasto == "") {
+    elseif ($lisa_haku_toimi == "" and $lisa_haku_osasto == "") {
       $query = "SELECT DISTINCT avainsana.selite,
                 $kieli_selitetark
                 FROM avainsana
@@ -845,12 +984,13 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $avainlisa
                 $orderlisa";
     }
-    else {
+    elseif ($lisa_haku_toimi != "" or $lisa_haku_osasto != "") {
       $query = "SELECT distinct avainsana.selite,
                 $kieli_selitetark
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -864,6 +1004,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 WHERE tuote.yhtio  = '$kukarow[yhtio]'
                 and tuote.try     != ''
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -874,26 +1015,18 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($sresult) > 1) {
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("try", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
       }
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Tuoteryhmä");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -944,6 +1077,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $kieltolisa
@@ -955,7 +1089,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 ORDER BY avainsana.selite";
       $tmsresult = pupe_query($query);
     }
-    elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
+    elseif ($lisa_haku_toimi == "" and $lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
       $query = "SELECT avainsana.selite as tme,
                 $kieli_selite
                       FROM avainsana
@@ -966,13 +1100,14 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                       ORDER BY avainsana.jarjestys, avainsana.selite";
       $tmsresult = pupe_query($query);
     }
-    elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
+    elseif ($lisa_haku_toimi != "" or $lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
       $query = "SELECT distinct avainsana.selite as tme,
                 $kieli_selite
                 FROM tuote
                 {$lisa_dynaaminen["tuote"]}
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $lisa_haku_malli
@@ -990,6 +1125,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $lisa_parametri
                 WHERE tuote.yhtio      = '$kukarow[yhtio]'
                 and tuote.tuotemerkki != ''
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $kieltolisa
@@ -1001,27 +1137,19 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Tuotemerkki");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
 
       echo "<tr><td nowrap style='padding:0px'>";
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("tuotemerkki", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -1060,7 +1188,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   if ($monivalintalaatikko == "malli/mallitark" or $monivalintalaatikko == "malli") {
     unset($sxresult);
 
-    if (($lisa_haku_osasto != "" or $lisa_haku_try != "")) {
+    if (($lisa_haku_toimi != "" or $lisa_haku_osasto != "" or $lisa_haku_try != "")) {
 
       if (($lisa_haku_tme != '' or $lisa_haku_try != '') and ($monivalintalaatikko == "malli" or (!in_array("malli", $monivalintalaatikot) and $monivalintalaatikko == 'malli/mallitark'))) {
         // malli dropdown
@@ -1071,6 +1199,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1101,6 +1230,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     $lisa_parametri
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1116,6 +1246,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     WHERE tuote.yhtio  = '$kukarow[yhtio]'
                     and tuote.malli   != ''
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1128,27 +1259,17 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>";
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "<label>";
-            }
-
             echo t("Malli");
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "</label>";
-            }
-
             echo "</th></tr>";
           }
 
           echo "<tr><td nowrap style='padding:0px'>";
 
-          $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+          $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
           if (in_array("malli", $monivalintalaatikot_normaali)) {
             $multiple_lisa = "";
@@ -1195,6 +1316,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1226,6 +1348,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     $lisa_parametri
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1242,6 +1365,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     WHERE tuote.yhtio        = '$kukarow[yhtio]'
                     and tuote.mallitarkenne != ''
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1254,27 +1378,17 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>";
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "<label>";
-            }
-
             echo t("Mallitarkenne");
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "</label>";
-            }
-
             echo "</th></tr>";
           }
 
           echo "<tr><td nowrap style='padding:0px'>";
 
-          $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+          $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
           if (in_array("mallitarkenne", $monivalintalaatikot_normaali)) {
             $multiple_lisa = "";
@@ -1398,7 +1512,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
             echo "</table></div>";
           }
 
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>$mul_otsik {$looppirow['syvyys']}</th></tr>";
@@ -1408,7 +1522,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           echo "<select name='mul_{$tree}{$looppirow['syvyys']}[]' ";
 
           if (is_array($monivalintalaatikot_normaali) and !in_array("dynaaminen_".$tree, $monivalintalaatikot_normaali)) {
-            echo " multiple='multiple' size='7' style='width: 100%;' ";
+            echo " multiple='multiple' class='multipleselect' size='7' ";
           }
 
           echo "{$autosubmit}>";
@@ -1544,21 +1658,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-        echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+        echo "<div class='monivalintadiv'><table valign='top'>";
 
         if ($piirra_otsikot) {
           echo "<tr><th>";
-
-          if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-            echo "<label>";
-          }
-
           echo t_avainsana("PARAMETRI", "", " and avainsana.selite='$parametri'", "", "", "selitetark");
-
-          if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-            echo "</label>";
-          }
-
           echo "</th></tr>";
         }
 
@@ -1566,7 +1670,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         echo "<select name='mul_{$parametri}[]' ";
 
         if (!in_array("parametri_$parametri", $monivalintalaatikot_normaali)) {
-          echo " multiple='multiple' size='7' style='width: 100%;' ";
+          echo " multiple='multiple' class='multipleselect' size='7' ";
         }
 
         if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
@@ -1605,7 +1709,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "laskumyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Myyjä"), "</th></tr>";
@@ -1621,7 +1725,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1653,7 +1757,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakastila") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakastila"), "</th></tr>";
@@ -1663,7 +1767,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASTILA");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakastila[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakastila[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1697,7 +1801,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "tuotemyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Tuotemyyjä"), "</th></tr>";
@@ -1713,7 +1817,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1745,7 +1849,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasmyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasmyyjä"), "</th></tr>";
@@ -1761,7 +1865,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1793,7 +1897,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "tuoteostaja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Tuoteostaja"), "</th></tr>";
@@ -1808,7 +1912,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1840,7 +1944,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasosasto") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasosasto"), "</th></tr>";
@@ -1850,7 +1954,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASOSASTO");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1884,7 +1988,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasryhma") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasryhmä"), "</th></tr>";
@@ -1894,7 +1998,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASRYHMA");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1928,7 +2032,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakaspiiri") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakaspiiri"), "</th></tr>";
@@ -1938,7 +2042,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("PIIRI");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakaspiiri[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakaspiiri[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1981,13 +2085,13 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($toimipaikka_result) > 0) {
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
+      echo "<div class='monivalintadiv'>";
       echo "<table valign='top'>";
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Toimipaikka"), "</th></tr>";
       }
       echo "<tr>";
-      echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+      echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
 
       while ($toimipaikka = mysql_fetch_assoc($toimipaikka_result)) {
@@ -2020,6 +2124,56 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     }
   }
 
+  if ($monivalintalaatikko == "maa") {
+    $query = "SELECT distinct koodi, nimi, MIN(tunnus) id
+              FROM maat
+              WHERE koodi != ''
+              AND nimi != ''
+              GROUP BY 1,2
+              ORDER BY 1,2";
+    $maa_res = pupe_query($query);
+
+    if (mysql_num_rows($maa_res) > 0) {
+
+      echo "<div class='monivalintadiv'>";
+      echo "<table valign='top'>";
+      if ($piirra_otsikot) {
+        echo "<tr><th>", t("Maa"), "</th></tr>";
+      }
+      echo "<tr>";
+      echo "<td nowrap style='padding:0px'><select name='mul_maa[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
+      echo "<option value=''>".t("Ei valintaa")."</option>";
+
+      while ($maa_row = mysql_fetch_assoc($maa_res)) {
+        $sel = '';
+        if (count($mul_maa) > 0) {
+          if (in_array(trim($maa_row['id']), $mul_maa)) {
+            $sel = 'SELECTED';
+          }
+        }
+
+        echo "<option value='{$maa_row['id']}' $sel>{$maa_row['nimi']}" . "</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+        $ruksitchk = "";
+
+        if ($ruksit["maa"] != "") {
+          $ruksitchk = "CHECKED";
+        }
+
+        echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[maa]' size='2' value='$jarjestys[maa]'> ".t("Maittain")." <input type='checkbox' name='ruksit[maa]' value='maa' $ruksitchk><br>";
+
+        echo "</th></tr>";
+      }
+
+      echo "</table>";
+      echo "</div>";
+    }
+  }
+
   if ($monivalintalaatikko == "kustp") {
 
     echo "<script language='javascript'>
@@ -2040,9 +2194,16 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
       </script> ";
 
-    $query = "SELECT tunnus, nimi, koodi, isa_tarkenne
+    $omakustprajaus = "";
+
+    if (!empty($vainomakustp)) {
+      $omakustprajaus = " and kustannuspaikka.tunnus = {$kukarow["osasto"]} ";
+    }
+
+    $query = "SELECT tunnus, nimi, koodi, ifnull(isa_tarkenne, 0) as isa_tarkenne
               FROM kustannuspaikka
               WHERE yhtio   = '$kukarow[yhtio]'
+              {$omakustprajaus}
               and kaytossa != 'E'
               and tyyppi    = 'K'
               ORDER BY isa_tarkenne, koodi+0, koodi, nimi";
@@ -2087,7 +2248,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     }
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Kustannuspaikka"), "</th></tr>";
@@ -2097,7 +2258,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<td nowrap style='padding:0px'>";
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("kustp", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -2167,7 +2328,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Kohde"), "</th></tr>";
@@ -2175,7 +2336,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr>";
 
-      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' " .
+      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' class='multipleselect' " .
         "size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
       echo "<option value=''>" . t("Ei valintaa") . "</option>";
       echo "<option value='0'>" . t("Ei kohdetta") . "</option>";
@@ -2224,7 +2385,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Projekti"), "</th></tr>";
@@ -2232,7 +2393,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr>";
 
-      echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+      echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
       echo "<option value='0'>" . t("Ei projektia") . "</option>";
 

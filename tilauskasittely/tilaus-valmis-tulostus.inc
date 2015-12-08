@@ -51,7 +51,7 @@ else {
   $siirtoalatila = "KJ";
 }
 
-if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
   $queryc = "SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
              FROM lasku
              WHERE tunnus in ($tilausnumeroita)
@@ -88,7 +88,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
 
   // P‰ivitet‰‰n tilaus pois jonosta ja avataan lukot
-  if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+  if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
     $query = "UPDATE lasku SET
               alatila     = 'C',
               lahetepvm   = now(),
@@ -251,8 +251,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
     $kerayslistatyyppi = "EXCEL1";
   }
-
-  $tyyppi = "";
 
   // ker‰yslistalle ei oletuksena tulosteta saldottomia tuotteita
   if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -461,65 +459,14 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $params_kerayslista["tots"] = 1;
   $params_kerayslista = loppu_kerayslista($params_kerayslista);
 
-  //tulostetaan faili ja valitaan sopivat printterit
-  if ($laskurow["varasto"] == 0) {
-    $query = "SELECT *
-              from varastopaikat
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tyyppi  != 'P'
-              order by alkuhyllyalue,alkuhyllynro
-              limit 1";
-  }
-  else {
-    $query = "SELECT *
-              from varastopaikat
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$laskurow[varasto]'";
-  }
-  $prires = pupe_query($query);
+  $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
-  if (mysql_num_rows($prires) > 0) {
-    $prirow = mysql_fetch_assoc($prires);
-
-    $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
-
-    //haetaan optimaalinen tulostin t‰lle l‰hetteelle
-    $tilaus  = $tilausnumeroita;
-    $varasto = $laskurow["varasto"];
-
-    require "varaston_tulostusalue.inc";
-
-    if (isset($kirjoitin) and $kirjoitin != '') {
-      $apuprintteri = $kirjoitin;
-    }
-
-    // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-    if (!empty($laskurow['yhtio_toimipaikka'])) {
-      $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
-                           and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
-                           and avainsana.selitetark_2 = 'printteri1'";
-
-      $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
-
-      if (!empty($tp_tulostin)) {
-        $apuprintteri = $tp_tulostin;
-      }
-    }
-    // k‰sinvalittu printteri
-    if (isset($valittu_tulostin) and $valittu_tulostin != '') {
-      $apuprintteri = $valittu_tulostin;
-    }
-
-    //haetaan l‰hetteen tulostuskomento
-    $query = "SELECT komento
-              FROM kirjoittimet
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$apuprintteri'";
-    $kirres = pupe_query($query);
-    $kirrow = mysql_fetch_assoc($kirres);
-
-    $komento = $kirrow['komento'];
-  }
+  $komento = hae_lahete_printteri(
+    $laskurow['varasto'],
+    $laskurow['yhtio_toimipaikka'],
+    $tilausnumeroita,
+    $valittu_tulostin
+  );
 
   if ($komento != "") {
     //tulostetaan sivu
@@ -564,7 +511,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     echo "<br><font class='error'>".t("L‰hetteen tulostus ep‰onnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("K‰y tulostamassa l‰hete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
     $virheellinen = "X";
 
-    if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+    if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
       $query = "UPDATE lasku SET
                 alatila     = 'B',
                 lahetepvm   = '0000-00-00 00:00:00',

@@ -337,6 +337,20 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
     $rivihintasumma = 0;
     $kate_yht      = 0;
 
+    $lopetus = $palvelin2;
+    $lopetus .= "raportit/asiakkaan_tilaukset_tuotteittain.php";
+    $lopetus .= "////tee=$tee";
+    $lopetus .= "//toim=$toim";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//tuoteno=".urlencode($tuoteno);
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//asiakasid=$asiakasid";
+
     while ($row = mysql_fetch_array($result)) {
 
       $excelsarake = 0;
@@ -370,7 +384,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
           }
         }
         elseif (mysql_field_name($result, $i) == 'tuoteno') {
-          echo "<$ero valign='top' $class><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></$ero>";
+          echo "<$ero valign='top' $class><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."&lopetus=$lopetus'>$row[$i]</a></$ero>";
         }
         elseif (mysql_field_name($result, $i) == 'kate') {
           if ($row["var"] == "P") {
@@ -408,7 +422,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               $kate_eur  = $row["kate"];
               $kate_yht += $kate_eur;
             }
-            elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
+            elseif ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S")) {
               if ($kpl > 0) {
                 //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
                 $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);

@@ -18,6 +18,7 @@ if ($tee != '') {
              tilausrivi WRITE,
              tilausrivi as t WRITE,
              tilausrivi as tilausrivi_osto READ,
+             tilausrivin_lisatiedot AS tt WRITE,
              sarjanumeroseuranta WRITE,
              sarjanumeroseuranta_arvomuutos READ,
              lasku WRITE,
@@ -309,6 +310,8 @@ if ($tee == 'MUUTA') {
   else {
     $tee = 'M';
   }
+
+  if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 }
 
 // Siirretään saldo, jos se on vielä olemassa
@@ -386,12 +389,11 @@ if ($tee == 'N') {
   // Tarkistetaan sarjanumeroseuranta
   // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
   // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
-  // U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
   // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
   // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
   // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
-  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
+  $query = "SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','V'), 1, 0)) sarjat,
             sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
             FROM tuote
             WHERE tuoteno            = '$tuoteno'
@@ -508,7 +510,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] > $myytavissa and $kutsuja != "vastaanota.php") {
+      if ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirtää. Saldo ei riittänyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
@@ -571,6 +573,9 @@ if ($tee == 'N') {
     $uusitee = "M";
   }
 
+  if (!isset($_poikkeavalaskutuspvm)) $_poikkeavalaskutuspvm = "";
+  if (!isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = "";
+
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
     $params = array(
@@ -585,6 +590,7 @@ if ($tee == 'N') {
       'selite' => !isset($selite) ? '' : $selite,
       'tun' => !isset($tun) ? 0 : $tun,
       'poikkeavalaskutuspvm' => $_poikkeavalaskutuspvm,
+      'kohdepaikasta_oletuspaikka' => $kohdepaikasta_oletuspaikka,
     );
 
     hyllysiirto($params);
@@ -828,7 +834,7 @@ if ($tee == 'M' or $tee == 'Q') {
     echo "<table><tr>";
     echo "<td>".t("Valitse listasta").":</td>";
     echo "<td>$ulos</td>";
-    echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+    echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
     echo "</tr></table>";
     echo "</form>";
 
@@ -857,7 +863,7 @@ if ($tee == 'M') {
 
   echo "<th>$tuoteno - ".t_tuotteen_avainsanat($trow, 'nimitys')."</th>";
   echo "<td>";
-  echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
+  echo "<input type='submit' value='".t("Edellinen tuote")."'>";
   echo "</td>";
   echo "</form>";
 
@@ -867,7 +873,7 @@ if ($tee == 'M') {
   echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td>";
-  echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
+  echo "<input type='submit' value='".t("Seuraava tuote")."'>";
   echo "</td>";
   echo "</form>";
   echo "</tr>";
@@ -893,14 +899,19 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka LEFT JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-            concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            inventointilistarivi.tunnus as inventointilistatunnus,
+            varastopaikat.nimitys,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus  = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno     = '$tuoteno'
-            and tuotepaikat.hyllyalue  != '!!M'
+              AND varastopaikat.tunnus                    = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno                       = '$tuoteno'
+            and tuotepaikat.hyllyalue                    != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult1 = pupe_query($query);
 
@@ -914,7 +925,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";
@@ -934,14 +945,19 @@ if ($tee == 'M') {
 
   // Saldot per varastopaikka JOIN
   $query = "SELECT tuotepaikat.*,
-            varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-            concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-             FROM tuotepaikat
+            varastopaikat.nimitys,
+            inventointilistarivi.tunnus as inventointilistatunnus,
+            if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+            concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
+            FROM tuotepaikat
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              AND varastopaikat.tunnus  = tuotepaikat.varasto)
-            WHERE tuotepaikat.yhtio     = '$kukarow[yhtio]'
-            and tuotepaikat.tuoteno     = '$tuoteno'
-            and tuotepaikat.hyllyalue  != '!!M'
+              AND varastopaikat.tunnus                    = tuotepaikat.varasto)
+            LEFT JOIN inventointilistarivi ON (inventointilistarivi.yhtio = tuotepaikat.yhtio
+              AND inventointilistarivi.tuotepaikkatunnus  = tuotepaikat.tunnus
+              AND inventointilistarivi.tila               = 'A')
+            WHERE tuotepaikat.yhtio                       = '$kukarow[yhtio]'
+            and tuotepaikat.tuoteno                       = '$tuoteno'
+            and tuotepaikat.hyllyalue                    != '!!M'
             ORDER BY sorttauskentta";
   $paikatresult2 = pupe_query($query);
 
@@ -952,7 +968,7 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["inventointilista_aika"] > 0) {
+      if ($saldorow["inventointilistatunnus"] !== null) {
         $invalisa1 = "DISABLED";
         $invalisa2 = " (".t("Lukittu, inventointi kesken").")";
         $saldorow["tunnus"] = "";
@@ -1139,24 +1155,29 @@ if ($tee == 'M') {
         echo "<td></td><td></td><td></td><td></td>";
       }
 
+      $chk = $poistoteksti = "";
+
+      if ($saldorow["poistettava"] != "") {
+        $chk = "CHECKED";
+        $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla, eikä tuotepaikalle ole avoimia rivejä").")";
+      }
+
       // Ei näytetä boxia, jos sitä ei saa käyttää
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
       elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0) {
 
-        $chk = $poistoteksti = "";
-
-        if ($saldorow["poistettava"] != "") {
-          $chk = "CHECKED";
-          $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla").")";
-        }
-
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
             <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
       }
       else {
-        echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'></td>";
+
+        if ($saldorow["poistettava"] != "") {
+          $poistoteksti .= "<br>(".t("Voit myös poistaa tuotepaikan tästä heti").")";
+        }
+
+        echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'> {$poistoteksti}</td>";
       }
 
       echo "</tr>";

@@ -346,7 +346,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
   // tavallinen laskenta.. VARATTU PITÄÄ OLLA != 0 ja varastoon-kenttä 1!
   // jos varastoon-kentässä on 0 niin tätä riviä ei haluttu vielä viedä varastoon
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
+  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -382,7 +382,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
   }
 
   // Näytetään ruudulla
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
+  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -706,7 +706,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   $ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
   //Keskihankintahintaa ylläpidetään vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
-  if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+  if ($tuorow["sarjanumeroseuranta"] == "S") {
     //Laitetaan kehahintamuuttujaan tämän keikan ostohinta jotta tapahtumat näyttäisivät fiksuja lukuja
     $kehahin = $ohinta;
   }
@@ -769,7 +769,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                and tunnus  = '$tilrivirow[tunnus]'";
     $resultxxx = pupe_query($query);
 
-    if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+    if ($tuorow["sarjanumeroseuranta"] == "S") {
       $kehalis = "";
     }
     else {
@@ -828,7 +828,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
               hyllynro   = '$tilrivirow[hyllynro]',
               hyllytaso  = '$tilrivirow[hyllytaso]',
               hyllyvali  = '$tilrivirow[hyllyvali]',
-              selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
+              selite     = '$tilrivirow[nimi] $tilrivirow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
               laatija    = '$kukarow[kuka]',
               rivitunnus = '$tilrivirow[tunnus]',
               laadittu   = '$varastoonvientipva'";
@@ -1188,7 +1188,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   $varastoon_msg .= "<td align='right' valign='top'>".sprintf('%.6f', $ohinta)."</td>
             <td align='right' valign='top'>".sprintf('%.6f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
-  if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+  if ($tuorow["sarjanumeroseuranta"] == "S") {
     $varastoon_msg .= "  <td align='right'></td>";
   }
   else {
@@ -1382,23 +1382,14 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
         $toimittajanrores = pupe_query($query);
         $toimittajanrorow = mysql_fetch_assoc($toimittajanrores);
 
-        $query = "SELECT status
-                  FROM asn_sanomat
+        $query = "UPDATE asn_sanomat SET
+                  status               = 'X'
                   WHERE yhtio          = '$kukarow[yhtio]'
                   AND toimittajanumero = '$toimittajanrorow[toimittajanro]'
                   AND asn_numero       = '$kulurow[laskunro]'
-                  AND status           = ''";
+                  AND status           = ''
+                  AND laji             = 'tec'";
         $asnsres = pupe_query($query);
-
-        if (mysql_num_rows($asnsres) > 0) {
-          $query = "UPDATE asn_sanomat SET
-                    status               = 'X'
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    AND toimittajanumero = '$toimittajanrorow[toimittajanro]'
-                    AND asn_numero       = '$kulurow[laskunro]'
-                    AND status           = ''";
-          $asnsres = pupe_query($query);
-        }
       }
     }
   }

@@ -113,12 +113,34 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, 6, 4));
   }
 
-  // Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
-  $viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
+  if (substr($juokseva, 0, 2) != "CE" or substr($juokseva, -2, 2) != "FI") {
+    // Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
+    $viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
+  }
+  else {
+    $viiva = $juokseva;
+  }
 
-  $viiva1   = "CE".$viiva."FI";
-  $viivaedi = "CE".$viiva."FI";
-  $viiva2   = "*CE".$viiva."FI*";
+  if (substr($viiva, 0, 2) != "CE" and substr($viiva, -2, 2) != "FI") {
+    $viiva1   = "CE".$viiva."FI";
+    $viivaedi = "CE".$viiva."FI";
+    $viiva2   = "*CE".$viiva."FI*";
+  }
+  elseif (substr($viiva, 0, 2) != "CE") {
+    $viiva1   = "CE".$viiva;
+    $viivaedi = "CE".$viiva;
+    $viiva2   = "*CE".$viiva."*";
+  }
+  elseif (substr($viiva, -2, 2) != "FI") {
+    $viiva1   = $viiva."FI";
+    $viivaedi = $viiva."FI";
+    $viiva2   = "*".$viiva."FI*";
+  }
+  else {
+    $viiva1   = $viiva;
+    $viivaedi = $viiva;
+    $viiva2   = "*".$viiva."*";
+  }
 
   // erotellaan spacella jokainen rahtikirjanumero
   $rahtikirjanro .= "$viiva1 ";
@@ -193,7 +215,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 
   $pdf->draw_text(18,  485,  "Recipient (name and address) / Destinataire (nom et adresse)",    $firstpage, $pieni);
-  $pdf->draw_text(120, 485,  $rakir_row["puhelin"],             $firstpage, $pieni);
+  $pdf->draw_text(120, 485,  $rakir_row["toim_puh"],             $firstpage, $pieni);
   $pdf->draw_text(18,  475,  $rakir_row["toim_nimi"],             $firstpage, $iso);
   $pdf->draw_text(18,  465,  $rakir_row["toim_nimitark"],         $firstpage, $iso);
   $pdf->draw_text(18,  455,  $rakir_row["toim_osoite"],           $firstpage, $iso);
@@ -205,7 +227,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $logoparam['scale'] = 0.12;
   $pdf->image_place($image, 418, 18, $firstpage, $logoparam);
 
-  $pdf->draw_text(35, 420,  $rakir_row["puhelin"],             $firstpage, $iso);
+  $pdf->draw_text(35, 420,  $rakir_row["toim_puh"],             $firstpage, $iso);
 
   $pdf->draw_text(115,  425,  "VAT No /",    $firstpage, $pieni);
   $pdf->draw_text(115,  420,  "No de T.V.A.",    $firstpage, $pieni);
@@ -268,7 +290,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(30,  380,  "treat item as abandoned",          $firstpage, $pieni);
   $pdf->draw_text(30,  375,  "traiter l'envoi comme abandonné",      $firstpage, $pieni);
 
-
+  $pdf->draw_rectangle(385, 128, 375, 138,                   $firstpage, $rectparam);
   $pdf->draw_text(140,  380,  "return to the sender immediately",      $firstpage, $pieni);
   $pdf->draw_text(140,  375,  "renvoyer à l'expéditeur immédiatement",  $firstpage, $pieni);
 

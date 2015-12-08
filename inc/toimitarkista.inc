@@ -150,7 +150,7 @@ if (!function_exists("toimitarkista")) {
           require "tarkistaytunnus.inc";
 
           if ($ok == 0) {
-            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrityshaku.aspx?path=1547%3b1631%3b1678&kielikoodi=1'>".t("täältä")."</a>.";
+            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='https://tietopalvelu.ytj.fi/yrityshaku.aspx'>".t("täältä")."</a>.";
           }
           else {
             $t[$i] = $ytunnus;
@@ -201,8 +201,11 @@ if (!function_exists("toimitarkista")) {
     }
 
     if ($fieldname == "email" and trim($t[$i]) != '') {
-      // Tarkistetaan sähköpostiosoite
-      $email_virhe = tarkista_email($t[$i]);
+      $email_virhe = "";
+      // Tarkistetaan sähköpostiosoite (jos ei olla Virossa)
+      if ($yhtiorow["maa"] != "EE") {
+        $email_virhe = tarkista_email($t[$i]);
+      }
 
       if ($email_virhe != "") {
         $virhe[$i] = t("Sähköpostin domain ei löydy")."! ($email_virhe)";

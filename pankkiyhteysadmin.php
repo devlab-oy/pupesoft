@@ -10,6 +10,7 @@ echo "<hr>";
 sepa_pankkiyhteys_kunnossa();
 
 $tee = empty($tee) ? '' : $tee;
+$company_name = empty($company_name) ? '' : $company_name;
 $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
@@ -149,6 +150,91 @@ if ($tee == "vaihda_salasana_form") {
   echo "</form>";
 }
 
+// Haetaan uusi pankin sertifikaatti, oikeellisuustarkastus
+if ($tee == "pankin_sertifikaatti_hae") {
+  if (empty($salasana)) {
+    virhe("Salasana t‰ytyy antaa!");
+    $virheet_count++;
+  }
+  else {
+    // Haetaan pankkiyhteys t‰ss‰, t‰t‰ k‰ytet‰‰n salasanan vaihdossa
+    $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+    if ($pankkiyhteys === false) {
+      virhe("Antamasi salasana on v‰‰r‰!");
+      $virheet_count++;
+    }
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "pankin_sertifikaatti";
+  }
+}
+
+// Haetaan ja tallennetaan uusi pankin sertifikaatti
+if ($tee == "pankin_sertifikaatti_hae") {
+
+  $params = array(
+    "bank" => $pankkiyhteys['bank'],
+    "customer_id" => $pankkiyhteys['customer_id'],
+  );
+
+  $tunnukset_pankista = sepa_get_bank_certificate($params);
+
+  if (!$tunnukset_pankista) {
+    virhe("Sertifikaatin hakeminen ep‰onnistui!");
+  }
+  else {
+    // Salataan sertifikaatit
+    $bec = salaa($tunnukset_pankista["bank_encryption_certificate"], $salasana);
+    $brc = salaa($tunnukset_pankista["bank_root_certificate"], $salasana);
+
+    // Haetaan sertifikaattien expire datet
+    $_temp = parse_sertificate($tunnukset_pankista["bank_encryption_certificate"]);
+    $bec_time = $_temp['valid_to'];
+
+    $_temp = parse_sertificate($tunnukset_pankista["bank_root_certificate"]);
+    $brc_time = $_temp['valid_to'];
+
+    $query = "UPDATE pankkiyhteys SET
+              bank_encryption_certificate          = '{$bec}',
+              bank_root_certificate                = '{$brc}',
+              bank_encryption_certificate_valid_to = '{$bec_time}',
+              bank_root_certificate_valid_to       = '{$brc_time}'
+              WHERE yhtio                          = '{$kukarow['yhtio']}'
+              AND tunnus                           = {$pankkiyhteys_tunnus}";
+    $result = pupe_query($query);
+
+    ok("Pankin sertifikaatit p‰ivitetty!");
+    echo "<br>";
+  }
+
+  $tee = "";
+}
+
+// Haetaan uusi pankin sertifikaatti, kysyt‰‰n salasana
+if ($tee == "pankin_sertifikaatti") {
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='pankin_sertifikaatti_hae'/>";
+  echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'/>";
+
+  echo "<table>";
+
+  echo "<tr>";
+  echo "<th><label for='salasana'>";
+  echo t("Salasana");
+  echo "</label></th>";
+  echo "<td><input type='password' name='salasana'></td>";
+  echo "</tr>";
+
+  echo "</table>";
+  echo "<br>";
+
+  echo "<input type='submit' value='" . t("Jatka") . "'/>";
+  echo "</form>";
+}
+
 // Uuden pankkiyhteyden oikeellisuustarkistus
 if ($tee == "luo") {
   $virheet_count = 0;
@@ -183,9 +269,15 @@ if ($tee == "luo") {
 
 // Haetaan sertifikaatti jos PIN on annettu
 if ($tee == "luo" and $pin != '') {
+  $csr_params = array(
+    "company_name" => $company_name,
+    "customer_id"  => $customer_id,
+    "pankki"       => $bank,
+  );
+
   // Generoidaan allekirjoitusta ja salausta varten private key ja certificate-signing-request
-  $generoidut_tunnukset1 = generoi_private_key_ja_csr();
-  $generoidut_tunnukset2 = generoi_private_key_ja_csr();
+  $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
+  $generoidut_tunnukset2 = generoi_private_key_ja_csr($csr_params);
 
   $signing_private_key = $generoidut_tunnukset1["private_key"];
   $encryption_private_key = $generoidut_tunnukset2["private_key"];
@@ -297,6 +389,17 @@ if ($tee == "") {
     echo "</tr>";
 
     echo "<tr>";
+    echo "<th>";
+    echo "<label for='company_name'>";
+    echo t("Yrityksen nimi (Sama kuin sopimuksessa)");
+    echo "</label>";
+    echo "</th>";
+    echo "<td>";
+    echo "<input type='text' name='company_name' id='company_name' value='{$company_name}'>";
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
     echo "<th><label for='customer_id'>";
     echo t("Asiakastunnus");
     echo "</label></th>";
@@ -397,6 +500,7 @@ if ($tee == "") {
     echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
     echo "<th></th>";
     echo "<th></th>";
+    echo "<td class='back'></td>";
     echo "</tr>";
 
     echo "</thead>";
@@ -452,6 +556,17 @@ if ($tee == "") {
       echo "</form>";
       echo "</td>";
 
+      // Danskella voi hakea uuden pankin sertifikaatin
+      if ($pankkiyhteys['pankki'] == "DABAFIHH") {
+        echo "<td class='back'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tee' value='pankin_sertifikaatti'/>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+        echo "<input type='submit' value='" . t("P‰ivit‰ pankin sertifikaatit") . "'/>";
+        echo "</form>";
+        echo "</td>";
+      }
+
       echo "</tr>";
     }
 
@@ -459,3 +574,5 @@ if ($tee == "") {
     echo "</table>";
   }
 }
+
+require "inc/footer.inc";

@@ -60,8 +60,11 @@ if (isset($tee) and $tee == "apix_siirto") {
 
       $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
+      $tilausnumero = hae_tilausnumero($invoice_number[1]);
+      $liitteet     = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+
       // Laitetaan lasku lähetysjonoon
-      echo apix_queue($apix_finvoice, $invoice_number[1], $kieli);
+      echo apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);
     }
   }
 }
@@ -182,7 +185,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
   //Haetaan tarvittavat funktiot aineistojen tekoa varten
   require "verkkolasku_elmaedi.inc";
-  require "verkkolasku_finvoice.inc";
+
+  if ($yhtiorow["finvoice_versio"] == "2") {
+    require "verkkolasku_finvoice_201.inc";
+  }
+  else {
+    require "verkkolasku_finvoice.inc";
+  }
+
   require "verkkolasku_pupevoice.inc";
 
   if (!isset($kieli)) {
@@ -604,7 +614,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
               // lasketaan isätuotteen riville lapsien hinnat yhteen
               $query = "SELECT
                         sum(tilausrivi.rivihinta) rivihinta,
-                        round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
+                        round(sum(tilausrivi.hinta
+                            * tilausrivi.kpl
+                            * {$query_ale_lisa})
+                          / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
                         sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
                         sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
                         FROM tilausrivi
@@ -810,7 +823,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
-        finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
+        $tilausnumero                  = hae_tilausnumero($lasrow["laskunro"]);
+        $liitteet[$lasrow["laskunro"]] = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+        $liitteita                     = !empty($liitteet[$lasrow["laskunro"]]);
+
+        finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
 
         if ($yhtiorow["verkkolasku_lah"] == "apix") {
           $tulostettavat_apix[] = $lasrow["laskunro"];
@@ -844,14 +861,33 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   if (filesize($nimixml) == 0) {
     unlink($nimixml);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimixml'");
+  }
+
   if (filesize($nimifinvoice) == 0) {
     unlink($nimifinvoice);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimifinvoice'");
+  }
+
   if (filesize($nimiedi) == 0) {
     unlink($nimiedi);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimiedi'");
+  }
+
   if (filesize($nimisisainenfinvoice) == 0) {
     unlink($nimisisainenfinvoice);
+  }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimisisainenfinvoice'");
   }
 
   if (count($tulostettavat_apix) > 0) {
@@ -941,6 +977,20 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           // Siirretään faili apixtemppiin
           if (!rename($apixtmpfile, $apix_tmpdirnimi."/Apix_invoice_$apixlasku.pdf")) {
             echo "APIX tmpmove Apix_invoice_$apixlasku.pdf feilas!";
+          }
+
+          if (!empty($liitteet[$apixlasku])) {
+            $attachment_dir = "{$apix_tmpdirnimi}/attachments";
+
+            mkdir($attachment_dir);
+
+            foreach ($liitteet[$apixlasku] as $filename => $data) {
+              file_put_contents("{$attachment_dir}/{$filename}", $data);
+            }
+
+            exec("cd {$attachment_dir}; zip ../Apix_attachments_{$apixlasku}.zip *;");
+
+            exec("rm -rf {$attachment_dir}");
           }
         }
 
@@ -1082,3 +1132,20 @@ if (!isset($tee) or $tee == "") {
 }
 
 if (!isset($tee) or $tee != "NAYTATILAUS") require "inc/footer.inc";
+
+function hae_tilausnumero($laskunro) {
+  global $kukarow;
+
+  $query = "SELECT tunnus
+            FROM lasku
+            WHERE laskunro = {$laskunro}
+            AND yhtio      = '{$kukarow["yhtio"]}'
+            AND tila       = 'L'
+            AND alatila    = 'X'";
+
+  $tilausnumero = pupe_query($query);
+  $tilausnumero = mysql_fetch_assoc($tilausnumero);
+  $tilausnumero = $tilausnumero["tunnus"];
+
+  return $tilausnumero;
+}

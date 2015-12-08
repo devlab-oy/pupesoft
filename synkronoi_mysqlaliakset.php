@@ -18,13 +18,11 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $aliakset = curl_exec($ch);
 
-  // Katsotaan onko meillä UTF-8 merkistö Pupesoftissa käytössä
-  $tervetuloa = file_get_contents("tervetuloa.php");
-  $utf8_enabled = (mb_detect_encoding($tervetuloa, 'UTF-8', true) !== false);
-
   // Käännetään aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
-  if ($utf8_enabled) {
-    $aliakset = utf8_encode($aliakset);
+  if (PUPE_UNICODE) {
+    // Tässä on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu tähän riviin
+    $aliakset = utf8_encode($aliakset); //NO_MB_OVERLOAD
   }
 
   $aliakset = explode("\n", trim($aliakset));
@@ -63,9 +61,9 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
       $sanakirjaquery  = "UPDATE avainsana SET
                           selitetark       = '$selitetark'
                           WHERE yhtio      = '$kukarow[yhtio]'
-                          and laji         = 'MYSQLALIAS'
-                          and selite       = '$selite'
-                          and selitetark_2 = '$selitetark_2'";
+                          AND laji         = 'MYSQLALIAS'
+                          AND selite       = '$selite'
+                          AND selitetark_2 = '$selitetark_2'";
       pupe_query($sanakirjaquery);
 
       if ($tee == "TEE") echo "<tr><th>".t("Päivitetään mysqlalias")."</th><td>$selite</td><td>$selitetark</td><td>$selitetark_2</td></tr>";

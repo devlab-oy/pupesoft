@@ -1,11 +1,21 @@
 <?php
 
-require "inc/parametrit.inc";
+if (@include "inc/parametrit.inc");
+elseif (@include "parametrit.inc");
+else exit;
 
 $go = $goso = '';
 
 if (isset($_REQUEST['go'])) {
+
   $go = $_REQUEST['go'];
+
+  if (strpos($go, '?')) {
+    $go .= "&indexvas=1";
+  }
+  else {
+    $go .= "?indexvas=1";
+  }
 }
 
 if (isset($_REQUEST['goso'])) {
@@ -15,12 +25,6 @@ if (isset($_REQUEST['goso'])) {
 if ($go == '') {
   $go = 'tervetuloa.php';
   $goso = '';
-}
-
-$colwidth = '175';
-
-if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
-  $colwidth = '45';
 }
 
 if (!headers_sent()) {
@@ -43,26 +47,66 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n";
 
 if (file_exists("pics/pupeicon.gif")) {
-  echo "  <link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
+  echo "<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 }
 else {
-  echo "  <link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
+  echo "<link rel='shortcut icon' href='{$palvelin2}devlab-shortcut.png'>\n";
 }
 
+if ($kukarow["extranet"] != "") {
+  echo $yhtiorow["web_seuranta"];
+}
 
-echo "</head>
-  <frameset cols='$colwidth,*' border='0'>
-    <frameset rows='*,0' border='0'>
-      <frame noresize src='indexvas.php?goso=$goso' name='menu' frameborder='0' marginwidth='0' marginheight='0'>
-      <frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>
-    </frameset>
-    <frame noresize src='$go' name='main' frameborder='0' marginwidth='0' marginheight='0'>
-    <noframes>
-      <body>
+echo "</head>";
+
+if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
+  echo "<frameset cols='175,*' border='0'>
+          <frameset rows='*,0' border='0'>
+            <frame noresize src='indexvas.php?goso=$goso' name='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+            <frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>
+          </frameset>
+          <frame noresize src='$go' name='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
+          <noframes>
+            <body>
+                    <p>
+                        This page uses frames, but your browser does not support them.
+                    </p>
+                </body>
+          </noframes>
+        </frameset>";
+}
+else {
+
+  if (isset($_COOKIE["yla_frame_showhide"]) and $_COOKIE["yla_frame_showhide"] == "hidden") {
+    $yla_cols = "20,*";
+  }
+  else {
+    $yla_cols = "90,*";
+  }
+
+  echo "<frameset rows='$yla_cols' border='0'>
+          <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>";
+
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    $vas_cols = "15,*";
+  }
+  else {
+    $vas_cols = "270,*";
+  }
+
+  echo "  <frameset cols='$vas_cols' border='0'>
+            <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+            <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
+          </frameset>
+
+          <noframes>
+            <body>
               <p>
-                  This page uses frames, but your browser does not support them.
+              This page uses frames, but your browser does not support them.
               </p>
-          </body>
-    </noframes>
-  </frameset>
-</html>";
+            </body>
+          </noframes>
+        </frameset>";
+}
+
+echo "</html>";

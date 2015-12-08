@@ -92,6 +92,7 @@ if (trim($konserni) != '') {
 }
 
 echo "<th>".t("Työm").".<br>".t("Viite")."</th>
+      <th>".t("Avattu")."</th>
       <th>".t("Prio")."</th>
       <th>".t("Ytunnus")."<br>".t("Asiakas")."</th>";
 
@@ -116,7 +117,7 @@ if (trim($konserni) != '') {
 }
 
 echo "<td valign='top'><input type='text'   size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
-
+echo "<td valign='top'><input type='text'   size='10' class='search_field' name='search_avattu_haku'></td>";
 // Haetaan prioriteetti avainsanat
 echo "<td><input type='hidden'  size='10' class='search_field' name='search_prioriteetti_haku'>";
 echo "<select class='prioriteetti_sort'>";
@@ -164,10 +165,8 @@ while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 }
 echo "</select>";
 echo "</td>";
-$piilotus = $yhtiorow['laiterekisteri_kaytossa'] != '' ? " style='visibility:hidden; display:none;'" : '';
-echo "<td $piilotus>";
-echo "<input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
+echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') echo "<td></td>";
 echo "</tr>";
 echo "</thead>";
 
@@ -267,7 +266,8 @@ $query = "SELECT
           tyomaarays.valmnro,
           tyomaarays.mallivari,
           tyomaarays.merkki,
-          tyomaarays.luvattu
+          tyomaarays.luvattu,
+          tyomaarays.luontiaika avattu
           {$laitelisa}
           FROM lasku
           JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
@@ -364,6 +364,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   else {
     echo "<td valign='top'><span class='tyom_id'>$muoklinkki</span><br>$vrow[viesti]</td>";
   }
+  echo "<td>".tv1dateconv($vrow['avattu'])."</td>";
 
   // Prioriteetti työjonoon
   echo "<td>$vrow[tyom_prioriteetti]</td>";
@@ -450,7 +451,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
     // Jos luvattupvm on ohitettu tai tänään
     if (strtotime($vrow["luvattu"]) <= strtotime(date('Y-m-j'))) {
-      $paivan_vari = "style='background-color: #000000;'";
+      $paivan_vari = "style='background-color: #000000; color:red;'";
     }
     elseif (strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 3 days")))) {
       // jos luvattupvm on 3pv sisällä
@@ -464,7 +465,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
   $naytettava_pvm = $vrow['toimaika'];
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-    $naytettava_pvm = $vrow['luvattu'];
+    $naytettava_pvm = tv1dateconv($vrow['luvattu']);
   }
 
   if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
@@ -595,10 +596,17 @@ echo "<br><br>";
 
 // Konffataan datatablesit
 if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-  $datatables_conf[] = array($pupe_DataTables[0], 12, 11, true, true);
+  $datatables_conf[] = array($pupe_DataTables[0], 13, 12, true, true, null, 12);
 }
 else {
-  $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true);
+  $datatables_conf[] = array($pupe_DataTables[0], 10, 9, true, true, null, 9);
+}
+
+// Jos on ruksattu konserni, inkrementoidaan molempia sarakkeita sekä hakusaraketta yhdellä
+if (trim($konserni) != '' and count($datatables_conf[0]) > 0) {
+  $datatables_conf[0][1]++;
+  $datatables_conf[0][2]++;
+  $datatables_conf[0][6]++;
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

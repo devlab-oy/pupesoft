@@ -84,6 +84,14 @@ if (!function_exists('alku_lahete')) {
 
     tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
+    if (!empty($laskurow['lahetepohjateksti'])) {
+      $redboldi["height"] = 8;
+      $redboldi["font"]   = "Times-Bold";
+      $redboldi["fillcolor"]  = $pdf->get_color("red");
+
+      $pdf->draw_text(30, 832, $laskurow['lahetepohjateksti'], $thispage, $redboldi);
+    }
+
     if ($tyyppi == "TILAUSVAHVISTUS") {
       $kerarow["kerattyaika"] = date("Y-m-d");
     }
@@ -491,6 +499,7 @@ if (!function_exists('alku_lahete')) {
       if (  ($base_lahetetyyppi == "tulosta_lahete.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_eialehintoja.inc"
           or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])
@@ -1507,8 +1516,8 @@ if (!function_exists('rivi_lahete')) {
 
           // lasketaan isätuotteen riville lapsien hinnat yhteen
           $query = "SELECT
-                    round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
-                    round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
+                    round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
+                    round(round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
                     GROUP_CONCAT(CONCAT(tilausrivi.tuoteno, '¡!¡!', tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) perheen_tuotteet
                     FROM tilausrivi
                     JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1520,18 +1529,20 @@ if (!function_exists('rivi_lahete')) {
           $riresult = pupe_query($query);
           $perherow = mysql_fetch_assoc($riresult);
 
-          $row["hinta"]     = $perherow["hinta"];
-          $row["rivihinta"]   = $perherow["rivihinta"];
-
-          $row['myyntihinta']     = 0;
-          $row['brutto_rivihinta']   = 0;
-          $myyntihinta_temp       = 0;
+          $row["hinta"]            = $perherow["hinta"];
+          $row["rivihinta"]        = $perherow["rivihinta"];
+          $row['myyntihinta']      = 0;
+          $row['brutto_rivihinta'] = 0;
+          $myyntihinta_temp        = 0;
 
           foreach (explode(",", $perherow['perheen_tuotteet']) as $perhetuote) {
 
             list($perhetuoteno, $perhekpl) = explode('¡!¡!', $perhetuote);
 
-            $query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '$perhetuoteno'";
+            $query = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '$perhetuoteno'";
             $lapsi_res = pupe_query($query);
             $lapsi_row = mysql_fetch_assoc($lapsi_res);
 
@@ -1629,7 +1640,7 @@ if (!function_exists('rivi_lahete')) {
       elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
         $sarjanutunnus = "ostorivitunnus";
       }
-      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
+      elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'G')) {
         $sarjanutunnus = "myyntirivitunnus";
       }
       elseif ($row["varattu"]+$row["kpl"] < 0) {
@@ -1671,6 +1682,16 @@ if (!function_exists('rivi_lahete')) {
 
         $row["kommentti"] = substr($row["kommentti"], 0, -2);
       }
+    }
+
+    // Lisätään mahdollinen saapumisaika tuoterivin alle, jos kyseessä on jt-rivi
+    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"]);
+
+    if (!empty($row["kommentti"]) and !empty($saapumisaika)) {
+      $row["kommentti"] .= "\n{$saapumisaika}";
+    }
+    elseif (!empty($saapumisaika)) {
+      $row["kommentti"] = $saapumisaika;
     }
 
     // Mahtuuko rivi tälle sivulle
@@ -2114,24 +2135,15 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
     $kala = $kala - $rivinkorkeus;
 
     if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
-
-      // tutkitaan onko tuotteelle eankoodi
-      $eanquery = "SELECT trim(eankoodi) eankoodi
-                   from tuote
-                   where yhtio = '$kukarow[yhtio]'
-                   and tuoteno = '$row[tuoteno]'";
-      $eanres = pupe_query($eanquery);
-      $eanrow = mysql_fetch_assoc($eanres);
-
       $alakala = $kala;
 
       // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-      if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+      if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
         //viivakoodi
-        $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+        $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
         $image = $pdf->jfif_embed($data);
         $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-        $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+        $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
         $alakala = $kala-17-$rivinkorkeus;
       }
@@ -2293,24 +2305,15 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     }
 
     $kala = $kala - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-17-$rivinkorkeus;
     }
@@ -2430,24 +2433,15 @@ if (!function_exists('rivi_hinta_eiale_lahete_ean')) {
     }
 
     $kala = $kala - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-17-$rivinkorkeus;
     }
@@ -3226,23 +3220,14 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
     }
 
     $kala = $pohja - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
-    if (trim($eanrow["eankoodi"]) != "" and trim($eanrow["eankoodi"]) != '0') {
+    if (trim($row["eankoodi"]) != "" and trim($row["eankoodi"]) != '0') {
       // viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "code128", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(420, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(420, $kala-17, $row["eankoodi"], $thispage, $pieni);
       $alakala = $kala-17-$rivinkorkeus;
     }
 
@@ -3364,14 +3349,14 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
                  and ytunnus = '$laskurow[ytunnus]'
                  and tuoteno = '$row[tuoteno]'";
     $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
+    $komrow = mysql_fetch_assoc($eanres);
 
-    if ($eanrow["kommentti"] != "") {
+    if ($komrow["kommentti"] != "") {
       //viivakoodi
-      $data = viivakoodi($eanrow["kommentti"], "code128", 100, 10, "");
+      $data = viivakoodi($komrow["kommentti"], "code128", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-13, 45, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(55, $kala-15, $eanrow["kommentti"], $thispage, $pieni);
+      $pdf->draw_text(55, $kala-15, $komrow["kommentti"], $thispage, $pieni);
 
       //viivakoodi
       $data = viivakoodi(sprintf("%08.2f", $row['varattu_viivakoodi']), "code128", 100, 10, "");
@@ -3428,23 +3413,15 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
     $oikpos = $pdf->strlen($row["varattu"], $norm);
     $pdf->draw_text(575-$oikpos, $kala, $row["varattu"],                   $thispage, $norm);
 
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-25, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-27, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-27, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-27-$rivinkorkeus;
     }
@@ -3534,7 +3511,15 @@ if (!function_exists('loppu_lahete')) {
 
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
-        $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
+        $alhqur = "SELECT
+                   puhelin,
+                   fax,
+                   email,
+                   www,
+                   vat_numero
+                   FROM yhtion_toimipaikat
+                   WHERE yhtio='$laskurow[yhtio]'
+                   AND tunnus='$laskurow[yhtio_toimipaikka]'";
         $alhire = pupe_query($alhqur);
 
         if (mysql_num_rows($alhire) == 1) {
@@ -3545,6 +3530,10 @@ if (!function_exists('loppu_lahete')) {
           $y_fax      = $alhiro['fax'];
           $y_email    = $alhiro['email'];
           $y_www      = $alhiro['www'];
+
+          if (!empty($alhiro['vat_numero'])) {
+            $y_vatnumero = $alhiro['vat_numero'];
+          }
         }
       }
 
@@ -3599,6 +3588,20 @@ if (!function_exists('loppu_lahete')) {
     $yhteystiedot_teksti = "{$y_nimi}, {$y_osoite}, {$y_postino} {$y_postitp}, {$maan_tiedot['nimi']}";
     $yhteystiedot_len = $pdf->strlen($yhteystiedot_teksti, $pieni);
     $yhteystiedot_len_www = $pdf->strlen($y_www, $pieni);
+
+
+    $query  = "SELECT pankkiyhteystiedot.*, maksuehto.*
+               FROM maksuehto
+               LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio = maksuehto.yhtio and pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
+               WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+               and maksuehto.tunnus  = '{$laskurow["maksuehto"]}'";
+    $result = pupe_query($query);
+    $masrow = mysql_fetch_assoc($result);
+
+    if ($masrow["pankkinimi1"] != "") {
+      $y_iban  = $masrow["pankkiiban1"];
+      $y_swift = $masrow["pankkiswift1"];
+    }
 
     if ($base_lahetetyyppi == "tulosta_lahete_custom.inc") {
       $pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
@@ -4219,19 +4222,32 @@ if (!function_exists('print_pdf_lahete')) {
               echo t("Tilausvahvistus tulostuu")."...<br>";
             }
 
+            switch ($yhtiorow["tilausvahvistus_tilausnumero"]) {
+            case 1:
+              if (empty($laskurow["asiakkaan_tilausnumero"])) {
+                $tilausnumero = $laskurow["tunnus"];
+              }
+              else {
+                $tilausnumero = $laskurow["asiakkaan_tilausnumero"];
+              }
+              break;
+            default:
+              $tilausnumero = $laskurow["tunnus"];
+            }
+
             if ($laskurow["tunnusnippu"] > 0) {
               if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
                 $subjnumero = $laskurow["tunnusnippu"];
               }
               else {
-                $subjnumero = $laskurow["tunnusnippu"]."/".$laskurow["tunnus"];
+                $subjnumero = $laskurow["tunnusnippu"] . "/" . $tilausnumero;
               }
             }
             else {
-              $subjnumero = $laskurow["tunnus"];
+              $subjnumero = $tilausnumero;
             }
 
-            $kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);
+            $kutsu = t("Tilausvahvistus", $kieli)." ".$subjnumero;
 
             $content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
             $content_body .= t("Tilausnumeronne on", $kieli)." $subjnumero\n\n";
@@ -4242,12 +4258,12 @@ if (!function_exists('print_pdf_lahete')) {
           elseif ($tyyppi == "YLLAPITOSOPIMUS") {
             echo t("Ylläpitosopimus tulostuu")."...<br>";
 
-            $kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Ylläpitosopimus", $kieli)." ".$laskurow["tunnus"];
           }
           else {
             echo t("Lähete tulostuu")."...<br>";
 
-            $kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Lähete", $kieli)." ".$laskurow["tunnus"];
 
             if (isset($koontilahete) and $koontilahete != 0) {
               $content_body .= t("Tilausnumero", $kieli).": ";
@@ -4282,6 +4298,7 @@ if (!function_exists('print_pdf_lahete')) {
           Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
           */
           $kutsu2 = "";
+
           if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
 
             $rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);

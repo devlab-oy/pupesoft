@@ -131,6 +131,40 @@ if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
   enable_ajax();
 }
 
+if ($tee == 'lisaa_aiemmalle_riville') {
+  $params = array(
+    "tilausnumero" => $tilausnumero,
+    "tuoteno"      => $lisattava["tuoteno"]
+  );
+
+  list($ensimmainen_tilausrivi, $viimeinen_tilausrivi) = hae_eka_ja_vika_tilausrivi($params);
+
+  $query = "UPDATE tilausrivi
+            SET tilkpl  = tilkpl  + '{$lisattava['kpl']}',
+                varattu     = varattu + '{$lisattava['kpl']}'
+            WHERE yhtio     = '{$kukarow['yhtio']}'
+            AND tyyppi      = 'O'
+            AND otunnus     = '{$kukarow["kesken"]}'
+            AND uusiotunnus = 0
+            AND laskutettu  = ''
+            AND tunnus      = '{$ensimmainen_tilausrivi}'";
+  $tru_result = pupe_query($query);
+
+  if ($tru_result) {
+    $query = "DELETE
+              FROM tilausrivi
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              AND tyyppi      = 'O'
+              AND otunnus     = '{$kukarow["kesken"]}'
+              AND uusiotunnus = 0
+              AND laskutettu  = ''
+              AND tunnus      = '{$viimeinen_tilausrivi}'";
+    $trd_result = pupe_query($query);
+  }
+
+  $tee = 'AKTIVOI';
+}
+
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
 if (count($_POST) == 0 and $from == "") {
   $tila        = '';
@@ -987,7 +1021,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
         <input type='hidden' name='tee'         value = 'MUUOTAOSTIKKOA'>
         <input type='hidden' name='tila'         value = 'Muuta'>
-        <input type='Submit' value='".t("Muuta otsikkoa")."'>
+        <input type='submit' value='".t("Muuta otsikkoa")."'>
         </form>
         </td>";
 
@@ -1008,7 +1042,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
         <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
         <input type='hidden' name='tee'         value = 'mikrotila'>
-        <input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>
+        <input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>
         </form>
         </td>";
 
@@ -1216,11 +1250,13 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.yksikko,
               tuotteen_toimittajat.toim_yksikko,
               tuote.tuotemassa,
+              (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
               tuotteen_toimittajat.ostohinta,
               if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
+              tuotteen_toimittajat.tunnus as tt_tunnus,
               tilausrivi.erikoisale,
               tilausrivi.ale1,
               tilausrivi.ale2,
@@ -1229,11 +1265,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
-              tilausrivi.hinta_alkuperainen,
-              ta1.selite p2,
-              ta1.selitetark p2s,
-              ta2.selite p3,
-              ta2.selitetark p3s
+              tilausrivi.hinta_alkuperainen
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno                      = tuote.tuoteno
@@ -1243,12 +1275,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                 AND tilausrivin_lisatiedot.tilausrivilinkki > 0
                 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
-              LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-                AND ta1.tuoteno                             = tuote.tuoteno
-                AND ta1.laji                                = 'pakkauskoko2' )
-              LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-                AND ta2.tuoteno                             = tuote.tuoteno
-                AND ta2.laji                                = 'pakkauskoko3')
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
               and tilausrivi.tyyppi                         = 'O'
@@ -1279,6 +1305,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       $yhteensa         = 0;
       $paino_yhteensa     = 0;
+      $tilavuus_yhteensa = 0;
       $nettoyhteensa       = 0;
       $eimitatoi         = '';
       $lask           = mysql_num_rows($presult);
@@ -1304,6 +1331,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa       += $prow["rivihinta"];
         $paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
+        $tilavuus_yhteensa   += ($prow["tilattu"]*$prow["tuotetilavuus"]);
 
         $class = "";
 
@@ -1481,7 +1509,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             }
           }
 
-          if ($prow["sarjanumeroseuranta"] != "") {
+          if ($prow["sarjanumeroseuranta"] != "" and $prow["sarjanumeroseuranta"] != "T") {
             $query = "SELECT count(*) kpl
                       from sarjanumeroseuranta
                       where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";
@@ -1489,7 +1517,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $sarjarow = mysql_fetch_assoc($sarjares);
 
             if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
+              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='green'>".t("S:nro ok")."</font></a>)";
             }
             else {
               echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";
@@ -1499,17 +1527,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           echo "</td>";
           echo "<td valign='top' class='tooltip' id='$divnolla'>$prow[toim_tuoteno]";
 
-          if ($yhtiorow["ostoera_pyoristys"] == "K" and ($prow["p2"] !="" or $prow["p3"] !="")) {
+          $_pakkaukset = tuotteen_toimittajat_pakkauskoot($prow['tt_tunnus']);
+
+          if ($yhtiorow["ostoera_pyoristys"] == "K" and count($_pakkaukset)) {
             echo "<br><img src='$palvelin2/pics/lullacons/info.png'>";
             echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
+
+            // pient‰ kaunistelua, ei turhia desimaaleja
+            $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]);
+
             // t‰h‰n pakkauskoot..
             echo "<ul><li>".t("Oletuskoko").": {$prow["osto_era"]}</li>";
-            if ($prow["p2"] !="") {
-              echo "<li>".t("pakkaus2").": {$prow["p2"]} {$prow["p2s"]}</li>";
+
+            foreach ($_pakkaukset as $_pak) {
+              echo "<li>{$_pak[0]} {$_pak[1]}</li>";
             }
-            if ($prow["p3"] !="") {
-              echo "<li>".t("pakkaus3").": {$prow["p3"]} {$prow["p3s"]}</li>";
-            }
+
             echo "</ul></div>";
           }
           echo "</td>";
@@ -1564,7 +1597,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               echo "<input type='hidden' name='hinta_alkuperainen' value = '{$prow['hinta_alkuperainen']}'>";
             }
 
-            echo "  <input type='Submit' value='".t("Muuta")."'>
+            echo "  <input type='submit' value='".t("Muuta")."'>
                 </form>
                 </td>";
 
@@ -1578,7 +1611,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
                 <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                 <input type='hidden' name='tee'         value = 'POISTA_RIVI'>
-                <input type='Submit' value='".t("Poista")."'>
+                <input type='submit' value='".t("Poista")."'>
                 </form>
                 </td>";
 
@@ -1593,7 +1626,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                   <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
                   <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                   <input type='hidden' name='tee'         value = 'OOKOOAA'>
-                  <input type='Submit' value='".t("Hyv‰ksy")."'>
+                  <input type='submit' value='".t("Hyv‰ksy")."'>
                   </form></td> ";
             }
 
@@ -1834,6 +1867,12 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
           <td class='spec'>kg</td>
           </tr>";
+      echo "  <tr>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t("Tilauksen tilavuus").":</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $tilavuus_yhteensa)."</td>
+          <td class='spec'>m3</td>
+          </tr>";
 
       echo "</table>";
     }
@@ -1866,7 +1905,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
           <input type='hidden' name='toimittajaid'      value = '$laskurow[liitostunnus]'>
           <input type='hidden' name='tee'          value = 'valmis'>
-          <input type='Submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
+          <input type='submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
           </form>
           </td>";
 
@@ -1888,7 +1927,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
             <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
             <input type='hidden' name='tee'          value = 'vahvista'>
-            <input type='Submit' value='".t("Vahvista toimitus")."'>
+            <input type='submit' value='".t("Vahvista toimitus")."'>
             </form>
             </td>";
       }
@@ -1918,7 +1957,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista'>
-          <input type='Submit' value='*".t("Mit‰tˆi koko tilaus")."*'>
+          <input type='submit' value='*".t("Mit‰tˆi koko tilaus")."*'>
           </form>
           </td>";
 
@@ -1933,7 +1972,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista_kohdistamattomat'>
-          <input type='Submit' value='*".t("Mit‰tˆi kohdistamattomat rivit")."*'>
+          <input type='submit' value='*".t("Mit‰tˆi kohdistamattomat rivit")."*'>
           </form>
           </td>";
 

@@ -4,9 +4,13 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
-if ($tee == 'V') {
+if ($tee == 'V' and isset($summa) and isset($summa_valuutassa)) {
   $summa = str_replace(",", ".", $summa);
   $summa_valuutassa = str_replace(",", ".", $summa_valuutassa);
+}
+else {
+  $summa = NULL;
+  $summa_valutuassa = NULL;
 }
 
 if ($tee == 'W') {
@@ -123,7 +127,7 @@ if ($tee == 'V') {
   $rahasumma = (float) $summa; // summa kotivaluutassa
   $kurssi    = (float) $kurssi; // kurssi
 
-  if ($rahasumma == 0 and $laskurow["summa"] != 0) {
+  if ($rahasumma == 0 and !is_null($summa) and !is_null($summa_valuutassa)) {
     echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
     $tee = 'W';
   }
@@ -472,7 +476,7 @@ if ($tee == 'V') {
       <input type='hidden' name='map' value = '$map'>
       <input type='hidden' name='mtili' value = '$mtili'>
       <input type='hidden' name='tunnus' value = '$tunnus'>
-      <input type='Submit' value='".t("Suorita lisää")."'>
+      <input type='submit' value='".t("Suorita lisää")."'>
       </form></td>";
 
   echo "<td class='back'>
@@ -480,7 +484,7 @@ if ($tee == 'V') {
       <input type='hidden' name='tee' value='E'>
       <input type='hidden' name='tunnus' value='$tunnus'>
       <input type='hidden' name='lopetus' value='$lopetus'>
-      <input type='Submit' value='".t("Korjaa tiliöinti")."'>
+      <input type='submit' value='".t("Korjaa tiliöinti")."'>
       </form></td></tr></table>";
 }
 
@@ -632,7 +636,7 @@ if ($tee == "W") {
           <input type='hidden' name='map' value = '$map'>
           <input type='hidden' name='mtili' value = $mtili>
           <input type='hidden' name='tunnus' value = $trow[tunnus]>
-          <input type='Submit' value='".t("Suorita")."'></td></tr></form>";
+          <input type='submit' value='".t("Suorita")."'></td></tr></form>";
     }
     else {
       echo "</td><td></td><td>";
@@ -682,7 +686,7 @@ if ($tee == '') {
 
       echo "<td>
           <input type='hidden' name='mtili' value = $trow[maksu_tili]>
-          <input type='Submit' value='".t("Valitse")."'></td></tr></form>";
+          <input type='submit' value='".t("Valitse")."'></td></tr></form>";
     }
 
     echo "</table>";

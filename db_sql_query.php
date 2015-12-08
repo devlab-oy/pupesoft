@@ -57,7 +57,7 @@ else {
               WHERE yhtio      = '$kukarow[yhtio]'
               and laji         = 'MYSQLALIAS'
               and selite       like '{$table}.%'
-              and selitetark_2 = ''
+              and selitetark_2 = 'Default'
               and selitetark_3 = 'PAKOLLINEN'";
     $al_res = pupe_query($query);
 
@@ -252,9 +252,9 @@ else {
     }
   }
 
-  echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
+  echo "<table><tr><td valign='top' class='back'>";
 
-  $query  = "SHOW tables FROM $dbkanta";
+  $query  = "SHOW tables FROM `$dbkanta`";
   $result =  pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {

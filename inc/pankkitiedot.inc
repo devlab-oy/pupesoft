@@ -101,12 +101,43 @@ if (!function_exists("pankkitiedot")) {
         break;
       }
       break;
-    case (4) : // Aktia Pankki, Säästöpankit (Sp) ja Paikallisosuuspankit (POP)
-      $pankki["rahalaitos"] = '4 ';
-      $pankki["pankkilaitos"] = "Aktia, Säästöpankit ja Paikallisosuuspankit";
-      $pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
-      $pankki["ytunnus"] = sprintf("%010.10s", $yhtiorow["ytunnus"])." ";
-      $pankki["swift"] = "HELSFIHH";
+    case (4) :
+      switch ($rahalaitoskoodi3) {
+      case (470) :
+      case (471) :
+      case (472) :
+      case (473) :
+      case (474) :
+      case (475) :
+      case (476) :
+      case (477) :
+      case (478) :
+      case (479) :
+        // Paikallisosuuspankit (POP) ja Bonum pankki
+        $pankki["rahalaitos"] = '4 ';
+        $pankki["pankkilaitos"] = "Paikallisosuuspankit ja Bonum pankki";
+        $pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
+        $pankki["ytunnus"] = sprintf("%010.10s", $yhtiorow["ytunnus"])." ";
+        $pankki["swift"] = "POPFFI22";
+        break;
+      case (405) :
+      case (497) :
+        // Aktia Pankki
+        $pankki["rahalaitos"] = '4 ';
+        $pankki["pankkilaitos"] = "Aktia";
+        $pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
+        $pankki["ytunnus"] = sprintf("%010.10s", $yhtiorow["ytunnus"])." ";
+        $pankki["swift"] = "HELSFIHH";
+        break;
+      default :
+        // Säästöpankit (Sp)
+        $pankki["rahalaitos"] = '4 ';
+        $pankki["pankkilaitos"] = "Säästöpankit";
+        $pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
+        $pankki["ytunnus"] = sprintf("%010.10s", $yhtiorow["ytunnus"])." ";
+        $pankki["swift"] = "ITELFIHH";
+        break;
+      }
       break;
     case (5) : // osuuspankit (Op), OKO ja Okopankki
       $pankki["rahalaitos"] = '5 ';

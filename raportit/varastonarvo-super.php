@@ -16,31 +16,57 @@ if (isset($_POST["tee"])) {
 }
 
 // Tämä skripti käyttää slave-tietokantapalvelinta
-$useslave = 2;
+$useslave = 1;
+
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+ini_set("display_errors", 0);
 
 if (!$php_cli) {
-  require "../inc/parametrit.inc";
+  require "inc/parametrit.inc";
 
-  ini_set("memory_limit", "2G");
+  ini_set("memory_limit", "5G");
 }
 else {
-  require_once "../inc/functions.inc";
-  require_once "../inc/connect.inc";
+
+  if ($argv[1] == '') {
+    die ("Yhtiö on pakollinen tieto!\n");
+  }
+  if ($argv[2] == '') {
+    die ("Sähköpostiosoite on pakollinen tieto!\n");
+  }
+
+  require_once "inc/functions.inc";
+  require_once "inc/connect.inc";
 
   // Logitetaan ajo
   cron_log();
 
-  ini_set("memory_limit", "2G");
+  ini_set("memory_limit", "5G");
 
-  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
-  error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-  ini_set("display_errors", 0);
+  $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
 
-  $tyyppi     = "";
-  $email_osoite = "";
+  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+  $query = "SELECT group_concat(distinct tunnus order by tunnus) varastot
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $varastores = pupe_query($query);
+  $varastorow = mysql_fetch_array($varastores);
+
+  if ($varastorow["varastot"] == "") {
+    die ("Yhtään varastoa ei löytynyt!\n");
+  }
+
   $pupe_root_polku = dirname(dirname(__FILE__));
 
   $supertee = "RAPORTOI";
+
+  $varastot = explode(",", $varastorow['varastot']);
+  $email_osoite = $argv[2];
+
+  $epakur = 'kaikki';
+  $tyyppi = 'A';
 }
 
 if (!function_exists("force_echo")) {
@@ -58,6 +84,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+if (!isset($tallennusmuoto)) $tallennusmuoto = 'excel';
+
 if (!isset($pp)) $pp = date("d");
 if (!isset($kk)) $kk = date("m");
 if (!isset($vv)) $vv = date("Y");
@@ -67,6 +95,7 @@ $kk  = sprintf("%02d", trim($kk));
 $vv  = sprintf("%04d", trim($vv));
 
 if (!isset($kiertoviilasku)) $kiertoviilasku = "";
+if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 
 // setataan
 $lisa = "";
@@ -270,6 +299,16 @@ if (!$php_cli) {
 
   echo "</select></td></tr>";
 
+  $sel = $tallennusmuoto == 'csv' ? "selected" : "";
+
+  echo "<tr>";
+  echo "<th>", t("Tallennusmuoto"), "</th>";
+  echo "<td><select name='tallennusmuoto'>";
+  echo "<option value='excel'>Excel</option>";
+  echo "<option value='csv' {$sel}>CSV</opton>";
+  echo "</select></td>";
+  echo "</tr>";
+
   echo "<tr><th>", t("Näytä kiertonopeus sekä viimeisin myynti ja kulutus"), ":</th>";
 
   echo "<td>";
@@ -282,6 +321,13 @@ if (!$php_cli) {
   echo "<input type='checkbox' name='kiertoviilasku' value='ON' $sel/>";
 
   echo "</td></tr>";
+
+  $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
+
+  echo "<tr>";
+  echo "<th>", t("Huomioi varastosiirrot viimeisin osto ja myyntitiedoissa"), ":</th>";
+  echo "<td><input type='checkbox' name='huomioi_varastosiirrot' {$chk} /></td>";
+  echo "</tr>";
 
   if ($piilotetut_varastot != 'on') {
     $piilotetut_varastot_where = ' AND tyyppi != "P"';
@@ -349,48 +395,7 @@ if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 $varastot2 = array();
 
-if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '')) {
-
-  if ($php_cli and $argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
-
-    $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
-
-    $query = "SELECT *
-              FROM yhtio
-              WHERE yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) {
-      echo "<b>".t("Käyttäjän yritys ei löydy")."! ($kukarow[yhtio])";
-      exit;
-    }
-
-    $yhtiorow = mysql_fetch_assoc($result);
-
-    $query = "SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio='$kukarow[yhtio]'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 1) {
-      $yhtion_parametritrow = mysql_fetch_assoc($result);
-
-      if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
-        $yhtion_parametritrow['hintapyoristys'] = 2;
-      }
-
-      // lisätään kaikki yhtiorow arrayseen
-      foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-        $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-      }
-    }
-
-    $varastot = explode(",", $argv[2]);
-    $email_osoite = mysql_real_escape_string($argv[3]);
-
-    $epakur = 'kaikki';
-    $tyyppi = 'A';
-  }
+if (isset($supertee) and $supertee == "RAPORTOI") {
 
   // Setataan jos ei olla setattu
   if (!isset($alaraja)) $alaraja = "";
@@ -494,29 +499,38 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   //################# varattu-rajaukset ##################
   if (isset($varatturajaus) and $varatturajaus != "") {
-    $query = "SELECT group_concat(distinct concat('\'',tuoteno,'\'')) varatut_tuotteet
-              FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tyyppi   in ('B','F','L','V','W')
-              and tuoteno != ''
-              and varattu != 0";
+    $query = "SELECT tuoteno,
+              sum(varattu) AS varattu_saldo
+              FROM tilausrivi
+              USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+              WHERE yhtio  = '{$kukarow["yhtio"]}'
+              AND tyyppi   IN ('B', 'F', 'L', 'V', 'W')
+              AND tuoteno != ''
+              AND varattu != 0
+              GROUP BY tuoteno;";
+
     $varares = pupe_query($query);
-    $vararow = mysql_fetch_assoc($varares);
 
-    $varatut_tuotteet = "''";
+    $tuotevaraukset = array();
 
-    if ($vararow["varatut_tuotteet"] != "") {
-      $varatut_tuotteet = $vararow["varatut_tuotteet"];
+    while ($vararivi = mysql_fetch_assoc($varares)) {
+      $tuotevaraukset[$vararivi["tuoteno"]] = $vararivi["varattu_saldo"];
+    }
+
+    $varatut_tuotteet = "";
+
+    if (!empty($tuotevaraukset)) {
+      $varatut_tuotteet = implode("','", array_keys($tuotevaraukset));
     }
 
     // Näytetään vain varatut tuotteet
     if ($varatturajaus == "O") {
-      $tuote_lisa .= " and tuote.tuoteno in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno in ('$varatut_tuotteet') ";
     }
 
     // Näytetään vain EI varatut tuotteet
     if ($varatturajaus == "E") {
-      $tuote_lisa .= " and tuote.tuoteno not in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno not in ('$varatut_tuotteet') ";
     }
   }
 
@@ -682,88 +696,193 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     mysql_data_seek($result, 0);
   }
 
-  include 'inc/pupeExcel.inc';
+  $tallennusmuoto_check = ($tallennusmuoto == "excel");
 
-  $worksheet    = new pupeExcel();
-  $format_bold = array("bold" => TRUE);
-  $excelrivi    = 0;
-  $excelsarake = 0;
+  if ($tallennusmuoto_check) {
+    include 'inc/pupeExcel.inc';
+
+    $worksheet    = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+    $excelrivi    = 0;
+    $excelsarake = 0;
+  }
+  else {
+    $tiedostonimi = "varastonarvo_tuotteittain-{$kukarow['yhtio']}-".date("YmdHis").".csv";
+    $fh = fopen("/tmp/".$tiedostonimi, "w");
+  }
 
   if ($summaustaso != "T" and $summaustaso != "TRY") {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Varasto"),     $format_bold);
-    $excelsarake++;
-  }
-
-  if ($summaustaso == "P") {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"),     $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"),     $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"),     $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"),     $format_bold);
-    $excelsarake++;
-  }
-
-  if (isset($sel_tuotemerkki) and $sel_tuotemerkki != '') {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"),   $format_bold);
-    $excelsarake++;
-  }
-
-  $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),         $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"),       $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"),       $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Yksikko"),       $format_bold);
-  $excelsarake++;
-
-  if ($variaatiosummaus != "") {
-    foreach ($kaikkikoot as $kokonimi => $koko) {
-      $worksheet->writeString($excelrivi, $excelsarake, $kokonimi,       $format_bold);
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Varasto"),     $format_bold);
       $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Varasto"))."\t");
     }
   }
 
-  $worksheet->writeString($excelrivi, $excelsarake, t("Saldo"),         $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"),       $format_bold);
-  $excelsarake++;
-  $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"),     $format_bold);
-  $excelsarake++;
-  if ("$vv-$kk-$pp" != date("Y-m-d")) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
+  if ($summaustaso == "P") {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"),     $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"),     $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"),     $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"),     $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Hyllyalue"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllynro"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllyvali"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllytaso"))."\t");
+    }
+  }
+
+  if (isset($sel_tuotemerkki) and $sel_tuotemerkki != '') {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"),   $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Tuotemerkki"))."\t");
+    }
+  }
+
+  if ($tallennusmuoto_check) {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),         $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"),       $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"),       $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Yksikko"),       $format_bold);
+    $excelsarake++;
   }
   else {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"),   $format_bold);
+    fwrite($fh, pupesoft_csvstring(t("Osasto"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Tuoteryhmä"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Tuoteno"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Nimitys"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Yksikko"))."\t");
+  }
+
+  if ($variaatiosummaus != "") {
+    foreach ($kaikkikoot as $kokonimi => $koko) {
+      if ($tallennusmuoto_check) {
+        $worksheet->writeString($excelrivi, $excelsarake, $kokonimi,       $format_bold);
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring($kokonimi)."\t");
+      }
+    }
+  }
+
+  if ($tallennusmuoto_check) {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Saldo"),         $format_bold);
+    $excelsarake++;
+  }
+  else {
+    fwrite($fh, pupesoft_csvstring(t("Saldo"))."\t");
+  }
+
+  if (isset($varatturajaus) and $varatturajaus == "O") {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Varattu saldo"), $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Varattu saldo"))."\t");
+    }
+  }
+
+  if ($tallennusmuoto_check) {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"),       $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"),     $format_bold);
+    $excelsarake++;
+  }
+  else {
+    fwrite($fh, pupesoft_csvstring(t("Kehahin"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Varastonarvo"))."\t");
+  }
+
+  if (isset($varatturajaus) and $varatturajaus == "O") {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Varattu varastonarvo"), $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Varattu varastonarvo"))."\t");
+    }
+  }
+
+  if ("$vv-$kk-$pp" != date("Y-m-d")) {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Bruttovarastonarvo")));
+      fwrite($fh, " ");
+      fwrite($fh, pupesoft_csvstring(t("Arvio"))."\t");
+    }
+  }
+  else {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"),   $format_bold);
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Bruttovarastonarvo"))."\t");
+    }
   }
   $excelsarake++;
 
   if ($variaatiosummaus == "") {
 
     if ($kiertoviilasku != "") {
-      $worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"),   $format_bold);
-      $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus")."/".t("kulutus"),   $format_bold);
-      $excelsarake++;
+      if ($tallennusmuoto_check) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"),   $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus")."/".t("kulutus"),   $format_bold);
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring(t("Kiertonopeus 12kk"))."\t");
+        fwrite($fh, pupesoft_csvstring(t("Viimeisin laskutus")."/".t("kulutus"))."\t");
+      }
     }
 
-    $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 25%"),   $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 50%"),   $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 75%"),   $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 100%"),   $format_bold);
-    $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintapäivä"),   $format_bold);
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 25%"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 50%"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 75%"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 100%"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintapäivä"),   $format_bold);
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 25%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 50%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 75%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 100%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Viimeinen hankintapäivä"))."\t");
+    }
   }
 
-  $excelrivi++;
-  $excelsarake = 0;
+  if ($tallennusmuoto_check) {
+    $excelrivi++;
+    $excelsarake = 0;
+  }
+  else {
+    fwrite($fh, "\r\n");
+  }
 
   if (!$php_cli) {
     echo "<a name='focus_tahan'>".t("Lasketaan varastonarvo")."...<br></a>";
@@ -809,16 +928,20 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $varasto_tuotepaikat = "AND tuotepaikat.varasto in ($mistavarastosta)";
       $varasto_tilausrivi = "AND tilausrivi.varasto in ($mistavarastosta)";
       $varasto_varastopaikat = "AND varastopaikat.tunnus in ($mistavarastosta)";
+      $varasto_laskuvarasto = "AND lasku.varasto in ($mistavarastosta)";
+      $varasto_laskuclearing = "AND lasku.clearing in ($mistavarastosta)";
     }
     else {
       $varasto_tapahtuma = "";
       $varasto_tuotepaikat = "";
       $varasto_tilausrivi = "";
       $varasto_varastopaikat = "";
+      $varasto_laskuvarasto = "";
+      $varasto_laskuclearing = "";
     }
 
     // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
-    if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
+    if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G") {
 
       // jos summaustaso on per paikka, otetaan varastonarvo vain siltä paikalta
       if ($summaustaso == "P") {
@@ -877,8 +1000,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $summaus_lisa = "";
       }
 
-      $query = "SELECT tuotepaikat.tuoteno,
-                sum(tuotepaikat.saldo) saldo,
+      $query = "SELECT sum(tuotepaikat.saldo) saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
                 FROM tuotepaikat
@@ -891,8 +1013,13 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvorow = mysql_fetch_assoc($vararvores);
 
       $kpl = (float) $vararvorow["saldo"];
-      $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
-      $bruttovaraston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"] );
+      $varattu_saldo = isset($tuotevaraukset[$row["tuoteno"]]) ? $tuotevaraukset[$row["tuoteno"]] : 0;
+      $varaston_arvo = hinta_kuluineen( $row["tuoteno"], (float) $vararvorow["varasto"] );
+      $varattu_varastonarvo = $varattu_saldo * $row["kehahin_nyt"];
+      $varattu_varastonarvo =
+        hinta_kuluineen($row["tuoteno"], (float) $varattu_varastonarvo);
+      $bruttovaraston_arvo =
+        hinta_kuluineen($row["tuoteno"], (float) $vararvorow["bruttovarasto"]);
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta
@@ -1107,8 +1234,11 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         }
 
         $varastorajausjoini = '';
+        $varastorajausjoini2 = '';
+
         if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
           $varastorajausjoini = $varasto_tapahtuma;
+          $varastorajausjoini2 = $varasto_laskuvarasto;
         }
 
         if ($kiertoviilasku != "") {
@@ -1116,8 +1246,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           // Haetaan tuotteen kulutetut kappaleet
           $query  = "SELECT
                      ifnull(sum(if(tilausrivi.tyyppi='L', tilausrivi.kpl, 0)), 0) myykpl,
-                     ifnull(sum(if(tilausrivi.tyyppi='V', tilausrivi.kpl, 0)), 0) kulkpl,
-                     ifnull(date_format(max(tilausrivi.laskutettuaika), '%Y%m%d'), 0) laskutettuaika
+                     ifnull(sum(if(tilausrivi.tyyppi='V', tilausrivi.kpl, 0)), 0) kulkpl
                      FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                      WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
                      and tilausrivi.tyyppi         in ('L','V')
@@ -1130,28 +1259,40 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyrow = mysql_fetch_assoc($xmyyres);
 
           // Viimeisin laskutuspäivämäärä
+          // Viimeisin kulutuspäivämäärä
+          // Ja mahdollinen viimeisin siirtopäivämäärä
           $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
                     FROM tapahtuma use index (yhtio_tuote_laadittu)
                     WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
                     and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
                     $varastorajausjoini
-                    and tapahtuma.laji     = 'laskutus'";
+                    AND tapahtuma.laji     IN ('laskutus', 'kulutus')";
           $xmyyres = pupe_query($query);
           $xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
-          // Viimeisin kulutuspäivämäärä
-          $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
-                    FROM tapahtuma use index (yhtio_tuote_laadittu)
-                    WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-                    and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-                    and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
-                    $varastorajausjoini
-                    and tapahtuma.laji     = 'kulutus'";
-          $xmyyres = pupe_query($query);
-          $xkulpvmrow = mysql_fetch_assoc($xmyyres);
+          $xsiirtopvmrow['vihapvm'] = 0;
 
-          $vikamykupaiva = max($xmyyrow['laskutettuaika'], $xmyypvmrow['laskutettuaika'], $xkulpvmrow['kulutettuaika']);
+          if (!empty($huomioi_varastosiirrot)) {
+
+            $query_a = "SELECT ifnull(date_format(max(tilausrivi.kerattyaika), '%Y%m%d'), 0) vihapvm
+                        FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+                        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+                          AND lasku.tunnus          = tilausrivi.otunnus
+                          $varastorajausjoini2
+                          AND lasku.varasto        != lasku.clearing
+                          AND lasku.tila            = 'G')
+                        WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tyyppi       = 'G'
+                        AND tilausrivi.tuoteno      = '{$row['tuoteno']}'
+                        AND tilausrivi.laadittu     >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                        AND tilausrivi.kerattyaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                        AND tilausrivi.kpl + tilausrivi.varattu > 0";
+            $xsiirtores = pupe_query($query_a);
+            $xsiirtopvmrow = mysql_fetch_assoc($xsiirtores);
+          }
+
+          $vikamykupaiva = max($xmyypvmrow['laskutettuaika'], $xsiirtopvmrow['vihapvm']);
 
           if ($vikamykupaiva > 0) {
             $vikamykupaiva = substr($vikamykupaiva, 0, 4)."-".substr($vikamykupaiva, 4, 2)."-".substr($vikamykupaiva, 6, 2);
@@ -1171,111 +1312,289 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       }
 
       if ($summaustaso != "T" and $summaustaso != "TRY") {
-        $worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"],   $format_bold);
-        $excelsarake++;
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"],   $format_bold);
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring($row["varastonnimi"])."\t");
+        }
       }
 
       if ($summaustaso == "P") {
-        $worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"],     $format_bold);
-        $excelsarake++;
-        $worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"],     $format_bold);
-        $excelsarake++;
-        $worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"],     $format_bold);
-        $excelsarake++;
-        $worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"],     $format_bold);
-        $excelsarake++;
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"],     $format_bold);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"],     $format_bold);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"],     $format_bold);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"],     $format_bold);
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring($row["hyllyalue"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllynro"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllyvali"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllytaso"])."\t");
+        }
       }
 
       if (isset($sel_tuotemerkki) and $sel_tuotemerkki != '') {
-        $worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
-        $excelsarake++;
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring($row["tuotemerkki"])."\t");
+        }
       }
 
-      $worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
-      $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
-      $excelsarake++;
+      if ($tallennusmuoto_check) {
+        $worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring($row["osasto"])."\t");
+        fwrite($fh, pupesoft_csvstring($row["try"])."\t");
+      }
 
       if ($variaatiosummaus != "") {
         $tuotenoparts = explode(" ", str_replace("_", " ", $row["tuoteno"]));
 
         if (count($tuotenoparts) > 1) array_pop($tuotenoparts);
 
-        $worksheet->writeString($excelrivi, $excelsarake, implode(" ", $tuotenoparts));
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, implode(" ", $tuotenoparts));
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(implode(" ", $tuotenoparts))."\t");
+        }
       }
       else {
-        $worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring($row["tuoteno"])."\t");
+        }
       }
 
       $tuotesarake = $excelsarake;
 
-      $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
-      $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
-      $excelsarake++;
+      if ($tallennusmuoto_check) {
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring(t_tuotteen_avainsanat($row, 'nimitys'))."\t");
+        fwrite($fh, pupesoft_csvstring($row["yksikko"])."\t");
+      }
 
       if ($variaatiosummaus != "") {
         foreach ($kaikkikoot as $kokonimi => $koko) {
-          if (isset($koot[$kokonimi])) $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
+          if (isset($koot[$kokonimi])) {
+            if ($tallennusmuoto_check) {
+              $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
+            }
+            else {
+              fwrite($fh, pupesoft_csvstring($koot[$kokonimi])."\t");
+            }
+          }
           $excelsarake++;
         }
       }
 
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $muutoskpl));
-      $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
-      $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
-      $excelsarake++;
-      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
-      $excelsarake++;
+      if ($tallennusmuoto_check) {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $muutoskpl));
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $muutoskpl))."\t");
+      }
+
+      if (isset($varatturajaus) and $varatturajaus == "O") {
+        if ($tallennusmuoto_check) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $varattu_saldo));
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $varattu_saldo))."\t");
+        }
+      }
+
+      if ($tallennusmuoto_check) {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
+        $excelsarake++;
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $kehasilloin))."\t");
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $muutoshinta))."\t");
+      }
+
+      if (isset($varatturajaus) and $varatturajaus == "O") {
+        if ($tallennusmuoto_check) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $varattu_varastonarvo));
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $varattu_varastonarvo))."\t");
+        }
+      }
+
+      if ($tallennusmuoto_check) {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
+        $excelsarake++;
+      }
+      else {
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $bmuutoshinta))."\t");
+      }
+
+      $varastorajausjoini = '';
 
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-        $query_a = "SELECT ifnull(max(laadittu), '0000-00-00') vihapvm
-                    FROM tapahtuma use index (yhtio_tuote_laadittu)
-                    WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-                    and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-                    and tapahtuma.laadittu >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
-                    $varasto_tapahtuma
-                    and tapahtuma.laji     = 'tulo'";
+
+        // jos osto/myynti vain valituista varastoista, laitetaan myös varastosiirtoihin varastorajaus
+        $varastorajausjoini = $varasto_laskuclearing;
+
+        $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
+                    FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
+                    WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
+                    AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
+                    AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    {$varasto_tapahtuma}
+                    AND tapahtuma.laji     = 'tulo'";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
         $row['vihapvm'] = $resultti_a['vihapvm'];
       }
 
+      // Huomioidaanko varastosiirrot viimeisimpänä tulona
+      if (!empty($huomioi_varastosiirrot)) {
+
+        $query_a = "SELECT IFNULL(MAX(tilausrivi.toimitettuaika), '0000-00-00') vihapvm
+                    FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+                    JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+                      AND lasku.tunnus             = tilausrivi.otunnus
+                      $varastorajausjoini
+                      AND lasku.varasto           != lasku.clearing
+                      AND lasku.tila               = 'G')
+                    WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+                    AND tilausrivi.tyyppi          = 'G'
+                    AND tilausrivi.tuoteno         = '{$row['tuoteno']}'
+                    AND tilausrivi.laadittu        >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    AND tilausrivi.toimitettuaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    AND tilausrivi.kpl + tilausrivi.varattu > 0";
+        $result_a = pupe_query($query_a);
+        $resultti_a = mysql_fetch_assoc($result_a);
+
+        if ($resultti_a['vihapvm'] > $row['vihapvm']) {
+          $row['vihapvm'] = $resultti_a['vihapvm'];
+        }
+      }
+
       if ($variaatiosummaus == "") {
 
         if ($kiertoviilasku != "") {
-          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $kierto));
-          $excelsarake++;
+          if ($tallennusmuoto_check) {
+            $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $kierto));
+            $excelsarake++;
 
-          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($vikamykupaiva));
-          $excelsarake++;
+            $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($vikamykupaiva));
+            $excelsarake++;
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $kierto))."\t");
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($vikamykupaiva))."\t");
+          }
         }
 
         if ($row['epakurantti25pvm'] != '0000-00-00') {
-          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti25pvm']));
+          if ($tallennusmuoto_check) {
+            $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti25pvm']));
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti25pvm'])));
+          }
         }
-        $excelsarake++;
-        if ($row['epakurantti50pvm'] != '0000-00-00') {
-          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti50pvm']));
-        }
-        $excelsarake++;
-        if ($row['epakurantti75pvm'] != '0000-00-00') {
-          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti75pvm']));
-        }
-        $excelsarake++;
-        if ($row['epakurantti100pvm'] != '0000-00-00') {
-          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti100pvm']));
-        }
-        $excelsarake++;
 
-        $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row["vihapvm"]));
-        $excelsarake++;
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, "\t");
+        }
+
+        if ($row['epakurantti50pvm'] != '0000-00-00') {
+          if ($tallennusmuoto_check) {
+            $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti50pvm']));
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti50pvm'])));
+          }
+        }
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, "\t");
+        }
+
+        if ($row['epakurantti75pvm'] != '0000-00-00') {
+          if ($tallennusmuoto_check) {
+            $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti75pvm']));
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti75pvm'])));
+          }
+        }
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, "\t");
+        }
+
+        if ($row['epakurantti100pvm'] != '0000-00-00') {
+          if ($tallennusmuoto_check) {
+            $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti100pvm']));
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti100pvm'])));
+          }
+        }
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, "\t");
+        }
+
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row["vihapvm"]));
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(tv1dateconv($row["vihapvm"]))."\t");
+        }
       }
 
-      $excelrivi++;
+      if ($tallennusmuoto_check) {
+        $excelrivi++;
+      }
+      else {
+        fwrite($fh, "\r\n");
+      }
 
       // Kun otetaan tuotteittain niin ekotetaan laitteet!
       if ($variaatiosummaus == "" and $summaustaso == "T" and $row["sarjanumeroseuranta"] == "S") {
@@ -1300,10 +1619,18 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
           $sarjanumeronarvo = sarjanumeron_ostohinta("tunnus", $vararvorow["tunnus"], "", "$vv-$kk-$pp 23:59:59");
 
-          $worksheet->writeString($excelrivi, $tuotesarake,   $vararvorow["sarjanumero"]);
-          $worksheet->writeString($excelrivi, $tuotesarake+1, $vararvorow["nimitys"]);
-          $worksheet->writeNumber($excelrivi, $tuotesarake+2, sprintf("%.02f", $sarjanumeronarvo));
-          $excelrivi++;
+          if ($tallennusmuoto_check) {
+            $worksheet->writeString($excelrivi, $tuotesarake,   $vararvorow["sarjanumero"]);
+            $worksheet->writeString($excelrivi, $tuotesarake+1, $vararvorow["nimitys"]);
+            $worksheet->writeNumber($excelrivi, $tuotesarake+2, sprintf("%.02f", $sarjanumeronarvo));
+            $excelrivi++;
+          }
+          else {
+            fwrite($fh, pupesoft_csvstring($vararvorow["sarjanumero"])."\t");
+            fwrite($fh, pupesoft_csvstring($vararvorow["nimitys"])."\t");
+            fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $sarjanumeronarvo))."\t");
+            fwrite($fh, "\r\n");
+          }
         }
       }
 
@@ -1407,15 +1734,36 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
   }
 
-  $excelnimi = $worksheet->close();
+  if ($tallennusmuoto_check) {
+    $excelnimi = $worksheet->close();
+  }
+  else {
+    fclose($fh);
+    $excelnimi = $tiedostonimi;
+  }
 
   if (!$php_cli) {
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xlsx'>";
-    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+
+    if ($tallennusmuoto_check) {
+      echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xlsx'>";
+    }
+    else {
+      echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.csv'>";
+    }
+
+    echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
     echo "<table>";
-    echo "<tr><th>".t("Tallenna Excel-aineisto").":</th>";
+    echo "<tr>";
+
+    if ($tallennusmuoto_check) {
+      echo "<th>".t("Tallenna Excel-aineisto").":</th>";
+    }
+    else {
+      echo "<th>".t("Tallenna CSV-aineisto").":</th>";
+    }
+
     echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
     echo "</table><br>";
     echo "</form>";
@@ -1424,13 +1772,19 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $komento = 'email';
 
     // itse print komento...
-    $liite = "/tmp/Varastonarvo_$vv-$kk-$pp.xlsx";
+    if ($tallennusmuoto_check) {
+      $liite = "/tmp/Varastonarvo_{$vv}-{$kk}-{$pp}.xlsx";
+      $ctype = "excel";
+    }
+    else {
+      $liite = "/tmp/Varastonarvo_{$vv}-{$kk}-{$pp}.csv";
+      $ctype = "text";
+    }
 
     rename("/tmp/".$excelnimi, $liite);
 
     $kutsu = t("Varastonarvoraportti")." $vv-$kk-$pp";
 
-    $ctype = "excel";
     $kukarow["eposti"] = $email_osoite;
 
     require "inc/sahkoposti.inc";

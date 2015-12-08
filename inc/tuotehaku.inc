@@ -1,9 +1,22 @@
 <?php
 
+pupeslave_start();
+
 $enarimatch   = FALSE;
 $poistetulisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 
-if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== FALSE and $kukarow["extranet"] == "") {
+if (
+  // Haetaan myös poistetut, jos kyseessä on tuotehallinta, eikä olla extranetissä
+  (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "")
+
+  // Haetaan myös poistetut, jos kyseessä on ostotilaus ja yhtiön parametreistä on valittu, että
+  // myös poistettuja tuotteita voi lisätä tilaukselle
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== false and $yhtiorow["poistetut_lisays"] == "P")
+
+  // Haetaan myös poistetut, jos kyseessä on extranet-tilaus ja yhtiön parametreistä on valittu,
+  // että myös poistettuja tuotteita voi lisätä tilaukselle
+  or (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== false and !empty($extranet) and $yhtiorow["poistetut_lisays"] == "P")
+) {
   $poistetulisa = "";
 }
 
@@ -57,9 +70,9 @@ if (!$enarimatch) {
   // Nyt me selataan
   if ((substr($tuoteno, 0, 1) == '*' or substr($tuoteno, -1) == '*' or substr($tuoteno, 0, 1) == '?' or substr($tuoteno, 0, 1) == "@") and trim(strlen($tuoteno)) >= 2) {
 
-    $th_lisa1  = "";
-    $ulos      = "";
-    $kieltolisa  = "";
+    $th_lisa1   = "";
+    $ulos       = "";
+    $kieltolisa = "";
 
     if (substr($tuoteno, 0, 1) == '?') {
       // Toimittajan tuotenumero
@@ -204,7 +217,7 @@ if (!$enarimatch) {
                 tuote.status,
                IF(tuote.epakurantti100pvm = '0000-00-00', IF(tuote.epakurantti75pvm = '0000-00-00', IF(tuote.epakurantti50pvm = '0000-00-00', IF(tuote.epakurantti25pvm = '0000-00-00', '', '25'), '50'), '75'), '100') epakurantti,
                (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
-              FROM tuote use index (tuoteno, nimitys)
+              FROM tuote
               {$tuotteen_toimittajat_join}
               WHERE tuote.$yhtiot
               $kieltolisa
@@ -278,6 +291,26 @@ if (!$enarimatch) {
       }
     }
 
+    // Etsitään vielä asiakaskommenteista, jos ei ole mitenkään muuten löytynyt ja kyseessä on
+    // myyntitilaus
+    if (count($rows) == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== false) {
+      $query = "SELECT tuote.*
+                FROM tuote
+                JOIN asiakaskommentti
+                  ON (asiakaskommentti.yhtio = tuote.yhtio
+                  AND asiakaskommentti.tuoteno = tuote.tuoteno
+                  AND asiakaskommentti.ytunnus = '{$asiakasrow["ytunnus"]}')
+                WHERE tuote.yhtio              = '{$kukarow["yhtio"]}'
+                AND asiakaskommentti.kommentti = '{$tuoteno}'
+                {$poistetulisa}
+                LIMIT 1";
+
+      $row = pupe_query($query);
+      $row = mysql_fetch_assoc($row);
+
+      $rows[$row["tuoteno"]] = $row;
+    }
+
     if (count($rows) >  200) {
       $kentta      = 'tuoteno';
       $varaosavirhe   = t("VIRHE: Hakuehdolla löytyi liikaa tuotteita!");
@@ -313,7 +346,7 @@ if (!$enarimatch) {
         $ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
       }
 
-      if ($yhtiorow["saldo_kasittely"] == "T") {
+      if (!empty($yhtiorow["saldo_kasittely"])) {
         $saldoaikalisa = date("Y-m-d");
       }
       else {
@@ -381,7 +414,12 @@ if (!$enarimatch) {
           $ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
         }
 
-        $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% ".t("epäkurantti").")" : "";
+        if (empty($kukarow["extranet"])) {
+          $epakuranttiteksti = $trow['epakurantti'] != '' ? " ({$trow['epakurantti']}% " . t("epäkurantti") . ")" : "";
+        }
+        else {
+          $epakuranttiteksti = "";
+        }
 
         $ulos .= "<option value='{$trow['tuoteno']}{$lisakala3}'>{$lisakala2} {$lisakala1} {$trow['tuoteno']} ".t_tuotteen_avainsanat($trow, 'nimitys')." ({$kokonaismyytavissa}){$epakuranttiteksti}</option>";
 
@@ -472,3 +510,5 @@ if (!$enarimatch) {
     }
   }
 }
+
+pupeslave_stop();

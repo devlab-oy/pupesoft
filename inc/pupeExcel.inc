@@ -45,13 +45,18 @@ class pupeExcel {
 
   function setStyle($cell, $style) {
     if (isset($style["date"]) and $style["date"]) {
-      // s=1 viittaa styles.zml failin ykkös-styleen
+      // s=1 viittaa styles.xml failin ykkös-styleen
       $cell->addAttribute('s', '1');
     }
 
     if (isset($style["bold"]) and $style["bold"]) {
-      // s=2 viittaa styles.zml failin kakkos-styleen
+      // s=2 viittaa styles.xml failin kakkos-styleen
       $cell->addAttribute('s', '2');
+    }
+
+    if (isset($style["strike"]) and $style["strike"]) {
+      // s=3 viittaa styles.xml failin kolmos-styleen
+      $cell->addAttribute('s', '3');
     }
   }
 

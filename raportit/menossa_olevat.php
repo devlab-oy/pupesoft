@@ -26,17 +26,30 @@ if ($tee == 'NAYTATILAUS') {
   $tee = "";
 }
 
+if (!isset($vain_toimittamattomat_kaikki)) $vain_toimittamattomat_kaikki = '';
+if (!isset($vain_toimittamattomat)) $vain_toimittamattomat = '';
+
 if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {
   require "inc/asiakashaku.inc";
 }
 
 if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 
+  $tilat = "and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
+
   if ($ytunnus != 'TULKAIKKI') {
-    $lisa = " and lasku.ytunnus = '$ytunnus' ";
+    $lisa = " and lasku.ytunnus = '{$ytunnus}' ";
+
+    if (!empty($vain_toimittamattomat)) {
+      $tilat = "and (lasku.tila = 'N' or (lasku.tila = 'L' and lasku.alatila IN ('A','B','BD','C')))";
+    }
   }
   else {
     $lisa = " ";
+
+    if (!empty($vain_toimittamattomat_kaikki)) {
+      $tilat = "and (lasku.tila = 'N' or (lasku.tila = 'L' and lasku.alatila IN ('A','B','BD','C')))";
+    }
   }
 
   if ($suunta == '' or $suunta == "DESC") {
@@ -66,7 +79,8 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) jt_arvo
             FROM lasku
             JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-            WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            {$tilat}
             $lisa
             GROUP BY 1,2,3,4,5
             ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
@@ -200,24 +214,47 @@ if ($vain_excel_kaikki != '') {
   $vain_excelchk_kaikki = "CHECKED";
 }
 
-echo "<br><form name=asiakas method='post' autocomplete='off'>";
-echo "<table><tr>";
-echo "<th>".t("Anna ytunnus tai osa nimestä")."</th>";
-echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td></tr>";
-echo "<tr><th>".t("Raportti Exceliin")."</th>";
-echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
-echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
-echo "</tr>";
-echo "</form>";
-echo "<tr><td class='back'><br><br></td></tr>";
-echo "<form name=asiakas method='post' autocomplete='off'>";
+$_chk = !empty($vain_toimittamattomat) ? 'checked' : '';
+
+echo "<br>";
+echo "<form name='asiakas' method='post' autocomplete='off'>";
+echo "<table>";
 echo "<tr>";
-echo "<th colspan='2'>".t("Listaa kaikki menossa olevat")."</th></tr>";
-echo "<tr><th>".t("Raportti Exceliin")."</th>";
-echo "<td><input type='checkbox' name='vain_excel_kaikki' $vain_excelchk_kaikki></td><tr>";
+echo "<th>".t("Anna ytunnus tai osa nimestä")."</th>";
+echo "<td><input type='text' name='ytunnus' value='{$ytunnus}'></td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>".t("Vain toimittamattomat")."</th>";
+echo "<td><input type='checkbox' name='vain_toimittamattomat' {$_chk}></td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>".t("Raportti Exceliin")."</th>";
+echo "<td><input type='checkbox' name='vain_excel' {$vain_excelchk}></td>";
+echo "</tr>";
+echo "<tr>";
+echo "<td class='back' colspan='2'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
+echo "</tr>";
+echo "</table>";
+echo "</form>";
+
+echo "<br><br>";
+
+$_chk = !empty($vain_toimittamattomat_kaikki) ? 'checked' : '';
+
+echo "<form name='asiakas' method='post' autocomplete='off'>";
 echo "<input type='hidden' name='ytunnus' value='TULKAIKKI'>";
-echo "<td class='back'><input type='submit' value='".t("Listaa")."'></td>";
-echo "</tr></table>";
+echo "<table>";
+echo "<tr><th colspan='2'>".t("Listaa kaikki menossa olevat")."</th></tr>";
+echo "<tr>";
+echo "<th>".t("Vain toimittamattomat")."</th>";
+echo "<td><input type='checkbox' name='vain_toimittamattomat_kaikki' {$_chk}></td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>".t("Raportti Exceliin")."</th>";
+echo "<td><input type='checkbox' name='vain_excel_kaikki' $vain_excelchk_kaikki></td>";
+echo "</tr>";
+echo "<tr><td class='back' colspan='2'><input type='submit' value='".t("Listaa")."'></td></tr>";
+echo "</table>";
 echo "</form>";
 
 

@@ -295,58 +295,59 @@ if ($tee == 'I') {
   $errormsg = "";
   // Talletetaan k‰ytt‰j‰n nimell‰ tositteen/liitteen kuva, jos sellainen tuli
   // koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
-  if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-    $kuva = false;
+  for ($k=1; $k<=3; $k++) {
+    if (is_uploaded_file($_FILES['userfile'.$k]['tmp_name'])) {
+      ${"kuva".$k} = false;
 
-    // otetaan file extensio
-    $path_parts = pathinfo($_FILES['userfile']['name']);
-    $ext = $path_parts['extension'];
-    if (strtoupper($ext) == "JPEG") $ext = "jpg";
+      // otetaan file extensio
+      $path_parts = pathinfo($_FILES['userfile'.$k]['name']);
+      $ext = $path_parts['extension'];
+      if (strtoupper($ext) == "JPEG") $ext = "jpg";
 
-    // extensio pit‰‰ olla oikein
-    if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
-      $errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+      // extensio pit‰‰ olla oikein
+      if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
+        $errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+        $tee = "E";
+        $fnimi = "";
+      }
+      // ja file jonkun kokonen
+      elseif ($_FILES['userfile'.$k]['size'] == 0) {
+        $errormsg .= "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
+        $tee = "E";
+        $fnimi = "";
+      }
+
+      $query = "SHOW variables like 'max_allowed_packet'";
+      $result = pupe_query($query);
+      $varirow = mysql_fetch_row($result);
+
+      if ($filesize > $varirow[1]) {
+        $errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>";
+        $tee = "E";
+      }
+
+      // jos ei virheit‰..
+      if ($tee == "I") {
+        ${"kuva".$k} = tallenna_liite("userfile".$k, "lasku", 0, "", "", 0, 0, "");
+      }
+    }
+    elseif (isset($_FILES['userfile'.$k]['error']) and $_FILES['userfile'.$k]['error'] != 4) {
+      // nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
+      if ($_FILES['userfile'.$k]['error'] == 1) {
+        $errormsg .=  "<font class='error'>".t("Liitetiedosto on liian suuri")."! (php: (".ini_get("upload_max_filesize")."))</font><br>";
+      }
+      else {
+        $errormsg .=  "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile'.$k]['error'].")</font><br>";
+      }
       $tee = "E";
-      $fnimi = "";
     }
-    // ja file jonkun kokonen
-    elseif ($_FILES['userfile']['size'] == 0) {
-      $errormsg .= "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
-      $tee = "E";
-      $fnimi = "";
-    }
-
-    $query = "SHOW variables like 'max_allowed_packet'";
-    $result = pupe_query($query);
-    $varirow = mysql_fetch_row($result);
-
-    if ($filesize > $varirow[1]) {
-      $errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>";
-      $tee = "E";
-    }
-
-    // jos ei virheit‰..
-    if ($tee == "I") {
-      $kuva = tallenna_liite("userfile", "lasku", 0, "", "", 0, 0, "");
-    }
-  }
-  elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
-    // nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
-    if ($_FILES['userfile']['error'] == 1) {
-      $errormsg .=  "<font class='error'>".t("Liitetiedosto on liian suuri")."! (php: (".ini_get("upload_max_filesize")."))</font><br>";
-    }
-    else {
-      $errormsg .=  "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
-    }
-    $tee = "E";
   }
 
   if ($yhtiorow['skannatut_laskut_polku'] != '' and $nayta_skannattu_lasku != "") {
-
     $skannatut_laskut_polku = rtrim($yhtiorow['skannatut_laskut_polku'], '/').'/';
 
     // lis‰t‰‰n kuva
-    $kuva = tallenna_liite($skannatut_laskut_polku.$nayta_skannattu_lasku, "lasku", 0, '');
+    $kuva1 = tallenna_liite($skannatut_laskut_polku.$nayta_skannattu_lasku, "lasku", 0, '');
   }
 
   if (isset($toitilinumero)) {
@@ -1113,7 +1114,7 @@ if ($tee == 'P' or $tee == 'E') {
       </script>";
 
   if ($yhtiorow['skannatut_laskut_polku'] != '' and $nayta_skannattu_lasku != "") {
-    echo "<table><tr><td class='back'>";
+    echo "<table><tr><td class='back ptop'>";
   }
 
   if ($toimittajaid > 0) {
@@ -1166,13 +1167,13 @@ if ($tee == 'P' or $tee == 'E') {
 
     $fakta = "";
     if (trim($trow["fakta"]) != "") {
-      $fakta = "<br><br><font class='message'>$trow[fakta]</font>";
+      $fakta = "<br><br><div style='font-weight: bold;'>$trow[fakta]</div>";
     }
 
     echo "<form name = 'lasku' action = '?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
     echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-    echo "<table><tr><td valign='top' style='padding: 0px;'>";
+    echo "<table><tr><td class='ptop' style='padding: 0px;'>";
     echo "<table>";
     echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
     echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus_clean])</td></tr>";
@@ -1189,7 +1190,7 @@ if ($tee == 'P' or $tee == 'E') {
     echo "</td>";
 
     // eri tilitiedot riippuen onko suomalainen vai ei
-    echo "<td valign='top' style='padding: 0px;'>";
+    echo "<td class='ptop' style='padding: 0px;'>";
     echo "<table>";
     echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 
@@ -1289,8 +1290,28 @@ if ($tee == 'P' or $tee == 'E') {
 
         </td><td class='back'>
 
-        <table>
-        <tr><th>".t("maa")."</th>    <td><input type='text' name='trow[maa]' maxlength='2'  size=4  value='$trow[maa]'></td></tr>
+        <table>";
+
+      $query = "SELECT DISTINCT koodi, nimi
+                FROM maat
+                WHERE nimi != ''
+                ORDER BY koodi";
+      $vresult = pupe_query($query);
+
+      echo "<tr><th valign='top'> ".t("Maa").": </th>
+            <td><select name='trow[maa]' ".js_alasvetoMaxWidth("maa", 400).">";
+
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        $sel = "";
+        if (strtoupper($trow["maa"]) == strtoupper($vrow["koodi"])) {
+          $sel = "selected";
+        }
+        echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "
         <tr><th>".t("IBAN")."</th>    <td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
         <tr><th>".t("SWIFT")."</th>    <td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swift]'></td></tr>
         <tr><th>".t("pankki1")."</th>  <td><input type='text' name='trow[pankki1]'  maxlength='35' size=45 value='$trow[pankki1]'></td></tr>
@@ -1614,14 +1635,30 @@ if ($tee == 'P' or $tee == 'E') {
   echo "<tr>";
   echo "<td>".t("Laskun kuva")."$tilino_alv_hidden</td>";
 
-  if ($kuva) {
-    echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
+  if ($kuva1 or $kuva2 or $kuva3) {
+    echo "<td>".t("Kuva jo tallessa")."!";
+
+    if ($kuva1) {
+      echo "<input name='kuva1' type='hidden' value = '$kuva1'>";
+    }
+    if ($kuva2) {
+      echo "<input name='kuva2' type='hidden' value = '$kuva2'>";
+    }
+    if ($kuva3) {
+      echo "<input name='kuva3' type='hidden' value = '$kuva3'>";
+    }
+
+    echo "</td>";
   }
   elseif ($yhtiorow['skannatut_laskut_polku'] != '' and $nayta_skannattu_lasku != "") {
     echo "<td>".t("Kts. oikealle")."!</td>";
   }
   else {
-    echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'><input name='userfile' type='file' tabindex='-1'></td>";
+    echo "<td><input type='hidden' name='MAX_FILE_SIZE' value='50000000'>
+            <input name='userfile1' type='file' tabindex='-1'><br>
+            <input name='userfile2' type='file' tabindex='-1'><br>
+            <input name='userfile3' type='file' tabindex='-1'>
+          </td>";
   }
 
   echo "</tr>";
@@ -1849,7 +1886,7 @@ if ($tee == 'P' or $tee == 'E') {
 
       echo "<td valign='top'><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
       echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]);
-      echo "$ivirhe[$i]";
+      echo " $ivirhe[$i]";
       echo "</td></tr>";
       echo "<tr id='tiliointirivi_hr_{$i}' style='display:none;'><td colspan='4'><hr></td></tr>";
     }
@@ -1983,7 +2020,7 @@ if ($tee == 'I') {
     $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") " . trim($komm);
   }
 
-  if ($kuva) {
+  if ($kuva1 or $kuva2 or $kuva3) {
     $ebid = '';
   }
 
@@ -2078,10 +2115,18 @@ if ($tee == 'I') {
   $result = pupe_query($query);
   $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
-  if ($kuva) {
+  if ($kuva1 or $kuva2 or $kuva3) {
+    $tunnarit = "";
+
+    if ($kuva1) $tunnarit.= $kuva1.",";
+    if ($kuva2) $tunnarit.= $kuva2.",";
+    if ($kuva3) $tunnarit.= $kuva3.",";
+
+    $tunnarit = substr($tunnarit, 0, -1);
+
     // p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
-    $query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='$trow[nimi] $summa $valkoodi' where tunnus='$kuva'";
-    $result = pupe_query($query);
+    $query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='$trow[nimi] $summa $valkoodi' where tunnus in ($tunnarit)";
+    pupe_query($query);
   }
 
   // Tehd‰‰n oletustiliˆinnit
@@ -2590,7 +2635,7 @@ if ($tee == 'I') {
   $tee = '';
 
   if ($yhtiorow['skannatut_laskut_polku'] != '' and $nayta_skannattu_lasku != "") {
-    unset($kuva);
+    unset($kuva1);
 
     $skannatut_laskut_polku = rtrim($yhtiorow['skannatut_laskut_polku'], '/').'/';
 

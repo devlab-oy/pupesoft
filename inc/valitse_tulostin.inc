@@ -54,6 +54,9 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
   <input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
   <input type='hidden' name='kertakassa' value='$kertakassa'>
+  <input type='hidden' name='status' value='{$status}'>
+  <input type='hidden' name='varasto' value='{$varasto}'>
+  <input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista' value='{$ei_huomioida_tuotepaikkoja_avainsanoista}'>
   <input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
   <input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
   <input type='hidden' name='varastonarvo' value='$varastonarvo'>
@@ -61,7 +64,24 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
   <input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
   <input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
-  <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
+  <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />
+  <input type='hidden' name='vapaa_teksti' value='{$vapaa_teksti}' />
+  <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />";
+
+if (!empty($kateismaksu["kateinen"])) {
+  echo "<input type='hidden' name='kateismaksu[kateinen]'
+               value='{$kateismaksu["kateinen"]}'>";
+}
+
+if (!empty($kateismaksu["pankkikortti"])) {
+  echo "<input type='hidden' name='kateismaksu[pankkikortti]'
+               value='{$kateismaksu["pankkikortti"]}'>";
+}
+
+if (!empty($kateismaksu["luottokortti"])) {
+  echo "<input type='hidden' name='kateismaksu[luottokortti]'
+               value='{$kateismaksu["luottokortti"]}'>";
+}
 
 if ($nappikeikalle == 'menossa') {
   echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
@@ -215,17 +235,11 @@ if ($toim == "TILAUSVAHVISTUS"
   $tvsel[$naytatvale] = "SELECTED";
 
   echo "<tr><th>".t("Tyyppi")."</th><td><select name='seltvtyyppi'>";
-  echo "<option value = '1' $tvsel[1]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus")."</option>";
-  echo "<option value = '2' $tvsel[2]>".t("N‰ytet‰‰n tuotteen myyntihinta ja alennusryhm‰")."</option>";
-  echo "<option value = '3' $tvsel[3]>".t("Ei n‰ytet‰ hintoja eik‰ alennuksia")."</option>";
-  echo "<option value = '4' $tvsel[4]>".t("N‰ytet‰‰n asiakkaan hinta")."</option>";
-  echo "<option value = '5' $tvsel[5]>".t("Haetaan hinnat toisesta pupesta")."</option>";
-  echo "<option value = '6' $tvsel[6]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus, modifioitu tulostuspohja")."</option>";
-  echo "<option value = '7' $tvsel[7]>".t("N‰ytet‰‰n asiakkaan hinta ja alennus sek‰ EAN-viivakoodi")."</option>";
-  echo "<option value = '8' $tvsel[8]>".t("N‰ytet‰‰n bruttorivihinta ja EAN-viivakoodi")."</option>";
-  echo "<option value = '10' $tvsel[10]>".t("N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina")."</option>";
-  echo "<option value = '11' $tvsel[11]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia")."</option>";
-  echo "<option value = '12' $tvsel[12]>".t("N‰ytet‰‰n asiakkaan hinta, viivakoodi, ale-1, ja erikoisale")."</option>";
+
+  foreach (pupesoft_tilausvahvistustyypit() as $tv_tyyppi => $tv_selite) {
+    echo "<option value = '$tv_tyyppi' $tvsel[$tv_tyyppi]>".t($tv_selite)."</option>";
+  }
+
   echo "</select></td></tr>";
 }
 
@@ -247,6 +261,12 @@ if ($toim == "TARJOUS") {
   echo "<option value=''>", t("N‰ytet‰‰n hinnat"), "</option>";
   echo "<option value='ei_rivihintaa'>", t("Ei n‰ytet‰ rivihintaa"), "</option>";
   echo "<option value='kokonaan_ilman_hintoja'>", t("Kokonaan ilman hintoja"), "</option>";
+  echo "</select></td></tr>";
+
+  echo "<tr><th>" . t("N‰ytet‰‰nkˆ yhteissummarivi") .
+    "</th><td><select name='naytetaanko_yhteissummarivi'>";
+  echo "<option value=''>" . t("N‰ytet‰‰n yhteissummarivi") . "</option>";
+  echo "<option value='E'>" . t("Ei n‰ytet‰ yhteissummarivi‰") . "</option>";
   echo "</select></td></tr>";
 
   echo "<tr><th>", t("N‰ytet‰‰nkˆ tuotenumerot"), "</th><td><select name='naytetaanko_tuoteno'>";
@@ -338,18 +358,44 @@ foreach ($tulostimet as $tulostin) {
     if (mysql_num_rows($suuntalavat_res) == 0) continue;
   }
 
-  if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
-    echo "<tr><th>", t("Tulosta myˆs tullinimike ja alkuper‰maa")."</th>";
-    echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
+  if ($toim == "PROFORMA" or $toim == "VIENTILASKU" or $toim == "LASKU") {
+    echo "<tr><th>", t("Tullinimike ja alkuper‰maa")."</th>";
+    echo "<td colspan='3'>";
+    echo "<select name='tullinimike_ja_alkuperamaa'>";
+    echo "<option value=''>" . t("Ei tulosteta") . "</option>";
+    echo "<option value='A'>" . t("Tulosta tullinimike ja alkuper‰maa") . "</option>";
+    echo "<option value='B'>" . t("Tulosta vain tullinimike") . "</option>";
+    echo "<option value='C'>" . t("Tulosta tullinimike ja alkuper‰maa (Kotimaan tuotantoa)") . "</option>";
+    echo "</select>";
+    echo "</td></tr>";
+  }
+
+  if ($toim == "TARJOUS") {
+    echo "<tr>";
+    echo "<th>" . t("Liit‰ tuotetiedot") . "</th>";
+    echo "<td>";
+    echo "<select name='liita_tuotetiedot'>";
+    echo "<option value=''>" . t("Ei") . "</option>";
+    echo "<option value='Y'>" . t("Kyll‰") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
   }
 
   echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
   echo "<td><select name='komento[$tulostin]'>";
-  echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-  echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+
+  if (empty($ei_inventointi)) {
+    echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+    echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+  }
 
   if ($tulostimet[0] == "Inventointi") {
     echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
+  }
+
+  if (!empty($editoimrow['email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
+    echo "<option value='toimittajaemail{$editoimrow['email']}'>".t("Toimittajan s‰hkˆpostiin").": {$editoimrow['email']}</option>";
   }
 
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
@@ -375,28 +421,30 @@ foreach ($tulostimet as $tulostin) {
     $rajaus = " and komento != 'edi' ";
   }
 
-  $querykieli = "SELECT *
-                 from kirjoittimet
-                 where yhtio='$kukarow[yhtio]'
-                 $rajaus
-                 ORDER BY kirjoitin";
-  $kires = pupe_query($querykieli);
+  if (empty($ei_inventointi)) {
+    $querykieli = "SELECT *
+                   from kirjoittimet
+                   where yhtio='$kukarow[yhtio]'
+                   $rajaus
+                   ORDER BY kirjoitin";
+    $kires = pupe_query($querykieli);
 
-  $seepra = false;
+    $seepra = false;
 
-  while ($kirow=mysql_fetch_array($kires)) {
+    while ($kirow=mysql_fetch_array($kires)) {
 
-    $sel = "";
-    if ($kirow["tunnus"] == $kukarow["kirjoitin"] and $valittu != "edi") {
-      $sel = "SELECTED";
+      $sel = "";
+      if ($kirow["tunnus"] == $kukarow["kirjoitin"] and $valittu != "edi") {
+        $sel = "SELECTED";
+      }
+      if ($kirow["komento"] == "edi" and $valittu == "edi") {
+        $sel = "SELECTED";
+      }
+
+      if ($kirow['merkisto'] != 0) $seepra = true;
+
+      echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
     }
-    if ($kirow["komento"] == "edi" and $valittu == "edi") {
-      $sel = "SELECTED";
-    }
-
-    if ($kirow['merkisto'] != 0) $seepra = true;
-
-    echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
   }
 
   echo "</select></td>";
@@ -404,7 +452,7 @@ foreach ($tulostimet as $tulostin) {
 
   if ($tulostin == 'Tyˆm‰‰r‰ys' and $kukarow['hinnat'] == 0) {
 
-    echo "<tr><th rowspan='2'>".t("Tyˆm‰‰r‰ystyyppi")."</th><td>";
+    echo "<tr><th>".t("Tyˆm‰‰r‰ystyyppi")."</th><td>";
     echo "<select name='tyomtyyppi'>";
 
     $sel = array();

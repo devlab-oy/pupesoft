@@ -11,17 +11,17 @@ enable_ajax();
 
 echo "<font class='head'>";
 
-if (!isset($toim))         $toim = "";
-if (!isset($tee))         $tee = "";
-if (!isset($ytunnus_oa))     $ytunnus_oa = "";
-if (!isset($ytunnus_oat))     $ytunnus_oat = "";
-if (!isset($firname))       $firname = "";
-if (!isset($generoitupass))   $generoitupass = "";
-if (!isset($kumpi))       $kumpi = "";
-if (!isset($oletus_asiakas))   $oletus_asiakas = "";
-if (!isset($oletus_profiili))  $oletus_profiili = '';
-if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
-if (!isset($myyja))        $myyja = "";
+if (!isset($toim))                  $toim = "";
+if (!isset($tee))                   $tee = "";
+if (!isset($ytunnus_oa))            $ytunnus_oa = "";
+if (!isset($ytunnus_oat))           $ytunnus_oat = "";
+if (!isset($firname))               $firname = "";
+if (!isset($generoitupass))         $generoitupass = "";
+if (!isset($kumpi))                 $kumpi = "";
+if (!isset($oletus_asiakas))        $oletus_asiakas = "";
+if (!isset($oletus_profiili))       $oletus_profiili = '';
+if (!isset($oletus_asiakastiedot))  $oletus_asiakastiedot = '';
+if (!isset($myyja))                 $myyja = "";
 
 if ($toim == 'extranet') {
   echo "Extranet-";
@@ -31,12 +31,6 @@ echo t("Käyttäjähallinta"), ":</font><hr>";
 
 // tää on tällänän kikka.. älkää seotko.. en jaksa pyörittää toimia joka formista vaikka pitäs..
 $PHP_SELF = $PHP_SELF."?toim={$toim}";
-
-if (isset($generatepass) and $generatepass != "") {
-  $generoitupass = trim(shell_exec("openssl rand -base64 12"));
-  $tee = "MUUTA";
-  $firname = "";
-}
 
 if (isset($muutparametrit)) {
   list ($tee, $selkuka, $kumpi, $yoaid) = explode("!¡!", $muutparametrit);
@@ -264,30 +258,30 @@ if ($tee == 'UUSI') {
   if (mysql_num_rows($reskuka) > 0 and $jatka != 1 and $kopsaakuka == "JOO") {
     $monta = mysql_fetch_assoc($reskuka);
 
-    $firname             = $monta['nimi'];
-    $ktunnus             = $monta['kuka'];
-    $phonenum             = $monta['puhno'];
-    $email               = $monta['eposti'];
-    $lang               = $monta['kieli'];
-    $ip                = $monta['ip'];
-    $taso               = $monta['taso'];
+    $firname                = $monta['nimi'];
+    $ktunnus                = $monta['kuka'];
+    $phonenum               = $monta['puhno'];
+    $email                  = $monta['eposti'];
+    $lang                   = $monta['kieli'];
+    $ip                     = $monta['ip'];
+    $taso                   = $monta['taso'];
     $tilaus_valmis          = $monta['tilaus_valmis'];
-    $hinta               = $monta['hinnat'];
-    $saatavat             = $monta['saatavat'];
-    $salasana             = $monta['salasana'];
-    $kassamyyja           = $monta['kassamyyja'];
-    $dynaaminen_kassamyynti      = $monta['dynaaminen_kassamyynti'];
-    $jyvitys             = $monta['jyvitys'];
+    $hinta                  = $monta['hinnat'];
+    $saatavat               = $monta['saatavat'];
+    $salasana               = $monta['salasana'];
+    $kassamyyja             = $monta['kassamyyja'];
+    $dynaaminen_kassamyynti = $monta['dynaaminen_kassamyynti'];
+    $jyvitys                = $monta['jyvitys'];
     $oletus_ohjelma         = $monta['oletus_ohjelma'];
-    $resoluutio           = $monta['resoluutio'];
-    $extranet             = $monta['extranet'];
-    $hyvaksyja             = $monta['hyvaksyja'];
+    $kayttoliittyma         = $monta['kayttoliittyma'];
+    $extranet               = $monta['extranet'];
+    $hyvaksyja              = $monta['hyvaksyja'];
     $naytetaan_katteet_tilauksella  = $monta['naytetaan_katteet_tilauksella'];
-    $naytetaan_asiakashinta      = $monta['naytetaan_asiakashinta'];
-    $naytetaan_tuotteet        = $monta['naytetaan_tuotteet'];
-    $naytetaan_tilaukset      = $monta['naytetaan_tilaukset'];
-    $profile             = $monta['profiilit'];
-    $piirit               = $monta['piirit'];
+    $naytetaan_asiakashinta = $monta['naytetaan_asiakashinta'];
+    $naytetaan_tuotteet     = $monta['naytetaan_tuotteet'];
+    $naytetaan_tilaukset    = $monta['naytetaan_tilaukset'];
+    $profile                = $monta['profiilit'];
+    $piirit                 = $monta['piirit'];
     $oletus_profiili        = $monta['oletus_profiili'];
 
     echo "<font class='message'>", t("Käyttäjä"), " {$monta['kuka']} ({$monta['nimi']}) ", t("löytyi muista yrityksistä."), "<br>";
@@ -356,6 +350,8 @@ if ($tee == 'UUSI') {
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
+              lahetetulostin                = '{$lahetetulostin}',
+              rahtikirjatulostin            = '{$rahtikirjatulostin}',
               kassalipas_otto               = '{$kassalipas_otto}',
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
@@ -364,7 +360,7 @@ if ($tee == 'UUSI') {
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
-              resoluutio                    = '{$resoluutio}',
+              kayttoliittyma                = '{$kayttoliittyma}',
               extranet                      = '{$extranet}',
               hyvaksyja                     = '{$hyvaksyja}',
               hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
@@ -518,6 +514,10 @@ else {
 $result = pupe_query($query);
 $selkukarow = mysql_fetch_assoc($result);
 
+if (mysql_num_rows($result) > 0) {
+  $selkuka = $selkukarow["tunnus"];
+}
+
 //muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 if ($tee == 'MUUTA') {
 
@@ -587,10 +587,13 @@ if ($tee == 'MUUTA') {
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
+              kuittitulostin                = '{$kuittitulostin}',
+              lahetetulostin                = '{$lahetetulostin}',
+              rahtikirjatulostin            = '{$rahtikirjatulostin}',
               oletus_asiakas                = '{$oletus_asiakas}',
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
-              resoluutio                    = '{$resoluutio}',
+              kayttoliittyma                = '{$kayttoliittyma}',
               extranet                      = '{$extranet}',
               hyvaksyja                     = '{$hyvaksyja}',
               hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
@@ -602,8 +605,13 @@ if ($tee == 'MUUTA') {
               kassalipas_otto               = '{$kassalipas_otto}',
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
+              maksupaate_kassamyynti        = '{$maksupaate_kassamyynti}',
+              maksupaate_ip                 = '{$maksupaate_ip}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
+              maksuehto                     = '{$maksuehto}',
+              toimitustapa                  = '{$toimitustapa}',
+              eilahetetta                   = '{$eilahetetta}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
@@ -728,6 +736,23 @@ if ($tee == 'MUUTA') {
       }
     }
 
+    if ($selkuka != "KOPSAAUUSI") {
+      echo '<script type="text/javascript">
+              // Create Base64 Object
+              var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/\r\n/g,"\n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+
+              $(function() {
+                $("#generoi_url").on("click", function(e) {
+                  e.preventDefault();
+                  var string = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 30),
+                      encodedString = Base64.encode(string).substr(0, 50);
+
+                  $("#password").val(encodedString);
+                });
+              });
+            </script>';
+    }
+
     echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 
     if ($toim == 'extranet') {
@@ -749,14 +774,19 @@ if ($tee == 'MUUTA') {
         echo "<input type='hidden' name='kopsaakuka' value='JOO'>";
       }
 
+      if (!isset($ktval)) $ktval = "";
+
       echo "<input type='hidden' name='tee' value='UUSI'>";
-      echo "<tr><th align='left'>", t("Käyttäjätunnus"), ":</th>
-      <td><input type='text' size='50' maxlength='50' name='ktunnus'></td></tr>";
+      echo "<tr>";
+      echo "<th align='left'>", t("Käyttäjätunnus"), ":</th>";
+      echo "<td>";
+      echo "<input type='text' size='50' maxlength='50' id='ktunnus' name='ktunnus' value='{$ktval}'>";
+      echo "</td>";
+      echo "</tr>";
     }
 
     if ($selkuka != "KOPSAAUUSI") {
-
-      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' name='password' value='{$generoitupass}'></td><td class='back'> <a href='?generatepass=y&selkuka={$selkuka}&toim={$toim}'>", t("Generoi salasana"), "</a></td></tr>";
+      echo "<tr><th align='left'>", t("Salasana"), ":</th><td><input type='text' size='50' maxlength='30' id='password' name='password' value='{$generoitupass}'></td><td class='back'> <button id='generoi_url' type='button'>", t("Generoi salasana"), "</button></td></tr>";
       echo "<tr><th align='left'>", t("Nimi"), ":</th><td><input type='text' size='50' value='{$krow['nimi']}' name='firname'></td></tr>";
       echo "<tr><th align='left'>", t("Puhelinnumero"), ":</th><td><input type='text' size='50' value='{$krow['puhno']}' maxlength='30' name='phonenum'></td></tr>";
       echo "<tr><th align='left'>", t("Sähköposti"), ":&nbsp;</th><td><input type='text' size='50' value='{$krow['eposti']}' maxlength='50' name='email'></td></tr>";
@@ -1080,6 +1110,84 @@ if ($tee == 'MUUTA') {
 
         echo "</select></td></tr>";
 
+        echo "<tr><th align='left'>", t("Kuittitulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='kuittitulostin'>" .
+          "<option value=''>" . t("Ei kuittitulostinta") .
+          "</option>";
+
+        $kuittitulostin_query =
+          "SELECT tunnus, kirjoitin
+           FROM kirjoittimet
+           WHERE yhtio     = '{$kukarow['yhtio']}'
+           AND mediatyyppi = 'kuittitulostin'";
+
+        $kuittitulostin_result = pupe_query($kuittitulostin_query);
+
+        while ($kuittitulostin_rivi = mysql_fetch_assoc($kuittitulostin_result)) {
+          $sel = '';
+
+          if ($kuittitulostin_rivi['tunnus'] == $krow["kuittitulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option " .
+            "value='{$kuittitulostin_rivi['tunnus']}' {$sel}>{$kuittitulostin_rivi['kirjoitin']}" .
+            "</option>";
+        }
+
+        echo "</select></td></tr>";
+
+        echo "<tr><th align='left'>", t("Lähetetulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='lahetetulostin'>" .
+          "<option value=''>" . t("Ei lähetetulostinta") .
+          "</option>";
+
+        $query  = "SELECT tunnus, kirjoitin
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
+        $result = pupe_query($query);
+
+        while ($rivi = mysql_fetch_assoc($result)) {
+          $sel = '';
+
+          if ($rivi['tunnus'] == $krow["lahetetulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
+        }
+
+        echo "</select></td></tr>";
+
+        echo "<tr><th align='left'>", t("Rahtikirjatulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='rahtikirjatulostin'>" .
+          "<option value=''>" . t("Ei rahtikirjatulostinta") .
+          "</option>";
+
+        $query  = "SELECT tunnus, kirjoitin
+                   FROM kirjoittimet
+                   WHERE yhtio  = '{$kukarow['yhtio']}'
+                   AND komento != 'EDI'
+                   ORDER BY kirjoitin";
+        $result = pupe_query($query);
+
+        while ($rivi = mysql_fetch_assoc($result)) {
+          $sel = '';
+
+          if ($rivi['tunnus'] == $krow["rahtikirjatulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
+        }
+
+        echo "</select></td></tr>";
+
         $kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
         $query = "SELECT *
                   FROM kassalipas
@@ -1129,6 +1237,47 @@ if ($tee == 'MUUTA') {
         echo "<option value='' {$sel1}>", t("Kassalipasta ei voi valita tilauksella"), "</option>";
         echo "<option value='o' {$sel2}>", t("Kassalippaan voi valita tilauksella"), "</option>";
         echo "</select></td>";
+
+        $maksupaate_sel_1 = "";
+        $maksupaate_sel_2 = "";
+
+        if ($krow["maksupaate_kassamyynti"] == "") {
+          $maksupaate_sel_1 = "selected";
+        }
+        elseif ($krow["maksupaate_kassamyynti"] == "E") {
+          $maksupaate_sel_2 = "selected";
+        }
+        else {
+          $maksupaate_sel_3 = "selected";
+        }
+
+        echo "<tr>
+                <th align='left'>" . t("Maksupääte kassamyynti") . ":</th>
+                <td>
+                  <select name='maksupaate_kassamyynti'>
+                    <option value=''
+                            {$maksupaate_sel_1}>" . t("Yhtiön oletus") . "
+                    </option>
+                    <option value='E'
+                            {$maksupaate_sel_2}>" . t("Ei käytetä maksupäätettä kassamyynnissä") . "
+                    </option>
+                    <option value='K'
+                            {$maksupaate_sel_3}>" . t("Käytetään maksupäätettä kassamyynnissä") . "
+                    </option>
+                  </select>
+                </td>
+              </tr>";
+
+        echo "<tr>
+                <th align='left'>" . t("Maksupäätteen IP") . ":</th>
+                <td>
+                  <input id='maksupaate_ip'
+                         type='text'
+                         name='maksupaate_ip'
+                         value='{$krow["maksupaate_ip"]}'
+                         placeholder='" . t("IP tai IP:portti") . "'/>
+                </td>
+              </tr>";
 
         $sel0 = $sel1 = "";
 
@@ -1297,26 +1446,6 @@ if ($tee == 'MUUTA') {
         }
         echo "</select></td></tr>";
 
-
-        $sel1 = $sel2 = $sel3 = "";
-
-        if ($krow['resoluutio'] == "N") {
-          $sel1 = "SELECTED";
-        }
-        if (!isset($krow["resoluutio"]) or $krow['resoluutio'] == "I") {
-          $sel2 = "SELECTED";
-        }
-        if ($krow['resoluutio'] == "P") {
-          $sel3 = "SELECTED";
-        }
-
-        echo "<tr><th align='left'>", t("Näytön koko"), ":</th>
-            <td><select name='resoluutio'>
-            <option value='I' {$sel2}>", t("Iso"), "</option>
-            <option value='N' {$sel1}>", t("Normaali"), "</option>
-            <option value='P' {$sel3}>", t("Pieni"), "</option>
-            </select></td></tr>";
-
         if ($krow['naytetaan_katteet_tilauksella'] == "") {
           $sel1 = "SELECTED";
           $sel2 = "";
@@ -1412,6 +1541,25 @@ if ($tee == 'MUUTA') {
         }
       }
 
+      $sel1 = $sel2 = $sel3 = "";
+
+      if ($krow['kayttoliittyma'] == "") {
+        $sel1 = "SELECTED";
+      }
+      if ($krow['kayttoliittyma'] == "C") {
+        $sel2 = "SELECTED";
+      }
+      if ($krow['kayttoliittyma'] == "U") {
+        $sel3 = "SELECTED";
+      }
+
+      echo "<tr><th align='left'>", t("Käyttöliittymä"), ":</th>
+          <td><select name='kayttoliittyma'>
+          <option value='' {$sel1}>", t("Yhtiön oletus"), "</option>
+          <option value='C' {$sel2}>", t("Pupesoft Classic"), "</option>
+          <option value='U' {$sel3}>", t("Pupesoft Next"), "</option>
+          </select></td></tr>";
+
       $sel = $krow['mitatoi_tilauksia'] == 'X' ? ' selected' : '';
 
       echo "<tr><th align='left'>", t("Tilausten mitätöiminen"), ":</td>";
@@ -1494,6 +1642,75 @@ if ($tee == 'MUUTA') {
       }
 
       echo "<tr><th>".t('Käyttäjän myyntitavoite 12kk').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
+
+      echo "<tr><th><label for='maksuehto'>" . t("Oletusmaksuehto") . "</label></th>";
+
+      $me_query = "SELECT *
+                   FROM maksuehto
+                   WHERE yhtio  = '{$kukarow["yhtio"]}'
+                   and kaytossa = ''
+                   ORDER BY jarjestys, teksti";
+
+      $me_result = pupe_query($me_query);
+
+      echo "<td><select id='maksuehto' name='maksuehto'>";
+      echo "<option value='0'>" . t("Ei valintaa") . "</option>";
+
+      while ($me_row = mysql_fetch_assoc($me_result)) {
+        $sallitut_maat = "";
+
+        if ($me_row["tunnus"] == $krow["maksuehto"]) {
+          $selected = "selected";
+        }
+        else {
+          $selected = "";
+        }
+
+        if ($me_row["sallitut_maat"] != "") {
+          $sallitut_maat = "($me_row[sallitut_maat])";
+        }
+
+        echo "<option value='{$me_row["tunnus"]}' {$selected}>" .
+          t_tunnus_avainsanat($me_row, "teksti", "MAKSUEHTOKV") . " {$sallitut_maat}</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "<tr><th><label for='toimitustapa'>" . t("Oletustoimitustapa") . "</label></th>";
+
+      $tt_query = "SELECT *
+                   FROM toimitustapa
+                   WHERE yhtio = '{$kukarow["yhtio"]}'
+                   ORDER BY jarjestys, selite";
+
+      $tt_result = pupe_query($tt_query);
+
+      echo "<td><select id='toimitustapa' name='toimitustapa'>";
+
+      echo "<option value=''>" . t("Ei valintaa") . "</option>";
+
+      while ($tt_row = mysql_fetch_array($tt_result)) {
+        if ($krow["toimitustapa"] == $tt_row['selite']) {
+          $selected = "selected";
+        }
+        else {
+          $selected = "";
+        }
+
+        echo "<option value='{$tt_row["selite"]}' {$selected}>" .
+          t_tunnus_avainsanat($tt_row, "selite", "TOIMTAPAKV") . "</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "<tr><th><label for='eilahetetta'>" . t("Tilaukset oletuksena suoraan laskutukseen") .
+        "</label></th>";
+      echo "<td>";
+
+      $checked = $krow["eilahetetta"] == "o" ? "checked" : "";
+
+      echo "<input id='eilahetetta' name='eilahetetta' type='checkbox' value='o' {$checked}>";
+      echo "</td></tr>";
     }
 
     echo "</table>";
@@ -1511,7 +1728,7 @@ if ($tee == 'MUUTA') {
       if (mysql_num_rows($res) > 0) {
         require "inc/extranet_kayttajan_lisatiedot.inc";
         echo "<td class='back'>";
-        echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
+        echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' frameborder='0'></iFrame>";
         echo "</td>";
       }
       echo "</tr>";

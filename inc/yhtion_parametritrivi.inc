@@ -2256,16 +2256,21 @@ if ($fieldname == "viitteen_kasinsyotto") {
 
   $sel1="";
   $sel2="";
+  $sel3="";
 
   if ($trow[$i] == "") {
     $sel1 = "selected";
   }
-  else {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
+  }
+  else {
+    $sel3 = "selected";
   }
 
   $ulos .= "<option value=''  $sel1>".t("Viitettä ei saa syöttää käsin")."</option>";
   $ulos .= "<option value='X' $sel2>".t("Viitteen saa syöttää käsin")."</option>";
+  $ulos .= "<option value='Y' $sel3>".t("Viitteen saa syöttää käsin ylläpitosopimuksille")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4760,6 +4765,20 @@ if ($fieldname == "viitemaksujen_oikaisut") {
   $ulos .= "<option value = ''>".t("Viitemaksujen oikaisuja ei tallenneta");
   $ulos .= "<option value = 'K' $sel[K]>".t("Viitemaksujen oikaisut tallennetaan");
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "laskun_kanavointitiedon_syotto") {
+  $apu = $trow[$i];
+  $sel = array($apu => " selected");
+
+  $ulos = "<td>
+             <select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+               <option value='0'>".t("Laskun kanavointitietoa ei voi syöttää käsin")."
+               <option value='1'{$sel["1"]}>".t("Laskun kanavointitiedon voi syöttää käsin ylläpitosopimukselle")."
+             </select>
+           </td>";
 
   $jatko = 0;
 }

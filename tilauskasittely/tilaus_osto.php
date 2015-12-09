@@ -14,6 +14,10 @@ if (isset($_REQUEST["tee"])) {
   }
 }
 
+if (isset($_REQUEST['ajax_popup'])) {
+  $no_head = true;
+}
+
 require "../inc/parametrit.inc";
 
 if ($kukarow['extranet'] == '' && isset($ajax_popup)) {

@@ -101,14 +101,14 @@ if [[ -n "${PUPENEXT_DIR}" ]]; then
   pupenextdir=${PUPENEXT_DIR}
 fi
 
-# Poikkeavan Pupesoft branchfilen voi antaa PUPESOFT_BRACHFILE environment muuttujassa
-if [[ -n "${PUPESOFT_BRACHFILE}" ]]; then
-  branchfile=${PUPESOFT_BRACHFILE}
+# Poikkeavan Pupesoft branchfilen voi antaa PUPESOFT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPESOFT_BRANCH_FILE}" ]]; then
+  branchfile=${PUPESOFT_BRANCH_FILE}
 fi
 
-# Poikkeavan Pupenext branchfilen voi antaa PUPENEXT_BRACHFILE environment muuttujassa
-if [[ -n "${PUPENEXT_BRACHFILE}" ]]; then
-  branchfilepupenext=${PUPENEXT_BRACHFILE}
+# Poikkeavan Pupenext branchfilen voi antaa PUPENEXT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPENEXT_BRANCH_FILE}" ]]; then
+  branchfilepupenext=${PUPENEXT_BRANCH_FILE}
 fi
 
 echo

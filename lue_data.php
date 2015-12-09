@@ -1898,7 +1898,7 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
-              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and empty($taulunrivit[$taulu][$eriviindex][$r])) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($table_mysql == 'tuote' and $otsikko == 'MYYNTIHINTA' and $myyntihinnan_paivitys == 1) {
@@ -1982,7 +1982,7 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
-              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and empty($taulunrivit[$taulu][$eriviindex][$r])) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($eilisataeikamuuteta == "") {

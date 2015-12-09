@@ -29,6 +29,10 @@ if (isset($_POST["tappi"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
+if (isset($_REQUEST['ajax_popup'])) {
+  $no_head = true;
+}
+
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;

@@ -87,10 +87,19 @@ normal=$(tput -Txterm-color sgr0)
 PUPESOFT_NEWHASH=""
 PUPENEXT_NEWHASH=""
 
-# Jos pupenext ei ole /home/devlab/pupenext hakemistossa,
-# tulee poikkeava polku antaa PUPENEXT_DIR environment muuttujassa
+# Poikkeavan pupenext hakemiston voi antaa PUPENEXT_DIR environment muuttujassa
 if [[ -n "${PUPENEXT_DIR}" ]]; then
   pupenextdir=${PUPENEXT_DIR}
+fi
+
+# Poikkeavan Pupesoft branchfilen voi antaa PUPESOFT_BRACHFILE environment muuttujassa
+if [[ -n "${PUPESOFT_BRACHFILE}" ]]; then
+  branchfile=${PUPESOFT_BRACHFILE}
+fi
+
+# Poikkeavan Pupenext branchfilen voi antaa PUPENEXT_BRACHFILE environment muuttujassa
+if [[ -n "${PUPENEXT_BRACHFILE}" ]]; then
+  branchfilepupenext=${PUPENEXT_BRACHFILE}
 fi
 
 echo

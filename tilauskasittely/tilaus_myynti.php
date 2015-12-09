@@ -7800,10 +7800,10 @@ if ($tee == '') {
           echo "<br>";
           if (!empty($sarjanumerotres['sarjanumerot'])) {
             echo "<br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']}<br>";
-            echo "<a href='{$palvelin2}kopioi_laitteita.php?toiminto=KOPIOI&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Kopioi laitteita</a>";
+            echo "<a href='{$palvelin2}kopioi_laitteita.php?toiminto=KOPIOI&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>".t("Kopioi laitteita")."</a>";
           }
           echo "<br>";
-          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
+          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>".t("Lis‰‰ laitteita")."</a>";
         }
 
         echo "</td>";

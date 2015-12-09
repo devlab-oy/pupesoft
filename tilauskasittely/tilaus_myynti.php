@@ -7339,7 +7339,7 @@ if ($tee == '') {
                         <input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
                         <input type='hidden' name='orig_tila' value='$orig_tila'>
                         <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-                        <select name='positio' onchange='submit();' $state>";
+                        <select name='positio' onchange='submit();'>";
 
               mysql_data_seek($trivityyppi_result, 0);
 

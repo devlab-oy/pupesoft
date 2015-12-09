@@ -26432,6 +26432,10 @@ if (!function_exists('hae_asiakas')) {
   function hae_asiakas($liitostunnus) {
     global $yhtiorow;
 
+    if (empty($liitostunnus)) {
+      return false;
+    }
+
     $query = "SELECT *
               FROM asiakas
               WHERE yhtio = '{$yhtiorow['yhtio']}'
@@ -30960,6 +30964,58 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists('luo_temp_tiedosto')) {
+
+  function luo_temp_tiedosto($liitetiedosto) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($liitetiedosto)) {
+      return '';
+    }
+
+    $fileparts = explode('.', $liitetiedosto['filename']);
+    $kpl = count($fileparts);
+    $extension = $fileparts[$kpl - 1];
+
+    $filepath = "/tmp/" . uniqid() . ".{$extension}";
+    file_put_contents($filepath, $liitetiedosto['data']);
+
+    return $filepath;
+  }
+}
+
+if (!function_exists('curl_file_create')) {
+  function curl_file_create($filename, $mimetype = '', $postname = '') {
+      return "@$filename;filename="
+          . ($postname ?: basename($filename))
+          . ($mimetype ? ";type=$mimetype" : '');
+  }
+}
+
+if (!function_exists('xml_to_array')) {
+
+  function xml_to_array($xml) {
+    $xml_string = $xml;
+    if ($xml instanceof SimpleXMLElement) {
+      $xml_string = $xml->asXML();
+    }
+
+    if (empty($xml_string)) {
+      return array();
+    }
+
+    $xml_string = str_replace(array("\n", "\r", "\t"), '', $xml_string);
+
+    //@TODO t‰‰ on xml:lle joka sis‰lt‰‰ CDATA nodeissa jos xml ei sis‰ll‰ CDATAA niin t‰m‰ ei toimi
+    //Korjaa jossain vaiheessa
+    $xml = simplexml_load_string($xml_string, null, LIBXML_NOCDATA);
+    $json = json_encode($xml);
+    $array = json_decode($json, TRUE);
+
+    return $array;
   }
 }
 

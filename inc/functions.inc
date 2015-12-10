@@ -30511,6 +30511,18 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("kohdista_lasku_ja_suoritus")) {
+  function kohdista_lasku_ja_suoritus($lasku_tunnus, $suoritus_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $tila = 'tee_kohdistus';
+    $lasku_tunnukset = array($lasku_tunnus);
+    $ohjelma_kutsuja = 'tee_viitemaksu_kohdistus_functio';
+
+    require 'myyntires/manuaalinen_suoritusten_kohdistus.php';
+  }
+}
+
 if (!function_exists("cron_aikaleima")) {
   function cron_aikaleima($aikaleima, $uusileima = 0) {
     global $kukarow, $yhtiorow;

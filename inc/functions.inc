@@ -5763,6 +5763,28 @@ if (!function_exists("alehinta")) {
         list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Asiakaspiirin tuotealeryhm‰n alennus");
       }
 
+      // 11,5. tuote.aleryhm‰ == ** (kaikki tuotteet) asiakas.tunnus aleprosentti
+      if (jatka_ale($ale)) {
+        $query = "SELECT alennus, alennuslaji
+                  FROM asiakasalennus USE INDEX (yhtio_asiakas_ryhma)
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and piiri    = ''
+                  and ryhma    = '**'
+                  and asiakas  = '$laskurow[liitostunnus]'
+                  and asiakas  > 0
+                  and asiakas_ryhma = ''
+                  and asiakas_segmentti = ''
+                  and tuoteno = ''
+                  and (minkpl = 0 or (minkpl <= $kpl and monikerta = '') or (mod($kpl, minkpl) = 0 and monikerta != ''))
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  and alennus  >= 0
+                  and alennus  <= 100
+                  ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
+        $hresult = pupe_query($query);
+
+        list($ale, $aleperuste, $aperuste) = settaa_ale($ale, $aleperuste, $aperuste, $hresult, 12, "Kaikkien tuotteiden asiakaskohtainen alennus");
+      }
+
       // 12. tuote.aleryhm‰ aleprosentti (tuotealeryhm‰n perusalennus) (Vain ykkˆstason alennus voidaan tallentaa t‰h‰n)
       if (!isset($ale["ale1"])) {
 
@@ -7583,126 +7605,7 @@ if (!function_exists("js_popup")) {
 
     echo "<script type='text/javascript' language='javascript'>";
 
-?>
-
-  jQuery.fn.tooltip = function(allowHtml, className){
-    jQuery.fn.tooltip.created.id = 'toolTip';
-    $('body').append(jQuery.fn.tooltip.created);
-
-    var toolTip = $(jQuery.fn.tooltip.created);
-
-      toolTip.css({'position':'absolute','display':'none'});
-
-      //functions
-    function getMouseX(e) {
-      var x = null;
-
-      if (e.pageX)   {
-        x = e.pageX;
-      }
-      else if (e.clientX) {
-        x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-      }
-      return x;
-    }
-
-    function getMouseY(e) {
-      var y = null;
-
-      if (e.pageY)   {
-        y = e.pageY;
-      }
-      else if (e.clientY) {
-        y = e.clientY + document.body.scrollTop
-          + document.documentElement.scrollTop;
-      }
-
-      return y;
-    }
-
-      function toolTipShow(e, x, y) {
-          toolTip.css({'top':y, 'left':x}).delay(500).show('fast');
-      }
-
-      function toolTipHide() {
-      toolTip.clearQueue();
-      toolTip.hide();
-      }
-
-      //events for each element
-      this.each(function() {
-
-          $(this).mousemove(function(e){
-        var x = getMouseX(e) + 20;
-        var y = getMouseY(e) + 20;
-
-        // get content id from element and fetch text from the div
-        var content_id = $(this).attr('id');
-        var content = $('#div_'+content_id).html();
-
-        var div_height = $('#div_'+content_id).height();
-        var div_width = $('#div_'+content_id).width();
-
-        var window_width = $(window).width();
-        var window_height = $(window).height();
-
-        var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-        var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-
-        //  Jos saimme riitt‰v‰sti tietoa voimme kalkuloida oikean position
-        if (div_height != null && div_width != null && x != null && y != null) {
-          //  Riitt‰‰kˆ leveys
-          if (((x - scrollX) + div_width + 30) > window_width) {
-            //  Siirret‰‰n t‰m‰ ihan oikeaan laitaan..
-            x = window_width - div_width - 30 + scrollX;
-          }
-
-          if ((y - scrollY) + div_height > window_height) {
-            y -= (div_height);
-          }
-
-          //  Oikea laita on kuitenkin aina t‰rkein!
-          if (x < 10) {
-            x = 10;
-          }
-          if (y < 10) {
-            y = 10;
-          }
-        }
-
-        toolTipShow(e, x, y);
-
-              //update the content
-              if (allowHtml) {
-                  toolTip.html(content);
-        }
-              else {
-                  toolTip.text(content);
-        }
-
-              //remove all classes for the tipBox before add a new one and to avoid the 'append class'
-              toolTip.removeClass();
-
-              //set class if specified
-              if (className) {
-          toolTip.addClass(className);
-        }
-      });
-
-          $(this).mouseout(function(){
-              toolTipHide();
-          });
-      });
-  };
-
-  $(function(){
-    //create the element (avoiding create multiple divisions for the tooltip)
-    jQuery.fn.tooltip.created = document.createElement('div');
-
-    $('.tooltip').tooltip('yes', 'popup');
-  });
-
-  <?php
+    require "popup.js";
 
     echo "</script>";
 
@@ -16565,7 +16468,7 @@ if (!function_exists("tuotteen_lisatiedot")) {
               AND tuotteen_avainsanat.tuoteno  = '$tuoteno'
               AND tuotteen_avainsanat.laji     LIKE 'lisatieto_%'
               AND tuotteen_avainsanat.selite  != ''
-              ORDER BY tuotteen_avainsanat.selite";
+              ORDER BY avainsana.jarjestys, tuotteen_avainsanat.selite";
     $parares = pupe_query($query);
 
     // Jos tuotteelle ei lˆydy parametrej‰
@@ -26529,6 +26432,10 @@ if (!function_exists('hae_asiakas')) {
   function hae_asiakas($liitostunnus) {
     global $yhtiorow;
 
+    if (empty($liitostunnus)) {
+      return false;
+    }
+
     $query = "SELECT *
               FROM asiakas
               WHERE yhtio = '{$yhtiorow['yhtio']}'
@@ -31057,6 +30964,58 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists('luo_temp_tiedosto')) {
+
+  function luo_temp_tiedosto($liitetiedosto) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($liitetiedosto)) {
+      return '';
+    }
+
+    $fileparts = explode('.', $liitetiedosto['filename']);
+    $kpl = count($fileparts);
+    $extension = $fileparts[$kpl - 1];
+
+    $filepath = "/tmp/" . uniqid() . ".{$extension}";
+    file_put_contents($filepath, $liitetiedosto['data']);
+
+    return $filepath;
+  }
+}
+
+if (!function_exists('curl_file_create')) {
+  function curl_file_create($filename, $mimetype = '', $postname = '') {
+      return "@$filename;filename="
+          . ($postname ?: basename($filename))
+          . ($mimetype ? ";type=$mimetype" : '');
+  }
+}
+
+if (!function_exists('xml_to_array')) {
+
+  function xml_to_array($xml) {
+    $xml_string = $xml;
+    if ($xml instanceof SimpleXMLElement) {
+      $xml_string = $xml->asXML();
+    }
+
+    if (empty($xml_string)) {
+      return array();
+    }
+
+    $xml_string = str_replace(array("\n", "\r", "\t"), '', $xml_string);
+
+    //@TODO t‰‰ on xml:lle joka sis‰lt‰‰ CDATA nodeissa jos xml ei sis‰ll‰ CDATAA niin t‰m‰ ei toimi
+    //Korjaa jossain vaiheessa
+    $xml = simplexml_load_string($xml_string, null, LIBXML_NOCDATA);
+    $json = json_encode($xml);
+    $array = json_decode($json, TRUE);
+
+    return $array;
   }
 }
 

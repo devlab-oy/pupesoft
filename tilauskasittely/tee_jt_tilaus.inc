@@ -107,7 +107,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   FROM lasku
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tunnus   = '$isarivirow[otunnus]'
-                  and tila     in ('N','L', 'E', 'C', 'A')
+                  and tila     in ('N','L', 'A')
                   and alatila != 'X'";
         $stresult = pupe_query($query);
 

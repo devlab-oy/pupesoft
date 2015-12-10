@@ -585,7 +585,7 @@ if ($tila == '') {
 
   echo "<br><font class='message'>";
   echo t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").". ";
-  echo "Voi myös <a href='$PHP_SELF?tila=uudelleenkohdista_viitemaksut'>uudelleenkohdistaa</a> kaikki viitemaksut.";
+  echo t("Voit myös")." <a href='$PHP_SELF?tila=uudelleenkohdista_viitemaksut'>".t("automaattikohdistaa")."</a> ".t("kaikki täsmäävät viitteelliset suoritukset").".";
   echo "</font><br><br>";
 
   $tila = '';

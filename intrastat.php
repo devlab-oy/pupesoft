@@ -290,7 +290,7 @@ if ($tee == "tulosta") {
           (SELECT
           tyomaarays.tullikoodi AS tullinimike1,
           if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          '{$yhtiorow['maa']}' AS alkuperamaa,
+          lasku.maa_alkupera AS alkuperamaa,
           if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
           lasku.kuljetusmuoto,
           lasku.kauppatapahtuman_luonne,
@@ -314,8 +314,8 @@ if ($tee == "tulosta") {
           WHERE lasku.tila = 'A'
           and lasku.kauppatapahtuman_luonne != '999'
           and lasku.yhtio = '{$kukarow['yhtio']}'
-          #and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
-          #and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
+          and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+          and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
           GROUP BY 1,2,3,4,5,6,7,8 {$ee_group}
           HAVING {$maalisa})
           UNION

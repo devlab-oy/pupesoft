@@ -88,6 +88,7 @@ $lisa_haku_asiakasosasto = "";
 $lisa_haku_asiakasryhma  = "";
 $lisa_haku_asiakaspiiri  = "";
 $lisa_haku_toimipaikka   = "";
+$lisa_haku_maa   = "";
 $lisa_haku_kustp         = "";
 $lisa_haku_kohde         = "";
 $lisa_haku_projekti      = "";
@@ -626,6 +627,24 @@ if (count($mul_toimipaikka) > 0) {
   if (trim($toimipaikat) != '') {
     $lisa_haku_toimipaikka = "  and lasku.yhtio_toimipaikka in ($toimipaikat)";
     $lisa .= " and lasku.yhtio_toimipaikka in ($toimipaikat) ";
+  }
+}
+
+if (count($mul_maa) > 0) {
+  $maat = '';
+  foreach ($mul_maa as $maax) {
+    if (trim($maax) != '') {
+      $maax = trim(mysql_real_escape_string($maax));
+      $maat .= "'$maax',";
+      $ulisa .= "&mul_maa[]=".rawurlencode($maax);
+    }
+  }
+
+  $maat = substr($maat, 0, -1);
+
+  if (trim($maat) != '') {
+    $lisa_haku_maa = " maat.tunnus in ($maat)";
+    $lisa .= " maat.tunnus in ($maat) ";
   }
 }
 
@@ -2096,6 +2115,56 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
 
         echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[toimipaikka]' size='2' value='$jarjestys[toimipaikka]'> ".t("Toimipaikoittain")." <input type='checkbox' name='ruksit[toimipaikka]' value='toimipaikka' $ruksitchk><br>";
+
+        echo "</th></tr>";
+      }
+
+      echo "</table>";
+      echo "</div>";
+    }
+  }
+
+  if ($monivalintalaatikko == "maa") {
+    $query = "SELECT distinct koodi, nimi, MIN(tunnus) id
+              FROM maat
+              WHERE koodi != ''
+              AND nimi != ''
+              GROUP BY 1,2
+              ORDER BY 1,2";
+    $maa_res = pupe_query($query);
+
+    if (mysql_num_rows($maa_res) > 0) {
+
+      echo "<div class='monivalintadiv'>";
+      echo "<table valign='top'>";
+      if ($piirra_otsikot) {
+        echo "<tr><th>", t("Maa"), "</th></tr>";
+      }
+      echo "<tr>";
+      echo "<td nowrap style='padding:0px'><select name='mul_maa[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
+      echo "<option value=''>".t("Ei valintaa")."</option>";
+
+      while ($maa_row = mysql_fetch_assoc($maa_res)) {
+        $sel = '';
+        if (count($mul_maa) > 0) {
+          if (in_array(trim($maa_row['id']), $mul_maa)) {
+            $sel = 'SELECTED';
+          }
+        }
+
+        echo "<option value='{$maa_row['id']}' $sel>{$maa_row['nimi']}" . "</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+        $ruksitchk = "";
+
+        if ($ruksit["maa"] != "") {
+          $ruksitchk = "CHECKED";
+        }
+
+        echo "<tr><th>".t("Prio").": <input type='text' name='jarjestys[maa]' size='2' value='$jarjestys[maa]'> ".t("Maittain")." <input type='checkbox' name='ruksit[maa]' value='maa' $ruksitchk><br>";
 
         echo "</th></tr>";
       }

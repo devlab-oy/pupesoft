@@ -143,6 +143,8 @@ foreach ($files as $file) {
           $rivi = preg_replace('/([^_])eregi_replace ?\(/', '$1mb_eregi_replace(', $rivi);
           $rivi = preg_replace('/([^_])split ?\(/',         '$1mb_split(',         $rivi);
 
+          $rivi = str_replace('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', 'ZZZZZZZZZZZZZZZZZZZZZZ',  $rivi);
+
           // Meidän omat multibytefunkkarit
           $rivi = preg_replace('/([^_])str_pad ?\(/',       '$1mb_str_pad(',       $rivi);
           $rivi = preg_replace('/([^_])str_split ?\(/',     '$1mb_str_split(',     $rivi);

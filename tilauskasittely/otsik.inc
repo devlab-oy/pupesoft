@@ -411,8 +411,19 @@ if (isset($jatka)) {
   }
 }
 
+switch ($yhtiorow["viitteen_kasinsyotto"]) {
+case "Y":
+  $viitten_kasinsyotto_sallittu = $toim == "YLLAPITO";
+  break;
+case "X":
+  $viitten_kasinsyotto_sallittu = true;
+  break;
+default:
+  $viitten_kasinsyotto_sallittu = false;
+}
+
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $yhtiorow["viitteen_kasinsyotto"] != "") {
+if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -1715,7 +1726,7 @@ if ($tila == "" and !isset($jatka)) {
     $oikea_sarake[$oikea] .= "</td>";
     $oikea++;
 
-    if ($yhtiorow["viitteen_kasinsyotto"] != "") {
+    if ($viitten_kasinsyotto_sallittu) {
       $vasen_sarake[$vasen] = "<td>".t("Viitenumero").":</td><td>";
       $vasen_sarake[$vasen] .= "<input type='text' id='kasinsyotetty_viite' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
       $vasen_sarake[$vasen] .= "<a href='' onclick='lisaa_tarkiste(); return false;'><img src='{$palvelin2}pics/lullacons/add.png'>".t("Lisää tarkiste")."</a>";
@@ -3042,6 +3053,29 @@ if ($tila == "" and !isset($jatka)) {
       echo "  <tr>
           <td>".t("Sisäiset kommentit")." 2:</td><td colspan='3'><textarea name='sopimus_lisatietoja2' rows='6' cols='50'>$srow[sopimus_lisatietoja2]</textarea></td>
           </tr>";
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        echo "<tr><td>".t("Sopimusnumero")."</td><td colspan='3'><input type='text' name='sopimus_numero' size='30' value='{$srow['sopimus_numero']}'></td></tr>";
+      }
+
+      if ($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && $toim == "YLLAPITO") {
+        $sel                   = array();
+        $sel[$laskurow["chn"]] = " selected";
+
+        echo "<tr>";
+        echo "<td>" . t("Laskun kanavointitieto") . "</td>";
+        echo "<td colspan='3'><select name='chn'>";
+        echo "<option value='100' {$sel['100']}>" . hae_chn_teksti('100') . "</option>";
+        echo "<option value='010' {$sel['010']}>" . hae_chn_teksti('010') . "</option>";
+        echo "<option value='020' {$sel['020']}>" . hae_chn_teksti('020') . "</option>";
+        echo "<option value='030' {$sel['030']}>" . hae_chn_teksti('030') . "</option>";
+        echo "<option value='111' {$sel['111']}>" . hae_chn_teksti('111') . "</option>";
+        echo "<option value='112' {$sel['112']}>" . hae_chn_teksti('112') . "</option>";
+        echo "<option value='666' {$sel['666']}>" . hae_chn_teksti('666') . "</option>";
+        echo "<option value='667' {$sel['667']}>" . hae_chn_teksti('667') . "</option>";
+        echo "<option value='999' {$sel['999']}>" . hae_chn_teksti('999') . "</option>";
+        echo "</select></td>";
+        echo "</tr>";
+      }
     }
 
     echo "</table><br>";
@@ -3921,7 +3955,8 @@ if (isset($jatka)) {
   if ($laskutuskielto != '') {
     $chn = '999';
   }
-  elseif ($liitostunnus != "") {
+  elseif ($liitostunnus != "" &&
+          !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn) && $toim == "YLLAPITO")) {
     $chn = $asiarow['chn'];
 
     if ($chn == '') {
@@ -4516,7 +4551,8 @@ if (isset($jatka)) {
       $sopimus_info = '';
       if ($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
         $sopimus_info = "sopimus_lisatietoja      = '$sopimus_lisatietoja',
-                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2', ";
+                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2',
+                         sopimus_numero           = '$sopimus_numero', ";
       }
 
       $query3 .= "laskun_lisatiedot SET

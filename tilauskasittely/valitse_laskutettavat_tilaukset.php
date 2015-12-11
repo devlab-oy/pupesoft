@@ -507,6 +507,16 @@ if ($tee == "VALITSE") {
 
     mysql_data_seek($res, 0);
 
+    if (!empty($yhtiorow['koontilaskut_alarajasumma'])) {
+      echo "<table>";
+      echo "<tr>";
+      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
+      echo "</tr>";
+      echo "</table>";
+      echo "<br>";
+    }
+
     if (!$yksi_valittu) {
       echo t("Valitse laskutettavat tilaukset").":<br>";
     }
@@ -1164,6 +1174,17 @@ if ($tee == "") {
   $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) > 0) {
+
+    if (!empty($yhtiorow['koontilaskut_alarajasumma'])) {
+      echo "<table>";
+      echo "<tr>";
+      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
+      echo "</tr>";
+      echo "</table>";
+      echo "<br>";
+    }
+
     echo "<table>";
     echo "<tr>
         <th>".t("Tilaukset")."</th>

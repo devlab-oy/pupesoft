@@ -118,6 +118,7 @@ else {
 
     echo "<br>\n\n\n";
     echo "<form method='post' action='myyntiseuranta.php'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
     echo "<input type='hidden' name='tee' value='go'>";
     echo "<input type='hidden' name='kaikki_parametrit_serialisoituna' value=''>";
 
@@ -217,7 +218,10 @@ else {
       echo "<input type='hidden' name='yhtiot[]' value='{$kukarow['yhtio']}'>";
     }
 
-    $noautosubmit = TRUE;
+    if (!$toim == "AUTOSUBMIT") {
+      $noautosubmit = true;
+    }
+
     $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA", "KUSTP", "KOHDE", "PROJEKTI");
     $monivalintalaatikot_normaali = array();
 
@@ -642,6 +646,45 @@ else {
       <td class='back'>", t("(Toimii vain jos listaat laskuittain)"), "</td>
       </tr>";
 
+    if (isset($vertailubu)) {
+      switch ($vertailubu) {
+      case 'asbu':
+        $sel_asbu = 'selected';
+        break;
+      case 'asbuos':
+        $sel_asbuos = 'selected';
+        break;
+      case 'asbury':
+        $sel_asbury = 'selected';
+        break;
+      case 'tubu':
+        $sel_tubu = 'selected';
+        break;
+      case 'mybu':
+        $sel_mybu = 'selected';
+        break;
+      case 'mybuos':
+        $sel_mybuos = 'selected';
+        break;
+      case 'mybury':
+        $sel_mybury = 'selected';
+        break;
+      case 'mabu':
+        $sel_mabu = 'selected';
+        break;
+      }
+    }
+    else {
+      $sel_asbu = '';
+      $sel_asbuos = '';
+      $sel_asbury = '';
+      $sel_tubu = '';
+      $sel_mybu = '';
+      $sel_mybuos = '';
+      $sel_mybury = '';
+      $sel_mabu = '';
+    }
+
     echo "<tr>
     <th>", t("Tavoitevertailu"), "</th>";
     echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
@@ -652,6 +695,7 @@ else {
     echo "<option value='mybu'    {$sel_mybu}>", t("Myyj‰tavoitteet"), "</option>";
     echo "<option value='mybuos' {$sel_mybuos}>", t("Myyj‰-Osastotavoitteet"), "</option>";
     echo "<option value='mybury' {$sel_mybury}>", t("Myyj‰-Tuoteryhm‰tavoitteet"), "</option>";
+    echo "<option value='mabu'   {$sel_mabu}>", t("Maatavoitteet"), "</option>";
     echo "</select></td>
     </tr>";
 
@@ -1298,6 +1342,8 @@ else {
           $order  .= "lasku.maa,";
           $gluku++;
 
+          $select .= "(select MIN(maat.tunnus) from maat where maat.koodi=lasku.maa) maalista, ";
+
           if ($rajaus[$i] != "") {
             $lisa .= " and lasku.maa='{$rajaus[$i]}' ";
           }
@@ -1771,6 +1817,22 @@ else {
         // siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
         if ($myyjagroups > 1) {
           echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
+          $tee = '';
+        }
+      }
+
+      if ($vertailubu == "mabu") {
+        // N‰ytet‰‰n maatavoitteet:
+
+        //siin‰ tapauksessa ei voi groupata muiden kuin maiden mukaan
+        if ($asiakasgroups > 0 or $tuotegroups > 0 or $muutgroups > 0) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
+          $tee = '';
+        }
+
+        // ei voi groupata muiden kuin maiden tietojen mukaan (paitsi tuoteryhm‰n mukaan kun valitaan mybury)
+        if ($vertailubu == "mabu" and ($turyhgroups > 0 or $tuosagroups > 0)) {
+          echo "<font class='error'>".t("VIRHE: Muita kuin maihin liittyvi‰ ryhmittelyj‰ ei voida valita kun n‰ytet‰‰n maatavoitteet")."!</font><br>";
           $tee = '';
         }
       }
@@ -2518,12 +2580,17 @@ else {
 
             if (isset($vertailubu) and
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
+              ($vertailubu == "mabu" and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
               (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
 
               if ($vertailubu == "tubu") {
                 $budj_taulu = "budjetti_tuote";
                 $bulisa = " and tuoteno  in ({$row['tuotelista']}) ";
+              }
+              elseif ($vertailubu == "mabu") {
+                $budj_taulu = "budjetti_maa";
+                $bulisa = " and maa_id in ({$row['maalista']}) ";
               }
               elseif ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
 
@@ -2711,10 +2778,14 @@ else {
             echo "<table><tr>";
 
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") echo "<th>", t($ken_nimi), "</th>";
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                echo "<th>", t($ken_nimi), "</th>";
+              }
+
               if ($ken_nimi == 'asiakasosasto') {
                 echo "<th>".t('Asiakkaittain')."</th>";
               }
+
               if ($ken_nimi == 'tuoteosasto') {
                 echo "<th>".t('Tuotteittain')."</th>";
               }
@@ -2726,7 +2797,9 @@ else {
           if (isset($worksheet)) {
             $excelsarake=0;
             foreach ($rows[0] as $ken_nimi => $null) {
-              if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
+              }
             }
 
             if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and isset($asiakas_tunnukset_sarja)) {
@@ -2921,7 +2994,7 @@ else {
                   }
                   $asiakasosasto_temp = $row[$ken_nimi];
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on piiri, haetaan sen nimi
@@ -2958,7 +3031,7 @@ else {
                     $serialisoitavat_muuttujat["ruksit"][30] = "tuote";
                   }
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -2991,7 +3064,7 @@ else {
 
                   $tuoteosasto_temp = $row[$ken_nimi];
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on tuoteosasto, haetaan sen nimi
@@ -3018,7 +3091,7 @@ else {
                     $serialisoitavat_muuttujat["ruksit"][30] = "tuote";
                   }
 
-                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
+                  $row[$ken_nimi] = "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
                 // jos kyseessa on myyj‰, haetaan sen nimi
@@ -3286,7 +3359,7 @@ else {
                   $row[$ken_nimi] = $varaston_saldo;
                 }
 
-                if ($ken_nimi != 'asiakaslista' and $ken_nimi != "tuotelista") {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
                   if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
@@ -3337,7 +3410,7 @@ else {
                           unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
                         }
 
-                        echo "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a>";
+                        echo "<a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a>";
                         echo "</td>";
                       }
                       elseif ($ken_nimi == 'tuoteosasto') {
@@ -3355,7 +3428,7 @@ else {
                         }
 
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
-                        echo "<td><a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a></td>";
+                        echo "<td><a href='myyntiseuranta.php?toim={$toim}&kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a></td>";
                       }
                       else {
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
@@ -3396,7 +3469,7 @@ else {
               $ken_lask = 0;
 
               foreach ($row as $ken_nimi => $kentta) {
-                if ($ken_nimi != "asiakaslista" and $ken_nimi != "tuotelista") {
+                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
                   if ($ken_lask < $data_start_index) {
                     $valisummat[$ken_nimi] = "";
                     $totsummat[$ken_nimi]  = "";
@@ -3563,6 +3636,7 @@ else {
             echo "<table>";
             echo "<tr><th>", t("Tallenna tulos"), ":</th>";
             echo "<form method='post' class='multisubmit'>";
+            echo "<input type='hidden' name='toim' value='{$toim}'>";
             echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
             echo "<input type='hidden' name='kaunisnimi' value='".t('Myynninseuranta').".xlsx'>";
             echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";

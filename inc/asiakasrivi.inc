@@ -1170,22 +1170,11 @@ if ($fieldname == "panttitili") {
 if ($fieldname == 'myynninseuranta') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-  $sel = trim($trow[$i]) == 'E' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('A' => '', 'E' => '');
 
   $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
-  $ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
-if ($fieldname == 'abc_raportointi') {
-  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-  $sel = trim($trow[$i]) == 'E' ? ' selected' : '';
-
-  $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon ABC-asiakasraportoinnissa")."</option>";
-  $ulos .= "<option value = 'E'{$sel}>".t("Asiakasta ei oteta huomioon ABC-asiakasraportoinnissa")."</option>";
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

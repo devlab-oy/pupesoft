@@ -172,7 +172,7 @@ if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_asiakasosasto) >
   $tuote_join_array = array('TK', 'TM', 'TP', 'TR', 'TV');
 
   if (in_array($abcchar, $asiakas_join_array)) {
-    $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus and asiakas.abc_raportointi = '') ";
+    $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus and asiakas.myynninseuranta != 'A') ";
   }
   elseif (in_array($abcchar, $tuote_join_array)) {
     $analyysin_join = " JOIN tuote USING (yhtio, tuoteno) ";

@@ -1170,7 +1170,7 @@ if ($fieldname == "panttitili") {
 if ($fieldname == 'myynninseuranta') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-  $sel = array($trow[$i] => 'selected') + array('A' => '', 'E' => '');
+  $sel = trim($trow[$i]) == 'E' ? ' selected' : '';
 
   $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
   $ulos .= "<option value = 'E' {$sel['E']}>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";

@@ -745,7 +745,7 @@ if ($silent == "") {
     if ($keikanalatila == "T") {
       $vientitilat = " and lasku.vienti in ('A','D','G') ";
     }
-    elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'KP') {
+    elseif (in_array($yhtiorow["jalkilaskenta_kuluperuste"], array('KP', 'KT'))) {
       $vientitilat = " and lasku.vienti in ('C','J','F','K','I','L') ";
     }
     elseif ($yhtiorow["jalkilaskenta_kuluperuste"] == 'PX') {

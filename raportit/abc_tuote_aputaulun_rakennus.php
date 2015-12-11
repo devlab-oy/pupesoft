@@ -66,10 +66,10 @@ if ($tee == 'YHTEENVETO') {
 
   // katotaan halutaanko saldottomia mukaan.. default on että EI haluta
   if (!isset($saldottomatmukaan) or $saldottomatmukaan == "") {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '') ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '' AND tuote.myynninseuranta = '') ";
   }
   else {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '') ";
   }
 
   if ($abclaji == "kulutus") {
@@ -286,7 +286,7 @@ if ($tee == 'YHTEENVETO') {
               sum(tuotepaikat.saldo) saldo,
               sum(tuotepaikat.saldo) * if(tuote.epakurantti100pvm = '0000-00-00',if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0) vararvo
               FROM tuotepaikat
-              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno AND tuote.myynninseuranta = '')
               WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
               AND tuotepaikat.tuoteno NOT IN ($myydyttuotteet)
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26

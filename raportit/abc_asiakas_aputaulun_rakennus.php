@@ -65,10 +65,10 @@ if ($tee == 'YHTEENVETO') {
 
   // katotaan halutaanko saldottomia mukaan.. default on ettei haluta
   if ($saldottomatmukaan == "") {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '') ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '' AND tuote.myynninseuranta = '') ";
   }
   else {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '') ";
   }
 
   //haetaan ensin koko kauden yhteismyynti ja ostot

@@ -1173,7 +1173,7 @@ if ($fieldname == 'myynninseuranta') {
   $sel = trim($trow[$i]) == 'E' ? ' selected' : '';
 
   $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
-  $ulos .= "<option value = 'E' $sel>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
+  $ulos .= "<option value = 'E' {$sel}>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

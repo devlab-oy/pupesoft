@@ -1173,8 +1173,7 @@ if ($fieldname == 'myynninseuranta') {
   $sel = array($trow[$i] => 'selected') + array('A' => '', 'E' => '');
 
   $ulos .= "<option value = ''>".t("Asiakas otetaan huomioon myynninseurannassa")."</option>";
-  $ulos .= "<option value = 'E' {$sel['E']}>".t("Asiakasta ei oteta huomioon myynninseurannassa")."</option>";
-  $ulos .= "<option value = 'A' {$sel['A']}>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Asiakasta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

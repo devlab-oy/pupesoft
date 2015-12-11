@@ -71,16 +71,17 @@ if ($tee == 'YHTEENVETO') {
     $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
   }
 
-  //haetaan ensin koko kauden yhteisnmyynti ja ostot
+  //haetaan ensin koko kauden yhteismyynti ja ostot
   $query = "SELECT
             lasku.liitostunnus,
-            sum(if(tyyppi='L', 1, 0))            rivia,
-            sum(if(tyyppi='L', tilausrivi.kpl, 0))      kpl,
-            sum(if(tyyppi='L', tilausrivi.rivihinta, 0))  summa,
-            sum(if(tyyppi='L', tilausrivi.kate, 0))     kate
+            sum(if(tyyppi='L', 1, 0)) rivia,
+            sum(if(tyyppi='L', tilausrivi.kpl, 0)) kpl,
+            sum(if(tyyppi='L', tilausrivi.rivihinta, 0)) summa,
+            sum(if(tyyppi='L', tilausrivi.kate, 0)) kate
             FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
             $tuotejoin
             JOIN lasku USE INDEX (primary) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
+            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
             WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
             and tilausrivi.tyyppi         = 'L'
             and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
@@ -93,19 +94,19 @@ if ($tee == 'YHTEENVETO') {
             FROM (
               (SELECT
               lasku.liitostunnus,
-              ifnull(asiakas.osasto,'#')    osasto,
-              ifnull(asiakas.ryhma,'#')     ryhma,
-              ifnull(asiakas.myyjanro,'#')  myyjanro,
-              count(*)            rivia,
-              sum(tilausrivi.kpl)        kpl,
-              sum(tilausrivi.rivihinta)    summa,
-              sum(tilausrivi.kate)      kate,
-              0                puutekpl,
-              0                puuterivia
+              ifnull(asiakas.osasto,'#') osasto,
+              ifnull(asiakas.ryhma,'#') ryhma,
+              ifnull(asiakas.myyjanro,'#') myyjanro,
+              count(*) rivia,
+              sum(tilausrivi.kpl) kpl,
+              sum(tilausrivi.rivihinta) summa,
+              sum(tilausrivi.kate) kate,
+              0 puutekpl,
+              0 puuterivia
               FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
               JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               $tuotejoin
-              LEFT JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+              JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         = 'L'
               AND tilausrivi.var            IN ('','H')
@@ -115,19 +116,19 @@ if ($tee == 'YHTEENVETO') {
               UNION
               (SELECT
               lasku.liitostunnus,
-              ifnull(asiakas.osasto,'#')     osasto,
-              ifnull(asiakas.ryhma,'#')      ryhma,
-              ifnull(asiakas.myyjanro,'#')   myyjanro,
-              0                 rivia,
-              0                 kpl,
-              0                 summa,
-              0                 kate,
+              ifnull(asiakas.osasto,'#') osasto,
+              ifnull(asiakas.ryhma,'#') ryhma,
+              ifnull(asiakas.myyjanro,'#') myyjanro,
+              0 rivia,
+              0 kpl,
+              0 summa,
+              0 kate,
               sum(tilausrivi.tilkpl)      puutekpl,
               count(*)            puuterivia
               FROM tilausrivi
               JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               $tuotejoin
-              LEFT JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+              JOIN asiakas USE INDEX (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         = 'L'
               AND tilausrivi.var            = 'P'

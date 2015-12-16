@@ -461,7 +461,8 @@ if (!function_exists("pakolliset_sarakkeet")) {
           }
         }
       }
-    }    
+    }
+
     return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset);
   }
 }

@@ -1272,7 +1272,7 @@ if (isset($ajax)) {
 
       while ($jtrow = mysql_fetch_assoc($jtresult)) {
 
-        if (isset($myyta) and (int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $myynyt === FALSE) { //(($yhtiorow["saldo_kasittely"] == "U" and $myyta < $myynyt)
+        if (isset($myyta) and (int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $myynyt === FALSE) {
           $myynyt = $myyta;
         }
         elseif (!isset($myyta) and (int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $myynyt === FALSE) {

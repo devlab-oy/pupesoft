@@ -66,10 +66,10 @@ if ($tee == 'YHTEENVETO') {
 
   // katotaan halutaanko saldottomia mukaan.. default on että EI haluta
   if (!isset($saldottomatmukaan) or $saldottomatmukaan == "") {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '') ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '' AND tuote.myynninseuranta = '') ";
   }
   else {
-    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
+    $tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno AND tuote.myynninseuranta = '') ";
   }
 
   if ($abclaji == "kulutus") {
@@ -104,11 +104,13 @@ if ($tee == 'YHTEENVETO') {
               0 osto_summa,
               0 osto_kerrat,
               sum((SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus)) summa,
-              count(*)                rivia,
-              sum(tilausrivi.kpl)            kpl,
-              count(DISTINCT tilausrivi.otunnus)-1  kerrat
+              count(*) rivia,
+              sum(tilausrivi.kpl) kpl,
+              count(DISTINCT tilausrivi.otunnus)-1 kerrat
               FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
               $tuotejoin
+              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         = 'V'
               AND tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00'
@@ -143,17 +145,19 @@ if ($tee == 'YHTEENVETO') {
               tuote.epakurantti50pvm,
               tuote.epakurantti25pvm,
               tuote.kehahin,
-              sum(if(tilausrivi.tyyppi='L', tilausrivi.rivihinta, 0))                summa,
-              sum(if(tilausrivi.tyyppi='L', tilausrivi.kate, 0))                  kate,
-              sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), 1, 0))          rivia,
-              sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kpl, 0))  kpl,
-              sum(if(tilausrivi.tyyppi='O', 1, 0))                        osto_rivia,
-              sum(if(tilausrivi.tyyppi='O', tilausrivi.kpl, 0))                  osto_kpl,
-              sum(if(tilausrivi.tyyppi='O', tilausrivi.rivihinta, 0))                osto_summa,
-              count(DISTINCT if(tilausrivi.tyyppi='O', tilausrivi.otunnus, 0))-1           osto_kerrat,
-              count(DISTINCT if(tilausrivi.tyyppi='L', tilausrivi.otunnus, 0))-1           kerrat
+              sum(if(tilausrivi.tyyppi='L', tilausrivi.rivihinta, 0)) summa,
+              sum(if(tilausrivi.tyyppi='L', tilausrivi.kate, 0)) kate,
+              sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), 1, 0)) rivia,
+              sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kpl, 0)) kpl,
+              sum(if(tilausrivi.tyyppi='O', 1, 0)) osto_rivia,
+              sum(if(tilausrivi.tyyppi='O', tilausrivi.kpl, 0)) osto_kpl,
+              sum(if(tilausrivi.tyyppi='O', tilausrivi.rivihinta, 0)) osto_summa,
+              count(DISTINCT if(tilausrivi.tyyppi='O', tilausrivi.otunnus, 0))-1 osto_kerrat,
+              count(DISTINCT if(tilausrivi.tyyppi='L', tilausrivi.otunnus, 0))-1 kerrat
               FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
               $tuotejoin
+              JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         in ('L','O')
               AND tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
@@ -282,7 +286,7 @@ if ($tee == 'YHTEENVETO') {
               sum(tuotepaikat.saldo) saldo,
               sum(tuotepaikat.saldo) * if(tuote.epakurantti100pvm = '0000-00-00',if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0) vararvo
               FROM tuotepaikat
-              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+              JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno AND tuote.myynninseuranta = '')
               WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
               AND tuotepaikat.tuoteno NOT IN ($myydyttuotteet)
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26

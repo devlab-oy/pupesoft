@@ -252,7 +252,8 @@ if ($aika != '') {
   if (!empty($pankkisaldo)) {
     $query = "SELECT sum(maksulimitti) saldo_nyt
               FROM yriti
-              WHERE yhtio = '$kukarow[yhtio]'";
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND valkoodi = '$yhtiorow[valkoodi]'";
     $yres = pupe_query($query);
     $yrow = mysql_fetch_assoc($yres);
 

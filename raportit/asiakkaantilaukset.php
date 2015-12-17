@@ -559,10 +559,10 @@ if ($ytunnus != '') {
   if (mysql_num_rows($result) > 0) {
 
     if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-      pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+      pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
     }
     else {
-      pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+      pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
     }
 
     echo "<br>";
@@ -575,7 +575,7 @@ if ($ytunnus != '') {
     }
 
     echo "<th>".t("Tyyppi")."</th>
-        <th style='visibility:hidden;'></th>";
+        <th class='back' style='visibility:hidden;'></th>";
     echo "</tr>";
 
     echo "<tr>";

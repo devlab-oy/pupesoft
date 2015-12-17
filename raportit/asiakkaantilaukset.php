@@ -575,7 +575,7 @@ if ($ytunnus != '') {
     }
 
     echo "<th>".t("Tyyppi")."</th>
-        <th class='back' style='visibility:hidden;'></th>";
+        <th style='visibility:hidden;'></th>";
     echo "</tr>";
 
     echo "<tr>";

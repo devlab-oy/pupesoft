@@ -16,6 +16,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   require "inc/parametrit.inc";
 
+  if (isset($toim)) {
+    $toim = strtoupper($toim);
+  }
+
   if (isset($tee) and $tee == "lataa_tiedosto") {
     readfile("/tmp/".$tmpfilenimi);
     exit;
@@ -89,7 +93,40 @@ if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] !=
 }
 
 if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
-  unset($tee);
+  if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "SUPER") and $tilausnumero != "") {
+    if ($toim == "SUPER") {
+      $laskutyyppilisa = " AND tila in ('L', 'N') ";
+      $tilausrivityyppilisa = " AND tyyppi = 'L' ";
+    }
+    else {
+      $laskutyyppilisa = " AND tila = 'T' ";
+      $tilausrivityyppilisa = " AND tyyppi = 'T' ";
+    }
+    pupemaster_start();
+
+    $query_tarjous = "UPDATE lasku
+                      SET alatila = tila,
+                      tila        = 'D',
+                      muutospvm   = now(),
+                      comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      {$laskutyyppilisa}
+                      AND tunnus  = $tilausnumero";
+    pupe_query($query_tarjous);
+
+    $query = "UPDATE tilausrivi
+              SET tyyppi = 'D'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              {$tilausrivityyppilisa}
+              AND otunnus  = $tilausnumero";
+    pupe_query($query);
+
+    //Nollataan sarjanumerolinkit
+    vapauta_sarjanumerot("", $tilausnumero);
+
+    echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
+    pupemaster_stop();
+  }
 }
 
 if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
@@ -238,6 +275,8 @@ enable_ajax();
 
 // Saako poistaa tarjouksia
 $deletarjous = FALSE;
+// Saako poistaa tilauksia
+$deletilaus = FALSE;
 
 if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
   //Saako poistaa tarjouksia
@@ -252,6 +291,21 @@ if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
 
   if (mysql_num_rows($result) > 0) {
     $deletarjous = TRUE;
+  }
+}
+elseif ($toim == "SUPER") {
+  //Saako poistaa tilauksia
+  $query = "SELECT yhtio
+            FROM oikeu
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and kuka     = '$kukarow[kuka]'
+            and nimi     = 'tilauskasittely/tilaus_myynti.php'
+            and alanimi  = 'TILAUS'
+            and paivitys = '1'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+    $deletilaus = TRUE;
   }
 }
 
@@ -382,32 +436,6 @@ if (($row["tila"] == "L" or $row["tila"] == "N") and isset($row["mapvm"]) and $r
 
 if (empty($oikeurow['paivitys'])) {
   $button_disabled = "disabled";
-}
-
-if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
-  pupemaster_start();
-
-  $query_tarjous = "UPDATE lasku
-                    SET alatila = tila,
-                    tila        = 'D',
-                    muutospvm   = now(),
-                    comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tunnus  = $tilausnumero";
-  pupe_query($query_tarjous);
-
-  $query = "UPDATE tilausrivi
-            SET tyyppi = 'D'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi  = 'T'
-            AND tunnus  = $tilausnumero";
-  pupe_query($query);
-
-  //Nollataan sarjanumerolinkit
-  vapauta_sarjanumerot("", $tilausnumero);
-
-  echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
-  pupemaster_stop();
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
@@ -2961,7 +2989,8 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";
       echo "</form></td>";
 
-      if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {
+      if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
+        or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
         echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1);'>";
         echo "<input type='hidden' name='toim' value='$whiletoim'>";
         echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";

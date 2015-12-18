@@ -11472,8 +11472,6 @@ if (!function_exists("hae_yhtion_parametrit")) {
       }
     }
 
-    $yhtiorow['koontilaskut_alarajasumma'] = (float) $yhtiorow['koontilaskut_alarajasumma'];
-
     return $yhtiorow;
   }
 }

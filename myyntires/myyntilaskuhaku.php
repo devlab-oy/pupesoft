@@ -311,15 +311,9 @@ if ($tee == 'VS') {
 
 // AT = Etsitään asiakkaan tilausnumerolla
 if ($tee == 'AT') {
-
-  if (strlen($summa2) == 0) {
-    $summa2 = $summa1;
-  }
-
   $summa1 = mysql_real_escape_string($summa1);
-  $summa2 = mysql_real_escape_string($summa2);
 
-  $ehto .= "asiakkaan_tilausnumero >= " . $summa1 . " and asiakkaan_tilausnumero <= " . $summa2;
+  $ehto .= "asiakkaan_tilausnumero LIKE '%{$summa1}%'";
   $index = " use index (yhtio_asiakkaan_tilausnumero) ";
   $jarj = "asiakkaan_tilausnumero, tapvm";
 }

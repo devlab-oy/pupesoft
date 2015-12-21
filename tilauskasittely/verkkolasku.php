@@ -912,7 +912,7 @@ else {
       $tulos_ulos .= $tulos_ulos_ehtosplit;
     }
 
-    if ($php_cli and !empty($yhtiorow['koontilaskut_alarajasumma'])) {
+    if ($php_cli and (float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
 
       // Tehdään ketjutus (group by PITÄÄ OLLA sama kuin alhaalla) rivi ~1243
       $query = "SELECT

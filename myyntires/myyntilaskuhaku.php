@@ -213,13 +213,14 @@ echo "<tr>";
 echo "<th>".t("Hakulaji")."</th>";
 echo "<td><select name = 'tee'>";
 
-echo "<option value = 'S'  {$sel["S"]}>",  t("Summalla"), "</option>";
-echo "<option value = 'VS' {$sel["VS"]}>", t("Valuuttasummalla"), "</option>";
-echo "<option value = 'N'  {$sel["N"]}>",  t("Nimellä"), "</option>";
-echo "<option value = 'V'  {$sel["V"]}>",  t("Viitteellä"), "</option>";
-echo "<option value = 'L'  {$sel["L"]}>",  t("Laskunnumerolla"), "</option>";
-echo "<option value = 'A'  {$sel["A"]}>",  t("Asiakasnumerolla"), "</option>";
-echo "<option value = 'LN' {$sel["LN"]}>", t("Laatijan/myyjän nimellä"), "</option>";
+echo "<option value = 'S'  {$sel["S"]}>",   t("Summalla"), "</option>";
+echo "<option value = 'VS' {$sel["VS"]}>",  t("Valuuttasummalla"), "</option>";
+echo "<option value = 'N'  {$sel["N"]}>",   t("Nimellä"), "</option>";
+echo "<option value = 'V'  {$sel["V"]}>",   t("Viitteellä"), "</option>";
+echo "<option value = 'L'  {$sel["L"]}>",   t("Laskunnumerolla"), "</option>";
+echo "<option value = 'A'  {$sel["A"]}>",   t("Asiakasnumerolla"), "</option>";
+echo "<option value = 'AT'  {$sel["AT"]}>", t("Asiakkaan tilausnumerolla"), "</option>";
+echo "<option value = 'LN' {$sel["LN"]}>",  t("Laatijan/myyjän nimellä"), "</option>";
 
 // M = laskuja eräpäivän:n mukaan
 if ($tee == 'M') {
@@ -306,6 +307,21 @@ if ($tee == 'VS') {
     $ehto .= "summa_valuutassa >= " . $summa1 . " and summa_valuutassa <= " . $summa2;
     $jarj = "summa_valuutassa, tapvm";
   }
+}
+
+// AT = Etsitään asiakkaan tilausnumerolla
+if ($tee == 'AT') {
+
+  if (strlen($summa2) == 0) {
+    $summa2 = $summa1;
+  }
+
+  $summa1 = mysql_real_escape_string($summa1);
+  $summa2 = mysql_real_escape_string($summa2);
+
+  $ehto .= "asiakkaan_tilausnumero >= " . $summa1 . " and asiakkaan_tilausnumero <= " . $summa2;
+  $index = " use index (yhtio_asiakkaan_tilausnumero) ";
+  $jarj = "asiakkaan_tilausnumero, tapvm";
 }
 
 // S = Etsitään summaa laskulta

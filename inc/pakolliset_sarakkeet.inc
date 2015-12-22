@@ -451,7 +451,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
           $sarake = strtoupper(trim($sarake));
 
           // Pakollisuus
-          if ($row["selitetark_3"] == "PAKOLLINEN") {
+          if ($row["selitetark_3"] == "PAKOLLINEN" and !in_array($sarake, $pakolliset)) {
             $pakolliset[] = $sarake;
           }
 

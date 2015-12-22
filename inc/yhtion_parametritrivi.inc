@@ -1422,6 +1422,7 @@ if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos .= "<option value=''>".t("Ker‰yspoikkeamia ei k‰sitell‰")."</option>";
   $ulos .= "<option value='o' $sel[o]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰")."</option>";
+  $ulos .= "<option value='P' $sel[P]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ ja voi vaihtaa ker‰yspaikkaa")."</option>";
   $ulos .= "<option value='J' $sel[J]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ (Oletuksena JT)")."</option>";
   $ulos .= "</select></td>";
 

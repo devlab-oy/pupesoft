@@ -4469,6 +4469,7 @@ if (isset($jatka)) {
             mittarilukema   = '$mittarilukema',
             merkki       = '$merkki',
             mallivari     = '$mallivari',
+            koodi       = '{$koodi}',
             valmnro     = '$valmnro',
             tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
             luvattu     = '$luvattuvv-$luvattukk-$luvattupp',

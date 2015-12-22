@@ -313,7 +313,7 @@ if ($tee == 'VS') {
 if ($tee == 'AT') {
   $summa1 = mysql_real_escape_string($summa1);
 
-  $ehto .= "asiakkaan_tilausnumero LIKE '%{$summa1}%'";
+  $ehto .= "tila = 'U' and asiakkaan_tilausnumero LIKE '%{$summa1}%'";
   $index = " use index (yhtio_asiakkaan_tilausnumero) ";
   $jarj = "asiakkaan_tilausnumero, tapvm";
 }

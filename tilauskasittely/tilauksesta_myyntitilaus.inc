@@ -557,7 +557,18 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       $tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
+      // Lisaarivi inciss‰ oletetaan, ett‰ hinnat on laskun valuutassa,
+      // mutta t‰ss‰ kohti otetaan hinta tilausrivilt‰, jossa on hinnat aina yhtiˆn valuutassa
+      // -> ilman t‰t‰ muutosta hinnat muuntuisi v‰‰rin.
+      // Otetaan laskun alkuper‰inen valuutta kuitenkin talteen ja plautetaan se lisaarivi.inc j‰lkeen.
+      $valkoodi_lasku = $laskurow["valkoodi"];
+      if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+       $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
+      }
+
       require 'lisaarivi.inc';
+
+      $laskurow["valkoodi"] = $valkoodi_lasku;
 
       // Jos is‰tuote meni ok ja sill‰ on tehdaslis‰varusteita niin lis‰t‰‰n ne saldosta piittaamatta
       if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {

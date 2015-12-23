@@ -17,7 +17,7 @@
 //
 // $silent muuttujalla voidaan hiljent‰‰ kaikki outputti
 
-//jos chn = 999 se tarkoittaa ett‰ lasku on laskutuskiellossa eli ei saa k‰sitell‰ t‰‰ll‰!!!!!
+// jos chn = 999 se tarkoittaa ett‰ lasku on laskutuskiellossa eli ei saa k‰sitell‰ t‰‰ll‰!!!!!
 
 //$silent = '';
 
@@ -2227,14 +2227,11 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
-            elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost","finvoice","maventa","trustpoint"))) {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAPAPIX");
-            }
-            elseif ($yhtiorow["verkkolasku_lah"] == "maventa") {
-              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             else {
               pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -2288,7 +2285,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
               }
-              elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "apix"))) {
                 finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
               }
               else {
@@ -2303,7 +2300,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
             }
-            elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "apix"))) {
               finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
             }
 
@@ -2599,7 +2596,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
-              elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "apix"))) {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
@@ -2624,7 +2621,7 @@ else {
               //N‰m‰ menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
-            elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice" or $yhtiorow["verkkolasku_lah"] == "apix" or $yhtiorow["verkkolasku_lah"] == "maventa") {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "apix"))) {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
@@ -2845,6 +2842,11 @@ else {
             $tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
           }
         }
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and file_exists(realpath($nimifinvoice))) {
+        // Siirret‰‰n l‰hetysjonoon
+        rename($nimifinvoice, "{$pupe_root_polku}/dataout/trustpoint_error/".basename($nimifinvoice));
+        $tulos_ulos .= "Lasku siirretty l‰hetysjonoon";
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
         if ($silent == "" or $silent == "VIENTI") {

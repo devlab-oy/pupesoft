@@ -100,7 +100,13 @@ $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
   // virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pitää olla viety varastoon jo ennen tätä..
-  $query = "SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
+  $query = "SELECT tilausrivi.*,
+            tilausrivi.kpl varattu,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -346,7 +352,14 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
   // tavallinen laskenta.. VARATTU PITÄÄ OLLA != 0 ja varastoon-kenttä 1!
   // jos varastoon-kentässä on 0 niin tätä riviä ei haluttu vielä viedä varastoon
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
+  $query = "SELECT tilausrivi.*,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            lasku.nimi,
+            lasku.nimitark,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -382,7 +395,14 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
   }
 
   // Näytetään ruudulla
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
+  $query = "SELECT tilausrivi.*,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            lasku.nimi,
+            lasku.nimitark,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -608,8 +628,12 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
-    // rivin hinta
-    $osuus   = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
+    if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
+      $osuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $rahtikulut;
+    }
+    else {
+      $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
+    }
     $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista tälle riville
   }
   else {

@@ -18,7 +18,7 @@ echo "<font class='head'>".t("Selaa Sopimuksia")."</font><hr>";
 echo "<table class='display dataTable' id='$pupe_DataTables'>";
 echo "<thead>";
 echo "<tr>";
-echo "<th>".t("Sopimus")."<br>".t("Myyjä")."</th>";
+echo "<th>".t("Tilaus")." / ".t("Sopimus")."<br>".t("Myyjä")."</th>";
 echo "<th>".t("Asiakkaan")."<br>".t("Tilausnumero")."</th>";
 echo "<th>".t("Asiakas")."</th>";
 echo "<th>".t("Tuoteno")."</th>";
@@ -60,6 +60,7 @@ $query = "SELECT lasku.tunnus tilaus,
           lasku.valkoodi,
           laskun_lisatiedot.sopimus_alkupvm,
           laskun_lisatiedot.sopimus_loppupvm,
+          laskun_lisatiedot.sopimus_numero,
           if (tilausrivi.kerayspvm = '0000-00-00', if(laskun_lisatiedot.sopimus_loppupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.kerayspvm) rivinsopimus_alku,
           if (tilausrivi.toimaika = '0000-00-00', if(laskun_lisatiedot.sopimus_alkupvm = '0000-00-00', '', laskun_lisatiedot.sopimus_loppupvm), tilausrivi.toimaika) rivinsopimus_loppu,
           tilausrivi.nimitys,
@@ -92,7 +93,9 @@ while ($rivit = mysql_fetch_assoc($result)) {
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
     $linkkilisa = "<br><br> <a href='#'>".t("Rapsalinkki")."</a>";
   }
-  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']} </td>";
+
+  $sopimusnumero = !empty($rivit['sopimus_numero']) ? $rivit['sopimus_numero'] : '-';
+  echo "<td nowrap>{$rivit["tilaus"]} / {$sopimusnumero} <br><br>{$rivit['sopimusmyyja']} </td>";
   echo "<td>{$rivit["asiakkaan_tilausnumero"]}</td>";
   echo "<td>{$rivit["asiakas"]}</td>";
   echo "<td nowrap>{$rivit["tuoteno"]}</td>";

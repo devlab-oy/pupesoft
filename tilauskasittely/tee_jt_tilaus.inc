@@ -87,7 +87,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   FROM lasku
                   WHERE yhtio = '$kukarow[yhtio]' and
                   tunnus      = '$kukarow[kesken]' and
-                  tila        in ('N', 'L', 'E', 'G', 'C')";
+                  tila        in ('N', 'L', 'E', 'G', 'C', 'A')";
         $stresult = pupe_query($query);
 
         if (mysql_num_rows($stresult) == 0) {
@@ -107,7 +107,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   FROM lasku
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tunnus   = '$isarivirow[otunnus]'
-                  and tila     in ('N','L')
+                  and tila     in ('N','L', 'A')
                   and alatila != 'X'";
         $stresult = pupe_query($query);
 
@@ -657,7 +657,7 @@ if (!function_exists("tee_jt_tilaus")) {
 
             if ($toim == "ENNAKKO") {
               $lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin, 2);
-              
+
               if ($yhtiorow["saldo_kasittely"] == 'U') {
                 $toimaika = $lisataanrow['toimaika'];
                 $kerayspvm = $lisataanrow['kerayspvm'];

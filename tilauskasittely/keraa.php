@@ -1251,7 +1251,7 @@ if ($tee == 'P') {
             $keraysera_ins_res = pupe_query($query_ins);
           }
 
-          if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
+          if (($toim == 'VASTAANOTA_REKLAMAATIO' or $yhtiorow["kerayspoikkeama_kasittely"] == 'P') and $keraysvirhe == 0) {
 
             if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
 
@@ -3227,24 +3227,28 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<tr class='aktiivi'>";
           echo "<td>";
 
-          if ($toim == 'VASTAANOTA_REKLAMAATIO') {
-
-            $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
+          // Voidaan vaihtaa tuotepaikka (VASTAANOTA_REKLAMAATIO ja kerayspoikkeama_kasittely == 'P')
+          // tai perustaa kokonaan uusi paikka (VASTAANOTA_REKLAMAATIO)
+          if ($toim == 'VASTAANOTA_REKLAMAATIO' or $yhtiorow["kerayspoikkeama_kasittely"] == 'P') {
 
             $s1_options = array();
             $s2_options = array();
             $s3_options = array();
 
-            while ($varow = mysql_fetch_assoc($vares)) {
-              $status = $varow['status'];
-              ${$status."_options"}[] = $varow;
-            }
+            if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+              $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
 
-            $counts = array(
-              's1' => count($s1_options),
-              's2' => count($s2_options),
-              's3' => count($s3_options)
-            );
+              while ($varow = mysql_fetch_assoc($vares)) {
+                $status = $varow['status'];
+                ${$status."_options"}[] = $varow;
+              }
+
+              $counts = array(
+                's1' => count($s1_options),
+                's2' => count($s2_options),
+                's3' => count($s3_options)
+              );
+            }
 
             if (!isset($reklahyllyalue[$row["tunnus"]])) $reklahyllyalue[$row["tunnus"]] = "";
             if (!isset($reklahyllynro[$row["tunnus"]]))  $reklahyllynro[$row["tunnus"]]  = "";
@@ -3270,6 +3274,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               }
               echo "<option value='$rivi[varastopaikka_rekla]' $sel>$rivi[varastopaikka]</option>";
             }
+
 
             if ($counts['s1'] > 0) {
               echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
@@ -3302,10 +3307,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             }
 
             echo "</select><br />";
-            echo hyllyalue("reklahyllyalue[{$row['tunnus']}]", $reklahyllyalue[$row["tunnus"]]), "
-                              <input type='text' size='5' name='reklahyllynro[$row[tunnus]]'  value = '{$reklahyllynro[$row["tunnus"]]}'>
-                              <input type='text' size='5' name='reklahyllyvali[$row[tunnus]]' value = '{$reklahyllyvali[$row["tunnus"]]}'>
-                              <input type='text' size='5' name='reklahyllytaso[$row[tunnus]]' value = '{$reklahyllytaso[$row["tunnus"]]}'>";
+
+            if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+              echo hyllyalue("reklahyllyalue[{$row['tunnus']}]", $reklahyllyalue[$row["tunnus"]]), "
+                                <input type='text' size='5' name='reklahyllynro[$row[tunnus]]'  value = '{$reklahyllynro[$row["tunnus"]]}'>
+                                <input type='text' size='5' name='reklahyllyvali[$row[tunnus]]' value = '{$reklahyllyvali[$row["tunnus"]]}'>
+                                <input type='text' size='5' name='reklahyllytaso[$row[tunnus]]' value = '{$reklahyllytaso[$row["tunnus"]]}'>";
+            }
           }
           else {
             echo "$row[varastopaikka]";

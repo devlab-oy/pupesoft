@@ -662,6 +662,13 @@ if ($tee == 'TULOSTA') {
         $filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
       }
 
+      // K‰‰nnet‰‰n pois UTF-8 muodosta, jos Pupe on UTF-8:ssa
+      if (PUPE_UNICODE) {
+        // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+        // jotta UTF8-konversio ei osu t‰h‰n riviin
+        $ulos = utf8_decode($ulos); //NO_MB_OVERLOAD
+      }
+
       //kirjoitetaan faili levylle..
       $fh = fopen("dataout/".$filenimi, "w");
       if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");

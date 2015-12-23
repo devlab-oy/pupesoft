@@ -1464,6 +1464,19 @@ if ($fieldname == "keraysvahvistus_lahetys") {
   $jatko = 0;
 }
 
+if ($fieldname == "kerays_riveittain") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value=''>".t("Keräys merkataan valmiiksi kerralla")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Keräys merkataan valmiiksi vasta kun kaikki rivit on merkattu erikseen kerätyiksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oletus_toimitusehto") {
 
   $kires = t_avainsana("TOIMEHTO");

@@ -634,6 +634,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     else {
       $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
     }
+
     $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista tälle riville
   }
   else {

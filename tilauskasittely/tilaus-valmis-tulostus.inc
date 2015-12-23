@@ -408,6 +408,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
 
   $query = "SELECT GROUP_CONCAT(viesti) tilausviitteet
+            FROM lasku
             WHERE tunnus IN ({$tilausnumeroita})
             and yhtio    = '{$kukarow['yhtio']}'";
   $tilausviiteres = pupe_query($query);

@@ -30957,7 +30957,7 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
     global $yhtiorow;
 
     if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
-      ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
+        ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0 or $tilausrivi["var"] == "J")
     ) {
       $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
       $myytavissa = $myytavissa[2];

@@ -24,6 +24,15 @@ function git_repo_uptodate {
   cd "${dir}" && git fetch origin --quiet 2>&1 > /dev/null
   EV1=$?
 
+  # Get current branch
+  symref=$(cd "${dir}" && git symbolic-ref --quiet HEAD)
+  current_branch=${symref#refs/heads/}
+
+  # If we are changing branches, we should always have changes
+  if [[ ${current_branch} != ${branch} ]]; then
+    return 1
+  fi
+
   # Get latest commit from local branch
   OLD_HEAD=$(cd "${dir}" && git rev-parse --quiet --verify ${branch})
   EV2=$?
@@ -87,10 +96,19 @@ normal=$(tput -Txterm-color sgr0)
 PUPESOFT_NEWHASH=""
 PUPENEXT_NEWHASH=""
 
-# Jos pupenext ei ole /home/devlab/pupenext hakemistossa,
-# tulee poikkeava polku antaa PUPENEXT_DIR environment muuttujassa
+# Poikkeavan pupenext hakemiston voi antaa PUPENEXT_DIR environment muuttujassa
 if [[ -n "${PUPENEXT_DIR}" ]]; then
   pupenextdir=${PUPENEXT_DIR}
+fi
+
+# Poikkeavan Pupesoft branchfilen voi antaa PUPESOFT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPESOFT_BRANCH_FILE}" ]]; then
+  branchfile=${PUPESOFT_BRANCH_FILE}
+fi
+
+# Poikkeavan Pupenext branchfilen voi antaa PUPENEXT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPENEXT_BRANCH_FILE}" ]]; then
+  branchfilepupenext=${PUPENEXT_BRANCH_FILE}
 fi
 
 echo

@@ -280,6 +280,10 @@ elseif ($edi_tyyppi == "magento") {
   $edi_laatija = "Magento";
   $editilaus_rahtivapaa = "o";
 }
+elseif ($edi_tyyppi == "presta") {
+  $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
+  $edi_laatija = "Presta";
+}
 elseif ($edi_tyyppi == "edifact911") {
 
   $edi_subj = "Sis‰‰ntuleva Orders 91.1 tilaus";
@@ -335,7 +339,7 @@ while ($tietue = fgets($fd)) {
   if (trim($tietue) == "") continue;
 
   // t‰‰ on futurikeisi
-  if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
+  if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento" or $edi_tyyppi == "presta") {
 
     if (substr($tietue, 0, 1) != '*') {
       list($tunnus, $tieto)  = explode(':', $tietue);
@@ -412,7 +416,7 @@ while ($tietue = fgets($fd)) {
   $rivinvaihto = $edi_tyyppi == "edifact911";
   $rivinvaihto = ($rivinvaihto and $tunnus == "QTY");
 
-  if ($crossdock911 == "JOO") {
+  if (isset($crossdock911) and $crossdock911 == "JOO") {
     $rivinvaihto = ($rivinvaihto and $next_tunnus == "LIN");
   }
 
@@ -1308,6 +1312,17 @@ while ($tietue = fgets($fd)) {
         elseif ($editilaus_tilaustyyppi == 'K') {
           $editilaus_tila   = 'N';
           $editilaus_alatila   = '';
+        }
+      }
+
+      if ($edi_tyyppi == 'presta') {
+        if ($editilaus_tilaustyyppi == 'maksamatta') {
+          $editilaus_tila   = 'N';
+          $editilaus_alatila   = '';
+        }
+        else if ($editilaus_tilaustyyppi == 'maksettu') {
+          $editilaus_tila   = 'N';
+          $editilaus_alatila   = 'A';
         }
       }
 

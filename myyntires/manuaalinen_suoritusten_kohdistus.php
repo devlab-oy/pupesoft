@@ -1492,7 +1492,13 @@ if ($tila == 'tee_kohdistus') {
     }
   }
 
-  $tila  = "suorituksenvalinta";
+  if (isset($ohjelma_kutsuja) && $ohjelma_kutsuja == 'tee_viitemaksu_kohdistus_functio') {
+    $tila = "ei_menn‰_mihink‰‰n!";
+  }
+  else {
+    $tila = "suorituksenvalinta";
+  }
+
   $asiakas_tunnus = $suoritus["asiakas_tunnus"];
 }
 
@@ -2172,4 +2178,6 @@ if ($tila == '') {
   echo "</table>";
 }
 
-require "inc/footer.inc";
+if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FALSE) {
+  require "inc/footer.inc";
+}

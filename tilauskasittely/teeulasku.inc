@@ -233,7 +233,20 @@ if ($lasrow["vienti"] == 'E') {
 }
 
 if ($lasrow["vienti"] == 'K') {
-  if (stripos($sisviestit1, "VAT 0% Export of goods outside the European Union.") === FALSE) $lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
+  //  Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
+  $query = "SELECT tilausrivi.tunnus
+            FROM tilausrivi
+            JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
+            WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+            and tilausrivi.otunnus in ($tunnukset)";
+  $abulisares = pupe_query($query);
+
+  if (mysql_num_rows($abulisares) == 0) {
+    if (stripos($sisviestit1, "VAT 0%") === FALSE) $lisa_comments .= "VAT 0% \n";
+  }
+  else {
+    if (stripos($sisviestit1, "VAT 0% Export of goods outside the European Union.") === FALSE) $lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
+  }
 }
 
 if ($lasrow["vienti"] != '') {

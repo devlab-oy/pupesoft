@@ -505,6 +505,11 @@ if (!function_exists('alku')) {
       $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
     }
 
+    // Lisätään kommenttiin sopimus_numero se on asetettu ja laiterekisteri käytössä
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $laskurow['sopimus_numero'] != '') {
+      $komm .= "\n".t('Sopimus').": {$laskurow['sopimus_numero']}";
+    }
+
     // Tutkitaan onko tämä työmääräys
     if ($laskurow["tila"] == 'U') {
       $where = " lasku.laskunro = '$laskurow[laskunro]' ";
@@ -2722,6 +2727,16 @@ if (!function_exists("tulosta_lasku")) {
 
     $laresult = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laresult);
+
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+      $query = "SELECT * 
+                FROM laskun_lisatiedot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'";
+      $lisresult = pupe_query($query);
+      $lisarow = mysql_fetch_assoc($lisresult);
+      $laskurow['sopimus_numero'] = $lisarow['sopimus_numero'];
+    }
 
     if ($toim == 'PROFORMA') {
       $asiakas_apu_query = "SELECT *

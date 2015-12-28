@@ -173,6 +173,13 @@ if ($tee == 'TULOSTA') {
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
+  // K‰‰nnet‰‰n pois UTF-8 muodosta, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $yhtiorow["nimi"] =  utf8_decode($yhtiorow["nimi"]); //NO_MB_OVERLOAD
+    $kukarow["nimi"] =  utf8_decode($kukarow["nimi"]); //NO_MB_OVERLOAD
+  }
 
   //Luodaan er‰tietue
   if ($toim == "OKO") {
@@ -185,19 +192,19 @@ if ($tee == 'TULOSTA') {
     $ulos  = sprintf('%-4.4s', "KRFL");                  //sovellustunnus
   }
 
-  $ulos .= sprintf('%01.1s',     0);                      //tietuetunnus
+  $ulos .= sprintf('%01.1s', 0);                      //tietuetunnus
 
   if ($toim == 'SAMPO') {
-    $ulos .= sprintf('%017.17s',       str_replace('-', '', $yhtiorow["ytunnus"]));  //myyj‰n ytunnus etunollilla SAMPO!
+    $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"]));  //myyj‰n ytunnus etunollilla SAMPO!
   }
   else {
-    $ulos .= sprintf('%-17.17s',   str_replace('-', '', $yhtiorow["ytunnus"]));  //myyj‰n ytunnus ilman v‰liviivaa OKO & NORDEA
+    $ulos .= sprintf('%-17.17s', str_replace('-', '', $yhtiorow["ytunnus"]));  //myyj‰n ytunnus ilman v‰liviivaa OKO & NORDEA
   }
 
-  $ulos .= sprintf('%06.6s',     $luontipvm);                //aineiston luontipvm
-  $ulos .= sprintf('%04.4s',     $luontiaika);                //luontikaika
-  $ulos .= sprintf('%06.6s',     $frow["sopimusnumero"]);          //sopimusnumero
-  $ulos .= sprintf('%-3.3s',   $valkoodi);                  //valuutta
+  $ulos .= sprintf('%06.6s', $luontipvm);                //aineiston luontipvm
+  $ulos .= sprintf('%04.4s', $luontiaika);                //luontikaika
+  $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]);          //sopimusnumero
+  $ulos .= sprintf('%-3.3s', $valkoodi);                  //valuutta
 
   if ($toim == "OKO") {
     $ulos .= sprintf('%-2.2s', "OP");                    //rahoitusyhtiˆn tunnus
@@ -210,15 +217,15 @@ if ($tee == 'TULOSTA') {
   }
 
   if ($toim == "OKO") {
-    $ulos .= sprintf('%-30.30s',   $yhtiorow["nimi"]);            //siirt‰j‰n nimi
+    $ulos .= sprintf('%-30.30s', $yhtiorow["nimi"]);            //siirt‰j‰n nimi
   }
   else {
-    $ulos .= sprintf('%-30.30s',   $kukarow["nimi"]);            //siirt‰j‰n nimi
+    $ulos .= sprintf('%-30.30s', $kukarow["nimi"]);            //siirt‰j‰n nimi
   }
 
-  $ulos .= sprintf('%06.6s',   $factoringsiirtonumero);          //siirtoluettelon numero
-  $ulos .= sprintf('%-37.37s',   "");                    //
-  $ulos .= sprintf('%-63.63s',   "");                    //
+  $ulos .= sprintf('%06.6s', $factoringsiirtonumero);          //siirtoluettelon numero
+  $ulos .= sprintf('%-37.37s', "");                    //
+  $ulos .= sprintf('%-63.63s', "");                    //
   $ulos .= sprintf('%-221.221s', "");                    //
   $ulos .= "\r\n";
 
@@ -333,78 +340,87 @@ if ($tee == 'TULOSTA') {
         $laskuvirh++;
       }
 
+      // K‰‰nnet‰‰n pois UTF-8 muodosta, jos Pupe on UTF-8:ssa
+      if (PUPE_UNICODE) {
+        // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+        // jotta UTF8-konversio ei osu t‰h‰n riviin
+        array_walk($laskurow, "utf8_decode"); //NO_MB_OVERLOAD
+        array_walk($asirow, "utf8_decode"); //NO_MB_OVERLOAD
+        array_walk($frow, "utf8_decode"); //NO_MB_OVERLOAD
+      }
+
       //luodaan ostajatietue
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-4.4s',   "LA01");                             //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "LA01");                             //sovellustunnus
       }
       elseif ($toim == 'SAMPO') {
-        $ulos .= sprintf('%-4.4s',     "SAFA");                          //sovellustunnus SAMPO
+        $ulos .= sprintf('%-4.4s', "SAFA");                          //sovellustunnus SAMPO
       }
       else {
-        $ulos .= sprintf('%-4.4s',   "KRFL");                             //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "KRFL");                             //sovellustunnus
       }
 
-      $ulos .= sprintf('%01.1s',       1);                                 //tietuetunnus
-      $ulos .= sprintf('%06.6s',       $frow["sopimusnumero"]);                     //sopimusnumero
+      $ulos .= sprintf('%01.1s', 1);                                 //tietuetunnus
+      $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]);                     //sopimusnumero
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-10.10s',  $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
+        $ulos .= sprintf('%-10.10s', $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
       }
       else {
-        $ulos .= sprintf('%06.6s',     $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
-        $ulos .= sprintf('%-4.4s',   "");
+        $ulos .= sprintf('%06.6s', $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
+        $ulos .= sprintf('%-4.4s', "");
       }
 
-      $ulos .= sprintf('%-10.10s',     str_replace('-', '', $laskurow["ytunnus"]));             //ostajan ytunnus
-
-      if ($toim == "OKO") {
-        $ulos .= sprintf('%-30.30s',   strtoupper($laskurow["nimi"]));                   //ostajan nimi
-      }
-      else {
-        $ulos .= sprintf('%-30.30s',   $laskurow["nimi"]);                         //ostajan nimi
-      }
+      $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"]));             //ostajan ytunnus
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-30.30s',    "");                               //ostajan nimitark (Ei k‰ytˆss‰)
+        $ulos .= sprintf('%-30.30s', strtoupper($laskurow["nimi"]));                   //ostajan nimi
       }
       else {
-        $ulos .= sprintf('%-30.30s',    $laskurow["nimitark"]);                       //ostajan nimitark
+        $ulos .= sprintf('%-30.30s', $laskurow["nimi"]);                         //ostajan nimi
       }
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-20.20s',   strtoupper($laskurow["osoite"]));                 //ostajan osoite
+        $ulos .= sprintf('%-30.30s', "");                               //ostajan nimitark (Ei k‰ytˆss‰)
       }
       else {
-        $ulos .= sprintf('%-20.20s',   $laskurow["osoite"]);                       //ostajan osoite
+        $ulos .= sprintf('%-30.30s', $laskurow["nimitark"]);                       //ostajan nimitark
       }
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-20.20s',   $laskurow["postino"]." ".strtoupper($laskurow["postitp"]));  //ostajan postino ja postitp
+        $ulos .= sprintf('%-20.20s', strtoupper($laskurow["osoite"]));                 //ostajan osoite
       }
       else {
-        $ulos .= sprintf('%-20.20s',   $laskurow["postino"]." ".$laskurow["postitp"]);        //ostajan postino ja postitp
+        $ulos .= sprintf('%-20.20s', $laskurow["osoite"]);                       //ostajan osoite
       }
 
-      $ulos .= sprintf('%-13.13s',     "");
-      $ulos .= sprintf('%-30.30s',     "");
-      $ulos .= sprintf('%-13.13s',     "");
-      $ulos .= sprintf('%-13.13s',     "");
-      $ulos .= sprintf('%-2.2s',     "FI");                            //kieli
-      $ulos .= sprintf('%-3.3s',     $laskurow["valkoodi"]);                    //valuutta
-
       if ($toim == "OKO") {
-        $ulos .= sprintf('%04.4s',   "");                            //viivastyskorko (Ei k‰ytˆss‰)
+        $ulos .= sprintf('%-20.20s', $laskurow["postino"]." ".strtoupper($laskurow["postitp"]));  //ostajan postino ja postitp
       }
       else {
-        $ulos .= sprintf('%04.4s',   $laskurow["viikorkopros"]);                  //viivastyskorko
+        $ulos .= sprintf('%-20.20s', $laskurow["postino"]." ".$laskurow["postitp"]);        //ostajan postino ja postitp
       }
 
-      $ulos .= sprintf('%03.3s',     0);
-      $ulos .= sprintf('%06.6s',       0);
+      $ulos .= sprintf('%-13.13s', "");
+      $ulos .= sprintf('%-30.30s', "");
+      $ulos .= sprintf('%-13.13s', "");
+      $ulos .= sprintf('%-13.13s', "");
+      $ulos .= sprintf('%-2.2s', "FI");                            //kieli
+      $ulos .= sprintf('%-3.3s', $laskurow["valkoodi"]);                    //valuutta
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%03.3s',     1);                              //myyj‰n sopimustunnus
-        $ulos .= sprintf('%-179.179s',  0);
+        $ulos .= sprintf('%04.4s', "");                            //viivastyskorko (Ei k‰ytˆss‰)
+      }
+      else {
+        $ulos .= sprintf('%04.4s', $laskurow["viikorkopros"]);                  //viivastyskorko
+      }
+
+      $ulos .= sprintf('%03.3s', 0);
+      $ulos .= sprintf('%06.6s', 0);
+
+      if ($toim == "OKO") {
+        $ulos .= sprintf('%03.3s', 1);                              //myyj‰n sopimustunnus
+        $ulos .= sprintf('%-179.179s', 0);
       }
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-182.182s', 0);                                                         // Sampo, tyhj‰‰, Varalla..
@@ -414,7 +430,7 @@ if ($tee == 'TULOSTA') {
           $ulos .= sprintf('%-10.10s', $laskurow["maa"]);
         }
         else {
-          $ulos .= sprintf('%-10.10s',   "");
+          $ulos .= sprintf('%-10.10s', "");
         }
 
         $ulos .= sprintf('%-172.172s', "");
@@ -424,127 +440,127 @@ if ($tee == 'TULOSTA') {
 
       //luodaan laskutietue
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-4.4s',   "LA01");                             //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "LA01");                             //sovellustunnus
       }
       elseif ($toim == 'SAMPO') {
-        $ulos .= sprintf('%-4.4s',     "SAFA");                          //sovellustunnus SAMPO
+        $ulos .= sprintf('%-4.4s', "SAFA");                          //sovellustunnus SAMPO
       }
       else {
-        $ulos .= sprintf('%-4.4s',   "KRFL");                             //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "KRFL");                             //sovellustunnus
       }
 
-      $ulos .= sprintf('%01.1s',       3);                              //tietuetunnus
-      $ulos .= sprintf('%06.6s',       $frow["sopimusnumero"]);                  //sopimusnumero
+      $ulos .= sprintf('%01.1s', 3);                              //tietuetunnus
+      $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]);                  //sopimusnumero
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-10.10s',  $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
+        $ulos .= sprintf('%-10.10s', $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
       }
       else {
-        $ulos .= sprintf('%06.6s',     $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
-        $ulos .= sprintf('%-4.4s',   "");
+        $ulos .= sprintf('%06.6s', $asirow["asiakasnro"]);                       //ostajan numero aka asiakasnumero
+        $ulos .= sprintf('%-4.4s', "");
       }
 
       if ($toim == 'SAMPO') {
-        $ulos .= sprintf('%09.9s',     $laskurow["laskunro"]);                                    // Sampo
-        $ulos .= sprintf('%-1.1s',     "");
+        $ulos .= sprintf('%09.9s', $laskurow["laskunro"]);                                    // Sampo
+        $ulos .= sprintf('%-1.1s', "");
       }
       else {
-        $ulos .= sprintf('%010.10s',    $laskurow["laskunro"]);                    //laskunro
+        $ulos .= sprintf('%010.10s', $laskurow["laskunro"]);                    //laskunro
       }
-      $ulos .= sprintf('%06.6s',       $laskurow["tapvm"]);                    //laskun p‰iv‰ys
-      $ulos .= sprintf('%-3.3s',     $laskurow["valkoodi"]);                    //valuutta
-      $ulos .= sprintf('%06.6s',     $laskurow["tapvm"]);                    //laskun arvop‰iv‰
-      $ulos .= sprintf('%02.2s',     $laskurow["tyyppi"]);                    //laskun tyyppi 01-veloitus 02-hyvitys 03-viiv‰styskorkolasku jne...
-      $ulos .= sprintf('%012.12s',     $laskurow["summa"]);                    //summa etumerkitˆn, senttein‰
-      $ulos .= sprintf('%06.6s',     $laskurow["erpcm"]);                    //er‰p‰iv‰
+      $ulos .= sprintf('%06.6s', $laskurow["tapvm"]);                    //laskun p‰iv‰ys
+      $ulos .= sprintf('%-3.3s', $laskurow["valkoodi"]);                    //valuutta
+      $ulos .= sprintf('%06.6s', $laskurow["tapvm"]);                    //laskun arvop‰iv‰
+      $ulos .= sprintf('%02.2s', $laskurow["tyyppi"]);                    //laskun tyyppi 01-veloitus 02-hyvitys 03-viiv‰styskorkolasku jne...
+      $ulos .= sprintf('%012.12s', $laskurow["summa"]);                    //summa etumerkitˆn, senttein‰
+      $ulos .= sprintf('%06.6s', $laskurow["erpcm"]);                    //er‰p‰iv‰
 
       if ($laskurow["kasumma"] > 0) {
-        $ulos .= sprintf('%06.6s',   $laskurow["kapvm"]);                    //kassa-ale1 pvm
+        $ulos .= sprintf('%06.6s', $laskurow["kapvm"]);                    //kassa-ale1 pvm
       }
       else {
-        $ulos .= sprintf('%06.6s',   0);
+        $ulos .= sprintf('%06.6s', 0);
       }
 
-      $ulos .= sprintf('%06.6s',         0);
-      $ulos .= sprintf('%06.6s',     0);
-      $ulos .= sprintf('%06.6s',     0);
+      $ulos .= sprintf('%06.6s', 0);
+      $ulos .= sprintf('%06.6s', 0);
+      $ulos .= sprintf('%06.6s', 0);
 
       if ($toim == 'SAMPO') {
-        $ulos .= sprintf('%06.6s',     0);
-        $ulos .= sprintf('%06.6s',         0);                              // Kassa-ale 6
+        $ulos .= sprintf('%06.6s', 0);
+        $ulos .= sprintf('%06.6s', 0);                              // Kassa-ale 6
       }
       else {
-        $ulos .= sprintf('%012.12s',    0);
+        $ulos .= sprintf('%012.12s', 0);
       }
 
       if ($laskurow["kasumma"] > 0) {
-        $ulos .= sprintf('%012.12s',   $laskurow["kasumma"]);                    //kassa-ale1 valuutassa
+        $ulos .= sprintf('%012.12s', $laskurow["kasumma"]);                    //kassa-ale1 valuutassa
       }
       else {
-        $ulos .= sprintf('%012.12s',   0);
+        $ulos .= sprintf('%012.12s', 0);
       }
 
-      $ulos .= sprintf('%012.12s',    0);
-      $ulos .= sprintf('%012.12s',     0);
-      $ulos .= sprintf('%012.12s',     0);
+      $ulos .= sprintf('%012.12s', 0);
+      $ulos .= sprintf('%012.12s', 0);
+      $ulos .= sprintf('%012.12s', 0);
 
       if ($toim == 'SAMPO') {
-        $ulos .= sprintf('%012.12s',       0);
-        $ulos .= sprintf('%012.12s',       0);                                                         // Ale6 valuutta
+        $ulos .= sprintf('%012.12s', 0);
+        $ulos .= sprintf('%012.12s', 0);                                                         // Ale6 valuutta
       }
       else {
-        $ulos .= sprintf('%024.24s',      0);
+        $ulos .= sprintf('%024.24s', 0);
       }
 
       if ($laskurow["kasumma"] > 0 and $toim != "OKO") {
-        $ulos .= sprintf('%01.1s',   1);                              //kassa-ale1 koodi 0-ei alennusta, 1-alennus
+        $ulos .= sprintf('%01.1s', 1);                              //kassa-ale1 koodi 0-ei alennusta, 1-alennus
       }
       else {
-        $ulos .= sprintf('%01.1s',   0);
+        $ulos .= sprintf('%01.1s', 0);
       }
 
-      $ulos .= sprintf('%01.1s',     0);
-      $ulos .= sprintf('%01.1s',     0);
-      $ulos .= sprintf('%01.1s',     0);
+      $ulos .= sprintf('%01.1s', 0);
+      $ulos .= sprintf('%01.1s', 0);
+      $ulos .= sprintf('%01.1s', 0);
 
       if ($toim == 'SAMPO') {
-        $ulos .= sprintf('%01.1s',             0);
-        $ulos .= sprintf('%01.1s',             0);                                                             // Koodi 6 ...
+        $ulos .= sprintf('%01.1s', 0);
+        $ulos .= sprintf('%01.1s', 0);                                                             // Koodi 6 ...
       }
       else {
-        $ulos .= sprintf('%02.2s',       0);
+        $ulos .= sprintf('%02.2s', 0);
       }
 
-      $ulos .= sprintf('%010.10s',      0);
-      $ulos .= sprintf('%04.4s',       0);                              //alv (ei v‰litet‰)
+      $ulos .= sprintf('%010.10s', 0);
+      $ulos .= sprintf('%04.4s', 0);                              //alv (ei v‰litet‰)
 
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-30.30s',   "");                            //toimituspaikan nimi
-        $ulos .= sprintf('%06.6s',     0);                              //asiakasnro
-        $ulos .= sprintf('%010.10s',   0);                              //toim  ytunnus
-        $ulos .= sprintf('%-20.20s',   "");                            //toim osoite
-        $ulos .= sprintf('%-20.20s',   "");                            //toim postitp ja postino
-        $ulos .= sprintf('%-30.30s',   "");
-        $ulos .= sprintf('%-13.13s',   "");
-        $ulos .= sprintf('%-30.30s',   "");
-        $ulos .= sprintf('%06.6s',   0);
-        $ulos .= sprintf('%03.3s',   1);                              //myyj‰n sopimustunnus
-        $ulos .= sprintf('%-38.38s',   "");
+        $ulos .= sprintf('%-30.30s', "");                            //toimituspaikan nimi
+        $ulos .= sprintf('%06.6s', 0);                              //asiakasnro
+        $ulos .= sprintf('%010.10s', 0);                              //toim  ytunnus
+        $ulos .= sprintf('%-20.20s', "");                            //toim osoite
+        $ulos .= sprintf('%-20.20s', "");                            //toim postitp ja postino
+        $ulos .= sprintf('%-30.30s', "");
+        $ulos .= sprintf('%-13.13s', "");
+        $ulos .= sprintf('%-30.30s', "");
+        $ulos .= sprintf('%06.6s', 0);
+        $ulos .= sprintf('%03.3s', 1);                              //myyj‰n sopimustunnus
+        $ulos .= sprintf('%-38.38s', "");
       }
       else {
-        $ulos .= sprintf('%-30.30s',   $laskurow["toim_nimi"]);                  //toimituspaikan nimi
-        $ulos .= sprintf('%06.6s',     $asirow["asiakasnro"]);                    //asiakasnro
-        $ulos .= sprintf('%010.10s',   str_replace('-', '', $laskurow["ytunnus"]));          //toim  ytunnus
-        $ulos .= sprintf('%-20.20s',   $laskurow["toim_osoite"]);                  //toim osoite
-        $ulos .= sprintf('%-20.20s',   $laskurow["toim_postino"]." ".$laskurow["toim_postitp"]);  //toim postitp ja postino
-        $ulos .= sprintf('%-30.30s',   "");
-        $ulos .= sprintf('%013.13s',   0);
-        $ulos .= sprintf('%-30.30s',   "");
-        $ulos .= sprintf('%06.6s',   0);
+        $ulos .= sprintf('%-30.30s', $laskurow["toim_nimi"]);                  //toimituspaikan nimi
+        $ulos .= sprintf('%06.6s', $asirow["asiakasnro"]);                    //asiakasnro
+        $ulos .= sprintf('%010.10s', str_replace('-', '', $laskurow["ytunnus"]));          //toim  ytunnus
+        $ulos .= sprintf('%-20.20s', $laskurow["toim_osoite"]);                  //toim osoite
+        $ulos .= sprintf('%-20.20s', $laskurow["toim_postino"]." ".$laskurow["toim_postitp"]);  //toim postitp ja postino
+        $ulos .= sprintf('%-30.30s', "");
+        $ulos .= sprintf('%013.13s', 0);
+        $ulos .= sprintf('%-30.30s', "");
+        $ulos .= sprintf('%06.6s', 0);
 
         if ($toim == 'SAMPO') {
-          $ulos .= sprintf('%-41.41s',   "");                                                        // Sampo, varalla
+          $ulos .= sprintf('%-41.41s', "");                                                        // Sampo, varalla
         }
         else {
           if ($laskurow["toim_maa"] != $yhtiorow["maa"] and $laskurow["toim_maa"] != '') {
@@ -554,9 +570,9 @@ if ($tee == 'TULOSTA') {
             $ulos .= sprintf('%-10.10s', "");
           }
 
-          $ulos .= sprintf('%03.3s',   0);
-          $ulos .= sprintf('%020.20s',   $laskurow["viite"]);
-          $ulos .= sprintf('%-8.8s',   "");
+          $ulos .= sprintf('%03.3s', 0);
+          $ulos .= sprintf('%020.20s', $laskurow["viite"]);
+          $ulos .= sprintf('%-8.8s', "");
         }
       }
 
@@ -608,45 +624,45 @@ if ($tee == 'TULOSTA') {
       //luodaan summatietue
       //luodaan laskutietue
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-4.4s',   "LA01");                //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "LA01");                //sovellustunnus
       }
       elseif ($toim == 'SAMPO') {
-        $ulos .= sprintf('%-4.4s',     "SAFA");                //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "SAFA");                //sovellustunnus
       }
       else {
-        $ulos .= sprintf('%-4.4s',   "KRFL");                //sovellustunnus
+        $ulos .= sprintf('%-4.4s', "KRFL");                //sovellustunnus
       }
 
-      $ulos .= sprintf('%01.1s',     9);
+      $ulos .= sprintf('%01.1s', 9);
 
       if ($toim == 'SAMPO') {
-        $ulos .= sprintf('%017.17s',           str_replace('-', '', $yhtiorow["ytunnus"]));
+        $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"]));
       }
       else {
-        $ulos .= sprintf('%-17.17s',     str_replace('-', '', $yhtiorow["ytunnus"]));
+        $ulos .= sprintf('%-17.17s', str_replace('-', '', $yhtiorow["ytunnus"]));
       }
 
-      $ulos .= sprintf('%06.6s',     $luontipvm);
-      $ulos .= sprintf('%04.4s',       $luontiaika);
-      $ulos .= sprintf('%06.6s',     $laskukpl);
-      $ulos .= sprintf('%06.6s',     $vlaskukpl);
-      $ulos .= sprintf('%013.13s',     $vlaskusum);
-      $ulos .= sprintf('%06.6s',     $hlaskukpl);
-      $ulos .= sprintf('%013.13s',     $hlaskusum);
-      $ulos .= sprintf('%06.6s',     0);
-      $ulos .= sprintf('%013.13s',     0);
-      $ulos .= sprintf('%06.6s',     0);
-      $ulos .= sprintf('%013.13s',     0);
+      $ulos .= sprintf('%06.6s', $luontipvm);
+      $ulos .= sprintf('%04.4s', $luontiaika);
+      $ulos .= sprintf('%06.6s', $laskukpl);
+      $ulos .= sprintf('%06.6s', $vlaskukpl);
+      $ulos .= sprintf('%013.13s', $vlaskusum);
+      $ulos .= sprintf('%06.6s', $hlaskukpl);
+      $ulos .= sprintf('%013.13s', $hlaskusum);
+      $ulos .= sprintf('%06.6s', 0);
+      $ulos .= sprintf('%013.13s', 0);
+      $ulos .= sprintf('%06.6s', 0);
+      $ulos .= sprintf('%013.13s', 0);
 
       if ($toim == "OKO") {
-        $ulos .= sprintf('%-286.286s',  "");
+        $ulos .= sprintf('%-286.286s', "");
       }
       elseif ($toim == 'SAMPO') {
-        $ulos .= sprintf('%-286.286s',  "");
+        $ulos .= sprintf('%-286.286s', "");
       }
       else {
-        $ulos .= sprintf('%013.13s',   0);
-        $ulos .= sprintf('%-273.273s',  "");
+        $ulos .= sprintf('%013.13s', 0);
+        $ulos .= sprintf('%-273.273s', "");
       }
 
       $ulos .= "\r\n";
@@ -660,13 +676,6 @@ if ($tee == 'TULOSTA') {
       }
       else {
         $filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
-      }
-
-      // K‰‰nnet‰‰n pois UTF-8 muodosta, jos Pupe on UTF-8:ssa
-      if (PUPE_UNICODE) {
-        // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
-        // jotta UTF8-konversio ei osu t‰h‰n riviin
-        $ulos = utf8_decode($ulos); //NO_MB_OVERLOAD
       }
 
       //kirjoitetaan faili levylle..

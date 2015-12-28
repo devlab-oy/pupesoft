@@ -1202,11 +1202,18 @@ if (isset($ajax)) {
       $toimipaikkarajaus = " and ((lasku.yhtio_toimipaikka = '{$toimipaikka}' and tilausrivi.tyyppi != 'O') OR (lasku.vanhatunnus = '{$toimipaikka}' and tilausrivi.tyyppi = 'O'))";
     }
 
+    if ($yhtiorow["saldo_kasittely"] == "U") {
+      $qpvm = "if(tilausrivi.tyyppi='O', tilausrivi.toimaika, tilausrivi.kerayspvm) pvm,";
+    }
+    else {
+      $qpvm = "tilausrivi.toimaika pvm,";
+    }
+
     // Tilausrivit tälle tuotteelle
     $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
               lasku.tunnus,
               (tilausrivi.varattu+tilausrivi.jt) kpl,
-              tilausrivi.toimaika pvm,
+              {$qpvm}
               tilausrivi.laadittu,
               varastopaikat.nimitys varasto,
               tilausrivi.tyyppi,
@@ -1244,8 +1251,6 @@ if (isset($ajax)) {
 
     if (mysql_num_rows($jtresult) != 0) {
 
-      $myyta = $kokonaismyytavissa;
-
       // Avoimet rivit
       $_return .= "<table>";
 
@@ -1259,17 +1264,36 @@ if (isset($ajax)) {
           <th>".t("Myytävissä")."</th>
           </tr>";
 
-      $yhteensa   = array();
-      $ekotettiin = 0;
+      $yhteensa = array();
+      $myynyt   = FALSE;
+      $myyta    = FALSE;
+      $jtrows   = array();
 
       while ($jtrow = mysql_fetch_assoc($jtresult)) {
 
-        $tyyppi    = "";
+        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and (($yhtiorow["saldo_kasittely"] == "U" and $myyta !== FALSE and $myyta < $myynyt) or $myynyt === FALSE)) {
+          $myynyt = $myyta;
+        }
+
+        list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"], '', FALSE);
+
+        $jtrow["myytavissa"] = $myyta;
+
+        $jtrows[] = $jtrow;
+      }
+
+      if ($myynyt === FALSE) {
+        $myynyt = $myyta;
+      }
+
+      foreach ($jtrows as $jtrow) {
+
+        $tyyppi      = "";
         $vahvistettu = "";
-        $merkki    = "";
-        $keikka    = "";
+        $merkki      = "";
+        $keikka      = "";
         $laskutunnus = $jtrow['tunnus'];
-        $tyyppi_url = "MYYNTI";
+        $tyyppi_url  = "MYYNTI";
 
         if ($jtrow["tyyppi"] == "O") {
 
@@ -1367,15 +1391,13 @@ if (isset($ajax)) {
           $tyyppi = $tyyppi." - ".$jtrow["varasto"];
         }
 
-        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $ekotettiin == 0) {
+        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $myynyt !== FALSE) {
           $_return .= "<tr>
               <td colspan='6' align='right' class='spec'>".t("Myytävissä nyt").":</td>
-              <td align='right' class='spec'>".sprintf('%.2f', $myyta)."</td>
+              <td align='right' class='spec'>".sprintf('%.2f', $myynyt)."</td>
               </tr>";
-          $ekotettiin = 1;
+          $myynyt = FALSE;
         }
-
-        list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
         $classlisa = ($jtrow['tyyppi'] == 'O' and $jtrow["kpl"] == 0) ? " class='error'" : "";
 
@@ -1451,10 +1473,17 @@ if (isset($ajax)) {
             <td>".tv1dateconv($jtrow["laadittu"])."</td>
             <td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
             <td align='right'>$merkki".abs($jtrow["kpl"])."</td>
-            <td align='right'>".sprintf('%.2f', $myyta)."</td>
+            <td align='right'>".sprintf('%.2f', $jtrow["myytavissa"])."</td>
             </tr>";
 
         $_return .= "<tr><td colspan='7' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$jtrow['tunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
+      }
+
+      if ($myynyt !== FALSE) {
+        $_return .= "<tr>
+            <td colspan='6' align='right' class='spec'>".t("Myytävissä nyt").":</td>
+            <td align='right' class='spec'>".sprintf('%.2f', $myynyt)."</td>
+            </tr>";
       }
 
       foreach ($yhteensa as $type => $kappale) {
@@ -2009,7 +2038,7 @@ if ($tee == 'Z') {
 
   if ($tuoterow["tuoteno"] != "") {
 
-    if ($yhtiorow["saldo_kasittely"] == "T") {
+    if (!empty($yhtiorow["saldo_kasittely"])) {
       $saldoaikalisa = date("Y-m-d");
     }
     else {
@@ -2498,7 +2527,7 @@ if ($tee == 'Z') {
     echo "<th>".t("Syvyys")."</th>";
     echo "<th>".t("Paino")."</th>";
     echo "<th>".t("Ostoehdotus")."</th>";
-    echo "<th></th>";
+    echo "<th>".t("Tuotteen lisätiedot")."</th>";
     echo "</tr>";
 
     echo "<tr>";
@@ -2507,7 +2536,21 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[tuotesyvyys] m</td>";
     echo "<td>$tuoterow[tuotemassa] kg</td>";
     echo "<td>$tuoterow[ostoehdotus]</td>";
-    echo "<td></td>";
+    echo "<td>";
+
+    $lisatiedot = tuotteen_lisatiedot($tuoterow["tuoteno"]);
+
+    if (count($lisatiedot) > 0) {
+      echo "<ul>";
+
+      foreach ($lisatiedot as $lisatieto) {
+        echo "<li>{$lisatieto["kentta"]} &raquo; {$lisatieto["selite"]}</li>";
+      }
+
+      echo "</ul>";
+    }
+
+    echo "</td>";
     echo "</tr>";
 
     echo "</table><br>";

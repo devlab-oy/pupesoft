@@ -998,7 +998,7 @@ if ($tee == 'mikrotila') {
       }
 
       echo "<td>".t("Netto")."</td>";
-      echo "<td>".t("Var")."</td>";
+      echo "<td>".t("Tila")."</td>";
       echo "<td>".t("Kommentti")."</td>";
       echo "<td>".t('Valmistuslinja')."</td>";
       echo "<td>".t('Keräysajankohta')." ".t("(vvvv-kk-pp)")."</td>";
@@ -1015,7 +1015,7 @@ if ($tee == 'mikrotila') {
       }
 
       echo "<td>".t("Netto")."</td>";
-      echo "<td>".t("Var")."</td>";
+      echo "<td>".t("Tila")."</td>";
       echo "<td>".t("Kommentti")."</td>";
     }
   }

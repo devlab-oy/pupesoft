@@ -108,7 +108,8 @@ tilauskasittely/tulosta_ostotilaus.inc
 tilauskasittely/tulosta_tilausvahvistus_pdf.inc
 tilauskasittely/tulostakopio.php
 tilauskasittely/tuote_selaus_haku.php
-vastaavat.class.php"
+vastaavat.class.php
+popup.js"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

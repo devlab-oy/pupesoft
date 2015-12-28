@@ -66,6 +66,12 @@ if (mysql_field_name($result, $i) == "ryhma") {
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
 
+  $sel_kaikki = '';
+  if (strtoupper($trow[$i]) == '**') {
+    $sel_kaikki = "selected";
+  }
+  $ulos .= "<option value = '**' $sel_kaikki>".t("Kaikki tuotteet")."</option>";
+
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';
     if (strtoupper($trow[$i]) == strtoupper($srow["ryhma"])) {

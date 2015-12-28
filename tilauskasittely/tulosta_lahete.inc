@@ -499,6 +499,7 @@ if (!function_exists('alku_lahete')) {
       if (  ($base_lahetetyyppi == "tulosta_lahete.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_eialehintoja.inc"
           or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])
@@ -1515,8 +1516,8 @@ if (!function_exists('rivi_lahete')) {
 
           // lasketaan isätuotteen riville lapsien hinnat yhteen
           $query = "SELECT
-                    round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
-                    round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
+                    round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta,
+                    round(round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta,
                     GROUP_CONCAT(CONCAT(tilausrivi.tuoteno, '¡!¡!', tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) perheen_tuotteet
                     FROM tilausrivi
                     JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1528,12 +1529,11 @@ if (!function_exists('rivi_lahete')) {
           $riresult = pupe_query($query);
           $perherow = mysql_fetch_assoc($riresult);
 
-          $row["hinta"]     = $perherow["hinta"];
-          $row["rivihinta"]   = $perherow["rivihinta"];
-
-          $row['myyntihinta']     = 0;
-          $row['brutto_rivihinta']   = 0;
-          $myyntihinta_temp       = 0;
+          $row["hinta"]            = $perherow["hinta"];
+          $row["rivihinta"]        = $perherow["rivihinta"];
+          $row['myyntihinta']      = 0;
+          $row['brutto_rivihinta'] = 0;
+          $myyntihinta_temp        = 0;
 
           foreach (explode(",", $perherow['perheen_tuotteet']) as $perhetuote) {
 
@@ -3589,6 +3589,20 @@ if (!function_exists('loppu_lahete')) {
     $yhteystiedot_len = $pdf->strlen($yhteystiedot_teksti, $pieni);
     $yhteystiedot_len_www = $pdf->strlen($y_www, $pieni);
 
+
+    $query  = "SELECT pankkiyhteystiedot.*, maksuehto.*
+               FROM maksuehto
+               LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio = maksuehto.yhtio and pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
+               WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+               and maksuehto.tunnus  = '{$laskurow["maksuehto"]}'";
+    $result = pupe_query($query);
+    $masrow = mysql_fetch_assoc($result);
+
+    if ($masrow["pankkinimi1"] != "") {
+      $y_iban  = $masrow["pankkiiban1"];
+      $y_swift = $masrow["pankkiswift1"];
+    }
+
     if ($base_lahetetyyppi == "tulosta_lahete_custom.inc") {
       $pdf->draw_text((595 / 2) - ($yhteystiedot_len / 2), 55, $yhteystiedot_teksti, $thispage, $pieni);
       $pdf->draw_text((595 / 2) - ($yhteystiedot_len_www / 2), 42, $y_www, $thispage, $pieni);
@@ -4233,7 +4247,7 @@ if (!function_exists('print_pdf_lahete')) {
               $subjnumero = $tilausnumero;
             }
 
-            $kutsu = t("Tilausvahvistus %s", $kieli, $subjnumero);
+            $kutsu = t("Tilausvahvistus", $kieli)." ".$subjnumero;
 
             $content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
             $content_body .= t("Tilausnumeronne on", $kieli)." $subjnumero\n\n";
@@ -4244,12 +4258,12 @@ if (!function_exists('print_pdf_lahete')) {
           elseif ($tyyppi == "YLLAPITOSOPIMUS") {
             echo t("Ylläpitosopimus tulostuu")."...<br>";
 
-            $kutsu = t("Ylläpitosopimus %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Ylläpitosopimus", $kieli)." ".$laskurow["tunnus"];
           }
           else {
             echo t("Lähete tulostuu")."...<br>";
 
-            $kutsu = t("Lähete %s", $kieli, $laskurow["tunnus"]);
+            $kutsu = t("Lähete", $kieli)." ".$laskurow["tunnus"];
 
             if (isset($koontilahete) and $koontilahete != 0) {
               $content_body .= t("Tilausnumero", $kieli).": ";
@@ -4284,6 +4298,7 @@ if (!function_exists('print_pdf_lahete')) {
           Muutama = 2, ja jos on enemmänkin rekkareita niin sitten niistä info tyyliin näin: (ABC-123, EFG-456, ..). Ja jos esim yksi niin: (ABC-123).
           */
           $kutsu2 = "";
+
           if (strpos($laskurow['tilausvahvistus'], 'R') !== FALSE) {
 
             $rekkarit_subject = array_slice(array_keys(hae_tilauksen_rekisterinumerot($laskurow['tunnus'], true)), 0, 3);

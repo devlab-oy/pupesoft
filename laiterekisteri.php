@@ -35,13 +35,15 @@ if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_lait
   pupe_query($query);
   $maara_paivitetty = true;
 }
-elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville)) {
+elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville) and count($lisaa_laite_sopimusriville) > 0) {
   // Lis‰t‰‰n laite sopimusriville
-  $query = "INSERT INTO laitteen_sopimukset
+  foreach ($lisaa_laite_sopimusriville as $laitetunnus) {
+    $query = "INSERT INTO laitteen_sopimukset
             SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
-            laitteen_tunnus = '{$lisaa_laite_sopimusriville}',
+            laitteen_tunnus = '{$laitetunnus}',
             yhtio           = '{$kukarow['yhtio']}'";
-  pupe_query($query);
+    pupe_query($query);
+  }
   $maara_paivitetty = true;
 }
 
@@ -152,7 +154,7 @@ if ($toiminto == "LINKKAA") {
   }
 
   // Uusi sarake mihin piirret‰‰n checkboxit
-  array_unshift($headerit, 'lis‰‰');
+  array_unshift($headerit, 'Valitse');
 
   // Valitut laitteet
   echo "<form>";
@@ -258,6 +260,9 @@ if (empty($toiminto) or $toiminto == 'LINKKAA') {
 }
 echo "</thead>";
 
+if (empty($toiminto) or $toiminto == 'LINKKAA') {
+  echo "<br><input type='submit' name='linkkaus' value='Liit‰ valitut laitteet'/><br><br>";
+}
 // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
 $query = "SELECT
           laite.*,
@@ -381,7 +386,7 @@ else {
 
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
-      echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville'  value='{$rowi['tunnus']}' onclick='submit();'/></td>";
+      echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville[]'  value='{$rowi['tunnus']}'/></td>";
       echo "<td>{$rowi['tunnus']}</td>";
     }
     else {

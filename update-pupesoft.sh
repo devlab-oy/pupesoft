@@ -24,6 +24,15 @@ function git_repo_uptodate {
   cd "${dir}" && git fetch origin --quiet 2>&1 > /dev/null
   EV1=$?
 
+  # Get current branch
+  symref=$(cd "${dir}" && git symbolic-ref --quiet HEAD)
+  current_branch=${symref#refs/heads/}
+
+  # If we are changing branches, we should always have changes
+  if [[ ${current_branch} != ${branch} ]]; then
+    return 1
+  fi
+
   # Get latest commit from local branch
   OLD_HEAD=$(cd "${dir}" && git rev-parse --quiet --verify ${branch})
   EV2=$?
@@ -86,11 +95,23 @@ normal=$(tput -Txterm-color sgr0)
 # Logataan mitä päivitettiin ja mihin versioon
 PUPESOFT_NEWHASH=""
 PUPENEXT_NEWHASH=""
+PUPESOFT_STATUS=0
+PUPENEXT_STATUS=0
+BUNDLER_STATUS=0
 
-# Jos pupenext ei ole /home/devlab/pupenext hakemistossa,
-# tulee poikkeava polku antaa PUPENEXT_DIR environment muuttujassa
+# Poikkeavan pupenext hakemiston voi antaa PUPENEXT_DIR environment muuttujassa
 if [[ -n "${PUPENEXT_DIR}" ]]; then
   pupenextdir=${PUPENEXT_DIR}
+fi
+
+# Poikkeavan Pupesoft branchfilen voi antaa PUPESOFT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPESOFT_BRANCH_FILE}" ]]; then
+  branchfile=${PUPESOFT_BRANCH_FILE}
+fi
+
+# Poikkeavan Pupenext branchfilen voi antaa PUPENEXT_BRANCH_FILE environment muuttujassa
+if [[ -n "${PUPENEXT_BRANCH_FILE}" ]]; then
+  branchfilepupenext=${PUPENEXT_BRANCH_FILE}
 fi
 
 echo
@@ -255,9 +276,9 @@ if [[ "${jatketaanko}" = "k" ]]; then
   git remote prune origin           # poistetaan ylimääriset branchit
 
   # Save git exit status
-  STATUS=$?
+  PUPESOFT_STATUS=$?
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPESOFT_STATUS} -eq 0 ]]; then
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
       USER_IP=$(who -m am i|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
     else
@@ -268,7 +289,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     PUPESOFT_NEWHASH=$(git rev-parse HEAD)
   fi
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPESOFT_STATUS} -eq 0 ]]; then
     echo
     echo "${green}Pupesoft päivitetty!${normal}"
   else
@@ -325,10 +346,10 @@ if [[ "${jatketaanko}" = "k" ]]; then
   git remote prune origin
 
   # Save git exit status
-  STATUS=$?
+  PUPENEXT_STATUS=$?
 
   # Päivitys onnistui, bundlataan
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPENEXT_STATUS} -eq 0 ]]; then
     bundle=true
 
     # Get new head
@@ -371,9 +392,9 @@ if [[ ${bundle} = true ]]; then
   TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
 
   # Save bundle/rake exit status
-  STATUS=$?
+  BUNDLER_STATUS=$?
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${BUNDLER_STATUS} -eq 0 ]]; then
     echo "${green}Pupenext päivitetty!${normal}"
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"
@@ -418,6 +439,7 @@ else
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then
+    bundle --quiet &&
     bundle exec rake db:migrate
 
     if [[ $? -eq 0 ]]; then

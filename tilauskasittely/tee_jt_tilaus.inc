@@ -87,7 +87,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   FROM lasku
                   WHERE yhtio = '$kukarow[yhtio]' and
                   tunnus      = '$kukarow[kesken]' and
-                  tila        in ('N', 'L', 'E', 'G', 'C')";
+                  tila        in ('N', 'L', 'E', 'G', 'C', 'A')";
         $stresult = pupe_query($query);
 
         if (mysql_num_rows($stresult) == 0) {
@@ -107,7 +107,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   FROM lasku
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tunnus   = '$isarivirow[otunnus]'
-                  and tila     in ('N','L')
+                  and tila     in ('N','L', 'A')
                   and alatila != 'X'";
         $stresult = pupe_query($query);
 
@@ -353,9 +353,14 @@ if (!function_exists("tee_jt_tilaus")) {
             $query .= "varasto=0,";
           }
           // keräysaika ja toimitusaikaan now
-          elseif ($fieldname == 'kerayspvm' or
-            $fieldname == 'toimaika') {
-            $query .= $fieldname."=now(),";
+          elseif ($fieldname == 'kerayspvm' or $fieldname == 'toimaika') {
+
+              if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+                $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+              }
+              else {
+                $query .= $fieldname."=now(),";
+              }
           }
           // Katotaan oisko käsinsyötetty eräpäivämäärä
           elseif ($fieldname == 'erpcm') {
@@ -652,6 +657,15 @@ if (!function_exists("tee_jt_tilaus")) {
 
             if ($toim == "ENNAKKO") {
               $lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin, 2);
+
+              if ($yhtiorow["saldo_kasittely"] == 'U') {
+                $toimaika = $lisataanrow['toimaika'];
+                $kerayspvm = $lisataanrow['kerayspvm'];
+              }
+              else {
+                $toimaika = "";
+                $kerayspvm = "";
+              }
             }
             else {
               $lisataanrow_kpl = round($lisataanrow["jt"] * $isa_kerroin, 2);

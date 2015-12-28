@@ -558,11 +558,21 @@ if ($ytunnus != '') {
 
   if (mysql_num_rows($result) > 0) {
 
-    if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-      pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+    if ($kukarow["hinnat"] == 0) {
+      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+      }
+      else {
+        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+      }
     }
     else {
-      pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+      }
+      else {
+        pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
+      }
     }
 
     echo "<br>";

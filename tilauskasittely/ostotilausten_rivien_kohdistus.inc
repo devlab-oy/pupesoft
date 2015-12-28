@@ -1332,7 +1332,8 @@ if ($tila == '') {
             lasku.comments,
             tuote.alv myyntialv,
             tuote.sarjanumeroseuranta,
-            tuote.automaattinen_sarjanumerointi
+            tuote.automaattinen_sarjanumerointi,
+            tuote.kuluprosentti
             FROM lasku
             JOIN tilausrivi use index ($tilriindex) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$uusilisa}otunnus=lasku.tunnus and tilausrivi.tyyppi='O' AND tilausrivi.kpl+tilausrivi.varattu != 0 $tilaajanrivinro $lisa2
             LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -1951,6 +1952,7 @@ if ($tila == '') {
     echo "<ul>";
     echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
     echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
+    echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
     echo "</ul>";
     echo "</div>";
     echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";

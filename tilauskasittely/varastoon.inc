@@ -100,7 +100,13 @@ $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'O');
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
   // virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pitää olla viety varastoon jo ennen tätä..
-  $query = "SELECT tilausrivi.*, tilausrivi.kpl varattu, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2
+  $query = "SELECT tilausrivi.*,
+            tilausrivi.kpl varattu,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -346,7 +352,14 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 
   // tavallinen laskenta.. VARATTU PITÄÄ OLLA != 0 ja varastoon-kenttä 1!
   // jos varastoon-kentässä on 0 niin tätä riviä ei haluttu vielä viedä varastoon
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
+  $query = "SELECT tilausrivi.*,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            lasku.nimi,
+            lasku.nimitark,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -382,7 +395,14 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
   }
 
   // Näytetään ruudulla
-  $query = "SELECT tilausrivi.*, {$ale_query_select_lisa} alennuksetyht, tilausrivin_lisatiedot.poikkeava_tulliprosentti, tuote.tullinimike1, tuote.tullinimike2, lasku.nimi, lasku.nimitark
+  $query = "SELECT tilausrivi.*,
+            {$ale_query_select_lisa} alennuksetyht,
+            tilausrivin_lisatiedot.poikkeava_tulliprosentti,
+            tuote.tullinimike1,
+            tuote.tullinimike2,
+            lasku.nimi,
+            lasku.nimitark,
+            if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) kuluprosentti
             FROM tilausrivi
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
             LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
@@ -463,8 +483,11 @@ else {
     }
 
     // lasketaan nyt varastoon vietävien rivien summa yhteensä
-    $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa
+    $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa,
+                        sum((if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) / 100) * ((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa})) kulut
                  FROM tilausrivi use index (uusiotunnus_index)
+                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                 JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
                  LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}' and tuotteen_toimittajat.yhtio = tilausrivi.yhtio and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
                  WHERE tilausrivi.uusiotunnus = '$otunnus'
                  AND tilausrivi.yhtio         = '{$kukarow["yhtio"]}'
@@ -479,10 +502,10 @@ else {
     // lasketaan itse rahtikulut
     // Lasketaan kuluprosentti rivien summasta + pyöristyseroista, ja lisätään lopuksi pyöristysero + rahtietu rahtikuluihin mukaan
     $rahtikulut = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
-    $rahtikulut =  $rahtikulut * ($laskurow['rahti'] / 100);
+    $rahtikulut = $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP' ? $hintarow['kulut'] : $rahtikulut * ($laskurow['rahti'] / 100);
     $rahtikulut += ($laskurow['rahti_etu'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
     $rahtikulut = round($rahtikulut, 6);
-    $rahtitapa  = t("Kuluprosentti") ." ". $laskurow['rahti']. "%";
+    $rahtitapa  = $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP' ? t("Tuotteiden kuluprosentit") : t("Kuluprosentti") . " " . $laskurow['rahti'] . "%";
   }
 }
 
@@ -605,8 +628,14 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
-    // rivin hinta
-    $osuus   = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
+    if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
+      // alvittoman rivihinnan osuus
+      $osuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $alvit / $rahtikulut;
+    }
+    else {
+      $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
+    }
+
     $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista tälle riville
   }
   else {

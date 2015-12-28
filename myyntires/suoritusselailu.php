@@ -184,6 +184,36 @@ if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
   $tila = "";
 }
 
+if ($tila == 'uudelleenkohdista_viitemaksut') {
+  // Haetaan kaikki suoritukset/laskut, jotka täsmää täydellisesti viitteellä ja summalla
+  $query = "SELECT suoritus.tunnus as suoritus_tunnus, lasku.tunnus as lasku_tunnus
+            FROM suoritus
+            INNER JOIN lasku ON (lasku.yhtio = suoritus.yhtio
+              AND lasku.tila = 'U'
+              AND lasku.alatila = 'X'
+              AND lasku.mapvm = '0000-00-00'
+              AND lasku.viite = suoritus.viite
+              AND lasku.valkoodi = suoritus.valkoodi
+              AND lasku.summa = suoritus.summa)
+            WHERE suoritus.yhtio = '$kukarow[yhtio]'
+            AND suoritus.kohdpvm = '0000-00-00'
+            AND suoritus.asiakas_tunnus != 0";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    echo "<font class='error'>";
+    echo t("Täsmääviä suorituksia ei löytynyt!");
+    echo "</font>";
+    echo "<br><br>";
+  }
+
+  while ($row = mysql_fetch_assoc($result)) {
+    kohdista_lasku_ja_suoritus($row['lasku_tunnus'], $row['suoritus_tunnus']);
+  }
+
+  $tila = "";
+}
+
 if ($tila == 'komm') {
   $query = "UPDATE suoritus
             SET viesti = '$komm'
@@ -553,7 +583,10 @@ if ($tila == '') {
   echo "</select></td></tr>";
   echo "</table>";
 
-  echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").".</font><br><br>";
+  echo "<br><font class='message'>";
+  echo t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").". ";
+  echo t("Voit myös")." <a href='$PHP_SELF?tila=uudelleenkohdista_viitemaksut'>".t("automaattikohdistaa")."</a> ".t("kaikki täsmäävät viitteelliset suoritukset").".";
+  echo "</font><br><br>";
 
   $tila = '';
 

@@ -131,7 +131,7 @@ if (mysql_field_name($result, $i) == "myynninseuranta") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = ''>".t("Tuote otetaan huomioon myynninseurannassa")."</option>";
-  $ulos .= "<option value = 'E'{$sel}>".t("Tuotetta ei oteta huomioon myynninseurannassa")."</option>";
+  $ulos .= "<option value = 'E'{$sel}>".t("Tuotetta ei oteta huomioon myynninseurannassa eikä ABC-analysoinnissa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

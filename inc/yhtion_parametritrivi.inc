@@ -1422,6 +1422,7 @@ if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos .= "<option value=''>".t("Keräyspoikkeamia ei käsitellä")."</option>";
   $ulos .= "<option value='o' $sel[o]>".t("Kerääjä päättää keräyspoikkeaman käsittelystä")."</option>";
+  $ulos .= "<option value='P' $sel[P]>".t("Kerääjä päättää keräyspoikkeaman käsittelystä ja voi vaihtaa keräyspaikkaa")."</option>";
   $ulos .= "<option value='J' $sel[J]>".t("Kerääjä päättää keräyspoikkeaman käsittelystä (Oletuksena JT)")."</option>";
   $ulos .= "</select></td>";
 
@@ -1458,6 +1459,19 @@ if ($fieldname == "keraysvahvistus_lahetys") {
   $ulos .= "<option value='N'{$sel['N']}>".t("Keräysvahvistus/sähköinen lähete lähetetään asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty. Paperista lähetettä ei tulosteta.")."</option>";
   $ulos .= "<option value='Q'{$sel['Q']}>".t("Keräysvahvistusta/sähköistä lähetettä ei lähetetä. Paperinen lähete tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
   $ulos .= "<option value='P'{$sel['P']}>".t("Keräysvahvistus/sähköinen ja paperinen lähete lähetetään/tulostetaan asiakkaalle kun koko alkuperäinen tilaus (myös JT-rivit) on kerätty")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "kerays_riveittain") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value=''>".t("Keräys merkataan valmiiksi kerralla")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Keräys merkataan valmiiksi vasta kun kaikki rivit on merkattu erikseen kerätyiksi")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2256,16 +2270,21 @@ if ($fieldname == "viitteen_kasinsyotto") {
 
   $sel1="";
   $sel2="";
+  $sel3="";
 
   if ($trow[$i] == "") {
     $sel1 = "selected";
   }
-  else {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
+  }
+  else {
+    $sel3 = "selected";
   }
 
   $ulos .= "<option value=''  $sel1>".t("Viitettä ei saa syöttää käsin")."</option>";
   $ulos .= "<option value='X' $sel2>".t("Viitteen saa syöttää käsin")."</option>";
+  $ulos .= "<option value='Y' $sel3>".t("Viitteen saa syöttää käsin ylläpitosopimuksille")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3889,6 +3908,7 @@ if ($fieldname == "jalkilaskenta_kuluperuste") {
 
   $ulos .= "<option value = ''>".t("Virallisen varastonarvon laskentaan käytetään saapumiseen liitettyjen huolinta-/rahtilaskujen summaa")."</option>";
   $ulos .= "<option value = 'KP' {$sel["KP"]}>".t("Virallisen varastonarvon laskentaan käytetään saapumiselle syötettyä kulusummaa/kuluprosenttia")."</option>";
+  $ulos .= "<option value = 'TP' {$sel["TP"]}>".t("Virallisen varastonarvon laskentaan käytetään saapumiselle syötettyä kulusummaa/tuotteen kuluprosenttia/kuluprosenttia")."</option>";
   $ulos .= "<option value = 'PX' {$sel["PX"]}>".t("Virallisen varastonarvon laskentaan käytetään kululaskujen summaa, mikäli kululaskut on syötetty, muuten kulusummaa/kuluprosenttia")."</option>";
   $ulos .= "<option value = 'VS' {$sel["VS"]}>".t("Vaihto-omaisuuslaskua ei tarvitse liittää saapumiselle, virallisen varastonarvon laskentaan käytetään kulusummaa / kuluprosenttia.")."</option>";
   $ulos .= "</select></td>";
@@ -4772,6 +4792,20 @@ if ($fieldname == "viitemaksujen_oikaisut") {
   $ulos .= "<option value = ''>".t("Viitemaksujen oikaisuja ei tallenneta");
   $ulos .= "<option value = 'K' $sel[K]>".t("Viitemaksujen oikaisut tallennetaan");
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "laskun_kanavointitiedon_syotto") {
+  $apu = $trow[$i];
+  $sel = array($apu => " selected");
+
+  $ulos = "<td>
+             <select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+               <option value='0'>".t("Laskun kanavointitietoa ei voi syöttää käsin")."
+               <option value='1'{$sel["1"]}>".t("Laskun kanavointitiedon voi syöttää käsin ylläpitosopimukselle")."
+             </select>
+           </td>";
 
   $jatko = 0;
 }

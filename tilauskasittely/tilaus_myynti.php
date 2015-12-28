@@ -31,9 +31,22 @@ if (isset($_POST["tappi"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
+if (isset($_REQUEST['ajax_popup'])) {
+  $no_head = true;
+}
+
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
+
+if ($kukarow['extranet'] == '') {
+  if (isset($ajax_popup)) {
+    require "tuotetiedot.inc";
+    exit;
+  }
+
+  js_popup();
+}
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
   or $kukarow["naytetaan_katteet_tilauksella"] == "B"
@@ -6285,6 +6298,7 @@ if ($tee == '') {
     else {
       $kehahin_select = " round(if(tuote.epakurantti100pvm='0000-00-00', if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0),6) ";
     }
+
     // Tilausrivit
     $query  = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
                if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
@@ -6298,6 +6312,8 @@ if ($tee == '') {
                tuote.vakkoodi,
                tilausrivi.ale_peruste,
                tuote.tunnus as tuote_tunnus,
+               concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+               tuote.kehahin,
                $kommentti_select
                $sorttauskentta
                FROM tilausrivi use index (yhtio_otunnus)
@@ -7433,7 +7449,7 @@ if ($tee == '') {
                         <input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
                         <input type='hidden' name='orig_tila' value='$orig_tila'>
                         <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-                        <select name='positio' onchange='submit();' $state>";
+                        <select name='positio' onchange='submit();'>";
 
               mysql_data_seek($trivityyppi_result, 0);
 
@@ -7745,7 +7761,20 @@ if ($tee == '') {
         }
 
         if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {
-          echo "<td $class><a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$row[tuoteno]</a>";
+          echo "<td $class>
+                  <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
+                     class='tooltip'
+                     data-content-url='?toim={$toim}" .
+                       "&ajax_popup=true" .
+                       "&tuoteno={$row["tuoteno"]}" .
+                       "&yksikko={$row["yksikko"]}" .
+                       "&tilattu={$row["tilkpl"]}" .
+                       "&varattu={$row["varattu"]}" .
+                       "&paikka={$row["paikka"]}" .
+                       "&keskihinta={$row["kehahin"]}" .
+                       "&valuutta={$row["valuutta"]}" .
+                       "&varasto={$laskurow["varasto"]}" .
+                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";
@@ -7881,10 +7910,10 @@ if ($tee == '') {
           echo "<br>";
           if (!empty($sarjanumerotres['sarjanumerot'])) {
             echo "<br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']}<br>";
-            echo "<a href='{$palvelin2}kopioi_laitteita.php?toiminto=KOPIOI&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Kopioi laitteita</a>";
+            echo "<a href='{$palvelin2}kopioi_laitteita.php?toiminto=KOPIOI&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>".t("Kopioi laitteita")."</a>";
           }
           echo "<br>";
-          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
+          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>".t("Lis‰‰ laitteita")."</a>";
         }
 
         echo "</td>";

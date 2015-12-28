@@ -11,8 +11,8 @@ if ($maara > 0) {
             WHERE session = '$session'";
   $result = pupe_query($query);
 
-  $kukarow['kesken']   = 0;
-  $tilausnumero     = 0;
+  $kukarow['kesken'] = 0;
+  $tilausnumero      = 0;
 
   $query  = "SELECT *, tunnus liitostunnus
              from toimi
@@ -22,26 +22,26 @@ if ($maara > 0) {
   $srow   = mysql_fetch_array($result);
 
   // oletuksia
-  $varasto     = 0;
-  $toimipiste   = 0;
+  $varasto    = 0;
+  $toimipiste = 0;
 
   if (isset($valittuvarasto) and $valittuvarasto > 0) {
     $varasto = $valittuvarasto;
   }
 
   // tarvittavat muuttujat otsikolle
-  $ytunnus     = $srow['ytunnus'];
-  $ovttunnus     = $srow["ovttunnus"];
+  $ytunnus   = $srow['ytunnus'];
+  $ovttunnus = $srow["ovttunnus"];
   $nimi      = $srow["nimi"];
-  $nimitark    = $srow["nimitark"];
-  $osoite      = $srow["osoite"];
-  $postino    = $srow["postino"];
-  $postitp    = $srow["postitp"];
-  $maa      = $srow["maa"];
-  $liitostunnus    = $toimittaja;
+  $nimitark  = $srow["nimitark"];
+  $osoite    = $srow["osoite"];
+  $postino   = $srow["postino"];
+  $postitp   = $srow["postitp"];
+  $maa       = $srow["maa"];
+  $liitostunnus = $toimittaja;
   $maksuteksti  = $srow["maksuteksti"];
-  $kuljetus    = $srow["kuljetus"];
-  $tnimi      = "";
+  $kuljetus     = $srow["kuljetus"];
+  $tnimi        = "";
 
   $query  = "SELECT nimi
              from yhteyshenkilo
@@ -114,6 +114,13 @@ if ($maara > 0) {
     $rivi = $trivirow['tilaajanrivinro'] + 1;
   }
 
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$tilausnumero'";
+  $lasres = pupe_query($query);
+  $lasrow = mysql_fetch_assoc($lasres);
+
   unset($jtsre);
 
   // Jos varasto on syötetty niin ostetaan siihen varastoon
@@ -139,30 +146,47 @@ if ($maara > 0) {
   }
 
   //haetaan tuotteen ostohinta
-  $query = "SELECT *
-            FROM tuotteen_toimittajat
-            WHERE yhtio      = '$kukarow[yhtio]'
-            AND tuoteno      = '$tuoteno'
-            AND liitostunnus = '$toimittaja'";
-  $ossre = pupe_query($query);
-  $osstu = mysql_fetch_array($ossre);
-
-  //haetaan tuotteen ostohinta
   $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
   $tuotere = pupe_query($query);
   $tuoterow = mysql_fetch_array($tuotere);
 
-  $hinta = $osstu["ostohinta"];
+  list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_val) = alehinta_osto($lasrow, $tuoterow, $maara, "", "", "");
 
   //otetaan tuoteen kertoimet huomioon - eli jaetaan myyntihinta kertoimella, jotta saadaan yksikköhinta
-  if ($tuoterow["myyntihinta_maara"] != 0 and $osstu["ostohinta"] != 0) {
-    $hinta = hintapyoristys($osstu["ostohinta"] / $tuoterow["myyntihinta_maara"]);
+  if ($tuoterow["myyntihinta_maara"] != 0 and $lis_hinta != 0) {
+    $lis_hinta = hintapyoristys($lis_hinta / $tuoterow["myyntihinta_maara"]);
+  }
+
+  $query_insert_ale_lisa = "";
+
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+    $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
   }
 
   // lisätään ostotilausrivi
-  $query = "INSERT into tilausrivi
-            (hinta, ale1, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
-            ('$hinta', '$osstu[alennus]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$maara', '$maara', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";
+  $query = "INSERT into tilausrivi SET
+            hinta = '$lis_hinta',
+            {$query_insert_ale_lisa}
+            nimitys = '$tuoterow[nimitys]',
+            tuoteno = '$tuoteno',
+            try = '$tuoterow[try]',
+            osasto = '$tuoterow[osasto]',
+            tilkpl = '$maara',
+            varattu = '$maara',
+            yksikko = '$tuoterow[yksikko]',
+            otunnus = '$tilausnumero',
+            yhtio = '$kukarow[yhtio]',
+            tyyppi = 'O',
+            kommentti ='',
+            toimaika = now(),
+            kerayspvm = now(),
+            hyllyalue = '$jtstu[hyllyalue]',
+            hyllynro = '$jtstu[hyllynro]',
+            hyllyvali = '$jtstu[hyllyvali]',
+            hyllytaso = '$jtstu[hyllytaso]',
+            tilaajanrivinro = '$rivi',
+            laatija = '$kukarow[kuka]',
+            laadittu = now()";
   $updre = pupe_query($query);
 }
 

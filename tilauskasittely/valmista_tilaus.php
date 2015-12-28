@@ -920,7 +920,7 @@ if ($tee == 'TEEVALMISTUS') {
                         varattu        = 0
                         WHERE yhtio    = '$kukarow[yhtio]'
                         and otunnus    = '$tilrivirow[otunnus]'
-                        and tyyppi     in ('W','V','M')
+                        and tyyppi     in ('W','V','M','O')
                         and perheid    = '$tilrivirow[perheid]'";
               $updresult = pupe_query($query);
 

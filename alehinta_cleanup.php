@@ -636,7 +636,7 @@ if ($tee == "AJA") {
     $asiakasale += count($tunnukset);
   }
 
-  // 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
+  // 6. ja 11.5 asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
             FROM asiakasalennus
             WHERE yhtio  = '$kukarow[yhtio]'

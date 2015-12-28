@@ -507,7 +507,7 @@ if ($tee == "VALITSE") {
 
     mysql_data_seek($res, 0);
 
-    if (!empty($yhtiorow['koontilaskut_alarajasumma'])) {
+    if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
       echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
@@ -1175,7 +1175,7 @@ if ($tee == "") {
 
   if (mysql_num_rows($tilre) > 0) {
 
-    if (!empty($yhtiorow['koontilaskut_alarajasumma'])) {
+    if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
       echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";

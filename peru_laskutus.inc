@@ -21,7 +21,7 @@ if (!function_exists("peru_laskutus")) {
       $query = "DELETE FROM tiliointi
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND ltunnus = '{$ulaskurow["tunnus"]}'";
-      $korjres = pupe_query($query);
+      pupe_query($query);
 
       //Deletoidaan U-lasku
       $query = "DELETE FROM lasku
@@ -29,7 +29,7 @@ if (!function_exists("peru_laskutus")) {
                 AND tila = 'U'
                 AND alatila = 'X'
                 AND tunnus = '{$ulaskurow["tunnus"]}'";
-      $korjres = pupe_query($query);
+      pupe_query($query);
 
       // Löytyykö L-laskua
       $query = "SELECT *
@@ -38,7 +38,7 @@ if (!function_exists("peru_laskutus")) {
                 AND tila = 'L'
                 AND alatila = 'X'
                 AND laskunro = '{$ulaskurow["laskunro"]}'";
-      $llaskures = pupe_query($query);
+      pupe_query($query);
 
       while ($laskurow = mysql_fetch_array($llaskures)) {
         if ($laskurow["vienti"] != "") {
@@ -65,7 +65,7 @@ if (!function_exists("peru_laskutus")) {
                   AND tila = 'L'
                   AND alatila	= 'X'
                   AND tunnus = '{$laskurow["tunnus"]}'";
-        $korjres = pupe_query($query);
+        pupe_query($query);
 
         //Hoidetaan tapahtumat ja saldot
         $query = "SELECT *
@@ -79,7 +79,7 @@ if (!function_exists("peru_laskutus")) {
           $query = "DELETE from tapahtuma
                     WHERE yhtio = '{$kukarow["yhtio"]}'
                     AND rivitunnus = '{$rivirow["tunnus"]}'";
-          $korjres = pupe_query($query);
+          pupe_query($query);
 
           ///* Päivitetään saldo tilausrivin osoittamalla paikalla *///
           $query = "UPDATE tuotepaikat SET
@@ -90,7 +90,7 @@ if (!function_exists("peru_laskutus")) {
                     AND hyllynro = '{$rivirow["hyllynro"]}'
                     AND hyllytaso = '{$rivirow["hyllytaso"]}'
                     AND hyllyvali = '{$rivirow["hyllyvali"]}'";
-          $korjres = pupe_query($query);
+          pupe_query($query);
 
           if (mysql_affected_rows() == 0) {
             ///* Päivitetään saldo tuotteen oletuspaikalla jos tilausrivillä ei ollut sopivaa paikkaa *///
@@ -100,7 +100,7 @@ if (!function_exists("peru_laskutus")) {
                       AND tuoteno	= '{$rivirow["tuoteno"]}'
                       AND oletus != ''
                       LIMIT 1";
-            $korjres = pupe_query($query);
+            pupe_query($query);
           }
         }
 
@@ -115,20 +115,20 @@ if (!function_exists("peru_laskutus")) {
                   kate				   = 0
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND otunnus = '{$laskurow["tunnus"]}'";
-        $korjres = pupe_query($query);
+        pupe_query($query);
 
         $query = "UPDATE tilausrivi SET
                   kommentti = ''
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND otunnus = '{$laskurow["tunnus"]}'
                   AND kommentti LIKE 'Tilaus%'";
-        $korjres = pupe_query($query);
+        pupe_query($query);
 
         $query = "DELETE FROM tilausrivi
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND otunnus = '{$laskurow["tunnus"]}'
                   AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
-        $korjres = pupe_query($query);
+        pupe_query($query);
       }
     }
   }

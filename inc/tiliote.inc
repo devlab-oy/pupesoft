@@ -1381,7 +1381,11 @@ case 'T40':
       $tilisaldo = round($tilisaldo * $valuuttarow['kurssi'], 2);
     }
 
-    $query = "UPDATE yriti SET maksulimitti = '".round($tilisaldo / 100, 2)."' WHERE tunnus = '$yritirow[tunnus]'";
+    $query = "UPDATE yriti SET
+              maksulimitti = '".round($tilisaldo / 100, 2)."',
+              muutospvm    = now(),
+              muuttaja     = '{$kukarow["kuka"]}'
+              WHERE tunnus = '$yritirow[tunnus]'";
     $result = pupe_query($query);
 
     $query = "UPDATE tiliotedata SET kasitelty = now() WHERE tunnus='$tiliotedatarow[tunnus]'";

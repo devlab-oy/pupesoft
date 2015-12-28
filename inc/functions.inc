@@ -30590,6 +30590,18 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("kohdista_lasku_ja_suoritus")) {
+  function kohdista_lasku_ja_suoritus($lasku_tunnus, $suoritus_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $tila = 'tee_kohdistus';
+    $lasku_tunnukset = array($lasku_tunnus);
+    $ohjelma_kutsuja = 'tee_viitemaksu_kohdistus_functio';
+
+    require 'myyntires/manuaalinen_suoritusten_kohdistus.php';
+  }
+}
+
 if (!function_exists("cron_aikaleima")) {
   function cron_aikaleima($aikaleima, $uusileima = 0) {
     global $kukarow, $yhtiorow;
@@ -31047,7 +31059,6 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
 }
 
 if (!function_exists('luo_temp_tiedosto')) {
-
   function luo_temp_tiedosto($liitetiedosto) {
     global $kukarow, $yhtiorow;
 
@@ -31066,16 +31077,7 @@ if (!function_exists('luo_temp_tiedosto')) {
   }
 }
 
-if (!function_exists('curl_file_create')) {
-  function curl_file_create($filename, $mimetype = '', $postname = '') {
-      return "@$filename;filename="
-          . ($postname ?: basename($filename))
-          . ($mimetype ? ";type=$mimetype" : '');
-  }
-}
-
 if (!function_exists('xml_to_array')) {
-
   function xml_to_array($xml) {
     $xml_string = $xml;
     if ($xml instanceof SimpleXMLElement) {

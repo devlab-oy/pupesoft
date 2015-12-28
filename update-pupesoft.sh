@@ -95,6 +95,9 @@ normal=$(tput -Txterm-color sgr0)
 # Logataan mitä päivitettiin ja mihin versioon
 PUPESOFT_NEWHASH=""
 PUPENEXT_NEWHASH=""
+PUPESOFT_STATUS=0
+PUPENEXT_STATUS=0
+BUNDLER_STATUS=0
 
 # Poikkeavan pupenext hakemiston voi antaa PUPENEXT_DIR environment muuttujassa
 if [[ -n "${PUPENEXT_DIR}" ]]; then
@@ -273,9 +276,9 @@ if [[ "${jatketaanko}" = "k" ]]; then
   git remote prune origin           # poistetaan ylimääriset branchit
 
   # Save git exit status
-  STATUS=$?
+  PUPESOFT_STATUS=$?
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPESOFT_STATUS} -eq 0 ]]; then
     if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
       USER_IP=$(who -m am i|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
     else
@@ -286,7 +289,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     PUPESOFT_NEWHASH=$(git rev-parse HEAD)
   fi
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPESOFT_STATUS} -eq 0 ]]; then
     echo
     echo "${green}Pupesoft päivitetty!${normal}"
   else
@@ -343,10 +346,10 @@ if [[ "${jatketaanko}" = "k" ]]; then
   git remote prune origin
 
   # Save git exit status
-  STATUS=$?
+  PUPENEXT_STATUS=$?
 
   # Päivitys onnistui, bundlataan
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${PUPENEXT_STATUS} -eq 0 ]]; then
     bundle=true
 
     # Get new head
@@ -389,9 +392,9 @@ if [[ ${bundle} = true ]]; then
   TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
 
   # Save bundle/rake exit status
-  STATUS=$?
+  BUNDLER_STATUS=$?
 
-  if [[ ${STATUS} -eq 0 ]]; then
+  if [[ ${BUNDLER_STATUS} -eq 0 ]]; then
     echo "${green}Pupenext päivitetty!${normal}"
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"
@@ -436,6 +439,7 @@ else
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then
+    bundle --quiet &&
     bundle exec rake db:migrate
 
     if [[ $? -eq 0 ]]; then

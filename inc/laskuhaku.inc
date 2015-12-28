@@ -112,9 +112,7 @@ echo "<table>";
 $sel = array_fill_keys(array($pvm_rajaustyyppi), " selected") + array_fill_keys(array('tappvm', 'luopvm', 'laspvm'), '');
 
 echo "<tr>
-    <th>
-      <label for='paivarajaus_kentta'>".t("P‰iv‰rajaus")."</label>
-    </th>
+    <th>".t("P‰iv‰rajaus")."</th>
         <td>
       <select name='pvm_rajaustyyppi' id='paivarajaus_kentta'>
         <option value='tappvm' {$sel['tappvm']}>".t("Tapahtumap‰iv‰m‰‰r‰")."</option>";

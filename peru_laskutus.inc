@@ -18,7 +18,7 @@ if (!function_exists("peru_laskutus")) {
 
     while ($ulaskurow = mysql_fetch_array($ulaskures)) {
       if ($hard_delete) {
-        //Poistetaan tiliöinnit
+        // Poistetaan tiliöinnit
         $query = "DELETE FROM tiliointi
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND ltunnus = '{$ulaskurow["tunnus"]}'";
@@ -31,14 +31,30 @@ if (!function_exists("peru_laskutus")) {
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND ltunnus = '{$ulaskurow["tunnus"]}'";
       }
+
       pupe_query($query);
 
-      //Deletoidaan U-lasku
-      $query = "DELETE FROM lasku
-                WHERE yhtio	= '{$kukarow["yhtio"]}'
-                AND tila = 'U'
-                AND alatila = 'X'
-                AND tunnus = '{$ulaskurow["tunnus"]}'";
+      if ($hard_delete) {
+        // Deletoidaan U-lasku
+        $query = "DELETE FROM lasku
+                  WHERE yhtio	= '{$kukarow["yhtio"]}'
+                  AND tila = 'U'
+                  AND alatila = 'X'
+                  AND tunnus = '{$ulaskurow["tunnus"]}'";
+      }
+      else {
+        // Merkataan lasku poistetuksi
+        $query = "UPDATE lasku SET
+                  tila      = 'D',
+                  alatila   = tila,
+                  muuttaja  = '{$kukarow["kuka"]}',
+                  muutospvm = now()
+                  WHERE yhtio	= '{$kukarow["yhtio"]}'
+                  AND tila = 'U'
+                  AND alatila = 'X'
+                  AND tunnus = '{$ulaskurow["tunnus"]}'";
+      }
+
       pupe_query($query);
 
       // Löytyykö L-laskua

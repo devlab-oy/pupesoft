@@ -2047,8 +2047,9 @@ if ($kasitellaan_tiedosto) {
               $and .= " and alennuslaji = '$chalennuslaji'";
             }
           }
-
-          $and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
+          if ($taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {
+            $and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
+          }
         }
 
         if (substr($taulu, 0, 11) == 'puun_alkio_' and $taulunrivit[$taulu][$eriviindex][$postoiminto] != 'POISTA') {

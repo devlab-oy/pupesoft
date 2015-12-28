@@ -1571,7 +1571,12 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$utunnus}'";
             break;
           case 'valmnro':
-            $values .= ", ''";
+            if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+              $values .= ", ''";
+            }
+            else {
+              $values .= ", '".$monistalisrow[$fieldname]."'";
+            }
             break;
           default:
             $values .= ", '".$monistalisrow[$fieldname]."'";

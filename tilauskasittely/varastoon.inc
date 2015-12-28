@@ -629,7 +629,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
     if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
-      $osuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $rahtikulut;
+      // alvittoman rivihinnan osuus
+      $osuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $alvit / $rahtikulut;
     }
     else {
       $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta

@@ -119,7 +119,7 @@ if (!function_exists("peru_laskutus")) {
 
         pupe_query($query);
 
-        //Hoidetaan tapahtumat ja saldot
+        // Hoidetaan tapahtumat ja saldot
         $query = "SELECT *
                   FROM tilausrivi
                   WHERE yhtio	= '{$kukarow["yhtio"]}'
@@ -133,7 +133,7 @@ if (!function_exists("peru_laskutus")) {
                     AND rivitunnus = '{$rivirow["tunnus"]}'";
           pupe_query($query);
 
-          ///* P‰ivitet‰‰n saldo tilausrivin osoittamalla paikalla *///
+          // P‰ivitet‰‰n saldo tilausrivin osoittamalla paikalla
           $query = "UPDATE tuotepaikat SET
                     saldo = saldo + {$rivirow["kpl"]}
                     WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -145,7 +145,7 @@ if (!function_exists("peru_laskutus")) {
           pupe_query($query);
 
           if (mysql_affected_rows() == 0) {
-            ///* P‰ivitet‰‰n saldo tuotteen oletuspaikalla jos tilausrivill‰ ei ollut sopivaa paikkaa *///
+            // P‰ivitet‰‰n saldo tuotteen oletuspaikalla jos tilausrivill‰ ei ollut sopivaa paikkaa
             $query = "UPDATE tuotepaikat
                       SET saldo = saldo + {$rivirow["kpl"]}
                       WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -156,7 +156,7 @@ if (!function_exists("peru_laskutus")) {
           }
         }
 
-        //P‰ivitet‰‰n tilausrivit
+        // P‰ivitet‰‰n tilausrivit
         $query = "UPDATE tilausrivi SET
                   varattu        = kpl,
                   kpl   	       = 0,

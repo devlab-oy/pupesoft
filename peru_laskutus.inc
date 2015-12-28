@@ -1,7 +1,8 @@
 <?php
 
 if (!function_exists("peru_laskutus")) {
-  function peru_laskutus($laskunro, $peru_numeroon = null, $hard_delete = false) {
+  function peru_laskutus($laskunro, $peru_numeroon = null, $hard_delete = false,
+                         $poista_liittyvat = true) {
     global $kukarow;
 
     if ($peru_numeroon === null) $peru_numeroon = $laskunro;
@@ -74,23 +75,48 @@ if (!function_exists("peru_laskutus")) {
           $alatila = "D";
         }
 
-        //Päivitetään tilausotsikko takaisin tilaan toimitettu/vientitiedot syötetty
-        $query = "UPDATE lasku SET
-                  alatila	= '{$alatila}',
-                  laskuttaja = '',
-                  laskutettu = '0000-00-00 00:00:00',
-                  tapvm = '0000-00-00',
-                  erpcm = '0000-00-00',
-                  laskunro = 0,
-                  summa = 0,
-                  kate = 0,
-                  arvo = 0,
-                  viite = '',
-                  factoringsiirtonumero = 0
-                  WHERE yhtio	= '{$kukarow["yhtio"]}'
-                  AND tila = 'L'
-                  AND alatila	= 'X'
-                  AND tunnus = '{$laskurow["tunnus"]}'";
+        if ($poista_liittyvat) {
+          if ($hard_delete) {
+            // Poistetaan tilausotsikko
+            $query = "DELETE FROM lasku
+                      WHERE yhtio	= '{$kukarow["yhtio"]}'
+                      AND tila = 'L'
+                      AND alatila	= 'X'
+                      AND tunnus = '{$laskurow["tunnus"]}'";
+          }
+          else {
+            // Merkitään tilausotsikko poistetuksi
+            $query = "UPDATE lasku SET
+                      tila      = 'D',
+                      alatila   = tila,
+                      muuttaja  = '{$kukarow["kuka"]}',
+                      muutospvm = now()
+                      WHERE yhtio	= '{$kukarow["yhtio"]}'
+                      AND tila = 'L'
+                      AND alatila	= 'X'
+                      AND tunnus = '{$laskurow["tunnus"]}'";
+          }
+        }
+        else {
+          // Päivitetään tilausotsikko takaisin tilaan toimitettu / vientitiedot syötetty
+          $query = "UPDATE lasku SET
+                    alatila	              = '{$alatila}',
+                    laskuttaja            = '',
+                    laskutettu            = '0000-00-00 00:00:00',
+                    tapvm                 = '0000-00-00',
+                    erpcm                 = '0000-00-00',
+                    laskunro              = 0,
+                    summa                 = 0,
+                    kate                  = 0,
+                    arvo                  = 0,
+                    viite                 = '',
+                    factoringsiirtonumero = 0
+                    WHERE yhtio	= '{$kukarow["yhtio"]}'
+                    AND tila = 'L'
+                    AND alatila	= 'X'
+                    AND tunnus = '{$laskurow["tunnus"]}'";
+        }
+
         pupe_query($query);
 
         //Hoidetaan tapahtumat ja saldot

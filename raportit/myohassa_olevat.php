@@ -189,16 +189,17 @@ if ($tee == "HAE") {
   echo "<table><tr>";
 
   if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
-    echo "<th>".t("Tuoteno")."</th>";
-    echo "<th>".t("Myynti Toimitusaika")."</th>";
-    echo "<th>".t("Myydyt")."</th>";
-    echo "<th>".t("Tilaus")."</th>";
     echo "<th>".t("Ytunnus")."</th>";
     echo "<th>".t("Asiakas")."</th>";
+    echo "<th>",t("Tila"),"</th>";
+    echo "<th>".t("Tilaus")."</th>";
+    echo "<th>".t("Tuoteno")."</th>";
+    echo "<th>".t("Myyt‰viss‰")."<br>".t("Hyllyss‰")."</th>";
+    echo "<th>".t("Myydyt")."</th>";
+    echo "<th>".t("Myynti Toimitusaika")."</th>";
+    echo "<th>", t("Tilattu"), "</th>";
     echo "<th>", t("Osto Toimitusaika"), "</th>";
     echo "<th>",t("Osto Vahvistettu"),"</th>";
-    echo "<th>", t("Tilattu"), "</th>";
-    echo "<th>",t("Tila"),"</th>";
   }
   else {
     echo "<th>".t("Ytunnus")."</th>";
@@ -228,25 +229,27 @@ if ($tee == "HAE") {
       $excelsarake = 0;
 
       if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
-        $worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Myynti Toimitusaika"), $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Myydyt"), $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Tilaus"), $format_bold);
-        $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Asiakas"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Osto Toimitusaika"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("Tila"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Osto Vahvistettu"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("Tilaus"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Myyt‰viss‰")."\n".t("Hyllyss‰"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Myydyt"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Myynti Toimitusaika"), $format_bold);
         $excelsarake++;
         $worksheet->write($excelrivi, $excelsarake, t("Tilattu"), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("Tila"), $format_bold);
+        $worksheet->write($excelrivi, $excelsarake, t("Osto Toimitusaika"), $format_bold);
+        $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, t("Osto Vahvistettu"), $format_bold);
       }
       else {
         $worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
@@ -349,7 +352,7 @@ if ($tee == "HAE") {
 
   while ($tulrow = mysql_fetch_array($result)) {
 
-    list(, , $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
+    list(, $hyllyssa, $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
 
     if (!empty($yhtiorow["saldo_kasittely"])) {
       list(, , $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
@@ -417,9 +420,17 @@ if ($tee == "HAE") {
 
       while ($myohastyneet_row = mysql_fetch_assoc($myohastyneet_res)) {
         echo "<tr class='aktiivi'>";
-        echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$tulrow['tuoteno']}</a></td>";
-        echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
-        echo "<td align='right'>$myohastyneet_row[varattu]</td>";
+        echo "<td>$myohastyneet_row[ytunnus]</td>";
+        echo "<td>$myohastyneet_row[nimi]</td>";
+
+        $laskutyyppi = $myohastyneet_row["tila"];
+        $alatila     = $myohastyneet_row["alatila"];
+
+        //tehd‰‰n selv‰kielinen tila/alatila
+        require "inc/laskutyyppi.inc";
+
+        echo "<td>{$laskutyyppi} {$alatila}</td>";
+
         echo "<td>";
         echo "<a href='#' onclick=\"window.open('$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">$myohastyneet_row[tunnus]</a>";
 
@@ -443,23 +454,30 @@ if ($tee == "HAE") {
         }
 
         echo "</td>";
-        echo "<td>$myohastyneet_row[ytunnus]</td>";
-        echo "<td>$myohastyneet_row[nimi]</td>";
+
+        echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$tulrow['tuoteno']}</a></td>";
+        echo "<td align='right'>{$myytavissa}<br>{$hyllyssa}</td>";
+        echo "<td align='right'>$myohastyneet_row[varattu]</td>";
+        echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
 
         if (isset($worksheet)) {
           $excelsarake = 0;
 
-          $worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
-          $excelsarake++;
-          $worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
-          $excelsarake++;
-          $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["varattu"], $format_bold);
-          $excelsarake++;
-          $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["tunnus"], $format_bold);
-          $excelsarake++;
           $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["ytunnus"], $format_bold);
           $excelsarake++;
           $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["nimi"], $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, "{$laskutyyppi} {$alatila}", $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["tunnus"], $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, $myytavissa."\n".$hyllyssa, $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["varattu"], $format_bold);
+          $excelsarake++;
+          $worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
           $excelsarake++;
         }
 
@@ -482,37 +500,29 @@ if ($tee == "HAE") {
               $excelsarake++;
               $worksheet->write($excelrivi, $excelsarake, '', $format_bold);
               $excelsarake++;
-
+              $worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+              $excelsarake++;
+              $worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+              $excelsarake++;
             }
 
-            echo "<tr class='aktiivi'><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
+            echo "<tr class='aktiivi'><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
           }
 
+          echo "<td align='right'>{$ostovarattu}</td>";
           echo "<td>",tv1dateconv($ostotoimitusaika),"</td>";
 
           $_vahvistettu = $vahvistettu_pvm[$myohastyneet_row['tuoteno']][$ostotoimitusaika] ? t("Kyll‰") : t("Ei");
           echo "<td>{$_vahvistettu}</td>";
 
-          echo "<td align='right'>$ostovarattu</td>";
-
-          $laskutyyppi = $myohastyneet_row["tila"];
-          $alatila     = $myohastyneet_row["alatila"];
-
-          //tehd‰‰n selv‰kielinen tila/alatila
-          require "inc/laskutyyppi.inc";
-
-          echo "<td>{$laskutyyppi} {$alatila}</td>";
-
           echo "</tr>";
 
           if (isset($worksheet)) {
+            $worksheet->write($excelrivi, $excelsarake, $ostovarattu, $format_bold);
+            $excelsarake++;
             $worksheet->write($excelrivi, $excelsarake, tv1dateconv($ostotoimitusaika), $format_bold);
             $excelsarake++;
             $worksheet->write($excelrivi, $excelsarake, $_vahvistettu, $format_bold);
-            $excelsarake++;
-            $worksheet->write($excelrivi, $excelsarake, $ostovarattu, $format_bold);
-            $excelsarake++;
-            $worksheet->write($excelrivi, $excelsarake, "{$laskutyyppi} {$alatila}", $format_bold);
           }
 
           $i++;

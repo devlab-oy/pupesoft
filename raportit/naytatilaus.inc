@@ -486,12 +486,25 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
   $reklaresult = pupe_query($query);
   $reklarow = mysql_fetch_assoc($reklaresult);
 
+  $komm1_nimi = t("Työn kuvaus");
+  $komm2_nimi = t("Sisäiset kommentit");
+
+  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT");
+
+  while ($kommnimi = mysql_fetch_assoc($tyom_avainsanat)) {
+    if ($kommnimi["selite"] == "komm1" and $kommnimi["selitetark"] != "") {
+      $komm1_nimi = $kommnimi["selitetark"];
+    } elseif ($kommnimi["selite"] = "komm2" and $kommnimi["selitetark"] != "") {
+      $komm2_nimi = $kommnimi["selitetark"];
+    }
+  }
+
   if (trim($reklarow['komm1']) != '') {
-    $komm .= "\n".t("Työn kuvaus").":###".wordwrap(str_replace("\n", "\n###", $reklarow['komm1']), 90, "\n###");
+    $komm .= "\n$komm1_nimi:###".wordwrap(str_replace("\n", "\n###", $reklarow['komm1']), 90, "\n###");
   }
 
   if (trim($reklarow['komm2']) != '') {
-    $komm .= "\n".t("Sisäiset kommentit").":###".wordwrap(str_replace("\n", "\n###", $reklarow['komm2']), 90, "\n###");
+    $komm .= "\n$komm2_nimi:###".wordwrap(str_replace("\n", "\n###", $reklarow['komm2']), 90, "\n###");
   }
 }
 

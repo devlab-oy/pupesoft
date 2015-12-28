@@ -357,7 +357,8 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
-          // Kieliversiot ja kauppakohtaiset_hinnat poimitaan talteen koska niitä käytetään toisaalla
+          // Kieliversiot ja kauppakohtaiset_hinnat sekä kauppakohtaiset_verokannat
+          // poimitaan talteen koska niitä käytetään toisaalla
           if ($key == 'kieliversiot') {
             $tuetut_kieliversiot = $erikoisparametri['arvo'];
             continue;
@@ -2007,15 +2008,19 @@ class MagentoClient {
         return false;
       }
 
-      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
-        // Haetaan jokaisen asiakkaan tuotehinta ja muut tarvittavat parametrit
-        $asiakaskohtainenhintadata[] = $this->hae_asiakaskohtainen_data($asiakas, $tuotenumero);
-      }
+      // Ensin poistetaan tuotteen asiakashinnat Magentosta
+      $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero);
 
-      // Siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
-      $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
-        array($magento_tuotenumero, $asiakaskohtainenhintadata));
-      $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
+      // Sitten haetaan asiakaskohtainen hintadata Pupesta
+      $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
+
+      // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
+      if (count($asiakaskohtainenhintadata) > 0) {
+        
+        $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
+          array($magento_tuotenumero, $asiakaskohtainenhintadata));
+        $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
+      }
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -2093,6 +2098,7 @@ class MagentoClient {
     $asiakkaat_per_yhteyshenkilo = array();
 
     $query = "SELECT asiakas.tunnus asiakastunnus,
+              asiakas.ytunnus,
               yhteyshenkilo.email asiakas_email,
               yhteyshenkilo.ulkoinen_asiakasnumero
               FROM yhteyshenkilo
@@ -2108,7 +2114,8 @@ class MagentoClient {
       $asiakasdata = array(
         'asiakastunnus'         => $rivi['asiakastunnus'],
         'asiakas_email'         => $rivi['asiakas_email'],
-        'magento_asiakastunnus' => $rivi['ulkoinen_asiakasnumero']
+        'magento_asiakastunnus' => $rivi['ulkoinen_asiakasnumero'],
+        'ytunnus'               => $rivi['ytunnus']
       );
       $asiakkaat_per_yhteyshenkilo[] = $asiakasdata;
     }
@@ -2116,35 +2123,35 @@ class MagentoClient {
     return $asiakkaat_per_yhteyshenkilo;
   }
 
-  private function hae_asiakaskohtainen_data($asiakas, $tuotenumero) {
-    global $yhtiorow, $kukarow;
+  private function poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
+    // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
+    $toiminto = false;
+    try {           
+      $asiakashinnat = array();
 
-    // Haetaan asiakas
-    $query  = "SELECT *
-               FROM asiakas
-               WHERE yhtio='{$kukarow['yhtio']}'
-               AND tunnus='{$asiakas['asiakastunnus']}'";
-    $result = pupe_query($query);
-    $asiakasrow = mysql_fetch_array($result);
+      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+        $asiakashinnat[] = array(
+          'customerEmail' => $asiakas['asiakas_email'],
+          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+          'delete' => 1);
+      }
 
-    // Haetaan kurssi
-    $query = "SELECT kurssi
-              FROM valuu
-              WHERE nimi = '{$asiakasrow['valkoodi']}'
-              and yhtio  = '{$kukarow['yhtio']}'";
-    $asres = pupe_query($query);
-    $kurssi = mysql_fetch_assoc($asres);
+      $toiminto = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
+        array($magento_tuotenumero, $asiakashinnat));
+      $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu " . print_r($asiakaskohtainenhintadata, true));
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe asiakaskohtaisten hintojen poistossa!", $e);
+    }
 
-    // Feikataan laskurow
-    $laskurow = array();
-    $laskurow["ytunnus"]        = $asiakasrow["ytunnus"];
-    $laskurow["liitostunnus"]   = $asiakasrow["tunnus"];
-    $laskurow["vienti"]         = $asiakasrow["vienti"];
-    $laskurow["alv"]            = $asiakasrow["alv"];
-    $laskurow["valkoodi"]       = $asiakasrow["valkoodi"];
-    $laskurow["vienti_kurssi"]  = $kurssi;
-    $laskurow["maa"]            = $asiakasrow["maa"];
-    $laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
+    return $toiminto;
+  }
+
+  private function hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero) {
+    global $kukarow;
+    // Haetaan annettujen Magentoasiakkaiden hinnat annetulle tuotteelle
+    $asiakaskohtaiset_hinnat_data = array();
 
     // Haetaan tuotteen tiedot
     $query = "SELECT *
@@ -2152,27 +2159,167 @@ class MagentoClient {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tuoteno = '{$tuotenumero}'";
     $result = pupe_query($query);
-    $tuote = mysql_fetch_assoc($result);
+    $tuoterow = mysql_fetch_assoc($result);
 
-    list($hinta, $netto, $ale) = alehinta($laskurow, $tuote, 1, '', '', '');
+    $tuotteen_vertailuhinta = $tuoterow['myyntihinta'];
 
-    if ($netto == '') {
-      $kokonaisale = 1;
-      $maara = $yhtiorow['myynnin_alekentat'];
+    $asiakashinnat = array();
 
-      for ($alepostfix = 1; $alepostfix <= $maara; $alepostfix++) {
-        $kokonaisale *= (1 - $ale["ale{$alepostfix}"] / 100);
+    $query = "SELECT ";
+    foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+      // Tuotteen hinta tälle asiakkaalle
+      $hinta = 0;
+      $kpl = 1;
+      unset($row);
+
+      $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                 FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
+                 WHERE yhtio   = '$kukarow[yhtio]'
+                 and asiakas   = '$asiakas[asiakastunnus]'
+                 and asiakas   > 0
+                 and tuoteno   = '$tuoterow[tuoteno]'
+                 and tuoteno  != ''
+                 and (minkpl <= $kpl or minkpl = 0)
+                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                 UNION
+                 (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                 FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
+                 WHERE yhtio   = '$kukarow[yhtio]'
+                 and ytunnus   = '$asiakas[ytunnus]'
+                 and ytunnus  != ''
+                 and tuoteno   = '$tuoterow[tuoteno]'
+                 and tuoteno  != ''
+                 and (minkpl <= $kpl or minkpl = 0)
+                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                 ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
+                 LIMIT 1";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) > 0) {
+        $row = mysql_fetch_assoc($result);
       }
-      $hinta = round(($hinta * $kokonaisale), 2);
+
+      if (!isset($row)) {
+        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                   FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
+                   WHERE yhtio   = '$kukarow[yhtio]'
+                   and asiakas   = '$asiakas[asiakastunnus]'
+                   and asiakas   > 0
+                   and ryhma     = '$tuoterow[aleryhma]'
+                   and ryhma    != ''
+                   and (minkpl <= $kpl or minkpl = 0)
+                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   UNION
+                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                   FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
+                   WHERE yhtio   = '$kukarow[yhtio]'
+                   and ytunnus   = '$asiakas[ytunnus]'
+                   and ytunnus  != ''
+                   and ryhma     = '$tuoterow[aleryhma]'
+                   and ryhma    != ''
+                   and (minkpl <= $kpl or minkpl = 0)
+                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
+                   LIMIT 1";
+
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $row = mysql_fetch_assoc($result);
+        }
+      }
+
+      if (!isset($row)) {
+        $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_tuoteno)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND asiakas  = '$asiakas[asiakastunnus]'
+                   AND asiakas  > 0
+                   AND tuoteno  = '$tuoterow[tuoteno]'
+                   AND tuoteno != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100)
+                   UNION
+                   (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_tuoteno)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND ytunnus  = '$asiakas[ytunnus]'
+                   AND ytunnus != ''
+                   AND tuoteno  = '$tuoterow[tuoteno]'
+                   AND tuoteno != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100)
+                   ORDER BY alennuslaji, prio, minkpl DESC, aika, alennus DESC, tunnus DESC
+                   LIMIT 1";
+
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $row = mysql_fetch_assoc($result);
+        }
+      }
+
+      if (!isset($row)) {
+        $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND asiakas  = '$asiakas[asiakastunnus]'
+                   AND asiakas  > 0
+                   AND ryhma    = '$tuoterow[aleryhma]'
+                   AND ryhma   != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100)
+                   UNION
+                   (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND ytunnus  = '$asiakas[ytunnus]'
+                   AND ytunnus != ''
+                   AND ryhma    = '$tuoterow[aleryhma]'
+                   AND ryhma   != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100)
+                   ORDER BY alennuslaji, prio, minkpl DESC, aika, alennus DESC, tunnus desc
+                   LIMIT 1";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $row = mysql_fetch_assoc($result);
+        }
+      }
+
+      // Asetetaan hintamuuttujaan joko:
+      if (isset($row)) {
+        // löydetty asiakashinta
+        if (isset($row['hinta'])) {
+          $hinta = $row['hinta'];
+        }
+        // tai lasketaan alennus pois myyntihinnasta
+        if (isset($row['alennus'])) {
+          $hinta = $tuoterow['myyntihinta'];
+          $kokonaisale = (1 - $row['alennus'] / 100);
+          $hinta = round(($hinta * $kokonaisale), 2);
+        }
+      }
+
+      if ($hinta > 0 and $hinta <> $tuotteen_vertailuhinta) {
+        $asiakaskohtaiset_hinnat_data[] = array(
+          'customerEmail' => $asiakas['asiakas_email'],
+          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+          'price' => $hinta,
+          'delete' => 0);
+      }
     }
 
-    // Haetaan Magentosta asiakkaan website_id..
-    $magentocustomer = $this->_proxy->call($this->_session, 'customer.info', $asiakas['magento_asiakastunnus']);
-
-    return array('customerEmail' => $asiakas['asiakas_email'],
-      'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-      'price' => $hinta,
-      'delete' => 0);
+    return $asiakaskohtaiset_hinnat_data;
   }
 
   /**

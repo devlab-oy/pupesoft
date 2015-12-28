@@ -312,6 +312,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $pakolliset  = array("VARASTO_POSTINO", "POSTINO", "KM", "POSTITP");
       $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $wherelliset = array("VARASTO_POSTINO", "POSTINO");
+      $saakopoistaa = TRUE;
       break;
     case "abc_parametrit" :
       $pakolliset  = array("TYYPPI", "LUOKKA");
@@ -456,7 +457,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
           $sarake = strtoupper(trim($sarake));
 
           // Pakollisuus
-          if ($row["selitetark_3"] == "PAKOLLINEN") {
+          if ($row["selitetark_3"] == "PAKOLLINEN" and !in_array($sarake, $pakolliset)) {
             $pakolliset[] = $sarake;
           }
 

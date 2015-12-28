@@ -124,7 +124,9 @@ tiedostofunkkarit.inc
 asiakasvalinta.inc
 extranet_tyomaaraykset.php
 extranet_laiterekisteri.php
-tyomaarays/tulosta_tyomaarays.inc"
+tyomaarays/tulosta_tyomaarays.inc
+tiedostofunkkarit.inc
+popup.js"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

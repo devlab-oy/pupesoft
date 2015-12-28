@@ -1907,6 +1907,9 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
+                $query .= ", $otsikko = NULL ";
+              }
               elseif ($table_mysql == 'tuote' and $otsikko == 'MYYNTIHINTA' and $myyntihinnan_paivitys == 1) {
                 $query .= ", $otsikko = GREATEST(myyntihinta, {$taulunrivit[$taulu][$eriviindex][$r]})";
               }
@@ -1990,6 +1993,9 @@ if ($kasitellaan_tiedosto) {
               }
               elseif ($table_mysql == 'customers_users' and $otsikko == 'USER_ID') {
                 $query .= " $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
+              }
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
+                $query .= ", $otsikko = NULL ";
               }
               elseif ($eilisataeikamuuteta == "") {
                 $query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
@@ -2337,16 +2343,22 @@ if ($kasitellaan_tiedosto) {
             // Itse lue_datan päivitysquery
             $iresult = pupe_query($query);
 
+            // Haetaan tunnus, jos oli INSERT
+            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
+            }
+
+            generoi_hinnastot($tunnus);
+
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
-                $syncrow = array();
-                $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
-              }
-              else {
-                $syncrow = mysql_fetch_array($syncres);
-                $tunnus  = $syncrow["tunnus"];
-              }
+            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              $syncrow = array();
+            }
+            else {
+              $syncrow = mysql_fetch_array($syncres);
+              $tunnus  = $syncrow["tunnus"];
+            }
 
               synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
             }

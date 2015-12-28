@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("peru_laskutus")) {
-  function peru_laskutus($laskunro, $peru_numeroon = null) {
+  function peru_laskutus($laskunro, $peru_numeroon = null, $hard_delete = false) {
     global $kukarow;
 
     if ($peru_numeroon === null) $peru_numeroon = $laskunro;
@@ -17,10 +17,20 @@ if (!function_exists("peru_laskutus")) {
     $ulaskures = pupe_query($query);
 
     while ($ulaskurow = mysql_fetch_array($ulaskures)) {
-      //Poistetaan tiliöinnit
-      $query = "DELETE FROM tiliointi
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND ltunnus = '{$ulaskurow["tunnus"]}'";
+      if ($hard_delete) {
+        //Poistetaan tiliöinnit
+        $query = "DELETE FROM tiliointi
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND ltunnus = '{$ulaskurow["tunnus"]}'";
+      }
+      else {
+        // Merkitään tiliöinnit korjatuksi
+        $query = "UPDATE tiliointi SET
+                  korjattu    = '{$kukarow["kuka"]}',
+                  korjausaika = now()
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND ltunnus = '{$ulaskurow["tunnus"]}'";
+      }
       pupe_query($query);
 
       //Deletoidaan U-lasku

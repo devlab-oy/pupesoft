@@ -6,21 +6,21 @@ $useslave = 1;
 // DataTables päälle
 $pupe_DataTables = "myyntilaskuhaku";
 
-  if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
-    $no_head = "yes";
-  }
+if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+  $no_head = "yes";
+}
 
-  require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($tee)) $tee = '';
 if (!isset($summa1)) $summa1 = '';
 if (!isset($summa2)) $summa2 = '';
 if (!isset($pvm)) $pvm = '';
-  if (!isset($index))   $index  = '';
+if (!isset($index)) $index  = '';
 
-  if (!function_exists("mlh_nimi")) {
-    function mlh_nimi($keta_haetaan) {
-      global $kukarow;
+if (!function_exists("mlh_nimi")) {
+  function mlh_nimi($keta_haetaan) {
+    global $kukarow;
 
     $query = "SELECT kuka.nimi
               FROM kuka
@@ -38,98 +38,288 @@ if (!isset($pvm)) $pvm = '';
   }
 }
 
-  if (!function_exists("mlh_maksuteksti")) {
-    function mlh_maksuteksti($trow) {
-      global $kukarow;
+if (!function_exists("mlh_maksuteksti")) {
+  function mlh_maksuteksti($trow) {
+    global $kukarow;
 
-      $maksuviesti = "";
+    $maksuviesti = "";
 
-      if ($trow['mapvm'] != "0000-00-00") {
-        $maksuviesti = t("Maksettu");
-      }
-      elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
-        $maksuviesti = t("Osasuoritettu");
-
-        if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-          $maksuviesti .= " / ".t("Erääntynyt");
-        }
-      }
-      elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-        $maksuviesti = " ".t("Erääntynyt");
-      }
-      else {
-        $maksuviesti = t("Avoin");
-      }
-
-      return $maksuviesti;
+    if ($trow['mapvm'] != "0000-00-00") {
+      $maksuviesti = t("Maksettu");
     }
-  }
+    elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
+      $maksuviesti = t("Osasuoritettu");
 
-  if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
-
-    /*
-     * Nämä sarakkeet haetaan kannasta ja tulostetaan tableen
-     */
-    $aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
-
-
-    /*
-     * Nämä sarakkeet haetaan kannasta, mutta ei näytetä tablessa
-     */
-    $aExtraColumns = array('tunnus', 'liitostunnus', 'ytunnus', 'mapvm', 'saldo_maksettu');
-
-    /*
-     * Käyttöliittymäpoikkeukset
-     */
-    $aExceptionColumns = array();
-
-    if (tarkista_oikeus("muutosite.php")) {
-      $aExceptionColumns[0] = "<a href = '../muutosite.php?tee=E&tunnus=#ROW_tunnus#&lopetus={$lopetus}'>#ROW_tapvm#</a>";
+      if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+        $maksuviesti .= " / ".t("Erääntynyt");
+      }
+    }
+    elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+      $maksuviesti = " ".t("Erääntynyt");
+    }
+    else {
+      $maksuviesti = t("Avoin");
     }
 
-    $aExceptionColumns[2] = "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=#ROW_laskunro#&lopetus={$lopetus}'>#ROW_laskunro#</a>";
-    $aExceptionColumns[3] = "<a name='#ROW_tunnus#' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=#ROW_ytunnus#&asiakasid=#ROW_liitostunnus#&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>#ROW_nimi#</a>";
-    $aExceptionColumns[6] = "#ROW_ebidFUNCTION#";
-    $aExceptionColumns[7] = "#ROW_mlh_maksutekstiFUNCTION#";
-    $aExceptionColumns[8] = "#ROW_mlh_nimiFUNCTION#";
-
-    /*
-     * Indeksisarake
-     */
-    $sIndexColumn = "tunnus";
-
-    /*
-     * DB table to use
-     */
-    $sTable = "lasku";
-
-    list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
-
-    require("server_processing_getdata.inc");
-    exit;
+    return $maksuviesti;
   }
+}
+
+if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+
+  /*
+   * Nämä sarakkeet haetaan kannasta ja tulostetaan tableen
+   */
+  $aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
+
+  /*
+   * Nämä sarakkeet haetaan kannasta, mutta ei näytetä tablessa
+   */
+  $aExtraColumns = array('tunnus', 'liitostunnus', 'ytunnus', 'mapvm', 'saldo_maksettu');
+
+  /*
+   * Käyttöliittymäpoikkeukset
+   */
+  $aExceptionColumns = array();
+
+  if (tarkista_oikeus("muutosite.php")) {
+    $aExceptionColumns[0] = "<a href = '../muutosite.php?tee=E&tunnus=#ROW_tunnus#&lopetus={$lopetus}'>#ROW_tapvm#</a>";
+  }
+
+  $aExceptionColumns[2] = "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=#ROW_laskunro#&lopetus={$lopetus}'>#ROW_laskunro#</a>";
+  $aExceptionColumns[3] = "<a name='#ROW_tunnus#' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=#ROW_ytunnus#&asiakasid=#ROW_liitostunnus#&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>#ROW_nimi#</a>";
+  $aExceptionColumns[6] = "#ROW_ebidFUNCTION#";
+  $aExceptionColumns[7] = "#ROW_mlh_maksutekstiFUNCTION#";
+  $aExceptionColumns[8] = "#ROW_mlh_nimiFUNCTION#";
+
+  /*
+   * Indeksisarake
+   */
+  $sIndexColumn = "tunnus";
+
+  /*
+   * DB table to use
+   */
+  $sTable = "lasku";
+
+  list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
+
+  require "server_processing_getdata.inc";
+  exit;
+}
 
 $lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
 
-  echo "<font class='head'>",t("Myyntilaskuhaku"),"</font><hr>";
-echo "<br><form name = 'valinta' method='post'>";
+$lopelisa = "${palvelin2}myyntires/myyntilaskuhaku.php////tee=$tee//laskuntyyppi=$laskuntyyppi//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//pvm=$pvm";
+if (isset($lopetus) and $lopetus != "") $lopelisa = "$lopetus/SPLIT/$lopelisa";
 
-  $seldr = array_fill_keys(array($tee), " selected") + array('A' => '','S' => '','VS' => '','N' => '','V' => '','L' => '','LN' => '');
+echo "<form name = 'valinta' method='post'>";
 
 echo "<table>";
+
+$sel = array_fill_keys(array($pvm_rajaustyyppi), " selected") + array_fill_keys(array('tappvm', 'luopvm', 'laspvm'), '');
+
+echo "<tr><th valign='top'>".t("Alkupvm")."</th>";
+echo "<td><select name='alkuvv'>";
+
+$sel = array();
+if (!isset($alkuvv) or $alkuvv == "") $alkuvv = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+$sel[$alkuvv] = "SELECTED";
+
+for ($i = date("Y"); $i >= date("Y")-10; $i--) {
+  if (!isset($sel[$i])) $sel[$i] = "";
+  echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($alkukk) or $alkukk == "") $alkukk = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+$sel[$alkukk] = "SELECTED";
+
+echo "<select name='alkukk'>";
+
+for ($i = 1; $i < 13; $i++) {
+  $val = $i < 10 ? '0'.$i : $i;
+
+  if (!isset($sel[$val])) $sel[$val] = "";
+
+  echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($alkupp) or $alkupp == "") $alkupp = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
+$sel[$alkupp] = "SELECTED";
+
+echo "<select name='alkupp'>";
+
+for ($i = 1; $i < 32; $i++) {
+  $val = $i < 10 ? '0'.$i : $i;
+
+  if (!isset($sel[$val])) $sel[$val] = "";
+
+  echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
+}
+
+echo "</select></td><td class='back'>&nbsp;</td></tr>";
+
+echo "<tr>
+  <th valign='top'>", t("Loppupvm"), "</th>
+  <td><select name='loppuvv'>";
+
+$sel = array();
+if (!isset($loppuvv) or $loppuvv == "") $loppuvv = date("y", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
+$sel[$loppuvv] = "SELECTED";
+
+for ($i = date("Y")+1; $i >= date("Y")-10; $i--) {
+
+  if (!isset($sel[$i])) $sel[$i] = "";
+
+  echo "<option value='{$i}' {$sel[$i]}>{$i}</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($loppukk) or $loppukk == "") $loppukk = date("m", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
+$sel[$loppukk] = "SELECTED";
+
+echo "<select name='loppukk'>";
+
+for ($i = 1; $i < 13; $i++) {
+  $val = $i < 10 ? '0'.$i : $i;
+
+  if (!isset($sel[$val])) $sel[$val] = "";
+
+  echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
+}
+
+echo "</select>";
+
+$sel = array();
+if (!isset($loppupp) or $loppupp == "") $loppupp = date("d", mktime(0, 0, 0, (date("m")+6), 0, date("Y")));
+$sel[$loppupp] = "SELECTED";
+
+echo "<select name='loppupp'>";
+
+for ($i = 1; $i < 32; $i++) {
+  $val = $i < 10 ? '0'.$i : $i;
+
+  if (!isset($sel[$val])) $sel[$val] = "";
+
+  echo "<option value='{$val}' {$sel[$val]}>{$val}</option>";
+}
+
+echo "</select></td><td class='back'>&nbsp;</td></tr>";
+
+if (!empty($serikustpt) or !empty($serikohdet) or !empty($seriprojektit)) {
+  $mul_kustp = unserialize(urldecode($serikustpt));
+  $mul_kohde = unserialize(urldecode($serikohdet));
+  $mul_projekti = unserialize(urldecode($seriprojektit));
+}
+
+$monivalintalaatikot = array();
+
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'K'
+          AND kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "KUSTP";
+}
+
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'O'
+          AND kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "KOHDE";
+}
+
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'P'
+          AND kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "PROJEKTI";
+}
+
+if (count($monivalintalaatikot) > 0) {
+  echo "<tr>";
+  echo "<th>".t("Tarkenne")."</th>";
+  echo "<td>";
+
+  $noautosubmit = TRUE;
+  require "tilauskasittely/monivalintalaatikot.inc";
+
+  echo "</td>";
+  echo "</tr>";
+}
+
+$sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');
+
+echo "<tr><th>".t("Laskun tila")."</th>";
+echo "<td><select name = 'laskuntyyppi'>
+    <option value = ''>".t("Kaikki")."</option>
+    <option {$sel['A']} value = 'A'>".t("Avoin")."</option>
+    <option {$sel['M']} value = 'M'>".t("Maksettu")."</option>
+    </select></td>
+    </tr>";
+
+$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'VS', 'N', 'V', 'L', 'A', 'LN', 'M'), '');
+
 echo "<tr>";
-echo "<th>", t("Etsi lasku"), "</th>";
+echo "<th>".t("Hakulaji")."</th>";
 echo "<td><select name = 'tee'>";
-echo "<option value = 'S'  {$seldr["S"]}>", t("summalla"), "</option>";
-echo "<option value = 'VS' {$seldr["VS"]}>", t("valuuttasummalla"), "</option>";
-echo "<option value = 'N'  {$seldr["N"]}>", t("nimellä"), "</option>";
-echo "<option value = 'V'  {$seldr["V"]}>", t("viitteellä"), "</option>";
-echo "<option value = 'L'  {$seldr["L"]}>", t("laskunnumerolla"), "</option>";
-echo "<option value = 'A'  {$seldr["A"]}>", t("asiakasnumerolla"), "</option>";
-echo "<option value = 'LN'  {$seldr["LN"]}>", t("Laatijan/myyjän nimellä"), "</option>";
-echo "</select></td>";
-echo "<td><input type = 'text' name = 'summa1' size='13'> - <input type = 'text' name = 'summa2' size='13'></td>";
-echo "<td class='back'><input type = 'submit' value = '", t("Hae"), "'></td>";
+
+echo "<option value = 'S'  {$sel["S"]}>",   t("Summalla"), "</option>";
+echo "<option value = 'VS' {$sel["VS"]}>",  t("Valuuttasummalla"), "</option>";
+echo "<option value = 'N'  {$sel["N"]}>",   t("Nimellä"), "</option>";
+echo "<option value = 'V'  {$sel["V"]}>",   t("Viitteellä"), "</option>";
+echo "<option value = 'L'  {$sel["L"]}>",   t("Laskunnumerolla"), "</option>";
+echo "<option value = 'A'  {$sel["A"]}>",   t("Asiakasnumerolla"), "</option>";
+echo "<option value = 'AT'  {$sel["AT"]}>", t("Asiakkaan tilausnumerolla"), "</option>";
+echo "<option value = 'LN' {$sel["LN"]}>",  t("Laatijan/myyjän nimellä"), "</option>";
+
+// M = laskuja eräpäivän:n mukaan
+if ($tee == 'M') {
+  echo "<option value = 'M' {$sel['M']}>".t("Eräpäivän mukaan")."</option>";
+}
+
+echo "</select></td></tr>";
+echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
+
+$sel = array_fill_keys(array($rajaus), " selected") + array_fill_keys(array('50', '100', '250', '500', '750', '1000'), '');
+
+echo "<tr><th>".t("Näytetään")."</th>";
+echo "<td><select name = 'rajaus'>";
+echo "<option {$sel['50']} value = '50'>".t("50")."</option>";
+echo "<option {$sel['100']} value = '100'>".t("100")."</option>";
+echo "<option {$sel['250']} value = '250'>".t("250")."</option>";
+echo "<option {$sel['500']} value = '500'>".t("500")."</option>";
+echo "<option {$sel['750']} value = '750'>".t("750")."</option>";
+echo "<option {$sel['1000']} value = '1000'>".t("1000")."</option>";
+echo "</select> ".t("laskua")."</td>";
+
+if ($tee == 'M') {
+  echo "<input type = 'hidden' name = 'pvm' value = '$pvm'>";
+}
+
+echo "<td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 echo "</table>";
 echo "</form>";
@@ -138,7 +328,7 @@ echo "<hr>";
 $formi = 'valinta';
 $kentta = 'summa1';
 
-if (trim($summa1) == "") {
+if (trim($summa1) == "" and empty($pvm)) {
   $tee = "";
 }
 
@@ -156,7 +346,7 @@ if ($tee == 'LN') {
 
   $row = mysql_fetch_assoc($kukares);
 
-  if ($row["myyja"] !="") {
+  if ($row["myyja"] != "") {
     $myyja = " or myyja in ({$row["myyja"]})";
   }
 
@@ -165,7 +355,6 @@ if ($tee == 'LN') {
     $row["kuka"] = "'".$summa1."'";
   }
 
-  $index = " use index (tila_index) ";
   $ehto = "tila = 'U' and (laatija in ({$row["kuka"]}) $myyja)";
   $jarj = "nimi, tapvm desc";
 }
@@ -191,6 +380,15 @@ if ($tee == 'VS') {
     $ehto .= "summa_valuutassa >= " . $summa1 . " and summa_valuutassa <= " . $summa2;
     $jarj = "summa_valuutassa, tapvm";
   }
+}
+
+// AT = Etsitään asiakkaan tilausnumerolla
+if ($tee == 'AT') {
+  $summa1 = mysql_real_escape_string($summa1);
+
+  $ehto .= "tila = 'U' and asiakkaan_tilausnumero LIKE '%{$summa1}%'";
+  $index = " use index (yhtio_asiakkaan_tilausnumero) ";
+  $jarj = "asiakkaan_tilausnumero, tapvm";
 }
 
 // S = Etsitään summaa laskulta
@@ -219,7 +417,7 @@ if ($tee == 'S') {
 // N = Etsitään nimeä laskulta
 if ($tee == 'N') {
   $index = " use index (asiakasnimi) ";
-    $ehto = "tila = 'U' and match (nimi) against ('$summa1*' IN BOOLEAN MODE)";
+  $ehto = "tila = 'U' and match (nimi) against ('$summa1*' IN BOOLEAN MODE)";
   $jarj = "nimi, tapvm desc";
 }
 
@@ -246,6 +444,7 @@ if ($tee == 'A') {
 
 // V = viitteellä
 if ($tee == 'V') {
+  $index = " use index (tila_viite) ";
   $ehto = "tila = 'U' and viite = '{$summa1}'";
   $jarj = "nimi, summa";
 }
@@ -257,13 +456,53 @@ if ($tee == 'L') {
   $jarj = "nimi, summa";
 }
 
-  if ($tee != '' and $ehto != "") {
+// M = eräpäivämäärällä
+if ($tee == 'M') {
+  $ehto = "tila = 'U' and lasku.erpcm = '$pvm'";
+  $jarj = "nimi, summa";
 
-    pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
+  unset($alkuvv);
+  unset($loppuvv);
+}
 
-    echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+// Päivämäärärajaus
+if (is_numeric($alkuvv) and is_numeric($alkukk) and is_numeric($alkupp) and is_numeric($loppuvv) and is_numeric($loppukk) and is_numeric($loppupp)) {
+  $ehto .= "\nand lasku.tapvm >= '{$alkuvv}-{$alkukk}-{$alkupp}'\nand lasku.tapvm <= '{$loppuvv}-{$loppukk}-{$loppupp}'";
 
-    echo "<thead>
+  if ($index == "") $index = " use index (yhtio_tila_tapvm) ";
+}
+
+// Maksetut tai avoimet laskut
+if (!empty($laskuntyyppi) and $laskuntyyppi == "A") {
+  $ehto .= " AND lasku.mapvm = 0 ";
+}
+elseif (!empty($laskuntyyppi) and $laskuntyyppi == "M") {
+  $ehto .= " AND lasku.mapvm > 0 ";
+}
+
+if (empty($rajaus) or !is_numeric($rajaus)) {
+  $rajaus = "LIMIT 50";
+}
+else {
+  $rajaus = "LIMIT ".round($rajaus);
+}
+
+if (!empty($tee)) {
+  $query = "SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
+            summa, valkoodi, ebid, tila, alatila, tunnus,
+            mapvm, saldo_maksettu, ytunnus, liitostunnus, laatija
+            FROM lasku {$index}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND {$ehto}
+            ORDER BY {$jarj}
+            {$rajaus}";
+  $result = pupe_query($query);
+
+  pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
+
+  echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+
+  echo "<thead>
         <tr>
         <th>", t("Pvm"), "</th>
         <th>", t("Eräpäivä"), "</th>
@@ -294,7 +533,7 @@ if ($tee == 'L') {
       </tbody>
       </table><br /><br />";
 
-    $toim = "";
-  }
+  $toim = "";
+}
 
 require "inc/footer.inc";

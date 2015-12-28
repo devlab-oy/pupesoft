@@ -66,16 +66,21 @@ $header .= "Cash discount amount $yhtiorow[valkoodi];";
 $header .= "Cash discount amount in invoice currency;";
 $header .= "Payer;";
 $header .= "Reference number;";
-$header .= "Reference text";
+$header .= "Reference text;";
+$header .= "Payment reminders;";
+$header .= "Last Payment reminder";
 $header .= "\n";
 
 fwrite($fp1, $header);
 
 $header = str_replace("Customer;", "Supplier;", $header);
+$header = str_replace(";Payment reminders;Last Payment reminder", "", $header);
+
 fwrite($fp2, $header);
 
 // Haetaan avoimet myyntilaskut
 $query = "(SELECT
+           lasku.tunnus,
            'SALESINVOICE' tyyppi,
            lasku.laskunro,
            lasku.viite,
@@ -103,11 +108,12 @@ $query = "(SELECT
            and lasku.tapvm          > '0000-00-00'
            and lasku.tila           = 'U'
            and lasku.alatila        = 'X'
-           GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
+           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12)
 
            UNION
 
            (SELECT
+            lasku.tunnus,
            'SUPPLIERINVOICE' tyyppi,
            if(lasku.laskunro > 0, lasku.laskunro, if(lasku.viite!='', lasku.viite, lasku.viesti)) laskunro,
            lasku.viite,
@@ -162,6 +168,22 @@ while ($row = mysql_fetch_assoc($res)) {
 
   if (empty($row['viite'])) {
     $rivi .= pupesoft_csvstring($row['viesti']);
+  }
+
+  if ($row['tyyppi'] == "SALESINVOICE") {
+    $rivi .= ";";
+
+    $query = "SELECT
+              max(karhukierros.pvm) as kpvm,
+              count(distinct karhu_lasku.ktunnus) ktun
+              FROM karhu_lasku
+              JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus)
+              WHERE karhu_lasku.ltunnus = {$row['tunnus']}";
+    $karhukertares = pupe_query($query);
+    $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+    $rivi .= "{$karhukertarow['ktun']};";
+    $rivi .= "{$karhukertarow['kpvm']}";
   }
 
   $rivi .= "\n";

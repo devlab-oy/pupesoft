@@ -13,7 +13,7 @@ class Edi {
   static function create($order) {
 
     // require 'magento_salasanat.php' muuttujat
-    global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
+    global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $magento_maksuehto_ohjaus;
     global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
 
     if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
@@ -48,6 +48,7 @@ class Edi {
     $edi_order .= "*RS OSTOTIL\n";
     $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
 
+    $vaihtoehtoinen_ovt = '';
     //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $edi_store = str_replace("\n", " ", $order['store_name']);
@@ -61,13 +62,11 @@ class Edi {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }
       }
-      // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin yliajetaan $ovt_tunnus
-      if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
-        $ovt_tunnus = $vaihtoehtoinen_ovt;
-      }
     }
+
+    $valittu_ovt_tunnus = (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
-    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$valittu_ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
@@ -81,7 +80,18 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     //Onko tilaus maksettu = processing vai jälkvaatimus = pending_cashondelivery_asp
     $edi_order .= "OSTOTIL.OT_MAKSETTU:".$order['status']."\n";
-    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:".strip_tags($order['payment']['method'])."\n";
+
+    $maksuehto = strip_tags($order['payment']['method']);
+    // Jos on asetettu maksuehtojen ohjaus, tarkistetaan korvataanko Magentosta tullut maksuehto
+    if (isset($magento_maksuehto_ohjaus) and count($magento_maksuehto_ohjaus) > 0) {
+      foreach ($magento_maksuehto_ohjaus as $key => $array) {
+        if (in_array($maksuehto, $array) and !empty($key)) {
+          $maksuehto = $key;
+        }
+      }
+    }
+
+    $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";

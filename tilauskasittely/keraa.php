@@ -2,6 +2,41 @@
 
 if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
   require "../inc/parametrit.inc";
+
+  if ($yhtiorow['kerays_riveittain'] == 'K' and $ajax_toiminto == 'kerattavatrivit') {
+
+    $tunnus = (int) $tunnus;
+    $hyllyalue = mysql_real_escape_string($hyllyalue);
+    $hyllynro = mysql_real_escape_string($hyllynro);
+    $hyllyvali = mysql_real_escape_string($hyllyvali);
+    $hyllytaso = mysql_real_escape_string($hyllytaso);
+    $poikkeava_maara = mysql_real_escape_string($poikkeava_maara);
+    $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
+
+    $query = "INSERT INTO kerattavatrivit SET
+              tilausrivi_id = '{$tunnus}',
+              hyllyalue  = '{$hyllyalue}',
+              hyllynro   = '{$hyllynro}',
+              hyllyvali  = '{$hyllyvali}',
+              hyllytaso  = '{$hyllytaso}',
+              poikkeava_maara = '{$poikkeava_maara}',
+              poikkeama_kasittely = '{$poikkeama_kasittely}',
+              keratty    = 1,
+              created_at = now()
+              ON DUPLICATE KEY UPDATE
+              hyllyalue  = '{$hyllyalue}',
+              hyllynro   = '{$hyllynro}',
+              hyllyvali  = '{$hyllyvali}',
+              hyllytaso  = '{$hyllytaso}',
+              poikkeava_maara = '{$poikkeava_maara}',
+              poikkeama_kasittely = '{$poikkeama_kasittely}',
+              updated_at  = now()";
+    $result = pupe_query($query);
+
+    echo $tunnus;
+    exit;
+  }
+
   require 'valmistuslinjat.inc';
   require 'validation/Validation.php';
   js_popup();
@@ -10,6 +45,67 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
   echo "<font class='error'>", t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia"), "!</font>";
   exit;
+}
+
+if ($yhtiorow['kerays_riveittain'] == 'K') {
+  echo "<script type='text/javascript'>
+          $(function() {
+            $('.kerattavatrivit').on('click', function(e) {
+              e.preventDefault();
+
+              var tunnus = $(this).val();
+              var hyllyalue, hyllynro, hyllyvali, hyllytaso,
+                  paikka_option = $('select[name=\"varastorekla['+tunnus+']\"] > option:selected').val(),
+                  poikkeava_maara = $('input[name=\"maara['+tunnus+']\"]').val(),
+                  poikkeama_kasittely = $('select[name=\"poikkeama_kasittely['+tunnus+']\"] > option:selected').val();
+
+              if (paikka_option != undefined && paikka_option.length > 0) {
+                hyllypaikka = paikka_option.split('###');
+                hyllyalue = hyllypaikka[0];
+                hyllynro  = hyllypaikka[1];
+                hyllyvali = hyllypaikka[2];
+                hyllytaso = hyllypaikka[3];
+              }
+
+              $.ajax({
+                async: false,
+                type: 'POST',
+                data: {
+                  ajax_toiminto: 'kerattavatrivit',
+                  tunnus: tunnus,
+                  hyllyalue: hyllyalue,
+                  hyllynro: hyllynro,
+                  hyllyvali: hyllyvali,
+                  hyllytaso: hyllytaso,
+                  poikkeava_maara: poikkeava_maara,
+                  poikkeama_kasittely: poikkeama_kasittely,
+                  no_head: 'yes',
+                  ohje: 'off'
+                },
+                url: '{$_SERVER['SCRIPT_NAME']}'
+              }).success(function(tunnus) {
+                console.log('success: '+tunnus);
+                $('#kerattavatrivit_info_'+tunnus).html('<font class=\"ok\">OK</font>');
+                $('button[name=\"kerattavatrivit['+tunnus+']\"]').html('",t("Päivitä"),"');
+
+                var kerattavatrivit_ok_rows_count = 0;
+
+                $('.kerattavatrivit_info').each(function() {
+                  if ($(this).html() == '<font class=\"ok\">OK</font>') {
+                    kerattavatrivit_ok_rows_count += 1;
+                  }
+                });
+
+                if ($('#total_rivi_count').val() == kerattavatrivit_ok_rows_count) {
+                  $('#real_submit').show();
+                }
+              }).error(function(tunnus) {
+                console.log(tunnus);
+                $('#kerattavatrivit_info_'+tunnus).html('<font class=\"error\">",t("Virhe"),"</font>');
+              });
+            });
+          });
+        </script>";
 }
 
 $logistiikka_yhtio = '';
@@ -1251,7 +1347,7 @@ if ($tee == 'P') {
             $keraysera_ins_res = pupe_query($query_ins);
           }
 
-          if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
+          if (($toim == 'VASTAANOTA_REKLAMAATIO' or $yhtiorow["kerayspoikkeama_kasittely"] == 'P') and $keraysvirhe == 0) {
 
             if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
 
@@ -3131,7 +3227,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "</table><br>";
 
-      echo "<table>
+      echo "<table id='maintable'>
           <tr>
           <th>".t("Varastopaikka")."</th>
           <th>".t("Tuoteno")."</th>
@@ -3150,12 +3246,33 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         $colspanni++;
       }
 
+      if ($yhtiorow['kerays_riveittain'] == 'K') {
+        echo "<th>",t("Merkkaa kerätyksi"),"</th>";
+        $colspanni++;
+      }
+
       echo "</tr>";
 
       $i = 0;
       $oslappkpl   = 0;
+      $kerattavatrivit_count = 0;
+      $total_rivi_count = mysql_num_rows($result);
+
+      echo "<input type='hidden' id='total_rivi_count' value='{$total_rivi_count}' />";
 
       while ($row = mysql_fetch_assoc($result)) {
+
+        if ($yhtiorow['kerays_riveittain'] == 'K') {
+
+          $query = "SELECT *,
+                    concat_ws('###',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka
+                    FROM kerattavatrivit
+                    WHERE tilausrivi_id = '{$row['tunnus']}'";
+          $kerattavatrivitres = pupe_query($query);
+          $kerattavatrivitrow = mysql_fetch_assoc($kerattavatrivitres);
+
+          if (!empty($kerattavatrivitrow['keratty'])) $kerattavatrivit_count++;
+        }
 
         if ($row['var'] == 'P') {
           // jos kyseessä on puuterivi
@@ -3227,24 +3344,28 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<tr class='aktiivi'>";
           echo "<td>";
 
-          if ($toim == 'VASTAANOTA_REKLAMAATIO') {
-
-            $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
+          // Voidaan vaihtaa tuotepaikka (VASTAANOTA_REKLAMAATIO ja kerayspoikkeama_kasittely == 'P')
+          // tai perustaa kokonaan uusi paikka (VASTAANOTA_REKLAMAATIO)
+          if ($toim == 'VASTAANOTA_REKLAMAATIO' or $yhtiorow["kerayspoikkeama_kasittely"] == 'P') {
 
             $s1_options = array();
             $s2_options = array();
             $s3_options = array();
 
-            while ($varow = mysql_fetch_assoc($vares)) {
-              $status = $varow['status'];
-              ${$status."_options"}[] = $varow;
-            }
+            if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+              $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
 
-            $counts = array(
-              's1' => count($s1_options),
-              's2' => count($s2_options),
-              's3' => count($s3_options)
-            );
+              while ($varow = mysql_fetch_assoc($vares)) {
+                $status = $varow['status'];
+                ${$status."_options"}[] = $varow;
+              }
+
+              $counts = array(
+                's1' => count($s1_options),
+                's2' => count($s2_options),
+                's3' => count($s3_options)
+              );
+            }
 
             if (!isset($reklahyllyalue[$row["tunnus"]])) $reklahyllyalue[$row["tunnus"]] = "";
             if (!isset($reklahyllynro[$row["tunnus"]]))  $reklahyllynro[$row["tunnus"]]  = "";
@@ -3265,11 +3386,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
             while ($rivi = mysql_fetch_assoc($results2)) {
               $sel = '';
-              if (trim($row['varastopaikka_rekla']) == trim($rivi['varastopaikka_rekla'])) {
+              if (trim($row['varastopaikka_rekla']) == trim($rivi['varastopaikka_rekla']) or
+                  ($yhtiorow['kerays_riveittain'] == 'K' and trim($kerattavatrivitrow['hyllypaikka']) == trim($rivi['varastopaikka_rekla']))) {
                 $sel = "SELECTED";
               }
               echo "<option value='$rivi[varastopaikka_rekla]' $sel>$rivi[varastopaikka]</option>";
             }
+
 
             if ($counts['s1'] > 0) {
               echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
@@ -3302,10 +3425,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             }
 
             echo "</select><br />";
-            echo hyllyalue("reklahyllyalue[{$row['tunnus']}]", $reklahyllyalue[$row["tunnus"]]), "
-                              <input type='text' size='5' name='reklahyllynro[$row[tunnus]]'  value = '{$reklahyllynro[$row["tunnus"]]}'>
-                              <input type='text' size='5' name='reklahyllyvali[$row[tunnus]]' value = '{$reklahyllyvali[$row["tunnus"]]}'>
-                              <input type='text' size='5' name='reklahyllytaso[$row[tunnus]]' value = '{$reklahyllytaso[$row["tunnus"]]}'>";
+
+            if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+              echo hyllyalue("reklahyllyalue[{$row['tunnus']}]", $reklahyllyalue[$row["tunnus"]]), "
+                                <input type='text' size='5' name='reklahyllynro[$row[tunnus]]'  value = '{$reklahyllynro[$row["tunnus"]]}'>
+                                <input type='text' size='5' name='reklahyllyvali[$row[tunnus]]' value = '{$reklahyllyvali[$row["tunnus"]]}'>
+                                <input type='text' size='5' name='reklahyllytaso[$row[tunnus]]' value = '{$reklahyllytaso[$row["tunnus"]]}'>";
+            }
           }
           else {
             echo "$row[varastopaikka]";
@@ -3354,7 +3480,14 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               echo "<input type='hidden' name='maara[$row[tunnus]]' id='maara_{$row['tunnus']}' value='$erapoikkeamamaara' />";
             }
             else {
-              if (!isset($maara[$i])) $maara[$i] = "";
+              if (!isset($maara[$i])) {
+                if ($yhtiorow['kerays_riveittain'] == 'K' and $kerattavatrivitrow['poikkeava_maara'] !== null) {
+                  $maara[$i] = $kerattavatrivitrow['poikkeava_maara'];
+                }
+                else {
+                  $maara[$i] = "";
+                }
+              }
 
               if ($poikkeava_maara_disabled != "") {
                 echo "<input type='hidden' name='maara[$row[tunnus]]' value=''>";
@@ -3466,7 +3599,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                   $laskurow["varasto"] == $alkurow["varasto"] or
                   ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
-                if ($yhtiorow["saldo_kasittely"] == "T") {
+                if (!empty($yhtiorow["saldo_kasittely"])) {
                   $saldoaikalisa = date("Y-m-d");
                 }
                 else {
@@ -3562,6 +3695,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 
+            $selpk_JT = $selpk_PU = $selpk_UR = $selpk_UT = $selpk_MI = '';
+
             echo "<td><select name='poikkeama_kasittely[$row[tunnus]]'>";
 
             if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
@@ -3580,6 +3715,15 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               echo "<option value='' SELECTED>".t("Ei käsitellä")."</option>";
             }
 
+            # selpk_JT
+            # selpk_PU
+            # selpk_UR
+            # selpk_UT
+            # selpk_MI
+            if ($yhtiorow['kerays_riveittain'] == 'K' and !empty($kerattavatrivitrow['poikkeama_kasittely'])) {
+              ${'selpk_'.strtoupper($kerattavatrivitrow['poikkeama_kasittely'])} = 'selected';
+            }
+
             echo "<option value='JT' $selpk_JT>".t("JT")."</option>";
             echo "<option value='PU' $selpk_PU>".t("Puute")."</option>";
 
@@ -3587,9 +3731,20 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               echo "<option value='UR' $selpk_UR>".t("Uusi rivi")."</option>";
             }
 
-            echo "<option value='UT'>".t("Uusi tilaus")."</option>";
-            echo "<option value='MI'>".t("Mitätöi")."</option>";
+            echo "<option value='UT' {$selpk_UT}>".t("Uusi tilaus")."</option>";
+            echo "<option value='MI' {$selpk_MI}>".t("Mitätöi")."</option>";
             echo "</select></td>";
+          }
+
+          if ($yhtiorow['kerays_riveittain'] == 'K') {
+            echo "<td nowrap>";
+            echo "<button class='kerattavatrivit' name='kerattavatrivit[{$row['tunnus']}]' value='{$row['tunnus']}'>";
+            echo !empty($kerattavatrivitrow['keratty']) ? t("Päivitä") : t("Kerää");
+            echo "</button>";
+            echo "<div class='kerattavatrivit_info' id='kerattavatrivit_info_{$row['tunnus']}' style='display: inline; margin-left: 5px;'>";
+            echo !empty($kerattavatrivitrow['keratty']) ? "<font class='ok'>OK</font>" : '';
+            echo "</div>";
+            echo "</td>";
           }
 
           echo "</tr>";
@@ -3866,14 +4021,22 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 
       if ($toim == 'VASTAANOTA_REKLAMAATIO') {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Tuotteet hyllytetty ja reklamaatio valmis laskutukseen")."'></form>";
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Tuotteet hyllytetty ja reklamaatio valmis laskutukseen")."'>";
       }
       elseif ($otsik_row["tulostustapa"] != "X" or $otsik_row["nouto"] != "") {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
+        if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
+          $hidden = "";
+        }
+        else {
+          $hidden = "style='display:none;'";
+        }
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."' {$hidden}>";
       }
       else {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'></form>";
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'>";
       }
+
+      echo "</form>";
 
       if ($otsik_row["tulostustapa"] != "X" and $otsik_row['nouto'] == '' and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
         echo "<br><br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";

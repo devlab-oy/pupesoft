@@ -139,6 +139,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       $valkoodi       = $asiakasrow["valkoodi"];
       $sisviesti1      = $asiakasrow["sisviesti1"];
+      $sisviesti2      = $asiakasrow["sisviesti2"];
       $rahtivapaa     = $asiakasrow["rahtivapaa"];
 
       if ($asiakasrow["myynti_kommentti1"] != "") {

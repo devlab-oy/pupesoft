@@ -452,7 +452,7 @@ foreach ($tulostimet as $tulostin) {
 
   if ($tulostin == 'Työmääräys' and $kukarow['hinnat'] == 0) {
 
-    echo "<tr><th rowspan='2'>".t("Työmääräystyyppi")."</th><td>";
+    echo "<tr><th>".t("Työmääräystyyppi")."</th><td>";
     echo "<select name='tyomtyyppi'>";
 
     $sel = array();

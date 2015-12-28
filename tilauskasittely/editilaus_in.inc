@@ -756,7 +756,7 @@ while ($tietue = fgets($fd)) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus = '$toimovt'
                 and toim_ovttunnus not in ('','0')
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
@@ -773,7 +773,7 @@ while ($tietue = fgets($fd)) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus = '$toimovt'
                 and toim_ovttunnus not in ('','0')
                 and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
@@ -867,14 +867,14 @@ while ($tietue = fgets($fd)) {
     if ($tieto != "") {
 
       $type = explode("@", $tieto);
-      $tieto = trim($type[0]);
+      $toimovt = trim($type[0]);
 
       $edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
 
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus = '$toimovt'
                 and toim_ovttunnus not in ('','0')
                 and laji           not in ('R','P')";
       $result = pupe_query($query);

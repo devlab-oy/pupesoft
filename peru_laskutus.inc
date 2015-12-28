@@ -1,15 +1,17 @@
 <?php
 
 if (!function_exists("peru_laskutus")) {
-  function peru_laskutus($laskunro) {
+  function peru_laskutus($laskunro, $peru_numeroon = null) {
     global $kukarow;
+
+    if ($peru_numeroon === null) $peru_numeroon = $laskunro;
 
     // Löytyykö U-laskua
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
               AND laskunro >= '{$laskunro}'
-              AND laskunro <= '{$laskunro}'
+              AND laskunro <= '{$peru_numeroon}'
               AND tila = 'U'
               AND alatila = 'X'";
     $ulaskures = mysql_query($query) or pupe_error($query);

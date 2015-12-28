@@ -1,11 +1,12 @@
 <?php
 
 if (!function_exists("peru_laskutus")) {
-  function peru_laskutus($laskunro, $peru_numeroon = null, $hard_delete = false,
-                         $poista_liittyvat = true) {
+  function peru_laskutus($laskunro, $params = array()) {
     global $kukarow;
 
-    if ($peru_numeroon === null) $peru_numeroon = $laskunro;
+    $peru_numeroon    = isset($params["peru_numeroon"])    ? $params["peru_numeroon"]    : $laskunro;
+    $hard_delete      = isset($params["hard_delete"])      ? $params["hard_delete"]      : false;
+    $poista_liittyvat = isset($params["poista_liittyvat"]) ? $params["poista_liittyvat"] : true;
 
     // Löytyykö U-laskua
     $query = "SELECT *

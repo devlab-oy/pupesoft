@@ -156,31 +156,50 @@ if (!function_exists("peru_laskutus")) {
           }
         }
 
-        // P‰ivitet‰‰n tilausrivit
-        $query = "UPDATE tilausrivi SET
-                  varattu        = kpl,
-                  kpl   	       = 0,
-                  laskutettu     = '',
-                  laskutettuaika = '0000-00-00',
-                  uusiotunnus	   = 0,
-                  rivihinta			 = 0,
-                  kate				   = 0
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND otunnus = '{$laskurow["tunnus"]}'";
-        pupe_query($query);
+        if ($poista_liittyvat) {
+          if ($hard_delete) {
+            // Poistetaan tilausrivit
+            $query = "DELETE FROM tilausrivi
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      AND otunnus = '{$laskurow["tunnus"]}'";
+            pupe_query($query);
+          }
+          else {
+            // Merkit‰‰n tilausrivit poistetuksi
+            $query = "UPDATE tilausrivi SET
+                      tyyppi = 'D'
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      AND otunnus = '{$laskurow["tunnus"]}'";
+            pupe_query($query);
+          }
+        }
+        else {
+          // P‰ivitet‰‰n tilausrivit
+          $query = "UPDATE tilausrivi SET
+                    varattu        = kpl,
+                    kpl   	       = 0,
+                    laskutettu     = '',
+                    laskutettuaika = '0000-00-00',
+                    uusiotunnus	   = 0,
+                    rivihinta			 = 0,
+                    kate				   = 0
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    AND otunnus = '{$laskurow["tunnus"]}'";
+          pupe_query($query);
 
-        $query = "UPDATE tilausrivi SET
-                  kommentti = ''
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND otunnus = '{$laskurow["tunnus"]}'
-                  AND kommentti LIKE 'Tilaus%'";
-        pupe_query($query);
+          $query = "UPDATE tilausrivi SET
+                    kommentti = ''
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    AND otunnus = '{$laskurow["tunnus"]}'
+                    AND kommentti LIKE 'Tilaus%'";
+          pupe_query($query);
 
-        $query = "DELETE FROM tilausrivi
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND otunnus = '{$laskurow["tunnus"]}'
-                  AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
-        pupe_query($query);
+          $query = "DELETE FROM tilausrivi
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    AND otunnus = '{$laskurow["tunnus"]}'
+                    AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
+          pupe_query($query);
+        }
       }
     }
   }

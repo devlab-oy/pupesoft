@@ -1251,8 +1251,6 @@ if (isset($ajax)) {
 
     if (mysql_num_rows($jtresult) != 0) {
 
-      $myyta = $kokonaismyytavissa;
-
       // Avoimet rivit
       $_return .= "<table>";
 
@@ -1268,11 +1266,12 @@ if (isset($ajax)) {
 
       $yhteensa = array();
       $myynyt   = FALSE;
+      $myyta    = FALSE;
       $jtrows   = array();
 
       while ($jtrow = mysql_fetch_assoc($jtresult)) {
 
-        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and (($yhtiorow["saldo_kasittely"] == "U" and $myyta < $myynyt) or $myynyt === FALSE)) {
+        if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and (($yhtiorow["saldo_kasittely"] == "U" and $myyta !== FALSE and $myyta < $myynyt) or $myynyt === FALSE)) {
           $myynyt = $myyta;
         }
 

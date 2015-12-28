@@ -2,6 +2,8 @@
 
 if (!function_exists("peru_laskutus")) {
   function peru_laskutus($laskunro) {
+    global $kukarow;
+
     // Löytyykö U-laskua
     $query = "SELECT *
               FROM lasku

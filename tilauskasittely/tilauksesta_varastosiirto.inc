@@ -306,6 +306,10 @@ if (!function_exists('luo_varastosiirtorivi')) {
       ${'ale'.$alepostfix} = "";
     }
 
+    if ($varastosiirtotyyppi == "G") {
+      $toim = 'SIIRTOLISTA';
+    }
+
     require 'lisaarivi.inc';
 
     return $lisatyt_rivit1;

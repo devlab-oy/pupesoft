@@ -207,11 +207,9 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
 
       if ($nosoap == "NOSOAP") {
-        fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"{$palvelin2}datain/Finvoice.dtd\">\r\n");
         fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"{$palvelin2}datain/Finvoice.xsl\"?>\r\n");
       }
       else {
-        fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"Finvoice.dtd\">\r\n");
         fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\r\n");
       }
 

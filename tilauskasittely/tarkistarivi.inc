@@ -92,6 +92,39 @@ if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOT
   }
 }
 
+$_onko_myynti = in_array($toim, array('PIKATILAUS','RIVISYOTTO'));
+$_onko_param = ($yhtiorow['myynti_jt_huom'] == 'K');
+
+if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
+
+  if ($yhtiorow["varaako_jt_saldoa"] != "") {
+    $lisavarattu = " + tilausrivi.varattu";
+  }
+  else {
+    $lisavarattu = "";
+  }
+
+  $query = "SELECT *
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.tuoteno = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi = 'L'
+              AND tilausrivi.var = 'J'
+              AND tilausrivi.jt {$lisavarattu} > 0
+              AND tilausrivi.tunnus != '{$row['tunnus']}'
+            )
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus != '{$laskurow['tunnus']}'
+            AND (lasku.tila = 'N' OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D','X')))";
+  $chk_res = pupe_query($query);
+
+  if (mysql_num_rows($chk_res) != 0) {
+    $varaosavirhe .= t("HUOM: tuotetta on jo jälkitoimituksessa")."<br>";
+  }
+}
+
 if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
   $riviok++;
@@ -396,7 +429,7 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
     $mimyhuom .= " minimierään";
   }
 
-  if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
+  if ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) {
     if ($trow["minimi_era"] > 0) {
       $mimyhuom .= " tai";
     }
@@ -419,8 +452,8 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
 }
 else {
 
-   if ($trow['myynti_era'] > 0 and $trow['myynti_era'] != $kpl_st and $yhtiorow['myyntiera_pyoristys'] != 'K') {
-     
+   if ($trow['myynti_era'] > 0 and $trow['myynti_era'] != $kpl_st and !in_array($yhtiorow['myyntiera_pyoristys'], array('K','S'))) {
+
      $mimyhuom = t("HUOM: Tuotteella on myyntierä"). " " . $trow['myynti_era'];
      $varaosakommentti .= $mimyhuom."<br>";
    }

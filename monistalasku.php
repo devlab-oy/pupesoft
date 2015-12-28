@@ -615,6 +615,10 @@ if ($tee == "ETSILASKU") {
           echo "<input type='checkbox' name='korjaarahdit[{$row['tilaus']}]' value='on' {$sel}> ".t("Laske rahtiveloitus uudestaan")."<br>";
         }
 
+        echo "<input type='checkbox'
+                     name='sailyta_rivikommentit[{$row['tilaus']}]'
+                     value='on'>" . t('Säilytä rivikommentit') . "<br>";
+
         if ($toim == '') {
 
           $display_none = "style='display:none;'";
@@ -1567,7 +1571,12 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$utunnus}'";
             break;
           case 'valmnro':
-            $values .= ", ''";
+            if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+              $values .= ", ''";
+            }
+            else {
+              $values .= ", '".$monistalisrow[$fieldname]."'";
+            }
             break;
           default:
             $values .= ", '".$monistalisrow[$fieldname]."'";
@@ -1744,10 +1753,18 @@ if ($tee == 'MONISTA') {
             $rvalues .= ", NULL";
             break;
           case 'kommentti':
-            if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS' or $toim == 'OSTOTILAUS' or $toim == 'ENNAKKOTILAUS') {
-              $rvalues .= ", '{$rivirow['kommentti']}'";
-            }
-            elseif ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '' and count($palautus) > 0) {
+            if (($toim == 'SOPIMUS' or
+                $toim == 'TARJOUS' or
+                $toim == 'TYOMAARAYS' or
+                $toim == 'TILAUS' or
+                $toim == 'OSTOTILAUS' or
+                $toim == 'ENNAKKOTILAUS') or
+                ($toim == '' and
+                 $kumpi == 'REKLAMA' and
+                 isset($kaytetaanhyvityshintoja[$lasku]) and
+                 $kaytetaanhyvityshintoja[$lasku] != '' and
+                 count($palautus) > 0) or
+                $sailyta_rivikommentit[$lasku] == "on") {
               $rvalues .= ", '{$rivirow['kommentti']}'";
             }
             else {

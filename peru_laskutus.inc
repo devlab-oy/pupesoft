@@ -65,15 +65,13 @@ if (!function_exists("poista_laskutus")) {
         if ($hard_delete) {
           $query = "DELETE FROM lasku
                     WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
-                    AND tila = 'U'
-                    AND alatila = 'X'";
+                    AND yhtio = '{$kukarow["yhtio"]}'";
         }
         else {
           $query = "UPDATE lasku SET
                     yhtio = 'ddddd'
                     WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
-                    AND tila = 'U'
-                    AND alatila = 'X'";
+                    AND yhtio = '{$kukarow["yhtio"]}'";
         }
 
         pupe_query($query);
@@ -106,10 +104,10 @@ if (!function_exists("poista_tilaus")) {
     else {
       // Siirretään tilausotsikko ddddd-yhtiölle
       $query = "UPDATE lasku SET
-                  yhtio = 'ddddd'
-                  WHERE yhtio	= '{$kukarow["yhtio"]}'
-                  AND tunnus = '{$laskurow["tunnus"]}'
-                  AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
+                yhtio = 'ddddd'
+                WHERE yhtio	= '{$kukarow["yhtio"]}'
+                AND tunnus = '{$laskurow["tunnus"]}'
+                AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
     }
 
     pupe_query($query);

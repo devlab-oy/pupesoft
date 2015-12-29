@@ -60,21 +60,9 @@ if (!function_exists("poista_laskutus")) {
                 AND otunnus = {$ulaskurow["jaksotettu"]}";
       $maksupositiores = pupe_query($query);
 
-      // Poistetaan maksuposition kautta liitetyt laskut
+      // Poistetaan maksuposition kautta liitetyt tilaukset
       while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
-        if ($hard_delete) {
-          $query = "DELETE FROM lasku
-                    WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
-                    AND yhtio = '{$kukarow["yhtio"]}'";
-        }
-        else {
-          $query = "UPDATE lasku SET
-                    yhtio = 'ddddd'
-                    WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
-                    AND yhtio = '{$kukarow["yhtio"]}'";
-        }
-
-        pupe_query($query);
+        poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
       }
     }
   }
@@ -91,6 +79,8 @@ if (!function_exists("poista_tilaus")) {
               AND tunnus = {$tunnus}
               AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
     $laskures = pupe_query($query);
+
+    if (mysql_num_rows($laskures) == 0) return false;
 
     $laskurow = mysql_fetch_assoc($laskures);
 

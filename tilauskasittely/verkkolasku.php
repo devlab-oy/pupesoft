@@ -2860,7 +2860,7 @@ else {
             $laresult = pupe_query($query);
             $laskurow = mysql_fetch_assoc($laresult);
 
-            echo "<form id='finvoice_$lasku' name='finvoice_$lasku' method='post' action='{$palvelin2}tilauskasittely/uudelleenluo_laskuaineisto.php' autocomplete='off'>
+            echo "<form id='finvoice_$lasku' name='finvoice_$lasku' method='post' action='{$palvelin2}tilauskasittely/uudelleenluo_laskuaineisto.php' class='multisubmit'>
                 <input type='hidden' name='laskunumerot' value='$laskurow[laskunro]'>
                 <input type='hidden' name='tee' value='NAYTATILAUS'>
                 <input type='hidden' name='nayta_ja_tallenna' value='TRUE'>

@@ -219,7 +219,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   //Timestamppi EDI-failiin alkuu ja loppuun
   $timestamppi = gmdate("YmdHis");
 
-  //Hetaan laskut jotka laitetaan aineistoon
+  $laskunumerot = trim($laskunumerot);
+
+  //Haetaan laskut jotka laitetaan aineistoon
   $query = "SELECT *
             from lasku
             where yhtio  = '$kukarow[yhtio]'
@@ -861,7 +863,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     }
   }
 
-  //Aineistojen lopputägit
+  // Aineistojen lopputägit
   elmaedi_aineisto_loppu($tootedi, $timestamppi);
   pupevoice_aineisto_loppu($tootxml);
 
@@ -1111,6 +1113,20 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
       echo "<td class='back'><input type='submit' value='".t("Lähetä")."'></td></tr></form>";
       echo "</table>";
+    }
+    elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
+      echo "<br>".t("Tallenna finvoice-aineisto").":<br>";
+
+      js_openFormInNewWindow();
+
+      foreach (explode(',', $laskunumerot) as $lasku) {
+        echo "<form id='finvoice_$lasku' name='finvoice_$lasku' method='post' action='{$palvelin2}tilauskasittely/uudelleenluo_laskuaineisto.php' class='multisubmit'>
+            <input type='hidden' name='laskunumerot' value='$lasku'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='nayta_ja_tallenna' value='TRUE'>
+            <input type='hidden' name='kaunisnimi' value='Finvoice_$lasku.xml'>
+            <input type='submit' value='".t("Tallenna Finvoice").": $lasku' onClick=\"js_openFormInNewWindow('finvoice_$lasku', 'samewindow'); return false;\"></form>";
+      }
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
       echo "<table>";

@@ -2844,7 +2844,7 @@ else {
       elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and file_exists(realpath($nimifinvoice))) {
         // Siirret‰‰n l‰hetysjonoon
         rename($nimifinvoice, "{$pupe_root_polku}/dataout/trustpoint_error/".basename($nimifinvoice));
-        $tulos_ulos .= "Lasku siirretty l‰hetysjonoon";
+        $tulos_ulos .= t("Lasku siirretty l‰hetysjonoon");
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
         // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin ja lasku ei mene automaattiseen verkkolaskuputkeen

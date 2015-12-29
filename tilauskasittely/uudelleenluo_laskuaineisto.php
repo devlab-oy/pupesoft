@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_REQUEST["tee"])) {
-  if ($_REQUEST["tee"] == 'lataa_tiedosto' or ($_REQUEST["tee"] == 'NAYTATILAUS' and !empty($_REQUEST["nayta_ja_tallenna"]))) {
+  if ($_REQUEST["tee"] == 'lataa_tiedosto') {
     $lataa_tiedosto = 1;
   }
 
@@ -10,7 +10,13 @@ if (isset($_REQUEST["tee"])) {
   }
 }
 
-if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") $no_head = "yes";
+if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
+  $no_head = "yes";
+}
+
+if ($_REQUEST["tee"] == 'NAYTATILAUS' and !empty($_REQUEST["nayta_ja_tallenna"])) {
+  $compression = FALSE;
+}
 
 require "../inc/parametrit.inc";
 
@@ -119,7 +125,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   $tulostettavat_apix  = array();
   $lask = 0;
 
-  if ($tee == "NAYTATILAUS") {
+  if ($tee == "NAYTATILAUS" and empty($nayta_ja_tallenna)) {
     $nosoap   = "NOSOAP";
     $nosoapapix = "NOSOAP";
   }
@@ -906,6 +912,18 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   }
 
   if ($tee == "NAYTATILAUS" and !empty($nayta_ja_tallenna)) {
+    header("Pragma: public");
+    header("Expires: 0");
+    header("HTTP/1.1 200 OK");
+    header("Status: 200 OK");
+    header("Accept-Ranges: bytes");
+    header("Content-Description: File Transfer");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header("Cache-Control: private", false);
+    header("Content-Transfer-Encoding: binary");
+    header("Content-Type: application/force-download");
+    header('Content-Disposition: attachment; filename='.basename($kaunisnimi));
+    header("Content-Length: ".filesize($nimifinvoice));
     readfile($nimifinvoice);
     exit;
   }

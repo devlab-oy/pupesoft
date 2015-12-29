@@ -2847,7 +2847,7 @@ else {
         $tulos_ulos .= "Lasku siirretty l‰hetysjonoon";
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
-        // T‰m‰ n‰ytet‰‰n vain kun laksutetaan k‰sin.
+        // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin ja lasku ei mene automaattiseen verkkolaskuputkeen
         if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
           js_openFormInNewWindow();
 
@@ -2865,7 +2865,7 @@ else {
                 <input type='hidden' name='tee' value='NAYTATILAUS'>
                 <input type='hidden' name='nayta_ja_tallenna' value='TRUE'>
                 <input type='hidden' name='kaunisnimi' value='Finvoice_$laskurow[laskunro].xml'>
-                <input type='submit' value='".t("N‰yt‰ Finvoice").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('finvoice_$lasku', ''); return false;\"></form>";
+                <input type='submit' value='".t("Tallenna Finvoice").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('finvoice_$lasku', 'samewindow'); return false;\"></form>";
           }
         }
       }
@@ -3012,7 +3012,7 @@ else {
       }
 
       if ($yhtiorow['lasku_tulostin'] == -88 or (isset($valittu_tulostin) and $valittu_tulostin == "-88")) {
-        // T‰m‰ n‰ytet‰‰n vain kun laksutetaan k‰sin.
+        // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin.
         if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
           js_openFormInNewWindow();
 

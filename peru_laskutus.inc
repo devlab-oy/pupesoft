@@ -77,7 +77,7 @@ if (!function_exists("poista_tilaus")) {
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
               AND tunnus = {$tunnus}
-              AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
+              AND (tila IN ('L', 'N', 'E') OR (tila = 'D' AND alatila IN ('L', 'N', 'E')))";
     $laskures = pupe_query($query);
 
     if (mysql_num_rows($laskures) == 0) return false;
@@ -89,7 +89,7 @@ if (!function_exists("poista_tilaus")) {
       $query = "DELETE FROM lasku
                 WHERE yhtio	= '{$kukarow["yhtio"]}'
                 AND tunnus = '{$laskurow["tunnus"]}'
-                AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
+                AND (tila IN ('L', 'N', 'E') OR (tila = 'D' AND alatila IN ('L', 'N', 'E')))";
     }
     else {
       // Siirretään tilausotsikko ddddd-yhtiölle
@@ -97,7 +97,7 @@ if (!function_exists("poista_tilaus")) {
                 yhtio = 'ddddd'
                 WHERE yhtio	= '{$kukarow["yhtio"]}'
                 AND tunnus = '{$laskurow["tunnus"]}'
-                AND (tila IN ('L', 'N') OR (tila = 'D' AND alatila IN ('L', 'N')))";
+                AND (tila IN ('L', 'N', 'E') OR (tila = 'D' AND alatila IN ('L', 'N', 'E')))";
     }
 
     pupe_query($query);

@@ -204,13 +204,13 @@ if (!function_exists("poista_tilaus_ja_laskutus")) {
 
       $llaskurow = mysql_fetch_assoc($result);
 
-      poista_laskutus($laskurow["tunnus"]);
-      poista_tilaus($llaskurow["tunnus"]);
+      poista_laskutus($laskurow["tunnus"], $hard_delete);
+      poista_tilaus($llaskurow["tunnus"], $hard_delete);
 
       break;
     default:
       if ($laskurow["laskunro"] == 0) {
-        poista_tilaus($laskurow["tunnus"]);
+        poista_tilaus($laskurow["tunnus"], $hard_delete);
       }
       else {
         $query = "SELECT tunnus
@@ -224,8 +224,8 @@ if (!function_exists("poista_tilaus_ja_laskutus")) {
 
         $ulaskurow = mysql_fetch_assoc($result);
 
-        poista_tilaus($laskurow["tunnus"]);
-        poista_laskutus($ulaskurow["tunnus"]);
+        poista_tilaus($laskurow["tunnus"], $hard_delete);
+        poista_laskutus($ulaskurow["tunnus"], $hard_delete);
       }
     }
   }

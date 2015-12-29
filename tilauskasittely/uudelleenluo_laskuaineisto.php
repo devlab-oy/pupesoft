@@ -1,17 +1,25 @@
 <?php
 
 if (isset($_REQUEST["tee"])) {
-  if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
+  if ($_REQUEST["tee"] == 'lataa_tiedosto' or ($_REQUEST["tee"] == 'NAYTATILAUS' and !empty($nayta_ja_tallenna))) {
+    $lataa_tiedosto = 1;
+  }
+
+  if ($_REQUEST["kaunisnimi"] != '') {
+    $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
+  }
 }
 
 if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") $no_head = "yes";
+
 
 require "../inc/parametrit.inc";
 
 // Timeout in 5h
 ini_set("mysql.connect_timeout", 18000);
 ini_set("max_execution_time", 18000);
+
+var_dump($lataa_tiedosto);
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("$pupe_root_polku/dataout/".basename($filenimi));
@@ -335,7 +343,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     }
 
     // tässä pohditaan laitetaanko verkkolaskuputkeen
-    if (verkkolaskuputkeen($lasrow, $masrow)) {
+    if ($tee == "NAYTATILAUS" or verkkolaskuputkeen($lasrow, $masrow)) {
 
       // Nyt meillä on:
       // $lasrow array on U-laskun tiedot
@@ -900,7 +908,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     require_once "tilauskasittely/tulosta_lasku.inc";
   }
 
-  if ($tee == "NAYTATILAUS") {
+  if ($tee == "NAYTATILAUS" and !empty($nayta_ja_tallenna)) {
+    readfile($nimifinvoice);
+    exit;
+  }
+  elseif ($tee == "NAYTATILAUS") {
     header("Content-type: text/xml");
     header("Content-length: ".(filesize($nimifinvoice)));
     header("Content-Disposition: inline; filename=$nimifinvoice");

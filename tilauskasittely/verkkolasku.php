@@ -2667,7 +2667,6 @@ else {
           }
           elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
             if ($silent == "" or $silent == "VIENTI") {
-
               if ($lasrow["chn"] == "666") {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
               }
@@ -2677,7 +2676,6 @@ else {
               else {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
               }
-
             }
 
             // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
@@ -2847,6 +2845,29 @@ else {
         // Siirretään lähetysjonoon
         rename($nimifinvoice, "{$pupe_root_polku}/dataout/trustpoint_error/".basename($nimifinvoice));
         $tulos_ulos .= "Lasku siirretty lähetysjonoon";
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
+        // Tämä näytetään vain kun laksutetaan käsin.
+        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+          js_openFormInNewWindow();
+
+          foreach ($tulostettavat as $lasku) {
+
+            $query = "SELECT laskunro
+                      FROM lasku
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$lasku'";
+            $laresult = pupe_query($query);
+            $laskurow = mysql_fetch_assoc($laresult);
+
+            echo "<form id='finvoice_$lasku' name='finvoice_$lasku' method='post' action='{$palvelin2}tilauskasittely/uudelleenluo_laskuaineisto.php' autocomplete='off'>
+                <input type='hidden' name='laskunumerot' value='$laskurow[laskunro]'>
+                <input type='hidden' name='tee' value='NAYTATILAUS'>
+                <input type='hidden' name='nayta_ja_tallenna' value='TRUE'>
+                <input type='hidden' name='kaunisnimi' value='Finvoice_$laskurow[laskunro].xml'>
+                <input type='submit' value='".t("Näytä Finvoice").": $laskurow[laskunro]' onClick=\"js_openFormInNewWindow('finvoice_$lasku', ''); return false;\"></form>";
+          }
+        }
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
         if ($silent == "" or $silent == "VIENTI") {

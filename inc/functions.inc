@@ -23460,7 +23460,6 @@ if  (!function_exists('hae_chn_teksti')) {
     default:
       return FALSE;
     }
-
   }
 }
 

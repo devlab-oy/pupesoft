@@ -1560,16 +1560,18 @@ if ($tee == 'E' or $tee == 'F') {
       </form>";
   }
 
-  echo "<form method='post'>
-          <input type='hidden' name='tee' value='poista_lasku'>
-          <input type='hidden' name='lopetus' value='{$lopetus}'>
-          <input type='hidden' name='laskunro' value='{$trow["laskunro"]}'>
-          <input type='hidden' name='no_head' value='yes'>
-          <input type='submit'
-                 value='" . t("Poista") . "'
-                 style='background:#FF4200;'
-                 onclick='return confirm(\"" . t("Oletko varma?") . "\");'>
-        </form>";
+  if ($trow["tila"] == "U") {
+    echo "<form method='post'>
+            <input type='hidden' name='tee' value='poista_lasku'>
+            <input type='hidden' name='lopetus' value='{$lopetus}'>
+            <input type='hidden' name='laskunro' value='{$trow["laskunro"]}'>
+            <input type='hidden' name='no_head' value='yes'>
+            <input type='submit'
+                   value='" . t("Poista") . "'
+                   style='background:#FF4200;'
+                   onclick='return confirm(\"" . t("Oletko varma?") . "\");'>
+          </form>";
+  }
 
   // tehdään tiliöintisääntönappula, mikäli laskussa on liitettynä finveoice tai pupevoice lasku
   if ($liitetiedosto == 1) {

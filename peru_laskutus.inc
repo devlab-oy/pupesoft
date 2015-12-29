@@ -6,7 +6,7 @@ if (!function_exists("peru_laskutus")) {
 
     $peru_numeroon    = isset($params["peru_numeroon"])    ? $params["peru_numeroon"]    : $laskunro;
     $hard_delete      = isset($params["hard_delete"])      ? $params["hard_delete"]      : false;
-    $poista_liittyvat = isset($params["poista_liittyvat"]) ? $params["poista_liittyvat"] : true;
+    $poista_tilaukset = isset($params["poista_tilaukset"]) ? $params["poista_tilaukset"] : true;
 
     // Löytyykö U-laskua
     $query = "SELECT *
@@ -47,8 +47,8 @@ if (!function_exists("peru_laskutus")) {
       else {
         // Merkataan lasku poistetuksi
         $query = "UPDATE lasku SET
-                  tila      = 'D',
                   alatila   = tila,
+                  tila      = 'D',
                   muuttaja  = '{$kukarow["kuka"]}',
                   muutospvm = now()
                   WHERE yhtio	= '{$kukarow["yhtio"]}'
@@ -76,7 +76,7 @@ if (!function_exists("peru_laskutus")) {
           $alatila = "D";
         }
 
-        if ($poista_liittyvat) {
+        if ($poista_tilaukset) {
           if ($hard_delete) {
             // Poistetaan tilausotsikko
             $query = "DELETE FROM lasku
@@ -88,8 +88,8 @@ if (!function_exists("peru_laskutus")) {
           else {
             // Merkitään tilausotsikko poistetuksi
             $query = "UPDATE lasku SET
-                      tila      = 'D',
                       alatila   = tila,
+                      tila      = 'D',
                       muuttaja  = '{$kukarow["kuka"]}',
                       muutospvm = now()
                       WHERE yhtio	= '{$kukarow["yhtio"]}'
@@ -128,7 +128,7 @@ if (!function_exists("peru_laskutus")) {
         $res = pupe_query($query);
 
         while ($rivirow = mysql_fetch_array($res)) {
-          //Poistetaan tapahtmat
+          //Poistetaan tapahtumat
           $query = "DELETE from tapahtuma
                     WHERE yhtio = '{$kukarow["yhtio"]}'
                     AND rivitunnus = '{$rivirow["tunnus"]}'";
@@ -157,7 +157,7 @@ if (!function_exists("peru_laskutus")) {
           }
         }
 
-        if ($poista_liittyvat) {
+        if ($poista_tilaukset) {
           if ($hard_delete) {
             // Poistetaan tilausrivit
             $query = "DELETE FROM tilausrivi
@@ -199,6 +199,32 @@ if (!function_exists("peru_laskutus")) {
                     WHERE yhtio = '{$kukarow["yhtio"]}'
                     AND otunnus = '{$laskurow["tunnus"]}'
                     AND tuoteno = '{$yhtiorow["rahti_tuotenumero"]}'";
+          pupe_query($query);
+        }
+      }
+
+      // Onko maksupositioita
+      if ($ulaskurow["jaksotettu"] != 0) {
+        $query = "SELECT uusiotunnus
+                  FROM maksupositio
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND otunnus = {$ulaskurow["jaksotettu"]}";
+        $maksupositiores = pupe_query($query);
+
+        // Poistetaan maksuposition kautta liitetyt laskut
+        while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
+          if ($hard_delete) {
+            $query = "DELETE FROM lasku
+                      WHERE tunnus = {$maksupositiorow["uusiotunnus"]}";
+          }
+          else {
+            $query = "UPDATE lasku SET
+                      alatila = tila,
+                      tila    = 'D'
+                      WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
+                      AND tila <> 'D'";
+          }
+
           pupe_query($query);
         }
       }

@@ -761,26 +761,28 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
-      echo "<td class='back'>
-              <form>
-                <input type='hidden' name='tee' value='POISTA_TILAUS'>
-                <input type='hidden' name='toim' value='{$toim}'>
-                <input type='hidden' name='asiakasid' value='{$asiakasid}'>
-                <input type='hidden' name='ytunnus' value='{$ytunnus}'>
-                <input type='hidden' name='ppa' value='{$ppa}'>
-                <input type='hidden' name='kka' value='{$kka}'>
-                <input type='hidden' name='vva' value='{$vva}'>
-                <input type='hidden' name='ppl' value='{$ppl}'>
-                <input type='hidden' name='kkl' value='{$kkl}'>
-                <input type='hidden' name='vvl' value='{$vvl}'>
-                <input type='hidden' name='tunnus' value='{$row["tilaus"]}'>
+      if ($row["tila"] != "U") {
+        echo "<td class='back'>
+                <form>
+                  <input type='hidden' name='tee' value='POISTA_TILAUS'>
+                  <input type='hidden' name='toim' value='{$toim}'>
+                  <input type='hidden' name='asiakasid' value='{$asiakasid}'>
+                  <input type='hidden' name='ytunnus' value='{$ytunnus}'>
+                  <input type='hidden' name='ppa' value='{$ppa}'>
+                  <input type='hidden' name='kka' value='{$kka}'>
+                  <input type='hidden' name='vva' value='{$vva}'>
+                  <input type='hidden' name='ppl' value='{$ppl}'>
+                  <input type='hidden' name='kkl' value='{$kkl}'>
+                  <input type='hidden' name='vvl' value='{$vvl}'>
+                  <input type='hidden' name='tunnus' value='{$row["tilaus"]}'>
 
-                <input type='submit'
-                       value='" . t("Poista") . "'
-                       style='background:#FF4200;'
-                       onclick='return confirm(\"" . t("Oletko varma?") . "\");'>
-              </form>
-            </td>";
+                  <input type='submit'
+                         value='" . t("Poista") . "'
+                         style='background:#FF4200;'
+                         onclick='return confirm(\"" . t("Oletko varma?") . "\");'>
+                </form>
+              </td>";
+      }
 
       echo "</tr>";
 

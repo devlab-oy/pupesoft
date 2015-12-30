@@ -65,9 +65,6 @@ else {
       echo "<th>", t("Tuotenumero"), "</th>";
       echo "<th>", t("Nimitys"), "</th>";
       echo "</tr>";
-
-      require "inc/footer.inc";
-      exit;
     }
     else {
       $xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");

@@ -214,9 +214,37 @@ if (!function_exists("poista_laskutus")) {
                 AND otunnus = {$ulaskurow["jaksotettu"]}";
       $maksupositiores = pupe_query($query);
 
-      // Poistetaan maksuposition kautta liitetyt tilaukset
+      // Poistetaan maksuposition kautta liitetyt tilaukset ja laskut
       while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
-        poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
+        $query = "SELECT laskunro
+                  FROM lasku
+                  WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
+                  LIMIT 1";
+        $maksupositiolaskuresult = pupe_query($query);
+
+        $maksupositiolaskurow = mysql_fetch_assoc($maksupositiolaskuresult);
+
+        if ($maksupositiolaskurow["laskunro"] == 0) {
+          poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
+        }
+        else {
+          poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
+
+          $query = "SELECT tunnus
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                    AND laskunro = {$maksupositiolaskurow["laskunro"]}
+                    AND tila = 'U'
+                    AND alatila = 'X'
+                    LIMIT 1";
+          $maksupositioulaskuresult = pupe_query($query);
+
+          if (mysql_num_rows($maksupositioulaskuresult) == 0) continue;
+
+          $maksupositioulaskurow = mysql_fetch_assoc($maksupositioulaskuresult);
+
+          poista_laskutus($maksupositioulaskurow["tunnus"], $hard_delete);
+        }
       }
     }
   }

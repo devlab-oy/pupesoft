@@ -193,7 +193,6 @@ if (!function_exists("poista_laskutus")) {
                      rahatili.aputunnus = myyntisaamiset.tunnus
               WHERE suorituksen_kohdistus.yhtio = '{$kukarow["yhtio"]}' AND
                     laskutunnus = '{$ulaskurow["tunnus"]}'";
-    query_dump($query);
     $suorituksen_kohdistusresult = pupe_query($query);
 
     if (mysql_num_rows($suorituksen_kohdistusresult) > 0) {
@@ -204,7 +203,6 @@ if (!function_exists("poista_laskutus")) {
                 AND yriti.kaytossa = ''
                 ORDER BY tunnus
                 LIMIT 1";
-      query_dump($query);
       $yritiresult = pupe_query($query);
 
       $yritirow = mysql_fetch_assoc($yritiresult);
@@ -222,7 +220,6 @@ if (!function_exists("poista_laskutus")) {
                 tila       = 'X',
                 laatija    = '{$kukarow["kuka"]}',
                 luontiaika = now()";
-      query_dump($query);
       pupe_query($query);
       $ltunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -242,7 +239,6 @@ if (!function_exists("poista_laskutus")) {
                 kustp            = '{$kustannuspaikka}',
                 kohde            = '{$kohde}',
                 projekti         = '{$projekti}'";
-      query_dump($query);
       pupe_query($query);
       $ttunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -267,7 +263,6 @@ if (!function_exists("poista_laskutus")) {
                 kustp            = '{$kustannuspaikka}',
                 kohde            = '{$kohde}',
                 projekti         = '{$projekti}'";
-      query_dump($query);
       pupe_query($query);
 
       // Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa
@@ -284,7 +279,6 @@ if (!function_exists("poista_laskutus")) {
                 viesti         = 'Generoitu suoritus poistetusta laskusta',
                 valkoodi       = '{$suorituksen_kohdistusrow["suoritus_valkoodi"]}',
                 kurssi         = '{$suorituksen_kohdistusrow["suoritus_kurssi"]}'";
-      query_dump($query);
       pupe_query($query);
     }
 

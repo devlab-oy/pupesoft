@@ -1,68 +1,53 @@
 <?php
 
-if (!function_exists("poista_laskutus")) {
-  function poista_laskutus($tunnus, $hard_delete = false) {
+if (!function_exists("poista_tilaus_ja_laskutus")) {
+  function poista_tilaus_ja_laskutus($tunnus, $hard_delete = false) {
     global $kukarow;
 
-    // Löytyykö laskua
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
               AND tunnus = {$tunnus}
-              AND tila = 'U'
-              AND alatila = 'X'
               LIMIT 1";
-    $ulaskures = pupe_query($query);
+    $result = pupe_query($query);
 
-    $ulaskurow = mysql_fetch_assoc($ulaskures);
+    $laskurow = mysql_fetch_assoc($result);
 
-    if ($hard_delete) {
-      // Poistetaan tiliöinnit
-      $query = "DELETE FROM tiliointi
+    switch ($laskurow["tila"]) {
+    case "U":
+      $query = "SELECT tunnus
+                FROM lasku
                 WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND ltunnus = '{$ulaskurow["tunnus"]}'";
-    }
-    else {
-      // Siirretään tiliöinnit ddddd-yhtiölle
-      $query = "UPDATE tiliointi SET
-                yhtio = 'ddddd'
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND ltunnus = '{$ulaskurow["tunnus"]}'";
-    }
-
-    pupe_query($query);
-
-    if ($hard_delete) {
-      // Deletoidaan U-lasku
-      $query = "DELETE FROM lasku
-                WHERE yhtio	= '{$kukarow["yhtio"]}'
-                AND tila = 'U'
+                AND laskunro = {$laskurow["laskunro"]}
+                AND tila = 'L'
                 AND alatila = 'X'
-                AND tunnus = '{$ulaskurow["tunnus"]}'";
-    }
-    else {
-      // Siirretään lasku ddddd-yhtiölle
-      $query = "UPDATE lasku SET
-                yhtio = 'ddddd'
-                WHERE yhtio	= '{$kukarow["yhtio"]}'
-                AND tila = 'U'
-                AND alatila = 'X'
-                AND tunnus = '{$ulaskurow["tunnus"]}'";
-    }
+                LIMIT 1";
+      $result = pupe_query($query);
 
-    pupe_query($query);
+      $llaskurow = mysql_fetch_assoc($result);
 
-    // Onko maksupositioita
-    if ($ulaskurow["jaksotettu"] != 0) {
-      $query = "SELECT uusiotunnus
-                FROM maksupositio
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND otunnus = {$ulaskurow["jaksotettu"]}";
-      $maksupositiores = pupe_query($query);
+      poista_tilaus($llaskurow["tunnus"], $hard_delete);
+      poista_laskutus($laskurow["tunnus"], $hard_delete);
 
-      // Poistetaan maksuposition kautta liitetyt tilaukset
-      while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
-        poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
+      break;
+    default:
+      if ($laskurow["laskunro"] == 0) {
+        poista_tilaus($laskurow["tunnus"], $hard_delete);
+      }
+      else {
+        $query = "SELECT tunnus
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND laskunro = {$laskurow["laskunro"]}
+                  AND tila = 'U'
+                  AND alatila = 'X'
+                  LIMIT 1";
+        $result = pupe_query($query);
+
+        $ulaskurow = mysql_fetch_assoc($result);
+
+        poista_tilaus($laskurow["tunnus"], $hard_delete);
+        poista_laskutus($ulaskurow["tunnus"], $hard_delete);
       }
     }
   }
@@ -163,57 +148,75 @@ if (!function_exists("poista_tilaus")) {
                 AND otunnus = '{$laskurow["tunnus"]}'";
       pupe_query($query);
     }
+
+    return true;
   }
 }
 
-if (!function_exists("poista_tilaus_ja_laskutus")) {
-  function poista_tilaus_ja_laskutus($tunnus, $hard_delete = false) {
+
+if (!function_exists("poista_laskutus")) {
+  function poista_laskutus($tunnus, $hard_delete = false) {
     global $kukarow;
 
+    // Löytyykö laskua
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
               AND tunnus = {$tunnus}
+              AND tila = 'U'
+              AND alatila = 'X'
               LIMIT 1";
-    $result = pupe_query($query);
+    $ulaskures = pupe_query($query);
 
-    $laskurow = mysql_fetch_assoc($result);
+    $ulaskurow = mysql_fetch_assoc($ulaskures);
 
-    switch ($laskurow["tila"]) {
-    case "U":
-      $query = "SELECT tunnus
-                FROM lasku
+    if ($hard_delete) {
+      // Poistetaan tiliöinnit
+      $query = "DELETE FROM tiliointi
                 WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND laskunro = {$laskurow["laskunro"]}
-                AND tila = 'L'
+                AND ltunnus = '{$ulaskurow["tunnus"]}'";
+    }
+    else {
+      // Siirretään tiliöinnit ddddd-yhtiölle
+      $query = "UPDATE tiliointi SET
+                yhtio = 'ddddd'
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND ltunnus = '{$ulaskurow["tunnus"]}'";
+    }
+
+    pupe_query($query);
+
+    if ($hard_delete) {
+      // Deletoidaan lasku
+      $query = "DELETE FROM lasku
+                WHERE yhtio	= '{$kukarow["yhtio"]}'
+                AND tila = 'U'
                 AND alatila = 'X'
-                LIMIT 1";
-      $result = pupe_query($query);
+                AND tunnus = '{$ulaskurow["tunnus"]}'";
+    }
+    else {
+      // Siirretään lasku ddddd-yhtiölle
+      $query = "UPDATE lasku SET
+                yhtio = 'ddddd'
+                WHERE yhtio	= '{$kukarow["yhtio"]}'
+                AND tila = 'U'
+                AND alatila = 'X'
+                AND tunnus = '{$ulaskurow["tunnus"]}'";
+    }
 
-      $llaskurow = mysql_fetch_assoc($result);
+    pupe_query($query);
 
-      poista_laskutus($laskurow["tunnus"], $hard_delete);
-      poista_tilaus($llaskurow["tunnus"], $hard_delete);
+    // Onko maksupositioita
+    if ($ulaskurow["jaksotettu"] != 0) {
+      $query = "SELECT uusiotunnus
+                FROM maksupositio
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND otunnus = {$ulaskurow["jaksotettu"]}";
+      $maksupositiores = pupe_query($query);
 
-      break;
-    default:
-      if ($laskurow["laskunro"] == 0) {
-        poista_tilaus($laskurow["tunnus"], $hard_delete);
-      }
-      else {
-        $query = "SELECT tunnus
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND laskunro = {$laskurow["laskunro"]}
-                  AND tila = 'U'
-                  AND alatila = 'X'
-                  LIMIT 1";
-        $result = pupe_query($query);
-
-        $ulaskurow = mysql_fetch_assoc($result);
-
-        poista_tilaus($laskurow["tunnus"], $hard_delete);
-        poista_laskutus($ulaskurow["tunnus"], $hard_delete);
+      // Poistetaan maksuposition kautta liitetyt tilaukset
+      while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
+        poista_tilaus($maksupositiorow["uusiotunnus"], $hard_delete);
       }
     }
   }

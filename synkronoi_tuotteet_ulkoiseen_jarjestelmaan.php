@@ -14,7 +14,7 @@ if (!isset($ulkoinen_jarjestelma) or empty($ulkoinen_jarjestelma)) {
   echo "<td>";
   echo "<select name='ulkoinen_jarjestelma'>";
   echo "<option value='P'>PostNord</option>";
-  echo "<option value='L'>Logmaster</option>";
+  echo "<option value='L'>Helsingin Hyllyvarasto</option>";
   echo "</select>";
   echo "</td>";
   echo "<td>";
@@ -69,21 +69,19 @@ else {
       exit;
     }
     else {
-
-      $query = "SELECT ulkoinen_jarjestelma_nimi AS nimi
-                FROM varastopaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND ulkoinen_jarjestelma = 'L'";
-      $uj_nimi_res = pupe_query($query);
-      $uj_nimi_row = mysql_fetch_assoc($uj_nimi_res);
-
-      $uj_nimi = !empty($uj_nimi_row['nimi']) ? $uj_nimi_row['nimi'] : 'Posten';
-
       $xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
 
       $messageheader = $xml->addChild('MessageHeader');
       $messageheader->addChild('MessageType', 'MaterialMaster');
       $messageheader->addChild('Sender', $yhtiorow['nimi']);
+
+      if ($ulkoinen_jarjestelma == 'L') {
+        $uj_nimi = "LogMaster";
+      }
+      else {
+        $uj_nimi = "Posten";
+      }
+
       $messageheader->addChild('Receiver', $uj_nimi);
 
       $iteminformation = $xml->addChild('ItemInformation');

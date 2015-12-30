@@ -242,23 +242,12 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='G'{$sel['G']}>".t("Geodis Wilson")."</option>";
   $ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
   $ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
-  $ulos .= "<option value='L'{$sel['L']}>".t("Logmaster")."</option>";
+  $ulos .= "<option value='L'{$sel['L']}>".t("Helsingin Hyllyvarasto")."</option>";
   $ulos .= "</select>";
 
   $ulkoinen_jarjestelma = $trow[$i];
 
   $ulos .= "</td>";
-  $jatko = 0;
-}
-
-if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma_nimi") {
-  if ($ulkoinen_jarjestelma == 'L') {
-    $ulos = "<td><input type='text' name='{$nimi}' value = '{$trow[$i]}'></td>";
-  }
-  else {
-    $tyyppi = 0;
-  }
-
   $jatko = 0;
 }
 

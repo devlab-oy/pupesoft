@@ -59,6 +59,7 @@ if (!isset($mobiili_keikka))   $mobiili_keikka = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
+$onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -82,7 +83,7 @@ if ($onkolaajattoimipaikat and isset($otunnus)) {
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
-if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 
@@ -334,6 +335,14 @@ if ($toiminto == "tulosta_hintalaput") {
   echo "</form>";
 
   $toiminto = "";
+}
+
+if ($onkologmaster and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
+  $saapumisnro = $otunnus;
+
+  require "saapuminen_ulkoiseen_jarjestelmaan.php";
+
+  $toiminto = "kohdista";
 }
 
 // syötetään keikan lisätietoja
@@ -1122,6 +1131,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             lasku.laatija,
             lasku.rahti_etu,
             lasku.kohdistettu,
+            lasku.sisviesti3,
             lasku.yhtio_toimipaikka
             {$selectlisa}
             FROM lasku
@@ -1143,9 +1153,15 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
   if (mysql_num_rows($result) > 0) {
 
     $maara = 9;
+
     if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
       $maara = 10;
     }
+
+    if ($onkologmaster) {
+      $maara++;
+    }
+
     pupe_DataTables(array(array($pupe_DataTables, $maara, $maara, false)));
 
     echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
@@ -1153,6 +1169,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
     echo "<tr>";
     if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
       echo "<th valign='top'>".t("toimipaikka")."</th>";
+    }
+    if ($onkologmaster) {
+      echo "<th valign='top'>".t("Ulkoinen järjestelmä")."</th>";
     }
     echo "<th valign='top'>".t("saapuminen")."</th>";
     echo "<th valign='top'>&nbsp;</th>";
@@ -1168,6 +1187,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
     echo "<tr>";
     if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
       echo "<td><input type='text'   class='search_field' name='search_toimipaikka'></td>";
+    }
+    if ($onkologmaster) {
+      echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
     }
     echo "<td><input type='text'   class='search_field' name='search_saapuminen'></td>";
     echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
@@ -1219,6 +1241,24 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
 
       if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
         echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
+      }
+      if ($onkologmaster) {
+        echo "<td valign='top'>";
+
+        switch ($row['sisviesti3']) {
+        case 'ei_vie_varastoon':
+          echo "<font class='error'>";
+          echo t("Odottaa kuittausta");
+          echo "</font>";
+          break;
+        case 'ok_vie_varastoon':
+          echo "<font class='ok'>";
+          echo t("Kuittaus saapunut");
+          echo "</font>";
+          break;
+        }
+
+        echo "</td>";
       }
       echo "<td valign='top'>$row[laskunro]</td>";
 
@@ -1357,11 +1397,11 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
+        $logmaster_chk = (!$onkologmaster or ($onkologmaster and $row['sisviesti3'] == 'ok_vie_varastoon'));
+
         // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-        if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
-          if ($yhtiorow['suuntalavat'] != 'S') {
-            echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
-          }
+        if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S' and $logmaster_chk) {
+          echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
         }
 
         // jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty (kukarow.taso 3 voi ohittaa tämän), niin saadaan laskea virallinen varastonarvo
@@ -1550,8 +1590,10 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
+  $logmaster_chk = (!$onkologmaster or ($onkologmaster and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
+
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-  if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
+  if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $logmaster_chk) {
     $nappikeikka .= "$formalku";
     $nappikeikka .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
     $nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";

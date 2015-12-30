@@ -306,7 +306,7 @@ if ($livesearch_tee == "TUOTEHAKU") {
   exit;
 }
 
-if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 

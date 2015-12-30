@@ -45,7 +45,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
   echo "<font class='message'>".t("K‰sittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
 
-  if ($tyyppi == 'multi') {
+  if ($tyyppi == 'multi' or $tyyppi == 'multi_asiakasnro') {
     // tarvitaan $filename
     require "inc/tilaus_in_multi.inc";
   }
@@ -121,8 +121,9 @@ else {
          <option value='magento'>Magento</option>
          <option value='pos'>".t("Kassap‰‰te")."</option>
          <option value='yct'>Yamaha Center</option>
-        <option value='edifact911'>Orders 91.1</option>
+         <option value='edifact911'>Orders 91.1</option>
          <option value='multi'>".t("Useita asiakkaita")."</option>
+         <option value='multi_asiakasnro'>".t("Useita asiakkaita asiakasnumerolla")."</option>
         <option value='asnui'>".t("ASN-sanoma")."</option>
         </select>";
   echo "<div id='keijo' style='display: none;'>

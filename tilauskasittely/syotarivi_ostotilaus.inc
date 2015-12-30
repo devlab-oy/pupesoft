@@ -80,7 +80,7 @@ if ($variaaritorivi === FALSE) {
     echo "<td>$ulos</td>";
   }
   else {
-    if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
+    if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K")) and $tuoteno == "") {
 
       $nosubmitti = "";
 

@@ -66,6 +66,7 @@ else {
       echo "<th>", t("Nimitys"), "</th>";
       echo "</tr>";
 
+      require "inc/footer.inc";
       exit;
     }
     else {

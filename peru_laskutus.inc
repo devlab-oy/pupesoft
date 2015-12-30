@@ -176,7 +176,6 @@ if (!function_exists("poista_laskutus")) {
                 myyntisaamiset.tilino   AS myyntisaamiset_tilino,
                 rahatili.valkoodi       AS rahatili_valkoodi,
                 rahatili.tilino         AS rahatili_tilino,
-                suoritus.tilino         AS suoritus_tilino,
                 suoritus.nimi_maksaja   AS suoritus_nimi_maksaja,
                 suoritus.asiakas_tunnus AS suoritus_asiakas_tunnus,
                 suoritus.valkoodi       AS suoritus_valkoodi,
@@ -194,93 +193,100 @@ if (!function_exists("poista_laskutus")) {
                      rahatili.aputunnus = myyntisaamiset.tunnus
               WHERE suorituksen_kohdistus.yhtio = '{$kukarow["yhtio"]}' AND
                     laskutunnus = '{$ulaskurow["tunnus"]}'";
+    query_dump($query);
     $suorituksen_kohdistusresult = pupe_query($query);
 
-    if (mysql_num_rows($suorituksen_kohdistusresult) == 0) return true;
+    if (mysql_num_rows($suorituksen_kohdistusresult) > 0) {
+      // Haetaan oletusrahatili
+      $query = "SELECT oletus_rahatili
+                FROM yriti
+                WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
+                AND yriti.kaytossa = ''
+                ORDER BY tunnus
+                LIMIT 1";
+      query_dump($query);
+      $yritiresult = pupe_query($query);
 
-    // Haetaan oletusrahatili
-    $query = "SELECT oletus_rahatili
-              FROM yriti
-              WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
-              AND yriti.kaytossa = ''
-              ORDER BY tunnus
-              LIMIT 1";
-    $yritiresult = pupe_query($query);
+      $yritirow = mysql_fetch_assoc($yritiresult);
 
-    $yritirow = mysql_fetch_assoc($yritiresult);
+      $suorituksen_kohdistusrow = mysql_fetch_assoc($suorituksen_kohdistusresult);
 
-    $suorituksen_kohdistusrow = mysql_fetch_assoc($suorituksen_kohdistusresult);
+      list($kustannuspaikka,
+           $kohde,
+           $projekti) = kustannuspaikka_kohde_projekti($yhtiorow["myyntisaamiset"]);
 
-    list($kustannuspaikka,
-         $kohde,
-         $projekti) = kustannuspaikka_kohde_projekti($yhtiorow["myyntisaamiset"]);
+      // Tehdään dummy-lasku johon liitetään kirjaukset
+      $query = "INSERT INTO lasku SET
+                yhtio      = '{$kukarow["yhtio"]}',
+                tapvm      = now(),
+                tila       = 'X',
+                laatija    = '{$kukarow["kuka"]}',
+                luontiaika = now()";
+      query_dump($query);
+      pupe_query($query);
+      $ltunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
-    // Tehdään dummy-lasku johon liitetään kirjaukset
-    $query = "INSERT INTO lasku SET
-              yhtio      = '{$kukarow["yhtio"]}',
-              tapvm      = now(),
-              tila       = 'X',
-              laatija    = '{$kukarow["kuka"]}',
-              luontiaika = now()";
-    pupe_query($query);
-    $ltunnus = mysql_insert_id($GLOBALS["masterlink"]);
+      // Myyntisaamiset
+      $query = "INSERT INTO tiliointi SET
+                yhtio            = '{$kukarow["yhtio"]}',
+                laatija          = '{$kukarow["kuka"]}',
+                laadittu         = now(),
+                tapvm            = now(),
+                ltunnus          = '$ltunnus',
+                tilino           = '{$suorituksen_kohdistusrow["myyntisaamiset_tilino"]}',
+                summa            = '{$ulaskurow["summa"]}' * -1,
+                summa_valuutassa = '{$ulaskurow["summa_valuutassa"]}' * -1,
+                valkoodi         = '{$suorituksen_kohdistusrow["myyntisaamiset_valkoodi"]}',
+                selite           = 'Generoitu tiliöinti poistetusta laskusta',
+                lukko            = '1',
+                kustp            = '{$kustannuspaikka}',
+                kohde            = '{$kohde}',
+                projekti         = '{$projekti}'";
+      query_dump($query);
+      pupe_query($query);
+      $ttunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
-    // Myyntisaamiset
-    $query = "INSERT INTO tiliointi SET
-              yhtio            = '{$kukarow["yhtio"]}',
-              laatija          = '{$kukarow["kuka"]}',
-              laadittu         = now(),
-              tapvm            = now(),
-              ltunnus          = '$ltunnus',
-              tilino           = '{$suorituksen_kohdistusrow["myyntisaamiset_tilino"]}',
-              summa            = '{$ulaskurow["summa"]}' * -1,
-              summa_valuutassa = '{$ulaskurow["summa_valuutassa"]}' * -1,
-              valkoodi         = '{$suorituksen_kohdistusrow["myyntisaamiset_valkoodi"]}',
-              selite           = 'Generoitu tiliöinti poistetusta laskusta',
-              lukko            = '1',
-              kustp            = '{$kustannuspaikka}',
-              kohde            = '{$kohde}',
-              projekti         = '{$projekti}'";
-    pupe_query($query);
-    $ttunnus = mysql_insert_id($GLOBALS["masterlink"]);
+      list($kustannuspaikka,
+           $kohde,
+           $projekti) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
-    list($kustannuspaikka,
-         $kohde,
-         $projekti) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+      // Rahatili
+      $query = "INSERT INTO tiliointi SET
+                yhtio            = '{$kukarow["yhtio"]}',
+                laatija          = '{$kukarow["kuka"]}',
+                laadittu         = now(),
+                tapvm            = now(),
+                ltunnus          = '$ltunnus',
+                tilino           = '{$suorituksen_kohdistusrow["rahatili_tilino"]}',
+                summa            = '{$ulaskurow["summa"]}',
+                summa_valuutassa = '{$ulaskurow["summa_valuutassa"]}',
+                valkoodi         = '{$suorituksen_kohdistusrow["rahatili_valkoodi"]}',
+                selite           = 'Generoitu tiliöinti poistetusta laskusta',
+                aputunnus        = '$ttunnus',
+                lukko            = '1',
+                kustp            = '{$kustannuspaikka}',
+                kohde            = '{$kohde}',
+                projekti         = '{$projekti}'";
+      query_dump($query);
+      pupe_query($query);
 
-    // Rahatili
-    $query = "INSERT INTO tiliointi SET
-              yhtio            = '{$kukarow["yhtio"]}',
-              laatija          = '{$kukarow["kuka"]}',
-              laadittu         = now(),
-              tapvm            = now(),
-              ltunnus          = '$ltunnus',
-              tilino           = '{$suorituksen_kohdistusrow["rahatili_tilino"]}',
-              summa            = '{$ulaskurow["summa"]}',
-              summa_valuutassa = '{$ulaskurow["summa_valuutassa"]}',
-              valkoodi         = '{$suorituksen_kohdistusrow["rahatili_valkoodi"]}',
-              selite           = 'Generoitu tiliöinti poistetusta laskusta',
-              aputunnus        = '$ttunnus',
-              lukko            = '1',
-              kustp            = '{$kustannuspaikka}',
-              kohde            = '{$kohde}',
-              projekti         = '{$projekti}'";
-    pupe_query($query);
-
-    // Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa
-    $query = "INSERT INTO suoritus SET
-              yhtio          = '{$kukarow["yhtio"]}',
-              tilino         = 'Selvittelytili',
-              nimi_maksaja   = '{$suorituksen_kohdistusrow["suoritus_nimi_maksaja"]}',
-              summa          = '{$ulaskurow["summa"]}',
-              maksupvm       = now(),
-              kirjpvm        = now(),
-              asiakas_tunnus = '{$suorituksen_kohdistusrow["suoritus_asiakas_tunnus"]}',
-              ltunnus        = '$ttunnus',
-              viesti         = 'Generoitu suoritus poistetusta laskusta',
-              valkoodi       = '{$suorituksen_kohdistusrow["suoritus_valkoodi"]}',
-              kurssi         = '{$suorituksen_kohdistusrow["suoritus_kurssi"]}'";
-    pupe_query($query);
+      // Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa
+      $query = "INSERT INTO suoritus SET
+                yhtio          = '{$kukarow["yhtio"]}',
+                tilino         = 'Selvittelytili',
+                nimi_maksaja   = '{$suorituksen_kohdistusrow["suoritus_nimi_maksaja"]}',
+                summa          = '{$ulaskurow["summa"]}',
+                maksupvm       = now(),
+                kirjpvm        = now(),
+                asiakas_tunnus = '{$suorituksen_kohdistusrow["suoritus_asiakas_tunnus"]}',
+                ltunnus        = '$ttunnus',
+                viite          = '{$suorituksen_kohdistusrow["suoritus_viite"]}',
+                viesti         = 'Generoitu suoritus poistetusta laskusta',
+                valkoodi       = '{$suorituksen_kohdistusrow["suoritus_valkoodi"]}',
+                kurssi         = '{$suorituksen_kohdistusrow["suoritus_kurssi"]}'";
+      query_dump($query);
+      pupe_query($query);
+    }
 
     if ($hard_delete) {
       // Poistetaan tiliöinnit

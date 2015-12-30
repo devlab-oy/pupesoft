@@ -334,6 +334,9 @@ if (mysql_field_name($result, $i) == "nakyvyys") {
     $ulos .= "<option value = ''>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰")."</option>";
     $ulos .= "<option value = 'K' $sel[K]>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
     $ulos .= "<option value = 'L' $sel[L]>".t("N‰ytet‰‰n laskulla")."</option>";
+    $ulos .= "<option value = 'H' $sel[H]>".t("N‰ytet‰‰n huoltosaatteella")."</option>";
+    $ulos .= "<option value = 'I' $sel[I]>".t("N‰ytet‰‰n huoltosaatteella ja tyˆm‰‰r‰yksell‰")."</option>";
+    $ulos .= "<option value = 'J' $sel[J]>".t("N‰ytet‰‰n huoltosaatteella ja tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
     $ulos .= "<option value = 'S' $sel[S]>".t("Sis‰inen tieto")."</option>";
     $ulos .= "</select></td>";
   }

@@ -2,25 +2,25 @@
 
 require_once "pdflib/phppdflib.class.php";
 
-$norm["height"]     = 10;
-$norm["font"]       = "Times-Roman";
+$norm["height"] = 10;
+$norm["font"] = "Times-Roman";
 
-$pieni["height"]     = 8;
-$pieni["font"]       = "Times-Roman";
+$pieni["height"] = 8;
+$pieni["font"] = "Times-Roman";
 
-$boldi["height"]     = 10;
-$boldi["font"]       = "Times-Bold";
+$boldi["height"] = 10;
+$boldi["font"] = "Times-Bold";
 
-$pieni_boldi["height"]   = 8;
-$pieni_boldi["font"]   = "Times-Bold";
+$pieni_boldi["height"] = 8;
+$pieni_boldi["font"] = "Times-Bold";
 
-$iso["height"]       = 14;
-$iso["font"]       = "Helvetica-Bold";
+$iso["height"] = 14;
+$iso["font"] = "Helvetica-Bold";
 
-$rectparam["width"]   = 0.3;
-$lineparam["width"]   = 1;
-$rivinkorkeus      = 17;
-// t‰‰ t‰ss‰ kusee
+$rectparam["width"] = 0.3;
+$lineparam["width"] = 1;
+$rivinkorkeus = 17;
+
 if (!function_exists('tyomaarays_alku')) {
   function tyomaarays_alku($params) {
     global $yhtiorow, $kukarow;
@@ -210,7 +210,7 @@ if (!function_exists('tyomaarays_alku')) {
     $kala  = 575;
 
     //T‰ysin dynaaminen osio
-    $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','L')");
+    $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('','K','I','J')");
 
     $al_lask = 35;
     $al_fask = 0;

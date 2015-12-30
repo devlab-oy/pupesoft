@@ -181,33 +181,34 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $tyyppi = $yhtiorow["tyomaaraystyyppi"];
       }
 
-      $params_tyomaarays = array( "asrow"           => $asrow,
-        "boldi"           => $boldi,
-        "edtuotetyyppi"   => "",
-        "iso"             => $iso,
-        "kala"            => 0,
-        "kieli"           => $kieli,
-        "komento"      => $komento[$tulostimet[0]],
-        "laskurow"        => $laskurow,
-        "lineparam"       => $lineparam,
-        "norm"            => $norm,
-        "page"            => NULL,
-        "pdf"             => NULL,
-        "perheid"         => 0,
-        "perheid2"        => 0,
-        "pieni"           => $pieni,
-        "pieni_boldi"     => $pieni_boldi,
-        "rectparam"       => $rectparam,
-        "returnvalue"     => 0,
-        "rivinkorkeus"    => $rivinkorkeus,
-        "rivinumerot"     => $rivinumerot,
-        "row"             => NULL,
-        "sivu"            => 1,
-        "tee"             => $tee,
+      $params_tyomaarays = array(
+        "asrow"         => $asrow,
+        "boldi"         => $boldi,
+        "edtuotetyyppi" => "",
+        "iso"           => $iso,
+        "kala"          => 0,
+        "kieli"         => $kieli,
+        "komento"       => $komento[$tulostimet[0]],
+        "laskurow"      => $laskurow,
+        "lineparam"     => $lineparam,
+        "norm"          => $norm,
+        "page"          => NULL,
+        "pdf"           => NULL,
+        "perheid"       => 0,
+        "perheid2"      => 0,
+        "pieni"         => $pieni,
+        "pieni_boldi"   => $pieni_boldi,
+        "rectparam"     => $rectparam,
+        "returnvalue"   => 0,
+        "rivinkorkeus"  => $rivinkorkeus,
+        "rivinumerot"   => $rivinumerot,
+        "row"           => NULL,
+        "sivu"          => 1,
+        "tee"           => $tee,
         "thispage"      => NULL,
-        "toim"            => $toim,
-        "tots"        => 0,
-        "tyyppi"          => $tyyppi, );
+        "toim"          => $toim,
+        "tots"          => 0,
+        "tyyppi"        => $tyyppi);
 
       $params_huoltosaate = $params_tyomaarays;
 
@@ -238,30 +239,23 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
       tyomaarays_print_pdf($params_tyomaarays);
 
       if (!empty($tulostimet[1]) and $tulostimet[1] == "Huoltosaate") {
-        $query = "SELECT *
-                  FROM tyomaarays
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$laskurow['tunnus']}'";
-        $tyomaaraysres = pupe_query($query);
-        $tyomaaraysrow = mysql_fetch_assoc($tyomaaraysres);
-
-        $params_huoltosaate['tyomaaraysrow'] = $tyomaaraysrow;
-
-        $query = "SELECT tilausrivi.tuoteno,
-                  sarjanumeroseuranta.sarjanumero,
-                  tilausrivi.alv
-                  FROM tilausrivi
-                  LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
-                      and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi = 'L'
-                  AND tilausrivi.varattu != 0";
-        $tuotenores = pupe_query($query);
-        $tuotenorow = mysql_fetch_assoc($tuotenores);
-
-        $params_huoltosaate['tuotenorow'] = $tuotenorow;
-        $params_huoltosaate['komento'] = $komento['Huoltosaate'];
-        $params_huoltosaate['rectparam']['width'] = 0.3;
+        $params_huoltosaate = array(
+          "_hsiso"       => $_hsiso,
+          "kala"         => 0,
+          "kieli"        => $kieli,
+          "komento"      => $komento["Huoltosaate"],
+          "laskurow"     => $laskurow,
+          "_hsnorm"      => $_hsnorm,
+          "page"         => NULL,
+          "pdf"          => NULL,
+          "_hspieni"     => $_hspieni,
+          "_hsrectparam" => $_hsrectparam,
+          "returnvalue"  => 0,
+          "row"          => NULL,
+          "sivu"         => 1,
+          "tee"          => $tee,
+          "thispage"     => NULL,
+          "yhteensa"     => 0);
 
         // Aloitellaan lomakkeen teko
         $params_huoltosaate = huoltosaate_alku($params_huoltosaate);

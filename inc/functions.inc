@@ -434,7 +434,15 @@ if (!function_exists("pupesoft_flock")) {
     $flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;
 
     // katotaan, ettei backuppi oo menossa....
-    $backupflock = fopen("/tmp/##pupesoft.sh-flock.lock", "c");
+    if (file_exists("/tmp/##pupesoft.sh-flock.lock")) {
+      $backupflock = fopen("/tmp/##pupesoft.sh-flock.lock", "c");
+    }
+    else {
+      $backupflock = fopen("/tmp/##pupesoft.sh-flock.lock", "w");
+      chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
+      @chown($lockfile, 'devlab');
+      @chgrp($lockfile, 'apache');
+    }
 
     if (! @flock($backupflock, LOCK_SH | LOCK_NB)) {
       if (mktime() - filemtime("/tmp/##pupesoft.sh-flock.lock") >= 14400) {
@@ -449,11 +457,18 @@ if (!function_exists("pupesoft_flock")) {
       else exit;
     }
     else {
-      @chmod("/tmp/##pupesoft.sh-flock.lock", 0666);
       flock($backupflock, LOCK_UN);
     }
 
-    $GLOBALS["flock_fp"] = $flock = fopen($lockfile, "c");
+    if (file_exists($lockfile)) {
+      $GLOBALS["flock_fp"] = $flock = fopen($lockfile, "c");
+    }
+    else {
+      $GLOBALS["flock_fp"] = $flock = fopen($lockfile, "w");
+      chmod($lockfile, 0666);
+      @chown($lockfile, 'devlab');
+      @chgrp($lockfile, 'apache');
+    }
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
       if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
@@ -471,7 +486,6 @@ if (!function_exists("pupesoft_flock")) {
     }
     else {
       touch($lockfile);
-      chmod($lockfile, 0666);
 
       if ($filecontent != "") {
         ftruncate($flock, 0);

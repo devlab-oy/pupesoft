@@ -42,8 +42,9 @@ if ($kukarow['extranet'] == '') {
     require "tuotetiedot.inc";
     exit;
   }
-
-  js_popup();
+  if (!isset($tappi) and $tappi != "lataa_tiedosto") {
+    js_popup();
+  }
 }
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"

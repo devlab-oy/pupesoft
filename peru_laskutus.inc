@@ -232,7 +232,7 @@ if (!function_exists("poista_laskutus")) {
                 laatija          = '{$kukarow["kuka"]}',
                 laadittu         = now(),
                 tapvm            = now(),
-                ltunnus          = '$ltunnus',
+                ltunnus          = '{$ltunnus}',
                 tilino           = '{$suorituksen_kohdistusrow["myyntisaamiset_tilino"]}',
                 summa            = '{$ulaskurow["summa"]}' * -1,
                 summa_valuutassa = '{$ulaskurow["summa_valuutassa"]}' * -1,

@@ -369,7 +369,7 @@ if ($handle = opendir($kansio)) {
 
     $tulos_ulos = "";
 
-    require "inc/ftp-send.inc";
+    require "inc/sftp-send.inc";
   }
 
   closedir($handle);

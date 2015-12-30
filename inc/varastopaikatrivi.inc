@@ -234,7 +234,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $sel = array();
   $sel[$trow[$i]] = " selected";
 
-  $ulos .= "<select name='{$nimi}' onchange='submit();'>";
+  $ulos .= "<select name='{$nimi}'>";
   $ulos .= "<option value=''>".t("Ei käytössä")."</option>";
   $ulos .= "<option value='K'{$sel['K']}>".t("Kardex")."</option>";
   $ulos .= "<option value='V'{$sel['V']}>".t("Vocollect")."</option>";

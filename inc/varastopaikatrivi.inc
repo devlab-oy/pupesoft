@@ -244,9 +244,6 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
   $ulos .= "<option value='L'{$sel['L']}>".t("Helsingin Hyllyvarasto")."</option>";
   $ulos .= "</select>";
-
-  $ulkoinen_jarjestelma = $trow[$i];
-
   $ulos .= "</td>";
   $jatko = 0;
 }

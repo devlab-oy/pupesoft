@@ -7,7 +7,7 @@ if (!function_exists("poista_tilaus_ja_laskutus")) {
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = {$tunnus}
+              AND tunnus = '{$tunnus}'
               LIMIT 1";
     $result = pupe_query($query);
 
@@ -18,7 +18,7 @@ if (!function_exists("poista_tilaus_ja_laskutus")) {
       $query = "SELECT tunnus
                 FROM lasku
                 WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND laskunro = {$laskurow["laskunro"]}
+                AND laskunro = '{$laskurow["laskunro"]}'
                 AND tila = 'L'
                 AND alatila = 'X'
                 LIMIT 1";
@@ -38,7 +38,7 @@ if (!function_exists("poista_tilaus_ja_laskutus")) {
         $query = "SELECT tunnus
                   FROM lasku
                   WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND laskunro = {$laskurow["laskunro"]}
+                  AND laskunro = '{$laskurow["laskunro"]}'
                   AND tila = 'U'
                   AND alatila = 'X'
                   LIMIT 1";
@@ -61,7 +61,7 @@ if (!function_exists("poista_tilaus")) {
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = {$tunnus}
+              AND tunnus = '{$tunnus}'
               AND (tila IN ('L', 'N', 'E') OR (tila = 'D' AND alatila IN ('L', 'N', 'E')))";
     $laskures = pupe_query($query);
 
@@ -162,7 +162,7 @@ if (!function_exists("poista_laskutus")) {
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = {$tunnus}
+              AND tunnus = '{$tunnus}'
               AND tila = 'U'
               AND alatila = 'X'
               LIMIT 1";
@@ -170,7 +170,7 @@ if (!function_exists("poista_laskutus")) {
 
     $ulaskurow = mysql_fetch_assoc($ulaskures);
 
-    // Onko suorituksia
+    // Onko laskulle suorituksia
     $query = "SELECT
                 myyntisaamiset.valkoodi AS myyntisaamiset_valkoodi,
                 myyntisaamiset.tilino   AS myyntisaamiset_tilino,
@@ -192,7 +192,7 @@ if (!function_exists("poista_laskutus")) {
                   ON rahatili.yhtio = myyntisaamiset.yhtio AND
                      rahatili.aputunnus = myyntisaamiset.tunnus
               WHERE suorituksen_kohdistus.yhtio = '{$kukarow["yhtio"]}' AND
-                    laskutunnus = '{$ulaskurow["tunnus"]}'";
+                    suorituksen_kohdistus.laskutunnus = '{$ulaskurow["tunnus"]}'";
     $suorituksen_kohdistusresult = pupe_query($query);
 
     if (mysql_num_rows($suorituksen_kohdistusresult) > 0) {
@@ -265,7 +265,7 @@ if (!function_exists("poista_laskutus")) {
                 projekti         = '{$projekti}'";
       pupe_query($query);
 
-      // Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa
+      // Suoritus
       $query = "INSERT INTO suoritus SET
                 yhtio          = '{$kukarow["yhtio"]}',
                 tilino         = 'Selvittelytili',
@@ -323,14 +323,14 @@ if (!function_exists("poista_laskutus")) {
       $query = "SELECT uusiotunnus
                 FROM maksupositio
                 WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND otunnus = {$ulaskurow["jaksotettu"]}";
+                AND otunnus = '{$ulaskurow["jaksotettu"]}'";
       $maksupositiores = pupe_query($query);
 
       // Poistetaan maksuposition kautta liitetyt tilaukset ja laskut
       while ($maksupositiorow = mysql_fetch_assoc($maksupositiores)) {
         $query = "SELECT laskunro
                   FROM lasku
-                  WHERE tunnus = {$maksupositiorow["uusiotunnus"]}
+                  WHERE tunnus = '{$maksupositiorow["uusiotunnus"]}'
                   LIMIT 1";
         $maksupositiolaskuresult = pupe_query($query);
 
@@ -345,7 +345,7 @@ if (!function_exists("poista_laskutus")) {
           $query = "SELECT tunnus
                     FROM lasku
                     WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND laskunro = {$maksupositiolaskurow["laskunro"]}
+                    AND laskunro = '{$maksupositiolaskurow["laskunro"]}'
                     AND tila = 'U'
                     AND alatila = 'X'
                     LIMIT 1";

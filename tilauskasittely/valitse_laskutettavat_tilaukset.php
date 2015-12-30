@@ -1201,8 +1201,8 @@ if ($tee == "") {
 
     while ($tilrow = mysql_fetch_array($tilre)) {
 
-      $laskutyyppi  = $tilrow["tila"];
-      $alatila    = $tilrow["alatila"];
+      $laskutyyppi = $tilrow["tila"];
+      $alatila     = $tilrow["alatila"];
 
       //tehd‰‰n selv‰kielinen tila/alatila
       require "inc/laskutyyppi.inc";

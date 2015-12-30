@@ -32,6 +32,7 @@ else exit;
 $palautus = "";
 $tulos_ulos_ftp  = "";
 $sftpport = !empty($ftpport) ? $ftpport : 22;
+$filenimi = basename($ftpfile);
 
 // jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
 if (substr($ftppath, -1) != "/") {

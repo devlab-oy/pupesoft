@@ -6,8 +6,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
-  'asiakkaan_tilausnumero' => isset($_REQUEST['asiakkaan_tilausnumero']) ? $_REQUEST['asiakkaan_tilausnumero'] : '', 
-  'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '', 
+  'asiakkaan_tilausnumero' => isset($_REQUEST['asiakkaan_tilausnumero']) ? $_REQUEST['asiakkaan_tilausnumero'] : '',
+  'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '',
   'malli' => isset($_REQUEST['malli']) ? $_REQUEST['malli'] : '',
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
   'tuotenro' => isset($_REQUEST['tuotenro']) ? $_REQUEST['tuotenro'] : '',
@@ -57,7 +57,7 @@ function piirra_kayttajan_tyomaaraykset() {
     piirra_tyomaaraysheaderit();
     echo "</tr>";
 
-    foreach ($naytettavat_tyomaaraykset as $tyomaarays) {    
+    foreach ($naytettavat_tyomaaraykset as $tyomaarays) {
       piirra_tyomaaraysrivi($tyomaarays);
     }
 
@@ -130,7 +130,7 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
             LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio and tuote.tuoteno = laite.tuoteno)
-            LEFT JOIN avainsana a6 ON (a6.yhtio = tuote.yhtio and a6.laji = 'TRY' and a6.selite = tuote.try) 
+            LEFT JOIN avainsana a6 ON (a6.yhtio = tuote.yhtio and a6.laji = 'TRY' and a6.selite = tuote.try)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tila     in ('A','L','N','S','C')
             {$alatila}
@@ -237,7 +237,7 @@ function piirra_edit_tyomaaraysrivi($request) {
   echo "<td><input type='text' name='sla' size='3' value='{$request['tyom_parametrit']['sla']}' disabled=true></td>";
   echo "<td></td>";
   echo "<td></td>";
-  echo "<td></td>"; 
+  echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   echo "<td></td>";
 }
@@ -247,7 +247,7 @@ function tallenna_tyomaarays($request) {
 
   // Haetaan oletusasiakkuus
   $query = "SELECT asiakas.*
-            FROM asiakas 
+            FROM asiakas
             WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
             AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
@@ -353,7 +353,9 @@ function email_tyomaarayskopio($request) {
 
   //työmääräyksen rivit
   $query = "SELECT tilausrivi.*,
-            round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1), '$yhtiorow[hintapyoristys]') hinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
             $sorttauskentta,
             if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
             if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -364,8 +366,6 @@ function email_tyomaarayskopio($request) {
             WHERE tilausrivi.otunnus  = '{$laskurow['tunnus']}'
             and tilausrivi.yhtio      = '{$kukarow['yhtio']}'
             and tilausrivi.tyyppi    != 'D'
-            and tilausrivi.yhtio      = tuote.yhtio
-            and tilausrivi.tuoteno    = tuote.tuoteno
             and tilausrivi.var       != 'O'
             ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
   $result = pupe_query($query);

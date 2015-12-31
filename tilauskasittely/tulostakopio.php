@@ -1801,8 +1801,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   WHERE tilausrivi.otunnus  = '{$laskurow["tunnus"]}'
                   and tilausrivi.yhtio      = '$kukarow[yhtio]'
                   and tilausrivi.tyyppi    != 'D'
-                  and tilausrivi.yhtio      = tuote.yhtio
-                  and tilausrivi.tuoteno    = tuote.tuoteno
                   and tilausrivi.var       != 'O'
                   ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
         $result = pupe_query($query);
@@ -1930,8 +1928,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 WHERE tilausrivi.otunnus  = '{$laskurow["tunnus"]}'
                 and tilausrivi.yhtio      = '$kukarow[yhtio]'
                 and tilausrivi.tyyppi    != 'D'
-                and tilausrivi.yhtio      = tuote.yhtio
-                and tilausrivi.tuoteno    = tuote.tuoteno
                 and tilausrivi.var       != 'O'
                 ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $result = pupe_query($query);

@@ -230,7 +230,7 @@ class PrestaSalesOrders extends PrestaClient {
     if (in_array($presta_order['current_state'], $this->not_paid_order_states)) {
       $pupesoft_order['tilaustyyppi'] = 'maksamatta';
     }
-    else if (in_array($presta_order['current_state'], $this->paid_order_states)) {
+    elseif (in_array($presta_order['current_state'], $this->paid_order_states)) {
       $pupesoft_order['tilaustyyppi'] = 'maksettu';
     }
     else {

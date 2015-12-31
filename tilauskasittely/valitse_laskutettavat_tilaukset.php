@@ -510,7 +510,7 @@ if ($tee == "VALITSE") {
     if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<th>", t("Koontilaskujen alarajasumma"), "</th>";
       echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
       echo "</tr>";
       echo "</table>";
@@ -1178,7 +1178,7 @@ if ($tee == "") {
     if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<th>", t("Koontilaskujen alarajasumma"), "</th>";
       echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
       echo "</tr>";
       echo "</table>";

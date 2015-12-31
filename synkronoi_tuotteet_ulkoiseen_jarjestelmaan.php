@@ -10,7 +10,7 @@ if (!isset($ulkoinen_jarjestelma) or empty($ulkoinen_jarjestelma)) {
   echo "<form action='' method='post'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Valitse ulkoinen järjestelmä"),"</th>";
+  echo "<th>", t("Valitse ulkoinen järjestelmä"), "</th>";
   echo "<td>";
   echo "<select name='ulkoinen_jarjestelma'>";
   echo "<option value='P'>PostNord</option>";
@@ -30,7 +30,7 @@ if (!isset($ulkoinen_jarjestelma) or empty($ulkoinen_jarjestelma)) {
 else {
 
   if (((empty($ftp_posten_logistik_host) or empty($ftp_posten_logistik_user) or empty($ftp_posten_logistik_pass) or empty($ftp_posten_logistik_path)) and $ulkoinen_jarjestelma == 'P') or
-      ((empty($ftp_logmaster_host) or empty($ftp_logmaster_user) or empty($ftp_logmaster_pass) or empty($ftp_logmaster_path)) and $ulkoinen_jarjestelma == 'L')) {
+    ((empty($ftp_logmaster_host) or empty($ftp_logmaster_user) or empty($ftp_logmaster_pass) or empty($ftp_logmaster_path)) and $ulkoinen_jarjestelma == 'L')) {
 
     echo "<br /><font class='error'>", t("Tarvittavat FTP-tunnukset ovat puutteelliset"), "!</font><br>";
 

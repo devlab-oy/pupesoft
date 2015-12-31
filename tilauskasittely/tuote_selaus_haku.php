@@ -724,7 +724,7 @@ if ($verkkokauppa == "") {
     echo "<th>".t("Näytä vain saldolliset tuotteet")."</th>";
     echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
     echo "</tr>";
-    if (in_array($laskurow['tila'], array('N','T')) and $kukarow['kesken'] != 0 and $kukarow['hinnat'] == 0) {
+    if (in_array($laskurow['tila'], array('N', 'T')) and $kukarow['kesken'] != 0 and $kukarow['hinnat'] == 0) {
       echo "<th>".t("Näytä asiakkaan hinnoilla")."</th>";
       echo "<td><input type='checkbox' name='asiakashinnat' $asiakashinnatcheck></td>";
       echo "</tr>";

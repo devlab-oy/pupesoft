@@ -16,10 +16,12 @@ class PrestaProductStocks extends PrestaClient {
 
   /**
    *
-   * @param array $stock
+   * @param array   $stock
    * @param SimpleXMLElement $existing_stock
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($stock, SimpleXMLElement $existing_stock = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -37,18 +39,18 @@ class PrestaProductStocks extends PrestaClient {
    * Used in PrestaProducts sync_products()
    * Creates or updates the products stock
    *
-   * @param int $product_id
-   * @param int $stock
+   * @param int     $product_id
+   * @param int     $stock
    * @return boolean
    */
   public function create_or_update($product_id, $stock) {
     $display = array();
     $filters = array(
-        'id_product' => $product_id,
+      'id_product' => $product_id,
     );
     $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $stock,
+      'product_id' => $product_id,
+      'saldo'      => $stock,
     );
 
     //Needs to be inside try-catch so that we wont interrupt product create loop.

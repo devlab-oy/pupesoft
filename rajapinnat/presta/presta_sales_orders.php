@@ -12,6 +12,8 @@ class PrestaSalesOrders extends PrestaClient {
   /**
    * State to be uploaded to presta when order is fetched and saved to pupesoft
    */
+
+
   const FETCHED = 3;
 
   /**
@@ -41,19 +43,18 @@ class PrestaSalesOrders extends PrestaClient {
     parent::__construct($url, $api_key);
 
     /**
-     *
-      1	Awaiting cheque payment
-      2	Payment accepted
-      3	Preparation in progress
-      4	Shipped
-      5	Delivered
-      6	Canceled
-      7	Refund
-      8	Payment error
-      9	On backorder
-      10	Awaiting bank wire payment
-      11	Awaiting PayPal payment
-      12	Remote payment accepted
+     * 1  Awaiting cheque payment
+     * 2  Payment accepted
+     * 3  Preparation in progress
+     * 4  Shipped
+     * 5  Delivered
+     * 6  Canceled
+     * 7  Refund
+     * 8  Payment error
+     * 9  On backorder
+     * 10  Awaiting bank wire payment
+     * 11  Awaiting PayPal payment
+     * 12  Remote payment accepted
      */
     $this->order_states = array(1, 2, 10, 11, 12);
 
@@ -67,7 +68,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   /**
    *
-   * @param array $sales_order
+   * @param array   $sales_order
    * @param SimpleXMLElement $existing_sales_order
    * @return \SimpleXMLElement
    */
@@ -122,7 +123,7 @@ class PrestaSalesOrders extends PrestaClient {
         //Do nothing because we still want to try to create the other
         //order eventhough this failed
         $msg = "Myyntitilauksen {$sales_order['id']} luominen "
-                . "pupesoftiin epäonnistui";
+          . "pupesoftiin epäonnistui";
         $this->logger->log($msg, $e);
 
         return false;
@@ -146,7 +147,7 @@ class PrestaSalesOrders extends PrestaClient {
       $states_str = implode('|', $this->order_states);
       $display = array();
       $filters = array(
-          'current_state' => "[{$states_str}]",
+        'current_state' => "[{$states_str}]",
       );
 
       $sales_orders = $this->all($display, $filters);
@@ -163,7 +164,7 @@ class PrestaSalesOrders extends PrestaClient {
   /**
    * Converts presta array to pupesoft
    *
-   * @param array $presta_order
+   * @param array   $presta_order
    * @return array
    */
   private function convert_for_pupesoft($presta_order) {
@@ -230,12 +231,12 @@ class PrestaSalesOrders extends PrestaClient {
     if (in_array($presta_order['current_state'], $this->not_paid_order_states)) {
       $pupesoft_order['tilaustyyppi'] = 'maksamatta';
     }
-    else if (in_array($presta_order['current_state'], $this->paid_order_states)) {
+    elseif (in_array($presta_order['current_state'], $this->paid_order_states)) {
       $pupesoft_order['tilaustyyppi'] = 'maksettu';
     }
     else {
       $msg = "Haettu tilaus on tilassa {$presta_order['current_state']},"
-              . " joka ei ole tuettujen tilojen joukossa " . implode(',', $this->order_states);
+        . " joka ei ole tuettujen tilojen joukossa " . implode(',', $this->order_states);
       throw new Exception($msg);
     }
 
@@ -265,7 +266,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   /**
    *
-   * @param array $sales_order
+   * @param array   $sales_order
    * @throws Exception
    */
   private function mark_as_fetched($sales_order) {
@@ -282,15 +283,15 @@ class PrestaSalesOrders extends PrestaClient {
       $this->update_xml($id, $existing_xml);
 
       $order_history = array(
-          'order_id'    => $id,
-          'order_state' => self::FETCHED,
+        'order_id'    => $id,
+        'order_state' => self::FETCHED,
       );
       $presta_order_history = new PrestaOrderHistories($this->url(), $this->api_key());
       $presta_order_history->create($order_history);
     }
     catch (Exception $e) {
       $msg = "Tilauksen {$sales_order['id']} haetuksi merkkaaminen"
-              . "epäonnistui";
+        . "epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }

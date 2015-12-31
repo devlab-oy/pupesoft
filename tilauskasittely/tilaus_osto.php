@@ -1451,17 +1451,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           if ($prow["tunnus"] != "") {
             if ($toim != "HAAMU") {
               $parametrit = "?toim={$toim}" .
-                            "&ajax_popup=true" .
-                            "&tuoteno={$prow["tuoteno"]}" .
-                            "&varasto={$laskurow["varasto"]}" .
-                            "&yksikko={$prow["yksikko"]}" .
-                            "&tilattu={$prow["tilattu"]}" .
-                            "&varattu={$prow["varattukpl"]}" .
-                            "&paikka={$prow["paikka"]}" .
-                            "&keskihinta={$prow["keskihinta"]}" .
-                            "&valuutta={$prow["valuutta"]}" .
-                            "&ostohinta={$prow["ostohinta"]}" .
-                            "&vanhatunnus={$laskurow["vanhatunnus"]}";
+                "&ajax_popup=true" .
+                "&tuoteno={$prow["tuoteno"]}" .
+                "&varasto={$laskurow["varasto"]}" .
+                "&yksikko={$prow["yksikko"]}" .
+                "&tilattu={$prow["tilattu"]}" .
+                "&varattu={$prow["varattukpl"]}" .
+                "&paikka={$prow["paikka"]}" .
+                "&keskihinta={$prow["keskihinta"]}" .
+                "&valuutta={$prow["valuutta"]}" .
+                "&ostohinta={$prow["ostohinta"]}" .
+                "&vanhatunnus={$laskurow["vanhatunnus"]}";
 
               echo "<td valign='top' $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'

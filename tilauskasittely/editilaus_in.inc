@@ -1320,7 +1320,7 @@ while ($tietue = fgets($fd)) {
           $editilaus_tila   = 'N';
           $editilaus_alatila   = '';
         }
-        else if ($editilaus_tilaustyyppi == 'maksettu') {
+        elseif ($editilaus_tilaustyyppi == 'maksettu') {
           $editilaus_tila   = 'N';
           $editilaus_alatila   = 'A';
         }

@@ -2778,7 +2778,7 @@ else {
             echo "<table><tr>";
 
             foreach ($rows[0] as $ken_nimi => $null) {
-              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+              if (!in_array($ken_nimi, array('asiakaslista', 'tuotelista', 'maalista'))) {
                 echo "<th>", t($ken_nimi), "</th>";
               }
 
@@ -2797,7 +2797,7 @@ else {
           if (isset($worksheet)) {
             $excelsarake=0;
             foreach ($rows[0] as $ken_nimi => $null) {
-              if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+              if (!in_array($ken_nimi, array('asiakaslista', 'tuotelista', 'maalista'))) {
                 $worksheet->write($excelrivi, $excelsarake++, ucfirst(t($ken_nimi)), $format_bold);
               }
             }
@@ -3359,7 +3359,7 @@ else {
                   $row[$ken_nimi] = $varaston_saldo;
                 }
 
-                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                if (!in_array($ken_nimi, array('asiakaslista', 'tuotelista', 'maalista'))) {
                   if (($ken_lask >= $data_start_index or $ken_nimi == "varastonarvo" or $ken_nimi == "kierto" or $ken_nimi == "varastonkpl") and is_numeric($row[$ken_nimi])) {
                     if ($rivimaara <= $rivilimitti) {
                       echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$ken_nimi])."</td>";
@@ -3469,7 +3469,7 @@ else {
               $ken_lask = 0;
 
               foreach ($row as $ken_nimi => $kentta) {
-                if (!in_array($ken_nimi, array('asiakaslista','tuotelista','maalista'))) {
+                if (!in_array($ken_nimi, array('asiakaslista', 'tuotelista', 'maalista'))) {
                   if ($ken_lask < $data_start_index) {
                     $valisummat[$ken_nimi] = "";
                     $totsummat[$ken_nimi]  = "";

@@ -36,14 +36,14 @@ if ($toimitusvahvistus_email_lahetys) {
   $rivi_loop_res = pupe_query($query);
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
-    
+
     if ($_toimvahvistus == "eihintaa") {
       $_hinta = "";
     }
     else {
       $_hinta = "{$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}";
     }
-    
+
     $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n";
   }
 

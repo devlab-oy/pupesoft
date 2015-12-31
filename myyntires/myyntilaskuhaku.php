@@ -207,7 +207,7 @@ echo "<td><select name = 'laskuntyyppi'>
     </select></td>
     </tr>";
 
-$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'VS', 'N', 'V', 'L', 'A', 'LN','M'), '');
+$sel = array_fill_keys(array($tee), " selected") + array_fill_keys(array('S', 'VS', 'N', 'V', 'L', 'A', 'LN', 'M'), '');
 
 echo "<tr>";
 echo "<th>".t("Hakulaji")."</th>";

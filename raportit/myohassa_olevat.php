@@ -191,7 +191,7 @@ if ($tee == "HAE") {
   if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
     echo "<th>".t("Ytunnus")."</th>";
     echo "<th>".t("Asiakas")."</th>";
-    echo "<th>",t("Tila"),"</th>";
+    echo "<th>", t("Tila"), "</th>";
     echo "<th>".t("Tilaus")."</th>";
     echo "<th>".t("Tuoteno")."</th>";
     echo "<th>".t("Myytävissä")."<br>".t("Hyllyssä")."</th>";
@@ -199,7 +199,7 @@ if ($tee == "HAE") {
     echo "<th>".t("Myynti Toimitusaika")."</th>";
     echo "<th>", t("Tilattu"), "</th>";
     echo "<th>", t("Osto Toimitusaika"), "</th>";
-    echo "<th>",t("Osto Vahvistettu"),"</th>";
+    echo "<th>", t("Osto Vahvistettu"), "</th>";
   }
   else {
     echo "<th>".t("Ytunnus")."</th>";
@@ -450,7 +450,7 @@ if ($tee == "HAE") {
             "lopetus={$lopetus}",
           );
 
-          echo "<a href='{$_url}?",implode('&', $_params),"'>",t("Muokkaa"),"</a>";
+          echo "<a href='{$_url}?", implode('&', $_params), "'>", t("Muokkaa"), "</a>";
         }
 
         echo "</td>";
@@ -510,7 +510,7 @@ if ($tee == "HAE") {
           }
 
           echo "<td align='right'>{$ostovarattu}</td>";
-          echo "<td>",tv1dateconv($ostotoimitusaika),"</td>";
+          echo "<td>", tv1dateconv($ostotoimitusaika), "</td>";
 
           $_vahvistettu = $vahvistettu_pvm[$myohastyneet_row['tuoteno']][$ostotoimitusaika] ? t("Kyllä") : t("Ei");
           echo "<td>{$_vahvistettu}</td>";

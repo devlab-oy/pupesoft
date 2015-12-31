@@ -206,7 +206,7 @@ if (!function_exists('huoltosaate_rivi_otsikot')) {
     $pdf->draw_text(125, $kala, t("Työnkuvaus", $kieli), $thispage, $_hsnorm);
     $pdf->draw_text(350, $kala, t("Kpl", $kieli), $thispage, $_hsnorm);
 
-    $otsikko = t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$laskurow['alv']}%";
+    $otsikko = t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." ".(int) $laskurow['alv']."%";
     $oikpos = $pdf->strlen($otsikko, $_hsnorm);
 
     $pdf->draw_text(540-$oikpos, $kala, $otsikko, $thispage, $_hsnorm);
@@ -288,7 +288,7 @@ if (!function_exists('huoltosaate_loppu')) {
 
     $pdf->draw_rectangle($kala-2, 50, $kala-2, 540, $thispage, $_hsrectparam);
 
-    $pdf->draw_text(50, $kala, t("Yhteensä", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$laskurow['alv']}%", $thispage, $_hsnorm);
+    $pdf->draw_text(50, $kala, t("Yhteensä", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." ".(int) $laskurow['alv']."%", $thispage, $_hsnorm);
 
     $oikpos = $pdf->strlen(sprintf('%.2f', $yhteensa).",-", $_hsnorm);
     $pdf->draw_text(540-$oikpos, $kala, sprintf('%.2f', $yhteensa).",-", $thispage, $_hsnorm);

@@ -804,7 +804,7 @@ class pdffile {
          * this is really a JFIF stream
          */
     if (!in_array(substr($data, 0, 4), array("\xff\xd8\xff\xe0", "\xff\xd8\xff\xe1")) ||
-        !in_array(strtoupper(substr($data, 6, 4)), array("JFIF", "EXIF"))
+      !in_array(strtoupper(substr($data, 6, 4)), array("JFIF", "EXIF"))
     ) {
       // This is not in JFIF or EXIF format
       $this->_push_std_error(6008);

@@ -16,10 +16,12 @@ class PrestaCustomerGroups extends PrestaClient {
 
   /**
    *
-   * @param array $group
+   * @param array   $group
    * @param SimpleXMLElement $existing_group
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($group, SimpleXMLElement $existing_group = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -89,7 +91,7 @@ class PrestaCustomerGroups extends PrestaClient {
     $query = "UPDATE avainsana
               SET selitetark_5 = '{$id}'
               WHERE yhtio = '{$group['yhtio']}'
-              AND tunnus = {$group['tunnus']}";
+              AND tunnus  = {$group['tunnus']}";
     pupe_query($query);
   }
 

@@ -704,7 +704,7 @@ if (!function_exists('finvoice_rivi')) {
 
             $lisakomm .= "|".t("Työmääräys", $kieli). ": $tyomrow[otunnus]";
 
-            $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+            $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L','J')");
 
             while ($al_row = mysql_fetch_assoc($al_res)) {
 

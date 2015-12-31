@@ -81,8 +81,8 @@ if ($aika != '') {
   if ($konserni == 'on') {
     $query = "SELECT yhtio, konserni, nimi
               FROM yhtio
-              WHERE konserni = '$trow[konserni]'
-              and konserni != ''";
+              WHERE konserni  = '$trow[konserni]'
+              and konserni   != ''";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) < 2) {
@@ -105,9 +105,9 @@ if ($aika != '') {
       //Myyntireskontra
       $query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa-saldo_maksettu) summa, count(*)
                 FROM lasku
-                WHERE yhtio = '$yrow[yhtio]'
+                WHERE yhtio    = '$yrow[yhtio]'
                 and lasku.tila = 'U'
-                and mapvm = '0000-00-00'
+                and mapvm      = '0000-00-00'
                 GROUP BY 1";
       $yresult = pupe_query($query);
 
@@ -137,9 +137,9 @@ if ($aika != '') {
       $query = "SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
                 FROM lasku, valuu, yhtio
                 WHERE lasku.yhtio  = '$yrow[yhtio]'
-                and valuu.yhtio = '$yrow[yhtio]'
+                and valuu.yhtio    = '$yrow[yhtio]'
                 and lasku.valkoodi = valuu.nimi
-                and lasku.tila in ($tilat)
+                and lasku.tila     in ($tilat)
                 GROUP BY olmapvm";
       $yresult = pupe_query($query);
 
@@ -166,8 +166,8 @@ if ($aika != '') {
     $query = "SELECT if(kapvm > now(), kapvm, erpcm) olmapvm, sum(summa-saldo_maksettu) summa, count(*)
               FROM lasku
               WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tila = 'U'
-              AND mapvm = '0000-00-00'
+              AND lasku.tila    = 'U'
+              AND mapvm         = '0000-00-00'
               GROUP BY 1";
     $result = pupe_query($query);
 
@@ -198,7 +198,7 @@ if ($aika != '') {
               FROM lasku
               JOIN valuu ON (valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi)
               WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tila in ($tilat)
+              AND lasku.tila    in ($tilat)
               GROUP BY olmapvm";
     $result = pupe_query($query);
 
@@ -252,7 +252,7 @@ if ($aika != '') {
   if (!empty($pankkisaldo)) {
     $query = "SELECT sum(maksulimitti) saldo_nyt
               FROM yriti
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio  = '$kukarow[yhtio]'
               AND valkoodi = '$yhtiorow[valkoodi]'";
     $yres = pupe_query($query);
     $yrow = mysql_fetch_assoc($yres);

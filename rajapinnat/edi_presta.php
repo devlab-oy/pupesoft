@@ -5,11 +5,13 @@ class EdiPresta {
   /**
    * Creates file in EDI-format from sales order
    *
-   * @param array $sales_order
-   * @param string $filepath_base
+   * @param array   $sales_order
+   * @param string  $filepath_base
    * @return string
    * @throws Exception
    */
+
+
   public static function create($sales_order, $filepath_base) {
     if (empty($sales_order)) {
       throw new Exception('Myyntitilauksen edi-sanoman luominen epäonnistui');
@@ -79,8 +81,8 @@ class EdiPresta {
 
     //Jos tilauksella on rahtikulu niin lisätään tilaukselle rahtikulurivi
     $rahtirivi = array(
-        'row_number'     => $row_number,
-        'sales_order_id' => $sales_order['external_system_id'],
+      'row_number'     => $row_number,
+      'sales_order_id' => $sales_order['external_system_id'],
     );
     if ($sales_order['rahti_veroton'] != 0) {
       self::add_row($rahtirivi, $edi_msg);
@@ -98,8 +100,8 @@ class EdiPresta {
 
   /**
    *
-   * @param array $tilausrivi
-   * @param string $edi_msg
+   * @param array   $tilausrivi
+   * @param string  $edi_msg
    */
   private static function add_row($tilausrivi, &$edi_msg) {
     $kpl = $tilausrivi['tilkpl'];
@@ -128,8 +130,8 @@ class EdiPresta {
 
   /**
    *
-   * @param string $edi_msg
-   * @param string $filepath
+   * @param string  $edi_msg
+   * @param string  $filepath
    * @return string
    * @throws Exception
    */

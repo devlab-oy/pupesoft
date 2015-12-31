@@ -19,11 +19,11 @@ else {
 // Etsit‰‰n lasku
 $query = "SELECT *
           FROM lasku
-          WHERE tunnus = '$kukarow[kesken]'
-          and yhtio = '$kukarow[yhtio]'
-          and tila = 'L'
-          and alatila != 'V'
-          and alatila != 'X'";
+          WHERE tunnus  = '$kukarow[kesken]'
+          and yhtio     = '$kukarow[yhtio]'
+          and tila      = 'L'
+          and alatila  != 'V'
+          and alatila  != 'X'";
 $laskutusres = pupe_query($query);
 
 if (mysql_num_rows($laskutusres) == 0) {
@@ -81,14 +81,14 @@ else {
         $query = "SELECT kurssi
                   FROM valuu
                   WHERE yhtio = '$kukarow[yhtio]'
-                  AND nimi = '$orow[valkoodi]'";
+                  AND nimi    = '$orow[valkoodi]'";
       }
       else {
         $query = "SELECT kurssi
                   FROM valuu_historia
                   WHERE kotivaluutta = '$yhtiorow[valkoodi]'
                   AND valuutta       = '$orow[valkoodi]'
-                  AND kurssipvm     <= '$valpaiva'
+                  AND kurssipvm      <= '$valpaiva'
                   ORDER BY kurssipvm DESC
                   LIMIT 1";
       }
@@ -100,9 +100,9 @@ else {
 
           // Korjataan tilausrivien hinnat, jotta laskun valuuttam‰‰r‰inen summa pysyy samana
           $query = "SELECT tilausrivi.hinta, tilausrivi.tunnus
-                     FROM tilausrivi
-                     WHERE tilausrivi.otunnus = '$kukarow[kesken]'
-                     and tilausrivi.yhtio     = '$kukarow[yhtio]'";
+                    FROM tilausrivi
+                    WHERE tilausrivi.otunnus = '$kukarow[kesken]'
+                    and tilausrivi.yhtio     = '$kukarow[yhtio]'";
           $presult = pupe_query($query);
 
           while ($trow = mysql_fetch_assoc($presult)) {
@@ -111,7 +111,7 @@ else {
             $query = "UPDATE tilausrivi
                       SET hinta = '$hinta'
                       WHERE tunnus = '$trow[tunnus]'
-                      and yhtio = '$kukarow[yhtio]'";
+                      and yhtio    = '$kukarow[yhtio]'";
             pupe_query($query);
           }
 
@@ -120,7 +120,7 @@ else {
           $query = "UPDATE lasku
                     SET vienti_kurssi = '$valrow[kurssi]'
                     WHERE tunnus = '$kukarow[kesken]'
-                    and yhtio = '$kukarow[yhtio]'";
+                    and yhtio    = '$kukarow[yhtio]'";
           pupe_query($query);
         }
       }

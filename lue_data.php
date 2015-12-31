@@ -1907,7 +1907,7 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
-              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM', 'KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00', 'NULL')))) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($table_mysql == 'tuote' and $otsikko == 'MYYNTIHINTA' and $myyntihinnan_paivitys == 1) {
@@ -2352,13 +2352,13 @@ if ($kasitellaan_tiedosto) {
 
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
-              $syncrow = array();
-            }
-            else {
-              $syncrow = mysql_fetch_array($syncres);
-              $tunnus  = $syncrow["tunnus"];
-            }
+              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+                $syncrow = array();
+              }
+              else {
+                $syncrow = mysql_fetch_array($syncres);
+                $tunnus  = $syncrow["tunnus"];
+              }
 
               synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
             }

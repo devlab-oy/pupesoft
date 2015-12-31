@@ -25,9 +25,9 @@ if ($tee == 'paivita_hae_saldo') {
   $hae_saldo = isset($hae_saldo) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET
-            hae_saldo = {$hae_saldo}
+            hae_saldo   = {$hae_saldo}
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
+            AND tunnus  = {$pankkiyhteys_tunnus}";
   pupe_query($query);
 
   $tee = "";

@@ -2016,7 +2016,7 @@ class MagentoClient {
 
       // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
       if (count($asiakaskohtainenhintadata) > 0) {
-        
+
         $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
           array($magento_tuotenumero, $asiakaskohtainenhintadata));
         $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
@@ -2126,7 +2126,7 @@ class MagentoClient {
   private function poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
     // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
     $toiminto = false;
-    try {           
+    try {
       $asiakashinnat = array();
 
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {

@@ -14,7 +14,7 @@ class Logger {
     }
 
     $this->file_handle = fopen($this->log_filepath, 'a');
-    
+
     if ($this->file_handle === false) {
       throw new RuntimeException('File handle is false');
     }

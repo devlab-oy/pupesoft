@@ -134,4 +134,3 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
 else {
   die ("Ei näin");
 }
-

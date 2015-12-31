@@ -114,7 +114,7 @@ class PrestaCustomers extends PrestaClient {
     if (empty($contact_id) or empty($yhtio)) {
       return false;
     }
-    
+
     $query = "UPDATE yhteyshenkilo
               SET salasanan_resetointi = ''
               WHERE yhtio = '{$yhtio}'

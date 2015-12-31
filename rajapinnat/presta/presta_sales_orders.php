@@ -42,18 +42,18 @@ class PrestaSalesOrders extends PrestaClient {
 
     /**
      *
-      1	Awaiting cheque payment
-      2	Payment accepted
-      3	Preparation in progress
-      4	Shipped
-      5	Delivered
-      6	Canceled
-      7	Refund
-      8	Payment error
-      9	On backorder
-      10	Awaiting bank wire payment
-      11	Awaiting PayPal payment
-      12	Remote payment accepted
+      1  Awaiting cheque payment
+      2  Payment accepted
+      3  Preparation in progress
+      4  Shipped
+      5  Delivered
+      6  Canceled
+      7  Refund
+      8  Payment error
+      9  On backorder
+      10  Awaiting bank wire payment
+      11  Awaiting PayPal payment
+      12  Remote payment accepted
      */
     $this->order_states = array(1, 2, 10, 11, 12);
 

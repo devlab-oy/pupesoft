@@ -81,4 +81,3 @@ if (count($lisatiedot) > 0) {
 
   echo "</ul>";
 }
-

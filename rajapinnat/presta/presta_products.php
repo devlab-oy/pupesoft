@@ -42,7 +42,7 @@ class PrestaProducts extends PrestaClient {
     unset($xml->product->position_in_category);
 
     $xml->product->reference = $product['tuoteno'];
-    $xml->product->supplier_reference = $product['tuoteno']; 
+    $xml->product->supplier_reference = $product['tuoteno'];
     $xml->product->ean13 = $product['ean'];
 
     $xml->product->price = $product['myyntihinta'];
@@ -138,7 +138,7 @@ class PrestaProducts extends PrestaClient {
             $presta_stock->create_or_update($id, $product['saldo']);
           }
           // Lisätään tuotekuvat vain jos kuvasiirto on aktivoitu
-          if ($images_activated) { 
+          if ($images_activated) {
             $this->create_product_images($id, $product['images']);
           }
         }

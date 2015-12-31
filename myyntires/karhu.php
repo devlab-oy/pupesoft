@@ -394,7 +394,7 @@ if ($tee == 'KARHUA') {
     $email_vaihtoehdot .= "<option value = '{$asiakastiedot['email']}'>".$asiakastiedot['email']."</option>";
   }
   echo $email_vaihtoehdot;
-  echo "</select>";    
+  echo "</select>";
   echo "</td></tr>";
   echo "<tr><td class='back'></td><td class='back'><br></td></tr>";
 

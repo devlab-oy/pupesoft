@@ -16,10 +16,12 @@ class PrestaCustomerGroups extends PrestaClient {
 
   /**
    *
-   * @param array $group
+   * @param array   $group
    * @param SimpleXMLElement $existing_group
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($group, SimpleXMLElement $existing_group = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 

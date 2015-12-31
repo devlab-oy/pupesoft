@@ -10,6 +10,8 @@ class PrestaProducts extends PrestaClient {
   /**
    * Ohitettavien tuoteparametrien lista
    */
+
+
   private $_removable_fields = array();
 
   // Päivitetäänkö tuotekuvat
@@ -25,7 +27,7 @@ class PrestaProducts extends PrestaClient {
 
   /**
    *
-   * @param array $product
+   * @param array   $product
    * @param SimpleXMLElement $existing_product
    * @return \SimpleXMLElement
    */
@@ -78,7 +80,7 @@ class PrestaProducts extends PrestaClient {
 
     $removables = $this->_removable_fields;
     if (isset($removables) and count($removables) > 0) {
-      foreach($removables as $element) {
+      foreach ($removables as $element) {
         unset($xml->product->$element);
       }
     }
@@ -89,7 +91,7 @@ class PrestaProducts extends PrestaClient {
   /**
    *
    * @param SimpleXMLElement $xml
-   * @param array $ancestors
+   * @param array   $ancestors
    * @return int
    */
   private function add_category(SimpleXMLElement &$xml, $ancestors) {
@@ -106,7 +108,7 @@ class PrestaProducts extends PrestaClient {
 
   /**
    *
-   * @param array $products
+   * @param array   $products
    * @return boolean
    */
   public function sync_products(array $products) {
@@ -177,8 +179,8 @@ class PrestaProducts extends PrestaClient {
 
   /**
    *
-   * @param int $product_id
-   * @param array $images
+   * @param int     $product_id
+   * @param array   $images
    * @return int
    */
   protected function create_product_images($product_id, $images) {
@@ -206,8 +208,8 @@ class PrestaProducts extends PrestaClient {
 
   /**
    *
-   * @param int $product_id
-   * @param array $image_ids If empty delete all
+   * @param int     $product_id
+   * @param array   $image_ids  If empty delete all
    * @return int
    */
   protected function delete_product_images($product_id, $image_ids = array()) {

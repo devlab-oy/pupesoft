@@ -17,10 +17,12 @@ class PrestaCustomers extends PrestaClient {
 
   /**
    *
-   * @param array $customer
+   * @param array   $customer
    * @param SimpleXMLElement $existing_customer
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -127,7 +129,7 @@ class PrestaCustomers extends PrestaClient {
   /**
    * Overrides parents get
    *
-   * @param int $id
+   * @param int     $id
    */
   public function get($id) {
     return parent::get($id);

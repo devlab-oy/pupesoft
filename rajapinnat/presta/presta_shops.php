@@ -16,10 +16,12 @@ class PrestaShops extends PrestaClient {
 
   /**
    *
-   * @param array $shop
+   * @param array   $shop
    * @param SimpleXMLElement $existing_shop
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
     throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
     $xml = new SimpleXMLElement($this->schema->asXML());
@@ -35,7 +37,7 @@ class PrestaShops extends PrestaClient {
    * This function updates the first shops category_id
    * This is used in PrestaCategories sync_categories();
    *
-   * @param string $category_id
+   * @param string  $category_id
    */
   public function update_shops_category($category_id) {
     try {

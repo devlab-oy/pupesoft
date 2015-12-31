@@ -32058,10 +32058,12 @@ if (!function_exists("hae_tuoteperhe")) {
 }
 
 if (!function_exists('generoi_hinnastot')) {
+
+
   /**
    * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi
    *
-   * @param int $tuote_tunnus Tuotteen tunnus
+   * @param int     $tuote_tunnus Tuotteen tunnus
    *
    * @return bool Luotiinko tai päivitettinkö hinnasto
    */

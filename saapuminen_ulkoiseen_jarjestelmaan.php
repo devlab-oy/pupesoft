@@ -66,9 +66,9 @@ if (!$ftp_chk) {
   die ("FTP-tiedot ovat puutteelliset!\n");
 }
 
-# Tarvitaan:
-# $saapumisnro
-# ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
+// Tarvitaan:
+// $saapumisnro
+// ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
 
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
@@ -115,9 +115,9 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   $body->addChild('PurchId', $ostotilaus_row['tunnus']);
   $body->addChild('ReceiptsListId', $row['laskunro']);
 
-  # U = new
-  # M = change
-  # P = delete
+  // U = new
+  // M = change
+  // P = delete
   $body->addChild('OrderCode', $ordercode);
   $body->addChild('OrderType', 'PO');
   $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));

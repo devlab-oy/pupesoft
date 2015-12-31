@@ -38,18 +38,18 @@ if (!isset($yhtiorow)) {
 }
 
 $request = array(
-    'action'              => $action,
-    'synkronointi_tyyppi' => $synkronointi_tyyppi,
+  'action'              => $action,
+  'synkronointi_tyyppi' => $synkronointi_tyyppi,
 );
 
 $request['synkronointi_tyypit'] = array(
-    'kaikki'        => t('Kaikki'),
-    'kategoriat'    => t('Kategoriat'),
-    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
-    'asiakasryhmat' => t('Asiakasryhmät'),
-    'asiakkaat'     => t('Asiakkaat'),
-    'asiakashinnat' => t('Asiakashinnat'),
-    'tilaukset'     => t('Tilauksien haku'),
+  'kaikki'        => t('Kaikki'),
+  'kategoriat'    => t('Kategoriat'),
+  'tuotteet'      => t('Tuotteet ja tuotekuvat'),
+  'asiakasryhmat' => t('Asiakasryhmät'),
+  'asiakkaat'     => t('Asiakkaat'),
+  'asiakashinnat' => t('Asiakashinnat'),
+  'tilaukset'     => t('Tilauksien haku'),
 );
 
 if ($request['action'] == 'sync') {
@@ -117,7 +117,7 @@ else {
   echo_kayttoliittyma($request);
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';
 
 function echo_kayttoliittyma($request) {
   global $kukarow, $yhtiorow;
@@ -286,7 +286,7 @@ function hae_tuotteet() {
             ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
   $dnstuote = array();
-// Pyöräytetään muuttuneet tuotteet läpi
+  // Pyöräytetään muuttuneet tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
 
     // Jos yhtiön hinnat eivät sisällä alv:tä
@@ -325,9 +325,9 @@ function hae_tuotteet() {
 
       while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
         $asiakashinnat[] = array(
-            'asiakasryhma' => $asiakashintarow['asiakasryhma'],
-            'tuoteno'      => $asiakashintarow['tuoteno'],
-            'hinta'        => $asiakashintarow['hinta'],
+          'asiakasryhma' => $asiakashintarow['asiakasryhma'],
+          'tuoteno'      => $asiakashintarow['tuoteno'],
+          'hinta'        => $asiakashintarow['hinta'],
         );
       }
     }
@@ -392,9 +392,9 @@ function hae_tuotteet() {
 
     while ($parametrirow = mysql_fetch_assoc($parametritres)) {
       $tuotteen_parametrit[] = array(
-          "nimi"        => $parametrirow["selitetark"],
-          "option_name" => $parametrirow["option_name"],
-          "arvo"        => $parametrirow["selite"]
+        "nimi"        => $parametrirow["selitetark"],
+        "option_name" => $parametrirow["option_name"],
+        "arvo"        => $parametrirow["selite"]
       );
     }
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
@@ -415,39 +415,39 @@ function hae_tuotteet() {
     if (!isset($hinnastoresult['hinta']))
       $hinnastoresult['hinta'] = '';
 
-    list(,, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
     $dnstuote[] = array(
-        'tuoteno'              => $row["tuoteno"],
-        'nimi'                 => $row["nimitys"],
-        'kuvaus'               => $row["kuvaus"],
-        'lyhytkuvaus'          => $row["lyhytkuvaus"],
-        'yksikko'              => $row["yksikko"],
-        'tuotemassa'           => $row["tuotemassa"],
-        'tuotemerkki'          => $row["tuotemerkki"],
-        'myyntihinta'          => $myyntihinta,
-        'myyntihinta_veroton'  => $myyntihinta_veroton,
-        'myymalahinta'         => $myymalahinta,
-        'myymalahinta_veroton' => $myymalahinta_veroton,
-        'kuluprosentti'        => $row['kuluprosentti'],
-        'ean'                  => $row["eankoodi"],
-        'osasto'               => $row["osasto"],
-        'try'                  => $row["try"],
-        'try_nimi'             => $row["try_nimi"],
-        'alv'                  => $row["alv"],
-        'nakyvyys'             => $row["nakyvyys"],
-        'nimi_swe'             => $row["nimi_swe"],
-        'nimi_eng'             => $row["nimi_eng"],
-        'campaign_code'        => $row["campaign_code"],
-        'target'               => $row["target"],
-        'onsale'               => $row["onsale"],
-        'tunnus'               => $row['tunnus'],
-        'hinnastohinta'        => $hinnastoresult['hinta'],
-        'asiakashinnat'        => $asiakashinnat,
-        'tuotepuun_nodet'      => $tuotepuun_nodet,
-        'tuotteen_parametrit'  => $tuotteen_parametrit,
-        'saldo'                => $myytavissa,
-        'images'               => hae_tuotekuvat($row['tunnus']),
+      'tuoteno'              => $row["tuoteno"],
+      'nimi'                 => $row["nimitys"],
+      'kuvaus'               => $row["kuvaus"],
+      'lyhytkuvaus'          => $row["lyhytkuvaus"],
+      'yksikko'              => $row["yksikko"],
+      'tuotemassa'           => $row["tuotemassa"],
+      'tuotemerkki'          => $row["tuotemerkki"],
+      'myyntihinta'          => $myyntihinta,
+      'myyntihinta_veroton'  => $myyntihinta_veroton,
+      'myymalahinta'         => $myymalahinta,
+      'myymalahinta_veroton' => $myymalahinta_veroton,
+      'kuluprosentti'        => $row['kuluprosentti'],
+      'ean'                  => $row["eankoodi"],
+      'osasto'               => $row["osasto"],
+      'try'                  => $row["try"],
+      'try_nimi'             => $row["try_nimi"],
+      'alv'                  => $row["alv"],
+      'nakyvyys'             => $row["nakyvyys"],
+      'nimi_swe'             => $row["nimi_swe"],
+      'nimi_eng'             => $row["nimi_eng"],
+      'campaign_code'        => $row["campaign_code"],
+      'target'               => $row["target"],
+      'onsale'               => $row["onsale"],
+      'tunnus'               => $row['tunnus'],
+      'hinnastohinta'        => $hinnastoresult['hinta'],
+      'asiakashinnat'        => $asiakashinnat,
+      'tuotepuun_nodet'      => $tuotepuun_nodet,
+      'tuotteen_parametrit'  => $tuotteen_parametrit,
+      'saldo'                => $myytavissa,
+      'images'               => hae_tuotekuvat($row['tunnus']),
     );
 
     if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {

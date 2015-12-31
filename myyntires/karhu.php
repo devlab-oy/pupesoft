@@ -381,7 +381,7 @@ if ($tee == 'KARHUA') {
 
   echo "<tr><th>".t("Sähköposti")."</th>";
   echo "<td>";
-  # Annetaan käyttäjän valita asiakkaan takaa löytyvä sähköpostiosoite jos on useita
+  // Annetaan käyttäjän valita asiakkaan takaa löytyvä sähköpostiosoite jos on useita
   echo "<select name='karhu_email'>";
   $email_vaihtoehdot = '';
   if (!empty($asiakastiedot['talhal_email'])) {

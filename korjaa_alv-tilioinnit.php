@@ -2,8 +2,8 @@
 
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
-#error_reporting(E_ALL);
-#ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 
 // otetaan tietokanta connect
 require "inc/connect.inc";
@@ -11,7 +11,7 @@ require "inc/functions.inc";
 
 // Pupeasennuksen root
 $pupe_root_polku = dirname(__FILE__);
-#$pupe_root_polku = "/Users/satu/Dropbox/Sites/pupesoft/";
+//$pupe_root_polku = "/Users/satu/Dropbox/Sites/pupesoft/";
 
 if (!isset($argv[1]) or !isset($argv[2]) or !isset($argv[3])) {
   echo utf8_encode("VIRHE: pakollisia parametreja puuttu!")."\n";
@@ -115,7 +115,7 @@ if (mysql_num_rows($result) > 0) {
 
         $kulu_chk_row['summa'] -= $alvin_ero;
         list($_tunnus, ) = explode(',', $new_alv_chk_row['tunnukset']);
-echo utf8_encode("$laskurow[laskunro], $laskurow[tapvm], $laskurow[tunnus], $laskurow[nimi], $laskurow[yhtio_toimipaikka], $old_alv_chk_row[summa], $new_alv_chk_row[summa], $_tunnus, ero: $alvin_ero")."\n";
+        echo utf8_encode("$laskurow[laskunro], $laskurow[tapvm], $laskurow[tunnus], $laskurow[nimi], $laskurow[yhtio_toimipaikka], $old_alv_chk_row[summa], $new_alv_chk_row[summa], $_tunnus, ero: $alvin_ero")."\n";
         $kpl += $kpl;
 
         kopioitiliointi($kulu_chk_row['tunnus'], $kukamuuttaa);

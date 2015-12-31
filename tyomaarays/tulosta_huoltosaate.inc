@@ -106,7 +106,7 @@ if (!function_exists('huoltosaate_alku')) {
 
       $_oikea_yla_x = 815;
 
-      foreach(explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
+      foreach (explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
         $oikpos = $pdf->strlen($oikea_yla_teksti, $_hsnorm);
         $pdf->draw_text(540-$oikpos, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $_hsnorm);
         $_oikea_yla_x -= 12;
@@ -169,11 +169,11 @@ if (!function_exists('huoltosaate_alku')) {
 
         $_oikea_yla_x = $kala;
 
-        foreach(explode("\n", trim($laskurow[$al_row['selite']])) as $komm) {
+        foreach (explode("\n", trim($laskurow[$al_row['selite']])) as $komm) {
 
           $komm = wordwrap($komm, 140, "\n", true);
 
-          foreach(explode("\n", trim($komm)) as $kommentti) {
+          foreach (explode("\n", trim($komm)) as $kommentti) {
             list($ff_string, $ff_font) = pdf_fontfit($kommentti, 595, $pdf, $_hspieni);
             $pdf->draw_text(50, $_oikea_yla_x, $ff_string, $thispage, $ff_font);
             $_oikea_yla_x -= 12;
@@ -253,11 +253,11 @@ if (!function_exists('huoltosaate_rivi')) {
 
     $_oikea_yla_x = $kala;
 
-    foreach(explode("\n", trim($row["kommentti"])) as $komm) {
+    foreach (explode("\n", trim($row["kommentti"])) as $komm) {
 
       $komm = wordwrap($komm, 65, "\n", true);
 
-      foreach(explode("\n", trim($komm)) as $kommentti) {
+      foreach (explode("\n", trim($komm)) as $kommentti) {
         list($ff_string, $ff_font) = pdf_fontfit($kommentti, 220, $pdf, $_hsnorm);
         $pdf->draw_text(125, $_oikea_yla_x, $ff_string, $thispage, $ff_font);
         $_oikea_yla_x -= 12;

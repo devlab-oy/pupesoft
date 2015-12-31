@@ -16,10 +16,12 @@ class PrestaCountries extends PrestaClient {
 
   /**
    *
-   * @param array $country
+   * @param array   $country
    * @param SimpleXMLElement $existing_country
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($country, SimpleXMLElement $existing_country = null) {
     throw new Exception('You shouldnt be here! Country does not have CRUD yet');
     $xml = new SimpleXMLElement($this->schema->asXML());

@@ -3956,7 +3956,7 @@ if (isset($jatka)) {
     $chn = '999';
   }
   elseif ($liitostunnus != "" &&
-          !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn) && $toim == "YLLAPITO")) {
+    !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn) && $toim == "YLLAPITO")) {
     $chn = $asiarow['chn'];
 
     if ($chn == '') {

@@ -23,10 +23,12 @@ class PrestaSpecificPrices extends PrestaClient {
 
   /**
    *
-   * @param array $specific_price
+   * @param array   $specific_price
    * @param SimpleXMLElement $existing_specific_price
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -114,7 +116,7 @@ class PrestaSpecificPrices extends PrestaClient {
   /**
    * Finds presta product id from $this->product_ids
    *
-   * @param string $tuoteno
+   * @param string  $tuoteno
    * @return int
    * @throws Exception
    */

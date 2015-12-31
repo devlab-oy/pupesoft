@@ -121,7 +121,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   //työmääräyksen rivit
   $query = "SELECT tilausrivi.*,
-            round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1), '$yhtiorow[hintapyoristys]') hinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
             tuote.sarjanumeroseuranta,
             $sorttauskentta,
             if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -268,7 +270,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $yhteensa = 0;
 
         while ($row = mysql_fetch_assoc($riresult)) {
-          $yhteensa += $row['rivihinta'];
+          $yhteensa += $row['rivihinta_verollinen'];
           $params_huoltosaate["row"] = $row;
           $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
         }

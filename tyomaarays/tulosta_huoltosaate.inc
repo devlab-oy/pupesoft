@@ -88,7 +88,7 @@ if (!function_exists('huoltosaate_alku')) {
         $logoparam['scale'] = $lasku_logo_koko_x / $isizelogo[0];
       }
       else {
-        $logoparam['scale'] = $lasku_logo_koko_y  / $isizelogo[1];
+        $logoparam['scale'] = $lasku_logo_koko_y / $isizelogo[1];
       }
 
       $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
@@ -120,15 +120,15 @@ if (!function_exists('huoltosaate_alku')) {
     $pdf->draw_text((595 / 2) - ($otsikko_len / 2), 715, t("Huoltosaate", $kieli), $thispage, $_hsiso);
 
     $pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), $thispage, $_hspieni);
-    $pdf->draw_text(50, 644, $laskurow["toim_nimi"],      $thispage, $_hsnorm);
-    $pdf->draw_text(50, 634, $laskurow["toim_nimitark"],  $thispage, $_hsnorm);
-    $pdf->draw_text(50, 624, $laskurow["toim_osoite"],    $thispage, $_hsnorm);
+    $pdf->draw_text(50, 644, $laskurow["toim_nimi"], $thispage, $_hsnorm);
+    $pdf->draw_text(50, 634, $laskurow["toim_nimitark"], $thispage, $_hsnorm);
+    $pdf->draw_text(50, 624, $laskurow["toim_osoite"], $thispage, $_hsnorm);
     $pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $_hsnorm);
-    $pdf->draw_text(50, 604, $laskurow["toim_maa"],       $thispage, $_hsnorm);
+    $pdf->draw_text(50, 604, $laskurow["toim_maa"], $thispage, $_hsnorm);
 
     $pdf->draw_text(410, 656, t("Asiakkaan yhteystiedot", $kieli), $thispage, $_hspieni);
-    $pdf->draw_text(410, 644, $laskurow["nimi"],      $thispage, $_hsnorm);
-    $pdf->draw_text(410, 634, $laskurow["nimitark"],  $thispage, $_hsnorm);
+    $pdf->draw_text(410, 644, $laskurow["nimi"], $thispage, $_hsnorm);
+    $pdf->draw_text(410, 634, $laskurow["nimitark"], $thispage, $_hsnorm);
     $pdf->draw_text(410, 624, t("Puh.", $kieli)." {$laskurow['puh']}", $thispage, $_hsnorm);
 
     $pdf->draw_text(50, 584, t("Pvm", $kieli).": ".tv1dateconv($laskurow['luvattu']), $thispage, $_hsnorm);
@@ -202,15 +202,15 @@ if (!function_exists('huoltosaate_rivi_otsikot')) {
 
     $kala -= 20;
 
-    $pdf->draw_text(50,  $kala, t("Koodi", $kieli),  $thispage, $_hsnorm);
-    $pdf->draw_text(125, $kala, t("Työnkuvaus", $kieli),    $thispage, $_hsnorm);
-    $pdf->draw_text(350, $kala, t("Kpl", $kieli),    $thispage, $_hsnorm);
+    $pdf->draw_text(50, $kala, t("Koodi", $kieli), $thispage, $_hsnorm);
+    $pdf->draw_text(125, $kala, t("Työnkuvaus", $kieli), $thispage, $_hsnorm);
+    $pdf->draw_text(350, $kala, t("Kpl", $kieli), $thispage, $_hsnorm);
 
     $otsikko = t("Suositushinta", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$laskurow['alv']}%";
     $oikpos = $pdf->strlen($otsikko, $_hsnorm);
 
     $pdf->draw_text(540-$oikpos, $kala, $otsikko, $thispage, $_hsnorm);
-    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 540, $thispage, $_hsrectparam);
+    $pdf->draw_rectangle($kala-2, 50, $kala-2, 540, $thispage, $_hsrectparam);
 
     $kala -= 20;
 
@@ -266,8 +266,8 @@ if (!function_exists('huoltosaate_rivi')) {
 
     $pdf->draw_text(350, $kala, $row["varattu"], $thispage, $_hsnorm);
 
-    $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $_hsnorm);
-    $pdf->draw_text(540-$oikpos, $kala, hintapyoristys($row["rivihinta"], $yhtiorow['hintapyoristys']).",-", $thispage, $_hsnorm);
+    $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta_verollinen"], $yhtiorow['hintapyoristys']).",-", $_hsnorm);
+    $pdf->draw_text(540-$oikpos, $kala, hintapyoristys($row["rivihinta_verollinen"], $yhtiorow['hintapyoristys']).",-", $thispage, $_hsnorm);
 
     $kala = $_oikea_yla_x;
     $kala -= 20;
@@ -286,12 +286,12 @@ if (!function_exists('huoltosaate_loppu')) {
     // Luodaan muuttujat
     extract($params);
 
-    $pdf->draw_rectangle($kala-2, 50,  $kala-2, 540, $thispage, $_hsrectparam);
+    $pdf->draw_rectangle($kala-2, 50, $kala-2, 540, $thispage, $_hsrectparam);
 
     $pdf->draw_text(50, $kala, t("Yhteensä", $kieli)." {$laskurow['valkoodi']} ".t("sis ALV", $kieli)." {$laskurow['alv']}%", $thispage, $_hsnorm);
 
-    $oikpos = $pdf->strlen("{$yhteensa},-", $_hsnorm);
-    $pdf->draw_text(540-$oikpos, $kala, "{$yhteensa},-", $thispage, $_hsnorm);
+    $oikpos = $pdf->strlen(sprintf('%.2f', $yhteensa).",-", $_hsnorm);
+    $pdf->draw_text(540-$oikpos, $kala, sprintf('%.2f', $yhteensa).",-", $thispage, $_hsnorm);
 
     // Luodaan palautettavat
     $return = compact(array_keys($params));

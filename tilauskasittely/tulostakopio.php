@@ -1788,7 +1788,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         //työmääräyksen rivit
         $query = "SELECT tilausrivi.*,
-                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1), '$yhtiorow[hintapyoristys]') hinta,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -1836,7 +1838,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $tyyppi = $yhtiorow["tyomaaraystyyppi"];
         }
 
-        $params_tyomaarays = array( "asrow"           => $asrow,
+        $params_tyomaarays = array(
+          "asrow"           => $asrow,
           "boldi"           => $boldi,
           "edtuotetyyppi"   => "",
           "iso"             => $iso,
@@ -1913,9 +1916,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
       else $pjat_sortlisa = "";
 
-      //työmääräyksen rivit
+      // Huoltosaatteen rivit
       $query = "SELECT tilausrivi.*,
-                round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                 $sorttauskentta,
                 if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                 if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -1961,7 +1965,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $yhteensa = 0;
 
       while ($row = mysql_fetch_assoc($result)) {
-        $yhteensa += $row['rivihinta'];
+        $yhteensa += $row['rivihinta_verollinen'];
         $params_huoltosaate["row"] = $row;
         $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
       }

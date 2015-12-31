@@ -138,8 +138,6 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
             WHERE tilausrivi.otunnus  = '$otunnus'
             and tilausrivi.yhtio      = '$kukarow[yhtio]'
             and tilausrivi.tyyppi    != 'D'
-            and tilausrivi.yhtio      = tuote.yhtio
-            and tilausrivi.tuoteno    = tuote.tuoteno
             ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
   $riresult = pupe_query($query);
 

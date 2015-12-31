@@ -1713,6 +1713,25 @@ if ($tee == 'MUUTA') {
       echo "</td></tr>";
     }
 
+    if ($toim == 'extranet') {
+
+      $query = "SELECT asiakas.nimi 
+                FROM customers_users 
+                JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+                WHERE user_id = '{$krow['tunnus']}'";
+      $result = pupe_query($query);
+
+      // Jos k‰ytt‰j‰lle on linkattu useita asiakkuuksia, n‰ytet‰‰n ne
+      if (mysql_num_rows($result) > 0) {
+        echo "<tr><th>".t('K‰ytt‰j‰‰n liitetyt asiakkuudet')."</th>";
+        echo "<td>";
+        while ($row = mysql_fetch_assoc($result)) {
+          echo $row['nimi']."<br>";
+        }
+        echo "</td>";
+        echo "</tr>";
+      }
+    }
     echo "</table>";
     echo "</td>";
 

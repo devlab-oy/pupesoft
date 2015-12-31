@@ -321,13 +321,13 @@ if (!function_exists('huoltosaate_print_pdf')) {
     if ($komento == 'email') {
       $liite = $pdffilenimi;
 
-      $kutsu = t("Työmääräys", $kieli)." $laskurow[tunnus]";
+      $kutsu = t("Huoltosaate", $kieli)." $laskurow[tunnus]";
 
       if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
         $kutsu .= ", ".trim($laskurow["nimi"]);
       }
 
-      echo t("Työmääräys tulostuu")."...<br>";
+      echo t("Huoltosaate tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
         require "inc/sahkoposti.inc";
@@ -341,7 +341,7 @@ if (!function_exists('huoltosaate_print_pdf')) {
       echo file_get_contents($pdffilenimi);
     }
     elseif ($komento != '' and $komento != 'edi') {
-      echo t("Työmääräys tulostuu")."...<br>";
+      echo t("Huoltosaate tulostuu")."...<br>";
       $line = exec("$komento $pdffilenimi", $output, $returnvalue);
     }
   }

@@ -155,13 +155,13 @@ function hae_asiakkaat1() {
             FROM yhteyshenkilo
             JOIN asiakas
             ON ( asiakas.yhtio = yhteyshenkilo.yhtio
-              AND asiakas.tunnus = yhteyshenkilo.liitostunnus )
+              AND asiakas.tunnus      = yhteyshenkilo.liitostunnus )
             LEFT JOIN avainsana
             ON ( avainsana.yhtio = asiakas.yhtio
-              AND avainsana.selite = asiakas.ryhma
-              AND avainsana.laji = 'ASIAKASRYHMA' )
+              AND avainsana.selite    = asiakas.ryhma
+              AND avainsana.laji      = 'ASIAKASRYHMA' )
             WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-            AND yhteyshenkilo.rooli = 'Presta'";
+            AND yhteyshenkilo.rooli   = 'Presta'";
   $result = pupe_query($query);
 
   $asiakkaat = array();
@@ -185,8 +185,8 @@ function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) 
             FROM yhteyshenkilo AS y
             JOIN asiakas AS a
             ON ( a.yhtio = y.yhtio
-              AND a.tunnus = y.liitostunnus )
-            WHERE y.yhtio = '{$kukarow['yhtio']}'
+              AND a.tunnus               = y.liitostunnus )
+            WHERE y.yhtio                = '{$kukarow['yhtio']}'
             AND y.ulkoinen_asiakasnumero = {$asiakasnumero}";
   $result = pupe_query($query);
 
@@ -200,7 +200,7 @@ function hae_asiakasryhmat() {
             avainsana.selitetark_5 AS presta_customergroup_id
             FROM avainsana
             WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'ASIAKASRYHMA'";
+            AND laji              = 'ASIAKASRYHMA'";
   $result = pupe_query($query);
 
   $ryhmat = array();
@@ -225,15 +225,15 @@ function hae_asiakashinnat() {
             FROM asiakashinta
             JOIN tuote
             ON ( tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno = asiakashinta.tuoteno )
+              AND tuote.tuoteno              = asiakashinta.tuoteno )
             LEFT JOIN avainsana
             ON ( avainsana.yhtio = asiakashinta.yhtio
-              AND avainsana.selite = asiakashinta.asiakas_ryhma
-              AND avainsana.laji = 'ASIAKASRYHMA' )
+              AND avainsana.selite           = asiakashinta.asiakas_ryhma
+              AND avainsana.laji             = 'ASIAKASRYHMA' )
             LEFT JOIN yhteyshenkilo
             ON ( yhteyshenkilo.yhtio = asiakashinta.yhtio
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas )
-            WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'";
+            WHERE asiakashinta.yhtio         = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $asiakashinnat = array();
@@ -278,11 +278,11 @@ function hae_tuotteet() {
   $query = "SELECT
             tuote.*
             FROM tuote
-            WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
-              AND tuote.status        != 'P'
-              AND tuote.tuotetyyppi    NOT in ('A','B')
-              AND tuote.tuoteno       != ''
-              AND tuote.nakyvyys      != ''
+            WHERE tuote.yhtio        = '{$kukarow["yhtio"]}'
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != ''
             ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
   $dnstuote = array();
@@ -310,17 +310,17 @@ function hae_tuotteet() {
     if (isset($tuotteiden_asiakashinnat_magentoon)) {
 
       $query = "SELECT
-              avainsana.selitetark AS asiakasryhma,
-              asiakashinta.tuoteno,
-              asiakashinta.hinta
-              FROM asiakas
-              JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                AND avainsana.selite           = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
-              JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
-                AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-              WHERE asiakas.yhtio              = '{$kukarow['yhtio']}'
-                AND asiakashinta.tuoteno ='{$row['tuoteno']}'
-              GROUP BY 1,2,3";
+                avainsana.selitetark AS asiakasryhma,
+                asiakashinta.tuoteno,
+                asiakashinta.hinta
+                FROM asiakas
+                JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
+                  AND avainsana.selite           = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
+                JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
+                  AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
+                WHERE asiakas.yhtio              = '{$kukarow['yhtio']}'
+                  AND asiakashinta.tuoteno ='{$row['tuoteno']}'
+                GROUP BY 1,2,3";
       $asiakashintares = pupe_query($query);
 
       while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
@@ -334,50 +334,50 @@ function hae_tuotteet() {
 
     // Haetaan kaikki tuotteen atribuutit
     $parametritquery = "SELECT
-                      tuotteen_avainsanat.selite,
-                      avainsana.selitetark,
-                      avainsana.selite option_name
-                      FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
-                      JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                        AND avainsana.laji             = 'PARAMETRI'
-                        AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                      WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
-                      AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
-                      AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
-                      AND tuotteen_avainsanat.laji     like 'parametri_%'
-                      AND tuotteen_avainsanat.tuoteno  = '{$row['tuoteno']}'
-                      AND tuotteen_avainsanat.kieli    = 'fi'
-                      ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
+                        tuotteen_avainsanat.selite,
+                        avainsana.selitetark,
+                        avainsana.selite option_name
+                        FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+                        JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+                          AND avainsana.laji             = 'PARAMETRI'
+                          AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                        WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
+                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                        AND tuotteen_avainsanat.laji     like 'parametri_%'
+                        AND tuotteen_avainsanat.tuoteno  = '{$row['tuoteno']}'
+                        AND tuotteen_avainsanat.kieli    = 'fi'
+                        ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
     $query = "SELECT t0.nimi node, t0.lft,
-            tuote.tuoteno,
-            GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
-            (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
-             FROM dynaaminen_puu t6
-             WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
-             AND t6.laji      = 'tuote'
-             ORDER BY t6.lft) ancestors
-            FROM dynaaminen_puu t0
-            LEFT JOIN
-            (SELECT *
-             FROM (SELECT t1.lft node,
-             MAX(t2.lft) nodeparent
-             FROM dynaaminen_puu t1
-             INNER JOIN
-             dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-             GROUP BY t1.lft) t3
-             LEFT JOIN
-             dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
-            LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
-             JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
-            WHERE t0.yhtio ='{$kukarow['yhtio']}'
-            AND t0.laji       = 'tuote'
-            AND tuote.tuoteno = '{$row['tuoteno']}'
-            GROUP BY t0.nimi
-            ORDER BY t0.lft";
+              tuote.tuoteno,
+              GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
+              (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
+               FROM dynaaminen_puu t6
+               WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
+               AND t6.laji      = 'tuote'
+               ORDER BY t6.lft) ancestors
+              FROM dynaaminen_puu t0
+              LEFT JOIN
+              (SELECT *
+               FROM (SELECT t1.lft node,
+               MAX(t2.lft) nodeparent
+               FROM dynaaminen_puu t1
+               INNER JOIN
+               dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
+               GROUP BY t1.lft) t3
+               LEFT JOIN
+               dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
+              LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
+               JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
+              WHERE t0.yhtio ='{$kukarow['yhtio']}'
+              AND t0.laji       = 'tuote'
+              AND tuote.tuoteno = '{$row['tuoteno']}'
+              GROUP BY t0.nimi
+              ORDER BY t0.lft";
     $result_tp = pupe_query($query);
 
     $tuotepuun_nodet = array();
@@ -399,15 +399,15 @@ function hae_tuotteet() {
     }
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
     $query = "SELECT
-            *
-            FROM hinnasto
-            WHERE yhtio   = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$row['tuoteno']}'
-              AND maa     = '{$yhtiorow['maa']}'
-              AND laji    = ''
-              AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-            ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-            LIMIT 1";
+              *
+              FROM hinnasto
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$row['tuoteno']}'
+                AND maa     = '{$yhtiorow['maa']}'
+                AND laji    = ''
+                AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+              ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+              LIMIT 1";
 
     $hinnastoq = pupe_query($query);
     $hinnastoresult = mysql_fetch_assoc($hinnastoq);
@@ -465,8 +465,8 @@ function hae_tuotekuvat($tuote_tunnus) {
 
   $query = "SELECT *
             FROM liitetiedostot
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND liitos = 'tuote'
+            WHERE yhtio      = '{$kukarow['yhtio']}'
+            AND liitos       = 'tuote'
             AND liitostunnus = '{$tuote_tunnus}'
             ORDER BY jarjestys ASC";
   $result = pupe_query($query);

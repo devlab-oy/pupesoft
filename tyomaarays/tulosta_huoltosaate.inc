@@ -41,9 +41,9 @@ if (!function_exists('huoltosaate_alku')) {
 
     $query = "SELECT *
               FROM liitetiedostot
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio      = '{$kukarow['yhtio']}'
               AND liitostunnus = '{$merkkiavainsanarow['tunnus']}'
-              and liitos = 'avainsana'";
+              and liitos       = 'avainsana'";
     $liiteres = pupe_query($query);
     $liite = mysql_fetch_assoc($liiteres);
 
@@ -136,7 +136,7 @@ if (!function_exists('huoltosaate_alku')) {
     $query = "SELECT *
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['liitostunnus']}'";
+              AND tunnus  = '{$laskurow['liitostunnus']}'";
     $asiakasres = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($asiakasres);
 

@@ -14,23 +14,23 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
 
     $query = "INSERT INTO kerattavatrivit SET
-              tilausrivi_id = '{$tunnus}',
-              hyllyalue  = '{$hyllyalue}',
-              hyllynro   = '{$hyllynro}',
-              hyllyvali  = '{$hyllyvali}',
-              hyllytaso  = '{$hyllytaso}',
-              poikkeava_maara = '{$poikkeava_maara}',
+              tilausrivi_id       = '{$tunnus}',
+              hyllyalue           = '{$hyllyalue}',
+              hyllynro            = '{$hyllynro}',
+              hyllyvali           = '{$hyllyvali}',
+              hyllytaso           = '{$hyllytaso}',
+              poikkeava_maara     = '{$poikkeava_maara}',
               poikkeama_kasittely = '{$poikkeama_kasittely}',
-              keratty    = 1,
-              created_at = now()
+              keratty             = 1,
+              created_at          = now()
               ON DUPLICATE KEY UPDATE
-              hyllyalue  = '{$hyllyalue}',
-              hyllynro   = '{$hyllynro}',
-              hyllyvali  = '{$hyllyvali}',
-              hyllytaso  = '{$hyllytaso}',
-              poikkeava_maara = '{$poikkeava_maara}',
+              hyllyalue           = '{$hyllyalue}',
+              hyllynro            = '{$hyllynro}',
+              hyllyvali           = '{$hyllyvali}',
+              hyllytaso           = '{$hyllytaso}',
+              poikkeava_maara     = '{$poikkeava_maara}',
               poikkeama_kasittely = '{$poikkeama_kasittely}',
-              updated_at  = now()";
+              updated_at          = now()";
     $result = pupe_query($query);
 
     echo $tunnus;

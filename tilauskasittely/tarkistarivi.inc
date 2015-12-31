@@ -107,16 +107,16 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
   $query = "SELECT *
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.tuoteno = '{$row['tuoteno']}'
-              AND tilausrivi.tyyppi = 'L'
-              AND tilausrivi.var = 'J'
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi   = 'L'
+              AND tilausrivi.var      = 'J'
               AND tilausrivi.jt {$lisavarattu} > 0
-              AND tilausrivi.tunnus != '{$row['tunnus']}'
+              AND tilausrivi.tunnus  != '{$row['tunnus']}'
             )
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.liitostunnus = '{$laskurow['liitostunnus']}'
-            AND lasku.tunnus != '{$laskurow['tunnus']}'
+            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus    = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus         != '{$laskurow['tunnus']}'
             AND (lasku.tila = 'N' OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','BD','C','D','X')))";
   $chk_res = pupe_query($query);
 

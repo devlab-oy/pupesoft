@@ -75,21 +75,21 @@ if ($handle = opendir($path)) {
             $kpl = (float) $line->ArrivedQuantity;
 
             $query = "UPDATE tilausrivi SET
-                      varattu = '{$kpl}'
-                      WHERE yhtio = '{$yhtio}'
-                      AND tyyppi = 'O'
-                      AND otunnus = '{$ostotilaus}'
+                      varattu         = '{$kpl}'
+                      WHERE yhtio     = '{$yhtio}'
+                      AND tyyppi      = 'O'
+                      AND otunnus     = '{$ostotilaus}'
                       AND uusiotunnus = '{$saapumisnro}'
-                      AND tuoteno = '{$tuoteno}'
-                      AND tunnus = '{$rivitunnus}'";
+                      AND tuoteno     = '{$tuoteno}'
+                      AND tunnus      = '{$rivitunnus}'";
             $updres = pupe_query($query);
           }
         }
 
         $query = "UPDATE lasku SET
-                  sisviesti3 = 'ok_vie_varastoon'
-                  WHERE yhtio = '{$yhtio}'
-                  AND tila = 'K'
+                  sisviesti3   = 'ok_vie_varastoon'
+                  WHERE yhtio  = '{$yhtio}'
+                  AND tila     = 'K'
                   AND laskunro = '{$saapumisnro}'";
         $updres = pupe_query($query);
 

@@ -104,7 +104,7 @@ class PrestaCustomers extends PrestaClient {
     $query = "UPDATE yhteyshenkilo
               SET ulkoinen_asiakasnumero = {$presta_id}
               WHERE yhtio = '{$yhtio}'
-              AND tunnus = {$pupesoft_id}";
+              AND tunnus  = {$pupesoft_id}";
     pupe_query($query);
 
     return true;
@@ -118,7 +118,7 @@ class PrestaCustomers extends PrestaClient {
     $query = "UPDATE yhteyshenkilo
               SET salasanan_resetointi = ''
               WHERE yhtio = '{$yhtio}'
-              AND tunnus = {$contact_id}";
+              AND tunnus  = {$contact_id}";
     pupe_query($query);
 
     return true;

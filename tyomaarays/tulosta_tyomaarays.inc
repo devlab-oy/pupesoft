@@ -155,9 +155,9 @@ if (!function_exists('tyomaarays_alku')) {
 
     //etsit‰‰n myyj‰n nimi
     $query = "SELECT nimi
-               FROM kuka
-               WHERE tunnus = '$laskurow[myyja]'
-               AND yhtio = '$kukarow[yhtio]'";
+              FROM kuka
+              WHERE tunnus = '$laskurow[myyja]'
+              AND yhtio    = '$kukarow[yhtio]'";
     $myyresult = pupe_query($query);
     $myyrow = mysql_fetch_array($myyresult);
 
@@ -237,7 +237,7 @@ if (!function_exists('tyomaarays_alku')) {
             $query = "SELECT nimi
                       FROM kuka
                       WHERE yhtio = '$kukarow[yhtio]'
-                      and kuka = '".$laskurow[$kentta]."'";
+                      and kuka    = '".$laskurow[$kentta]."'";
             $yresult = pupe_query($query);
             $row = mysql_fetch_array($yresult);
 
@@ -596,14 +596,14 @@ if (!function_exists('tyomaarays_rivi')) {
       $query = "SELECT vanhatunnus
                 FROM lasku
                 WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '$row[otunnus]'";
+                and tunnus  = '$row[otunnus]'";
       $vtunres = pupe_query($query);
       $vtunrow = mysql_fetch_array($vtunres);
 
       if ($vtunrow["vanhatunnus"] != 0) {
         $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
                   FROM lasku use index (yhtio_vanhatunnus)
-                  WHERE yhtio = '$kukarow[yhtio]'
+                  WHERE yhtio     = '$kukarow[yhtio]'
                   and vanhatunnus = '$vtunrow[vanhatunnus]'";
         $perheresult = pupe_query($query);
         $numrows = mysql_num_rows($perheresult);
@@ -613,7 +613,7 @@ if (!function_exists('tyomaarays_rivi')) {
         $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
                   FROM lasku use index (PRIMARY)
                   WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$row[otunnus]'";
+                  and tunnus  = '$row[otunnus]'";
         $perheresult = pupe_query($query);
       }
 
@@ -797,8 +797,8 @@ if (!function_exists('tyomaarays_rivi')) {
 
       $query = "SELECT DISTINCT sarjanumero, parasta_ennen
                 FROM sarjanumeroseuranta
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno = '$row[tuoteno]'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tuoteno      = '$row[tuoteno]'
                 and $sarjanutunnus='$row[tunnus]'
                 and sarjanumero != ''
                 ORDER BY sarjanumero";

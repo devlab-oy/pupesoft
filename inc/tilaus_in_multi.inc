@@ -77,7 +77,7 @@ while ($rivi = fgets($fd)) {
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 {$asiakashaku_lis}
-                and laji not in ('P','R')";
+                and laji    not in ('P','R')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {

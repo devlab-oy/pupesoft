@@ -60,13 +60,13 @@ if (!isset($kukarow)) {
 
 // haetaan halutut varastotaphtumat
 $query  = "SELECT laskunro, tunnus, date_format(tapvm, '%Y%m%d') tapvm, month(tapvm) KUUKAUSI,
-      osto_rahti, osto_kulu, osto_rivi_kulu, nimi, ytunnus, yhtio_toimipaikka
-           FROM lasku
-           WHERE yhtio            = '$kukarow[yhtio]'
-           and ytunnus            = $ytunnus
-           and tila               in ('H','M','P','Q','Y')
-           #and yhtio_toimipaikka  = $tp
-           and (osto_rahti != 0 or osto_kulu != 0 or osto_rivi_kulu != 0)";
+           osto_rahti, osto_kulu, osto_rivi_kulu, nimi, ytunnus, yhtio_toimipaikka
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and ytunnus = $ytunnus
+                and tila    in ('H','M','P','Q','Y')
+                #and yhtio_toimipaikka  = $tp
+                and (osto_rahti != 0 or osto_kulu != 0 or osto_rivi_kulu != 0)";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -74,23 +74,23 @@ if (mysql_num_rows($result) > 0) {
   while ($laskurow = mysql_fetch_assoc($result)) {
 
     $query  = "SELECT laadittu, sum(summa) summa
-                from tiliointi
-                where yhtio   = '{$kukarow['yhtio']}'
-                and ltunnus   = '{$laskurow['tunnus']}'
-                and tilino    = '{$yhtiorow['alv']}'
-                and korjattu != ''
-                group by 1
-                order by 1 asc";
+               from tiliointi
+               where yhtio   = '{$kukarow['yhtio']}'
+               and ltunnus   = '{$laskurow['tunnus']}'
+               and tilino    = '{$yhtiorow['alv']}'
+               and korjattu != ''
+               group by 1
+               order by 1 asc";
 
     $old_alv_chk_res = pupe_query($query);
     $old_alv_chk_row = mysql_fetch_assoc($old_alv_chk_res);
 
     $query = "SELECT sum(summa) summa, group_concat(tunnus) tunnukset
               from tiliointi
-              where yhtio  = '{$kukarow['yhtio']}'
-              and ltunnus  = '{$laskurow['tunnus']}'
-              and tilino   = '{$yhtiorow['alv']}'
-              and korjattu = ''
+              where yhtio           = '{$kukarow['yhtio']}'
+              and ltunnus           = '{$laskurow['tunnus']}'
+              and tilino            = '{$yhtiorow['alv']}'
+              and korjattu          = ''
               and summa_valuutassa != 0";
 
     $new_alv_chk_res = pupe_query($query);

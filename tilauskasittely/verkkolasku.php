@@ -922,7 +922,7 @@ else {
                 FROM lasku
                 LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
                 LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-                where lasku.yhtio = '{$kukarow['yhtio']}'
+                where lasku.yhtio  = '{$kukarow['yhtio']}'
                 and lasku.tila     = 'L'
                 and lasku.alatila  = 'D'
                 and lasku.viite    = ''
@@ -939,9 +939,9 @@ else {
       while ($alaraja_row = mysql_fetch_assoc($alaraja_res)) {
         $query = "SELECT ROUND(SUM(tilausrivi.hinta * IF('{$yhtiorow['alv_kasittely']}' != '' AND tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
                   FROM tilausrivi
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi = 'L'
-                  AND tilausrivi.otunnus IN ({$alaraja_row['tunnukset']})
+                  WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi   = 'L'
+                  AND tilausrivi.otunnus  IN ({$alaraja_row['tunnukset']})
                   AND tilausrivi.varattu != 0
                   HAVING summa >= '{$yhtiorow['koontilaskut_alarajasumma']}'";
         $alarajasumma_chk_res = pupe_query($query);

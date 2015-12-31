@@ -1192,9 +1192,9 @@ function hae_tilin_saldo($params) {
   $query = "SELECT bic, tilino, hae_saldo
             FROM pankkiyhteys
             JOIN yriti ON (yriti.yhtio = pankkiyhteys.yhtio
-              AND yriti.bic = pankkiyhteys.pankki)
+              AND yriti.bic          = pankkiyhteys.pankki)
             WHERE pankkiyhteys.yhtio = '{$kukarow["yhtio"]}'
-            AND pankkiyhteys.tunnus = {$params['pankkiyhteys_tunnus']}
+            AND pankkiyhteys.tunnus  = {$params['pankkiyhteys_tunnus']}
             LIMIT 1";
   $result = pupe_query($query);
   $pankkiyhteys = mysql_fetch_assoc($result);

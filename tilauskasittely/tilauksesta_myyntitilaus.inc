@@ -369,6 +369,23 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
+    $_ALVREKULK = FALSE;
+
+    // Jos meillä on lasku menossa ulkomaille
+    // Tietyissä tapauksissa yhtiorow maa voi olla sama kuin laskun maa, mutta vat_numerosta tiedetään,
+    // että ollaan verovelsollisia tähä maahan
+    if ((isset($yhtiorow["vat_numero"]) and $yhtiorow["vat_numero"] != "") or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
+
+      // tutkitaan ollaanko siellä alv-rekisteröity
+      $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+      $alhire = pupe_query($query);
+
+      // ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+      if (mysql_num_rows($alhire) == 1) {
+        $_ALVREKULK = TRUE;
+      }
+    }
+
     $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
               FROM tilausrivi
               LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -409,7 +426,22 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $var  = "";
       }
 
-      $hinta   = $coprivirow['hinta'];
+      $tuotealv = $tuoterow["alv"];
+
+      // ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+      if ($_ALVREKULK) {
+        $query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$coprivirow[tuoteno]' limit 1";
+        $alhire = pupe_query($query);
+        $alehi_alrow = mysql_fetch_assoc($alhire);
+        $tuotealv = $alehi_alrow["alv"];
+      }
+
+      if ($tuotealv != $coprivirow["alv"] and $yhtiorow["alv_kasittely"] == "" and $coprivirow["alv"] < 500) {
+        $hinta = hintapyoristys($coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuotealv/100));
+      }
+      else {
+        $hinta = $coprivirow['hinta'];
+      }
 
       // jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
       if ($tuoterow["myyntihinta_maara"] != 0) {

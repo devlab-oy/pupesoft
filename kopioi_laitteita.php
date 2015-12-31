@@ -96,9 +96,9 @@ function hae_kopioitavat_laitteet($tilausrivin_tunnus) {
             laitteen_sopimukset.sopimusrivin_tunnus linkattu
             FROM laitteen_sopimukset
             JOIN laite
-              ON (laite.yhtio = laitteen_sopimukset.yhtio 
-                AND laite.tunnus = laitteen_sopimukset.laitteen_tunnus)
-            WHERE laitteen_sopimukset.yhtio = '{$kukarow['yhtio']}'
+              ON (laite.yhtio = laitteen_sopimukset.yhtio
+                AND laite.tunnus                        = laitteen_sopimukset.laitteen_tunnus)
+            WHERE laitteen_sopimukset.yhtio             = '{$kukarow['yhtio']}'
             AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
   $result = pupe_query($query);
   while ($row = mysql_fetch_assoc($result)) {
@@ -160,9 +160,9 @@ function voidaanko_laite_liittaa_riviin($laite, $sopimusrivi) {
   global $kukarow;
   $query = "SELECT *
             FROM laitteen_sopimukset
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio             = '{$kukarow['yhtio']}'
             AND sopimusrivin_tunnus = '{$sopimusrivi}'
-            AND laitteen_tunnus = '{$laite}'";
+            AND laitteen_tunnus     = '{$laite}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

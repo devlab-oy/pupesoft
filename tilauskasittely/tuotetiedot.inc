@@ -15,10 +15,10 @@ $_varastot = array($varasto);
 
 if ($vanhatunnus != 0) {
   $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
-                   FROM varastopaikat
-                   WHERE yhtio      = '{$kukarow['yhtio']}'
-                   AND tyyppi      != 'P'
-                   AND toimipaikka  = '{$vanhatunnus}'";
+            FROM varastopaikat
+            WHERE yhtio      = '{$kukarow['yhtio']}'
+            AND tyyppi      != 'P'
+            AND toimipaikka  = '{$vanhatunnus}'";
   $vares = pupe_query($query);
   $varow = mysql_fetch_assoc($vares);
 
@@ -81,4 +81,3 @@ if (count($lisatiedot) > 0) {
 
   echo "</ul>";
 }
-

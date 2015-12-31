@@ -1759,12 +1759,12 @@ if ($tee == 'MONISTA') {
                 $toim == 'TILAUS' or
                 $toim == 'OSTOTILAUS' or
                 $toim == 'ENNAKKOTILAUS') or
-                ($toim == '' and
-                 $kumpi == 'REKLAMA' and
-                 isset($kaytetaanhyvityshintoja[$lasku]) and
-                 $kaytetaanhyvityshintoja[$lasku] != '' and
-                 count($palautus) > 0) or
-                $sailyta_rivikommentit[$lasku] == "on") {
+              ($toim == '' and
+                $kumpi == 'REKLAMA' and
+                isset($kaytetaanhyvityshintoja[$lasku]) and
+                $kaytetaanhyvityshintoja[$lasku] != '' and
+                count($palautus) > 0) or
+              $sailyta_rivikommentit[$lasku] == "on") {
               $rvalues .= ", '{$rivirow['kommentti']}'";
             }
             else {

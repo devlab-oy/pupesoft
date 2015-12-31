@@ -31,6 +31,9 @@ if ($fieldname == "verkkolasku_lah") {
   $sel2 = "";
   $sel3 = "";
   $sel4 = "";
+  $sel5 = "";
+  $sel6 = "";
+  $sel7 = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -47,6 +50,9 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'servinet') {
     $sel6 = "selected";
   }
+  elseif ($trow[$i] == 'trustpoint') {
+    $sel7 = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -57,6 +63,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
   $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");
+  $ulos .= "<option value = 'trustpoint' $sel7>".t("Trustpoint-verkkolaskut");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3637,7 +3644,7 @@ if ($fieldname == "myyntiera_pyoristys" ) {
 
   $sela = $selb = "";
 
-  $sel = array($trow[$i] => 'selected') + array('','K','S');
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
         <option value = ' '>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>

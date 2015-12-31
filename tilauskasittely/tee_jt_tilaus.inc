@@ -355,12 +355,12 @@ if (!function_exists("tee_jt_tilaus")) {
           // keräysaika ja toimitusaikaan now
           elseif ($fieldname == 'kerayspvm' or $fieldname == 'toimaika') {
 
-              if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
-                $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
-              }
-              else {
-                $query .= $fieldname."=now(),";
-              }
+            if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            }
+            else {
+              $query .= $fieldname."=now(),";
+            }
           }
           // Katotaan oisko käsinsyötetty eräpäivämäärä
           elseif ($fieldname == 'erpcm') {

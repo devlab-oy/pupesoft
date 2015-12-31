@@ -461,7 +461,7 @@ if ($tee == 'add' and isset($muutos) and $muutos == 'yes') {
             FROM lasku
             JOIN toimitustapa use index (selite_index) ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
             WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tunnus IN ({$tunnuslisa})
+            AND lasku.tunnus  IN ({$tunnuslisa})
             AND (lasku.alatila in ('B','E') or (lasku.alatila = 'D' and toimitustapa.tulostustapa = 'H'))";
   $result = pupe_query($query);
 

@@ -222,7 +222,7 @@ if ((int) $tunnus != 0) {
       $eka_hyvaksyja = $check_row['hyvak1'];
     }
 
-    // Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä 
+    // Matkalaskun eka hyväksyjä, eli matkustaja itse ei saa muuttaa tiliöintejä
     // Ei myöskään näytetä tiliöintejä, jos ei niin haluta
     if ($check_row['tilaustyyppi'] == "M" and $check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
       if ($kukarow['taso'] != 1 and $kukarow['taso'] != 9) $kukarow['taso'] = 1;

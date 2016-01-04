@@ -1647,6 +1647,7 @@ if (!function_exists('loppu_tarjous')) {
         }
         else {
           $pdf_tarjous->draw_text(30,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
+          $_y = $_y - 10;
         }
 
         $kuha = $_y;

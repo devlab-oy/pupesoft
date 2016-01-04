@@ -761,7 +761,9 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
-      if ($row["tila"] != "U") {
+      $poista_tilaus_whiteliset = array("tarja", "heidi", "virpi", "admin");
+
+      if ($row["tila"] != "U" and in_array($kukarow['kuka'], $poista_tilaus_whiteliset)) {
         echo "<td class='back'>
                 <form>
                   <input type='hidden' name='tee' value='POISTA_TILAUS'>

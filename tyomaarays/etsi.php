@@ -7,6 +7,15 @@ include '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
+// Tsekataan rekno-kentän nimi;
+$reknokentta = t("Rekno");
+
+$al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selite = 'rekno'");
+
+if ($al_row = mysql_fetch_assoc($al_res)) {
+  $reknokentta = $al_row["selitetark"];
+}
+
 if ($tee == 'etsi') {
   echo "<table>";
   $hakuehdot = '';
@@ -73,7 +82,7 @@ if ($tee == 'etsi') {
     echo "<tr>
         <th>".t("Työmääräys").":</th>
         <th>".t("Nimi").":</th>
-        <th>".t("Rekno").":</th>
+        <th>{$reknokentta}:</th>
         <th>".t("Päivämäärä").":</th>
         <th>".t("Työn kuvaus / Toimenpiteet").":</th>
         <th>".t("Muokkaa").":</th>
@@ -179,7 +188,7 @@ echo "<td colspan='3'><input type='text' name='nimi' size='35' value='{$nimi}' >
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Rekno").":</th>";
+echo "<th>{$reknokentta}:</th>";
 echo "<td colspan='3'><input type='text' name='rekno' size='35' value='{$rekno}'></td>";
 echo "</tr>";
 

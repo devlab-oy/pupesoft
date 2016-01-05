@@ -478,7 +478,8 @@ elseif (trim($laskurow['viesti']) != '') {
   $komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];
 }
 
-if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $laskurow['tilaustyyppi'] == 'A') {
+// Reklamaation / tarjouksen työmääräyskommentit
+if ($laskurow['tilaustyyppi'] == 'R' or ($laskurow['tilaustyyppi'] == 'T' and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
   $query = "SELECT komm1, komm2
             from tyomaarays
             where yhtio = '$kukarow[yhtio]'
@@ -489,12 +490,13 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
   $komm1_nimi = t("Työn kuvaus");
   $komm2_nimi = t("Sisäiset kommentit");
 
-  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT");
+  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selite != ''");
 
   while ($kommnimi = mysql_fetch_assoc($tyom_avainsanat)) {
     if ($kommnimi["selite"] == "komm1" and $kommnimi["selitetark"] != "") {
       $komm1_nimi = $kommnimi["selitetark"];
-    } elseif ($kommnimi["selite"] = "komm2" and $kommnimi["selitetark"] != "") {
+    }
+    elseif ($kommnimi["selite"] == "komm2" and $kommnimi["selitetark"] != "") {
       $komm2_nimi = $kommnimi["selitetark"];
     }
   }
@@ -505,6 +507,22 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
 
   if (trim($reklarow['komm2']) != '') {
     $komm .= "\n$komm2_nimi:###".wordwrap(str_replace("\n", "\n###", $reklarow['komm2']), 90, "\n###");
+  }
+}
+
+// Työmääräystiedot
+if ($laskurow['tilaustyyppi'] == 'A') {
+  $query = "SELECT *
+            from tyomaarays
+            where yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[tunnus]'";
+  $reklaresult = pupe_query($query);
+  $reklarow = mysql_fetch_assoc($reklaresult);
+
+  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selite != ''");
+
+  while ($kommnimi = mysql_fetch_assoc($tyom_avainsanat)) {
+    $komm .= "\n{$kommnimi["selitetark"]}:###".wordwrap(str_replace("\n", "\n###", $reklarow[$kommnimi["selite"]]), 90, "\n###");
   }
 }
 

@@ -323,8 +323,13 @@ echo "  <script type='text/javascript' language='JavaScript'>
         }
       }
 
-      function tarkista_mitatointi(count) {
-        msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+      function tarkista_mitatointi(count, type) {
+        if (typeof type !== 'undefined' && type === 'SUPER') {
+          msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tilausta?")."';
+        }
+        else {
+          msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+        }
 
         if (confirm(msg)) {
           return true;
@@ -2996,7 +3001,8 @@ if (mysql_num_rows($result) != 0) {
 
       if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
         or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
-        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1);'>";
+
+        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
         echo "<input type='hidden' name='toim' value='$whiletoim'>";
         echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
         echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";

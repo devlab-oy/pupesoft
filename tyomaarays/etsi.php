@@ -10,7 +10,21 @@ elseif (!empty($_COOKIE["etsityom_alkupvm"])) {
   list($_REQUEST["vva"], $_REQUEST["kka"], $_REQUEST["ppa"]) = explode("-", $_COOKIE["etsityom_alkupvm"]);
 }
 
-include '../inc/parametrit.inc';
+if (!empty($_REQUEST["laajahaku"])) {
+  if (count($_REQUEST["laajahaku"]) == 1) {
+    $_REQUEST["laajahaku"] = "";
+  }
+  else {
+    $_REQUEST["laajahaku"] = "on";
+  }
+
+  setcookie("etsityom_laajahaku", $_REQUEST["laajahaku"]);
+}
+elseif (!empty($_COOKIE["etsityom_laajahaku"])) {
+  $_REQUEST["laajahaku"] = $_COOKIE["etsityom_laajahaku"];
+}
+
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
@@ -19,19 +33,24 @@ $tyom_kentat_array["rekno"] = t("Rekno");
 $tyom_kentat_array["valmnro"] = t("Sarjanumero");
 $tyom_kentat_array["komm1"] = t("Työn kuvaus");
 $tyom_kentat_array["komm2"] = t("Toimenpiteet");
+$laajah = "";
 
-$tyomkentta_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != '' and avainsana.selitetark_2 != 'DATE'");
+if (!empty($laajahaku)) {
+  $tyomkentta_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != '' and avainsana.selitetark_2 != 'DATE'");
 
-if (mysql_num_rows($tyomkentta_res)) {
-  $tyom_kentat_array = array();
+  if (mysql_num_rows($tyomkentta_res)) {
+    $tyom_kentat_array = array();
 
-  while ($al_row = mysql_fetch_assoc($tyomkentta_res)) {
-    $tyom_kentat_array[$al_row['selite']] = $al_row['selitetark'];
-    $tyom_kentat_tyyppi[$al_row['selite']] = $al_row['selitetark_2'];
+    while ($al_row = mysql_fetch_assoc($tyomkentta_res)) {
+      $tyom_kentat_array[$al_row['selite']] = $al_row['selitetark'];
+      $tyom_kentat_tyyppi[$al_row['selite']] = $al_row['selitetark_2'];
+    }
   }
+
+  $laajah = "CHECKED";
 }
 
-if ($tee == 'etsi') {
+if ($tee == 'etsi' and !empty($hakusubmit)) {
   echo "<table>";
   $hakuehdot = '';
 
@@ -169,7 +188,7 @@ if ($tee == 'etsi') {
 
 echo "<form method='post'><input type='hidden' name='tee' value='etsi'>";
 echo "<table><tr>";
-echo "<th colspan='4'>".t("Hae työmääräykset väliltä").":</th>";
+echo "<th colspan='4'>".t("Hae työmääräyksiä").": <div style='float: right;'>(".t("Laajahaku").": <input type='hidden' name='laajahaku[]' value='default'><input type='checkbox' name='laajahaku[]' onclick='submit();' $laajah>)</div></th>";
 echo "</tr>";
 
 if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -219,7 +238,7 @@ foreach ($tyom_kentat_array as $selite => $selitetark) {
 }
 
 echo "</table>";
-echo "<input type='submit' value='Hae'>";
+echo "<input type='submit' name='hakusubmit' value='".t("Hae")."'>";
 echo "</form>";
 
 require "../inc/footer.inc";

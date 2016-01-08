@@ -88,7 +88,7 @@ class PrestaProducts extends PrestaClient {
     $product_parameters = $this->_dynamic_fields;
     if (isset($product_parameters) and count($product_parameters) > 0) {
       foreach ($product_parameters as $parameter) {        
-        $xml->product->$parameter['nimi'] = utf8_encode($parameter['arvo']);
+        $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
       } 
     }
 

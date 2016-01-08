@@ -272,7 +272,7 @@ if (!function_exists('alku')) {
     if (!kyseessa_eramaksu($laskurow)) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli), $page_lasku[$sivu],
         $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viikorkopros"], $page_lasku[$sivu],
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], ($laskurow["viikorkopros"]*1)." %", $page_lasku[$sivu],
         $norm);
     }
 
@@ -450,9 +450,11 @@ if (!function_exists('alku')) {
     if ($toimehto == "") $toimehto = $laskurow["toimitusehto"];
     else $toimehto = substr($laskurow["toimitusehto"], 0, 3)." ".$toimehto;
 
-    $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Toimitusehto", $kieli), $page_lasku[$sivu], $pieni);
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($toimehto, 270, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
-    $rivi_ind++;
+    if (!empty($toimehto)) {
+      $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Toimitusehto", $kieli), $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($toimehto, 270, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
+      $rivi_ind++;
+    }
 
     if ($laskutyyppi == 20) {
       $lahetysmaa = hae_maa(array("maakoodi" => $laskurow["maa_lahetys"]));
@@ -1032,6 +1034,11 @@ if (!function_exists('rivi_otsikot')) {
       if ($laskutyyppi != 5) {
         $pdf_lasku->draw_text(490, $kala-9, t("Verollinen arvo", $kieli), $thispage, $pieni);
       }
+    }
+
+    if ($laskutyyppi == 21 or $laskutyyppi == 22) {
+      $pdf_lasku->draw_line(array(35, 580), array($kala-12, $kala-12), $thispage, $lineparams);
+      $kala -= 5;
     }
 
     $kala -= 25;

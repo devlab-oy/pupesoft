@@ -15152,8 +15152,11 @@ if (!function_exists("hintapyoristys")) {
       // katotaan montako desimaalia luvussa on
       $desimaaleja = strlen($luku) - strpos($luku, ".") - 1;
 
-      // jos alle kaksi desimaalia, niin n‰ytet‰‰n silti kaksi
-      if ($desimaaleja < 2) {
+      if ($loppunollat_pois == "NONE") {
+        $luku = substr($luku, 0, -1);
+      }
+      elseif ($desimaaleja < 2) {
+        // jos alle kaksi desimaalia, niin n‰ytet‰‰n silti kaksi
         $luku = sprintf("%.02f", $luku);
       }
     }
@@ -19671,6 +19674,10 @@ if (!function_exists("pupesoft_laskutyypit")) {
       18 => "Normaali laskupohja (nimitykset rivitettyn‰)",
       19 => "Normaali laskupohja (Tuoteperheen hinnat is‰tuotteella, lapsituotteet n‰ytet‰‰n ilman hintoja)",
       20 => "Normaali laskupohja (Korvattu alennukset ja viite viennin lis‰tiedoilla ja lis‰tty uusi kommenttikentt‰)",
+
+      21  => "UUSI laskupohja",
+      22  => "UUSI laskupohja (Tuoteperheet yhdistetty)",
+
     );
   }
 }

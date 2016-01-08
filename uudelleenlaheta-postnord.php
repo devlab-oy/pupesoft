@@ -13,7 +13,7 @@ if ($tee == "laheta" and $tilaukset != "") {
 
   $query = "SELECT distinct lasku.tunnus
             FROM lasku
-            JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma in ('L','P')
+            JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma in ('L','P'))
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND lasku.tila    in ('L','N', 'G')
             AND lasku.tunnus  in ($tilaukset)";

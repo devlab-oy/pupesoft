@@ -329,6 +329,10 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     echo "<font class='error'>" . $errortext . t("Reklamaatiota ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
   else {
+    if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
+      $toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
+    }
+
     echo "<font class='error'>" . $errortext . t("Tilausta ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
 }

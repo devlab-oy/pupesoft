@@ -6207,7 +6207,6 @@ if ($tee == '') {
                tilausrivi.ale_peruste,
                tuote.tunnus as tuote_tunnus,
                concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
-               tuote.kehahin,
                $kommentti_select
                $sorttauskentta
                FROM tilausrivi use index (yhtio_otunnus)

@@ -19674,10 +19674,8 @@ if (!function_exists("pupesoft_laskutyypit")) {
       18 => "Normaali laskupohja (nimitykset rivitettynä)",
       19 => "Normaali laskupohja (Tuoteperheen hinnat isätuotteella, lapsituotteet näytetään ilman hintoja)",
       20 => "Normaali laskupohja (Korvattu alennukset ja viite viennin lisätiedoilla ja lisätty uusi kommenttikenttä)",
-
-      21  => "UUSI laskupohja",
-      22  => "UUSI laskupohja (Tuoteperheet yhdistetty)",
-
+      21 => "Tuoteno, nimitys. Kommentit rivien jälkeen.",
+      22 => "Tuoteno, nimitys. Kommentit rivien jälkeen. (Tuoteperheet yhdistetty)",
     );
   }
 }

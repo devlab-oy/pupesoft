@@ -1193,8 +1193,8 @@ if (!function_exists('rivi_original')) {
 
     if (($laskutyyppi == 19 and (empty($row['perheid']) or $row['tunnus'] == $row['perheid'])) or $laskutyyppi != 19) {
       // A-hinta
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($veroton_hinta, 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(435-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($veroton_hinta, 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(435-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
 
       //Alennus
       $alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
@@ -1204,13 +1204,13 @@ if (!function_exists('rivi_original')) {
 
       if ($kurssi != 1) {
         //Veroton Rivihinta Valuutassa
-        $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $norm);
-        $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $thispage, $norm);
+        $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $norm);
+        $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $thispage, $norm);
       }
       else {
         // Veroton Rivihinta
-        $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $norm);
-        $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $thispage, $norm);
+        $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $norm);
+        $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $thispage, $norm);
       }
 
       //Arvonlisävero
@@ -1227,7 +1227,7 @@ if (!function_exists('rivi_original')) {
 
     if ($row["myyntihinta_maara"] > 1) {
       $kala = $kala - 7;
-      $pdf_lasku->draw_text(390, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"], 0, $laskurow['loppunollat'])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
+      $pdf_lasku->draw_text(390, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"], 0, $laskurow['_loppunollat'])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
       $kalakorjaus = 7;
     }
     else {
@@ -1264,8 +1264,8 @@ if (!function_exists('rivi_original')) {
         $verollrivi = $row["rivihinta_verollinen"];
       }
 
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($verollrivi, 0, $laskurow['loppunollat']), $pieni);
-      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($verollrivi, 0, $laskurow['loppunollat']), $thispage, $pieni);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($verollrivi, 0, $laskurow['_loppunollat']), $pieni);
+      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($verollrivi, 0, $laskurow['_loppunollat']), $thispage, $pieni);
     }
 
     if ($laskutyyppi == 18 and $kala >= $kuinka_alhaalla_kaytiin_nimitys) {
@@ -1349,12 +1349,12 @@ if (!function_exists('rivi_original')) {
     }
 
     if ($kurssi != 1) {
-      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
     else {
-      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1401,8 +1401,8 @@ if (!function_exists('rivi_plain')) {
     }
 
     // A-hinta
-    $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $norm);
-    $pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $thispage, $norm);
+    $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $norm);
+    $pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
 
     //Alennus
     $alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
@@ -1413,13 +1413,13 @@ if (!function_exists('rivi_plain')) {
 
     if ($kurssi != 1) {
       //Veroton Rivihinta Valuutassa
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
     else {
       // Veroton Rivihinta
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
 
     if (trim($row["kommentti"]) != '') {
@@ -1482,12 +1482,12 @@ if (!function_exists('rivi_plain')) {
     }
 
     if ($kurssi != 1) {
-      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
     else {
-      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1530,8 +1530,8 @@ if (!function_exists('rivi_plain_2')) {
     }
 
     // A-hinta
-    $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $norm);
-    $pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $thispage, $norm);
+    $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $norm);
+    $pdf_lasku->draw_text(455-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
 
     //Alennus
     $alennukset_yhteensa = generoi_alekentta_php($row, 'M', 'plain');
@@ -1542,13 +1542,13 @@ if (!function_exists('rivi_plain_2')) {
 
     if ($kurssi != 1) {
       //Veroton Rivihinta Valuutassa
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
     else {
       // Veroton Rivihinta
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
 
     // rivitetään tuotenimitys jos se ei mahdu lokeroonsa
@@ -1622,12 +1622,12 @@ if (!function_exists('rivi_plain_2')) {
     }
 
     if ($kurssi != 1) {
-      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
     else {
-      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1664,31 +1664,31 @@ if (!function_exists('rivi_viro')) {
 
     // SVH-hinta
     if (($laskutyyppi == 15 or $laskutyyppi == 16) and $row["myyntihinta"] != 0) {
-      $pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($row["myyntihinta"], $kurssi), 0, $laskurow['loppunollat']), $thispage, $norm);
+      $pdf_lasku->draw_text(390, $kala, hintapyoristys(laskuval($row["myyntihinta"], $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
 
     // yksikköhinta pitää olla veroton
     if ($kurssi != 1) {
       //Veroton yksikköhinta Valuutassa
-      $veroton_hinta = hintapyoristys($row["rivihinta_valuutassa"]/$row["kpl"], 0, $laskurow['loppunollat']);
+      $veroton_hinta = hintapyoristys($row["rivihinta_valuutassa"]/$row["kpl"], 0, $laskurow['_loppunollat']);
     }
     else {
       // Veroton yksikköhinta
-      $veroton_hinta = hintapyoristys($row["rivihinta"]/$row["kpl"], 0, $laskurow['loppunollat']);
+      $veroton_hinta = hintapyoristys($row["rivihinta"]/$row["kpl"], 0, $laskurow['_loppunollat']);
     }
 
     // A-hinta
-    $pdf_lasku->draw_text(440, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['loppunollat']), $thispage, $norm);
+    $pdf_lasku->draw_text(440, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
 
     if ($kurssi != 1) {
       //Veroton Rivihinta Valuutassa
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
     else {
       // Veroton Rivihinta
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $norm);
-      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']), $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(535-$oikpos, $kala, hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']), $thispage, $norm);
     }
 
     //Arvonlisävero
@@ -1704,7 +1704,7 @@ if (!function_exists('rivi_viro')) {
 
     if ($row["myyntihinta_maara"] > 1) {
       $kala = $kala - 7;
-      $pdf_lasku->draw_text(440, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"], 0, $laskurow['loppunollat'])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
+      $pdf_lasku->draw_text(440, $kala, hintapyoristys($veroton_hinta*$row["myyntihinta_maara"], 0, $laskurow['_loppunollat'])." / $row[myyntihinta_maara] $row[yksikko]", $thispage, $pieni);
       $kalakorjaus = 7;
     }
     else {
@@ -1796,12 +1796,12 @@ if (!function_exists('rivi_viro')) {
     }
 
     if ($kurssi != 1) {
-      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
     else {
-      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['loppunollat']);
+      $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1929,12 +1929,6 @@ if (!function_exists('loppu')) {
     }
 
     if ($vikasivu != "") {
-      $sivukala = 815;
-
-      #if ($laskutyyppi == 21 or $laskutyyppi == 22) {
-      #  $sivukala = 115 + $vientikala;
-      #}
-
       for ($pp=1; $pp<=$sivu; $pp++) {
         $pdf_lasku->draw_text(500, $sivukala, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
       }
@@ -2955,7 +2949,7 @@ if (!function_exists("tulosta_lasku")) {
     }
 
     if ($laskutyyppi == 21 or $laskutyyppi == 22) {
-       $laskurow['loppunollat'] = "NONE";
+       $laskurow['_loppunollat'] = "NONE";
     }
 
     // haetaan tilauksen kaikki rivit

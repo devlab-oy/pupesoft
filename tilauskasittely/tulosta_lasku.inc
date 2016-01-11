@@ -1193,7 +1193,7 @@ if (!function_exists('rivi_original')) {
 
     if (($laskutyyppi == 19 and (empty($row['perheid']) or $row['tunnus'] == $row['perheid'])) or $laskutyyppi != 19) {
       // A-hinta
-      $oikpos = $pdf_lasku->strlen(hintapyoristys($veroton_hinta, 0, $laskurow['_loppunollat']), $norm);
+      $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $norm);
       $pdf_lasku->draw_text(435-$oikpos, $kala, hintapyoristys(laskuval($veroton_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
 
       //Alennus
@@ -1251,7 +1251,15 @@ if (!function_exists('rivi_original')) {
 
     // Näytetäänkö verollinen rivihinta
     $_pii_verolli = (!in_array($laskutyyppi, array(5,19,21,22)));
-    $_pii_verolli = ($laskutyyppi == 19 and (empty($row['perheid']) or $row['tunnus'] == $row['perheid']));
+
+    if (in_array($laskutyyppi, array(21,22))) {
+      $_pii_verolli = (empty($laskurow['vienti']));
+    }
+
+    if ($laskutyyppi == 19) {
+      $_pii_verolli = (empty($row['perheid']) or $row['tunnus'] == $row['perheid']);
+    }
+
     $_pii_verolli = ($_pii_verolli AND $row["alv"] < 500);
 
     // Verollinen rivihinta
@@ -1930,7 +1938,7 @@ if (!function_exists('loppu')) {
 
     if ($vikasivu != "") {
       for ($pp=1; $pp<=$sivu; $pp++) {
-        $pdf_lasku->draw_text(500, $sivukala, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
+        $pdf_lasku->draw_text(500, 815, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
       }
     }
 
@@ -3204,6 +3212,7 @@ if (!function_exists("tulosta_lasku")) {
     }
 
     if ($laskutyyppi == 21 or $laskutyyppi == 22) {
+      $kala -= 10;
       list($page_lasku, $sivu, $kala) = laskun_kommentit($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu, $kala);
     }
 

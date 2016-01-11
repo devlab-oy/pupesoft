@@ -363,7 +363,8 @@ if ($handle = opendir($kansio)) {
     $ftphost = "ftp.trustpoint.fi";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
-    $ftppath = "test/invoice/finvoice/";
+    //$ftppath = "test/invoice/finvoice/";
+    $ftppath = "invoice/finvoice/";
     $ftpfile = $kansio.$lasku;
     $ftpsucc = "{$pupe_root_polku}/dataout/";
 

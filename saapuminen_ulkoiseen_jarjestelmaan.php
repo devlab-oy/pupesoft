@@ -66,9 +66,9 @@ if (!$ftp_chk) {
   die ("FTP-tiedot ovat puutteelliset!\n");
 }
 
-# Tarvitaan:
-# $saapumisnro
-# ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
+// Tarvitaan:
+// $saapumisnro
+// ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
 
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
@@ -82,9 +82,9 @@ $xml = new SimpleXMLElement($xmlstr);
 $query = "SELECT *
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tila = 'K'
+          AND tila    = 'K'
           AND alatila = ''
-          AND tunnus = '{$saapumisnro}'";
+          AND tunnus  = '{$saapumisnro}'";
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 
@@ -96,8 +96,8 @@ $header->addChild('Receiver', 'LogMaster');
 
 $query = "SELECT DISTINCT otunnus
           FROM tilausrivi
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tyyppi = 'O'
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tyyppi      = 'O'
           AND uusiotunnus = '{$saapumisnro}'";
 $otunnukset_res = pupe_query($query);
 
@@ -106,8 +106,8 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'O'
-            AND tunnus = '{$otunnukset_row['otunnus']}'";
+            AND tila    = 'O'
+            AND tunnus  = '{$otunnukset_row['otunnus']}'";
   $ostotilaus_res = pupe_query($query);
   $ostotilaus_row = mysql_fetch_assoc($ostotilaus_res);
 
@@ -115,9 +115,9 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   $body->addChild('PurchId', $ostotilaus_row['tunnus']);
   $body->addChild('ReceiptsListId', $row['laskunro']);
 
-  # U = new
-  # M = change
-  # P = delete
+  // U = new
+  // M = change
+  // P = delete
   $body->addChild('OrderCode', $ordercode);
   $body->addChild('OrderType', 'PO');
   $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
@@ -127,7 +127,7 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   $query = "SELECT *
             FROM toimi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$ostotilaus_row['liitostunnus']}'";
+            AND tunnus  = '{$ostotilaus_row['liitostunnus']}'";
   $toimires = pupe_query($query);
   $toimirow = mysql_fetch_assoc($toimires);
 
@@ -150,9 +150,9 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 
   $query = "SELECT *
             FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi = 'O'
-            AND otunnus = '{$otunnukset_row['otunnus']}'
+            WHERE yhtio     = '{$kukarow['yhtio']}'
+            AND tyyppi      = 'O'
+            AND otunnus     = '{$otunnukset_row['otunnus']}'
             AND uusiotunnus = '{$saapumisnro}'";
   $rivit_res = pupe_query($query);
 
@@ -197,10 +197,10 @@ if ($xml_chk and $ftp_chk) {
     require "inc/ftp-send.inc";
 
     $query = "UPDATE lasku SET
-              sisviesti3 = 'ei_vie_varastoon'
+              sisviesti3  = 'ei_vie_varastoon'
               WHERE yhtio = '{$yhtio}'
-              AND tila = 'K'
-              AND tunnus = '{$saapumisnro}'";
+              AND tila    = 'K'
+              AND tunnus  = '{$saapumisnro}'";
     $updres = pupe_query($query);
   }
   else {

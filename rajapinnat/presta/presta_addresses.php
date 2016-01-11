@@ -17,10 +17,12 @@ class PrestaAddresses extends PrestaClient {
 
   /**
    *
-   * @param array $address
+   * @param array   $address
    * @param SimpleXMLElement $existing_address
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 

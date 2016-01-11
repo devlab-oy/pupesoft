@@ -687,7 +687,7 @@ function hae_kassalippaan_tiedot($kassalipas, $mehtorow, $laskurow) {
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {
   global $kukarow, $yhtiorow;
 
-  if (strtotime($yhtiorow['tilikausi_alku']) < strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) > strtotime($tapahtumapaiva)) {
+  if (strtotime($yhtiorow['tilikausi_alku']) <= strtotime($tapahtumapaiva) and strtotime($yhtiorow['tilikausi_loppu']) >= strtotime($tapahtumapaiva)) {
     return false;
   }
   else {

@@ -171,9 +171,9 @@ if ($tee == "valitse") {
   echo "<br><br>";
 
   $saldo = hae_tilin_saldo(array(
-    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
-    "pankkiyhteys_salasana" => $salasana
-  ));
+      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+      "pankkiyhteys_salasana" => $salasana
+    ));
 
   if ($saldo) {
     echo "<table>";

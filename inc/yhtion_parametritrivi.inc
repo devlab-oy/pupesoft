@@ -3644,7 +3644,7 @@ if ($fieldname == "myyntiera_pyoristys" ) {
 
   $sela = $selb = "";
 
-  $sel = array($trow[$i] => 'selected') + array('','K','S');
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
         <option value = ' '>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>

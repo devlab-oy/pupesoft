@@ -532,7 +532,7 @@ if (!function_exists('alku')) {
 
         $komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
 
-        $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+        $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L','J')");
 
         while ($al_row = mysql_fetch_assoc($al_res)) {
 
@@ -2729,7 +2729,7 @@ if (!function_exists("tulosta_lasku")) {
     $laskurow = mysql_fetch_assoc($laresult);
 
     if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-      $query = "SELECT * 
+      $query = "SELECT *
                 FROM laskun_lisatiedot
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = '{$laskurow['tunnus']}'";

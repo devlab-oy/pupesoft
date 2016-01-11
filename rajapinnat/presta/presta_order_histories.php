@@ -16,10 +16,12 @@ class PrestaOrderHistories extends PrestaClient {
 
   /**
    *
-   * @param array $order_history
+   * @param array   $order_history
    * @param SimpleXMLElement $existing_order_history
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($order_history, SimpleXMLElement $existing_order_history = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 

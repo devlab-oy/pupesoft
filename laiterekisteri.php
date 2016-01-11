@@ -39,9 +39,9 @@ elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_l
   // Lis‰t‰‰n laite sopimusriville
   foreach ($lisaa_laite_sopimusriville as $laitetunnus) {
     $query = "INSERT INTO laitteen_sopimukset
-            SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
-            laitteen_tunnus = '{$laitetunnus}',
-            yhtio           = '{$kukarow['yhtio']}'";
+              SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
+              laitteen_tunnus = '{$laitetunnus}',
+              yhtio           = '{$kukarow['yhtio']}'";
     pupe_query($query);
   }
   $maara_paivitetty = true;

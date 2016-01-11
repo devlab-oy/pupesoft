@@ -1542,15 +1542,15 @@ if (!function_exists("saldo_myytavissa")) {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
 
-      $query  = " SELECT distinct tuoteno, kerayspvm
-                  FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
-                  WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-                  and tilausrivi.tyyppi in ('L','E','G','V','W','M','O')
-                  and tilausrivi.varattu + tilausrivi.jt != 0
-                  and tilausrivi.tuoteno = '$tuoteno'
-                  and tilausrivi.kerayspvm > '$pvm'
-                  and tilausrivi.var != 'P'
-                  ORDER BY kerayspvm";
+      $query  = "SELECT distinct tuoteno, kerayspvm
+                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
+                 WHERE tilausrivi.yhtio    = '{$kukarow["yhtio"]}'
+                 and tilausrivi.tyyppi     in ('L','E','G','V','W','M','O')
+                 and tilausrivi.varattu + tilausrivi.jt != 0
+                 and tilausrivi.tuoteno    = '$tuoteno'
+                 and tilausrivi.kerayspvm  > '$pvm'
+                 and tilausrivi.var       != 'P'
+                 ORDER BY kerayspvm";
       $kerres = pupe_query($query);
 
       while ($kerrow = mysql_fetch_assoc($kerres)) {
@@ -5781,18 +5781,18 @@ if (!function_exists("alehinta")) {
       if (jatka_ale($ale)) {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus USE INDEX (yhtio_asiakas_ryhma)
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  and piiri    = ''
-                  and ryhma    = '**'
-                  and asiakas  = '$laskurow[liitostunnus]'
-                  and asiakas  > 0
-                  and asiakas_ryhma = ''
+                  WHERE yhtio           = '$kukarow[yhtio]'
+                  and piiri             = ''
+                  and ryhma             = '**'
+                  and asiakas           = '$laskurow[liitostunnus]'
+                  and asiakas           > 0
+                  and asiakas_ryhma     = ''
                   and asiakas_segmentti = ''
-                  and tuoteno = ''
+                  and tuoteno           = ''
                   and (minkpl = 0 or (minkpl <= $kpl and monikerta = '') or (mod($kpl, minkpl) = 0 and monikerta != ''))
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                  and alennus  >= 0
-                  and alennus  <= 100
+                  and alennus           >= 0
+                  and alennus           <= 100
                   ORDER BY alennuslaji, minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc";
         $hresult = pupe_query($query);
 
@@ -32058,10 +32058,12 @@ if (!function_exists("hae_tuoteperhe")) {
 }
 
 if (!function_exists('generoi_hinnastot')) {
+
+
   /**
    * Generoi annetulle tuottelle hinnaston valuutoille, joilta löytyy hinnastokurssi
    *
-   * @param int $tuote_tunnus Tuotteen tunnus
+   * @param int     $tuote_tunnus Tuotteen tunnus
    *
    * @return bool Luotiinko tai päivitettinkö hinnasto
    */
@@ -32075,7 +32077,7 @@ if (!function_exists('generoi_hinnastot')) {
     $query = "SELECT myyntihinta, tuoteno
               FROM tuote
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus = '{$tuote_tunnus}'";
+              AND tunnus  = '{$tuote_tunnus}'";
     $tuote = pupe_query($query);
 
     if (mysql_num_rows($tuote) != 1) {
@@ -32086,7 +32088,7 @@ if (!function_exists('generoi_hinnastot')) {
 
     $query = "SELECT hinnastokurssi, nimi
               FROM valuu
-              WHERE yhtio = '{$kukarow["yhtio"]}'
+              WHERE yhtio        = '{$kukarow["yhtio"]}'
               AND hinnastokurssi > 0";
     $valuu_result = pupe_query($query);
 

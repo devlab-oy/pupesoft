@@ -29,7 +29,6 @@ if (!empty($tyyppi) and $tyyppi == "multi_asiakasnro") {
   $_asiak_kummmalla = "ASIAKASNRO";
 }
 
-
 while ($rivi = fgets($fd)) {
 
   $poista = array("\"", "'", "\\");
@@ -77,7 +76,7 @@ while ($rivi = fgets($fd)) {
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 {$asiakashaku_lis}
-                and laji not in ('P','R')";
+                and laji    not in ('P','R')";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -134,6 +133,15 @@ while ($rivi = fgets($fd)) {
       );
 
       echo "Tehtiin tilaus $id asiakkaalle $ytunnus {$_toimitustapa_echo}<br>";
+
+      // Jos ei haluta tilausvahvistusta
+      if (!empty($tilaus_novahvistus)) {
+        $query = "UPDATE lasku
+            SET tilausvahvistus = ''
+            WHERE tunnus = '$id'
+            AND yhtio    = '$kukarow[yhtio]'";
+        pupe_query($query);
+      }
 
       // haetaan tilauksen tiedot
       $query = "SELECT *

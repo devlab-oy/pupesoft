@@ -14,7 +14,7 @@ echo "<script type='text/javascript'>
       {
         keijo = ($('#valinta option:selected').val());
 
-        if (keijo == 'multi') {
+        if (keijo == 'multi' || keijo == 'multi_asiakasnro') {
           $('#keijo').show();
         }
         else {
@@ -128,7 +128,8 @@ else {
         </select>";
   echo "<div id='keijo' style='display: none;'>
       <br>".t("Tilaukset suoraan valmis-tilaan")." <input type='checkbox' name='tilaus_valmiiksi' >
-      <br>".t("Tilauksesta oma lasku")." <input type='checkbox' name='tilaus_ketjutus' ></div>";
+      <br>".t("Tilauksesta oma lasku")." <input type='checkbox' name='tilaus_ketjutus' >
+      <br>".t("Ei tilausvahvistusta")." <input type='checkbox' name='tilaus_novahvistus' ></div>";
   echo "</td>";
   echo "</tr>";
   echo "</table>";

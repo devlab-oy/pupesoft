@@ -12,6 +12,8 @@ class PrestaCategories extends PrestaClient {
    *
    * @var int
    */
+
+
   private $root = null;
 
   /**
@@ -45,7 +47,7 @@ class PrestaCategories extends PrestaClient {
    * );
    *
    *
-   * @param array $ancestors
+   * @param array   $ancestors
    * @return string
    */
   public function find_category($ancestors) {
@@ -87,7 +89,7 @@ class PrestaCategories extends PrestaClient {
 
   /**
    *
-   * @param array $category
+   * @param array   $category
    * @param SimpleXMLElement $existing_category
    * @return \SimpleXMLElement
    */
@@ -122,7 +124,7 @@ class PrestaCategories extends PrestaClient {
 
   /**
    *
-   * @param array $categories 2D array (array of hashes) of categories
+   * @param array   $categories 2D array (array of hashes) of categories
    * @return boolean
    */
   public function sync_categories($categories) {
@@ -151,7 +153,7 @@ class PrestaCategories extends PrestaClient {
 
       //We start with root level. This means that the pupesoft root is inserted under Presta root.
       $first_level_node_depth = array(
-          'node_syvyys' => 0
+        'node_syvyys' => 0
       );
       $first_level_nodes = array_find($this->categories, $first_level_node_depth);
       $shop_category_updated = false;
@@ -180,7 +182,7 @@ class PrestaCategories extends PrestaClient {
   /**
    * Contains the logic to save a node and recursively all its children
    *
-   * @param array $node
+   * @param array   $node
    * @return string
    */
   private function recursive_save($node) {
@@ -200,9 +202,9 @@ class PrestaCategories extends PrestaClient {
   /**
    * Returns specific nodes first level chidlren
    *
-   * @param int $parent_depth (syvyys)
-   * @param int $parent_right (rgt)
-   * @param int $parent_left (lft)
+   * @param int     $parent_depth (syvyys)
+   * @param int     $parent_right (rgt)
+   * @param int     $parent_left  (lft)
    * @return array
    */
   private function next_level_nodes($parent_depth, $parent_right, $parent_left) {
@@ -232,7 +234,7 @@ class PrestaCategories extends PrestaClient {
    *    Cars
    *    Mopeds
    *
-   * @param int $presta_category_id
+   * @param int     $presta_category_id
    */
   public function set_category_root($presta_category_id) {
     $this->root = $presta_category_id;

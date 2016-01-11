@@ -423,7 +423,7 @@ if (!function_exists('alku_tarjous')) {
 
         while ($tyomrow = mysql_fetch_array($tyomres)) {
 
-          $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L')");
+          $al_res = t_avainsana("TYOM_TYOKENTAT", $kieli, "and avainsana.selitetark != '' and avainsana.nakyvyys in ('K','L','J')");
 
           while ($al_row = mysql_fetch_array($al_res)) {
 
@@ -1647,6 +1647,7 @@ if (!function_exists('loppu_tarjous')) {
         }
         else {
           $pdf_tarjous->draw_text(30,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
+          $_y = $_y - 10;
         }
 
         $kuha = $_y;

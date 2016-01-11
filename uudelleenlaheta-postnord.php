@@ -11,7 +11,7 @@ if ($tee == "laheta" and $tilaukset != "") {
 
   $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
 
-  $query = "SELECT distinct lasku.tunnus
+  $query = "SELECT distinct lasku.tunnus, varastopaikat.ulkoinen_jarjestelma
             FROM lasku
             JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma in ('L','P'))
             WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -22,7 +22,7 @@ if ($tee == "laheta" and $tilaukset != "") {
   if (mysql_num_rows($result) > 0) {
     while ($laskurow = mysql_fetch_assoc($res)) {
       echo t("Uudelleenl‰hetet‰‰n LogMaster-ker‰yssanoma").": $laskurow[tunnus]<br>";
-      posten_outbounddelivery($laskurow["tunnus"]);
+      posten_outbounddelivery($laskurow["tunnus"], $laskurow['ulkoinen_jarjestelma']);
     }
   }
   else {

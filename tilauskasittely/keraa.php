@@ -4020,20 +4020,21 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
       echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 
+      if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
+        $hidden = "";
+      }
+      else {
+        $hidden = "style='display:none;'";
+      }
+
       if ($toim == 'VASTAANOTA_REKLAMAATIO') {
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Tuotteet hyllytetty ja reklamaatio valmis laskutukseen")."'>";
       }
       elseif ($otsik_row["tulostustapa"] != "X" or $otsik_row["nouto"] != "") {
-        if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
-          $hidden = "";
-        }
-        else {
-          $hidden = "style='display:none;'";
-        }
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."' {$hidden}>";
       }
       else {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'>";
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."' {$hidden}>";
       }
 
       echo "</form>";

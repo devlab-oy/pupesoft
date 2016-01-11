@@ -37,14 +37,23 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+$e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
+$e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
+$e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
+$e4 = isset($tmpfilenimi);
+
+if (($e1 or $e2) and $e3 and $e4) {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
+
 if ($kukarow['extranet'] == '') {
   if (isset($ajax_popup)) {
     require "tuotetiedot.inc";
     exit;
   }
-  if (!isset($tappi) and $tappi != "lataa_tiedosto") {
-    js_popup();
-  }
+
+  js_popup();
 }
 
 $oikeus_nahda_kate = ($kukarow["naytetaan_katteet_tilauksella"] == "Y"
@@ -99,17 +108,6 @@ if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_
 
   die();
 }
-
-$e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
-$e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
-$e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
-$e4 = isset($tmpfilenimi);
-
-if (($e1 or $e2) and $e3 and $e4) {
-  readfile("/tmp/".$tmpfilenimi);
-  exit;
-}
-
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 $sahkoinen_lahete_toim = array('RIVISYOTTO', 'PIKATILAUS');

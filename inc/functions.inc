@@ -15152,7 +15152,7 @@ if (!function_exists("hintapyoristys")) {
       // katotaan montako desimaalia luvussa on
       $desimaaleja = strlen($luku) - strpos($luku, ".") - 1;
 
-      if ($loppunollat_pois == "NONE") {
+      if ($desimaaleja == 0 and $loppunollat_pois == "NONE") {
         $luku = substr($luku, 0, -1);
       }
       elseif ($desimaaleja < 2) {

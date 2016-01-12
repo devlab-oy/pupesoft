@@ -10,8 +10,14 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $hyllynro = mysql_real_escape_string($hyllynro);
     $hyllyvali = mysql_real_escape_string($hyllyvali);
     $hyllytaso = mysql_real_escape_string($hyllytaso);
-    $poikkeava_maara = mysql_real_escape_string($poikkeava_maara);
     $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
+
+    if (trim($poikkeava_maara) == "") {
+      $poikkeava_maara = null;
+    }
+    else {
+      $poikkeava_maara = (float) $poikkeava_maara;
+    }
 
     $query = "INSERT INTO kerattavatrivit SET
               tilausrivi_id       = '{$tunnus}',
@@ -19,7 +25,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               hyllynro            = '{$hyllynro}',
               hyllyvali           = '{$hyllyvali}',
               hyllytaso           = '{$hyllytaso}',
-              poikkeava_maara     = '{$poikkeava_maara}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
               keratty             = 1,
               created_at          = now()
@@ -28,7 +34,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               hyllynro            = '{$hyllynro}',
               hyllyvali           = '{$hyllyvali}',
               hyllytaso           = '{$hyllytaso}',
-              poikkeava_maara     = '{$poikkeava_maara}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
               updated_at          = now()";
     $result = pupe_query($query);

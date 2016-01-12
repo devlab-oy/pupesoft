@@ -13,7 +13,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
 
     if (trim($poikkeava_maara) == "") {
-      $poikkeava_maara = null;
+      $poikkeava_maara = 'null';
     }
     else {
       $poikkeava_maara = (float) $poikkeava_maara;

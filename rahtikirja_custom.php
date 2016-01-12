@@ -124,6 +124,12 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $toimitustapa = $data['toimitustapa'][0];
     $tulostin     = $kopiotulostin;
 
+    if (!empty($osoitelappurow['jv'])) {
+      // Postiennakon tiedot
+      $yhteensa = $osoitelappurow['yhteensa'];
+      $viite = $osoitelappurow['viite'];
+    }
+
     if ($varasto == 0) {
       $query = "SELECT tunnus
                 FROM varastopaikat
@@ -144,7 +150,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                AND ytunnus = '$ytunnus'";
+                AND tunnus = '$asiakasid'";
       $asres = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asres);
 
@@ -261,6 +267,28 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $postirow["yhtio_postino"]  = $postirow_varasto["postino"];
     $postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
     $postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+  }
+
+  // Onko JV
+  if (!empty($_POST['jv_laskuliitos'])) {
+
+    $lt = (int) $_POST['jv_laskuliitos'];
+
+    $query = "SELECT summa, viite, valkoodi
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tila = 'U'
+              and alatila = 'X'
+              and liitostunnus = '$asiakasrow[tunnus]'
+              and tunnus = $lt";
+    $res = pupe_query($query);
+    $row = mysql_fetch_array($res);
+
+    // Postiennakon tiedot
+    $osoitelappurow['jv'] = "X";
+    $osoitelappurow['yhteensa'] = $yhteensa = $row['summa'];
+    $osoitelappurow['viite'] = $viite = $row['viite'];
+    $osoitelappurow['valkoodi'] = $row['valkoodi'];
   }
 
   $rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
@@ -516,7 +544,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   <th><?php echo t('Toimitustapa') ?></th>
   <td><select name='toimitustapa' onchange='document.rahtikirja.submit();'>
       <?php
-  $toimitustapa_val = "";
+  $toimitustapa_val = array("");
   $toimtavat = pupe_toimitustapa_fetch_all();
 
   foreach ($toimtavat as $toimt): ?>
@@ -527,7 +555,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   if ((isset($_POST['toimitustapa']) and $_POST['toimitustapa'] == $toimt['selite'])
     or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
     $sel = "selected";
-    $toimitustapa_val = $toimt['selite'];
+    $toimitustapa_val = $toimt;
   }
 
 ?>
@@ -544,13 +572,13 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   // jos toimitustapaa EI submitattu niin haetaan kannasta
   if (!isset($_POST['toimitustapa'])) {
     $merahti = true;
-    $sel    = '';
+    $sel = '';
 
     // haetaan toimitustavan tiedot tarkastuksia varten
     $apuqu2 = "SELECT *
                from toimitustapa
                where yhtio = '$kukarow[yhtio]'
-               and selite  = '$toimitustapa_val'";
+               and selite  = '$toimitustapa_val[selite]'";
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
@@ -568,9 +596,9 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   }
 ?>
 
-<tr><th><?php echo t('Rahti') ?></th><td><select name='merahti' onChange='document.rahtikirja.submit();'>
-  <option value='1'>L‰hett‰j‰</option>
-  <option <?php echo $sel ?> value='0'>Vastaanottaja</option>
+<tr><th><?php echo t('Rahtisopimus') ?></th><td><select name='merahti' onChange='document.rahtikirja.submit();'>
+  <option value='1'>K‰ytet‰‰n l‰hett‰j‰n rahtisopimusta</option>
+  <option <?php echo $sel ?> value='0'>K‰ytet‰‰n vastaanottajan rahtisopimusta</option>
   </select></td>
 </tr>
 <tr>
@@ -585,6 +613,34 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 </tr>
 
 <?php
+
+  if (!empty($asiakasid)) {
+    $query = "SELECT lasku.*
+              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+              JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.jv!='')
+              WHERE lasku.yhtio     = '$kukarow[yhtio]'
+              and lasku.tila        = 'U'
+              and lasku.alatila     = 'X'
+              and lasku.liitostunnus = '$asiakasid'
+              and lasku.tapvm >= date_sub(now(), INTERVAL 90 DAY)";
+    $res = pupe_query($query);
+
+    if (mysql_num_rows($res)) {
+      echo "<tr><th>".t('J‰lkivaatimuslasku')."</th><td><select name='jv_laskuliitos'>";
+      echo "<option value='0'>".t("Ei valintaa")."</option>";
+
+      while ($row = mysql_fetch_array($res)) {
+        if (!empty($_POST['jv_laskuliitos']) and $_POST['jv_laskuliitos'] == $row["tunnus"]) {
+          $sel = " SELECTED";
+        }
+
+        echo "<option value='$row[tunnus]'$sel>$row[laskunro] $row[nimi] $row[summa]$row[valkoodi]</option>";
+      }
+
+      echo "</select></td></tr>";
+    }
+  }
+
   echo "<tr><th>".t('L‰hett‰j‰n viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
   echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
   echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";

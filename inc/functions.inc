@@ -27119,7 +27119,7 @@ if (!function_exists('hae_asiakashinnat')) {
 }
 
 if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus) {
+  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
@@ -27220,7 +27220,14 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-      $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+
+      if ($ulkoinen_jarjestelma == 'L') {
+        $line->addChild('ItemNumber', substr($looprow['tuoteno'], 0, 20));
+      }
+      else {
+        $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+      }
+
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);

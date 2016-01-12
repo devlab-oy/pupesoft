@@ -448,32 +448,53 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
 if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
-  if (empty($asiakasrow['toim_postitp'])) {
-    $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
-    $asiakasrow['toim_postino']  = $asiakasrow['postino'];
-    $asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
-    $asiakasrow['toim_nimitark'] = $asiakasrow['nimitark'];
-    $asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
-    $asiakasrow['toim_maa']      = $asiakasrow['maa'];
-  }
+  if (!empty($kumpiosoite) and $kumpiosoite_ed != $kumpiosoite) {
 
-  if ($rahtikirja_ilman_asiakasta) {
-    $asiakasrow['toim_postitp']  = '';
-    $asiakasrow['toim_postino']  = '';
-    $asiakasrow['toim_osoite']   = '';
-    $asiakasrow['toim_nimitark'] = '';
-    $asiakasrow['toim_nimi']     = '';
-    $asiakasrow['toim_maa']      = '';
-  }
+    if ($kumpiosoite == "toimitus") {
+      $etuliite = "toim_";
+    }
+    elseif ($kumpiosoite == "laskutus") {
+      $etuliite = "laskutus_";
+    }
+    else {
+      $etuliite = "";
+    }
 
-  if (isset($tnimi) and trim($tnimi) != '') {
-    $asiakasrow['toim_postitp']  = $tpostitp;
-    $asiakasrow['toim_postino']  = $tpostino;
-    $asiakasrow['toim_osoite']   = $tosoite;
-    $asiakasrow['toim_nimitark'] = $tnimitark;
-    $asiakasrow['toim_nimi']     = $tnimi;
-    $asiakasrow['toim_maa']      = $tmaa;
-    $asiakasrow['toim_puh']      = $tpuh;
+    $asiakasrow['toim_postitp']  = $asiakasrow[$etuliite.'postitp'];
+    $asiakasrow['toim_postino']  = $asiakasrow[$etuliite.'postino'];
+    $asiakasrow['toim_osoite']   = $asiakasrow[$etuliite.'osoite'];
+    $asiakasrow['toim_nimitark'] = $asiakasrow[$etuliite.'nimitark'];
+    $asiakasrow['toim_nimi']     = $asiakasrow[$etuliite.'nimi'];
+    $asiakasrow['toim_maa']      = $asiakasrow[$etuliite.'maa'];
+  }
+  else {
+    if (empty($asiakasrow['toim_postitp'])) {
+      $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
+      $asiakasrow['toim_postino']  = $asiakasrow['postino'];
+      $asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
+      $asiakasrow['toim_nimitark'] = $asiakasrow['nimitark'];
+      $asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
+      $asiakasrow['toim_maa']      = $asiakasrow['maa'];
+    }
+
+    if ($rahtikirja_ilman_asiakasta) {
+      $asiakasrow['toim_postitp']  = '';
+      $asiakasrow['toim_postino']  = '';
+      $asiakasrow['toim_osoite']   = '';
+      $asiakasrow['toim_nimitark'] = '';
+      $asiakasrow['toim_nimi']     = '';
+      $asiakasrow['toim_maa']      = '';
+    }
+
+    if (isset($tnimi) and trim($tnimi) != '') {
+      $asiakasrow['toim_postitp']  = $tpostitp;
+      $asiakasrow['toim_postino']  = $tpostino;
+      $asiakasrow['toim_osoite']   = $tosoite;
+      $asiakasrow['toim_nimitark'] = $tnimitark;
+      $asiakasrow['toim_nimi']     = $tnimi;
+      $asiakasrow['toim_maa']      = $tmaa;
+      $asiakasrow['toim_puh']      = $tpuh;
+    }
   }
 
   echo "<form method='post' action='rahtikirja_custom.php' name='rahtikirja'><table>";
@@ -481,7 +502,28 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       <th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
   echo "<tr>
       <td valign='top'> ".t("Nimi").": </td>
-      <td><input type='text' name='tnimi' size='35' value='$asiakasrow[toim_nimi]'></td></tr>";
+      <td><input type='text' name='tnimi' size='35' value='$asiakasrow[toim_nimi]'>";
+
+  if ($asiakasid) {
+    echo "<div style='float: right;'>";
+
+    if (!empty($kumpiosoite)) {
+      $sel[$kumpiosoite] = "SELECTED";
+    }
+    else {
+      $kumpiosoite = "";
+    }
+
+    echo "<input type=hidden name='kumpiosoite_ed' value='$kumpiosoite'>";
+    echo "<select name='kumpiosoite' onchange='submit();'>";
+    echo "<option value='toimitus' $sel[toimitus]>".t("Toimitusosite")."</option>";
+    echo "<option value='virallinen' $sel[virallinen]>".t("Virallinen osoite")."</option>";
+    echo "<option value='laskutus' $sel[laskutus]>".t("Laskutusosoite")."</option>";
+    echo "</select>";
+    echo "</div>";
+  }
+
+  echo "</td></tr>";
   echo "<tr>
       <td></td>
       <td><input type='text' name='tnimitark' size='35' value='$asiakasrow[toim_nimitark]'></td></tr>";

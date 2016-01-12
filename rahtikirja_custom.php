@@ -507,6 +507,8 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   if ($asiakasid) {
     echo "<div style='float: right;'>";
 
+    $sel = "";
+
     if (!empty($kumpiosoite)) {
       $sel[$kumpiosoite] = "SELECTED";
     }
@@ -672,6 +674,8 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       echo "<option value='0'>".t("Ei valintaa")."</option>";
 
       while ($row = mysql_fetch_array($res)) {
+        $sel = "";
+
         if (!empty($_POST['jv_laskuliitos']) and $_POST['jv_laskuliitos'] == $row["tunnus"]) {
           $sel = " SELECTED";
         }

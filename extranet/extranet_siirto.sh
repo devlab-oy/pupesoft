@@ -125,7 +125,6 @@ asiakasvalinta.inc
 extranet_tyomaaraykset.php
 extranet_laiterekisteri.php
 tyomaarays/tulosta_tyomaarays.inc
-tiedostofunkkarit.inc
 popup.js"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi

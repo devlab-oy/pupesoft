@@ -1139,6 +1139,11 @@ if (!function_exists("apix_invoice_put_file")) {
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";
     $version         = "1.0";
+
+    if ($yhtiorow["finvoice_versio"] == "2") {
+      $version       = "1.1";
+    }
+
     $timestamp       = gmdate("YmdHis");
     $apix_ulos       = "";
     $apixerrorreport = "";

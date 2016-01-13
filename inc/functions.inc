@@ -27153,10 +27153,10 @@ if (!function_exists('posten_outbounddelivery')) {
     $messageheader->addChild('Sender', $yhtiorow['nimi']);
 
     if ($ulkoinen_jarjestelma == 'L') {
-      $uj_nimi = "LogMaster";
+      $uj_nimi = "Helsingin Hyllyvarasto";
     }
     else {
-      $uj_nimi = "Posten";
+      $uj_nimi = "PostNord";
     }
 
     $messageheader->addChild('Receiver', $uj_nimi);

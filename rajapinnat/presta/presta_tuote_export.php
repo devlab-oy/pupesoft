@@ -130,7 +130,7 @@ if (in_array('kategoriat', $synkronoi)) {
 if (in_array('tuotteet', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään tuotetiedot.\n";
   $tuotteet = hae_tuotteet();
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
   if (isset($presta_ohita_tuoteparametrit) and count($presta_ohita_tuoteparametrit) > 0) {
     $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   }
@@ -386,7 +386,7 @@ function hae_tuotteet() {
     $tuotteen_parametrit = array();
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-    $query = "SELECT t0.nimi node, t0.lft,
+    $query = "SELECT t0.nimi node, t0.lft, t0.tunnus,
               tuote.tuoteno,
               GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
               (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
@@ -415,8 +415,11 @@ function hae_tuotteet() {
     $result_tp = pupe_query($query);
 
     $tuotepuun_nodet = array();
+    $tuotepuun_tunnukset = array();
 
     while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
+      $tuotepuun_tunnukset[] = $tuotepuurow['tunnus'];
+
       $breadcrumbs = empty($tuotepuurow['ancestors']) ? array() : explode("\n", $tuotepuurow['ancestors']);
       $breadcrumbs[] = $tuotepuurow['node'];
       if (count($breadcrumbs) > 1)
@@ -479,6 +482,7 @@ function hae_tuotteet() {
       'hinnastohinta'        => $hinnastoresult['hinta'],
       'asiakashinnat'        => $asiakashinnat,
       'tuotepuun_nodet'      => $tuotepuun_nodet,
+      'tuotepuun_tunnukset'  => $tuotepuun_tunnukset,
       'tuotteen_parametrit'  => $tuotteen_parametrit,
       'saldo'                => $myytavissa,
       'images'               => hae_tuotekuvat($row['tunnus']),

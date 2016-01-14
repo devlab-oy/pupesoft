@@ -1,7 +1,7 @@
 <?php
 
 require_once 'rajapinnat/logger.php';
-require_once 'PSWebServiceLibrary.php';
+require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
 

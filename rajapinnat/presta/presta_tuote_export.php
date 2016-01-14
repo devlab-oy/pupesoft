@@ -266,24 +266,26 @@ function hae_asiakashinnat() {
 function hae_kategoriat() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;
 
-  $query = "SELECT
-            node.lft AS lft,
-            node.rgt AS rgt,
-            node.nimi AS node_nimi,
-            node.koodi AS node_koodi,
+  // haetaan kaikki kategoriat ja niiden parent_id
+  $query = "SELECT node.nimi,
+            node.koodi,
             node.tunnus AS node_tunnus,
-            node.syvyys as node_syvyys,
-            (COUNT(node.tunnus) - 1) AS syvyys
+            (SELECT parent.tunnus
+             FROM dynaaminen_puu AS parent
+             WHERE parent.yhtio = node.yhtio
+             AND parent.lati = node.laji
+             AND parent.lft < node.lft
+             AND parent.rgt > node.rgt
+             ORDER by parent.lft DESC
+             LIMIT 1) as parent_tunnus
             FROM dynaaminen_puu AS node
-            JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
             WHERE node.yhtio = '{$kukarow['yhtio']}'
-            AND node.laji    = 'tuote'
-            GROUP BY node.lft
-            ORDER BY node.lft";
-
+            AND node.laji = 'tuote'
+            ORDER BY node.syvyys, node.lft";
   $result = pupe_query($query);
 
   $kategoriat = array();
+
   while ($kategoria = mysql_fetch_assoc($result)) {
     $kategoriat[] = $kategoria;
   }

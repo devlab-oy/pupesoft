@@ -120,14 +120,14 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 
-if (in_array('kategoriat', $synkronoi)) {
+if (array_key_exists('kategoriat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään tuotekategoriat.\n";
   $kategoriat = hae_kategoriat();
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
   $ok = $presta_categories->sync_categories($kategoriat);
 }
 
-if (in_array('tuotteet', $synkronoi)) {
+if (array_key_exists('tuotteet', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään tuotetiedot.\n";
   $tuotteet = hae_tuotteet();
   $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
@@ -140,28 +140,28 @@ if (in_array('tuotteet', $synkronoi)) {
   $ok = $presta_products->sync_products($tuotteet);
 }
 
-if (in_array('asiakasryhmat', $synkronoi)) {
+if (array_key_exists('asiakasryhmat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään asiakasryhmät.\n";
   $groups = hae_asiakasryhmat();
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
   $ok = $presta_customer_groups->sync_groups($groups);
 }
 
-if (in_array('asiakkaat', $synkronoi)) {
+if (array_key_exists('asiakkaat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään asiakkaat.\n";
   $asiakkaat = hae_asiakkaat1();
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
   $ok = $presta_customer->sync_customers($asiakkaat);
 }
 
-if (in_array('asiakashinnat', $synkronoi)) {
+if (array_key_exists('asiakashinnat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään asiakashinnat.\n";
   $hinnat = hae_asiakashinnat();
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
   $presta_prices->sync_prices($hinnat);
 }
 
-if (in_array('tilaukset', $synkronoi)) {
+if (array_key_exists('tilaukset', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tilaukset.\n";
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);

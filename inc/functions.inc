@@ -27156,7 +27156,15 @@ if (!function_exists('posten_outbounddelivery')) {
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
     $messageheader->addChild('Sender', $yhtiorow['nimi']);
-    $messageheader->addChild('Receiver', 'Posten');
+
+    if ($ulkoinen_jarjestelma == 'L') {
+      $uj_nimi = "Helsingin Hyllyvarasto";
+    }
+    else {
+      $uj_nimi = "PostNord";
+    }
+
+    $messageheader->addChild('Receiver', $uj_nimi);
 
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));

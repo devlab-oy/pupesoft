@@ -6490,7 +6490,7 @@ if ($tee == '') {
               </form><br><br>";
       }
 
-      if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
+      if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
         echo t("Tilausrivin verollisuus").":<br>";
         echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -6526,6 +6526,17 @@ if ($tee == '') {
       echo "</div>";
 
       echo "<img id='rivientoiminnot' src='$palvelin2/pics/lullacons/mini-edit.png' style='padding-bottom: 5px; padding-left: 15px; padding-right: 15px;'>";
+
+      if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+        // valittu ei n‰ytet‰ alveja vaikka hinnat alvillisina
+        if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+          echo "<font class='info'>(".t("Verottomat hinnat").")</font>";
+        }
+        // valittu n‰ytet‰‰n alvit vaikka hinnat alvittomia
+        if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+          echo "<font class='info'>(".t("Verolliset hinnat").")</font>";
+        }
+      }
     }
 
     if ($rivilaskuri > 0) {

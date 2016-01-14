@@ -273,7 +273,7 @@ function hae_kategoriat() {
             (SELECT parent.tunnus
              FROM dynaaminen_puu AS parent
              WHERE parent.yhtio = node.yhtio
-             AND parent.lati = node.laji
+             AND parent.laji = node.laji
              AND parent.lft < node.lft
              AND parent.rgt > node.rgt
              ORDER by parent.lft DESC

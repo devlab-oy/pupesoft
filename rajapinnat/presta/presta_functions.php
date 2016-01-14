@@ -138,8 +138,7 @@ function hae_tuotteet() {
   }
 
   // Haetaan pupesta tuotteen tiedot
-  $query = "SELECT
-            tuote.*
+  $query = "SELECT tuote.*
             FROM tuote
             WHERE tuote.yhtio        = '{$kukarow['yhtio']}'
               AND tuote.status      != 'P'
@@ -153,7 +152,6 @@ function hae_tuotteet() {
 
   // Pyöräytetään muuttuneet tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
-
     // Jos yhtiön hinnat eivät sisällä alv:tä
     if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
       $myyntihinta = hintapyoristys($row["myyntihinta"] * (1 + ($row["alv"] / 100)));
@@ -179,12 +177,13 @@ function hae_tuotteet() {
                 asiakashinta.hinta
                 FROM asiakas
                 JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                  AND avainsana.selite           = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')
+                  AND avainsana.selite = asiakas.ryhma
+                  AND avainsana.laji = 'asiakasryhma')
                 JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
                   AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-                WHERE asiakas.yhtio              = '{$kukarow['yhtio']}'
-                  AND asiakashinta.tuoteno ='{$row['tuoteno']}'
-                GROUP BY 1,2,3";
+                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                AND asiakashinta.tuoteno ='{$row['tuoteno']}'
+                GROUP BY 1, 2, 3";
       $asiakashintares = pupe_query($query);
 
       while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
@@ -203,14 +202,14 @@ function hae_tuotteet() {
                         avainsana.selite option_name
                         FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                         JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                          AND avainsana.laji             = 'PARAMETRI'
-                          AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                        WHERE tuotteen_avainsanat.yhtio='{$kukarow['yhtio']}'
-                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
-                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
-                        AND tuotteen_avainsanat.laji     like 'parametri_%'
-                        AND tuotteen_avainsanat.tuoteno  = '{$row['tuoteno']}'
-                        AND tuotteen_avainsanat.kieli    = 'fi'
+                          AND avainsana.laji = 'PARAMETRI'
+                          AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                        WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+                        AND tuotteen_avainsanat.laji != 'parametri_variaatio'
+                        AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
+                        AND tuotteen_avainsanat.laji like 'parametri_%'
+                        AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
+                        AND tuotteen_avainsanat.kieli = 'fi'
                         ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();

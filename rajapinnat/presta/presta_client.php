@@ -46,7 +46,7 @@ abstract class PrestaClient {
     }
     $this->url = $url;
     $this->api_key = $api_key;
-    $this->ws = new PrestaShopWebservice($this->url, $this->api_key);
+    $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
   }
 
   /**

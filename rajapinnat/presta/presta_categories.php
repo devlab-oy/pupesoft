@@ -84,6 +84,17 @@ class PrestaCategories {
     $this->delete_unnecessary_categories($pupesoft_categories);
   }
 
+  public function find_category_by_tunnus($tunnus) {
+    // loop categories
+    foreach ($this->categories() as $category) {
+      if ($category->category->meta_keywords->language[0] == $tunnus) {
+        return $category;
+      }
+    }
+
+    return false;
+  }
+
   private function delete_unnecessary_categories($pupesoft_categories) {
     // collect all presta ID:s we should keep (always keep home)
     $keep_presta_ids = array(
@@ -202,17 +213,6 @@ class PrestaCategories {
     $this->_empty_category = $category;
 
     return $this->_empty_category;
-  }
-
-  private function find_category_by_tunnus($tunnus) {
-    // loop categories
-    foreach ($this->categories() as $category) {
-      if ($category->category->meta_keywords->language[0] == $tunnus) {
-        return $category;
-      }
-    }
-
-    return false;
   }
 
   private function find_category_by_id($id) {

@@ -339,10 +339,9 @@ function hae_tuotteet() {
       $myymalahinta_veroton = hintapyoristys($row["myymalahinta"] / (1 + ($row["alv"] / 100)));
     }
 
-
     $asiakashinnat = array();
-    if (isset($tuotteiden_asiakashinnat_magentoon)) {
 
+    if (isset($tuotteiden_asiakashinnat_magentoon)) {
       $query = "SELECT
                 avainsana.selitetark AS asiakasryhma,
                 asiakashinta.tuoteno,
@@ -385,48 +384,6 @@ function hae_tuotteet() {
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();
 
-    // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
-    $query = "SELECT t0.nimi node, t0.lft, t0.tunnus,
-              tuote.tuoteno,
-              GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
-              (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
-               FROM dynaaminen_puu t6
-               WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
-               AND t6.laji      = 'tuote'
-               ORDER BY t6.lft) ancestors
-              FROM dynaaminen_puu t0
-              LEFT JOIN
-              (SELECT *
-               FROM (SELECT t1.lft node,
-               MAX(t2.lft) nodeparent
-               FROM dynaaminen_puu t1
-               INNER JOIN
-               dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
-               GROUP BY t1.lft) t3
-               LEFT JOIN
-               dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
-              LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
-               JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
-              WHERE t0.yhtio ='{$kukarow['yhtio']}'
-              AND t0.laji       = 'tuote'
-              AND tuote.tuoteno = '{$row['tuoteno']}'
-              GROUP BY t0.nimi
-              ORDER BY t0.lft";
-    $result_tp = pupe_query($query);
-
-    $tuotepuun_nodet = array();
-    $tuotepuun_tunnukset = array();
-
-    while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
-      $tuotepuun_tunnukset[] = $tuotepuurow['tunnus'];
-
-      $breadcrumbs = empty($tuotepuurow['ancestors']) ? array() : explode("\n", $tuotepuurow['ancestors']);
-      $breadcrumbs[] = $tuotepuurow['node'];
-      if (count($breadcrumbs) > 1)
-        array_shift($breadcrumbs);
-      $tuotepuun_nodet[] = $breadcrumbs;
-    }
-
     while ($parametrirow = mysql_fetch_assoc($parametritres)) {
       $tuotteen_parametrit[] = array(
         "nimi"        => $parametrirow["selitetark"],
@@ -434,6 +391,20 @@ function hae_tuotteet() {
         "arvo"        => $parametrirow["selite"]
       );
     }
+
+    // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
+    $query = "SELECT puun_tunnus
+              FROM puun_alkio
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'tuote'
+              AND liitos = '{$row['tuoteno']}'";
+    $result_tp = pupe_query($query);
+    $tuotepuun_tunnukset = array();
+
+    while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
+      $tuotepuun_tunnukset[] = $tuotepuurow['puun_tunnus'];
+    }
+
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
     $query = "SELECT
               *
@@ -445,12 +416,13 @@ function hae_tuotteet() {
                 AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
               ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
               LIMIT 1";
-
     $hinnastoq = pupe_query($query);
     $hinnastoresult = mysql_fetch_assoc($hinnastoq);
+
     // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
-    if (!isset($hinnastoresult['hinta']))
+    if (!isset($hinnastoresult['hinta'])) {
       $hinnastoresult['hinta'] = '';
+    }
 
     list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
@@ -481,7 +453,6 @@ function hae_tuotteet() {
       'tunnus'               => $row['tunnus'],
       'hinnastohinta'        => $hinnastoresult['hinta'],
       'asiakashinnat'        => $asiakashinnat,
-      'tuotepuun_nodet'      => $tuotepuun_nodet,
       'tuotepuun_tunnukset'  => $tuotepuun_tunnukset,
       'tuotteen_parametrit'  => $tuotteen_parametrit,
       'saldo'                => $myytavissa,
@@ -509,6 +480,7 @@ function hae_tuotekuvat($tuote_tunnus) {
             ORDER BY jarjestys ASC";
   $result = pupe_query($query);
   $tuotekuvat = array();
+
   while ($tuotekuva = mysql_fetch_assoc($result)) {
     $tuotekuvat[] = $tuotekuva;
   }

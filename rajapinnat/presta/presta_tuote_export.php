@@ -103,6 +103,9 @@ if (!isset($presta_edi_folderpath)) {
 if (!isset($yhtiorow)) {
   die('Yhtiorow puuttuu');
 }
+if (!isset($presta_home_category_id)) {
+  $presta_home_category_id = 2;
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -120,7 +123,7 @@ echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 if (in_array('kategoriat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan ja siirretään tuotekategoriat.\n";
   $kategoriat = hae_kategoriat();
-  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
   $ok = $presta_categories->sync_categories($kategoriat);
 }
 

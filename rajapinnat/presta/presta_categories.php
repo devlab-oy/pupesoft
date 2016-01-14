@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
+require_once 'rajapinnat/logger.php';
 
 class PrestaCategories {
   private $_categories = null;
@@ -15,9 +16,14 @@ class PrestaCategories {
     $this->presta_url = $url;
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
+
+    $this->logger = new Logger('/tmp/presta_log.txt');
+    $this->logger->set_date_format('Y-m-d H:i:s');
   }
 
   public function sync_categories($pupesoft_categories) {
+    $this->logger->log("---Start category import---");
+
     $count = count($pupesoft_categories) - 1;
     $current = 1;
 
@@ -33,7 +39,7 @@ class PrestaCategories {
         continue;
       }
 
-      echo "[$current/$count] ";
+      $this->logger->log("[$current/$count]");
 
       // if our parent is pupesoft root, parent is presta home
       if ($parent_tunnus == $this->pupesoft_root_category_id) {
@@ -44,7 +50,7 @@ class PrestaCategories {
         $presta_category = $this->find_category_by_tunnus($parent_tunnus);
 
         if ($presta_category === false) {
-          echo "parenttia ei löytynyt! ohitetaan\n";
+          $this->logger->log("Parent $parent_tunnus not FOUND! Skipping {$category['nimi']}");
           continue;
         }
 
@@ -62,19 +68,19 @@ class PrestaCategories {
 
       if ($presta_category === false) {
         $return = $this->create_category($params);
-        echo "Create {$category['nimi']}: ";
+        $this->logger->log("Create {$category['nimi']}");
       }
       else {
         $id = $presta_category->category->id;
         $return = $this->update_category($id, $params);
-        echo "Update {$category['nimi']}: ";
+        $this->logger->log("Update {$category['nimi']}");
       }
 
       if ($return === false) {
-        echo "FAILED!\n";
+        $this->logger->log("FAILED!");
       }
       else {
-        echo "OK!\n";
+        $this->logger->log("OK!");
       }
 
       $current += 1;
@@ -82,6 +88,8 @@ class PrestaCategories {
 
     // delete unnecessary categories
     $this->delete_unnecessary_categories($pupesoft_categories);
+
+    $this->logger->log("---Stop category import---");
   }
 
   public function find_category_by_tunnus($tunnus) {
@@ -124,15 +132,15 @@ class PrestaCategories {
 
     // we should delete them from presta
     foreach ($delete_presta_ids as $id) {
-      echo "Delete $id: ";
+      $this->logger->log("Delete $id");
 
       $result = $this->delete_category($id);
 
       if ($result === false) {
-        echo "FAILED!\n";
+        $this->logger->log("FAILED!");
       }
       else {
-        echo "OK!\n";
+        $this->logger->log("OK!");
       }
     }
 
@@ -153,7 +161,7 @@ class PrestaCategories {
       $xml = $this->presta_client->get($params);
     }
     catch (PrestaShopWebserviceException $ex) {
-      echo $ex->getMessage();
+      $this->logger->log($ex->getMessage());
       return false;
     }
 
@@ -184,7 +192,7 @@ class PrestaCategories {
         $categories[] = $xml;
       }
       catch (PrestaShopWebserviceException $ex) {
-        echo $ex->getMessage();
+        $this->logger->log($ex->getMessage());
       }
     }
 
@@ -206,7 +214,7 @@ class PrestaCategories {
       $category = $this->presta_client->get($params);
     }
     catch (PrestaShopWebserviceException $ex) {
-      echo $ex->getMessage();
+      $this->logger->log($ex->getMessage());
       return false;
     }
 
@@ -293,7 +301,7 @@ class PrestaCategories {
       $category = $this->presta_client->edit($params);
     }
     catch (PrestaShopWebserviceException $ex) {
-      echo $ex->getMessage();
+      $this->logger->log($ex->getMessage());
       return false;
     }
 
@@ -341,7 +349,7 @@ class PrestaCategories {
       $category = $this->presta_client->add($params);
     }
     catch (PrestaShopWebserviceException $ex) {
-      echo $ex->getMessage();
+      $this->logger->log($ex->getMessage());
       return false;
     }
 
@@ -361,7 +369,7 @@ class PrestaCategories {
       $category = $this->presta_client->delete($params);
     }
     catch (PrestaShopWebserviceException $ex) {
-      echo $ex->getMessage();
+      $this->logger->log($ex->getMessage());
       return false;
     }
 

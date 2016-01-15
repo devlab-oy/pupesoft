@@ -86,9 +86,6 @@ if ($request['action'] == 'sync') {
     if (isset($presta_ohita_tuoteparametrit) and count($presta_ohita_tuoteparametrit) > 0) {
       $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
     }
-    if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
-      $presta_products->set_image_sync($presta_ohita_tuotekuvat);
-    }
     $ok = $presta_products->sync_products($tuotteet);
   }
 

@@ -141,10 +141,6 @@ if (array_key_exists('tuotteet', $synkronoi)) {
     $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   }
 
-  if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
-    $presta_products->set_image_sync($presta_ohita_tuotekuvat);
-  }
-
   $ok = $presta_products->sync_products($tuotteet);
 }
 

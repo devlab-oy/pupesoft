@@ -55,21 +55,9 @@ echo "<li>" . t("Tilattu") . ": {$tilattu} {$pop_yks}</li>
       <li>" . t("Varattu") . ": {$varattu} {$pop_yks}</li>";
 
 if ($paikka !== null) {
+  $halytysraja = hae_halytysraja($tuoteno, $paikka);
 
-  list($_hyllyalue, $_hyllynro, $_hyllyvali, $_hyllytaso) = explode(" ", $paikka);
-
-  $query = "SELECT halytysraja
-            FROM tuotepaikat
-            WHERE yhtio   = '{$kukarow['yhtio']}'
-            AND tuoteno   = '{$tuoteno}'
-            AND hyllyalue = '{$_hyllyalue}'
-            AND hyllynro  = '{$_hyllynro}'
-            AND hyllyvali = '{$_hyllyvali}'
-            AND hyllytaso = '{$_hyllytaso}'";
-  $halyraja_chk_res = pupe_query($query);
-  $halyraja_chk_row = mysql_fetch_assoc($halyraja_chk_res);
-
-  echo "<li>", t("Hälytysraja"), ": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
+  echo "<li>", t("Hälytysraja"), ": {$halytysraja} {$pop_yks}</li>";
 }
 
 echo "<li>" . t("Keskihinta") . ": {$keskihinta} {$valuutta}</li>";
@@ -114,4 +102,32 @@ function tilattu_varattu($tuoteno, $tyyppi) {
   $tilausrivirow["varattu"] = $tilausrivirow["varattu"] == null ? 0 : $tilausrivirow["varattu"];
 
   return $tilausrivirow;
+}
+
+function hae_halytysraja($tuoteno, $paikka) {
+  list($_hyllyalue, $_hyllynro, $_hyllyvali, $_hyllytaso) = explode(" ", $paikka);
+
+  global $kukarow;
+
+  $query = "SELECT halytysraja
+            FROM tuotepaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuoteno}'
+            AND hyllyalue = '{$_hyllyalue}'
+            AND hyllynro = '{$_hyllynro}'
+            AND hyllyvali = '{$_hyllyvali}'
+            AND hyllytaso = '{$_hyllytaso}'";
+  $result = pupe_query($query);
+  $tuotepaikatrow = mysql_fetch_assoc($result);
+
+  if ($tuotepaikatrow["halytysraja"] != 0) return $tuotepaikatrow["halytysraja"];
+
+  $query = "SELECT halytysraja
+            FROM tuote
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteno = '{$tuoteno}'";
+  $result = pupe_query($query);
+  $tuoterow = mysql_fetch_assoc($result);
+
+  return $tuoterow["halytysraja"];
 }

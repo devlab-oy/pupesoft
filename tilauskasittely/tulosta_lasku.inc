@@ -1047,8 +1047,13 @@ if (!function_exists('rivi_otsikot')) {
       }
 
       if ($laskutyyppi == 21 or $laskutyyppi == 22) {
-        $pdf_lasku->draw_text(340, $kala, t("Määrä", $kieli).":", $thispage, $pieni);
-        $pdf_lasku->draw_text(390, $kala, t("A-hinta", $kieli).":", $thispage, $pieni);
+
+        //Määrä
+        $oikpos = $pdf_lasku->strlen(t("Määrä", $kieli).":", $pieni);
+        $pdf_lasku->draw_text(365-$oikpos, $kala, t("Määrä", $kieli).":", $thispage, $pieni);
+
+        $oikpos = $pdf_lasku->strlen(t("A-hinta", $kieli).":", $pieni);
+        $pdf_lasku->draw_text(435-$oikpos, $kala, t("A-hinta", $kieli).":", $thispage, $pieni);
       }
       else {
         $pdf_lasku->draw_text(340, $kala, t("Määrä", $kieli), $thispage, $pieni);
@@ -1061,7 +1066,8 @@ if (!function_exists('rivi_otsikot')) {
 
 
       if (in_array($laskutyyppi, array('21','22'))) {
-        $pdf_lasku->draw_text(490, $kala, t("Veroton arvo", $kieli).":", $thispage, $pieni);
+        $oikpos = $pdf_lasku->strlen(t("Veroton arvo", $kieli).":", $pieni);
+        $pdf_lasku->draw_text(540-$oikpos, $kala, t("Veroton arvo", $kieli).":", $thispage, $pieni);
       }
       else {
         $pdf_lasku->draw_text(490, $kala, t("Veroton arvo", $kieli), $thispage, $pieni);

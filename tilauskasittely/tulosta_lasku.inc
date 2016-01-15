@@ -1059,7 +1059,13 @@ if (!function_exists('rivi_otsikot')) {
         $pdf_lasku->draw_text(450, $kala, t("Alennus", $kieli)."-%", $thispage, $pieni);
       }
 
-      $pdf_lasku->draw_text(490, $kala, t("Veroton arvo", $kieli), $thispage, $pieni);
+
+      if (in_array($laskutyyppi, array('21','22'))) {
+        $pdf_lasku->draw_text(490, $kala, t("Veroton arvo", $kieli).":", $thispage, $pieni);
+      }
+      else {
+        $pdf_lasku->draw_text(490, $kala, t("Veroton arvo", $kieli), $thispage, $pieni);
+      }
 
       if ($laskutyyppi != 21 and $laskutyyppi != 22) {
         $pdf_lasku->draw_text(550, $kala, t("Alv", $kieli)."-%", $thispage, $pieni);

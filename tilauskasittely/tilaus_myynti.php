@@ -7675,8 +7675,7 @@ if ($tee == '') {
                        "&keskihinta={$row["kehahin"]}" .
                        "&valuutta={$row["valuutta"]}" .
                        "&varasto={$laskurow["varasto"]}" .
-                       "&vanhatunnus={$laskurow["vanhatunnus"]}" .
-                       "&tyyppi=L'>$row[tuoteno]</a>";
+                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";

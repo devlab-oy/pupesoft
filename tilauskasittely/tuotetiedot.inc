@@ -33,19 +33,8 @@ list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $_varastot
 
 $pop_yks = t_avainsana("Y", "", "and avainsana.selite='{$yksikko}'", "", "", "selite");
 
-if ($tyyppi == "O") {
-  $tilattu = tilattu_varattu($tuoteno, $tyyppi);
-  $tilattu = $tilattu["tilattu"];
-
-  $varattu = tilattu_varattu($tuoteno, "L");
-  $varattu = $varattu["tilattu"];
-}
-else {
-  $tilattu_varattu = tilattu_varattu($tuoteno, $tyyppi);
-
-  $tilattu = $tilattu_varattu["tilattu"];
-  $varattu = $tilattu_varattu["varattu"];
-}
+$tilattu = tilattu($tuoteno, "O");
+$varattu = tilattu($tuoteno, "L");
 
 echo "<ul>";
 echo "<li>" . t("Saldo") . ": {$saldo} {$pop_yks}</li>
@@ -83,12 +72,10 @@ if (count($lisatiedot) > 0) {
   echo "</ul>";
 }
 
-function tilattu_varattu($tuoteno, $tyyppi) {
+function tilattu($tuoteno, $tyyppi) {
   global $kukarow;
 
-  $query = "SELECT
-              sum(tilausrivi.varattu + tilausrivi.jt) AS tilattu,
-              sum(tilausrivi.varattu)                 AS varattu
+  $query = "SELECT sum(tilausrivi.varattu + tilausrivi.jt) AS tilattu
             FROM tilausrivi
             WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
             AND tilausrivi.tyyppi = '{$tyyppi}'
@@ -99,9 +86,8 @@ function tilattu_varattu($tuoteno, $tyyppi) {
   $tilausrivirow = mysql_fetch_assoc($result);
 
   $tilausrivirow["tilattu"] = $tilausrivirow["tilattu"] == null ? 0 : $tilausrivirow["tilattu"];
-  $tilausrivirow["varattu"] = $tilausrivirow["varattu"] == null ? 0 : $tilausrivirow["varattu"];
 
-  return $tilausrivirow;
+  return $tilausrivirow["tilattu"];
 }
 
 function hae_halytysraja($tuoteno, $paikka) {

@@ -303,7 +303,7 @@ function hae_tuotekuvat($tuote_tunnus) {
   global $kukarow, $yhtiorow, $presta_ohita_tuotekuvat;
 
   if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
-    return $array();
+    return array();
   }
 
   $query = "SELECT *

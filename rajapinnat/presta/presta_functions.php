@@ -128,7 +128,7 @@ function hae_kategoriat() {
 }
 
 function hae_tuotteet() {
-  global $kukarow, $yhtiorow, $verkkokauppatyyppi, $datetime_checkpoint, $ajetaanko_kaikki;
+  global $kukarow, $yhtiorow, $verkkokauppatyyppi, $datetime_checkpoint, $ajetaanko_kaikki, $presta_ohita_tuotekuvat;
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
@@ -300,7 +300,11 @@ function hae_tuotteet() {
 }
 
 function hae_tuotekuvat($tuote_tunnus) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $presta_ohita_tuotekuvat;
+
+  if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
+    return $array();
+  }
 
   $query = "SELECT *
             FROM liitetiedostot

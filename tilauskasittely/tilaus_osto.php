@@ -1455,13 +1455,12 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 "&tuoteno={$prow["tuoteno"]}" .
                 "&varasto={$laskurow["varasto"]}" .
                 "&yksikko={$prow["yksikko"]}" .
-                "&tilattu={$prow["tilattu"]}" .
-                "&varattu={$prow["varattukpl"]}" .
                 "&paikka={$prow["paikka"]}" .
                 "&keskihinta={$prow["keskihinta"]}" .
                 "&valuutta={$prow["valuutta"]}" .
                 "&ostohinta={$prow["ostohinta"]}" .
-                "&vanhatunnus={$laskurow["vanhatunnus"]}";
+                "&vanhatunnus={$laskurow["vanhatunnus"]}" .
+                "&tyyppi=O";
 
               echo "<td valign='top' $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'

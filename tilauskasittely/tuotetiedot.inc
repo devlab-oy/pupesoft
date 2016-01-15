@@ -1,15 +1,14 @@
 <?php
 
-$tuoteno      = isset($tuoteno)      ? $tuoteno                    : null;
-$varasto      = isset($varasto)      ? $varasto                    : null;
-$yksikko      = isset($yksikko)      ? $yksikko                    : null;
-$tilattu      = isset($tilattu)      ? $tilattu                    : null;
-$varattu      = isset($varattu)      ? $varattu                    : null;
-$paikka       = isset($paikka)       ? $paikka                     : null;
-$keskihinta   = isset($keskihinta)   ? $keskihinta                 : null;
-$valuutta     = isset($valuutta)     ? $valuutta                   : null;
-$ostohinta    = isset($ostohinta)    ? $ostohinta                  : null;
-$vanhatunnus  = isset($vanhatunnus)  ? $vanhatunnus                : 0;
+$keskihinta  = isset($keskihinta)  ? $keskihinta  : null;
+$ostohinta   = isset($ostohinta)   ? $ostohinta   : null;
+$paikka      = isset($paikka)      ? $paikka      : null;
+$tyyppi      = isset($tyyppi)      ? $tyyppi      : "O";
+$tuoteno     = isset($tuoteno)     ? $tuoteno     : null;
+$valuutta    = isset($valuutta)    ? $valuutta    : null;
+$vanhatunnus = isset($vanhatunnus) ? $vanhatunnus : 0;
+$varasto     = isset($varasto)     ? $varasto     : null;
+$yksikko     = isset($yksikko)     ? $yksikko     : null;
 
 $_varastot = array($varasto);
 
@@ -33,6 +32,20 @@ if ($vanhatunnus != 0) {
 list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', $_varastot);
 
 $pop_yks = t_avainsana("Y", "", "and avainsana.selite='{$yksikko}'", "", "", "selite");
+
+if ($tyyppi == "O") {
+  $tilattu = tilattu_varattu($tuoteno, $tyyppi);
+  $tilattu = $tilattu["tilattu"];
+
+  $varattu = tilattu_varattu($tuoteno, "L");
+  $varattu = $varattu["tilattu"];
+}
+else {
+  $tilattu_varattu = tilattu_varattu($tuoteno, $tyyppi);
+
+  $tilattu = $tilattu_varattu["tilattu"];
+  $varattu = $tilattu_varattu["varattu"];
+}
 
 echo "<ul>";
 echo "<li>" . t("Saldo") . ": {$saldo} {$pop_yks}</li>
@@ -80,4 +93,25 @@ if (count($lisatiedot) > 0) {
   }
 
   echo "</ul>";
+}
+
+function tilattu_varattu($tuoteno, $tyyppi) {
+  global $kukarow;
+
+  $query = "SELECT
+              sum(tilausrivi.varattu + tilausrivi.jt) AS tilattu,
+              sum(tilausrivi.varattu)                 AS varattu
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+            AND tilausrivi.tyyppi = '{$tyyppi}'
+            AND tilausrivi.tuoteno = '{$tuoteno}'
+            AND tilausrivi.laskutettuaika = '0000-00-00'
+            AND tilausrivi.var != 'P'";
+  $result = pupe_query($query);
+  $tilausrivirow = mysql_fetch_assoc($result);
+
+  $tilausrivirow["tilattu"] = $tilausrivirow["tilattu"] == null ? 0 : $tilausrivirow["tilattu"];
+  $tilausrivirow["varattu"] = $tilausrivirow["varattu"] == null ? 0 : $tilausrivirow["varattu"];
+
+  return $tilausrivirow;
 }

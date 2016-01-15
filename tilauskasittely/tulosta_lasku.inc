@@ -1046,12 +1046,12 @@ if (!function_exists('rivi_otsikot')) {
         $pdf_lasku->draw_text(190, $kala, t("Tuotenumero", $kieli), $thispage, $pieni);
       }
 
-      $pdf_lasku->draw_text(340, $kala, t("Määrä", $kieli), $thispage, $pieni);
-
       if ($laskutyyppi == 21 or $laskutyyppi == 22) {
+        $pdf_lasku->draw_text(340, $kala, t("Määrä", $kieli).":", $thispage, $pieni);
         $pdf_lasku->draw_text(390, $kala, t("A-hinta", $kieli).":", $thispage, $pieni);
       }
       else {
+        $pdf_lasku->draw_text(340, $kala, t("Määrä", $kieli), $thispage, $pieni);
         $pdf_lasku->draw_text(390, $kala, t("A-hinta", $kieli), $thispage, $pieni);
       }
 

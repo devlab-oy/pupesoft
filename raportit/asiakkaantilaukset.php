@@ -510,7 +510,23 @@ if ($ytunnus != '') {
     $query .=  "$jarj";
   }
   else {
-    $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+    $query = "SELECT
+                $yhtioekolisa
+                lasku.tunnus tilaus,
+                lasku.laskunro,
+                concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas,
+                lasku.ytunnus,
+                lasku.toimaika,
+                lasku.laatija,
+                $summaselli
+                lasku.tila,
+                lasku.alatila,
+                lasku.hyvak1,
+                lasku.hyvak2,
+                lasku.h1time,
+                lasku.h2time,
+                lasku.luontiaika,
+                lasku.yhtio
               FROM lasku use index (yhtio_tila_luontiaika)
               $yhtioekojoin
               WHERE lasku.$logistiikka_yhtiolisa ";
@@ -529,7 +545,7 @@ if ($ytunnus != '') {
     $query .= "  and $til
           and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
           and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-          $jarj";
+          ORDER BY abs(lasku.jaksotettu), 2 DESC, 1 ASC";
   }
 
   if ($kaikki == "") {

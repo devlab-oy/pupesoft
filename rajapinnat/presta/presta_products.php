@@ -11,13 +11,17 @@ class PrestaProducts extends PrestaClient {
    * Ohitettavien tuoteparametrien lista
    */
 
-
+  private $presta_categories = null;
+  private $presta_home_category_id = null;
   private $_removable_fields = array();
 
   // Päivitetäänkö tuotekuvat
   private $_image_sync = true;
 
-  public function __construct($url, $api_key) {
+  public function __construct($url, $api_key, $presta_home_category_id) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
+    $this->presta_home_category_id = $presta_home_category_id;
+
     parent::__construct($url, $api_key);
   }
 
@@ -69,13 +73,13 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
-    if (!empty($product['tuotepuun_nodet'])) {
-      foreach ($product['tuotepuun_nodet'] as $category_ancestors) {
-        //Default category id is set inside for. This means that the last category is set default
-        $default_category_id = $this->add_category($xml, $category_ancestors);
+    if (!empty($product['tuotepuun_tunnukset'])) {
+      foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
+        // Default category id is set inside for. This means that the last category is set default
+        $category_id = $this->add_category($xml, $pupesoft_category);
       }
 
-      $xml->product->id_category_default = $default_category_id;
+      $xml->product->id_category_default = $category_id;
     }
 
     $removables = $this->_removable_fields;
@@ -94,14 +98,18 @@ class PrestaProducts extends PrestaClient {
    * @param array   $ancestors
    * @return int
    */
-  private function add_category(SimpleXMLElement &$xml, $ancestors) {
-    $presta_categories = new PrestaCategories($this->url(), $this->api_key());
-    $category_id = $presta_categories->find_category($ancestors);
-    if (!is_null($category_id)) {
-      $category = $xml->product->associations->categories->addChild('category');
-      $category->addChild('id');
-      $category->id = $category_id;
+  private function add_category(SimpleXMLElement &$xml, $category) {
+    // fetch presta category with pupe tunnus
+    $response = $this->presta_categories->find_category_by_tunnus($category);
+
+    if ($response === false) {
+      return null;
     }
+
+    $category_id = $response->category->id;
+    $category = $xml->product->associations->categories->addChild('category');
+    $category->addChild('id');
+    $category->id = $category_id;
 
     return $category_id;
   }

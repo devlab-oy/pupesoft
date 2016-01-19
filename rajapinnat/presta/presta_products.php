@@ -8,15 +8,23 @@ class PrestaProducts extends PrestaClient {
   const RESOURCE = 'products';
 
   /**
+  * Dynaamiset tuoteparametrien lista
+  */
+  private $_dynamic_fields = array();
+
+  /**
    * Ohitettavien tuoteparametrien lista
    */
+  private $_removable_fields = array();
 
   private $presta_categories = null;
   private $presta_home_category_id = null;
-  private $_removable_fields = array();
 
   // Päivitetäänkö tuotekuvat
   private $_image_sync = true;
+
+  // Päivitetäänkö tuotekategoriat
+  private $_category_sync = true;
 
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
@@ -73,7 +81,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
-    if (!empty($product['tuotepuun_tunnukset'])) {
+    if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
       foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
         // Default category id is set inside for. This means that the last category is set default
         $category_id = $this->add_category($xml, $pupesoft_category);
@@ -82,6 +90,15 @@ class PrestaProducts extends PrestaClient {
       $xml->product->id_category_default = $category_id;
     }
 
+    // Dynamic product parameters
+    $product_parameters = $this->_dynamic_fields;
+    if (isset($product_parameters) and count($product_parameters) > 0) {
+      foreach ($product_parameters as $parameter) {        
+        $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
+      } 
+    }
+
+    // Removed product parameters
     $removables = $this->_removable_fields;
     if (isset($removables) and count($removables) > 0) {
       foreach ($removables as $element) {
@@ -179,9 +196,19 @@ class PrestaProducts extends PrestaClient {
     $this->_removable_fields = $fields;
   }
 
+  public function set_dynamic_fields($fields) {
+    $this->_dynamic_fields = $fields;
+  }
+
   public function set_image_sync($status) {
     if (!empty($status)) {
       $this->_image_sync = false;
+    }
+  }
+
+  public function set_category_sync($status) {
+    if (!empty($status)) {
+      $this->_category_sync = false;
     }
   }
 

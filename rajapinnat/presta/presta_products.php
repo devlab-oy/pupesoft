@@ -19,10 +19,10 @@ class PrestaProducts extends PrestaClient {
 
   private $presta_categories = null;
   private $presta_home_category_id = null;
-    
+
   // Päivitetäänkö tuotekuvat
   private $_image_sync = true;
-  
+
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
 
@@ -81,7 +81,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
-    if (!empty($product['tuotepuun_tunnukset'])) {
+    if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
       foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
         // Default category id is set inside for. This means that the last category is set default
         $category_id = $this->add_category($xml, $pupesoft_category);

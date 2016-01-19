@@ -84,10 +84,10 @@ if ($request['action'] == 'sync') {
     $tuotteet = hae_tuotteet();
 
     $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
+
     if (isset($presta_dynaamiset_tuoteparametrit) and count($presta_dynaamiset_tuoteparametrit) > 0) {
       $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
     }
-
     if (isset($presta_ohita_tuoteparametrit) and count($presta_ohita_tuoteparametrit) > 0) {
       $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
     }

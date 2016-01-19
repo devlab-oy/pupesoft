@@ -2553,10 +2553,6 @@ if (mysql_num_rows($result) != 0) {
             }
           }
 
-          if ($row['viesti'] != '' and $deletilaus) {
-            echo "<br>".t('Tilausviite').": {$row['viesti']}";
-          }
-
           if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $row['sopimus_numero'] != '') {
             echo "<br>".t('Sopimusnumero').": {$row['sopimus_numero']}";
           }

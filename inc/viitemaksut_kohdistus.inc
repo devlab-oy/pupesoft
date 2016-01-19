@@ -93,7 +93,17 @@ while ($row = mysql_fetch_assoc($suorires)) {
             and mapvm   = '0000-00-00'";
   $lasresult = pupe_query($query);
 
-  if (mysql_num_rows($lasresult) == 1 and ($row["ftilino"] == $row["stilino"] or $row["ftilino"] == "")) {
+  // Katsotaan ensin, ettei t‰t‰ suoritusta ei oo viel‰ k‰ytetty
+  // Eli keissi jossa asiakkaalla on useampi lasku samalla summa/viitteell‰ auki reskontrassa
+  $query = "SELECT tunnus
+            FROM suoritus
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$row[suoritunnus]'
+            and kohdpvm = '0000-00-00'
+            and ltunnus = 0";
+  $surresult = pupe_query($query);
+
+  if (mysql_num_rows($lasresult) == 1 and mysql_num_rows($surresult) == 1 and ($row["ftilino"] == $row["stilino"] or $row["ftilino"] == "")) {
     $malaskurow = mysql_fetch_assoc($lasresult);
 
     // Etsit‰‰n asiakas, jos se olisi konsernin j‰sen

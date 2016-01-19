@@ -383,8 +383,10 @@ if ($tee != 'NAYTATILAUS') {
         echo "<th>".t("Asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'> ", asiakashakuohje(), "</td></tr>";
       }
 
-      $formi  = 'hakuformi';
-      $kentta = 'ytunnus';
+      if (empty($tee)) {
+        $formi  = 'hakuformi';
+        $kentta = 'ytunnus';
+      }
     }
 
     echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";

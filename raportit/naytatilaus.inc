@@ -343,8 +343,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
-    elseif (stripos($laskurow["toimitustapa"], "mypack") !== FALSE) {
-      $linkurl = "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$rakirrow['rahtikirjanro']}'>{$rakirrow['rahtikirjanro']}</a>";
+    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
+      foreach(explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
+        $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
+      }
     }
     else {
       $linkurl = $rakirrow['rahtikirjanro'];
@@ -478,7 +480,8 @@ elseif (trim($laskurow['viesti']) != '') {
   $komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];
 }
 
-if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $laskurow['tilaustyyppi'] == 'A') {
+// Reklamaation / tarjouksen työmääräyskommentit
+if ($laskurow['tilaustyyppi'] == 'R' or ($laskurow['tilaustyyppi'] == 'T' and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
   $query = "SELECT komm1, komm2
             from tyomaarays
             where yhtio = '$kukarow[yhtio]'
@@ -489,12 +492,13 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
   $komm1_nimi = t("Työn kuvaus");
   $komm2_nimi = t("Sisäiset kommentit");
 
-  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT");
+  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selite != ''");
 
   while ($kommnimi = mysql_fetch_assoc($tyom_avainsanat)) {
     if ($kommnimi["selite"] == "komm1" and $kommnimi["selitetark"] != "") {
       $komm1_nimi = $kommnimi["selitetark"];
-    } elseif ($kommnimi["selite"] = "komm2" and $kommnimi["selitetark"] != "") {
+    }
+    elseif ($kommnimi["selite"] == "komm2" and $kommnimi["selitetark"] != "") {
       $komm2_nimi = $kommnimi["selitetark"];
     }
   }
@@ -505,6 +509,22 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
 
   if (trim($reklarow['komm2']) != '') {
     $komm .= "\n$komm2_nimi:###".wordwrap(str_replace("\n", "\n###", $reklarow['komm2']), 90, "\n###");
+  }
+}
+
+// Työmääräystiedot
+if ($laskurow['tilaustyyppi'] == 'A') {
+  $query = "SELECT *
+            from tyomaarays
+            where yhtio = '$kukarow[yhtio]'
+            and otunnus = '$laskurow[tunnus]'";
+  $reklaresult = pupe_query($query);
+  $reklarow = mysql_fetch_assoc($reklaresult);
+
+  $tyom_avainsanat = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selite != ''");
+
+  while ($kommnimi = mysql_fetch_assoc($tyom_avainsanat)) {
+    $komm .= "\n{$kommnimi["selitetark"]}:###".wordwrap(str_replace("\n", "\n###", $reklarow[$kommnimi["selite"]]), 90, "\n###");
   }
 }
 

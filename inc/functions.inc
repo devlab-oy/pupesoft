@@ -1139,6 +1139,11 @@ if (!function_exists("apix_invoice_put_file")) {
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";
     $version         = "1.0";
+
+    if ($yhtiorow["finvoice_versio"] == "2") {
+      $version       = "1.1";
+    }
+
     $timestamp       = gmdate("YmdHis");
     $apix_ulos       = "";
     $apixerrorreport = "";
@@ -27119,7 +27124,7 @@ if (!function_exists('hae_asiakashinnat')) {
 }
 
 if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus) {
+  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
@@ -27151,7 +27156,15 @@ if (!function_exists('posten_outbounddelivery')) {
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
     $messageheader->addChild('Sender', $yhtiorow['nimi']);
-    $messageheader->addChild('Receiver', 'Posten');
+
+    if ($ulkoinen_jarjestelma == 'L') {
+      $uj_nimi = "Helsingin Hyllyvarasto";
+    }
+    else {
+      $uj_nimi = "PostNord";
+    }
+
+    $messageheader->addChild('Receiver', $uj_nimi);
 
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
@@ -27220,7 +27233,14 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-      $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+
+      if ($ulkoinen_jarjestelma == 'L') {
+        $line->addChild('ItemNumber', substr($looprow['tuoteno'], 0, 20));
+      }
+      else {
+        $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+      }
+
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);

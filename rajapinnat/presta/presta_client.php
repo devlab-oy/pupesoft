@@ -1,7 +1,7 @@
 <?php
 
 require_once 'rajapinnat/logger.php';
-require_once 'PSWebServiceLibrary.php';
+require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
 
@@ -46,7 +46,7 @@ abstract class PrestaClient {
     }
     $this->url = $url;
     $this->api_key = $api_key;
-    $this->ws = new PrestaShopWebservice($this->url, $this->api_key);
+    $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
   }
 
   /**

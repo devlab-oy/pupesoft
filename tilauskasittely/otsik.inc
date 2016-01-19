@@ -1569,6 +1569,13 @@ if ($tila == "" and !isset($jatka)) {
 
     $vasen++;
 
+    // Jos on reklamaatioiden hinnoittelusäännöt käytössä tulee hintojen laskussa jo erikoisalennus
+    // huomioitua tämän takia se nollataan tässä.
+    // Jos kuitenkin halutaan erikoisalennus täsä huolimatta syöttää pitää sekin olla mahdollista
+    if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $toim == "REKLAMAATIO" and !isset($laskurow["erikoisale"])) {
+      $srow["erikoisale"] = 0;
+    }
+
     $oikea_sarake[$oikea] = "<td>".t("Erikoisalennus").":</td><td><input type='text' name='erikoisale' value='$srow[erikoisale]'></td>";
     $oikea++;
 
@@ -3003,7 +3010,7 @@ if ($tila == "" and !isset($jatka)) {
                     ORDER BY nimi";
           $result = pupe_query($query);
 
-          echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";            
+          echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
           echo "<option value=''>".t("Valitse")."</option>";
 
           while ($row = mysql_fetch_assoc($result)) {

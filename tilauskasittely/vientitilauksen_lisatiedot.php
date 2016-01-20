@@ -11,6 +11,8 @@ if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
   exit;
 }
 
+enable_ajax();
+
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);

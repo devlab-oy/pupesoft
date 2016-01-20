@@ -134,7 +134,7 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."), $painorow["massa"], $osumapros)."</font><br><br>";
 
     echo "<table>";
-    echo "<form method='post'>
+    echo "<form method='post' name='paaformi'>
         <input type='hidden' name='toim' value='$toim'>
         <input type='hidden' name='asiakasid' value='$asiakasid'>
         <input type='hidden' name='toiminto' value='lisatiedot'>

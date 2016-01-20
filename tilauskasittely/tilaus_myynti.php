@@ -7668,16 +7668,14 @@ if ($tee == '') {
                   <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
                      class='tooltip'
                      data-content-url='?toim={$toim}" .
-            "&ajax_popup=true" .
-            "&tuoteno={$row["tuoteno"]}" .
-            "&yksikko={$row["yksikko"]}" .
-            "&tilattu={$row["tilkpl"]}" .
-            "&varattu={$row["varattu"]}" .
-            "&paikka={$row["paikka"]}" .
-            "&keskihinta={$row["kehahin"]}" .
-            "&valuutta={$row["valuutta"]}" .
-            "&varasto={$laskurow["varasto"]}" .
-            "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
+                       "&ajax_popup=true" .
+                       "&tuoteno={$row["tuoteno"]}" .
+                       "&yksikko={$row["yksikko"]}" .
+                       "&paikka={$row["paikka"]}" .
+                       "&keskihinta={$row["kehahin"]}" .
+                       "&valuutta={$row["valuutta"]}" .
+                       "&varasto={$laskurow["varasto"]}" .
+                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";

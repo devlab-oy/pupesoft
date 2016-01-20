@@ -148,11 +148,6 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEMERKKIHAKU") {
   exit;
 }
 
-if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
-  livesearch_tullinimikehaku();
-  exit;
-}
-
 enable_ajax();
 
 $tilauskaslisa = "";

@@ -763,13 +763,7 @@ if ($tila == "" and !isset($jatka)) {
       $asiakasid = substr($asiakasid, 1);
 
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*,  lasku.hyvaksynnanmuutos as luokka,
-                 asiakas.fakta,
-                 IFNULL(tyomaarays.kuljetusmuoto, lasku.kuljetusmuoto) kuljetusmuoto,
-                 IFNULL(tyomaarays.maa_lahetys, lasku.maa_lahetys) maa_lahetys,
-                 IFNULL(tyomaarays.maa_maara, lasku.maa_maara) maa_maara,
-                 IFNULL(tyomaarays.maa_alkupera, lasku.maa_alkupera) maa_alkupera,
-                 IFNULL(tyomaarays.kauppatapahtuman_luonne, lasku.kauppatapahtuman_luonne) kauppatapahtuman_luonne,
-                 IFNULL(tyomaarays.bruttopaino, lasku.bruttopaino) bruttopaino
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -801,13 +795,7 @@ if ($tila == "" and !isset($jatka)) {
     }
     elseif ($kopioitava_otsikko > 0) {
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka,
-                 asiakas.fakta,
-                 IFNULL(tyomaarays.kuljetusmuoto, lasku.kuljetusmuoto) kuljetusmuoto,
-                 IFNULL(tyomaarays.maa_lahetys, lasku.maa_lahetys) maa_lahetys,
-                 IFNULL(tyomaarays.maa_maara, lasku.maa_maara) maa_maara,
-                 IFNULL(tyomaarays.maa_alkupera, lasku.maa_alkupera) maa_alkupera,
-                 IFNULL(tyomaarays.kauppatapahtuman_luonne, lasku.kauppatapahtuman_luonne) kauppatapahtuman_luonne,
-                 IFNULL(tyomaarays.bruttopaino, lasku.bruttopaino) bruttopaino
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -818,13 +806,7 @@ if ($tila == "" and !isset($jatka)) {
     }
     else {
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka,
-                 asiakas.fakta,
-                 IFNULL(tyomaarays.kuljetusmuoto, lasku.kuljetusmuoto) kuljetusmuoto,
-                 IFNULL(tyomaarays.maa_lahetys, lasku.maa_lahetys) maa_lahetys,
-                 IFNULL(tyomaarays.maa_maara, lasku.maa_maara) maa_maara,
-                 IFNULL(tyomaarays.maa_alkupera, lasku.maa_alkupera) maa_alkupera,
-                 IFNULL(tyomaarays.kauppatapahtuman_luonne, lasku.kauppatapahtuman_luonne) kauppatapahtuman_luonne,
-                 IFNULL(tyomaarays.bruttopaino, lasku.bruttopaino) bruttopaino
+                 asiakas.fakta
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
                  LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -2964,98 +2946,6 @@ if ($tila == "" and !isset($jatka)) {
 
           echo "</td>";
         }
-        elseif ($kentta == "kauppatapahtuman_luonne") {
-          echo "<td>{$al_row['selitetark']}:</td>";
-          echo "<td><select name='{$kentta}'>";
-
-          echo "<option value=''>",t("Valitse"),"</option>";
-
-          $ktresult = t_avainsana("KT");
-
-          while ($ktrow = mysql_fetch_assoc($ktresult)) {
-            $sel = $ktrow["selite"] == $srow[$kentta] ? 'selected' : '';
-            echo "<option value='{$ktrow['selite']}' {$sel}>{$ktrow['selitetark']}</option>";
-          }
-
-          echo "</select>";
-          echo "</td>";
-        }
-        elseif ($kentta == "kuljetusmuoto") {
-          echo "<td>{$al_row['selitetark']}:</td>";
-          echo "<td><select name='{$kentta}'>";
-
-          echo "<option value=''>",t("Valitse"),"</option>";
-
-          $kmresult = t_avainsana("KM");
-
-          while ($kmrow = mysql_fetch_assoc($kmresult)) {
-            $sel = $kmrow["selite"] == $srow[$kentta] ? 'selected' : '';
-            echo "<option value='{$kmrow['selite']}' {$sel}>{$kmrow['selitetark']}</option>";
-          }
-
-          echo "</select>";
-          echo "</td>";
-        }
-        elseif (in_array($kentta, array('maa_lahetys','maa_maara','maa_alkupera'))) {
-          echo "<td>{$al_row['selitetark']}:</td>";
-          echo "<td><select name='{$kentta}'>";
-
-          $query = "SELECT DISTINCT koodi, nimi
-                    FROM maat
-                    WHERE nimi != ''
-                    ORDER BY koodi";
-          $maa_result = pupe_query($query);
-
-          echo "<option value=''>",t("Valitse"),"</option>";
-
-          if ($kentta == "maa_maara" and empty($srow[$kentta])) {
-            $query = "SELECT varastopaikat.maa, count(*) kpl
-                      FROM lasku
-                      JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                        AND varastopaikat.tunnus = lasku.varasto)
-                      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                      AND lasku.tunnus  = '{$tilausnumero}'
-                      GROUP BY varastopaikat.maa
-                      ORDER BY kpl DESC
-                      LIMIT 1";
-            $maaresult2 = pupe_query($query);
-
-            if ($maarow = mysql_fetch_assoc($maaresult2)) {
-              $srow[$kentta] = $maarow["maa"];
-            }
-            else {
-              $srow[$kentta] = $yhtiorow["maa"];
-            }
-          }
-
-          if ($kentta == "maa_alkupera" and empty($srow[$kentta])) {
-            $query = "SELECT varastopaikat.maa, count(*) kpl
-                      FROM lasku
-                      JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                        AND varastopaikat.tunnus = lasku.varasto)
-                      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                      AND lasku.tunnus  = '{$row['tunnus']}'
-                      GROUP BY varastopaikat.maa
-                      ORDER BY kpl DESC
-                      LIMIT 1";
-            $maaresult2 = pupe_query($query);
-
-            if ($maarow = mysql_fetch_assoc($maaresult2)) {
-              $srow[$kentta] = $maarow["maa"];
-            }
-            else {
-              $srow[$kentta] = $yhtiorow["maa"];
-            }
-          }
-
-          while ($maarow = mysql_fetch_assoc($maa_result)) {
-            $sel = $maarow['koodi'] == $srow[$kentta] ? 'selected' : '';
-            echo "<option value='{$maarow['koodi']}' {$sel}>{$maarow['nimi']}</option>";
-          }
-
-          echo "</select>";
-          echo "</td>";
-        }
         elseif ($kentta == "suorittaja") {
 
           $query = "SELECT if(avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi
@@ -4569,9 +4459,6 @@ if (isset($jatka)) {
         $merkki = $merkki2;
       }
 
-      $bruttopaino = str_replace(",", ".", $bruttopaino);
-      $tulliarvo = str_replace(",", ".", $tulliarvo);
-
       $query2 .= "tyomaarays SET
             yhtio      = '$kukarow[yhtio]',
             kotipuh     = '$kotipuh',
@@ -4600,14 +4487,6 @@ if (isset($jatka)) {
             takuunumero    = '$takuunumero',
             tyokoodi    = '$tyokoodi',
             hyvaksy      = '$hyvaksy',
-            tullikoodi      = '$tullikoodi',
-            tulliarvo      = '$tulliarvo',
-            kuljetusmuoto      = '$kuljetusmuoto',
-            maa_lahetys      = '$maa_lahetys',
-            maa_maara      = '$maa_maara',
-            maa_alkupera      = '$maa_alkupera',
-            kauppatapahtuman_luonne      = '$kauppatapahtuman_luonne',
-            bruttopaino      = '$bruttopaino',
             otunnus     = '$kukarow[kesken]'";
 
       //N‰m‰ kent‰t p‰ivitet‰‰n vain, jos p‰ivitet‰‰n sit‰ tyˆm‰‰r‰ykselt‰ tai muualta miss‰ nuo kaksi kentt‰‰ n‰kyy..

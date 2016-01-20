@@ -4569,6 +4569,8 @@ if (isset($jatka)) {
         $merkki = $merkki2;
       }
 
+      $bruttopaino = str_replace(",", ".", $bruttopaino);
+
       $query2 .= "tyomaarays SET
             yhtio      = '$kukarow[yhtio]',
             kotipuh     = '$kotipuh',

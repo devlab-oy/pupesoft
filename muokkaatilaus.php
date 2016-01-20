@@ -295,16 +295,7 @@ if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
 }
 elseif ($toim == "SUPER") {
   //Saako poistaa tilauksia
-  $query = "SELECT yhtio
-            FROM oikeu
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and kuka     = '$kukarow[kuka]'
-            and nimi     = 'tilauskasittely/tilaus_myynti.php'
-            and alanimi  = 'TILAUS'
-            and paivitys = '1'";
-  $result = pupe_query($query);
-
-  if (mysql_num_rows($result) > 0) {
+  if (tarkista_oikeus('tilauskasittely/tilaus_myynti.php', 'TILAUS', 1)) {
     $deletilaus = TRUE;
   }
 }

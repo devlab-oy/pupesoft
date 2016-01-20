@@ -4570,6 +4570,7 @@ if (isset($jatka)) {
       }
 
       $bruttopaino = str_replace(",", ".", $bruttopaino);
+      $tulliarvo = str_replace(",", ".", $tulliarvo);
 
       $query2 .= "tyomaarays SET
             yhtio      = '$kukarow[yhtio]',

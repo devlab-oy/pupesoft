@@ -785,7 +785,7 @@ if ($tee == "tulosta") {
       $ulos .= "<tr class='aktiivi'>";
 
       if ($vaintullinimike != "") {
-        $lisatoim = $tapahtumalaji == "tyomaarays" ? "&toim=TYOMAARAYS" : "";
+        $lisatoim = ($tapahtumalaji == "tyomaarays" and $tapa == "tuonti") ? "&toim=TYOMAARAYS" : "";
         $ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$row[kaikkitunnukset]&lopetus=$lopetus/SPLIT/$lopetus_intra1$lopetus_intra2'>$row[laskunro]</a></td>";
       }
       else {

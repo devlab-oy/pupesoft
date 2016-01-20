@@ -811,7 +811,15 @@ elseif ($tee == '') {
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
   if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
-  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+  if ($toim == "TYOMAARAYS") {
+    if (isset($toimittamattomat) and $toimittamattomat == 1) {
+      $tilaehto = "AND ((tila = 'L' AND alatila = 'X') OR (tila = 'A'))";
+    }
+    else {
+      $tilaehto = "AND tila = 'L' AND alatila = 'X'";
+    }
+  }
+  elseif (isset($toimittamattomat) and $toimittamattomat == 1) {
     $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
   }
   else {

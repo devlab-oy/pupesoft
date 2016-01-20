@@ -121,11 +121,13 @@ if ($tee == "tulosta") {
     $maalisa .= " and maalahetys = '{$vainmaalahetys}' and alkuperamaa = '{$vainalkuperamaa}' and maamaara = '{$vainmaamaara}' ";
 
     $vainnimikelisa2 = " tilausrivi.tunnus, ";
+    $vainnimikelisa2_tyom = "'' as tunnus,";
     $vainnimikegroup = " ,9 ";
   }
   else {
     $vainnimikelisa  = "";
     $vainnimikelisa2 = "";
+    $vainnimikelisa2_tyom = "";
     $vainnimikegroup = "";
   }
 
@@ -312,13 +314,14 @@ if ($tee == "tulosta") {
             '' AS kaikkituotteet,
             '' AS perheid2set,
             {$ee_kentat}
+            {$vainnimikelisa2_tyom}
             max(lasku.tunnus) laskunro,
             group_concat(lasku.tunnus) as kaikkitunnukset
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
             LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
-            WHERE lasku.tila 'L'
+            WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
             and lasku.kauppatapahtuman_luonne != '999'
             and lasku.yhtio = '{$kukarow['yhtio']}'
@@ -782,7 +785,8 @@ if ($tee == "tulosta") {
       $ulos .= "<tr class='aktiivi'>";
 
       if ($vaintullinimike != "") {
-        $ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&lopetus=$lopetus/SPLIT/$lopetus_intra1$lopetus_intra2'>$row[laskunro]</a></td>";
+        $lisatoim = $tapahtumalaji == "tyomaarays" ? "&toim=TYOMAARAYS" : "";
+        $ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$row[kaikkitunnukset]&lopetus=$lopetus/SPLIT/$lopetus_intra1$lopetus_intra2'>$row[laskunro]</a></td>";
       }
       else {
         $ulos .= "<td valign='top'>".$row["laskunro"]."</td>";

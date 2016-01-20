@@ -291,74 +291,81 @@ if ($tee == "tulosta") {
   }
 
   if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "tyomaarays") {
-    $query .= "
-          (SELECT
-          tyomaarays.tullikoodi AS tullinimike1,
-          if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          lasku.maa_alkupera AS alkuperamaa,
-          if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
-          lasku.kuljetusmuoto,
-          lasku.kauppatapahtuman_luonne,
-          tullinimike.su_vientiilmo su,
-          'Työmääräys' as tapa,
-          tyomaarays.koodi AS tuoteno,
-          '' AS nimitys,
-          1 AS kpl,
-          0 AS paino,
-          tyomaarays.tulliarvo AS rivihinta,
-          tyomaarays.tulliarvo AS rivihinta_laskutusarvo,
-          '' AS kaikkituotteet,
-          '' AS perheid2set,
-          {$ee_kentat}
-          max(lasku.tunnus) laskunro,
-          group_concat(lasku.tunnus) as kaikkitunnukset
-          FROM lasku use index (yhtio_tila_tapvm)
-          JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
-          LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
-          WHERE lasku.tila = 'A'
-          and lasku.kauppatapahtuman_luonne != '999'
-          and lasku.yhtio = '{$kukarow['yhtio']}'
-          and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
-          and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
-          GROUP BY 1,2,3,4,5,6,7,8 {$ee_group}
-          HAVING {$maalisa})
-          UNION
-          (SELECT
-          tuote.tullinimike1,
-          if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1), '$yhtiorow[maa]') alkuperamaa,
-          if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
-          lasku.kuljetusmuoto,
-          lasku.kauppatapahtuman_luonne,
-          tullinimike.su_vientiilmo su,
-          'Työmääräys' as tapa,
-          {$vainnimikelisa2}
-          {$ee_kentat}
-          max(lasku.tunnus) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
-          round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
-          round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
-          if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-          if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
-          group_concat(lasku.tunnus) as kaikkitunnukset,
-          group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
-          FROM lasku use index (yhtio_tila_tapvm)
-          JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
-          JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-          LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
-          WHERE lasku.tila = 'A'
-          and lasku.kauppatapahtuman_luonne != '999'
-          and lasku.yhtio = '{$kukarow['yhtio']}'
-          and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
-          and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
-          {$vainnimikelisa}
-          {$lisavarlisa}
-          GROUP BY 1,2,3,4,5,6,7,8 {$vainnimikegroup} {$ee_group}
-          HAVING {$maalisa})";
+
+    if ($tapa == "tuonti") {
+      $query .= "
+            (SELECT
+            tyomaarays.tullikoodi AS tullinimike1,
+            if (tyomaarays.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), tyomaarays.maa_lahetys) maalahetys,
+            tyomaarays.maa_alkupera AS alkuperamaa,
+            if (tyomaarays.maa_maara='', lasku.toim_maa, tyomaarays.maa_maara) maamaara,
+            tyomaarays.kuljetusmuoto,
+            tyomaarays.kauppatapahtuman_luonne,
+            tullinimike.su_vientiilmo su,
+            'Työmääräys' as tapa,
+            tyomaarays.koodi AS tuoteno,
+            '' AS nimitys,
+            1 AS kpl,
+            tyomaarays.bruttopaino AS paino,
+            tyomaarays.tulliarvo AS rivihinta,
+            tyomaarays.tulliarvo AS rivihinta_laskutusarvo,
+            '' AS kaikkituotteet,
+            '' AS perheid2set,
+            {$ee_kentat}
+            max(lasku.tunnus) laskunro,
+            group_concat(lasku.tunnus) as kaikkitunnukset
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+            LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            WHERE lasku.tila 'L'
+            and lasku.alatila = 'X'
+            and lasku.kauppatapahtuman_luonne != '999'
+            and lasku.yhtio = '{$kukarow['yhtio']}'
+            and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+            and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
+            GROUP BY 1,2,3,4,5,6,7,8 {$ee_group}
+            HAVING {$maalisa})";
+    }
+    else {
+      $query .= "
+            (SELECT
+            tuote.tullinimike1,
+            if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+            ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1), '$yhtiorow[maa]') alkuperamaa,
+            if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+            lasku.kuljetusmuoto,
+            lasku.kauppatapahtuman_luonne,
+            tullinimike.su_vientiilmo su,
+            'Työmääräys' as tapa,
+            {$vainnimikelisa2}
+            {$ee_kentat}
+            max(lasku.tunnus) laskunro,
+            max(tuote.tuoteno) tuoteno,
+            left(max(tuote.nimitys), 40) nimitys,
+            round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+            round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
+            if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+            if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
+            group_concat(lasku.tunnus) as kaikkitunnukset,
+            group_concat(distinct tilausrivi.perheid2) as perheid2set,
+            group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
+            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+            LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            WHERE lasku.tila = 'L'
+            and lasku.alatila = 'X'
+            and lasku.kauppatapahtuman_luonne != '999'
+            and lasku.yhtio = '{$kukarow['yhtio']}'
+            and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+            and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
+            {$vainnimikelisa}
+            {$lisavarlisa}
+            GROUP BY 1,2,3,4,5,6,7,8 {$vainnimikegroup} {$ee_group}
+            HAVING {$maalisa})";
+    }
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";

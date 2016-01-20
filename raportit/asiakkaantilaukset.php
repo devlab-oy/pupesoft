@@ -545,7 +545,7 @@ if ($ytunnus != '') {
     $query .= "  and $til
           and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
           and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-          ORDER BY abs(lasku.jaksotettu), 2 DESC, 1 ASC";
+          ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 2 DESC, 1 ASC";
   }
 
   if ($kaikki == "") {

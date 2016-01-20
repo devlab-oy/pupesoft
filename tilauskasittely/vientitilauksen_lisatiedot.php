@@ -940,7 +940,13 @@ elseif ($tee == '') {
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='otunnus' value='$tilrow[tilaus]'>
           <input type='hidden' name='tee' value='K'>
-          <input type='submit' name='tila' value='".t("Valitse")."'></form></td>";
+          <input type='submit' name='tila' value='".t("Valitse")."'>";
+
+      if ($toim == "TYOMAARAYS") {
+        echo "<input type='hidden' name='tapa' value='tuonti'>";
+      }
+
+      echo "</form></td>";
 
       $ketjutus      = $tilrow["ketjutus"];
       $erpcm        = $tilrow["erpcm"];

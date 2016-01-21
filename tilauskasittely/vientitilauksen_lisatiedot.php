@@ -810,32 +810,62 @@ elseif ($tee == '') {
   echo "</form>";
 
   $haku='';
-  if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
-  if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+  if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
+  if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
   if ($toim == "TYOMAARAYS") {
-    if (isset($toimittamattomat) and $toimittamattomat == 1) {
-      $tilaehto = "AND ((tila = 'L' AND alatila = 'X') OR (tila = 'A'))";
-    }
-    else {
-      $tilaehto = "AND tila = 'L' AND alatila = 'X'";
-    }
-  }
-  elseif (isset($toimittamattomat) and $toimittamattomat == 1) {
-    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
+    $tyomaarays_tilaehto = "A";
+    $tilaehto = "AND lasku.tilaustyyppi = 'A' ";
   }
   else {
-    $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";
+    $tyomaarays_tilaehto = "N";
+    $tilaehto = "";
+  }
+
+  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+    $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}'))";
+  }
+  else {
+    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E')";
+  }
+
+  if ($toim == "TYOMAARAYS") {
+    $tyomaaraysjoin = "JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus)";
+    $selectlisa = "tyomaarays.maa_maara, tyomaarays.kuljetusmuoto, tyomaarays.kauppatapahtuman_luonne,";
+  }
+  else {
+    $tyomaaraysjoin = "";
+    $selectlisa = "lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,";
   }
 
   //listataan laskuttamattomat tilausket
-  $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
-            maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
+  $query = "SELECT lasku.tunnus as tilaus,
+            lasku.nimi as asiakas,
+            lasku.luontiaika as laadittu,
+            lasku.laatija,
+            lasku.vienti,
+            lasku.erpcm,
+            lasku.ytunnus,
+            lasku.nimi,
+            lasku.nimitark,
+            lasku.postino,
+            lasku.postitp,
+            lasku.maksuehto,
+            lasku.lisattava_era,
+            lasku.vahennettava_era,
+            lasku.ketjutus,
+            {$selectlisa}
+            lasku.sisamaan_kuljetus,
+            lasku.sisamaan_kuljetusmuoto,
+            lasku.poistumistoimipaikka,
+            lasku.poistumistoimipaikka_koodi,
+            lasku.alatila
             FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
+            {$tyomaaraysjoin}
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilaehto}
-            AND vienti  in ('K','E')
-            $haku
+            AND lasku.vienti  in ('K','E')
+            {$haku}
             ORDER by 5,6,7,8,9,10,11,12,13,14";
   $tilre = pupe_query($query);
 
@@ -926,7 +956,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif ($tilrow['alatila'] == 'E'
+      elseif (($tilrow['alatila'] == 'E' or ($toim == "TYOMAARAYS" and in_array($tilrow['alatila'], array('B','D','E'))))
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0

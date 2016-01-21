@@ -1563,6 +1563,8 @@ while ($tietue = fgets($fd)) {
         $tpuh = $arow['toim_puh'];
       }
 
+      $tallennettava_ytunnus = isset($edi_ytunnus) ? $edi_ytunnus : $arow["ytunnus"];
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1651,7 +1653,7 @@ while ($tietue = fgets($fd)) {
                 yhtio_postino           = '$yhtiorow[postino]',
                 yhtio_postitp           = '$yhtiorow[postitp]',
                 yhtio_toimipaikka       = '$kukarow[toimipaikka]',
-                ytunnus                 = '$arow[ytunnus]',
+                ytunnus                 = '$tallennettava_ytunnus',
                 ohjelma_moduli          = '$ohjelmamoduli'";
       $result = pupe_query($query);
       $id = mysql_insert_id($GLOBALS["masterlink"]);

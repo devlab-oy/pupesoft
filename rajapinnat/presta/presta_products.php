@@ -146,11 +146,18 @@ class PrestaProducts extends PrestaClient {
   public function sync_products(array $products) {
     $this->logger->log('---------Start product sync---------');
 
+    $row_counter = 0;
+    $total_counter = count($products);
+
     try {
       $this->schema = $this->get_empty_schema();
       $existing_products = $this->all_skus();
 
       foreach ($products as $product) {
+
+        $row_counter++;
+        $this->logger->log("[$row_counter/$total_counter]");
+
         //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {

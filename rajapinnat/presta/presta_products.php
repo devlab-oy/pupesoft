@@ -82,8 +82,16 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
     if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
+      // First, remove all categories from XML
+      $remove_node = $xml->product->associations->categories;
+      $dom_node = dom_import_simplexml($remove_node);
+      $dom_node->parentNode->removeChild($dom_node);
+
+      // Then add them back
+      $xml->product->associations->addChild('categories');
+
       foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
-        // Default category id is set inside for. This means that the last category is set default
+        // Default category id is set inside loop, so the last category is set as default
         $category_id = $this->add_category($xml, $pupesoft_category);
       }
 
@@ -93,9 +101,9 @@ class PrestaProducts extends PrestaClient {
     // Dynamic product parameters
     $product_parameters = $this->_dynamic_fields;
     if (isset($product_parameters) and count($product_parameters) > 0) {
-      foreach ($product_parameters as $parameter) {        
+      foreach ($product_parameters as $parameter) {
         $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
-      } 
+      }
     }
 
     // Removed product parameters
@@ -127,6 +135,8 @@ class PrestaProducts extends PrestaClient {
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
+
+    $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
 
     return $category_id;
   }

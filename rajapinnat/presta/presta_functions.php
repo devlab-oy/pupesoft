@@ -286,7 +286,6 @@ function hae_tuotteet() {
       'tuotepuun_tunnukset'  => $tuotepuun_tunnukset,
       'tuotteen_parametrit'  => $tuotteen_parametrit,
       'saldo'                => $myytavissa,
-      'images'               => hae_tuotekuvat($row['tunnus']),
     );
 
     if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {

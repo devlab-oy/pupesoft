@@ -842,9 +842,13 @@ while ($tietue = fgets($fd)) {
 
     break;
   case 'OSTOTIL.OT_YTUNNUS':
-    $edi_ytunnus = trim($tieto);
-    break;
+    $tieto = trim($tieto);
 
+    if (!empty($tieto)) {
+      $edi_ytunnus = $tieto;
+    }
+
+    break;
   case 'OSTOTIL.OT_YRITYS':
     $lnimitark = trim($tieto);
     break;

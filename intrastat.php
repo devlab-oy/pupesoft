@@ -322,7 +322,7 @@ if ($tee == "tulosta") {
             LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
             WHERE lasku.tila = 'L'
-            and lasku.alatila = 'X'
+            and lasku.alatila IN ('B','D','E','X')
             and lasku.kauppatapahtuman_luonne != '999'
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'

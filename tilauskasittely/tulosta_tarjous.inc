@@ -2363,7 +2363,7 @@ if (!function_exists('alvierittely')) {
       }
     }
 
-    if ($yhtiorow['tarjoustyyppi'] == 5) {
+    if ($yhtiorow['tarjoustyyppi'] == 5 or $toim == 'TARJOUS') {
       $_lasku_vai_tarjoustxt = "Tarjous";
     }
     else {

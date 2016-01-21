@@ -8,12 +8,20 @@ class PrestaProducts extends PrestaClient {
   const RESOURCE = 'products';
 
   /**
+  * Dynaamiset tuoteparametrien lista
+  */
+  private $_dynamic_fields = array();
+
+  /**
    * Ohitettavien tuoteparametrien lista
    */
+  private $_removable_fields = array();
 
   private $presta_categories = null;
   private $presta_home_category_id = null;
-  private $_removable_fields = array();
+
+  // Päivitetäänkö tuotekategoriat
+  private $_category_sync = true;
 
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
@@ -70,15 +78,32 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
-    if (!empty($product['tuotepuun_tunnukset'])) {
+    if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
+      // First, remove all categories from XML
+      $remove_node = $xml->product->associations->categories;
+      $dom_node = dom_import_simplexml($remove_node);
+      $dom_node->parentNode->removeChild($dom_node);
+
+      // Then add them back
+      $xml->product->associations->addChild('categories');
+
       foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
-        // Default category id is set inside for. This means that the last category is set default
+        // Default category id is set inside loop, so the last category is set as default
         $category_id = $this->add_category($xml, $pupesoft_category);
       }
 
       $xml->product->id_category_default = $category_id;
     }
 
+    // Dynamic product parameters
+    $product_parameters = $this->_dynamic_fields;
+    if (isset($product_parameters) and count($product_parameters) > 0) {
+      foreach ($product_parameters as $parameter) {
+        $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
+      }
+    }
+
+    // Removed product parameters
     $removables = $this->_removable_fields;
     if (isset($removables) and count($removables) > 0) {
       foreach ($removables as $element) {
@@ -107,6 +132,8 @@ class PrestaProducts extends PrestaClient {
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
+
+    $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
 
     return $category_id;
   }
@@ -165,5 +192,15 @@ class PrestaProducts extends PrestaClient {
 
   public function set_removable_fields($fields) {
     $this->_removable_fields = $fields;
+  }
+
+  public function set_dynamic_fields($fields) {
+    $this->_dynamic_fields = $fields;
+  }
+
+  public function set_category_sync($status) {
+    if (!empty($status)) {
+      $this->_category_sync = false;
+    }
   }
 }

@@ -386,7 +386,7 @@ if (mysql_num_rows($result) > 0) {
     if (mysql_field_name($result, $i) == "hankintakulut") {
       echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th>";      }
     else {
-      echo "<th>".mysql_field_name($result, $i)."</th>";
+      echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }
   }
 

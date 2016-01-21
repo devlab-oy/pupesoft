@@ -10,27 +10,33 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $hyllynro = mysql_real_escape_string($hyllynro);
     $hyllyvali = mysql_real_escape_string($hyllyvali);
     $hyllytaso = mysql_real_escape_string($hyllytaso);
-    $poikkeava_maara = mysql_real_escape_string($poikkeava_maara);
     $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
 
+    if (trim($poikkeava_maara) == "") {
+      $poikkeava_maara = 'null';
+    }
+    else {
+      $poikkeava_maara = (float) $poikkeava_maara;
+    }
+
     $query = "INSERT INTO kerattavatrivit SET
-              tilausrivi_id = '{$tunnus}',
-              hyllyalue  = '{$hyllyalue}',
-              hyllynro   = '{$hyllynro}',
-              hyllyvali  = '{$hyllyvali}',
-              hyllytaso  = '{$hyllytaso}',
-              poikkeava_maara = '{$poikkeava_maara}',
+              tilausrivi_id       = '{$tunnus}',
+              hyllyalue           = '{$hyllyalue}',
+              hyllynro            = '{$hyllynro}',
+              hyllyvali           = '{$hyllyvali}',
+              hyllytaso           = '{$hyllytaso}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
-              keratty    = 1,
-              created_at = now()
+              keratty             = 1,
+              created_at          = now()
               ON DUPLICATE KEY UPDATE
-              hyllyalue  = '{$hyllyalue}',
-              hyllynro   = '{$hyllynro}',
-              hyllyvali  = '{$hyllyvali}',
-              hyllytaso  = '{$hyllytaso}',
-              poikkeava_maara = '{$poikkeava_maara}',
+              hyllyalue           = '{$hyllyalue}',
+              hyllynro            = '{$hyllynro}',
+              hyllyvali           = '{$hyllyvali}',
+              hyllytaso           = '{$hyllytaso}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
-              updated_at  = now()";
+              updated_at          = now()";
     $result = pupe_query($query);
 
     echo $tunnus;
@@ -86,7 +92,7 @@ if ($yhtiorow['kerays_riveittain'] == 'K') {
               }).success(function(tunnus) {
                 console.log('success: '+tunnus);
                 $('#kerattavatrivit_info_'+tunnus).html('<font class=\"ok\">OK</font>');
-                $('button[name=\"kerattavatrivit['+tunnus+']\"]').html('",t("Päivitä"),"');
+                $('button[name=\"kerattavatrivit['+tunnus+']\"]').html('", t("Päivitä"), "');
 
                 var kerattavatrivit_ok_rows_count = 0;
 
@@ -101,7 +107,7 @@ if ($yhtiorow['kerays_riveittain'] == 'K') {
                 }
               }).error(function(tunnus) {
                 console.log(tunnus);
-                $('#kerattavatrivit_info_'+tunnus).html('<font class=\"error\">",t("Virhe"),"</font>');
+                $('#kerattavatrivit_info_'+tunnus).html('<font class=\"error\">", t("Virhe"), "</font>');
               });
             });
           });
@@ -3247,7 +3253,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       }
 
       if ($yhtiorow['kerays_riveittain'] == 'K') {
-        echo "<th>",t("Merkkaa kerätyksi"),"</th>";
+        echo "<th>", t("Merkkaa kerätyksi"), "</th>";
         $colspanni++;
       }
 
@@ -3387,7 +3393,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             while ($rivi = mysql_fetch_assoc($results2)) {
               $sel = '';
               if (trim($row['varastopaikka_rekla']) == trim($rivi['varastopaikka_rekla']) or
-                  ($yhtiorow['kerays_riveittain'] == 'K' and trim($kerattavatrivitrow['hyllypaikka']) == trim($rivi['varastopaikka_rekla']))) {
+                ($yhtiorow['kerays_riveittain'] == 'K' and trim($kerattavatrivitrow['hyllypaikka']) == trim($rivi['varastopaikka_rekla']))) {
                 $sel = "SELECTED";
               }
               echo "<option value='$rivi[varastopaikka_rekla]' $sel>$rivi[varastopaikka]</option>";
@@ -3715,11 +3721,11 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               echo "<option value='' SELECTED>".t("Ei käsitellä")."</option>";
             }
 
-            # selpk_JT
-            # selpk_PU
-            # selpk_UR
-            # selpk_UT
-            # selpk_MI
+            // selpk_JT
+            // selpk_PU
+            // selpk_UR
+            // selpk_UT
+            // selpk_MI
             if ($yhtiorow['kerays_riveittain'] == 'K' and !empty($kerattavatrivitrow['poikkeama_kasittely'])) {
               ${'selpk_'.strtoupper($kerattavatrivitrow['poikkeama_kasittely'])} = 'selected';
             }
@@ -4020,20 +4026,21 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
       echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 
+      if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
+        $hidden = "";
+      }
+      else {
+        $hidden = "style='display:none;'";
+      }
+
       if ($toim == 'VASTAANOTA_REKLAMAATIO') {
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Tuotteet hyllytetty ja reklamaatio valmis laskutukseen")."'>";
       }
       elseif ($otsik_row["tulostustapa"] != "X" or $otsik_row["nouto"] != "") {
-        if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
-          $hidden = "";
-        }
-        else {
-          $hidden = "style='display:none;'";
-        }
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."' {$hidden}>";
       }
       else {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'>";
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."' {$hidden}>";
       }
 
       echo "</form>";

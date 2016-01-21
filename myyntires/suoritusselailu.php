@@ -189,14 +189,14 @@ if ($tila == 'uudelleenkohdista_viitemaksut') {
   $query = "SELECT suoritus.tunnus as suoritus_tunnus, lasku.tunnus as lasku_tunnus
             FROM suoritus
             INNER JOIN lasku ON (lasku.yhtio = suoritus.yhtio
-              AND lasku.tila = 'U'
-              AND lasku.alatila = 'X'
-              AND lasku.mapvm = '0000-00-00'
-              AND lasku.viite = suoritus.viite
-              AND lasku.valkoodi = suoritus.valkoodi
-              AND lasku.summa = suoritus.summa)
-            WHERE suoritus.yhtio = '$kukarow[yhtio]'
-            AND suoritus.kohdpvm = '0000-00-00'
+              AND lasku.tila             = 'U'
+              AND lasku.alatila          = 'X'
+              AND lasku.mapvm            = '0000-00-00'
+              AND lasku.viite            = suoritus.viite
+              AND lasku.valkoodi         = suoritus.valkoodi
+              AND lasku.summa            = suoritus.summa)
+            WHERE suoritus.yhtio         = '$kukarow[yhtio]'
+            AND suoritus.kohdpvm         = '0000-00-00'
             AND suoritus.asiakas_tunnus != 0";
   $result = pupe_query($query);
 

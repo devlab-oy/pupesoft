@@ -510,7 +510,7 @@ if ($tee == "VALITSE") {
     if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<th>", t("Koontilaskujen alarajasumma"), "</th>";
       echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
       echo "</tr>";
       echo "</table>";
@@ -1178,7 +1178,7 @@ if ($tee == "") {
     if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Koontilaskujen alarajasumma"),"</th>";
+      echo "<th>", t("Koontilaskujen alarajasumma"), "</th>";
       echo "<td>{$yhtiorow['koontilaskut_alarajasumma']}</td>";
       echo "</tr>";
       echo "</table>";
@@ -1201,8 +1201,8 @@ if ($tee == "") {
 
     while ($tilrow = mysql_fetch_array($tilre)) {
 
-      $laskutyyppi  = $tilrow["tila"];
-      $alatila    = $tilrow["alatila"];
+      $laskutyyppi = $tilrow["tila"];
+      $alatila     = $tilrow["alatila"];
 
       //tehd‰‰n selv‰kielinen tila/alatila
       require "inc/laskutyyppi.inc";

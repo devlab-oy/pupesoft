@@ -25,12 +25,12 @@ else {
 if ($tee == "update") {
 
   if ($yhtiorow['jalkilaskenta_kuluperuste'] == "VS" and isset($vienti_kurssi) and $vienti_kurssi >= 0) {
-    $query  = " UPDATE lasku SET
-                vienti_kurssi = '{$vienti_kurssi}'
-                WHERE tunnus  = '$otunnus'
-                AND yhtio     = '$kukarow[yhtio]'
-                AND tila      = 'K'
-                AND alatila  != 'X'";
+    $query  = "UPDATE lasku SET
+               vienti_kurssi  = '{$vienti_kurssi}'
+               WHERE tunnus   = '$otunnus'
+               AND yhtio      = '$kukarow[yhtio]'
+               AND tila       = 'K'
+               AND alatila   != 'X'";
     $result = pupe_query($query);
     $laskurow['vienti_kurssi'] = $vienti_kurssi;
   }

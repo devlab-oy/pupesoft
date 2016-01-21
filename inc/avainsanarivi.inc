@@ -37,6 +37,7 @@ if ($_selitetark_4 and
     $avain_sel['MYSQLALIAS'] == "SELECTED" or
     $avain_sel['TRY'] == "SELECTED" or
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
+    $avain_sel['TYOM_TYOJONO'] == "SELECTED" or
     $avain_sel['TYOM_TYOKENTAT'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -334,6 +335,9 @@ if (mysql_field_name($result, $i) == "nakyvyys") {
     $ulos .= "<option value = ''>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰")."</option>";
     $ulos .= "<option value = 'K' $sel[K]>".t("N‰ytet‰‰n tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
     $ulos .= "<option value = 'L' $sel[L]>".t("N‰ytet‰‰n laskulla")."</option>";
+    $ulos .= "<option value = 'H' $sel[H]>".t("N‰ytet‰‰n huoltosaatteella")."</option>";
+    $ulos .= "<option value = 'I' $sel[I]>".t("N‰ytet‰‰n huoltosaatteella ja tyˆm‰‰r‰yksell‰")."</option>";
+    $ulos .= "<option value = 'J' $sel[J]>".t("N‰ytet‰‰n huoltosaatteella ja tyˆm‰‰r‰yksell‰ ja laskulla")."</option>";
     $ulos .= "<option value = 'S' $sel[S]>".t("Sis‰inen tieto")."</option>";
     $ulos .= "</select></td>";
   }
@@ -1069,6 +1073,29 @@ if (($avain_sel["TYOM_PRIORIT"] == "SELECTED" or $avain_sel["TYOM_TYOJONO"] == "
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value='' $sel>".t("Ei oletus")."</option>";
   $ulos .= "<option value='OLETUS' $sel>".t("Oletus")."</option>";
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+if ($avain_sel['TYOM_TYOJONO'] == "SELECTED" and $_selitetark_4) {
+
+  $ulos = "<td><select name = '$nimi'>";
+  $ulos .= "<option value=''>".t('Ei oletusvastuuhenkilˆ‰')."</option>";
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND aktiivinen = 1
+            AND extranet = ''
+            ORDER BY nimi";
+  $vastuuresult = pupe_query($query);
+
+  while ($vastuurow = mysql_fetch_assoc($vastuuresult)) {
+    $sel = '';
+    if ($trow[$i] == $vastuurow['tunnus']) {
+      $sel = 'selected';
+    }
+    $ulos .= "<option value='{$vastuurow['kuka']}' $sel>{$vastuurow['nimi']} ({$vastuurow['kuka']})</option>";
+  }
   $ulos .= "</select></td>";
   $jatko = 0;
 }

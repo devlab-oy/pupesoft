@@ -8,14 +8,25 @@ class PrestaProducts extends PrestaClient {
   const RESOURCE = 'products';
 
   /**
+  * Dynaamiset tuoteparametrien lista
+  */
+  private $_dynamic_fields = array();
+
+  /**
    * Ohitettavien tuoteparametrien lista
    */
   private $_removable_fields = array();
 
-  // Päivitetäänkö tuotekuvat
-  private $_image_sync = true;
+  private $presta_categories = null;
+  private $presta_home_category_id = null;
 
-  public function __construct($url, $api_key) {
+  // Päivitetäänkö tuotekategoriat
+  private $_category_sync = true;
+
+  public function __construct($url, $api_key, $presta_home_category_id) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
+    $this->presta_home_category_id = $presta_home_category_id;
+
     parent::__construct($url, $api_key);
   }
 
@@ -25,7 +36,7 @@ class PrestaProducts extends PrestaClient {
 
   /**
    *
-   * @param array $product
+   * @param array   $product
    * @param SimpleXMLElement $existing_product
    * @return \SimpleXMLElement
    */
@@ -42,7 +53,7 @@ class PrestaProducts extends PrestaClient {
     unset($xml->product->position_in_category);
 
     $xml->product->reference = $product['tuoteno'];
-    $xml->product->supplier_reference = $product['tuoteno']; 
+    $xml->product->supplier_reference = $product['tuoteno'];
     $xml->product->ean13 = $product['ean'];
 
     $xml->product->price = $product['myyntihinta'];
@@ -67,18 +78,35 @@ class PrestaProducts extends PrestaClient {
     $xml->product->description = utf8_encode($product['kuvaus']);
     $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
 
-    if (!empty($product['tuotepuun_nodet'])) {
-      foreach ($product['tuotepuun_nodet'] as $category_ancestors) {
-        //Default category id is set inside for. This means that the last category is set default
-        $default_category_id = $this->add_category($xml, $category_ancestors);
+    if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
+      // First, remove all categories from XML
+      $remove_node = $xml->product->associations->categories;
+      $dom_node = dom_import_simplexml($remove_node);
+      $dom_node->parentNode->removeChild($dom_node);
+
+      // Then add them back
+      $xml->product->associations->addChild('categories');
+
+      foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
+        // Default category id is set inside loop, so the last category is set as default
+        $category_id = $this->add_category($xml, $pupesoft_category);
       }
 
-      $xml->product->id_category_default = $default_category_id;
+      $xml->product->id_category_default = $category_id;
     }
 
+    // Dynamic product parameters
+    $product_parameters = $this->_dynamic_fields;
+    if (isset($product_parameters) and count($product_parameters) > 0) {
+      foreach ($product_parameters as $parameter) {
+        $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
+      }
+    }
+
+    // Removed product parameters
     $removables = $this->_removable_fields;
     if (isset($removables) and count($removables) > 0) {
-      foreach($removables as $element) {
+      foreach ($removables as $element) {
         unset($xml->product->$element);
       }
     }
@@ -89,44 +117,52 @@ class PrestaProducts extends PrestaClient {
   /**
    *
    * @param SimpleXMLElement $xml
-   * @param array $ancestors
+   * @param array   $ancestors
    * @return int
    */
-  private function add_category(SimpleXMLElement &$xml, $ancestors) {
-    $presta_categories = new PrestaCategories($this->url(), $this->api_key());
-    $category_id = $presta_categories->find_category($ancestors);
-    if (!is_null($category_id)) {
-      $category = $xml->product->associations->categories->addChild('category');
-      $category->addChild('id');
-      $category->id = $category_id;
+  private function add_category(SimpleXMLElement &$xml, $category) {
+    // fetch presta category with pupe tunnus
+    $response = $this->presta_categories->find_category_by_tunnus($category);
+
+    if ($response === false) {
+      return null;
     }
+
+    $category_id = $response->category->id;
+    $category = $xml->product->associations->categories->addChild('category');
+    $category->addChild('id');
+    $category->id = $category_id;
+
+    $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
 
     return $category_id;
   }
 
   /**
    *
-   * @param array $products
+   * @param array   $products
    * @return boolean
    */
   public function sync_products(array $products) {
     $this->logger->log('---------Start product sync---------');
 
+    $row_counter = 0;
+    $total_counter = count($products);
+
     try {
       $this->schema = $this->get_empty_schema();
       $existing_products = $this->all_skus();
 
-      $images_activated = $this->_image_sync;
       foreach ($products as $product) {
+
+        $row_counter++;
+        $this->logger->log("[$row_counter/$total_counter]");
+
         //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
             $response = $this->update($id, $product);
-            // Poistetaan tuotekuvat vain jos kuvasiirto on aktivoitu
-            if ($images_activated) {
-              $this->delete_product_images($id);
-            }
           }
           else {
             $response = $this->create($product);
@@ -136,10 +172,6 @@ class PrestaProducts extends PrestaClient {
           if (!empty($product['saldo'])) {
             $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
             $presta_stock->create_or_update($id, $product['saldo']);
-          }
-          // Lisätään tuotekuvat vain jos kuvasiirto on aktivoitu
-          if ($images_activated) { 
-            $this->create_product_images($id, $product['images']);
           }
         }
         catch (Exception $e) {
@@ -169,70 +201,13 @@ class PrestaProducts extends PrestaClient {
     $this->_removable_fields = $fields;
   }
 
-  public function set_image_sync($status) {
+  public function set_dynamic_fields($fields) {
+    $this->_dynamic_fields = $fields;
+  }
+
+  public function set_category_sync($status) {
     if (!empty($status)) {
-      $this->_image_sync = false;
+      $this->_category_sync = false;
     }
-  }
-
-  /**
-   *
-   * @param int $product_id
-   * @param array $images
-   * @return int
-   */
-  protected function create_product_images($product_id, $images) {
-    if (empty($images)) {
-      return;
-    }
-
-    $count = 0;
-    foreach ($images as $image) {
-      try {
-        $response = $this->create_resource_image($product_id, $image);
-        if ($response['status_code'] == 200) {
-          $count++;
-        }
-      }
-      catch (Exception $e) {
-        //Do not throw exception because one failed image create can not interrupt with other image create
-      }
-    }
-
-    $this->logger->log("Luotiin {$count} tuotekuvaa");
-
-    return $count;
-  }
-
-  /**
-   *
-   * @param int $product_id
-   * @param array $image_ids If empty delete all
-   * @return int
-   */
-  protected function delete_product_images($product_id, $image_ids = array()) {
-    $deleted = 0;
-
-    try {
-      if (empty($image_ids)) {
-        $image_ids = $this->get_resource_images($product_id);
-      }
-
-      foreach ($image_ids as $image_id) {
-        $ok = $this->delete_resource_image($product_id, $image_id);
-        if ($ok) {
-          $deleted++;
-        }
-      }
-    }
-    catch (Exception $e) {
-      //If get_product_images throws an exception with status code 500 it means that there is no existing
-      //product images.
-      //@TODO For now we do not check for the status code but in future statuscodes other than 500
-      //should retry get_product_images
-      //Do not throw exception here
-    }
-
-    return $deleted;
   }
 }

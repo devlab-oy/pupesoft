@@ -136,7 +136,7 @@ if (!isset($nayta_pdf) and isset($livesearch_tee) and $livesearch_tee == "TUOTEH
   exit;
 }
 
-if (!isset($nayta_pdf) and $yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (!isset($nayta_pdf) and in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 
@@ -1451,17 +1451,15 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           if ($prow["tunnus"] != "") {
             if ($toim != "HAAMU") {
               $parametrit = "?toim={$toim}" .
-                            "&ajax_popup=true" .
-                            "&tuoteno={$prow["tuoteno"]}" .
-                            "&varasto={$laskurow["varasto"]}" .
-                            "&yksikko={$prow["yksikko"]}" .
-                            "&tilattu={$prow["tilattu"]}" .
-                            "&varattu={$prow["varattukpl"]}" .
-                            "&paikka={$prow["paikka"]}" .
-                            "&keskihinta={$prow["keskihinta"]}" .
-                            "&valuutta={$prow["valuutta"]}" .
-                            "&ostohinta={$prow["ostohinta"]}" .
-                            "&vanhatunnus={$laskurow["vanhatunnus"]}";
+                "&ajax_popup=true" .
+                "&tuoteno={$prow["tuoteno"]}" .
+                "&varasto={$laskurow["varasto"]}" .
+                "&yksikko={$prow["yksikko"]}" .
+                "&paikka={$prow["paikka"]}" .
+                "&keskihinta={$prow["keskihinta"]}" .
+                "&valuutta={$prow["valuutta"]}" .
+                "&ostohinta={$prow["ostohinta"]}" .
+                "&vanhatunnus={$laskurow["vanhatunnus"]}";
 
               echo "<td valign='top' $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'

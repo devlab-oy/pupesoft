@@ -156,6 +156,7 @@ if ($handle = opendir($path)) {
             }
 
             $query  = "INSERT INTO rahtikirjat SET
+                       toimitustapa   = '{$laskurow['toimitustapa']}',
                        kollit         = 1,
                        kilot          = {$tuotteiden_paino},
                        pakkaus        = '',

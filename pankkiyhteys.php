@@ -14,6 +14,8 @@ sepa_pankkiyhteys_kunnossa();
 
 toggle_all("viite_toggler", "viite_boxes");
 toggle_all("tiliote_toggler", "tiliote_boxes");
+toggle_all("factoring_tiliote_toggler", "factoring_tiliote_boxes");
+toggle_all("factoring_viite_toggler", "factoring_viite_boxes");
 toggle_all("palaute_toggler", "palaute_boxes");
 
 $tee = empty($tee) ? '' : $tee;

@@ -1542,6 +1542,22 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
+    if ($onkologmaster) {
+      echo "<form method='post'>
+          <input type='hidden' name='toimittajaid' value='$toimittajaid'>
+          <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
+          <input type='hidden' name='tee' value='K'>
+          <input type='hidden' name='alku' value='$alku'>
+          <input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
+          <input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
+          $hiddenit
+          <input type='hidden' name='ojarj' value=\"$ojarj\">
+          <input type='hidden' name='otunnus' value='$otunnus'>
+          <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
+          <input type='submit' value='".t("Lähetä ulkoiseen järjestelmään")."'>
+          </form>";
+    }
+
     echo "<form name='formi' method='post'>";
     echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
     echo "<input type='hidden' name='toiminto' value='kohdista'>";
@@ -2291,6 +2307,22 @@ if ($tila == '') {
         <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
+
+    if ($onkologmaster) {
+      echo "<form method='post'>
+          <input type='hidden' name='toimittajaid' value='$toimittajaid'>
+          <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
+          <input type='hidden' name='tee' value='K'>
+          <input type='hidden' name='alku' value='$alku'>
+          <input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
+          <input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
+          $hiddenit
+          <input type='hidden' name='ojarj' value=\"$ojarj\">
+          <input type='hidden' name='otunnus' value='$otunnus'>
+          <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
+          <input type='submit' value='".t("Lähetä ulkoiseen järjestelmään")."'>
+          </form>";
+    }
 
     echo "<form name='formi' method='post'>
         <input type='hidden' name='toimittajaid' value='$toimittajaid'>

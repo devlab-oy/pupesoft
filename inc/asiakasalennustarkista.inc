@@ -186,7 +186,7 @@ if (!function_exists("asiakasalennustarkista")) {
       if ($chpiiri != '' and mysql_field_name($result, $i) == 'piiri') {
         $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää piiriin!");
       }
-      // Jos on syötetty asiakas_segmentti kaikki tuotteet-"ryhmän" lisäksi 
+      // Jos on syötetty asiakas_segmentti kaikki tuotteet-"ryhmän" lisäksi
       if ($chsegmentti != '' and mysql_field_name($result, $i) == 'asiakas_segmentti') {
         $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää asiakas-segmenttiin!");
       }

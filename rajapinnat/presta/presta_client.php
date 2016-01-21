@@ -1,7 +1,7 @@
 <?php
 
 require_once 'rajapinnat/logger.php';
-require_once 'PSWebServiceLibrary.php';
+require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
 
@@ -12,11 +12,14 @@ abstract class PrestaClient {
    *
    * @var PrestaShopWebservice REST-client
    */
+
+
   protected $ws = null;
 
   /**
    * Schema is used to create / update a resource.
    * It contains given resource blank xml schema
+   *
    * @var SimpleXML
    */
   protected $schema = null;
@@ -43,7 +46,7 @@ abstract class PrestaClient {
     }
     $this->url = $url;
     $this->api_key = $api_key;
-    $this->ws = new PrestaShopWebservice($this->url, $this->api_key);
+    $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
   }
 
   /**
@@ -54,7 +57,7 @@ abstract class PrestaClient {
   protected function get_empty_schema() {
     $resource = $this->resource_name();
     $opt = array(
-        'resource' => "{$resource}?schema=blank"
+      'resource' => "{$resource}?schema=blank"
     );
 
     try {
@@ -74,7 +77,7 @@ abstract class PrestaClient {
   /**
    * Use $this-> instead of parent:: if you are going to override this class get()
    *
-   * @param int $id
+   * @param int     $id
    * @return array
    * @throws Exception
    */
@@ -110,15 +113,15 @@ abstract class PrestaClient {
 
   /**
    *
-   * @param int $id
+   * @param int     $id
    * @return SimpleXMLElement
    * @throws Exception
    */
   protected function get_as_xml($id) {
     $resource = $this->resource_name();
     $opt = array(
-        'resource' => $resource,
-        'id'       => $id,
+      'resource' => $resource,
+      'id'       => $id,
     );
 
     try {
@@ -138,13 +141,13 @@ abstract class PrestaClient {
   /**
    * Creates the given resource
    *
-   * @param array $resource
+   * @param array   $resource
    * @return array
    * @throws Exception
    */
   protected function create(array $resource) {
     $opt = array(
-        'resource' => $this->resource_name()
+      'resource' => $this->resource_name()
     );
 
     try {
@@ -168,8 +171,8 @@ abstract class PrestaClient {
   /**
    * Updates given resource
    *
-   * @param int $id
-   * @param array $resource
+   * @param int     $id
+   * @param array   $resource
    * @return array
    * @throws Exception
    */
@@ -189,15 +192,15 @@ abstract class PrestaClient {
    * Xml needs to be in Presta format.
    * This is used for example in PrestaSalesOrders
    *
-   * @param int $id
+   * @param int     $id
    * @param SimpleXMLElement $xml
    * @return array
    * @throws Exception
    */
   protected function update_xml($id, SimpleXMLElement $xml) {
     $opt = array(
-        'id'       => $id,
-        'resource' => $this->resource_name(),
+      'id'       => $id,
+      'resource' => $this->resource_name(),
     );
 
     try {
@@ -208,8 +211,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: "
-              . $this->resource_name()
-              . " {$id} päivittäminen epäonnistui";
+        . $this->resource_name()
+        . " {$id} päivittäminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -221,15 +224,15 @@ abstract class PrestaClient {
    * $display = array('id','name');
    * $filter = array('name'=>'John');
    *
-   * @param array $display Defines SELECT columns
-   * @param array $filters adds WHERE statements. Needs to be key/value pair
+   * @param array   $display Defines SELECT columns
+   * @param array   $filters adds WHERE statements. Needs to be key/value pair
    * @return array
    * @throws Exception
    */
   protected function all($display = array(), $filters = array()) {
     $resource = $this->resource_name();
     $opt = array(
-        'resource' => $resource,
+      'resource' => $resource,
     );
 
     if (!empty($display)) {
@@ -252,8 +255,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Kaikkien resurssin "
-              . $resource
-              . " rivien haku epäonnistui";
+        . $resource
+        . " rivien haku epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -297,14 +300,14 @@ abstract class PrestaClient {
 
   /**
    *
-   * @param int $id
+   * @param int     $id
    * @return boolean
    * @throws Exception
    */
   protected function delete($id) {
     $opt = array(
-        'resource' => $this->resource_name(),
-        'id'       => $id,
+      'resource' => $this->resource_name(),
+      'id'       => $id,
     );
 
     try {
@@ -314,8 +317,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: "
-              . $this->resource_name()
-              . " {$id} poistaminen epäonnistui";
+        . $this->resource_name()
+        . " {$id} poistaminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -347,102 +350,6 @@ abstract class PrestaClient {
 
   /**
    *
-   * @param int $id
-   * @param array $image
-   * @return array
-   * @throws Exception
-   */
-  protected function create_resource_image($id, $image) {
-    $opt = array(
-        'resource'   => $this->resource_name(),
-        'id'         => $id,
-        'attachment' => $image,
-        'method'     => 'POST'
-    );
-    try {
-      $response = $this->ws->executeImageRequest($opt);
-
-      $msg = "Luotiin resurssille: " . $this->resource_name() . " kuva {$id}";
-      $this->logger->log($msg);
-    }
-    catch (Exception $e) {
-      $msg = "Resurssin:"
-              . $this->resource_name()
-              . " {$id} kuvan luonti epäonnistui";
-      $this->logger->log($msg, $e);
-      throw $e;
-    }
-
-    return $response;
-  }
-
-  /**
-   *
-   * @param int $id
-   * @return array
-   * @throws Exception
-   */
-  protected function get_resource_images($id) {
-    $image_ids = array();
-    $opt = array(
-        'resource' => 'images/' . $this->resource_name(),
-        'id'       => $id,
-    );
-
-    try {
-      $response_xml = $this->ws->get($opt);
-      foreach ($response_xml->image->declination as $node) {
-        foreach ($node->attributes() as $key => $value) {
-          if ($key == 'id') {
-            $image_ids[] = (string) $value;
-          }
-        }
-      }
-
-      //For some reason API gives duplicate ids sometimes
-      $image_ids = array_unique($image_ids);
-    }
-    catch (Exception $e) {
-      $msg = "Resurssin: "
-              . $this->resource_name()
-              . " {$id} kuvien haku epäonnistui."
-              . " Jos kyseessä HTTP code 500 tarkoittaa se"
-              . ", että resurssille ei löytynyt kuvia.";
-      $this->logger->log($msg, $e);
-      throw $e;
-    }
-
-    return $image_ids;
-  }
-
-  /**
-   *
-   * @param int $resouce_id
-   * @param int $image_id
-   * @return boolean
-   * @throws Exception
-   */
-  protected function delete_resource_image($resouce_id, $image_id) {
-    $opt = array(
-        'url' => "{$this->url}/api/images/" . $this->resource_name() . "/{$resouce_id}/{$image_id}",
-    );
-
-    try {
-      $response = $this->ws->delete($opt);
-    }
-    catch (Exception $e) {
-      $msg = "Resurssin: " . $this->resource_name() . " {$resouce_id}"
-              . " kuvan {$image_id} poistaminen epäonnistui"
-              . "url: {$opt['url']}";
-      $this->logger->log($msg, $e);
-      throw $e;
-    }
-
-    return $response;
-  }
-
-  /**
-   *
    * @return string
    */
   protected function url() {
@@ -460,7 +367,7 @@ abstract class PrestaClient {
   /**
    * Sanitezes string for presta link_rewrite column
    *
-   * @param string $string
+   * @param string  $string
    * @return string
    */
   protected function saniteze_link_rewrite($string) {

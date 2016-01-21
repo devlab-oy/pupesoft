@@ -121,6 +121,10 @@ verkkokauppa/ostoskori.php
 verkkokauppa/tyhjenna_ostoskorit.php
 tiedostokirjasto.php
 tiedostofunkkarit.inc
+asiakasvalinta.inc
+extranet_tyomaaraykset.php
+extranet_laiterekisteri.php
+tyomaarays/tulosta_tyomaarays.inc
 popup.js"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi

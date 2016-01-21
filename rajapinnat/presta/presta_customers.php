@@ -17,10 +17,12 @@ class PrestaCustomers extends PrestaClient {
 
   /**
    *
-   * @param array $customer
+   * @param array   $customer
    * @param SimpleXMLElement $existing_customer
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -104,7 +106,7 @@ class PrestaCustomers extends PrestaClient {
     $query = "UPDATE yhteyshenkilo
               SET ulkoinen_asiakasnumero = {$presta_id}
               WHERE yhtio = '{$yhtio}'
-              AND tunnus = {$pupesoft_id}";
+              AND tunnus  = {$pupesoft_id}";
     pupe_query($query);
 
     return true;
@@ -114,11 +116,11 @@ class PrestaCustomers extends PrestaClient {
     if (empty($contact_id) or empty($yhtio)) {
       return false;
     }
-    
+
     $query = "UPDATE yhteyshenkilo
               SET salasanan_resetointi = ''
               WHERE yhtio = '{$yhtio}'
-              AND tunnus = {$contact_id}";
+              AND tunnus  = {$contact_id}";
     pupe_query($query);
 
     return true;
@@ -127,7 +129,7 @@ class PrestaCustomers extends PrestaClient {
   /**
    * Overrides parents get
    *
-   * @param int $id
+   * @param int     $id
    */
   public function get($id) {
     return parent::get($id);

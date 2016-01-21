@@ -23,10 +23,12 @@ class PrestaSpecificPrices extends PrestaClient {
 
   /**
    *
-   * @param array $specific_price
+   * @param array   $specific_price
    * @param SimpleXMLElement $existing_specific_price
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -35,9 +37,11 @@ class PrestaSpecificPrices extends PrestaClient {
     }
 
     $xml->specific_price->id_group = 0;
+
     if (!empty($specific_price['presta_customergroup_id'])) {
       $xml->specific_price->id_group = $specific_price['presta_customergroup_id'];
     }
+
     if (!empty($specific_price['presta_customer_id'])) {
       $xml->specific_price->id_customer = $specific_price['presta_customer_id'];
     }
@@ -88,8 +92,15 @@ class PrestaSpecificPrices extends PrestaClient {
       foreach ($prices as $price) {
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
+          $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
           continue;
         }
+
+        if (empty($price['presta_customer_id'])) {
+          $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus puuttuu");
+          continue;
+        }
+
         try {
           $price['presta_product_id'] = $this->find_presta_product_id($price['tuoteno']);
           $this->create($price);
@@ -114,7 +125,7 @@ class PrestaSpecificPrices extends PrestaClient {
   /**
    * Finds presta product id from $this->product_ids
    *
-   * @param string $tuoteno
+   * @param string  $tuoteno
    * @return int
    * @throws Exception
    */

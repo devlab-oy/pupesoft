@@ -1409,14 +1409,14 @@ if (!function_exists("verkkolasku_in")) {
 
             $query = "SELECT tilino, kustp, alv
                       FROM tiliointisaanto
-                      WHERE ttunnus = '$trow[tunnus]'
-                      and tyyppi    = 't'
-                      and yhtio     = '$yhtio'
-                      and mintuote  <= '$tuote'
-                      and maxtuote  >= '$tuote'
+                      WHERE ttunnus  = '$trow[tunnus]'
+                      and tyyppi     = 't'
+                      and yhtio      = '$yhtio'
+                      and mintuote   <= '$tuote'
+                      and maxtuote   >= '$tuote'
                       and mintuote  != ''
                       and maxtuote  != ''
-                      and tilino    not in ('0','')
+                      and tilino     not in ('0','')
                       order by tunnus
                       limit 1";
             $result = pupe_query($query);
@@ -1425,12 +1425,12 @@ if (!function_exists("verkkolasku_in")) {
             if (mysql_num_rows($result) != 1 and $rinfo != "") {
               $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
-                        WHERE ttunnus = '$trow[tunnus]'
-                        and tyyppi    = 't'
-                        and yhtio     = '$yhtio'
-                        and kuvaus    like '%$rinfo%'
+                        WHERE ttunnus  = '$trow[tunnus]'
+                        and tyyppi     = 't'
+                        and yhtio      = '$yhtio'
+                        and kuvaus     like '%$rinfo%'
                         and kuvaus    != ''
-                        and tilino    not in ('0','')
+                        and tilino     not in ('0','')
                         order by tunnus
                         limit 1";
               $result = pupe_query($query);

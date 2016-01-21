@@ -193,7 +193,7 @@ class Edi {
         // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu euromääräistä alennusta
         if ($alennusprosentti == 0 and $alennusmaara > 0) {
           // Lasketaan alennusmäärä alennusprosentiksi
-          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 6);
+          $alennusprosentti = round(($alennusmaara * 100 / ($verollinen_hinta * $kpl)), 6);
         }
 
         // Verokanta

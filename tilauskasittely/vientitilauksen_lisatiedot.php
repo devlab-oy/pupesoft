@@ -65,6 +65,7 @@ if ($tapa == "tuonti" and $tee != "") {
                 tulliarvo                        = '$tulliarvo',
                 maa_maara                        = '$maa_maara',
                 maa_lahetys                      = '$maa_lahetys',
+                maa_alkupera                     = '$maa_alkupera',
                 kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
                 kuljetusmuoto                    = '$kuljetusmuoto',
                 bruttopaino                      = '$bruttopaino'
@@ -176,6 +177,28 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<th>".t("Bruttopaino").":</th>";
     echo "<td><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]' style='width:300px;'></td>";
     echo "</tr>";
+
+    if ($toim == "TYOMAARAYS") {
+      echo "<tr>";
+      echo "<th>".t("Alkuperämaa").":</th>";
+      echo "<td>";
+      echo "<select name='maa_alkupera' style='width:300px;'>";
+
+      $query = "SELECT distinct koodi, nimi
+                FROM maat
+                where nimi != ''
+                ORDER BY koodi";
+      $result = pupe_query($query);
+
+      echo "<option value=''>".t("Valitse")."</option>";
+
+      while ($row = mysql_fetch_assoc($result)) {
+        $sel = $row["koodi"] == $laskurow["maa_alkupera"] ? 'selected' : '';
+        echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
+      }
+      echo "</select></td>";
+      echo "</tr>";
+    }
 
     echo "<tr>";
     echo "<th>".t("Lähetysmaa").":</th>";
@@ -956,7 +979,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif (($tilrow['alatila'] == 'E' or ($toim == "TYOMAARAYS" and in_array($tilrow['alatila'], array('B','D','E'))))
+      elseif (($tilrow['alatila'] == 'E' or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0

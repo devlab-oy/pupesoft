@@ -77,15 +77,28 @@ else {
   }
 }
 
+if ($row['tapa'] == "Tyˆm‰‰r‰ys") {
+  // k‰yd‰‰n l‰pi kaikki laskut
+  $query = "SELECT lasku.*,
+            if(tyomaarays.maa_lahetys = '', if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys), tyomaarays.maa_lahetys) as maalahetys,
+            if(tyomaarays.maa_maara = '', if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara), tyomaarays.maa_maara) as maamaara
+            FROM lasku
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus)
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  in ({$row['kaikkitunnukset']})";
+}
+else {
+  // k‰yd‰‰n l‰pi kaikki laskut
+  $query = "SELECT lasku.*,
+            if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+            if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
+             FROM lasku
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tunnus  in ($row[kaikkitunnukset])";
+}
 
-// k‰yd‰‰n l‰pi kaikki laskut
-$query = "SELECT lasku.*,
-          if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
-           FROM lasku
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tunnus  in ($row[kaikkitunnukset])";
 $intrlasres = pupe_query($query);
 
 while ($intrlasrow = mysql_fetch_array($intrlasres)) {

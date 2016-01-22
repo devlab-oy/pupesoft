@@ -288,11 +288,11 @@ if ($tee == "tulosta") {
           HAVING $maalisa)";
   }
 
-  if ($tapahtumalaji == "kaikki") {
+  if ($tapahtumalaji == "kaikki" and $tapa == "tuonti") {
     $query .= " UNION ";
   }
 
-  if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "tyomaarays") {
+  if (($tapahtumalaji == "kaikki" and $tapa == "tuonti") or $tapahtumalaji == "tyomaarays") {
 
     if ($tapa == "tuonti") {
       $query .= "

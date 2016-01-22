@@ -77,7 +77,7 @@ else {
   }
 }
 
-if ($row['tapa'] == "Työmääräys") {
+if ($row['tapa'] == "Työmääräys" and ($tapa == 'tuonti' or $tapa == 'tuontivienti')) {
   // käydään läpi kaikki laskut
   $query = "SELECT lasku.*,
             if(tyomaarays.maa_lahetys = '', if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys), tyomaarays.maa_lahetys) as maalahetys,

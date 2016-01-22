@@ -235,6 +235,7 @@ if ($tee == "tulosta") {
           LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
           WHERE lasku.tila = 'L'
           and lasku.alatila = 'X'
+          and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
@@ -288,11 +289,11 @@ if ($tee == "tulosta") {
           HAVING $maalisa)";
   }
 
-  if ($tapahtumalaji == "kaikki" and $tapa == "tuonti") {
+  if ($tapahtumalaji == "kaikki") {
     $query .= " UNION ";
   }
 
-  if (($tapahtumalaji == "kaikki" and $tapa == "tuonti") or $tapahtumalaji == "tyomaarays") {
+  if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "tyomaarays") {
 
     if ($tapa == "tuonti") {
       $query .= "
@@ -308,8 +309,8 @@ if ($tee == "tulosta") {
             {$vainnimikelisa2_tyom}
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
-            tyomaarays.koodi AS tuoteno,
-            '' AS nimitys,
+            'Huolto' AS tuoteno,
+            'Huolto' AS nimitys,
             1 AS kpl,
             tyomaarays.bruttopaino AS paino,
             tyomaarays.tulliarvo AS rivihinta,
@@ -360,6 +361,7 @@ if ($tee == "tulosta") {
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
             WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
+            and lasku.tilaustyyppi = 'A'
             and lasku.kauppatapahtuman_luonne != '999'
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'

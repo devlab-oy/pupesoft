@@ -1064,9 +1064,8 @@ if (!function_exists('rivi_otsikot')) {
         $pdf_lasku->draw_text(450, $kala, t("Alennus", $kieli)."-%", $thispage, $pieni);
       }
 
-
       if (in_array($laskutyyppi, array('21','22'))) {
-        list($ff_string, $ff_font) = pdf_fontfit(t("Veroton arvo", $kieli).":", 50, $pdf_lasku, $pieni);
+        list($ff_string, $ff_font) = pdf_fontfit(t("Yhteensä", $kieli).":", 50, $pdf_lasku, $pieni);
 
         $oikpos = $pdf_lasku->strlen($ff_string, $ff_font);
         $pdf_lasku->draw_text(540-$oikpos, $kala, $ff_string, $thispage, $ff_font);

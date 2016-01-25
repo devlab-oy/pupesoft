@@ -4,8 +4,13 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') {
+    $lataa_tiedosto = 1;
+  }
+
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+    $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  }
 }
 
 require 'inc/parametrit.inc';
@@ -116,11 +121,13 @@ if ($tee == "tulosta") {
     $maalisa .= " and maalahetys = '{$vainmaalahetys}' and alkuperamaa = '{$vainalkuperamaa}' and maamaara = '{$vainmaamaara}' ";
 
     $vainnimikelisa2 = " tilausrivi.tunnus, ";
+    $vainnimikelisa2_tyom = "'' as tunnus,";
     $vainnimikegroup = " ,9 ";
   }
   else {
     $vainnimikelisa  = "";
     $vainnimikelisa2 = "";
+    $vainnimikelisa2_tyom = "";
     $vainnimikegroup = "";
   }
 
@@ -228,6 +235,7 @@ if ($tee == "tulosta") {
           LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
           WHERE lasku.tila = 'L'
           and lasku.alatila = 'X'
+          and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
@@ -279,6 +287,90 @@ if ($tee == "tulosta") {
           $lisavarlisa
           GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup $ee_group
           HAVING $maalisa)";
+  }
+
+  if ($tapahtumalaji == "kaikki") {
+    $query .= " UNION ";
+  }
+
+  if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "tyomaarays") {
+
+    if ($tapa == "tuonti") {
+      $query .= "
+            (SELECT
+            tyomaarays.tullikoodi AS tullinimike1,
+            if (tyomaarays.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), tyomaarays.maa_lahetys) maalahetys,
+            tyomaarays.maa_alkupera AS alkuperamaa,
+            if (tyomaarays.maa_maara='', lasku.toim_maa, tyomaarays.maa_maara) maamaara,
+            tyomaarays.kuljetusmuoto,
+            tyomaarays.kauppatapahtuman_luonne,
+            tullinimike.su_vientiilmo su,
+            'Työmääräys' as tapa,
+            {$vainnimikelisa2_tyom}
+            {$ee_kentat}
+            max(lasku.tunnus) laskunro,
+            'Huolto' AS tuoteno,
+            'Huolto' AS nimitys,
+            1 AS kpl,
+            tyomaarays.bruttopaino AS paino,
+            tyomaarays.tulliarvo AS rivihinta,
+            tyomaarays.tulliarvo AS rivihinta_laskutusarvo,
+            group_concat(lasku.tunnus) as kaikkitunnukset,
+            '' AS kaikkituotteet,
+            '' AS perheid2set
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+            LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            WHERE lasku.tila = 'L'
+            and lasku.alatila = 'X'
+            and lasku.kauppatapahtuman_luonne != '999'
+            and lasku.yhtio = '{$kukarow['yhtio']}'
+            and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+            and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
+            GROUP BY 1,2,3,4,5,6,7,8 {$ee_group}
+            HAVING {$maalisa})";
+    }
+    else {
+      $query .= "
+            (SELECT
+            tuote.tullinimike1,
+            if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+            ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1), '$yhtiorow[maa]') alkuperamaa,
+            if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+            lasku.kuljetusmuoto,
+            lasku.kauppatapahtuman_luonne,
+            tullinimike.su_vientiilmo su,
+            'Työmääräys' as tapa,
+            {$vainnimikelisa2}
+            {$ee_kentat}
+            max(lasku.tunnus) laskunro,
+            max(tuote.tuoteno) tuoteno,
+            left(max(tuote.nimitys), 40) nimitys,
+            round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
+            round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
+            if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+            if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
+            group_concat(lasku.tunnus) as kaikkitunnukset,
+            group_concat(distinct tilausrivi.perheid2) as perheid2set,
+            group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
+            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+            LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            WHERE lasku.tila = 'L'
+            and lasku.alatila = 'X'
+            and lasku.tilaustyyppi = 'A'
+            and lasku.kauppatapahtuman_luonne != '999'
+            and lasku.yhtio = '{$kukarow['yhtio']}'
+            and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
+            and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
+            {$vainnimikelisa}
+            {$lisavarlisa}
+            GROUP BY 1,2,3,4,5,6,7,8 {$vainnimikegroup} {$ee_group}
+            HAVING {$maalisa})";
+    }
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
@@ -695,7 +787,8 @@ if ($tee == "tulosta") {
       $ulos .= "<tr class='aktiivi'>";
 
       if ($vaintullinimike != "") {
-        $ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&lopetus=$lopetus/SPLIT/$lopetus_intra1$lopetus_intra2'>$row[laskunro]</a></td>";
+        $lisatoim = ($row['tapa'] == "Työmääräys" and $tapa == "tuonti") ? "&toim=TYOMAARAYS" : "";
+        $ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$row[kaikkitunnukset]&lopetus=$lopetus/SPLIT/$lopetus_intra1$lopetus_intra2'>$row[laskunro]</a></td>";
       }
       else {
         $ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
@@ -980,7 +1073,16 @@ $sel1[$outputti]     = "SELECTED";
 $sel2[$tapa]         = "SELECTED";
 $sel3[$lahetys]      = "SELECTED";
 $sel4[$lisavar]      = "SELECTED";
-$sel5[$tapahtumalaji] = "SELECTED";
+
+$_lajit = array(
+  'kaikki' => '',
+  'keikka' => '',
+  'lasku' => '',
+  'siirtolista' => '',
+  'tyomaarays' => ''
+);
+
+$sel5 = array($tapahtumalaji => 'selected') + $_lajit;
 
 if ($excel != "") {
   $echecked = "checked";
@@ -1081,10 +1183,11 @@ echo "<tr>
     <th>".t("Valitse tapahtumalaji")."</th>
     <td>
     <select name='tapahtumalaji'>
-    <option value='kaikki'     $sel5[kaikki]>".t("Kaikki")."</option>
-    <option value='keikka'     $sel5[keikka]>".t("Saapuminen")."</option>
-    <option value='lasku'    $sel5[lasku]>".t("Lasku")."</option>
-    <option value='siirtolista' $sel5[siirtolista]>".t("Siirtolista")."</option>
+    <option value='kaikki' {$sel5['kaikki']}>".t("Kaikki")."</option>
+    <option value='keikka' {$sel5['keikka']}>".t("Saapuminen")."</option>
+    <option value='lasku' {$sel5['lasku']}>".t("Lasku")."</option>
+    <option value='siirtolista' {$sel5['siirtolista']}>".t("Siirtolista")."</option>
+    <option value='tyomaarays' {$sel5['tyomaarays']}>".t("Työmääräys")."</option>
     </select>
 </table>
 

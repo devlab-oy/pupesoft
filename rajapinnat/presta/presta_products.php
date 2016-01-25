@@ -20,9 +20,6 @@ class PrestaProducts extends PrestaClient {
   private $presta_categories = null;
   private $presta_home_category_id = null;
 
-  // Päivitetäänkö tuotekuvat
-  private $_image_sync = true;
-
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
 
@@ -149,21 +146,23 @@ class PrestaProducts extends PrestaClient {
   public function sync_products(array $products) {
     $this->logger->log('---------Start product sync---------');
 
+    $row_counter = 0;
+    $total_counter = count($products);
+
     try {
       $this->schema = $this->get_empty_schema();
       $existing_products = $this->all_skus();
 
-      $images_activated = $this->_image_sync;
       foreach ($products as $product) {
+
+        $row_counter++;
+        $this->logger->log("[$row_counter/$total_counter]");
+
         //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
             $response = $this->update($id, $product);
-            // Poistetaan tuotekuvat vain jos kuvasiirto on aktivoitu
-            if ($images_activated) {
-              $this->delete_product_images($id);
-            }
           }
           else {
             $response = $this->create($product);
@@ -173,10 +172,6 @@ class PrestaProducts extends PrestaClient {
           if (!empty($product['saldo'])) {
             $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
             $presta_stock->create_or_update($id, $product['saldo']);
-          }
-          // Lisätään tuotekuvat vain jos kuvasiirto on aktivoitu
-          if ($images_activated) {
-            $this->create_product_images($id, $product['images']);
           }
         }
         catch (Exception $e) {
@@ -210,76 +205,9 @@ class PrestaProducts extends PrestaClient {
     $this->_dynamic_fields = $fields;
   }
 
-  public function set_image_sync($status) {
-    if (!empty($status)) {
-      $this->_image_sync = false;
-    }
-  }
-
   public function set_category_sync($status) {
     if (!empty($status)) {
       $this->_category_sync = false;
     }
-  }
-
-  /**
-   *
-   * @param int     $product_id
-   * @param array   $images
-   * @return int
-   */
-  protected function create_product_images($product_id, $images) {
-    if (empty($images)) {
-      return;
-    }
-
-    $count = 0;
-    foreach ($images as $image) {
-      try {
-        $response = $this->create_resource_image($product_id, $image);
-        if ($response['status_code'] == 200) {
-          $count++;
-        }
-      }
-      catch (Exception $e) {
-        //Do not throw exception because one failed image create can not interrupt with other image create
-      }
-    }
-
-    $this->logger->log("Luotiin {$count} tuotekuvaa");
-
-    return $count;
-  }
-
-  /**
-   *
-   * @param int     $product_id
-   * @param array   $image_ids  If empty delete all
-   * @return int
-   */
-  protected function delete_product_images($product_id, $image_ids = array()) {
-    $deleted = 0;
-
-    try {
-      if (empty($image_ids)) {
-        $image_ids = $this->get_resource_images($product_id);
-      }
-
-      foreach ($image_ids as $image_id) {
-        $ok = $this->delete_resource_image($product_id, $image_id);
-        if ($ok) {
-          $deleted++;
-        }
-      }
-    }
-    catch (Exception $e) {
-      //If get_product_images throws an exception with status code 500 it means that there is no existing
-      //product images.
-      //@TODO For now we do not check for the status code but in future statuscodes other than 500
-      //should retry get_product_images
-      //Do not throw exception here
-    }
-
-    return $deleted;
   }
 }

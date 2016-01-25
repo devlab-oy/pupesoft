@@ -104,8 +104,9 @@ class PrestaCategories {
   }
 
   private function delete_unnecessary_categories($pupesoft_categories) {
-    // collect all presta ID:s we should keep (always keep home)
+    // collect all presta ID:s we should keep (always keep home and root 1)
     $keep_presta_ids = array(
+      1,
       (int) $this->presta_home_category_id
     );
 

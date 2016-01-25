@@ -37,9 +37,11 @@ class PrestaSpecificPrices extends PrestaClient {
     }
 
     $xml->specific_price->id_group = 0;
+
     if (!empty($specific_price['presta_customergroup_id'])) {
       $xml->specific_price->id_group = $specific_price['presta_customergroup_id'];
     }
+
     if (!empty($specific_price['presta_customer_id'])) {
       $xml->specific_price->id_customer = $specific_price['presta_customer_id'];
     }
@@ -90,8 +92,15 @@ class PrestaSpecificPrices extends PrestaClient {
       foreach ($prices as $price) {
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
+          $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
           continue;
         }
+
+        if (empty($price['presta_customer_id'])) {
+          $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus puuttuu");
+          continue;
+        }
+
         try {
           $price['presta_product_id'] = $this->find_presta_product_id($price['tuoteno']);
           $this->create($price);

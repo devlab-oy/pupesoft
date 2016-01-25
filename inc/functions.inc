@@ -1139,6 +1139,11 @@ if (!function_exists("apix_invoice_put_file")) {
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";
     $version         = "1.0";
+
+    if ($yhtiorow["finvoice_versio"] == "2") {
+      $version       = "1.1";
+    }
+
     $timestamp       = gmdate("YmdHis");
     $apix_ulos       = "";
     $apixerrorreport = "";
@@ -10159,6 +10164,85 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei sarjanumeroita").".</font></div>";
+      }
+
+      livesearch_trimmaa_leveys($hakuid);
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+
+    pupeslave_stop();
+  }
+}
+
+if (!function_exists("livesearch_tullinimikehaku")) {
+  function livesearch_tullinimikehaku() {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      $query = "SELECT cn, dm
+                FROM tullinimike
+                WHERE kieli = '{$yhtiorow['kieli']}'
+                AND cn != ''";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='sarjanumero_valinta_$row[cn]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'cn_valinta_$row[cn]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='$row[cn]';";
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
+                style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
+                <font style='font-weight:bold'>{$row['cn']} {$row['dm']}</font>
+                </span>
+              </div><div name='selectValues$hakuid' id='$row[cn]'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result)." ", t("tullinimikettä"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei tullinimikkeitä").".</font></div>";
       }
 
       livesearch_trimmaa_leveys($hakuid);
@@ -27124,7 +27208,7 @@ if (!function_exists('hae_asiakashinnat')) {
 }
 
 if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus) {
+  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
@@ -27156,7 +27240,15 @@ if (!function_exists('posten_outbounddelivery')) {
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
     $messageheader->addChild('Sender', $yhtiorow['nimi']);
-    $messageheader->addChild('Receiver', 'Posten');
+
+    if ($ulkoinen_jarjestelma == 'L') {
+      $uj_nimi = "Helsingin Hyllyvarasto";
+    }
+    else {
+      $uj_nimi = "PostNord";
+    }
+
+    $messageheader->addChild('Receiver', $uj_nimi);
 
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
@@ -27225,7 +27317,14 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-      $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+
+      if ($ulkoinen_jarjestelma == 'L') {
+        $line->addChild('ItemNumber', substr($looprow['tuoteno'], 0, 20));
+      }
+      else {
+        $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
+      }
+
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);

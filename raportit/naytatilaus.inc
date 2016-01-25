@@ -343,8 +343,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
-    elseif (stripos($laskurow["toimitustapa"], "mypack") !== FALSE) {
-      $linkurl = "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$rakirrow['rahtikirjanro']}'>{$rakirrow['rahtikirjanro']}</a>";
+    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
+      foreach(explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
+        $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
+      }
     }
     else {
       $linkurl = $rakirrow['rahtikirjanro'];

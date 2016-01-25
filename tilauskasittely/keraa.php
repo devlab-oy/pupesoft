@@ -10,8 +10,14 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $hyllynro = mysql_real_escape_string($hyllynro);
     $hyllyvali = mysql_real_escape_string($hyllyvali);
     $hyllytaso = mysql_real_escape_string($hyllytaso);
-    $poikkeava_maara = mysql_real_escape_string($poikkeava_maara);
     $poikkeama_kasittely = mysql_real_escape_string($poikkeama_kasittely);
+
+    if (trim($poikkeava_maara) == "") {
+      $poikkeava_maara = 'null';
+    }
+    else {
+      $poikkeava_maara = (float) $poikkeava_maara;
+    }
 
     $query = "INSERT INTO kerattavatrivit SET
               tilausrivi_id       = '{$tunnus}',
@@ -19,7 +25,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               hyllynro            = '{$hyllynro}',
               hyllyvali           = '{$hyllyvali}',
               hyllytaso           = '{$hyllytaso}',
-              poikkeava_maara     = '{$poikkeava_maara}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
               keratty             = 1,
               created_at          = now()
@@ -28,7 +34,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               hyllynro            = '{$hyllynro}',
               hyllyvali           = '{$hyllyvali}',
               hyllytaso           = '{$hyllytaso}',
-              poikkeava_maara     = '{$poikkeava_maara}',
+              poikkeava_maara     = {$poikkeava_maara},
               poikkeama_kasittely = '{$poikkeama_kasittely}',
               updated_at          = now()";
     $result = pupe_query($query);
@@ -4020,20 +4026,21 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
       echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 
+      if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
+        $hidden = "";
+      }
+      else {
+        $hidden = "style='display:none;'";
+      }
+
       if ($toim == 'VASTAANOTA_REKLAMAATIO') {
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Tuotteet hyllytetty ja reklamaatio valmis laskutukseen")."'>";
       }
       elseif ($otsik_row["tulostustapa"] != "X" or $otsik_row["nouto"] != "") {
-        if ($yhtiorow['kerays_riveittain'] == '' or $kerattavatrivit_count == $total_rivi_count) {
-          $hidden = "";
-        }
-        else {
-          $hidden = "style='display:none;'";
-        }
         echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."' {$hidden}>";
       }
       else {
-        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."'>";
+        echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa toimitetuksi")."' {$hidden}>";
       }
 
       echo "</form>";

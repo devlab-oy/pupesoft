@@ -407,6 +407,14 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $kal++;
   }
 
+  $query = "SELECT GROUP_CONCAT(viesti) tilausviitteet
+            FROM lasku
+            WHERE tunnus IN ({$tilausnumeroita})
+            and yhtio    = '{$kukarow['yhtio']}'";
+  $tilausviiteres = pupe_query($query);
+  $tilausviiterow = mysql_fetch_assoc($tilausviiteres);
+  $laskurow['viesti'] = $tilausviiterow['tilausviitteet'];
+
   if (mysql_num_rows($riresult) > 0) {
     mysql_data_seek($riresult, 0);
   }

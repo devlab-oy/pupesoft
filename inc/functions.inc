@@ -27296,7 +27296,18 @@ if (!function_exists('posten_outbounddelivery')) {
     $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
 
     $transport = $custpickinglist->addChild('Transport');
-    $transport->addChild('TransportAccount', substr($toimitustapa_chk_row['tunnus'], 0, 10));
+
+    $toim_ta = t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark');
+
+    if (empty($toim_ta)) {
+      $transport_account = substr($toimitustapa_chk_row['tunnus'], 0, 10);
+    }
+    else {
+      $transport_account = $toim_ta;
+    }
+
+    $transport->addChild('TransportAccount', $transport_account);
+
     $transport->addChild('TransportInstruction', substr('', 0, 250));
     $transport->addChild('FreightPayer', 'sender');
 

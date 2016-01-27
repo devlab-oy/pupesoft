@@ -376,7 +376,7 @@ if ($tee == 'tulosta') {
             lasku.toim_puh,
             lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
-            asiakas.toimitusvahvistus,
+            asiakas.toimitusvahvistus, asiakas.kieli,
             IF(lasku.toim_email != '', lasku.toim_email,
             IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email,
             IF(lasku.toim_puh != '', lasku.toim_puh,
@@ -428,6 +428,18 @@ if ($tee == 'tulosta') {
     // Haetaan tulostettavat rahtikirjat
     while ($mysql_rakir_row = mysql_fetch_assoc($rakir_res)) {
 
+      if ($kieli != "") {
+        $kieli = trim(strtoupper($kieli));
+      }
+      elseif (trim($mysql_rakir_row["kieli"]) != "") {
+        $kieli = trim(strtoupper($mysql_rakir_row["kieli"]));
+      }
+      elseif (trim($kukarow["kieli"]) != "") {
+        $kieli = trim(strtoupper($kukarow["kieli"]));
+      }
+      else {
+        $kieli = trim(strtoupper($yhtiorow["kieli"]));
+      }
       // Katsotaan onko tämä koontikuljetus
       if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
         // Monen asiakkaan rahtikirjat tulostuu aina samalle paperille

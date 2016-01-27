@@ -15,8 +15,8 @@ error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
 // otetaan tietokanta connect
-require "../inc/connect.inc";
-require "../inc/functions.inc";
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Logitetaan ajo
 cron_log();

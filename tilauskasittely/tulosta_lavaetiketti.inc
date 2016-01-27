@@ -125,7 +125,6 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 
       $query = "SELECT tilausrivi.nimitys,
                 tilausrivi.yksikko,
-                tuote.sarjanumeroseuranta,
                 tilausrivi.tuoteno,
                 tilausrivi.tunnus
                 FROM tilausrivi
@@ -161,7 +160,7 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
         $query = "SELECT sarjanumero, parasta_ennen
                   FROM sarjanumeroseuranta
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND myyntirivitunnus = '{$row['tunnus']}'
+                  AND myyntirivitunnus = '{$rivirow['tunnus']}'
                   AND tuoteno = '{$rivirow['tuoteno']}'";
         $sarjanumerores = pupe_query($query);
         $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);

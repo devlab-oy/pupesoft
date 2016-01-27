@@ -217,7 +217,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = 90/282;
     $pdf->image_place($image, mm_pt(100), mm_pt(40), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(40), mm_pt(95), $barcode1_text, $firstpage, $norm);
+    $pdf->draw_text(mm_pt(50), mm_pt(95), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
@@ -232,7 +232,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = 90/282;
     $pdf->image_place($image, mm_pt(65), mm_pt(30), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(30), mm_pt(60), $barcode2_text, $firstpage, $norm);
+    $pdf->draw_text(mm_pt(50), mm_pt(60), $barcode2_text, $firstpage, $norm);
     system("rm -f $nimi");
   }
 

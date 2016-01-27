@@ -165,6 +165,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);
 
     $eranumero = $sarjanumerorow['sarjanumero'];
+    $eranumero = $row['nro'];
     $parasta_ennen = $sarjanumerorow['parasta_ennen'];
 
     # VVKKPP muoto

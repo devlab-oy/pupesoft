@@ -223,9 +223,10 @@ while ($row = mysql_fetch_assoc($result)) {
     fclose($fh);
 
     $image = $pdf->jfif_embed($data);
+    $image_size = $pdf->get_image_size($image);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(115), mm_pt(39), $firstpage, $logoparam);
+    $pdf->image_place($image, mm_pt(115), mm_pt(75-($image_size['x']/2)), $firstpage, $logoparam);
     $pdf->draw_text(mm_pt(39), mm_pt(110), $barcode0_text, $firstpage, $norm);
     system("rm -f $nimi");
 

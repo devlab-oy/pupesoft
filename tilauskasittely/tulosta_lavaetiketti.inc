@@ -226,8 +226,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $image_size = $pdf->get_image_size($image);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(115), mm_pt(75)-((($image_size['width'] / 1.3333333333) / 2) * $logoparam['scale']), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(39), mm_pt(110), $barcode0_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(115), mm_pt(5), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(5), mm_pt(110), $barcode0_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     //luodaan viivakoodiolio
@@ -242,8 +242,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(80), mm_pt(39), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(39), mm_pt(75), $barcode1_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(80), mm_pt(5), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(5), mm_pt(75), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
@@ -258,8 +258,8 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = 90/270;
 
-    $pdf->image_place($image, mm_pt(40), mm_pt(30), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(30), mm_pt(35), $barcode2_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(40), mm_pt(5), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(5), mm_pt(35), $barcode2_text, $firstpage, $norm);
     system("rm -f $nimi");
   }
 

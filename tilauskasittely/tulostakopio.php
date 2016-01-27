@@ -116,6 +116,9 @@ if ($toim == "TARIFFI") {
 if ($toim == "SIIRTOLISTA") {
   $fuse = t("Siirtolista");
 }
+if ($toim == "LAVAETIKETTI") {
+  $fuse = t("Lavaetiketti");
+}
 if ($toim == "VALMISTUS") {
   $fuse = t("Valmistus");
 }
@@ -722,7 +725,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
-  if ($toim == "KERAYSLISTA") {
+  if ($toim == "KERAYSLISTA" or $toim == "LAVAETIKETTI") {
 
     if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
       $where1 .= " lasku.tila in ('L','N','V','G') ";
@@ -2051,6 +2054,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       loppu_valm($page[$sivu], 1);
       print_pdf_valm($komento["Valmistus"]);
+
+      $tee = '';
+    }
+
+    if ($toim == "LAVAETIKETTI") {
+
+      require_once "tulosta_lavaetiketti.inc";
 
       $tee = '';
     }

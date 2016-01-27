@@ -232,7 +232,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = array(
       'x' => mm_pt(165),
-      'y' => mm_pt(400),
+      'y' => mm_pt(200),
     );
 
     $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);

@@ -70,8 +70,6 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
       }
     }
 
-    $laskurow['tunnus'] = 5401537;
-
     $query = "SELECT kerayserat.nro
               FROM kerayserat
               WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'

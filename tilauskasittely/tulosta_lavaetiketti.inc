@@ -232,9 +232,9 @@ while ($row = mysql_fetch_assoc($result)) {
 
     // $logoparam['scale'] = 90/282;
     $logoparam['scale']['x'] = mm_pt(165);
-    $logoparam['scale']['y'] = mm_pt(200);
-    $pdf->image_place($image, mm_pt(65), mm_pt(30), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(50), mm_pt(60), $barcode2_text, $firstpage, $norm);
+    $logoparam['scale']['y'] = mm_pt(300);
+    $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(50), mm_pt(50), $barcode2_text, $firstpage, $norm);
     system("rm -f $nimi");
   }
 

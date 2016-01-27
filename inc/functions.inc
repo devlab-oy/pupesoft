@@ -22553,6 +22553,24 @@ if (!function_exists("gs1_sscc")) {
   }
 }
 
+if (!function_exists("gs1_sscc_barcode_text")) {
+  function gs1_sscc_barcode_text($expansioncode, $id, $n) {
+    global $yhtiorow;
+
+    $sscc_prefix = '00';
+    $sscc_expansioncode = $expansioncode;
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
+    $sscc_item_id = str_pad(substr($id, -7), 7, 0, STR_PAD_LEFT);
+    $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
+
+    $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
+    $sscc_checknum = tarkiste($sscc);
+    $sscc_text = "({$sscc_prefix}) {$expansioncode} {$sscc_gs1_company_id} {$sscc_item_id}{$sscc_count} {$sscc_checknum}";
+
+    return $sscc_text;
+  }
+}
+
 if (!function_exists('tee_keraysera_painon_perusteella')) {
   function tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita, $_pakkaus = 0) {
     global $kukarow, $yhtiorow;

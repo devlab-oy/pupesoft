@@ -201,6 +201,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
   $barcode1 = $code1.$code2;
   $barcode1_text = "{$code1_text} {$code2_text}";
+  $barcode2_text = gs1_sscc_barcode_text($expansioncode, $laskurow['tunnus'], $cnt);
 
   if (class_exists("Image_Barcode")) {
     //luodaan viivakoodiolio kuljetusohjeelle = postino

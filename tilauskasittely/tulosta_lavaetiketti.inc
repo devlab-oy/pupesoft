@@ -167,7 +167,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $parasta_ennen = $sarjanumerorow['parasta_ennen'];
 
     # VVKKPP muoto
-    $parastaennen_code = substr($parasta_ennen, 2, 2).substr($parasta_ennen, 6, 2).substr($parasta_ennen, 9, 2);
+    $parastaennen_code = substr($parasta_ennen, 2, 2).substr($parasta_ennen, 5, 2).substr($parasta_ennen, 8, 2);
   }
   else {
     $eranumero = $row['nro'];

@@ -175,13 +175,13 @@ while ($row = mysql_fetch_assoc($result)) {
     $parastaennen_code = '';
   }
 
-  $oikpos = $pdf->strlen(t("Parasta ennen")." (DD.MM.YYYY):", $norm);
-  $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(165), t("Parasta ennen")." (DD.MM.YYYY):", $firstpage, $norm);
+  $oikpos = $pdf->strlen("BEST BEFORE (DD.MM.YYYY):", $norm);
+  $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(165), "BEST BEFORE (DD.MM.YYYY):", $firstpage, $norm);
 
   $oikpos = $pdf->strlen(tv1dateconv($parasta_ennen), $otsik);
   $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(160), tv1dateconv($parasta_ennen), $firstpage, $otsik);
 
-  $pdf->draw_text(mm_pt(5), mm_pt(150), t("Eränumero").":", $firstpage, $norm);
+  $pdf->draw_text(mm_pt(5), mm_pt(150), "BATCH/LOT:", $firstpage, $norm);
   $pdf->draw_text(mm_pt(5), mm_pt(145), $eranumero, $firstpage, $otsik);
 
   $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);

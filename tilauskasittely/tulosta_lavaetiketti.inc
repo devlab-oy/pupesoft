@@ -257,8 +257,8 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 
           $logoparam['scale'] = 90/270;
 
-          $pdf->image_place($image, mm_pt(40), mm_pt(5), $firstpage, $logoparam);
-          $pdf->draw_text(mm_pt(5), mm_pt(35), $barcode2_text, $firstpage, $norm);
+          $pdf->image_place($image, mm_pt(45), mm_pt(5), $firstpage, $logoparam);
+          $pdf->draw_text(mm_pt(5), mm_pt(40), $barcode2_text, $firstpage, $norm);
           system("rm -f $nimi");
         }
 

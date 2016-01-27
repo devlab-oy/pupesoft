@@ -228,7 +228,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(70), mm_pt(25), $firstpage, $logoparam);
+    $pdf->image_place($image, mm_pt(65), mm_pt(30), $firstpage, $logoparam);
     system("rm -f $nimi");
   }
 

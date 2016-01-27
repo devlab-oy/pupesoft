@@ -97,7 +97,7 @@ $query = "SELECT kerayserat.nro,
           FROM kerayserat
           WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
           AND kerayserat.sscc_ulkoinen != ''
-          AND kerayserat.otunnus = '5403027'
+          AND kerayserat.otunnus = '5401537'
           GROUP BY 1,2,3,4,5,6
           ORDER BY 1,2,3,4,5,6";
 $result = pupe_query($query);

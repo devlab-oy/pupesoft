@@ -21,28 +21,42 @@ require "../inc/functions.inc";
 // Logitetaan ajo
 cron_log();
 
-// hmm.. j‰nn‰‰
-$kukarow['yhtio']     = $argv[1];
-$kieli                = $argv[2];
-$kukarow['kuka']      = "admin";
-$kukarow["kirjoitin"] = "";
+if ($argv[1] == 'KAIKKI_YHTIOT') {
+  $query = "SELECT group_concat(DISTINCT yhtio) AS yhtiot
+            FROM yhtio";
+  $result = pupe_query($query);
 
-// Haetaan yhtion tiedot (virhetsekki funktiossa....)
-$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  $yhtiot = mysql_fetch_assoc($result);
+  $yhtiot = explode(",", $yhtiot["yhtiot"]);
+}
+else {
+  $yhtiot = array($argv[1]);
+}
 
-$cron_pvm = array();
-$cron_tun = array();
+foreach ($yhtiot as $_yhtio) {
+  // hmm.. j‰nn‰‰
+  $kukarow['yhtio']     = $_yhtio;
+  $kieli                = $argv[2];
+  $kukarow['kuka']      = "admin";
+  $kukarow["kirjoitin"] = "";
 
-// ajetaan eka l‰pi niin saadaan laskuttamattomat sopparit muuttujiin
-require "yllapitosopimukset.php";
+  // Haetaan yhtion tiedot (virhetsekki funktiossa....)
+  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-$laskutapvm = $cron_pvm;
-$laskutatun = $cron_tun;
-$tee        = "laskuta";
+  $cron_pvm = array();
+  $cron_tun = array();
 
-// sitte ajetaan uudestaan laskuta modessa kaikki sopparit l‰pi
-require "yllapitosopimukset.php";
+  // ajetaan eka l‰pi niin saadaan laskuttamattomat sopparit muuttujiin
+  require "yllapitosopimukset.php";
 
-// echotaan outputti
-$laskuta_message = str_replace("<br>", "\n", $laskuta_message);
-echo strip_tags($laskuta_message);
+  $laskutapvm = $cron_pvm;
+  $laskutatun = $cron_tun;
+  $tee        = "laskuta";
+
+  // sitte ajetaan uudestaan laskuta modessa kaikki sopparit l‰pi
+  require "yllapitosopimukset.php";
+
+  // echotaan outputti
+  $laskuta_message = str_replace("<br>", "\n", $laskuta_message);
+  echo strip_tags($laskuta_message);
+}

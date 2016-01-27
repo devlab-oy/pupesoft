@@ -202,36 +202,36 @@ while ($row = mysql_fetch_assoc($result)) {
 
   $barcode1 = $code1.$code2;
 
-  if (class_exists("Image_Barcode")) {
-    //luodaan viivakoodiolio kuljetusohjeelle = postino
-    $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+  // if (class_exists("Image_Barcode")) {
+  //   //luodaan viivakoodiolio kuljetusohjeelle = postino
+  //   $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-    imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
+  //   imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
 
-    $fh = fopen($nimi, "r");
-    $data = fread($fh, filesize($nimi));
-    fclose($fh);
+  //   $fh = fopen($nimi, "r");
+  //   $data = fread($fh, filesize($nimi));
+  //   fclose($fh);
 
-    $image = $pdf->jfif_embed($data);
+  //   $image = $pdf->jfif_embed($data);
 
-    $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(80), mm_pt(15), $firstpage, $logoparam);
-    system("rm -f $nimi");
+  //   $logoparam['scale'] = 90/282;
+  //   $pdf->image_place($image, mm_pt(80), mm_pt(15), $firstpage, $logoparam);
+  //   system("rm -f $nimi");
 
-    $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+  //   $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-    imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
+  //   imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
 
-    $fh = fopen($nimi, "r");
-    $data = fread($fh, filesize($nimi));
-    fclose($fh);
+  //   $fh = fopen($nimi, "r");
+  //   $data = fread($fh, filesize($nimi));
+  //   fclose($fh);
 
-    $image = $pdf->jfif_embed($data);
+  //   $image = $pdf->jfif_embed($data);
 
-    $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(9), mm_pt(5), $firstpage, $logoparam);
-    system("rm -f $nimi");
-  }
+  //   $logoparam['scale'] = 90/282;
+  //   $pdf->image_place($image, mm_pt(9), mm_pt(5), $firstpage, $logoparam);
+  //   system("rm -f $nimi");
+  // }
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/lavaetiketti-".md5(uniqid(rand(), true)).".pdf";

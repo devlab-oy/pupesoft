@@ -205,12 +205,31 @@ while ($row = mysql_fetch_assoc($result)) {
     $code2 = '';
   }
 
+  $barcode0 = "400{$laskurow['asiakkaan_tilausnumero']}";
   $barcode1 = $code1.$code2;
+  $barcode0_text = "(400) {$laskurow['asiakkaan_tilausnumero']}";
   $barcode1_text = "{$code1_text} {$code2_text}";
   $barcode2_text = gs1_sscc_barcode_text($expansioncode, $laskurow['tunnus'], $cnt);
 
   if (class_exists("Image_Barcode")) {
-    //luodaan viivakoodiolio kuljetusohjeelle = postino
+
+    //luodaan viivakoodiolio
+    $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+
+    imagejpeg(Image_Barcode::draw($barcode0, 'code128', 'jpg', false, 3, 170), $nimi);
+
+    $fh = fopen($nimi, "r");
+    $data = fread($fh, filesize($nimi));
+    fclose($fh);
+
+    $image = $pdf->jfif_embed($data);
+
+    $logoparam['scale'] = 90/282;
+    $pdf->image_place($image, mm_pt(80), mm_pt(39), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(39), mm_pt(75), $barcode1_text, $firstpage, $norm);
+    system("rm -f $nimi");
+
+    //luodaan viivakoodiolio
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
     imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
@@ -222,8 +241,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(100), mm_pt(39), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(39), mm_pt(95), $barcode1_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(60), mm_pt(39), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(39), mm_pt(55), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
@@ -238,8 +257,8 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = 90/270;
 
-    $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(30), mm_pt(50), $barcode2_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(40), mm_pt(30), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(30), mm_pt(35), $barcode2_text, $firstpage, $norm);
     system("rm -f $nimi");
   }
 

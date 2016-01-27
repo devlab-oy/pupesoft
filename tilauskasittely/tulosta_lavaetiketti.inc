@@ -205,7 +205,7 @@ while ($row = mysql_fetch_assoc($result)) {
     //luodaan viivakoodiolio kuljetusohjeelle = postino
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-    imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
+    imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170, false), $nimi);
 
     $fh = fopen($nimi, "r");
     $data = fread($fh, filesize($nimi));
@@ -214,7 +214,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(80), mm_pt(15), $firstpage, $logoparam);
+    $pdf->image_place($image, mm_pt(100), mm_pt(40), $firstpage, $logoparam);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";

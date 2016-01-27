@@ -52,7 +52,6 @@ if (isset($argv[2]) and $argv[2] != '') {
 
     if (strtoupper($argv[2]) == 'WEEKLY') {
       $weekly_ajo = TRUE;
-      $ajotext = "weekly";
     }
     else {
       $paiva_ajo = TRUE;
@@ -73,7 +72,7 @@ if ($kuukausi_ajo) {
   $filepath = "/tmp/history_{$vuosi}{$kuukausi}_input_transactions_{$yhtio}.csv";
 }
 elseif ($weekly_ajo) {
-  $filepath = "/tmp/input_transactions_{$ajotext}_{$yhtio}.csv";
+  $filepath = "/tmp/input_transactions_weekly_{$yhtio}.csv";
 }
 else {
   $filepath = "/tmp/input_transactions_{$yhtio}_{$ajopaiva}.csv";

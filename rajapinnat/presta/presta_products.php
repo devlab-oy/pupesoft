@@ -97,9 +97,16 @@ class PrestaProducts extends PrestaClient {
 
     // Dynamic product parameters
     $product_parameters = $this->_dynamic_fields;
+
     if (isset($product_parameters) and count($product_parameters) > 0) {
       foreach ($product_parameters as $parameter) {
-        $xml->product->$parameter['nimi'] = utf8_encode($product[$parameter['arvo']]);
+        $_key = $parameter['arvo'];
+        $_attribute = $parameter['nimi'];
+        $_value = utf8_encode($product[$_key]);
+
+        $this->logger->log("Poikkeava arvo tuotteelle '{$product['tuoteno']}' product.{$_attribute} -kenttään. Asetetaan {$_key} kentän arvo {$_value}");
+
+        $xml->product->$_attribute = $_value;
       }
     }
 

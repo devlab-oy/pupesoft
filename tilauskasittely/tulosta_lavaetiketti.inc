@@ -216,8 +216,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(100), mm_pt(35), $firstpage, $logoparam);
-    $pdf->draw_text(mm_pt(35), mm_pt(95), $barcode1_text, $firstpage, $norm);
+    $pdf->image_place($image, mm_pt(100), mm_pt(37.5), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(37.5), mm_pt(95), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";

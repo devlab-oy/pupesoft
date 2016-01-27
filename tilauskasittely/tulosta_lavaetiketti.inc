@@ -128,7 +128,7 @@ while ($row = mysql_fetch_assoc($result)) {
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
-  $query = "SELECT tilausrivi.nimitys, tilausrivi.yksikko, tuote.sarjanumeroseuranta
+  $query = "SELECT tilausrivi.nimitys, tilausrivi.yksikko, tuote.sarjanumeroseuranta, tilausrivi.tuoteno
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -159,7 +159,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $query = "SELECT sarjanumero, parasta_ennen
               FROM sarjanumeroseuranta
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND myyntirivitunnus = '{$row['tilausrivi']}'";
+              AND myyntirivitunnus = '{$row['tilausrivi']}'
+              AND tuoteno = '{$rivirow['tuoteno']}'";
     $sarjanumerores = pupe_query($query);
     $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);
 

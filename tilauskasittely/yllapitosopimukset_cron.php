@@ -35,7 +35,8 @@ else {
 
 foreach ($yhtiot as $_yhtio) {
   // hmm.. j‰nn‰‰
-  $kukarow['yhtio']     = $_yhtio;
+  $argv[1]              = $_yhtio;
+  $kukarow['yhtio']     = $argv[1];
   $kieli                = $argv[2];
   $kukarow['kuka']      = "admin";
   $kukarow["kirjoitin"] = "";

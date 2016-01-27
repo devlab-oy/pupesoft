@@ -79,9 +79,11 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
     $query = "SELECT kerayserat.otunnus,
               kerayserat.sscc,
               kerayserat.sscc_ulkoinen,
-              kerayserat.tilausrivi,
+              tilausrivi.tuoteno,
+              GROUP_CONCAT(kerayserat.tilausrivi SEPARATOR \"','\") as tilausrivi,
               SUM(kerayserat.kpl) as kpl
               FROM kerayserat
+              JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio and tilausrivi.tunnus = kerayserat.tilausrivi)
               WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
               AND kerayserat.nro = '{$row['nro']}'
               GROUP BY 1,2,3,4
@@ -121,41 +123,45 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
         $sscc  = $sscc.$loppu;
       }
 
-      // tehdään pdf:n uusi sivu
-      $firstpage = $pdf->new_page("a5");
-
-      $query = "SELECT tilausrivi.nimitys, tilausrivi.yksikko, tuote.sarjanumeroseuranta, tilausrivi.tuoteno
+      $query = "SELECT tilausrivi.nimitys,
+                tilausrivi.yksikko,
+                tuote.sarjanumeroseuranta,
+                tilausrivi.tuoteno,
+                tilausrivi.tunnus
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus = '{$row['tilausrivi']}'";
+                AND tilausrivi.tunnus IN ('{$row['tilausrivi']}')
+                AND tuote.sarjanumeroseuranta = 'E'";
       $rivires = pupe_query($query);
-      $rivirow = mysql_fetch_assoc($rivires);
 
-      $pdf->draw_text(mm_pt(5), mm_pt(200), $laskurow['toim_nimi'], $firstpage, $norm);
+      while ($rivirow = mysql_fetch_assoc($rivires)) {
 
-      if (!empty($laskurow['toim_nimitark'])) {
-        $pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['toim_nimitark'], $firstpage, $norm);
-        $pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['toim_osoite'].", ".$laskurow['toim_postino']." ".strtoupper($laskurow['toim_postitp']), $firstpage, $norm);
-      }
-      else {
-        $pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['toim_osoite'].", ".$laskurow['toim_postino']." ".strtoupper($laskurow['toim_postitp']), $firstpage, $norm);
-      }
+        // tehdään pdf:n uusi sivu
+        $firstpage = $pdf->new_page("a5");
 
-      $pdf->draw_text(mm_pt(5), mm_pt(180), $rivirow['nimitys'], $firstpage, $norm);
-      $pdf->draw_text(mm_pt(5), mm_pt(175), $row['kpl']." ".$rivirow['yksikko'], $firstpage, $norm);
+        $pdf->draw_text(mm_pt(5), mm_pt(200), $laskurow['toim_nimi'], $firstpage, $norm);
 
-      $pdf->draw_rectangle(mm_pt(170), mm_pt(0), mm_pt(170), mm_pt(150), $firstpage, $rectparam);
+        if (!empty($laskurow['toim_nimitark'])) {
+          $pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['toim_nimitark'], $firstpage, $norm);
+          $pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['toim_osoite'].", ".$laskurow['toim_postino']." ".strtoupper($laskurow['toim_postitp']), $firstpage, $norm);
+        }
+        else {
+          $pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['toim_osoite'].", ".$laskurow['toim_postino']." ".strtoupper($laskurow['toim_postitp']), $firstpage, $norm);
+        }
 
-      $pdf->draw_text(mm_pt(5), mm_pt(165), t("SSCC").":", $firstpage, $norm);
-      $pdf->draw_text(mm_pt(5), mm_pt(160), $sscc, $firstpage, $otsik);
+        $pdf->draw_text(mm_pt(5), mm_pt(180), $rivirow['nimitys'], $firstpage, $norm);
+        $pdf->draw_text(mm_pt(5), mm_pt(175), $row['kpl']." ".$rivirow['yksikko'], $firstpage, $norm);
 
-      if ($rivirow['sarjanumeroseuranta'] == 'E') {
+        $pdf->draw_rectangle(mm_pt(170), mm_pt(0), mm_pt(170), mm_pt(150), $firstpage, $rectparam);
+
+        $pdf->draw_text(mm_pt(5), mm_pt(165), t("SSCC").":", $firstpage, $norm);
+        $pdf->draw_text(mm_pt(5), mm_pt(160), $sscc, $firstpage, $otsik);
 
         $query = "SELECT sarjanumero, parasta_ennen
                   FROM sarjanumeroseuranta
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND myyntirivitunnus = '{$row['tilausrivi']}'
+                  AND myyntirivitunnus = '{$row['tunnus']}'
                   AND tuoteno = '{$rivirow['tuoteno']}'";
         $sarjanumerores = pupe_query($query);
         $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);
@@ -165,129 +171,124 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
 
         # VVKKPP muoto
         $parastaennen_code = substr($parasta_ennen, 2, 2).substr($parasta_ennen, 5, 2).substr($parasta_ennen, 8, 2);
-      }
-      else {
-        $eranumero = $row['nro'];
-        $parasta_ennen = '';
-        $parastaennen_code = '';
-      }
 
-      $oikpos = $pdf->strlen("BEST BEFORE (DD.MM.YYYY):", $norm);
-      $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(165), "BEST BEFORE (DD.MM.YYYY):", $firstpage, $norm);
+        $oikpos = $pdf->strlen("BEST BEFORE (DD.MM.YYYY):", $norm);
+        $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(165), "BEST BEFORE (DD.MM.YYYY):", $firstpage, $norm);
 
-      $oikpos = $pdf->strlen(tv1dateconv($parasta_ennen), $otsik);
-      $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(160), tv1dateconv($parasta_ennen), $firstpage, $otsik);
+        $oikpos = $pdf->strlen(tv1dateconv($parasta_ennen), $otsik);
+        $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(160), tv1dateconv($parasta_ennen), $firstpage, $otsik);
 
-      $pdf->draw_text(mm_pt(5), mm_pt(150), "BATCH/LOT:", $firstpage, $norm);
-      $pdf->draw_text(mm_pt(5), mm_pt(145), $eranumero, $firstpage, $otsik);
+        $pdf->draw_text(mm_pt(5), mm_pt(150), "BATCH/LOT:", $firstpage, $norm);
+        $pdf->draw_text(mm_pt(5), mm_pt(145), $eranumero, $firstpage, $otsik);
 
-      $oikpos = $pdf->strlen("CUSTOMER PURCHASE ORDER NUMBER:", $norm);
-      $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(150), "CUSTOMER PURCHASE ORDER NUMBER:", $firstpage, $norm);
+        $oikpos = $pdf->strlen("CUSTOMER PURCHASE ORDER NUMBER:", $norm);
+        $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(150), "CUSTOMER PURCHASE ORDER NUMBER:", $firstpage, $norm);
 
-      $oikpos = $pdf->strlen($laskurow['asiakkaan_tilausnumero'], $otsik);
-      $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(145), $laskurow['asiakkaan_tilausnumero'], $firstpage, $otsik);
+        $oikpos = $pdf->strlen($laskurow['asiakkaan_tilausnumero'], $otsik);
+        $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(145), $laskurow['asiakkaan_tilausnumero'], $firstpage, $otsik);
 
-      $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);
+        $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);
 
-      # AI (10) tarkoittaa eränumeroa
-      $code1_text = "(10) {$eranumero}";
-      $code1 = "10{$eranumero}";
+        # AI (10) tarkoittaa eränumeroa
+        $code1_text = "(10) {$eranumero}";
+        $code1 = "10{$eranumero}";
 
-      if (!empty($parastaennen_code)) {
-        # AI (15) tarkoittaa parasta ennen päivämäärää
-        $code2_text = "(15) {$parastaennen_code}";
-        $code2 = "15{$parastaennen_code}";
-      }
-      else {
-        $code2 = '';
-      }
+        if (!empty($parastaennen_code)) {
+          # AI (15) tarkoittaa parasta ennen päivämäärää
+          $code2_text = "(15) {$parastaennen_code}";
+          $code2 = "15{$parastaennen_code}";
+        }
+        else {
+          $code2 = '';
+        }
 
-      $barcode0 = "400{$laskurow['asiakkaan_tilausnumero']}";
-      $barcode1 = $code1.$code2;
-      $barcode0_text = "(400) {$laskurow['asiakkaan_tilausnumero']}";
-      $barcode1_text = "{$code1_text} {$code2_text}";
-      $barcode2_text = gs1_sscc_barcode_text($expansioncode, $laskurow['tunnus'], $cnt);
+        $barcode0 = "400{$laskurow['asiakkaan_tilausnumero']}";
+        $barcode1 = $code1.$code2;
+        $barcode0_text = "(400) {$laskurow['asiakkaan_tilausnumero']}";
+        $barcode1_text = "{$code1_text} {$code2_text}";
+        $barcode2_text = gs1_sscc_barcode_text($expansioncode, $laskurow['tunnus'], $cnt);
 
-      if (class_exists("Image_Barcode")) {
+        if (class_exists("Image_Barcode")) {
 
-        //luodaan viivakoodiolio
-        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+          //luodaan viivakoodiolio
+          $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-        imagejpeg(Image_Barcode::draw($barcode0, 'code128', 'jpg', false, 3, 170), $nimi);
+          imagejpeg(Image_Barcode::draw($barcode0, 'code128', 'jpg', false, 3, 170), $nimi);
 
-        $fh = fopen($nimi, "r");
-        $data = fread($fh, filesize($nimi));
+          $fh = fopen($nimi, "r");
+          $data = fread($fh, filesize($nimi));
+          fclose($fh);
+
+          $image = $pdf->jfif_embed($data);
+          $image_size = $pdf->get_image_size($image);
+
+          $logoparam['scale'] = 90/282;
+          $pdf->image_place($image, mm_pt(115), mm_pt(5), $firstpage, $logoparam);
+          $pdf->draw_text(mm_pt(5), mm_pt(110), $barcode0_text, $firstpage, $norm);
+          system("rm -f $nimi");
+
+          //luodaan viivakoodiolio
+          $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+
+          imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
+
+          $fh = fopen($nimi, "r");
+          $data = fread($fh, filesize($nimi));
+          fclose($fh);
+
+          $image = $pdf->jfif_embed($data);
+
+          $logoparam['scale'] = 90/282;
+          $pdf->image_place($image, mm_pt(80), mm_pt(5), $firstpage, $logoparam);
+          $pdf->draw_text(mm_pt(5), mm_pt(75), $barcode1_text, $firstpage, $norm);
+          system("rm -f $nimi");
+
+          $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+
+          imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
+
+          $fh = fopen($nimi, "r");
+          $data = fread($fh, filesize($nimi));
+          fclose($fh);
+
+          $image = $pdf->jfif_embed($data);
+
+          $logoparam['scale'] = 90/270;
+
+          $pdf->image_place($image, mm_pt(40), mm_pt(5), $firstpage, $logoparam);
+          $pdf->draw_text(mm_pt(5), mm_pt(35), $barcode2_text, $firstpage, $norm);
+          system("rm -f $nimi");
+        }
+
+        //keksitään uudelle failille joku varmasti uniikki nimi:
+        $pdffilenimi = "/tmp/lavaetiketti-".md5(uniqid(rand(), true)).".pdf";
+
+        //kirjoitetaan pdf faili levylle..
+        $fh = fopen($pdffilenimi, "w");
+        if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui {$pdffilenimi}");
         fclose($fh);
 
-        $image = $pdf->jfif_embed($data);
-        $image_size = $pdf->get_image_size($image);
+        if ($lavaetiketti == 'email') {
+          $liite = $pdffilenimi;
+          $kutsu = "Lavaetiketti";
 
-        $logoparam['scale'] = 90/282;
-        $pdf->image_place($image, mm_pt(115), mm_pt(5), $firstpage, $logoparam);
-        $pdf->draw_text(mm_pt(5), mm_pt(110), $barcode0_text, $firstpage, $norm);
-        system("rm -f $nimi");
+          require "inc/sahkoposti.inc";
+        }
+        elseif ($tee == 'NAYTATILAUS') {
+          //Työnnetään tuo pdf vaan putkeen!
+          echo file_get_contents($pdffilenimi);
+        }
+        elseif ($lavaetiketti != '' and $lavaetiketti != 'edi') {
+          $line = exec("$lavaetiketti $pdffilenimi");
+          echo t("Lavaetiketti tulostuu")."...<br>";
+        }
 
-        //luodaan viivakoodiolio
-        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
+        $pdffilenimi = '';
+        $tilausnumeroita = "";
 
-        imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
-
-        $fh = fopen($nimi, "r");
-        $data = fread($fh, filesize($nimi));
-        fclose($fh);
-
-        $image = $pdf->jfif_embed($data);
-
-        $logoparam['scale'] = 90/282;
-        $pdf->image_place($image, mm_pt(80), mm_pt(5), $firstpage, $logoparam);
-        $pdf->draw_text(mm_pt(5), mm_pt(75), $barcode1_text, $firstpage, $norm);
-        system("rm -f $nimi");
-
-        $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-        imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
-
-        $fh = fopen($nimi, "r");
-        $data = fread($fh, filesize($nimi));
-        fclose($fh);
-
-        $image = $pdf->jfif_embed($data);
-
-        $logoparam['scale'] = 90/270;
-
-        $pdf->image_place($image, mm_pt(40), mm_pt(5), $firstpage, $logoparam);
-        $pdf->draw_text(mm_pt(5), mm_pt(35), $barcode2_text, $firstpage, $norm);
-        system("rm -f $nimi");
+        $cnt++;
+        exit;
       }
-
-      //keksitään uudelle failille joku varmasti uniikki nimi:
-      $pdffilenimi = "/tmp/lavaetiketti-".md5(uniqid(rand(), true)).".pdf";
-
-      //kirjoitetaan pdf faili levylle..
-      $fh = fopen($pdffilenimi, "w");
-      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui {$pdffilenimi}");
-      fclose($fh);
-
-      if ($lavaetiketti == 'email') {
-        $liite = $pdffilenimi;
-        $kutsu = "Lavaetiketti";
-
-        require "inc/sahkoposti.inc";
-      }
-      elseif ($tee == 'NAYTATILAUS') {
-        //Työnnetään tuo pdf vaan putkeen!
-        echo file_get_contents($pdffilenimi);
-      }
-      elseif ($lavaetiketti != '' and $lavaetiketti != 'edi') {
-        $line = exec("$lavaetiketti $pdffilenimi");
-        echo t("Lavaetiketti tulostuu")."...<br>";
-      }
-
-      $pdffilenimi = '';
-      $tilausnumeroita = "";
-
-      $cnt++;
-      exit;
     }
   }
 }

@@ -231,8 +231,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $image = $pdf->jfif_embed($data);
 
     $logoparam['scale'] = array(
-      'x' => mm_pt(165),
-      'y' => mm_pt(200),
+      'x' => 0.5,
+      'y' => 0.5,
     );
 
     $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);

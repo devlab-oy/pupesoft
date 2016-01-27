@@ -226,7 +226,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $image_size = $pdf->get_image_size($image);
 
     $logoparam['scale'] = 90/282;
-    $pdf->image_place($image, mm_pt(115), mm_pt(39), $firstpage, $logoparam);
+    $pdf->image_place($image, mm_pt(115), mm_pt(75)-((($image_size['width'] / 1.3333333333) / 2) * $logoparam['scale']), $firstpage, $logoparam);
     $pdf->draw_text(mm_pt(39), mm_pt(110), $barcode0_text, $firstpage, $norm);
     system("rm -f $nimi");
 

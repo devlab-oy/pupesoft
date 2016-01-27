@@ -30,6 +30,7 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
 $kuukausi_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
@@ -48,7 +49,14 @@ if (isset($argv[2]) and $argv[2] != '') {
         $ajopaiva = $argv[2];
       }
     }
-    $paiva_ajo = TRUE;
+
+    if (strtoupper($argv[2]) == 'WEEKLY') {
+      $weekly_ajo = TRUE;
+      $ajotext = "weekly";
+    }
+    else {
+      $paiva_ajo = TRUE;
+    }
   }
 }
 
@@ -64,8 +72,11 @@ $tuoterajaus = rakenna_relex_tuote_parametrit();
 if ($kuukausi_ajo) {
   $filepath = "/tmp/history_{$vuosi}{$kuukausi}_input_transactions_{$yhtio}.csv";
 }
+elseif ($weekly_ajo) {
+  $filepath = "/tmp/input_transactions_{$ajotext}_{$yhtio}.csv";
+}
 else {
-  $filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";
+  $filepath = "/tmp/input_transactions_{$yhtio}_{$ajopaiva}.csv";
 }
 
 if (!$fp = fopen($filepath, 'w+')) {
@@ -333,7 +344,7 @@ foreach ($relex_transactions as $row) {
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;

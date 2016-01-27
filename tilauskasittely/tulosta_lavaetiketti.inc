@@ -230,10 +230,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $image = $pdf->jfif_embed($data);
 
-    $logoparam['scale'] = array(
-      'x' => 0.5,
-      'y' => 0.5,
-    );
+    $logoparam['scale'] = 90/270;
 
     $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);
     $pdf->draw_text(mm_pt(50), mm_pt(50), $barcode2_text, $firstpage, $norm);

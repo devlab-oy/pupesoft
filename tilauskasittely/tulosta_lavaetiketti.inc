@@ -187,7 +187,7 @@ while ($row = mysql_fetch_assoc($result)) {
   $oikpos = $pdf->strlen("CUSTOMER PURCHASE ORDER NUMBER:", $norm);
   $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(150), "CUSTOMER PURCHASE ORDER NUMBER:", $firstpage, $norm);
 
-  $oikpos = $pdf->strlen(tv1dateconv($laskurow['asiakkaan_tilausnumero']), $otsik);
+  $oikpos = $pdf->strlen($laskurow['asiakkaan_tilausnumero'], $otsik);
   $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(145), $laskurow['asiakkaan_tilausnumero'], $firstpage, $otsik);
 
   $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);

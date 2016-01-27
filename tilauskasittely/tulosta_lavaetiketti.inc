@@ -187,12 +187,12 @@ while ($row = mysql_fetch_assoc($result)) {
   $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);
 
   # AI (10) tarkoittaa eränumeroa
-  $code1_clean = "(10) {$eranumero}";
+  $code1_text = "(10) {$eranumero}";
   $code1 = "10{$eranumero}";
 
   if (!empty($parastaennen_code)) {
     # AI (15) tarkoittaa parasta ennen päivämäärää
-    $code2_clean = "(15) {$parastaennen_code}";
+    $code2_text = "(15) {$parastaennen_code}";
     $code2 = "15{$parastaennen_code}";
   }
   else {
@@ -200,12 +200,13 @@ while ($row = mysql_fetch_assoc($result)) {
   }
 
   $barcode1 = $code1.$code2;
+  $barcode1_text = "{$code1_text} {$code2_text}";
 
   if (class_exists("Image_Barcode")) {
     //luodaan viivakoodiolio kuljetusohjeelle = postino
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-    imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170, false), $nimi);
+    imagejpeg(Image_Barcode::draw($barcode1, 'code128', 'jpg', false, 3, 170), $nimi);
 
     $fh = fopen($nimi, "r");
     $data = fread($fh, filesize($nimi));
@@ -215,11 +216,12 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = 90/282;
     $pdf->image_place($image, mm_pt(100), mm_pt(40), $firstpage, $logoparam);
+    $pdf->draw_text(mm_pt(40), mm_pt(95), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
 
     $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-    imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170, false), $nimi);
+    imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
 
     $fh = fopen($nimi, "r");
     $data = fread($fh, filesize($nimi));

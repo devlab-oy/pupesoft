@@ -184,6 +184,10 @@ while ($row = mysql_fetch_assoc($result)) {
   $pdf->draw_text(mm_pt(5), mm_pt(150), "BATCH/LOT:", $firstpage, $norm);
   $pdf->draw_text(mm_pt(5), mm_pt(145), $eranumero, $firstpage, $otsik);
 
+  $oikpos = $pdf->strlen("CUSTOMER PURCHASE ORDER NUMBER:", $norm);
+  $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(150), "CUSTOMER PURCHASE ORDER NUMBER:", $firstpage, $norm);
+  $pdf->draw_text(mm_pt(144)-$oikpos, mm_pt(145), $laskurow['asiakkaan_tilausnumero'], $firstpage, $otsik);
+
   $pdf->draw_rectangle(mm_pt(140), mm_pt(0), mm_pt(140), mm_pt(150), $firstpage, $rectparam);
 
   # AI (10) tarkoittaa eränumeroa

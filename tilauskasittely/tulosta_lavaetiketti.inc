@@ -1,5 +1,8 @@
 <?php
 
+# Oletetaan että meillä on $laskurow
+# Keräyserät painon perusteella tai keräyserä painon perusteella asiakkaan takaa kytketty päälle
+
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
   if (@include_once "viivakoodi/Barcode.php");
@@ -267,7 +270,7 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
         if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui {$pdffilenimi}");
         fclose($fh);
 
-        if ($lavaetiketti == 'email') {
+        if ($komento == 'email') {
           $liite = $pdffilenimi;
           $kutsu = "Lavaetiketti";
 
@@ -277,8 +280,8 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
           //Työnnetään tuo pdf vaan putkeen!
           echo file_get_contents($pdffilenimi);
         }
-        elseif ($lavaetiketti != '' and $lavaetiketti != 'edi') {
-          $line = exec("$lavaetiketti $pdffilenimi");
+        elseif ($komento != '' and $komento != 'edi') {
+          $line = exec("$komento $pdffilenimi");
           echo t("Lavaetiketti tulostuu")."...<br>";
         }
 
@@ -286,7 +289,6 @@ if ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A') {
         $tilausnumeroita = "";
 
         $cnt++;
-        exit;
       }
     }
   }

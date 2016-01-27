@@ -215,11 +215,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $image = $pdf->jfif_embed($data);
 
-    $logoparam['scale'] = array(
-      'x' => mm_pt(165),
-      'y' => mm_pt(200),
-    );
-
+    $logoparam['scale'] = 90/282;
     $pdf->image_place($image, mm_pt(100), mm_pt(40), $firstpage, $logoparam);
     $pdf->draw_text(mm_pt(50), mm_pt(95), $barcode1_text, $firstpage, $norm);
     system("rm -f $nimi");
@@ -236,7 +232,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     $logoparam['scale'] = array(
       'x' => mm_pt(165),
-      'y' => mm_pt(200),
+      'y' => mm_pt(400),
     );
 
     $pdf->image_place($image, mm_pt(55), mm_pt(30), $firstpage, $logoparam);

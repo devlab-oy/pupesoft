@@ -163,7 +163,7 @@ if (array_key_exists('asiakasryhmat', $synkronoi)) {
 
 if (array_key_exists('asiakkaat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
-  $asiakkaat = hae_asiakkaat1();
+  $asiakkaat = presta_hae_asiakkaat();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);

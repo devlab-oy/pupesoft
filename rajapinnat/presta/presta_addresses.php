@@ -34,15 +34,15 @@ class PrestaAddresses extends PrestaClient {
     $finland = $presta_country->find_findland();
 
     // Mandatory fields
-    $_osoite = empty($address['osoite']) ? "-" : $address['osoite'];
-    $_postitp = empty($address['postitp']) ? "-" : $address['postitp'];
+    $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);
+    $_postitp = empty($address['postitp']) ? "-" : utf8_encode($address['postitp']);
     $_puh = empty($address['puh']) ? "-" : $address['puh'];
 
     $xml->address->id_country = $finland['id'];
     $xml->address->id_customer = $address['presta_customer_id'];
     $xml->address->alias = 'Home';
-    $xml->address->lastname = $address['sukunimi'];
-    $xml->address->firstname = $address['etunimi'];
+    $xml->address->lastname = utf8_encode($address['nimi']);
+    $xml->address->firstname = '-';
     $xml->address->address1 = $_osoite;
     $xml->address->postcode = $address['postino'];
     $xml->address->city = $_postitp;

@@ -65,29 +65,36 @@ function hae_asiakasryhmat() {
 function presta_hae_asiakashinnat() {
   global $kukarow, $yhtiorow;
 
-  //Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa ett‰ sama asiakashintarivi
-  //voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. N‰in pit‰‰kin koska yhteyshenkilo
-  //on prestassa asiakas.
-  $query = "SELECT asiakashinta.*,
-            asiakashinta.hinta customer_price,
+  // Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa ett‰ sama asiakashintarivi
+  // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. N‰in pit‰‰kin koska yhteyshenkilo
+  // on prestassa asiakas.
+  // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eik‰ prestan asiakas/ryhm‰tunnusta
+  $query = "SELECT
+            asiakashinta.tuoteno,
+            asiakashinta.alkupvm,
+            asiakashinta.loppupvm,
+            asiakashinta.minkpl,
+            asiakashinta.hinta AS customer_price,
             (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
-            JOIN tuote
-            ON ( tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno              = asiakashinta.tuoteno )
-            LEFT JOIN avainsana
-            ON ( avainsana.yhtio = asiakashinta.yhtio
-              AND avainsana.selite           = asiakashinta.asiakas_ryhma
-              AND avainsana.laji             = 'ASIAKASRYHMA' )
-            LEFT JOIN yhteyshenkilo
-            ON ( yhteyshenkilo.yhtio = asiakashinta.yhtio
-              AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas )
-            WHERE asiakashinta.yhtio         = '{$kukarow['yhtio']}'";
+            INNER JOIN tuote ON (tuote.yhtio = asiakashinta.yhtio
+              AND tuote.tuoteno = asiakashinta.tuoteno)
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
+              AND avainsana.selite = asiakashinta.asiakas_ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
+            LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
+              AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
+            WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
+            AND asiakashinta.tuoteno != ''
+            AND asiakashinta.hinta != 0
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
+            ORDER BY asiakashinta.tuoteno";
   $result = pupe_query($query);
 
   $asiakashinnat = array();
+
   while ($asiakashinta = mysql_fetch_assoc($result)) {
     $asiakashinnat[] = $asiakashinta;
   }

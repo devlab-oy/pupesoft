@@ -1,26 +1,24 @@
 <?php
 
-function hae_asiakkaat1() {
+function presta_hae_asiakkaat() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;
 
   $query = "SELECT yhteyshenkilo.*,
             avainsana.selitetark_5 AS presta_customergroup_id
             FROM yhteyshenkilo
-            JOIN asiakas
-            ON ( asiakas.yhtio = yhteyshenkilo.yhtio
-              AND asiakas.tunnus      = yhteyshenkilo.liitostunnus )
+            INNER JOIN asiakas
+            ON (asiakas.yhtio = yhteyshenkilo.yhtio
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus )
             LEFT JOIN avainsana
-            ON ( avainsana.yhtio = asiakas.yhtio
-              AND avainsana.selite    = asiakas.ryhma
-              AND avainsana.laji      = 'ASIAKASRYHMA' )
+            ON (avainsana.yhtio = asiakas.yhtio
+              AND avainsana.selite = asiakas.ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
             WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-            AND yhteyshenkilo.rooli   = 'Presta'";
+            AND yhteyshenkilo.rooli = 'Presta'";
   $result = pupe_query($query);
 
   $asiakkaat = array();
   while ($asiakas = mysql_fetch_assoc($result)) {
-    $asiakas['etunimi'] = '-';
-    $asiakas['sukunimi'] = preg_replace('/[^a-zA-Z]/', '', $asiakas['nimi']);
     $asiakkaat[] = $asiakas;
   }
 
@@ -153,7 +151,7 @@ function hae_tuotteet() {
   // Pyöräytetään muuttuneet tuotteet läpi
   while ($row = mysql_fetch_array($res)) {
     // Jos yhtiön hinnat eivät sisällä alv:tä
-    if ($yhtiorow["alv_kasittely"] != "" and $verkkokauppatyyppi != 'magento') {
+    if ($yhtiorow["alv_kasittely"] != "") {
       $myyntihinta = hintapyoristys($row["myyntihinta"] * (1 + ($row["alv"] / 100)));
       $myyntihinta_veroton = $row["myyntihinta"];
 
@@ -167,6 +165,12 @@ function hae_tuotteet() {
       $myymalahinta = $row["myymalahinta"];
       $myymalahinta_veroton = hintapyoristys($row["myymalahinta"] / (1 + ($row["alv"] / 100)));
     }
+
+    // erikoistapaukset, jos hintoja halutaan siirtää vasten pupen alv_käsittelyä
+    $myyntihinta_verot_pois    = hintapyoristys($row["myyntihinta"]  / (1 + ($row["alv"] / 100)));
+    $myyntihinta_verot_mukaan  = hintapyoristys($row["myyntihinta"]  * (1 + ($row["alv"] / 100)));
+    $myymalahinta_verot_pois   = hintapyoristys($row["myymalahinta"] / (1 + ($row["alv"] / 100)));
+    $myymalahinta_verot_mukaan = hintapyoristys($row["myymalahinta"] * (1 + ($row["alv"] / 100)));
 
     $asiakashinnat = array();
 
@@ -257,35 +261,39 @@ function hae_tuotteet() {
     list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
     $dnstuote[] = array(
-      'tuoteno'              => $row["tuoteno"],
-      'nimi'                 => $row["nimitys"],
-      'kuvaus'               => $row["kuvaus"],
-      'lyhytkuvaus'          => $row["lyhytkuvaus"],
-      'yksikko'              => $row["yksikko"],
-      'tuotemassa'           => $row["tuotemassa"],
-      'tuotemerkki'          => $row["tuotemerkki"],
-      'myyntihinta'          => $myyntihinta,
-      'myyntihinta_veroton'  => $myyntihinta_veroton,
-      'myymalahinta'         => $myymalahinta,
-      'myymalahinta_veroton' => $myymalahinta_veroton,
-      'kuluprosentti'        => $row['kuluprosentti'],
-      'ean'                  => $row["eankoodi"],
-      'osasto'               => $row["osasto"],
-      'try'                  => $row["try"],
-      'try_nimi'             => $row["try_nimi"],
-      'alv'                  => $row["alv"],
-      'nakyvyys'             => $row["nakyvyys"],
-      'nimi_swe'             => $row["nimi_swe"],
-      'nimi_eng'             => $row["nimi_eng"],
-      'campaign_code'        => $row["campaign_code"],
-      'target'               => $row["target"],
-      'onsale'               => $row["onsale"],
-      'tunnus'               => $row['tunnus'],
-      'hinnastohinta'        => $hinnastoresult['hinta'],
-      'asiakashinnat'        => $asiakashinnat,
-      'tuotepuun_tunnukset'  => $tuotepuun_tunnukset,
-      'tuotteen_parametrit'  => $tuotteen_parametrit,
-      'saldo'                => $myytavissa,
+      'tuoteno'                   => $row["tuoteno"],
+      'nimi'                      => $row["nimitys"],
+      'kuvaus'                    => $row["kuvaus"],
+      'lyhytkuvaus'               => $row["lyhytkuvaus"],
+      'yksikko'                   => $row["yksikko"],
+      'tuotemassa'                => $row["tuotemassa"],
+      'tuotemerkki'               => $row["tuotemerkki"],
+      'myyntihinta'               => $myyntihinta,
+      'myyntihinta_veroton'       => $myyntihinta_veroton,
+      'myyntihinta_verot_pois'    => $myyntihinta_verot_pois,
+      'myyntihinta_verot_mukaan'  => $myyntihinta_verot_mukaan,
+      'myymalahinta'              => $myymalahinta,
+      'myymalahinta_veroton'      => $myymalahinta_veroton,
+      'myymalahinta_verot_pois'   => $myymalahinta_verot_pois,
+      'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,
+      'kuluprosentti'             => $row['kuluprosentti'],
+      'ean'                       => $row["eankoodi"],
+      'osasto'                    => $row["osasto"],
+      'try'                       => $row["try"],
+      'try_nimi'                  => $row["try_nimi"],
+      'alv'                       => $row["alv"],
+      'nakyvyys'                  => $row["nakyvyys"],
+      'nimi_swe'                  => $row["nimi_swe"],
+      'nimi_eng'                  => $row["nimi_eng"],
+      'campaign_code'             => $row["campaign_code"],
+      'target'                    => $row["target"],
+      'onsale'                    => $row["onsale"],
+      'tunnus'                    => $row['tunnus'],
+      'hinnastohinta'             => $hinnastoresult['hinta'],
+      'asiakashinnat'             => $asiakashinnat,
+      'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
+      'tuotteen_parametrit'       => $tuotteen_parametrit,
+      'saldo'                     => $myytavissa,
     );
 
     if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {

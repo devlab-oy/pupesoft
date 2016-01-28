@@ -9,6 +9,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
   private $shop;
   private $product_ids;
+  private $all_prices = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -41,6 +42,8 @@ class PrestaSpecificPrices extends PrestaClient {
     if (!empty($specific_price['presta_customergroup_id'])) {
       $xml->specific_price->id_group = $specific_price['presta_customergroup_id'];
     }
+
+    $xml->specific_price->id_customer = 0;
 
     if (!empty($specific_price['presta_customer_id'])) {
       $xml->specific_price->id_customer = $specific_price['presta_customer_id'];
@@ -77,7 +80,6 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   public function sync_prices($prices) {
-    $this->delete_all();
     $this->logger->log('---------Start specific price sync---------');
 
     try {
@@ -89,21 +91,34 @@ class PrestaSpecificPrices extends PrestaClient {
       $presta_product = new PrestaProducts($this->url(), $this->api_key());
       $this->product_ids = $presta_product->all_skus();
 
+      $total = count($prices);
+      $current = 0;
+
       foreach ($prices as $price) {
+        $current++;
+        $this->logger->log("[{$current}/$total]");
+
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
           $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
           continue;
         }
 
-        if (empty($price['presta_customer_id'])) {
-          $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus puuttuu");
-          continue;
-        }
-
         try {
           $price['presta_product_id'] = $this->find_presta_product_id($price['tuoteno']);
+
+          $this->delete_special_prices_for_product($price['presta_product_id']);
+
+          if (empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+            $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus ja asiakasryhmä puuttuu");
+            continue;
+          }
+
           $this->create($price);
+          $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
+            ." specific_price {$price['customer_price']}"
+            ." asiakastunnus '{$price['presta_customer_id']}'"
+            ." asiakasryhma '{$price['presta_customergroup_id']}'");
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
@@ -131,6 +146,7 @@ class PrestaSpecificPrices extends PrestaClient {
    */
   private function find_presta_product_id($tuoteno) {
     $presta_product_id = array_search($tuoteno, $this->product_ids);
+
     if ($presta_product_id === false) {
       $msg = "Tuotetta {$tuoteno} ei löytynyt";
       $this->logger->log($msg);
@@ -138,5 +154,20 @@ class PrestaSpecificPrices extends PrestaClient {
     }
 
     return (int) $presta_product_id;
+  }
+
+  private function delete_special_prices_for_product($id) {
+    if ($this->all_prices === null) {
+      $this->logger->log('Haetaan kaikki Prestan alennukset');
+      $this->all_prices = $this->all(array('id', 'id_product'));
+    }
+
+    foreach ($this->all_prices as $price) {
+      if ($price['id_product'] == $id) {
+        $this->delete($price['id']);
+      }
+    }
+
+    return true;
   }
 }

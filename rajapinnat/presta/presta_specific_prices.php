@@ -10,6 +10,7 @@ class PrestaSpecificPrices extends PrestaClient {
   private $shop;
   private $product_ids;
   private $all_prices = null;
+  private $already_removed_product = array();
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -157,6 +158,17 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   private function delete_special_prices_for_product($id) {
+    $id = (int) $id;
+
+    if ($id <= 0) {
+      return false;
+    }
+
+    // make sure to remove old prices only once..
+    if (array_search($id, $this->already_removed_product) !== false) {
+      return true;
+    }
+
     if ($this->all_prices === null) {
       $this->logger->log('Haetaan kaikki Prestan alennukset');
       $this->all_prices = $this->all(array('id', 'id_product'));
@@ -164,9 +176,17 @@ class PrestaSpecificPrices extends PrestaClient {
 
     foreach ($this->all_prices as $price) {
       if ($price['id_product'] == $id) {
-        $this->delete($price['id']);
+        try {
+          $price_id = $price['id'];
+          $this->delete($price_id);
+        }
+        catch (Exception $e) {
+          $this->logger->log("Tuotteen {$id} hinnan {$price_id} poisto epäonnistui!");
+        }
       }
     }
+
+    $this->already_removed_product[] = $id;
 
     return true;
   }

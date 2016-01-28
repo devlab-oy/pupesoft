@@ -1040,8 +1040,8 @@ if (!function_exists("verkkolasku_in")) {
 
       $summa = round($summa, 2);
 
-      if ($summa == 0) {
-        $return .= "Laskulta puuttuu summa!\n";
+      if ($summa == 0 and trim($laskun_numero) == '') {
+        $return .= "Laskulta puuttuu summa ja laskunumero!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
         return $return;
       }

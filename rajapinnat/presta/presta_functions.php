@@ -69,7 +69,11 @@ function presta_hae_asiakashinnat() {
   // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. N‰in pit‰‰kin koska yhteyshenkilo
   // on prestassa asiakas.
   // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eik‰ prestan asiakas/ryhm‰tunnusta
-  $query = "SELECT asiakashinta.*,
+  $query = "SELECT
+            asiakashinta.tuoteno,
+            asiakashinta.alkupvm,
+            asiakashinta.loppupvm,
+            asiakashinta.minkpl,
             asiakashinta.hinta AS customer_price,
             (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
             avainsana.selitetark_5 AS presta_customergroup_id,

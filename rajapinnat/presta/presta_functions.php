@@ -89,7 +89,8 @@ function presta_hae_asiakashinnat() {
             WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
             AND asiakashinta.tuoteno != ''
             AND asiakashinta.hinta != 0
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
+            ORDER BY asiakashinta.tuoteno";
   $result = pupe_query($query);
 
   $asiakashinnat = array();

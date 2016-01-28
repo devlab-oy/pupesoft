@@ -106,7 +106,7 @@ if ($request['action'] == 'sync') {
   }
 
   if ($ok and in_array('asiakkaat', $synkronoi)) {
-    $asiakkaat = hae_asiakkaat1();
+    $asiakkaat = presta_hae_asiakkaat();
     $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
     $ok = $presta_customer->sync_customers($asiakkaat);
   }

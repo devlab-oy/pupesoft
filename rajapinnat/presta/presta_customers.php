@@ -22,7 +22,6 @@ class PrestaCustomers extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
-
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -30,13 +29,11 @@ class PrestaCustomers extends PrestaClient {
       $xml = $existing_customer;
     }
 
-    $xml->customer->firstname = $customer['etunimi'];
-    $xml->customer->lastname = $customer['sukunimi'];
-    //Email is mandatory
-    $xml->customer->email = $customer['email'];
-    if (empty($customer['email'])) {
-      $xml->customer->email = 'test@example.com';
-    }
+    $_email = empty($customer['email']) ? 'test@example.com' : $customer['email'];
+
+    $xml->customer->firstname = "-";
+    $xml->customer->lastname = utf8_encode($customer['nimi']);
+    $xml->customer->email = $_email;
 
     if (!empty($customer['salasanan_resetointi'])) {
       $xml->customer->passwd = $customer['salasanan_resetointi'];
@@ -45,9 +42,11 @@ class PrestaCustomers extends PrestaClient {
 
     $xml->customer->active = 1;
 
-    if (!empty($customer['presta_customergroup_id'])) {
-      $xml->customer->id_default_group = $customer['presta_customergroup_id'];
-      $xml->customer->associations->groups->groups->id = $customer['presta_customergroup_id'];
+    $group_id = $customer['presta_customergroup_id'];
+
+    if (!empty($group_id)) {
+      $xml->customer->id_default_group = $group_id;
+      $xml->customer->associations->groups->groups->id = $group_id;
     }
 
     return $xml;
@@ -64,8 +63,9 @@ class PrestaCustomers extends PrestaClient {
       foreach ($customers as $customer) {
         try {
           $presta_address = new PrestaAddresses($this->url(), $this->api_key());
-          if (in_array($customer['ulkoinen_asiakasnumero'], $existing_customers)) {
-            $id = $customer['ulkoinen_asiakasnumero'];
+          $id = $customer['ulkoinen_asiakasnumero'];
+
+          if (in_array($id, $existing_customers)) {
             $this->update($id, $customer);
 
             $customer['presta_customer_id'] = $id;
@@ -102,6 +102,8 @@ class PrestaCustomers extends PrestaClient {
     if (empty($presta_id) or empty($pupesoft_id) or empty($yhtio)) {
       return false;
     }
+
+    $this->logger->log("Päivitetään {$yhtio} Pupesoft yhteyshenkilölle {$pupesoft_id} Presta id {$presta_id}");
 
     $query = "UPDATE yhteyshenkilo
               SET ulkoinen_asiakasnumero = {$presta_id}

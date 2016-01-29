@@ -2120,21 +2120,13 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     sahkoinen_lahete($laskurow);
   }
 
-  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" and strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-
-    if (count($komento) == 0) {
-      echo "<font class='head'>".t("Reklamaatio").":</font><hr><br>";
-
-      $otunnus = $tilausnumero;
-      $tulostimet[0] = "Tilausvahvistus";
-      require "inc/valitse_tulostin.inc";
-    }
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+    and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
 
     $params_tilausvahvistus = array(
       'tee'            => $tee,
       'toim'           => $toim,
       'kieli'          => $kieli,
-      'komento'        => $komento,
       'laskurow'       => $laskurow,
       'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
       'extranet_tilausvahvistus' => $extranet_tilausvahvistus,

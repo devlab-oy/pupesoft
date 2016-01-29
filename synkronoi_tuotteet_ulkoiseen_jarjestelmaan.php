@@ -38,13 +38,20 @@ else {
     exit;
   }
 
+  if ($ulkoinen_jarjestelma == "P") {
+    $wherelisa = "AND tuote.eankoodi  != ''";
+  }
+  else {
+    $wherelisa = "";
+  }
+
   $query = "SELECT tuote.*, ta.selite AS synkronointi
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
             AND tuote.status    != 'P'
             AND tuote.ei_saldoa  = ''
-            AND tuote.eankoodi  != ''
+            {$wherelisa}
             AND ta.selite IS NULL";
   $res = pupe_query($query);
 

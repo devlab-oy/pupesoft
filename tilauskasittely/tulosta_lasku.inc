@@ -806,6 +806,7 @@ if (!function_exists('rivi_lasku')) {
       $row["rivihinta"] = 0;
       $row["rivihinta_valuutassa"] = 0;
       $row["rivihinta_verollinen"] = 0;
+      $row["rivihinta_valuutassa_verollinen"] = 0;
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         $row["ale{$alepostfix}"] = 0;
@@ -1315,9 +1316,8 @@ if (!function_exists('rivi_original')) {
 
     // Verollinen rivihinta
     if ($_pii_verolli) {
-      //Lasketaan saman kaavan mukaan kuin laskutus.inc:ssä, eli pyöristetään kaikki kerralla lopuksi!
       if ($kurssi != 1) {
-        $verollrivi = $row["rivihinta_valuutassa"] * (1 + ($row["alv"] / 100));
+        $verollrivi = $row["rivihinta_valuutassa_verollinen"];
       }
       else {
         $verollrivi = $row["rivihinta_verollinen"];
@@ -1409,11 +1409,11 @@ if (!function_exists('rivi_original')) {
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa_verollinen"], 0, $laskurow['_loppunollat']);
     }
     else {
       $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_verollinen"], 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1542,11 +1542,11 @@ if (!function_exists('rivi_plain')) {
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa_verollinen"], 0, $laskurow['_loppunollat']);
     }
     else {
       $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_verollinen"], 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1682,11 +1682,11 @@ if (!function_exists('rivi_plain_2')) {
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa_verollinen"], 0, $laskurow['_loppunollat']);
     }
     else {
       $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_verollinen"], 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1856,11 +1856,11 @@ if (!function_exists('rivi_viro')) {
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta_valuutassa"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_valuutassa_verollinen"], 0, $laskurow['_loppunollat']);
     }
     else {
       $arvo += hintapyoristys($row["rivihinta"], 0, $laskurow['_loppunollat']);
-      $summa += hintapyoristys($row["rivihinta"]*(1+($laskalv/100)), 0, $laskurow['_loppunollat']);
+      $summa += hintapyoristys($row["rivihinta_verollinen"], 0, $laskurow['_loppunollat']);
     }
 
     return array($thispage, $kala, $summa, $arvo);
@@ -1905,18 +1905,9 @@ if (!function_exists('rivi_perhe')) {
         // lasketaan isätuotteen riville lapsien hinnat yhteen
         $query = "SELECT
                   $lisa
-                  round(sum(tilausrivi.hinta
-                      * if ('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                        (1 + tilausrivi.alv / 100),
-                        1)
-                      * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}),
-                    $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]})
-                    / if ('$yhtiorow[alv_kasittely]' = '' AND tilausrivi.alv < 500,
-                      (1 + tilausrivi.alv / 100),
-                      1)
-                    * (tilausrivi.varattu + tilausrivi.kpl)
-                    * {$query_ale_lisa}) rivihinta_valuutassa
+                  round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
                   FROM tilausrivi
                   WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                   AND tilausrivi.uusiotunnus = '$row[uusiotunnus]'
@@ -1929,6 +1920,7 @@ if (!function_exists('rivi_perhe')) {
         $row["rivihinta"] = $perherow["rivihinta"];
         $row["rivihinta_verollinen"] = $perherow["rivihinta_verollinen"];
         $row["rivihinta_valuutassa"] = $perherow["rivihinta_valuutassa"];
+        $row["rivihinta_valuutassa_verollinen"] = $perherow["rivihinta_valuutassa_verollinen"];
 
         // Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1946,7 +1938,9 @@ if (!function_exists('rivi_perhe')) {
           $row["rivihinta"] = 'null';
           $row["rivihinta_verollinen"] = 'null';
           $row["rivihinta_valuutassa"] = 'null';
+          $row["rivihinta_valuutassa_verollinen"] = 'null';
           $row['toimitettuaika'] = "";
+
           for ($alepostfix = 0; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
             $row['ale'.$alepostfix] = '';
           }
@@ -3004,12 +2998,12 @@ if (!function_exists("tulosta_lasku")) {
     if ($toim == 'PROFORMA') {
       $laskurow["tapvm"] = date("Y-m-d");
 
-      $lisa = "   sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta,
-            sum(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
+      $lisa = " sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta,
+                sum(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
     }
     else {
-      $lisa = "  sum(tilausrivi.rivihinta) rivihinta,
-            sum(tilausrivi.kpl) kpl,";
+      $lisa = " sum(tilausrivi.rivihinta) rivihinta,
+                sum(tilausrivi.kpl) kpl,";
     }
 
     $sivu = 1;
@@ -3072,7 +3066,8 @@ if (!function_exists("tulosta_lasku")) {
               min(tilausrivi.laadittu) laadittu,
               sum(tilausrivi.tilkpl) tilkpl,
               sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-              sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+              sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+              sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen,
               group_concat(tilausrivi.tunnus) rivitunnukset,
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
@@ -3118,7 +3113,8 @@ if (!function_exists("tulosta_lasku")) {
                   tuoteperhe.hintakerroin hinta,
                   round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
                   round(tuoteperhe.hintakerroin * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa
+                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa,
+                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa_verollinen
                   FROM tuoteperhe
                   JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
                   WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
@@ -3141,6 +3137,7 @@ if (!function_exists("tulosta_lasku")) {
             $lisarow["rivihinta"] = $tuoteperhe_row["rivihinta"];
             $lisarow["rivihinta_verollinen"] = $tuoteperhe_row["rivihinta_verollinen"];
             $lisarow["rivihinta_valuutassa"] = $tuoteperhe_row["rivihinta_valuutassa"];
+            $lisarow["rivihinta_valuutassa_verollinen"] = $tuoteperhe_row["rivihinta_valuutassa_verollinen"];
 
             $lisarow["tilkpl"] = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
             $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];

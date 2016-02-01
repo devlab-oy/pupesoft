@@ -616,11 +616,11 @@ if (!function_exists('finvoice_rivi')) {
     global $err_finvoice, $yhtiorow, $kukarow;
 
     if ($laskutyyppi == 10 or $laskutyyppi == 12) {
-      $tilrow['hinta']         = 0;
-      $tilrow['rivihinta']       = 0;
+      $tilrow['hinta'] = 0;
+      $tilrow['rivihinta'] = 0;
       $tilrow["rivihinta_verollinen"] = 0;
-      $vatamount             = 0;
-      $alennukset_yhteensa       = 0;
+      $vatamount = 0;
+      $alennukset_yhteensa = 0;
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         $tilrow["ale{$alepostfix}"] = 0;

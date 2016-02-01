@@ -171,10 +171,10 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 }
 
 if (array_key_exists('asiakashinnat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat.\n";
-  $hinnat = presta_hae_asiakashinnat();
+  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat ja alennukset.\n";
+  $hinnat = presta_specific_prices();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat.\n";
+  echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat ja alennukset.\n";
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
   $presta_prices->sync_prices($hinnat);
 }

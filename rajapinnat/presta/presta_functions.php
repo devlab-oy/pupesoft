@@ -62,20 +62,24 @@ function hae_asiakasryhmat() {
   return $ryhmat;
 }
 
-function presta_hae_asiakashinnat() {
+function presta_specific_prices() {
   global $kukarow, $yhtiorow;
+
+  $specific_prices = array();
 
   // Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
   // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. Näin pitääkin koska yhteyshenkilo
   // on prestassa asiakas.
+
+  // Laitetaan hinnat ja alennukset samaan arrayseen, koska prestassa niitä käsitellään samalla tavalla
+
   // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eikä prestan asiakas/ryhmätunnusta
   $query = "SELECT
             asiakashinta.tuoteno,
             asiakashinta.alkupvm,
             asiakashinta.loppupvm,
             asiakashinta.minkpl,
-            asiakashinta.hinta AS customer_price,
-            (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
+            asiakashinta.hinta,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
@@ -88,18 +92,43 @@ function presta_hae_asiakashinnat() {
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
             WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
             AND asiakashinta.tuoteno != ''
-            AND asiakashinta.hinta != 0
+            AND asiakashinta.hinta > 0
             AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
             ORDER BY asiakashinta.tuoteno";
   $result = pupe_query($query);
 
-  $asiakashinnat = array();
-
   while ($asiakashinta = mysql_fetch_assoc($result)) {
-    $asiakashinnat[] = $asiakashinta;
+    $specific_prices[] = $asiakashinta;
   }
 
-  return $asiakashinnat;
+  // Rajataan pois alennukset, joilla ei ole tuotetta tai prestan asiakas-/ryhmätunnusta
+  $query = "SELECT
+            asiakasalennus.tuoteno,
+            asiakasalennus.alkupvm,
+            asiakasalennus.loppupvm,
+            asiakasalennus.minkpl,
+            asiakasalennus.alennus,
+            avainsana.selitetark_5 AS presta_customergroup_id,
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            FROM asiakasalennus
+            INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
+              AND tuote.tuoteno = asiakasalennus.tuoteno)
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
+              AND avainsana.selite = asiakasalennus.asiakas_ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
+            LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
+              AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
+            WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
+            AND asiakasalennus.tuoteno != ''
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
+            ORDER BY asiakasalennus.tuoteno";
+  $result = pupe_query($query);
+
+  while ($asiakasalennus = mysql_fetch_assoc($result)) {
+    $specific_prices[] = $asiakasalennus;
+  }
+
+  return $specific_prices;
 }
 
 function hae_kategoriat() {

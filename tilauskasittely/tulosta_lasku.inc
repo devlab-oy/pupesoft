@@ -1400,13 +1400,6 @@ if (!function_exists('rivi_original')) {
 
     $kala = $kala - 15;
 
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    $laskalv = $row["alv"];
-
-    if ($row["alv"] >= 500) {
-      $laskalv = 0;
-    }
-
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
       $summa += hintapyoristys($row["rivihinta_valuutassa_verollinen"], 0, $laskurow['_loppunollat']);
@@ -1532,13 +1525,6 @@ if (!function_exists('rivi_plain')) {
     }
 
     $kala = $kala - 15;
-
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    $laskalv = $row["alv"];
-
-    if ($row["alv"] >= 500) {
-      $laskalv = 0;
-    }
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
@@ -1672,13 +1658,6 @@ if (!function_exists('rivi_plain_2')) {
     }
 
     $kala = $kala - 15;
-
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    $laskalv = $row["alv"];
-
-    if ($row["alv"] >= 500) {
-      $laskalv = 0;
-    }
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);
@@ -1846,13 +1825,6 @@ if (!function_exists('rivi_viro')) {
     }
 
     $kala = $kala - 15;
-
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    $laskalv = $row["alv"];
-
-    if ($row["alv"] >= 500) {
-      $laskalv = 0;
-    }
 
     if ($kurssi != 1) {
       $arvo += hintapyoristys($row["rivihinta_valuutassa"], 0, $laskurow['_loppunollat']);

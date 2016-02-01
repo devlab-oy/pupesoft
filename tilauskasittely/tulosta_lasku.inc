@@ -1011,7 +1011,7 @@ if (!function_exists('rivi_otsikot')) {
       $pdf_lasku->draw_text(350, $kala, t("Määrä", $kieli), $thispage, $pieni);
       $pdf_lasku->draw_text(390, $kala, t("SVH", $kieli), $thispage, $pieni);
       $pdf_lasku->draw_text(440, $kala, t("A-hinta", $kieli), $thispage, $pieni);
-      $pdf_lasku->draw_text(510, $kala, t("Veroton arvo", $kieli), $thispage, $pieni);
+      $pdf_lasku->draw_text(495, $kala, t("Veroton arvo", $kieli), $thispage, $pieni);
       $pdf_lasku->draw_text(550, $kala, t("Alv", $kieli)."-%", $thispage, $pieni);
 
       //toka rivi
@@ -1098,7 +1098,14 @@ if (!function_exists('rivi_otsikot')) {
     }
 
     if ($laskutyyppi == 21 or $laskutyyppi == 22) {
-      $pdf_lasku->draw_line(array(35, 580), array($kala-6, $kala-6), $thispage, $lineparams);
+      if ($laskurow['vienti'] == "") {
+        $viivakala = $kala-15;
+      }
+      else {
+        $viivakala = $kala-6;
+      }
+
+      $pdf_lasku->draw_line(array(35, 580), array($viivakala, $viivakala), $thispage, $lineparams);
       $kala -= 5;
     }
 

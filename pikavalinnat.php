@@ -199,7 +199,7 @@ echo "<table><tr>";
 $kala = 0;
 
 foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
-  echo "<td><img src='{$palvelin2}pics/facelift/icons/$kuva'> $kuvanimi</td>";
+  echo "<td><img src='{$palvelin2}pics/facelift/icons/$kuva'> ".t($kuvanimi)."</td>";
 
   $kala++;
 

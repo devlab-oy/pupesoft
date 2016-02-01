@@ -143,11 +143,10 @@ if (!function_exists('alku')) {
 
       $ostaja_kala = 644;
       $toim_kala = 583;
-      $pohja = 504;
+      $pohja = 515;
       $osoitekenttia = 3;
 
       $pdf_lasku->draw_text(50, 656, t("Ostaja", $kieli), $page_lasku[$sivu], $pieni);
-
     }
     else {
 
@@ -512,12 +511,7 @@ if (!function_exists('alku')) {
       list($page_lasku, $sivu, $kala) = laskun_kommentit($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu, $pohja);
     }
     else {
-      if ($osoitekenttia == 3) {
-        $kala = 510;
-      }
-      else {
-        $kala = 565;
-      }
+      $kala = $pohja;
     }
 
     list($page_lasku[$sivu], $kala) = rivi_otsikot($laskurow, $asiakasrow, $kieli, $pdf_lasku, $page_lasku[$sivu], $kala, $laskutyyppi);
@@ -690,12 +684,7 @@ if (!function_exists('laskun_kommentit')) {
 
     }
     else {
-      if ($osoitekenttia == 3) {
-        $kala = 510;
-      }
-      else {
-        $kala = 565;
-      }
+      $kala = $pohja;
     }
 
     return array($page_lasku, $sivu, $kala);

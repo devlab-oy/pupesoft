@@ -181,31 +181,6 @@ function hae_tuotteet() {
 
     $asiakashinnat = array();
 
-    if (isset($tuotteiden_asiakashinnat_magentoon)) {
-      $query = "SELECT
-                avainsana.selitetark AS asiakasryhma,
-                asiakashinta.tuoteno,
-                asiakashinta.hinta
-                FROM asiakas
-                JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                  AND avainsana.selite = asiakas.ryhma
-                  AND avainsana.laji = 'asiakasryhma')
-                JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
-                  AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                AND asiakashinta.tuoteno ='{$row['tuoteno']}'
-                GROUP BY 1, 2, 3";
-      $asiakashintares = pupe_query($query);
-
-      while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
-        $asiakashinnat[] = array(
-          'asiakasryhma' => $asiakashintarow['asiakasryhma'],
-          'tuoteno'      => $asiakashintarow['tuoteno'],
-          'hinta'        => $asiakashintarow['hinta'],
-        );
-      }
-    }
-
     // Haetaan kaikki tuotteen atribuutit
     $parametritquery = "SELECT
                         tuotteen_avainsanat.selite,
@@ -311,27 +286,4 @@ function hae_tuotteet() {
   }
 
   return $dnstuote;
-}
-
-function hae_tuotekuvat($tuote_tunnus) {
-  global $kukarow, $yhtiorow, $presta_ohita_tuotekuvat;
-
-  if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
-    return array();
-  }
-
-  $query = "SELECT *
-            FROM liitetiedostot
-            WHERE yhtio      = '{$kukarow['yhtio']}'
-            AND liitos       = 'tuote'
-            AND liitostunnus = '{$tuote_tunnus}'
-            ORDER BY jarjestys ASC";
-  $result = pupe_query($query);
-  $tuotekuvat = array();
-
-  while ($tuotekuva = mysql_fetch_assoc($result)) {
-    $tuotekuvat[] = $tuotekuva;
-  }
-
-  return $tuotekuvat;
 }

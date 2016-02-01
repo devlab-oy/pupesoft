@@ -30,9 +30,13 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $_email = empty($customer['email']) ? 'test@example.com' : $customer['email'];
+    $_nimi = empty($customer['nimi']) ? '-' : utf8_encode(substr($customer['nimi'], 0, 32));
+
+    // numbers and special characters not allowed
+    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", $_nimi);
 
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = utf8_encode($customer['nimi']);
+    $xml->customer->lastname = $_nimi;
     $xml->customer->email = $_email;
 
     if (!empty($customer['salasanan_resetointi'])) {

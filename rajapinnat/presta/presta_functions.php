@@ -101,7 +101,11 @@ function presta_specific_prices() {
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
             INNER JOIN tuote ON (tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno = asiakashinta.tuoteno)
+              AND tuote.tuoteno = asiakashinta.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != '')
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
               AND avainsana.selite = asiakashinta.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
@@ -128,7 +132,11 @@ function presta_specific_prices() {
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakasalennus
             INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
-              AND tuote.tuoteno = asiakasalennus.tuoteno)
+              AND tuote.tuoteno = asiakasalennus.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != '')
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
               AND avainsana.selite = asiakasalennus.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')

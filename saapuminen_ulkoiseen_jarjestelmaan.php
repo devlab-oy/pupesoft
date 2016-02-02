@@ -191,7 +191,16 @@ if ($xml_chk and $ftp_chk) {
 
   $is_utf8 = $utf8_check_row['character_set_name'] == 'utf8' ? true : false;
 
-  if ($is_utf8 and file_put_contents($filename, utf8_encode($xml->asXML()))) {
+  if ($is_utf8) {
+
+    $as_xml = $xml->asXML();
+
+    if (mb_detect_encoding($as_xml) == 'ASCII') {
+      $as_xml = mb_convert_encoding($as_xml, 'UTF-8', 'ASCII');
+    }
+
+    file_put_contents($filename, $as_xml);
+
     $_file_put_contents = true;
   }
   elseif (file_put_contents($filename, $xml->asXML())) {

@@ -177,7 +177,7 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-  $filename = "/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
+  $filename = $pupe_root_polku."/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
 
   // Tarkistetaan onko kanta UTF-8
   $query = "SELECT c.character_set_name

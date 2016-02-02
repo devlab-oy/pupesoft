@@ -25,6 +25,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
   $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
   $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
+  $ulos .= "<option value='ala_try' $sel[ala_try]>" . t("Tuotteen alatuoteryhmä") . "</option>";
   $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
@@ -235,4 +236,22 @@ if (mysql_field_name($result, $i) == 'nakyvyys') {
   else {
     $tyyppi = 0;
   }
+}
+
+if (mysql_field_name($result, $i) == 'selite' && $trow[3] == 'ala_try') {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 300) . ">";
+
+  $ala_tryresult = t_avainsana('ALA_TRY');
+
+  while ($ala_tryrow = mysql_fetch_assoc($ala_tryresult)) {
+    $sel = $ala_tryrow["selitetark"] == $trow[$i] ? " selected" : "";
+
+    $ulos .= "<option{$sel} value='{$ala_tryrow["selitetark"]}'>
+                {$ala_tryrow["selitetark"]} - {$ala_tryrow["selitetark_2"]}
+              </option>";
+  }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
 }

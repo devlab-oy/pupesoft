@@ -30,10 +30,10 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $_email = empty($customer['email']) ? 'test@example.com' : $customer['email'];
-    $_nimi = empty($customer['nimi']) ? '-' : utf8_encode(substr($customer['nimi'], 0, 32));
 
-    // numbers and special characters not allowed
-    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", $_nimi);
+    // max 32, numbers and special characters not allowed
+    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
+    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
 
     $xml->customer->firstname = "-";
     $xml->customer->lastname = $_nimi;
@@ -64,7 +64,13 @@ class PrestaCustomers extends PrestaClient {
       $existing_customers = $this->all(array('id'));
       $existing_customers = array_column($existing_customers, 'id');
 
+      $total = count($customers);
+      $current = 0;
+
       foreach ($customers as $customer) {
+        $current++;
+        $this->logger->log("[{$current}/{$total}]");
+
         try {
           $presta_address = new PrestaAddresses($this->url(), $this->api_key());
           $id = $customer['ulkoinen_asiakasnumero'];

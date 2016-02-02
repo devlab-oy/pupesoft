@@ -29,17 +29,22 @@ function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) 
   global $kukarow, $yhtiorow;
 
   if (empty($asiakasnumero)) {
-    return false;
+    return null;
   }
 
-  $query = "SELECT a.*
-            FROM yhteyshenkilo AS y
-            JOIN asiakas AS a
-            ON ( a.yhtio = y.yhtio
-              AND a.tunnus               = y.liitostunnus )
-            WHERE y.yhtio                = '{$kukarow['yhtio']}'
-            AND y.ulkoinen_asiakasnumero = {$asiakasnumero}";
+  $query = "SELECT asiakas.*
+            FROM yhteyshenkilo
+            INNER JOIN asiakas
+            ON (asiakas.yhtio = yhteyshenkilo.yhtio
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+            AND yhteyshenkilo.ulkoinen_asiakasnumero = {$asiakasnumero}
+            LIMIT 1";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
 
   return mysql_fetch_assoc($result);
 }
@@ -62,20 +67,24 @@ function hae_asiakasryhmat() {
   return $ryhmat;
 }
 
-function presta_hae_asiakashinnat() {
+function presta_specific_prices() {
   global $kukarow, $yhtiorow;
+
+  $specific_prices = array();
 
   // Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
   // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. Näin pitääkin koska yhteyshenkilo
   // on prestassa asiakas.
+
+  // Laitetaan hinnat ja alennukset samaan arrayseen, koska prestassa niitä käsitellään samalla tavalla
+
   // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eikä prestan asiakas/ryhmätunnusta
   $query = "SELECT
             asiakashinta.tuoteno,
             asiakashinta.alkupvm,
             asiakashinta.loppupvm,
             asiakashinta.minkpl,
-            asiakashinta.hinta AS customer_price,
-            (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
+            asiakashinta.hinta,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
@@ -88,18 +97,43 @@ function presta_hae_asiakashinnat() {
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
             WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
             AND asiakashinta.tuoteno != ''
-            AND asiakashinta.hinta != 0
+            AND asiakashinta.hinta > 0
             AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
             ORDER BY asiakashinta.tuoteno";
   $result = pupe_query($query);
 
-  $asiakashinnat = array();
-
   while ($asiakashinta = mysql_fetch_assoc($result)) {
-    $asiakashinnat[] = $asiakashinta;
+    $specific_prices[] = $asiakashinta;
   }
 
-  return $asiakashinnat;
+  // Rajataan pois alennukset, joilla ei ole tuotetta tai prestan asiakas-/ryhmätunnusta
+  $query = "SELECT
+            asiakasalennus.tuoteno,
+            asiakasalennus.alkupvm,
+            asiakasalennus.loppupvm,
+            asiakasalennus.minkpl,
+            asiakasalennus.alennus,
+            avainsana.selitetark_5 AS presta_customergroup_id,
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            FROM asiakasalennus
+            INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
+              AND tuote.tuoteno = asiakasalennus.tuoteno)
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
+              AND avainsana.selite = asiakasalennus.asiakas_ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
+            LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
+              AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
+            WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
+            AND asiakasalennus.tuoteno != ''
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
+            ORDER BY asiakasalennus.tuoteno";
+  $result = pupe_query($query);
+
+  while ($asiakasalennus = mysql_fetch_assoc($result)) {
+    $specific_prices[] = $asiakasalennus;
+  }
+
+  return $specific_prices;
 }
 
 function hae_kategoriat() {
@@ -180,31 +214,6 @@ function hae_tuotteet() {
     $myymalahinta_verot_mukaan = hintapyoristys($row["myymalahinta"] * (1 + ($row["alv"] / 100)), 6);
 
     $asiakashinnat = array();
-
-    if (isset($tuotteiden_asiakashinnat_magentoon)) {
-      $query = "SELECT
-                avainsana.selitetark AS asiakasryhma,
-                asiakashinta.tuoteno,
-                asiakashinta.hinta
-                FROM asiakas
-                JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                  AND avainsana.selite = asiakas.ryhma
-                  AND avainsana.laji = 'asiakasryhma')
-                JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
-                  AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                AND asiakashinta.tuoteno ='{$row['tuoteno']}'
-                GROUP BY 1, 2, 3";
-      $asiakashintares = pupe_query($query);
-
-      while ($asiakashintarow = mysql_fetch_assoc($asiakashintares)) {
-        $asiakashinnat[] = array(
-          'asiakasryhma' => $asiakashintarow['asiakasryhma'],
-          'tuoteno'      => $asiakashintarow['tuoteno'],
-          'hinta'        => $asiakashintarow['hinta'],
-        );
-      }
-    }
 
     // Haetaan kaikki tuotteen atribuutit
     $parametritquery = "SELECT
@@ -311,27 +320,4 @@ function hae_tuotteet() {
   }
 
   return $dnstuote;
-}
-
-function hae_tuotekuvat($tuote_tunnus) {
-  global $kukarow, $yhtiorow, $presta_ohita_tuotekuvat;
-
-  if (isset($presta_ohita_tuotekuvat) and !empty($presta_ohita_tuotekuvat)) {
-    return array();
-  }
-
-  $query = "SELECT *
-            FROM liitetiedostot
-            WHERE yhtio      = '{$kukarow['yhtio']}'
-            AND liitos       = 'tuote'
-            AND liitostunnus = '{$tuote_tunnus}'
-            ORDER BY jarjestys ASC";
-  $result = pupe_query($query);
-  $tuotekuvat = array();
-
-  while ($tuotekuva = mysql_fetch_assoc($result)) {
-    $tuotekuvat[] = $tuotekuva;
-  }
-
-  return $tuotekuvat;
 }

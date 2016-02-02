@@ -73,9 +73,24 @@ class PrestaSpecificPrices extends PrestaClient {
     $xml->specific_price->id_currency = 0;
     $xml->specific_price->id_country = 0;
 
-    //Price == -1 if Leave base price is checked. Otherwise its the given price.
-    //To use reduction amounts rather than fixed price enter hinta_muutos as reduction and -1 as price
-    $xml->specific_price->price = $specific_price['customer_price'];
+    // price or percentage
+    if (isset($specific_price['alennus'])) {
+      // Pupe stores percentages, presta needs them divided
+      $reduction = $specific_price['alennus'] / 100;
+
+      // Price -1 == "Leave base price" checked
+      $xml->specific_price->price = -1;
+      $xml->specific_price->reduction_type = "percentage";
+      $xml->specific_price->reduction = $reduction;
+    }
+    elseif (isset($specific_price['hinta'])) {
+      $xml->specific_price->price = $specific_price['hinta'];
+      $xml->specific_price->reduction_type = "amount";
+      $xml->specific_price->reduction = 0;
+    }
+    else {
+      $this->logger->log('Both amount and percentage were empty! Nothing was set!');
+    }
 
     return $xml;
   }
@@ -117,7 +132,8 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->create($price);
           $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
-            ." specific_price {$price['customer_price']}"
+            ." hinta {$price['hinta']}"
+            ." alennus {$price['alennus']}"
             ." asiakastunnus '{$price['presta_customer_id']}'"
             ." asiakasryhma '{$price['presta_customergroup_id']}'");
         }

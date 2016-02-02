@@ -38,10 +38,14 @@ class PrestaAddresses extends PrestaClient {
     $_postitp = empty($address['postitp']) ? "-" : utf8_encode($address['postitp']);
     $_puh = empty($address['puh']) ? "-" : $address['puh'];
 
+    // max 32, numbers and special characters not allowed
+    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
+    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+
     $xml->address->id_country = $finland['id'];
     $xml->address->id_customer = $address['presta_customer_id'];
     $xml->address->alias = 'Home';
-    $xml->address->lastname = utf8_encode($address['nimi']);
+    $xml->address->lastname = $_nimi;
     $xml->address->firstname = '-';
     $xml->address->address1 = $_osoite;
     $xml->address->postcode = $address['postino'];

@@ -231,21 +231,24 @@ abstract class PrestaClient {
    */
   protected function all($display = array(), $filters = array()) {
     $resource = $this->resource_name();
-    $opt = array(
-      'resource' => $resource,
-    );
 
+    // esim. 'display' => '[name,value]'
     if (!empty($display)) {
       $display = '[' . implode(',', $display) . ']';
     }
     else {
       $display = 'full';
     }
-    $opt['display'] = $display;
 
-    foreach ($filters as $column_key => $value) {
-      $key = "filter[{$column_key}]";
-      $opt[$key] = "[{$value}]";
+    $opt = array(
+      'resource' => $resource,
+      'display'  => $display,
+    );
+
+    // esim: 'filter[id]' => '[1|5]'
+    foreach ($filters as $key => $value) {
+      $key = "filter[{$key}]";
+      $opt[$key] = $value;
     }
 
     try {

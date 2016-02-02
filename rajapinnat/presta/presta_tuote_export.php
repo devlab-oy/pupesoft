@@ -56,15 +56,13 @@ if (trim($argv[1]) != '') {
   }
 }
 else {
-  die ("Et antanut yhtiötä.\n");
+  die ("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [ajentaanko_kaikki] [laji,laji,...]\n");
 }
 
-$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
+$ajetaanko_kaikki = (isset($argv[2]) and trim($argv[2]) != '') ? "YES" : "NO";
 
-$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
-
-if (isset($argv[4])) {
-  $synkronoi = explode(',', $argv[4]);
+if (isset($argv[3])) {
+  $synkronoi = explode(',', $argv[3]);
   $synkronoi = array_flip($synkronoi);
 }
 elseif (isset($synkronoi_prestaan) and count($synkronoi_prestaan) > 0) {
@@ -79,10 +77,6 @@ else {
     'asiakashinnat' => t('Asiakashinnat'),
     'tilaukset'     => t('Tilauksien haku'),
   );
-}
-
-if ($verkkokauppatyyppi != "presta") {
-  die ("Et antanut verkkokaupan tyyppiä.\n");
 }
 
 if (!isset($verkkokauppa_saldo_varasto)) $verkkokauppa_saldo_varasto = array();
@@ -106,6 +100,30 @@ if (!isset($yhtiorow)) {
 }
 if (!isset($presta_home_category_id)) {
   $presta_home_category_id = 2;
+}
+if (!isset($presta_verkkokauppa_asiakas)) {
+  // verkkokauppa_asiakas on fallback, mikäli oikeaa asiakasta ei löydetä pupesoftista
+  $presta_verkkokauppa_asiakas = null;
+}
+if (!isset($presta_haettavat_tilaus_statukset)) {
+  /* Tämä on Prestan default status list;
+   * 1  Awaiting cheque payment
+   * 2  Payment accepted
+   * 3  Preparation in progress
+   * 4  Shipped
+   * 5  Delivered
+   * 6  Canceled
+   * 7  Refund
+   * 8  Payment error
+   * 9  On backorder
+   * 10 Awaiting bank wire payment
+   * 11 Awaiting PayPal payment
+   * 12 Remote payment accepted
+  */
+  $presta_haettavat_tilaus_statukset = array(2);
+}
+if (!isset($presta_haettu_tilaus_status)) {
+  $presta_haettu_tilaus_status = 3;
 }
 
 // Haetaan timestamp
@@ -171,10 +189,10 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 }
 
 if (array_key_exists('asiakashinnat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat.\n";
-  $hinnat = presta_hae_asiakashinnat();
+  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat ja alennukset.\n";
+  $hinnat = presta_specific_prices();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat.\n";
+  echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat ja alennukset.\n";
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
   $presta_prices->sync_prices($hinnat);
 }
@@ -185,6 +203,9 @@ if (array_key_exists('tilaukset', $synkronoi)) {
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
   $presta_orders->set_yhtiorow($yhtiorow);
+  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
+  $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
   $presta_orders->transfer_orders_to_pupesoft();
 }
 

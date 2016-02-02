@@ -6,60 +6,16 @@ require_once 'rajapinnat/presta/presta_order_histories.php';
 require_once 'rajapinnat/edi_presta.php';
 
 class PrestaSalesOrders extends PrestaClient {
-
   const RESOURCE = 'orders';
 
-  /**
-   * State to be uploaded to presta when order is fetched and saved to pupesoft
-   */
-
-
-  const FETCHED = 3;
-
-  /**
-   * Presta order states which are fetched in fetch_sales_orders()
-   *
-   * @var array
-   */
-  protected $order_states = array();
-
-  /**
-   * Order states which indicate that presta order is not yet paid
-   *
-   * @var array
-   */
-  private $not_paid_order_states = array();
-  private $paid_order_states = array();
-
-  /**
-   * Filepath base where edi files are saved
-   *
-   * @var string
-   */
   private $edi_filepath_base = '';
   private $yhtiorow = array();
+  private $verkkokauppa_customer = null;
+  private $fetch_statuses = array();
+  private $fetched_status = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
-
-    /**
-     * 1  Awaiting cheque payment
-     * 2  Payment accepted
-     * 3  Preparation in progress
-     * 4  Shipped
-     * 5  Delivered
-     * 6  Canceled
-     * 7  Refund
-     * 8  Payment error
-     * 9  On backorder
-     * 10  Awaiting bank wire payment
-     * 11  Awaiting PayPal payment
-     * 12  Remote payment accepted
-     */
-    $this->order_states = array(1, 2, 10, 11, 12);
-
-    $this->not_paid_order_states = array(1, 10, 11);
-    $this->paid_order_states = array(2, 12);
   }
 
   protected function resource_name() {
@@ -94,6 +50,18 @@ class PrestaSalesOrders extends PrestaClient {
     $this->yhtiorow = $yhtiorow;
   }
 
+  public function set_verkkokauppa_customer($value) {
+    $this->verkkokauppa_customer = $value;
+  }
+
+  public function set_fetch_statuses($value) {
+    $this->fetch_statuses = $value;
+  }
+
+  public function set_fetched_status($value) {
+    $this->fetched_status = $value;
+  }
+
   /**
    * Gets all PrestaShop sales orders and saves them in EDI-format for pupesoft.
    * Marks saved sales orders as fetched and updates them to presta.
@@ -102,6 +70,8 @@ class PrestaSalesOrders extends PrestaClient {
    * @throws Exception
    */
   public function transfer_orders_to_pupesoft() {
+    $this->logger->log('---------Start sales orders fetch---------');
+
     if ($this->edi_filepath_base == '') {
       throw new Exception('Edi tiedosto polku pitää olla määritelty');
     }
@@ -112,7 +82,14 @@ class PrestaSalesOrders extends PrestaClient {
 
     $sales_orders = $this->fetch_sales_orders();
 
+    $total = count($sales_orders);
+    $current = 0;
+
     foreach ($sales_orders as $sales_order) {
+
+      $current++;
+      $this->logger->log("[{$current}/{$total}]");
+
       try {
         $pupesoft_order = $this->convert_for_pupesoft($sales_order);
         EdiPresta::create($pupesoft_order, $this->edi_filepath_base);
@@ -122,13 +99,14 @@ class PrestaSalesOrders extends PrestaClient {
       catch (Exception $e) {
         //Do nothing because we still want to try to create the other
         //order eventhough this failed
-        $msg = "Myyntitilauksen {$sales_order['id']} luominen "
-          . "pupesoftiin epäonnistui";
+        $msg = "Myyntitilauksen {$sales_order['id']} luominen pupesoftiin epäonnistui";
         $this->logger->log($msg, $e);
 
         return false;
       }
     }
+
+    $this->logger->log('---------End sales orders fetch---------');
 
     return true;
   }
@@ -139,24 +117,23 @@ class PrestaSalesOrders extends PrestaClient {
    * @return array
    */
   public function fetch_sales_orders() {
-    $this->logger->log('---------Start sales orders fetch---------');
+    $this->logger->log('Fetching sales orders');
 
     try {
-      //@TODO Consider if order_states should be synced aswell.
-      //For now we dont do it.
-      $states_str = implode('|', $this->order_states);
-      $display = array();
+      $states_str = implode('|', $this->fetch_statuses);
       $filters = array(
         'current_state' => "[{$states_str}]",
       );
 
-      $sales_orders = $this->all($display, $filters);
+      $this->logger->log("Haetaan tilaukset rajauksella current_state = {$states_str}");
+
+      $sales_orders = $this->all(null, $filters);
     }
     catch (Exception $e) {
       return array();
     }
 
-    $this->logger->log('---------End sales orders fetch---------');
+    $this->logger->log("Fetched ".count($sales_orders)." orders.");
 
     return $sales_orders;
   }
@@ -169,97 +146,103 @@ class PrestaSalesOrders extends PrestaClient {
    */
   private function convert_for_pupesoft($presta_order) {
     $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($presta_order['id_customer']);
+
     if (empty($pupesoft_customer)) {
-      //@TODO Tässä pitää hakea $pupesoft_customer = verkkokauppa_asiakas();
-      //tai jotain vastaavaa
-      $pupesoft_customer = hae_asiakas(70201);
+      $msg = "Asiakasta {$presta_order['id_customer']} ei löytynyt Pupesoftista! ";
+
+      $id = $this->verkkokauppa_customer;
+
+      if (empty($id)) {
+        $msg .= "Oletus verkkokauppa-asiakasta ei ole asetettu! Tilausta ei voida hakea!";
+
+        throw new Exception($msg);
+      }
+
+      $msg .= "Käytetään oletusasiakasta {$id}.";
+      $this->logger->log($msg);
+
+      $pupesoft_customer = hae_asiakas($id);
     }
+
+    $shipping_tax = ($presta_order['total_shipping_tax_incl'] - $presta_order['total_shipping_tax_excl']);
+    $tax_amount   = ($presta_order['total_paid_tax_incl'] - $presta_order['total_paid_tax_excl']);
 
     $pupesoft_order = array();
-    $pupesoft_order['yhtio_ovttunnus'] = $this->yhtiorow['ovttunnus'];
-    $pupesoft_order['liitostunnus'] = $pupesoft_customer['tunnus'];
-    $pupesoft_order['asiakasnro'] = $pupesoft_customer['asiakasnro'];
-    $pupesoft_order['viite'] = $presta_order['invoice_number'];
+    $pupesoft_order['alv_maara']          = $tax_amount;
+    $pupesoft_order['asiakasnro']         = $pupesoft_customer['asiakasnro'];
+    $pupesoft_order['email']              = $pupesoft_customer['email'];
     $pupesoft_order['external_system_id'] = $presta_order['id'];
-    $pupesoft_order['toimitustapa'] = '';
-    $pupesoft_order['maksettu'] = '';
-    $pupesoft_order['maksuehto'] = $presta_order['payment'];
-    $pupesoft_order['alv_maara'] = ($presta_order['total_paid_tax_incl'] - $presta_order['total_paid_tax_excl']);
-    $pupesoft_order['summa'] = $presta_order['total_paid_tax_incl'];
-    $pupesoft_order['valkoodi'] = $presta_order['id_currency'];
+    $pupesoft_order['fax']                = $pupesoft_customer['fax'];
+    $pupesoft_order['liitostunnus']       = $pupesoft_customer['tunnus'];
+    $pupesoft_order['maksettu']           = 'complete'; // tarkoittaa, että on jo maksettu
+    $pupesoft_order['maksuehto']          = $presta_order['payment'];
+    $pupesoft_order['puhelin']            = $pupesoft_customer['puhelin'];
+    $pupesoft_order['rahti_vero_maara']   = $shipping_tax;
+    $pupesoft_order['rahti_veroton']      = $presta_order['total_shipping_tax_excl'];
+    $pupesoft_order['summa']              = $presta_order['total_paid_tax_incl'];
+    $pupesoft_order['tilausrivit']        = array();
+    $pupesoft_order['tilaustyyppi']       = '';
+    $pupesoft_order['toimitustapa']       = '';
+    $pupesoft_order['valkoodi']           = $presta_order['id_currency'];
+    $pupesoft_order['viite']              = $presta_order['invoice_number'];
+    $pupesoft_order['yhtio_ovttunnus']    = $this->yhtiorow['ovttunnus'];
 
     if (empty($pupesoft_customer['laskutus_osoite'])) {
-      $pupesoft_order['laskutus_nimi'] = $pupesoft_customer['nimi'];
-      $pupesoft_order['laskutus_osoite'] = $pupesoft_customer['osoite'];
+      $pupesoft_order['laskutus_nimi']    = $pupesoft_customer['nimi'];
+      $pupesoft_order['laskutus_osoite']  = $pupesoft_customer['osoite'];
       $pupesoft_order['laskutus_postitp'] = $pupesoft_customer['postitp'];
       $pupesoft_order['laskutus_postino'] = $pupesoft_customer['postino'];
-      $pupesoft_order['laskutus_maa'] = $pupesoft_customer['maa'];
+      $pupesoft_order['laskutus_maa']     = $pupesoft_customer['maa'];
     }
     else {
-      $pupesoft_order['laskutus_nimi'] = $pupesoft_customer['laskutus_nimi'];
-      $pupesoft_order['laskutus_osoite'] = $pupesoft_customer['laskutus_osoite'];
+      $pupesoft_order['laskutus_nimi']    = $pupesoft_customer['laskutus_nimi'];
+      $pupesoft_order['laskutus_osoite']  = $pupesoft_customer['laskutus_osoite'];
       $pupesoft_order['laskutus_postitp'] = $pupesoft_customer['laskutus_postitp'];
       $pupesoft_order['laskutus_postino'] = $pupesoft_customer['laskutus_postino'];
-      $pupesoft_order['laskutus_maa'] = $pupesoft_customer['laskutus_maa'];
+      $pupesoft_order['laskutus_maa']     = $pupesoft_customer['laskutus_maa'];
     }
-
-    $pupesoft_order['puhelin'] = $pupesoft_customer['puhelin'];
-    $pupesoft_order['fax'] = $pupesoft_customer['fax'];
 
     if (empty($pupesoft_customer['toim_osoite'])) {
-      $pupesoft_order['toim_nimi'] = $pupesoft_customer['nimi'];
-      $pupesoft_order['toim_osoite'] = $pupesoft_customer['osoite'];
+      $pupesoft_order['toim_nimi']    = $pupesoft_customer['nimi'];
+      $pupesoft_order['toim_osoite']  = $pupesoft_customer['osoite'];
       $pupesoft_order['toim_postitp'] = $pupesoft_customer['postitp'];
       $pupesoft_order['toim_postino'] = $pupesoft_customer['postino'];
-      $pupesoft_order['toim_maa'] = $pupesoft_customer['maa'];
+      $pupesoft_order['toim_maa']     = $pupesoft_customer['maa'];
       $pupesoft_order['toim_puhelin'] = $pupesoft_customer['puhelin'];
     }
     else {
-      $pupesoft_order['toim_nimi'] = $pupesoft_customer['toim_nimi'];
-      $pupesoft_order['toim_osoite'] = $pupesoft_customer['toim_osoite'];
+      $pupesoft_order['toim_nimi']    = $pupesoft_customer['toim_nimi'];
+      $pupesoft_order['toim_osoite']  = $pupesoft_customer['toim_osoite'];
       $pupesoft_order['toim_postitp'] = $pupesoft_customer['toim_postitp'];
       $pupesoft_order['toim_postino'] = $pupesoft_customer['toim_postino'];
-      $pupesoft_order['toim_maa'] = $pupesoft_customer['toim_maa'];
+      $pupesoft_order['toim_maa']     = $pupesoft_customer['toim_maa'];
       $pupesoft_order['toim_puhelin'] = $pupesoft_customer['puhelin'];
     }
 
-    $pupesoft_order['email'] = $pupesoft_customer['email'];
-    $pupesoft_order['rahti_veroton'] = $presta_order['total_shipping_tax_excl'];
-    $shipping_tax = ($presta_order['total_shipping_tax_incl'] - $presta_order['total_shipping_tax_excl']);
-    $pupesoft_order['rahti_vero_maara'] = $shipping_tax;
-
-    if (in_array($presta_order['current_state'], $this->not_paid_order_states)) {
-      $pupesoft_order['tilaustyyppi'] = 'maksamatta';
-    }
-    elseif (in_array($presta_order['current_state'], $this->paid_order_states)) {
-      $pupesoft_order['tilaustyyppi'] = 'maksettu';
-    }
-    else {
-      $msg = "Haettu tilaus on tilassa {$presta_order['current_state']},"
-        . " joka ei ole tuettujen tilojen joukossa " . implode(',', $this->order_states);
-      throw new Exception($msg);
-    }
-
-    $pupesoft_order['tilausrivit'] = array();
-
     $rows = $presta_order['associations']['order_rows']['order_rows'];
-    //One row fix
+
+    // One row fix
     if (isset($rows['id'])) {
       $rows = array($rows);
     }
 
     foreach ($rows as $row) {
       $pupesoft_row = array();
-      $pupesoft_row['tuoteno'] = $row['product_reference'];
-      $pupesoft_row['nimitys'] = $row['product_name'];
-      $pupesoft_row['tilkpl'] = $row['product_quantity'];
+
+      $pupesoft_row['tuoteno']                 = $row['product_reference'];
+      $pupesoft_row['nimitys']                 = $row['product_name'];
+      $pupesoft_row['tilkpl']                  = $row['product_quantity'];
       $pupesoft_row['verollinen_yksikkohinta'] = $row['unit_price_tax_incl'];
-      $pupesoft_row['veroton_yksikkohinta'] = $row['product_price'];
-      $pupesoft_row['alennusprosentti'] = 0;
-      $pupesoft_row['alv_prosentti'] = $presta_order['carrier_tax_rate'];
+      $pupesoft_row['veroton_yksikkohinta']    = $row['product_price'];
+      $pupesoft_row['alennusprosentti']        = 0;
+      $pupesoft_row['alv_prosentti']           = $presta_order['carrier_tax_rate'];
 
       $pupesoft_order['tilausrivit'][] = $pupesoft_row;
     }
+
+    $msg = "Tilaus {$presta_order['id']} haettu, ";
+    $msg .= count($pupesoft_order['tilausrivit']). " tilausriviä ";
+    $this->logger->log($msg);
 
     return $pupesoft_order;
   }
@@ -279,20 +262,23 @@ class PrestaSalesOrders extends PrestaClient {
       //update_xml function.
       $id = $sales_order['id'];
       $existing_xml = $this->get_as_xml($id);
-      $existing_xml->order->current_state = self::FETCHED;
+      $existing_xml->order->current_state = $this->fetched_status;
       $this->update_xml($id, $existing_xml);
 
       $order_history = array(
         'order_id'    => $id,
-        'order_state' => self::FETCHED,
+        'order_state' => $this->fetched_status,
       );
+
+      $this->logger->log("Merkattiin tilaus {$id} tilaan {$this->fetched_status}.");
+
       $presta_order_history = new PrestaOrderHistories($this->url(), $this->api_key());
       $presta_order_history->create($order_history);
     }
     catch (Exception $e) {
-      $msg = "Tilauksen {$sales_order['id']} haetuksi merkkaaminen"
-        . "epäonnistui";
+      $msg = "Tilauksen {$sales_order['id']} haetuksi merkkaaminen epäonnistui";
       $this->logger->log($msg, $e);
+
       throw $e;
     }
   }

@@ -29,17 +29,22 @@ function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) 
   global $kukarow, $yhtiorow;
 
   if (empty($asiakasnumero)) {
-    return false;
+    return null;
   }
 
-  $query = "SELECT a.*
-            FROM yhteyshenkilo AS y
-            JOIN asiakas AS a
-            ON ( a.yhtio = y.yhtio
-              AND a.tunnus               = y.liitostunnus )
-            WHERE y.yhtio                = '{$kukarow['yhtio']}'
-            AND y.ulkoinen_asiakasnumero = {$asiakasnumero}";
+  $query = "SELECT asiakas.*
+            FROM yhteyshenkilo
+            INNER JOIN asiakas
+            ON (asiakas.yhtio = yhteyshenkilo.yhtio
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+            AND yhteyshenkilo.ulkoinen_asiakasnumero = {$asiakasnumero}
+            LIMIT 1";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
 
   return mysql_fetch_assoc($result);
 }

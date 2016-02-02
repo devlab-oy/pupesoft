@@ -38,8 +38,8 @@ class PrestaCustomerGroups extends PrestaClient {
     //1 = Tax excluded, 0 = tax included in presta
     $xml->group->price_display_method = 0;
     $xml->group->show_prices = 1;
-    $xml->group->name->language[0] = $group['selitetark'];
-    $xml->group->name->language[1] = $group['selitetark'];
+    $xml->group->name->language[0] = utf8_encode($group['selitetark']);
+    $xml->group->name->language[1] = utf8_encode($group['selitetark']);
 
     return $xml;
   }

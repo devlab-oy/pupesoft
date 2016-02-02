@@ -199,9 +199,7 @@ if ($xml_chk and $ftp_chk) {
       $as_xml = mb_convert_encoding($as_xml, 'UTF-8', mb_detect_encoding($as_xml));
     }
 
-    file_put_contents($filename, $as_xml);
-
-    $_file_put_contents = true;
+    $_file_put_contents = file_put_contents($filename, $as_xml);
   }
   elseif (file_put_contents($filename, $xml->asXML())) {
     $_file_put_contents = true;

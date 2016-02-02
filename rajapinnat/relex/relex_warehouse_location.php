@@ -24,6 +24,7 @@ require 'inc/functions.inc';
 cron_log();
 
 $ajopaiva  = date("Y-m-d");
+$ftppath = "/data/input";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -33,6 +34,10 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
+}
+
+if (isset($argv[3]) and trim($argv[3]) != '') {
+  $ftppath = trim($argv[3]);
 }
 
 // Yhtiö
@@ -108,7 +113,6 @@ if (!empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
-  $ftppath = "/data/input";
   $ftpfile = $filepath;
   require "inc/ftp-send.inc";
 }

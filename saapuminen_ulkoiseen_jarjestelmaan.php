@@ -179,36 +179,7 @@ $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Line
 if ($xml_chk and $ftp_chk) {
   $filename = $pupe_root_polku."/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
 
-  // Tarkistetaan onko kanta UTF-8
-  $query = "SELECT c.character_set_name
-            FROM information_schema.tables AS t,
-                 information_schema.collation_character_set_applicability AS c
-            WHERE c.collation_name = t.table_collation
-            AND t.table_schema = '{$dbkanta}'
-            AND t.table_name = 'lasku'";
-  $utf8_check_res = pupe_query($query);
-  $utf8_check_row = mysql_fetch_assoc($utf8_check_res);
-
-  $is_utf8 = $utf8_check_row['character_set_name'] == 'utf8' ? true : false;
-
-  if ($is_utf8) {
-
-    $as_xml = $xml->asXML();
-
-    if (!mb_detect_encoding($as_xml, 'UTF-8', true)) {
-      $as_xml = iconv(mb_detect_encoding($as_xml), 'UTF-8', $as_xml);
-    }
-
-    $_file_put_contents = file_put_contents($filename, $as_xml);
-  }
-  elseif (file_put_contents($filename, $xml->asXML())) {
-    $_file_put_contents = true;
-  }
-  else {
-    $_file_put_contents = false;
-  }
-
-  if ($_file_put_contents) {
+  if (file_put_contents($filename, $xml->asXML())) {
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti onnistui"), "\n";

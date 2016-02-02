@@ -598,13 +598,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
                 min(tilausrivi.laadittu) laadittu,
                 sum(tilausrivi.tilkpl) tilkpl,
+                sum(tilausrivi.kpl) kpl,
+                sum(tilausrivi.rivihinta) rivihinta,
                 sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-                sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen,
                 group_concat(tilausrivi.tunnus) rivitunnukset,
                 group_concat(distinct tilausrivi.perheid) perheideet,
                 count(*) rivigroup_maara,
-                sum(tilausrivi.rivihinta) rivihinta,
-                sum(tilausrivi.kpl) kpl,
                 $sorttauskentta
                 FROM tilausrivi
                 JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -638,7 +639,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                             * {$query_ale_lisa})
                           / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
                         sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-                        sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
+                        sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa,
+                        sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
                         FROM tilausrivi
                         WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
                         and tilausrivi.uusiotunnus = '$tilrow[uusiotunnus]'
@@ -647,10 +649,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
               $riresult = pupe_query($query);
               $perherow = mysql_fetch_assoc($riresult);
 
-              $tilrow["hinta"]         = $perherow["hinta"];
-              $tilrow["rivihinta"]       = $perherow["rivihinta"];
+              $tilrow["hinta"] = $perherow["hinta"];
+              $tilrow["rivihinta"] = $perherow["rivihinta"];
               $tilrow["rivihinta_verollinen"] = $perherow["rivihinta_verollinen"];
               $tilrow["rivihinta_valuutassa"] = $perherow["rivihinta_valuutassa"];
+              $tilrow["rivihinta_valuutassa_verollinen"] = $perherow["rivihinta_valuutassa_verollinen"];
 
               // Nollataan alet, koska hinta lasketaan rivihinnasta jossa alet on jo huomioitu
               for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -771,6 +774,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           // Veroton rivihinta valuutassa
           $tilrow["rivihinta"] = $tilrow["rivihinta_valuutassa"];
 
+          // Verollinen rivihinta valuutassa
+          $tilrow["rivihinta_verollinen"] = $tilrow["rivihinta_valuutassa_verollinen"];
+
           // Yksikköhinta valuutassa
           $tilrow["hinta"] = laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]);
         }
@@ -784,10 +790,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $vatamount = $tilrow['rivihinta'] * $tilrow['alv'] / 100;
 
         // Pyöristetään ja formatoidaan lopuksi
-        $tilrow["hinta"]          = hintapyoristys($tilrow["hinta"]);
-        $tilrow["rivihinta"]       = hintapyoristys($tilrow["rivihinta"]);
-        $tilrow["rivihinta_verollinen"]  = hintapyoristys($tilrow["rivihinta_verollinen"]);
-        $vatamount              = hintapyoristys($vatamount);
+        $tilrow["hinta"] = hintapyoristys($tilrow["hinta"]);
+        $tilrow["rivihinta"] = hintapyoristys($tilrow["rivihinta"]);
+        $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
+        $vatamount = hintapyoristys($vatamount);
 
         $tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
         $tilrow['nimitys']    = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);

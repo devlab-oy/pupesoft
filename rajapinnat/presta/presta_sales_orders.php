@@ -174,14 +174,14 @@ class PrestaSalesOrders extends PrestaClient {
     $pupesoft_order['external_system_id'] = $presta_order['id'];
     $pupesoft_order['fax']                = $pupesoft_customer['fax'];
     $pupesoft_order['liitostunnus']       = $pupesoft_customer['tunnus'];
-    $pupesoft_order['maksettu']           = '';
+    $pupesoft_order['maksettu']           = 'complete'; // tarkoittaa, että on jo maksettu
     $pupesoft_order['maksuehto']          = $presta_order['payment'];
     $pupesoft_order['puhelin']            = $pupesoft_customer['puhelin'];
     $pupesoft_order['rahti_vero_maara']   = $shipping_tax;
     $pupesoft_order['rahti_veroton']      = $presta_order['total_shipping_tax_excl'];
     $pupesoft_order['summa']              = $presta_order['total_paid_tax_incl'];
     $pupesoft_order['tilausrivit']        = array();
-    $pupesoft_order['tilaustyyppi']       = 'maksettu';
+    $pupesoft_order['tilaustyyppi']       = '';
     $pupesoft_order['toimitustapa']       = '';
     $pupesoft_order['valkoodi']           = $presta_order['id_currency'];
     $pupesoft_order['viite']              = $presta_order['invoice_number'];

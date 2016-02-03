@@ -2110,6 +2110,7 @@ if ($tee == 'P') {
         $lahete_tulostus_paperille     = 0;
         $lahete_tulostus_paperille_vak = 0;
         $lahete_tulostus_emailiin      = 0;
+        $lahete_tulostus_ruudulle      = 0;
         $laheteprintterinimi           = "";
         $onko_nouto                    = "";
         $lahetekpl_alkuperainen = $lahetekpl;
@@ -2166,7 +2167,7 @@ if ($tee == 'P') {
             $laheteprintterinimi = $kirrow["kirjoitin"];
           }
 
-          if ($valittu_oslapp_tulostin != "") {
+          if ($valittu_oslapp_tulostin != "" and $valittu_oslapp_tulostin != "-88") {
             //haetaan osoitelapun tulostuskomento
             $query  = "SELECT *
                        from kirjoittimet
@@ -2188,6 +2189,7 @@ if ($tee == 'P') {
           $_keraysvahvistus_lahetys = array('k', 'L', 'M', 'N', 'Q', 'P');
 
           if (($komento != "" and $lahetekpl > 0)
+            or $valittu_tulostin == "-88"
             or ($laskurow["tila"] != 'V'
               and ((in_array($laskurow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
                   or (in_array($yhtiorow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
@@ -2201,7 +2203,7 @@ if ($tee == 'P') {
 
             list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
 
-            if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
+            if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "") or $valittu_tulostin == "-88") {
 
               // Lasketaan kuinka monta lähetettä tulostuu paperille (muuttujat valuu optiscan.php:seen)
               if (is_array($komento)) {
@@ -2213,6 +2215,9 @@ if ($tee == 'P') {
                     $lahete_tulostus_emailiin++;
                   }
                 }
+              }
+              elseif ($valittu_tulostin == "-88") {
+                $lahete_tulostus_ruudulle++;
               }
               elseif ($komento != 'email' and substr($komento, 0, 12) != 'asiakasemail') {
                 $lahete_tulostus_paperille++;
@@ -2236,13 +2241,15 @@ if ($tee == 'P') {
                 'kieli'                    => $kieli,
                 'koontilahete'             => $koontilahete,
                 'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+                'valittu_tulostin'         => $valittu_tulostin,
               );
 
               pupesoft_tulosta_lahete($params);
 
               if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";
+              if ($lahete_tulostus_ruudulle > 0) echo "<br>".t("Tulostettiin %s lähetettä ruudulle", "", $lahete_tulostus_ruudulle).".";
               if ($lahete_tulostus_emailiin > 0) echo "<br>".t("Lähetettiin %s sähköistä lähetettä", "", $lahete_tulostus_emailiin).".";
-              if ($lahete_tulostus_emailiin == 0 and $lahete_tulostus_paperille == 0) echo "<br>".t("Lähetteitä ei tulostettu").".";
+              if ($lahete_tulostus_emailiin == 0 and $lahete_tulostus_paperille == 0 and $lahete_tulostus_ruudulle == 0) echo "<br>".t("Lähetteitä ei tulostettu").".";
             }
           }
 
@@ -2253,7 +2260,7 @@ if ($tee == 'P') {
           }
 
           // Tulostetaan osoitelappu
-          if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
+          if (($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) or $valittu_oslapp_tulostin == "-88") {
             $tunnus = $laskurow["tunnus"];
 
             $query = "SELECT osoitelappu
@@ -3879,6 +3886,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
         }
 
+        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+
         echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'>";
         echo "<input type='hidden' name='valittu_uista' value='1' />";
 
@@ -3959,6 +3968,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           echo "<option value='$kirrow[tunnus]'{$sel}>$kirrow[kirjoitin]</option>";
         }
+
+        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
 
         echo "</select> ".t("Kpl").": ";
 

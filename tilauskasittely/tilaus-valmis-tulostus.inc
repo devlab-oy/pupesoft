@@ -454,7 +454,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     'tots'              => 0,
     'tyyppi'        => $tyyppi,
     'kerayseran_numero' => $kerayseran_numero,
-    'kerayslistatyyppi'  => $kerayslistatyyppi);
+    'kerayslistatyyppi'  => $kerayslistatyyppi,
+    'valittu_tulostin' => $valittu_tulostin,
+  );
 
   // Aloitellaan keräyslistan teko
   $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -469,14 +471,19 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
-  $komento = hae_lahete_printteri(
-    $laskurow['varasto'],
-    $laskurow['yhtio_toimipaikka'],
-    $tilausnumeroita,
-    $valittu_tulostin
-  );
+  if ($valittu_tulostin == "-88") {
+    $komento = "";
+  }
+  else {
+    $komento = hae_lahete_printteri(
+      $laskurow['varasto'],
+      $laskurow['yhtio_toimipaikka'],
+      $tilausnumeroita,
+      $valittu_tulostin
+    );
+  }
 
-  if ($komento != "") {
+  if ($komento != "" or $valittu_tulostin == "-88") {
     //tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 

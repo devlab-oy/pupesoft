@@ -33,6 +33,13 @@ if (!function_exists('alku_kerayslista')) {
     // Luodaan muuttujat
     extract($params);
 
+    # Jos PDF halutaan ruudulle
+    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
+
     if ($kerayslistatyyppi == 'EXCEL1') {
 
       include 'inc/pupeExcel.inc';
@@ -688,6 +695,18 @@ if (!function_exists('rivi_kerayslista')) {
       ${$key} = $val;
     }
 
+    # Jos PDF halutaan ruudulle
+    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = array();
+
+      foreach ($params as $key => $null) {
+        $return[$key] = ${$key};
+      }
+
+      return $return;
+    }
+
     if ($kerayslistatyyppi == 'EXCEL1') {
       $thispage->writeString($kala, 0, $row["tuoteno"]);
       $thispage->writeString($kala, 1, $row["nimitys"]);
@@ -1215,6 +1234,18 @@ if (!function_exists('loppu_kerayslista')) {
       ${$key} = $val;
     }
 
+    # Jos PDF halutaan ruudulle
+    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = array();
+
+      foreach ($params as $key => $null) {
+        $return[$key] = ${$key};
+      }
+
+      return $return;
+    }
+
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       // Tässä pärjätään ilman footteria....
     }
@@ -1353,7 +1384,7 @@ if (!function_exists('loppu_kerayslista')) {
 
 if (!function_exists('print_pdf_kerayslista')) {
   function print_pdf_kerayslista($params) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $palvelin2;
 
     // Luodaan muuttujat
     foreach ($params as $key => $val) {
@@ -1362,7 +1393,23 @@ if (!function_exists('print_pdf_kerayslista')) {
 
     $returnvalue = 0;
 
-    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+      js_openFormInNewWindow();
+
+      if (strpos($_SERVER['SCRIPT_NAME'], "lahetteen_tulostusjono.php") !== FALSE) {
+        $toim = 'KERAYSLISTA';
+      }
+
+      foreach (explode(",", $tilausnumeroita) as $tilaus) {
+
+        echo "<br><form id='tulostakopioform_{$tilaus}' name='tulostakopioform_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+            <input type='hidden' name='otunnus' value='{$tilaus}'>
+            <input type='hidden' name='toim' value='{$toim}'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tilaus}', ''); return false;\"></form><br>";
+      }
+    }
+    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       $excelnimi = $thispage->close();
 
       $liite['excel'] = "/tmp/".$excelnimi;

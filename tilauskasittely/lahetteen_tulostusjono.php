@@ -574,6 +574,8 @@ if ($tee2 == 'VALITSE') {
 
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
+
+      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
       echo "</select></td></tr>";
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
@@ -1288,6 +1290,8 @@ if ($tee2 == '') {
           echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
         }
 
+        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+
         echo "</select></$ero>";
 
         echo "<input type='hidden' name='toim'       value='$toim'>";
@@ -1406,6 +1410,8 @@ if ($tee2 == '') {
 
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
+
+      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
 
       echo "</select></td>";
 

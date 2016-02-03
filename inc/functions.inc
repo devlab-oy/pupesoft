@@ -20037,6 +20037,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       'lahetekpl'                => $lahetekpl,
       'onko_kerayserat_kaytossa' => $onko_kerayserat_kaytossa,
       'koontilahete'             => $koontilahete,
+      'valittu_tulostin'         => $valittu_tulostin,
+      'tilausnumeroita'          => $otunnus,
     );
 
     if ($laskurow["tila"] == "G") {

@@ -40,6 +40,12 @@ if (!function_exists('alku_lahete')) {
     // Luodaan muuttujat
     extract($params);
 
+    if ($valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
+
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
     $lahetetyyppi_avainsana = t_avainsana("LAHETETYYPPI", "", " and selite='$lahetetyyppi'", "", "", "selitetark_2");
@@ -896,6 +902,12 @@ if (!function_exists('rivi_otsikot_lahete')) {
     // Luodaan muuttujat
     extract($params);
 
+    if ($valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
+
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
     if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
@@ -1237,6 +1249,12 @@ if (!function_exists('kollirivi_lahete')) {
     // Luodaan muuttujat
     extract($params);
 
+    if ($valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
+
     // Mahtuuko rivi tälle sivulle
     $kalatest = $kala;
 
@@ -1287,6 +1305,12 @@ if (!function_exists('rivi_lahete')) {
 
     // Luodaan muuttujat
     extract($params);
+
+    if ($valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
@@ -3477,6 +3501,12 @@ if (!function_exists('loppu_lahete')) {
     // Luodaan muuttujat
     extract($params);
 
+    if ($valittu_tulostin == "-88") {
+      // Luodaan palautettavat
+      $return = compact(array_keys($params));
+      return $return;
+    }
+
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
     if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc") {
@@ -4083,6 +4113,12 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
+      if ($valittu_tulostin == "-88") {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+        return $return;
+      }
+
       $page[$sivu] = $thispage;
 
       $pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
@@ -4097,6 +4133,12 @@ if (!function_exists('kuittaus_lahete')) {
     elseif (mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'A') {
       // Luodaan muuttujat
       extract($params);
+
+      if ($valittu_tulostin == "-88") {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+        return $return;
+      }
 
       if ($kala < 90 ) {
         // Luodaan palautettavat
@@ -4128,6 +4170,12 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
+      if ($valittu_tulostin == "-88") {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+        return $return;
+      }
+
       $page[$sivu] = $thispage;
 
       $pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
@@ -4142,6 +4190,12 @@ if (!function_exists('kuittaus_lahete')) {
     elseif ($yhtiorow['lahete_allekirjoitus'] == 'S') {
       // Luodaan muuttujat
       extract($params);
+
+      if ($valittu_tulostin == "-88") {
+        // Luodaan palautettavat
+        $return = compact(array_keys($params));
+        return $return;
+      }
 
       if ($kala < 90 ) {
         // Luodaan palautettavat
@@ -4171,7 +4225,7 @@ if (!function_exists('kuittaus_lahete')) {
 
 if (!function_exists('print_pdf_lahete')) {
   function print_pdf_lahete($params) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $palvelin2;
 
     // Luodaan muuttujat
     extract($params);
@@ -4181,17 +4235,35 @@ if (!function_exists('print_pdf_lahete')) {
     $oslapp     = '';
     $returnvalue = 0;
 
-    //keksitään uudelle failille joku varmasti uniikki nimi:
-    list($usec, $sec) = explode(' ', microtime());
-    mt_srand((float) $sec + ((float) $usec * 100000));
-    $pdffilenimi = "/tmp/Lahete-".md5(uniqid(mt_rand(), true)).".pdf";
+    if (!isset($valittu_tulostin) or $valittu_tulostin != "-88") {
+      //keksitään uudelle failille joku varmasti uniikki nimi:
+      list($usec, $sec) = explode(' ', microtime());
+      mt_srand((float) $sec + ((float) $usec * 100000));
+      $pdffilenimi = "/tmp/Lahete-".md5(uniqid(mt_rand(), true)).".pdf";
 
-    //kirjoitetaan pdf faili levylle..
-    $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
-    fclose($fh);
+      //kirjoitetaan pdf faili levylle..
+      $fh = fopen($pdffilenimi, "w");
+      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+      fclose($fh);
+    }
 
-    if ($tee == 'NAYTATILAUS') {
+    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+      js_openFormInNewWindow();
+
+      if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
+        $toim = 'LAHETE';
+      }
+
+      foreach (explode(",", $tilausnumeroita) as $tilaus) {
+
+        echo "<br><form id='tulostakopioform_lahete_{$tilaus}' name='tulostakopioform_lahete_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+            <input type='hidden' name='otunnus' value='{$tilaus}'>
+            <input type='hidden' name='toim' value='{$toim}'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+      }
+    }
+    elseif ($tee == 'NAYTATILAUS') {
       //Työnnetään tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }

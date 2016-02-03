@@ -186,7 +186,7 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-  $_name = substr("out_{$saapumisnro}_".implode('_', $ostotilaukset), 0, 25);
+  $_name = substr("out_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {

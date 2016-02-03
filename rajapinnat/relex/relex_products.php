@@ -226,7 +226,6 @@ if ($_tuoterajaus) {
     $ftphost = $relex_ftphost;
     $ftpuser = $relex_ftpuser;
     $ftppass = $relex_ftppass;
-    $ftppath = "/data/input";
     $ftpfile = $ofilepath;
     require "inc/ftp-send.inc";
   }

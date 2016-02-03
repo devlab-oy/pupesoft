@@ -666,7 +666,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
 
         if ($solu_orig == '!' or is_numeric($solu_orig)) {
 
-          if (($toim == "ASIAKAS" or $toim == "MYYJA") and $summabudjetti == "on") {
+          if (($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") and $summabudjetti == "on") {
             $liitostunnarit_array = explode(",", $liitostunnarit);
           }
           else {
@@ -714,7 +714,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
             if ($toim == "TOIMITTAJA" or $toim == "MAA") {
               $tall_summa = $solu;
             }
-            elseif ($toim == "ASIAKAS" or $toim == "MYYJA") {
+            elseif ($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
               if ($budj_kohtelu == "euro") {
                 // Syötetty arvo summa kenttään
                 $tall_summa = round($solu, 2);
@@ -941,7 +941,7 @@ if ($tee == "") {
       </td>";
   echo "</tr>";
 
-  if ($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA") {
+  if ($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
 
     // indeksi vai euromäärä
     echo "<tr>";
@@ -1281,7 +1281,7 @@ if ($submit_button != "") {
   }
 
   // Kokonaisbudjetti-tarkastukset
-  if (($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA") and $summabudjetti == "on") {
+  if (($toim == "TUOTE" or $toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") and $summabudjetti == "on") {
     if ($budj_kohtelu == "indeksi" and $budjetointi_taso != "joka_kk_sama") {
       echo "<font class='error'>".t("VIRHE: Kokonaistavoitteet voi syöttää indeksiluvulla vain valitsemalla jokaiselle kuukaudelle saman arvon!")."</font><br>";
       $tee = "";

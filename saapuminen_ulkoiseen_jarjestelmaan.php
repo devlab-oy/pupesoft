@@ -73,7 +73,9 @@ if (!$ftp_chk) {
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-$xmlstr  = '<?xml version="1.0" encoding="Windows-1257"?>';
+$encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
+
+$xmlstr  = "<?xml version='1.0' encoding='{$encoding}'?>";
 $xmlstr .= '<Message>';
 $xmlstr .= '</Message>';
 
@@ -101,7 +103,11 @@ $query = "SELECT DISTINCT otunnus
           AND uusiotunnus = '{$saapumisnro}'";
 $otunnukset_res = pupe_query($query);
 
+$ostotilaukset = array();
+
 while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
+
+  $ostotilaukset[] = $otunnukset_row['otunnus'];
 
   $query = "SELECT *
             FROM lasku
@@ -161,14 +167,17 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 
     $lines = $body->addChild('Lines');
-    $lines->addChild('Line', $i);
-    $lines->addChild('TransId', $rivit_row['tunnus']);
-    $lines->addChild('ItemNumber', $rivit_row['tuoteno']);
-    $lines->addChild('OrderedQuantity', $rivit_row['varattu']);
-    $lines->addChild('Unit', $rivit_row['yksikko']);
-    $lines->addChild('Price', $rivit_row['hinta']);
-    $lines->addChild('CurrencyCode', $ostotilaus_row['valkoodi']);
-    $lines->addChild('RowInfo', $rivit_row['kommentti']);
+
+    $line = $lines->addChild('Line');
+    $line->addAttribute('No', $i);
+
+    $line->addChild('TransId', $rivit_row['tunnus']);
+    $line->addChild('ItemNumber', $rivit_row['tuoteno']);
+    $line->addChild('OrderedQuantity', $rivit_row['varattu']);
+    $line->addChild('Unit', $rivit_row['yksikko']);
+    $line->addChild('Price', $rivit_row['hinta']);
+    $line->addChild('CurrencyCode', $ostotilaus_row['valkoodi']);
+    $line->addChild('RowInfo', $rivit_row['kommentti']);
 
     $i++;
   }
@@ -177,7 +186,8 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-  $filename = $pupe_root_polku."/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
+  $_name = substr("out_{$saapumisnro}_".implode('_', $ostotilaukset), 0, 25);
+  $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
 

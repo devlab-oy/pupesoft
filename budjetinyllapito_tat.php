@@ -45,7 +45,7 @@ if ($tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
-var_dump($_REQUEST);
+
 // Tämä funkkari palauttaa syötetyn tuotteen sen kuukauden myynnin arvon ja kpl-määrän
 function tuotteenmyynti($tuoteno, $alkupvm) {
 
@@ -89,6 +89,10 @@ function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
     $liitostunnuslisa = "and lasku.myyja in ({$tunnukset})";
     $use_index = "yhtio_tila_tapvm";
   }
+  elseif ($toim == "ASIAKASMYYJA") {
+    $liitostunnuslisa = " and asiakas.myyja in ({$tunnukset})";
+    $use_index = "yhtio_tila_tapvm";
+  }
   else {
     $liitostunnuslisa = "and lasku.liitostunnus in ({$tunnukset})";
     $use_index = "yhtio_tila_liitostunnus_tapvm";
@@ -98,6 +102,7 @@ function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
             ROUND(SUM(IF(tapvm > '{$edellinen_vuosi_loppu}', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
             FROM lasku USE INDEX ({$use_index})
             JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.asiakas)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tila    = 'U'
             and lasku.alatila = 'X'
@@ -150,6 +155,13 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
     if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[myyja] $row[nimi]</td>";
   }
 
+  if ($toim == "ASIAKASMYYJA") {
+    $worksheet->writeString($excelrivi, $excelsarake, "{$row['asiakasmyyja']} {$row['nimi']}");
+    $excelsarake++;
+
+    if ($rivimaara < $maxrivimaara) echo "<tr><td>$row[myyja] $row[nimi]</td>";
+  }
+
   if ($toim == "ASIAKAS") {
     $worksheet->writeString($excelrivi, $excelsarake, $row['asiakasnro']);
     $excelsarake++;
@@ -192,11 +204,14 @@ function piirra_budj_rivi($row, $ostryrow = "", $ohitus = "", $org_sar = "") {
     }
   }
 
-  if ($toim == "ASIAKAS" or $toim == "MYYJA") {
+  if ($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
     if ($naytamyyntiennuste != "") {
 
       if ($toim == "MYYJA") {
         list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["myyjan_tunnus"], $try, $osasto);
+      }
+      elseif ($toim == "ASIAKASMYYJA") {
+        list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakasmyyjan_tunnus"], $try, $osasto);
       }
       else {
         list($edvuodenkokonaismyynti, $tanvuodenalustamyynti, $tanvuodenennuste, $ensvuodenennuste) = asiakkaanmyynti($row["asiakkaan_tunnus"], $try, $osasto);
@@ -445,7 +460,7 @@ elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp
   }
 
   // Huomaa nämä jos muutat excel-failin sarakkeita!!!!
-  if ($toim == "TUOTE" or $toim == "MYYJA") {
+  if ($toim == "TUOTE" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
     $lukualku = 2;
   }
   elseif ($toim == "MAA") {
@@ -470,7 +485,7 @@ elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp
   }
 
   // Hypätään myös myyntisarakkeiden yli
-  if (($toim == "ASIAKAS" or $toim == "MYYJA") and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
+  if (($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") and stripos($headers[$lukualku], "Myynti")  !== FALSE) {
     $lukualku += 3;
   }
 
@@ -1147,7 +1162,7 @@ if ($tee == "") {
   echo "<td><input type='checkbox' name='onko_ilman_budjettia' $tcheck></td>";
   echo "</tr>";
 
-  if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA" or $toim == "MYYJA") {
+  if ($toim == "ASIAKAS" or $toim == "TOIMITTAJA" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
 
     echo "<tr><th>", t("Tavoitetaso"), "</th><td>";
 
@@ -1168,6 +1183,9 @@ if ($tee == "") {
     }
     elseif ($toim == "TOIMITTAJA") {
       $toim_selite = t("Toimittajan");
+    } 
+    elseif ($toim == "ASIAKASMYYJA") {
+      $toim_selite = t("Asiakasmyyjän");
     }
     else {
       $toim_selite = t("Asiakkaan");
@@ -1182,7 +1200,7 @@ if ($tee == "") {
     echo "</td></tr>";
   }
 
-  if ($toim == "ASIAKAS" or $toim == "MYYJA") {
+  if ($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
     // Keroin jolla interpoloidaan asiakkaan kuluvan vuoden myynnit koko vuoden myynneiksi
     echo "<tr><th>", t("Myyntiennustekerroin, kuluva vuosi"), "</th><td>";
     echo "<input type='text' name='myyntiennustekerroin' value='$myyntiennustekerroin' size='5'>";
@@ -1275,6 +1293,11 @@ if ($submit_button != "") {
     $tee = "";
   }
 
+  if ($toim == "ASIAKASMYYJA" and $lisa_dynaaminen["asiakasmyyja"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+    echo "<font class='error'>".t("On valittava asiakasmyyjä")."!";
+    $tee = "";
+  }
+
   if ($toim == "MAA" and $lisa_dynaaminen["maa"] == "" and $lisa == "" and $lisa_parametri == "" and !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
     echo "<font class='error'>".t("On valittava maa")."!";
     $tee = "";
@@ -1334,6 +1357,10 @@ if ($tee == "AJA_RAPORTTI") {
     $worksheet->write($excelrivi, $excelsarake, t("Myyjän tunnus"), $format_bold);
     $excelsarake++;
   }
+  elseif ($toim == "ASIAKASMYYJA") {
+    $worksheet->write($excelrivi, $excelsarake, t("Asiakasmyyjän tunnus"), $format_bold);
+    $excelsarake++;
+  }
   elseif ($toim == "MAA") {
     $worksheet->write($excelrivi, $excelsarake, t("Maan tunnus"), $format_bold);
     $excelsarake++;
@@ -1381,6 +1408,9 @@ if ($tee == "AJA_RAPORTTI") {
     }
     elseif ($toim == "MYYJA") {
       $lisa = " and kuka.tunnus in ({$liitostunnukset}) ";
+    }
+    elseif ($toim == "ASIAKASMYYJA") {
+      $lisa = " and kuka.myyjanro in ({$liitostunnukset}) ";
     }
     elseif ($toim == "MAA") {
       $lisa = " maat.tunnus in ({$liitostunnukset}) ";
@@ -1483,6 +1513,17 @@ if ($tee == "AJA_RAPORTTI") {
               {$lisa}";
 
   }
+  elseif ($toim == "ASIAKASMYYJA") {
+    $query = "SELECT DISTINCT(kuka.tunnus) asiakasmyyjan_tunnus,
+              kuka.nimi,
+              kuka.myyja
+              FROM kuka
+              JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.myyjanro = kuka.myyja)
+              WHERE kuka.yhtio = '{$kukarow['yhtio']}'
+              AND kuka.extranet = ''
+              AND asiakas.myyjanro > 0
+              {$lisa}";
+  }
 
   $result = pupe_query($query);
 
@@ -1568,6 +1609,9 @@ if ($tee == "AJA_RAPORTTI") {
   elseif ($toim == "MYYJA") {
     if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Myyjä"), "</th>";
   }
+  elseif ($toim == "ASIAKASMYYJA") {
+    if ($rivimaara < $maxrivimaara) echo "<tr><th>", t("Asiakasmyyjä"), "</th>";
+  }
 
   if (isset($osastotryttain) and $osastotryttain == "tuoteryhmittain") {
     if ($rivimaara < $maxrivimaara) echo "<th>", t("Tuoteryhmä"), "</th>";
@@ -1583,7 +1627,7 @@ if ($tee == "AJA_RAPORTTI") {
     $excelsarake++;
   }
 
-  if ($toim == "ASIAKAS" or $toim == "MYYJA") {
+  if ($toim == "ASIAKAS" or $toim == "MYYJA" or $toim == "ASIAKASMYYJA") {
     if ($naytamyyntiennuste != "") {
       if ($rivimaara < $maxrivimaara) {
         echo "<th>", t("Myynti"), " ", (date('Y')-1), "</th>";

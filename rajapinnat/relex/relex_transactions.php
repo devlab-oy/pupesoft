@@ -352,7 +352,6 @@ if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
-  $ftppath = "/data/input";
   $ftpfile = $filepath;
   require "inc/ftp-send.inc";
 }

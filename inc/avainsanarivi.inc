@@ -167,6 +167,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tuotteiden avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "Y")         $ulos .= "<option value='Y' $avain_sel[Y]>                  ".t("Yksikko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRY")         $ulos .= "<option value='TRY' $avain_sel[TRY]>                ".t("Tuoteryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PS_ALA_TRY") $ulos .= "<option value='PS_ALA_TRY' $avain_sel[PS_ALA_TRY]>" . t("PupeShop alaryhmä") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "THR")         $ulos .= "<option value='THR' $avain_sel[THR]>                ".t("Tuotehinnastoryhmä")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSASTO")       $ulos .= "<option value='OSASTO' $avain_sel[OSASTO]>            ".t("Tuoteosasto")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI")     $ulos .= "<option value='TUOTEMERKKI' $avain_sel[TUOTEMERKKI]>        ".t("Tuotemerkki")."</option>";
@@ -1364,5 +1365,29 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
 
   $ulos .= "</select>";
 
+  $jatko = 0;
+}
+
+if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selite) {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 300) . ">";
+
+  $try_result = t_avainsana('try', '', "AND selitetark <> ''");
+
+  while ($tryrow = mysql_fetch_assoc($try_result)) {
+    $sel = $tryrow["selite"] == $trow[$i] ? " selected" : "";
+
+    $ulos .= "<option{$sel} value='{$tryrow["selite"]}'>
+                {$tryrow["selite"]} - {$tryrow["selitetark"]}
+              </option>";
+  }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
+  $ulos  = "<th>" . t("Nimitys") . "</th>
+            <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
 }

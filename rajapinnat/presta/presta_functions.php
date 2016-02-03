@@ -1,7 +1,15 @@
 <?php
 
 function presta_hae_asiakkaat() {
-  global $kukarow, $yhtiorow, $verkkokauppatyyppi;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki, $datetime_checkpoint;
+
+  if ($ajetaanko_kaikki == "NO") {
+    $muutoslisa = " AND (yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'
+      OR asiakas.muutospvm >= '{$datetime_checkpoint}') ";
+  }
+  else {
+    $muutoslisa = "";
+  }
 
   $query = "SELECT yhteyshenkilo.*,
             avainsana.selitetark_5 AS presta_customergroup_id
@@ -14,7 +22,8 @@ function presta_hae_asiakkaat() {
               AND avainsana.selite = asiakas.ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
             WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-            AND yhteyshenkilo.rooli = 'Presta'";
+            AND yhteyshenkilo.rooli = 'Presta'
+            {$muutoslisa}";
   $result = pupe_query($query);
 
   $asiakkaat = array();
@@ -52,11 +61,12 @@ function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) 
 function hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
+  // HUOM. pakko hakea aina kaikki, koska muuten ei osata deletoida poistettuja
   $query = "SELECT avainsana.*,
             avainsana.selitetark_5 AS presta_customergroup_id
             FROM avainsana
             WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-            AND laji              = 'ASIAKASRYHMA'";
+            AND laji = 'ASIAKASRYHMA'";
   $result = pupe_query($query);
 
   $ryhmat = array();
@@ -72,9 +82,11 @@ function presta_specific_prices() {
 
   $specific_prices = array();
 
-  // Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
+  // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
   // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. Näin pitääkin koska yhteyshenkilo
   // on prestassa asiakas.
+
+  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset
 
   // Laitetaan hinnat ja alennukset samaan arrayseen, koska prestassa niitä käsitellään samalla tavalla
 
@@ -89,7 +101,11 @@ function presta_specific_prices() {
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
             INNER JOIN tuote ON (tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno = asiakashinta.tuoteno)
+              AND tuote.tuoteno = asiakashinta.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != '')
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
               AND avainsana.selite = asiakashinta.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
@@ -98,8 +114,7 @@ function presta_specific_prices() {
             WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
             AND asiakashinta.tuoteno != ''
             AND asiakashinta.hinta > 0
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
-            ORDER BY asiakashinta.tuoteno";
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
   $result = pupe_query($query);
 
   while ($asiakashinta = mysql_fetch_assoc($result)) {
@@ -117,7 +132,11 @@ function presta_specific_prices() {
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakasalennus
             INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
-              AND tuote.tuoteno = asiakasalennus.tuoteno)
+              AND tuote.tuoteno = asiakasalennus.tuoteno
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != '')
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
               AND avainsana.selite = asiakasalennus.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
@@ -125,8 +144,7 @@ function presta_specific_prices() {
               AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
             WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
             AND asiakasalennus.tuoteno != ''
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')
-            ORDER BY asiakasalennus.tuoteno";
+            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
   $result = pupe_query($query);
 
   while ($asiakasalennus = mysql_fetch_assoc($result)) {
@@ -137,9 +155,10 @@ function presta_specific_prices() {
 }
 
 function hae_kategoriat() {
-  global $kukarow, $yhtiorow, $verkkokauppatyyppi;
+  global $kukarow, $yhtiorow;
 
   // haetaan kaikki kategoriat ja niiden parent_id
+  // HUOM! pakko hakea aina kaikki, että osataan poistaa poistetut/siirretyt
   $query = "SELECT node.nimi,
             node.koodi,
             node.tunnus AS node_tunnus,
@@ -167,7 +186,7 @@ function hae_kategoriat() {
 }
 
 function hae_tuotteet() {
-  global $kukarow, $yhtiorow, $verkkokauppatyyppi, $datetime_checkpoint, $ajetaanko_kaikki, $presta_ohita_tuotekuvat;
+  global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
@@ -184,7 +203,7 @@ function hae_tuotteet() {
               AND tuote.tuotetyyppi  NOT in ('A','B')
               AND tuote.tuoteno     != ''
               AND tuote.nakyvyys    != ''
-              $muutoslisa
+              {$muutoslisa}
             ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
   $dnstuote = array();

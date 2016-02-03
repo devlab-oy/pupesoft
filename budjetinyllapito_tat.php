@@ -45,7 +45,7 @@ if ($tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
-
+var_dump($_REQUEST);
 // Tämä funkkari palauttaa syötetyn tuotteen sen kuukauden myynnin arvon ja kpl-määrän
 function tuotteenmyynti($tuoteno, $alkupvm) {
 
@@ -1052,6 +1052,25 @@ if ($tee == "") {
 
     $mulselprefix = "laskumyyja";
     $monivalintalaatikot = array('LASKUMYYJA');
+    $monivalintalaatikot_normaali = array();
+
+    require "tilauskasittely/monivalintalaatikot.inc";
+
+    echo "</td></tr>";
+  }
+
+  if ($toim == "ASIAKASMYYJA") {
+    echo "<tr>";
+    echo "<th>", t("Anna kokonaistavoitteet valituille asiakasmyyjille"), "</th>";
+
+    $scheck = ($summabudjetti != "") ? "CHECKED": "";
+    echo "<td><input type='checkbox' name='summabudjetti' {$scheck}></td>";
+    echo "</tr>";
+
+    echo "<tr><th>", t("Asiakasmyyjä"), "</th><td>";
+
+    $mulselprefix = "asiakasmyyja";
+    $monivalintalaatikot = array('ASIAKASMYYJA');
     $monivalintalaatikot_normaali = array();
 
     require "tilauskasittely/monivalintalaatikot.inc";

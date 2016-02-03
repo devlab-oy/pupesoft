@@ -396,8 +396,14 @@ elseif ($toim == "MAA") {
   $budj_taulu = "budjetti_maa";
   $budj_sarak = "maa_id";
 }
+elseif ($toim == "ASIAKASMYYJA") {
+  echo "<font class='head'>", t("Asiakasmyyjien myyntitavoitteet"), "</font><hr>";
+
+  $budj_taulu = "budjetti_asiakasmyyja";
+  $budj_sarak = "asiakasmyyjan_tunnus";
+}
 else {
-  echo "<font class='error'>", t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS, MYYJA tai MAA"), ".</font>";
+  echo "<font class='error'>", t("Anna ohjelmalle alanimi: TUOTE, TOIMITTAJA, ASIAKAS, MYYJA, ASIAKASMYYJA tai MAA"), ".</font>";
   exit;
 }
 

@@ -2651,7 +2651,6 @@ else {
 
                 if (isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") {
                   $tunnus_lisa = $row["asiakasmyyjä"];
-                  var_dump($row);
                 }
 
                 $budj_taulu = "budjetti_asiakasmyyja";

@@ -1514,13 +1514,14 @@ if ($tee == "AJA_RAPORTTI") {
 
   }
   elseif ($toim == "ASIAKASMYYJA") {
-    $query = "SELECT DISTINCT(kuka.tunnus) asiakasmyyjan_tunnus,
+    $query = "SELECT DISTINCT(kuka.myyja) asiakasmyyjan_tunnus,
               kuka.nimi,
               kuka.myyja
               FROM kuka
               JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.myyjanro = kuka.myyja)
               WHERE kuka.yhtio = '{$kukarow['yhtio']}'
               AND kuka.extranet = ''
+              AND kuka.myyja > 0
               AND asiakas.myyjanro > 0
               {$lisa}";
   }

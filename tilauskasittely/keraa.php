@@ -4071,7 +4071,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
   }
 
   if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php&valittu_tulostin={$valittu_tulostin}&valittu_oslapp_tulostin={$valittu_oslapp_tulostin}'>";
   }
 
   require "inc/footer.inc";

@@ -47,7 +47,8 @@ if ($mista == 'keraa.php' and $tunnukset != '' and ($onko_valittu_tulostin or $o
           <input type='hidden' name='otunnus' value='{$tilaus}'>
           <input type='hidden' name='toim' value='LAHETE'>
           <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+          <input type='submit' value='".t("Näytä lähete").": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+    }
   }
 
   if ($onko_valittu_oslap) {
@@ -57,7 +58,7 @@ if ($mista == 'keraa.php' and $tunnukset != '' and ($onko_valittu_tulostin or $o
         <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
         <input type='hidden' name='toim' value='OSOITELAPPU'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+        <input type='submit' value='".t("Näytä osoitelappu").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
   }
 
   echo "<br><br>";

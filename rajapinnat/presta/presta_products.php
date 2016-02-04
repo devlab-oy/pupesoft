@@ -19,6 +19,8 @@ class PrestaProducts extends PrestaClient {
 
   private $presta_categories = null;
   private $presta_home_category_id = null;
+  private $pupesoft_all_products = null;
+  private $presta_all_products = null;
 
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
@@ -193,15 +195,60 @@ class PrestaProducts extends PrestaClient {
       return false;
     }
 
+    $this->delete_all_unnecessary_products();
+
     $this->logger->log('---------End product sync---------');
     return true;
   }
 
   public function all_skus() {
+    if ($this->presta_all_products !== null) {
+      return $this->presta_all_products;
+    }
+
+    $this->logger->log('Fetching all SKUs');
+
     $existing_products = $this->all(array('id', 'reference'));
     $existing_products = array_column($existing_products, 'reference', 'id');
 
+    $this->presta_all_products = $existing_products;
     return $existing_products;
+  }
+
+  private function delete_all_unnecessary_products() {
+    $pupesoft_products = $this->pupesoft_all_products;
+
+    if ($pupesoft_products === null or count($pupesoft_products) == 0) {
+      $this->logger->log("pupesoft_all_products not set, can't delete!");
+      return;
+    }
+
+    $presta_products = $this->all_skus();
+    $keep_presta_ids = array();
+    $all_presta_ids = array();
+
+    foreach ($pupesoft_products as $product) {
+      // do we have this product in presta
+      $presta_id = array_search($product, $presta_products);
+
+      // if we found product from presta, add presta id to array
+      if ($presta_id !== false) {
+        $keep_presta_ids[] = $presta_id;
+      }
+    }
+
+    foreach ($presta_products as $key => $value) {
+      $all_presta_ids[] = $key;
+    }
+
+    // compare all_presta_ids against keep_presta_ids
+    // return the values that are not present keep_presta_ids
+    $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
+
+    // delete products from presta
+    foreach ($delete_presta_ids as $presta_id) {
+      $this->delete($presta_id);
+    }
   }
 
   public function set_removable_fields($fields) {
@@ -215,6 +262,12 @@ class PrestaProducts extends PrestaClient {
   public function set_category_sync($status) {
     if (!empty($status)) {
       $this->_category_sync = false;
+    }
+  }
+
+  public function set_all_products($value) {
+    if (is_array($value)) {
+      $this->pupesoft_all_products = $value;
     }
   }
 }

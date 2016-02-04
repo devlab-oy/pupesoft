@@ -167,6 +167,9 @@ if (array_key_exists('tuotteet', $synkronoi)) {
     $presta_products->set_category_sync($presta_ohita_kategoriat);
   }
 
+  $kaikki_tuotteet = hae_kaikki_tuotteet();
+  $presta_products->set_all_products($kaikki_tuotteet);
+
   $ok = $presta_products->sync_products($tuotteet);
 }
 

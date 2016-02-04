@@ -185,6 +185,29 @@ function hae_kategoriat() {
   return $kategoriat;
 }
 
+function hae_kaikki_tuotteet() {
+  global $kukarow, $yhtiorow;
+
+  // Haetaan kaikki siirrett‰v‰t tuotteet, t‰m‰ on poistettujen dellausta varten
+  // query pit‰‰ olla sama kun hae_tuotteet (ilman muutosp‰iv‰‰)
+  $query = "SELECT tuote.tuoteno
+            FROM tuote
+            WHERE tuote.yhtio        = '{$kukarow['yhtio']}'
+              AND tuote.status      != 'P'
+              AND tuote.tuotetyyppi  NOT in ('A','B')
+              AND tuote.tuoteno     != ''
+              AND tuote.nakyvyys    != ''";
+  $res = pupe_query($query);
+
+  $tuotteet = array();
+
+  while ($row = mysql_fetch_array($res)) {
+    $tuotteet[] = $row['tuoteno'];
+  }
+
+  return $tuotteet;
+}
+
 function hae_tuotteet() {
   global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
 

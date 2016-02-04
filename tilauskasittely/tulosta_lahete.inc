@@ -4248,19 +4248,22 @@ if (!function_exists('print_pdf_lahete')) {
     }
 
     if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
-      js_openFormInNewWindow();
 
-      if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
-        $toim = 'LAHETE';
-      }
+      if (($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $onko_nouto != '') and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'H' or $rahtikirjalle == "")) {
+        js_openFormInNewWindow();
 
-      foreach (explode(",", $tilausnumeroita) as $tilaus) {
+        if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
+          $toim = 'LAHETE';
+        }
 
-        echo "<br><form id='tulostakopioform_lahete_{$tilaus}' name='tulostakopioform_lahete_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
-            <input type='hidden' name='otunnus' value='{$tilaus}'>
-            <input type='hidden' name='toim' value='{$toim}'>
-            <input type='hidden' name='tee' value='NAYTATILAUS'>
-            <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+        foreach (explode(",", $tilausnumeroita) as $tilaus) {
+
+          echo "<br><form id='tulostakopioform_lahete_{$tilaus}' name='tulostakopioform_lahete_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+              <input type='hidden' name='otunnus' value='{$tilaus}'>
+              <input type='hidden' name='toim' value='{$toim}'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
+              <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+        }
       }
     }
     elseif ($tee == 'NAYTATILAUS') {

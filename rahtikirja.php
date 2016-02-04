@@ -33,6 +33,36 @@ if (!isset($lavametri)) $lavametri = '';
 if (!isset($montavalittu)) $montavalittu = '';
 if (!isset($kuljetusohje)) $kuljetusohje = '';
 
+$onko_valittu_tulostin = (isset($valittu_tulostin) and $valittu_tulostin == "-88");
+$onko_valittu_oslap = (isset($valittu_oslapp_tulostin) and $valittu_oslapp_tulostin == "-88");
+
+if ($mista == 'keraa.php' and $tunnukset != '' and ($onko_valittu_tulostin or $onko_valittu_oslap)) {
+
+  if ($onko_valittu_tulostin) {
+    js_openFormInNewWindow();
+
+    foreach (explode(",", $tunnukset) as $tilaus) {
+
+      echo "<br><form id='tulostakopioform_lahete_{$tilaus}' name='tulostakopioform_lahete_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+          <input type='hidden' name='otunnus' value='{$tilaus}'>
+          <input type='hidden' name='toim' value='LAHETE'>
+          <input type='hidden' name='tee' value='NAYTATILAUS'>
+          <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
+  }
+
+  if ($onko_valittu_oslap) {
+    js_openFormInNewWindow();
+
+    echo "<br><form id='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' name='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+        <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+        <input type='hidden' name='toim' value='OSOITELAPPU'>
+        <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+  }
+
+  echo "<br><br>";
+}
+
 if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
   // jos käyttäjällä on oletusvarasto, valitaan se
   if ($kukarow['oletus_varasto'] != 0) {

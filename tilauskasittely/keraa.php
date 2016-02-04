@@ -2230,17 +2230,19 @@ if ($tee == 'P') {
               $kieli = (!isset($kieli)) ? "" : $kieli;
 
               $params = array(
-                'laskurow'                 => $laskurow,
-                'sellahetetyyppi'          => $sellahetetyyppi,
                 'extranet_tilausvahvistus' => "",
-                'naytetaanko_rivihinta'    => "",
-                'tee'                      => $tee,
-                'toim'                     => $toim,
-                'komento'                  => $komento,
-                'lahetekpl'                => $lahetekpl,
                 'kieli'                    => $kieli,
+                'komento'                  => $komento,
                 'koontilahete'             => $koontilahete,
                 'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
+                'lahetekpl'                => $lahetekpl,
+                'laskurow'                 => $laskurow,
+                'naytetaanko_rivihinta'    => "",
+                'onko_nouto'               => $onko_nouto,
+                'rahtikirjalle'            => $rahtikirjalle,
+                'sellahetetyyppi'          => $sellahetetyyppi,
+                'tee'                      => $tee,
+                'toim'                     => $toim,
                 'valittu_tulostin'         => $valittu_tulostin,
               );
 

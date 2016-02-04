@@ -247,7 +247,11 @@ class PrestaProducts extends PrestaClient {
 
     // delete products from presta
     foreach ($delete_presta_ids as $presta_id) {
-      $this->delete($presta_id);
+      try {
+        $this->delete($presta_id);
+      }
+      catch (Exception $e) {
+      }
     }
   }
 

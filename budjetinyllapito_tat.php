@@ -1410,7 +1410,7 @@ if ($tee == "AJA_RAPORTTI") {
       $lisa = " and kuka.tunnus in ({$liitostunnukset}) ";
     }
     elseif ($toim == "ASIAKASMYYJA") {
-      $lisa = " and kuka.myyjanro in ({$liitostunnukset}) ";
+      $lisa = " and kuka.myyja in ({$liitostunnukset}) ";
     }
     elseif ($toim == "MAA") {
       $lisa = " maat.tunnus in ({$liitostunnukset}) ";

@@ -432,7 +432,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     'iso_boldi'         => $iso_boldi,
     'kala'              => 0,
     'kieli'             => $kieli,
-    'komento'      => '',
+    'komento'           => '',
     'laskurow'          => $laskurow,
     'norm'              => $norm,
     'page'              => '',
@@ -444,18 +444,17 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     'pieni_boldi'       => $pieni_boldi,
     'rectparam'         => $rectparam,
     'rivinkorkeus'      => $rivinkorkeus,
-    'rivinumerot'      => $rivinumerot,
+    'rivinumerot'       => $rivinumerot,
     'row'               => NULL,
     'sivu'              => 1,
     'tee'               => $tee,
-    'thispage'      => NULL,
+    'thispage'          => NULL,
     'tilausnumeroita'   => $tilausnumeroita,
     'toim'              => $toim,
     'tots'              => 0,
-    'tyyppi'        => $tyyppi,
+    'tyyppi'            => $tyyppi,
     'kerayseran_numero' => $kerayseran_numero,
-    'kerayslistatyyppi'  => $kerayslistatyyppi,
-    'valittu_tulostin' => $valittu_tulostin,
+    'kerayslistatyyppi' => $kerayslistatyyppi,
   );
 
   // Aloitellaan keräyslistan teko
@@ -472,7 +471,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
   if ($valittu_tulostin == "-88") {
-    $komento = "";
+    $komento = "-88";
   }
   else {
     $komento = hae_lahete_printteri(
@@ -483,7 +482,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     );
   }
 
-  if ($komento != "" or $valittu_tulostin == "-88") {
+  if ($komento != "") {
     //tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 

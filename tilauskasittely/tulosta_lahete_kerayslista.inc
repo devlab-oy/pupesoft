@@ -34,7 +34,7 @@ if (!function_exists('alku_kerayslista')) {
     extract($params);
 
     # Jos PDF halutaan ruudulle
-    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+    if (isset($komento) and $komento == "-88") {
       // Luodaan palautettavat
       $return = compact(array_keys($params));
       return $return;
@@ -696,7 +696,7 @@ if (!function_exists('rivi_kerayslista')) {
     }
 
     # Jos PDF halutaan ruudulle
-    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+    if (isset($komento) and $komento == "-88") {
       // Luodaan palautettavat
       $return = array();
 
@@ -1235,7 +1235,7 @@ if (!function_exists('loppu_kerayslista')) {
     }
 
     # Jos PDF halutaan ruudulle
-    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+    if (isset($komento) and $komento == "-88") {
       // Luodaan palautettavat
       $return = array();
 
@@ -1393,21 +1393,14 @@ if (!function_exists('print_pdf_kerayslista')) {
 
     $returnvalue = 0;
 
-    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
+    if (isset($komento) and $komento == "-88") {
       js_openFormInNewWindow();
 
-      if (strpos($_SERVER['SCRIPT_NAME'], "lahetteen_tulostusjono.php") !== FALSE) {
-        $toim = 'KERAYSLISTA';
-      }
-
-      foreach (explode(",", $tilausnumeroita) as $tilaus) {
-
-        echo "<br><form id='tulostakopioform_{$tilaus}' name='tulostakopioform_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
-            <input type='hidden' name='otunnus' value='{$tilaus}'>
-            <input type='hidden' name='toim' value='{$toim}'>
+      echo "<form id='tulostakopioform_{$laskurow['tunnus']}' name='tulostakopioform_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+             <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+            <input type='hidden' name='toim' value='KERAYSLISTA'>
             <input type='hidden' name='tee' value='NAYTATILAUS'>
-            <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tilaus}', ''); return false;\"></form><br>";
-      }
+            <input type='submit' value='".t("Keräyslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
     }
     elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       $excelnimi = $thispage->close();

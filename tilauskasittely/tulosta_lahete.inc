@@ -4247,26 +4247,7 @@ if (!function_exists('print_pdf_lahete')) {
       fclose($fh);
     }
 
-    if (isset($valittu_tulostin) and $valittu_tulostin == "-88") {
-
-      if (($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $onko_nouto != '') and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'H' or $rahtikirjalle == "")) {
-        js_openFormInNewWindow();
-
-        if (strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !== FALSE) {
-          $toim = 'LAHETE';
-        }
-
-        foreach (explode(",", $tilausnumeroita) as $tilaus) {
-
-          echo "<br><form id='tulostakopioform_lahete_{$tilaus}' name='tulostakopioform_lahete_{$tilaus}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
-              <input type='hidden' name='otunnus' value='{$tilaus}'>
-              <input type='hidden' name='toim' value='{$toim}'>
-              <input type='hidden' name='tee' value='NAYTATILAUS'>
-              <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$tilaus}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$tilaus}', ''); return false;\"></form><br>";
-        }
-      }
-    }
-    elseif ($tee == 'NAYTATILAUS') {
+    if ($tee == 'NAYTATILAUS') {
       //Työnnetään tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }
@@ -4280,7 +4261,16 @@ if (!function_exists('print_pdf_lahete')) {
 
       foreach ($komentoulos as $komento) {
         // itse print komento...
-        if ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
+        if ($komento == "-88") {
+          js_openFormInNewWindow();
+
+          echo "<br><form id='tulostakopioform_lahete_{$laskurow['tunnus']}' name='tulostakopioform_lahete_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+                <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+                <input type='hidden' name='toim' value='LAHETE'>
+                <input type='hidden' name='tee' value='NAYTATILAUS'>
+                <input type='submit' value='".t("Lähete").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+        }
+        elseif ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
           $liite = $pdffilenimi;
           $content_body = "";
 

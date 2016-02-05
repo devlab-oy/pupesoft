@@ -614,48 +614,63 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 }
 
-//keksitään uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";
+if (isset($kirjoitin) and $kirjoitin == "-88") {
+  js_openFormInNewWindow();
 
-//kirjoitetaan pdf faili levylle..
-$fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die(t("PDF kirjoitus epäonnistui %s", "", $pdffilenimi));
-fclose($fh);
-
-if ($kirjoitin == "email") {
-  $liite = $pdffilenimi;
-  $kutsu = "PDF-rahtikirja";
-  require "inc/sahkoposti.inc";
-
-}
-elseif ($kirjoitin == 'PDF_RUUDULLE') {
-  //Työnnetään tuo pdf vaan putkeen!
-  echo file_get_contents($pdffilenimi);
+  echo "<br><form id='tulostakopioform_rahtikirja_{$postirow['tunnus']}' name='tulostakopioform_rahtikirja_{$postirow['tunnus']}' method='post' action='{$palvelin2}rahtikirja-kopio.php' autocomplete='off'>
+        <input type='hidden' name='rtunnukset[]' value='{$rahtikirjanro}'>
+        <input type='hidden' name='tee' value='tulosta'>
+        <input type='hidden' name='real_submit' value='joo'>
+        <input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
+        <input type='hidden' name='yksittainen' value='ON'>
+        <input type='hidden' name='komento' value='PDF_RUUDULLE'>
+        <input type='submit' value='".t("Rahtikirja").": {$postirow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_rahtikirja_{$postirow['tunnus']}', ''); return false;\"></form><br>";
 }
 else {
-  //itse print komento...
-  $line = exec("$kirjoitin $pdffilenimi");
-}
 
-if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";
 
-  // Lähetetään rahtikirja myös kuljetusfirman sähköpostiin jos se löytyy
-  if ($toitarow['rahtikirjakopio_email'] != '') {
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die(t("PDF kirjoitus epäonnistui %s", "", $pdffilenimi));
+  fclose($fh);
 
-    $polkuinffo = pathinfo($pdffilenimi);
-    echo t("Lähetetään rahtikirjakopio").": {$toitarow['rahtikirjakopio_email']}<br>";
-    $params = array(
-      "to" => $toitarow['rahtikirjakopio_email'],
-      "subject" => $toitarow['selite']." ".t("Rahtikirjakopio"),
-      "ctype" => "text",
-      "attachements"  => array(0   => array(
-          "filename"    => $pdffilenimi,
-          "newfilename"  => "",
-          "ctype"      => $polkuinffo['extension'],
+  if ($kirjoitin == "email") {
+    $liite = $pdffilenimi;
+    $kutsu = "PDF-rahtikirja";
+    require "inc/sahkoposti.inc";
+
+  }
+  elseif ($kirjoitin == 'PDF_RUUDULLE') {
+    //Työnnetään tuo pdf vaan putkeen!
+    echo file_get_contents($pdffilenimi);
+  }
+  else {
+    //itse print komento...
+    $line = exec("$kirjoitin $pdffilenimi");
+  }
+
+  if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+
+    // Lähetetään rahtikirja myös kuljetusfirman sähköpostiin jos se löytyy
+    if ($toitarow['rahtikirjakopio_email'] != '') {
+
+      $polkuinffo = pathinfo($pdffilenimi);
+      echo t("Lähetetään rahtikirjakopio").": {$toitarow['rahtikirjakopio_email']}<br>";
+      $params = array(
+        "to" => $toitarow['rahtikirjakopio_email'],
+        "subject" => $toitarow['selite']." ".t("Rahtikirjakopio"),
+        "ctype" => "text",
+        "attachements"  => array(0   => array(
+            "filename"    => $pdffilenimi,
+            "newfilename"  => "",
+            "ctype"      => $polkuinffo['extension'],
+          )
         )
-      )
-    );
+      );
 
-    pupesoft_sahkoposti($params);
+      pupesoft_sahkoposti($params);
+    }
   }
 }

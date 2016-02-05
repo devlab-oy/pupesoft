@@ -47,17 +47,14 @@ else {
   $laskurow = $osoitelappurow;
 }
 
-if (isset($valittu_oslapp_tulostin) and $valittu_oslapp_tulostin == "-88") {
+if (isset($oslapp) and $oslapp == "-88") {
+  js_openFormInNewWindow();
 
-  if (($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $onko_nouto != '') and ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'H' or $rahtikirjalle == "")) {
-    js_openFormInNewWindow();
-
-    echo "<br><form id='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' name='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+  echo "<br><form id='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' name='tulostakopioform_osoitelappu_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
         <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
         <input type='hidden' name='toim' value='OSOITELAPPU'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='submit' value='".t("Näytä %s", '', strtolower($toim)).": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
-  }
+        <input type='submit' value='".t("Osoitelappu").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
 }
 else {
 

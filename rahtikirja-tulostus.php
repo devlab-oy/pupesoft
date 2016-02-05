@@ -38,8 +38,8 @@ if ($tee == 'tulosta') {
     $kukarow['yhtio'] = $yhtio;
   }
 
-  $toimitustapa   = mysql_real_escape_string(trim($toimitustapa));
-  $varasto     = (int) $varasto;
+  $toimitustapa = mysql_real_escape_string(trim($toimitustapa));
+  $varasto = (int) $varasto;
 
   // haetaan toimitustavan tiedot
   $query = "SELECT *
@@ -149,7 +149,10 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   $mediatyyppi = "";
 
-  if ($komento != "PDF_RUUDULLE") {
+  if ($komento == "-88") {
+    $kirjoitin = "-88";
+  }
+  elseif ($komento != "PDF_RUUDULLE") {
     // haetaan printterille tulostuskomento
     $query = "SELECT *
               from kirjoittimet

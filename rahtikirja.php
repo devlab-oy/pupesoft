@@ -2582,7 +2582,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
 
-      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+      $sel = ($kirjoitin_tunnus == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select></td>";
     }
     else {
@@ -3157,7 +3158,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       mysql_data_seek($kirre, 0);
 
-      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+      $sel = ($lahete_printteri == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
     }
 
@@ -3179,7 +3181,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
     mysql_data_seek($kirre, 0);
 
-    echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+    $sel = ($oslappu_printteri == "-88") ? " selected" : "";
+    echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
     echo "</select> ".t("Kpl").": ";
 
     $oslappkpl_hidden = 0;
@@ -3234,7 +3237,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
-      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+      $sel = ($oslappu_printteri == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
     }
 
@@ -3255,7 +3259,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       if (!isset($dgdkpl)) $dgdkpl = 1;
 
-      echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+      $sel = ($rakirsyotto_dgd_tulostin == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ", t("Kpl"), ": <input type='text' maxlength='2' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
     }
 

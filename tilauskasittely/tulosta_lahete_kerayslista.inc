@@ -1340,8 +1340,8 @@ if (!function_exists('print_pdf_kerayslista')) {
     if (isset($komento) and $komento == "-88") {
       js_openFormInNewWindow();
 
-      echo "<form id='tulostakopioform_{$laskurow['tunnus']}' name='tulostakopioform_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
-             <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+      echo "<br><form id='tulostakopioform_{$laskurow['tunnus']}' name='tulostakopioform_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+            <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
             <input type='hidden' name='toim' value='KERAYSLISTA'>
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='submit' value='".t("Keräyslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";

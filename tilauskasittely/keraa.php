@@ -3896,7 +3896,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<option value='{$kirrow['tunnus']}'{$sel}>{$kirrow['kirjoitin']}</option>";
         }
 
-        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+        $sel = (isset($sel_lahete["-88"])) ? " selected" : "";
+        echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
         echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'>";
         echo "<input type='hidden' name='valittu_uista' value='1' />";
 
@@ -3978,7 +3979,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<option value='$kirrow[tunnus]'{$sel}>$kirrow[kirjoitin]</option>";
         }
 
-        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
+        $sel = (isset($sel_oslapp["-88"])) ? " selected" : "";
+        echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
         echo "</select> ".t("Kpl").": ";
 
         $oslappkpl_hidden = 0;

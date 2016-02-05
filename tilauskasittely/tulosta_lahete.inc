@@ -38,7 +38,6 @@ if (!function_exists('alku_lahete')) {
     global $kukarow, $yhtiorow;
 
     if (skippa_lahete_pdf($params)) {
-      // Luodaan palautettavat
       return $params;
     }
 
@@ -899,7 +898,6 @@ if (!function_exists('rivi_otsikot_lahete')) {
     global $kukarow, $yhtiorow;
 
     if (skippa_lahete_pdf($params)) {
-      // Luodaan palautettavat
       return $params;
     }
 
@@ -1245,7 +1243,6 @@ if (!function_exists('kollirivi_lahete')) {
     global $kukarow, $yhtiorow;
 
     if (skippa_lahete_pdf($params)) {
-      // Luodaan palautettavat
       return $params;
     }
 
@@ -1301,7 +1298,6 @@ if (!function_exists('rivi_lahete')) {
     global $kukarow, $yhtiorow;
 
     if (skippa_lahete_pdf($params)) {
-      // Luodaan palautettavat
       return $params;
     }
 

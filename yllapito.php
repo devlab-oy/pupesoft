@@ -1616,7 +1616,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'laji' value = '$laji'>
         <input type = 'hidden' name = 'del' value = '2'></tr>";
   }
-
+echo "1619 ",var_dump($lopetus)," <br> ",var_dump($from),"<br>",var_dump($lopetus_muut),"<br><br>";
   while ($trow = mysql_fetch_array($result)) {
     echo "<tr class='aktiivi'>";
 
@@ -1650,6 +1650,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           if ($from == "" and $lopetus == "") {
             echo "&lopetus=".$palvelin2."yllapito.php////mista=$mista//ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
+          }
+          elseif ($lopetus == "" and $lopetus_muut != "") {
+            echo "&lopetus_muut=$lopetus_muut";
           }
           else {
             echo "&lopetus=$lopetus";

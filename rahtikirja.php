@@ -912,10 +912,7 @@ if ($tee == 'add') {
     $prires = pupe_query($query);
 
     if (mysql_num_rows($prires) > 0) {
-
       $prirow = mysql_fetch_assoc($prires);
-
-
 
       //haetaan lähetteen tulostuskomento
       if ($rakirsyotto_lahete_tulostin == "-88") {

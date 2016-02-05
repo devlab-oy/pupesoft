@@ -1207,7 +1207,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
   echo "<input type='hidden' name='toimtila' value='$tila'>";
   echo "<input type='hidden' name='text' value='etsi'>";
   echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
-  echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
   $query = "SELECT tunnus, nimitys, yhtio
             FROM varastopaikat
@@ -1259,7 +1259,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
 
   echo "</td>";
 
-  echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+  echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
   $sela = $selb = $selc = "";
 
@@ -1279,7 +1279,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
 
   echo "</select></td></tr>";
 
-  echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
 
   $query = "SELECT selite, min(tunnus) tunnus
             FROM toimitustapa
@@ -1302,7 +1302,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
   echo "</select></td>";
 
   if ($yhtiorow['pakkaamolokerot'] != '') {
-    echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
+    echo "<th>".t("Valitse pakkaamo:")."</th><td><select name='tupakkaamo' onchange='submit()'>";
 
     $query = "SELECT distinct nimi
               FROM pakkaamo
@@ -1333,7 +1333,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     echo "</select></td></tr><tr>";
   }
 
-  echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+  echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
   echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";
@@ -1910,7 +1910,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='toimtila' value='$tila'>";
   echo "<input type='hidden' name='text' value='etsi'>";
-  echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
   $query = "SELECT tunnus, nimitys, yhtio
             FROM varastopaikat
@@ -1955,7 +1955,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</td>";
 
-  echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+  echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
   $sela = $selb = $selc = "";
 
@@ -1975,7 +1975,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</select></td></tr>";
 
-  echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
 
   $query = "SELECT *
             FROM toimitustapa
@@ -1998,7 +1998,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</select></td>";
 
-  echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+  echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
   echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";

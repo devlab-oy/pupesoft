@@ -201,6 +201,30 @@ if ($handle = opendir($path)) {
                       AND mapvm   != '0000-00-00'
                       AND chn      = '999'";
             $yoimresult  = pupe_query($query);
+
+            // Tarkistetaan asiakkaan toimitusvahvistustyyppi
+            $query = "SELECT * 
+                      FROM asiakas
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus = '{$laskurow['liitostunnus']}'";
+            $asresult = pupe_query($query);
+            $asrow = mysql_fetch_assoc($asresult);
+
+            // Jos toimitusvahvistuksena käytetään lähetettä
+            if ($asrow['toimitusvahvistus'] == 'toimitusvahvistus_onkin_lahete') {
+              $params = array(
+                'laskurow'                 => $laskurow,
+                'sellahetetyyppi'          => "",
+                'extranet_tilausvahvistus' => "",
+                'naytetaanko_rivihinta'    => "",
+                'tee'                      => "",
+                'toim'                     => $toim,
+                'komento'                  => $komento,
+                'lahetekpl'                => "",
+                'kieli'                    => ""
+              );
+              pupesoft_tulosta_lahete($params);
+            }
           }
           else {
             // Laitetaan sähköpostia tuplakeräyksestä - ollaan yritetty merkitä kerätyksi jo käsin kerättyä tilausta

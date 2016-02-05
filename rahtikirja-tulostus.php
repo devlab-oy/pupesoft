@@ -966,6 +966,20 @@ if ($tee == 'tulosta') {
             $laskurow = $tmp_laskurow;
           }
         }
+        elseif ($rakir_row['toimitusvahvistus'] == 'toimitusvahvistus_onkin_lahete') {
+          $params = array(
+            'laskurow'                 => $laskurow,
+            'sellahetetyyppi'          => "",
+            'extranet_tilausvahvistus' => "",
+            'naytetaanko_rivihinta'    => "",
+            'tee'                      => "",
+            'toim'                     => $toim,
+            'komento'                  => $komento,
+            'lahetekpl'                => "",
+            'kieli'                    => ""
+          );
+          pupesoft_tulosta_lahete($params);
+        }
       }
 
       // jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin E-tyyppiset Unifaunit merkataan toimitetuiksi close_with_printer-haarassa..

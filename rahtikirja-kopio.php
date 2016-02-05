@@ -13,6 +13,11 @@ if (!isset($real_submit)) $real_submit = '';
 
 if ($real_submit == '') $tee = '';
 
+// js_openFormInNewWindow()-funkkarin juttuja
+if (isset($nayta_pdf) and $tee == 'NAYTATILAUS') {
+  $tee = "tulosta";
+}
+
 if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
   $logistiikka_yhtio = $konsernivarasto_yhtiot;
   $logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";

@@ -1616,7 +1616,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'laji' value = '$laji'>
         <input type = 'hidden' name = 'del' value = '2'></tr>";
   }
-echo "1619 ",var_dump($lopetus)," <br> ",var_dump($from),"<br>",var_dump($lopetus_muut),"<br><br>";
+
   while ($trow = mysql_fetch_array($result)) {
     echo "<tr class='aktiivi'>";
 

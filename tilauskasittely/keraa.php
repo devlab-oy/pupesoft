@@ -2138,36 +2138,45 @@ if ($tee == 'P') {
             if ($vakadr_komento != 'email' and $onko_vak) $lahete_tulostus_paperille_vak++;
           }
 
-          // Valittu tulostin
-          $valittu_tulostin_valittu = $valittu_tulostin;
+          //Lähetetulostin
+          if ($valittu_tulostin == "-88") {
+            $komento = "-88";
+            $laheteprintterinimi = t("PDF Ruudulle");
+          }
+          else {
+            $valittu_tulostin_valittu = $valittu_tulostin;
 
-          // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
-          if (!empty($laskurow['yhtio_toimipaikka'])) {
-            $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
-                                 and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
-                                 and avainsana.selitetark_2 = 'printteri1'";
+            // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
+            if (!empty($laskurow['yhtio_toimipaikka'])) {
+              $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
+                                   and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
+                                   and avainsana.selitetark_2 = 'printteri1'";
 
-            $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+              $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 
-            if (!empty($tp_tulostin)) {
-              $valittu_tulostin_valittu = $tp_tulostin;
+              if (!empty($tp_tulostin)) {
+                $valittu_tulostin_valittu = $tp_tulostin;
+              }
+            }
+
+            if ($valittu_tulostin_valittu != "") {
+              // haetaan lähetteen tulostuskomento
+              $query   = "SELECT *
+                          from kirjoittimet
+                          where yhtio = '$kukarow[yhtio]'
+                          and tunnus  = '$valittu_tulostin_valittu'";
+              $kirres  = pupe_query($query);
+              $kirrow  = mysql_fetch_assoc($kirres);
+              $komento = $kirrow['komento'];
+
+              $laheteprintterinimi = $kirrow["kirjoitin"];
             }
           }
 
-          if ($valittu_tulostin_valittu != "") {
-            // haetaan lähetteen tulostuskomento
-            $query   = "SELECT *
-                        from kirjoittimet
-                        where yhtio = '$kukarow[yhtio]'
-                        and tunnus  = '$valittu_tulostin_valittu'";
-            $kirres  = pupe_query($query);
-            $kirrow  = mysql_fetch_assoc($kirres);
-            $komento = $kirrow['komento'];
-
-            $laheteprintterinimi = $kirrow["kirjoitin"];
+          if ($valittu_oslapp_tulostin == "-88") {
+            $oslapp = "-88";
           }
-
-          if ($valittu_oslapp_tulostin != "" and $valittu_oslapp_tulostin != "-88") {
+          elseif ($valittu_oslapp_tulostin != "") {
             //haetaan osoitelapun tulostuskomento
             $query  = "SELECT *
                        from kirjoittimet
@@ -2189,7 +2198,6 @@ if ($tee == 'P') {
           $_keraysvahvistus_lahetys = array('k', 'L', 'M', 'N', 'Q', 'P');
 
           if (($komento != "" and $lahetekpl > 0)
-            or $valittu_tulostin == "-88"
             or ($laskurow["tila"] != 'V'
               and ((in_array($laskurow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
                   or (in_array($yhtiorow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
@@ -2203,12 +2211,15 @@ if ($tee == 'P') {
 
             list($komento, $koontilahete, $koontilahete_tilausrivit) = koontilahete_check($laskurow, $komento);
 
-            if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "") or $valittu_tulostin == "-88") {
+            if ((is_array($komento) and count($komento) > 0) or (!is_array($komento) and $komento != "")) {
 
               // Lasketaan kuinka monta lähetettä tulostuu paperille (muuttujat valuu optiscan.php:seen)
               if (is_array($komento)) {
                 foreach ($komento as $paprulleko) {
-                  if ($paprulleko != 'email' and substr($paprulleko, 0, 12) != 'asiakasemail') {
+                  if ($paprulleko == '-88') {
+                    $lahete_tulostus_ruudulle++;
+                  }
+                  elseif ($paprulleko != 'email' and substr($paprulleko, 0, 12) != 'asiakasemail') {
                     $lahete_tulostus_paperille++;
                   }
                   else {
@@ -2216,7 +2227,7 @@ if ($tee == 'P') {
                   }
                 }
               }
-              elseif ($valittu_tulostin == "-88") {
+              elseif ($komento == "-88") {
                 $lahete_tulostus_ruudulle++;
               }
               elseif ($komento != 'email' and substr($komento, 0, 12) != 'asiakasemail') {
@@ -2249,16 +2260,16 @@ if ($tee == 'P') {
               pupesoft_tulosta_lahete($params);
 
               if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";
-              if ($lahete_tulostus_ruudulle > 0) echo "<br>".t("Tulostettiin %s lähetettä ruudulle", "", $lahete_tulostus_ruudulle).".";
+              #if ($lahete_tulostus_ruudulle > 0) echo "<br>".t("Tulostettiin %s lähetettä ruudulle", "", $lahete_tulostus_ruudulle).".";
               if ($lahete_tulostus_emailiin > 0) echo "<br>".t("Lähetettiin %s sähköistä lähetettä", "", $lahete_tulostus_emailiin).".";
               if ($lahete_tulostus_emailiin == 0 and $lahete_tulostus_paperille == 0 and $lahete_tulostus_ruudulle == 0) echo "<br>".t("Lähetteitä ei tulostettu").".";
             }
           }
 
           if (($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' and $onko_nouto == '') or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
-            $valittu_oslapp_tulostin   = "";
-            $oslapp           = '';
-            $oslappkpl           = 0;
+            $valittu_oslapp_tulostin = "";
+            $oslapp = '';
+            $oslappkpl = 0;
           }
 
           // Tulostetaan osoitelappu
@@ -3889,7 +3900,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         }
 
         echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
-
         echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'>";
         echo "<input type='hidden' name='valittu_uista' value='1' />";
 
@@ -3972,7 +3982,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         }
 
         echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
-
         echo "</select> ".t("Kpl").": ";
 
         $oslappkpl_hidden = 0;
@@ -4071,7 +4080,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
   }
 
   if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php&valittu_tulostin={$valittu_tulostin}&valittu_oslapp_tulostin={$valittu_oslapp_tulostin}'>";
+    if ($valittu_tulostin == "-88" or $valittu_oslapp_tulostin == "-88") {
+      echo "<a href={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>".t("Siirry rahtikirjan syöttöön")."</a>";
+    }
+    else {
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
+    }
   }
 
   require "inc/footer.inc";

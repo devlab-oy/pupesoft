@@ -27235,7 +27235,9 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $looprow = mysql_fetch_assoc($loopres);
 
-    $xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
+    $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
+
+    $xml = simplexml_load_string("<?xml version='1.0' encoding='{$encoding}'?><Message></Message>");
 
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
@@ -27358,7 +27360,9 @@ if (!function_exists('posten_outbounddelivery')) {
       $_line_i++;
     }
 
-    $filename = $pupe_root_polku."/dataout/outbounddelivery_".md5(uniqid()).".xml";
+    $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
+
+    $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";

@@ -2270,7 +2270,7 @@ if ($tee == 'P') {
           }
 
           // Tulostetaan osoitelappu
-          if (($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) or $valittu_oslapp_tulostin == "-88") {
+          if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
             $tunnus = $laskurow["tunnus"];
 
             $query = "SELECT osoitelappu

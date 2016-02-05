@@ -37,14 +37,13 @@ if (!function_exists('alku_lahete')) {
   function alku_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
-
-    if ($valittu_tulostin == "-88") {
-      // Luodaan palautettavat
-      $return = compact(array_keys($params));
-      return $return;
-    }
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
@@ -899,14 +898,13 @@ if (!function_exists('rivi_otsikot_lahete')) {
   function rivi_otsikot_lahete($params, $kollitiedot=null) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
-
-    if ($valittu_tulostin == "-88") {
-      // Luodaan palautettavat
-      $return = compact(array_keys($params));
-      return $return;
-    }
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
@@ -1246,14 +1244,13 @@ if (!function_exists('kollirivi_lahete')) {
   function kollirivi_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
-
-    if ($valittu_tulostin == "-88") {
-      // Luodaan palautettavat
-      $return = compact(array_keys($params));
-      return $return;
-    }
 
     // Mahtuuko rivi tälle sivulle
     $kalatest = $kala;
@@ -1303,14 +1300,13 @@ if (!function_exists('rivi_lahete')) {
   function rivi_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
-
-    if ($valittu_tulostin == "-88") {
-      // Luodaan palautettavat
-      $return = compact(array_keys($params));
-      return $return;
-    }
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
@@ -3498,14 +3494,13 @@ if (!function_exists('loppu_lahete')) {
   function loppu_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
-
-    if ($valittu_tulostin == "-88") {
-      // Luodaan palautettavat
-      $return = compact(array_keys($params));
-      return $return;
-    }
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
@@ -4094,6 +4089,11 @@ if (!function_exists('kuittaus_lahete')) {
   function kuittaus_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     //katotaan onko laskutus nouto
     $query = "SELECT toimitustapa.nouto, maksuehto.kateinen
               FROM lasku
@@ -4113,12 +4113,6 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
-      if ($valittu_tulostin == "-88") {
-        // Luodaan palautettavat
-        $return = compact(array_keys($params));
-        return $return;
-      }
-
       $page[$sivu] = $thispage;
 
       $pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
@@ -4133,12 +4127,6 @@ if (!function_exists('kuittaus_lahete')) {
     elseif (mysql_num_rows($kures) > 0 and $yhtiorow['lahete_allekirjoitus'] == 'A') {
       // Luodaan muuttujat
       extract($params);
-
-      if ($valittu_tulostin == "-88") {
-        // Luodaan palautettavat
-        $return = compact(array_keys($params));
-        return $return;
-      }
 
       if ($kala < 90 ) {
         // Luodaan palautettavat
@@ -4170,12 +4158,6 @@ if (!function_exists('kuittaus_lahete')) {
       // Luodaan muuttujat
       extract($params);
 
-      if ($valittu_tulostin == "-88") {
-        // Luodaan palautettavat
-        $return = compact(array_keys($params));
-        return $return;
-      }
-
       $page[$sivu] = $thispage;
 
       $pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _______________________________",   $thispage, $norm);
@@ -4190,12 +4172,6 @@ if (!function_exists('kuittaus_lahete')) {
     elseif ($yhtiorow['lahete_allekirjoitus'] == 'S') {
       // Luodaan muuttujat
       extract($params);
-
-      if ($valittu_tulostin == "-88") {
-        // Luodaan palautettavat
-        $return = compact(array_keys($params));
-        return $return;
-      }
 
       if ($kala < 90 ) {
         // Luodaan palautettavat
@@ -4232,10 +4208,10 @@ if (!function_exists('print_pdf_lahete')) {
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
-    $oslapp     = '';
+    $oslapp = '';
     $returnvalue = 0;
 
-    if (!isset($valittu_tulostin) or $valittu_tulostin != "-88") {
+    if (!skippa_lahete_pdf($params)) {
       //keksitään uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -4416,3 +4392,25 @@ if (!function_exists('hae_base_lahetetyyppi')) {
     return $base_lahetetyyppi;
   }
 }
+
+if (!function_exists('skippa_lahete_pdf')) {
+  function skippa_lahete_pdf($params) {
+
+    extract($params);
+
+    if (!is_array($komento)) {
+      $komentoulos = array($komento);
+    }
+    else {
+      $komentoulos = $komento;
+    }
+
+    if (count($komentoulos) == 1 and $komentoulos[0] == "-88") {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+}
+

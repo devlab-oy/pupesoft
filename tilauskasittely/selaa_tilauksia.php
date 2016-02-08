@@ -188,7 +188,7 @@ if ($toim == "KEIKKA") {
   // päivänäkymä
   $query2 = "SELECT lasku.laskunro saapuminen, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
              round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
-             FROM lasku use index (yhtio_tila_luontiaika)
+             FROM lasku
              JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
              WHERE lasku.yhtio = '$kukarow[yhtio]' and
              tila              in ('K') and

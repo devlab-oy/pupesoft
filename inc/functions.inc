@@ -3052,9 +3052,9 @@ if (!function_exists("jalkilaskentafunktio")) {
     global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind;
 
     /*
-    $tuoteno   = korjattava tuote
-    $pvm     = mihin p‰iv‰‰n asti korjataan
-    $uusihinta   = mik‰ on tuon pvm:n oikea ostohinta
+    $tuoteno = korjattava tuote
+    $pvm = mihin p‰iv‰‰n asti korjataan
+    $uusihinta = mik‰ on tuon pvm:n oikea ostohinta
     $rivitunnus = mik‰ on tapahtuman tehneen rivin tunnus (ostorivitunnus)
     */
 
@@ -3076,6 +3076,9 @@ if (!function_exists("jalkilaskentafunktio")) {
            yhtio READ,
            yhtion_toimipaikat READ";
     $re = pupe_query($qu);
+
+    // T‰g‰t‰‰n kaikki t‰m‰n funtiokutsun tekem‰t asiat
+    $_jalkilaskenta_selite = "(".t("J‰lkilaskenta", $yhtiorow['kieli']).": ".date("Y-m-d H:i:s").chr(rand(65,90)).")";
 
     require "tilauskasittely/jalkilaskenta.inc";
 

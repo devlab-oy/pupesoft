@@ -22,6 +22,7 @@ class PrestaCustomers extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
+
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 

@@ -28,6 +28,8 @@ class PrestaSalesOrders extends PrestaClient {
    * @param SimpleXMLElement $existing_sales_order
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($sales_order, SimpleXMLElement $existing_sales_order = null) {
     die('You should not be here! Order update() or create() are not implemented');
     $xml = new SimpleXMLElement($this->schema->asXML());

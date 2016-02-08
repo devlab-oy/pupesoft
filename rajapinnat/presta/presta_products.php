@@ -8,8 +8,10 @@ class PrestaProducts extends PrestaClient {
   const RESOURCE = 'products';
 
   /**
-  * Dynaamiset tuoteparametrien lista
-  */
+   * Dynaamiset tuoteparametrien lista
+   */
+
+
   private $_dynamic_fields = array();
 
   /**

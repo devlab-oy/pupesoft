@@ -3078,7 +3078,7 @@ if (!function_exists("jalkilaskentafunktio")) {
     $re = pupe_query($qu);
 
     // Tägätään kaikki tämän funtiokutsun tekemät asiat
-    $_jalkilaskenta_selite = "(".t("Jälkilaskenta", $yhtiorow['kieli']).": ".date("Y-m-d H:i:s").chr(rand(65,90)).")";
+    $_jalkilaskenta_selite = "(".t("Jälkilaskenta", $yhtiorow['kieli']).": ".date("Y-m-d H:i:s").chr(rand(65, 90)).")";
 
     require "tilauskasittely/jalkilaskenta.inc";
 

@@ -149,7 +149,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   $mediatyyppi = "";
 
-  if ($komento == "-88") {
+  if ($komento == "-88" or $kirjoitin_tunnus == "-88") {
     $kirjoitin = "-88";
   }
   elseif ($komento != "PDF_RUUDULLE") {
@@ -1397,6 +1397,8 @@ if ($tee == '') {
       echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]' {$selected}>$kirow[kirjoitin]</option>";
     }
 
+    $sel = ($sel_tulostin == "-88") ? " selected" : "";
+    echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
     echo "</select></td></tr>";
 
     echo "<tr><th>", t("Tulosta osoitelaput"), "</th>";
@@ -1411,6 +1413,7 @@ if ($tee == '') {
       echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
     }
 
+    echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
     echo "</select></td></tr>";
 
     echo "<tr><th>", t("DGD-lomake"), "</th><td>";
@@ -1430,6 +1433,7 @@ if ($tee == '') {
 
     if (!isset($dgdkpl)) $dgdkpl = 1;
 
+    echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
     echo "</select>&nbsp;", t("Kpl"), ": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
 
     echo "</table>";

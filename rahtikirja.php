@@ -2368,7 +2368,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     $query  = "SELECT *
                FROM toimitustapa
                WHERE yhtio       = '$kukarow[yhtio]'
-               and tulostustapa != 'X'
+               and (tulostustapa != 'X' OR selite = '{$otsik["toimitustapa"]}')
                {$toimtapalisa}
                order by jarjestys, selite";
     $result = pupe_query($query);
@@ -3308,7 +3308,12 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
   }
 }
 
-if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
+if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan'
+  and ($rakirsyotto_dgd_tulostin == "-88" or $rakirsyotto_oslapp_tulostin == "-88" or $rakirsyotto_lahete_tulostin == "-88"
+    or $rakirsyotto_termoslapp_tulostin == "-88" or $komento == "-88")) {
+
+}
+elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php'>";
   exit;
 }

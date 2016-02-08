@@ -293,10 +293,10 @@ if (!function_exists("korjaalaskut")) {
         $pvm = $tilikausi_alku > (int) str_replace("-", "", $tiliointi1["tapvm"]) ? $yhtiorow['tilikausi_alku'] : "";
 
         $tiliointi1['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tiliointi1['selite']);
-        $tiliointi1['selite'] = " $_jalkilaskenta_selite";
+        $tiliointi1['selite'] = trim($tiliointi1['selite']." $_jalkilaskenta_selite");
 
         $tiliointi2['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tiliointi2['selite']);
-        $tiliointi2['selite'] = " $_jalkilaskenta_selite";
+        $tiliointi2['selite'] = trim($tiliointi2['selite']." $_jalkilaskenta_selite");
 
         // Ollaan avoimella tilikaudella
         if ($pvm == "") {
@@ -305,7 +305,7 @@ if (!function_exists("korjaalaskut")) {
           $query = "UPDATE tiliointi
                     SET korjattu = '{$kukarow['kuka']}',
                     korjausaika  = now(),
-                    selite       = concat(selite, ' {$_jalkilaskenta_selite}')
+                    selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                     WHERE tunnus = '{$tiliointi1['tunnus']}'";
           $katekorjres = pupe_query($query);
 
@@ -328,7 +328,7 @@ if (!function_exists("korjaalaskut")) {
           $query = "UPDATE tiliointi
                     SET korjattu = '{$kukarow['kuka']}',
                     korjausaika  = now(),
-                    selite       = concat(selite, ' {$_jalkilaskenta_selite}')
+                    selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                     WHERE tunnus = '{$tiliointi2['tunnus']}'";
           $katekorjres = pupe_query($query);
 
@@ -743,6 +743,15 @@ if ($tuoteno != '') {
     else {
       $tapahtuma = mysql_fetch_assoc($result);
       $pvm = $tapahtuma["laadittu"]; // k‰‰ntˆpisteen tarkka aika talteen
+
+      $tapahtuma['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tapahtuma['selite']);
+      $tapahtuma['selite'] = trim($tapahtuma['selite']." $_jalkilaskenta_selite");
+
+      $query = "UPDATE tapahtuma
+                SET selite = '{$tapahtuma['selite']}'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '{$tapahtuma['tunnus']}'";
+      pupe_query($query);
     }
 
     if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti100pvm'] != '0000-00-00')) {
@@ -1010,7 +1019,7 @@ if ($tuoteno != '') {
                   $pvm_chk = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
 
                   $sum_chk_row['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
-                  $sum_chk_row['selite'] = " $_jalkilaskenta_selite";
+                  $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
 
                   if ($pvm_chk == "") {
 
@@ -1029,7 +1038,7 @@ if ($tuoteno != '') {
                     $query = "UPDATE tiliointi
                               SET korjattu = '$kukarow[kuka]',
                               korjausaika = now(),
-                              selite      = concat(selite, ' {$_jalkilaskenta_selite}')
+                              selite      = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                               WHERE yhtio = '$kukarow[yhtio]'
                               AND tunnus  = '$sum_chk_row[tunnus]'";
                     $invupd = pupe_query($query);
@@ -1167,7 +1176,7 @@ if ($tuoteno != '') {
                         $sum_chk_row = mysql_fetch_assoc($sum_chk_res);
 
                         $sum_chk_row['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
-                        $sum_chk_row['selite'] = " $_jalkilaskenta_selite";
+                        $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
 
                         $params = array(
                           'summa' => round($trow["kpl"] * $uusikehahin * -1, 2),
@@ -1195,7 +1204,7 @@ if ($tuoteno != '') {
                         $query = "UPDATE tiliointi
                                   SET korjattu = '$kukarow[kuka]',
                                   korjausaika  = now(),
-                                  selite       = concat(selite, ' {$_jalkilaskenta_selite}')
+                                  selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                                   WHERE yhtio  = '$kukarow[yhtio]'
                                   AND ltunnus  = '$invrow[ltunnus]'
                                   AND tunnus   IN ('{$invrow['tunnus']}','{$sum_chk_row['tunnus']}')
@@ -1219,7 +1228,7 @@ if ($tuoteno != '') {
                         $sum_chk_row = mysql_fetch_assoc($sum_chk_res);
 
                         $sum_chk_row['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
-                        $sum_chk_row['selite'] = " $_jalkilaskenta_selite";
+                        $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
 
                         $params = array(
                           'tapvm' => $yhtiorow['tilikausi_alku'],
@@ -1275,7 +1284,7 @@ if ($tuoteno != '') {
                       // korjataan vaan VARASTO kirjaus, niin tosite j‰‰ heitt‰m‰‰n ja sen lˆyt‰‰ helposti
 
                       $invrow['selite'] = preg_replace("/".t("J‰lkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $invrow['selite']);
-                      $invrow['selite'] = " $_jalkilaskenta_selite";
+                      $invrow['selite'] = trim($invrow['selite']." $_jalkilaskenta_selite");
 
                       // Ollaan avoimella tilikaudella
                       if ($pvm_chk == "") {
@@ -1284,7 +1293,7 @@ if ($tuoteno != '') {
                         $query = "UPDATE tiliointi
                                   SET korjattu = '$kukarow[kuka]',
                                   korjausaika  = now(),
-                                  selite       = concat(selite, ' {$_jalkilaskenta_selite}')
+                                  selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                                   WHERE yhtio  = '$kukarow[yhtio]'
                                   AND ltunnus  = '$invrow[ltunnus]'
                                   AND korjattu = ''

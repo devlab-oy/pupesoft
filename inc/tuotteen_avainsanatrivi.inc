@@ -33,6 +33,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
   $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
   $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("hinnastoryhmittely")."</option>";
+  $ulos .= "<option value='kielialue' {$sel['kielialue']}>".t("Sallittu kielialue")."</option>";
 
   // Tuotteiden avainsanojen laji
   // N‰m‰ on dynaamisia ja k‰ytet‰‰n ainoastaan raporteissa/erikoistapauksissa, johon erikseen hardcoodattu sovittu arvo.
@@ -91,6 +92,24 @@ if (mysql_field_name($result, $i) == "selite") {
 
       $ulos .= "</select></td>";
     }
+
+    $jatko = 0;
+  }
+  elseif (strtolower($tem_laji) == "kielialue") {
+    $vresult = t_avainsana("KIELIALUE");
+
+    $ulos = "<td><select name='{$nimi}'>";
+    $ulos .= "<option value=''>".t("Ei kielialuetta")."</option>";
+
+    if (mysql_num_rows($vresult) > 0) {
+
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        $sel = $trow[$i] == $vrow['selite'] ? 'selected' : '';
+        $ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+      }
+    }
+
+    $ulos .= "</select></td>";
 
     $jatko = 0;
   }

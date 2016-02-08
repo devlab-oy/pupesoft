@@ -10204,8 +10204,8 @@ if (!function_exists("livesearch_tullinimikehaku")) {
 
       $query = "SELECT cn, dm
                 FROM tullinimike
-                WHERE kieli = '{$yhtiorow['kieli']}'
-                AND cn != ''";
+                WHERE kieli  = '{$yhtiorow['kieli']}'
+                AND cn      != ''";
       $result = pupe_query($query);
 
       $limit = 0;

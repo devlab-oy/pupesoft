@@ -61,16 +61,16 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       $query = "UPDATE tyomaarays SET
-                tullikoodi                       = '$tullikoodi',
-                tulliarvo                        = '$tulliarvo',
-                maa_maara                        = '$maa_maara',
-                maa_lahetys                      = '$maa_lahetys',
-                maa_alkupera                     = '$maa_alkupera',
-                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-                kuljetusmuoto                    = '$kuljetusmuoto',
-                bruttopaino                      = '$bruttopaino'
-                WHERE otunnus                    in ($otunnus)
-                and yhtio                        = '$kukarow[yhtio]'";
+                tullikoodi              = '$tullikoodi',
+                tulliarvo               = '$tulliarvo',
+                maa_maara               = '$maa_maara',
+                maa_lahetys             = '$maa_lahetys',
+                maa_alkupera            = '$maa_alkupera',
+                kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
+                kuljetusmuoto           = '$kuljetusmuoto',
+                bruttopaino             = '$bruttopaino'
+                WHERE otunnus           in ($otunnus)
+                and yhtio               = '$kukarow[yhtio]'";
       $result = pupe_query($query);
     }
     else {

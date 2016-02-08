@@ -186,7 +186,7 @@ if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
 
 if ($tila == 'uudelleenkohdista_viitemaksut') {
   // Haetaan kaikki suoritukset/laskut, jotka t‰sm‰‰ t‰ydellisesti viitteell‰ ja summalla
-  $query = "SELECT suoritus.tunnus as suoritus_tunnus, lasku.tunnus as lasku_tunnus
+  $query = "SELECT suoritus.tunnus AS suoritus_tunnus, lasku.tunnus AS lasku_tunnus
             FROM suoritus
             INNER JOIN lasku ON (lasku.yhtio = suoritus.yhtio
               AND lasku.tila             = 'U'
@@ -195,9 +195,14 @@ if ($tila == 'uudelleenkohdista_viitemaksut') {
               AND lasku.viite            = suoritus.viite
               AND lasku.valkoodi         = suoritus.valkoodi
               AND lasku.summa            = suoritus.summa)
+            JOIN tiliointi AS laskunT ON (laskunT.yhtio = lasku.yhtio
+              AND laskunT.ltunnus = lasku.tunnus)
+            JOIN tiliointi AS suorinT ON (suorinT.yhtio = suoritus.yhtio
+              AND suorinT.tunnus = suoritus.ltunnus)
             WHERE suoritus.yhtio         = '$kukarow[yhtio]'
             AND suoritus.kohdpvm         = '0000-00-00'
-            AND suoritus.asiakas_tunnus != 0";
+            AND suoritus.asiakas_tunnus != 0
+            AND laskunT.tilino = suorinT.tilino";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

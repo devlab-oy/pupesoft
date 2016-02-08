@@ -3049,7 +3049,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 if (!function_exists("jalkilaskentafunktio")) {
   function jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus=0, $kaantopisteen_saldomuutos=0) {
-    global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind;
+    global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind, $_jalkilaskenta_selite;
 
     /*
     $tuoteno = korjattava tuote

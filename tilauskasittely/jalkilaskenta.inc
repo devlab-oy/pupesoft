@@ -17,7 +17,7 @@ $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa,
 if (!function_exists("korjaalaskut")) {
   function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
     global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $varastotili,
-    $varastonmuutostili;
+    $varastonmuutostili, $_jalkilaskenta_selite;
 
     if ($korjtunnus != 0) {
       $lisa = " and tilausrivi.tunnus = '$korjtunnus' ";
@@ -458,7 +458,7 @@ if (!function_exists("korjaalaskut")) {
 
 if (!function_exists('korjaatapahtuma')) {
   function korjaatapahtuma($tapahtuma_tunnus, $selite_txt, $upd_hinta, $upd_kplhinta = FALSE) {
-    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
+    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $_jalkilaskenta_selite;
 
     // Haetaan ensimmäinen
     $query = "SELECT LEFT(laadittu, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl, laji

@@ -1715,9 +1715,9 @@ if ($tee == 'MUUTA') {
 
     if ($toim == 'extranet') {
 
-      $query = "SELECT asiakas.nimi 
-                FROM customers_users 
-                JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+      $query = "SELECT asiakas.nimi
+                FROM customers_users
+                JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
                 WHERE user_id = '{$krow['tunnus']}'";
       $result = pupe_query($query);
 

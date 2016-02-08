@@ -2120,7 +2120,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     sahkoinen_lahete($laskurow);
   }
 
-  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != ""
     and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
 
     $params_tilausvahvistus = array(

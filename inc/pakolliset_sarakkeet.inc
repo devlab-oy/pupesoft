@@ -431,10 +431,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "customers_users" :
       $pakolliset = array("USER_ID", "CUSTOMER_ID");
-      $kielletyt    = array("YHTIO"); 
+      $kielletyt    = array("YHTIO");
       $eiyhtiota    = "EITUNNUSTAKAAN";
       $saakopoistaa = TRUE;
-      break;  
+      break;
     default :
       $pakolliset   = array("TUNTEMATON_TAULU");
       $kielletyt    = array();

@@ -711,7 +711,7 @@ for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix
 }
 
 //Ei olla pikatilauksella, mutta ollaan jostain syystä kuitenkin ilman asiakasta ja halutaan nyt liittää se
-if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
+if (isset($liitaasiakasnappi)  and !empty($liitaasiakasnappi_real) and $kukarow["extranet"] == "") {
   $tee  = "OTSIK";
   $tila = "vaihdaasiakas";
 }
@@ -3358,7 +3358,8 @@ if ($tee == '') {
       if ($laskurow["liitostunnus"] == 0) {
         echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
         echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-        echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
+        echo "<input type='hidden' name='liitaasiakasnappi_real' id='liitaasiakasnappi_real' value='' />";
+        echo "<input type='submit' name='liitaasiakasnappi' id='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
       }
       else {
         echo "<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&lopetus={$tilmyy_lopetus}'>{$laskurow['ytunnus']}</a>";

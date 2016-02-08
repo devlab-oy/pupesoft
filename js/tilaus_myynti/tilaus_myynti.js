@@ -25,6 +25,10 @@ $(document).ready(function() {
     $('#hae_asiakasta_boksi').focus();
   });
 
+  $('#liitaasiakasnappi').on('mousedown', function() {
+    $('#liitaasiakasnappi_real').val('oh_yeah');
+  });
+
   $('#hae_asiakasta_boksi').on('keyup', function(e) {
     e.preventDefault();
 

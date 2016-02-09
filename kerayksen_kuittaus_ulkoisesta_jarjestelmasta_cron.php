@@ -219,7 +219,7 @@ if ($handle = opendir($path)) {
                 'naytetaanko_rivihinta'    => "",
                 'tee'                      => "",
                 'toim'                     => $toim,
-                'komento'                  => $komento,
+                'komento'                  => "asiakasemail".$asrow['email'],
                 'lahetekpl'                => "",
                 'kieli'                    => ""
               );

@@ -967,6 +967,12 @@ if ($tee == 'tulosta') {
           }
         }
         elseif ($rakir_row['toimitusvahvistus'] == 'toimitusvahvistus_onkin_lahete') {
+          $asiakasquery = "SELECT * 
+                           FROM asiakas
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           AND tunnus = '{$laskurow['liitostunnus']}'";
+          $asiakasresult = pupe_query($asiakasquery);
+          $asiakasrow = mysql_fetch_assoc($asiakasresult);
           $params = array(
             'laskurow'                 => $laskurow,
             'sellahetetyyppi'          => "",
@@ -974,7 +980,7 @@ if ($tee == 'tulosta') {
             'naytetaanko_rivihinta'    => "",
             'tee'                      => "",
             'toim'                     => $toim,
-            'komento'                  => $komento,
+            'komento'                  => "asiakasemail".$asiakasrow['email'],
             'lahetekpl'                => "",
             'kieli'                    => ""
           );

@@ -10,14 +10,17 @@ if (isset($laskurow['varasto']) and $laskurow['varasto'] != 0) {
   if (mysql_num_rows($prires) != 0) {
     $prirow = mysql_fetch_assoc($prires);
 
-    $query  = "SELECT *
-               FROM kirjoittimet
-               WHERE yhtio = '$kukarow[yhtio]'
-               AND tunnus  = '$prirow[printteri1]'";
-    $kirres = pupe_query($query);
+    if ($prirow["printteri1"] != "-88") {
+      $query  = "SELECT *
+                 FROM kirjoittimet
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tunnus  = '$prirow[printteri1]'";
+      $kirres = pupe_query($query);
 
-    if (mysql_num_rows($kirres) == 0)
-      die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
+      if (mysql_num_rows($kirres) == 0) {
+        die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
+      }
+    }
   }
   else {
     die ("<font class='error'>Yhtään varastoa ei ole määritelty. Lähetteitä ei voida tulostaa...</font>");
@@ -432,7 +435,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     'iso_boldi'         => $iso_boldi,
     'kala'              => 0,
     'kieli'             => $kieli,
-    'komento'      => '',
+    'komento'           => '',
     'laskurow'          => $laskurow,
     'norm'              => $norm,
     'page'              => '',
@@ -444,17 +447,18 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     'pieni_boldi'       => $pieni_boldi,
     'rectparam'         => $rectparam,
     'rivinkorkeus'      => $rivinkorkeus,
-    'rivinumerot'      => $rivinumerot,
+    'rivinumerot'       => $rivinumerot,
     'row'               => NULL,
     'sivu'              => 1,
     'tee'               => $tee,
-    'thispage'      => NULL,
+    'thispage'          => NULL,
     'tilausnumeroita'   => $tilausnumeroita,
     'toim'              => $toim,
     'tots'              => 0,
-    'tyyppi'        => $tyyppi,
+    'tyyppi'            => $tyyppi,
     'kerayseran_numero' => $kerayseran_numero,
-    'kerayslistatyyppi'  => $kerayslistatyyppi);
+    'kerayslistatyyppi' => $kerayslistatyyppi,
+  );
 
   // Aloitellaan keräyslistan teko
   $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -469,12 +473,17 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
-  $komento = hae_lahete_printteri(
-    $laskurow['varasto'],
-    $laskurow['yhtio_toimipaikka'],
-    $tilausnumeroita,
-    $valittu_tulostin
-  );
+  if ($valittu_tulostin == "-88") {
+    $komento = "-88";
+  }
+  else {
+    $komento = hae_lahete_printteri(
+      $laskurow['varasto'],
+      $laskurow['yhtio_toimipaikka'],
+      $tilausnumeroita,
+      $valittu_tulostin
+    );
+  }
 
   if ($komento != "") {
     //tulostetaan sivu
@@ -573,6 +582,10 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
                 and tunnus  in ({$tilausnumeroita})";
       pupe_query($query);
     }
+  }
+
+  if ($valittu_tulostin == "-88") {
+    echo "<br>";
   }
 }
 else {

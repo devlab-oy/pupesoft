@@ -79,13 +79,7 @@ else {
   );
 }
 
-if (!isset($verkkokauppa_saldo_varasto)) $verkkokauppa_saldo_varasto = array();
-
-if (!is_array($verkkokauppa_saldo_varasto)) {
-  echo "verkkokauppa_saldo_varasto pitää olla array!";
-  exit;
-}
-
+// Tässä kaikki parametrit, jota voi säätää salasanat.php:ssä
 if (!isset($presta_url)) {
   die('Presta url puuttuu');
 }
@@ -125,6 +119,15 @@ if (!isset($presta_haettavat_tilaus_statukset)) {
 if (!isset($presta_haettu_tilaus_status)) {
   $presta_haettu_tilaus_status = 3;
 }
+if (!isset($presta_dynaamiset_tuoteparametrit)) {
+  $presta_dynaamiset_tuoteparametrit = array();
+}
+if (!isset($presta_ohita_tuoteparametrit)) {
+  $presta_ohita_tuoteparametrit = array();
+}
+if (!isset($presta_synkronoi_tuotepuu)) {
+  $presta_synkronoi_tuotepuu = true;
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -145,32 +148,22 @@ if (array_key_exists('kategoriat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotekategoriat.\n";
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
-  $ok = $presta_categories->sync_categories($kategoriat);
+  $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
+  $presta_categories->sync_categories($kategoriat);
 }
 
 if (array_key_exists('tuotteet', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
   $tuotteet = hae_tuotteet();
+  $kaikki_tuotteet = hae_kaikki_tuotteet();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotetiedot.\n";
   $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
-
-  if (isset($presta_dynaamiset_tuoteparametrit) and count($presta_dynaamiset_tuoteparametrit) > 0) {
-    $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
-  }
-
-  if (isset($presta_ohita_tuoteparametrit) and count($presta_ohita_tuoteparametrit) > 0) {
-    $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
-  }
-
-  if (isset($presta_ohita_kategoriat) and !empty($presta_ohita_kategoriat)) {
-    $presta_products->set_category_sync($presta_ohita_kategoriat);
-  }
-
-  $kaikki_tuotteet = hae_kaikki_tuotteet();
+  $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
+  $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
+  $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_all_products($kaikki_tuotteet);
-
-  $ok = $presta_products->sync_products($tuotteet);
+  $presta_products->sync_products($tuotteet);
 }
 
 if (array_key_exists('asiakasryhmat', $synkronoi)) {
@@ -179,7 +172,7 @@ if (array_key_exists('asiakasryhmat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakasryhmät.\n";
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
-  $ok = $presta_customer_groups->sync_groups($groups);
+  $presta_customer_groups->sync_groups($groups);
 }
 
 if (array_key_exists('asiakkaat', $synkronoi)) {
@@ -188,7 +181,7 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
-  $ok = $presta_customer->sync_customers($asiakkaat);
+  $presta_customer->sync_customers($asiakkaat);
 }
 
 if (array_key_exists('asiakashinnat', $synkronoi)) {

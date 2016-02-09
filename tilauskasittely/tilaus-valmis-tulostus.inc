@@ -583,6 +583,10 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       pupe_query($query);
     }
   }
+
+  if ($valittu_tulostin == "-88") {
+    echo "<br>";
+  }
 }
 else {
   echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";

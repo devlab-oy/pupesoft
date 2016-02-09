@@ -1565,6 +1565,25 @@ if ($kasitellaan_tiedosto) {
               }
             }
 
+            if ($table_mysql == 'tuote' and $otsikko == 'VIENTI' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+
+              $_selitetark = mysql_real_escape_string($taulunrivit[$taulu][$eriviindex][$r]);
+
+              $kielialuequery = "SELECT *
+                                 FROM avainsana
+                                 WHERE yhtio = '{$kukarow['yhtio']}'
+                                 and laji    = 'kielialue'
+                                 and selite != ''
+                                 and selitetark = '{$_selitetark}'
+                                 ORDER BY jarjestys";
+              $kielialueres = pupe_query($kielialuequery);
+
+              if (mysql_num_rows($kielialueres) > 0) {
+                $kielialuerow = mysql_fetch_assoc($kielialueres);
+                $taulunrivit[$taulu][$eriviindex][$r] = $kielialuerow['selite'];
+              }
+            }
+
             if ($table_mysql == 'tuote' and ($otsikko == 'EPAKURANTTI25PVM' or $otsikko == 'EPAKURANTTI50PVM' or $otsikko == 'EPAKURANTTI75PVM' or $otsikko == 'EPAKURANTTI100PVM') and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 
               if (trim($taulunrivit[$taulu][$eriviindex][$r]) != '' and trim($taulunrivit[$taulu][$eriviindex][$r]) != '0000-00-00' and $otsikko == 'EPAKURANTTI100PVM') {

@@ -737,6 +737,14 @@ if (!function_exists("tee_jt_tilaus")) {
               $kommentti .= trim($lisataanrow['kommentti']);
             }
 
+            // Rivin
+            $tuotenimitys = "";
+
+            if (trim($lisataanrow['nimitys']) != "" and !empty($yhtiorow["nimityksen_muutos_tilauksella"])) {
+              // Tilausriville ollaan voitu syöttä speciaali nimitys -> talnteen
+              $tuotenimitys = trim($lisataanrow['nimitys']);
+            }
+
             unset($orig_laskurow);
 
             if ($lisataanrow["vanha_otunnus"] > 0) {

@@ -263,8 +263,8 @@ class PrestaProducts extends PrestaClient {
     $this->_dynamic_fields = $fields;
   }
 
-  public function set_category_sync($status) {
-    if (!empty($status)) {
+  public function set_category_sync($value) {
+    if ($value === false) {
       $this->_category_sync = false;
     }
   }

@@ -92,7 +92,6 @@ if ($handle = opendir($path)) {
           $laskurow = mysql_fetch_assoc($laskures);
 
           $tuotteiden_paino = 0;
-
           $kerayspoikkeama = array();
 
           if (mysql_num_rows($laskures) > 0) {
@@ -167,6 +166,7 @@ if ($handle = opendir($path)) {
                        yhtio          = '{$kukarow['yhtio']}',
                        viesti         = ''";
             $result_rk = pupe_query($query);
+            $tunnukset = mysql_insert_id($GLOBALS["masterlink"]);
 
             if ($laskurow["tila"] == "G") {
               if ($laskurow["tilaustyyppi"] != 'M') {
@@ -202,29 +202,8 @@ if ($handle = opendir($path)) {
                       AND chn      = '999'";
             $yoimresult  = pupe_query($query);
 
-            // Tarkistetaan asiakkaan toimitusvahvistustyyppi
-            $query = "SELECT * 
-                      FROM asiakas
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$laskurow['liitostunnus']}'";
-            $asresult = pupe_query($query);
-            $asrow = mysql_fetch_assoc($asresult);
-
-            // Jos toimitusvahvistuksena käytetään lähetettä
-            if ($asrow['toimitusvahvistus'] == 'toimitusvahvistus_onkin_lahete') {
-              $params = array(
-                'laskurow'                 => $laskurow,
-                'sellahetetyyppi'          => "",
-                'extranet_tilausvahvistus' => "",
-                'naytetaanko_rivihinta'    => "",
-                'tee'                      => "",
-                'toim'                     => $toim,
-                'komento'                  => "asiakasemail".$asrow['email'],
-                'lahetekpl'                => "",
-                'kieli'                    => ""
-              );
-              pupesoft_tulosta_lahete($params);
-            }
+            // Lähetetään toimitusvahvistus
+            pupesoft_toimitusvahvistus($otunnus, $tunnukset);
           }
           else {
             // Laitetaan sähköpostia tuplakeräyksestä - ollaan yritetty merkitä kerätyksi jo käsin kerättyä tilausta

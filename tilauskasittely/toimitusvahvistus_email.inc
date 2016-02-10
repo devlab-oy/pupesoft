@@ -1,18 +1,9 @@
 <?php
 
-$toimitusvahvistus_email_lahetys = true;
+if (!empty($laskurow['asiakas_email'])) {
 
-if (!isset($rakir_row) or !isset($rakir_row['toimitusvahvistus']) or !isset($rakir_row['asiakas_email']) or !isset($tunnukset) or !isset($otunnukset)) {
-  $toimitusvahvistus_email_lahetys = false;
-}
+  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", "", " and avainsana.selite = '{$laskurow['toimitusvahvistus']}'", "", "", "selitetark_2");
 
-if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_row['asiakas_email'] == '' or $tunnukset == '' or $otunnukset == '') {
-  $toimitusvahvistus_email_lahetys = false;
-}
-
-if ($toimitusvahvistus_email_lahetys) {
-
-  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", '', '', '', '', "selitetark_2");
   if ($_toimvahvistus == "eihintaa") {
     $_hinta = "";
   }
@@ -52,7 +43,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
             FROM rahtikirjat
             WHERE tunnus IN ({$tunnukset})
-            AND yhtio    = '{$kukarow['yhtio']}'";
+            AND yhtio = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
   $body .= t("Seurantakoodit").":\n";
@@ -65,22 +56,23 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= t("Tilauksen toimitusosoite").":\n\n";
 
-  $maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
+  $maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
 
-  $body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n";
-  $body .= "{$rakir_row['toim_osoite']}\n";
-  $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n";
+  $body .= "{$laskurow['toim_nimi']} {$laskurow['toim_nimitark']}\n";
+  $body .= "{$laskurow['toim_osoite']}\n";
+  $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
 
   // Sähköpostin lähetykseen parametrit
-  $parametri = array( "to"       => $rakir_row['asiakas_email'],
-    "cc"       => "",
-    "subject"    => t("Toimitusvahvistus"),
-    "ctype"      => "text",
-    "body"      => $body,
+  $parametri = array(
+    "to" => $laskurow['asiakas_email'],
+    "cc" => "",
+    "subject" => t("Toimitusvahvistus"),
+    "ctype" => "text",
+    "body" => $body,
   );
 
   if (pupesoft_sahkoposti($parametri)) {
-    echo t("Sähköpostin lähetys onnistui").": {$rakir_row['asiakas_email']}<br />";
+    echo t("Sähköpostin lähetys onnistui").": {$laskurow['asiakas_email']}<br />";
   }
 }

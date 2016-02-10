@@ -356,40 +356,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // sscc_ulkoinen magentoa varten
         $sscc_ulkoinen = $sscc_ulk_arr[$key];
 
-        $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
-
-        if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
-
-          if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-            $desadv_version = "una";
-            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-          }
-          elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
-            $desadv_version = "fi0089";
-            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-          }
-          else {
-            $desadv_version = "";
-          }
-
-          if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
-
-            $rakir_row = $laskurow;
-
-            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-              // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
-              $tmp_laskurow = $laskurow;
-
-              $myynti_vai_osto = 'M';
-            }
-
-            require "tilauskasittely/{$laskurow['toimitusvahvistus']}";
-
-            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-              $laskurow = $tmp_laskurow;
-            }
-          }
-        }
+        // Lähetetään toimitusvahvistus
+        pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
 
         // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));

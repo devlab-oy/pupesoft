@@ -2264,7 +2264,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td></tr>";
-echo "2267 toim $toim <br><br>";
+
   // M‰‰ritell‰‰n mit‰ tietueita saa poistaa
   if ($toim == "auto_vari" or
     $toim == "auto_vari_tuote" or

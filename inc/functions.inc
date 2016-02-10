@@ -27268,8 +27268,12 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $custpickinglist->addChild('UnloadingDate', 0);
     $custpickinglist->addChild('OrderDate', 0);
-    $custpickinglist->addChild('DlvTerm', substr(utf8_encode($looprow['toimitusehto']), 0, 3));
-    $custpickinglist->addChild('PickingInstruction', substr(utf8_encode($looprow['sisviesti2']), 0, 128));
+
+    $_toimitusehto = substr($looprow['toimitusehto'], 0, 3);
+    $custpickinglist->addChild('DlvTerm', utf8_encode($_toimitusehto));
+
+    $_sisviesti2 = substr($looprow['sisviesti2'], 0, 128);
+    $custpickinglist->addChild('PickingInstruction', utf8_encode($_sisviesti2));
     $custpickinglist->addChild('SalesOffice', 0);
     $custpickinglist->addChild('SalesContact', 0);
     $custpickinglist->addChild('Warehouse', 0);
@@ -27277,22 +27281,33 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $orderedby = $custpickinglist->addChild('OrderedBy');
     $orderedby->addChild('CustAccount', 0);
-    $orderedby->addChild('CustName', substr(utf8_encode(trim($looprow['nimi'].' '.$looprow['nimitark'])), 0, 50));
-    $orderedby->addChild('CustStreet', substr(utf8_encode($looprow['osoite']), 0, 50));
-    $orderedby->addChild('CustStreet2', substr(utf8_encode($looprow['osoite']), 0, 50));
+
+    $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
+    $_osoite = substr($looprow['osoite'], 0, 50);
+    $_postitp = substr($looprow['postitp'], 0, 30);
+    $_maa = substr($looprow['maa'], 0, 10);
+
+    $orderedby->addChild('CustName', utf8_encode($_nimi));
+    $orderedby->addChild('CustStreet', utf8_encode($_osoite));
+    $orderedby->addChild('CustStreet2', utf8_encode($_osoite));
     $orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));
-    $orderedby->addChild('CustCity', substr(utf8_encode($looprow['postitp']), 0, 30));
-    $orderedby->addChild('CustCountry', substr(utf8_encode($looprow['maa']), 0, 10));
+    $orderedby->addChild('CustCity', utf8_encode($_postitp));
+    $orderedby->addChild('CustCountry', utf8_encode($_maa));
     $orderedby->addChild('Email', utf8_encode($looprow['email']));
+
+    $_nimi = substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50);
+    $_osoite = substr($looprow['toim_osoite'], 0, 50);
+    $_postitp = substr($looprow['toim_postitp'], 0, 30);
+    $_maa = substr($looprow['toim_maa'], 0, 10);
 
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount', 0);
-    $receiver->addChild('RecCustName', substr(utf8_encode(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark'])), 0, 50));
-    $receiver->addChild('RecCustStreet', substr(utf8_encode($looprow['toim_osoite']), 0, 50));
-    $receiver->addChild('RecCustStreet2', substr(utf8_encode($looprow['toim_osoite']), 0, 50));
+    $receiver->addChild('RecCustName', utf8_encode($_nimi));
+    $receiver->addChild('RecCustStreet', utf8_encode($_osoite));
+    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite));
     $receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));
-    $receiver->addChild('RecCustCity', substr(utf8_encode($looprow['toim_postitp']), 0, 30));
-    $receiver->addChild('RecCustCountry', substr(utf8_encode($looprow['toim_maa']), 0, 10));
+    $receiver->addChild('RecCustCity', utf8_encode($_postitp));
+    $receiver->addChild('RecCustCountry', utf8_encode($_maa));
     $receiver->addChild('RecCustPhone', substr($looprow['toim_puh'], 0, 30));
 
     $query = "SELECT tunnus
@@ -27332,7 +27347,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
 
       if ($ulkoinen_jarjestelma == 'L') {
-        $line->addChild('ItemNumber', substr(utf8_encode($looprow['tuoteno']), 0, 20));
+        $_tuoteno = substr($looprow['tuoteno'], 0, 20);
+        $line->addChild('ItemNumber', utf8_encode($_tuoteno));
       }
       else {
         $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
@@ -27355,7 +27371,9 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('DiscountPercent', 0);
       $line->addChild('CurrencyCode', 0);
       $line->addChild('TaxCode', 0);
-      $line->addChild('LineInfo', substr(utf8_encode($looprow['kommentti']), 0, 92));
+
+      $_kommentti = substr($looprow['kommentti'], 0, 92);
+      $line->addChild('LineInfo', utf8_encode($_kommentti));
 
       $_line_i++;
     }

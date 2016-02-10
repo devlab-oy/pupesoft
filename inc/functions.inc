@@ -32177,7 +32177,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
   // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 
   function pupesoft_toimitusvahvistus($otunnukset, $tunnukset="") {
-    global $kukarow, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
+    global $kukarow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
 
     if (empty($otunnukset)) {
       return;
@@ -32253,15 +32253,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
       }
 
       if (file_exists("tilauskasittely/$laskurow[toimitusvahvistus]")) {
-
         if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-          $query = "SELECT *
-                    FROM lasku
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$rivi['otunnus']}'";
-          $laskurow_edi_res = pupe_query($query);
-          $laskurow = mysql_fetch_assoc($laskurow_edi_res);
-
           $myynti_vai_osto = 'M';
         }
 

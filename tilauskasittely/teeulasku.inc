@@ -205,8 +205,8 @@ if (strtoupper($mehtorow["factoring"]) != "") {
 
     $kieliind = "teksti_".$kielirow["kieli"];
 
-    if (trim($frow[$kieliind]) != "" and stripos($sisviestit1, $frow[$kieliind]) === FALSE) $lisa_comments .= trim($frow[$kieliind])." \n";
-    elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n";
+    if (trim($frow[$kieliind]) != "" and stripos($sisviestit1, $frow[$kieliind]) === FALSE) $lisa_comments .= trim($frow[$kieliind])." \n\n";
+    elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n\n";
   }
 }
 if ($lasrow["vienti"] == 'E') {

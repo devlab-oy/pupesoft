@@ -99,8 +99,7 @@ if (!function_exists('desadv_header')) {
 
       // DTM - despatch and/or delivery date/time
       // 171 = tilauspäivä
-      list($date, $time) = explode(" ", $desadv_laskurow['toimaika']);
-      list($year, $month, $day) = explode("-", $date);
+      list($year, $month, $day) = explode("-", $desadv_laskurow['toimaika']);
       $desadv_message .= "DTM+69:{$year}{$month}{$day}:102'";
       $x++;
 

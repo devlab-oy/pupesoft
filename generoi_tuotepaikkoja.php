@@ -13,7 +13,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
   exit(1);
 }
 else {
-  $yhtio = $argv[1];
+  $kukarow['yhtio'] = $yhtio = $argv[1];
 }
 
 // otetaan includepath aina rootista
@@ -50,8 +50,8 @@ while ($tuoterow = mysql_fetch_assoc($tuoteresult)) {
               AND varasto = '$varastorow[tunnus]'";
     $paikkaresult = pupe_query($query);
 
-    if (mysql_num_rows($paikkaresult) == 0) {
-      lisaa_tuotepaikka($tuoterow["tuoteno"], $varastorow["alkuhyllyalue"], $varastorow["hyllynro"], '0', '0', 'Lisättiin tuotepaikka generoinnissa');
+    if (mysql_num_rows($paikkaresult) == 0 and $varastorow["alkuhyllyalue"] != "!!M") {
+      lisaa_tuotepaikka($tuoterow["tuoteno"], $varastorow["alkuhyllyalue"], $varastorow["alkuhyllynro"], '0', '0', 'Lisättiin tuotepaikka generoinnissa');
     }
   }
 

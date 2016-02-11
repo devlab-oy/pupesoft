@@ -2309,6 +2309,10 @@ class MagentoClient {
           $hinta = round(($hinta * $kokonaisale), 2);
         }
       }
+      else {
+        // ei alennusta eikä asiakaskohtaista hintaa
+        continue;
+      }
 
       if ($hinta > 0 and $hinta <> $tuotteen_vertailuhinta) {
         $asiakaskohtaiset_hinnat_data[] = array(

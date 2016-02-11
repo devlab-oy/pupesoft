@@ -309,7 +309,16 @@ if (!function_exists('print_pdf_dgd')) {
       ${$key} = $val;
     }
 
-    if ($tee == 'NAYTATILAUS') {
+    if (isset($komento) and $komento == "-88") {
+      js_openFormInNewWindow();
+
+      echo "<br><form id='tulostakopioform_dgd_{$laskurow['tunnus']}' name='tulostakopioform_dgd_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+            <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+            <input type='hidden' name='toim' value='DGD'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='submit' value='".t("DGD").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_dgd_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+    }
+    elseif ($tee == 'NAYTATILAUS') {
       //Työnnetään tuo pdf vaan putkeen!
       echo $pdf->render();
     }

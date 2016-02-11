@@ -27,6 +27,9 @@ if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
     $ulos .=">$kirow[kirjoitin]</option>";
   }
 
+  $ulos .= "<option value='-88' ";
+  if (isset($sel["-88"])) $ulos .= $sel["-88"];
+  $ulos .=">".t("PDF Ruudulle")."</option>";
   $ulos .= "</select></td>";
 
   $jatko=0;

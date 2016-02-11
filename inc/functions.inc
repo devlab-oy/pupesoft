@@ -7521,6 +7521,11 @@ if (!function_exists("js_selectAllCheckboxesByName")) {
 
 if (!function_exists("js_openFormInNewWindow")) {
   function js_openFormInNewWindow() {
+    static $js_openFormInNewWindowCalled = FALSE;
+
+    # Ekotetaan vain kerran.
+    if (!$js_openFormInNewWindowCalled) {
+      $js_openFormInNewWindowCalled = TRUE;
 ?>
     <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
       function js_openFormInNewWindow(formID, name) {
@@ -7551,6 +7556,7 @@ if (!function_exists("js_openFormInNewWindow")) {
       }
     </SCRIPT>
     <?php
+    }
   }
 }
 

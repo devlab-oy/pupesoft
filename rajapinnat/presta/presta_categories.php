@@ -6,6 +6,7 @@ require_once 'rajapinnat/logger.php';
 class PrestaCategories {
   private $_categories = null;
   private $_empty_category = null;
+  private $_category_sync = true;
 
   private $presta_url = null;
   private $presta_client = null;
@@ -17,12 +18,17 @@ class PrestaCategories {
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
 
-    $this->logger = new Logger('/tmp/presta_log.txt');
+    $this->logger = new Logger('/home/devlab/logs/presta_export.log');
     $this->logger->set_date_format('Y-m-d H:i:s');
   }
 
   public function sync_categories($pupesoft_categories) {
     $this->logger->log("---Start category import---");
+
+    if ($this->_category_sync === false) {
+      $this->logger->log("Category sync distabled!");
+      return;
+    }
 
     $count = count($pupesoft_categories) - 1;
     $current = 1;
@@ -386,5 +392,11 @@ class PrestaCategories {
     }
 
     return preg_replace("/[^a-zA-Z0-9_]+/", "", $string);
+  }
+
+  public function set_category_sync($value) {
+    if ($value === false) {
+      $this->_category_sync = false;
+    }
   }
 }

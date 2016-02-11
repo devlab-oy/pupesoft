@@ -73,15 +73,6 @@ if (!$ftp_chk) {
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-if (!defined("PUPE_UNICODE")) {
-  if (get_cfg_var('mssql.charset') == "UTF-8") {
-    define("PUPE_UNICODE", TRUE);
-  }
-  else {
-    define("PUPE_UNICODE", FALSE);
-  }
-}
-
 $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
 
 $xmlstr  = "<?xml version='1.0' encoding='{$encoding}'?>";

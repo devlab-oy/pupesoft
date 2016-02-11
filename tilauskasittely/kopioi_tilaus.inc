@@ -68,6 +68,20 @@ if (!function_exists("kopioi_tilaus")) {
       if ($field == "kate_korjattu") {
         $values .= ", NULL";
       }
+      elseif ($field == "erpcm") {
+        $pp = substr($monistarow[$i], 8, 2);
+        $kk = substr($monistarow[$i], 5, 2);
+        $vv = substr($monistarow[$i], 0, 4);
+
+        // Jos on syötetty eräpäivämäärästä vain päivä, taiotaan siitä kokonainen päivämäärä seuraavalle kuukaudelle
+        if ($pp > 0 and !checkdate($kk, $pp, $vv)) {
+          $seuraavankuunpvm = date("Y-m-{$pp}", strtotime('+1 month'));
+          $values .= ", '$seuraavankuunpvm'";
+        }
+        else {
+          $values .= ", '$monistarow[$i]'";
+        } 
+      }
       else {
         $values .= ", '$monistarow[$i]'";
       }

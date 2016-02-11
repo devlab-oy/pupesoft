@@ -34,7 +34,7 @@ if (!function_exists("toimitustapatarkista")) {
     }
 
     // jos toimitustavan nimeä ollaan muuttamassa...
-    if (mysql_field_name($result, $i) == "selite" and !empty($trow) and $t[$i] != $trow[$i]) {
+    if (mysql_field_name($result, $i) == "selite" and !empty($tunnus) and $t[$i] != $trow[$i]) {
       $toita = trim($t[$i]);
       $toita = str_replace("'", "", $toita);
       $toita = str_replace("\"", "", $toita);
@@ -175,7 +175,7 @@ if (!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "vak_kielto" and !empty($trow) and $t[$i] != "") {
+    if (mysql_field_name($result, $i) == "vak_kielto" and !empty($tunnus) and $t[$i] != "") {
       $query = "SELECT count(*) AS count
                 FROM toimitustapa
                 WHERE yhtio                         = '{$kukarow["yhtio"]}'

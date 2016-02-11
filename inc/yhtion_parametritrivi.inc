@@ -850,6 +850,7 @@ if ($fieldname == "saldo_kasittely") {
 
   $sel1 = "";
   $sel2 = "";
+  $sel3 = "";
 
   if ($trow[$i] == "") {
     $sel1 = "selected";

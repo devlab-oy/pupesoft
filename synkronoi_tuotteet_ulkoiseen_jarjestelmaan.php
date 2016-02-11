@@ -113,7 +113,14 @@ else {
         $line->addAttribute('No', $i);
 
         $line->addChild('Type', 'U');
-        $line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
+
+        if ($ulkoinen_jarjestelma == "P") {
+          $line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
+        }
+        else {
+          $line->addChild('ItemNumber', substr($row['tuoteno'], 0, 20));
+        }
+
         $line->addChild('ItemName', substr($row['nimitys'], 0, 50));
         $line->addChild('ProdGroup1', substr($row['try'], 0, 6));
         $line->addChild('ProdGroup2', 0);

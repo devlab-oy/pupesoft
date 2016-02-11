@@ -389,7 +389,7 @@ if [[ ${bundle} = true ]]; then
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&
-  TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
+  RAILS_ENV=${environment} TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work
 
   # Save bundle/rake exit status
   BUNDLER_STATUS=$?

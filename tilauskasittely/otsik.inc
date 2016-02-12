@@ -456,7 +456,15 @@ else {
   $meapurow = array("erapvmkasin" => "");
 }
 
-if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
+if ($toim == "YLLAPITO" and $erpcmvv == '0000' and $erpcmkk == '00') {
+  // Sopimuksen kausilaskutuksessa toistuva eräpäivämäärä pitää olla 1-28
+  if ($erpcmpp == '' or $erpcmpp == 0 or $erpcmpp > 28) {
+    echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+    unset($jatka);
+    $erpcm_virhe = "X"; // apumuuttuja
+  }
+}
+elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
 
   $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
   $erpres = pupe_query($erpquery);
@@ -1597,6 +1605,8 @@ if ($tila == "" and !isset($jatka)) {
     $vasen_sarake[$vasen] = "<td>".t("Eräpäivä").":</td><td>";
 
     if ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
+      // Ylläpitosopimuksella voidaan syöttää laskutuksessa toistuva eräpäivä
+      // (kopioi tilaus käyttää tätä päivämäärää eräpäivän laskemiseen seuraavalle kuukaudelle)
       $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
           <input type='hidden' name='erpcmkk' value='00'>
           <input type='hidden' name='erpcmvv' value='0000'>";

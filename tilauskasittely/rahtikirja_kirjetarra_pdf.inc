@@ -116,6 +116,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(13, 433, "{$postirow['yhtio_postino']} {$postirow['yhtio_postitp']}", $firstpage, $isompi);
   $pdf->draw_text(13, 417, 'Puh: '.$yhtiorow["puhelin"], $firstpage, $isompi);
 
+  $pdf->draw_text(13, 380, 'Vastaanottaja / Mottag / Consing:', $firstpage, $isompi);
+  $pdf->draw_text(13, 365, $rakir_row["toim_nimi"], $firstpage, $isompi);
+  $pdf->draw_text(13, 349, $rakir_row["toim_osoite"], $firstpage, $isompi);
+  $pdf->draw_text(13, 333, "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}", $firstpage, $isompi);
+
+  $pdf->draw_text(13, 180, 'Viite:', $firstpage, $isompi);
 }
 
 if ($tulostakolli > 0) {

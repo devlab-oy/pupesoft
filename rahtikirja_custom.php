@@ -600,7 +600,6 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       <?php
   $toimitustapa_val = array("");
   $toimtavat = pupe_toimitustapa_fetch_all();
-
   foreach ($toimtavat as $toimt): ?>
           <?php
 
@@ -610,6 +609,10 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
     $sel = "selected";
     $toimitustapa_val = $toimt;
+  }
+
+  if ($toimitustapa_val[0] == "") {
+    $toimitustapa_val = $toimtavat[0];
   }
 
 ?>
@@ -623,6 +626,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
 <?php
 
+#echo "603 ",var_dump($toimtavat),"<br><br>";
   // jos toimitustapaa EI submitattu niin haetaan kannasta
   if (!isset($_POST['toimitustapa'])) {
     $merahti = true;
@@ -662,6 +666,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   if (isset($_POST['toimitustapa'])) {
     $toimitustapa = $_POST['toimitustapa'];
   }
+echo "665 ",var_dump($toimitustapa),"<br><br>";
 ?>
   <td><input type="text" name="rahtisopimus" value="<?php echo pupe_rahtisopimus($merahti, $toimitustapa, $asiakasrow['ytunnus']) ?>"></td>
 </tr>

@@ -1597,7 +1597,9 @@ if ($tila == "" and !isset($jatka)) {
     $vasen_sarake[$vasen] = "<td>".t("Eräpäivä").":</td><td>";
 
     if ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
-      $vasen_sarake[$vasen] .= t("Ei käytössä");
+      $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
+          <input type='hidden' name='erpcmkk' value='00'>
+          <input type='hidden' name='erpcmvv' value='0000'>";
     }
     else {
       $edis = "";

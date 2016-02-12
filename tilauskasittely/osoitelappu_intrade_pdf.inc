@@ -310,7 +310,10 @@ else {
     $pdf->draw_text(mm_pt(100), mm_pt(175), "Lähetyspvm",                  $firstpage, $norm);
     $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,                  $firstpage, $norm);
 
-    $query = "SELECT * FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              and selite = '$laskurow[toimitustapa]'";
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 
@@ -326,13 +329,25 @@ else {
     $pdf->draw_text(mm_pt(22),  mm_pt(127), $laskurow['toim_osoite'],            $firstpage, $norm);
     $pdf->draw_text(mm_pt(22),  mm_pt(120), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $iso);
 
-
     $pdf->draw_text(mm_pt(100), mm_pt(140), "Toimituspvm",                  $firstpage, $norm);
     $pdf->draw_text(mm_pt(100), mm_pt(135), date("d.m.Y") ,                  $firstpage, $norm);
 
     // Kuljetusohjeet = viivakoodi tulee tähän
     $pdf->draw_text(mm_pt(22), mm_pt(112), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",  $firstpage, $otsik);
-    $pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti:                            Jono:                            Lähetysehto:",  $firstpage, $otsik);
+
+    $pdf->draw_text(mm_pt(22), mm_pt(107), "Reitti / Alue / Ehto:",  $firstpage, $otsik);
+
+    $query = "SELECT avainsana
+              FROM asiakkaan_avainsanat
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND laji         = 'INTRADE_OHJAUS'
+              AND liitostunnus = '{$laskurow['liitostunnus']}'
+              LIMIT 1";
+    $intrade_res = pupe_query($query);
+
+    if ($intrade_row = mysql_fetch_assoc($intrade_res)) {
+      $pdf->draw_text(mm_pt(50), mm_pt(107), $intrade_row['avainsana'],  $firstpage, $norm);
+    }
 
     if (isset($vakit) and $vakit != "") {
       $pdf->draw_text(mm_pt(22), mm_pt(102), "VAK: ".$vakit, $firstpage, $norm);

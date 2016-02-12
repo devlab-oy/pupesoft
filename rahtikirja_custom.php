@@ -460,12 +460,22 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       $etuliite = "";
     }
 
-    $asiakasrow['toim_postitp']  = $asiakasrow[$etuliite.'postitp'];
-    $asiakasrow['toim_postino']  = $asiakasrow[$etuliite.'postino'];
-    $asiakasrow['toim_osoite']   = $asiakasrow[$etuliite.'osoite'];
-    $asiakasrow['toim_nimitark'] = $asiakasrow[$etuliite.'nimitark'];
-    $asiakasrow['toim_nimi']     = $asiakasrow[$etuliite.'nimi'];
-    $asiakasrow['toim_maa']      = $asiakasrow[$etuliite.'maa'];
+    if (empty($asiakasrow[$etuliite.'postitp'])) {
+      $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
+      $asiakasrow['toim_postino']  = $asiakasrow['postino'];
+      $asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
+      $asiakasrow['toim_nimitark'] = $asiakasrow['nimitark'];
+      $asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
+      $asiakasrow['toim_maa']      = $asiakasrow['maa'];
+    }
+    else {
+      $asiakasrow['toim_postitp']  = $asiakasrow[$etuliite.'postitp'];
+      $asiakasrow['toim_postino']  = $asiakasrow[$etuliite.'postino'];
+      $asiakasrow['toim_osoite']   = $asiakasrow[$etuliite.'osoite'];
+      $asiakasrow['toim_nimitark'] = $asiakasrow[$etuliite.'nimitark'];
+      $asiakasrow['toim_nimi']     = $asiakasrow[$etuliite.'nimi'];
+      $asiakasrow['toim_maa']      = $asiakasrow[$etuliite.'maa'];
+    }
   }
   else {
     if (empty($asiakasrow['toim_postitp'])) {
@@ -648,7 +658,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 <tr>
   <th><?php echo t('Rahtisopimus') ?></th>
   <?php
-  $toimitustapa = $toimitustapa_val;
+  $toimitustapa = $toimitustapa_val["selite"];
   if (isset($_POST['toimitustapa'])) {
     $toimitustapa = $_POST['toimitustapa'];
   }

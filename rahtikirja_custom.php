@@ -626,7 +626,6 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
 <?php
 
-#echo "603 ",var_dump($toimtavat),"<br><br>";
   // jos toimitustapaa EI submitattu niin haetaan kannasta
   if (!isset($_POST['toimitustapa'])) {
     $merahti = true;
@@ -666,7 +665,6 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   if (isset($_POST['toimitustapa'])) {
     $toimitustapa = $_POST['toimitustapa'];
   }
-echo "665 ",var_dump($toimitustapa),"<br><br>";
 ?>
   <td><input type="text" name="rahtisopimus" value="<?php echo pupe_rahtisopimus($merahti, $toimitustapa, $asiakasrow['ytunnus']) ?>"></td>
 </tr>

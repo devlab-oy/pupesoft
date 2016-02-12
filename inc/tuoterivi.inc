@@ -133,18 +133,18 @@ if (mysql_field_name($result, $i) == "vienti") {
   $query = "SELECT *
             FROM avainsana
             WHERE yhtio = '{$kukarow['yhtio']}'
-            and laji    = 'kielialue'";
-  $kielialueres = pupe_query($query);
+            and laji    = 'maaryhma'";
+  $maaryhmares = pupe_query($query);
 
-  if (mysql_num_rows($kielialueres) > 0) {
+  if (mysql_num_rows($maaryhmares) > 0) {
     $ulos .= "&nbsp;";
 
-    $ulos .= "<select name='kielialue_vienti' ".js_alasvetoMaxWidth($nimi, 300).">";
-    $ulos .= "<option value = ''>".t("Ei kielialuetta")."</option>";
+    $ulos .= "<select name='maaryhma_vienti' ".js_alasvetoMaxWidth($nimi, 300).">";
+    $ulos .= "<option value = ''>".t("Ei maaryhm‰‰")."</option>";
 
-    while ($kielialuerow = mysql_fetch_assoc($kielialueres)) {
-      $sel = $trow[$i] == $kielialuerow['selite'] ? " selected" : "";
-      $ulos .= "<option value='{$kielialuerow['selite']}'{$sel}>{$kielialuerow['selitetark']}</option>";
+    while ($maaryhmarow = mysql_fetch_assoc($maaryhmares)) {
+      $sel = $trow[$i] == $maaryhmarow['selite'] ? " selected" : "";
+      $ulos .= "<option value='{$maaryhmarow['selite']}'{$sel}>{$maaryhmarow['selitetark']}</option>";
     }
 
     $ulos .= "</select>";

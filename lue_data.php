@@ -583,6 +583,22 @@ if ($kasitellaan_tiedosto) {
     }
   }
 
+  // Tarkistetaan käytetäänkö maaryhmiä
+  if (in_array("tuote", $taulut)) {
+    $maaryhmaquery = "SELECT *
+                       FROM avainsana
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       and laji    = 'maaryhma'
+                       and selite != ''
+                       ORDER BY jarjestys";
+    $maaryhmares = pupe_query($maaryhmaquery);
+
+    $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
+  }
+  else {
+    $maaryhma_kaytossa = false;
+  }
+
   /*
   foreach ($taulunrivit as $taulu => $rivit) {
 
@@ -1565,22 +1581,22 @@ if ($kasitellaan_tiedosto) {
               }
             }
 
-            if ($table_mysql == 'tuote' and $otsikko == 'VIENTI' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+            if ($maaryhma_kaytossa and $table_mysql == 'tuote' and $otsikko == 'VIENTI' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
 
               $_selitetark = mysql_real_escape_string($taulunrivit[$taulu][$eriviindex][$r]);
 
-              $kielialuequery = "SELECT *
+              $maaryhmaquery = "SELECT *
                                  FROM avainsana
                                  WHERE yhtio = '{$kukarow['yhtio']}'
-                                 and laji    = 'kielialue'
+                                 and laji    = 'maaryhma'
                                  and selite != ''
                                  and selitetark = '{$_selitetark}'
                                  ORDER BY jarjestys";
-              $kielialueres = pupe_query($kielialuequery);
+              $maaryhmares = pupe_query($maaryhmaquery);
 
-              if (mysql_num_rows($kielialueres) > 0) {
-                $kielialuerow = mysql_fetch_assoc($kielialueres);
-                $taulunrivit[$taulu][$eriviindex][$r] = $kielialuerow['selite'];
+              if (mysql_num_rows($maaryhmares) > 0) {
+                $maaryhmarow = mysql_fetch_assoc($maaryhmares);
+                $taulunrivit[$taulu][$eriviindex][$r] = $maaryhmarow['selite'];
               }
             }
 

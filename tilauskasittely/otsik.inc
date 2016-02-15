@@ -457,11 +457,14 @@ else {
 }
 
 if ($toim == "YLLAPITO" and $erpcmvv == '0000' and $erpcmkk == '00') {
-  // Sopimuksen kausilaskutuksessa toistuva eräpäivämäärä pitää olla 1-28
-  if ($erpcmpp == '' or $erpcmpp == 0 or $erpcmpp > 28) {
+  // Sopimuksen kausilaskutuksessa toistuva eräpäivämäärä pitää olla 1-28, tyhjä ohittaa ominaisuuden
+  if ($erpcmpp != '' and ($erpcmpp < 1 or $erpcmpp > 28)) {
     echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
     unset($jatka);
     $erpcm_virhe = "X"; // apumuuttuja
+  }
+  elseif (empty($erpcmpp)) {
+    $erpcmpp = $erpcmkk = $erpcmvv = '';
   }
 }
 elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {

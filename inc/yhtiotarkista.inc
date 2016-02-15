@@ -130,6 +130,10 @@ if (!function_exists("yhtiotarkista")) {
       }
     }
 
+    if (mysql_field_name($result, $i) == "ean" and strlen($t[$i]) > 9) {
+      $virhe[$i] = t("Ean pit‰‰ olla max 9 merkki‰ pitk‰!");
+    }
+
     if (mysql_field_name($result, $i) == "ytunnus" and strtoupper($yhtiorow["maa"]) == "FI") {
       $ytunnus = trim($t[$i]);
       require "tarkistaytunnus.inc";

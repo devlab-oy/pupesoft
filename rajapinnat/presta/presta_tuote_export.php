@@ -139,9 +139,9 @@ if (!isset($presta_verokannat)) {
 if (!isset($presta_kieliversiot)) {
   $presta_kieliversiot = array(
     // Pupen kieli => Prestan language_id
-    // fi => 2,
-    // se => 3,
-    // en => 1,
+    // "fi" => 2,
+    // "se" => 3,
+    // "en" => 1,
   );
 }
 

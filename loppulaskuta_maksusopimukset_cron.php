@@ -23,6 +23,7 @@ cron_log();
 
 // Haetaan yhtion tiedot
 $yhtiorow = hae_yhtion_parametrit($argv[1]);
+$kukarow = hae_kukarow('admin', $argv[1]);
 
 // Haetaan maksusopimukset
 $query = "SELECT
@@ -39,14 +40,14 @@ $query = "SELECT
           JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio AND maksupositio.otunnus = lasku.tunnus
           JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto AND maksuehto.jaksotettu != ''
           LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio AND maksupositio.uusiotunnus = uusiolasku.tunnus
-          WHERE lasku.yhtio     = '{$yhtiorow['yhtio']}'
+          WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
           AND lasku.jaksotettu  > 0
           AND lasku.tila        IN ('L','N','R','A','D')
           AND lasku.alatila    != 'X'
           GROUP BY jaksotettu, nimi, tila
           HAVING count(*) > sum(IF (maksupositio.uusiotunnus > 0 AND uusiolasku.tila='L' AND uusiolasku.alatila='X', 1, 0))
           AND (yhteensa_kpl - laskutettu_kpl <= 1)
-          ORDER BY jaksotettu asc";
+          ORDER BY jaksotettu DESC";
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
@@ -54,7 +55,7 @@ while ($row = mysql_fetch_assoc($result)) {
   if ($row["tila"] == 'D') {
     $query = "SELECT tunnus
               FROM lasku
-              WHERE yhtio      = '{$yhtiorow['yhtio']}'
+              WHERE yhtio      = '{$kukarow['yhtio']}'
               AND vanhatunnus  = '{$row['jaksotettu']}'
               AND tila         IN ('L','N','R','A')
               AND alatila     != 'X'";
@@ -75,7 +76,7 @@ while ($row = mysql_fetch_assoc($result)) {
               AND tilausrivi.tyyppi != 'D' 
               AND tilausrivi.var != 'P' 
               AND tilausrivi.toimitettu != '')
-            WHERE lasku.yhtio = '{$yhtiorow['yhtio']}'
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.jaksotettu = '{$row['jaksotettu']}' 
             AND lasku.tila = 'L'
             AND lasku.alatila IN ('J', 'X')

@@ -136,6 +136,14 @@ if (!isset($presta_verokannat)) {
     // 10 => 3,
   );
 }
+if (!isset($presta_kieliversiot)) {
+  $presta_kieliversiot = array(
+    // Pupen kieli => Prestan language_id
+    // "fi" => 2,
+    // "se" => 3,
+    // "en" => 1,
+  );
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -171,6 +179,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_tax_rates_table($presta_verokannat);
+  $presta_products->set_languages_table($presta_kieliversiot);
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->sync_products($tuotteet);
 }

@@ -126,6 +126,7 @@ if (in_array($naytatvale, array(10, 11))) {
 if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
   $query = "SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, {$ale_query_select_lisa}
             tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
+            tilausrivi.alv,
             $ale_query_select_lisa_y aleyhteensa,
             $sorttauskentta,
             {$jtsort_lisa}

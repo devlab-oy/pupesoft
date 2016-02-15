@@ -22,6 +22,7 @@ class PrestaProducts extends PrestaClient {
   private $pupesoft_all_products = null;
   private $presta_all_products = null;
   private $tax_rates_table = null;
+  private $languages_table = null;
 
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
@@ -74,14 +75,37 @@ class PrestaProducts extends PrestaClient {
     $xml->product->show_price = 1;
     $xml->product->unit_price = 1;
 
-    $link_rewrite = utf8_encode($this->saniteze_link_rewrite($product['nimi']));
-    $xml->product->link_rewrite->language[0] = $link_rewrite;
-    $xml->product->link_rewrite->language[1] = $link_rewrite;
-    $xml->product->name->language[0] = utf8_encode($product['nimi']);
-    $xml->product->name->language[1] = utf8_encode($product['nimi']);
+    // Set default language from Pupesoft to first presta id
+    $xml->product->name->language[0]              = utf8_encode($product['nimi']);
+    $xml->product->description->language[0]       = utf8_encode($product['kuvaus']);
+    $xml->product->description_short->language[0] = utf8_encode($product['lyhytkuvaus']);
+    $xml->product->link_rewrite->language[0]      = $this->saniteze_link_rewrite($product['nimi']);
 
-    $xml->product->description = utf8_encode($product['kuvaus']);
-    $xml->product->description_short = utf8_encode($product['lyhytkuvaus']);
+    // loop all translations
+    foreach ($product['tuotteen_kaannokset'] as $translation) {
+      $tr_id = $this->get_language_id($translation['kieli']);
+
+      // if we don't have the language in presta
+      if ($tr_id === null) {
+        continue;
+      }
+
+      $value = utf8_encode($translation['teksti']);
+
+      // set translation to correct field
+      switch ($translation['kentta']) {
+        case 'nimitys':
+          $xml->product->name->language[$tr_id] = $value;
+          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite($value);
+          break;
+        case 'kuvaus':
+          $xml->product->description->language[$tr_id] = $value;
+          break;
+        case 'lyhytkuvaus':
+          $xml->product->description_short->language[$tr_id] = $value;
+          break;
+      }
+    }
 
     if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
       // First, remove all categories from XML
@@ -117,6 +141,7 @@ class PrestaProducts extends PrestaClient {
 
     // Removed product parameters
     $removables = $this->_removable_fields;
+
     if (isset($removables) and count($removables) > 0) {
       foreach ($removables as $element) {
         unset($xml->product->$element);
@@ -230,6 +255,18 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
+  private function get_language_id($code) {
+    $value = $this->languages_table[$code];
+
+    if (empty($value)) {
+      return null;
+    }
+    else {
+      // substract one, since API key starts from zero
+      return ($value - 1);
+    }
+  }
+
   private function delete_all_unnecessary_products() {
     $pupesoft_products = $this->pupesoft_all_products;
 
@@ -293,6 +330,12 @@ class PrestaProducts extends PrestaClient {
   public function set_tax_rates_table($value) {
     if (is_array($value)) {
       $this->tax_rates_table = $value;
+    }
+  }
+
+  public function set_languages_table($value) {
+    if (is_array($value)) {
+      $this->languages_table = $value;
     }
   }
 }

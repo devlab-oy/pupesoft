@@ -32288,6 +32288,15 @@ if (!function_exists("loppulaskuta")) {
       $vikatunnus = $row["vikatunnus"];
     }
 
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$tunnus'
+              ORDER BY tunnus
+              LIMIT 1";
+    $rahres = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($rahres);
+
     // tarkistetaan että meillä on jotain järkevää laskutettavaa
     $query = "SELECT *
               FROM maksupositio

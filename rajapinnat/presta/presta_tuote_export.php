@@ -128,6 +128,14 @@ if (!isset($presta_ohita_tuoteparametrit)) {
 if (!isset($presta_synkronoi_tuotepuu)) {
   $presta_synkronoi_tuotepuu = true;
 }
+if (!isset($presta_verokannat)) {
+  $presta_verokannat = array(
+    // Pupen verokanta decimal => Prestan tax_group_id integer
+    // 24 => 1,
+    // 14 => 2,
+    // 10 => 3,
+  );
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -162,6 +170,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
+  $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->sync_products($tuotteet);
 }

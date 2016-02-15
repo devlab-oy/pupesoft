@@ -21,6 +21,7 @@ class PrestaProducts extends PrestaClient {
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
   private $presta_all_products = null;
+  private $tax_rates_table = null;
 
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
@@ -60,6 +61,8 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
+
+    $xml->product->id_tax_rules_group = $this->get_tax_group_id($product["alv"]);
 
     $xml->product->width  = str_replace(",", ".", $product['tuoteleveys']);
     $xml->product->height = str_replace(",", ".", $product['tuotekorkeus']);
@@ -215,6 +218,18 @@ class PrestaProducts extends PrestaClient {
     return $existing_products;
   }
 
+  private function get_tax_group_id($vat) {
+    $vat = round($vat, 2);
+    $value = $this->tax_rates_table[$vat];
+
+    if (empty($value)) {
+      return null;
+    }
+    else {
+      return $value;
+    }
+  }
+
   private function delete_all_unnecessary_products() {
     $pupesoft_products = $this->pupesoft_all_products;
 
@@ -272,6 +287,12 @@ class PrestaProducts extends PrestaClient {
   public function set_all_products($value) {
     if (is_array($value)) {
       $this->pupesoft_all_products = $value;
+    }
+  }
+
+  public function set_tax_rates_table($value) {
+    if (is_array($value)) {
+      $this->tax_rates_table = $value;
     }
   }
 }

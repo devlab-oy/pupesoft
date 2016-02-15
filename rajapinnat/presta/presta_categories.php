@@ -18,7 +18,9 @@ class PrestaCategories {
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
 
-    $this->logger = new Logger('/home/devlab/logs/presta_export.log');
+    $log_path = is_dir('/home/devlab/logs') ? '/home/devlab/logs' : '/tmp';
+
+    $this->logger = new Logger("{$log_path}/presta_export.log");
     $this->logger->set_date_format('Y-m-d H:i:s');
   }
 

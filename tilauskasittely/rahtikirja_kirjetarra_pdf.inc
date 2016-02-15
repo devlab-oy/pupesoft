@@ -122,6 +122,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(13, 333, "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}", $firstpage, $isompi);
 
   $pdf->draw_text(13, 180, 'Viite:', $firstpage, $isompi);
+
+  if ($postirow['asiakkaan_tilausnumero'] != '') {
+    $pdf->draw_text(50, 180, $postirow['asiakkaan_tilausnumero'], $firstpage, $isompi);
+    $pdf->draw_text(50, 164, $postirow['tilausyhteyshenkilo'], $firstpage, $isompi);
+  }
+  else {
+    $pdf->draw_text(50, 180, $postirow['tilausyhteyshenkilo'], $firstpage, $isompi);
+  }
 }
 
 if ($tulostakolli > 0) {

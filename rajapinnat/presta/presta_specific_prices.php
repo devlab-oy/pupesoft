@@ -116,7 +116,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
-          $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
+          $this->logger->log('Ohitettu special price koska tuotenumero puuttuu');
           continue;
         }
 
@@ -126,7 +126,12 @@ class PrestaSpecificPrices extends PrestaClient {
           $this->delete_special_prices_for_product($price['presta_product_id']);
 
           if (empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
-            $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus ja asiakasryhmä puuttuu");
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska asiakastunnus sekä asiakasryhmä puuttuu");
+            continue;
+          }
+
+          if (empty($price['hinta']) and empty($price['alennus'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennus sekä hinta puuttuu");
             continue;
           }
 

@@ -38,7 +38,9 @@ abstract class PrestaClient {
       throw new Exception('Presta API key puuttuu');
     }
 
-    $this->logger = new Logger('/home/devlab/logs/presta_export.log');
+    $log_path = is_dir('/home/devlab/logs') ? '/home/devlab/logs' : '/tmp';
+
+    $this->logger = new Logger("{$log_path}/presta_export.log");
     $this->logger->set_date_format('Y-m-d H:i:s');
 
     if (substr($url, -1) == '/') {

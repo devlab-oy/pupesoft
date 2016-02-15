@@ -87,6 +87,7 @@ class PrestaProducts extends PrestaClient {
 
       // if we don't have the language in presta
       if ($tr_id === null) {
+        $this->logger->log("VIRHE! Tuote '{$product['tuoteno']}', kieltä {$translation['kieli']} ei löydy Prestasta.");
         continue;
       }
 
@@ -105,6 +106,8 @@ class PrestaProducts extends PrestaClient {
           $xml->product->description_short->language[$tr_id] = $value;
           break;
       }
+
+      $this->logger->log("Käännös {$translation['kieli']} tuotteelle '{$product['tuoteno']}', {$translation['kentta']}: $value");
     }
 
     if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {

@@ -21,6 +21,7 @@ class PrestaProducts extends PrestaClient {
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
   private $presta_all_products = null;
+  private $tax_rates_table = null;
 
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
@@ -272,6 +273,12 @@ class PrestaProducts extends PrestaClient {
   public function set_all_products($value) {
     if (is_array($value)) {
       $this->pupesoft_all_products = $value;
+    }
+  }
+
+  public function set_tax_rates_table($value) {
+    if (is_array($value)) {
+      $this->tax_rates_table = $value;
     }
   }
 }

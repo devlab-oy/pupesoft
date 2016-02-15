@@ -82,69 +82,69 @@ function presta_specific_prices() {
 
   $specific_prices = array();
 
-  // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
-  // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. Näin pitääkin koska yhteyshenkilo
-  // on prestassa asiakas.
+  // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa, että sama asiakashintarivi
+  // voi tulla monta kertaa, koska asiakas has_many yhteyshenkilö.
+  // Näin pitääkin, koska yhteyshenkilö on Prestassa asiakas.
 
-  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset
+  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset.
 
-  // Laitetaan hinnat ja alennukset samaan arrayseen, koska prestassa niitä käsitellään samalla tavalla
+  // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niitä käsitellään samalla tavalla
 
-  // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eikä prestan asiakas/ryhmätunnusta
+  // Haetaan from tuote, koska pitää saada kaikki tuotteet, jotka on menossa prestaan.
+  // Vaikka ei olisi alennusta, koska muuten ei saada poistettua alennuksia tuotteilta
+
+  // Asiakashinnat kaikille tuotetteilla
   $query = "SELECT
-            asiakashinta.tuoteno,
+            tuote.tuoteno,
             asiakashinta.alkupvm,
             asiakashinta.loppupvm,
             asiakashinta.minkpl,
             asiakashinta.hinta,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
-            FROM asiakashinta
-            INNER JOIN tuote ON (tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno = asiakashinta.tuoteno
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != '')
+            FROM tuote
+            LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
+              AND asiakashinta.tuoteno = tuote.tuoteno
+              AND asiakashinta.hinta > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
               AND avainsana.selite = asiakashinta.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
-            WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
-            AND asiakashinta.tuoteno != ''
-            AND asiakashinta.hinta > 0
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''";
   $result = pupe_query($query);
 
   while ($asiakashinta = mysql_fetch_assoc($result)) {
     $specific_prices[] = $asiakashinta;
   }
 
-  // Rajataan pois alennukset, joilla ei ole tuotetta tai prestan asiakas-/ryhmätunnusta
+  // Asiakasalennukset kaikille tuotteille
   $query = "SELECT
-            asiakasalennus.tuoteno,
+            tuote.tuoteno,
             asiakasalennus.alkupvm,
             asiakasalennus.loppupvm,
             asiakasalennus.minkpl,
             asiakasalennus.alennus,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
-            FROM asiakasalennus
-            INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
-              AND tuote.tuoteno = asiakasalennus.tuoteno
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != '')
+            FROM tuote
+            LEFT JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
+              AND asiakasalennus.tuoteno = tuote.tuoteno
+              AND asiakasalennus.alennus > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
               AND avainsana.selite = asiakasalennus.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
               AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
-            WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
-            AND asiakasalennus.tuoteno != ''
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''";
   $result = pupe_query($query);
 
   while ($asiakasalennus = mysql_fetch_assoc($result)) {

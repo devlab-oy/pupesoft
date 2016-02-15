@@ -144,6 +144,13 @@ if (!isset($presta_kieliversiot)) {
     // "en" => 1,
   );
 }
+if (!isset($presta_valuuttakoodit)) {
+  $presta_valuuttakoodit = array(
+    // Pupen valkoodi => Prestan currency_id
+    // "USD" => 1,
+    // "EUR" => 2,
+  );
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -208,6 +215,7 @@ if (array_key_exists('asiakashinnat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat ja alennukset.\n";
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
+  $presta_prices->set_currency_codes($presta_valuuttakoodit);
   $presta_prices->sync_prices($hinnat);
 }
 

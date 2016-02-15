@@ -82,69 +82,70 @@ function presta_specific_prices() {
 
   $specific_prices = array();
 
-  // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa että sama asiakashintarivi
-  // voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. Näin pitääkin koska yhteyshenkilo
-  // on prestassa asiakas.
+  // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa, että sama asiakashintarivi
+  // voi tulla monta kertaa, koska asiakas has_many yhteyshenkilö.
+  // Näin pitääkin, koska yhteyshenkilö on Prestassa asiakas.
 
-  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset
+  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset.
 
-  // Laitetaan hinnat ja alennukset samaan arrayseen, koska prestassa niitä käsitellään samalla tavalla
+  // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niitä käsitellään samalla tavalla
 
-  // Rajataan suoraan pois hinnat, joilla ei ole hintaa, tuotenumeroa eikä prestan asiakas/ryhmätunnusta
+  // Haetaan from tuote, koska pitää saada kaikki tuotteet, jotka on menossa prestaan.
+  // Vaikka ei olisi alennusta, koska muuten ei saada poistettua alennuksia tuotteilta
+
+  // Asiakashinnat kaikille tuotetteilla
   $query = "SELECT
-            asiakashinta.tuoteno,
+            tuote.tuoteno,
             asiakashinta.alkupvm,
             asiakashinta.loppupvm,
             asiakashinta.minkpl,
             asiakashinta.hinta,
+            asiakashinta.valkoodi,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
-            FROM asiakashinta
-            INNER JOIN tuote ON (tuote.yhtio = asiakashinta.yhtio
-              AND tuote.tuoteno = asiakashinta.tuoteno
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != '')
+            FROM tuote
+            LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
+              AND asiakashinta.tuoteno = tuote.tuoteno
+              AND asiakashinta.hinta > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
               AND avainsana.selite = asiakashinta.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
-            WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
-            AND asiakashinta.tuoteno != ''
-            AND asiakashinta.hinta > 0
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''";
   $result = pupe_query($query);
 
   while ($asiakashinta = mysql_fetch_assoc($result)) {
     $specific_prices[] = $asiakashinta;
   }
 
-  // Rajataan pois alennukset, joilla ei ole tuotetta tai prestan asiakas-/ryhmätunnusta
+  // Asiakasalennukset kaikille tuotteille
   $query = "SELECT
-            asiakasalennus.tuoteno,
+            tuote.tuoteno,
             asiakasalennus.alkupvm,
             asiakasalennus.loppupvm,
             asiakasalennus.minkpl,
             asiakasalennus.alennus,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
-            FROM asiakasalennus
-            INNER JOIN tuote ON (tuote.yhtio = asiakasalennus.yhtio
-              AND tuote.tuoteno = asiakasalennus.tuoteno
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != '')
+            FROM tuote
+            LEFT JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
+              AND asiakasalennus.tuoteno = tuote.tuoteno
+              AND asiakasalennus.alennus > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
               AND avainsana.selite = asiakasalennus.asiakas_ryhma
               AND avainsana.laji = 'ASIAKASRYHMA')
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
               AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
-            WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
-            AND asiakasalennus.tuoteno != ''
-            AND (avainsana.selitetark_5 != '' OR yhteyshenkilo.ulkoinen_asiakasnumero != '')";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''";
   $result = pupe_query($query);
 
   while ($asiakasalennus = mysql_fetch_assoc($result)) {
@@ -255,35 +256,6 @@ function hae_tuotteet() {
     $myymalahinta_verot_pois   = hintapyoristys($row["myymalahinta"] / (1 + ($row["alv"] / 100)), 6);
     $myymalahinta_verot_mukaan = hintapyoristys($row["myymalahinta"] * (1 + ($row["alv"] / 100)), 6);
 
-    $asiakashinnat = array();
-
-    // Haetaan kaikki tuotteen atribuutit
-    $parametritquery = "SELECT
-                        tuotteen_avainsanat.selite,
-                        avainsana.selitetark,
-                        avainsana.selite option_name
-                        FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
-                        JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                          AND avainsana.laji = 'PARAMETRI'
-                          AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                        WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-                        AND tuotteen_avainsanat.laji != 'parametri_variaatio'
-                        AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
-                        AND tuotteen_avainsanat.laji like 'parametri_%'
-                        AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
-                        AND tuotteen_avainsanat.kieli = 'fi'
-                        ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
-    $parametritres = pupe_query($parametritquery);
-    $tuotteen_parametrit = array();
-
-    while ($parametrirow = mysql_fetch_assoc($parametritres)) {
-      $tuotteen_parametrit[] = array(
-        "nimi"        => $parametrirow["selitetark"],
-        "option_name" => $parametrirow["option_name"],
-        "arvo"        => $parametrirow["selite"]
-      );
-    }
-
     // Haetaan tuotteen kaikki käännökset
     $query = "SELECT kieli, laji, selite
               FROM tuotteen_avainsanat
@@ -314,69 +286,36 @@ function hae_tuotteet() {
       $tuotepuun_tunnukset[] = $tuotepuurow['puun_tunnus'];
     }
 
-    // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-    $query = "SELECT
-              *
-              FROM hinnasto
-              WHERE yhtio   = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$row['tuoteno']}'
-                AND maa     = '{$yhtiorow['maa']}'
-                AND laji    = ''
-                AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-              ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-              LIMIT 1";
-    $hinnastoq = pupe_query($query);
-    $hinnastoresult = mysql_fetch_assoc($hinnastoq);
-
-    // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
-    if (!isset($hinnastoresult['hinta'])) {
-      $hinnastoresult['hinta'] = '';
-    }
-
+    // Haetaan tuotteen myytävissä määrä (saldo)
     list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
     $dnstuote[] = array(
-      'tuoteno'                   => $row["tuoteno"],
-      'nimi'                      => $row["nimitys"],
+      'alv'                       => $row["alv"],
+      'ean'                       => $row["eankoodi"],
+      'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
-      'yksikko'                   => $row["yksikko"],
-      'tuotemassa'                => $row["tuotemassa"],
-      'tuotemerkki'               => $row["tuotemerkki"],
-      'myyntihinta'               => $myyntihinta,
-      'myyntihinta_veroton'       => $myyntihinta_veroton,
-      'myyntihinta_verot_pois'    => $myyntihinta_verot_pois,
-      'myyntihinta_verot_mukaan'  => $myyntihinta_verot_mukaan,
-      'myymalahinta'              => $myymalahinta,
-      'myymalahinta_veroton'      => $myymalahinta_veroton,
-      'myymalahinta_verot_pois'   => $myymalahinta_verot_pois,
-      'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,
-      'kuluprosentti'             => $row['kuluprosentti'],
-      'ean'                       => $row["eankoodi"],
+      'nakyvyys'                  => $row["nakyvyys"],
+      'nimi'                      => $row["nimitys"],
       'osasto'                    => $row["osasto"],
       'try'                       => $row["try"],
-      'try_nimi'                  => $row["try_nimi"],
-      'alv'                       => $row["alv"],
-      'nakyvyys'                  => $row["nakyvyys"],
-      'nimi_swe'                  => $row["nimi_swe"],
-      'nimi_eng'                  => $row["nimi_eng"],
-      'campaign_code'             => $row["campaign_code"],
-      'target'                    => $row["target"],
-      'onsale'                    => $row["onsale"],
       'tunnus'                    => $row['tunnus'],
-      'hinnastohinta'             => $hinnastoresult['hinta'],
-      'asiakashinnat'             => $asiakashinnat,
-      'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
-      'tuotteen_parametrit'       => $tuotteen_parametrit,
+      'tuotemassa'                => $row["tuotemassa"],
+      'tuotemerkki'               => $row["tuotemerkki"],
+      'tuoteno'                   => $row["tuoteno"],
+      'yksikko'                   => $row["yksikko"],
+      'myymalahinta'              => $myymalahinta,
+      'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,
+      'myymalahinta_verot_pois'   => $myymalahinta_verot_pois,
+      'myymalahinta_veroton'      => $myymalahinta_veroton,
+      'myyntihinta'               => $myyntihinta,
+      'myyntihinta_verot_mukaan'  => $myyntihinta_verot_mukaan,
+      'myyntihinta_verot_pois'    => $myyntihinta_verot_pois,
+      'myyntihinta_veroton'       => $myyntihinta_veroton,
       'saldo'                     => $myytavissa,
+      'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
       'tuotteen_kaannokset'       => $tuotteen_kaannokset,
     );
-
-    if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {
-      foreach ($lukitut_tuotekentat as $lukittu_kentta) {
-        unset($dnstuote[$lukittu_kentta]);
-      }
-    }
   }
 
   return $dnstuote;

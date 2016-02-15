@@ -11,6 +11,7 @@ class PrestaSpecificPrices extends PrestaClient {
   private $product_ids;
   private $all_prices = null;
   private $already_removed_product = array();
+  private $currency_codes = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -70,7 +71,7 @@ class PrestaSpecificPrices extends PrestaClient {
     $xml->specific_price->reduction = 0;
     $xml->specific_price->id_shop = $this->shop['id'];
     $xml->specific_price->id_cart = 0;
-    $xml->specific_price->id_currency = 0;
+    $xml->specific_price->id_currency = $this->get_currency_id($specific_price['valkoodi']);
     $xml->specific_price->id_country = 0;
 
     // price or percentage
@@ -116,7 +117,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
-          $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
+          $this->logger->log('Ohitettu special price koska tuotenumero puuttuu');
           continue;
         }
 
@@ -126,13 +127,19 @@ class PrestaSpecificPrices extends PrestaClient {
           $this->delete_special_prices_for_product($price['presta_product_id']);
 
           if (empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
-            $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus ja asiakasryhmä puuttuu");
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska asiakastunnus sekä asiakasryhmä puuttuu");
+            continue;
+          }
+
+          if (empty($price['hinta']) and empty($price['alennus'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennus sekä hinta puuttuu");
             continue;
           }
 
           $this->create($price);
           $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
-            ." hinta {$price['hinta']}"
+            ." hinta {$price['hinta']} "
+            ." valuutta {$price['valkoodi']} "
             ." alennus {$price['alennus']}"
             ." asiakastunnus '{$price['presta_customer_id']}'"
             ." asiakasryhma '{$price['presta_customergroup_id']}'");
@@ -205,5 +212,23 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->already_removed_product[] = $id;
 
     return true;
+  }
+
+  private function get_currency_id($code) {
+    $value = $this->currency_codes[$code];
+
+    if (empty($value)) {
+      // zero means "all currencies"
+      return 0;
+    }
+    else {
+      return $value;
+    }
+  }
+
+  public function set_currency_codes($value) {
+    if (is_array($value)) {
+      $this->currency_codes = $value;
+    }
   }
 }

@@ -100,6 +100,7 @@ function presta_specific_prices() {
             asiakashinta.loppupvm,
             asiakashinta.minkpl,
             asiakashinta.hinta,
+            asiakashinta.valkoodi,
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM tuote

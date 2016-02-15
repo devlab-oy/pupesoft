@@ -27241,11 +27241,13 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $looprow = mysql_fetch_assoc($loopres);
 
-    $xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
+    $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
+
+    $xml = simplexml_load_string("<?xml version='1.0' encoding='{$encoding}'?><Message></Message>");
 
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
-    $messageheader->addChild('Sender', $yhtiorow['nimi']);
+    $messageheader->addChild('Sender', utf8_encode($yhtiorow['nimi']));
 
     if ($ulkoinen_jarjestelma == 'L') {
       $uj_nimi = "Helsingin Hyllyvarasto";
@@ -27272,8 +27274,12 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $custpickinglist->addChild('UnloadingDate', 0);
     $custpickinglist->addChild('OrderDate', 0);
-    $custpickinglist->addChild('DlvTerm', substr($looprow['toimitusehto'], 0, 3));
-    $custpickinglist->addChild('PickingInstruction', substr($looprow['sisviesti2'], 0, 128));
+
+    $_toimitusehto = substr($looprow['toimitusehto'], 0, 3);
+    $custpickinglist->addChild('DlvTerm', utf8_encode($_toimitusehto));
+
+    $_sisviesti2 = substr($looprow['sisviesti2'], 0, 128);
+    $custpickinglist->addChild('PickingInstruction', utf8_encode($_sisviesti2));
     $custpickinglist->addChild('SalesOffice', 0);
     $custpickinglist->addChild('SalesContact', 0);
     $custpickinglist->addChild('Warehouse', 0);
@@ -27281,22 +27287,33 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $orderedby = $custpickinglist->addChild('OrderedBy');
     $orderedby->addChild('CustAccount', 0);
-    $orderedby->addChild('CustName', substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50));
-    $orderedby->addChild('CustStreet', substr($looprow['osoite'], 0, 50));
-    $orderedby->addChild('CustStreet2', substr($looprow['osoite'], 0, 50));
+
+    $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
+    $_osoite = substr($looprow['osoite'], 0, 50);
+    $_postitp = substr($looprow['postitp'], 0, 30);
+    $_maa = substr($looprow['maa'], 0, 10);
+
+    $orderedby->addChild('CustName', utf8_encode($_nimi));
+    $orderedby->addChild('CustStreet', utf8_encode($_osoite));
+    $orderedby->addChild('CustStreet2', utf8_encode($_osoite));
     $orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));
-    $orderedby->addChild('CustCity', substr($looprow['postitp'], 0, 30));
-    $orderedby->addChild('CustCountry', substr($looprow['maa'], 0, 10));
-    $orderedby->addChild('Email', $looprow['email']);
+    $orderedby->addChild('CustCity', utf8_encode($_postitp));
+    $orderedby->addChild('CustCountry', utf8_encode($_maa));
+    $orderedby->addChild('Email', utf8_encode($looprow['email']));
+
+    $_nimi = substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50);
+    $_osoite = substr($looprow['toim_osoite'], 0, 50);
+    $_postitp = substr($looprow['toim_postitp'], 0, 30);
+    $_maa = substr($looprow['toim_maa'], 0, 10);
 
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount', 0);
-    $receiver->addChild('RecCustName', substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50));
-    $receiver->addChild('RecCustStreet', substr($looprow['toim_osoite'], 0, 50));
-    $receiver->addChild('RecCustStreet2', substr($looprow['toim_osoite'], 0, 50));
+    $receiver->addChild('RecCustName', utf8_encode($_nimi));
+    $receiver->addChild('RecCustStreet', utf8_encode($_osoite));
+    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite));
     $receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));
-    $receiver->addChild('RecCustCity', substr($looprow['toim_postitp'], 0, 30));
-    $receiver->addChild('RecCustCountry', substr($looprow['toim_maa'], 0, 10));
+    $receiver->addChild('RecCustCity', utf8_encode($_postitp));
+    $receiver->addChild('RecCustCountry', utf8_encode($_maa));
     $receiver->addChild('RecCustPhone', substr($looprow['toim_puh'], 0, 30));
 
     $query = "SELECT tunnus
@@ -27336,7 +27353,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
 
       if ($ulkoinen_jarjestelma == 'L') {
-        $line->addChild('ItemNumber', substr($looprow['tuoteno'], 0, 20));
+        $_tuoteno = substr($looprow['tuoteno'], 0, 20);
+        $line->addChild('ItemNumber', utf8_encode($_tuoteno));
       }
       else {
         $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
@@ -27359,14 +27377,23 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('DiscountPercent', 0);
       $line->addChild('CurrencyCode', 0);
       $line->addChild('TaxCode', 0);
-      $line->addChild('LineInfo', substr($looprow['kommentti'], 0, 92));
+
+      $_kommentti = substr($looprow['kommentti'], 0, 92);
+      $line->addChild('LineInfo', utf8_encode($_kommentti));
 
       $_line_i++;
     }
 
-    $filename = $pupe_root_polku."/dataout/outbounddelivery_".md5(uniqid()).".xml";
+    $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
 
-    if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+    $filename = $pupe_root_polku."/dataout/{$_name}.xml";
+
+    if (file_put_contents($filename, $xml->asXML())) {
+
+      if (!PUPE_UNICODE) {
+        exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
+      }
+
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
       $ftphost = $ftp_posten_logistik_host;

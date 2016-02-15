@@ -284,6 +284,23 @@ function hae_tuotteet() {
       );
     }
 
+    // Haetaan tuotteen kaikki käännökset
+    $query = "SELECT kieli, laji, selite
+              FROM tuotteen_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$row['tuoteno']}'
+              AND laji IN ('nimitys', 'kuvaus', 'lyhytkuvaus')";
+    $tr_result = pupe_query($query);
+    $tuotteen_kaannokset = array();
+
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      $tuotteen_kaannokset[] = array(
+        "kieli"  => $tr_row['kieli'],
+        "kentta" => $tr_row['laji'],
+        "teksti" => $tr_row['selite']
+      );
+    }
+
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
     $query = "SELECT puun_tunnus
               FROM puun_alkio
@@ -352,6 +369,7 @@ function hae_tuotteet() {
       'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
       'tuotteen_parametrit'       => $tuotteen_parametrit,
       'saldo'                     => $myytavissa,
+      'tuotteen_kaannokset'       => $tuotteen_kaannokset,
     );
 
     if (isset($lukitut_tuotekentat) and !empty($lukitut_tuotekentat)) {

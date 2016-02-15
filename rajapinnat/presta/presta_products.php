@@ -62,6 +62,8 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
 
+    $xml->product->id_tax_rules_group = $this->get_tax_group_id($product["alv"]);
+
     $xml->product->width  = str_replace(",", ".", $product['tuoteleveys']);
     $xml->product->height = str_replace(",", ".", $product['tuotekorkeus']);
     $xml->product->depth  = str_replace(",", ".", $product['tuotesyvyys']);
@@ -214,6 +216,18 @@ class PrestaProducts extends PrestaClient {
 
     $this->presta_all_products = $existing_products;
     return $existing_products;
+  }
+
+  private function get_tax_group_id($vat) {
+    $vat = round($vat, 2);
+    $value = $this->tax_rates_table[$vat];
+
+    if (empty($value)) {
+      return null;
+    }
+    else {
+      return $value;
+    }
   }
 
   private function delete_all_unnecessary_products() {

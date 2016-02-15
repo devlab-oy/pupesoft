@@ -331,13 +331,14 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "asiakkaan_avainsanat" :
       if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset  = array("LAJI", "AVAINSANA");
-        $wherelliset = array("LAJI", "AVAINSANA");
+        $wherelliset = array("LAJI", "AVAINSANA","KIELI");
       }
       else {
         $pakolliset  = array("LIITOSTUNNUS", "LAJI", "AVAINSANA");
-        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA");
+        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA","KIELI");
       }
 
+      $joinattavat  = array("LIITOSTUNNUS" => "asiakas");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $saakopoistaa = TRUE;
       break;
@@ -431,10 +432,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "customers_users" :
       $pakolliset = array("USER_ID", "CUSTOMER_ID");
-      $kielletyt    = array("YHTIO"); 
+      $kielletyt    = array("YHTIO");
       $eiyhtiota    = "EITUNNUSTAKAAN";
       $saakopoistaa = TRUE;
-      break;  
+      break;
     default :
       $pakolliset   = array("TUNTEMATON_TAULU");
       $kielletyt    = array();

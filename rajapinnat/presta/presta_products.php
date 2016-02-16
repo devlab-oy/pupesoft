@@ -23,6 +23,7 @@ class PrestaProducts extends PrestaClient {
   private $presta_all_products = null;
   private $tax_rates_table = null;
   private $languages_table = null;
+  private $visibility_type = null;
 
   // Päivitetäänkö tuotekategoriat
   private $_category_sync = true;
@@ -340,5 +341,9 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->languages_table = $value;
     }
+  }
+
+  public function set_visibility_type($value) {
+    $this->visibility_type = $value;
   }
 }

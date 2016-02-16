@@ -193,6 +193,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_languages_table($presta_kieliversiot);
   $presta_products->set_all_products($kaikki_tuotteet);
+  $presta_products->set_visibility_type($presta_tuotekasittely);
   $presta_products->sync_products($tuotteet);
 }
 

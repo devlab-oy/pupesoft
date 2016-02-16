@@ -95,40 +95,40 @@ $tulostakolli = $tulostuskpl;
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   // tehdään pdf:n uusi sivu
-  $firstpage = $pdf->new_page("a5");
+  $firstpage = $pdf->new_page('10.5x14.8cm');
 
   // koko kortin ympärille border
-  $pdf->draw_rectangle(8, 8, 590, 410, $firstpage, $rectparam);
+  $pdf->draw_rectangle(8, 8, 410, 290, $firstpage, $rectparam);
 
-  $pdf->draw_rectangle(585, 315, 508, 400, $firstpage, $rectparam);
-  $pdf->draw_text(330, 565, 'Port Payé', $firstpage, $isompi);
-  $pdf->draw_text(330, 550, 'Finlande', $firstpage, $isompi);
-  $pdf->draw_text(330, 535, $toitarow['sopimusnro'], $firstpage, $isompi);
-  $pdf->draw_text(330, 520, 'Posti Oy', $firstpage, $isompi);
+  $pdf->draw_rectangle(405, 230, 350, 285, $firstpage, $rectparam);
+  $pdf->draw_text(238, 390, 'Port Payé', $firstpage, $iso);
+  $pdf->draw_text(241, 380, 'Finlande', $firstpage, $iso);
+  $pdf->draw_text(243, 370, $toitarow['sopimusnro'], $firstpage, $iso);
+  $pdf->draw_text(241, 360, 'Posti Oy', $firstpage, $iso);
 
   # Jaetaan kirje osiin vaakaviivoilla
-  $pdf->draw_rectangle(400, 8, 400, 410, $firstpage, $rectparam);
-  $pdf->draw_rectangle(150, 8, 150, 410, $firstpage, $rectparam);
+  $pdf->draw_rectangle(280, 8, 280, 290, $firstpage, $rectparam);
+  $pdf->draw_rectangle(100, 8, 100, 290, $firstpage, $rectparam);
 
-  $pdf->draw_text(13, 480, 'Lähettäjä / Avsend / Sender:', $firstpage, $isompi);
-  $pdf->draw_text(13, 465, $postirow["yhtio_nimi"], $firstpage, $isompi);
-  $pdf->draw_text(13, 449, $postirow["yhtio_osoite"], $firstpage, $isompi);
-  $pdf->draw_text(13, 433, "{$postirow['yhtio_postino']} {$postirow['yhtio_postitp']}", $firstpage, $isompi);
-  $pdf->draw_text(13, 417, 'Puh: '.$yhtiorow["puhelin"], $firstpage, $isompi);
+  $pdf->draw_text(13, 330, 'Lähettäjä / Avsend / Sender:', $firstpage, $iso);
+  $pdf->draw_text(13, 317, $postirow["yhtio_nimi"], $firstpage, $iso);
+  $pdf->draw_text(13, 306, $postirow["yhtio_osoite"], $firstpage, $iso);
+  $pdf->draw_text(13, 296, "{$postirow['yhtio_postino']} {$postirow['yhtio_postitp']}", $firstpage, $iso);
+  $pdf->draw_text(13, 285, 'Puh: '.$yhtiorow["puhelin"], $firstpage, $iso);
 
-  $pdf->draw_text(13, 380, 'Vastaanottaja / Mottag / Consing:', $firstpage, $isompi);
-  $pdf->draw_text(13, 365, $rakir_row["toim_nimi"], $firstpage, $isompi);
-  $pdf->draw_text(13, 349, $rakir_row["toim_osoite"], $firstpage, $isompi);
-  $pdf->draw_text(13, 333, "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}", $firstpage, $isompi);
+  $pdf->draw_text(13, 265, 'Vastaanottaja / Mottag / Consing:', $firstpage, $iso);
+  $pdf->draw_text(13, 252, $rakir_row["toim_nimi"], $firstpage, $iso);
+  $pdf->draw_text(13, 241, $rakir_row["toim_osoite"], $firstpage, $iso);
+  $pdf->draw_text(13, 230, "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}", $firstpage, $iso);
 
-  $pdf->draw_text(13, 180, 'Viite:', $firstpage, $isompi);
+  $pdf->draw_text(13, 117, 'Viite:', $firstpage, $iso);
 
   if ($postirow['asiakkaan_tilausnumero'] != '') {
-    $pdf->draw_text(50, 180, $postirow['asiakkaan_tilausnumero'], $firstpage, $isompi);
-    $pdf->draw_text(50, 164, $postirow['tilausyhteyshenkilo'], $firstpage, $isompi);
+    $pdf->draw_text(40, 117, $postirow['asiakkaan_tilausnumero'], $firstpage, $iso);
+    $pdf->draw_text(40, 105, $postirow['tilausyhteyshenkilo'], $firstpage, $iso);
   }
   else {
-    $pdf->draw_text(50, 180, $postirow['tilausyhteyshenkilo'], $firstpage, $isompi);
+    $pdf->draw_text(40, 117, $postirow['tilausyhteyshenkilo'], $firstpage, $iso);
   }
 }
 

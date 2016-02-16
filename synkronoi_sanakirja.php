@@ -197,7 +197,6 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
       echo "</table><br><br>";
 
-
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='UPDATE'>";
       echo "<input type='submit' value='".t("Synkronoi")."'>";
@@ -209,7 +208,12 @@ else {
   echo "<form method='post'>
       <input type='hidden' name='tee' value='TEE'>
       <input type='submit' value='".t("Vertaa sanakirjoja")."'>
-      </form>";
+      </form> ";
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='UPDATE'>";
+  echo "<input type='submit' value='".t("Synkronoi sanakirjat")."'>";
+  echo "</form>";
 }
 
 require "inc/footer.inc";

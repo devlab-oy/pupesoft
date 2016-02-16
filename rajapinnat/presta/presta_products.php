@@ -160,6 +160,19 @@ class PrestaProducts extends PrestaClient {
       }
     }
 
+    // First, remove all old child products
+    $remove_node = $xml->product->associations->product_bundle;
+    $dom_node = dom_import_simplexml($remove_node);
+    $dom_node->parentNode->removeChild($dom_node);
+
+    // Then add element back
+    $xml->product->associations->addChild('product_bundle');
+
+    // Add child products for product bundle
+    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+      $this->add_child_product($xml, $child_product);
+    }
+
     return $xml;
   }
 
@@ -185,6 +198,27 @@ class PrestaProducts extends PrestaClient {
     $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
 
     return $category_id;
+  }
+
+  private function add_child_product(SimpleXMLElement &$xml, $product) {
+    $discount   = $product['alekerroin'];
+    $price      = $product['hintakerroin'];
+    $qty        = $product['kerroin'];
+    $sku        = $product['tuoteno'];
+    $product_id = array_search($sku, $this->all_skus());
+
+    if ($product_id === false) {
+      $this->logger->log("VIRHE! Tuotteen {$xml->product->reference} lapsituotetta {$sku} ei löytynyt!");
+      return false;
+    }
+
+    $product = $xml->product->associations->product_bundle->addChild('product');
+    $product->addChild('id');
+    $product->id = $product_id;
+    $product->addChild('quantity');
+    $product->quantity = $qty;
+
+    $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} lapsituote {$sku} ({$product_id})");
   }
 
   /**

@@ -81,6 +81,7 @@ function presta_specific_prices() {
   global $kukarow, $yhtiorow;
 
   $specific_prices = array();
+  $tuoterajaus = presta_tuoterajaus();
 
   // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa, että sama asiakashintarivi
   // voi tulla monta kertaa, koska asiakas has_many yhteyshenkilö.
@@ -113,10 +114,7 @@ function presta_specific_prices() {
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
               AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            AND tuote.status      != 'P'
-            AND tuote.tuotetyyppi  NOT in ('A','B')
-            AND tuote.tuoteno     != ''
-            AND tuote.nakyvyys    != ''";
+            {$tuoterajaus}";
   $result = pupe_query($query);
 
   while ($asiakashinta = mysql_fetch_assoc($result)) {
@@ -142,10 +140,7 @@ function presta_specific_prices() {
             LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
               AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            AND tuote.status      != 'P'
-            AND tuote.tuotetyyppi  NOT in ('A','B')
-            AND tuote.tuoteno     != ''
-            AND tuote.nakyvyys    != ''";
+            {$tuoterajaus}";
   $result = pupe_query($query);
 
   while ($asiakasalennus = mysql_fetch_assoc($result)) {
@@ -189,15 +184,14 @@ function hae_kategoriat() {
 function hae_kaikki_tuotteet() {
   global $kukarow, $yhtiorow;
 
+  $tuoterajaus = presta_tuoterajaus();
+
   // Haetaan kaikki siirrettävät tuotteet, tämä on poistettujen dellausta varten
   // query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio        = '{$kukarow['yhtio']}'
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != ''";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$tuoterajaus}";
   $res = pupe_query($query);
 
   $tuotteet = array();
@@ -212,23 +206,19 @@ function hae_kaikki_tuotteet() {
 function hae_tuotteet() {
   global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
 
+  $tuoterajaus = presta_tuoterajaus();
+
   if ($ajetaanko_kaikki == "NO") {
-    $muutoslisa = " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
-  }
-  else {
-    $muutoslisa = "";
+    $tuoterajaus .= " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
   }
 
   // Haetaan pupesta tuotteen tiedot
   $query = "SELECT tuote.*
             FROM tuote
-            WHERE tuote.yhtio        = '{$kukarow['yhtio']}'
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != ''
-              {$muutoslisa}
-            ORDER BY tuote.tuoteno";
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$tuoterajaus}";
+            echo $query;
+            exit;
   $res = pupe_query($query);
   $dnstuote = array();
 
@@ -319,4 +309,21 @@ function hae_tuotteet() {
   }
 
   return $dnstuote;
+}
+
+function presta_tuoterajaus() {
+  $presta_tuotekasittely = $GLOBALS["presta_tuotekasittely"];
+
+  $tuoterajaus = " AND tuote.tuoteno != ''
+                   AND tuote.tuotetyyppi NOT in ('A','B') ";
+
+  if ($presta_tuotekasittely == 2) {
+    $tuoterajaus .= "";
+  }
+  else {
+    $tuoterajaus .= " AND tuote.status != 'P'
+                      AND tuote.nakyvyys != '' ";
+  }
+
+  return $tuoterajaus;
 }

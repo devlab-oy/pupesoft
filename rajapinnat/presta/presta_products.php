@@ -7,25 +7,16 @@ class PrestaProducts extends PrestaClient {
 
   const RESOURCE = 'products';
 
-  /**
-  * Dynaamiset tuoteparametrien lista
-  */
+  private $_category_sync = true;
   private $_dynamic_fields = array();
-
-  /**
-   * Ohitettavien tuoteparametrien lista
-   */
   private $_removable_fields = array();
-
+  private $languages_table = null;
+  private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
-  private $presta_all_products = null;
   private $tax_rates_table = null;
-  private $languages_table = null;
-
-  // P‰ivitet‰‰nkˆ tuotekategoriat
-  private $_category_sync = true;
+  private $visibility_type = null;
 
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
@@ -62,6 +53,24 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
+
+    // by default product is visible everywhere
+    // values: both, catalog, search, none
+    $visibility = 'both';
+
+    // if we are moving all products to presta, hide the product if we don't want to show it
+    if ($this->visibility_type == 2) {
+      if (empty($product['nakyvyys'])) {
+        $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
+        $visibility = 'none';
+      }
+      elseif ($product['status'] == 'P' and $product['saldo'] <= 0) {
+        $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
+        $visibility = 'none';
+      }
+    }
+
+    $xml->product->visibility = $visibility;
 
     $xml->product->id_tax_rules_group = $this->get_tax_group_id($product["alv"]);
 
@@ -340,5 +349,9 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->languages_table = $value;
     }
+  }
+
+  public function set_visibility_type($value) {
+    $this->visibility_type = $value;
   }
 }

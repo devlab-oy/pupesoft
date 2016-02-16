@@ -54,6 +54,24 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
 
+    // by default product is visible everywhere
+    // values: both, catalog, search, none
+    $visibility = 'both';
+
+    // if we are moving all products to presta, hide the product if we don't want to show it
+    if ($this->visibility_type == 2) {
+      if (empty($product['nakyvyys'])) {
+        $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
+        $visibility = 'none';
+      }
+      elseif ($product['status'] == 'P' and $product['saldo'] <= 0) {
+        $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
+        $visibility = 'none';
+      }
+    }
+
+    $xml->product->visibility = $visibility;
+
     $xml->product->id_tax_rules_group = $this->get_tax_group_id($product["alv"]);
 
     $xml->product->width  = str_replace(",", ".", $product['tuoteleveys']);

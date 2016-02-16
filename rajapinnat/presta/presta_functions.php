@@ -298,6 +298,7 @@ function hae_tuotteet() {
     $dnstuote[] = array(
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
+      'ei_saldoa'                 => $row["ei_saldoa"],
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],

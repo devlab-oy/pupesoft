@@ -151,6 +151,11 @@ if (!isset($presta_valuuttakoodit)) {
     // "EUR" => 2,
   );
 }
+if (!isset($presta_tuotekasittely)) {
+  // 1 = siirretään tuotteet joiden status != 'P' ja nakyvyys != ''
+  // 2 = siirretään kaikki pupen tuotteet prestaan (poistetutkin), mutta merkataan ne hiddeniksi
+  $presta_tuotekasittely = 1;
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");

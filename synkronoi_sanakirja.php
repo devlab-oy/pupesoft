@@ -20,6 +20,7 @@ if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
     $uusi = 0;
     $tunnus = 0;
   }
+  echo "<br>";
 }
 
 if (!isset($tee)) $tee = "";
@@ -59,6 +60,12 @@ if ($tee == "TEE" or $tee == "UPDATE") {
     }
 
     if (isset($sync_otsikot["fi"])) {
+
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='UPDATE'>";
+      echo "<input type='submit' value='".t("Synkronoi")."'>";
+      echo "</form>";
+      echo "<br><br>";
 
       echo "<table>";
       echo "<tr><th>".t("Kysytty")."</td>";
@@ -190,21 +197,23 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
       echo "</table><br><br>";
 
-
-      echo "  <form method='post'>
-          <input type='hidden' name='tee' value='UPDATE'>
-          <input type='submit' value='".t("Synkronoi")."'>
-
-          </form>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='UPDATE'>";
+      echo "<input type='submit' value='".t("Synkronoi")."'>";
+      echo "</form>";
     }
   }
 }
 else {
-  echo "  <br><br>
-      <form method='post'>
+  echo "<form method='post'>
       <input type='hidden' name='tee' value='TEE'>
       <input type='submit' value='".t("Vertaa sanakirjoja")."'>
-      </form>";
+      </form> ";
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='UPDATE'>";
+  echo "<input type='submit' value='".t("Synkronoi sanakirjat")."'>";
+  echo "</form>";
 }
 
 require "inc/footer.inc";

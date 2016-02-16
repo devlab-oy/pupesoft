@@ -390,12 +390,21 @@ else {
           $taulunimi = "asiakkaan_avainsanat_{$kieli}_{$laji}";
           $joinit[$taulunimi] = "\nLEFT JOIN asiakkaan_avainsanat AS $taulunimi ON asiakas.yhtio=$taulunimi.yhtio and asiakas.tunnus=$taulunimi.liitostunnus and $taulunimi.laji='$laji' and $taulunimi.kieli='$kieli'";
 
+          if (!empty($esitayta_kieli_laji)) {
+            $selecti .= "'$kieli' as 'asiakkaan_avainsanat.kieli',\n";
+            $selecti .= "'$laji' as 'asiakkaan_avainsanat.laji',\n";
+          }
+
           foreach ($sarakkeet as $kentta) {
 
             $clean_kentta = $kentta;
             list($taulu, $kentta) = explode(".", $clean_kentta);
 
-            if ($taulu != "asiakkaan_avainsanat" or $kentta == "kieli" and $kentta == "laji") continue;
+            if ($taulu != "asiakkaan_avainsanat") continue;
+
+            if (!empty($esitayta_kieli_laji) and ($kentta == "kieli" or $kentta == "laji")) {
+              continue;
+            }
 
             if (!empty($kentat[$clean_kentta])) {
               $selecti .= "$taulunimi.$kentta as 'asiakkaan_avainsanat.$kentta',\n";
@@ -427,8 +436,10 @@ else {
           $taulunimi = "tuotteen_avainsanat_{$kieli}_{$laji}";
           $joinit[$taulunimi] = "\nLEFT JOIN tuotteen_avainsanat AS $taulunimi ON tuote.yhtio=$taulunimi.yhtio and tuote.tuoteno=$taulunimi.tuoteno and $taulunimi.laji='$laji' and $taulunimi.kieli='$kieli'";
 
-          #$selecti .= "'$kieli' as 'tuotteen_avainsanat.kieli',\n";
-          #$selecti .= "'$laji' as 'tuotteen_avainsanat.laji',\n";
+          if (!empty($esitayta_kieli_laji)) {
+            $selecti .= "'$kieli' as 'tuotteen_avainsanat.kieli',\n";
+            $selecti .= "'$laji' as 'tuotteen_avainsanat.laji',\n";
+          }
 
           foreach ($sarakkeet as $kentta) {
 
@@ -436,6 +447,10 @@ else {
             list($taulu, $kentta) = explode(".", $clean_kentta);
 
             if ($taulu != "tuotteen_avainsanat") continue;
+
+            if (!empty($esitayta_kieli_laji) and ($kentta == "kieli" or $kentta == "laji")) {
+              continue;
+            }
 
             if (!empty($kentat[$clean_kentta])) {
               $selecti .= "$taulunimi.$kentta as 'tuotteen_avainsanat.$kentta',\n";
@@ -727,6 +742,10 @@ else {
         echo "$rivi";
       }
       echo "</table>";
+
+      echo "<br>".t("Esitäytä kieli ja laji").": ";
+      $chk1 = !empty($esitayta_kieli_laji) ? "CHECKED" : "";
+      echo "<input type='checkbox' name='esitayta_kieli_laji' $chk1>";
       echo "</td>";
     }
 
@@ -739,6 +758,10 @@ else {
         echo "$rivi";
       }
       echo "</table>";
+
+      echo "<br>".t("Esitäytä kieli ja laji").": ";
+      $chk1 = !empty($esitayta_kieli_laji) ? "CHECKED" : "";
+      echo "<input type='checkbox' name='esitayta_kieli_laji' $chk1>";
       echo "</td>";
     }
 

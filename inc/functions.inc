@@ -22547,8 +22547,23 @@ if (!function_exists("gs1_sscc")) {
 
     $sscc_prefix = '00';
     $sscc_expansioncode = $expansioncode;
-    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
-    $sscc_item_id = str_pad(substr($id, -7), 7, 0, STR_PAD_LEFT);
+
+    // jos gs1 yritystunnus on yli 7 merkki‰ (oletuspituus), tehd‰‰n
+    // erikoisk‰sittely sscc koodin muodostukselle ja raivataan tilaa 
+    // tilausnumerosta
+    if (strlen($yhtiorow['ean']) > 7) {
+      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli 
+      // 7 merkin tuo menee
+      $company_id_space   = strlen($yhtiorow['ean']);               //t‰nne lis‰‰ tilaa
+      $item_id_space      = 7 - (strlen($yhtiorow['ean']) - 7);     //t‰‰lt‰ pois tilaa
+    }                     
+    else {                
+      $company_id_space   = 7;
+      $item_id_space      = 7;
+    }
+
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_LEFT);
+    $sscc_item_id = str_pad(substr($id, -$item_id_space), $item_id_space, 0, STR_PAD_LEFT);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
     $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;

@@ -422,7 +422,7 @@ else {
       foreach ($rajaus["tuotteen_avainsanat.kieli"] as $kieli) {
         foreach ($rajaus["tuotteen_avainsanat.laji"] as $laji) {
 
-          $taulunimi = "tuotteen_avainsanat__{$kieli}_{$laji}";
+          $taulunimi = "tuotteen_avainsanat_{$kieli}_{$laji}";
           $joinit[$taulunimi] = "\nLEFT JOIN tuotteen_avainsanat AS $taulunimi ON tuote.yhtio=$taulunimi.yhtio and tuote.tuoteno=$taulunimi.tuoteno and $taulunimi.laji='$laji' and $taulunimi.kieli='$kieli'";
 
           foreach ($sarakkeet as $kentta) {

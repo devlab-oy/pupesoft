@@ -162,7 +162,7 @@ class PrestaProducts extends PrestaClient {
 
     // Product type, default to simple
     // Values: simple, pack, virtual
-    $product_type = emtpy($product['ei_saldoa']) ? 'simple' : 'virtual';
+    $product_type = empty($product['ei_saldoa']) ? 'simple' : 'virtual';
 
     // First, remove all old child products
     $remove_node = $xml->product->associations->product_bundle;

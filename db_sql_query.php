@@ -186,12 +186,13 @@ else {
         // Tuotteen parametri.
         // K‰ytet‰‰n "tuote-export" -raportissa, "monivalintalaatikot" -listauksessa
         // sek‰ "myyntier‰t ja tuotetetiedot" -n‰kym‰ss‰ (jos se on enabloitu myyntitilaukselle)
-        $vresult = t_avainsana("PARAMETRI");
+        $sresult = t_avainsana("PARAMETRI");
 
-        while ($vrow = mysql_fetch_assoc($vresult)) {
-          $chk = !empty($rajaus[$row[0]][$srow["selite"]]) ? "CHECKED" : "";
+        while ($srow = mysql_fetch_assoc($sresult)) {
+          $selite = "parametri_$srow[selite]";
+          $chk = !empty($rajaus[$row[0]][$selite]) ? "CHECKED" : "";
 
-          $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$srow[selite]]' value='$srow[selite]' $chk>".t("Tuotteen parametri").": $vrow[selitetark]<br>";
+          $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$selite]' value='$selite' $chk>".t("Tuotteen parametri").": $srow[selitetark]<br>";
         }
 
         // Tuotteen lis‰tieto.
@@ -199,9 +200,10 @@ else {
         $lresult = t_avainsana("LISATIETO");
 
         while ($lrow = mysql_fetch_assoc($lresult)) {
-          $chk = !empty($rajaus[$row[0]][$srow["selite"]]) ? "CHECKED" : "";
+          $selite = "lisatieto_$srow[selite]";
+          $chk = !empty($rajaus[$row[0]][$selite]) ? "CHECKED" : "";
 
-          $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$srow[selite]]' value='$srow[selite]' $chk>".t("Tuotteen lis‰tieto").": $lrow[selitetark]<br>";
+          $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$selite]' value='$selite' $chk>".t("Tuotteen lis‰tieto").": $lrow[selitetark]<br>";
         }
 
         $rivi .= "</td>";

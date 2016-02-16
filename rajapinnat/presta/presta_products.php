@@ -160,6 +160,10 @@ class PrestaProducts extends PrestaClient {
       }
     }
 
+    // Product type, default to simple
+    // Values: simple, pack, virtual
+    $product_type = 'simple';
+
     // First, remove all old child products
     $remove_node = $xml->product->associations->product_bundle;
     $dom_node = dom_import_simplexml($remove_node);
@@ -170,8 +174,12 @@ class PrestaProducts extends PrestaClient {
 
     // Add child products for product bundle
     foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+      $product_type = 'pack';
       $this->add_child_product($xml, $child_product);
     }
+
+    // set product type
+    $xml->product->type = $product_type;
 
     return $xml;
   }

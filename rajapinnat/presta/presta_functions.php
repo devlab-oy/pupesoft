@@ -288,6 +288,7 @@ function hae_tuotteet() {
       'nakyvyys'                  => $row["nakyvyys"],
       'nimi'                      => $row["nimitys"],
       'osasto'                    => $row["osasto"],
+      'status'                    => $row["status"],
       'try'                       => $row["try"],
       'tunnus'                    => $row['tunnus'],
       'tuotemassa'                => $row["tuotemassa"],

@@ -22549,15 +22549,15 @@ if (!function_exists("gs1_sscc")) {
     $sscc_expansioncode = $expansioncode;
 
     // jos gs1 yritystunnus on yli 7 merkkiä (oletuspituus), tehdään
-    // erikoiskäsittely sscc koodin muodostukselle ja raivataan tilaa 
+    // erikoiskäsittely sscc koodin muodostukselle ja raivataan tilaa
     // tilausnumerosta
     if (strlen($yhtiorow['ean']) > 7) {
-      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli 
+      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli
       // 7 merkin tuo menee
       $company_id_space   = strlen($yhtiorow['ean']);               //tänne lisää tilaa
       $item_id_space      = 7 - (strlen($yhtiorow['ean']) - 7);     //täältä pois tilaa
-    }                     
-    else {                
+    }
+    else {
       $company_id_space   = 7;
       $item_id_space      = 7;
     }
@@ -32273,5 +32273,17 @@ if (!function_exists('generoi_hinnastot')) {
     }
 
     return false;
+  }
+}
+
+if (!function_exists('sort_array_of_arrays')) {
+  function sort_array_of_arrays(&$array, $subfield) {
+    $sortarray = array();
+
+    foreach ($array as $key => $row) {
+      $sortarray[$key] = $row[$subfield];
+    }
+
+    array_multisort($sortarray, SORT_ASC, $array);
   }
 }

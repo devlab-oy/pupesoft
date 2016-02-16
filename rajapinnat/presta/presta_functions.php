@@ -261,6 +261,24 @@ function hae_tuotteet() {
       );
     }
 
+    // Haetaan tuotteen lapsituotteet, jos tämä on isätuote
+    $query = "SELECT tuoteno, kerroin, hintakerroin, alekerroin
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$row['tuoteno']}'
+              AND tyyppi = 'P'";
+    $tr_result = pupe_query($query);
+    $tuotteen_lapsituotteet = array();
+
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      $tuotteen_lapsituotteet[] = array(
+        "alekerroin"   => $tr_row['alekerroin'],
+        "hintakerroin" => $tr_row['hintakerroin'],
+        "kerroin"      => $tr_row['kerroin'],
+        "tuoteno"      => $tr_row['tuoteno'],
+      );
+    }
+
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
     $query = "SELECT puun_tunnus
               FROM puun_alkio
@@ -304,8 +322,14 @@ function hae_tuotteet() {
       'saldo'                     => $myytavissa,
       'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
       'tuotteen_kaannokset'       => $tuotteen_kaannokset,
+      'tuotteen_lapsien_maara'    => count($tuotteen_lapsituotteet),
+      'tuotteen_lapsituotteet'    => $tuotteen_lapsituotteet,
     );
   }
+
+  // pitää sortata array siten, että isätuotteet ovat lopussa.
+  // muuten lapsia ei välttämättä ole perustettu, kun yritetään rakentaa perhettä
+  sort_array_of_arrays($dnstuote, 'tuotteen_lapsien_maara');
 
   return $dnstuote;
 }

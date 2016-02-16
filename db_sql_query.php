@@ -425,12 +425,15 @@ else {
           $taulunimi = "tuotteen_avainsanat_{$kieli}_{$laji}";
           $joinit[$taulunimi] = "\nLEFT JOIN tuotteen_avainsanat AS $taulunimi ON tuote.yhtio=$taulunimi.yhtio and tuote.tuoteno=$taulunimi.tuoteno and $taulunimi.laji='$laji' and $taulunimi.kieli='$kieli'";
 
+          #$selecti .= "'$kieli' as 'tuotteen_avainsanat.kieli',\n";
+          #$selecti .= "'$laji' as 'tuotteen_avainsanat.laji',\n";
+
           foreach ($sarakkeet as $kentta) {
 
             $clean_kentta = $kentta;
             list($taulu, $kentta) = explode(".", $clean_kentta);
 
-            if ($taulu != "tuotteen_avainsanat" or $kentta == "kieli" and $kentta == "laji") continue;
+            if ($taulu != "tuotteen_avainsanat") continue;
 
             if (!empty($kentat[$clean_kentta])) {
               $selecti .= "$taulunimi.$kentta as 'tuotteen_avainsanat.$kentta',\n";

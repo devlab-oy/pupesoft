@@ -687,7 +687,7 @@ else {
     echo "<table>";
     echo "<tr>";
 
-    echo "<td class='back'>";
+    echo "<td class='back ptop'>";
     echo "<table>";
     db_piirra_otsikot($table);
 
@@ -702,7 +702,7 @@ else {
     echo "</td>";
 
     if (!empty($tuotteentoim_join)) {
-      echo "<td class='back'>";
+      echo "<td class='back ptop'>";
       echo "<table>";
       db_piirra_otsikot("tuotteen_toimittajat");
 
@@ -714,7 +714,7 @@ else {
     }
 
     if (!empty($tuotteenavainsana_join)) {
-      echo "<td class='back'>";
+      echo "<td class='back ptop'>";
       echo "<table>";
       db_piirra_otsikot("tuotteen_avainsanat");
 
@@ -726,7 +726,7 @@ else {
     }
 
     if (!empty($asiakkaanavainsana_join)) {
-      echo "<td class='back'>";
+      echo "<td class='back ptop'>";
       echo "<table>";
       db_piirra_otsikot("asiakkaan_avainsanat");
 

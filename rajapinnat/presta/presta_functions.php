@@ -217,8 +217,6 @@ function hae_tuotteet() {
             FROM tuote
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
-            echo $query;
-            exit;
   $res = pupe_query($query);
   $dnstuote = array();
 

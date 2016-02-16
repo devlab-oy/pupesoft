@@ -7,26 +7,16 @@ class PrestaProducts extends PrestaClient {
 
   const RESOURCE = 'products';
 
-  /**
-  * Dynaamiset tuoteparametrien lista
-  */
+  private $_category_sync = true;
   private $_dynamic_fields = array();
-
-  /**
-   * Ohitettavien tuoteparametrien lista
-   */
   private $_removable_fields = array();
-
+  private $languages_table = null;
+  private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
-  private $presta_all_products = null;
   private $tax_rates_table = null;
-  private $languages_table = null;
   private $visibility_type = null;
-
-  // Päivitetäänkö tuotekategoriat
-  private $_category_sync = true;
 
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);

@@ -1467,7 +1467,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
     $tuotteet_str = substr($tuotteet_str, 0, -1);
 
-    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi
+    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi, tuotepaikat.oletus
               FROM tuote
               JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
                 AND tuotepaikat.tuoteno   = tuote.tuoteno
@@ -1497,6 +1497,11 @@ if (!function_exists("tuoteperhe_myytavissa")) {
       foreach ($tuotteet as $tuoteno => $kerroin) {
 
         list(, , $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
+
+        if (!isset($perhe_myytavissa[$tuoteno])) {
+          $perhe_myytavissa[$tuoteno] = 0;
+        }
+
         $perhe_myytavissa[$tuoteno] += round($myytavissa/$kerroin, 2);
       }
 

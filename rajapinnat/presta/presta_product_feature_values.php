@@ -3,14 +3,21 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaProductFeatureValues extends PrestaClient {
-  # http://prestashop.devlab.fi/api/product_feature_values/34
+  private $all_values = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   public function value_id_by_value($value) {
-    array_search($value, $this->fetch_all());
+    foreach ($this->fetch_all() as $feature_value) {
+      // Match only to default language
+      if ($feature_value["value"]["language"][0] == $value) {
+        return $feature_value['id'];
+      }
+    }
+
+    return false;
   }
 
   protected function resource_name() {
@@ -19,7 +26,7 @@ class PrestaProductFeatureValues extends PrestaClient {
 
   protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
     if (is_null($existing_record)) {
-      $xml = empty_xml();
+      $xml = $this->empty_xml();
     }
     else {
       $xml = $existing_record;
@@ -38,14 +45,15 @@ class PrestaProductFeatureValues extends PrestaClient {
   }
 
   private function fetch_all() {
-    if (isset($this->all_features)) {
-      return $this->all_features;
+    if (isset($this->all_values)) {
+      return $this->all_values;
     }
 
     $display = array('id', 'value');
 
-    $this->all_features = $this->all($display);
+    $this->logger->log("Haetaan ominaisuuksien arvot.");
+    $this->all_values = $this->all($display);
 
-    return $this->all_features;
+    return $this->all_values;
   }
 }

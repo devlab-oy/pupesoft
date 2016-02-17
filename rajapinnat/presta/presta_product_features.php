@@ -10,24 +10,13 @@ class PrestaProductFeatures extends PrestaClient {
     parent::__construct($url, $api_key);
   }
 
-  public function feature_id_by_value($value) {
-    $feature_id = array_search($value, $this->fetch_all());
-
-    if ($feature_id === false) {
-      $this->logger->log("VIRHE! Ominaisuutta {$value} ei ole perustettu Prestaan!");
-      return false;
-    }
-
-    return $feature_id;
-  }
-
   protected function resource_name() {
     return 'product_features';
   }
 
   protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
     if (is_null($existing_record)) {
-      $xml = empty_xml();
+      $xml = $this->empty_xml();
     }
     else {
       $xml = $existing_record;
@@ -52,6 +41,7 @@ class PrestaProductFeatures extends PrestaClient {
 
     $display = array('id', 'name');
 
+    $this->logger->log("Haetaan kaikki ominaisuudet.");
     $this->all_features = $this->all($display);
 
     return $this->all_features;

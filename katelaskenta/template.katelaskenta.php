@@ -10,11 +10,11 @@
  * ei ole vielä käännetty template muotoon.
  */
 ?>
-<?php if(isset($template["flash_success"])) { ?>
+<?php if (isset($template["flash_success"])) { ?>
     <p style="color: green; font-weight: bold;"><?php echo $template["flash_success"]; ?></p>
 <?php } ?>
 
-<?php if(isset($template["flash_error"])) { ?>
+<?php if (isset($template["flash_error"])) { ?>
     <p style="color: red; font-weight: bold;"><?php echo $template["flash_error"]; ?></p>
 <?php } ?>
 
@@ -57,11 +57,11 @@
                     <th>&nbsp</th>
                 </tr>
                 <?php
-                // Käydään hakutulokset läpi.
-                // $template muuttuja on alustettu tämän templaten ulkopuolella.
-                foreach ($template["tuotteet"] as $avain => &$tuote) {
-                    $tuotetunnus = $tuote["tunnus"];
-                    ?>
+  // Käydään hakutulokset läpi.
+  // $template muuttuja on alustettu tämän templaten ulkopuolella.
+  foreach ($template["tuotteet"] as $avain => &$tuote) {
+    $tuotetunnus = $tuote["tunnus"];
+?>
 
                     <tr class="aktiivi" id="rivi_<?php echo trim($tuote["tuoteno"]); ?>" data-kehahinta="<?php echo $tuote["kehahin"]; ?>">
                         <td style="display: none;"><input type="hidden" value="<?php echo $tuote["kehahin"]; ?>" name="valitutkeskihankintahinnat['<?php echo $tuotetunnus; ?>']" /></td>

@@ -13,6 +13,7 @@ class PrestaProducts extends PrestaClient {
   private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
+  private $presta_stock = null;
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
@@ -21,6 +22,8 @@ class PrestaProducts extends PrestaClient {
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
     $this->presta_home_category_id = $presta_home_category_id;
+
+    $this->presta_stock = new PrestaProductStocks($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -260,10 +263,8 @@ class PrestaProducts extends PrestaClient {
             $id = (string) $response['product']['id'];
           }
 
-          if (!empty($product['saldo'])) {
-            $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
-            $presta_stock->create_or_update($id, $product['saldo']);
-          }
+          $qty = empty($product['saldo']) ? 0 : $product['saldo'];
+          $this->presta_stock->create_or_update($id, $qty);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions

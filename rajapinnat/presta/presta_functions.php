@@ -270,13 +270,28 @@ function hae_tuotteet() {
     $tr_result = pupe_query($query);
     $tuotteen_lapsituotteet = array();
 
-    while ($tr_row = mysql_fetch_assoc($tr_result)) {
-      $tuotteen_lapsituotteet[] = array(
-        "alekerroin"   => $tr_row['alekerroin'],
-        "hintakerroin" => $tr_row['hintakerroin'],
-        "kerroin"      => $tr_row['kerroin'],
-        "tuoteno"      => $tr_row['tuoteno'],
-      );
+    // tämä on isätuote
+    if (mysql_num_rows($tr_result) > 0) {
+      // lasketaan isän saldo
+      $isa_saldot = tuoteperhe_myytavissa($row["tuoteno"], 'KAIKKI');
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+
+      while ($tr_row = mysql_fetch_assoc($tr_result)) {
+        $tuotteen_lapsituotteet[] = array(
+          "alekerroin"   => $tr_row['alekerroin'],
+          "hintakerroin" => $tr_row['hintakerroin'],
+          "kerroin"      => $tr_row['kerroin'],
+          "tuoteno"      => $tr_row['tuoteno'],
+        );
+      }
+    }
+    else {
+      // Normi tuote, haetaan tuotteen myytävissä määrä (saldo)
+      list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
     }
 
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
@@ -292,9 +307,6 @@ function hae_tuotteet() {
       $tuotepuun_tunnukset[] = $tuotepuurow['puun_tunnus'];
     }
 
-    // Haetaan tuotteen myytävissä määrä (saldo)
-    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
-
     $dnstuote[] = array(
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
@@ -308,9 +320,13 @@ function hae_tuotteet() {
       'status'                    => $row["status"],
       'try'                       => $row["try"],
       'tunnus'                    => $row['tunnus'],
+      'tuotekorkeus'              => $row['tuotekorkeus'],
+      'tuoteleveys'               => $row['tuoteleveys'],
       'tuotemassa'                => $row["tuotemassa"],
+      'tuotemassa'                => $row['tuotemassa'],
       'tuotemerkki'               => $row["tuotemerkki"],
       'tuoteno'                   => $row["tuoteno"],
+      'tuotesyvyys'               => $row['tuotesyvyys'],
       'yksikko'                   => $row["yksikko"],
       'myymalahinta'              => $myymalahinta,
       'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,

@@ -10,6 +10,7 @@ class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
   private $_dynamic_fields = array();
   private $_removable_fields = array();
+  private $features_table = null;
   private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
@@ -428,5 +429,11 @@ class PrestaProducts extends PrestaClient {
 
   public function set_visibility_type($value) {
     $this->visibility_type = $value;
+  }
+
+  public function set_product_features($value) {
+    if (is_array($value)) {
+      $this->features_table = $value;
+    }
   }
 }

@@ -9,6 +9,10 @@ class PrestaProductFeatureValues extends PrestaClient {
     parent::__construct($url, $api_key);
   }
 
+  public function value_id_by_value($value) {
+    array_search($value, $this->fetch_all());
+  }
+
   protected function resource_name() {
     return 'product_feature_values';
   }

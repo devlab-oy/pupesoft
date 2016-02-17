@@ -376,7 +376,7 @@ abstract class PrestaClient {
    * @return string
    */
   protected function saniteze_link_rewrite($string) {
-    return preg_replace('/[^a-zA-Z0-9]/', '', $string);
+    return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

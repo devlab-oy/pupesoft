@@ -13,6 +13,7 @@ class PrestaProducts extends PrestaClient {
   private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
+  private $presta_stock = null;
   private $presta_home_category_id = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
@@ -21,6 +22,8 @@ class PrestaProducts extends PrestaClient {
   public function __construct($url, $api_key, $presta_home_category_id) {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
     $this->presta_home_category_id = $presta_home_category_id;
+
+    $this->presta_stock = new PrestaProductStocks($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -84,13 +87,18 @@ class PrestaProducts extends PrestaClient {
     $xml->product->show_price = 1;
     $xml->product->unit_price = 1;
 
-    // Set default language from Pupesoft to first presta id
-    $xml->product->name->language[0]              = utf8_encode($product['nimi']);
-    $xml->product->description->language[0]       = utf8_encode($product['kuvaus']);
-    $xml->product->description_short->language[0] = utf8_encode($product['lyhytkuvaus']);
-    $xml->product->link_rewrite->language[0]      = $this->saniteze_link_rewrite($product['nimi']);
+    // Set default value from Pupesoft to all languages
+    $languages = count($xml->product->name->language);
 
-    // loop all translations
+    // we must set these for all languages
+    for ($i=0; $i < $languages; $i++) {
+      $xml->product->name->language[$i]              = utf8_encode($product['nimi']);
+      $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
+      $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
+      $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
+    }
+
+    // loop all translations and overwrite defaults
     foreach ($product['tuotteen_kaannokset'] as $translation) {
       $tr_id = $this->get_language_id($translation['kieli']);
 
@@ -106,7 +114,7 @@ class PrestaProducts extends PrestaClient {
       switch ($translation['kentta']) {
         case 'nimitys':
           $xml->product->name->language[$tr_id] = $value;
-          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite($value);
+          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
           break;
         case 'kuvaus':
           $xml->product->description->language[$tr_id] = $value;
@@ -160,6 +168,47 @@ class PrestaProducts extends PrestaClient {
       }
     }
 
+    // Product type, default to simple
+    // Values: simple, pack, virtual
+    $product_type = empty($product['ei_saldoa']) ? 'simple' : 'virtual';
+
+    // First, remove all old child products
+    $remove_node = $xml->product->associations->product_bundle;
+    $dom_node = dom_import_simplexml($remove_node);
+    $dom_node->parentNode->removeChild($dom_node);
+
+    // Then add element back
+    $xml->product->associations->addChild('product_bundle');
+
+    // Calculated parent price
+    $parent_price = 0;
+
+    // Add child products for product bundle
+    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+      $child_id = $this->add_child_product($xml, $child_product);
+
+      // added the child successfully
+      if ($child_id !== false) {
+        // set parent product to pack
+        $product_type = 'pack';
+
+        // we must fetch child from presta
+        $child = $this->get($child_id);
+
+        // calculate parent price
+        $parent_price += ($child['price'] * $child_product['kerroin'] * $child_product['hintakerroin']);
+      }
+    }
+
+    // set product type
+    $xml->product->type = $product_type;
+
+    // if it's a pack, update parent price
+    if ($product_type == 'pack') {
+      $this->logger->log("Laskettiin tuoteperheen isätuotteelle '{$product['tuoteno']}' hinta {$parent_price}");
+      $xml->product->price = $parent_price;
+    }
+
     return $xml;
   }
 
@@ -185,6 +234,30 @@ class PrestaProducts extends PrestaClient {
     $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
 
     return $category_id;
+  }
+
+  private function add_child_product(SimpleXMLElement &$xml, $product) {
+    $discount   = $product['alekerroin'];
+    $price      = $product['hintakerroin'];
+    $qty        = $product['kerroin'];
+    $sku        = $product['tuoteno'];
+    $product_id = array_search($sku, $this->all_skus());
+
+    if ($product_id === false) {
+      $this->logger->log("VIRHE! Tuotteen {$xml->product->reference} lapsituotetta {$sku} ei löytynyt!");
+      return false;
+    }
+
+    $product = $xml->product->associations->product_bundle->addChild('product');
+    $product->addChild('id');
+    $product->id = $product_id;
+    $product->addChild('quantity');
+    $product->quantity = $qty;
+
+    $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} lapsituote {$sku} ({$product_id})");
+
+    // return the id of the child product
+    return $product_id;
   }
 
   /**
@@ -218,10 +291,8 @@ class PrestaProducts extends PrestaClient {
             $id = (string) $response['product']['id'];
           }
 
-          if (!empty($product['saldo'])) {
-            $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
-            $presta_stock->create_or_update($id, $product['saldo']);
-          }
+          $qty = empty($product['saldo']) ? 0 : $product['saldo'];
+          $this->presta_stock->create_or_update($id, $qty);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions

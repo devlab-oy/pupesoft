@@ -1467,7 +1467,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
     $tuotteet_str = substr($tuotteet_str, 0, -1);
 
-    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi
+    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi, tuotepaikat.oletus
               FROM tuote
               JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
                 AND tuotepaikat.tuoteno   = tuote.tuoteno
@@ -1497,6 +1497,11 @@ if (!function_exists("tuoteperhe_myytavissa")) {
       foreach ($tuotteet as $tuoteno => $kerroin) {
 
         list(, , $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
+
+        if (!isset($perhe_myytavissa[$tuoteno])) {
+          $perhe_myytavissa[$tuoteno] = 0;
+        }
+
         $perhe_myytavissa[$tuoteno] += round($myytavissa/$kerroin, 2);
       }
 
@@ -22549,15 +22554,15 @@ if (!function_exists("gs1_sscc")) {
     $sscc_expansioncode = $expansioncode;
 
     // jos gs1 yritystunnus on yli 7 merkkiä (oletuspituus), tehdään
-    // erikoiskäsittely sscc koodin muodostukselle ja raivataan tilaa 
+    // erikoiskäsittely sscc koodin muodostukselle ja raivataan tilaa
     // tilausnumerosta
     if (strlen($yhtiorow['ean']) > 7) {
-      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli 
+      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli
       // 7 merkin tuo menee
       $company_id_space   = strlen($yhtiorow['ean']);               //tänne lisää tilaa
       $item_id_space      = 7 - (strlen($yhtiorow['ean']) - 7);     //täältä pois tilaa
-    }                     
-    else {                
+    }
+    else {
       $company_id_space   = 7;
       $item_id_space      = 7;
     }
@@ -32273,5 +32278,17 @@ if (!function_exists('generoi_hinnastot')) {
     }
 
     return false;
+  }
+}
+
+if (!function_exists('sort_array_of_arrays')) {
+  function sort_array_of_arrays(&$array, $subfield) {
+    $sortarray = array();
+
+    foreach ($array as $key => $row) {
+      $sortarray[$key] = $row[$subfield];
+    }
+
+    array_multisort($sortarray, SORT_ASC, $array);
   }
 }

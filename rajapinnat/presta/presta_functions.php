@@ -261,6 +261,39 @@ function hae_tuotteet() {
       );
     }
 
+    // Haetaan tuotteen lapsituotteet, jos tämä on isätuote
+    $query = "SELECT tuoteno, kerroin, hintakerroin, alekerroin
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$row['tuoteno']}'
+              AND tyyppi = 'P'";
+    $tr_result = pupe_query($query);
+    $tuotteen_lapsituotteet = array();
+
+    // tämä on isätuote
+    if (mysql_num_rows($tr_result) > 0) {
+      // lasketaan isän saldo
+      $isa_saldot = tuoteperhe_myytavissa($row["tuoteno"], 'KAIKKI');
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+
+      while ($tr_row = mysql_fetch_assoc($tr_result)) {
+        $tuotteen_lapsituotteet[] = array(
+          "alekerroin"   => $tr_row['alekerroin'],
+          "hintakerroin" => $tr_row['hintakerroin'],
+          "kerroin"      => $tr_row['kerroin'],
+          "tuoteno"      => $tr_row['tuoteno'],
+        );
+      }
+    }
+    else {
+      // Normi tuote, haetaan tuotteen myytävissä määrä (saldo)
+      list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+    }
+
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
     $query = "SELECT puun_tunnus
               FROM puun_alkio
@@ -274,12 +307,10 @@ function hae_tuotteet() {
       $tuotepuun_tunnukset[] = $tuotepuurow['puun_tunnus'];
     }
 
-    // Haetaan tuotteen myytävissä määrä (saldo)
-    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
-
     $dnstuote[] = array(
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
+      'ei_saldoa'                 => $row["ei_saldoa"],
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
@@ -289,9 +320,13 @@ function hae_tuotteet() {
       'status'                    => $row["status"],
       'try'                       => $row["try"],
       'tunnus'                    => $row['tunnus'],
+      'tuotekorkeus'              => $row['tuotekorkeus'],
+      'tuoteleveys'               => $row['tuoteleveys'],
       'tuotemassa'                => $row["tuotemassa"],
+      'tuotemassa'                => $row['tuotemassa'],
       'tuotemerkki'               => $row["tuotemerkki"],
       'tuoteno'                   => $row["tuoteno"],
+      'tuotesyvyys'               => $row['tuotesyvyys'],
       'yksikko'                   => $row["yksikko"],
       'myymalahinta'              => $myymalahinta,
       'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,
@@ -304,8 +339,14 @@ function hae_tuotteet() {
       'saldo'                     => $myytavissa,
       'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
       'tuotteen_kaannokset'       => $tuotteen_kaannokset,
+      'tuotteen_lapsien_maara'    => count($tuotteen_lapsituotteet),
+      'tuotteen_lapsituotteet'    => $tuotteen_lapsituotteet,
     );
   }
+
+  // pitää sortata array siten, että isätuotteet ovat lopussa.
+  // muuten lapsia ei välttämättä ole perustettu, kun yritetään rakentaa perhettä
+  sort_array_of_arrays($dnstuote, 'tuotteen_lapsien_maara');
 
   return $dnstuote;
 }

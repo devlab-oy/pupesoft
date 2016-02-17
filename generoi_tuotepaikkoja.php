@@ -28,7 +28,8 @@ require "inc/functions.inc";
 // Generoidaan jokaiselle yhtiön tuotteelle tuotepaikka jokaiseen yhtiön varastoon
 $query = "SELECT *
           FROM varastopaikat
-          WHERE yhtio = '$yhtio'";
+          WHERE yhtio = '$yhtio'
+          AND alkuhyllyalue != '!!M'";
 $varastoresult = pupe_query($query);
 
 // Kaikki tuotteet
@@ -50,7 +51,7 @@ while ($tuoterow = mysql_fetch_assoc($tuoteresult)) {
               AND varasto = '$varastorow[tunnus]'";
     $paikkaresult = pupe_query($query);
 
-    if (mysql_num_rows($paikkaresult) == 0 and $varastorow["alkuhyllyalue"] != "!!M") {
+    if (mysql_num_rows($paikkaresult) == 0) {
       lisaa_tuotepaikka($tuoterow["tuoteno"], $varastorow["alkuhyllyalue"], $varastorow["alkuhyllynro"], '0', '0', 'Lisättiin tuotepaikka generoinnissa');
     }
   }

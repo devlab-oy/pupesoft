@@ -34,16 +34,11 @@
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 
-if (@include "../inc/parametrit.inc")
-  ;
-elseif (@include "parametrit.inc")
-  ;
-else
-  exit;
+require "../inc/parametrit.inc";
 
 // Haetaan _funktiot.php -tiedosto, jossa katelaskennan toimintalogiikka.
-include "functions.php";
-include "functions.katelaskenta.php";
+require "functions.php";
+require "functions.katelaskenta.php";
 
 // Tempalte array on luotu sivupohjan tietoja varten.
 $template = array();
@@ -104,15 +99,18 @@ if ($poistetut != "") {
                   AND tuotepaikat.saldo > 0) > 0 ";
     if (($yhtiorow["yhtio"] == 'allr')) {
       $hinta_rajaus = " AND tuote.myymalahinta > tuote.myyntihinta ";
-    } else {
+    }
+    else {
       $hinta_rajaus = " ";
     }
     $poislisa_mulsel = " and tuote.status in ('P','X') ";
-  } else {
+  }
+  else {
     $poislisa = "";
     //$poislisa_mulsel  = "";
   }
-} else {
+}
+else {
   $poislisa = " and (tuote.status not in ('P','X')
           or (SELECT sum(saldo)
               FROM tuotepaikat
@@ -145,23 +143,32 @@ if (strlen($ojarj) > 0) {
 
   if ($ojarj == 'tuoteno') {
     $jarjestys = 'tuote.tuoteno';
-  } elseif ($ojarj == 'toim_tuoteno') {
+  }
+  elseif ($ojarj == 'toim_tuoteno') {
     $jarjestys = 'tuote.tuoteno';
-  } elseif ($ojarj == 'nimitys') {
+  }
+  elseif ($ojarj == 'nimitys') {
     $jarjestys = 'tuote.nimitys';
-  } elseif ($ojarj == 'osasto') {
+  }
+  elseif ($ojarj == 'osasto') {
     $jarjestys = 'tuote.osasto';
-  } elseif ($ojarj == 'try') {
+  }
+  elseif ($ojarj == 'try') {
     $jarjestys = 'tuote.try';
-  } elseif ($ojarj == 'hinta') {
+  }
+  elseif ($ojarj == 'hinta') {
     $jarjestys = 'tuote.myyntihinta';
-  } elseif ($ojarj == 'nettohinta') {
+  }
+  elseif ($ojarj == 'nettohinta') {
     $jarjestys = 'tuote.nettohinta';
-  } elseif ($ojarj == 'aleryhma') {
+  }
+  elseif ($ojarj == 'aleryhma') {
     $jarjestys = 'tuote.aleryhma';
-  } elseif ($ojarj == 'status') {
+  }
+  elseif ($ojarj == 'status') {
     $jarjestys = 'tuote.status';
-  } else {
+  }
+  else {
     $jarjestys = 'tuote.tuoteno';
   }
 }
@@ -176,7 +183,8 @@ if (!isset($piilota_tuoteperheen_lapset)) {
 if ($piilota_tuoteperheen_lapset != '') {
   $ptlcheck = "CHECKED";
   $ulisa .= "&piilota_tuoteperheen_lapset=checked";
-} else {
+}
+else {
   $ptlcheck = "";
 }
 
@@ -191,7 +199,8 @@ if (!isset($saldotonrajaus)) {
 if ($saldotonrajaus != '') {
   $saldotoncheck = "CHECKED";
   $ulisa .= "&saldotonrajaus=checked";
-} else {
+}
+else {
   $saldotoncheck = "";
 }
 
@@ -205,7 +214,8 @@ if (!isset($lisatiedot)) {
 if ($lisatiedot != "") {
   $lisacheck = "CHECKED";
   $ulisa .= "&lisatiedot=checked";
-} else {
+}
+else {
   $lisacheck = "";
 }
 
@@ -232,7 +242,8 @@ if (trim($tuotenumero) != '') {
 
   if (isset($alkukoodilla) and $alkukoodilla != "") {
     $lisa .= " and tuote.tuoteno like '$tuotenumero%' ";
-  } else {
+  }
+  else {
     $lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
   }
   $ulisa .= "&tuotenumero=$tuotenumero";
@@ -278,48 +289,7 @@ if (trim($toim_tuoteno) != '') {
   $ulisa .= "&toim_tuoteno=$toim_tuoteno";
 }
 
-// Mihin alkuper‰isnumero viittaa?
-if (!isset($alkuperaisnumero)) {
-  $alkuperaisnumero = '';
-}
-
-if (trim($alkuperaisnumero) != '') {
-  $alkuperaisnumero = mysql_real_escape_string(trim($alkuperaisnumero));
-
-  $query = "SELECT distinct tuoteno
-              FROM tuotteen_orginaalit
-              WHERE yhtio      = '$kukarow[yhtio]'
-              AND orig_tuoteno like '$alkuperaisnumero%'
-              LIMIT 500";
-  $pres = pupe_query($query);
-
-  while ($prow = mysql_fetch_assoc($pres)) {
-    $origtuotteet .= "'" . $prow["tuoteno"] . "',";
-  }
-
-  $origtuotteet = substr($origtuotteet, 0, -1);
-
-  if ($origtuotteet != "") {
-    $lisa .= " and tuote.tuoteno in ($origtuotteet) ";
-  }
-
-  $ulisa .= "&alkuperaisnumero=$alkuperaisnumero";
-}
-
-
-// Mit‰ ovat originaaalit?
-$orginaaalit = FALSE;
-if (table_exists("tuotteen_orginaalit")) {
-  $query = "SELECT tunnus
-              FROM tuotteen_orginaalit
-              WHERE yhtio = '$kukarow[yhtio]'
-              LIMIT 1";
-  $orginaaleja_res = pupe_query($query);
-
-  if (mysql_num_rows($orginaaleja_res) > 0) {
-    $orginaaalit = TRUE;
-  }
-}
+echo "<font class='head'>".t("Katelaskenta").":</font><br/><br/>";
 
 // Seuraavaksi aletaan piirt‰m‰‰n tuotehakulomaketta.
 if ($hae_ja_selaa_row['selite'] == 'B') {
@@ -354,7 +324,8 @@ if ($hae_ja_selaa_row['selite'] == 'B') {
 
   if ($kukarow["extranet"] != "") {
     echo "<th>" . t("Tarjoustuotteet") . "</th>";
-  } else {
+  }
+  else {
     echo "<th>" . t("Poistetut") . "</th>";
   }
   echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td>";
@@ -366,29 +337,14 @@ if ($hae_ja_selaa_row['selite'] == 'B') {
   echo "</tr>";
 
   echo "<tr><th>" . t("Nimitys") . "</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td>";
-
-  if ($orginaaalit) {
-    echo "<th>" . t("Alkuper‰isnumero") . "</th><td><input type='text' size='25' name = 'alkuperaisnumero' id='alkuperaisnumero' value = '$alkuperaisnumero'></td>";
-  } else {
-    echo "<th>&nbsp;</th><td>&nbsp;</td>";
-  }
-
   echo "<th>" . t("Lis‰tiedot") . "</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td>";
   echo "</tr>";
-} else {
+}
+else {
   echo "<tr><th>" . t("Tuotenumero") . "</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
   echo "<tr><th>" . t("Toim tuoteno") . "</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
-
-  if ($orginaaalit) {
-    echo "<tr><th>" . t("Alkuper‰isnumero") . "</th><td><input type='text' size='25' name = 'alkuperaisnumero' id='alkuperaisnumero' value = '$alkuperaisnumero'></td></tr>";
-  }
-
   echo "<tr><th>" . t("Nimitys") . "</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
-  if ($kukarow["extranet"] != "") {
-    echo "<tr><th>" . t("Tarjoustuotteet") . "</th>";
-  } else {
-    echo "<tr><th>" . t("Poistetut") . "</th>";
-  }
+  echo "<tr><th>" . t("Poistetut") . "</th>";
   echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
   echo "<tr><th>" . t("Lis‰tiedot") . "</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 }
@@ -423,10 +379,12 @@ if (trim($hae_ja_selaa_row['selitetark']) != '') {
 
   if (trim($hae_ja_selaa_row['selitetark_2'] != '')) {
     $monivalintalaatikot_normaali = explode(",", $hae_ja_selaa_row['selitetark_2']);
-  } else {
+  }
+  else {
     $monivalintalaatikot_normaali = array();
   }
-} else {
+}
+else {
   // Oletus
   $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE");
   $monivalintalaatikot_normaali = array();
@@ -517,7 +475,6 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
               $hinta_rajaus
               ORDER BY jarjestys, $jarjestys $sort
               LIMIT 500";
-
   $result = pupe_query($query);
 
   // T‰ytet‰‰n template muuttuja tiedoilla, jotka halutaan
@@ -562,11 +519,4 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
 /**
  * Tulostetaan sivuston footer osio.
  */
-if ($verkkokauppa == "") {
-  if (@include "inc/footer.inc")
-    ;
-  elseif (@include "footer.inc")
-    ;
-  else
-    exit;
-}
+require "inc/footer.inc";

@@ -41,7 +41,8 @@ function lisaa_vastaavat_ja_korvaavat_tuotteet($result, $rows, $haetaan_perheet)
               // poimitaan isätuotteet
               $krow["vastaavamaara"] = $vastaavamaara;
               unset($vastaavamaara);
-            } else {
+            }
+            else {
               $krow["mikavastaava"] = $mrow["tuoteno"];
             }
 
@@ -307,7 +308,8 @@ function hae_yhtiot() {
       $yhtiot[] = $row["yhtio"];
     }
     return $yhtiot;
-  } else {
+  }
+  else {
     $yhtiot = array();
     $yhtiot[] = $kukarow["yhtio"];
     return $yhtiot;
@@ -366,10 +368,12 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
         if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
           $naytettava_saldo = sprintf("%.2f", $kokonaismyytavissa) . " {$rivin_yksikko}";
           $_vari = "";
-        } elseif ($kokonaismyytavissa > 0) {
+        }
+        elseif ($kokonaismyytavissa > 0) {
           $naytettava_saldo = t("On");
           $_vari = "green";
-        } else {
+        }
+        else {
           $naytettava_saldo = t("Ei");
           $_vari = "red";
         }
@@ -419,7 +423,8 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
     elseif ($row['ei_saldoa'] != '') {
       if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
         echo "<td valign='top' class='$vari' $classrigh><font class='green'>" . t("On") . "</font></td>";
-      } else {
+      }
+      else {
         echo "<td valign='top' class='$vari' $classrigh><font class='green'>" . t("Saldoton") . "</font></td>";
       }
     }
@@ -427,7 +432,8 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
     elseif ($verkkokauppa == "" and ( $row["sarjanumeroseuranta"] == "S" and ( $row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"]) and $row["osaluettelo"] == "")) {
       if ($kukarow["extranet"] != "") {
         echo "<td valign='top' class='$vari' $classrigh>$row[sarjanumero] ";
-      } else {
+      }
+      else {
         echo "<td valign='top' class='$vari' $classrigh><a onClick=\"javascript:sarjanumeronlisatiedot_popup('$row[sarjatunnus]')\">$row[sarjanumero]</a> ";
       }
 
@@ -481,7 +487,8 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
                           and tuote.tuoteno                         = '$row[tuoteno]'
                           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
                           ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
-      } else {
+      }
+      else {
         $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
                           tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
                           concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
@@ -528,7 +535,8 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
                 // poistaan orpojen varaamat tuotteet tältä paikalta
                 $myytavissa = $myytavissa - $orvot;
                 $orvot = 0;
-              } elseif ($orvot > $myytavissa and $saldorow["yhtio"] == $kukarow["yhtio"]) {
+              }
+              elseif ($orvot > $myytavissa and $saldorow["yhtio"] == $kukarow["yhtio"]) {
                 // poistetaan niin paljon orpojen saldoa ku voidaan
                 $orvot = $orvot - $myytavissa;
                 $myytavissa = 0;

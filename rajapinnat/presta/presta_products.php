@@ -2,6 +2,8 @@
 
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_product_stocks.php';
+require_once 'rajapinnat/presta/presta_product_features.php';
+require_once 'rajapinnat/presta/presta_product_feature_values.php';
 
 class PrestaProducts extends PrestaClient {
 
@@ -10,11 +12,14 @@ class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
   private $_dynamic_fields = array();
   private $_removable_fields = array();
+  private $features_table = null;
   private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
-  private $presta_stock = null;
   private $presta_home_category_id = null;
+  private $presta_product_feature_values = null;
+  private $presta_product_features = null;
+  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
@@ -24,6 +29,8 @@ class PrestaProducts extends PrestaClient {
     $this->presta_home_category_id = $presta_home_category_id;
 
     $this->presta_stock = new PrestaProductStocks($url, $api_key);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -207,6 +214,38 @@ class PrestaProducts extends PrestaClient {
     if ($product_type == 'pack') {
       $this->logger->log("Laskettiin tuoteperheen isätuotteelle '{$product['tuoteno']}' hinta {$parent_price}");
       $xml->product->price = $parent_price;
+    }
+
+    // First, remove all product features
+    $remove_node = $xml->product->associations->product_features;
+    $dom_node = dom_import_simplexml($remove_node);
+    $dom_node->parentNode->removeChild($dom_node);
+
+    // Then add element back
+    $xml->product->associations->addChild('product_features');
+
+    // Add product features
+    foreach ($this->features_table as $field_name => $feature_id) {
+      $value = $product[$field_name];
+
+      $value_id = $this->presta_product_feature_values->value_id_by_value($value);
+
+      if (empty($value_id)) {
+        $feature_value = array(
+          "id_feature" => $feature_id,
+          "value" => $value,
+        );
+
+        // Create feature value
+        $response = $this->presta_product_feature_values->create($feature_value);
+        $value_id = $response['product_feature_value']['id'];
+      }
+
+      $feature = $xml->product->associations->product_features->addChild('product_features');
+      $feature->id = $feature_id;
+      $feature->id_feature_value = $value_id;
+
+      $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
     }
 
     return $xml;
@@ -424,5 +463,11 @@ class PrestaProducts extends PrestaClient {
 
   public function set_visibility_type($value) {
     $this->visibility_type = $value;
+  }
+
+  public function set_product_features($value) {
+    if (is_array($value)) {
+      $this->features_table = $value;
+    }
   }
 }

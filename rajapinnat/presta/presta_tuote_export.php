@@ -156,6 +156,13 @@ if (!isset($presta_tuotekasittely)) {
   // 2 = siirretään kaikki pupen tuotteet prestaan (poistetutkin), mutta merkataan ne hiddeniksi
   $presta_tuotekasittely = 1;
 }
+if (!isset($presta_tuoteominaisuudet)) {
+  $presta_tuoteominaisuudet = array(
+    // Tuote-arrayn kenttä => Prestan product_feature_id
+    // "tuotemerkki" => 6,
+    // "tähtituote"  => 10,
+  );
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -192,6 +199,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
   $presta_products->set_languages_table($presta_kieliversiot);
+  $presta_products->set_product_features($presta_tuoteominaisuudet);
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_visibility_type($presta_tuotekasittely);

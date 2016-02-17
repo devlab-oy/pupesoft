@@ -91,7 +91,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->name->language[0]              = utf8_encode($product['nimi']);
     $xml->product->description->language[0]       = utf8_encode($product['kuvaus']);
     $xml->product->description_short->language[0] = utf8_encode($product['lyhytkuvaus']);
-    $xml->product->link_rewrite->language[0]      = $this->saniteze_link_rewrite($product['nimi']);
+    $xml->product->link_rewrite->language[0]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
 
     // loop all translations
     foreach ($product['tuotteen_kaannokset'] as $translation) {
@@ -109,7 +109,7 @@ class PrestaProducts extends PrestaClient {
       switch ($translation['kentta']) {
         case 'nimitys':
           $xml->product->name->language[$tr_id] = $value;
-          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite($value);
+          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
           break;
         case 'kuvaus':
           $xml->product->description->language[$tr_id] = $value;
@@ -175,14 +175,34 @@ class PrestaProducts extends PrestaClient {
     // Then add element back
     $xml->product->associations->addChild('product_bundle');
 
+    // Calculated parent price
+    $parent_price = 0;
+
     // Add child products for product bundle
     foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
-      $product_type = 'pack';
-      $this->add_child_product($xml, $child_product);
+      $child_id = $this->add_child_product($xml, $child_product);
+
+      // added the child successfully
+      if ($child_id !== false) {
+        // set parent product to pack
+        $product_type = 'pack';
+
+        // we must fetch child from presta
+        $child = $this->get($child_id);
+
+        // calculate parent price
+        $parent_price += ($child['price'] * $child_product['kerroin'] * $child_product['hintakerroin']);
+      }
     }
 
     // set product type
     $xml->product->type = $product_type;
+
+    // if it's a pack, update parent price
+    if ($product_type == 'pack') {
+      $this->logger->log("Laskettiin tuoteperheen isätuotteelle '{$product['tuoteno']}' hinta {$parent_price}");
+      $xml->product->price = $parent_price;
+    }
 
     return $xml;
   }
@@ -230,6 +250,9 @@ class PrestaProducts extends PrestaClient {
     $product->quantity = $qty;
 
     $this->logger->log("Lisättiin tuotteelle {$xml->product->reference} lapsituote {$sku} ({$product_id})");
+
+    // return the id of the child product
+    return $product_id;
   }
 
   /**

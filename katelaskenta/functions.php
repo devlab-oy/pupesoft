@@ -13,7 +13,7 @@
 
 /**
  * Funktio lisää tuotteisiin vastaavat ja korvaavat tuotteet.
- * 
+ *
  * Funktio luotu jo aikaisemmasta koodista, joka on sitten
  * laitettu uuden funktion sisään.
  */
@@ -112,8 +112,8 @@ function lisaa_vastaavat_ja_korvaavat_tuotteet($result, $rows, $haetaan_perheet)
 
 /**
  * Funktiota käytetään "lisaa_vastaavat_ja_korvaavat_tuotteet" -funktion
- * tulosten hakemiseen. 
- * 
+ * tulosten hakemiseen.
+ *
  * @global type $kukarow
  * @global type $kieltolisa
  * @global type $poislisa
@@ -173,8 +173,8 @@ function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tu
 
 /**
  * Funktiota käytetään "lisaa_vastaavat_ja_korvaavat_tuotteet" -funktion
- * tulosten hakemiseen. 
- * 
+ * tulosten hakemiseen.
+ *
  * @global type $kukarow
  * @global type $kieltolisa
  * @global type $poislisa
@@ -246,7 +246,7 @@ function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaik
 
 /**
  * Funktio valmistelee hakutulokset templatea varten.
- * 
+ *
  * Palauttaa muokatun hakutulostaulukon.
  * @param type $tuotteet
  * @param type $verkkokauppa
@@ -254,7 +254,7 @@ function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaik
  */
 function valmistele_hakutulokset($tuotteet, $verkkokauppa, $hae_ja_selaa_row) {
 
-    foreach ($tuotteet as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta 
+    foreach ($tuotteet as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta
         // Laajennetaan tuotteen nimitystä "korvaa tuotteen" merkinnällä
         if ($verkkokauppa == "" and isset($arvo["mikakorva"])) {
             $tuotteet[$avain]["nimitys"] .= "<br> * " . t("Korvaa tuotteen") . ": $arvo[mikakorva]";
@@ -277,10 +277,10 @@ function valmistele_hakutulokset($tuotteet, $verkkokauppa, $hae_ja_selaa_row) {
 }
 
 /**
- * Funktio hakee tietokannasta yhtiöt. 
- * 
+ * Funktio hakee tietokannasta yhtiöt.
+ *
  * Kysely tehdään yhtio -taululle. Hakuehdoksi määritetään konserni sarake.
- * 
+ *
  * @global type $yhtiorow
  * @global type $kukarow
  * @return type
@@ -311,13 +311,13 @@ function hae_yhtiot() {
 
 /**
  * Funktio hakee ja piirtää tuotteen saldon.
- * 
+ *
  * Aivan sama kuin tuote_selaus_haku.php tiedostossa. Koska funktio myös
  * echottelee html -koodia, on siitä vaikea saada yhtä arvoa takaisin.
- * 
+ *
  * REFACTOR: Funktio kaipaa refaktorointia, jotta sitä voitaisiin käyttää molemmissa
  * tiedostoissa.
- * 
+ *
  * @global type $toim_kutsu
  * @global type $verkkokauppa
  * @global type $kukarow
@@ -596,9 +596,3 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
         }
     }
 }
-
-
-
-
-
-

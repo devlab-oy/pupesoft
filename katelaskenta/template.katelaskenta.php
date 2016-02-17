@@ -20,14 +20,14 @@
 
 
 <?php if (!array_key_exists("ilmoitus", $template)) { // Tämä if-voidaan siirtää kontrolleriin, jos muutoksia vielä tehdään. ?>
-    <form id="lomake-katelaskenta-hakutulokset" 
-          action="?submit_button=1&sort=<?php echo $template["edsort"]; ?>&ojarj=<?php echo $template["ojarj"] . $template["ulisa"] . $template["variaatio_query_param"]; ?>" 
+    <form id="lomake-katelaskenta-hakutulokset"
+          action="?submit_button=1&sort=<?php echo $template["edsort"]; ?>&ojarj=<?php echo $template["ojarj"] . $template["ulisa"] . $template["variaatio_query_param"]; ?>"
           method="post">
         <table id="katelaskenta-hakutulokset">
-            <!-- 
+            <!--
                 TFOOT elementti taulukon viimeinen rivi, jossa toiminnot
                 koko taulun tietojen käsittelemiseen yhtäaikaisesti.
-            --> 
+            -->
             <tfoot>
                 <tr>
                     <td><input type="checkbox" checked="checked" name="valitutrivit[]" value="" /></td>
@@ -53,7 +53,7 @@
                     <th colspan="2">Myyntihinta - Kate%</th>
                     <th colspan="2">Myymälähinta - Kate%</th>
                     <th colspan="2">Nettohinta - Kate%</th>
-                    <th>Myytävissä</th>              
+                    <th>Myytävissä</th>
                     <th>&nbsp</th>
                 </tr>
                 <?php
@@ -85,13 +85,13 @@
             </tbody>
         </table>
 
-        <input type="submit" 
-               name="submit-katelaskenta" 
-               id="submit-katelaskenta" 
+        <input type="submit"
+               name="submit-katelaskenta"
+               id="submit-katelaskenta"
                value="Laske ja talleta valitut" />
     </form>
 <?php } else { // array_key_exists() tarkistuksen else osio ?>
     <p><font class="message"><?php echo $template["ilmoitus"]; ?></font><p>
     <?php };  // array_key_exists() loppu ?>
-    
+
 <script src="scripts.katelaskenta.js" type="text/javascript"></script>

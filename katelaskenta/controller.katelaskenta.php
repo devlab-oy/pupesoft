@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * controller.katelaskenta.php
  *
  * Kontrolleri -tiedoston tehtävä on hoitaa tietojen alustaminen
@@ -58,10 +58,10 @@ if(strlen($submit_katelaskenta) > 0) {
     $post_array = $_POST;
     // Tallennetaan katemuutokset.
     $virheelliset_rivit = tallenna_valitut_katemuutokset($post_array);
-    
+
     //Tiedot tallennettu onnistuneesti, ilmoitus käyttäjälle
     $template["flash_success"] = "Katemuutokset tallennettu onnistuneesti.";
-    
+
     // Jos virheellisiä rivejä ilmeni, tehdään niistä ilmoitus käyttäjälle.
     $virheiden_lkm = count($virheelliset_rivit);
     if($virheiden_lkm > 0)
@@ -466,7 +466,7 @@ $yhtiot = hae_yhtiot();
 
 /**
  * Seuraava if lähettää hakukyselyn tietokantaan.
- * 
+ *
  * Lisäksi if-lohkon sisällä käsitellään tuotteiden tulostus omassa
  * if-lohkossa. Jos tuotteita ei löydy yhtään, tulostetaan siitä ilmoitus.
  */
@@ -525,11 +525,11 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
     // Sort tietoja, joita käytetään kun tietoja lähetetään ja
     // samat hakutulokset tulevat näkyviin myös sivun uudelleen
     // latauksen jälkeen.
-    $template["edsort"] = (isset($edsort) ? $edsort : "");    
+    $template["edsort"] = (isset($edsort) ? $edsort : "");
     $template["ojarj"] = (isset($ojarj) ? $orarj : "");
     $template["ulisa"] = (isset($ulisa) ? $ulisa : "");
     $template["variaatio_query_param"] = (isset($variaatio_query_param) ? $variaatio_query_param : "");
-    
+
     // Jos tuotteita ei löydy, tulostetaan ilmoitus
     if (mysql_num_rows($result) <= 0)
         $template["ilmoitus"] = t("Yhtään tuotetta ei löytynyt");
@@ -538,7 +538,7 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
     if (mysql_num_rows($result) >= 500)
         $template["ilmoitus"] = t("Löytyi yli 500 tuotetta, tarkenna hakuasi");
 
-    // Jos aikaisemmat tarkistukset on läpäisty, eikä ilmoitusta ole 
+    // Jos aikaisemmat tarkistukset on läpäisty, eikä ilmoitusta ole
     // taulukossa, voidaan jatkaa hakurivien käsittelyä.
     if (!array_key_exists("ilmoitus", $template)) {
         $rows = array();
@@ -551,7 +551,7 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
         // Valmistelee hakutulokset templatea varten.
         $template["tuotteet"] = valmistele_hakutulokset($rows, $verkkokauppa, $hae_ja_selaa_row);
         $template["yhtio"] = $yhtiorow;
-        
+
     }
     // _hakutulokset.php template käytetään tulostaulukon tulostamiseen.
     require_once 'template.katelaskenta.php';
@@ -569,4 +569,3 @@ if ($verkkokauppa == "") {
     else
         exit;
 }
-

@@ -6,7 +6,7 @@
  * suorittamiseen.
  */
 
- 
+
 /**
  * Funktio laskee uuden hinnan kateprosentilla.
  *
@@ -30,11 +30,11 @@ function lisaa_hintaan_kate($keskihankintahinta, $kateprosentti) {
 function tarkista_kateprosentti($kateprosentti) {
     if(!is_numeric($kateprosentti))
         return false;
-    
+
     $kateprosentti = (float)$kateprosentti;
     if($kateprosentti >= 100 || $kateprosentti < 0)
         return false;
-    
+
     return true;
 }
 
@@ -51,38 +51,38 @@ function tarkista_kateprosentti($kateprosentti) {
  * [avain] => [tunnus, myyntikate, myymalakate, nettokate, keskihankintahinta]
  */
 function tarkista_katelaskenta_syotteet($taulukko) {
-    
+
     // Luodaan uusi virhe-taulukko, johon ker‰t‰‰n mahdolliset
     // virheelliset rivit.
     $virherivit = array();
-    
+
     // K‰yd‰‰n l‰pi valitut rivit k‰ytt‰j‰n syˆtteist‰.
     foreach($taulukko["kunnossa"] as &$rivi) {
-        
+
         // Jos kateprosentti on virheellinen, lis‰t‰‰n rivi
         // virhe-taulukkoon ja hyp‰t‰‰n seuraavaan riviin.
         if(!tarkista_kateprosentti($rivi[1])) {
             $virherivit["'" . $rivi[0] . "'"] = $rivi;
             continue;
         }
-        
+
         if(!tarkista_kateprosentti($rivi[2])) {
             $virherivit["'" . $rivi[0] . "'"] = $rivi;
             continue;
         }
-        
+
         if(!tarkista_kateprosentti($rivi[3])) {
             $virherivit["'" . $rivi[0] . "'"] = $rivi;
             continue;
         }
     }
-    
+
     // Tallennetaan virheelliset rivit omaan alkioonsa.
     $taulukko["virheelliset"] = $virherivit;
-    
+
     // Siivotaan alkuper‰isist‰ riveist‰ virherivit
     $taulukko["kunnossa"] = array_diff_key($taulukko["kunnossa"], $virherivit);
-    
+
     // Palautetaan taulukko, joka pit‰‰ sis‰ll‰‰n kunnossa olevat
     // ja virheelliset rivit.
     return $taulukko;
@@ -101,20 +101,20 @@ function luo_katelaskenta_update_komennot($taulukko) {
     $update_komennot = array();
     $sql_komento_alku = "UPDATE tuote SET ";
     $sql_komento_loppu = "WHERE tunnus = ";
-    
+
     // K‰yd‰‰n l‰pi jokainen valittu tuoterivi ja muodostetaan
     // ehtojen mukaan oikeanlainen update-komento.
     foreach($taulukko as $rivi) {
-        
+
         $rivin_tunnus = $rivi[0];
         $rivin_myyntikate = $rivi[1];
         $rivin_myymalakate = $rivi[2];
         $rivin_nettokate = $rivi[3];
         $rivin_keskihankintahinta = $rivi[4];
-        
+
         $update_kysely = "";
         $update_kysely .= $sql_komento_alku;
-        
+
         // Jos komennossa m, lasketaan myyntihinta.
         if($rivin_myyntikate > 0) {
             $uusi_hinta = lisaa_hintaan_kate($rivin_keskihankintahinta, $rivin_myyntikate);
@@ -133,21 +133,21 @@ function luo_katelaskenta_update_komennot($taulukko) {
             $uusi_hinta = hintapyoristys($uusi_hinta, 2);
             $update_kysely .= "nettohinta = {$uusi_hinta}, ";
         }
-        
+
         // Lis‰t‰‰n kyselyyn pakolliset kent‰t, jotka tulee jokaiseen
         // komennon lopuksi mukaan.
         $update_kysely .= "myyntikate = {$rivin_myyntikate}, ";
         $update_kysely .= "myymalakate = {$rivin_myymalakate}, ";
         $update_kysely .= "nettokate = {$rivin_nettokate}, ";
         $update_kysely .= "hintamuutospvm = NOW() ";
-        
+
         // Kyselyn where -ehdon lis‰‰minen.
         $update_kysely .= $sql_komento_loppu . $rivin_tunnus;
-        
+
         // Lis‰t‰‰n valmisteltu kysely taulukkoon.
         array_push($update_komennot, $update_kysely);
     }
-    
+
     return $update_komennot;
 }
 
@@ -161,7 +161,7 @@ function luo_katelaskenta_update_komennot($taulukko) {
  * Kunnossa olleet rivit tallennetaan siit‰ huolimatta.
  */
 function tallenna_valitut_katemuutokset($data) {
-    
+
     // Luodaan yhdistelm‰taulukko, jossa eritell‰‰n virheelliset
     // rivit ja kunnossa olevat. Virheelliset taulukkoon lis‰t‰‰n
     // ne rivit, joiden syˆtteiss‰ prosessin aikana ilmenee ongelmia.
@@ -171,18 +171,18 @@ function tallenna_valitut_katemuutokset($data) {
 
     // Siivotaan valitut tuoterivit tyhjist‰ avain => arvo pareista
     $valitut_tuoterivit = array_filter($data["valitutrivit"]);
-    
+
     // Siivotaan valitut kateprosentit valittujen tuoterivien
     // perusteella. J‰ljelle j‰‰ vain valitut tuotteet taulukosta.
     $valitut_tuoterivit_myyntikate = array_intersect_key($data["myyntikate"], $valitut_tuoterivit);
     $valitut_tuoterivit_myymalakate = array_intersect_key($data["myymalakate"], $valitut_tuoterivit);
     $valitut_tuoterivit_nettokate = array_intersect_key($data["nettokate"], $valitut_tuoterivit);
-    
+
     // Siivotaan valitut keskihankintahinnat valittujen tuoterivien
     // perusteella. J‰ljelle j‰‰ vain valitut tuotteet taulukosta.
-    $valitut_tuoterivit_keskihankintahinnat = array_intersect_key($data["valitutkeskihankintahinnat"], $valitut_tuoterivit);    
-    
-    
+    $valitut_tuoterivit_keskihankintahinnat = array_intersect_key($data["valitutkeskihankintahinnat"], $valitut_tuoterivit);
+
+
     // Array_merge_recursive -funktiolla taulut yhdistet‰‰n yhdeksi kokonaisuudeksi.
     // Funktio k‰ytt‰‰ taulukon avaimia, joilla tiedot koostetaan yksinkertaisemmaksi
     // taulukoksi.
@@ -194,24 +194,24 @@ function tallenna_valitut_katemuutokset($data) {
                                                    $valitut_tuoterivit_myymalakate,
                                                    $valitut_tuoterivit_nettokate,
                                                    $valitut_tuoterivit_keskihankintahinnat);
-    
+
 
     // Tarkistetaan syˆtteet ja funktio palauttaa taulukon, jossa
     // on eritelty kunnossa olleet rivit virheellisist‰.
     $yhdistetyt_tuoterivit = tarkista_katelaskenta_syotteet($yhdistetyt_tuoterivit);
-    
+
     // Update_komennot -taulukko sis‰lt‰‰ valmistellus update -sql komennot
     // Komennot luodaan erillisess‰ funktiossa, jonne annetaan parametrina
     // jo tarkistetut tiedot. Virheellisille riveille ei tehd‰ mit‰‰n.
     $update_komennot = array();
     $update_komennot = luo_katelaskenta_update_komennot($yhdistetyt_tuoterivit["kunnossa"]);
-    
-    
+
+
     // Ajetaan p‰ivityskomennot tietokantaan.
     foreach($update_komennot as $updatesql) {
-        pupe_query($updatesql);        
+        pupe_query($updatesql);
     }
-    
+
     // Palautetaan virheelliset tuotteet.
     // count() == 0 jos virheit‰ ei ollut.
     return $yhdistetyt_tuoterivit["virheelliset"];

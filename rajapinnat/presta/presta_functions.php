@@ -314,6 +314,7 @@ function hae_tuotteet() {
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
+      'myynti_era'                => $row['myynti_era'],
       'nakyvyys'                  => $row["nakyvyys"],
       'nimi'                      => $row["nimitys"],
       'osasto'                    => $row["osasto"],

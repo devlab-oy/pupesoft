@@ -13,8 +13,10 @@ class PrestaProducts extends PrestaClient {
   private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
-  private $presta_stock = null;
   private $presta_home_category_id = null;
+  private $presta_product_feature_values = null;
+  private $presta_product_features = null;
+  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
@@ -24,6 +26,8 @@ class PrestaProducts extends PrestaClient {
     $this->presta_home_category_id = $presta_home_category_id;
 
     $this->presta_stock = new PrestaProductStocks($url, $api_key);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
 
     parent::__construct($url, $api_key);
   }

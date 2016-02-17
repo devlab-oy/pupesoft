@@ -57,6 +57,10 @@ abstract class PrestaClient {
    * @throws Exception
    */
   protected function get_empty_schema() {
+    if (isset($this->schema)) {
+      return $this->schema;
+    }
+
     $resource = $this->resource_name();
     $opt = array(
       'resource' => "{$resource}?schema=blank"
@@ -73,7 +77,16 @@ abstract class PrestaClient {
       throw $e;
     }
 
+    $this->schema = $schema;
+
     return $schema;
+  }
+
+  protected function empty_xml() {
+    $empty = $this->get_empty_schema()->asXML();
+    $xml   = new SimpleXMLElement($empty);
+
+    return $xml;
   }
 
   /**

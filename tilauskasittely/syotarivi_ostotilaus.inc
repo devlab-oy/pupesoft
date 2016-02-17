@@ -63,7 +63,6 @@ if ($variaaritorivi === FALSE) {
       <tr>
       <th>".t("Tuoteno")."</th>
       <th>".t("M‰‰r‰")."</th>
-      <th>".t("M‰‰r‰")."</th>
       <th>".t("Hinta")."</th>";
 
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
@@ -95,9 +94,8 @@ if ($variaaritorivi === FALSE) {
     }
   }
 
-  echo "<td>$kpl</td>
-    <td><input type='text' size='7' name='kpl' value = '$kpl'></td>
-    <td><input type='text' size='7' name='hinta' value = '$hinta'></td>";
+  echo "<td><input type='text' size='7' name='kpl' value = '$kpl'></td>
+        <td><input type='text' size='7' name='hinta' value = '$hinta'></td>";
 
   $backspan = 5;
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {

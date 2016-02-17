@@ -180,7 +180,7 @@ if (!function_exists('vakadr_loppu')) {
     $y_postitp     = $laskurow["yhtio_postitp"];
     $y_maa       = $laskurow["yhtio_maa"];
     $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-    $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+    $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
     $y_iban     = $yhtiorow['pankkiiban1'];
     $y_swift     = $yhtiorow['pankkiswift1'];
 

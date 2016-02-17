@@ -279,7 +279,7 @@ class Unifaun {
     //$uni_snd_val = $uni_sender->addChild('val', ""); # Organisation number (only for Sweden)
     //$uni_snd_val->addAttribute('n', "orgno");
 
-    $uni_snd_val = $uni_sender->addChild('val', utf8_encode(str_replace("0037", "FI", $this->postirow["yhtio_ovttunnus"]))); // VAT number
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode(preg_replace("/^0037/", "FI", $this->postirow["yhtio_ovttunnus"]))); // VAT number
     $uni_snd_val->addAttribute('n', "vatno");
 
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->sanitizeEmails($this->yhtiorow["email"]))); // E-mail

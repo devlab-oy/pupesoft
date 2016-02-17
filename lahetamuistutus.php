@@ -33,7 +33,7 @@ if (!$tamascripti or $tee == "LAHETA") {
             WHERE lasku.yhtio='$kukarow[yhtio]' and valuu.yhtio=lasku.yhtio and
             kuka.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi and
             lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> '' and
-            lasku.tila = 'H'
+            lasku.tila = 'H' and lasku.alatila != 'M'
             ORDER BY kuka.eposti, tapvm";
   $result = pupe_query($query);
 

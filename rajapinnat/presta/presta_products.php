@@ -87,13 +87,18 @@ class PrestaProducts extends PrestaClient {
     $xml->product->show_price = 1;
     $xml->product->unit_price = 1;
 
-    // Set default language from Pupesoft to first presta id
-    $xml->product->name->language[0]              = utf8_encode($product['nimi']);
-    $xml->product->description->language[0]       = utf8_encode($product['kuvaus']);
-    $xml->product->description_short->language[0] = utf8_encode($product['lyhytkuvaus']);
-    $xml->product->link_rewrite->language[0]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
+    // Set default value from Pupesoft to all languages
+    $languages = count($xml->product->name->language);
 
-    // loop all translations
+    // we must set these for all languages
+    for ($i=0; $i < $languages; $i++) {
+      $xml->product->name->language[$i]              = utf8_encode($product['nimi']);
+      $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
+      $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
+      $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
+    }
+
+    // loop all translations and overwrite defaults
     foreach ($product['tuotteen_kaannokset'] as $translation) {
       $tr_id = $this->get_language_id($translation['kieli']);
 

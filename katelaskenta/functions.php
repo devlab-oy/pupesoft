@@ -133,39 +133,39 @@ function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tu
         $kyselylisa = "";
 
     $query = "SELECT
-                '' tuoteperhe,
-                {$tvk_taulu}.id {$tvk_taulu},
-                tuote.tuoteno,
-                tuote.nimitys,
-                tuote.osasto,
-                tuote.try,
-                tuote.myyntihinta,
-                tuote.myymalahinta,
-                tuote.nettohinta,
-                tuote.aleryhma,
-                tuote.status,
-                tuote.ei_saldoa,
-                tuote.yksikko,
-                tuote.tunnus,
-                tuote.epakurantti25pvm,
-                tuote.epakurantti50pvm,
-                tuote.epakurantti75pvm,
-                tuote.epakurantti100pvm,
-                tuote.kehahin,
-                tuote.myyntikate,
-                tuote.nettokate,
-                tuote.myymalakate,
-                (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-                tuote.sarjanumeroseuranta
-                FROM {$tvk_taulu}
-                JOIN tuote ON (tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno $hinta_rajaus)
-                WHERE {$tvk_taulu}.yhtio = '$kukarow[yhtio]'
-                and {$tvk_taulu}.id = '$tvk_korvaavat'
-                $kyselylisa
-                $kieltolisa
-                $poislisa
-                $extra_poislisa
-                ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
+              '' tuoteperhe,
+              {$tvk_taulu}.id {$tvk_taulu},
+              tuote.tuoteno,
+              tuote.nimitys,
+              tuote.osasto,
+              tuote.try,
+              tuote.myyntihinta,
+              tuote.myymalahinta,
+              tuote.nettohinta,
+              tuote.aleryhma,
+              tuote.status,
+              tuote.ei_saldoa,
+              tuote.yksikko,
+              tuote.tunnus,
+              tuote.epakurantti25pvm,
+              tuote.epakurantti50pvm,
+              tuote.epakurantti75pvm,
+              tuote.epakurantti100pvm,
+              tuote.kehahin,
+              tuote.myyntikate,
+              tuote.nettokate,
+              tuote.myymalakate,
+              (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+              tuote.sarjanumeroseuranta
+              FROM {$tvk_taulu}
+              JOIN tuote ON (tuote.yhtio={$tvk_taulu}.yhtio and tuote.tuoteno={$tvk_taulu}.tuoteno $hinta_rajaus)
+              WHERE {$tvk_taulu}.yhtio = '$kukarow[yhtio]'
+              and {$tvk_taulu}.id = '$tvk_korvaavat'
+              $kyselylisa
+              $kieltolisa
+              $poislisa
+              $extra_poislisa
+              ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
     $kores = pupe_query($query);
 
     return $kores;
@@ -289,8 +289,8 @@ function hae_yhtiot() {
     global $yhtiorow, $kukarow;
 
     $query = "SELECT *
-            FROM yhtio
-            WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+              FROM yhtio
+              WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] != "") {
@@ -453,40 +453,40 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
             // K‰yd‰‰n l‰pi tuotepaikat
             if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
                 $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-                  sarjanumeroseuranta.sarjanumero era,
-                  concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                   FROM tuote
-                  JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
-                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                  $sallitut_maat_lisa
-                  AND varastopaikat.tunnus                  = tuotepaikat.varasto)
-                  JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
-                  AND sarjanumeroseuranta.tuoteno           = tuote.tuoteno
-                  AND sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
-                  AND sarjanumeroseuranta.hyllynro          = tuotepaikat.hyllynro
-                  AND sarjanumeroseuranta.hyllyvali         = tuotepaikat.hyllyvali
-                  AND sarjanumeroseuranta.hyllytaso         = tuotepaikat.hyllytaso
-                  AND sarjanumeroseuranta.myyntirivitunnus  = 0
-                  AND sarjanumeroseuranta.era_kpl          != 0
-                  WHERE tuote.yhtio                         in ('" . implode("','", $yhtiot) . "')
-                  and tuote.tuoteno                         = '$row[tuoteno]'
-                  GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
-                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+                          tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+                          sarjanumeroseuranta.sarjanumero era,
+                          concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
+                          varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+                           FROM tuote
+                          JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+                          JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                          $sallitut_maat_lisa
+                          AND varastopaikat.tunnus                  = tuotepaikat.varasto)
+                          JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
+                          AND sarjanumeroseuranta.tuoteno           = tuote.tuoteno
+                          AND sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
+                          AND sarjanumeroseuranta.hyllynro          = tuotepaikat.hyllynro
+                          AND sarjanumeroseuranta.hyllyvali         = tuotepaikat.hyllyvali
+                          AND sarjanumeroseuranta.hyllytaso         = tuotepaikat.hyllytaso
+                          AND sarjanumeroseuranta.myyntirivitunnus  = 0
+                          AND sarjanumeroseuranta.era_kpl          != 0
+                          WHERE tuote.yhtio                         in ('" . implode("','", $yhtiot) . "')
+                          and tuote.tuoteno                         = '$row[tuoteno]'
+                          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+                          ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
             } else {
                 $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-                  concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                  FROM tuote
-                  JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
-                  JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                  $sallitut_maat_lisa
-                  AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio        in ('" . implode("','", $yhtiot) . "')
-                  AND tuote.tuoteno        = '$row[tuoteno]'
-                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+                          tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+                          concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+                          varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+                          FROM tuote
+                          JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+                          JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                          $sallitut_maat_lisa
+                          AND varastopaikat.tunnus = tuotepaikat.varasto)
+                          WHERE tuote.yhtio        in ('" . implode("','", $yhtiot) . "')
+                          AND tuote.tuoteno        = '$row[tuoteno]'
+                          ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
             }
             $varresult = pupe_query($query);
 

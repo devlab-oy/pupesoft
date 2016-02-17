@@ -36,4 +36,16 @@ class PrestaProductFeatureValues extends PrestaClient {
 
     return $xml;
   }
+
+  private function fetch_all() {
+    if (isset($this->all_features)) {
+      return $this->all_features;
+    }
+
+    $display = array('id', 'value');
+
+    $this->all_features = $this->all($display);
+
+    return $this->all_features;
+  }
 }

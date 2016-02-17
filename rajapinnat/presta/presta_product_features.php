@@ -21,7 +21,6 @@ class PrestaProductFeatures extends PrestaClient {
     return $feature_id;
   }
 
-
   protected function resource_name() {
     return 'product_features';
   }

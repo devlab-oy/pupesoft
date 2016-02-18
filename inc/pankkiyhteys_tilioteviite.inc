@@ -189,7 +189,7 @@ if ($tee == "valitse") {
   $pankkiyhteys_tunnus = $_COOKIE[$cookie_tunnus];
 
   // Haetaan pankkiyhteysrivi
-  $query = "SELECT hae_factoring
+  $query = "SELECT *
             FROM pankkiyhteys
             WHERE tunnus = '{$pankkiyhteys_tunnus}'
             LIMIT 1";
@@ -227,13 +227,24 @@ if ($tee == "valitse") {
 
     $factoring_tiliote_tiedostot = sepa_download_file_list($params);
 
-    // Haetaan factoring-viite-lista
-    $params = array(
-      "file_type"             => "FINRREFPL",
-      "status"                => "ALL",
-      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
-      "pankkiyhteys_salasana" => $salasana
-    );
+    if ($pankkiyhteysrow['pankki'] == 'DABAFIHH') {
+      // Haetaan factoring-viite-lista
+      $params = array(
+        "file_type"             => "VIPN",
+        "status"                => "ALL",
+        "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+        "pankkiyhteys_salasana" => $salasana
+      );
+    }
+    else {
+      // Haetaan factoring-viite-lista
+      $params = array(
+        "file_type"             => "FINRREFPL",
+        "status"                => "ALL",
+        "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+        "pankkiyhteys_salasana" => $salasana
+      );
+    }
 
     $factoring_viite_tiedostot = sepa_download_file_list($params);
   }

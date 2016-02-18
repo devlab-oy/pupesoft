@@ -2326,25 +2326,27 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
             }
         </SCRIPT>";
 
-      if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
+      if ($rajattu_nakyma == '' or $rajattu_nakyma == "true_poisto") {
 
-      echo "<tr><td class='back pnopad'>";
-      echo "<br />
-        <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
-        <input type = 'hidden' name = 'toim' value = '$aputoim'>
-        <input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
-        <input type = 'hidden' name = 'limit' value = '$limit'>
-        <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
-        <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
-        <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'hidden' name = 'tunnus' value = '$tunnus'>
-        <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-        <input type = 'hidden' name = 'del' value ='1'>
-        <input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
-        <input type = 'submit' class='poista_btn' value = '".t("Poista $otsikko_nappi")."'>
-        </form>";
-      echo "</td></tr>";
+        if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 
+          echo "<tr><td class='back pnopad'>";
+          echo "<br />
+            <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
+            <input type = 'hidden' name = 'toim' value = '$aputoim'>
+            <input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
+            <input type = 'hidden' name = 'limit' value = '$limit'>
+            <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+            <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
+            <input type = 'hidden' name = 'laji' value = '$laji'>
+            <input type = 'hidden' name = 'tunnus' value = '$tunnus'>
+            <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+            <input type = 'hidden' name = 'del' value ='1'>
+            <input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
+            <input type = 'submit' class='poista_btn' value = '".t("Poista $otsikko_nappi")."'>
+            </form>";
+          echo "</td></tr>";
+      }
     }
   }
 

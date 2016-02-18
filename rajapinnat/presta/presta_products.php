@@ -73,11 +73,14 @@ class PrestaProducts extends PrestaClient {
 
     // if we are moving all products to presta, hide the product if we don't want to show it
     if ($this->visibility_type == 2) {
+      // we have stock value in pupesoft_all_products
+      $stock = $this->pupesoft_all_products[$product['tuoteno']];
+
       if (empty($product['nakyvyys'])) {
         $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
       }
-      elseif ($product['status'] == 'P' and $product['saldo'] <= 0) {
+      elseif ($product['status'] == 'P' and $stock <= 0) {
         $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
       }
@@ -347,23 +350,17 @@ class PrestaProducts extends PrestaClient {
       $existing_products = $this->all_skus();
 
       foreach ($products as $product) {
-
         $row_counter++;
         $this->logger->log("[$row_counter/$total_counter]");
 
-        //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
-            $response = $this->update($id, $product);
+            $this->update($id, $product);
           }
           else {
-            $response = $this->create($product);
-            $id = (string) $response['product']['id'];
+            $this->create($product);
           }
-
-          $qty = empty($product['saldo']) ? 0 : $product['saldo'];
-          $this->presta_stock->create_or_update($id, $qty);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
@@ -378,6 +375,7 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->delete_all_unnecessary_products();
+    $this->update_stock();
 
     $this->logger->log('---------End product sync---------');
     return true;
@@ -422,7 +420,8 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function delete_all_unnecessary_products() {
-    $pupesoft_products = $this->pupesoft_all_products;
+    // pupesoft_all_products has SKU as the array key, we need an array of SKUs.
+    $pupesoft_products = array_keys($this->pupesoft_all_products);
 
     if ($pupesoft_products === null or count($pupesoft_products) == 0) {
       $this->logger->log("pupesoft_all_products not set, can't delete!");
@@ -459,6 +458,28 @@ class PrestaProducts extends PrestaClient {
       catch (Exception $e) {
       }
     }
+  }
+
+  private function update_stock() {
+    $this->logger->log('---------Start stock sync---------');
+
+    // set all products null, so we'll fetch all_skus again from presta
+    $this->presta_all_products = null;
+    $pupesoft_products = $this->pupesoft_all_products;
+
+    $current = 0;
+    $total = count($pupesoft_products);
+
+    foreach ($pupesoft_products as $sku => $stock) {
+      $product_id = array_search($sku, $this->all_skus());
+
+      $current++;
+      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$stock}");
+
+      $this->presta_stock->create_or_update($product_id, $stock);
+    }
+
+    $this->logger->log('---------End stock sync---------');
   }
 
   public function set_removable_fields($fields) {

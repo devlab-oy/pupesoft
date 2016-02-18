@@ -240,7 +240,33 @@ function hae_kaikki_tuotteet() {
   $tuotteet = array();
 
   while ($row = mysql_fetch_array($res)) {
-    $tuotteet[] = $row['tuoteno'];
+    $tuoteno = $row['tuoteno'];
+
+    // Katsotaan onko tämä isätuote
+    $query = "SELECT tunnus
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$tuoteno}'
+              AND tyyppi = 'P'
+              LIMIT 1";
+    $tr_result = pupe_query($query);
+
+    if (mysql_num_rows($tr_result) == 1) {
+      // isätuote
+      $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI');
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+    }
+    else {
+      // normituote
+      list(, , $myytavissa) = saldo_myytavissa($tuoteno);
+    }
+
+    // tuoteno avaimena, saldo arvona
+    $tuotteet[$tuoteno] = $myytavissa;
   }
 
   return $tuotteet;
@@ -315,14 +341,6 @@ function hae_tuotteet() {
 
     // tämä on isätuote
     if (mysql_num_rows($tr_result) > 0) {
-      // lasketaan isän saldo
-      $isa_saldot = tuoteperhe_myytavissa($row["tuoteno"], 'KAIKKI');
-      $myytavissa = 0;
-
-      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
-        $myytavissa += $isa_saldo;
-      }
-
       while ($tr_row = mysql_fetch_assoc($tr_result)) {
         $tuotteen_lapsituotteet[] = array(
           "alekerroin"   => $tr_row['alekerroin'],
@@ -331,10 +349,6 @@ function hae_tuotteet() {
           "tuoteno"      => $tr_row['tuoteno'],
         );
       }
-    }
-    else {
-      // Normi tuote, haetaan tuotteen myytävissä määrä (saldo)
-      list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"]);
     }
 
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt
@@ -380,7 +394,6 @@ function hae_tuotteet() {
       'myyntihinta_verot_mukaan'  => $myyntihinta_verot_mukaan,
       'myyntihinta_verot_pois'    => $myyntihinta_verot_pois,
       'myyntihinta_veroton'       => $myyntihinta_veroton,
-      'saldo'                     => $myytavissa,
       'tuotepuun_tunnukset'       => $tuotepuun_tunnukset,
       'tuotteen_kaannokset'       => $tuotteen_kaannokset,
       'tuotteen_lapsien_maara'    => count($tuotteen_lapsituotteet),

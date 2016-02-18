@@ -38,7 +38,9 @@ abstract class PrestaClient {
       throw new Exception('Presta API key puuttuu');
     }
 
-    $this->logger = new Logger('/home/devlab/logs/presta_export.log');
+    $log_path = is_dir('/home/devlab/logs') ? '/home/devlab/logs' : '/tmp';
+
+    $this->logger = new Logger("{$log_path}/presta_export.log");
     $this->logger->set_date_format('Y-m-d H:i:s');
 
     if (substr($url, -1) == '/') {
@@ -55,6 +57,10 @@ abstract class PrestaClient {
    * @throws Exception
    */
   protected function get_empty_schema() {
+    if (isset($this->schema)) {
+      return $this->schema;
+    }
+
     $resource = $this->resource_name();
     $opt = array(
       'resource' => "{$resource}?schema=blank"
@@ -71,7 +77,16 @@ abstract class PrestaClient {
       throw $e;
     }
 
+    $this->schema = $schema;
+
     return $schema;
+  }
+
+  protected function empty_xml() {
+    $empty = $this->get_empty_schema()->asXML();
+    $xml   = new SimpleXMLElement($empty);
+
+    return $xml;
   }
 
   /**
@@ -151,13 +166,11 @@ abstract class PrestaClient {
     );
 
     try {
-      if (empty($this->schema)) {
-        $this->schema = $this->get_empty_schema();
-      }
+      $this->get_empty_schema();
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
       $response_xml = $this->ws->add($opt);
-      //@TODO Resource IDENTIFIER to log message
-      $this->logger->log("Luotiin resurssi:" . $this->resource_name());
+
+      $this->logger->log("Luotiin resurssi: " . $this->resource_name());
     }
     catch (Exception $e) {
       $msg = "Resurssin " . $this->resource_name() . " luonti epäonnistui";
@@ -179,9 +192,8 @@ abstract class PrestaClient {
   protected function update($id, array $resource) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id);
-    if (empty($this->schema)) {
-      $this->schema = $this->get_empty_schema();
-    }
+    $this->get_empty_schema();
+
     $xml = $this->generate_xml($resource, $existing_resource);
 
     return $this->update_xml($id, $xml);
@@ -374,7 +386,7 @@ abstract class PrestaClient {
    * @return string
    */
   protected function saniteze_link_rewrite($string) {
-    return preg_replace('/[^a-zA-Z0-9]/', '', $string);
+    return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

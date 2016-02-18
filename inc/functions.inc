@@ -1467,7 +1467,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
     $tuotteet_str = substr($tuotteet_str, 0, -1);
 
-    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi
+    $query = "SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi, tuotepaikat.oletus
               FROM tuote
               JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio
                 AND tuotepaikat.tuoteno   = tuote.tuoteno
@@ -1497,6 +1497,11 @@ if (!function_exists("tuoteperhe_myytavissa")) {
       foreach ($tuotteet as $tuoteno => $kerroin) {
 
         list(, , $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
+
+        if (!isset($perhe_myytavissa[$tuoteno])) {
+          $perhe_myytavissa[$tuoteno] = 0;
+        }
+
         $perhe_myytavissa[$tuoteno] += round($myytavissa/$kerroin, 2);
       }
 
@@ -22547,8 +22552,23 @@ if (!function_exists("gs1_sscc")) {
 
     $sscc_prefix = '00';
     $sscc_expansioncode = $expansioncode;
-    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], 7, 0, STR_PAD_LEFT);
-    $sscc_item_id = str_pad(substr($id, -7), 7, 0, STR_PAD_LEFT);
+
+    // jos gs1 yritystunnus on yli 7 merkki‰ (oletuspituus), tehd‰‰n
+    // erikoisk‰sittely sscc koodin muodostukselle ja raivataan tilaa
+    // tilausnumerosta
+    if (strlen($yhtiorow['ean']) > 7) {
+      // 9 on maksimi ean pituus, joten lasketaan kuinka paljon yli
+      // 7 merkin tuo menee
+      $company_id_space   = strlen($yhtiorow['ean']);               //t‰nne lis‰‰ tilaa
+      $item_id_space      = 7 - (strlen($yhtiorow['ean']) - 7);     //t‰‰lt‰ pois tilaa
+    }
+    else {
+      $company_id_space   = 7;
+      $item_id_space      = 7;
+    }
+
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_LEFT);
+    $sscc_item_id = str_pad(substr($id, -$item_id_space), $item_id_space, 0, STR_PAD_LEFT);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
     $sscc = $sscc_expansioncode.$sscc_gs1_company_id.$sscc_item_id.$sscc_count;
@@ -27393,6 +27413,9 @@ if (!function_exists('posten_outbounddelivery')) {
       if (!PUPE_UNICODE) {
         exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
       }
+      else {
+        $ftputf8 = TRUE;
+      }
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
@@ -31072,9 +31095,8 @@ if (!function_exists("mb_str_pad")) {
   function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
     // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
     // jotta UTF8-konversio ei osu t‰h‰n riviin
-    $pad_string_length =  mb_strlen($pad_string);
-    $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
-    return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+    $diff = strlen($input) - mb_strlen($input); //NO_MB_OVERLOAD
+    return str_pad($input, $pad_length + $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
   }
 }
 
@@ -32429,5 +32451,17 @@ if (!function_exists("loppulaskuta")) {
     $lrow = mysql_fetch_assoc($lres);
 
     return $lrow["tunnukset"];
+  }
+}
+
+if (!function_exists('sort_array_of_arrays')) {
+  function sort_array_of_arrays(&$array, $subfield) {
+    $sortarray = array();
+
+    foreach ($array as $key => $row) {
+      $sortarray[$key] = $row[$subfield];
+    }
+
+    array_multisort($sortarray, SORT_ASC, $array);
   }
 }

@@ -307,7 +307,7 @@ else {
       $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']), $firstpage, $pien);
     }
 
-    $pdf->draw_text(mm_pt(100), mm_pt(175), "L‰hetyspvm",                  $firstpage, $norm);
+    $pdf->draw_text(mm_pt(100), mm_pt(175), "L‰hetyspvm:",                  $firstpage, $otsik);
     $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,                  $firstpage, $norm);
 
     $query = "SELECT *
@@ -329,8 +329,16 @@ else {
     $pdf->draw_text(mm_pt(22),  mm_pt(127), $laskurow['toim_osoite'],            $firstpage, $norm);
     $pdf->draw_text(mm_pt(22),  mm_pt(120), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $iso);
 
-    $pdf->draw_text(mm_pt(100), mm_pt(140), "Toimituspvm",                  $firstpage, $norm);
-    $pdf->draw_text(mm_pt(100), mm_pt(135), date("d.m.Y") ,                  $firstpage, $norm);
+    $pdf->draw_text(mm_pt(90), mm_pt(140), "Toimituspvm myym‰l‰‰n:",         $firstpage, $otsik);
+    
+    if ((int) str_replace("-", "", $laskurow['toimaika']) < date("Ymd")) {
+      $_toimaika = date("d.m.Y");
+    }
+    else {
+      $_toimaika = tv1dateconv($laskurow['toimaika']);
+    }
+    
+    $pdf->draw_text(mm_pt(100), mm_pt(135), $_toimaika,                  $firstpage, $norm);
 
     // Kuljetusohjeet = viivakoodi tulee t‰h‰n
     $pdf->draw_text(mm_pt(22), mm_pt(112), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",  $firstpage, $otsik);

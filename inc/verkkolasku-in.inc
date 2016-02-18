@@ -169,7 +169,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($yhtiorow) and $verkkotunnus_vas != 0) {
       // 4 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
-      $yyhtio1 = substr(str_replace("0037", "", $verkkotunnus_vas), 0, 8); // mahdollisella etunollalla
+      $yyhtio1 = substr(preg_replace("/^0037/", "", $verkkotunnus_vas), 0, 8); // mahdollisella etunollalla
       $yyhtio2 = (int) $yyhtio1; // ilman etunollaa
 
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
@@ -221,7 +221,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
       // 8 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
-      $yyhtio3 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
+      $yyhtio3 = substr(preg_replace("/^0037/", "", $yhtio), 0, 8); // mahdollisella etunollalla
       $yyhtio4 = (int) $yyhtio3; // ilman etunollaa
 
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio3', '$yyhtio4')";
@@ -398,7 +398,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_ovt != "") {
       // 5 etsit‰‰n toimittaja ytunnuksella
-      $yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
+      $yovt1 = substr(preg_replace("/^0037/", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
       $yovt2 = (int) $yovt1; // ilman etunollaa
 
       $query  = "SELECT *

@@ -489,6 +489,10 @@ if ($upd == 1) {
             }
           }
 
+          if ($toim == 'tuote' and mysql_field_name($result, $i) == 'vienti' and !empty($maaryhma_vienti)) {
+            $t[$i] = $maaryhma_vienti;
+          }
+
           if (mysql_field_type($result, $i) == 'real') {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
@@ -2329,7 +2333,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
             }
         </SCRIPT>";
 
-      if ($rajattu_nakyma == '') {
+      if ($rajattu_nakyma == '' or $rajattu_nakyma == "true_poisto") {
 
         if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 

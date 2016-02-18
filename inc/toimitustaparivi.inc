@@ -64,6 +64,8 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
   $ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
   $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan lähetys</option>";
+  $ulos .= "<option value='Express Business Day parcel 14' {$sel["Express Business Day parcel 14"]}>Itella Express Business Day parcel 14</option>";
+  $ulos .= "<option value='Express Business Day pallet 14' {$sel["Express Business Day pallet 14"]}>Itella Express Business Day pallet 14</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Itella'>";

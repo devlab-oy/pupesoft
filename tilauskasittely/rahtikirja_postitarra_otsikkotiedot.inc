@@ -191,8 +191,18 @@ case "9":
   $tuoteviiva2=">62W>52101";
   break;
 case "14":
-  $tuoteviiva1="2W2102";
-  $tuoteviiva2=">62W>52102";
+  if (strpos($selite_chk, "Express Business Day parcel") !== FALSE) {
+    $tuoteviiva1="2W2317";
+    $tuoteviiva2=">62W>52317";
+  }
+  elseif (strpos($selite_chk, "Express Business Day pallet") !== FALSE) {
+    $tuoteviiva1="2W2318";
+    $tuoteviiva2=">62W>52318";
+  }
+  else {
+    $tuoteviiva1="2W2102";
+    $tuoteviiva2=">62W>52102";
+  }
   break;
 case "00/16":
   $tuoteviiva1="2W2105";

@@ -147,6 +147,32 @@ function presta_specific_prices() {
     $specific_prices[] = $asiakasalennus;
   }
 
+  // Tuotteen hinnastohinnat kaikille tuotteille. lajit:
+  // '' Bruttohinta Myyntihinta
+  // 'N' N-Nettohinta Myyntihinta
+  // 'E' E-Nettohinta Myyntihinta
+  $query = "SELECT
+            tuote.tuoteno,
+            hinnasto.alkupvm,
+            hinnasto.loppupvm,
+            hinnasto.minkpl,
+            hinnasto.hinta,
+            hinnasto.valkoodi,
+            hinnasto.maa
+            FROM tuote
+            LEFT JOIN hinnasto ON (hinnasto.yhtio = tuote.yhtio
+              AND hinnasto.tuoteno = tuote.tuoteno
+              AND hinnasto.hinta > 0
+              AND hinnasto.laji in ('', 'N', 'E')
+              AND (hinnasto.loppupvm = '0000-00-00' or hinnasto.loppupvm > current_date()))
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$tuoterajaus}";
+  $result = pupe_query($query);
+
+  while ($hinnasto = mysql_fetch_assoc($result)) {
+    $specific_prices[] = $hinnasto;
+  }
+
   return $specific_prices;
 }
 

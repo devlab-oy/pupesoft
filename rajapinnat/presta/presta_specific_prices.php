@@ -31,7 +31,6 @@ class PrestaSpecificPrices extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
-
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
@@ -105,7 +104,7 @@ class PrestaSpecificPrices extends PrestaClient {
       $presta_shop = new PrestaShops($this->url(), $this->api_key());
       $this->shop = $presta_shop->first_shop();
 
-      $presta_product = new PrestaProducts($this->url(), $this->api_key());
+      $presta_product = new PrestaProducts($this->url(), $this->api_key(), null);
       $this->product_ids = $presta_product->all_skus();
 
       $total = count($prices);
@@ -126,11 +125,6 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->delete_special_prices_for_product($price['presta_product_id']);
 
-          if (empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
-            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska asiakastunnus sekä asiakasryhmä puuttuu");
-            continue;
-          }
-
           if (empty($price['hinta']) and empty($price['alennus'])) {
             $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennus sekä hinta puuttuu");
             continue;
@@ -138,11 +132,13 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->create($price);
           $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
-            ." hinta {$price['hinta']} "
-            ." valuutta {$price['valkoodi']} "
-            ." alennus {$price['alennus']}"
+            ." alennus '{$price['alennus']}'"
+            ." hinta '{$price['hinta']}'"
+            ." valuutta '{$price['valkoodi']}'"
             ." asiakastunnus '{$price['presta_customer_id']}'"
-            ." asiakasryhma '{$price['presta_customergroup_id']}'");
+            ." asiakasryhma '{$price['presta_customergroup_id']}'"
+            ." alkupvm '{$price['alkupvm']}'"
+            ." loppupvm '{$price['loppupvm']}'");
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions

@@ -257,9 +257,8 @@ function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaik
  *
  * @param type    $tuotteet
  * @param type    $verkkokauppa
- * @param type    $hae_ja_selaa_row
  */
-function valmistele_hakutulokset($tuotteet, $verkkokauppa, $hae_ja_selaa_row) {
+function valmistele_hakutulokset($tuotteet, $verkkokauppa) {
 
   foreach ($tuotteet as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta
     // Laajennetaan tuotteen nimityst‰ "korvaa tuotteen" merkinn‰ll‰
@@ -268,9 +267,7 @@ function valmistele_hakutulokset($tuotteet, $verkkokauppa, $hae_ja_selaa_row) {
     }
 
     // Merkit‰‰n nimitykseen "poistuva"
-    if ($hae_ja_selaa_row['selite'] != 'B' and
-      $verkkokauppa == "" and
-      strtoupper($arvo["status"]) == "P") {
+    if (strtoupper($arvo["status"]) == "P") {
       $tuotteet[$avain]["nimitys"] .= "<br> * " . t("Poistuva tuote");
     }
 
@@ -341,7 +338,6 @@ function hae_yhtiot() {
  * @global type $ostoskori
  * @global type $yht_i
  * @global type $lisatiedot
- * @global type $hae_ja_selaa_row
  * @param type    $row
  * @param type    $yhtiot
  * @param type    $oleasrow
@@ -349,7 +345,7 @@ function hae_yhtiot() {
 function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
   $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
-  $yht_i, $lisatiedot, $hae_ja_selaa_row;
+  $yht_i, $lisatiedot;
 
   if ($toim_kutsu != "EXTENNAKKO" and ( $verkkokauppa == "" or ( $verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
     // Tuoteperheen is‰t, mutta ei sarjanumerollisisa isi‰ (Normi, Extranet ja Verkkokauppa)
@@ -553,17 +549,7 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
               echo "</td>";
 
               echo "<td class='$vari' align='right' nowrap>";
-
-              if ($hae_ja_selaa_row['selite'] == 'B') {
-                echo "<font class='green'>";
-              }
-
               echo sprintf("%.2f", $myytavissa) . " " . $rivin_yksikko;
-
-              if ($hae_ja_selaa_row['selite'] == 'B') {
-                echo "</font>";
-              }
-
               echo "</td></tr>";
             }
 

@@ -701,9 +701,15 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     }
   }
 
-  echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
-  echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
-  echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
+  if (!isset($viitelah)) $viitelah = '';
+  if (!isset($viitevas)) $viitevas = '';
+  if (!isset($viesti)) $viesti = $asiakasrow['kuljetusohje'];
+
+  echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'>";
+  echo "<input type='text' name='viitelah' value='{$viitelah}'></td></tr>";
+  echo "<tr><th>".t('Vastaanottajan viite')."</th>";
+  echo "<td><input type='text' name='viitevas' value='{$viitevas}'></td></tr>";
+  echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$viesti}'></td></tr>";
   echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 

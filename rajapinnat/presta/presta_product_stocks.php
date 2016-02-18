@@ -43,14 +43,14 @@ class PrestaProductStocks extends PrestaClient {
    * @param int     $stock
    * @return boolean
    */
-  public function create_or_update($product_id, $stock) {
+  public function create_or_update($product_id, $qty) {
     $display = array();
     $filters = array(
       'id_product' => $product_id,
     );
     $stock = array(
       'product_id' => $product_id,
-      'saldo'      => $stock,
+      'saldo'      => $qty,
     );
 
     //Needs to be inside try-catch so that we wont interrupt product create loop.
@@ -70,7 +70,7 @@ class PrestaProductStocks extends PrestaClient {
       }
     }
     catch (Exception $e) {
-      $msg = "Tuotteen: {$product_id} saldon luonti/päivitys epäonnistui. Saldo: {$stock}";
+      $msg = "Tuotteen: {$product_id} saldon luonti/päivitys epäonnistui. Saldo: {$qty}";
       $this->logger->log($msg, $e);
 
       return false;

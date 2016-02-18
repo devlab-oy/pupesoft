@@ -569,8 +569,9 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
   echo "</select></td></tr>";
 
-
-  $tpuh = $asiakasrow['gsm'] != '' ? $asiakasrow['gsm'] : ($yhteyshenkiloasiakas['tyopuhelin'] != '' ? $yhteyshenkiloasiakas['tyopuhelin'] : ($yhteyshenkiloasiakas['puhelin'] != '' ? $yhteyshenkiloasiakas['puhelin'] : ''));
+  if (empty($tpuh)) {
+    $tpuh = $asiakasrow['gsm'] != '' ? $asiakasrow['gsm'] : ($yhteyshenkiloasiakas['tyopuhelin'] != '' ? $yhteyshenkiloasiakas['tyopuhelin'] : ($yhteyshenkiloasiakas['puhelin'] != '' ? $yhteyshenkiloasiakas['puhelin'] : ''));
+  }
 
   echo "<tr>
       <td valign='top'>".t("Puhelin").": </td>

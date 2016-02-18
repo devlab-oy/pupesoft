@@ -24,6 +24,7 @@ cron_log();
 // Haetaan yhtion tiedot
 $yhtiorow = hae_yhtion_parametrit($argv[1]);
 $kukarow = hae_kukarow('admin', $argv[1]);
+$debug = 0;
 
 // Haetaan maksusopimukset
 $query = "SELECT
@@ -87,5 +88,5 @@ while ($row = mysql_fetch_assoc($result)) {
   if (mysql_affected_rows() > 0) {
     echo "\nLoppulaskutetaan maksusopimus: {$row['jaksotettu']}\n";
     loppulaskuta($row['jaksotettu']);
-  }  
+  }
 }

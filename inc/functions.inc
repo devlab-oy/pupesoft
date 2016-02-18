@@ -27413,6 +27413,9 @@ if (!function_exists('posten_outbounddelivery')) {
       if (!PUPE_UNICODE) {
         exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
       }
+      else {
+        $ftputf8 = TRUE;
+      }
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 

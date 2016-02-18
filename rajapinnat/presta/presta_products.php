@@ -372,6 +372,7 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->delete_all_unnecessary_products();
+    $this->update_stock();
 
     $this->logger->log('---------End product sync---------');
     return true;
@@ -454,6 +455,28 @@ class PrestaProducts extends PrestaClient {
       catch (Exception $e) {
       }
     }
+  }
+
+  private function update_stock() {
+    $this->logger->log('---------Start stock sync---------');
+
+    // set all products null, so we'll fetch all_skus again from presta
+    $this->presta_all_products = null;
+    $pupesoft_products = $this->pupesoft_all_products;
+
+    $current = 0;
+    $total = count($pupesoft_products);
+
+    foreach ($pupesoft_products as $sku => $stock) {
+      $product_id = array_search($sku, $this->all_skus());
+
+      $current++;
+      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$stock}");
+
+      $this->presta_stock->create_or_update($product_id, $stock);
+    }
+
+    $this->logger->log('---------End stock sync---------');
   }
 
   public function set_removable_fields($fields) {

@@ -523,7 +523,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       $sel[$kumpiosoite] = "SELECTED";
     }
     else {
-      $kumpiosoite = "";
+      $kumpiosoite = "toimitus";
     }
 
     echo "<input type=hidden name='kumpiosoite_ed' value='$kumpiosoite'>";

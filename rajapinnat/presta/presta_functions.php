@@ -91,8 +91,9 @@ function presta_specific_prices() {
 
   // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niitä käsitellään samalla tavalla
 
-  // Haetaan from tuote, koska pitää saada kaikki tuotteet, jotka on menossa prestaan.
-  // Vaikka ei olisi alennusta, koska muuten ei saada poistettua alennuksia tuotteilta
+  // HUOM! Haetaan from tuote, koska pitää saada kaikki tuotteet, jotka on menossa prestaan.
+  // Vaikka ei olisi hintaa, koska muuten ei saada poistettua hintoja/alennuksia tuotteilta
+  // vain ekassa queryssä pitää olla from tuote, koska silloin on kaikki tuotteet jo mukana arrayssä
 
   // Asiakashinnat kaikille tuotetteilla
   $query = "SELECT
@@ -122,6 +123,8 @@ function presta_specific_prices() {
   }
 
   // Asiakasalennukset kaikille tuotteille
+  // Ei tarvitse olla tässä left joinia, koska ensimmäisessä queryssä on jo.
+  // Joten meillä on kaikki tuotteet arrayssä ja presta hanskaa homman
   $query = "SELECT
             tuote.tuoteno,
             asiakasalennus.alkupvm,
@@ -131,7 +134,7 @@ function presta_specific_prices() {
             avainsana.selitetark_5 AS presta_customergroup_id,
             yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM tuote
-            LEFT JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
+            INNER JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
               AND asiakasalennus.tuoteno = tuote.tuoteno
               AND asiakasalennus.alennus > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
@@ -151,26 +154,40 @@ function presta_specific_prices() {
   // '' Bruttohinta Myyntihinta
   // 'N' N-Nettohinta Myyntihinta
   // 'E' E-Nettohinta Myyntihinta
-  $query = "SELECT
-            tuote.tuoteno,
-            hinnasto.alkupvm,
-            hinnasto.loppupvm,
-            hinnasto.minkpl,
-            hinnasto.hinta,
-            hinnasto.valkoodi,
-            hinnasto.maa
-            FROM tuote
-            LEFT JOIN hinnasto ON (hinnasto.yhtio = tuote.yhtio
-              AND hinnasto.tuoteno = tuote.tuoteno
-              AND hinnasto.hinta > 0
-              AND hinnasto.laji in ('', 'N', 'E')
-              AND (hinnasto.loppupvm = '0000-00-00' or hinnasto.loppupvm > current_date()))
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            {$tuoterajaus}";
+  //
+  // Ei tarvitse olla tässä left joinia, koska ensimmäisessä queryssä on jo.
+  // Joten meillä on kaikki tuotteet arrayssä ja presta hanskaa homman
+  $query = "SELECT distinct tuoteno, valkoodi, maa
+            FROM hinnasto
+            WHERE hinnasto.yhtio = '$kukarow[yhtio]'
+            AND hinnasto.hinta > 0
+            AND hinnasto.laji in ('', 'N', 'E')";
   $result = pupe_query($query);
 
-  while ($hinnasto = mysql_fetch_assoc($result)) {
-    $specific_prices[] = $hinnasto;
+  while ($hintavalrow = mysql_fetch_assoc($result)) {
+    // katotaan onko tuotteelle voimassa hinnastohintoja
+    $query = "SELECT hinnasto.tuoteno,
+              hinnasto.alkupvm,
+              hinnasto.loppupvm,
+              hinnasto.minkpl,
+              hinnasto.hinta,
+              hinnasto.valkoodi,
+              hinnasto.maa
+              FROM hinnasto
+              WHERE hinnasto.yhtio = '$kukarow[yhtio]'
+              AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
+              AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
+              AND hinnasto.maa = '$hintavalrow[maa]'
+              AND hinnasto.laji in ('', 'N', 'E')
+              AND hinnasto.hinta > 0
+              AND ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm = '0000-00-00' and hinnasto.loppupvm = '0000-00-00'))
+              ORDER BY ifnull(to_days(current_date) - to_days(hinnasto.alkupvm), 9999999999999)
+              LIMIT 1";
+    $hinnastoresult = pupe_query($query);
+
+    while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
+      $specific_prices[] = $hinnasto;
+    }
   }
 
   return $specific_prices;

@@ -347,23 +347,17 @@ class PrestaProducts extends PrestaClient {
       $existing_products = $this->all_skus();
 
       foreach ($products as $product) {
-
         $row_counter++;
         $this->logger->log("[$row_counter/$total_counter]");
 
-        //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
-            $response = $this->update($id, $product);
+            $this->update($id, $product);
           }
           else {
-            $response = $this->create($product);
-            $id = (string) $response['product']['id'];
+            $this->create($product);
           }
-
-          $qty = empty($product['saldo']) ? 0 : $product['saldo'];
-          $this->presta_stock->create_or_update($id, $qty);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
@@ -422,7 +416,8 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function delete_all_unnecessary_products() {
-    $pupesoft_products = $this->pupesoft_all_products;
+    // pupesoft_all_products has SKU as the array key, we need an array of SKUs.
+    $pupesoft_products = array_keys($this->pupesoft_all_products);
 
     if ($pupesoft_products === null or count($pupesoft_products) == 0) {
       $this->logger->log("pupesoft_all_products not set, can't delete!");

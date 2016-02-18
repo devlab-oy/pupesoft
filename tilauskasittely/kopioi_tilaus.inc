@@ -50,6 +50,14 @@ if (!function_exists("kopioi_tilaus")) {
 
     $monistarow = mysql_fetch_array($monistares);
 
+    // haetaan maksuehdon tiedot tarkastuksia varten
+    $apuqu = "SELECT erapvmkasin
+              from maksuehto
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$monistarow[maksuehto]'";
+    $meapu = pupe_query($apuqu);
+    $meapurow = mysql_fetch_assoc($meapu);
+
     $fields = mysql_field_name($monistares, 0);
     $values = "'".$monistarow[0]."'";
 
@@ -68,19 +76,19 @@ if (!function_exists("kopioi_tilaus")) {
       if ($field == "kate_korjattu") {
         $values .= ", NULL";
       }
-      elseif ($field == "erpcm") {
-        $pp = substr($monistarow[$i], 8, 2);
-        $kk = substr($monistarow[$i], 5, 2);
-        $vv = substr($monistarow[$i], 0, 4);
+      elseif ($field == "erpcm" and $meapurow["erapvmkasin"] != '') {
+        $pp = (int) substr($monistarow[$i], 8, 2);
+        $kk = (int) substr($monistarow[$i], 5, 2);
+        $vv = (int) substr($monistarow[$i], 0, 4);
 
         // Jos on syötetty eräpäivämäärästä vain päivä, taiotaan siitä kokonainen päivämäärä seuraavalle kuukaudelle
-        if ($pp > 0 and !checkdate($kk, $pp, $vv)) {
+        if ($pp > 0 and $pp == 0 and $vv == 0) {
           $seuraavankuunpvm = date("Y-m-{$pp}", strtotime('+1 month'));
           $values .= ", '$seuraavankuunpvm'";
         }
         else {
           $values .= ", '$monistarow[$i]'";
-        } 
+        }
       }
       else {
         $values .= ", '$monistarow[$i]'";

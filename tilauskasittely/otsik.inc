@@ -456,15 +456,21 @@ else {
   $meapurow = array("erapvmkasin" => "");
 }
 
-if ($toim == "YLLAPITO" and $erpcmvv == '0000' and $erpcmkk == '00') {
+if ($toim == "YLLAPITO" and !empty($erpcmpp)) {
+  $erpcmpp = (int) $erpcmpp;
+  $erpcmkk = $erpcmvv = 0;
+
   // Sopimuksen kausilaskutuksessa toistuva eräpäivämäärä pitää olla 1-28, tyhjä ohittaa ominaisuuden
-  if ($erpcmpp != '' and ($erpcmpp < 1 or $erpcmpp > 28)) {
+  if ($erpcmpp < 1 or $erpcmpp > 28) {
     echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
     unset($jatka);
     $erpcm_virhe = "X"; // apumuuttuja
   }
-  elseif (empty($erpcmpp)) {
-    $erpcmpp = $erpcmkk = $erpcmvv = '';
+
+  if ($meapurow["erapvmkasin"] == '') {
+    echo "<font class='error'>".t("VIRHE: Valitse maksuehto joka sallii eräpäivän käsinsyötön")."!</font><br>";
+    unset($jatka);
+    $erpcm_virhe = "X"; // apumuuttuja
   }
 }
 elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
@@ -526,9 +532,11 @@ elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmk
         echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
       }
     }
+
     $tee  = "OTSIK";
     unset($jatka);
     $erpcm_virhe = "X"; // apumuuttuja
+
     if ($kukarow['kesken'] != 0) {
       $tiedot_laskulta = "ok";
     }
@@ -1607,12 +1615,15 @@ if ($tila == "" and !isset($jatka)) {
 
     $vasen_sarake[$vasen] = "<td>".t("Eräpäivä").":</td><td>";
 
-    if ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
+    if (mysql_num_rows($maposres) > 0) {
+      $vasen_sarake[$vasen] .= t("Ei käytössä");
+    }
+    elseif ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
       // Ylläpitosopimuksella voidaan syöttää laskutuksessa toistuva eräpäivä
       // (kopioi tilaus käyttää tätä päivämäärää eräpäivän laskemiseen seuraavalle kuukaudelle)
       $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
           <input type='hidden' name='erpcmkk' value='00'>
-          <input type='hidden' name='erpcmvv' value='0000'>";
+          <input type='hidden' name='erpcmvv' value='0000'> (".t("Sopimuslaskun kiinteä eräpäivä").")";
     }
     else {
       $edis = "";

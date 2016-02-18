@@ -73,11 +73,14 @@ class PrestaProducts extends PrestaClient {
 
     // if we are moving all products to presta, hide the product if we don't want to show it
     if ($this->visibility_type == 2) {
+      // we have stock value in pupesoft_all_products
+      $stock = $this->pupesoft_all_products[$product['tuoteno']];
+
       if (empty($product['nakyvyys'])) {
         $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
       }
-      elseif ($product['status'] == 'P' and $product['saldo'] <= 0) {
+      elseif ($product['status'] == 'P' and $stock <= 0) {
         $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
       }

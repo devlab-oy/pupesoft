@@ -1,9 +1,10 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
-require_once 'rajapinnat/presta/presta_product_stocks.php';
-require_once 'rajapinnat/presta/presta_product_features.php';
+require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
+require_once 'rajapinnat/presta/presta_product_features.php';
+require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
 
@@ -17,6 +18,7 @@ class PrestaProducts extends PrestaClient {
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
+  private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
   private $presta_stock = null;
@@ -28,9 +30,10 @@ class PrestaProducts extends PrestaClient {
     $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
     $this->presta_home_category_id = $presta_home_category_id;
 
-    $this->presta_stock = new PrestaProductStocks($url, $api_key);
-    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+    $this->presta_stock = new PrestaProductStocks($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -239,6 +242,10 @@ class PrestaProducts extends PrestaClient {
         // Create feature value
         $response = $this->presta_product_feature_values->create($feature_value);
         $value_id = $response['product_feature_value']['id'];
+
+        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
+        $this->presta_product_feature_values->all_values = null;
+        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
       }
 
       $feature = $xml->product->associations->product_features->addChild('product_features');
@@ -246,6 +253,31 @@ class PrestaProducts extends PrestaClient {
       $feature->id_feature_value = $value_id;
 
       $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
+    }
+
+    $manufacturer_name = $product['tuotemerkki'];
+
+    $xml->product->id_manufacturer = 0;
+
+    // add manufacturer
+    if (!empty($manufacturer_name)) {
+      $manufacturer_id = $this->presta_manufacturers->manufacturer_id_by_name($manufacturer_name);
+
+      if (empty($manufacturer_id)) {
+        $manufacturer = array(
+          "name" => $manufacturer_name,
+        );
+
+        // Create manufacturer
+        $response = $this->presta_manufacturers->create($manufacturer);
+        $manufacturer_id = $response['manufacturer']['id'];
+
+        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
+        $this->presta_manufacturers->all_records = null;
+        $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
+      }
+
+      $xml->product->id_manufacturer = $manufacturer_id;
     }
 
     return $xml;

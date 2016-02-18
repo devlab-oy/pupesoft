@@ -4,14 +4,20 @@ require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaManufacturers extends PrestaClient {
 
-  private $all_records = null;
+  public $all_records = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   public function manufacturer_id_by_name($value) {
-    array_search($value, $this->fetch_all());
+    foreach ($this->fetch_all() as $record) {
+      if ($record['name'] == $value) {
+        return $record['id'];
+      }
+    }
+
+    return null;
   }
 
   protected function resource_name() {
@@ -26,8 +32,8 @@ class PrestaManufacturers extends PrestaClient {
       $xml = $existing_record;
     }
 
-    $xml->manufacturer->id = $record['id'];
     $xml->manufacturer->name = $record['name'];
+    $xml->manufacturer->active = 1;
 
     return $xml;
   }

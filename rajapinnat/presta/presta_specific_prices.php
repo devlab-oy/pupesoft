@@ -131,14 +131,32 @@ class PrestaSpecificPrices extends PrestaClient {
           }
 
           $this->create($price);
-          $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
-            ." alennus '{$price['alennus']}'"
-            ." hinta '{$price['hinta']}'"
-            ." valuutta '{$price['valkoodi']}'"
-            ." asiakastunnus '{$price['presta_customer_id']}'"
-            ." asiakasryhma '{$price['presta_customergroup_id']}'"
-            ." alkupvm '{$price['alkupvm']}'"
-            ." loppupvm '{$price['loppupvm']}'");
+
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}'";
+
+          if (isset($price['alennus'])) {
+            $message .= " alennus '{$price['alennus']}'";
+          }
+          if (isset($price['hinta'])) {
+            $message .= " hinta '{$price['hinta']}'";
+          }
+          if (isset($price['valkoodi'])) {
+            $message .= " valuutta '{$price['valkoodi']}'";
+          }
+          if (isset($price['presta_customer_id'])) {
+            $message .= " asiakastunnus '{$price['presta_customer_id']}'";
+          }
+          if (isset($price['presta_customergroup_id'])) {
+            $message .= " asiakasryhma '{$price['presta_customergroup_id']}'";
+          }
+          if (isset($price['alkupvm'])) {
+            $message .= " alkupvm '{$price['alkupvm']}'";
+          }
+          if (isset($price['loppupvm'])) {
+            $message .= " loppupvm '{$price['loppupvm']}'";
+          }
+
+          $this->logger->log($message);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions

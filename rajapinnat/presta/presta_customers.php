@@ -39,8 +39,8 @@ class PrestaCustomers extends PrestaClient {
     $xml->customer->lastname = $_nimi;
     $xml->customer->email = $_email;
 
-    if (!empty($customer['salasanan_resetointi'])) {
-      $xml->customer->passwd = $customer['salasanan_resetointi'];
+    if (!empty($customer['verkkokauppa_salasana'])) {
+      $xml->customer->passwd = $customer['verkkokauppa_salasana'];
       $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
     }
 
@@ -130,7 +130,7 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $query = "UPDATE yhteyshenkilo
-              SET salasanan_resetointi = ''
+              SET verkkokauppa_salasana = ''
               WHERE yhtio = '{$yhtio}'
               AND tunnus  = {$contact_id}";
     pupe_query($query);

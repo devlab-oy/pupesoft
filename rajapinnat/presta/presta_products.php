@@ -67,9 +67,11 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
 
-    // by default product is visible everywhere
-    // values: both, catalog, search, none
+    // by default product is visible everywhere, and active
+    // visibility values: both, catalog, search, none
+    // activity values: 0 off, 1 on
     $visibility = 'both';
+    $active = 1;
 
     // if we are moving all products to presta, hide the product if we don't want to show it
     if ($this->visibility_type == 2) {
@@ -79,13 +81,16 @@ class PrestaProducts extends PrestaClient {
       if (empty($product['nakyvyys'])) {
         $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
+        $active = 0;
       }
       elseif ($product['status'] == 'P' and $stock <= 0) {
         $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
+        $active = 0;
       }
     }
 
+    $xml->product->active = $active;
     $xml->product->visibility = $visibility;
 
     $xml->product->id_tax_rules_group = $this->get_tax_group_id($product["alv"]);
@@ -96,7 +101,6 @@ class PrestaProducts extends PrestaClient {
     $xml->product->weight = str_replace(",", ".", $product['tuotemassa']);
 
     $xml->product->available_for_order = 1;
-    $xml->product->active = 1;
     $xml->product->show_price = 1;
     $xml->product->unit_price = 1;
 

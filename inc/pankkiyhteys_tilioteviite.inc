@@ -22,6 +22,14 @@ if ($tee == "hae_aineistot") {
   $salasana = $_COOKIE[$cookie_secret];
   $pankkiyhteys_tunnus = $_COOKIE[$cookie_tunnus];
 
+  // Haetaan pankkiyhteysrivi
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE tunnus = '{$pankkiyhteys_tunnus}'
+            LIMIT 1";
+  $result = pupe_query($query);
+  $pankkiyhteysrow = mysql_fetch_assoc($result);
+
   echo "<br>";
 
   if (count($tiliote_references) > 0) {
@@ -97,12 +105,23 @@ if ($tee == "hae_aineistot") {
   }
 
   if (count($factoring_viite_references) > 0) {
-    $params = array(
-      "file_type"             => "FINRREFPL",
-      "viitteet"              => $factoring_viite_references,
-      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
-      "pankkiyhteys_salasana" => $salasana
-    );
+
+    if ($pankkiyhteysrow['pankki'] == 'DABAFIHH') {
+      $params = array(
+        "file_type"             => "VIPN",
+        "viitteet"              => $factoring_viite_references,
+        "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+        "pankkiyhteys_salasana" => $salasana
+      );
+    }
+    else {
+      $params = array(
+        "file_type"             => "FINRREFPL",
+        "viitteet"              => $factoring_viite_references,
+        "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+        "pankkiyhteys_salasana" => $salasana
+      );
+    }
 
     $tiedostot = sepa_download_files($params);
 

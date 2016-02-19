@@ -510,7 +510,7 @@ if (!function_exists('alku_lahete')) {
           and $GLOBALS['eta_yhtio'] != ''
           and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
 
-        if ($yhtiorow['alv_kasittely'] == '' or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+        if (($laskurow['alv'] > 0 and $yhtiorow['alv_kasittely'] == '') or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
           $pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli).".", $thispage, $boldi);
         }
         else {

@@ -65,12 +65,14 @@ class PrestaSpecificPrices extends PrestaClient {
       $xml->specific_price->from_quantity = $specific_price['minkpl'];
     }
 
+    $currency_id = empty($specific_price['valkoodi']) ? 0 : $this->get_currency_id($specific_price['valkoodi']);
+
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = 0;
     $xml->specific_price->id_shop = $this->shop['id'];
     $xml->specific_price->id_cart = 0;
-    $xml->specific_price->id_currency = $this->get_currency_id($specific_price['valkoodi']);
+    $xml->specific_price->id_currency = $currency_id;
     $xml->specific_price->id_country = 0;
 
     // price or percentage
@@ -127,6 +129,11 @@ class PrestaSpecificPrices extends PrestaClient {
 
           if (empty($price['hinta']) and empty($price['alennus'])) {
             $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennus sekä hinta puuttuu");
+            continue;
+          }
+
+          if (!empty($price['hinta']) and empty($price['valkoodi'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska hinnalla {$price['hinta']} ei ole valuuttaa!");
             continue;
           }
 
@@ -229,6 +236,11 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   private function get_currency_id($code) {
+    if (empty($code) or !isset($this->currency_codes[$code])) {
+      // zero means "all currencies"
+      return 0;
+    }
+
     $value = $this->currency_codes[$code];
 
     if (empty($value)) {

@@ -231,7 +231,7 @@ function hae_kaikki_tuotteet() {
 
   // Haetaan kaikki siirrettävät tuotteet, tämä on poistettujen dellausta varten
   // query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
-  $query = "SELECT tuote.tuoteno
+  $query = "SELECT tuote.tuoteno, tuote.ei_saldoa
             FROM tuote
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
@@ -242,27 +242,33 @@ function hae_kaikki_tuotteet() {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    // Katsotaan onko tämä isätuote
-    $query = "SELECT tunnus
-              FROM tuoteperhe
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND isatuoteno = '{$tuoteno}'
-              AND tyyppi = 'P'
-              LIMIT 1";
-    $tr_result = pupe_query($query);
-
-    if (mysql_num_rows($tr_result) == 1) {
-      // isätuote
-      $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI');
-      $myytavissa = 0;
-
-      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
-        $myytavissa += $isa_saldo;
-      }
+    if ($row['ei_saldoa'] != '') {
+      // saldottomille tuoteteilla null, jotta presta tietää olla lisäämättä tätä saldoa
+      $myytavissa = null;
     }
     else {
-      // normituote
-      list(, , $myytavissa) = saldo_myytavissa($tuoteno);
+      // Katsotaan onko tämä isätuote
+      $query = "SELECT tunnus
+                FROM tuoteperhe
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND isatuoteno = '{$tuoteno}'
+                AND tyyppi = 'P'
+                LIMIT 1";
+      $tr_result = pupe_query($query);
+
+      if (mysql_num_rows($tr_result) == 1) {
+        // isätuote
+        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI');
+        $myytavissa = 0;
+
+        foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+          $myytavissa += $isa_saldo;
+        }
+      }
+      else {
+        // normituote
+        list(, , $myytavissa) = saldo_myytavissa($tuoteno);
+      }
     }
 
     // tuoteno avaimena, saldo arvona

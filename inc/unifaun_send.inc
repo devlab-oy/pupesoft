@@ -111,9 +111,10 @@ class Unifaun {
                  AND otunnus   = '{$this->postirow['tunnus']}'
                  AND noutopisteen_tunnus != ''";
     $ll_res = pupe_query($ll_query);
-    $ll_row = mysql_fetch_assoc($ll_res);
 
-    $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
+    if ($ll_row = mysql_fetch_assoc($ll_res)) {
+      $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
+    }
 
     // jos varastolle on annettu joku osoite, käytetään sitä
     if ($postirow_varasto["nimi"] != "") {
@@ -343,7 +344,7 @@ class Unifaun {
 
     $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
-    if (isset($this->postirow["noutopisteen_tunnus"]) and $this->postirow["noutopisteen_tunnus"] != '') {
+    if (!empty($this->postirow["noutopisteen_tunnus"])) {
       // Toimituspisteen receiver segmentti
       //<receiver rcvid="AR"> 
       $ar_receiver = $xml->addChild('receiver');
@@ -594,7 +595,7 @@ class Unifaun {
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
     //$uni_shi_val->addAttribute('n', "legalto");
 
-    if (isset($this->postirow["noutopisteen_tunnus"]) and $this->postirow["noutopisteen_tunnus"] != '') {
+    if (!empty($this->postirow["noutopisteen_tunnus"])) {
       //<val n="agentto">AR</val> # definaa noutopisteen toimitustietosegmentin
       $ar_shi_val = $uni_shipment->addChild('val', utf8_encode("AR")); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
       $ar_shi_val->addAttribute('n', "agentto");

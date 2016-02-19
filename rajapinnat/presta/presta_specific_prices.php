@@ -132,6 +132,11 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
+          if (!empty($price['hinta']) and empty($price['valkoodi'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska hinnalla {$price['hinta']} ei ole valuuttaa!");
+            continue;
+          }
+
           $this->create($price);
 
           $message = "Lisätty tuotteelle '{$price['tuoteno']}'";

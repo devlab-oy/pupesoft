@@ -62,7 +62,7 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->reference = utf8_encode($product['tuoteno']);
     $xml->product->supplier_reference = utf8_encode($product['tuoteno']);
-    $xml->product->ean13 = utf8_encode($product['ean']);
+    $xml->product->ean13 = is_numeric($product['ean']) ? $product['ean'] : '';
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
@@ -109,7 +109,7 @@ class PrestaProducts extends PrestaClient {
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
-      $xml->product->name->language[$i]              = utf8_encode($product['nimi']);
+      $xml->product->name->language[$i]              = empty($product['nimi']) ? '-' : utf8_encode($product['nimi']);
       $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
       $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
@@ -479,6 +479,12 @@ class PrestaProducts extends PrestaClient {
 
       $current++;
       $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$stock}");
+
+      // could not find product or
+      // this is a virtual product, no stock management
+      if ($product_id === false or $stock === null) {
+        continue;
+      }
 
       $this->presta_stock->create_or_update($product_id, $stock);
     }

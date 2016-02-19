@@ -157,11 +157,14 @@ function presta_specific_prices() {
   //
   // Ei tarvitse olla tässä left joinia, koska ensimmäisessä queryssä on jo.
   // Joten meillä on kaikki tuotteet arrayssä ja presta hanskaa homman
-  $query = "SELECT distinct tuoteno, valkoodi, maa
-            FROM hinnasto
-            WHERE hinnasto.yhtio = '$kukarow[yhtio]'
-            AND hinnasto.hinta > 0
-            AND hinnasto.laji in ('', 'N', 'E')";
+  $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
+            FROM tuote
+            INNER JOIN hinnasto ON (hinnasto.yhtio = tuote.yhtio
+              AND hinnasto.tuoteno = tuote.tuoteno
+              AND hinnasto.laji in ('', 'N', 'E')
+              AND hinnasto.hinta > 0)
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$tuoterajaus}";
   $result = pupe_query($query);
 
   while ($hintavalrow = mysql_fetch_assoc($result)) {

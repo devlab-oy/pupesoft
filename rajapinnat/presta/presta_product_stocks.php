@@ -29,6 +29,9 @@ class PrestaProductStocks extends PrestaClient {
       $xml = $existing_stock;
     }
 
+    // we need to floor quantity, as Presta does not allow decimal numbers
+    $quantity = is_numeric($stock['saldo']) ? floor($stock['saldo']) : 0;
+
     $xml->stock_available->quantity = $stock['saldo'];
     $xml->stock_available->id_product = $stock['product_id'];
 

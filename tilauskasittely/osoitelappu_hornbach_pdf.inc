@@ -242,7 +242,7 @@ else {
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 
-    $pdf->draw_text(mm_pt(22), mm_pt(175), t("Mistä - Från - From").":",              $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(22), mm_pt(175), t("Mistä").":",              $firstpage, $otsik);
 
     // toimittajanumero
     $pdf->draw_text(mm_pt(56), mm_pt(173), $toitarow['toimittajanumero'],               $firstpage, $iso);
@@ -271,7 +271,7 @@ else {
     
     $pdf->draw_text(mm_pt(100), mm_pt(135), $_toimaika,                  $firstpage, $norm);
 
-    $pdf->draw_text(mm_pt(22),  mm_pt(140), t("Minne - Till - To").":",   $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(22),  mm_pt(140), t("Minne").":",   $firstpage, $otsik);
 
     $pdf->draw_text(mm_pt(22),  mm_pt(136), $laskurow['toim_nimi'],       $firstpage, $norm);
     $pdf->draw_text(mm_pt(22),  mm_pt(129), $laskurow['toim_nimitark'],   $firstpage, $huge);

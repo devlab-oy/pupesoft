@@ -54,7 +54,7 @@ if (isset($oslapp) and $oslapp == "-88") {
         <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
         <input type='hidden' name='toim' value='OSOITELAPPU'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='submit' value='".t("Osoitelappu").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+        <input type='submit' value='".t("Osoitelappu", $kieli).": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_osoitelappu_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
 }
 else {
 
@@ -190,7 +190,7 @@ else {
       system("rm -f $nimi");
     }
 
-    $pdf->draw_text(mm_pt(22), mm_pt(65), t("Asiakastilaus").":",  $firstpage, $norm);
+    $pdf->draw_text(mm_pt(22), mm_pt(65), t("Asiakastilaus", $kieli).":",  $firstpage, $norm);
     $pdf->draw_text(mm_pt(50), mm_pt(65), "$laskurow[asiakkaan_tilausnumero]{$kirjainlisa}",  $firstpage, $iso);
 
     $pdf->draw_rectangle(mm_pt(179), mm_pt(21.5), mm_pt(31), mm_pt(126.5), $firstpage, $rectparam);
@@ -242,7 +242,7 @@ else {
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 
-    $pdf->draw_text(mm_pt(22), mm_pt(175), t("Mistä").":",              $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(22), mm_pt(175), t("Mistä", $kieli).":",              $firstpage, $otsik);
 
     // toimittajanumero
     $pdf->draw_text(mm_pt(56), mm_pt(173), $toitarow['toimittajanumero'],               $firstpage, $iso);
@@ -256,11 +256,11 @@ else {
       $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']), $firstpage, $pien);
     }
 
-    $pdf->draw_text(mm_pt(100), mm_pt(175), t("Lähetyspvm").":",      $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(100), mm_pt(175), t("Lähetyspvm", $kieli).":",      $firstpage, $otsik);
     $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,           $firstpage, $norm);
 
-    $pdf->draw_text(mm_pt(22), mm_pt(157), t("Terminaalitoimitus"),  $firstpage, $norm);
-    $pdf->draw_text(mm_pt(100), mm_pt(140), t("Toimituspvm").":",    $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(22), mm_pt(157), t("Terminaalitoimitus", $kieli),  $firstpage, $norm);
+    $pdf->draw_text(mm_pt(100), mm_pt(140), t("Toimituspvm", $kieli).":",    $firstpage, $otsik);
     
     if ((int) str_replace("-", "", $laskurow['toimaika']) < date("Ymd")) {
       $_toimaika = date("d.m.Y");
@@ -271,7 +271,7 @@ else {
     
     $pdf->draw_text(mm_pt(100), mm_pt(135), $_toimaika,                  $firstpage, $norm);
 
-    $pdf->draw_text(mm_pt(22),  mm_pt(140), t("Minne").":",   $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(22),  mm_pt(140), t("Minne", $kieli).":",   $firstpage, $otsik);
 
     $pdf->draw_text(mm_pt(22),  mm_pt(136), $laskurow['toim_nimi'],       $firstpage, $norm);
     $pdf->draw_text(mm_pt(22),  mm_pt(129), $laskurow['toim_nimitark'],   $firstpage, $huge);

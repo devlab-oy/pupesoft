@@ -200,6 +200,20 @@ class PrestaSalesOrders extends PrestaClient {
       $rows = array($rows);
     }
 
+    // Add shipping costs
+    $shipping_cost = $order['total_shipping_tax_excl']; // veroton hinta
+    $shipping_product = $this->yhtiorow['rahti_tuotenumero'];
+
+    if ($shipping_cost > 0 and isset($shipping_product)) {
+      // "emulate" order row
+      $rows[] = array(
+        'product_name' => 'Rahti',
+        'product_quantity' => 1,
+        'product_reference' => $shipping_product,
+        'unit_price_tax_excl' => $shipping_cost,
+      );
+    }
+
     $row_number = 0;
 
     foreach ($rows as $row) {

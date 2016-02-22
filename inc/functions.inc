@@ -32263,7 +32263,19 @@ if (!function_exists('generoi_hinnastot')) {
     $valuu_result = pupe_query($query);
 
     while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $query = "SELECT hinta
+                FROM hinnasto
+                WHERE tuoteno = '{$tuote["tuoteno"]}'
+                AND yhtio = '{$kukarow["yhtio"]}'
+                AND valkoodi = '{$valuu["nimi"]}'
+                ORDER BY alkupvm DESC
+                LIMIT 1";
+      $result = pupe_query($query);
+      $hinnastorow = mysql_fetch_assoc($result);
+
       $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
+
+      if ($hinnastorow["hinta"] == $hinta) continue;
 
       $query = "INSERT INTO hinnasto SET
                 alkupvm    = NOW(),

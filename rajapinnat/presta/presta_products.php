@@ -81,15 +81,18 @@ class PrestaProducts extends PrestaClient {
       $stock = $this->pupesoft_all_products[$product['tuoteno']];
 
       if (empty($product['nakyvyys'])) {
-        $this->logger->log("Tuote '{$product['tuoteno']}' n‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
+        $this->logger->log("N‰kyvyys tyhj‰‰, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
         $active = 0;
       }
       elseif ($product['status'] == 'P' and $stock <= 0) {
-        $this->logger->log("Tuote '{$product['tuoteno']}' poistettu ja ei saldoa, ei n‰ytet‰ verkkokaupassa.");
+        $this->logger->log("Status P ja saldo <= 0, ei n‰ytet‰ verkkokaupassa.");
         $visibility = 'none';
         $active = 0;
       }
+    }
+    else {
+      $this->logger->log("Tuote aktiivinen ja n‰ytet‰‰n verkkokaupassa.");
     }
 
     $xml->product->active = $active;
@@ -122,7 +125,7 @@ class PrestaProducts extends PrestaClient {
 
       // if we don't have the language in presta
       if ($tr_id === null) {
-        $this->logger->log("VIRHE! Tuote '{$product['tuoteno']}', kielt‰ {$translation['kieli']} ei lˆydy Prestasta.");
+        $this->logger->log("VIRHE! kielt‰ {$translation['kieli']} ei lˆydy Prestasta!");
         continue;
       }
 
@@ -142,7 +145,7 @@ class PrestaProducts extends PrestaClient {
           break;
       }
 
-      $this->logger->log("K‰‰nnˆs {$translation['kieli']} tuotteelle '{$product['tuoteno']}', {$translation['kentta']}: $value");
+      $this->logger->log("K‰‰nnˆs {$translation['kieli']}, {$translation['kentta']}: $value");
     }
 
     if ($this->_category_sync) {
@@ -173,7 +176,7 @@ class PrestaProducts extends PrestaClient {
         $_attribute = $parameter['nimi'];
         $_value = utf8_encode($product[$_key]);
 
-        $this->logger->log("Poikkeava arvo tuotteelle '{$product['tuoteno']}' product.{$_attribute} -kentt‰‰n. Asetetaan {$_key} kent‰n arvo {$_value}");
+        $this->logger->log("Poikkeava arvo product.{$_attribute} -kentt‰‰n. Asetetaan {$_key} kent‰n arvo {$_value}");
 
         $xml->product->$_attribute = $_value;
       }
@@ -225,7 +228,7 @@ class PrestaProducts extends PrestaClient {
 
     // if it's a pack, update parent price
     if ($product_type == 'pack') {
-      $this->logger->log("Laskettiin tuoteperheen is‰tuotteelle '{$product['tuoteno']}' hinta {$parent_price}");
+      $this->logger->log("Asetettiin tuottelle hinta hinta {$parent_price}, joka laskettiin lapsituotteiden hinnoista.");
       $xml->product->price = $parent_price;
     }
 
@@ -312,7 +315,7 @@ class PrestaProducts extends PrestaClient {
     $category->addChild('id');
     $category->id = $category_id;
 
-    $this->logger->log("Lis‰ttiin tuotteelle {$xml->product->reference} kategoria {$category_id}");
+    $this->logger->log("Liitettiin tuote kategoriaan {$category_id}");
 
     return $category_id;
   }
@@ -325,7 +328,7 @@ class PrestaProducts extends PrestaClient {
     $product_id = array_search($sku, $this->all_skus());
 
     if ($product_id === false) {
-      $this->logger->log("VIRHE! Tuotteen {$xml->product->reference} lapsituotetta {$sku} ei lˆytynyt!");
+      $this->logger->log("VIRHE! Lapsituotetta {$sku} ei lˆytynyt!");
       return false;
     }
 
@@ -335,7 +338,7 @@ class PrestaProducts extends PrestaClient {
     $product->addChild('quantity');
     $product->quantity = $qty;
 
-    $this->logger->log("Lis‰ttiin tuotteelle {$xml->product->reference} lapsituote {$sku} ({$product_id})");
+    $this->logger->log("Lis‰ttiin lapsituote {$sku} ({$product_id})");
 
     // return the id of the child product
     return $product_id;
@@ -347,7 +350,7 @@ class PrestaProducts extends PrestaClient {
    * @return boolean
    */
   public function sync_products(array $products) {
-    $this->logger->log('---------Start product sync---------');
+    $this->logger->log('---------Aloitetaan tuotteiden siirto---------');
 
     $row_counter = 0;
     $total_counter = count($products);
@@ -358,7 +361,7 @@ class PrestaProducts extends PrestaClient {
 
       foreach ($products as $product) {
         $row_counter++;
-        $this->logger->log("[$row_counter/$total_counter]");
+        $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
 
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
@@ -373,6 +376,8 @@ class PrestaProducts extends PrestaClient {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
         }
+
+        $this->logger->log("Tuote {$product['tuoteno']} k‰sitelty.\n");
       }
     }
     catch (Exception $e) {
@@ -384,7 +389,7 @@ class PrestaProducts extends PrestaClient {
     $this->delete_all_unnecessary_products();
     $this->update_stock();
 
-    $this->logger->log('---------End product sync---------');
+    $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
   }
 
@@ -393,7 +398,7 @@ class PrestaProducts extends PrestaClient {
       return $this->presta_all_products;
     }
 
-    $this->logger->log('Fetching all SKUs');
+    $this->logger->log('Haetaan kaikki tuotteet Prestashopista');
 
     $existing_products = $this->all(array('id', 'reference'));
     $existing_products = array_column($existing_products, 'reference', 'id');
@@ -468,7 +473,7 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function update_stock() {
-    $this->logger->log('---------Start stock sync---------');
+    $this->logger->log('---------Aloitetaan saldojen p‰ivitys---------');
 
     // set all products null, so we'll fetch all_skus again from presta
     $this->presta_all_products = null;
@@ -492,7 +497,7 @@ class PrestaProducts extends PrestaClient {
       $this->presta_stock->create_or_update($product_id, $stock);
     }
 
-    $this->logger->log('---------End stock sync---------');
+    $this->logger->log('---------Saldojen p‰ivitys valmis---------');
   }
 
   public function set_removable_fields($fields) {

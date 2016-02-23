@@ -66,6 +66,8 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
+    $xml->product->unity = $product['yksikko'];
+    $xml->product->unit_price_ratio = 1; // unit price is same as price
 
     // by default product is visible everywhere, and active
     // visibility values: both, catalog, search, none
@@ -102,7 +104,6 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->available_for_order = 1;
     $xml->product->show_price = 1;
-    $xml->product->unit_price = 1;
 
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
@@ -144,7 +145,7 @@ class PrestaProducts extends PrestaClient {
       $this->logger->log("Käännös {$translation['kieli']} tuotteelle '{$product['tuoteno']}', {$translation['kentta']}: $value");
     }
 
-    if ($this->_category_sync and !empty($product['tuotepuun_tunnukset'])) {
+    if ($this->_category_sync) {
       // First, remove all categories from XML
       $remove_node = $xml->product->associations->categories;
       $dom_node = dom_import_simplexml($remove_node);
@@ -152,6 +153,8 @@ class PrestaProducts extends PrestaClient {
 
       // Then add them back
       $xml->product->associations->addChild('categories');
+
+      $category_id = '';
 
       foreach ($product['tuotepuun_tunnukset'] as $pupesoft_category) {
         // Default category id is set inside loop, so the last category is set as default

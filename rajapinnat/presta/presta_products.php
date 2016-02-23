@@ -49,13 +49,14 @@ class PrestaProducts extends PrestaClient {
    * @return \SimpleXMLElement
    */
   protected function generate_xml($product, SimpleXMLElement $existing_product = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
     if (!is_null($existing_product)) {
       $xml = $existing_product;
       unset($xml->product->position_in_category);
       unset($xml->product->manufacturer_name);
       unset($xml->product->quantity);
+    }
+    else {
+      $xml = new SimpleXMLElement($this->schema->asXML());
     }
 
     unset($xml->product->position_in_category);
@@ -67,6 +68,9 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
     $xml->product->unity = $product['yksikko'];
+
+    // TODO: unit_price_ratio does nothing. Presta just ignores this field and we cannot set unit price.
+    // find another way to se unit price? or do wait for presta to fix?
     $xml->product->unit_price_ratio = 1; // unit price is same as price
 
     // by default product is visible everywhere, and active

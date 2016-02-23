@@ -7,9 +7,6 @@ require_once 'rajapinnat/presta/presta_product_features.php';
 require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
-
-  const RESOURCE = 'products';
-
   private $_category_sync = true;
   private $_dynamic_fields = array();
   private $_removable_fields = array();
@@ -39,7 +36,7 @@ class PrestaProducts extends PrestaClient {
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'products';
   }
 
   /**
@@ -49,14 +46,15 @@ class PrestaProducts extends PrestaClient {
    * @return \SimpleXMLElement
    */
   protected function generate_xml($product, SimpleXMLElement $existing_product = null) {
-    if (!is_null($existing_product)) {
+    if (is_null($existing_product)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_product;
+
       unset($xml->product->position_in_category);
       unset($xml->product->manufacturer_name);
       unset($xml->product->quantity);
-    }
-    else {
-      $xml = new SimpleXMLElement($this->schema->asXML());
     }
 
     unset($xml->product->position_in_category);
@@ -360,7 +358,6 @@ class PrestaProducts extends PrestaClient {
     $total_counter = count($products);
 
     try {
-      $this->schema = $this->get_empty_schema();
       $existing_products = $this->all_skus();
 
       foreach ($products as $product) {

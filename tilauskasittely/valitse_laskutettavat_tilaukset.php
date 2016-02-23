@@ -566,6 +566,12 @@ if ($tee == "VALITSE") {
       }
 
       echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
+      
+      // jos veroton on nolla, niin kaikki on aina nollaa
+      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0) {
+        $row['summa'] = 0.00;
+      }
+      
       echo "<td align='right'>$row[arvo]<br>$row[summa]</td>";
 
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {

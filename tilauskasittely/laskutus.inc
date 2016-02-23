@@ -1109,6 +1109,19 @@ else {
     $pyorerotus_valuutassa = $pyorerotus;
   }
 
+  // jos veroton on nolla, niin kaikki on aina nollaa
+  if ($yhtiorow["alv_kasittely"] != '' and $arvosumma == 0) {
+    $arvosumma = 0;
+    $arvosumma_valuutassa = 0;
+    $katesumma = 0;
+    $loppusumma = 0;
+    $loppusumma_valuutassa = 0;
+    $pyorerotus = 0;
+    $pyorerotus_valuutassa = 0;
+    $kassa_loppusumma = 0;
+    $kassa_loppusumma_valuutassa = 0;
+  }
+
   $query = "UPDATE lasku
             SET alatila       = 'V',
             arvo                 = '$arvosumma',

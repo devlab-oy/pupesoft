@@ -2544,6 +2544,7 @@ while ($tietue = fgets($fd)) {
     $yhteyshenkilon_puhelin       = "";
     $ovt_tunnus                   = "";
     $ovt_tunnuswhere              = "";
+    $noutopisteen_tunnus          = "";
     break;
   }
 }

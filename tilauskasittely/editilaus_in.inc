@@ -233,6 +233,7 @@ $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
 $ovt_tunnus                   = "";
 $ovt_tunnuswhere              = "";
+$noutopisteen_tunnus          = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -1006,6 +1007,11 @@ while ($tietue = fgets($fd)) {
     $yhteyshenkilon_puhelin = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_TOIMITUS_NOUTOPISTE_TUNNUS' :
+    // noutopisteen tunnus unifaunia varten
+    $noutopisteen_tunnus = trim($tieto);
+    break;
+
   case 'OSTOTIL.OT_MAKSETTU' :
     // Jos Magenton tilaus ja osutaan erikoiskauppakäsittelyyn
     if ($edi_tyyppi == 'magento' and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
@@ -1649,6 +1655,7 @@ while ($tietue = fgets($fd)) {
                 laskutus_postitp  = '$arow[laskutus_postitp]',
                 laskutus_postino  = '$arow[laskutus_postino]',
                 laskutus_maa      = '$arow[laskutus_maa]',
+                noutopisteen_tunnus = '{$noutopisteen_tunnus}',
                 laatija           = '$edi_laatija',
                 luontiaika        = now(),
                 yhtio             = '$kukarow[yhtio]',
@@ -2526,6 +2533,7 @@ while ($tietue = fgets($fd)) {
     $yhteyshenkilon_puhelin       = "";
     $ovt_tunnus                   = "";
     $ovt_tunnuswhere              = "";
+    $noutopisteen_tunnus          = "";
     break;
   }
 }

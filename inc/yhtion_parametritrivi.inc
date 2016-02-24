@@ -3106,7 +3106,7 @@ if ($fieldname == "livetuotehaku_hakutapa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('E' => '', 'F' => '', 'G' => '', 'H' => '', 'I' => );
+  $sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('E' => '', 'F' => '', 'G' => '', 'H' => '', 'I' => '');
 
   $ulos .= "<option value = ''>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'E' {$sel['E']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";

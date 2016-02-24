@@ -300,7 +300,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
              ORDER BY jarjestys, selite";
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
-  
+
   if ((int) $tulostin > 0 and $kollityht > 0) {
     $query = "SELECT komento
               from kirjoittimet

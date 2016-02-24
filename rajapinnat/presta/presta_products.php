@@ -244,7 +244,12 @@ class PrestaProducts extends PrestaClient {
 
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
-      $value = $product[$field_name];
+      $value = trim($product[$field_name]);
+
+      // if we don't have a value, don't add anything.
+      if (empty($value)) {
+        continue;
+      }
 
       $value_id = $this->presta_product_feature_values->value_id_by_value($value);
 

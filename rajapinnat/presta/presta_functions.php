@@ -193,6 +193,29 @@ function presta_specific_prices() {
     }
   }
 
+  // TODO karsea kovakoodaus. pit‰‰ keksi‰ t‰h‰n dynaamisempi vaihtoehto.
+  if ($kukarow['yhtio'] == 'audio') {
+    // Kaikille tuotteille halutaan tuotteen myyntihinta Prestan Specific Price -listaan
+    // Prestan asiakasryhm‰lle 3
+    $query = "SELECT
+              tuote.tuoteno,
+              '0000-00-00' as alkupvm,
+              '0000-00-00' as loppupvm,
+              '' as minkpl,
+              tuote.myyntihinta as hinta,
+              '{$yhtiorow['valkoodi']}' as valkoodi,
+              '3' AS presta_customergroup_id,
+              '' AS presta_customer_id
+              FROM tuote
+              WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              {$tuoterajaus}";
+    $result = pupe_query($query);
+
+    while ($asiakashinta = mysql_fetch_assoc($result)) {
+      $specific_prices[] = $asiakashinta;
+    }
+  }
+
   return $specific_prices;
 }
 

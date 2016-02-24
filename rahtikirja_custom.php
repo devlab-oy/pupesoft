@@ -299,6 +299,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
 
+  // Jos 'tyhj‰ rahtikirja' -tiedot l‰hetet‰‰n edin‰ postiin, 
+  // sit‰ ei hyv‰ksyt‰ postin p‰‰ss‰ jos ytunnus puuttuu
   if ($kukarow["yhtio"] == 'allr' and empty($osoitelappurow["ytunnus"]) 
     and $toitarow["rahtikirja"] == 'rahtikirja_postitarra_pdf.inc') {
       $osoitelappurow["ytunnus"] = '999999';

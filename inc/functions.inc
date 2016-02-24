@@ -9087,7 +9087,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
 
-        if ($yhtiorow['livetuotehaku_hakutapa'] == "H") {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('H', 'I'))) {
           $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
           $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
           $muuta_haku_query .= " and tuote.muuta like ('%{$haku}%') ";
@@ -9195,7 +9195,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I'))) {
 
           $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
 
@@ -9244,7 +9244,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 

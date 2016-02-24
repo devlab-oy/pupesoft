@@ -3113,6 +3113,7 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'F' {$sel['F']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
   $ulos .= "<option value = 'G' {$sel['G']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'H' {$sel['H']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'I' {$sel['I']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

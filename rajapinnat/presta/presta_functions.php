@@ -216,6 +216,10 @@ function presta_specific_prices() {
     }
   }
 
+  // sortataan array tuotej‰rjestykseen, silloin tuote ei ole ikin‰ kauaa ilman alennuksia
+  // rajapinta dellaa aina aluksi tuotteen alennukset, sen j‰lkeen lis‰‰ kaikki takaisin
+  sort_array_of_arrays($specific_prices, 'tuoteno');
+
   return $specific_prices;
 }
 

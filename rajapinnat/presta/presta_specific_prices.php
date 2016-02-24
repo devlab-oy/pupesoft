@@ -4,14 +4,11 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaSpecificPrices extends PrestaClient {
-
-  const RESOURCE = 'specific_prices';
-
-  private $shop;
-  private $product_ids;
   private $all_prices = null;
   private $already_removed_product = array();
   private $currency_codes = null;
+  private $product_ids;
+  private $shop;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -21,7 +18,7 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'specific_prices';
   }
 
   /**

@@ -157,10 +157,10 @@ class PrestaSpecificPrices extends PrestaClient {
           if (isset($price['presta_customergroup_id'])) {
             $message .= " asiakasryhma '{$price['presta_customergroup_id']}'";
           }
-          if (isset($price['alkupvm'])) {
+          if (isset($price['alkupvm']) and $price['alkupvm'] != '0000-00-00') {
             $message .= " alkupvm '{$price['alkupvm']}'";
           }
-          if (isset($price['loppupvm'])) {
+          if (isset($price['loppupvm']) and $price['loppupvm'] != '0000-00-00') {
             $message .= " loppupvm '{$price['loppupvm']}'";
           }
 

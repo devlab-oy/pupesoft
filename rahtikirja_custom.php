@@ -201,6 +201,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       }
     }
     else {
+      $osoitelappurow["ytunnus"]  = '';
       $osoitelappurow["nimi"]     = $tnimi;
       $osoitelappurow["nimitark"] = $tnimitark;
       $osoitelappurow["osoite"]   = $tosoite;
@@ -291,8 +292,6 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $osoitelappurow['valkoodi'] = $row['valkoodi'];
   }
 
-  $rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
-
   $query  = "SELECT *
              FROM toimitustapa
              WHERE yhtio = '{$GLOBALS['kukarow']['yhtio']}'
@@ -300,6 +299,13 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
              ORDER BY jarjestys, selite";
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
+
+  if ($kukarow["yhtio"] == 'allr' and empty($osoitelappurow["ytunnus"]) 
+    and $toitarow["rahtikirja"] == 'rahtikirja_postitarra_pdf.inc') {
+      $osoitelappurow["ytunnus"] = '999999';
+  }
+  
+  $rahtikirjanrostring = mysql_real_escape_string(serialize($osoitelappurow));
 
   if ((int) $tulostin > 0 and $kollityht > 0) {
     $query = "SELECT komento

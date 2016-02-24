@@ -201,7 +201,6 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       }
     }
     else {
-      $osoitelappurow["ytunnus"]  = '';
       $osoitelappurow["nimi"]     = $tnimi;
       $osoitelappurow["nimitark"] = $tnimitark;
       $osoitelappurow["osoite"]   = $tosoite;

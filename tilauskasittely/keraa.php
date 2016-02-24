@@ -2283,6 +2283,9 @@ if ($tee == 'P') {
             if ($oslarow['osoitelappu'] == 'intrade') {
               require 'osoitelappu_intrade_pdf.inc';
             }
+            elseif ($oslarow['osoitelappu'] == 'hornbach') {
+              require 'osoitelappu_hornbach_pdf.inc';
+            }
             elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K' and $toim == "") {
 
               $query = "SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro

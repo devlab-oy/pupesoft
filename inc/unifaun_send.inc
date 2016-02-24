@@ -104,18 +104,6 @@ class Unifaun {
     $tempr = pupe_query($query);
     $postirow_varasto = mysql_fetch_assoc($tempr);
 
-    // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
-    $ll_query = "SELECT noutopisteen_tunnus
-                 FROM laskun_lisatiedot
-                 WHERE yhtio  = '{$this->kukarow['yhtio']}'
-                 AND otunnus   = '{$this->postirow['tunnus']}'
-                 AND noutopisteen_tunnus != ''";
-    $ll_res = pupe_query($ll_query);
-
-    if ($ll_row = mysql_fetch_assoc($ll_res)) {
-      $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
-    }
-
     // jos varastolle on annettu joku osoite, käytetään sitä
     if ($postirow_varasto["nimi"] != "") {
       $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
@@ -344,33 +332,6 @@ class Unifaun {
 
     $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
-    if (!empty($this->postirow["noutopisteen_tunnus"])) {
-      // Toimituspisteen receiver segmentti
-      //<receiver rcvid="AR"> 
-      $ar_receiver = $xml->addChild('receiver');
-      $ar_receiver->addAttribute('rcvid', utf8_encode('AR'));
-      //<val n="id4user">IDXXX</val>
-      $ar_id = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->postirow['noutopisteen_tunnus']));
-      //<val n="city">XXX</val>
-      $ar_city = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_postitp']));
-      //<val n="address1">XXX</val> 
-      $ar_address = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_osoite']));
-      //<val n="country">FI</val> 
-      $ar_country = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode("FI"));
-      //<val n="phone"></val> 
-      //<val n="address2"></val> 
-      //<val n="name">XXX</val>
-      $ar_name = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_nimi']));
-      //<val n="zipcode">XXX</val>
-      $ar_zipcode = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow["toim_postino"]));
-      //</receiver>
-    }
     // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
     if ($this->toitarow['merahti'] == '') {
 
@@ -595,11 +556,8 @@ class Unifaun {
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
     //$uni_shi_val->addAttribute('n', "legalto");
 
-    if (!empty($this->postirow["noutopisteen_tunnus"])) {
-      //<val n="agentto">AR</val> # definaa noutopisteen toimitustietosegmentin
-      $ar_shi_val = $uni_shipment->addChild('val', utf8_encode("AR")); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
-      $ar_shi_val->addAttribute('n', "agentto");
-    }
+    //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+    //$uni_shi_val->addAttribute('n', "agentto");
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Exporter
     //$uni_shi_val->addAttribute('n', "customsfrom");

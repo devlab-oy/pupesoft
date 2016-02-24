@@ -149,15 +149,6 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:".$order['shipping_address']['country_id']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:".$order['shipping_address']['telephone']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:".$order['customer_email']."\n";
-
-    $noutopistetunnus = '';
-    $tunnisteosa = 'matkahuoltoNearbyParcel_';
-    // Jos shipping_method sis‰lt‰‰ tunnisteosan ja sen per‰ss‰ on numero niin otetaan talteen
-    if (!empty($order['shipping_method']) and strpos($order['shipping_method'], $tunnisteosa) !== false) {
-       $tunnistekoodi = str_replace($tunnisteosa, '', $order['shipping_method']);
-       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
-    }
-    $edi_order .= "OSTOTIL.OT_TOIMITUS_NOUTOPISTE_TUNNUS:".$noutopistetunnus."\n";
     $edi_order .= "*RE OSTOTIL\n";
 
     $i = 1;

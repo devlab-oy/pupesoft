@@ -4,14 +4,11 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaSpecificPrices extends PrestaClient {
-
-  const RESOURCE = 'specific_prices';
-
-  private $shop;
-  private $product_ids;
   private $all_prices = null;
   private $already_removed_product = array();
   private $currency_codes = null;
+  private $product_ids;
+  private $shop;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -21,7 +18,7 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'specific_prices';
   }
 
   /**
@@ -32,9 +29,10 @@ class PrestaSpecificPrices extends PrestaClient {
    */
 
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_specific_price)) {
+    if (is_null($existing_specific_price)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_specific_price;
     }
 
@@ -101,8 +99,6 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->logger->log('---------Start specific price sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema();
-
       $presta_shop = new PrestaShops($this->url(), $this->api_key());
       $this->shop = $presta_shop->first_shop();
 

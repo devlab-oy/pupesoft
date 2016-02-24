@@ -24,9 +24,10 @@ class PrestaCustomers extends PrestaClient {
    */
 
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_customer)) {
+    if (is_null($existing_customer)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_customer;
     }
 
@@ -84,7 +85,6 @@ class PrestaCustomers extends PrestaClient {
     $this->logger->log('---------Start customer sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema();
       $existing_customers = $this->all(array('id'));
       $existing_customers = array_column($existing_customers, 'id');
 

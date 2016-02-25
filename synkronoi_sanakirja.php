@@ -29,6 +29,14 @@ $kieliarray = array("se", "en", "de", "no", "dk", "ee");
 
 if ($tee == "TEE" or $tee == "UPDATE") {
 
+  function sanakirja_echo($ekotus) {
+    GLOBAL $ei_ruudulle;
+
+    if (empty($ei_ruudulle)) {
+      echo "$ekotus";
+    }
+  }
+
   $ch  = curl_init();
   curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssisanakirja.sql");
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -61,30 +69,30 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
     if (isset($sync_otsikot["fi"])) {
 
-      echo "<form method='post'>";
-      echo "<input type='hidden' name='tee' value='UPDATE'>";
-      echo "<input type='submit' value='".t("Synkronoi")."'>";
-      echo "</form>";
-      echo "<br><br>";
+      sanakirja_echo("<form method='post'>");
+      sanakirja_echo("<input type='hidden' name='tee' value='UPDATE'>");
+      sanakirja_echo("<input type='submit' value='".t("Synkronoi")."'>");
+      sanakirja_echo("</form>");
+      sanakirja_echo("<br><br>");
 
-      echo "<table>";
-      echo "<tr><th>".t("Kysytty")."</td>";
-      echo "<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>";
+      sanakirja_echo("<table>");
+      sanakirja_echo("<tr><th>".t("Kysytty")."</td>");
+      sanakirja_echo("<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>");
 
       foreach ($kieliarray as $kieli) {
-        echo "<th>".t("Me")." $kieli</td><th>".t("Ref")." $kieli</td>";
+        sanakirja_echo("<th>".t("Me")." $kieli</td><th>".t("Ref")." $kieli</td>");
       }
 
-      echo "</tr>";
+      sanakirja_echo("</tr>");
 
       $sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
       $sanakirjaresult = pupe_query($sanakirjaquery);
 
       foreach ($sanakirja as $rivi) {
         // luetaan rivi tiedostosta..
-        $poista   = array("'", "\\");
-        $rivi   = str_replace($poista, "", $rivi);
-        $rivi   = explode("\t", trim($rivi));
+        $poista = array("'", "\\");
+        $rivi = str_replace($poista, "", $rivi);
+        $rivi = explode("\t", trim($rivi));
 
         if ($rivi[$sync_otsikot["fi"]] != "") {
 
@@ -99,8 +107,8 @@ if ($tee == "TEE" or $tee == "UPDATE") {
             $sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '$sanakirjarow[fi]'";
             $sanakirjaresult = pupe_query($sanakirjaquery);
 
-            echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
-            echo "<td>".$sanakirjarow["fi"]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+            sanakirja_echo("<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>");
+            sanakirja_echo("<td>".$sanakirjarow["fi"]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>");
 
             foreach ($kieliarray as $kieli) {
 
@@ -133,14 +141,14 @@ if ($tee == "TEE" or $tee == "UPDATE") {
                 }
               }
 
-              echo "<td>$e".$sanakirjarow[$kieli]."$t</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
+              sanakirja_echo("<td>$e".$sanakirjarow[$kieli]."$t</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>");
             }
 
-            echo "</tr>";
+            sanakirja_echo("</tr>");
           }
           else {
 
-            echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
+            sanakirja_echo("<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>");
 
             if ($tee == "UPDATE") {
               $sanakirjaquery  = "INSERT INTO sanakirja SET
@@ -157,21 +165,21 @@ if ($tee == "TEE" or $tee == "UPDATE") {
                                   luontiaika = now()";
               $sanakirjaresult = pupe_query($sanakirjaquery);
 
-              echo "<td>".$rivi[$sync_otsikot["fi"]]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+              sanakirja_echo("<td>".$rivi[$sync_otsikot["fi"]]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>");
 
               foreach ($kieliarray as $kieli) {
-                echo "<td>".$rivi[$sync_otsikot[$kieli]]."</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
+                sanakirja_echo("<td>".$rivi[$sync_otsikot[$kieli]]."</td><td>".$rivi[$sync_otsikot[$kieli]]."</td>");
               }
             }
             else {
-              echo "<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+              sanakirja_echo("<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>");
 
               foreach ($kieliarray as $kieli) {
-                echo "<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot[$kieli]]."</td>";
+                sanakirja_echo("<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot[$kieli]]."</td>");
               }
             }
 
-            echo "</tr>";
+            sanakirja_echo("</tr>");
           }
         }
       }
@@ -185,22 +193,27 @@ if ($tee == "TEE" or $tee == "UPDATE") {
       $sanakirjaresult = pupe_query($sanakirjaquery);
 
       while ($sanakirjarow = mysql_fetch_assoc($sanakirjaresult)) {
-        echo "<tr><td>".$sanakirjarow["kysytty"]."</td>";
-        echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+        sanakirja_echo("<tr><td>".$sanakirjarow["kysytty"]."</td>");
+        sanakirja_echo("<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>");
 
         foreach ($kieliarray as $kieli) {
-          echo "<td>".$sanakirjarow[$kieli]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+          sanakirja_echo("<td>".$sanakirjarow[$kieli]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>");
         }
 
-        echo "</tr>";
+        sanakirja_echo("</tr>");
       }
 
-      echo "</table><br><br>";
+      sanakirja_echo("</table><br><br>");
 
-      echo "<form method='post'>";
-      echo "<input type='hidden' name='tee' value='UPDATE'>";
-      echo "<input type='submit' value='".t("Synkronoi")."'>";
-      echo "</form>";
+      if ($tee == "UPDATE") {
+        echo t("Sanakirjat synkronoitu")."!<br>";
+      }
+      else {
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tee' value='UPDATE'>";
+        echo "<input type='submit' value='".t("Synkronoi")."'>";
+        echo "</form>";
+      }
     }
   }
 }
@@ -212,7 +225,7 @@ else {
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='UPDATE'>";
-  echo "<input type='submit' value='".t("Synkronoi sanakirjat")."'>";
+  echo "<input type='submit' name='ei_ruudulle' value='".t("Synkronoi sanakirjat")."'>";
   echo "</form>";
 }
 

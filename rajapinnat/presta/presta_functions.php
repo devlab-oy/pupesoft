@@ -193,6 +193,34 @@ function presta_specific_prices() {
     }
   }
 
+  // TODO karsea kovakoodaus. pitää keksiä tähän dynaamisempi vaihtoehto.
+  if ($kukarow['yhtio'] == 'audio') {
+    // Kaikille tuotteille halutaan tuotteen myyntihinta Prestan Specific Price -listaan
+    // Prestan asiakasryhmälle 3
+    $query = "SELECT
+              tuote.tuoteno,
+              '0000-00-00' as alkupvm,
+              '0000-00-00' as loppupvm,
+              '' as minkpl,
+              tuote.myyntihinta as hinta,
+              '{$yhtiorow['valkoodi']}' as valkoodi,
+              '3' AS presta_customergroup_id,
+              '' AS presta_customer_id
+              FROM tuote
+              WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.myyntihinta > 0
+              {$tuoterajaus}";
+    $result = pupe_query($query);
+
+    while ($asiakashinta = mysql_fetch_assoc($result)) {
+      $specific_prices[] = $asiakashinta;
+    }
+  }
+
+  // sortataan array tuotejärjestykseen, silloin tuote ei ole ikinä kauaa ilman alennuksia
+  // rajapinta dellaa aina aluksi tuotteen alennukset, sen jälkeen lisää kaikki takaisin
+  sort_array_of_arrays($specific_prices, 'tuoteno');
+
   return $specific_prices;
 }
 
@@ -380,6 +408,8 @@ function hae_tuotteet() {
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
+      'mainosteksti'              => $row['mainosteksti'],
+      'mallitarkenne'             => $row['mallitarkenne'],
       'myynti_era'                => $row['myynti_era'],
       'nakyvyys'                  => $row["nakyvyys"],
       'nimi'                      => $row["nimitys"],
@@ -389,11 +419,11 @@ function hae_tuotteet() {
       'tunnus'                    => $row['tunnus'],
       'tuotekorkeus'              => $row['tuotekorkeus'],
       'tuoteleveys'               => $row['tuoteleveys'],
-      'tuotemassa'                => $row["tuotemassa"],
       'tuotemassa'                => $row['tuotemassa'],
       'tuotemerkki'               => $row["tuotemerkki"],
       'tuoteno'                   => $row["tuoteno"],
       'tuotesyvyys'               => $row['tuotesyvyys'],
+      'valmistuslinja'            => $row['valmistuslinja'],
       'yksikko'                   => $row["yksikko"],
       'myymalahinta'              => $myymalahinta,
       'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,

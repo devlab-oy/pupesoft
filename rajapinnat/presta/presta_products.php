@@ -263,8 +263,8 @@ class PrestaProducts extends PrestaClient {
         $response = $this->presta_product_feature_values->create($feature_value);
         $value_id = $response['product_feature_value']['id'];
 
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_product_feature_values->all_values = null;
+        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
+        $this->presta_product_feature_values->reset_all_values();
         $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
       }
 
@@ -293,7 +293,7 @@ class PrestaProducts extends PrestaClient {
         $manufacturer_id = $response['manufacturer']['id'];
 
         // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->all_records = null;
+        $this->presta_manufacturers->reset_all_records();
         $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
       }
 

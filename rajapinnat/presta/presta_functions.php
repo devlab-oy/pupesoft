@@ -208,6 +208,7 @@ function presta_specific_prices() {
               '' AS presta_customer_id
               FROM tuote
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.myyntihinta > 0
               {$tuoterajaus}";
     $result = pupe_query($query);
 

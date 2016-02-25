@@ -82,7 +82,7 @@ if (!function_exists("kopioi_tilaus")) {
         $vv = (int) substr($monistarow[$i], 0, 4);
 
         // Jos on syötetty eräpäivämäärästä vain päivä, taiotaan siitä kokonainen päivämäärä
-        if ($pp > 0 and $pp == 0 and $vv == 0) {
+        if ($pp > 0 and $kk == 0 and $vv == 0) {
           // Jos syötetty päivä on kuluvalla kuukaudella vielä tulevaisuudessa, tehdään päivämäärä samalle kuukaudelle
           if ($pp > date("d")) {
             $uusi_erapaivamaara = date("Y-m-{$pp}");

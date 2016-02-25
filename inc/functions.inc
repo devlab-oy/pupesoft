@@ -32286,7 +32286,8 @@ if (!function_exists('generoi_hinnastot')) {
                 WHERE tuoteno = '{$tuote["tuoteno"]}'
                 AND yhtio = '{$kukarow["yhtio"]}'
                 AND valkoodi = '{$valuu["nimi"]}'
-                ORDER BY alkupvm DESC
+                AND ((alkupvm <= current_date AND if(loppupvm = '0000-00-00', '9999-12-31', loppupvm) >= current_date) OR (alkupvm = '0000-00-00' AND loppupvm = '0000-00-00'))
+                ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(alkupvm), 9999999999999), maa DESC
                 LIMIT 1";
       $result = pupe_query($query);
       $hinnastorow = mysql_fetch_assoc($result);

@@ -81,10 +81,18 @@ if (!function_exists("kopioi_tilaus")) {
         $kk = (int) substr($monistarow[$i], 5, 2);
         $vv = (int) substr($monistarow[$i], 0, 4);
 
-        // Jos on syˆtetty er‰p‰iv‰m‰‰r‰st‰ vain p‰iv‰, taiotaan siit‰ kokonainen p‰iv‰m‰‰r‰ seuraavalle kuukaudelle
+        // Jos on syˆtetty er‰p‰iv‰m‰‰r‰st‰ vain p‰iv‰, taiotaan siit‰ kokonainen p‰iv‰m‰‰r‰
         if ($pp > 0 and $pp == 0 and $vv == 0) {
-          $seuraavankuunpvm = date("Y-m-{$pp}", strtotime('+1 month'));
-          $values .= ", '$seuraavankuunpvm'";
+          // Jos syˆtetty p‰iv‰ on kuluvalla kuukaudella viel‰ tulevaisuudessa, tehd‰‰n p‰iv‰m‰‰r‰ samalle kuukaudelle
+          if ($pp > date("d")) {
+            $uusi_erapaivamaara = date("Y-m-{$pp}");
+          }
+          else {
+            // Muutoin p‰iv‰m‰‰r‰ tehd‰‰n seuraavalle kuukaudelle
+            $uusi_erapaivamaara = date("Y-m-{$pp}", strtotime('+1 month'));
+          }
+
+          $values .= ", '$uusi_erapaivamaara'";
         }
         else {
           $values .= ", '$monistarow[$i]'";

@@ -1100,8 +1100,8 @@ else {
   }
 
   // HUOM: Tallennetaan PYÖRISTETTY loppusumma laskun loppusummaksi.
-  $loppusumma       = round($loppusumma - $pyorerotus, 2);
-  $loppusumma_valuutassa   = round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
+  $loppusumma = round($loppusumma - $pyorerotus, 2);
+  $loppusumma_valuutassa = round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
 
   // Jos kotivaluutassa niin viedään samat luvut näihin kenttiin
   if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1109,11 +1109,11 @@ else {
     $pyorerotus_valuutassa = $pyorerotus;
   }
 
-  // jos veroton on nolla, niin kaikki on aina nollaa
-  if ($yhtiorow["alv_kasittely"] != '' and $arvosumma == 0) {
+  // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
+  // niin tehdään nollalasku
+  if ($yhtiorow["alv_kasittely"] != '' and $arvosumma == 0 and abs($loppusumma) <= 0.05 and $pyorerotus == 0) {
     $arvosumma = 0;
     $arvosumma_valuutassa = 0;
-    $katesumma = 0;
     $loppusumma = 0;
     $loppusumma_valuutassa = 0;
     $pyorerotus = 0;
@@ -1123,7 +1123,7 @@ else {
   }
 
   $query = "UPDATE lasku
-            SET alatila       = 'V',
+            SET alatila          = 'V',
             arvo                 = '$arvosumma',
             arvo_valuutassa      = '$arvosumma_valuutassa',
             kate                 = '$katesumma',

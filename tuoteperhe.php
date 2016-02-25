@@ -937,6 +937,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("M‰‰r‰kerroin")."</th>";
         echo "<th>".t("Hintakerroin")."</th>";
         echo "<th>".t("Alennuskerroin")."</th>";
+        echo "<th>".t("Myyntihinta*Hintakerroin")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin*Kerroin")."</th>";
         echo "<th>".t("Ohita ker‰ys")."</th>";
@@ -947,6 +948,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("M‰‰r‰kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Hintakerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Alennuskerroin"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta*Hintakerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Ohita ker‰ys"));
@@ -1051,6 +1053,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       $resyht = 0;
       $reshikeyht = 0;
+      $myyntihintayht = 0;
 
       $kop_index   = 0;
       $kop_tuoteno = array();
@@ -1079,6 +1082,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
           echo "<td><input type='text' name='hintakerroin' size='10'></td>";
           echo "<td><input type='text' name='alekerroin' size='10'></td>";
+          echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
           echo "<td><input type='checkbox' name='ohita_kerays' {$chk_ohita_kerays}></td>";
@@ -1207,10 +1211,22 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "PERHE") {
-            echo "<td align='right'>$prow[hintakerroin]</td>";
-            echo "<td align='right'>$prow[alekerroin]</td>";
+            $query = "SELECT myyntihinta
+                      FROM tuote
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$prow['tuoteno']}'";
+            $lapsituoteres = pupe_query($query);
+            $lapsituoterow = mysql_fetch_assoc($lapsituoteres);
+
+            $lapsituote_myyntihinta = $lapsituoterow['myyntihinta'] * $prow['hintakerroin'];
+            $myyntihintayht += $lapsituote_myyntihinta;
+
+            echo "<td align='right'>{$prow['hintakerroin']}</td>";
+            echo "<td align='right'>{$prow['alekerroin']}</td>";
+            echo "<td align='right'>{$lapsituote_myyntihinta}</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"], $style);
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"], $style);
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $lapsituote_myyntihinta, $style);
             //echo "<td align='right'>$prow[rivikommentti]</td>";
           }
 
@@ -1466,7 +1482,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($tunnus == "") {
 
         if ($toim == "PERHE") {
-          echo "<td class='back' colspan='5'></td>";
+          echo "<td class='back' colspan='4'></td>";
         }
         elseif ($toim == "LISAVARUSTE") {
           echo "<td class='back' colspan='2'></td>";
@@ -1494,6 +1510,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           if ($toim == "OSALUETTELO") {
             $_yhteensa = sprintf('%.2f', round($reshikeyht, 6));
+            echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
+          }
+          elseif ($toim == "PERHE") {
+            $_yhteensa = sprintf('%.2f', round($myyntihintayht, 6));
             echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
           }
 

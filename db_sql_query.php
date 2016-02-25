@@ -217,6 +217,30 @@ else {
           echo "</table><br>";
         }
 
+        if ($table == "tuote" and in_array("tuote.vienti", $kentat)) {
+          $maaryhmaquery = "SELECT *
+                             FROM avainsana
+                             WHERE yhtio = '{$kukarow['yhtio']}'
+                             and laji    = 'maaryhma'
+                             and selite != ''
+                             ORDER BY jarjestys";
+          $maaryhmares = pupe_query($maaryhmaquery);
+          $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
+
+          if ($maaryhma_kaytossa) {
+            for ($i=0; $i < mysql_num_fields($result); $i++) {
+              if (mysql_field_name($result, $i) == 'vienti') {
+                $vienti_indx = $i;
+                break;
+              }
+            }
+          }
+        }
+        else {
+          $vienti_indx = false;
+          $maaryhma_kaytossa = false;
+        }
+
         $lask = 0;
         $filelask = 1;
 
@@ -239,6 +263,20 @@ else {
               $worksheet->writeNumber($excelrivi, $i+$talis, $row[$i]);
             }
             else {
+              if ($maaryhma_kaytossa and $vienti_indx == $i) {
+                $query = "SELECT *
+                          FROM avainsana
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          and laji    = 'maaryhma'
+                          and selite  = '{$row[$i]}'";
+                $maaryhmares = pupe_query($query);
+
+                if (mysql_num_rows($maaryhmares) != 0) {
+                  $maaryhmarow = mysql_fetch_assoc($maaryhmares);
+                  $row[$i]     = $maaryhmarow['selitetark'];
+                }
+              }
+
               $worksheet->writeString($excelrivi, $i+$talis, $row[$i]);
             }
           }

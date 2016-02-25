@@ -232,6 +232,7 @@ class PrestaProducts extends PrestaClient {
     if ($product_type == 'pack') {
       $this->logger->log("Asetettiin tuottelle hinta hinta {$parent_price}, joka laskettiin lapsituotteiden hinnoista.");
       $xml->product->price = $parent_price;
+      $xml->product->wholesale_price = $parent_price;
     }
 
     // First, remove all product features

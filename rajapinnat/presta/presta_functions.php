@@ -260,9 +260,13 @@ function hae_kategoriat() {
 }
 
 function hae_kaikki_tuotteet() {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $presta_varastot;
 
   $tuoterajaus = presta_tuoterajaus();
+
+  if (!is_array($presta_varastot)) {
+    die('Presta varastot ei ole array!');
+  }
 
   // Haetaan kaikki siirrettävät tuotteet, tämä on poistettujen dellausta varten
   // query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
@@ -293,7 +297,7 @@ function hae_kaikki_tuotteet() {
 
       if (mysql_num_rows($tr_result) == 1) {
         // isätuote
-        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI');
+        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
         $myytavissa = 0;
 
         foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
@@ -302,7 +306,7 @@ function hae_kaikki_tuotteet() {
       }
       else {
         // normituote
-        list(, , $myytavissa) = saldo_myytavissa($tuoteno);
+        list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
       }
     }
 

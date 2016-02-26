@@ -186,7 +186,7 @@ $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
 $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
-echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
+echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop päivitys.\n";
 
 if (array_key_exists('kategoriat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotekategoriat.\n";
@@ -275,4 +275,4 @@ if (mysql_affected_rows() != 1) {
   echo date("d.m.Y @ G:i:s")." - Timestamp päivitys epäonnistui!\n";
 }
 
-echo date("d.m.Y @ G:i:s")." - Tuote-export valmis.\n";
+echo date("d.m.Y @ G:i:s")." - Prestashop päivitys valmis.\n";

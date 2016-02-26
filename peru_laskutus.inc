@@ -265,18 +265,21 @@ if (!function_exists("poista_laskutus")) {
                 projekti         = '{$projekti}'";
       pupe_query($query);
 
+      $suoritusviesti = "Generoitu suoritus poistetusta laskusta";
+      if (!empty($suorituksen_kohdistusrow["suoritus_viite"])) {
+        $suoritusviesti .= " / Viite: {$suorituksen_kohdistusrow["suoritus_viite"]}";
+      }
       // Suoritus
       $query = "INSERT INTO suoritus SET
                 yhtio          = '{$kukarow["yhtio"]}',
                 tilino         = 'Selvittelytili',
                 nimi_maksaja   = '{$suorituksen_kohdistusrow["suoritus_nimi_maksaja"]}',
                 summa          = '{$ulaskurow["summa"]}',
-                maksupvm       = now(),
-                kirjpvm        = now(),
+                maksupvm       = '{$ulaskurow["mapvm"]}',
+                kirjpvm        = '{$ulaskurow["mapvm"]}',
                 asiakas_tunnus = '{$suorituksen_kohdistusrow["suoritus_asiakas_tunnus"]}',
                 ltunnus        = '$ttunnus',
-                viite          = '{$suorituksen_kohdistusrow["suoritus_viite"]}',
-                viesti         = 'Generoitu suoritus poistetusta laskusta',
+                viesti         = '{$suoritusviesti}',
                 valkoodi       = '{$suorituksen_kohdistusrow["suoritus_valkoodi"]}',
                 kurssi         = '{$suorituksen_kohdistusrow["suoritus_kurssi"]}'";
       pupe_query($query);

@@ -38,13 +38,20 @@ else {
     exit;
   }
 
+  if ($ulkoinen_jarjestelma == "P") {
+    $wherelisa = "AND tuote.eankoodi  != ''";
+  }
+  else {
+    $wherelisa = "";
+  }
+
   $query = "SELECT tuote.*, ta.selite AS synkronointi
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
             AND tuote.status    != 'P'
             AND tuote.ei_saldoa  = ''
-            AND tuote.eankoodi  != ''
+            {$wherelisa}
             AND ta.selite IS NULL";
   $res = pupe_query($query);
 
@@ -67,11 +74,14 @@ else {
       echo "</tr>";
     }
     else {
-      $xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?><Message></Message>");
+
+      $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
+
+      $xml = simplexml_load_string("<?xml version='1.0' encoding='{$encoding}'?><Message></Message>");
 
       $messageheader = $xml->addChild('MessageHeader');
       $messageheader->addChild('MessageType', 'MaterialMaster');
-      $messageheader->addChild('Sender', $yhtiorow['nimi']);
+      $messageheader->addChild('Sender', utf8_encode($yhtiorow['nimi']));
 
       if ($ulkoinen_jarjestelma == 'L') {
         $uj_nimi = "LogMaster";
@@ -106,12 +116,27 @@ else {
         $line->addAttribute('No', $i);
 
         $line->addChild('Type', 'U');
-        $line->addChild('ItemNumber', substr($row['eankoodi'], 0, 20));
-        $line->addChild('ItemName', substr($row['nimitys'], 0, 50));
-        $line->addChild('ProdGroup1', substr($row['try'], 0, 6));
+
+        $eankoodi = substr($row['eankoodi'], 0, 20);
+
+        if ($ulkoinen_jarjestelma == "P") {
+          $line->addChild('ItemNumber', utf8_encode($eankoodi));
+        }
+        else {
+          $tuoteno = substr($row['tuoteno'], 0, 20);
+          $line->addChild('ItemNumber', utf8_encode($tuoteno));
+        }
+
+        $nimitys = substr($row['nimitys'], 0, 50);
+        $try = substr($row['try'], 0, 6);
+        $yksikko = substr($row['yksikko'], 0, 10);
+        $tuoteno = substr($row['tuoteno'], 0, 100);
+
+        $line->addChild('ItemName', utf8_encode($nimitys));
+        $line->addChild('ProdGroup1', utf8_encode($try));
         $line->addChild('ProdGroup2', 0);
         $line->addChild('SalesPrice', 0);
-        $line->addChild('Unit1', substr($row['yksikko'], 0, 10));
+        $line->addChild('Unit1', utf8_encode($yksikko));
         $line->addChild('Unit2', 0);
         $line->addChild('Relation', 0);
         $line->addChild('Weight', round($row['tuotemassa'], 3));
@@ -124,7 +149,7 @@ else {
         $line->addChild('PalletSize', 0);
         $line->addChild('Status', 0);
         $line->addChild('WholesalePackageSize', 0);
-        $line->addChild('EANCode', substr($row['eankoodi'], 0, 20));
+        $line->addChild('EANCode', utf8_encode($eankoodi));
         $line->addChild('EANCode2', 0);
         $line->addChild('CustomsTariffNum', 0);
         $line->addChild('AlarmLimit', 0);
@@ -143,7 +168,7 @@ else {
         $line->addChild('PurchasePrice', 0);
         $line->addChild('ConsumerPrice', 0);
         $line->addChild('OperRecommendation', 0);
-        $line->addChild('FreeText', substr($row['tuoteno'], 0, 100));
+        $line->addChild('FreeText', utf8_encode($tuoteno));
         $line->addChild('PurchaseUnit', 0);
         $line->addChild('ManufactItemNum', 0);
         $line->addChild('InternationalItemNum', 0);
@@ -192,9 +217,10 @@ else {
     }
     else {
 
-      $filename = $pupe_root_polku."/dataout/materialmaster_".md5(uniqid()).".xml";
+      $_name = substr("tuote_".md5(uniqid()), 0, 25);
+      $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
-      if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+      if (file_put_contents($filename, $xml->asXML())) {
         echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
         switch ($ulkoinen_jarjestelma) {
@@ -218,6 +244,13 @@ else {
           require "inc/footer.inc";
           exit;
           break;
+        }
+
+        if (!PUPE_UNICODE) {
+          exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
+        }
+        else {
+          $ftputf8 = TRUE;
         }
 
         require "inc/ftp-send.inc";

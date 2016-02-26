@@ -167,6 +167,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tuotteiden avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "Y")         $ulos .= "<option value='Y' $avain_sel[Y]>                  ".t("Yksikko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRY")         $ulos .= "<option value='TRY' $avain_sel[TRY]>                ".t("Tuoteryhm‰")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PS_ALA_TRY") $ulos .= "<option value='PS_ALA_TRY' $avain_sel[PS_ALA_TRY]>" . t("PupeShop alaryhm‰") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "THR")         $ulos .= "<option value='THR' $avain_sel[THR]>                ".t("Tuotehinnastoryhm‰")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSASTO")       $ulos .= "<option value='OSASTO' $avain_sel[OSASTO]>            ".t("Tuoteosasto")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI")     $ulos .= "<option value='TUOTEMERKKI' $avain_sel[TUOTEMERKKI]>        ".t("Tuotemerkki")."</option>";
@@ -185,6 +186,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA")     $ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>      ".t("Tuoteryhm‰n tai tuotestatuksen oletuspaikka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI")     $ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>      ".t("Tuotteen elinkaarityyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOPIOITUOTE") $ulos .= "<option value='KOPIOITUOTE' {$avain_sel['KOPIOITUOTE']}>      ".t("Kopioi tuote parametri")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAARYHMA") $ulos .= "<option value='MAARYHMA' {$avain_sel['MAARYHMA']}>".t("Sallittu maaryhm‰")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -307,6 +309,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR")  $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille l‰htev‰ TransportAccount")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -318,7 +321,9 @@ if (mysql_field_name($result, $i) == "laji") {
 }
 
 if (mysql_field_name($result, $i) == "nakyvyys") {
-  if ($avain_sel["TRY"] == "SELECTED"  or $avain_sel["OSASTO"] == "SELECTED") {
+  if (in_array("SELECTED", array($avain_sel["TRY"],
+                                 $avain_sel["OSASTO"],
+                                 $avain_sel["PS_ALA_TRY"]))) {
     $sel = array();
     $sel[$trow[$i]] = "SELECTED";
 
@@ -1363,5 +1368,29 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
 
   $ulos .= "</select>";
 
+  $jatko = 0;
+}
+
+if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selite) {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 300) . ">";
+
+  $try_result = t_avainsana('try', '', "AND selitetark <> ''");
+
+  while ($tryrow = mysql_fetch_assoc($try_result)) {
+    $sel = $tryrow["selite"] == $trow[$i] ? " selected" : "";
+
+    $ulos .= "<option{$sel} value='{$tryrow["selite"]}'>
+                {$tryrow["selite"]} - {$tryrow["selitetark"]}
+              </option>";
+  }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
+  $ulos  = "<th>" . t("Nimitys") . "</th>
+            <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
 }

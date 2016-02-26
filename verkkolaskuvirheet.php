@@ -330,7 +330,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
           if (!isset($trow) and $laskuttajan_ovt != "") {
             // 5 etsit‰‰n toimittaja ytunnuksella
-            $yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
+            $yovt1 = substr(preg_replace("/^0037/", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
             $yovt2 = (int) $yovt1; // ilman etunollaa
 
             $query  = "SELECT *

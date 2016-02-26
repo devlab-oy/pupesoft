@@ -1111,7 +1111,7 @@ class MagentoClient {
       }
 
       $message .= "\n";
-      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
+      $log_location = $type == 'product' ? '/home/devlab/logs/magento_export.log' : '/home/devlab/logs/magento_orders.log';
       error_log("{$timestamp}: {$message}", 3, $log_location);
     }
   }

@@ -24,30 +24,35 @@ class PrestaAddresses extends PrestaClient {
 
 
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_address)) {
+    if (is_null($existing_address)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_address;
     }
 
     $presta_country = new PrestaCountries($this->url(), $this->api_key());
     $finland = $presta_country->find_findland();
+
+    // Mandatory fields
+    $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);
+    $_postitp = empty($address['postitp']) ? "-" : utf8_encode($address['postitp']);
+    $_puh = empty($address['puh']) ? "-" : $address['puh'];
+
+    // max 32, numbers and special characters not allowed
+    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
+    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+
     $xml->address->id_country = $finland['id'];
     $xml->address->id_customer = $address['presta_customer_id'];
-    //Address alias is mandatory
     $xml->address->alias = 'Home';
-    $xml->address->lastname = $address['sukunimi'];
-    $xml->address->firstname = $address['etunimi'];
-    $xml->address->address1 = $address['osoite'];
+    $xml->address->lastname = $_nimi;
+    $xml->address->firstname = '-';
+    $xml->address->address1 = $_osoite;
     $xml->address->postcode = $address['postino'];
-    $xml->address->city = $address['postitp'];
-    //Phone or phone_mobile is mandatory
-    $xml->address->phone = $address['puh'];
+    $xml->address->city = $_postitp;
+    $xml->address->phone = $_puh;
     $xml->address->phone_mobile = $address['gsm'];
-
-    if (empty($address['puh']) and empty($address['gsm'])) {
-      $xml->address->phone = '0000000000';
-    }
 
     return $xml;
   }

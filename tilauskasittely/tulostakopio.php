@@ -2192,6 +2192,23 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $otunnus = $laskurow["tunnus"];
       $tilausnumeroita = $otunnus;
 
+      if ($laskurow['kerayslista'] > 0) {
+        //haetaan kaikki tälle klöntille kuuluvat otsikot
+        $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
+                  FROM lasku
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND tila         = '{$laskurow['tila']}'
+                  AND kerayslista  = '{$laskurow['kerayslista']}'
+                  HAVING tunnukset IS NOT NULL";
+        $toimresult = pupe_query($query);
+
+        //jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
+        if (mysql_num_rows($toimresult) > 0) {
+          $toimrow = mysql_fetch_assoc($toimresult);
+          $tilausnumeroita = $toimrow["tunnukset"];
+        }
+      }
+
       //haetaan asiakkaan tiedot
       $query = "SELECT luokka,
                 puhelin,
@@ -2200,7 +2217,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 kerayserat,
                 kieli
                 FROM asiakas
-                WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+                WHERE tunnus = '$laskurow[liitostunnus]'
+                and yhtio = '$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 
@@ -2211,11 +2229,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $result = pupe_query($query);
       $varastorow = mysql_fetch_assoc($result);
 
-      $select_lisa     = "";
-      $where_lisa     = "";
-      $lisa1         = "";
-      $pjat_sortlisa     = "";
-      $kerayslistatyyppi   = "";
+      $select_lisa = "";
+      $where_lisa = "";
+      $lisa1 = "";
+      $pjat_sortlisa = "";
+      $kerayslistatyyppi = "";
 
       if ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
         $kerayslistatyyppi = "EXCEL2";
@@ -2412,6 +2430,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         if ($oslarow['osoitelappu'] == 'intrade') {
           require 'osoitelappu_intrade_pdf.inc';
+        }
+        elseif ($oslarow['osoitelappu'] == 'hornbach') {
+          require 'osoitelappu_hornbach_pdf.inc';
         }
         elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 

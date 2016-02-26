@@ -110,7 +110,6 @@ if ($tee == 'YHTEENVETO') {
               FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
               $tuotejoin
               JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               AND tilausrivi.tyyppi         = 'V'
               AND tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00'

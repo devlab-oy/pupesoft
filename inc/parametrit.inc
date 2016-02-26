@@ -16,7 +16,7 @@ ini_set("log_errors", 1);
 // Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
 // (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
 if (!defined("PUPE_UNICODE")) {
-  if (get_cfg_var('mssql.charset') == "UTF-8") {
+  if (get_cfg_var('mssql.charset') == "UTF-8" or @include_once(".PUPE_UNICODE")) {
     define("PUPE_UNICODE", TRUE);
   }
   else {
@@ -269,6 +269,16 @@ unset($magento_api_ht_url);
 unset($magento_api_ht_usr);
 unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
+
+unset($ftp_logmaster_host);
+unset($ftp_logmaster_user);
+unset($ftp_logmaster_pass);
+unset($ftp_logmaster_path);
+
+unset($ftp_posten_logistik_host);
+unset($ftp_posten_logistik_user);
+unset($ftp_posten_logistik_pass);
+unset($ftp_posten_logistik_path);
 
 unset($pupesoft_commandlinelog);
 
@@ -924,19 +934,19 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
                         AND messenger.status        = 'X'";
       if ($message_result = pupe_query($message_query)) {
         if (mysql_num_rows($message_result) > 0) {
-
           enable_ajax();
+          echo "<table>";
 
           while ($message_row = mysql_fetch_assoc($message_result)) {
-            echo "<div id='{$message_row['tunnus']}'>";
-            echo t("Viesti käyttäjältä").": ";
-            echo "{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
-            echo "{$message_row['viesti']} ";
-            echo "<input type='button' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
-            echo "</div>";
+            echo "<tr id='{$message_row['tunnus']}'>";
+            echo "<td>".t("Viesti käyttäjältä")."</td>";
+            echo "<td>{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes', 'LYHYT')."</td>";
+            echo "<td>{$message_row['viesti']}</td>";
+            echo "<td class='back'><a href='#' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false); return false;\">".t("Kuittaa")."</a></td>";
+            echo "</tr>";
           }
 
-          echo "<br>";
+          echo "</table><br>";
         }
       }
     }

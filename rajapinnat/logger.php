@@ -14,7 +14,7 @@ class Logger {
     }
 
     $this->file_handle = fopen($this->log_filepath, 'a');
-    
+
     if ($this->file_handle === false) {
       throw new RuntimeException('File handle is false');
     }
@@ -28,9 +28,11 @@ class Logger {
 
   /**
    *
-   * @param string $message
+   * @param string  $message
    * @param Exception $exception
    */
+
+
   public function log($message, $exception = null) {
     if (!is_null($exception)) {
       $message = $this->exception_message($exception, $message);
@@ -41,7 +43,7 @@ class Logger {
 
   /**
    *
-   * @param string $date_format
+   * @param string  $date_format
    */
   public function set_date_format($date_format) {
     $this->date_format = $date_format;
@@ -49,7 +51,7 @@ class Logger {
 
   /**
    *
-   * @param string $message
+   * @param string  $message
    * @throws RuntimeException
    */
   private function write($message) {
@@ -64,7 +66,7 @@ class Logger {
    * Returns message with exception message
    *
    * @param Exception $exception
-   * @param string $message
+   * @param string  $message
    * @return string
    */
   private function exception_message($exception, $message = '') {
@@ -74,7 +76,7 @@ class Logger {
   /**
    * Timestamps log lines
    *
-   * @param string $message
+   * @param string  $message
    * @return string
    */
   private function format_message($message) {

@@ -121,7 +121,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   //työmääräyksen rivit
   $query = "SELECT tilausrivi.*,
-            round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1), '$yhtiorow[hintapyoristys]') hinta,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+            round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
             tuote.sarjanumeroseuranta,
             $sorttauskentta,
             if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -136,8 +138,6 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
             WHERE tilausrivi.otunnus  = '$otunnus'
             and tilausrivi.yhtio      = '$kukarow[yhtio]'
             and tilausrivi.tyyppi    != 'D'
-            and tilausrivi.yhtio      = tuote.yhtio
-            and tilausrivi.tuoteno    = tuote.tuoteno
             ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
   $riresult = pupe_query($query);
 
@@ -181,33 +181,34 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $tyyppi = $yhtiorow["tyomaaraystyyppi"];
       }
 
-      $params_tyomaarays = array( "asrow"           => $asrow,
-        "boldi"           => $boldi,
-        "edtuotetyyppi"   => "",
-        "iso"             => $iso,
-        "kala"            => 0,
-        "kieli"           => $kieli,
-        "komento"      => $komento[$tulostimet[0]],
-        "laskurow"        => $laskurow,
-        "lineparam"       => $lineparam,
-        "norm"            => $norm,
-        "page"            => NULL,
-        "pdf"             => NULL,
-        "perheid"         => 0,
-        "perheid2"        => 0,
-        "pieni"           => $pieni,
-        "pieni_boldi"     => $pieni_boldi,
-        "rectparam"       => $rectparam,
-        "returnvalue"     => 0,
-        "rivinkorkeus"    => $rivinkorkeus,
-        "rivinumerot"     => $rivinumerot,
-        "row"             => NULL,
-        "sivu"            => 1,
-        "tee"             => $tee,
+      $params_tyomaarays = array(
+        "asrow"         => $asrow,
+        "boldi"         => $boldi,
+        "edtuotetyyppi" => "",
+        "iso"           => $iso,
+        "kala"          => 0,
+        "kieli"         => $kieli,
+        "komento"       => $komento[$tulostimet[0]],
+        "laskurow"      => $laskurow,
+        "lineparam"     => $lineparam,
+        "norm"          => $norm,
+        "page"          => NULL,
+        "pdf"           => NULL,
+        "perheid"       => 0,
+        "perheid2"      => 0,
+        "pieni"         => $pieni,
+        "pieni_boldi"   => $pieni_boldi,
+        "rectparam"     => $rectparam,
+        "returnvalue"   => 0,
+        "rivinkorkeus"  => $rivinkorkeus,
+        "rivinumerot"   => $rivinumerot,
+        "row"           => NULL,
+        "sivu"          => 1,
+        "tee"           => $tee,
         "thispage"      => NULL,
-        "toim"            => $toim,
-        "tots"        => 0,
-        "tyyppi"          => $tyyppi, );
+        "toim"          => $toim,
+        "tots"          => 0,
+        "tyyppi"        => $tyyppi);
 
       $params_huoltosaate = $params_tyomaarays;
 
@@ -238,30 +239,23 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
       tyomaarays_print_pdf($params_tyomaarays);
 
       if (!empty($tulostimet[1]) and $tulostimet[1] == "Huoltosaate") {
-        $query = "SELECT *
-                  FROM tyomaarays
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$laskurow['tunnus']}'";
-        $tyomaaraysres = pupe_query($query);
-        $tyomaaraysrow = mysql_fetch_assoc($tyomaaraysres);
-
-        $params_huoltosaate['tyomaaraysrow'] = $tyomaaraysrow;
-
-        $query = "SELECT tilausrivi.tuoteno,
-                  sarjanumeroseuranta.sarjanumero,
-                  tilausrivi.alv
-                  FROM tilausrivi
-                  LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
-                      and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi = 'L'
-                  AND tilausrivi.varattu != 0";
-        $tuotenores = pupe_query($query);
-        $tuotenorow = mysql_fetch_assoc($tuotenores);
-
-        $params_huoltosaate['tuotenorow'] = $tuotenorow;
-        $params_huoltosaate['komento'] = $komento['Huoltosaate'];
-        $params_huoltosaate['rectparam']['width'] = 0.3;
+        $params_huoltosaate = array(
+          "_hsiso"       => $_hsiso,
+          "kala"         => 0,
+          "kieli"        => $kieli,
+          "komento"      => $komento["Huoltosaate"],
+          "laskurow"     => $laskurow,
+          "_hsnorm"      => $_hsnorm,
+          "page"         => NULL,
+          "pdf"          => NULL,
+          "_hspieni"     => $_hspieni,
+          "_hsrectparam" => $_hsrectparam,
+          "returnvalue"  => 0,
+          "row"          => NULL,
+          "sivu"         => 1,
+          "tee"          => $tee,
+          "thispage"     => NULL,
+          "yhteensa"     => 0);
 
         // Aloitellaan lomakkeen teko
         $params_huoltosaate = huoltosaate_alku($params_huoltosaate);
@@ -274,7 +268,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $yhteensa = 0;
 
         while ($row = mysql_fetch_assoc($riresult)) {
-          $yhteensa += $row['rivihinta'];
+          $yhteensa += $row['rivihinta_verollinen'];
           $params_huoltosaate["row"] = $row;
           $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
         }

@@ -134,6 +134,9 @@ if ($toim == "TILAUSTUOTETARRA") {
 if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
   $fuse = t("Työmääräys");
 }
+if ($toim == "HUOLTOSAATE") {
+  $fuse = t("Huoltosaate");
+}
 if ($toim == "SAD") {
   $fuse = t("Sad-lomake");
 }
@@ -380,8 +383,10 @@ if ($tee != 'NAYTATILAUS') {
         echo "<th>".t("Asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'> ", asiakashakuohje(), "</td></tr>";
       }
 
-      $formi  = 'hakuformi';
-      $kentta = 'ytunnus';
+      if (empty($tee)) {
+        $formi  = 'hakuformi';
+        $kentta = 'ytunnus';
+      }
     }
 
     echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
@@ -849,7 +854,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
-  if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
+  if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "HUOLTOSAATE") {
     /// Työmääräys
     $where1 .= " lasku.tila in ('L','A','N','S','T')";
 
@@ -1341,6 +1346,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
     $tulostimet[0] = 'Työmääräys';
   }
+  elseif ($toim == "HUOLTOSAATE") {
+    $tulostimet[0] = 'Huoltosaate';
+  }
   elseif ($toim == "REKLAMAATIO" or $toim == "TAKUU") {
     $tulostimet[0] = 'Keräyslista';
   }
@@ -1782,7 +1790,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         //työmääräyksen rivit
         $query = "SELECT tilausrivi.*,
-                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1), '$yhtiorow[hintapyoristys]') hinta,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                  round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -1793,8 +1803,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   WHERE tilausrivi.otunnus  = '{$laskurow["tunnus"]}'
                   and tilausrivi.yhtio      = '$kukarow[yhtio]'
                   and tilausrivi.tyyppi    != 'D'
-                  and tilausrivi.yhtio      = tuote.yhtio
-                  and tilausrivi.tuoteno    = tuote.tuoteno
                   and tilausrivi.var       != 'O'
                   ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
         $result = pupe_query($query);
@@ -1830,7 +1838,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $tyyppi = $yhtiorow["tyomaaraystyyppi"];
         }
 
-        $params_tyomaarays = array( "asrow"           => $asrow,
+        $params_tyomaarays = array(
+          "asrow"           => $asrow,
           "boldi"           => $boldi,
           "edtuotetyyppi"   => "",
           "iso"             => $iso,
@@ -1884,6 +1893,86 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         //tulostetaan sivu
         tyomaarays_print_pdf($params_tyomaarays);
       }
+
+      $tee = '';
+    }
+
+    if ($toim == "HUOLTOSAATE") {
+
+      require_once "tyomaarays/tulosta_huoltosaate.inc";
+
+      //Tehdään joini
+      $query = "SELECT tyomaarays.*, lasku.*
+                FROM lasku
+                LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and lasku.tunnus  = '$laskurow[tunnus]'";
+      $result = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($result);
+
+      $sorttauskentta = generoi_sorttauskentta($yhtiorow["tyomaarayksen_jarjestys"]);
+      $order_sorttaus = $yhtiorow["tyomaarayksen_jarjestys_suunta"];
+
+      if ($yhtiorow["tyomaarayksen_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+      else $pjat_sortlisa = "";
+
+      // Huoltosaatteen rivit
+      $query = "SELECT tilausrivi.*,
+                round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                round(tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                $sorttauskentta,
+                if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+                if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+                tuote.sarjanumeroseuranta
+                FROM tilausrivi
+                JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+                WHERE tilausrivi.otunnus  = '{$laskurow["tunnus"]}'
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                and tilausrivi.var       != 'O'
+                ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+      $result = pupe_query($query);
+
+      $params_huoltosaate = array(
+        "_hsiso"       => $_hsiso,
+        "kala"         => 0,
+        "kieli"        => $kieli,
+        "komento"      => $komento["Huoltosaate"],
+        "laskurow"     => $laskurow,
+        "_hsnorm"      => $_hsnorm,
+        "page"         => NULL,
+        "pdf"          => NULL,
+        "_hspieni"     => $_hspieni,
+        "_hsrectparam" => $_hsrectparam,
+        "returnvalue"  => 0,
+        "row"          => NULL,
+        "sivu"         => 1,
+        "tee"          => $tee,
+        "thispage"     => NULL,
+        "yhteensa"     => 0);
+
+      // Aloitellaan lomakkeen teko
+      $params_huoltosaate = huoltosaate_alku($params_huoltosaate);
+
+      // Ekan sivun otsikot
+      $params_huoltosaate = huoltosaate_rivi_otsikot($params_huoltosaate);
+
+      mysql_data_seek($result, 0);
+
+      $yhteensa = 0;
+
+      while ($row = mysql_fetch_assoc($result)) {
+        $yhteensa += $row['rivihinta_verollinen'];
+        $params_huoltosaate["row"] = $row;
+        $params_huoltosaate = huoltosaate_rivi($params_huoltosaate);
+      }
+
+      $params_huoltosaate["yhteensa"] = $yhteensa;
+      $params_huoltosaate = huoltosaate_loppu($params_huoltosaate);
+
+      //tulostetaan sivu
+      huoltosaate_print_pdf($params_huoltosaate);
 
       $tee = '';
     }
@@ -2093,6 +2182,23 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $otunnus = $laskurow["tunnus"];
       $tilausnumeroita = $otunnus;
 
+      if ($laskurow['kerayslista'] > 0) {
+        //haetaan kaikki tälle klöntille kuuluvat otsikot
+        $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
+                  FROM lasku
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND tila         = '{$laskurow['tila']}'
+                  AND kerayslista  = '{$laskurow['kerayslista']}'
+                  HAVING tunnukset IS NOT NULL";
+        $toimresult = pupe_query($query);
+
+        //jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
+        if (mysql_num_rows($toimresult) > 0) {
+          $toimrow = mysql_fetch_assoc($toimresult);
+          $tilausnumeroita = $toimrow["tunnukset"];
+        }
+      }
+
       //haetaan asiakkaan tiedot
       $query = "SELECT luokka,
                 puhelin,
@@ -2101,7 +2207,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 kerayserat,
                 kieli
                 FROM asiakas
-                WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+                WHERE tunnus = '$laskurow[liitostunnus]'
+                and yhtio = '$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 
@@ -2112,11 +2219,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $result = pupe_query($query);
       $varastorow = mysql_fetch_assoc($result);
 
-      $select_lisa     = "";
-      $where_lisa     = "";
-      $lisa1         = "";
-      $pjat_sortlisa     = "";
-      $kerayslistatyyppi   = "";
+      $select_lisa = "";
+      $where_lisa = "";
+      $lisa1 = "";
+      $pjat_sortlisa = "";
+      $kerayslistatyyppi = "";
 
       if ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
         $kerayslistatyyppi = "EXCEL2";
@@ -2313,6 +2420,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         if ($oslarow['osoitelappu'] == 'intrade') {
           require 'osoitelappu_intrade_pdf.inc';
+        }
+        elseif ($oslarow['osoitelappu'] == 'hornbach') {
+          require 'osoitelappu_hornbach_pdf.inc';
         }
         elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 

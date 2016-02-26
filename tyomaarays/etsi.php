@@ -3,11 +3,54 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-include '../inc/parametrit.inc';
+if (!empty($_REQUEST["vva"])) {
+  setcookie("etsityom_alkupvm", $_REQUEST["vva"]."-".$_REQUEST["kka"]."-".$_REQUEST["ppa"]);
+}
+elseif (!empty($_COOKIE["etsityom_alkupvm"])) {
+  list($_REQUEST["vva"], $_REQUEST["kka"], $_REQUEST["ppa"]) = explode("-", $_COOKIE["etsityom_alkupvm"]);
+}
+
+if (!empty($_REQUEST["laajahaku"])) {
+  if (count($_REQUEST["laajahaku"]) == 1) {
+    $_REQUEST["laajahaku"] = "";
+  }
+  else {
+    $_REQUEST["laajahaku"] = "on";
+  }
+
+  setcookie("etsityom_laajahaku", $_REQUEST["laajahaku"]);
+}
+elseif (!empty($_COOKIE["etsityom_laajahaku"])) {
+  $_REQUEST["laajahaku"] = $_COOKIE["etsityom_laajahaku"];
+}
+
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
-if ($tee == 'etsi') {
+$tyom_kentat_array = array();
+$tyom_kentat_array["rekno"] = t("Rekno");
+$tyom_kentat_array["valmnro"] = t("Sarjanumero");
+$tyom_kentat_array["komm1"] = t("Työn kuvaus");
+$tyom_kentat_array["komm2"] = t("Toimenpiteet");
+$laajah = "";
+
+if (!empty($laajahaku)) {
+  $tyomkentta_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != '' and avainsana.selitetark_2 != 'DATE'");
+
+  if (mysql_num_rows($tyomkentta_res)) {
+    $tyom_kentat_array = array();
+
+    while ($al_row = mysql_fetch_assoc($tyomkentta_res)) {
+      $tyom_kentat_array[$al_row['selite']] = $al_row['selitetark'];
+      $tyom_kentat_tyyppi[$al_row['selite']] = $al_row['selitetark_2'];
+    }
+  }
+
+  $laajah = "CHECKED";
+}
+
+if ($tee == 'etsi' and !empty($hakusubmit)) {
   echo "<table>";
   $hakuehdot = '';
 
@@ -20,41 +63,37 @@ if ($tee == 'etsi') {
   }
 
   if ($nimi != '') {
-    $hakuehdot .= " AND lasku.nimi LIKE '%".$nimi."%'";
-  }
-
-  if ($rekno != '') {
-    $hakuehdot .= " AND tyomaarays.rekno LIKE '%".$rekno."%'";
+    $hakuehdot .= " AND lasku.nimi LIKE '%".$nimi."%' ";
   }
 
   if ($eid != '') {
-    $hakuehdot .= " AND lasku.tunnus = '$eid'";
+    $hakuehdot .= " AND lasku.tunnus = '$eid' ";
   }
 
   if ($asno != '') {
-    $hakuehdot .= " AND asiakas.asiakasnro = '$asno'";
+    $hakuehdot .= " AND asiakas.asiakasnro = '$asno' ";
   }
 
-  if ($valmno != '') {
-    $hakuehdot .= " AND tyomaarays.valmnro LIKE '%".$valmno."%'";
-  }
-
-  if ($komm1 != '') {
-    $hakuehdot .= " AND tyomaarays.komm1 LIKE '%".$komm1."%' ";
-  }
-
-  if ($komm2 != '') {
-    $hakuehdot .= " AND tyomaarays.komm2 LIKE '%".$komm2."%' ";
+  foreach ($tyom_kentat_array as $selite => $selitetark) {
+    if (!empty(${$selite})) {
+      if (strtoupper($tyom_kentat_tyyppi[$selite]) == "DROPDOWN") {
+        $hakuehdot .= " AND tyomaarays.{$selite} = '".${$selite}."'";
+      }
+      else {
+        $hakuehdot .= " AND tyomaarays.{$selite} LIKE '%".${$selite}."%'";
+      }
+    }
   }
 
   if ($hakuteksti != '') {
     $hakuehdot .= " AND ( lasku.nimi LIKE '%".$hakuteksti."%' ";
-    $hakuehdot .= " OR tyomaarays.rekno LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";
-    $hakuehdot .= " OR tyomaarays.valmnro LIKE '%".$hakuteksti."%' ";
-    $hakuehdot .= " OR tyomaarays.komm1 LIKE '%".$hakuteksti."%' ";
-    $hakuehdot .= " OR tyomaarays.komm2 LIKE '%".$hakuteksti."%' ";
+
+    foreach ($tyom_kentat_array as $selite => $selitetark) {
+      $hakuehdot .= " OR tyomaarays.{$selite} LIKE '%".$hakuteksti."%' ";
+    }
+
     $hakuehdot .= " ) ";
   }
 
@@ -66,14 +105,15 @@ if ($tee == 'etsi') {
              and lasku.tila         in ('A','L','N')
              and lasku.tilaustyyppi = 'A'
              $hakuehdot
-             ORDER BY lasku.tunnus desc";
+             ORDER BY lasku.tunnus desc
+             LIMIT 100";
   $sresult = pupe_query($squery);
 
   if (mysql_num_rows($sresult) > 0) {
     echo "<tr>
         <th>".t("Työmääräys").":</th>
         <th>".t("Nimi").":</th>
-        <th>".t("Rekno").":</th>
+        <th>{$reknokentta}:</th>
         <th>".t("Päivämäärä").":</th>
         <th>".t("Työn kuvaus / Toimenpiteet").":</th>
         <th>".t("Muokkaa").":</th>
@@ -82,10 +122,12 @@ if ($tee == 'etsi') {
         <th>".t("Uusi").":</th>
        </tr>";
 
+    $lopelinkki = "{$palvelin2}tyomaarays/etsi.php////tee=$tee//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//hakuteksti=$hakuteksti//nimi=$nimi//rekno=$rekno//eid=$eid//asno=$asno//valmno=$valmno//komm1=$komm1//komm2=$komm2";
+
     while ($row = mysql_fetch_array($sresult)) {
 
       echo "<tr>
-          <td valign='top'>$row[laskutunnus]</td>
+          <td valign='top'><a name='tyom_$row[laskutunnus]'></a>$row[laskutunnus]</td>
           <td valign='top'>$row[nimi]</td>
           <td valign='top'>$row[rekno]</td>
           <td valign='top'>".tv1dateconv(substr($row["luontiaika"], 0, 10))."</td>
@@ -93,7 +135,7 @@ if ($tee == 'etsi') {
 
       if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or $row["alatila"] == 'C' or $row["alatila"] == 'J') {
         echo "<td valign='top'>
-            <form method='post' action='../tilauskasittely/tilaus_myynti.php'>
+            <form method='post' action='{$palvelin2}tilauskasittely/tilaus_myynti.php?lopetus=$lopelinkki///tyom_$row[laskutunnus]'>
             <input type='hidden' name='toim' value='TYOMAARAYS'>
             <input type='hidden' name='tilausnumero' value='$row[laskutunnus]'>
             <input type='submit' value = '".t("Muokkaa")."'></form></td>";
@@ -103,7 +145,7 @@ if ($tee == 'etsi') {
       }
 
       echo "<td valign='top'>
-          <form method='post' action='../monistalasku.php'>
+          <form method='post' action='{$palvelin2}monistalasku.php'>
           <input type='hidden' name='toim' value='TYOMAARAYS'>
           <input type='hidden' name='monistettavat[{$row['laskutunnus']}]' value='MONISTA'>
           <input type='hidden' name='tee' value='MONISTA'>
@@ -112,13 +154,13 @@ if ($tee == 'etsi') {
           <input type='hidden' name='ytunnus' value='{$row['ytunnus']}'>
           <input type='submit' value = '".t("Monista")."'></form></td>";
 
-      echo "<td valign='top'><form action = '../tilauskasittely/tulostakopio.php' method='post'>
+      echo "<td valign='top'><form action = '{$palvelin2}tilauskasittely/tulostakopio.php?lopetus=$lopelinkki///tyom_$row[laskutunnus]' method='post'>
           <input type='hidden' name='tee' value = 'ETSILASKU'>
           <input type='hidden' name='otunnus' value='$row[laskutunnus]'>
           <input type='hidden' name='toim' value='TYOMAARAYS'>
           <input type='submit' value = '".t("Tulosta")."'></form></td>";
 
-      echo "<td valign='top'><form action = '../tilauskasittely/tilaus_myynti.php' method='post'>
+      echo "<td valign='top'><form action = '{$palvelin2}tilauskasittely/tilaus_myynti.php' method='post'>
           <input type='hidden' name='toim' value='TYOMAARAYS'>
           <input type='hidden' name='tee' value='OTSIK'>
           <input type='hidden' name='asiakasid' value='{$row['liitostunnus']}'>
@@ -132,7 +174,7 @@ if ($tee == 'etsi') {
     echo t("Yhtään työmääräystä ei löytynyt annetuilla ehdoilla")."!";
 
     echo "&nbsp;&nbsp;&nbsp;&nbsp;";
-    echo "<form action = '../tilauskasittely/tilaus_myynti.php' method='post'>
+    echo "<form action = '{$palvelin2}tilauskasittely/tilaus_myynti.php' method='post'>
         <input type='hidden' name='toim' value='TYOMAARAYS'>
         <input type='hidden' name='tee' value='OTSIK'>";
     if (!empty($nimi)) {
@@ -146,7 +188,7 @@ if ($tee == 'etsi') {
 
 echo "<form method='post'><input type='hidden' name='tee' value='etsi'>";
 echo "<table><tr>";
-echo "<th colspan='4'>".t("Hae työmääräykset väliltä").":</th>";
+echo "<th colspan='4'>".t("Hae työmääräyksiä").": <div style='float: right;'>(".t("Laajahaku").": <input type='hidden' name='laajahaku[]' value='default'><input type='checkbox' name='laajahaku[]' onclick='submit();' $laajah>)</div></th>";
 echo "</tr>";
 
 if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -179,11 +221,6 @@ echo "<td colspan='3'><input type='text' name='nimi' size='35' value='{$nimi}' >
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Rekno").":</th>";
-echo "<td colspan='3'><input type='text' name='rekno' size='35' value='{$rekno}'></td>";
-echo "</tr>";
-
-echo "<tr>";
 echo "<th>".t("Työmääräysno").":</th>";
 echo "<td colspan='3'><input type='text' name='eid' size='35' value='{$eid}'></td>";
 echo "</tr>";
@@ -193,23 +230,15 @@ echo "<th>".t("Asiakasnumero").":</th>";
 echo "<td colspan='3'><input type='text' name='asno' size='35' value='{$asno}'></td>";
 echo "</tr>";
 
-echo "<tr>";
-echo "<th>".t("Sarjanumero").":</th>";
-echo "<td colspan='3'><input type='text' name='valmno' size='35' value='{$valmno}'></td>";
-echo "</tr>";
-
-echo "<tr>";
-echo "<th>".t("Työn kuvaus").":</th>";
-echo "<td colspan='3'><input type='text' name='komm1' size='35' value='{$komm1}'></td>";
-echo "</tr>";
-
-echo "<tr>";
-echo "<th>".t("Toimenpiteet").":</th>";
-echo "<td colspan='3'><input type='text' name='komm2' size='35' value='{$komm2}'></td>";
-echo "</tr>";
+foreach ($tyom_kentat_array as $selite => $selitetark) {
+  echo "<tr>";
+  echo "<th>{$selitetark}:</th>";
+  echo "<td colspan='3'><input type='text' name='$selite' size='35' value='".${$selite}."'></td>";
+  echo "</tr>";
+}
 
 echo "</table>";
-echo "<input type='submit' value='Hae'>";
+echo "<input type='submit' name='hakusubmit' value='".t("Hae")."'>";
 echo "</form>";
 
 require "../inc/footer.inc";

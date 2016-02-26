@@ -2128,7 +2128,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $query = "SELECT distinct koodi, nimi, MIN(tunnus) id
               FROM maat
               WHERE koodi != ''
-              AND nimi != ''
+              AND nimi    != ''
               GROUP BY 1,2
               ORDER BY 1,2";
     $maa_res = pupe_query($query);

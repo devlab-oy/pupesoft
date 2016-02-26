@@ -37,6 +37,16 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+$e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
+$e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
+$e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
+$e4 = isset($tmpfilenimi);
+
+if (($e1 or $e2) and $e3 and $e4) {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
+
 if ($kukarow['extranet'] == '') {
   if (isset($ajax_popup)) {
     require "tuotetiedot.inc";
@@ -98,17 +108,6 @@ if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_
 
   die();
 }
-
-$e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
-$e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
-$e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
-$e4 = isset($tmpfilenimi);
-
-if (($e1 or $e2) and $e3 and $e4) {
-  readfile("/tmp/".$tmpfilenimi);
-  exit;
-}
-
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc");
 $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
 $sahkoinen_lahete_toim = array('RIVISYOTTO', 'PIKATILAUS');
@@ -306,7 +305,7 @@ if ($livesearch_tee == "TUOTEHAKU") {
   exit;
 }
 
-if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+if (in_array($yhtiorow["livetuotehaku_tilauksella"], array("J", "K"))) {
   enable_ajax();
 }
 
@@ -2119,6 +2118,21 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     require_once "inc/sahkoinen_lahete.class.inc";
 
     sahkoinen_lahete($laskurow);
+  }
+
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+    and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
+
+    $params_tilausvahvistus = array(
+      'tee'            => $tee,
+      'toim'           => $toim,
+      'kieli'          => $kieli,
+      'laskurow'       => $laskurow,
+      'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+    );
+
+    laheta_tilausvahvistus($params_tilausvahvistus);
   }
 
   if ($tee == 'VALMIS' or $yhtiorow['reklamaation_kasittely'] == 'X') {
@@ -6207,7 +6221,6 @@ if ($tee == '') {
                tilausrivi.ale_peruste,
                tuote.tunnus as tuote_tunnus,
                concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
-               tuote.kehahin,
                $kommentti_select
                $sorttauskentta
                FROM tilausrivi use index (yhtio_otunnus)
@@ -6492,7 +6505,7 @@ if ($tee == '') {
               </form><br><br>";
       }
 
-      if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
+      if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
         echo t("Tilausrivin verollisuus").":<br>";
         echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -6528,6 +6541,17 @@ if ($tee == '') {
       echo "</div>";
 
       echo "<img id='rivientoiminnot' src='$palvelin2/pics/lullacons/mini-edit.png' style='padding-bottom: 5px; padding-left: 15px; padding-right: 15px;'>";
+
+      if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+        // valittu ei n‰ytet‰ alveja vaikka hinnat alvillisina
+        if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+          echo "<font class='info'>(".t("Verottomat hinnat").")</font>";
+        }
+        // valittu n‰ytet‰‰n alvit vaikka hinnat alvittomia
+        if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+          echo "<font class='info'>(".t("Verolliset hinnat").")</font>";
+        }
+      }
     }
 
     if ($rivilaskuri > 0) {
@@ -7662,8 +7686,6 @@ if ($tee == '') {
                        "&ajax_popup=true" .
                        "&tuoteno={$row["tuoteno"]}" .
                        "&yksikko={$row["yksikko"]}" .
-                       "&tilattu={$row["tilkpl"]}" .
-                       "&varattu={$row["varattu"]}" .
                        "&paikka={$row["paikka"]}" .
                        "&keskihinta={$row["kehahin"]}" .
                        "&valuutta={$row["valuutta"]}" .

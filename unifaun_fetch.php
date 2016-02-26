@@ -118,20 +118,20 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
                     FROM lasku
                     LEFT JOIN asiakas ON (
-                      asiakas.yhtio  = lasku.yhtio AND
-                      asiakas.tunnus = lasku.liitostunnus)
+                      asiakas.yhtio            = lasku.yhtio AND
+                      asiakas.tunnus           = lasku.liitostunnus)
                     LEFT JOIN maksuehto ON (
-                      lasku.yhtio     = maksuehto.yhtio AND
-                      lasku.maksuehto = maksuehto.tunnus)
+                      lasku.yhtio              = maksuehto.yhtio AND
+                      lasku.maksuehto          = maksuehto.tunnus)
                     LEFT JOIN rahtikirjat ON (
-                      rahtikirjat.yhtio = lasku.yhtio AND
-                      rahtikirjat.otsikkonro = lasku.tunnus)
+                      rahtikirjat.yhtio        = lasku.yhtio AND
+                      rahtikirjat.otsikkonro   = lasku.tunnus)
                     LEFT JOIN rahtisopimukset ON (
                       lasku.ytunnus            = rahtisopimukset.ytunnus AND
                       rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
                       rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tunnus  = '{$eranumero_sscc}'";
+                    WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus           = '{$eranumero_sscc}'";
           $laskurow = mysql_fetch_assoc(pupe_query($query));
         }
 
@@ -199,9 +199,9 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
           $query = "SELECT *
                     FROM kerayserat
-                    WHERE yhtio   = '{$kukarow['yhtio']}'
-                    AND sscc      = '{$sscc}'
-                    AND nro       = '{$eranumero}'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND sscc    = '{$sscc}'
+                    AND nro     = '{$eranumero}'";
           $ker_res = pupe_query($query);
           $ker_row = mysql_fetch_assoc($ker_res);
 
@@ -210,20 +210,20 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email
                     FROM lasku
                     LEFT JOIN asiakas ON (
-                      asiakas.yhtio  = lasku.yhtio AND
-                      asiakas.tunnus = lasku.liitostunnus)
+                      asiakas.yhtio            = lasku.yhtio AND
+                      asiakas.tunnus           = lasku.liitostunnus)
                     LEFT JOIN maksuehto ON (
-                      lasku.yhtio     = maksuehto.yhtio AND
-                      lasku.maksuehto = maksuehto.tunnus)
+                      lasku.yhtio              = maksuehto.yhtio AND
+                      lasku.maksuehto          = maksuehto.tunnus)
                     LEFT JOIN rahtikirjat ON (
-                      rahtikirjat.yhtio = lasku.yhtio AND
-                      rahtikirjat.otsikkonro = lasku.tunnus)
+                      rahtikirjat.yhtio        = lasku.yhtio AND
+                      rahtikirjat.otsikkonro   = lasku.tunnus)
                     LEFT JOIN rahtisopimukset ON (
                       lasku.ytunnus            = rahtisopimukset.ytunnus AND
                       rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa AND
                       rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
-                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                    AND lasku.tunnus = '{$ker_row['otunnus']}'";
+                    WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus           = '{$ker_row['otunnus']}'";
           $laskures = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laskures);
 

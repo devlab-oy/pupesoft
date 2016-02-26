@@ -49,7 +49,8 @@ if (!isset($tee) or $tee == '') {
 
     $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
               FROM lasku
-              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' 
+              and alatila!='H' and alatila!='M' and tila!='D'
               ORDER BY erpcm";
     $result = pupe_query($query);
 
@@ -202,7 +203,7 @@ if (!isset($tee) or $tee == '') {
     echo "</table><br>";
   }
 
-  // Näytetään käyttäjäkohtaiset työmääräykset
+  // Näytetään käyttäjäkohtaiset työmääräykset ja työmääräykset joissa käyttäjä on vastuuhenkilönä
   $tyojonosql = "SELECT lasku.tunnus,
                  lasku.nimi,
                  lasku.toimaika,
@@ -210,7 +211,7 @@ if (!isset($tee) or $tee == '') {
                  a2.selitetark_2 tyostatusvari,
                  a5.selitetark tyom_prioriteetti
                  FROM lasku
-                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND (tyomaarays.suorittaja = '{$kukarow["kuka"]}' OR tyomaarays.vastuuhenkilo = '{$kukarow["kuka"]}'))
                  LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
                  LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
                  WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'

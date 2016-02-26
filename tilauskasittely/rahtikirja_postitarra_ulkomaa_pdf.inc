@@ -211,7 +211,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $pdf->draw_text(115,  500,  "Sender's business ID /",    $firstpage, $pieni);
   $pdf->draw_text(115,  495,  "No de T.V.A. de l'expéditeur",    $firstpage, $pieni);
-  $pdf->draw_text(185,  500,  $postirow["yhtio_maa"]."-".str_replace("0037", "", $postirow["yhtio_ovttunnus"]),    $firstpage, $norm);
+  $pdf->draw_text(185,  500,  $postirow["yhtio_maa"]."-".preg_replace("/^0037/", "", $postirow["yhtio_ovttunnus"]),    $firstpage, $norm);
 
 
   $pdf->draw_text(18,  485,  "Recipient (name and address) / Destinataire (nom et adresse)",    $firstpage, $pieni);
@@ -233,7 +233,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(115,  420,  "No de T.V.A.",    $firstpage, $pieni);
 
   if ($rakir_row["ovttunnus"] != "") {
-    $pdf->draw_text(155,  420,  $rakir_row['maa']."-".str_replace("0037", "", $rakir_row["ovttunnus"]),    $firstpage, $norm);
+    $pdf->draw_text(155,  420,  $rakir_row['maa']."-".preg_replace("/^0037/", "", $rakir_row["ovttunnus"]),    $firstpage, $norm);
   }
 
   // tuoteviivakoodin alle
@@ -356,26 +356,40 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 }
 
 if ($tulostakolli > 0) {
-  //keksitään uudelle failille joku varmasti uniikki nimi:
-  $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";
+  if (isset($kirjoitin) and $kirjoitin == "-88") {
+    js_openFormInNewWindow();
 
-  //kirjoitetaan pdf faili levylle..
-  $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-  fclose($fh);
-
-  //tulostetaan PDF
-  if ($kirjoitin == 'email') {
-    $liite = $pdffilenimi;
-    $kutsu = "Postitarra";
-
-    require "inc/sahkoposti.inc";
-  }
-  elseif ($kirjoitin == 'PDF_RUUDULLE') {
-    //Työnnetään tuo pdf vaan putkeen!
-    echo file_get_contents($pdffilenimi);
+    echo "<br><form id='tulostakopioform_postitarra_{$postirow['tunnus']}' name='tulostakopioform_postitarra_{$postirow['tunnus']}' method='post' action='{$palvelin2}rahtikirja-kopio.php' autocomplete='off'>
+          <input type='hidden' name='rtunnukset[]' value='{$rahtikirjanro}'>
+          <input type='hidden' name='tee' value='tulosta'>
+          <input type='hidden' name='real_submit' value='joo'>
+          <input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
+          <input type='hidden' name='yksittainen' value='ON'>
+          <input type='hidden' name='komento' value='PDF_RUUDULLE'>
+          <input type='submit' value='".t("Pakettikortti").": {$postirow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_postitarra_{$postirow['tunnus']}', ''); return false;\"></form><br>";
   }
   else {
-    $line = exec("$kirjoitin $pdffilenimi");
+    //keksitään uudelle failille joku varmasti uniikki nimi:
+    $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";
+
+    //kirjoitetaan pdf faili levylle..
+    $fh = fopen($pdffilenimi, "w");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+    fclose($fh);
+
+    //tulostetaan PDF
+    if ($kirjoitin == 'email') {
+      $liite = $pdffilenimi;
+      $kutsu = "Postitarra";
+
+      require "inc/sahkoposti.inc";
+    }
+    elseif ($kirjoitin == 'PDF_RUUDULLE') {
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
+    else {
+      $line = exec("$kirjoitin $pdffilenimi");
+    }
   }
 }

@@ -3,8 +3,7 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaManufacturers extends PrestaClient {
-
-  public $all_records = null;
+  private $all_records = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -18,6 +17,10 @@ class PrestaManufacturers extends PrestaClient {
     }
 
     return null;
+  }
+
+  public function reset_all_records() {
+    $this->all_records = null;
   }
 
   protected function resource_name() {

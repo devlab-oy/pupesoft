@@ -24,9 +24,10 @@ class PrestaAddresses extends PrestaClient {
 
 
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_address)) {
+    if (is_null($existing_address)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_address;
     }
 

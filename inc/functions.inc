@@ -9072,11 +9072,12 @@ if (!function_exists("livesearch_tuotehaku")) {
         document.getElementById('livesearch_{$hakuid}').style.visibility = 'visible';
       </script>";
 
-      $haku_array     = explode(" ", $haku);
+      $haku_array = explode(" ", $haku);
       $tuoteno_haku_query = "";
       $nimitys_haku_query = "";
-      $tuoteindex     = "";
-      $nimitindex      = "";
+      $muuta_haku_query = "";
+      $tuoteindex = "";
+      $nimitindex = "";
 
       if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
         $tuoteindex = "USE INDEX (tuoteno)";
@@ -9086,7 +9087,12 @@ if (!function_exists("livesearch_tuotehaku")) {
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
 
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('H', 'I'))) {
+          $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+          $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
+          $muuta_haku_query .= " and tuote.muuta like ('%{$haku}%') ";
+        }
+        elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
           $tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
           $nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
         }
@@ -9165,8 +9171,20 @@ if (!function_exists("livesearch_tuotehaku")) {
                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                  {$naytetaanko_poistetut}
                  {$kieltolisa}
-                 {$nimitys_haku_query})
-                 ORDER BY jarjestys, tuoteno
+                 {$nimitys_haku_query})";
+
+      if (!empty($muuta_haku_query)) {
+        $query .= "UNION
+                  (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
+                  if (tuote.muuta = '{$haku}', 1, if(left(tuote.muuta, length('{$haku}')) = '{$haku}', 2, if(tuote.tuoteno = '{$haku}', 3, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  {$naytetaanko_poistetut}
+                  {$kieltolisa}
+                  {$muuta_haku_query})";
+      }
+
+      $query .= " ORDER BY jarjestys, tuoteno
                  LIMIT 500";
       $result = pupe_query($query);
 
@@ -9177,7 +9195,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I'))) {
 
           $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
 
@@ -9226,7 +9244,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 
@@ -32263,7 +32281,20 @@ if (!function_exists('generoi_hinnastot')) {
     $valuu_result = pupe_query($query);
 
     while ($valuu = mysql_fetch_assoc($valuu_result)) {
+      $query = "SELECT hinta
+                FROM hinnasto
+                WHERE tuoteno = '{$tuote["tuoteno"]}'
+                AND yhtio = '{$kukarow["yhtio"]}'
+                AND valkoodi = '{$valuu["nimi"]}'
+                AND ((alkupvm <= current_date AND if(loppupvm = '0000-00-00', '9999-12-31', loppupvm) >= current_date) OR (alkupvm = '0000-00-00' AND loppupvm = '0000-00-00'))
+                ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(alkupvm), 9999999999999), maa DESC
+                LIMIT 1";
+      $result = pupe_query($query);
+      $hinnastorow = mysql_fetch_assoc($result);
+
       $hinta = round($tuote["myyntihinta"] * $valuu["hinnastokurssi"], 6);
+
+      if ($hinnastorow["hinta"] == $hinta) continue;
 
       $query = "INSERT INTO hinnasto SET
                 alkupvm    = NOW(),

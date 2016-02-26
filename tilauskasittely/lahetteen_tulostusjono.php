@@ -58,6 +58,22 @@ $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t(
 
 js_popup();
 
+if ($toim == 'SIIRTOLISTA') {
+  echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
+}
+elseif ($toim == 'SIIRTOTYOMAARAYS') {
+  echo "<font class='head'>".t("Tulosta sisäinen työmääräys").":</font><hr>";
+}
+elseif ($toim == 'VALMISTUS') {
+  echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
+}
+elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
+  echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
+}
+else {
+  echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
+}
+
 if ($toim == 'KAIKKILISTAT') {
   $tila         = "N";
   $lalatila      = "A";
@@ -358,24 +374,7 @@ if ($tee2 == 'VALITSE') {
     $keskenresult = pupe_query($query);
 
     //jos kaikki on ok...
-    if (mysql_num_rows($keskenresult)==0) {
-
-      if ($toim == 'SIIRTOLISTA') {
-        echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
-      }
-      elseif ($toim == 'SIIRTOTYOMAARAYS') {
-        echo "<font class='head'>".t("Tulosta sisäinen työmääräys").":</font><hr>";
-      }
-      elseif ($toim == 'VALMISTUS') {
-        echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
-      }
-      elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
-        echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
-      }
-      else {
-        echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
-      }
-
+    if (mysql_num_rows($keskenresult) == 0) {
       echo "<form method='post'>";
       echo "<input type='hidden' name='toim'       value='$toim'>";
       echo "<input type='hidden' name='jarj'       value='$jarj'>";
@@ -574,6 +573,15 @@ if ($tee2 == 'VALITSE') {
 
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
+
+      $sel = '';
+
+      //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+      if (($kirjoitin == "-88" and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kukarow['kirjoitin'] == "-88")) {
+        $sel = "SELECTED";
+      }
+
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select></td></tr>";
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
@@ -581,8 +589,8 @@ if ($tee2 == 'VALITSE') {
 
       echo "<br>";
       echo "<form action = 'lahetteen_tulostusjono.php' method = 'post'>
-        <input type='hidden' name='toim' value='$toim'>
-        <input type='hidden' name='lopetus' value='$lopetus'>";
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<br><input type='submit' value='".t("Takaisin tilauksen valintaan")."'>";
       echo "</form>";
     }
@@ -598,22 +606,6 @@ if ($tee2 == '') {
 
     $yhtiorow = hae_yhtion_parametrit($lasku_yhtio_originaali);
     $kukarow['yhtio'] = $lasku_yhtio_originaali;
-  }
-
-  if ($toim == 'SIIRTOLISTA') {
-    echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
-  }
-  elseif ($toim == 'SIIRTOTYOMAARAYS') {
-    echo "<font class='head'>".t("Tulosta sisäinen työmääräys").":</font><hr>";
-  }
-  elseif ($toim == 'VALMISTUS') {
-    echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
-  }
-  elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
-    echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
-  }
-  else {
-    echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
   }
 
   /*
@@ -1288,6 +1280,14 @@ if ($tee2 == '') {
           echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
         }
 
+        $sel = '';
+
+        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+        if (($kirjoitin == "-88" and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kukarow['kirjoitin'] == "-88")) {
+          $sel = "SELECTED";
+        }
+
+        echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
         echo "</select></$ero>";
 
         echo "<input type='hidden' name='toim'       value='$toim'>";
@@ -1407,6 +1407,14 @@ if ($tee2 == '') {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
 
+      $sel = '';
+
+      //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+      if ($kukarow['kirjoitin'] == "-88") {
+        $sel = "SELECTED";
+      }
+
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select></td>";
 
       $tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));

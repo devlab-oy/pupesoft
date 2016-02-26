@@ -6,6 +6,7 @@ require_once 'rajapinnat/logger.php';
 class PrestaCategories {
   private $_categories = null;
   private $_empty_category = null;
+  private $_category_sync = true;
 
   private $presta_url = null;
   private $presta_client = null;
@@ -17,12 +18,19 @@ class PrestaCategories {
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
 
-    $this->logger = new Logger('/tmp/presta_log.txt');
+    $log_path = is_dir('/home/devlab/logs') ? '/home/devlab/logs' : '/tmp';
+
+    $this->logger = new Logger("{$log_path}/presta_export.log");
     $this->logger->set_date_format('Y-m-d H:i:s');
   }
 
   public function sync_categories($pupesoft_categories) {
     $this->logger->log("---Start category import---");
+
+    if ($this->_category_sync === false) {
+      $this->logger->log("Category sync distabled!");
+      return;
+    }
 
     $count = count($pupesoft_categories) - 1;
     $current = 1;
@@ -104,8 +112,9 @@ class PrestaCategories {
   }
 
   private function delete_unnecessary_categories($pupesoft_categories) {
-    // collect all presta ID:s we should keep (always keep home)
+    // collect all presta ID:s we should keep (always keep home and root 1)
     $keep_presta_ids = array(
+      1,
       (int) $this->presta_home_category_id
     );
 
@@ -284,9 +293,15 @@ class PrestaCategories {
       return true;
     }
 
-    $category->category->name->language[0]          = $new_name;
-    $category->category->link_rewrite->language[0]  = $new_url;
-    $category->category->meta_keywords->language[0] = $new_tunnus;
+    $languages = count($category->category->name->language);
+
+    // we must set these for all languages
+    for ($i=0; $i < $languages; $i++) {
+      $category->category->name->language[$i]          = $new_name;
+      $category->category->link_rewrite->language[$i]  = $new_url;
+      $category->category->meta_keywords->language[$i] = $new_tunnus;
+    }
+
     $category->category->active                     = $new_active;
     $category->category->id_parent                  = $new_parent_id;
 
@@ -332,10 +347,15 @@ class PrestaCategories {
 
     $friendly_url = $this->parameterize($koodi, $nimi);
 
-    // change category info
-    $category->category->name->language[0] = utf8_encode($nimi);
-    $category->category->link_rewrite->language[0] = utf8_encode($friendly_url);
-    $category->category->meta_keywords->language[0] = $tunnus;
+    $languages = count($category->category->name->language);
+
+    // change category info for every language
+    for ($i=0; $i < $languages; $i++) {
+      $category->category->name->language[$i] = utf8_encode($nimi);
+      $category->category->link_rewrite->language[$i] = utf8_encode($friendly_url);
+      $category->category->meta_keywords->language[$i] = $tunnus;
+    }
+
     $category->category->active = 1;
     $category->category->id_parent = $parent_id;
 
@@ -385,5 +405,11 @@ class PrestaCategories {
     }
 
     return preg_replace("/[^a-zA-Z0-9_]+/", "", $string);
+  }
+
+  public function set_category_sync($value) {
+    if ($value === false) {
+      $this->_category_sync = false;
+    }
   }
 }

@@ -2120,6 +2120,21 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     sahkoinen_lahete($laskurow);
   }
 
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+    and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
+
+    $params_tilausvahvistus = array(
+      'tee'            => $tee,
+      'toim'           => $toim,
+      'kieli'          => $kieli,
+      'laskurow'       => $laskurow,
+      'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+    );
+
+    laheta_tilausvahvistus($params_tilausvahvistus);
+  }
+
   if ($tee == 'VALMIS' or $yhtiorow['reklamaation_kasittely'] == 'X') {
     $alatila_lisa = "AND alatila = ''";              // semilaaja reklamaatio & takuu
   }

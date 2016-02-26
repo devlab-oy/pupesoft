@@ -77,15 +77,28 @@ else {
   }
 }
 
+if ($row['tapa'] == "Työmääräys" and ($tapa == 'tuonti' or $tapa == 'tuontivienti')) {
+  // käydään läpi kaikki laskut
+  $query = "SELECT lasku.*,
+            if(tyomaarays.maa_lahetys = '', if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys), tyomaarays.maa_lahetys) as maalahetys,
+            if(tyomaarays.maa_maara = '', if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara), tyomaarays.maa_maara) as maamaara
+            FROM lasku
+            JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus)
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus  in ({$row['kaikkitunnukset']})";
+}
+else {
+  // käydään läpi kaikki laskut
+  $query = "SELECT lasku.*,
+            if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+            if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
+             FROM lasku
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tunnus  in ($row[kaikkitunnukset])";
+}
 
-// käydään läpi kaikki laskut
-$query = "SELECT lasku.*,
-          if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
-           FROM lasku
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tunnus  in ($row[kaikkitunnukset])";
 $intrlasres = pupe_query($query);
 
 while ($intrlasrow = mysql_fetch_array($intrlasres)) {
@@ -122,12 +135,14 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
   // tuontispecific tarkistuksia
   if ($tapa == 'tuonti' or $tapa == 'tuontivienti') {
 
+    $lisatoim = $row['tapa'] == "Työmääräys" ? "&toim=TYOMAARAYS" : "";
+
     if ($intrlasrow["maalahetys"] == '') {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
+      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
       $virhe++;
     }
     elseif ($intrlasrow["maalahetys"] == $yhtiorow["maa"]) {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
+      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
       $virhe++;
     }
     else {
@@ -137,13 +152,13 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
       $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
-        $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen")."!<br>";
+        $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen")."!<br>";
         $virhe++;
       }
       else {
         $eurow = mysql_fetch_array($maaresult);
         if ($eurow["eu"] == "") {
-          $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen").": NON-EU!<br>";
+          $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K{$lisatoim}&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen").": NON-EU!<br>";
           $virhe++;
         }
       }

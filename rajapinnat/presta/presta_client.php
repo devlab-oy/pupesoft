@@ -57,6 +57,10 @@ abstract class PrestaClient {
    * @throws Exception
    */
   protected function get_empty_schema() {
+    if (isset($this->schema)) {
+      return $this->schema;
+    }
+
     $resource = $this->resource_name();
     $opt = array(
       'resource' => "{$resource}?schema=blank"
@@ -64,16 +68,25 @@ abstract class PrestaClient {
 
     try {
       $schema = $this->ws->get($opt);
-      $msg = "Resurssin {$resource} empty schema haettu";
+      $msg = "Haetaan {$resource} empty schema";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Resurssin {$resource} empty schema GET epäonnistui";
+      $msg = "Empty schema haku {$resource} epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
 
+    $this->schema = $schema;
+
     return $schema;
+  }
+
+  protected function empty_xml() {
+    $empty = $this->get_empty_schema()->asXML();
+    $xml   = new SimpleXMLElement($empty);
+
+    return $xml;
   }
 
   /**
@@ -127,12 +140,12 @@ abstract class PrestaClient {
     );
 
     try {
-      $response_xml = $this->ws->get($opt);
-      $msg = "Resurssin {$resource} {$id} haettu";
+      $msg = "Haetaan {$resource} id {$id} Prestasta";
       $this->logger->log($msg);
+      $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Resurssin: {$resource} {$id} haku epäonnistui";
+      $msg = "Haku {$resource} id {$id} Prestasta epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -153,16 +166,14 @@ abstract class PrestaClient {
     );
 
     try {
-      if (empty($this->schema)) {
-        $this->schema = $this->get_empty_schema();
-      }
+      $this->get_empty_schema();
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
       $response_xml = $this->ws->add($opt);
-      //@TODO Resource IDENTIFIER to log message
-      $this->logger->log("Luotiin resurssi:" . $this->resource_name());
+
+      $this->logger->log("Luotiin Prestaan uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti Prestaan epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -181,9 +192,8 @@ abstract class PrestaClient {
   protected function update($id, array $resource) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id);
-    if (empty($this->schema)) {
-      $this->schema = $this->get_empty_schema();
-    }
+    $this->get_empty_schema();
+
     $xml = $this->generate_xml($resource, $existing_resource);
 
     return $this->update_xml($id, $xml);
@@ -208,13 +218,10 @@ abstract class PrestaClient {
     try {
       $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
-      //@TODO Resource IDENTIFIER to log message
-      $this->logger->log("Päivitettiin resurssi: " . $this->resource_name());
+      $this->logger->log("Päivitettiin " . $this->resource_name() . " id $id");
     }
     catch (Exception $e) {
-      $msg = "Resurssin: "
-        . $this->resource_name()
-        . " {$id} päivittäminen epäonnistui";
+      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -255,13 +262,11 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Resurssin {$resource} kaikki rivit haettu";
+      $msg = "Kaikki {$resource} rivit haettu";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien resurssin "
-        . $resource
-        . " rivien haku epäonnistui";
+      $msg = "Kaikkien {$resource} rivien haku epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -317,13 +322,11 @@ abstract class PrestaClient {
 
     try {
       $response_bool = $this->ws->delete($opt);
-      $msg = "Resurssin " . $this->resource_name() . " {$id} poistettu";
+      $msg = "Poistettiin " . $this->resource_name() . " id {$id}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Resurssin: "
-        . $this->resource_name()
-        . " {$id} poistaminen epäonnistui";
+      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -376,7 +379,7 @@ abstract class PrestaClient {
    * @return string
    */
   protected function saniteze_link_rewrite($string) {
-    return preg_replace('/[^a-zA-Z0-9]/', '', $string);
+    return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

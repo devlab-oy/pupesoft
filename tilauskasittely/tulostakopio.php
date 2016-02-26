@@ -2421,6 +2421,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         if ($oslarow['osoitelappu'] == 'intrade') {
           require 'osoitelappu_intrade_pdf.inc';
         }
+        elseif ($oslarow['osoitelappu'] == 'hornbach') {
+          require 'osoitelappu_hornbach_pdf.inc';
+        }
         elseif ($oslarow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
 
           // Yritetään komennon avulla löytää oikea tulostin....

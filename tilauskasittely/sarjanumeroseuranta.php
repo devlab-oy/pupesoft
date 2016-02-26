@@ -1801,10 +1801,10 @@ function generoi_sarjanumero($tuote, $tunnuskentta = "") {
 
     break;
   case 2:
-    $query = "SELECT max(substr(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
+    $query = "SELECT max(substring(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
               FROM sarjanumeroseuranta
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND substr(sarjanumero, 1, 4) = year(now())";
+              AND substring(sarjanumero, 1, 4) = year(now())";
 
     $result = pupe_query($query);
     $row    = mysql_fetch_assoc($result);

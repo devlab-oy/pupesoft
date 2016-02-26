@@ -931,7 +931,7 @@ else {
       $tasoluku = strlen($tasorow["taso"]);
 
       // tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
-      $apusort = str_pad($tasorow["taso"], 20, "Ö");
+      $apusort = str_pad($tasorow["taso"], 20, "Z");
       $tasonimi[$apusort] = $tasorow["nimi"];
 
       // Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinpäätöksessä
@@ -1168,7 +1168,7 @@ else {
 
       $px++;
 
-      $key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
+      $key = str_replace("Z", "", $key_c); // Ö-kirjaimet pois
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {

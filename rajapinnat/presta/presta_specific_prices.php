@@ -133,14 +133,14 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
-          if (!empty($price['alennus']) and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+          if ($price['tyyppi'] !== 'hinnastohinta') and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
             $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennukselle {$price['alennus']} ei ole asiakastunnusta eikä asiakasryhmää");
             continue;
           }
 
           $this->create($price);
 
-          $message = "Lisätty tuotteelle '{$price['tuoteno']}'";
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
 
           if (isset($price['alennus'])) {
             $message .= " alennus '{$price['alennus']}'";

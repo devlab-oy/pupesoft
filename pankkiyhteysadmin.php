@@ -37,9 +37,9 @@ if ($tee == 'paivita_hae_factoring') {
   $hae_factoring = isset($hae_factoring) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET
-            hae_factoring   = {$hae_factoring}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
+            hae_factoring = {$hae_factoring}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
   pupe_query($query);
 
   $tee = "";

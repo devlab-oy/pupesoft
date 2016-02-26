@@ -150,7 +150,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$asiakasid'";
+                AND tunnus  = '$asiakasid'";
       $asres = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asres);
 
@@ -276,11 +276,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
     $query = "SELECT summa, viite, valkoodi
               FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tila = 'U'
-              and alatila = 'X'
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and tila         = 'U'
+              and alatila      = 'X'
               and liitostunnus = '$asiakasrow[tunnus]'
-              and tunnus = $lt";
+              and tunnus       = $lt";
     $res = pupe_query($query);
     $row = mysql_fetch_array($res);
 
@@ -665,11 +665,11 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     $query = "SELECT lasku.*
               FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
               JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.jv!='')
-              WHERE lasku.yhtio     = '$kukarow[yhtio]'
-              and lasku.tila        = 'U'
-              and lasku.alatila     = 'X'
+              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              and lasku.tila         = 'U'
+              and lasku.alatila      = 'X'
               and lasku.liitostunnus = '$asiakasid'
-              and lasku.tapvm >= date_sub(now(), INTERVAL 90 DAY)";
+              and lasku.tapvm        >= date_sub(now(), INTERVAL 90 DAY)";
     $res = pupe_query($query);
 
     if (mysql_num_rows($res)) {

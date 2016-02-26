@@ -263,9 +263,9 @@ class PrestaCategories {
     $parent_id    = (int)    $params['parent_id'];
 
     if ($category === false
-        or empty($nimi)
-        or empty($tunnus)
-        or empty($parent_id)) {
+      or empty($nimi)
+      or empty($tunnus)
+      or empty($parent_id)) {
       return false;
     }
 
@@ -286,10 +286,10 @@ class PrestaCategories {
 
     // if nothing changes, don't do anything
     if ($new_name == $before_name and
-        $new_url == $before_url and
-        $new_tunnus == $before_tunnus and
-        $new_active == $before_active and
-        $new_parent_id == $before_parent_id) {
+      $new_url == $before_url and
+      $new_tunnus == $before_tunnus and
+      $new_active == $before_active and
+      $new_parent_id == $before_parent_id) {
       return true;
     }
 
@@ -320,10 +320,10 @@ class PrestaCategories {
       return false;
     }
 
-    # update instance variable with these values
+    // update instance variable with these values
     $return = $this->update_category_array($id, $category);
 
-    # update failed, set to null
+    // update failed, set to null
     if ($return === false) {
       $this->_categories = null;
     }
@@ -339,9 +339,9 @@ class PrestaCategories {
     $parent_id    = (int)    $params['parent_id'];
 
     if ($category === false
-        or empty($nimi)
-        or empty($tunnus)
-        or empty($parent_id)) {
+      or empty($nimi)
+      or empty($tunnus)
+      or empty($parent_id)) {
       return false;
     }
 
@@ -373,7 +373,7 @@ class PrestaCategories {
       return false;
     }
 
-    # add this to the instance variable
+    // add this to the instance variable
     $this->_categories[] = $category;
 
     return true;

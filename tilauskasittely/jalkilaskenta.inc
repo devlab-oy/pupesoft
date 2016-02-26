@@ -2,9 +2,9 @@
 
 /* Tälle on annettava
 
-$tuoteno   = korjattava tuote
-$pvm     = mihin päivään asti korjataan
-$uusihinta   = mikä on tuon pvm:n oikea ostohinta
+$tuoteno = korjattava tuote
+$pvm = mihin päivään asti korjataan
+$uusihinta = mikä on tuon pvm:n oikea ostohinta
 $rivitunnus = mikä on tapahtuman tehneen rivin tunnus
 
 Palautetaan $jlerror, joka on 1, jos jotain epätavallista sattui
@@ -17,7 +17,7 @@ $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa,
 if (!function_exists("korjaalaskut")) {
   function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
     global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $varastotili,
-    $varastonmuutostili;
+    $varastonmuutostili, $_jalkilaskenta_selite;
 
     if ($korjtunnus != 0) {
       $lisa = " and tilausrivi.tunnus = '$korjtunnus' ";
@@ -67,7 +67,7 @@ if (!function_exists("korjaalaskut")) {
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$tilausrivi[ltunnus]'";
       $laskures = pupe_query($query);
-      $lasku    = mysql_fetch_assoc($laskures);
+      $lasku = mysql_fetch_assoc($laskures);
 
       // Katotaan mille kustannuspaikalle tuote on alunperin tiliöity
       // HUOM: sama pätkä kuin teelaskuntiliointi.inc:ssä
@@ -87,7 +87,7 @@ if (!function_exists("korjaalaskut")) {
                 AND tilausrivi.tyyppi   = 'L'
                 AND tilausrivi.yhtio    = '$kukarow[yhtio]'";
       $xresult = pupe_query($query);
-      $xrivi  = mysql_fetch_assoc($xresult);
+      $xrivi = mysql_fetch_assoc($xresult);
 
       // katotaan saadaanko tehdä tiliöintejä
       // tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
@@ -173,7 +173,7 @@ if (!function_exists("korjaalaskut")) {
                   tapvm    = '{$pvm}',
                   summa    = $uusi_varasto_kp,
                   vero     = 0,
-                  selite   = 'Varastostamyynti $lasku[nimi]',
+                  selite   = 'Varastostamyynti $lasku[nimi] {$_jalkilaskenta_selite}',
                   lukko    = '',
                   laatija  = '$kukarow[kuka]',
                   laadittu = now()";
@@ -193,7 +193,7 @@ if (!function_exists("korjaalaskut")) {
                   tapvm    = '{$pvm}',
                   summa    = $uusi_varastonmuutos_kp,
                   vero     = 0,
-                  selite   = 'Varastostamyynti $lasku[nimi]',
+                  selite   = 'Varastostamyynti $lasku[nimi] {$_jalkilaskenta_selite}',
                   lukko    = '',
                   laatija  = '$kukarow[kuka]',
                   laadittu = now()";
@@ -292,50 +292,56 @@ if (!function_exists("korjaalaskut")) {
 
         $pvm = $tilikausi_alku > (int) str_replace("-", "", $tiliointi1["tapvm"]) ? $yhtiorow['tilikausi_alku'] : "";
 
+        $tiliointi1['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tiliointi1['selite']);
+        $tiliointi1['selite'] = trim($tiliointi1['selite']." $_jalkilaskenta_selite");
+
+        $tiliointi2['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tiliointi2['selite']);
+        $tiliointi2['selite'] = trim($tiliointi2['selite']." $_jalkilaskenta_selite");
+
         // Ollaan avoimella tilikaudella
         if ($pvm == "") {
 
           // Yliviivataan alkuperäinen varastonmuutostiliöinti
-          $query = "UPDATE tiliointi SET korjattu = '{$kukarow['kuka']}', korjausaika = now() WHERE tunnus='{$tiliointi1['tunnus']}'";
+          $query = "UPDATE tiliointi
+                    SET korjattu = '{$kukarow['kuka']}',
+                    korjausaika  = now(),
+                    selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
+                    WHERE tunnus = '{$tiliointi1['tunnus']}'";
           $katekorjres = pupe_query($query);
 
           if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-          if (stripos($tiliointi1['selite'], t("Jälkilaskennan korjaus")) === FALSE and stripos($tiliointi1['selite'], "Jälkilaskennan korjaus") === FALSE) {
-            $tiliointi1['selite'] = "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus");
-          }
-
           // Tehdään uusi varastonmuutostiliöinti
           $params = array(
-            'summa'     => ($tiliointi1['summa'] + $muutos),
-            'korjattu'     => '',
-            'korjausaika'   => '',
-            'laatija'     => $kukarow['kuka'],
-            'laadittu'     => date('Y-m-d H:i:s'),
-            'selite'     => $tiliointi1['selite'],
+            'summa' => ($tiliointi1['summa'] + $muutos),
+            'korjattu' => '',
+            'korjausaika' => '',
+            'laatija' => $kukarow['kuka'],
+            'laadittu' => date('Y-m-d H:i:s'),
+            'selite' => $tiliointi1['selite'],
           );
 
           // Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
           kopioitiliointi($tiliointi1['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
           // Yliviivataan alkuperäinen varastotiliöinti
-          $query = "UPDATE tiliointi SET korjattu = '{$kukarow['kuka']}', korjausaika = now() WHERE tunnus='{$tiliointi2['tunnus']}'";
+          $query = "UPDATE tiliointi
+                    SET korjattu = '{$kukarow['kuka']}',
+                    korjausaika  = now(),
+                    selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
+                    WHERE tunnus = '{$tiliointi2['tunnus']}'";
           $katekorjres = pupe_query($query);
 
           if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-          if (stripos($tiliointi2['selite'], t("Jälkilaskennan korjaus")) === FALSE and stripos($tiliointi2['selite'], "Jälkilaskennan korjaus") === FALSE) {
-            $tiliointi2['selite'] = "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus");
-          }
-
           // Tehdään uusi varastotiliöinti
           $params = array(
-            'summa'     => ($tiliointi2['summa'] - $muutos),
-            'korjattu'     => '',
-            'korjausaika'   => '',
-            'laatija'     => $kukarow['kuka'],
-            'laadittu'     => date('Y-m-d H:i:s'),
-            'selite'     => $tiliointi2['selite'],
+            'summa' => ($tiliointi2['summa'] - $muutos),
+            'korjattu' => '',
+            'korjausaika' => '',
+            'laatija' => $kukarow['kuka'],
+            'laadittu' => date('Y-m-d H:i:s'),
+            'selite' => $tiliointi2['selite'],
           );
 
           // Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
@@ -373,7 +379,7 @@ if (!function_exists("korjaalaskut")) {
             'korjausaika' => '',
             'laatija' => $kukarow['kuka'],
             'laadittu' => date('Y-m-d H:i:s'),
-            'selite' => "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus"),
+            'selite' => $tiliointi1['selite'],
           );
 
           // Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
@@ -387,7 +393,7 @@ if (!function_exists("korjaalaskut")) {
             'korjausaika' => '',
             'laatija' => $kukarow['kuka'],
             'laadittu' => date('Y-m-d H:i:s'),
-            'selite' => "{$tiliointi1['selite']} ".t("Jälkilaskennan korjaus"),
+            'selite' => $tiliointi1['selite'],
           );
 
           // Tehdään uusi varastonmuutostiliöinti oikeilla arvoilla
@@ -405,7 +411,7 @@ if (!function_exists("korjaalaskut")) {
             'korjausaika' => '',
             'laatija' => $kukarow['kuka'],
             'laadittu' => date('Y-m-d H:i:s'),
-            'selite' => "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus"),
+            'selite' => $tiliointi2['selite'],
           );
 
           //  Tehdään vastakirjaus alkuperäiselle varastotiliöinnille
@@ -419,7 +425,7 @@ if (!function_exists("korjaalaskut")) {
             'korjausaika' => '',
             'laatija' => $kukarow['kuka'],
             'laadittu' => date('Y-m-d H:i:s'),
-            'selite' => "{$tiliointi2['selite']} ".t("Jälkilaskennan korjaus"),
+            'selite' => $tiliointi2['selite'],
           );
 
           // Tehdään uusi varastotiliöinti oikeilla arvoilla
@@ -452,7 +458,7 @@ if (!function_exists("korjaalaskut")) {
 
 if (!function_exists('korjaatapahtuma')) {
   function korjaatapahtuma($tapahtuma_tunnus, $selite_txt, $upd_hinta, $upd_kplhinta = FALSE) {
-    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
+    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $_jalkilaskenta_selite;
 
     // Haetaan ensimmäinen
     $query = "SELECT LEFT(laadittu, 10) laadittu, rivitunnus, tunnus, selite, kplhinta, hinta, kpl, laji
@@ -489,7 +495,7 @@ if (!function_exists('korjaatapahtuma')) {
     if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
     $tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
-    $korjaus_alku   = (int) str_replace("-", "", $tun_chk_row["laadittu"]);
+    $korjaus_alku = (int) str_replace("-", "", $tun_chk_row["laadittu"]);
 
     // Korjataan tapahtumia suljetulla tilikaudella
     if ($tilikausi_alku > $korjaus_alku) {
@@ -511,11 +517,11 @@ if (!function_exists('korjaatapahtuma')) {
       $hinta_chk_row = mysql_fetch_assoc($hinta_chk_res);
 
       $params = array(
-        'kpl'     => ($tun_chk_row['kpl'] * -1),
-        'selite'   => "{$tun_chk_row['selite']}{$selite_txt}",
-        'laadittu'   => "{$yhtiorow['tilikausi_alku']} 00:00:00",
-        'laatija'   => $kukarow['kuka'],
-        'laji'    => "korjaus",
+        'kpl' => ($tun_chk_row['kpl'] * -1),
+        'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
+        'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
+        'laatija' => $kukarow['kuka'],
+        'laji' => "korjaus",
       );
 
       $params['hinta'] = $hinta_chk_row['hinta'];
@@ -527,10 +533,10 @@ if (!function_exists('korjaatapahtuma')) {
       kopioitapahtuma($tapahtuma_tunnus, $params);
 
       $params = array(
-        'selite'   => "{$tun_chk_row['selite']}{$selite_txt}",
-        'laadittu'  => "{$yhtiorow['tilikausi_alku']} 00:00:00",
-        'laatija'   => $kukarow['kuka'],
-        'laji'     => "korjaus",
+        'selite' => "{$tun_chk_row['selite']}{$selite_txt}",
+        'laadittu' => "{$yhtiorow['tilikausi_alku']} 00:00:00",
+        'laatija' => $kukarow['kuka'],
+        'laji' => "korjaus",
       );
 
       // Laitetaan inventoinnin korjaustapahtumassa alkuperäisen tapahtuman tunnus rivitunnukseksi
@@ -598,14 +604,14 @@ if ($tuoteno != '') {
     //Tähän haaraan mennään jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveiltä
     if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "Tuotenumero $tuoteno on sarjanumeroseurannassa<br>";
 
-    $query  = "SELECT tilausrivi.yhtio, tapahtuma.tunnus tapahtuma_tunnus
-               FROM tilausrivi
-               JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus AND tapahtuma.laji != 'korjaus')
-               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-               and ((tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0) or (tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0))
-               and tilausrivi.laskutettuaika != '0000-00-00'
-               and tilausrivi.tunnus          = '$rivitunnus'
-               and tilausrivi.tuoteno         = '$tuoteno'";
+    $query = "SELECT tilausrivi.yhtio, tapahtuma.tunnus tapahtuma_tunnus
+              FROM tilausrivi
+              JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus AND tapahtuma.laji != 'korjaus')
+              WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
+              and ((tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0) or (tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0))
+              and tilausrivi.laskutettuaika != '0000-00-00'
+              and tilausrivi.tunnus          = '$rivitunnus'
+              and tilausrivi.tuoteno         = '$tuoteno'";
     $rxiviresult = pupe_query($query);
 
     if (mysql_num_rows($rxiviresult) == 1 and is_numeric($uusihinta)) {
@@ -613,11 +619,11 @@ if ($tuoteno != '') {
       $rxivirow = mysql_fetch_assoc($rxiviresult);
 
       // Päivitetään ostotilausrivin rivihinta
-      $query  = "UPDATE tilausrivi
-                 SET rivihinta = round($uusihinta*kpl,2)
-                 WHERE yhtio = '$kukarow[yhtio]'
-                 and tunnus  = '$rivitunnus'
-                 and tuoteno = '$tuoteno'";
+      $query = "UPDATE tilausrivi
+                SET rivihinta = round($uusihinta*kpl,2)
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rivitunnus'
+                and tuoteno = '$tuoteno'";
       $result = pupe_query($query);
 
       $selite_txt = ",<br>".t("Jälkilaskennan ostohinta", $yhtiorow['kieli']).": $uusihinta (".tv1dateconv(date("Y-m-d")).")";
@@ -685,12 +691,12 @@ if ($tuoteno != '') {
     //Tähän haaraan mennään jos tuotteella ei ole sarjanumeroseurantaa eli ylläpidetään keskihankintahintaa tuotteella
 
     //Alkusaldo
-    $query  = "SELECT sum(saldo) saldo
-               FROM tuotepaikat
-               WHERE yhtio = '$kukarow[yhtio]'
-               AND tuoteno = '$tuoteno'";
+    $query = "SELECT sum(saldo) saldo
+              FROM tuotepaikat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tuoteno = '$tuoteno'";
     $result = pupe_query($query);
-    $saldo  = mysql_fetch_assoc($result);
+    $saldo = mysql_fetch_assoc($result);
 
     //Kääntöpiste
     $query = "SELECT *
@@ -737,6 +743,15 @@ if ($tuoteno != '') {
     else {
       $tapahtuma = mysql_fetch_assoc($result);
       $pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
+
+      $tapahtuma['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $tapahtuma['selite']);
+      $tapahtuma['selite'] = trim($tapahtuma['selite']." $_jalkilaskenta_selite");
+
+      $query = "UPDATE tapahtuma
+                SET selite = '{$tapahtuma['selite']}'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '{$tapahtuma['tunnus']}'";
+      pupe_query($query);
     }
 
     if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti100pvm'] != '0000-00-00')) {
@@ -837,10 +852,10 @@ if ($tuoteno != '') {
           $testiapukala = round($uusihinta * $apujlrow["kpl"], $yhtiorow['hintapyoristys']);
 
           // päivitetään ostotilausrivin rivihinta
-          $query  = "UPDATE tilausrivi
-                     SET rivihinta = '$testiapukala'
-                     WHERE yhtio = '$kukarow[yhtio]'
-                     and tunnus  = '$rivitunnus'";
+          $query = "UPDATE tilausrivi
+                    SET rivihinta = '$testiapukala'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$rivitunnus'";
           $result = pupe_query($query);
 
           // Nyt lasketaan kaikki hankintahinnat uusiksi
@@ -858,9 +873,9 @@ if ($tuoteno != '') {
           if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
           if (mysql_num_rows($result) > 0) {
-            $jlerror   = 0;
-            $eka     = 1;
-            $vlaadittu   = "3000-01-01 00:00:00"; // varmuuden vuoks ettei korjailla nollasta lähtien jos käy jotain todellaa weird...
+            $jlerror = 0;
+            $eka = 1;
+            $vlaadittu = "3000-01-01 00:00:00"; // varmuuden vuoks ettei korjailla nollasta lähtien jos käy jotain todellaa weird...
             $korjattavia_laskuja = 0;
 
             if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Lasketaan uudet hinnat tuotteelle: $tuote[tuoteno] Sort: Asc</font><br><br>";
@@ -980,7 +995,7 @@ if ($tuoteno != '') {
                 // katotaan saadaanko tehdä tiliöintejä
                 // tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
                 $tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
-                $korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
+                $korjaus_alku = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
 
                 // Haetaan tiliöinnit, näitä on kolme (varasto ja varastonmuutos ja 'osto')
                 $query = "SELECT *
@@ -1003,13 +1018,17 @@ if ($tuoteno != '') {
 
                   $pvm_chk = $tilikausi_alku > $korjaus_alku ? $yhtiorow['tilikausi_alku'] : "";
 
+                  $sum_chk_row['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
+                  $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
+
                   if ($pvm_chk == "") {
 
                     $params = array(
-                      'summa'       => $vasisum,
-                      'summa_valuutassa'   => $vasisum,
-                      'laatija'       => $kukarow['kuka'],
-                      'laadittu'       => date('Y-m-d H:i:s'),
+                      'summa' => $vasisum,
+                      'summa_valuutassa' => $vasisum,
+                      'laatija' => $kukarow['kuka'],
+                      'laadittu' => date('Y-m-d H:i:s'),
+                      'selite' => $sum_chk_row['selite'],
                     );
 
                     // Tehdään uusi tiliöinti
@@ -1018,7 +1037,8 @@ if ($tuoteno != '') {
                     // yliviivataan alkuperäinen tiliöinti
                     $query = "UPDATE tiliointi
                               SET korjattu = '$kukarow[kuka]',
-                              korjausaika = now()
+                              korjausaika = now(),
+                              selite      = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                               WHERE yhtio = '$kukarow[yhtio]'
                               AND tunnus  = '$sum_chk_row[tunnus]'";
                     $invupd = pupe_query($query);
@@ -1028,23 +1048,25 @@ if ($tuoteno != '') {
                   else {
 
                     $params = array(
-                      'tapvm'       => $yhtiorow['tilikausi_alku'],
-                      'tapahtumatunnus'  => 0,
-                      'summa'       => round($sum_chk_row["summa"] * -1, 2),
-                      'summa_valuutassa'   => round($sum_chk_row["summa"] * -1, 2),
-                      'laatija'       => $kukarow['kuka'],
-                      'laadittu'       => date('Y-m-d H:i:s'),
+                      'tapvm' => $yhtiorow['tilikausi_alku'],
+                      'tapahtumatunnus' => 0,
+                      'summa' => round($sum_chk_row["summa"] * -1, 2),
+                      'summa_valuutassa' => round($sum_chk_row["summa"] * -1, 2),
+                      'laatija' => $kukarow['kuka'],
+                      'laadittu' => date('Y-m-d H:i:s'),
+                      'selite' => $sum_chk_row['selite'],
                     );
 
                     // Tehdään vastakirjaus tilikauden ensimmäiselle päivälle
                     kopioitiliointi($sum_chk_row['tunnus'], "", $params);
 
                     $params = array(
-                      'tapvm'       => $yhtiorow['tilikausi_alku'],
-                      'summa'       => $vasisum,
-                      'summa_valuutassa'   => $vasisum,
-                      'laatija'       => $kukarow['kuka'],
-                      'laadittu'       => date('Y-m-d H:i:s'),
+                      'tapvm' => $yhtiorow['tilikausi_alku'],
+                      'summa' => $vasisum,
+                      'summa_valuutassa' => $vasisum,
+                      'laatija' => $kukarow['kuka'],
+                      'laadittu' => date('Y-m-d H:i:s'),
+                      'selite' => $sum_chk_row['selite'],
                     );
 
                     // Tehdään uusi kirjaus oikeilla hinnoilla tilikauden ensimmäiselle päivälle
@@ -1052,7 +1074,7 @@ if ($tuoteno != '') {
 
                     // Nollataan alkuperäisen tiliöinnin tapahtumatunnus, ku se ei oo enää "voimassa"
                     $query = "UPDATE tiliointi
-                              SET tapahtumatunnus  = 0
+                              SET tapahtumatunnus = 0
                               WHERE yhtio = '$kukarow[yhtio]'
                               AND tunnus  = '$sum_chk_row[tunnus]'";
                     $invupd = pupe_query($query);
@@ -1094,7 +1116,7 @@ if ($tuoteno != '') {
                   // katotaan saadaanko tehdä tiliöintejä
                   // tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
                   $tilikausi_alku = (int) str_replace("-", "", $yhtiorow["tilikausi_alku"]);
-                  $korjaus_alku   = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
+                  $korjaus_alku = (int) str_replace("-", "", substr($trow["laadittu"], 0, 10));
 
                   // Lasketaan onko luku muuttunut
                   $inventoinnin_varastonmuutos = round($trow["kpl"] * $uusikehahin - $invrow['summa'], 2);
@@ -1153,21 +1175,26 @@ if ($tuoteno != '') {
                         $sum_chk_res = pupe_query($query);
                         $sum_chk_row = mysql_fetch_assoc($sum_chk_res);
 
+                        $sum_chk_row['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
+                        $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
+
                         $params = array(
-                          'summa'       => round($trow["kpl"] * $uusikehahin * -1, 2),
-                          'summa_valuutassa'   => round($trow["kpl"] * $uusikehahin * -1, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'summa' => round($trow["kpl"] * $uusikehahin * -1, 2),
+                          'summa_valuutassa' => round($trow["kpl"] * $uusikehahin * -1, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään uusi varastonmuutostiliöinti
                         kopioitiliointi($sum_chk_row['tunnus'], "", $params);
 
                         $params = array(
-                          'summa'       => round($trow["kpl"] * $uusikehahin, 2),
-                          'summa_valuutassa'   => round($trow["kpl"] * $uusikehahin, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'summa' => round($trow["kpl"] * $uusikehahin, 2),
+                          'summa_valuutassa' => round($trow["kpl"] * $uusikehahin, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään uusi varastotiliöinti
@@ -1176,7 +1203,8 @@ if ($tuoteno != '') {
                         // yliviivataan vanhat tiliöinnit
                         $query = "UPDATE tiliointi
                                   SET korjattu = '$kukarow[kuka]',
-                                  korjausaika  = now()
+                                  korjausaika  = now(),
+                                  selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                                   WHERE yhtio  = '$kukarow[yhtio]'
                                   AND ltunnus  = '$invrow[ltunnus]'
                                   AND tunnus   IN ('{$invrow['tunnus']}','{$sum_chk_row['tunnus']}')
@@ -1199,45 +1227,52 @@ if ($tuoteno != '') {
                         $sum_chk_res = pupe_query($query);
                         $sum_chk_row = mysql_fetch_assoc($sum_chk_res);
 
+                        $sum_chk_row['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $sum_chk_row['selite']);
+                        $sum_chk_row['selite'] = trim($sum_chk_row['selite']." $_jalkilaskenta_selite");
+
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($sum_chk_row['summa'] * -1, 2),
-                          'summa_valuutassa'   => round($sum_chk_row['summa_valuutassa'] * -1, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($sum_chk_row['summa'] * -1, 2),
+                          'summa_valuutassa' => round($sum_chk_row['summa_valuutassa'] * -1, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille tilikauden ensimmäiselle päivälle
                         kopioitiliointi($sum_chk_row['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($trow['kpl'] * $uusikehahin * -1, 2),
-                          'summa_valuutassa'   => round($trow['kpl'] * $uusikehahin * -1, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($trow['kpl'] * $uusikehahin * -1, 2),
+                          'summa_valuutassa' => round($trow['kpl'] * $uusikehahin * -1, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään uusi varastonmuutostiliöinti oikeilla hinnoilla tilikauden ensimmäiselle päivälle
                         kopioitiliointi($sum_chk_row['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($invrow['summa'] * -1, 2),
-                          'summa_valuutassa'   => round($invrow['summa_valuutassa'] * -1, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($invrow['summa'] * -1, 2),
+                          'summa_valuutassa' => round($invrow['summa_valuutassa'] * -1, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään vastakirjaus alkuperäiselle varastotiliöinnille tilikauden ensimmäiselle päivälle
                         kopioitiliointi($invrow['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($trow['kpl'] * $uusikehahin, 2),
-                          'summa_valuutassa'   => round($trow['kpl'] * $uusikehahin, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($trow['kpl'] * $uusikehahin, 2),
+                          'summa_valuutassa' => round($trow['kpl'] * $uusikehahin, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $sum_chk_row['selite'],
                         );
 
                         // Tehdään uusi varastotiliöinti oikeilla hinnoilla tilikauden ensimmäiselle päivälle
@@ -1248,13 +1283,17 @@ if ($tuoteno != '') {
                       // Jos on jotain muita kirjauksia (käsin säädetty, omaan käyttöönotto, tms)
                       // korjataan vaan VARASTO kirjaus, niin tosite jää heittämään ja sen löytää helposti
 
+                      $invrow['selite'] = preg_replace("/".t("Jälkilaskenta", $yhtiorow['kieli']).":[^\)]*?\)/", "", $invrow['selite']);
+                      $invrow['selite'] = trim($invrow['selite']." $_jalkilaskenta_selite");
+
                       // Ollaan avoimella tilikaudella
                       if ($pvm_chk == "") {
 
                         // yliviivataan varastotiliöinti
                         $query = "UPDATE tiliointi
                                   SET korjattu = '$kukarow[kuka]',
-                                  korjausaika  = now()
+                                  korjausaika  = now(),
+                                  selite       = trim(concat(selite, ' {$_jalkilaskenta_selite}'))
                                   WHERE yhtio  = '$kukarow[yhtio]'
                                   AND ltunnus  = '$invrow[ltunnus]'
                                   AND korjattu = ''
@@ -1283,22 +1322,24 @@ if ($tuoteno != '') {
                       else {
 
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($invrow['summa'] * -1, 2),
-                          'summa_valuutassa'   => round($invrow['summa_valuutassa'] * -1, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($invrow['summa'] * -1, 2),
+                          'summa_valuutassa' => round($invrow['summa_valuutassa'] * -1, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+                          'selite' => $invrow['selite'],
                         );
 
                         // Tehdään vastakirjaus alkuperäiselle varastotiliöinnille tilikauden ensimmäiselle päivälle
                         kopioitiliointi($invrow['tunnus'], "", $params); // kopioidaan vanha tiliöintirivi
 
                         $params = array(
-                          'tapvm'       => $yhtiorow['tilikausi_alku'],
-                          'summa'       => round($trow['kpl'] * $uusikehahin, 2),
-                          'summa_valuutassa'   => round($trow['kpl'] * $uusikehahin, 2),
-                          'laatija'       => $kukarow['kuka'],
-                          'laadittu'       => date('Y-m-d H:i:s'),
+                          'tapvm' => $yhtiorow['tilikausi_alku'],
+                          'summa' => round($trow['kpl'] * $uusikehahin, 2),
+                          'summa_valuutassa' => round($trow['kpl'] * $uusikehahin, 2),
+                          'laatija' => $kukarow['kuka'],
+                          'laadittu' => date('Y-m-d H:i:s'),
+
                         );
 
                         // Tehdään uusi varastotiliöinti oikeilla hinnoilla tilikauden ensimmäiselle päivälle

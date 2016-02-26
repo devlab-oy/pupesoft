@@ -118,7 +118,7 @@ if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
               SET tyyppi = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
               {$tilausrivityyppilisa}
-              AND otunnus  = $tilausnumero";
+              AND otunnus = $tilausnumero";
     pupe_query($query);
 
     //Nollataan sarjanumerolinkit
@@ -2987,7 +2987,7 @@ if (mysql_num_rows($result) != 0) {
       echo "</form></td>";
 
       if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
-        or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
+          or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
 
         echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
         echo "<input type='hidden' name='toim' value='$whiletoim'>";

@@ -3,7 +3,7 @@
 // Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
 // (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
 if (!defined("PUPE_UNICODE")) {
-  if (get_cfg_var('mssql.charset') == "UTF-8" or @include_once(".PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8" or @include_once ".PUPE_UNICODE") {
     define("PUPE_UNICODE", TRUE);
   }
   else {

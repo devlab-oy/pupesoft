@@ -2997,9 +2997,9 @@ if ($tila == "" and !isset($jatka)) {
           // Tarkistetaan, onko valitulle työjonolle asetettu oletusvastuuhenkilö,
           // jos ei ole vielä valittu vastuuhenkilöä
           if (empty($srow[$kentta]) and isset($srow['tyojono'])) {
-             $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
-             $oletus_row = mysql_fetch_assoc($oletus_result);
-             $oletus_kuka = $oletus_row['selitetark_4'];
+            $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
+            $oletus_row = mysql_fetch_assoc($oletus_result);
+            $oletus_kuka = $oletus_row['selitetark_4'];
           }
 
           $query = "SELECT *

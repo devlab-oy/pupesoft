@@ -3054,12 +3054,12 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 if (!function_exists("jalkilaskentafunktio")) {
   function jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus=0, $kaantopisteen_saldomuutos=0) {
-    global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind;
+    global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind, $_jalkilaskenta_selite;
 
     /*
-    $tuoteno   = korjattava tuote
-    $pvm     = mihin p‰iv‰‰n asti korjataan
-    $uusihinta   = mik‰ on tuon pvm:n oikea ostohinta
+    $tuoteno = korjattava tuote
+    $pvm = mihin p‰iv‰‰n asti korjataan
+    $uusihinta = mik‰ on tuon pvm:n oikea ostohinta
     $rivitunnus = mik‰ on tapahtuman tehneen rivin tunnus (ostorivitunnus)
     */
 
@@ -3081,6 +3081,9 @@ if (!function_exists("jalkilaskentafunktio")) {
            yhtio READ,
            yhtion_toimipaikat READ";
     $re = pupe_query($qu);
+
+    // T‰g‰t‰‰n kaikki t‰m‰n funtiokutsun tekem‰t asiat
+    $_jalkilaskenta_selite = "(".t("J‰lkilaskenta", $yhtiorow['kieli']).": ".date("Y-m-d H:i:s").chr(rand(65, 90)).")";
 
     require "tilauskasittely/jalkilaskenta.inc";
 
@@ -10230,8 +10233,8 @@ if (!function_exists("livesearch_tullinimikehaku")) {
 
       $query = "SELECT cn, dm
                 FROM tullinimike
-                WHERE kieli = '{$yhtiorow['kieli']}'
-                AND cn != ''";
+                WHERE kieli  = '{$yhtiorow['kieli']}'
+                AND cn      != ''";
       $result = pupe_query($query);
 
       $limit = 0;

@@ -491,11 +491,11 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   echo "<td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
   //Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-  if (isset($tiliointirow) and $kuitattu_checked == '' 
-    and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" 
-      or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") 
-    and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] 
-      or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) 
+  if (isset($tiliointirow) and $kuitattu_checked == ''
+    and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00"
+      or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00")
+    and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']
+      or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili'])
     and ($kuittikoodi == ' ' or $kuittikoodi == 'P')) {
     //Olisiko tämä meidän toimittaja
     $tpv = substr($pvm, 0, 2);

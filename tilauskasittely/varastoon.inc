@@ -1165,7 +1165,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
     $varastoon_msg .= "<td valign='top' nowrap>".tv1dateconv("$vpvva-$vpkka-$vpppa")."</td>";
 
-    if ($yhtiorow['suuntalavat'] == 'S' and is_numeric($suuntalavan_tunnus)) {
+    if ($yhtiorow['suuntalavat'] == 'S' and !empty($suuntalavan_tunnus) and is_numeric($suuntalavan_tunnus)) {
 
       $query = "SELECT laskunro FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilrivirow['uusiotunnus']}'";
       $saapuminen_chk_res = pupe_query($query);

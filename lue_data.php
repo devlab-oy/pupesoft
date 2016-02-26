@@ -2029,7 +2029,7 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'customers_users' and $otsikko == 'USER_ID') {
                 $query .= " $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
               }
-              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM', 'KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00', 'NULL')))) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($eilisataeikamuuteta == "") {

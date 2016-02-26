@@ -23,6 +23,7 @@ class PrestaCustomers extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
+
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     if (is_null($existing_customer)) {
       $xml = $this->empty_xml();

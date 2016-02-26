@@ -34,7 +34,7 @@ if (!function_exists("toimitustapatarkista")) {
     }
 
     // jos toimitustavan nimeä ollaan muuttamassa...
-    if (mysql_field_name($result, $i) == "selite" and $t[$i] != $trow[$i]) {
+    if (mysql_field_name($result, $i) == "selite" and !empty($tunnus) and $t[$i] != $trow[$i]) {
       $toita = trim($t[$i]);
       $toita = str_replace("'", "", $toita);
       $toita = str_replace("\"", "", $toita);
@@ -51,23 +51,21 @@ if (!function_exists("toimitustapatarkista")) {
 
         echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
-        if ($trow) {
-          $query = "UPDATE toimitustapa
-                    SET vak_kielto='{$toita}'
-                    WHERE vak_kielto='{$trow[$i]}'
-                    AND yhtio='{$kukarow["yhtio"]}'";
-          pupe_query($query);
+        $query = "UPDATE toimitustapa
+                  SET vak_kielto='{$toita}'
+                  WHERE vak_kielto='{$trow[$i]}'
+                  AND yhtio='{$kukarow["yhtio"]}'";
+        pupe_query($query);
 
-          echo ", " . mysql_affected_rows() . " " . t("VAK-käsittelyä");
+        echo ", " . mysql_affected_rows() . " " . t("VAK-käsittelyä");
 
-          $query = "UPDATE toimitustapa
-                    SET vaihtoehtoinen_vak_toimitustapa='{$toita}'
-                    WHERE vaihtoehtoinen_vak_toimitustapa='{$trow[$i]}'
-                    AND yhtio='{$kukarow["yhtio"]}'";
-          pupe_query($query);
+        $query = "UPDATE toimitustapa
+                  SET vaihtoehtoinen_vak_toimitustapa='{$toita}'
+                  WHERE vaihtoehtoinen_vak_toimitustapa='{$trow[$i]}'
+                  AND yhtio='{$kukarow["yhtio"]}'";
+        pupe_query($query);
 
-          echo ", " . mysql_affected_rows() . " " . t("vaihtoehtoista VAK-toimitustapaa");
-        }
+        echo ", " . mysql_affected_rows() . " " . t("vaihtoehtoista VAK-toimitustapaa");
 
         $query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
         $updre = pupe_query($query);
@@ -177,7 +175,7 @@ if (!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if ($trow and mysql_field_name($result, $i) == "vak_kielto" and $t[$i] != "") {
+    if (mysql_field_name($result, $i) == "vak_kielto" and !empty($tunnus) and $t[$i] != "") {
       $query = "SELECT count(*) AS count
                 FROM toimitustapa
                 WHERE yhtio                         = '{$kukarow["yhtio"]}'

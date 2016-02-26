@@ -53,12 +53,12 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "";
       break;
     }
-    
+
     // Trustkapitalilla pit‰ olla TULOSTUSPALVELU
     if ($senderintermediator == '003723327487' and $yhtiorow['verkkolasku_lah'] == 'trustpoint') {
         $tulostuspalvelu  = "TULOSTUSPALVELU";
     }
-    
+
     //  Aloitellaan aineiston luontia. Kaikki tiedot pit‰‰ olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
     if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
 
@@ -245,7 +245,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("SellerPartyIdentifier", tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa), $tootfinvoice, 35);
       //xml_add("SellerPartyIdentifierUrlText", "", $tootfinvoice);
       xml_add("SellerOrganisationName", $y_nimi, $tootfinvoice, 35, 2);
-      xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice, 35);
+      xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(preg_replace("/^0037/", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice, 35);
       //xml_add("SellerOrganisationTaxCodeUrlText", "", $tootfinvoice);
 
       fputs($tootfinvoice, "<SellerPostalAddressDetails>\r\n");
@@ -310,6 +310,12 @@ if (!function_exists('finvoice_otsik')) {
       $laskutusosoitetiedot = array();
 
       if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php") === FALSE) {
+        $laskosoiteeri = "";
+
+        if ($yhtiorow["verkkolasku_lah"] != "trustpoint") {
+          $laskosoiteeri = "AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'";
+        }
+
         //  Oisko toista laskutusosoitetta?
         $query = "SELECT laskutus_nimi,
                   laskutus_nimitark,
@@ -320,7 +326,7 @@ if (!function_exists('finvoice_otsik')) {
                   FROM laskun_lisatiedot
                   WHERE yhtio        = '{$lasrow['yhtio']}'
                   AND laskutus_nimi != ''
-                  AND CONCAT(laskutus_nimi, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa) != '$lasrow[nimi]$lasrow[osoite]$lasrow[postino]$lasrow[postitp]$lasrow[maa]'
+                  {$laskosoiteeri}
                   AND otunnus        = '{$lasrow['tunnus']}'
                   LIMIT 1";
         $tarkres = pupe_query($query);

@@ -52,6 +52,8 @@ else {
 
   $kukarow = mysql_fetch_assoc($kukares);
 
+  $pupe_root_polku = dirname(__FILE__);
+
   $saapumisnro = $argv[2];
 
   if (!empty($argv[3])) {
@@ -73,7 +75,9 @@ if (!$ftp_chk) {
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-$xmlstr  = '<?xml version="1.0" encoding="Windows-1257"?>';
+$encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
+
+$xmlstr  = "<?xml version='1.0' encoding='{$encoding}'?>";
 $xmlstr .= '<Message>';
 $xmlstr .= '</Message>';
 
@@ -91,7 +95,7 @@ $row = mysql_fetch_assoc($res);
 $header = $xml->addChild('MessageHeader');
 
 $header->addChild('MessageType', 'inboundDelivery');
-$header->addChild('Sender', $yhtiorow['nimi']);
+$header->addChild('Sender', utf8_encode($yhtiorow['nimi']));
 $header->addChild('Receiver', 'LogMaster');
 
 $query = "SELECT DISTINCT otunnus
@@ -101,7 +105,11 @@ $query = "SELECT DISTINCT otunnus
           AND uusiotunnus = '{$saapumisnro}'";
 $otunnukset_res = pupe_query($query);
 
+$ostotilaukset = array();
+
 while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
+
+  $ostotilaukset[] = $otunnukset_row['otunnus'];
 
   $query = "SELECT *
             FROM lasku
@@ -132,21 +140,21 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   $toimirow = mysql_fetch_assoc($toimires);
 
   $vendor = $body->addChild('Vendor');
-  $vendor->addChild('VendAccount', $toimirow['toimittajanro']);
-  $vendor->addChild('VendName', $ostotilaus_row['nimi']);
-  $vendor->addChild('VendStreet', $ostotilaus_row['osoite']);
+  $vendor->addChild('VendAccount',  $toimirow['toimittajanro']);
+  $vendor->addChild('VendName',     utf8_encode($ostotilaus_row['nimi']));
+  $vendor->addChild('VendStreet',   utf8_encode($ostotilaus_row['osoite']));
   $vendor->addChild('VendPostCode', $ostotilaus_row['postino']);
-  $vendor->addChild('VendCity', $ostotilaus_row['postitp']);
-  $vendor->addChild('VendCountry', $ostotilaus_row['maa']);
+  $vendor->addChild('VendCity',     utf8_encode($ostotilaus_row['postitp']));
+  $vendor->addChild('VendCountry',  utf8_encode($ostotilaus_row['maa']));
   $vendor->addChild('VendInfo', '');
 
   $purchaser = $body->addChild('Purchaser');
-  $purchaser->addChild('PurcAccount', $yhtiorow['ytunnus']);
-  $purchaser->addChild('PurcName', $yhtiorow['nimi']);
-  $purchaser->addChild('PurcStreet', $yhtiorow['osoite']);
+  $purchaser->addChild('PurcAccount',  $yhtiorow['ytunnus']);
+  $purchaser->addChild('PurcName',     utf8_encode($yhtiorow['nimi']));
+  $purchaser->addChild('PurcStreet',   utf8_encode($yhtiorow['osoite']));
   $purchaser->addChild('PurcPostCode', $yhtiorow['postino']);
-  $purchaser->addChild('PurcCity', $yhtiorow['postitp']);
-  $purchaser->addChild('PurcCountry', $yhtiorow['maa']);
+  $purchaser->addChild('PurcCity',     utf8_encode($yhtiorow['postitp']));
+  $purchaser->addChild('PurcCountry',  utf8_encode($yhtiorow['maa']));
 
   $query = "SELECT *
             FROM tilausrivi
@@ -161,14 +169,17 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
   while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 
     $lines = $body->addChild('Lines');
-    $lines->addChild('Line', $i);
-    $lines->addChild('TransId', $rivit_row['tunnus']);
-    $lines->addChild('ItemNumber', $rivit_row['tuoteno']);
-    $lines->addChild('OrderedQuantity', $rivit_row['varattu']);
-    $lines->addChild('Unit', $rivit_row['yksikko']);
-    $lines->addChild('Price', $rivit_row['hinta']);
-    $lines->addChild('CurrencyCode', $ostotilaus_row['valkoodi']);
-    $lines->addChild('RowInfo', $rivit_row['kommentti']);
+
+    $line = $lines->addChild('Line');
+    $line->addAttribute('No', $i);
+
+    $line->addChild('TransId',         $rivit_row['tunnus']);
+    $line->addChild('ItemNumber',      utf8_encode($rivit_row['tuoteno']));
+    $line->addChild('OrderedQuantity', $rivit_row['varattu']);
+    $line->addChild('Unit',            utf8_encode($rivit_row['yksikko']));
+    $line->addChild('Price',           $rivit_row['hinta']);
+    $line->addChild('CurrencyCode',    utf8_encode($ostotilaus_row['valkoodi']));
+    $line->addChild('RowInfo',         utf8_encode($rivit_row['kommentti']));
 
     $i++;
   }
@@ -177,9 +188,17 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-  $filename = "/dataout/logmaster_inbound_delivery_".md5(uniqid()).".xml";
+  $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
+  $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
-  if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
+  if (file_put_contents($filename, $xml->asXML())) {
+
+    if (!PUPE_UNICODE) {
+      exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
+    }
+    else {
+      $ftputf8 = TRUE;
+    }
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti onnistui"), "\n";

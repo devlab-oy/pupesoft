@@ -24,13 +24,6 @@ class PrestaShops extends PrestaClient {
 
   protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
     throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_shop)) {
-      $xml = $existing_shop;
-    }
-
-    return $xml;
   }
 
   /**

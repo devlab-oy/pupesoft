@@ -77,7 +77,7 @@ if ($kuukausi_ajo) {
   $filepath = "/tmp/history_{$vuosi}{$kuukausi}_input_transactions_{$yhtio}.csv";
 }
 elseif ($weekly_ajo) {
-  $filepath = "/tmp/input_transactions_weekly_{$yhtio}.csv";
+  $filepath = "/tmp/input_transactions_weekly_{$yhtio}_{$ajopaiva}.csv";
 }
 else {
   $filepath = "/tmp/input_transactions_{$yhtio}_{$ajopaiva}.csv";

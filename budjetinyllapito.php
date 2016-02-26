@@ -290,7 +290,7 @@ else {
     $tasoluku = strlen($tasorow["taso"]);
 
     // tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
-    $apusort = str_pad($tasorow["taso"], 20, "Ö");
+    $apusort = str_pad($tasorow["taso"], 20, "Z");
     $tasonimi[$apusort] = $tasorow["nimi"];
 
     // pilkotaan taso osiin
@@ -424,7 +424,7 @@ else {
     // loopataan tasot läpi
     foreach ($tasonimi as $key_c => $value) {
 
-      $key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
+      $key = str_replace("Z", "", $key_c); // Ö-kirjaimet pois
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {

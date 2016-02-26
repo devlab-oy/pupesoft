@@ -245,7 +245,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("SellerPartyIdentifier", tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa), $tootfinvoice, 35);
       //xml_add("SellerPartyIdentifierUrlText", "", $tootfinvoice);
       xml_add("SellerOrganisationName", $y_nimi, $tootfinvoice, 35, 2);
-      xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(str_replace("0037", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice, 35);
+      xml_add("SellerOrganisationTaxCode", tulosta_ytunnus(preg_replace("/^0037/", "", $y_vatnumero), $y_maa, "VATNUMERO"), $tootfinvoice, 35);
       //xml_add("SellerOrganisationTaxCodeUrlText", "", $tootfinvoice);
 
       fputs($tootfinvoice, "<SellerPostalAddressDetails>\r\n");

@@ -104,7 +104,8 @@ function presta_specific_prices() {
             asiakashinta.hinta,
             asiakashinta.valkoodi,
             avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+            'asiakashinta' AS tyyppi
             FROM tuote
             LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
               AND asiakashinta.tuoteno = tuote.tuoteno
@@ -132,7 +133,8 @@ function presta_specific_prices() {
             asiakasalennus.minkpl,
             asiakasalennus.alennus,
             avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+            'asiakasalennus' AS tyyppi
             FROM tuote
             INNER JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
               AND asiakasalennus.tuoteno = tuote.tuoteno
@@ -175,7 +177,8 @@ function presta_specific_prices() {
               hinnasto.minkpl,
               hinnasto.hinta,
               hinnasto.valkoodi,
-              hinnasto.maa
+              hinnasto.maa,
+              'hinnasto' AS tyyppi
               FROM hinnasto
               WHERE hinnasto.yhtio = '$kukarow[yhtio]'
               AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
@@ -205,7 +208,8 @@ function presta_specific_prices() {
               tuote.myyntihinta as hinta,
               '{$yhtiorow['valkoodi']}' as valkoodi,
               '3' AS presta_customergroup_id,
-              '' AS presta_customer_id
+              '' AS presta_customer_id,
+              'custom' AS tyyppi
               FROM tuote
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
               AND tuote.myyntihinta > 0

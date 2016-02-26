@@ -270,7 +270,7 @@ function hae_kaikki_tuotteet() {
 
   // Haetaan kaikki siirrettävät tuotteet, tämä on poistettujen dellausta varten
   // query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
-  $query = "SELECT tuote.tuoteno, tuote.ei_saldoa
+  $query = "SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
             FROM tuote
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
@@ -310,8 +310,12 @@ function hae_kaikki_tuotteet() {
       }
     }
 
-    // tuoteno avaimena, saldo arvona
-    $tuotteet[$tuoteno] = $myytavissa;
+    // lisätään saldon päivittämiseen tarvittavat tiedot
+    $tuotteet[] = array(
+      "saldo"   => $myytavissa,
+      "status"  => $row['status'],
+      "tuoteno" => $tuoteno,
+    );
   }
 
   return $tuotteet;

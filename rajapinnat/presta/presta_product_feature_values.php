@@ -20,6 +20,10 @@ class PrestaProductFeatureValues extends PrestaClient {
     return false;
   }
 
+  public function reset_all_values() {
+    $this->all_values = null;
+  }
+
   protected function resource_name() {
     return 'product_feature_values';
   }

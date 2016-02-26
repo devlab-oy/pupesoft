@@ -2333,7 +2333,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
             }
         </SCRIPT>";
 
-      if ($rajattu_nakyma == '') {
+      if ($rajattu_nakyma == '' or $rajattu_nakyma == "true_poisto") {
 
         if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 

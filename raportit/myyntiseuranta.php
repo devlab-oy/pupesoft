@@ -644,6 +644,9 @@ else {
       case 'asbu':
         $sel_asbu = 'selected';
         break;
+      case 'asmy':
+        $sel_asmy = 'selected';
+        break;  
       case 'asbuos':
         $sel_asbuos = 'selected';
         break;
@@ -669,6 +672,7 @@ else {
     }
     else {
       $sel_asbu = '';
+      $sel_asmy = '';
       $sel_asbuos = '';
       $sel_asbury = '';
       $sel_tubu = '';
@@ -682,6 +686,7 @@ else {
     <th>", t("Tavoitevertailu"), "</th>";
     echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
     echo "<option value='asbu'   {$sel_asbu}>", t("Asiakastavoitteet"), "</option>";
+    echo "<option value='asmy'   {$sel_asmy}>", t("Asiakasmyyjätavoitteet"), "</option>";
     echo "<option value='asbuos' {$sel_asbuos}>", t("Asiakas-Osastotavoitteet"), "</option>";
     echo "<option value='asbury' {$sel_asbury}>", t("Asiakas-Tuoteryhmätavoitteet"), "</option>";
     echo "<option value='tubu'    {$sel_tubu}>", t("Tuotetavoitteet"), "</option>";
@@ -2598,7 +2603,7 @@ else {
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
               ($vertailubu == "mabu" and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
-              (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") or (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") or (isset($row["myyjä"]) and $row["myyjä"] != "")))) {
+              (($vertailubu == "mybu" or $vertailubu == "asmy" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") or (isset($row["tuotemyyjä"]) and $row["tuotemyyjä"] != "") or (isset($row["myyjä"]) and $row["myyjä"] != "")))) {
 
               if ($vertailubu == "tubu") {
                 $budj_taulu = "budjetti_tuote";
@@ -2624,6 +2629,32 @@ else {
 
                 $budj_taulu = "budjetti_myyja";
                 $bulisa = " and myyjan_tunnus in ({$tunnus_lisa}) ";
+
+                if ($vertailubu == "mybuos" and $tuosagroups > 0) {
+                  $bulisa .= " and osasto = '{$row['osasto']}' ";
+                }
+                elseif ($vertailubu == "mybuos") {
+                  $bulisa .= " and osasto != '' ";
+                }
+                elseif ($vertailubu == "mybury" and $turyhgroups > 0) {
+                  $bulisa .= " and try = '{$row['tuoteryhmä']}' ";
+                }
+                elseif ($vertailubu == "mybury") {
+                  $bulisa .= " and try != '' ";
+                }
+                else {
+                  $bulisa .= " and try = '' and osasto = '' ";
+                }
+              }
+              elseif ($vertailubu == "asmy") {
+                $tunnus_lisa = "";
+
+                if (isset($row["asiakasmyyjä"]) and $row["asiakasmyyjä"] != "") {
+                  $tunnus_lisa = $row["asiakasmyyjä"];
+                }
+
+                $budj_taulu = "budjetti_asiakasmyyja";
+                $bulisa = " and asiakasmyyjan_tunnus in ({$tunnus_lisa}) ";
 
                 if ($vertailubu == "mybuos" and $tuosagroups > 0) {
                   $bulisa .= " and osasto = '{$row['osasto']}' ";

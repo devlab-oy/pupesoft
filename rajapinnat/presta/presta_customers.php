@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
+  private $default_groups = array();
 
   const RESOURCE = 'customers';
 
@@ -24,9 +25,10 @@ class PrestaCustomers extends PrestaClient {
 
 
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_customer)) {
+    if (is_null($existing_customer)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_customer;
     }
 
@@ -40,18 +42,41 @@ class PrestaCustomers extends PrestaClient {
     $xml->customer->lastname = $_nimi;
     $xml->customer->email = $_email;
 
-    if (!empty($customer['salasanan_resetointi'])) {
-      $xml->customer->passwd = $customer['salasanan_resetointi'];
+    if (!empty($customer['verkkokauppa_salasana'])) {
+      $xml->customer->passwd = $customer['verkkokauppa_salasana'];
       $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
     }
 
     $xml->customer->active = 1;
 
     $group_id = $customer['presta_customergroup_id'];
+    $xml->customer->id_default_group = $group_id;
 
+    // First, remove all groups from XML
+    $remove_node = $xml->customer->associations->groups;
+    $dom_node = dom_import_simplexml($remove_node);
+    $dom_node->parentNode->removeChild($dom_node);
+
+    // Add it back
+    $groups = $xml->customer->associations->addChild('groups');
+
+    // Groups customer belongs to
+    $all_groups = $this->default_groups;
+
+    // add group to default groups array
     if (!empty($group_id)) {
-      $xml->customer->id_default_group = $group_id;
-      $xml->customer->associations->groups->groups->id = $group_id;
+      $all_groups[] = $group_id;
+    }
+
+    // id's must be in order
+    sort($all_groups);
+
+    // add all groups
+    foreach ($all_groups as $group_id) {
+      $group = $groups->addChild('groups');
+      $group->addChild('id', $group_id);
+
+      $this->logger->log("Lisätään asiakas ryhmään {$group_id}");
     }
 
     return $xml;
@@ -61,7 +86,6 @@ class PrestaCustomers extends PrestaClient {
     $this->logger->log('---------Start customer sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema();
       $existing_customers = $this->all(array('id'));
       $existing_customers = array_column($existing_customers, 'id');
 
@@ -70,7 +94,7 @@ class PrestaCustomers extends PrestaClient {
 
       foreach ($customers as $customer) {
         $current++;
-        $this->logger->log("[{$current}/{$total}]");
+        $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
         try {
           $presta_address = new PrestaAddresses($this->url(), $this->api_key());
@@ -131,7 +155,7 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $query = "UPDATE yhteyshenkilo
-              SET salasanan_resetointi = ''
+              SET verkkokauppa_salasana = ''
               WHERE yhtio = '{$yhtio}'
               AND tunnus  = {$contact_id}";
     pupe_query($query);
@@ -146,5 +170,11 @@ class PrestaCustomers extends PrestaClient {
    */
   public function get($id) {
     return parent::get($id);
+  }
+
+  public function set_default_groups($value) {
+    if (is_array($value)) {
+      $this->default_groups = $value;
+    }
   }
 }

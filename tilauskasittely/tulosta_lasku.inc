@@ -2201,10 +2201,10 @@ if (!function_exists('loppu')) {
       $y_vatnumero = $yhtiorow["ytunnus"];
     }
     elseif (!empty($toimipaikkarow["vat_numero"])) {
-      $y_vatnumero = str_replace("0037", "", $toimipaikkarow["vat_numero"]);
+      $y_vatnumero = preg_replace("/^0037/", "", $toimipaikkarow["vat_numero"]);
     }
     else {
-      $y_vatnumero = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+      $y_vatnumero = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
     }
     $y_iban = $yhtiorow['pankkiiban1'];
     $y_swift = $yhtiorow['pankkiswift1'];

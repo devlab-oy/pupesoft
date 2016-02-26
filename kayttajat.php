@@ -1108,6 +1108,9 @@ if ($tee == 'MUUTA') {
           echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['kirjoitin']}</option>";
         }
 
+        $sel = '';
+        if ($krow["kirjoitin"] == "-88") $sel = 'selected';
+        echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
         echo "</select></td></tr>";
 
         echo "<tr><th align='left'>", t("Kuittitulostin"), ":</th>";
@@ -1161,6 +1164,9 @@ if ($tee == 'MUUTA') {
           echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
         }
 
+        $sel = '';
+        if ($krow["lahetetulostin"] == "-88") $sel = 'selected';
+        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
         echo "</select></td></tr>";
 
         echo "<tr><th align='left'>", t("Rahtikirjatulostin"), ":</th>";
@@ -1186,6 +1192,9 @@ if ($tee == 'MUUTA') {
           echo "<option value='{$rivi['tunnus']}' {$sel}>{$rivi['kirjoitin']}</option>";
         }
 
+        $sel = '';
+        if ($krow["rahtikirjatulostin"] == "-88") $sel = 'selected';
+        echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
         echo "</select></td></tr>";
 
         $kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";

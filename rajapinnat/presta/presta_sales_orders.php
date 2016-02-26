@@ -3,49 +3,29 @@
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_customers.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
-require_once 'rajapinnat/edi_presta.php';
 
 class PrestaSalesOrders extends PrestaClient {
-  const RESOURCE = 'orders';
-
   private $edi_filepath_base = '';
-  private $yhtiorow = array();
-  private $verkkokauppa_customer = null;
+  private $edi_order = '';
   private $fetch_statuses = array();
   private $fetched_status = null;
+  private $verkkokauppa_customer = null;
+  private $yhtiorow = array();
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'orders';
   }
-
-  /**
-   *
-   * @param array   $sales_order
-   * @param SimpleXMLElement $existing_sales_order
-   * @return \SimpleXMLElement
-   */
-
 
   protected function generate_xml($sales_order, SimpleXMLElement $existing_sales_order = null) {
     die('You should not be here! Order update() or create() are not implemented');
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_sales_order)) {
-      $xml = $existing_sales_order;
-    }
-
-    return $xml;
   }
 
   public function set_edi_filepath($filepath) {
-    if (!empty($filepath) and substr($filepath, -1) != '/') {
-      $filepath = $filepath . '/';
-    }
-    $this->edi_filepath_base = $filepath;
+    $this->edi_filepath_base = rtrim($filepath, '/');
   }
 
   public function set_yhtiorow($yhtiorow) {
@@ -64,13 +44,6 @@ class PrestaSalesOrders extends PrestaClient {
     $this->fetched_status = $value;
   }
 
-  /**
-   * Gets all PrestaShop sales orders and saves them in EDI-format for pupesoft.
-   * Marks saved sales orders as fetched and updates them to presta.
-   *
-   * @return boolean
-   * @throws Exception
-   */
   public function transfer_orders_to_pupesoft() {
     $this->logger->log('---------Start sales orders fetch---------');
 
@@ -88,19 +61,16 @@ class PrestaSalesOrders extends PrestaClient {
     $current = 0;
 
     foreach ($sales_orders as $sales_order) {
-
       $current++;
-      $this->logger->log("[{$current}/{$total}]");
+      $this->logger->log("[{$current}/{$total}] Myyntitilaus {$sales_order['id']}");
 
       try {
-        $pupesoft_order = $this->convert_for_pupesoft($sales_order);
-        EdiPresta::create($pupesoft_order, $this->edi_filepath_base);
-
+        $this->convert_to_edi($sales_order);
         $this->mark_as_fetched($sales_order);
       }
       catch (Exception $e) {
-        //Do nothing because we still want to try to create the other
-        //order eventhough this failed
+        // Do nothing because we still want to try to create the other
+        // order eventhough this failed
         $msg = "Myyntitilauksen {$sales_order['id']} luominen pupesoftiin epäonnistui";
         $this->logger->log($msg, $e);
 
@@ -146,11 +116,11 @@ class PrestaSalesOrders extends PrestaClient {
    * @param array   $presta_order
    * @return array
    */
-  private function convert_for_pupesoft($presta_order) {
-    $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($presta_order['id_customer']);
+  private function convert_to_edi($order) {
+    $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
 
     if (empty($pupesoft_customer)) {
-      $msg = "Asiakasta {$presta_order['id_customer']} ei löytynyt Pupesoftista! ";
+      $msg = "Asiakasta {$order['id_customer']} ei löytynyt Pupesoftista! ";
 
       $id = $this->verkkokauppa_customer;
 
@@ -166,94 +136,115 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
-    $shipping_tax = ($presta_order['total_shipping_tax_incl'] - $presta_order['total_shipping_tax_excl']);
-    $tax_amount   = ($presta_order['total_paid_tax_incl'] - $presta_order['total_paid_tax_excl']);
+    // empty edi_order
+    $this->edi_order = '';
+    $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
+    $this->add_row("*MS {$order['id']}");
+    $this->add_row("*RS OSTOTIL");
+    $this->add_row("NADSE:{$this->yhtiorow['ovttunnus']}");
+    $this->add_row("OSTOTIL.OT_NRO:{$order['id']}");
+    $this->add_row("OSTOTIL.OT_TILAUSTYYPPI:");
+    $this->add_row("OSTOTIL.VERKKOKAUPPA:");
+    $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:");
+    $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$order['invoice_number']}");
+    $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:");
+    $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_KOHDE:");
+    $this->add_row("OSTOTIL.OT_TILAUSAIKA:");
+    $this->add_row("OSTOTIL.OT_KASITTELIJA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
+    $this->add_row("OSTOTIL.OT_MAKSETTU:complete"); // tarkoittaa, että on jo maksettu
+    $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");
+    $this->add_row("OSTOTIL.OT_VIITTEEMME:");
+    $this->add_row("OSTOTIL.OT_VIITTEENNE:");
+    $this->add_row("OSTOTIL.OT_VEROMAARA:");
+    $this->add_row("OSTOTIL.OT_SUMMA:{$order['total_paid_tax_incl']}");
+    $this->add_row("OSTOTIL.OT_VALUUTTAKOODI:{$order['id_currency']}");
+    $this->add_row("OSTOTIL.OT_KLAUSUULI1:");
+    $this->add_row("OSTOTIL.OT_KLAUSUULI2:");
+    $this->add_row("OSTOTIL.OT_KULJETUSOHJE:");
+    $this->add_row("OSTOTIL.OT_LAHETYSTAPA:");
+    $this->add_row("OSTOTIL.OT_VAHVISTUS_FAKSILLA:");
+    $this->add_row("OSTOTIL.OT_FAKSI:");
+    $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer['asiakasnro']}");
+    $this->add_row("OSTOTIL.OT_YRITYS:");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$pupesoft_customer['nimi']}");
+    $this->add_row("OSTOTIL.OT_KATUOSOITE:{$pupesoft_customer['osoite']}");
+    $this->add_row("OSTOTIL.OT_POSTITOIMIPAIKKA:{$pupesoft_customer['postitp']}");
+    $this->add_row("OSTOTIL.OT_POSTINRO:{$pupesoft_customer['postino']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONPUH:{$pupesoft_customer['puhelin']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONFAX:{$pupesoft_customer['fax']}");
+    $this->add_row("OSTOTIL.OT_MYYNTI_YRITYS:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_KATUOSOITE:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_POSTITOIMIPAIKKA:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_POSTINRO:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_MAAKOODI:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILO:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:");
+    $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_YRITYS:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_KATUOSOITE:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTINRO:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_MAAKOODI:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_PUH:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_EMAIL:");
+    $this->add_row("*RE OSTOTIL");
 
-    $pupesoft_order = array();
-    $pupesoft_order['alv_maara']          = $tax_amount;
-    $pupesoft_order['asiakasnro']         = $pupesoft_customer['asiakasnro'];
-    $pupesoft_order['email']              = $pupesoft_customer['email'];
-    $pupesoft_order['external_system_id'] = $presta_order['id'];
-    $pupesoft_order['fax']                = $pupesoft_customer['fax'];
-    $pupesoft_order['liitostunnus']       = $pupesoft_customer['tunnus'];
-    $pupesoft_order['maksettu']           = 'complete'; // tarkoittaa, että on jo maksettu
-    $pupesoft_order['maksuehto']          = $presta_order['payment'];
-    $pupesoft_order['puhelin']            = $pupesoft_customer['puhelin'];
-    $pupesoft_order['rahti_vero_maara']   = $shipping_tax;
-    $pupesoft_order['rahti_veroton']      = $presta_order['total_shipping_tax_excl'];
-    $pupesoft_order['summa']              = $presta_order['total_paid_tax_incl'];
-    $pupesoft_order['tilausrivit']        = array();
-    $pupesoft_order['tilaustyyppi']       = '';
-    $pupesoft_order['toimitustapa']       = '';
-    $pupesoft_order['valkoodi']           = $presta_order['id_currency'];
-    $pupesoft_order['viite']              = $presta_order['invoice_number'];
-    $pupesoft_order['yhtio_ovttunnus']    = $this->yhtiorow['ovttunnus'];
-
-    if (empty($pupesoft_customer['laskutus_osoite'])) {
-      $pupesoft_order['laskutus_nimi']    = $pupesoft_customer['nimi'];
-      $pupesoft_order['laskutus_osoite']  = $pupesoft_customer['osoite'];
-      $pupesoft_order['laskutus_postitp'] = $pupesoft_customer['postitp'];
-      $pupesoft_order['laskutus_postino'] = $pupesoft_customer['postino'];
-      $pupesoft_order['laskutus_maa']     = $pupesoft_customer['maa'];
-    }
-    else {
-      $pupesoft_order['laskutus_nimi']    = $pupesoft_customer['laskutus_nimi'];
-      $pupesoft_order['laskutus_osoite']  = $pupesoft_customer['laskutus_osoite'];
-      $pupesoft_order['laskutus_postitp'] = $pupesoft_customer['laskutus_postitp'];
-      $pupesoft_order['laskutus_postino'] = $pupesoft_customer['laskutus_postino'];
-      $pupesoft_order['laskutus_maa']     = $pupesoft_customer['laskutus_maa'];
-    }
-
-    if (empty($pupesoft_customer['toim_osoite'])) {
-      $pupesoft_order['toim_nimi']    = $pupesoft_customer['nimi'];
-      $pupesoft_order['toim_osoite']  = $pupesoft_customer['osoite'];
-      $pupesoft_order['toim_postitp'] = $pupesoft_customer['postitp'];
-      $pupesoft_order['toim_postino'] = $pupesoft_customer['postino'];
-      $pupesoft_order['toim_maa']     = $pupesoft_customer['maa'];
-      $pupesoft_order['toim_puhelin'] = $pupesoft_customer['puhelin'];
-    }
-    else {
-      $pupesoft_order['toim_nimi']    = $pupesoft_customer['toim_nimi'];
-      $pupesoft_order['toim_osoite']  = $pupesoft_customer['toim_osoite'];
-      $pupesoft_order['toim_postitp'] = $pupesoft_customer['toim_postitp'];
-      $pupesoft_order['toim_postino'] = $pupesoft_customer['toim_postino'];
-      $pupesoft_order['toim_maa']     = $pupesoft_customer['toim_maa'];
-      $pupesoft_order['toim_puhelin'] = $pupesoft_customer['puhelin'];
-    }
-
-    $rows = $presta_order['associations']['order_rows']['order_rows'];
+    $rows = $order['associations']['order_rows']['order_rows'];
 
     // One row fix
     if (isset($rows['id'])) {
       $rows = array($rows);
     }
 
-    foreach ($rows as $row) {
-      $pupesoft_row = array();
+    // Add shipping costs
+    $shipping_cost = $order['total_shipping_tax_excl']; // veroton hinta
+    $shipping_product = $this->yhtiorow['rahti_tuotenumero'];
 
-      $pupesoft_row['tuoteno']                 = $row['product_reference'];
-      $pupesoft_row['nimitys']                 = $row['product_name'];
-      $pupesoft_row['tilkpl']                  = $row['product_quantity'];
-      $pupesoft_row['verollinen_yksikkohinta'] = $row['unit_price_tax_incl'];
-      $pupesoft_row['veroton_yksikkohinta']    = $row['product_price'];
-      $pupesoft_row['alennusprosentti']        = 0;
-      $pupesoft_row['alv_prosentti']           = $presta_order['carrier_tax_rate'];
-
-      $pupesoft_order['tilausrivit'][] = $pupesoft_row;
+    if ($shipping_cost > 0 and isset($shipping_product)) {
+      // "emulate" order row
+      $rows[] = array(
+        'product_name' => 'Rahti',
+        'product_quantity' => 1,
+        'product_reference' => $shipping_product,
+        'unit_price_tax_excl' => $shipping_cost,
+      );
     }
 
-    $msg = "Tilaus {$presta_order['id']} haettu, ";
-    $msg .= count($pupesoft_order['tilausrivit']). " tilausriviä ";
-    $this->logger->log($msg);
+    $row_number = 0;
 
-    return $pupesoft_order;
+    foreach ($rows as $row) {
+      $row_number += 1;
+
+      $this->add_row("*RS OSTOTILRIV {$row_number}");
+      $this->add_row("OSTOTILRIV.OTR_NRO:{$order['id']}");
+      $this->add_row("OSTOTILRIV.OTR_RIVINRO:{$row_number}");
+      $this->add_row("OSTOTILRIV.OTR_TOIMITTAJANRO:");
+      $this->add_row("OSTOTILRIV.OTR_TUOTEKOODI:{$row['product_reference']}");
+      $this->add_row("OSTOTILRIV.OTR_NIMI:{$row['product_name']}");
+      $this->add_row("OSTOTILRIV.OTR_TILATTUMAARA:{$row['product_quantity']}");
+      $this->add_row("OSTOTILRIV.OTR_RIVISUMMA:");
+      $this->add_row("OSTOTILRIV.OTR_OSTOHINTA:{$row['unit_price_tax_excl']}"); // veroton hinta
+      $this->add_row("OSTOTILRIV.OTR_ALENNUS:");
+      $this->add_row("OSTOTILRIV.OTR_VEROKANTA:");
+      $this->add_row("OSTOTILRIV.OTR_VIITE:");
+      $this->add_row("OSTOTILRIV.OTR_OSATOIMITUSKIELTO:");
+      $this->add_row("OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:");
+      $this->add_row("OSTOTILRIV.OTR_YKSIKKO:");
+      $this->add_row("OSTOTILRIV.OTR_SALLITAANJT:0");
+      $this->add_row("*RE  OSTOTILRIV {$row_number}");
+    }
+
+    $this->add_row("*ME");
+    $this->add_row("*IE");
+
+    // write order to disk
+    $this->write_to_file();
   }
 
-  /**
-   *
-   * @param array   $sales_order
-   * @throws Exception
-   */
   private function mark_as_fetched($sales_order) {
 
     try {
@@ -283,5 +274,27 @@ class PrestaSalesOrders extends PrestaClient {
 
       throw $e;
     }
+  }
+
+  private function add_row($value) {
+    $this->edi_order .= "{$value}\n";
+  }
+
+  private function write_to_file() {
+    $rnd  = md5(uniqid(rand(), true));
+    $date = date("Ymd");
+    $filepath = "{$this->edi_filepath_base}/presta-order-{$date}-{$rnd}.txt";
+
+    if (!is_writable(dirname($filepath))) {
+      throw new Exception("{$filepath} ei pysty kirjoittamaan");
+    }
+
+    // write file
+    file_put_contents($filepath, $this->edi_order);
+
+    // empty variable
+    $this->edi_order = '';
+
+    return true;
   }
 }

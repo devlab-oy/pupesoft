@@ -241,11 +241,11 @@ if ($kasitellaan_tiedosto) {
     }
   }
 
-  $taulut      = array();
-  $mul_taulut   = array();
-  $mul_taulas   = array();
-  $taulunotsikot  = array();
-  $taulunrivit  = array();
+  $taulut        = array();
+  $mul_taulut    = array();
+  $mul_taulas    = array();
+  $taulunotsikot = array();
+  $taulunrivit   = array();
 
   // Katsotaan onko sarakkeita useasta taulusta
   for ($i = 0; $i < count($headers); $i++) {
@@ -713,6 +713,11 @@ if ($kasitellaan_tiedosto) {
         $apu_sarakkeet = array("YTUNNUS");
       }
 
+      // Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
+      if (in_array($table_mysql, array("asiakas"))) {
+        $apu_sarakkeet = array("LIITOSTUNNUS");
+      }
+
       if (count($apu_sarakkeet) > 0) {
         foreach ($apu_sarakkeet as $s) {
           $trows[$table_mysql.".".strtoupper($s)] = "";
@@ -929,7 +934,7 @@ if ($kasitellaan_tiedosto) {
       if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA/LISÄÄ")   $taulunrivit[$taulu][$eriviindex][$postoiminto] = "MUUTA/LISAA";
       if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA")     $taulunrivit[$taulu][$eriviindex][$postoiminto] = "POISTA";
 
-      //Jos eri where-ehto array on määritelty
+      // Jos eri where-ehto array on määritelty
       if (is_array($wherelliset)) {
         $indeksi = array_merge($indeksi, $indeksi_where);
         $indeksi = array_unique($indeksi);

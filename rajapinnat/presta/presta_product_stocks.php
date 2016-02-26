@@ -27,14 +27,18 @@ class PrestaProductStocks extends PrestaClient {
     $xml->stock_available->quantity = $stock['saldo'];
     $xml->stock_available->id_product = $stock['product_id'];
 
+    // Tilaustuote
+    // 0 = deny orders, 1 = allow orders, 2 = default
+    $out_of_stock = $stock['status'] == 'T' ? 1 : 2;
+
+    $xml->stock_available->out_of_stock = $out_of_stock;
+
     return $xml;
   }
 
-  public function create_or_update($product_id, $qty) {
-    $stock = array(
-      'product_id' => $product_id,
-      'saldo'      => $qty,
-    );
+  public function create_or_update($stock) {
+    $product_id = $stock['product_id'];
+    $qty = $stock['saldo'];
 
     // Needs to be inside try-catch so that we wont interrupt product create loop.
     // In catch we only log the error. Do not rethrow the exception because that interrupts

@@ -497,20 +497,27 @@ class PrestaProducts extends PrestaClient {
 
     foreach ($pupesoft_products as $product_row) {
       $sku = $product_row['tuoteno'];
-      $stock = $product_row['saldo'];
+      $saldo = $product_row['saldo'];
+      $status = $product_row['status'];
 
       $product_id = array_search($sku, $this->all_skus());
 
       $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$stock}");
+      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo}");
 
       // could not find product or
       // this is a virtual product, no stock management
-      if ($product_id === false or $stock === null) {
+      if ($product_id === false or $saldo === null) {
         continue;
       }
 
-      $this->presta_stock->create_or_update($product_id, $stock);
+      $stock = array(
+        'product_id' => $product_id,
+        'saldo'      => $saldo,
+        'status'     => $status,
+      );
+
+      $this->presta_stock->create_or_update($stock);
     }
 
     $this->logger->log('---------Saldojen päivitys valmis---------');

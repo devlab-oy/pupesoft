@@ -290,7 +290,7 @@ else {
     $tasoluku = strlen($tasorow["taso"]);
 
     // tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-    $apusort = str_pad($tasorow["taso"], 20, "÷");
+    $apusort = str_pad($tasorow["taso"], 20, "Z");
     $tasonimi[$apusort] = $tasorow["nimi"];
 
     // pilkotaan taso osiin

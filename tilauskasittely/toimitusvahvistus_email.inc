@@ -1,5 +1,16 @@
 <?php
 
+if ($kieli == '') {
+  $querykiel = "SELECT kieli
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus = '$laskurow[liitostunnus]'";
+  $kielresult = pupe_query($querykiel);
+  $kielrow = mysql_fetch_assoc($kielresult);
+
+  $kieli = strtolower($kielrow['kieli']);
+}
+
 $toimitusvahvistus_email_lahetys = true;
 
 if (!isset($rakir_row) or !isset($rakir_row['toimitusvahvistus']) or !isset($rakir_row['asiakas_email']) or !isset($tunnukset) or !isset($otunnukset)) {
@@ -12,15 +23,15 @@ if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_r
 
 if ($toimitusvahvistus_email_lahetys) {
 
-  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", '', '', '', '', "selitetark_2");
+  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", $kieli, '', '', '', "selitetark_2");
   if ($_toimvahvistus == "eihintaa") {
     $_hinta = "";
   }
   else {
-    $_hinta = " ".t("Hinta");
+    $_hinta = " ".t("Hinta", $kieli);
   }
 
-  $body = t("Hei").",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa").":\n\n\n".t("Tuotenumero")." ".t("Määrä")." ".t("Nimitys").$_hinta."\n\n";
+  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
 
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -55,7 +66,7 @@ if ($toimitusvahvistus_email_lahetys) {
             AND yhtio    = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
-  $body .= t("Seurantakoodit").":\n\n";
+  $body .= t("Seurantakoodit", $kieli).":\n\n";
 
   while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
     $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
@@ -63,7 +74,7 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= "\n";
 
-  $body .= t("Tilauksen toimitusosoite").":\n\n";
+  $body .= t("Tilauksen toimitusosoite", $kieli).":\n\n";
 
   $maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
 
@@ -75,7 +86,7 @@ if ($toimitusvahvistus_email_lahetys) {
   // Sähköpostin lähetykseen parametrit
   $parametri = array( "to"       => $rakir_row['asiakas_email'],
     "cc"       => "",
-    "subject"    => t("Toimitusvahvistus"),
+    "subject"    => t("Toimitusvahvistus", $kieli),
     "ctype"      => "text",
     "body"      => $body,
   );

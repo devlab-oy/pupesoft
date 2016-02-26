@@ -737,6 +737,13 @@ if (!function_exists("tee_jt_tilaus")) {
               $kommentti .= trim($lisataanrow['kommentti']);
             }
 
+            // Rivin nimitys voi olla ollut käsinsyötetty, joten otetaan se tässä talteen
+            $tuotenimitys = "";
+
+            if (trim($lisataanrow['nimitys']) != "" and !empty($yhtiorow["nimityksen_muutos_tilauksella"])) {
+              $tuotenimitys = trim($lisataanrow['nimitys']);
+            }
+
             unset($orig_laskurow);
 
             if ($lisataanrow["vanha_otunnus"] > 0) {

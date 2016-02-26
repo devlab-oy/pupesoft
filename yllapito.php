@@ -490,6 +490,10 @@ if ($upd == 1) {
             }
           }
 
+          if ($toim == 'tuote' and mysql_field_name($result, $i) == 'vienti' and !empty($maaryhma_vienti)) {
+            $t[$i] = $maaryhma_vienti;
+          }
+
           if (mysql_field_type($result, $i) == 'real') {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
@@ -1651,6 +1655,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           if ($from == "" and $lopetus == "") {
             echo "&lopetus=".$palvelin2."yllapito.php////mista=$mista//ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
           }
+          elseif ($lopetus == "" and $lopetus_muut != "") {
+            echo "&lopetus_muut=$lopetus_muut";
+          }
           else {
             echo "&lopetus=$lopetus";
           }
@@ -2306,7 +2313,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
             }
         </SCRIPT>";
 
-      if ($rajattu_nakyma == '') {
+      if ($rajattu_nakyma == '' or $rajattu_nakyma == "true_poisto") {
 
         if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 

@@ -6,22 +6,49 @@ handle_cookie("toimittamattomat", "find_submit");
 
 require '../inc/parametrit.inc';
 
+if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
+  livesearch_tullinimikehaku();
+  exit;
+}
+
+enable_ajax();
+
 echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
 if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
 if (isset($vahennettava_era)) $vahennettava_era = str_replace(",", ".", $vahennettava_era);
 
+$toim = strtoupper($toim);
+
 if ($tapa == "tuonti" and $tee != "") {
 
-  $query = "SELECT *
-            FROM lasku
-            WHERE tunnus in ($otunnus)
-            and yhtio    = '$kukarow[yhtio]'";
+  if ($toim == "TYOMAARAYS") {
+    $query = "SELECT tyomaarays.*, lasku.*,
+              tyomaarays.kuljetusmuoto,
+              tyomaarays.maa_lahetys,
+              tyomaarays.maa_maara,
+              tyomaarays.maa_alkupera,
+              tyomaarays.kauppatapahtuman_luonne,
+              tyomaarays.bruttopaino,
+              tyomaarays.tullikoodi,
+              tyomaarays.tulliarvo
+              FROM lasku
+              JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus)
+              WHERE lasku.tunnus in ($otunnus)
+              and lasku.yhtio    = '$kukarow[yhtio]'";
+  }
+  else {
+    $query = "SELECT *
+              FROM lasku
+              WHERE tunnus in ($otunnus)
+              and yhtio    = '$kukarow[yhtio]'";
+  }
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "laskua ei löydy";
+    echo $toim == "TYOMAARAYS" ? t("Työmääräysä ei löydy") : t("Laskua ei löydy");
     exit;
   }
   else {
@@ -32,28 +59,44 @@ if ($tapa == "tuonti" and $tee != "") {
 
     $ultilno = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
-    $query = "UPDATE lasku
-              SET maa_maara                    = '$maa_maara',
-              maa_lahetys                      = '$maa_lahetys',
-              kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-              kuljetusmuoto                    = '$kuljetusmuoto',
-              sisamaan_kuljetus                = '$sisamaan_kuljetus',
-              sisamaan_kuljetusmuoto           = '$sisamaan_kuljetusmuoto',
-              sisamaan_kuljetus_kansallisuus   = '$sisamaan_kuljetus_kansallisuus',
-              kontti                           = '$kontti',
-              aktiivinen_kuljetus              = '$aktiivinen_kuljetus',
-              aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
-              poistumistoimipaikka             = '$poistumistoimipaikka',
-              poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
-              aiotut_rajatoimipaikat           = '$aiotut_rajatoimipaikat',
-              maaratoimipaikka                 = '$maaratoimipaikka',
-              bruttopaino                      = '$bruttopaino',
-              lisattava_era                    = '$lisattava_era',
-              vahennettava_era                 = '$vahennettava_era',
-              ultilno                          = '$ultilno'
-              WHERE tunnus                     in ($otunnus)
-              and yhtio                        = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
+    if ($toim == "TYOMAARAYS") {
+      $query = "UPDATE tyomaarays SET
+                tullikoodi                       = '$tullikoodi',
+                tulliarvo                        = '$tulliarvo',
+                maa_maara                        = '$maa_maara',
+                maa_lahetys                      = '$maa_lahetys',
+                maa_alkupera                     = '$maa_alkupera',
+                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
+                kuljetusmuoto                    = '$kuljetusmuoto',
+                bruttopaino                      = '$bruttopaino'
+                WHERE otunnus                    in ($otunnus)
+                and yhtio                        = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+    }
+    else {
+      $query = "UPDATE lasku
+                SET maa_maara                    = '$maa_maara',
+                maa_lahetys                      = '$maa_lahetys',
+                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
+                kuljetusmuoto                    = '$kuljetusmuoto',
+                sisamaan_kuljetus                = '$sisamaan_kuljetus',
+                sisamaan_kuljetusmuoto           = '$sisamaan_kuljetusmuoto',
+                sisamaan_kuljetus_kansallisuus   = '$sisamaan_kuljetus_kansallisuus',
+                kontti                           = '$kontti',
+                aktiivinen_kuljetus              = '$aktiivinen_kuljetus',
+                aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
+                poistumistoimipaikka             = '$poistumistoimipaikka',
+                poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
+                aiotut_rajatoimipaikat           = '$aiotut_rajatoimipaikat',
+                maaratoimipaikka                 = '$maaratoimipaikka',
+                bruttopaino                      = '$bruttopaino',
+                lisattava_era                    = '$lisattava_era',
+                vahennettava_era                 = '$vahennettava_era',
+                ultilno                          = '$ultilno'
+                WHERE tunnus                     in ($otunnus)
+                and yhtio                        = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+    }
 
     $tee = "";
 
@@ -94,7 +137,7 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."), $painorow["massa"], $osumapros)."</font><br><br>";
 
     echo "<table>";
-    echo "<form method='post'>
+    echo "<form method='post' name='paaformi'>
         <input type='hidden' name='toim' value='$toim'>
         <input type='hidden' name='asiakasid' value='$asiakasid'>
         <input type='hidden' name='toiminto' value='lisatiedot'>
@@ -102,6 +145,24 @@ if ($tapa == "tuonti" and $tee != "") {
         <input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>
         <input type='hidden' name='lopetus' value='$lopetus'>
         <input type='hidden' name='tee' value='update'>";
+
+    if ($toim == "TYOMAARAYS") {
+      echo "<tr>";
+      echo "<th>",t("Tullinimike"),"</th>";
+      echo "<td>";
+      echo "<br>";
+      echo livesearch_kentta("paaformi", 'TULLINIMIKEHAKU', 'tullikoodi', 140, $laskurow['tullikoodi'], 'EISUBMIT', '', '', 'ei_break_all');
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>",t("Tulliarvo"),"</th>";
+      echo "<td>";
+      echo "<br>";
+      echo "<input type='text' name='tulliarvo' value='{$laskurow['tulliarvo']}' />";
+      echo "</td>";
+      echo "</tr>";
+    }
 
     $query = "SELECT sum(kollit) kollit, sum(kilot) kilot
               FROM rahtikirjat
@@ -116,6 +177,28 @@ if ($tapa == "tuonti" and $tee != "") {
     echo "<th>".t("Bruttopaino").":</th>";
     echo "<td><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]' style='width:300px;'></td>";
     echo "</tr>";
+
+    if ($toim == "TYOMAARAYS") {
+      echo "<tr>";
+      echo "<th>".t("Alkuperämaa").":</th>";
+      echo "<td>";
+      echo "<select name='maa_alkupera' style='width:300px;'>";
+
+      $query = "SELECT distinct koodi, nimi
+                FROM maat
+                where nimi != ''
+                ORDER BY koodi";
+      $result = pupe_query($query);
+
+      echo "<option value=''>".t("Valitse")."</option>";
+
+      while ($row = mysql_fetch_assoc($result)) {
+        $sel = $row["koodi"] == $laskurow["maa_alkupera"] ? 'selected' : '';
+        echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
+      }
+      echo "</select></td>";
+      echo "</tr>";
+    }
 
     echo "<tr>";
     echo "<th>".t("Lähetysmaa").":</th>";
@@ -220,7 +303,6 @@ if ($tapa == "tuonti" and $tee != "") {
     $tunnus = $otunnus;
     require "raportit/naytatilaus.inc";
   }
-
 }
 elseif ($tee != "") {
   if ($tee == 'L') {
@@ -751,24 +833,62 @@ elseif ($tee == '') {
   echo "</form>";
 
   $haku='';
-  if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
-  if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+  if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
+  if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
-  if (isset($toimittamattomat) and $toimittamattomat == 1) {
-    $tilaehto = "AND ((tila = 'L' AND alatila NOT IN ('X')) OR (tila = 'N'))";
+  if ($toim == "TYOMAARAYS") {
+    $tyomaarays_tilaehto = "A";
+    $tilaehto = "AND lasku.tilaustyyppi = 'A' ";
   }
   else {
-    $tilaehto = "AND tila = 'L' AND alatila IN ('B','D','E')";
+    $tyomaarays_tilaehto = "N";
+    $tilaehto = "";
+  }
+
+  if (isset($toimittamattomat) and $toimittamattomat == 1) {
+    $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}'))";
+  }
+  else {
+    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E')";
+  }
+
+  if ($toim == "TYOMAARAYS") {
+    $tyomaaraysjoin = "JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus)";
+    $selectlisa = "tyomaarays.maa_maara, tyomaarays.kuljetusmuoto, tyomaarays.kauppatapahtuman_luonne,";
+  }
+  else {
+    $tyomaaraysjoin = "";
+    $selectlisa = "lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,";
   }
 
   //listataan laskuttamattomat tilausket
-  $query = "SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
-            maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
+  $query = "SELECT lasku.tunnus as tilaus,
+            lasku.nimi as asiakas,
+            lasku.luontiaika as laadittu,
+            lasku.laatija,
+            lasku.vienti,
+            lasku.erpcm,
+            lasku.ytunnus,
+            lasku.nimi,
+            lasku.nimitark,
+            lasku.postino,
+            lasku.postitp,
+            lasku.maksuehto,
+            lasku.lisattava_era,
+            lasku.vahennettava_era,
+            lasku.ketjutus,
+            {$selectlisa}
+            lasku.sisamaan_kuljetus,
+            lasku.sisamaan_kuljetusmuoto,
+            lasku.poistumistoimipaikka,
+            lasku.poistumistoimipaikka_koodi,
+            lasku.alatila
             FROM lasku
-            WHERE yhtio = '$kukarow[yhtio]'
+            {$tyomaaraysjoin}
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilaehto}
-            AND vienti  in ('K','E')
-            $haku
+            AND lasku.vienti  in ('K','E')
+            {$haku}
             ORDER by 5,6,7,8,9,10,11,12,13,14";
   $tilre = pupe_query($query);
 
@@ -859,7 +979,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif ($tilrow['alatila'] == 'E'
+      elseif (($tilrow['alatila'] == 'E' or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -875,7 +995,13 @@ elseif ($tee == '') {
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='otunnus' value='$tilrow[tilaus]'>
           <input type='hidden' name='tee' value='K'>
-          <input type='submit' name='tila' value='".t("Valitse")."'></form></td>";
+          <input type='submit' name='tila' value='".t("Valitse")."'>";
+
+      if ($toim == "TYOMAARAYS") {
+        echo "<input type='hidden' name='tapa' value='tuonti'>";
+      }
+
+      echo "</form></td>";
 
       $ketjutus      = $tilrow["ketjutus"];
       $erpcm        = $tilrow["erpcm"];

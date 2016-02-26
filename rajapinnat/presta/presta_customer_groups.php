@@ -23,9 +23,10 @@ class PrestaCustomerGroups extends PrestaClient {
 
 
   protected function generate_xml($group, SimpleXMLElement $existing_group = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_group)) {
+    if (is_null($existing_group)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_group;
     }
 
@@ -38,8 +39,8 @@ class PrestaCustomerGroups extends PrestaClient {
     //1 = Tax excluded, 0 = tax included in presta
     $xml->group->price_display_method = 0;
     $xml->group->show_prices = 1;
-    $xml->group->name->language[0] = $group['selitetark'];
-    $xml->group->name->language[1] = $group['selitetark'];
+    $xml->group->name->language[0] = utf8_encode($group['selitetark']);
+    $xml->group->name->language[1] = utf8_encode($group['selitetark']);
 
     return $xml;
   }
@@ -48,7 +49,6 @@ class PrestaCustomerGroups extends PrestaClient {
     $this->logger->log('---------Start group sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema();
       $existing_groups = $this->all(array('id'));
       $existing_groups = array_column($existing_groups, 'id');
 

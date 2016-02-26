@@ -2120,6 +2120,21 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     sahkoinen_lahete($laskurow);
   }
 
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+    and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
+
+    $params_tilausvahvistus = array(
+      'tee'            => $tee,
+      'toim'           => $toim,
+      'kieli'          => $kieli,
+      'laskurow'       => $laskurow,
+      'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+    );
+
+    laheta_tilausvahvistus($params_tilausvahvistus);
+  }
+
   if ($tee == 'VALMIS' or $yhtiorow['reklamaation_kasittely'] == 'X') {
     $alatila_lisa = "AND alatila = ''";              // semilaaja reklamaatio & takuu
   }
@@ -6490,7 +6505,7 @@ if ($tee == '') {
               </form><br><br>";
       }
 
-      if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
+      if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
         echo t("Tilausrivin verollisuus").":<br>";
         echo "<form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' method='post'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -6526,6 +6541,17 @@ if ($tee == '') {
       echo "</div>";
 
       echo "<img id='rivientoiminnot' src='$palvelin2/pics/lullacons/mini-edit.png' style='padding-bottom: 5px; padding-left: 15px; padding-right: 15px;'>";
+
+      if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+        // valittu ei n‰ytet‰ alveja vaikka hinnat alvillisina
+        if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+          echo "<font class='info'>(".t("Verottomat hinnat").")</font>";
+        }
+        // valittu n‰ytet‰‰n alvit vaikka hinnat alvittomia
+        if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+          echo "<font class='info'>(".t("Verolliset hinnat").")</font>";
+        }
+      }
     }
 
     if ($rivilaskuri > 0) {
@@ -7657,16 +7683,14 @@ if ($tee == '') {
                   <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
                      class='tooltip'
                      data-content-url='?toim={$toim}" .
-            "&ajax_popup=true" .
-            "&tuoteno={$row["tuoteno"]}" .
-            "&yksikko={$row["yksikko"]}" .
-            "&tilattu={$row["tilkpl"]}" .
-            "&varattu={$row["varattu"]}" .
-            "&paikka={$row["paikka"]}" .
-            "&keskihinta={$row["kehahin"]}" .
-            "&valuutta={$row["valuutta"]}" .
-            "&varasto={$laskurow["varasto"]}" .
-            "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
+                       "&ajax_popup=true" .
+                       "&tuoteno={$row["tuoteno"]}" .
+                       "&yksikko={$row["yksikko"]}" .
+                       "&paikka={$row["paikka"]}" .
+                       "&keskihinta={$row["kehahin"]}" .
+                       "&valuutta={$row["valuutta"]}" .
+                       "&varasto={$laskurow["varasto"]}" .
+                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";

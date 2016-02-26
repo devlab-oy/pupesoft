@@ -297,10 +297,40 @@ if ($tee == "SYOTTO") {
   }
 }
 
-if ($asiakasid != "" and $tee == "ETSI") {
+if (!empty($viite_haku) and $tee == "ETSI") {
+  $query = "SELECT liitostunnus, valkoodi
+            FROM lasku
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tila     = 'U'
+            and alatila  = 'X'
+            and viite = '$viite_haku'";
+  $result  = pupe_query($query);
 
-  $laskunro = $asiakasid; // haku talteen
+  if ($asiakas = mysql_fetch_assoc($result)) {
+    echo "<font class='message'>".t("Maksaja löytyi viitteellä")." $viite_haku:</font><br><br>";
+    $asiakasid = $asiakas["liitostunnus"];
+  }
+}
+elseif (!empty($laskunro_haku) and $tee == "ETSI") {
+  $query = "SELECT liitostunnus
+            FROM lasku
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tila     = 'U'
+            and alatila  = 'X'
+            and laskunro = '$laskunro_haku'";
+  $result  = pupe_query($query);
 
+  if ($asiakas = mysql_fetch_assoc($result)) {
+    echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro_haku:</font><br><br>";
+    $asiakasid = $asiakas["liitostunnus"];
+  }
+}
+
+if (empty($asiakasid) and $tee == "ETSI") {
+  $tee = "";
+}
+
+if (!empty($asiakasid) and $tee == "ETSI") {
   // jos meillä on IE käytössä (eli ei livesearchia) tai ollaan submitattu jotain tekstiä, niin tehdään YTUNNUS haku, muuten asiakasid haku
   if ($ytunnus == "" and stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE or !is_numeric($asiakasid)) {
     $ytunnus = $asiakasid;
@@ -309,23 +339,6 @@ if ($asiakasid != "" and $tee == "ETSI") {
 
   require "inc/asiakashaku.inc";
   $tee = "";
-
-  // jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
-  if ($ytunnus == "" and is_numeric($laskunro)) {
-    $query = "SELECT liitostunnus
-              FROM lasku
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tila     = 'U'
-              and alatila  = 'X'
-              and laskunro = '$laskunro'";
-    $result  = pupe_query($query);
-
-    if ($asiakas = mysql_fetch_assoc($result)) {
-      echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br><br>";
-      $asiakasid = $asiakas["liitostunnus"];
-      require "inc/asiakashaku.inc";
-    }
-  }
 
   // otetaan muutparametrit takas
   list ($summa, $ppa, $kka, $vva, $mtili, $selite) = explode("#", $muutparametrit);
@@ -615,14 +628,35 @@ if ($tee == "" and $ytunnus == "") {
     $maksaja_haku = htmlentities($maksaja_haku);
   }
 
-  echo "<font class='message'>", t("Maksajan hakuinfo"), " ", asiakashakuohje(), "</font><br>";
-  echo "<br>";
-  echo t("Maksaja").": ";
   echo "<form method='post' name='maksaja'>";
-  echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku);
   echo "<input type='hidden' name='tee' value='ETSI'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
   echo "<input type='hidden' name='muutparametrit' value='$summa#$ppa#$kka#$vva#$mtili#$selite'>";
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>",t("Maksaja"),"</th>";
+  echo "<td>",livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku),"</td>";
+  echo "<td class='back'>",asiakashakuohje(),"</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back' colspan='2'><br>tai etsi maksaja laskunumerolla:<br><br></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>",t("Laskunro")."</th><td><input type='text' name='laskunro_haku' size='25'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td class='back' colspan='2'><br>tai etsi maksaja viitenumerolla:<br><br></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>",t("Viitenumero")."</th><td><input type='text' name='viite_haku' size='25'></td>";
+  echo "</tr>";
+  echo "</table>";
+
   echo "<br>";
   echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";

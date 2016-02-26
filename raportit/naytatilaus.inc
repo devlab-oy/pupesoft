@@ -990,10 +990,12 @@ else {
             tuote.ei_saldoa,
             tuote.valmistuslinja,
             if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
-            if (tilausrivi.tyyppi='V', 0, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) arvo,
-            if (tilausrivi.tyyppi='V', 0, if (tilausrivi.kpl!=0, tilausrivi.rivihinta * if (tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})) summa,
+            if (tilausrivi.tyyppi='V', 0, (tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta_valuutassa,
+            if (tilausrivi.tyyppi='V', 0, if (tilausrivi.kpl!=0, tilausrivi.rivihinta * if (tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa})) summa,
+            if (tilausrivi.tyyppi='V', 0, (tilausrivi.hinta / if (lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) summa_valuutassa,
             $sorttauskentta
             FROM tilausrivi
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
             LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
             LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
             WHERE $where
@@ -1041,17 +1043,15 @@ else {
       <th>".t("Tila")."</th>
       <th>".t("Netto")."</th>";
 
-  $kurssilisa = "";
+  $kurssilisa1 = "";
+  $kurssilisa2 = "";
+
   if ($vientikurssi != 1) {
-    $kurssilisa = " (Hinta val.)";
+    $kurssilisa1 = " (Hinta val.)";
+    $kurssilisa2 = " (Rivihinta val.)";
   }
 
-  $kurssilisa = "";
-  if ($vientikurssi != 1) {
-    $kurssilisa = " (Rivihinta val.)";
-  }
-
-  if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Svh $kurssilisa")."</th>";
+  if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Svh $kurssilisa1")."</th>";
 
   if ($kukarow['hinnat'] == 0) {
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1060,7 +1060,7 @@ else {
   }
 
   if ($kukarow['hinnat'] == 0) echo "<th style='text-align:right;'>".t("Hinta")."</th>";
-  if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Rivihinta $kurssilisa")."</th>";
+  if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Rivihinta $kurssilisa2")."</th>";
 
   if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
     echo "<th style='text-align:right;'>".t("Kate")."</th>";
@@ -1087,24 +1087,24 @@ else {
 
   echo "</tr>";
 
-  $tuotetyyppi    = "";
-  $positio_varattu  = "";
-  $varaosatyyppi    = "";
-  $vanhaid       = "KALA";
-  $borderlask      = 0;
-  $pknum        = 0;
+  $tuotetyyppi = "";
+  $positio_varattu = "";
+  $varaosatyyppi = "";
+  $vanhaid = "KALA";
+  $borderlask = 0;
+  $pknum = 0;
   $erikoistuote_tuoteperhe = array();
-  $tuoteperhe_kayty   = '';
-  $edotunnus       = 0;
-  $tuotekyslinkki    = "";
+  $tuoteperhe_kayty = '';
+  $edotunnus = 0;
+  $tuotekyslinkki = "";
   $lopetus_apu = "";
   $lopetus_vika = "";
   $_lopetus_talteen = "";
   $_lopetus_talteen_array = array();
 
-  $summa_yht     = 0;
-  $arvo_yht      = 0;
-  $kate_yht      = 0;
+  $summa_yht    = 0;
+  $arvo_yht     = 0;
+  $kate_yht     = 0;
   $ennas_yht    = 0;
   $ennaa_yht    = 0;
   $rihin_yht    = 0;
@@ -1187,24 +1187,24 @@ else {
 
     if ($row["tuoteno"] == $yhtiorow["ennakkomaksu_tuotenumero"]) {
       $ennas_yht += $row["summa"];
-      $ennaa_yht += $row["arvo"];
+      $ennaa_yht += $row["rivihinta"];
     }
     else {
 
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
-          $rihin_yht += laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]);
+          $rihin_yht += $row["rivihinta_valuutassa"];
         }
 
-        $arvo_yht  += round(laskuval($row["arvo"], $laskurow["vienti_kurssi"]), 2);
-        $summa_yht += round(laskuval($row["summa"], $laskurow["vienti_kurssi"]), 2);
+        $arvo_yht  += round($row["rivihinta_valuutassa"], 2);
+        $summa_yht += round($row["summa_valuutassa"], 2);
       }
       else {
         if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
           $rihin_yht += $row["rivihinta"];
         }
 
-        $arvo_yht  += round($row["arvo"], 2);
+        $arvo_yht  += round($row["rivihinta"], 2);
         $summa_yht += round($row["summa"], 2);
       }
     }
@@ -1582,6 +1582,7 @@ else {
     elseif ($kukarow['hinnat'] == 0) {
 
       $kurssilisa = "";
+
       if ($vientikurssi != 1) {
         $kurssilisa = " (".hintapyoristys($row["hinta"]/$vientikurssi).")";
       }
@@ -1613,16 +1614,16 @@ else {
         //verolliset hinnat
         $kurssilisa = "";
         if ($vientikurssi != 1) {
-          $kurssilisa = " (".hintapyoristys($row["summa"]/$vientikurssi).")";
+          $kurssilisa = " (".hintapyoristys($row["summa_valuutassa"]).")";
         }
         echo "<td $class align='right' valign='top' nowrap>".hintapyoristys($row["summa"])."$kurssilisa</td>";
       }
       else {
         $kurssilisa = "";
         if ($vientikurssi != 1) {
-          $kurssilisa = " (".hintapyoristys($row["arvo"]/$vientikurssi).")";
+          $kurssilisa = " (".hintapyoristys($row["rivihinta_valuutassa"]).")";
         }
-        echo "<td $class align='right' valign='top' nowrap>".hintapyoristys($row["arvo"])."$kurssilisa</td>";
+        echo "<td $class align='right' valign='top' nowrap>".hintapyoristys($row["rivihinta"])."$kurssilisa</td>";
       }
     }
 

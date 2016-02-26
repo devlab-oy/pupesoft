@@ -7,7 +7,7 @@ if ($kieli == '') {
   $querykiel = "SELECT kieli
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                and ytunnus = '$laskurow[ytunnus]'";
+                and tunnus = '$laskurow[liitostunnus]'";
   $kielresult = pupe_query($querykiel);
   $kielrow = mysql_fetch_assoc($kielresult);
 
@@ -36,6 +36,10 @@ $rivinkorkeus       = 15;
 if (!function_exists('alku_lahete')) {
   function alku_lahete($params) {
     global $kukarow, $yhtiorow;
+
+    if (skippa_lahete_pdf($params)) {
+      return $params;
+    }
 
     // Luodaan muuttujat
     extract($params);
@@ -348,7 +352,7 @@ if (!function_exists('alku_lahete')) {
       $pdf->draw_text(150, 730, $ff_string, $thispage, $ff_font);
 
       $pdf->draw_text(50, 717, t("Y-tunnus", $kieli), $thispage, $boldi);
-      $pdf->draw_text(150, 717, tulosta_ytunnus(str_replace("0037", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
 
       $pdf->draw_text(50, 704, t("Nimi", $kieli), $thispage, $boldi);
       $pdf->draw_text(150, 704, $yhtiorow["nimi"], $thispage, $norm);
@@ -893,6 +897,10 @@ if (!function_exists('rivi_otsikot_lahete')) {
   function rivi_otsikot_lahete($params, $kollitiedot=null) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
 
@@ -1234,6 +1242,10 @@ if (!function_exists('kollirivi_lahete')) {
   function kollirivi_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
 
@@ -1284,6 +1296,10 @@ if (!function_exists('kollirivi_lahete')) {
 if (!function_exists('rivi_lahete')) {
   function rivi_lahete($params) {
     global $kukarow, $yhtiorow;
+
+    if (skippa_lahete_pdf($params)) {
+      return $params;
+    }
 
     // Luodaan muuttujat
     extract($params);
@@ -3474,6 +3490,11 @@ if (!function_exists('loppu_lahete')) {
   function loppu_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
 
@@ -3491,7 +3512,7 @@ if (!function_exists('loppu_lahete')) {
       $y_postitp     = $GLOBALS['eta_yhtio_postitp'];
       $y_maa       = $GLOBALS['eta_yhtio_maa'];
       $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
-      $y_vatnumero  = str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
+      $y_vatnumero  = preg_replace("/^0037/", "", $GLOBALS['eta_yhtio_ovttunnus']);
       $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
       $y_iban     = "";
       $y_swift     = "";
@@ -3505,7 +3526,7 @@ if (!function_exists('loppu_lahete')) {
       $y_postitp     = $laskurow["yhtio_postitp"];
       $y_maa       = $laskurow["yhtio_maa"];
       $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
       $y_iban     = $yhtiorow['pankkiiban1'];
       $y_swift     = $yhtiorow['pankkiswift1'];
 
@@ -4064,6 +4085,11 @@ if (!function_exists('kuittaus_lahete')) {
   function kuittaus_lahete($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_lahete_pdf($params)) {
+      // Luodaan palautettavat
+      return $params;
+    }
+
     //katotaan onko laskutus nouto
     $query = "SELECT toimitustapa.nouto, maksuehto.kateinen
               FROM lasku
@@ -4171,25 +4197,27 @@ if (!function_exists('kuittaus_lahete')) {
 
 if (!function_exists('print_pdf_lahete')) {
   function print_pdf_lahete($params) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $palvelin2;
 
     // Luodaan muuttujat
     extract($params);
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
-    $oslapp     = '';
+    $oslapp = '';
     $returnvalue = 0;
 
-    //keksitään uudelle failille joku varmasti uniikki nimi:
-    list($usec, $sec) = explode(' ', microtime());
-    mt_srand((float) $sec + ((float) $usec * 100000));
-    $pdffilenimi = "/tmp/Lahete-".md5(uniqid(mt_rand(), true)).".pdf";
+    if (!skippa_lahete_pdf($params)) {
+      //keksitään uudelle failille joku varmasti uniikki nimi:
+      list($usec, $sec) = explode(' ', microtime());
+      mt_srand((float) $sec + ((float) $usec * 100000));
+      $pdffilenimi = "/tmp/Lahete-".md5(uniqid(mt_rand(), true)).".pdf";
 
-    //kirjoitetaan pdf faili levylle..
-    $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
-    fclose($fh);
+      //kirjoitetaan pdf faili levylle..
+      $fh = fopen($pdffilenimi, "w");
+      if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+      fclose($fh);
+    }
 
     if ($tee == 'NAYTATILAUS') {
       //Työnnetään tuo pdf vaan putkeen!
@@ -4205,7 +4233,16 @@ if (!function_exists('print_pdf_lahete')) {
 
       foreach ($komentoulos as $komento) {
         // itse print komento...
-        if ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
+        if ($komento == "-88") {
+          js_openFormInNewWindow();
+
+          echo "<br><form id='tulostakopioform_lahete_{$laskurow['tunnus']}' name='tulostakopioform_lahete_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+                <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+                <input type='hidden' name='toim' value='LAHETE'>
+                <input type='hidden' name='tee' value='NAYTATILAUS'>
+                <input type='submit' value='".t("Lähete").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_lahete_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+        }
+        elseif ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
           $liite = $pdffilenimi;
           $content_body = "";
 
@@ -4351,3 +4388,25 @@ if (!function_exists('hae_base_lahetetyyppi')) {
     return $base_lahetetyyppi;
   }
 }
+
+if (!function_exists('skippa_lahete_pdf')) {
+  function skippa_lahete_pdf($params) {
+
+    extract($params);
+
+    if (!is_array($komento)) {
+      $komentoulos = array($komento);
+    }
+    else {
+      $komentoulos = $komento;
+    }
+
+    if (count($komentoulos) == 1 and $komentoulos[0] == "-88") {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+}
+

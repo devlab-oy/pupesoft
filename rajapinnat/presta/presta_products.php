@@ -80,7 +80,8 @@ class PrestaProducts extends PrestaClient {
     // if we are moving all products to presta, hide the product if we don't want to show it
     if ($this->visibility_type == 2) {
       // we have stock value in pupesoft_all_products
-      $stock = $this->pupesoft_all_products[$product['tuoteno']];
+      $stock_row = $this->find_product_from_all_products($product['tuoteno']);
+      $stock = (int) $stock_row['saldo'];
 
       if (empty($product['nakyvyys'])) {
         $this->logger->log("Näkyvyys tyhjää, ei näytetä verkkokaupassa.");
@@ -110,6 +111,9 @@ class PrestaProducts extends PrestaClient {
     $xml->product->available_for_order = 1;
     $xml->product->show_price = 1;
 
+    // Out of stock message
+    $out_of_stock = $product['status'] == 'T' ? "Tilaustuote" : "";
+
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
 
@@ -119,6 +123,7 @@ class PrestaProducts extends PrestaClient {
       $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
       $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
+      $xml->product->available_later                 = $out_of_stock;
     }
 
     // loop all translations and overwrite defaults
@@ -439,8 +444,7 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function delete_all_unnecessary_products() {
-    // pupesoft_all_products has SKU as the array key, we need an array of SKUs.
-    $pupesoft_products = array_keys($this->pupesoft_all_products);
+    $pupesoft_products = $this->pupesoft_all_products;
 
     if ($pupesoft_products === null or count($pupesoft_products) == 0) {
       $this->logger->log("pupesoft_all_products not set, can't delete!");
@@ -451,7 +455,9 @@ class PrestaProducts extends PrestaClient {
     $keep_presta_ids = array();
     $all_presta_ids = array();
 
-    foreach ($pupesoft_products as $product) {
+    foreach ($pupesoft_products as $product_row) {
+      $product = $product_row['tuoteno'];
+
       // do we have this product in presta
       $presta_id = array_search($product, $presta_products);
 
@@ -489,7 +495,10 @@ class PrestaProducts extends PrestaClient {
     $current = 0;
     $total = count($pupesoft_products);
 
-    foreach ($pupesoft_products as $sku => $stock) {
+    foreach ($pupesoft_products as $product_row) {
+      $sku = $product_row['tuoteno'];
+      $stock = $product_row['saldo'];
+
       $product_id = array_search($sku, $this->all_skus());
 
       $current++;
@@ -505,6 +514,16 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->logger->log('---------Saldojen päivitys valmis---------');
+  }
+
+  private function find_product_from_all_products($sku) {
+    foreach ($this->pupesoft_all_products as $product_row) {
+      if ($sku == $product_row['tuoteno']) {
+        return $product_row;
+      }
+    }
+
+    return false;
   }
 
   public function set_removable_fields($fields) {

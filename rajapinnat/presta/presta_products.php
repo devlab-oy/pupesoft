@@ -503,7 +503,7 @@ class PrestaProducts extends PrestaClient {
       $product_id = array_search($sku, $this->all_skus());
 
       $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo}");
+      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
 
       // could not find product or
       // this is a virtual product, no stock management

@@ -1168,7 +1168,7 @@ else {
 
       $px++;
 
-      $key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
+      $key = str_replace("Z", "", $key_c); // Ö-kirjaimet pois
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {

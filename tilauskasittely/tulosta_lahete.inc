@@ -7,7 +7,7 @@ if ($kieli == '') {
   $querykiel = "SELECT kieli
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                and ytunnus = '$laskurow[ytunnus]'";
+                and tunnus = '$laskurow[liitostunnus]'";
   $kielresult = pupe_query($querykiel);
   $kielrow = mysql_fetch_assoc($kielresult);
 
@@ -352,7 +352,7 @@ if (!function_exists('alku_lahete')) {
       $pdf->draw_text(150, 730, $ff_string, $thispage, $ff_font);
 
       $pdf->draw_text(50, 717, t("Y-tunnus", $kieli), $thispage, $boldi);
-      $pdf->draw_text(150, 717, tulosta_ytunnus(str_replace("0037", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
 
       $pdf->draw_text(50, 704, t("Nimi", $kieli), $thispage, $boldi);
       $pdf->draw_text(150, 704, $yhtiorow["nimi"], $thispage, $norm);
@@ -3512,7 +3512,7 @@ if (!function_exists('loppu_lahete')) {
       $y_postitp     = $GLOBALS['eta_yhtio_postitp'];
       $y_maa       = $GLOBALS['eta_yhtio_maa'];
       $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
-      $y_vatnumero  = str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
+      $y_vatnumero  = preg_replace("/^0037/", "", $GLOBALS['eta_yhtio_ovttunnus']);
       $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
       $y_iban     = "";
       $y_swift     = "";
@@ -3526,7 +3526,7 @@ if (!function_exists('loppu_lahete')) {
       $y_postitp     = $laskurow["yhtio_postitp"];
       $y_maa       = $laskurow["yhtio_maa"];
       $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
       $y_iban     = $yhtiorow['pankkiiban1'];
       $y_swift     = $yhtiorow['pankkiswift1'];
 

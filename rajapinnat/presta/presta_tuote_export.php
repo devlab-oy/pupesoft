@@ -16,8 +16,8 @@ if (!$php_cli) {
 
 $pupe_root_polku=dirname(dirname(dirname(__FILE__)));
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
-error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-ini_set("display_errors", 0);
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 
 require "inc/connect.inc";
 require "inc/functions.inc";
@@ -151,6 +151,29 @@ if (!isset($presta_valuuttakoodit)) {
     // "EUR" => 2,
   );
 }
+if (!isset($presta_tuotekasittely)) {
+  // 1 = siirretään tuotteet joiden status != 'P' ja nakyvyys != ''
+  // 2 = siirretään kaikki pupen tuotteet prestaan (poistetutkin), mutta merkataan ne hiddeniksi
+  $presta_tuotekasittely = 1;
+}
+if (!isset($presta_tuoteominaisuudet)) {
+  $presta_tuoteominaisuudet = array(
+    // Tuote-arrayn kenttä => Prestan product_feature_id
+    // "tuotemerkki" => 6,
+    // "tähtituote"  => 10,
+  );
+}
+if (!isset($presta_vakioasiakasryhmat)) {
+  $presta_vakioasiakasryhmat = array(
+    // Prestan customer_group_id
+    // 3,
+    // 6,
+  );
+}
+if (!isset($presta_varastot)) {
+  // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
+  $presta_varastot = array(0);
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -182,12 +205,16 @@ if (array_key_exists('tuotteet', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotetiedot.\n";
   $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
-  $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
-  $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
-  $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
-  $presta_products->set_tax_rates_table($presta_verokannat);
-  $presta_products->set_languages_table($presta_kieliversiot);
+
   $presta_products->set_all_products($kaikki_tuotteet);
+  $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
+  $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
+  $presta_products->set_languages_table($presta_kieliversiot);
+  $presta_products->set_product_features($presta_tuoteominaisuudet);
+  $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
+  $presta_products->set_tax_rates_table($presta_verokannat);
+  $presta_products->set_visibility_type($presta_tuotekasittely);
+
   $presta_products->sync_products($tuotteet);
 }
 
@@ -206,6 +233,7 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
 }
 
@@ -232,12 +260,9 @@ if (array_key_exists('tilaukset', $synkronoi)) {
 }
 
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
+mysql_close($link);
 unset($link);
-$link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
-
-mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
-mysql_set_charset("latin1", $link);
-mysql_query("set group_concat_max_len=1000000", $link);
+require "inc/connect.inc";
 
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
 $query = "UPDATE avainsana SET

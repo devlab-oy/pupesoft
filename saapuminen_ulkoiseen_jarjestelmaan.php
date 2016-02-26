@@ -52,6 +52,8 @@ else {
 
   $kukarow = mysql_fetch_assoc($kukares);
 
+  $pupe_root_polku = dirname(__FILE__);
+
   $saapumisnro = $argv[2];
 
   if (!empty($argv[3])) {
@@ -186,13 +188,16 @@ while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-  $_name = substr("out_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
+  $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
 
     if (!PUPE_UNICODE) {
       exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
+    }
+    else {
+      $ftputf8 = TRUE;
     }
 
     if ($_cli) {

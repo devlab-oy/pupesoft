@@ -990,7 +990,7 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
  * Generoi private keyn ja certificate signing requestin. Osa signing requestin tiedoista haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
  *
- * @param array $params
+ * @param array   $params
  *
  * @return array
  */
@@ -1030,11 +1030,11 @@ function generoi_private_key_ja_csr($params = array()) {
   $subject    = "/" . implode("/", $csr_info);
   $passphrase = openssl_random_pseudo_bytes(100);
   $command    = escapeshellcmd("openssl req " .
-                               "-newkey rsa:{$key_bits} " .
-                               "-passout stdin " .
-                               "-keyout {$key_path} " .
-                               "-out {$csr_path} " .
-                               "-subj '{$subject}'");
+    "-newkey rsa:{$key_bits} " .
+    "-passout stdin " .
+    "-keyout {$key_path} " .
+    "-out {$csr_path} " .
+    "-subj '{$subject}'");
 
   mkdir($csr_dir);
 
@@ -1177,10 +1177,11 @@ function parameter($param) {
   return empty($param) ? '' : $param;
 }
 
+
 /**
  * Palauttaa tilin saldon. Toimii toistaiseksi ainoastaan OP:n kanssa
  *
- * @param array $params
+ * @param array   $params
  *
  * @return array|bool Saldo ja valuutta tai false, jos jokin meni vikaan
  */
@@ -1192,9 +1193,9 @@ function hae_tilin_saldo($params) {
   $query = "SELECT bic, tilino, hae_saldo
             FROM pankkiyhteys
             JOIN yriti ON (yriti.yhtio = pankkiyhteys.yhtio
-              AND yriti.bic = pankkiyhteys.pankki)
+              AND yriti.bic          = pankkiyhteys.pankki)
             WHERE pankkiyhteys.yhtio = '{$kukarow["yhtio"]}'
-            AND pankkiyhteys.tunnus = {$params['pankkiyhteys_tunnus']}
+            AND pankkiyhteys.tunnus  = {$params['pankkiyhteys_tunnus']}
             LIMIT 1";
   $result = pupe_query($query);
   $pankkiyhteys = mysql_fetch_assoc($result);

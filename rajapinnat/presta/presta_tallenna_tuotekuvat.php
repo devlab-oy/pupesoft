@@ -8,6 +8,7 @@
  * php presta_tallenna_tuotekuvat.php yhtio presta downloadhakemisto
  */
 
+
 // Kutsutaanko CLI:st‰
 $php_cli = FALSE;
 
@@ -79,11 +80,11 @@ echo date("d.m.Y @ G:i:s")." - Haetaan tuotekuvia verkkokaupasta hakemistoon $ha
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
   $presta_products = new PrestaProducts($presta_url, $presta_api_key);
 
-  # Haetaan kaikki Prestashopista kaikkien tuotteiden prestaid:t/tuotenumerot
+  // Haetaan kaikki Prestashopista kaikkien tuotteiden prestaid:t/tuotenumerot
   $all_products = $presta_products->all_skus();
 
-  # Huom!!! Editoi t‰t‰ jos haluat hakea vain pienen otteen tuotekuvista aluksi
-  #$limitti = 20;
+  // Huom!!! Editoi t‰t‰ jos haluat hakea vain pienen otteen tuotekuvista aluksi
+  //$limitti = 20;
 
   $counter = 0;
   foreach ($all_products as $product_id => $pupe_product_code) {
@@ -92,7 +93,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
       die ("\nLimitti saavutettu");
     }
 
-    # Haetaan tuotteen kuvatiedot tuote kerrallaan
+    // Haetaan tuotteen kuvatiedot tuote kerrallaan
     $url = $presta_url ."/api/images/products/$product_id";
     echo "$counter Haetaan $url \n";
     $ch = curl_init();
@@ -106,13 +107,13 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
     $response = curl_exec($ch);
     curl_close($ch);
 
-    # Parsitaan xml:st‰ array
+    // Parsitaan xml:st‰ array
     $p = xml_parser_create();
     xml_parse_into_struct($p, $response, $product_data, $index);
 
     $unique_picture_urls = array();
 
-    # K‰yd‰‰n kaikki tuotteen kuvatiedot l‰pi ja poimitaan uniikit kuvaurlit talteen
+    // K‰yd‰‰n kaikki tuotteen kuvatiedot l‰pi ja poimitaan uniikit kuvaurlit talteen
     foreach ($product_data as $product) {
       if ($product['tag'] == 'DECLINATION') {
         $unique_picture_urls[$product['attributes']['XLINK:HREF']] = $product['attributes']['XLINK:HREF'];
@@ -125,7 +126,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
         if (file_exists($filename)) {
           $filename = "{$hakemisto}/{$pupe_product_code}#".md5(uniqid(mt_rand(), true)).".jpg";
         }
-        # Imaistaan kuva
+        // Imaistaan kuva
         exec("curl -s -o '{$filename}' -u {$presta_api_key}: $picture_url");
       }
     }
@@ -134,4 +135,3 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
 else {
   die ("Ei n‰in");
 }
-

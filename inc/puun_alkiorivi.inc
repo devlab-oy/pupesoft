@@ -64,8 +64,8 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
       $query = "SELECT nimi
                 FROM dynaaminen_puu
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji   = '{$apu['laji']}'
-                AND tunnus   = '{$trow[$i]}'";
+                AND laji    = '{$apu['laji']}'
+                AND tunnus  = '{$trow[$i]}'";
       $vres = pupe_query($query);
       $nimirow = mysql_fetch_assoc($vres);
       $alkio_nimi = $nimirow['nimi'];
@@ -75,8 +75,8 @@ if (mysql_field_name($result, $i) == "puun_tunnus") {
               FROM puun_alkio
               WHERE yhtio = '{$kukarow["yhtio"]}'
               and liitos  = '{$apu["liitos"]}'
-              and kieli  = '{$apu["kieli"]}'
-              and laji  = '{$apu["laji"]}'";
+              and kieli   = '{$apu["kieli"]}'
+              and laji    = '{$apu["laji"]}'";
     $vres = pupe_query($query);
     $vrow = mysql_fetch_array($vres);
 

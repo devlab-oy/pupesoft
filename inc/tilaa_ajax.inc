@@ -165,28 +165,28 @@ if ($maara > 0) {
 
   // lis‰t‰‰n ostotilausrivi
   $query = "INSERT into tilausrivi SET
-            hinta = '$lis_hinta',
+            hinta           = '$lis_hinta',
             {$query_insert_ale_lisa}
-            nimitys = '$tuoterow[nimitys]',
-            tuoteno = '$tuoteno',
-            try = '$tuoterow[try]',
-            osasto = '$tuoterow[osasto]',
-            tilkpl = '$maara',
-            varattu = '$maara',
-            yksikko = '$tuoterow[yksikko]',
-            otunnus = '$tilausnumero',
-            yhtio = '$kukarow[yhtio]',
-            tyyppi = 'O',
+            nimitys         = '$tuoterow[nimitys]',
+            tuoteno         = '$tuoteno',
+            try             = '$tuoterow[try]',
+            osasto          = '$tuoterow[osasto]',
+            tilkpl          = '$maara',
+            varattu         = '$maara',
+            yksikko         = '$tuoterow[yksikko]',
+            otunnus         = '$tilausnumero',
+            yhtio           = '$kukarow[yhtio]',
+            tyyppi          = 'O',
             kommentti ='',
-            toimaika = now(),
-            kerayspvm = now(),
-            hyllyalue = '$jtstu[hyllyalue]',
-            hyllynro = '$jtstu[hyllynro]',
-            hyllyvali = '$jtstu[hyllyvali]',
-            hyllytaso = '$jtstu[hyllytaso]',
+            toimaika        = now(),
+            kerayspvm       = now(),
+            hyllyalue       = '$jtstu[hyllyalue]',
+            hyllynro        = '$jtstu[hyllynro]',
+            hyllyvali       = '$jtstu[hyllyvali]',
+            hyllytaso       = '$jtstu[hyllytaso]',
             tilaajanrivinro = '$rivi',
-            laatija = '$kukarow[kuka]',
-            laadittu = now()";
+            laatija         = '$kukarow[kuka]',
+            laadittu        = now()";
   $updre = pupe_query($query);
 }
 

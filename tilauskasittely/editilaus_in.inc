@@ -283,6 +283,7 @@ elseif ($edi_tyyppi == "magento") {
 elseif ($edi_tyyppi == "presta") {
   $edi_subj = "Sisääntuleva Verkkokauppa-tilaus";
   $edi_laatija = "Presta";
+  $edi_tyyppi = "magento"; // presta toimii täällä samaan tapaan kuin magento
 }
 elseif ($edi_tyyppi == "edifact911") {
 
@@ -339,7 +340,7 @@ while ($tietue = fgets($fd)) {
   if (trim($tietue) == "") continue;
 
   // tää on futurikeisi
-  if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento" or $edi_tyyppi == "presta") {
+  if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
     if (substr($tietue, 0, 1) != '*') {
       list($tunnus, $tieto)  = explode(':', $tietue);
@@ -1315,23 +1316,11 @@ while ($tietue = fgets($fd)) {
         }
       }
 
-      if ($edi_tyyppi == 'presta') {
-        if ($editilaus_tilaustyyppi == 'maksamatta') {
-          $editilaus_tila   = 'N';
-          $editilaus_alatila   = '';
-        }
-        else if ($editilaus_tilaustyyppi == 'maksettu') {
-          $editilaus_tila   = 'N';
-          $editilaus_alatila   = 'A';
-        }
-      }
-
       $tilaustyyppilisa = '';
 
-      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-        and count($verkkokauppa_erikoiskasittely) > 0) {
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) =
-          hae_erikoiskaupan_parametrit($verkkokauppa);
+      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
+        list($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) = hae_erikoiskaupan_parametrit($verkkokauppa);
+
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},

@@ -1111,7 +1111,7 @@ class MagentoClient {
       }
 
       $message .= "\n";
-      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
+      $log_location = $type == 'product' ? '/home/devlab/logs/magento_export.log' : '/home/devlab/logs/magento_orders.log';
       error_log("{$timestamp}: {$message}", 3, $log_location);
     }
   }
@@ -2016,7 +2016,7 @@ class MagentoClient {
 
       // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
       if (count($asiakaskohtainenhintadata) > 0) {
-        
+
         $reply = $this->_proxy->call($this->_session, 'price_per_customer.setPriceForCustomersPerProduct',
           array($magento_tuotenumero, $asiakaskohtainenhintadata));
         $this->log("Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty " . print_r($asiakaskohtainenhintadata, true));
@@ -2126,7 +2126,7 @@ class MagentoClient {
   private function poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
     // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
     $toiminto = false;
-    try {           
+    try {
       $asiakashinnat = array();
 
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
@@ -2174,21 +2174,21 @@ class MagentoClient {
 
       $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
                  FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
-                 WHERE yhtio   = '$kukarow[yhtio]'
-                 and asiakas   = '$asiakas[asiakastunnus]'
-                 and asiakas   > 0
-                 and tuoteno   = '$tuoterow[tuoteno]'
-                 and tuoteno  != ''
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 and asiakas  = '$asiakas[asiakastunnus]'
+                 and asiakas  > 0
+                 and tuoteno  = '$tuoterow[tuoteno]'
+                 and tuoteno != ''
                  and (minkpl <= $kpl or minkpl = 0)
                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
                  UNION
                  (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
                  FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
-                 WHERE yhtio   = '$kukarow[yhtio]'
-                 and ytunnus   = '$asiakas[ytunnus]'
-                 and ytunnus  != ''
-                 and tuoteno   = '$tuoterow[tuoteno]'
-                 and tuoteno  != ''
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 and ytunnus  = '$asiakas[ytunnus]'
+                 and ytunnus != ''
+                 and tuoteno  = '$tuoterow[tuoteno]'
+                 and tuoteno != ''
                  and (minkpl <= $kpl or minkpl = 0)
                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
                  ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
@@ -2202,21 +2202,21 @@ class MagentoClient {
       if (!isset($row)) {
         $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
                    FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
-                   WHERE yhtio   = '$kukarow[yhtio]'
-                   and asiakas   = '$asiakas[asiakastunnus]'
-                   and asiakas   > 0
-                   and ryhma     = '$tuoterow[aleryhma]'
-                   and ryhma    != ''
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   and asiakas  = '$asiakas[asiakastunnus]'
+                   and asiakas  > 0
+                   and ryhma    = '$tuoterow[aleryhma]'
+                   and ryhma   != ''
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
                    UNION
                    (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
                    FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
-                   WHERE yhtio   = '$kukarow[yhtio]'
-                   and ytunnus   = '$asiakas[ytunnus]'
-                   and ytunnus  != ''
-                   and ryhma     = '$tuoterow[aleryhma]'
-                   and ryhma    != ''
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   and ytunnus  = '$asiakas[ytunnus]'
+                   and ytunnus != ''
+                   and ryhma    = '$tuoterow[aleryhma]'
+                   and ryhma   != ''
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
                    ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc

@@ -429,6 +429,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $saakopoistaa = TRUE;
       break;
+    case "customers_users" :
+      $pakolliset = array("USER_ID", "CUSTOMER_ID");
+      $kielletyt    = array("YHTIO"); 
+      $eiyhtiota    = "EITUNNUSTAKAAN";
+      $saakopoistaa = TRUE;
+      break;  
     default :
       $pakolliset   = array("TUNTEMATON_TAULU");
       $kielletyt    = array();

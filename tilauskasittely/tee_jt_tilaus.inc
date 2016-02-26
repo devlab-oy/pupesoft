@@ -355,12 +355,12 @@ if (!function_exists("tee_jt_tilaus")) {
           // keräysaika ja toimitusaikaan now
           elseif ($fieldname == 'kerayspvm' or $fieldname == 'toimaika') {
 
-              if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
-                $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
-              }
-              else {
-                $query .= $fieldname."=now(),";
-              }
+            if ($yhtiorow["saldo_kasittely"] == 'U' and $toim == 'ENNAKKO') {
+              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            }
+            else {
+              $query .= $fieldname."=now(),";
+            }
           }
           // Katotaan oisko käsinsyötetty eräpäivämäärä
           elseif ($fieldname == 'erpcm') {
@@ -735,6 +735,13 @@ if (!function_exists("tee_jt_tilaus")) {
             if (trim($lisataanrow['kommentti']) != "") {
               // Alkuperäisen rivin kommentti
               $kommentti .= trim($lisataanrow['kommentti']);
+            }
+
+            // Rivin nimitys voi olla ollut käsinsyötetty, joten otetaan se tässä talteen
+            $tuotenimitys = "";
+
+            if (trim($lisataanrow['nimitys']) != "" and !empty($yhtiorow["nimityksen_muutos_tilauksella"])) {
+              $tuotenimitys = trim($lisataanrow['nimitys']);
             }
 
             unset($orig_laskurow);

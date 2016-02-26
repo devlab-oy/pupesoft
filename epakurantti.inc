@@ -508,7 +508,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     laji       = 'zeniorparts',
                     selite     = 'K',
                     selitetark = '{$tuoterow["myyntihinta"]}',
-                    laatija    = '{$kukarow["kuka"]}', 
+                    laatija    = '{$kukarow["kuka"]}',
                     luontiaika = now()";
         $z_result = pupe_query($z_query);
       }

@@ -4,9 +4,9 @@
  * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
  * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
  *
- * @param int   $laskunro
- * @param int   $tulostimen_tunnus
- * @param array $params
+ * @param int     $laskunro
+ * @param int     $tulostimen_tunnus
+ * @param array   $params
  *
  *        Esimerkki config parametreistä arvoina defaultit:
  *        array(
@@ -59,7 +59,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $yhtion_osoite        = $lasku['yhtio_osoite'];
   $yhtion_postino       = $lasku['yhtio_postino'];
   $yhtion_postitp       = $lasku['yhtio_postitp'];
-  $yhtion_ytunnus       = str_replace("0037", "", $lasku["yhtio_ovttunnus"]);
+  $yhtion_ytunnus       = preg_replace("/^0037/", "", $lasku["yhtio_ovttunnus"]);
   $yhtion_ytunnus       = tulosta_ytunnus($yhtion_ytunnus, $lasku['yhtio_maa']);
   $myyjan_nimi          = $lasku['myyjan_nimi'];
   $asiakkaan_kieli      = $lasku["asiakkaan_kieli"];
@@ -165,9 +165,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   foreach ($verorivit as $verorivi) {
     $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
-                      "{$verorivi['netto']}" .
-                      "{$verorivi['vero']}" .
-                      "{$verorivi['brutto']}\n";
+      "{$verorivi['netto']}" .
+      "{$verorivi['vero']}" .
+      "{$verorivi['brutto']}\n";
   }
 
   $kuitin_teksti .= "\n";
@@ -184,9 +184,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= t("Kuittinumero", $asiakkaan_kieli) . ": {$lasku['laskunro']}\n\n";
 
   $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
-                    ": " .
-                    implode(", ", $tilausnumerot) .
-                    "\n\n";
+    ": " .
+    implode(", ", $tilausnumerot) .
+    "\n\n";
 
   $kuitin_teksti .= date("d.m.Y H:i:s");
 
@@ -418,10 +418,10 @@ function receipt_dump($dumpattava) {
   $dumpattava = str_replace("\x1B\x70\x00\n\n", "", $dumpattava);
 
   $style = "background: white;" .
-           "margin-left: auto;" .
-           "margin-right: auto;" .
-           "width: 333px;" .
-           "padding: 20px;";
+    "margin-left: auto;" .
+    "margin-right: auto;" .
+    "width: 333px;" .
+    "padding: 20px;";
 
   echo "<pre style='{$style}'>" . htmlentities($dumpattava, ENT_IGNORE) . "</pre>";
 }

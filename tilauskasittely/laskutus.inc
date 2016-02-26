@@ -19,11 +19,11 @@ else {
 // Etsit‰‰n lasku
 $query = "SELECT *
           FROM lasku
-          WHERE tunnus = '$kukarow[kesken]'
-          and yhtio = '$kukarow[yhtio]'
-          and tila = 'L'
-          and alatila != 'V'
-          and alatila != 'X'";
+          WHERE tunnus  = '$kukarow[kesken]'
+          and yhtio     = '$kukarow[yhtio]'
+          and tila      = 'L'
+          and alatila  != 'V'
+          and alatila  != 'X'";
 $laskutusres = pupe_query($query);
 
 if (mysql_num_rows($laskutusres) == 0) {
@@ -81,14 +81,14 @@ else {
         $query = "SELECT kurssi
                   FROM valuu
                   WHERE yhtio = '$kukarow[yhtio]'
-                  AND nimi = '$orow[valkoodi]'";
+                  AND nimi    = '$orow[valkoodi]'";
       }
       else {
         $query = "SELECT kurssi
                   FROM valuu_historia
                   WHERE kotivaluutta = '$yhtiorow[valkoodi]'
                   AND valuutta       = '$orow[valkoodi]'
-                  AND kurssipvm     <= '$valpaiva'
+                  AND kurssipvm      <= '$valpaiva'
                   ORDER BY kurssipvm DESC
                   LIMIT 1";
       }
@@ -100,9 +100,9 @@ else {
 
           // Korjataan tilausrivien hinnat, jotta laskun valuuttam‰‰r‰inen summa pysyy samana
           $query = "SELECT tilausrivi.hinta, tilausrivi.tunnus
-                     FROM tilausrivi
-                     WHERE tilausrivi.otunnus = '$kukarow[kesken]'
-                     and tilausrivi.yhtio     = '$kukarow[yhtio]'";
+                    FROM tilausrivi
+                    WHERE tilausrivi.otunnus = '$kukarow[kesken]'
+                    and tilausrivi.yhtio     = '$kukarow[yhtio]'";
           $presult = pupe_query($query);
 
           while ($trow = mysql_fetch_assoc($presult)) {
@@ -111,7 +111,7 @@ else {
             $query = "UPDATE tilausrivi
                       SET hinta = '$hinta'
                       WHERE tunnus = '$trow[tunnus]'
-                      and yhtio = '$kukarow[yhtio]'";
+                      and yhtio    = '$kukarow[yhtio]'";
             pupe_query($query);
           }
 
@@ -120,7 +120,7 @@ else {
           $query = "UPDATE lasku
                     SET vienti_kurssi = '$valrow[kurssi]'
                     WHERE tunnus = '$kukarow[kesken]'
-                    and yhtio = '$kukarow[yhtio]'";
+                    and yhtio    = '$kukarow[yhtio]'";
           pupe_query($query);
         }
       }
@@ -1100,8 +1100,8 @@ else {
   }
 
   // HUOM: Tallennetaan PY÷RISTETTY loppusumma laskun loppusummaksi.
-  $loppusumma       = round($loppusumma - $pyorerotus, 2);
-  $loppusumma_valuutassa   = round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
+  $loppusumma = round($loppusumma - $pyorerotus, 2);
+  $loppusumma_valuutassa = round($loppusumma_valuutassa - $pyorerotus_valuutassa, 2);
 
   // Jos kotivaluutassa niin vied‰‰n samat luvut n‰ihin kenttiin
   if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1109,8 +1109,21 @@ else {
     $pyorerotus_valuutassa = $pyorerotus;
   }
 
+  // jos veroton summa on nolla ja verollinen summa on myˆs hyvin l‰hell‰ nollaa
+  // niin tehd‰‰n nollalasku
+  if ($yhtiorow["alv_kasittely"] != '' and $arvosumma == 0 and abs($loppusumma) <= 0.05 and $pyorerotus == 0) {
+    $arvosumma = 0;
+    $arvosumma_valuutassa = 0;
+    $loppusumma = 0;
+    $loppusumma_valuutassa = 0;
+    $pyorerotus = 0;
+    $pyorerotus_valuutassa = 0;
+    $kassa_loppusumma = 0;
+    $kassa_loppusumma_valuutassa = 0;
+  }
+
   $query = "UPDATE lasku
-            SET alatila       = 'V',
+            SET alatila          = 'V',
             arvo                 = '$arvosumma',
             arvo_valuutassa      = '$arvosumma_valuutassa',
             kate                 = '$katesumma',

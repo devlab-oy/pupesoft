@@ -32,6 +32,7 @@ $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 $weekly_ajo = FALSE;
 $ajotext = "";
+$ftppath = "/data/input";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -49,6 +50,10 @@ if (isset($argv[2]) and $argv[2] != '') {
   else {
     $paiva_ajo = TRUE;
   }
+}
+
+if (isset($argv[3]) and trim($argv[3]) != '') {
+  $ftppath = trim($argv[3]);
 }
 
 // Yhtiö
@@ -126,7 +131,6 @@ if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
-  $ftppath = "/data/input";
   $ftpfile = $filepath;
   require "inc/ftp-send.inc";
 }

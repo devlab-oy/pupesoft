@@ -1569,6 +1569,13 @@ if ($tila == "" and !isset($jatka)) {
 
     $vasen++;
 
+    // Jos on reklamaatioiden hinnoittelusäännöt käytössä tulee hintojen laskussa jo erikoisalennus
+    // huomioitua tämän takia se nollataan tässä.
+    // Jos kuitenkin halutaan erikoisalennus täsä huolimatta syöttää pitää sekin olla mahdollista
+    if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $toim == "REKLAMAATIO" and !isset($laskurow["erikoisale"])) {
+      $srow["erikoisale"] = 0;
+    }
+
     $oikea_sarake[$oikea] = "<td>".t("Erikoisalennus").":</td><td><input type='text' name='erikoisale' value='$srow[erikoisale]'></td>";
     $oikea++;
 
@@ -2984,6 +2991,39 @@ if ($tila == "" and !isset($jatka)) {
 
           echo "</select></td>";
         }
+        elseif ($kentta == "vastuuhenkilo") {
+
+          $oletus_kuka = '';
+          // Tarkistetaan, onko valitulle työjonolle asetettu oletusvastuuhenkilö,
+          // jos ei ole vielä valittu vastuuhenkilöä
+          if (empty($srow[$kentta]) and isset($srow['tyojono'])) {
+             $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
+             $oletus_row = mysql_fetch_assoc($oletus_result);
+             $oletus_kuka = $oletus_row['selitetark_4'];
+          }
+
+          $query = "SELECT *
+                    FROM kuka
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND aktiivinen = 1
+                    and extranet   = ''
+                    ORDER BY nimi";
+          $result = pupe_query($query);
+
+          echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
+          echo "<option value=''>".t("Valitse")."</option>";
+
+          while ($row = mysql_fetch_assoc($result)) {
+            $sel = "";
+
+            if ($row['kuka'] == $srow[$kentta] or ($oletus_kuka != '' and $oletus_kuka == $row['kuka'])) {
+              $sel = 'selected';
+            }
+
+            echo "<option value='{$row['kuka']}' $sel>{$row['nimi']}</option>";
+          }
+          echo "</select></td>";
+        }
         elseif ($kentta == "merkki") {
 
           echo "<td>$al_row[selitetark]:</td><td>";
@@ -3088,11 +3128,13 @@ if ($tila == "" and !isset($jatka)) {
         if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
           $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
           $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+          $lokin_vastuuhenkilo = $eka_tuomaarays_row['vastuuhenkilo'];
         }
         else {
           $tilaquery = "SELECT
                         ifnull(tyojono_selite, '') tyojono_selite,
-                        ifnull(tyostatus_selite,'') tyostatus_selite
+                        ifnull(tyostatus_selite,'') tyostatus_selite,
+                        ifnull(vastuuhenkilo,'') vastuuhenkilo
                         FROM tyomaarayksen_tapahtumat
                         WHERE yhtio           = '{$kukarow['yhtio']}'
                         AND tyomaarays_tunnus = '{$kukarow['kesken']}'
@@ -3103,13 +3145,15 @@ if ($tila == "" and !isset($jatka)) {
 
           $lokin_tyojono = $tilarivi['tyojono_selite'];
           $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+          $lokin_vastuuhenkilo = $tilarivi['vastuuhenkilo'];
         }
 
-        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus or $lokin_vastuuhenkilo != $vastuuhenkilo) {
           $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
                        tyomaarays_tunnus = '{$kukarow['kesken']}',
                        tyojono_selite    = '$tyojono',
                        tyostatus_selite  = '$tyostatus',
+                       vastuuhenkilo     = '$vastuuhenkilo',
                        kommentti         = '$tapahtuma_kommentti',
                        yhtio             = '{$kukarow['yhtio']}',
                        laatija           = '{$kukarow['kuka']}',
@@ -3139,10 +3183,11 @@ if ($tila == "" and !isset($jatka)) {
 
       if (mysql_affected_rows() > 0) {
         echo "<table>";
-        echo "<tr><th colspan='5'>".t("Työmääräyksen tapahtumat").":</th></font></tr>";
+        echo "<tr><th colspan='6'>".t("Työmääräyksen tapahtumat").":</th></font></tr>";
         echo "<tr>";
         echo "<td>".t("Työstatus").":</td>";
         echo "<td>".t("Työjono").":</td>";
+        echo "<td>".t("Vastuuhenkilö").":</td>";
         echo "<td>".t("Muutosaika").":</td>";
         echo "<td>".t("Muuttaja").":</td>";
         echo "<td>".t("Kommentti").":</td>";
@@ -3152,6 +3197,7 @@ if ($tila == "" and !isset($jatka)) {
           echo "<tr>";
           echo "<td>{$row['tilassa']}</td>";
           echo "<td>{$row['jonossa']}</td>";
+          echo "<td>{$row['vastuuhenkilo']}</td>";
           echo "<td>{$row['luontiaika']}</td>";
           echo "<td>{$row['laatija']}</td>";
           echo "<td>{$row['kommentti']}</td>";
@@ -3956,7 +4002,7 @@ if (isset($jatka)) {
     $chn = '999';
   }
   elseif ($liitostunnus != "" &&
-          !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn) && $toim == "YLLAPITO")) {
+    !($yhtiorow["laskun_kanavointitiedon_syotto"] == 1 && !empty($chn) && $toim == "YLLAPITO")) {
     $chn = $asiarow['chn'];
 
     if ($chn == '') {
@@ -4479,6 +4525,7 @@ if (isset($jatka)) {
             komm1       = '$komm1',
             komm2       = '$komm2',
             suorittaja     = '$suorittaja',
+            vastuuhenkilo  = '$vastuuhenkilo',
             viite       = '$viite',
             prioriteetti  = '$prioriteetti',
             jalleenmyyja   = '$jalleenmyyja',
@@ -4500,11 +4547,13 @@ if (isset($jatka)) {
           if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
             $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
             $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+            $lokin_vastuuhenkilo = $eka_tuomaarays_row['vastuuhenkilo'];
           }
           else {
             $tilaquery = "SELECT
                           ifnull(tyojono_selite, '') tyojono_selite,
-                          ifnull(tyostatus_selite,'') tyostatus_selite
+                          ifnull(tyostatus_selite,'') tyostatus_selite,
+                          ifnull(vastuuhenkilo,'') vastuuhenkilo
                           FROM tyomaarayksen_tapahtumat
                           WHERE yhtio           = '{$kukarow['yhtio']}'
                           AND tyomaarays_tunnus = '{$kukarow['kesken']}'
@@ -4515,13 +4564,15 @@ if (isset($jatka)) {
 
             $lokin_tyojono = $tilarivi['tyojono_selite'];
             $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+            $lokin_vastuuhenkilo = $tilarivi['vastuuhenkilo'];
           }
 
-          if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+          if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus or $lokin_vastuuhenkilo != $vastuuhenkilo) {
             $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
                          tyomaarays_tunnus = '{$kukarow['kesken']}',
                          tyojono_selite    = '$tyojono',
                          tyostatus_selite  = '$tyostatus',
+                         vastuuhenkilo     = '$vastuuhenkilo',
                          kommentti         = '{$tapahtuma_kommentti}',
                          yhtio             = '{$kukarow['yhtio']}',
                          laatija           = '{$kukarow['kuka']}',

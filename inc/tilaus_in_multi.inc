@@ -7,7 +7,7 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus epäonnistui!");
 $edytunnus = "luuppiinmeno_ekalla";
 
 /* FILEFORMAATTI:
-  ytunnus
+  ytunnus TAI asiakasnro JOS $tyyppi == multi_asiakasnro:
   toim_ovttunnus
   tuoteno
   kpl
@@ -22,15 +22,22 @@ $edytunnus = "luuppiinmeno_ekalla";
   toimitustapa
 */
 
+$_asiak_kummmalla = "YTUNNUS";
+
+// Luetaanko asiakasnumerolla vai ytunnuksella/toim_ovttunnuksella
+if (!empty($tyyppi) and $tyyppi == "multi_asiakasnro") {
+  $_asiak_kummmalla = "ASIAKASNRO";
+}
+
 while ($rivi = fgets($fd)) {
 
-  $poista      = array("\"", "'", "\\");
-  $rivi      = str_replace($poista, "", $rivi);
-  $rivi      = explode("\t", trim($rivi));
+  $poista = array("\"", "'", "\\");
+  $rivi = str_replace($poista, "", $rivi);
+  $rivi = explode("\t", trim($rivi));
 
-  $ytunnus    = trim($rivi[0]);
-  $toim_ovttunnus  = trim($rivi[1]);
-  $tuoteno    = trim($rivi[2]);
+  $ytunnus = trim($rivi[0]);
+  $toim_ovttunnus = trim($rivi[1]);
+  $tuoteno = trim($rivi[2]);
 
   $tarkytunnus = $ytunnus.$toim_ovttunnus;
 
@@ -51,21 +58,24 @@ while ($rivi = fgets($fd)) {
                 WHERE session = '$session'";
       $result = pupe_query($query);
 
-      $kukarow['kesken']   = 0;
-      $tilausnumero     = 0;
+      $kukarow['kesken'] = 0;
+      $tilausnumero = 0;
 
-      if ($toim_ovttunnus != '') {
-        $toim_lis = " and toim_ovttunnus='$toim_ovttunnus' ";
+      if ($_asiak_kummmalla == "ASIAKASNRO") {
+        $asiakashaku_lis = " and asiakasnro = '$ytunnus' ";
       }
       else {
-        $toim_lis = "";
+        $asiakashaku_lis = " and ytunnus = '$ytunnus' ";
+
+        if ($toim_ovttunnus != '') {
+          $asiakashaku_lis .= " and toim_ovttunnus = '$toim_ovttunnus' ";
+        }
       }
 
       $query = "SELECT tunnus
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                and ytunnus = '$ytunnus'
-                $toim_lis
+                {$asiakashaku_lis}
                 and laji    not in ('P','R')";
       $result = pupe_query($query);
 
@@ -123,6 +133,15 @@ while ($rivi = fgets($fd)) {
       );
 
       echo "Tehtiin tilaus $id asiakkaalle $ytunnus {$_toimitustapa_echo}<br>";
+
+      // Jos ei haluta tilausvahvistusta
+      if (!empty($tilaus_novahvistus)) {
+        $query = "UPDATE lasku
+            SET tilausvahvistus = ''
+            WHERE tunnus = '$id'
+            AND yhtio    = '$kukarow[yhtio]'";
+        pupe_query($query);
+      }
 
       // haetaan tilauksen tiedot
       $query = "SELECT *

@@ -43,7 +43,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     require "inc/kasitteleerittelysaanto.inc";
   }
 
-  if ($_tiliotetoim == 'K' and $kuittikoodi == ' ' and $tiliotedataka == '0000-00-00') {
+  if ($_tiliotetoim == 'K' and ($kuittikoodi == ' ' or $kuittikoodi == 'P') and $tiliotedataka == '0000-00-00') {
 
     if (is_numeric($vasta_kurssi) and $vasta_kurssi != 0 and $vasta_kurssi != 1) {
       $kurssi = 1 / $vasta_kurssi;
@@ -408,7 +408,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   else {
     // Miksi ei tiliöity?
 
-    if ($kuittikoodi != ' ') {
+    if ($kuittikoodi != ' ' and $kuittikoodi != 'P') {
       echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font><br>\n";
 
       if ($erialla == "E") {
@@ -482,7 +482,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
         }
       }
-      elseif ($kuittikoodi == ' ') {
+      elseif ($kuittikoodi == ' ' or $kuittikoodi == 'P') {
         echo "<font class='error'>".t("VIRHE: Tiliöinti puuttuu")."!</font>";
       }
     }
@@ -491,7 +491,12 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   echo "<td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
   //Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-  if (isset($tiliointirow) and $kuitattu_checked == '' and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and $kuittikoodi == ' ') {
+  if (isset($tiliointirow) and $kuitattu_checked == '' 
+    and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" 
+      or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") 
+    and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] 
+      or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) 
+    and ($kuittikoodi == ' ' or $kuittikoodi == 'P')) {
     //Olisiko tämä meidän toimittaja
     $tpv = substr($pvm, 0, 2);
     $tpk = substr($pvm, 2, 2);
@@ -559,7 +564,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   }
   echo "</td><td name='td_{$td_perheid}' class='$class'>";
 
-  if ($kuittikoodi == ' ') {
+  if ($kuittikoodi == ' ' or $kuittikoodi == 'P') {
     if ($eiselitetta == 1) $selite = '';
 
     $selite = str_replace("\n", "", $selite);

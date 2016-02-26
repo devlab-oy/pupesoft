@@ -272,10 +272,10 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
                 usermanualurl = '$row[usermanualurl]',
                 muutospvm     = now(),
                 muuttaja      = '{$kukarow['kuka']}'
-                WHERE yhtio  = '$yhtio'
-                and sovellus = '$row[sovellus]'
-                and nimi     = '$row[nimi]'
-                and alanimi  = '$row[alanimi]'";
+                WHERE yhtio   = '$yhtio'
+                and sovellus  = '$row[sovellus]'
+                and nimi      = '$row[nimi]'
+                and alanimi   = '$row[alanimi]'";
       pupe_query($query);
     }
 
@@ -351,16 +351,16 @@ if ($tee == "PAIVITA") {
 
       //p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
       $query = "UPDATE oikeu SET
-                sovellus      = '$sove',
-                nimi          = '$nimi',
-                alanimi       = '$alanimi',
-                nimitys       = '$nimitys',
-                jarjestys     = '$jarjestys',
-                jarjestys2    = '$jarjestys2',
-                hidden        = '$hidden',
-                usermanualurl = '$usermanualurl',
-                muutospvm     = now(),
-                muuttaja      = '{$kukarow['kuka']}'
+                sovellus       = '$sove',
+                nimi           = '$nimi',
+                alanimi        = '$alanimi',
+                nimitys        = '$nimitys',
+                jarjestys      = '$jarjestys',
+                jarjestys2     = '$jarjestys2',
+                hidden         = '$hidden',
+                usermanualurl  = '$usermanualurl',
+                muutospvm      = now(),
+                muuttaja       = '{$kukarow['kuka']}'
                 WHERE
                 sovellus       = '$row[sovellus]'
                 and nimi       = '$row[nimi]'

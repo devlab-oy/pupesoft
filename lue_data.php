@@ -583,6 +583,22 @@ if ($kasitellaan_tiedosto) {
     }
   }
 
+  // Tarkistetaan käytetäänkö maaryhmiä
+  if (in_array("tuote", $taulut)) {
+    $maaryhmaquery = "SELECT *
+                       FROM avainsana
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       and laji    = 'maaryhma'
+                       and selite != ''
+                       ORDER BY jarjestys";
+    $maaryhmares = pupe_query($maaryhmaquery);
+
+    $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
+  }
+  else {
+    $maaryhma_kaytossa = false;
+  }
+
   /*
   foreach ($taulunrivit as $taulu => $rivit) {
 
@@ -889,6 +905,9 @@ if ($kasitellaan_tiedosto) {
       }
       elseif ($eiyhtiota == "TRIP") {
         $valinta   = " tunnus > 0 ";
+      }
+      elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+        $valinta = "1 = 1";
       }
 
       if ($table_mysql == 'tullinimike' and $tulli_ei_kielta != "") {
@@ -1453,6 +1472,9 @@ if ($kasitellaan_tiedosto) {
           elseif ($eiyhtiota == "TRIP") {
             $query = "INSERT LOW_PRIORITY into {$table_mysql} SET laatija='$kukarow[kuka]', luontiaika=now() ";
           }
+          elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+            $query = "INSERT LOW_PRIORITY into {$table_mysql} SET ";
+          }
         }
 
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
@@ -1464,6 +1486,9 @@ if ($kasitellaan_tiedosto) {
           }
           elseif ($eiyhtiota == "TRIP") {
             $query = "UPDATE LOW_PRIORITY {$table_mysql} SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
+          }
+          elseif ($eiyhtiota == "EITUNNUSTAKAAN") {
+            $query = "UPDATE LOW_PRIORITY {$table_mysql} SET ";
           }
         }
 
@@ -1553,6 +1578,25 @@ if ($kasitellaan_tiedosto) {
                   $taulunrivit[$taulu][$eriviindex][$r] = "X"; // jos yhtään varastopaikkaa ei löydy, pakotetaan oletus
                   lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Tuotteella")." '$tuoteno' ".t("ei ole yhtään oletuspaikkaa! Tätä EI PITÄISI tapahtua! Tehdään nyt tästä oletus").".<br>");
                 }
+              }
+            }
+
+            if ($maaryhma_kaytossa and $table_mysql == 'tuote' and $otsikko == 'VIENTI' and $taulunrivit[$taulu][$eriviindex][$r] != "") {
+
+              $_selitetark = mysql_real_escape_string($taulunrivit[$taulu][$eriviindex][$r]);
+
+              $maaryhmaquery = "SELECT *
+                                 FROM avainsana
+                                 WHERE yhtio = '{$kukarow['yhtio']}'
+                                 and laji    = 'maaryhma'
+                                 and selite != ''
+                                 and selitetark = '{$_selitetark}'
+                                 ORDER BY jarjestys";
+              $maaryhmares = pupe_query($maaryhmaquery);
+
+              if (mysql_num_rows($maaryhmares) > 0) {
+                $maaryhmarow = mysql_fetch_assoc($maaryhmares);
+                $taulunrivit[$taulu][$eriviindex][$r] = $maaryhmarow['selite'];
               }
             }
 
@@ -1898,7 +1942,7 @@ if ($kasitellaan_tiedosto) {
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
               }
-              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
+              elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM', 'KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00', 'NULL')))) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($table_mysql == 'tuote' and $otsikko == 'MYYNTIHINTA' and $myyntihinnan_paivitys == 1) {
@@ -1981,6 +2025,9 @@ if ($kasitellaan_tiedosto) {
               }
               elseif ($table_mysql == 'tili' and $otsikko == 'OLETUS_ALV' and ($taulunrivit[$taulu][$eriviindex][$r] == "" or $taulunrivit[$taulu][$eriviindex][$r] == "NULL")) {
                 $query .= ", $otsikko = NULL ";
+              }
+              elseif ($table_mysql == 'customers_users' and $otsikko == 'USER_ID') {
+                $query .= " $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
               }
               elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM','KASSA_ABSPVM')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00','NULL')))) {
                 $query .= ", $otsikko = NULL ";
@@ -2340,13 +2387,13 @@ if ($kasitellaan_tiedosto) {
 
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-            if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
-              $syncrow = array();
-            }
-            else {
-              $syncrow = mysql_fetch_array($syncres);
-              $tunnus  = $syncrow["tunnus"];
-            }
+              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+                $syncrow = array();
+              }
+              else {
+                $syncrow = mysql_fetch_array($syncres);
+                $tunnus  = $syncrow["tunnus"];
+              }
 
               synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
             }
@@ -2461,6 +2508,7 @@ if (!$cli and !isset($api_kentat)) {
     'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
     'avainsana'                       => 'Avainsanat',
     'budjetti'                        => 'Budjetti',
+    'customers_users'                 => 'Extranet käyttäjien multiasiakkuus',
     'dynaaminen_puu_avainsanat'      => 'Dynaamisen puun avainsanat',
     'etaisyydet'                      => 'Etäisyydet varastosta',
     'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',

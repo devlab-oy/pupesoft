@@ -126,6 +126,35 @@ if (mysql_field_name($result, $i) == "tuotetyyppi") {
   $jatko=0;
 }
 
+if (mysql_field_name($result, $i) == "vienti") {
+  $ulos = "<td>";
+  $ulos .= "<input type='text' name='{$nimi}' value='{$trow[$i]}' />";
+
+  $query = "SELECT *
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            and laji    = 'maaryhma'";
+  $maaryhmares = pupe_query($query);
+
+  if (mysql_num_rows($maaryhmares) > 0) {
+    $ulos .= "&nbsp;";
+
+    $ulos .= "<select name='maaryhma_vienti' ".js_alasvetoMaxWidth($nimi, 300).">";
+    $ulos .= "<option value = ''>".t("Ei maaryhm‰‰")."</option>";
+
+    while ($maaryhmarow = mysql_fetch_assoc($maaryhmares)) {
+      $sel = $trow[$i] == $maaryhmarow['selite'] ? " selected" : "";
+      $ulos .= "<option value='{$maaryhmarow['selite']}'{$sel}>{$maaryhmarow['selitetark']}</option>";
+    }
+
+    $ulos .= "</select>";
+  }
+
+  $ulos .= "</td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "myynninseuranta") {
   $sel = $trow[$i] == "E" ? " selected" : "";
 

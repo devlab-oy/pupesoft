@@ -169,7 +169,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($yhtiorow) and $verkkotunnus_vas != 0) {
       // 4 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
-      $yyhtio1 = substr(str_replace("0037", "", $verkkotunnus_vas), 0, 8); // mahdollisella etunollalla
+      $yyhtio1 = substr(preg_replace("/^0037/", "", $verkkotunnus_vas), 0, 8); // mahdollisella etunollalla
       $yyhtio2 = (int) $yyhtio1; // ilman etunollaa
 
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
@@ -221,7 +221,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($yhtiorow) and $yhtio != "" and $yhtio != 0) {
       // 8 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
-      $yyhtio3 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
+      $yyhtio3 = substr(preg_replace("/^0037/", "", $yhtio), 0, 8); // mahdollisella etunollalla
       $yyhtio4 = (int) $yyhtio3; // ilman etunollaa
 
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio3', '$yyhtio4')";
@@ -398,7 +398,7 @@ if (!function_exists("verkkolasku_in")) {
 
     if (!isset($trow) and $laskuttajan_ovt != "") {
       // 5 etsit‰‰n toimittaja ytunnuksella
-      $yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
+      $yovt1 = substr(preg_replace("/^0037/", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
       $yovt2 = (int) $yovt1; // ilman etunollaa
 
       $query  = "SELECT *
@@ -1040,8 +1040,8 @@ if (!function_exists("verkkolasku_in")) {
 
       $summa = round($summa, 2);
 
-      if ($summa == 0) {
-        $return .= "Laskulta puuttuu summa!\n";
+      if ($summa == 0 and trim($laskun_numero) == '') {
+        $return .= "Laskulta puuttuu summa ja laskunumero!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto ep‰onnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
         return $return;
       }
@@ -1409,14 +1409,14 @@ if (!function_exists("verkkolasku_in")) {
 
             $query = "SELECT tilino, kustp, alv
                       FROM tiliointisaanto
-                      WHERE ttunnus = '$trow[tunnus]'
-                      and tyyppi    = 't'
-                      and yhtio     = '$yhtio'
-                      and mintuote  <= '$tuote'
-                      and maxtuote  >= '$tuote'
+                      WHERE ttunnus  = '$trow[tunnus]'
+                      and tyyppi     = 't'
+                      and yhtio      = '$yhtio'
+                      and mintuote   <= '$tuote'
+                      and maxtuote   >= '$tuote'
                       and mintuote  != ''
                       and maxtuote  != ''
-                      and tilino    not in ('0','')
+                      and tilino     not in ('0','')
                       order by tunnus
                       limit 1";
             $result = pupe_query($query);
@@ -1425,12 +1425,12 @@ if (!function_exists("verkkolasku_in")) {
             if (mysql_num_rows($result) != 1 and $rinfo != "") {
               $query = "SELECT tilino, kustp, alv
                         FROM tiliointisaanto
-                        WHERE ttunnus = '$trow[tunnus]'
-                        and tyyppi    = 't'
-                        and yhtio     = '$yhtio'
-                        and kuvaus    like '%$rinfo%'
+                        WHERE ttunnus  = '$trow[tunnus]'
+                        and tyyppi     = 't'
+                        and yhtio      = '$yhtio'
+                        and kuvaus     like '%$rinfo%'
                         and kuvaus    != ''
-                        and tilino    not in ('0','')
+                        and tilino     not in ('0','')
                         order by tunnus
                         limit 1";
               $result = pupe_query($query);

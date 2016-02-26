@@ -4,9 +4,10 @@ if (!function_exists("handle_cookie")) {
   /**
    * Handlaa cookien settauksen ja unsettauksen
    *
-   * @param string $nimi            Cookien ja inputin nimi
-   * @param string $formin_submitti Submitattavan formin submit-nappulan nimi
+   * @param string  $nimi            Cookien ja inputin nimi
+   * @param string  $formin_submitti Submitattavan formin submit-nappulan nimi
    */
+
 
   function handle_cookie($nimi, $formin_submitti) {
     if (isset($_POST[$formin_submitti]) && !isset($_POST[$nimi])) {

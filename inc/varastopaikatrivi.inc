@@ -27,6 +27,9 @@ if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
     $ulos .=">$kirow[kirjoitin]</option>";
   }
 
+  $ulos .= "<option value='-88' ";
+  if (isset($sel["-88"])) $ulos .= $sel["-88"];
+  $ulos .=">".t("PDF Ruudulle")."</option>";
   $ulos .= "</select></td>";
 
   $jatko=0;
@@ -242,8 +245,8 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='G'{$sel['G']}>".t("Geodis Wilson")."</option>";
   $ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
   $ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
+  $ulos .= "<option value='L'{$sel['L']}>".t("Helsingin Hyllyvarasto")."</option>";
   $ulos .= "</select>";
-
   $ulos .= "</td>";
   $jatko = 0;
 }

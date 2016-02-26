@@ -1187,7 +1187,7 @@ if ($tee == 'E' or $tee == 'F') {
 
         if ($trow['valkoodi'] != $yhtiorow['valkoodi']) {
           echo " (";
-          echo $trow['saldo_valuutassa'] - $trow['saldo_maksettu_valuutassa'];
+          echo $trow['summa_valuutassa'] - $trow['saldo_maksettu_valuutassa'];
           echo $trow['valkoodi'];
           echo ")";
         }

@@ -329,6 +329,10 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     echo "<font class='error'>" . $errortext . t("Reklamaatiota ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
   else {
+    if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
+      $toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
+    }
+
     echo "<font class='error'>" . $errortext . t("Tilausta ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
 }
@@ -2072,8 +2076,8 @@ else {
       }
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
-        if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and $_ulkoinen_jarjestelma == 'P') {
-          posten_outbounddelivery($_otunnus);
+        if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L','P'))) {
+          posten_outbounddelivery($_otunnus, $_ulkoinen_jarjestelma);
         }
       }
 

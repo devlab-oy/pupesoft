@@ -148,6 +148,22 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         case 'kate_korjattu':
           $values .= ", NULL";
           break;
+        case 'kerayspvm':
+          if ($monistarow[$i] > date("Y-m-d G:i:s")) {
+            $values .= ", '".$monistarow[$i]."'";
+          }
+          else {
+            $values .= ", now()";
+          }
+          break;
+        case 'toimaika':
+          if ($monistarow[$i] > date("Y-m-d")) {
+            $values .= ", '".$monistarow[$i]."'";
+          }
+          else {
+            $values .= ", now()";
+          }
+          break;
         default:
           $values .= ", '".$monistarow[$i]."'";
         }
@@ -369,6 +385,23 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
+    $_ALVREKULK = FALSE;
+
+    // Jos meillä on lasku menossa ulkomaille
+    // Tietyissä tapauksissa yhtiorow maa voi olla sama kuin laskun maa, mutta vat_numerosta tiedetään,
+    // että ollaan verovelsollisia tähä maahan
+    if ((isset($yhtiorow["vat_numero"]) and $yhtiorow["vat_numero"] != "") or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
+
+      // tutkitaan ollaanko siellä alv-rekisteröity
+      $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+      $alhire = pupe_query($query);
+
+      // ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+      if (mysql_num_rows($alhire) == 1) {
+        $_ALVREKULK = TRUE;
+      }
+    }
+
     $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus
               FROM tilausrivi
               LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -409,11 +442,21 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $var  = "";
       }
 
-      if ($tuoterow["alv"] != $coprivirow["alv"] and $yhtiorow["alv_kasittely"] == "" and $coprivirow["alv"] < 500) {
-        $hinta  = hintapyoristys($coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuoterow["alv"]/100));
+      $tuotealv = $tuoterow["alv"];
+
+      // ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+      if ($_ALVREKULK) {
+        $query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$coprivirow[tuoteno]' limit 1";
+        $alhire = pupe_query($query);
+        $alehi_alrow = mysql_fetch_assoc($alhire);
+        $tuotealv = $alehi_alrow["alv"];
+      }
+
+      if ($tuotealv != $coprivirow["alv"] and $yhtiorow["alv_kasittely"] == "" and $coprivirow["alv"] < 500) {
+        $hinta = hintapyoristys($coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuotealv/100));
       }
       else {
-        $hinta   = $coprivirow['hinta'];
+        $hinta = $coprivirow['hinta'];
       }
 
       // jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
@@ -557,7 +600,18 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       $tilauksesta_myyntitilaus .= "<font class='message'>Lisätään rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
+      // Lisaarivi incissä oletetaan, että hinnat on laskun valuutassa,
+      // mutta tässä kohti otetaan hinta tilausriviltä, jossa on hinnat aina yhtiön valuutassa
+      // -> ilman tätä muutosta hinnat muuntuisi väärin.
+      // Otetaan laskun alkuperäinen valuutta kuitenkin talteen ja plautetaan se lisaarivi.inc jälkeen.
+      $valkoodi_lasku = $laskurow["valkoodi"];
+      if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+       $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
+      }
+
       require 'lisaarivi.inc';
+
+      $laskurow["valkoodi"] = $valkoodi_lasku;
 
       // Jos isätuote meni ok ja sillä on tehdaslisävarusteita niin lisätään ne saldosta piittaamatta
       if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {

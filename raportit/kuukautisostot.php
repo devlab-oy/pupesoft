@@ -79,6 +79,28 @@ else {
     ${"apaiva{$i}"} = (int) date('Ymd', mktime(0, 0, 0, ${"kkaed{$i}"}, ${"ppaed{$i}"}, ${"vvaed{$i}"}));
     ${"lpaiva{$i}"} = (int) date('Ymd', mktime(0, 0, 0, ${"kkl{$i}"}, ${"ppl{$i}"}, ${"vvl{$i}"}));
   }
+  
+  $k = 0; 
+  // Vuosineljännekset
+  for ($i = 1; $i < 5; $i++) {
+    $j = $k + 1;
+    if (!isset(${"qkkl{$i}"})) ${"qkkl{$i}"} = ${"kkl{$j}"};
+    if (!isset(${"qppl{$i}"})) ${"qppl{$i}"} = ${"ppl{$j}"};
+    if (!isset(${"qvvl{$i}"})) ${"qvvl{$i}"} = ${"vvl{$j}"};
+    $k = $j + 2;
+    if (!isset(${"qkka{$i}"})) ${"qkka{$i}"} = ${"kkl{$k}"};
+    if (!isset(${"qvva{$i}"})) ${"qvva{$i}"} = ${"vvl{$k}"};
+    if (!isset(${"qppa{$i}"})) ${"qppa{$i}"} = ${"ppa{$k}"};
+  } 
+  $qa1 = "$qvva1"."-"."$qkka1"."-"."$qppa1";
+  $qa2 = "$qvva2"."-"."$qkka2"."-"."$qppa2";
+  $qa3 = "$qvva3"."-"."$qkka3"."-"."$qppa3";
+  $qa4 = "$qvva4"."-"."$qkka4"."-"."$qppa4";
+  
+  $ql1 = "$qvvl1"."-"."$qkkl1"."-"."$qppl1";
+  $ql2 = "$qvvl2"."-"."$qkkl2"."-"."$qppl2";
+  $ql3 = "$qvvl3"."-"."$qkkl3"."-"."$qppl3";
+  $ql4 = "$qvvl4"."-"."$qkkl4"."-"."$qppl4";
 
   $apienin = 99999999;
   $lsuurin = 0;
@@ -2859,29 +2881,14 @@ function saldo_funktio($tuoteno, $varastot_yhtiot, $varastot, $paikoittain, $lis
 }
 
 function myydyt_kappaleet($row_yhtio, $tuoteno, $apvm, $lpvm, $lisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
-  global $kukarow, $yhtiorow;
-
+  global $kukarow, $yhtiorow, $qa1, $qa2, $qa3, $qa4, $ql1, $ql2, $ql3, $ql4;
+ 
   $selectlisa = "";
-  $q1 = array(
-    'alku' => date('Y')."-01-01",
-    'loppu' => date('Y')."-03-31",
-  );
-  $q2 = array(
-    'alku' => date('Y')."-04-01",
-    'loppu' => date('Y')."-06-30",
-  );
-  $q3 = array(
-    'alku' => date('Y')."-07-01",
-    'loppu' => date('Y')."-09-30",
-  );
-  $q4 = array(
-    'alku' => date('Y')."-10-01",
-    'loppu' => date('Y')."-12-31",
-  );
-  $selectlisa .= "sum(if (laskutettuaika >= '{$q1['alku']}' and laskutettuaika <= '{$q1['loppu']}', kpl, 0)) as kpl_q1, ";
-  $selectlisa .= "sum(if (laskutettuaika >= '{$q2['alku']}' and laskutettuaika <= '{$q2['loppu']}', kpl, 0)) as kpl_q2, ";
-  $selectlisa .= "sum(if (laskutettuaika >= '{$q3['alku']}' and laskutettuaika <= '{$q3['loppu']}', kpl, 0)) as kpl_q3, ";
-  $selectlisa .= "sum(if (laskutettuaika >= '{$q4['alku']}' and laskutettuaika <= '{$q4['loppu']}', kpl, 0)) as kpl_q4";
+ 
+  $selectlisa .= "sum(if (laskutettuaika >= '$qa1' and laskutettuaika <= '$ql1', kpl, 0)) as kpl_q1, ";
+  $selectlisa .= "sum(if (laskutettuaika >= '$qa2' and laskutettuaika <= '$ql2.', kpl, 0)) as kpl_q2, ";
+  $selectlisa .= "sum(if (laskutettuaika >= '$qa3' and laskutettuaika <= '$ql3', kpl, 0)) as kpl_q3, ";
+  $selectlisa .= "sum(if (laskutettuaika >= '$qa4' and laskutettuaika <= '$ql4', kpl, 0)) as kpl_q4";
 
   ///* Myydyt kappaleet *///
   $query = "SELECT

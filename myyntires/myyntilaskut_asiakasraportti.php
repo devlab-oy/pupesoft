@@ -21,7 +21,7 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
     $asiakasid = (int) $asiakasid;
     $email = mysql_real_escape_string($email);
 
-    $query = "SELECT nimi
+    $query = "SELECT nimi, kieli
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$asiakasid}'";
@@ -31,13 +31,13 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
     $params = array(
       'to' => $email,
       'cc' => '',
-      'subject' => t("Asiakasraportit myyntilaskuista")." - {$asiakasrow['nimi']}",
+      'subject' => t("Asiakasraportit myyntilaskuista", $asiakasrow['kieli'])." - {$asiakasrow['nimi']}",
       'ctype' => 'html',
       'body' => "",
       'attachements' => array(
         array(
           "filename" => $pdffilenimi,
-          "newfilename" => t("Asiakasraportti myyntilaskuista")." - {$asiakasrow['nimi']}.pdf",
+          "newfilename" => t("Asiakasraportti myyntilaskuista", $asiakasrow['kieli'])." - {$asiakasrow['nimi']}.pdf",
           "ctype" => "pdf",
         ),
       ),
@@ -61,7 +61,7 @@ if (!empty($tee) and $tee == 'TULOSTA_EMAIL_LASKUT' and !empty($laskunrot)) {
   else exit;
 
   foreach (explode(",", $laskunrot) as $laskunro) {
-    tulosta_lasku("LASKU:{$laskunro}", $kieli, $tee, 'LASKU', "asiakasemail{$asiakasemail}", "", "");
+    tulosta_lasku("LASKU:{$laskunro}", $asiakasrow['kieli'], $tee, 'LASKU', "asiakasemail{$asiakasemail}", "", "");
   }
 
   echo "<font class='info'>";

@@ -1798,8 +1798,14 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
-
               list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
+
+              if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+                $lis_hinta = round($lis_hinta, 6);
+              }
+              else {
+                $lis_hinta = round($lis_hinta, $yhtiorow['hintapyoristys']);
+              }
 
               // jos ollaan laittamassa muuta tuotetta kun mitä tilattiin, lisätään rivikommentti
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
@@ -2773,6 +2779,13 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
       list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
+
+      if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+        $lis_hinta = round($lis_hinta, 6);
+      }
+      else {
+        $lis_hinta = round($lis_hinta, $yhtiorow['hintapyoristys']);
+      }
     }
 
     if ($rivityyppi != 'O') {

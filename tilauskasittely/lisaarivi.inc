@@ -1798,7 +1798,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
-
               list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
               // jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti

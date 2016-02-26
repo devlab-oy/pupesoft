@@ -163,6 +163,17 @@ if (!isset($presta_tuoteominaisuudet)) {
     // "tähtituote"  => 10,
   );
 }
+if (!isset($presta_vakioasiakasryhmat)) {
+  $presta_vakioasiakasryhmat = array(
+    // Prestan customer_group_id
+    // 3,
+    // 6,
+  );
+}
+if (!isset($presta_varastot)) {
+  // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
+  $presta_varastot = array(0);
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -222,6 +233,7 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
 }
 

@@ -3,7 +3,7 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaProductFeatureValues extends PrestaClient {
-  public $all_values = null;
+  private $all_values = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -18,6 +18,10 @@ class PrestaProductFeatureValues extends PrestaClient {
     }
 
     return false;
+  }
+
+  public function reset_all_values() {
+    $this->all_values = null;
   }
 
   protected function resource_name() {

@@ -345,6 +345,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     if ($toitarow['osoitelappu'] == 'intrade') {
       require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
     }
+    elseif ($toitarow['osoitelappu'] == 'hornbach') {
+      require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+    }
     else {
       require "tilauskasittely/osoitelappu_pdf.inc";
     }

@@ -211,7 +211,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $pdf->draw_text(115,  500,  "Sender's business ID /",    $firstpage, $pieni);
   $pdf->draw_text(115,  495,  "No de T.V.A. de l'expéditeur",    $firstpage, $pieni);
-  $pdf->draw_text(185,  500,  $postirow["yhtio_maa"]."-".str_replace("0037", "", $postirow["yhtio_ovttunnus"]),    $firstpage, $norm);
+  $pdf->draw_text(185,  500,  $postirow["yhtio_maa"]."-".preg_replace("/^0037/", "", $postirow["yhtio_ovttunnus"]),    $firstpage, $norm);
 
 
   $pdf->draw_text(18,  485,  "Recipient (name and address) / Destinataire (nom et adresse)",    $firstpage, $pieni);
@@ -233,7 +233,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(115,  420,  "No de T.V.A.",    $firstpage, $pieni);
 
   if ($rakir_row["ovttunnus"] != "") {
-    $pdf->draw_text(155,  420,  $rakir_row['maa']."-".str_replace("0037", "", $rakir_row["ovttunnus"]),    $firstpage, $norm);
+    $pdf->draw_text(155,  420,  $rakir_row['maa']."-".preg_replace("/^0037/", "", $rakir_row["ovttunnus"]),    $firstpage, $norm);
   }
 
   // tuoteviivakoodin alle

@@ -18,7 +18,9 @@ class PrestaCategories {
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
 
-    $this->logger = new Logger('/home/devlab/logs/presta_export.log');
+    $log_path = is_dir('/home/devlab/logs') ? '/home/devlab/logs' : '/tmp';
+
+    $this->logger = new Logger("{$log_path}/presta_export.log");
     $this->logger->set_date_format('Y-m-d H:i:s');
   }
 
@@ -291,9 +293,15 @@ class PrestaCategories {
       return true;
     }
 
-    $category->category->name->language[0]          = $new_name;
-    $category->category->link_rewrite->language[0]  = $new_url;
-    $category->category->meta_keywords->language[0] = $new_tunnus;
+    $languages = count($category->category->name->language);
+
+    // we must set these for all languages
+    for ($i=0; $i < $languages; $i++) {
+      $category->category->name->language[$i]          = $new_name;
+      $category->category->link_rewrite->language[$i]  = $new_url;
+      $category->category->meta_keywords->language[$i] = $new_tunnus;
+    }
+
     $category->category->active                     = $new_active;
     $category->category->id_parent                  = $new_parent_id;
 
@@ -339,10 +347,15 @@ class PrestaCategories {
 
     $friendly_url = $this->parameterize($koodi, $nimi);
 
-    // change category info
-    $category->category->name->language[0] = utf8_encode($nimi);
-    $category->category->link_rewrite->language[0] = utf8_encode($friendly_url);
-    $category->category->meta_keywords->language[0] = $tunnus;
+    $languages = count($category->category->name->language);
+
+    // change category info for every language
+    for ($i=0; $i < $languages; $i++) {
+      $category->category->name->language[$i] = utf8_encode($nimi);
+      $category->category->link_rewrite->language[$i] = utf8_encode($friendly_url);
+      $category->category->meta_keywords->language[$i] = $tunnus;
+    }
+
     $category->category->active = 1;
     $category->category->id_parent = $parent_id;
 

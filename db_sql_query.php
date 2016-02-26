@@ -43,7 +43,9 @@ else {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
   echo "<form method='post' action='db_sql_query.php'>";
-  echo t("Valitse taulu").": <select name='table' onchange='submit();'>";
+  echo "<table><tr>";
+  echo "<th>".t("Valitse taulu")."</th></tr>";
+  echo "<tr><td><select name='table' onchange='submit();'>";
   echo "<option value=''></option>";
 
   $query  = "SHOW tables FROM `$dbkanta`";
@@ -65,11 +67,11 @@ else {
 
     if ($naytetaanko) {
       $sel = (!empty($table) and $table == $row[0]) ? "SELECTED" : "";
-      echo "<option value='$row[0]' $sel>$row[0]</option>";
+      echo "<option value='$row[0]' $sel>".ucfirst($row[0])."</option>";
     }
   }
 
-  echo "</select></form><br><br>";
+  echo "</select></td></tr></table></form><br>";
 
   $oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in', 'like' => 'like', 'gt' => '>', 'lt' => '<', 'gte' => '>=', 'lte' => '<=');
 
@@ -139,7 +141,7 @@ else {
         $rivi .= "<option value='OLETUS' $chk1>".t("P‰‰toimittaja")."</option>";
 
         while ($toimittaja = mysql_fetch_assoc($toimittaja_result)) {
-          $sel = ($toimittaja["tunnus"] == $trow[$i]) ? ' selected' : '';
+          $sel = ($toimittaja["tunnus"] == $rajaus[$row[0]]) ? ' selected' : '';
           $rivi .= "<option value='{$toimittaja["tunnus"]}' $sel>{$toimittaja["nimi"]}</option>";
         }
 
@@ -505,12 +507,11 @@ else {
           $format_bold = array("bold" => TRUE);
 
           $excelrivi = 0;
-          $talis = 0;
 
           for ($i=0; $i < mysql_num_fields($result); $i++) {
-            $worksheet->write($excelrivi, $i+$talis, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
+            $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
           }
-          $worksheet->write($excelrivi, $i+$talis, "TOIMINTO", $format_bold);
+          $worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
           $excelrivi++;
 
           return array($worksheet, $excelrivi);
@@ -535,7 +536,7 @@ else {
         }
 
         if ($table == "tuote" and in_array("tuote.vienti", $kentat)) {
-          $maaryhmaquery = "SELECT *
+          $maaryhmaquery = " SELECT *
                              FROM avainsana
                              WHERE yhtio = '{$kukarow['yhtio']}'
                              and laji    = 'maaryhma'
@@ -593,7 +594,7 @@ else {
                 }
               }
 
-              $worksheet->writeString($excelrivi, $i+$talis, $row[$i]);
+              $worksheet->writeString($excelrivi, $i, $row[$i]);
             }
           }
 
@@ -688,8 +689,6 @@ else {
     echo "<input type='hidden' name='edkysely' value='$kysely'>";
 
     echo "<table>";
-    echo "<tr><th colspan='2'>$table</th></tr>";
-
     echo "<tr><td>".t("Tallenna kysely").":</td><td><input type='text' size='20' name='uusirappari' value=''></td></tr>";
     echo "<tr><td>".t("Valitse kysely").":</td><td>";
 
@@ -721,7 +720,7 @@ else {
     echo "</select>";
 
     echo "</td></tr>";
-    echo "</table><br><br>";
+    echo "</table><br>";
 
     echo "<table>";
     echo "<tr><td>".t("Ruksaa sis‰‰nluvussa pakolliset kent‰t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";
@@ -740,7 +739,7 @@ else {
       echo "<tr><td>".t("Asiakkaan avainsanat").":</td><td><input type='checkbox' name='asiakkaanavainsana_join' onclick='submit();' $chk1></td></tr>";
     }
 
-    echo "</table><br><br>";
+    echo "</table><br>";
 
     echo "<table>";
     echo "<tr>";

@@ -133,14 +133,14 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
-          if (!empty($price['alennus']) and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
-            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennukselle {$price['alennus']} ei ole asiakastunnusta eikä asiakasryhmää");
+          if ($price['tyyppi'] !== 'hinnastohinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+            $this->logger->log("Ohitettu {$price['tyyppi']} tuotteelle '{$price['tuoteno']}' koska sillä ei ole asiakastunnusta eikä asiakasryhmää");
             continue;
           }
 
           $this->create($price);
 
-          $message = "Lisätty tuotteelle '{$price['tuoteno']}'";
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
 
           if (isset($price['alennus'])) {
             $message .= " alennus '{$price['alennus']}'";
@@ -157,10 +157,10 @@ class PrestaSpecificPrices extends PrestaClient {
           if (isset($price['presta_customergroup_id'])) {
             $message .= " asiakasryhma '{$price['presta_customergroup_id']}'";
           }
-          if (isset($price['alkupvm'])) {
+          if (isset($price['alkupvm']) and $price['alkupvm'] != '0000-00-00') {
             $message .= " alkupvm '{$price['alkupvm']}'";
           }
-          if (isset($price['loppupvm'])) {
+          if (isset($price['loppupvm']) and $price['loppupvm'] != '0000-00-00') {
             $message .= " loppupvm '{$price['loppupvm']}'";
           }
 

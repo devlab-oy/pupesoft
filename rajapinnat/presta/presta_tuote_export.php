@@ -170,6 +170,10 @@ if (!isset($presta_vakioasiakasryhmat)) {
     // 6,
   );
 }
+if (!isset($presta_varastot)) {
+  // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
+  $presta_varastot = array(0);
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");

@@ -104,7 +104,8 @@ function presta_specific_prices() {
             asiakashinta.hinta,
             asiakashinta.valkoodi,
             avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+            'asiakashinta' AS tyyppi
             FROM tuote
             LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
               AND asiakashinta.tuoteno = tuote.tuoteno
@@ -132,7 +133,8 @@ function presta_specific_prices() {
             asiakasalennus.minkpl,
             asiakasalennus.alennus,
             avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+            'asiakasalennus' AS tyyppi
             FROM tuote
             INNER JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
               AND asiakasalennus.tuoteno = tuote.tuoteno
@@ -175,7 +177,8 @@ function presta_specific_prices() {
               hinnasto.minkpl,
               hinnasto.hinta,
               hinnasto.valkoodi,
-              hinnasto.maa
+              hinnasto.maa,
+              'hinnastohinta' AS tyyppi
               FROM hinnasto
               WHERE hinnasto.yhtio = '$kukarow[yhtio]'
               AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
@@ -205,9 +208,11 @@ function presta_specific_prices() {
               tuote.myyntihinta as hinta,
               '{$yhtiorow['valkoodi']}' as valkoodi,
               '3' AS presta_customergroup_id,
-              '' AS presta_customer_id
+              '' AS presta_customer_id,
+              'customhinta' AS tyyppi
               FROM tuote
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.myyntihinta > 0
               {$tuoterajaus}";
     $result = pupe_query($query);
 
@@ -215,6 +220,10 @@ function presta_specific_prices() {
       $specific_prices[] = $asiakashinta;
     }
   }
+
+  // sortataan array tuotejärjestykseen, silloin tuote ei ole ikinä kauaa ilman alennuksia
+  // rajapinta dellaa aina aluksi tuotteen alennukset, sen jälkeen lisää kaikki takaisin
+  sort_array_of_arrays($specific_prices, 'tuoteno');
 
   return $specific_prices;
 }
@@ -251,9 +260,13 @@ function hae_kategoriat() {
 }
 
 function hae_kaikki_tuotteet() {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $presta_varastot;
 
   $tuoterajaus = presta_tuoterajaus();
+
+  if (!is_array($presta_varastot)) {
+    die('Presta varastot ei ole array!');
+  }
 
   // Haetaan kaikki siirrettävät tuotteet, tämä on poistettujen dellausta varten
   // query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
@@ -284,7 +297,7 @@ function hae_kaikki_tuotteet() {
 
       if (mysql_num_rows($tr_result) == 1) {
         // isätuote
-        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI');
+        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
         $myytavissa = 0;
 
         foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
@@ -293,7 +306,7 @@ function hae_kaikki_tuotteet() {
       }
       else {
         // normituote
-        list(, , $myytavissa) = saldo_myytavissa($tuoteno);
+        list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
       }
     }
 
@@ -403,6 +416,8 @@ function hae_tuotteet() {
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
+      'mainosteksti'              => $row['mainosteksti'],
+      'mallitarkenne'             => $row['mallitarkenne'],
       'myynti_era'                => $row['myynti_era'],
       'nakyvyys'                  => $row["nakyvyys"],
       'nimi'                      => $row["nimitys"],
@@ -412,11 +427,11 @@ function hae_tuotteet() {
       'tunnus'                    => $row['tunnus'],
       'tuotekorkeus'              => $row['tuotekorkeus'],
       'tuoteleveys'               => $row['tuoteleveys'],
-      'tuotemassa'                => $row["tuotemassa"],
       'tuotemassa'                => $row['tuotemassa'],
       'tuotemerkki'               => $row["tuotemerkki"],
       'tuoteno'                   => $row["tuoteno"],
       'tuotesyvyys'               => $row['tuotesyvyys'],
+      'valmistuslinja'            => $row['valmistuslinja'],
       'yksikko'                   => $row["yksikko"],
       'myymalahinta'              => $myymalahinta,
       'myymalahinta_verot_mukaan' => $myymalahinta_verot_mukaan,

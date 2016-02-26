@@ -232,6 +232,7 @@ class PrestaProducts extends PrestaClient {
     if ($product_type == 'pack') {
       $this->logger->log("Asetettiin tuottelle hinta hinta {$parent_price}, joka laskettiin lapsituotteiden hinnoista.");
       $xml->product->price = $parent_price;
+      $xml->product->wholesale_price = $parent_price;
     }
 
     // First, remove all product features
@@ -244,7 +245,12 @@ class PrestaProducts extends PrestaClient {
 
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
-      $value = $product[$field_name];
+      $value = trim($product[$field_name]);
+
+      // if we don't have a value, don't add anything.
+      if (empty($value)) {
+        continue;
+      }
 
       $value_id = $this->presta_product_feature_values->value_id_by_value($value);
 
@@ -258,8 +264,8 @@ class PrestaProducts extends PrestaClient {
         $response = $this->presta_product_feature_values->create($feature_value);
         $value_id = $response['product_feature_value']['id'];
 
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_product_feature_values->all_values = null;
+        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
+        $this->presta_product_feature_values->reset_all_values();
         $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
       }
 
@@ -288,7 +294,7 @@ class PrestaProducts extends PrestaClient {
         $manufacturer_id = $response['manufacturer']['id'];
 
         // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->all_records = null;
+        $this->presta_manufacturers->reset_all_records();
         $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
       }
 

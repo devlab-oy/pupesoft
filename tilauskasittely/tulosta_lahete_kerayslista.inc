@@ -30,6 +30,10 @@ if (!function_exists('alku_kerayslista')) {
   function alku_kerayslista($params) {
     global $kukarow, $yhtiorow;
 
+    if (skippa_kerayslista_pdf($params)) {
+      return $params;
+    }
+
     // Luodaan muuttujat
     extract($params);
 
@@ -498,6 +502,7 @@ if (!function_exists('alku_kerayslista')) {
     if (isset($thispage)) {
       $params['thispage']=$thispage;
     }
+
     // Luodaan palautettavat
     $return = compact(array_keys($params));
 
@@ -512,9 +517,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
-    foreach ($params as $key => $val) {
-      ${$key} = $val;
-    }
+    extract($params);
 
     $thispage = $pdf->new_page("a4");
 
@@ -603,11 +606,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
     $kala = 715;
 
     // Luodaan palautettavat
-    $return = array();
-
-    foreach ($params as $key => $null) {
-      $return[$key] = ${$key};
-    }
+    $return = compact(array_keys($params));
 
     $return = rivi_otsikot_kerayslista($return);
 
@@ -620,9 +619,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
-    foreach ($params as $key => $val) {
-      ${$key} = $val;
-    }
+    extract($params);
 
     if ($kerayslistatyyppi == 'EXCEL1') {
       $thispage->writeString($kala, 0, "Code", $boldi);
@@ -669,11 +666,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
     }
 
     // Luodaan palautettavat
-    $return = array();
-
-    foreach ($params as $key => $null) {
-      $return[$key] = ${$key};
-    }
+    $return = compact(array_keys($params));
 
     return $return;
   }
@@ -683,10 +676,12 @@ if (!function_exists('rivi_kerayslista')) {
   function rivi_kerayslista($params) {
     global $kukarow, $yhtiorow, $asrow, $onkolaajattoimipaikat;
 
-    // Luodaan muuttujat
-    foreach ($params as $key => $val) {
-      ${$key} = $val;
+    if (skippa_kerayslista_pdf($params)) {
+      return $params;
     }
+
+    // Luodaan muuttujat
+    extract($params);
 
     if ($kerayslistatyyppi == 'EXCEL1') {
       $thispage->writeString($kala, 0, $row["tuoteno"]);
@@ -733,19 +728,13 @@ if (!function_exists('rivi_kerayslista')) {
         $sivu++;
 
         // Luodaan palautettavat
-        $return = array();
-
-        foreach ($params as $key => $null) {
-          $return[$key] = ${$key};
-        }
+        $return = compact(array_keys($params));
 
         $params = loppu_kerayslista($return);
         $params = uusi_sivu_kerayslista($params);
 
         // Luodaan muuttujat
-        foreach ($params as $key => $val) {
-          ${$key} = $val;
-        }
+        extract($params);
 
         $page[$sivu] = $thispage;
       }
@@ -841,19 +830,13 @@ if (!function_exists('rivi_kerayslista')) {
             $sivu++;
 
             // Luodaan palautettavat
-            $return = array();
-
-            foreach ($params as $key => $null) {
-              $return[$key] = ${$key};
-            }
+            $return = compact(array_keys($params));
 
             $params = loppu_kerayslista($return);
             $params = uusi_sivu_kerayslista($params);
 
             // Luodaan muuttujat
-            foreach ($params as $key => $val) {
-              ${$key} = $val;
-            }
+            extract($params);
 
             $page[$sivu] = $thispage;
           }
@@ -1196,11 +1179,7 @@ if (!function_exists('rivi_kerayslista')) {
     }
 
     // Luodaan palautettavat
-    $return = array();
-
-    foreach ($params as $key => $null) {
-      $return[$key] = ${$key};
-    }
+    $return = compact(array_keys($params));
 
     return $return;
   }
@@ -1210,10 +1189,12 @@ if (!function_exists('loppu_kerayslista')) {
   function loppu_kerayslista($params) {
     global $kukarow, $yhtiorow;
 
-    // Luodaan muuttujat
-    foreach ($params as $key => $val) {
-      ${$key} = $val;
+    if (skippa_kerayslista_pdf($params)) {
+      return $params;
     }
+
+    // Luodaan muuttujat
+    extract($params);
 
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       // Tässä pärjätään ilman footteria....
@@ -1227,7 +1208,7 @@ if (!function_exists('loppu_kerayslista')) {
       $y_postitp     = $laskurow["yhtio_postitp"];
       $y_maa       = $laskurow["yhtio_maa"];
       $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
       $y_iban     = $yhtiorow['pankkiiban1'];
       $y_swift     = $yhtiorow['pankkiswift1'];
 
@@ -1341,11 +1322,7 @@ if (!function_exists('loppu_kerayslista')) {
     }
 
     // Luodaan palautettavat
-    $return = array();
-
-    foreach ($params as $key => $null) {
-      $return[$key] = ${$key};
-    }
+    $return = compact(array_keys($params));
 
     return $return;
   }
@@ -1353,16 +1330,23 @@ if (!function_exists('loppu_kerayslista')) {
 
 if (!function_exists('print_pdf_kerayslista')) {
   function print_pdf_kerayslista($params) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $palvelin2;
 
     // Luodaan muuttujat
-    foreach ($params as $key => $val) {
-      ${$key} = $val;
-    }
+    extract($params);
 
     $returnvalue = 0;
 
-    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    if (isset($komento) and $komento == "-88") {
+      js_openFormInNewWindow();
+
+      echo "<br><form id='tulostakopioform_{$laskurow['tunnus']}' name='tulostakopioform_{$laskurow['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+            <input type='hidden' name='otunnus' value='{$laskurow['tunnus']}'>
+            <input type='hidden' name='toim' value='KERAYSLISTA'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='submit' value='".t("Keräyslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
+    }
+    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       $excelnimi = $thispage->close();
 
       $liite['excel'] = "/tmp/".$excelnimi;
@@ -1451,6 +1435,20 @@ if (!function_exists('print_pdf_kerayslista')) {
         echo t("Keräyslista tulostuu")."...<br>";
         $line = exec("$komento $pdffilenimi", $output, $returnvalue);
       }
+    }
+  }
+}
+
+if (!function_exists('skippa_kerayslista_pdf')) {
+  function skippa_kerayslista_pdf($params) {
+
+    extract($params);
+
+    if (isset($komento) and $komento == "-88") {
+      return TRUE;
+    }
+    else {
+      return FALSE;
     }
   }
 }

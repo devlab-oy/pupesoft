@@ -4,13 +4,11 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaSpecificPrices extends PrestaClient {
-
-  const RESOURCE = 'specific_prices';
-
-  private $shop;
-  private $product_ids;
   private $all_prices = null;
   private $already_removed_product = array();
+  private $currency_codes = null;
+  private $product_ids;
+  private $shop;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -20,7 +18,7 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'specific_prices';
   }
 
   /**
@@ -30,11 +28,11 @@ class PrestaSpecificPrices extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
-
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
-    $xml = new SimpleXMLElement($this->schema->asXML());
-
-    if (!is_null($existing_specific_price)) {
+    if (is_null($existing_specific_price)) {
+      $xml = $this->empty_xml();
+    }
+    else {
       $xml = $existing_specific_price;
     }
 
@@ -65,12 +63,14 @@ class PrestaSpecificPrices extends PrestaClient {
       $xml->specific_price->from_quantity = $specific_price['minkpl'];
     }
 
+    $currency_id = empty($specific_price['valkoodi']) ? 0 : $this->get_currency_id($specific_price['valkoodi']);
+
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = 0;
     $xml->specific_price->id_shop = $this->shop['id'];
     $xml->specific_price->id_cart = 0;
-    $xml->specific_price->id_currency = 0;
+    $xml->specific_price->id_currency = $currency_id;
     $xml->specific_price->id_country = 0;
 
     // price or percentage
@@ -99,12 +99,10 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->logger->log('---------Start specific price sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema();
-
       $presta_shop = new PrestaShops($this->url(), $this->api_key());
       $this->shop = $presta_shop->first_shop();
 
-      $presta_product = new PrestaProducts($this->url(), $this->api_key());
+      $presta_product = new PrestaProducts($this->url(), $this->api_key(), null);
       $this->product_ids = $presta_product->all_skus();
 
       $total = count($prices);
@@ -116,7 +114,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
-          $this->logger->log('Ohitettu asiakashinta koska tuotenumero puuttuu');
+          $this->logger->log('Ohitettu special price koska tuotenumero puuttuu');
           continue;
         }
 
@@ -125,17 +123,48 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->delete_special_prices_for_product($price['presta_product_id']);
 
-          if (empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
-            $this->logger->log("Ohitettu asiakashinta tuotteelle {$price['tuoteno']} koska asiakastunnus ja asiakasryhmä puuttuu");
+          if (empty($price['hinta']) and empty($price['alennus'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska alennus sekä hinta puuttuu");
+            continue;
+          }
+
+          if (!empty($price['hinta']) and empty($price['valkoodi'])) {
+            $this->logger->log("Ohitettu special price tuotteelle {$price['tuoteno']} koska hinnalla {$price['hinta']} ei ole valuuttaa!");
+            continue;
+          }
+
+          if ($price['tyyppi'] !== 'hinnastohinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+            $this->logger->log("Ohitettu {$price['tyyppi']} tuotteelle '{$price['tuoteno']}' koska sillä ei ole asiakastunnusta eikä asiakasryhmää");
             continue;
           }
 
           $this->create($price);
-          $this->logger->log("Lisätty tuotteelle '{$price['tuoteno']}'"
-            ." hinta {$price['hinta']}"
-            ." alennus {$price['alennus']}"
-            ." asiakastunnus '{$price['presta_customer_id']}'"
-            ." asiakasryhma '{$price['presta_customergroup_id']}'");
+
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
+
+          if (isset($price['alennus'])) {
+            $message .= " alennus '{$price['alennus']}'";
+          }
+          if (isset($price['hinta'])) {
+            $message .= " hinta '{$price['hinta']}'";
+          }
+          if (isset($price['valkoodi'])) {
+            $message .= " valuutta '{$price['valkoodi']}'";
+          }
+          if (isset($price['presta_customer_id'])) {
+            $message .= " asiakastunnus '{$price['presta_customer_id']}'";
+          }
+          if (isset($price['presta_customergroup_id'])) {
+            $message .= " asiakasryhma '{$price['presta_customergroup_id']}'";
+          }
+          if (isset($price['alkupvm']) and $price['alkupvm'] != '0000-00-00') {
+            $message .= " alkupvm '{$price['alkupvm']}'";
+          }
+          if (isset($price['loppupvm']) and $price['loppupvm'] != '0000-00-00') {
+            $message .= " loppupvm '{$price['loppupvm']}'";
+          }
+
+          $this->logger->log($message);
         }
         catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
@@ -205,5 +234,28 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->already_removed_product[] = $id;
 
     return true;
+  }
+
+  private function get_currency_id($code) {
+    if (empty($code) or !isset($this->currency_codes[$code])) {
+      // zero means "all currencies"
+      return 0;
+    }
+
+    $value = $this->currency_codes[$code];
+
+    if (empty($value)) {
+      // zero means "all currencies"
+      return 0;
+    }
+    else {
+      return $value;
+    }
+  }
+
+  public function set_currency_codes($value) {
+    if (is_array($value)) {
+      $this->currency_codes = $value;
+    }
   }
 }

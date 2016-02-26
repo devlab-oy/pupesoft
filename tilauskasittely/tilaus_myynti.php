@@ -2120,7 +2120,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     sahkoinen_lahete($laskurow);
   }
 
-  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != "" 
+  if ($_tilaustyyppi and trim($laskurow['tilausvahvistus']) != ""
     and (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE or strpos($laskurow['tilausvahvistus'], 'O') !== FALSE)) {
 
     $params_tilausvahvistus = array(
@@ -2929,7 +2929,8 @@ if ($tee == '') {
         <input type='hidden' name='tyojono' value='$tyojono'>
         <input type='hidden' name='projektilla' value='$projektilla'>
         <input type='hidden' name='orig_tila' value='$orig_tila'>
-        <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+        <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+        <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
 
     if ($toim != "VALMISTAVARASTOON") {
       echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";

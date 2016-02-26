@@ -193,8 +193,8 @@ if (mysql_num_rows($uresult) > 0) {
     $Declaration = $FIExportDeclaration->appendChild($xml->createElement('Declaration'));
     $Exporter =  $Declaration->appendChild($xml->createElement('Exporter'));
     $params = array();
-    $params['identity']           = tulosta_ytunnus(substr(str_replace("0037", "", $yhtiorow["ovttunnus"]), 0, 8), "", "V");
-    $params['identityExtension']      = substr(str_replace("0037", "", $yhtiorow["ovttunnus"]), 8);
+    $params['identity']           = tulosta_ytunnus(substr(preg_replace("/^0037/", "", $yhtiorow["ovttunnus"]), 0, 8), "", "V");
+    $params['identityExtension']      = substr(preg_replace("/^0037/", "", $yhtiorow["ovttunnus"]), 8);
     $params['name1']             = $yhtiorow["nimi"];
     //$params['name2']             = $yhtiorow["nimitark"];
     $params['line']             = $yhtiorow["osoite"];
@@ -206,8 +206,8 @@ if (mysql_num_rows($uresult) > 0) {
 
     $Agent = $Declaration->appendChild($xml->createElement('Agent'));
     $params = array();
-    $params['identity']            = tulosta_ytunnus(substr(str_replace("0037", "", $lisrow["kolm_ovttunnus"]), 0, 8), "", "V");
-    $params['identityExtension']       = substr(str_replace("0037", "", $lisrow["kolm_ovttunnus"]), 8);
+    $params['identity']            = tulosta_ytunnus(substr(preg_replace("/^0037/", "", $lisrow["kolm_ovttunnus"]), 0, 8), "", "V");
+    $params['identityExtension']       = substr(preg_replace("/^0037/", "", $lisrow["kolm_ovttunnus"]), 8);
     $params['name1']                = $lisrow["kolm_nimi"];
     $params['name2']                = $lisrow["kolm_nimitark"];
     $params['line']                 = $lisrow["kolm_osoite"];

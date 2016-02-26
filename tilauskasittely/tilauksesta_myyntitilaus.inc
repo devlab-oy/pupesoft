@@ -148,6 +148,22 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         case 'kate_korjattu':
           $values .= ", NULL";
           break;
+        case 'kerayspvm':
+          if ($monistarow[$i] > date("Y-m-d G:i:s")) {
+            $values .= ", '".$monistarow[$i]."'";
+          }
+          else {
+            $values .= ", now()";
+          }
+          break;
+        case 'toimaika':
+          if ($monistarow[$i] > date("Y-m-d")) {
+            $values .= ", '".$monistarow[$i]."'";
+          }
+          else {
+            $values .= ", now()";
+          }
+          break;
         default:
           $values .= ", '".$monistarow[$i]."'";
         }

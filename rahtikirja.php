@@ -872,10 +872,10 @@ if ($tee == 'add') {
     }
 
     // Katotaan haluttiinko osoitelappuja tai lähetteitä
-    $oslappkpl     = (int) $oslappkpl;
-    $termoslappkpl   = (int) $termoslappkpl;
-    $lahetekpl     = (int) $lahetekpl;
-    $dgdkpl      = (int) $dgdkpl;
+    $oslappkpl = (int) $oslappkpl;
+    $termoslappkpl = (int) $termoslappkpl;
+    $lahetekpl = (int) $lahetekpl;
+    $dgdkpl = (int) $dgdkpl;
 
     //tulostetaan faili ja valitaan sopivat printterit
     if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
@@ -912,57 +912,78 @@ if ($tee == 'add') {
     $prires = pupe_query($query);
 
     if (mysql_num_rows($prires) > 0) {
-
       $prirow = mysql_fetch_assoc($prires);
 
-      // käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
-      // ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
-      if ($kateinen == 'X') {
-        $apuprintteri = $prirow['printteri5']; // laskuprintteri
+      //haetaan lähetteen tulostuskomento
+      if ($rakirsyotto_lahete_tulostin == "-88") {
+        $komento = "-88";
       }
       else {
-        $apuprintteri = $rakirsyotto_lahete_tulostin;
+        // käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
+        // ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
+        if ($kateinen == 'X') {
+          $apuprintteri = $prirow['printteri5']; // laskuprintteri
+        }
+        else {
+          $apuprintteri = $rakirsyotto_lahete_tulostin;
+        }
+
+        $query   = "SELECT *
+                    from kirjoittimet
+                    where yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$apuprintteri'";
+        $kirres  = pupe_query($query);
+        $kirrow  = mysql_fetch_assoc($kirres);
+
+        $komento = $kirrow['komento'];
       }
 
-      //haetaan lähetteen tulostuskomento
-      $query   = "SELECT *
-                  from kirjoittimet
-                  where yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$apuprintteri'";
-      $kirres  = pupe_query($query);
-      $kirrow  = mysql_fetch_assoc($kirres);
-      $komento = $kirrow['komento'];
-
       //haetaan osoitelapun tulostuskomento
-      $query  = "SELECT *
-                 from kirjoittimet
-                 where yhtio = '$kukarow[yhtio]'
-                 and tunnus  = '$rakirsyotto_oslapp_tulostin'";
-      $kirres = pupe_query($query);
-      $kirrow = mysql_fetch_assoc($kirres);
+      if ($rakirsyotto_oslapp_tulostin == "-88") {
+        $oslapp = "-88";
+      }
+      else {
+        $query  = "SELECT *
+                   from kirjoittimet
+                   where yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$rakirsyotto_oslapp_tulostin'";
+        $kirres = pupe_query($query);
+        $kirrow = mysql_fetch_assoc($kirres);
 
-      $oslapp = $kirrow['komento'];
-      $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+        $oslapp = $kirrow['komento'];
+        $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+      }
 
       //haetaan terminaaliosoitelapun tulostuskomento
-      $query  = "SELECT *
-                 from kirjoittimet
-                 where yhtio = '$kukarow[yhtio]'
-                 and tunnus  = '$rakirsyotto_termoslapp_tulostin'";
-      $kirres = pupe_query($query);
-      $kirrow = mysql_fetch_assoc($kirres);
+      if ($rakirsyotto_termoslapp_tulostin == "-88") {
+        $termoslapp = "-88";
+      }
+      else {
+        $query  = "SELECT *
+                   from kirjoittimet
+                   where yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$rakirsyotto_termoslapp_tulostin'";
+        $kirres = pupe_query($query);
+        $kirrow = mysql_fetch_assoc($kirres);
 
-      $termoslapp = $kirrow['komento'];
-      $termooslapp_mediatyyppi = $kirrow['mediatyyppi'];
+        $termoslapp = $kirrow['komento'];
+        $termooslapp_mediatyyppi = $kirrow['mediatyyppi'];
+      }
 
       //haetaan DGD-lomakkeen tulostuskomento
-      $query  = "SELECT *
-                 from kirjoittimet
-                 where yhtio = '$kukarow[yhtio]'
-                 and tunnus  = '$rakirsyotto_dgd_tulostin'";
-      $kirres = pupe_query($query);
-      $kirrow = mysql_fetch_assoc($kirres);
-      $dgdkomento = $kirrow['komento'];
+      if ($rakirsyotto_dgd_tulostin == "-88") {
+        $dgdkomento = "-88";
+      }
+      else {
+        $query  = "SELECT *
+                   from kirjoittimet
+                   where yhtio = '$kukarow[yhtio]'
+                   and tunnus  = '$rakirsyotto_dgd_tulostin'";
+        $kirres = pupe_query($query);
+        $kirrow = mysql_fetch_assoc($kirres);
+
+        $dgdkomento = $kirrow['komento'];
+      }
     }
 
     if ($rakirsyotto_lahete_tulostin != '' and $komento != "" and $lahetekpl > 0) {
@@ -1005,17 +1026,17 @@ if ($tee == 'add') {
           $laskurow = mysql_fetch_assoc($lasresult);
 
           $params = array(
-            'laskurow'          => $laskurow,
-            'sellahetetyyppi'       => $sellahetetyyppi,
-            'extranet_tilausvahvistus'   => "",
-            'naytetaanko_rivihinta'    => "",
-            'tee'            => $tee,
-            'toim'            => $toim,
-            'komento'           => $komento,
-            'lahetekpl'          => $lahetekpl,
-            'kieli'           => $kieli,
-            'koontilahete'        => $koontilahete,
-            'koontilahete_tilausrivit'  => $koontilahete_tilausrivit,
+            'laskurow' => $laskurow,
+            'sellahetetyyppi' => $sellahetetyyppi,
+            'extranet_tilausvahvistus' => "",
+            'naytetaanko_rivihinta' => "",
+            'tee' => $tee,
+            'toim' => $toim,
+            'komento' => $komento,
+            'lahetekpl' => $lahetekpl,
+            'kieli' => $kieli,
+            'koontilahete' => $koontilahete,
+            'koontilahete_tilausrivit' => $koontilahete_tilausrivit,
           );
 
           pupesoft_tulosta_lahete($params);
@@ -1079,6 +1100,9 @@ if ($tee == 'add') {
           if ($toimitustaparow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
+          elseif ($toimitustaparow['osoitelappu'] == 'hornbach') {
+            require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+          }
           else {
             require "tilauskasittely/osoitelappu_pdf.inc";
           }
@@ -1116,6 +1140,9 @@ if ($tee == 'add') {
         if ($toimitustaparow['osoitelappu'] == 'intrade') {
           require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
         }
+        elseif ($toimitustaparow['osoitelappu'] == 'hornbach') {
+          require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+        }
         else {
           require "tilauskasittely/osoitelappu_pdf.inc";
         }
@@ -1129,7 +1156,7 @@ if ($tee == 'add') {
     // Tulostetaan DGD
     if ($rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 
-      if ($dgdkpl > 0 and $dgdkpl != '' and $dgdkomento != 'email') {
+      if ($dgdkpl > 0 and $dgdkpl != '' and $dgdkomento != 'email' and $dgdkomento != '-88') {
         $dgdkomento .= " -#$dgdkpl ";
       }
 
@@ -1138,16 +1165,16 @@ if ($tee == 'add') {
       $dgd_otunnukset = (isset($dgdlle_tunnukset) and $dgdlle_tunnukset != "") ? $dgdlle_tunnukset : $laskurow['tunnus'];
 
       $params_dgd = array(
-        'kieli'      => 'en',
-        'laskurow'    => $laskurow,
-        'page'      => NULL,
-        'pdf'      => NULL,
-        'row'      => NULL,
-        'sivu'      => 0,
-        'tee'      => $tee,
-        'toim'      => $toim,
-        'norm'      => $norm,
-        'otunnukset'  => $dgd_otunnukset,
+        'kieli' => 'en',
+        'laskurow' => $laskurow,
+        'page' => NULL,
+        'pdf' => NULL,
+        'row' => NULL,
+        'sivu' => 0,
+        'tee' => $tee,
+        'toim' => $toim,
+        'norm' => $norm,
+        'otunnukset' => $dgd_otunnukset,
       );
 
       // Aloitellaan lähetteen teko
@@ -1186,7 +1213,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
   echo "<input type='hidden' name='toimtila' value='$tila'>";
   echo "<input type='hidden' name='text' value='etsi'>";
   echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
-  echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
   $query = "SELECT tunnus, nimitys, yhtio
             FROM varastopaikat
@@ -1238,7 +1265,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
 
   echo "</td>";
 
-  echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+  echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
   $sela = $selb = $selc = "";
 
@@ -1258,7 +1285,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
 
   echo "</select></td></tr>";
 
-  echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
 
   $query = "SELECT selite, min(tunnus) tunnus
             FROM toimitustapa
@@ -1281,7 +1308,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
   echo "</select></td>";
 
   if ($yhtiorow['pakkaamolokerot'] != '') {
-    echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
+    echo "<th>".t("Valitse pakkaamo:")."</th><td><select name='tupakkaamo' onchange='submit()'>";
 
     $query = "SELECT distinct nimi
               FROM pakkaamo
@@ -1312,7 +1339,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     echo "</select></td></tr><tr>";
   }
 
-  echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+  echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
   echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";
@@ -1889,7 +1916,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='toimtila' value='$tila'>";
   echo "<input type='hidden' name='text' value='etsi'>";
-  echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse varasto:")."</th><td><select name='tuvarasto' onchange='submit()'>";
 
   $query = "SELECT tunnus, nimitys, yhtio
             FROM varastopaikat
@@ -1934,7 +1961,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</td>";
 
-  echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+  echo "<th>".t("Valitse tilaustyyppi:")."</th><td><select name='tutyyppi' onchange='submit()'>";
 
   $sela = $selb = $selc = "";
 
@@ -1954,7 +1981,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</select></td></tr>";
 
-  echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+  echo "<tr><th>".t("Valitse toimitustapa:")."</th><td><select name='tutoimtapa' onchange='submit()'>";
 
   $query = "SELECT *
             FROM toimitustapa
@@ -1977,7 +2004,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
 
   echo "</select></td>";
 
-  echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+  echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
   echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";
@@ -2347,7 +2374,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     $query  = "SELECT *
                FROM toimitustapa
                WHERE yhtio       = '$kukarow[yhtio]'
-               and tulostustapa != 'X'
+               and (tulostustapa != 'X' OR selite = '{$otsik["toimitustapa"]}')
                {$toimtapalisa}
                order by jarjestys, selite";
     $result = pupe_query($query);
@@ -2561,6 +2588,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
 
+      $sel = ($kirjoitin_tunnus == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select></td>";
     }
     else {
@@ -3132,8 +3161,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
+
       mysql_data_seek($kirre, 0);
 
+      $sel = ($lahete_printteri == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='lahetekpl' value='$lahetekpl'></td></tr>";
     }
 
@@ -3152,8 +3184,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
     }
+
     mysql_data_seek($kirre, 0);
 
+    $sel = ($oslappu_printteri == "-88") ? " selected" : "";
+    echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
     echo "</select> ".t("Kpl").": ";
 
     $oslappkpl_hidden = 0;
@@ -3208,6 +3243,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
       mysql_data_seek($kirre, 0);
 
+      $sel = ($oslappu_printteri == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ".t("Kpl").": <input type='text' maxlength='2' size='4' name='termoslappkpl' value='$termoslappkpl'></td></tr>";
     }
 
@@ -3228,6 +3265,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
       if (!isset($dgdkpl)) $dgdkpl = 1;
 
+      $sel = ($rakirsyotto_dgd_tulostin == "-88") ? " selected" : "";
+      echo "<option value='-88' $sel>".t("PDF Ruudulle")."</option>";
       echo "</select> ", t("Kpl"), ": <input type='text' maxlength='2' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
     }
 
@@ -3275,7 +3314,12 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
   }
 }
 
-if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
+if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan'
+  and ($rakirsyotto_dgd_tulostin == "-88" or $rakirsyotto_oslapp_tulostin == "-88" or $rakirsyotto_lahete_tulostin == "-88"
+    or $rakirsyotto_termoslapp_tulostin == "-88" or $komento == "-88")) {
+
+}
+elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php'>";
   exit;
 }

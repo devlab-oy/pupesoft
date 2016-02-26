@@ -49,7 +49,8 @@ if (!isset($tee) or $tee == '') {
 
     $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
               FROM lasku
-              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' 
+              and alatila!='H' and alatila!='M' and tila!='D'
               ORDER BY erpcm";
     $result = pupe_query($query);
 

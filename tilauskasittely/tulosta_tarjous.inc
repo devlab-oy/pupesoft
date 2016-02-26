@@ -108,7 +108,7 @@ if (!function_exists('alku_tarjous')) {
       $pdf_tarjous->draw_text(150, 730, $ff_string, $page_tarjous[$sivu], $ff_font);
 
       $pdf_tarjous->draw_text(50, 717, t("Y-tunnus", $kieli), $page_tarjous[$sivu], $boldi);
-      $pdf_tarjous->draw_text(150, 717, tulosta_ytunnus(str_replace("0037", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $page_tarjous[$sivu], $norm);
+      $pdf_tarjous->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $page_tarjous[$sivu], $norm);
 
       $pdf_tarjous->draw_text(50, 704, t("Nimi", $kieli), $page_tarjous[$sivu], $boldi);
       $pdf_tarjous->draw_text(150, 704, $yhtiorow['nimi'], $page_tarjous[$sivu], $norm);
@@ -1334,7 +1334,7 @@ if (!function_exists('loppu_tarjous')) {
     $y_postitp     = $laskurow["yhtio_postitp"];
     $y_maa       = $laskurow["yhtio_maa"];
     $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-    $y_vatnumero  = str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+    $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
     $y_iban     = $yhtiorow['pankkiiban1'];
     $y_swift     = $yhtiorow['pankkiswift1'];
 
@@ -2363,7 +2363,7 @@ if (!function_exists('alvierittely')) {
       }
     }
 
-    if ($yhtiorow['tarjoustyyppi'] == 5) {
+    if ($yhtiorow['tarjoustyyppi'] == 5 or $toim == 'TARJOUS') {
       $_lasku_vai_tarjoustxt = "Tarjous";
     }
     else {

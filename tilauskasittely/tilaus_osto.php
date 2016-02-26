@@ -1455,8 +1455,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 "&tuoteno={$prow["tuoteno"]}" .
                 "&varasto={$laskurow["varasto"]}" .
                 "&yksikko={$prow["yksikko"]}" .
-                "&tilattu={$prow["tilattu"]}" .
-                "&varattu={$prow["varattukpl"]}" .
                 "&paikka={$prow["paikka"]}" .
                 "&keskihinta={$prow["keskihinta"]}" .
                 "&valuutta={$prow["valuutta"]}" .

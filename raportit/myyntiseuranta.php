@@ -124,44 +124,37 @@ else {
 
     // t‰ss‰ on t‰m‰ "perusn‰kym‰" mik‰ tulisi olla kaikissa myynnin raportoinneissa..
 
+    if (!isset($ajotapa)) $ajotapa = 'lasku';
+
     // Jos ajetaan tilauksittain vaihdetaan aina ajotavaksi 'tilaus'
     if (isset($ruksit[140]) and $ruksit[140] != "" and $ajotapa == "lasku") {
       $ajotapa = 'tilaus';
     }
 
-    if ($ajotapa == "lasku") {
-      $chk1 = "SELECTED";
-    }
-    elseif ($ajotapa == "tilaus") {
-      $chk2 = "SELECTED";
-    }
-    elseif ($ajotapa == "tilausjaauki") {
-      $chk3 = "SELECTED";
-    }
-    elseif ($ajotapa == "tilausjaaukiluonti") {
-      $chk4 = "SELECTED";
-    }
-    elseif ($ajotapa == "ennakot") {
-      $chk5 = "SELECTED";
-    }
-    elseif ($ajotapa == "tilausauki") {
-      $chk6 = "SELECTED";
-    }
-    else {
-      $chk1 = "SELECTED";
-    }
+    $chk_array = array(
+      'lasku' => '',
+      'tilaus' => '',
+      'tilausjaauki' => '',
+      'tilausjaaukiluonti' => '',
+      'ennakot' => '',
+      'tilausauki' => '',
+      'erikoismyynnit' => '',
+    );
+
+    $ajotapa_chk = array($ajotapa => 'selected') + $chk_array;
 
     echo "<table>";
     echo "<tr>";
     echo "<th>", t("Valitse ajotapa:"), "</th>";
 
     echo "<td><select name='ajotapa'>";
-    echo "<option value='lasku'               {$chk1}>", t("Laskuista"), " (", t("Laskutus"), ")</option>";
-    echo "<option value='tilaus'              {$chk2}>", t("Laskutetuista tilauksista"), "</option>";
-    echo "<option value='tilausjaauki'        {$chk3}>", t("Laskutetuista sek‰ avoimista tilauksista"), "</option>";
-    echo "<option value='tilausjaaukiluonti'  {$chk4}>", t("Laskutetuista sek‰ avoimista tilauksista luontiajalla"), " (", t("Myynti"), ")</option>";
-    echo "<option value='ennakot'             {$chk5}>", t("Lep‰‰m‰ss‰ olevista ennakoista"), "</option>";
-    echo "<option value='tilausauki'          {$chk6}>", t("Avoimista tilauksista"), "</option>";
+    echo "<option value='lasku'              {$ajotapa_chk['lasku']}>",              t("Laskuista"), " (", t("Laskutus"), ")</option>";
+    echo "<option value='tilaus'             {$ajotapa_chk['tilaus']}>",             t("Laskutetuista tilauksista"), "</option>";
+    echo "<option value='tilausjaauki'       {$ajotapa_chk['tilausjaauki']}>",       t("Laskutetuista sek‰ avoimista tilauksista"), "</option>";
+    echo "<option value='tilausjaaukiluonti' {$ajotapa_chk['tilausjaaukiluonti']}>", t("Laskutetuista sek‰ avoimista tilauksista luontiajalla"), " (", t("Myynti"), ")</option>";
+    echo "<option value='ennakot'            {$ajotapa_chk['ennakot']}>",            t("Lep‰‰m‰ss‰ olevista ennakoista"), "</option>";
+    echo "<option value='tilausauki'         {$ajotapa_chk['tilausauki']}>",         t("Avoimista tilauksista"), "</option>";
+    echo "<option value='erikoismyynnit'     {$ajotapa_chk['erikoismyynnit']}>",     t("Erikoismyynneist‰"), "</option>";
     echo "</select></td>";
 
     echo "</tr>";
@@ -651,6 +644,9 @@ else {
       case 'asbu':
         $sel_asbu = 'selected';
         break;
+      case 'asmy':
+        $sel_asmy = 'selected';
+        break;  
       case 'asbuos':
         $sel_asbuos = 'selected';
         break;
@@ -676,6 +672,7 @@ else {
     }
     else {
       $sel_asbu = '';
+      $sel_asmy = '';
       $sel_asbuos = '';
       $sel_asbury = '';
       $sel_tubu = '';
@@ -689,6 +686,7 @@ else {
     <th>", t("Tavoitevertailu"), "</th>";
     echo "<td colspan='3'><select name='vertailubu'><option value=''>", t("Ei tavoitevertailua"), "</option>";
     echo "<option value='asbu'   {$sel_asbu}>", t("Asiakastavoitteet"), "</option>";
+    echo "<option value='asmy'   {$sel_asmy}>", t("Asiakasmyyj‰tavoitteet"), "</option>";
     echo "<option value='asbuos' {$sel_asbuos}>", t("Asiakas-Osastotavoitteet"), "</option>";
     echo "<option value='asbury' {$sel_asbury}>", t("Asiakas-Tuoteryhm‰tavoitteet"), "</option>";
     echo "<option value='tubu'    {$sel_tubu}>", t("Tuotetavoitteet"), "</option>";
@@ -927,6 +925,13 @@ else {
       $ouusio    = 'otunnus';
       $index    = 'yhtio_otunnus';
       $tyyppi    = "'E'";
+    }
+    elseif ($ajotapa == "erikoismyynnit") {
+      // Erikoismyynnit
+      $tila    = "'9'";
+      $ouusio    = 'otunnus';
+      $index    = 'yhtio_otunnus';
+      $tyyppi    = "'9'";
     }
     // haetaan laskuista
     else {
@@ -2451,6 +2456,22 @@ else {
 
           $query .= " ) ";
         }
+        elseif ($ajotapa == 'erikoismyynnit') {
+          $query .= "  and lasku.alatila='' ";
+
+          if (!empty($kumulatiivinen_valittu)) {
+            $query .= "and ((lasku.tapvm >= '{$kumulalkurajaus}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+          }
+          else {
+            $query .= "  and ((lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'  and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}') ";
+          }
+
+          if ($piiloed == "") {
+            $query .= " or (lasku.tapvm >= '{$vvaa}-{$kka}-{$ppa}' and lasku.tapvm <= '{$vvll}-{$kkl}-{$ppl}') ";
+          }
+
+          $query .= " ) ";
+        }
         else {
           $query .= "  and lasku.alatila='X' ";
 
@@ -2582,7 +2603,7 @@ else {
               (($vertailubu == "asbu" or $vertailubu == "asbury" or $vertailubu == "asbuos") and isset($row["asiakaslista"]) and $row["asiakaslista"] != "") or
               ($vertailubu == "mabu" and !empty($row['maalista'])) or
               ($vertailubu  == "tubu" and isset($row["tuotelista"]) and $row["tuotelista"] != "") or
-              (($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
+              (($vertailubu == "mybu" or $vertailubu == "asmy" or $vertailubu == "mybury" or $vertailubu == "mybuos") and $myyjagroups > 0 and ((isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") or (isset($row["tuotemyyj‰"]) and $row["tuotemyyj‰"] != "") or (isset($row["myyj‰"]) and $row["myyj‰"] != "")))) {
 
               if ($vertailubu == "tubu") {
                 $budj_taulu = "budjetti_tuote";
@@ -2608,6 +2629,32 @@ else {
 
                 $budj_taulu = "budjetti_myyja";
                 $bulisa = " and myyjan_tunnus in ({$tunnus_lisa}) ";
+
+                if ($vertailubu == "mybuos" and $tuosagroups > 0) {
+                  $bulisa .= " and osasto = '{$row['osasto']}' ";
+                }
+                elseif ($vertailubu == "mybuos") {
+                  $bulisa .= " and osasto != '' ";
+                }
+                elseif ($vertailubu == "mybury" and $turyhgroups > 0) {
+                  $bulisa .= " and try = '{$row['tuoteryhm‰']}' ";
+                }
+                elseif ($vertailubu == "mybury") {
+                  $bulisa .= " and try != '' ";
+                }
+                else {
+                  $bulisa .= " and try = '' and osasto = '' ";
+                }
+              }
+              elseif ($vertailubu == "asmy") {
+                $tunnus_lisa = "";
+
+                if (isset($row["asiakasmyyj‰"]) and $row["asiakasmyyj‰"] != "") {
+                  $tunnus_lisa = $row["asiakasmyyj‰"];
+                }
+
+                $budj_taulu = "budjetti_asiakasmyyja";
+                $bulisa = " and asiakasmyyjan_tunnus in ({$tunnus_lisa}) ";
 
                 if ($vertailubu == "mybuos" and $tuosagroups > 0) {
                   $bulisa .= " and osasto = '{$row['osasto']}' ";

@@ -16,6 +16,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   require "inc/parametrit.inc";
 
+  if (isset($toim)) {
+    $toim = strtoupper($toim);
+  }
+
   if (isset($tee) and $tee == "lataa_tiedosto") {
     readfile("/tmp/".$tmpfilenimi);
     exit;
@@ -89,7 +93,40 @@ if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] !=
 }
 
 if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
-  unset($tee);
+  if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "SUPER") and $tilausnumero != "") {
+    if ($toim == "SUPER") {
+      $laskutyyppilisa = " AND tila in ('L', 'N') ";
+      $tilausrivityyppilisa = " AND tyyppi = 'L' ";
+    }
+    else {
+      $laskutyyppilisa = " AND tila = 'T' ";
+      $tilausrivityyppilisa = " AND tyyppi = 'T' ";
+    }
+    pupemaster_start();
+
+    $query_tarjous = "UPDATE lasku
+                      SET alatila = tila,
+                      tila        = 'D',
+                      muutospvm   = now(),
+                      comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      {$laskutyyppilisa}
+                      AND tunnus  = $tilausnumero";
+    pupe_query($query_tarjous);
+
+    $query = "UPDATE tilausrivi
+              SET tyyppi = 'D'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              {$tilausrivityyppilisa}
+              AND otunnus  = $tilausnumero";
+    pupe_query($query);
+
+    //Nollataan sarjanumerolinkit
+    vapauta_sarjanumerot("", $tilausnumero);
+
+    echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
+    pupemaster_stop();
+  }
 }
 
 if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
@@ -238,6 +275,8 @@ enable_ajax();
 
 // Saako poistaa tarjouksia
 $deletarjous = FALSE;
+// Saako poistaa tilauksia
+$deletilaus = FALSE;
 
 if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
   //Saako poistaa tarjouksia
@@ -252,6 +291,12 @@ if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" or $toim == "HYPER") {
 
   if (mysql_num_rows($result) > 0) {
     $deletarjous = TRUE;
+  }
+}
+elseif ($toim == "SUPER") {
+  //Saako poistaa tilauksia
+  if (tarkista_oikeus('tilauskasittely/tilaus_myynti.php', 'TILAUS', 1)) {
+    $deletilaus = TRUE;
   }
 }
 
@@ -269,8 +314,13 @@ echo "  <script type='text/javascript' language='JavaScript'>
         }
       }
 
-      function tarkista_mitatointi(count) {
-        msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+      function tarkista_mitatointi(count, type) {
+        if (typeof type !== 'undefined' && type === 'SUPER') {
+          msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tilausta?")."';
+        }
+        else {
+          msg = '".t("Oletko varma, että haluat mitätöidä ")."' + count + '".t(" tarjousta?")."';
+        }
 
         if (confirm(msg)) {
           return true;
@@ -382,32 +432,6 @@ if (($row["tila"] == "L" or $row["tila"] == "N") and isset($row["mapvm"]) and $r
 
 if (empty($oikeurow['paivitys'])) {
   $button_disabled = "disabled";
-}
-
-if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
-  pupemaster_start();
-
-  $query_tarjous = "UPDATE lasku
-                    SET alatila = tila,
-                    tila        = 'D',
-                    muutospvm   = now(),
-                    comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tunnus  = $tilausnumero";
-  pupe_query($query_tarjous);
-
-  $query = "UPDATE tilausrivi
-            SET tyyppi = 'D'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tyyppi  = 'T'
-            AND tunnus  = $tilausnumero";
-  pupe_query($query);
-
-  //Nollataan sarjanumerolinkit
-  vapauta_sarjanumerot("", $tilausnumero);
-
-  echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
-  pupemaster_stop();
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
@@ -1162,7 +1186,7 @@ if ($toim == 'HYPER') {
 }
 elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 
-  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
+  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta
@@ -1509,7 +1533,7 @@ elseif ($toim == "VALMISTUSSUPER") {
   $miinus = 5;
 }
 elseif ($toim == "VALMISTUSMYYNTI") {
-  $query = "SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.tilaustyyppi, lasku.varasto
+  $query = "SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti tilausviite, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.tilaustyyppi, lasku.varasto
             FROM lasku use index (tila_index)
             LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -1541,7 +1565,7 @@ elseif ($toim == "VALMISTUSMYYNTI") {
   $miinus = 6;
 }
 elseif ($toim == "VALMISTUSMYYNTISUPER") {
-  $query = "SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, tilaustyyppi, lasku.varasto
+  $query = "SELECT lasku.tunnus tilaus, $seuranta $asiakasstring asiakas, $kohde lasku.viesti tilausviite, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, tilaustyyppi, lasku.varasto
             FROM lasku use index (tila_index)
             LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -2519,6 +2543,7 @@ if (mysql_num_rows($result) != 0) {
               }
             }
           }
+
           if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $row['sopimus_numero'] != '') {
             echo "<br>".t('Sopimusnumero').": {$row['sopimus_numero']}";
           }
@@ -2961,8 +2986,10 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";
       echo "</form></td>";
 
-      if (($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous and $kukarow["mitatoi_tilauksia"] == "") {
-        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1);'>";
+      if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
+        or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
+
+        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
         echo "<input type='hidden' name='toim' value='$whiletoim'>";
         echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
         echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";

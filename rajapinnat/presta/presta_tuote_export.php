@@ -156,6 +156,24 @@ if (!isset($presta_tuotekasittely)) {
   // 2 = siirretään kaikki pupen tuotteet prestaan (poistetutkin), mutta merkataan ne hiddeniksi
   $presta_tuotekasittely = 1;
 }
+if (!isset($presta_tuoteominaisuudet)) {
+  $presta_tuoteominaisuudet = array(
+    // Tuote-arrayn kenttä => Prestan product_feature_id
+    // "tuotemerkki" => 6,
+    // "tähtituote"  => 10,
+  );
+}
+if (!isset($presta_vakioasiakasryhmat)) {
+  $presta_vakioasiakasryhmat = array(
+    // Prestan customer_group_id
+    // 3,
+    // 6,
+  );
+}
+if (!isset($presta_varastot)) {
+  // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
+  $presta_varastot = array(0);
+}
 
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
@@ -192,6 +210,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
   $presta_products->set_languages_table($presta_kieliversiot);
+  $presta_products->set_product_features($presta_tuoteominaisuudet);
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_visibility_type($presta_tuotekasittely);
@@ -214,6 +233,7 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
 }
 

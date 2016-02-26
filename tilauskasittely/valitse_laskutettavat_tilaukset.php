@@ -566,12 +566,13 @@ if ($tee == "VALITSE") {
       }
 
       echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
-      
-      // jos veroton on nolla, niin kaikki on aina nollaa
-      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0) {
+
+      // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
+      // niin tehdään nollalasku
+      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
         $row['summa'] = 0.00;
       }
-      
+
       echo "<td align='right'>$row[arvo]<br>$row[summa]</td>";
 
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
@@ -1371,6 +1372,7 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             lasku.jaksotettu,
             lasku.verkkotunnus,
             lasku.erikoisale,
+            lasku.hinta,
             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
             round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
             FROM lasku use index (tila_index)
@@ -1389,7 +1391,8 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             $vientilisa
             GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
             laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
-            maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
+            maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale,
+            lasku.hinta
             ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
   $res = pupe_query($query);
 

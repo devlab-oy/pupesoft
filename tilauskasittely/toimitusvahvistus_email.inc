@@ -31,7 +31,7 @@ if ($toimitusvahvistus_email_lahetys) {
     $_hinta = " ".t("Hinta", $kieli);
   }
 
-  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n";
+  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
 
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -55,7 +55,7 @@ if ($toimitusvahvistus_email_lahetys) {
       $_hinta = "{$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}";
     }
 
-    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n";
+    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n\n";
   }
 
   $body .= "\n";
@@ -66,10 +66,10 @@ if ($toimitusvahvistus_email_lahetys) {
             AND yhtio    = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
-  $body .= t("Seurantakoodit", $kieli).":\n";
+  $body .= t("Seurantakoodit", $kieli).":\n\n";
 
   while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n";
+    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
   }
 
   $body .= "\n";
@@ -78,10 +78,10 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
 
-  $body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n";
-  $body .= "{$rakir_row['toim_osoite']}\n";
-  $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n";
-  $body .= "{$maan_tiedot['nimi']}\n";
+  $body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n\n";
+  $body .= "{$rakir_row['toim_osoite']}\n\n";
+  $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n\n";
+  $body .= "{$maan_tiedot['nimi']}\n\n";
 
   // Sähköpostin lähetykseen parametrit
   $parametri = array( "to"       => $rakir_row['asiakas_email'],

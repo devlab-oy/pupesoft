@@ -194,7 +194,7 @@ if ($tila == 'uudelleenkohdista_viitemaksut') {
               AND lasku.mapvm            = '0000-00-00'
               AND lasku.viite            = suoritus.viite
               AND lasku.valkoodi         = suoritus.valkoodi
-              AND lasku.summa            = suoritus.summa)
+              AND (lasku.summa - lasku.saldo_maksettu) = suoritus.summa)
             JOIN tiliointi AS suorinT ON (suorinT.yhtio = suoritus.yhtio
               AND suorinT.tunnus = suoritus.ltunnus
               AND suorinT.korjattu = '')
@@ -204,8 +204,7 @@ if ($tila == 'uudelleenkohdista_viitemaksut') {
               AND laskunT.korjattu = '')
             WHERE suoritus.yhtio         = '$kukarow[yhtio]'
             AND suoritus.kohdpvm         = '0000-00-00'
-            AND suoritus.asiakas_tunnus != 0
-            AND abs(laskunT.summa) = abs(suorinT.summa)";
+            AND suoritus.asiakas_tunnus != 0";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

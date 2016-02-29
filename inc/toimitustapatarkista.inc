@@ -217,18 +217,5 @@ if (!function_exists("toimitustapatarkista")) {
         }
       }
     }
-
-    if (mysql_field_name($result, $i) == "sallitut_alustat") {
-      if (is_array($t[$i]) and count($t[$i]) > 0) {
-        if (count($t[$i]) == 1 and $t[$i][0] == 'default') {
-          unset($t[$i]);
-          $t[$i] = '';
-        }
-        else {
-          unset($t[$i][0]);
-          $t[$i] = implode(",", $t[$i]);
-        }
-      }
-    }
   }
 }

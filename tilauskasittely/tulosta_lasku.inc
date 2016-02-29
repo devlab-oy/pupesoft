@@ -3414,6 +3414,11 @@ if (!function_exists("tulosta_lasku")) {
           $content_subject = "";
           $content_body = "";
 
+          if (!empty($saatekirje)) {
+            include_once "inc/generoi_laskun_saate.inc";
+            list($devnull, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli, "");
+          }
+
           include "inc/sahkoposti.inc";
         }
         elseif ($kirow["komento"] != "" and $kirow["komento"] != "email") {

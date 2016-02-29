@@ -351,7 +351,7 @@ else {
         $liitos = " and tuotteen_toimittajat.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
       }
       else {
-        $liitos = " and tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'";
+        $liitos = " and tuotteen_toimittajat.liitostunnus = '{$rajaus["tuotteen_toimittajat.liitostunnus"]}'";
       }
 
       $joinit["tuotteen_toimittajat"] = "\nLEFT JOIN tuotteen_toimittajat ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno {$liitos}";

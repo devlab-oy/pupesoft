@@ -1618,7 +1618,7 @@ if ($tila == "" and !isset($jatka)) {
     if (mysql_num_rows($maposres) > 0) {
       $vasen_sarake[$vasen] .= t("Ei k‰ytˆss‰");
     }
-    elseif ($toim == "YLLAPITO" or mysql_num_rows($maposres) > 0) {
+    elseif ($toim == "YLLAPITO") {
       // Yll‰pitosopimuksella voidaan syˆtt‰‰ laskutuksessa toistuva er‰p‰iv‰
       // (kopioi tilaus k‰ytt‰‰ t‰t‰ p‰iv‰m‰‰r‰‰ er‰p‰iv‰n laskemiseen seuraavalle kuukaudelle)
       $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>

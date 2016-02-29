@@ -71,18 +71,12 @@ function hae_kayttajan_laitteet() {
 
 function piirra_headerit() {
   $headerit = array(
-    t("Nro"),
     t("Valmistaja"),
-    t("Malli"),
     t("Sarjanumero"),
-    t("Tuotenumero"),
-    t("Sla"),
-    t("Sd sla"),
+    t("Malli"),
     t("Vc"),
     t("Vc end"),
-    t("Lcm info"),
-    t("Ip"),
-    t("Mac")
+    t("Lcm info")
   );
   foreach ($headerit as $header) {
     echo "<th>{$header}</th>";
@@ -93,18 +87,12 @@ function piirra_laiterivi($laite) {
   global $palvelin2;
 
   echo "<tr>";
-  echo "<td>{$laite['tunnus']}</td>";
   echo "<td>{$laite['valmistaja']}</td>";
-  echo "<td>{$laite['malli']}</td>";
   echo "<td>{$laite['sarjanro']}</td>";
   echo "<td>{$laite['tuoteno']}</td>";
-  echo "<td>{$laite['sla']}</td>";
-  echo "<td>{$laite['sd_sla']}</td>";
   echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
   echo "<td>{$laite['kommentti']}</td>";
-  echo "<td>{$laite['ip_osoite']}</td>";
-  echo "<td>{$laite['mac_osoite']}</td>";
-  echo "<td class='back'><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi työmääräys')."</a></td>";
+  echo "<td class='back'><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";
   echo "</tr>";
 }

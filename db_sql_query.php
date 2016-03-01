@@ -21,9 +21,6 @@ else {
         var isChecked = toggleBox.checked;
 
         for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-
-            alert(currForm.elements[elementIdx].className);
-
           if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].className == 'toggle shift') {
               currForm.elements[elementIdx].checked = isChecked;
           }

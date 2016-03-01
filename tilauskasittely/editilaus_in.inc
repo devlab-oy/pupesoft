@@ -1012,7 +1012,8 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa);
-      if (count($result) > 0) {
+
+      if (!empty($result[6])) {
         // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
         $tieto = '';
         break;

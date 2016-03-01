@@ -151,7 +151,7 @@ if ($tee == "tulosta") {
                $ee_kentat
                max(lasku.laskunro) laskunro,
                max(tuote.tuoteno) tuoteno,
-               left(max(tuote.nimitys), 40) nimitys,
+               (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
                round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
                round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
                if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -220,7 +220,7 @@ if ($tee == "tulosta") {
           $ee_kentat
           max(lasku.laskunro) laskunro,
           max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
+          (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -264,7 +264,7 @@ if ($tee == "tulosta") {
           $ee_kentat
           max(lasku.tunnus) laskunro,
           max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
+          (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -346,7 +346,7 @@ if ($tee == "tulosta") {
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
             max(tuote.tuoteno) tuoteno,
-            left(max(tuote.nimitys), 40) nimitys,
+            (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
             round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
             round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
             if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,

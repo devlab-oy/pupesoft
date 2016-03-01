@@ -20,26 +20,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   echo "<script src='yllapito.js'></script>";
 }
 
-// Pupenext yll‰pitonakym‰t aakkosj‰rjestyksess‰
-$psx_ohjelmat = array(
-  "kassalipas"         => "{$palvelin2}pupenext/cash_registers",
-  "kirjoittimet"       => "{$palvelin2}pupenext/printers",
-  "kustannuspaikka"    => "{$palvelin2}pupenext/qualifiers",
-  "maksuehto"          => "{$palvelin2}pupenext/terms_of_payments",
-  "pakkaamo"           => "{$palvelin2}pupenext/packing_areas",
-  "pakkaus"            => "{$palvelin2}pupenext/packages",
-  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details",
-  "rahdinkuljettajat"  => "{$palvelin2}pupenext/carriers",
-  "taso"               => "{$palvelin2}pupenext/sum_levels",
-  "tili"               => "{$palvelin2}pupenext/accounts",
-  "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
-  "valuu"              => "{$palvelin2}pupenext/currencies",
-  "yriti"              => "{$palvelin2}pupenext/bank_accounts",
-);
+// Rails infraan siirretyt yll‰piton‰kym‰t, eli $pupenext_yllapitonakymat, m‰‰ritell‰‰n parametrit.inc:tiedostossa.
+if (array_key_exists($toim, $pupenext_yllapitonakymat)) {
 
-if (array_key_exists($toim, $psx_ohjelmat)) {
-
-  $psx_url = $psx_ohjelmat[$toim];
+  $psx_url = $pupenext_yllapitonakymat[$toim];
 
   echo "<font class='head'>", t("Virhe"), "</font><hr>";
 

@@ -299,7 +299,7 @@ if (!function_exists('alku')) {
 
     $rivi_ind++;
 
-    if (!kyseessa_eramaksu($laskurow)) {
+    if (!kyseessa_eramaksu($laskurow) and empty($laskurow["kateistyyppi"])) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli), $page_lasku[$sivu],
         $pieni);
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind], ($laskurow["viikorkopros"]*1)." %", $page_lasku[$sivu],

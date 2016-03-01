@@ -260,6 +260,8 @@ else {
     $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,           $firstpage, $norm);
 
     $pdf->draw_text(mm_pt(22), mm_pt(157), t("Terminaalitoimitus", $kieli),  $firstpage, $norm);
+    $pdf->draw_text(mm_pt(22), mm_pt(152), $toitarow['selite'],  $firstpage, $norm);
+
     $pdf->draw_text(mm_pt(100), mm_pt(140), t("Toimituspvm", $kieli).":",    $firstpage, $otsik);
     
     if ((int) str_replace("-", "", $laskurow['toimaika']) < date("Ymd")) {

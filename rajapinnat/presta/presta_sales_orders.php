@@ -193,7 +193,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_TOIMITUS_EMAIL:");
     $this->add_row("*RE OSTOTIL");
 
-    $rows = $order['associations']['order_rows']['order_rows'];
+    $rows = $order['associations']['order_rows']['order_row'];
 
     // One row fix
     if (isset($rows['id'])) {

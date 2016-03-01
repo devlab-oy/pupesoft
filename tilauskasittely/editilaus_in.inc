@@ -1012,7 +1012,8 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa);
-      if (count($result) > 0) {
+
+      if (!empty($result[6])) {
         // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
         $tieto = '';
         break;
@@ -2359,12 +2360,29 @@ while ($tietue = fgets($fd)) {
         $silent = "SILENT";
         $tilausvalmiskutsuja = "EDITILAUS";
 
+        if (!empty($ltoim_email)) {
+          $saate_query = "SELECT tunnus
+                    FROM avainsana
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND laji    = 'LASKUTUS_SAATE'
+                    AND selite  = 'Verkkokauppa'";
+          $saate_res = pupe_query($saate_query);
+
+          if ($saaterow = mysql_fetch_assoc($saate_res)) {
+            $saatekirje = $saaterow["tunnus"];
+            $valittu_kopio_tulostin = "asiakasemail$ltoim_email";
+          }
+        }
+
         // Vientitilauksille saa kutsua tilaus-valmis.inciä vaan kerran
         // Kotimaan tilauksilel kutsutaan tilaus-valmis.inciä kahdesti,
         // koska ekalla kerralla niille luodaan pupeen lasku
         if ($laskurow["vienti"] == "") {
           require "tilaus-valmis.inc";
         }
+
+        $valittu_kopio_tulostin = "";
+        $saatekirje = 0;
 
         // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
         if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {

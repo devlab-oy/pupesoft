@@ -26,7 +26,8 @@ if ($_selitetark_5 or
 if ($_selitetark_5 and
   $avain_sel['MYSQLALIAS'] == "SELECTED" or
   $avain_sel["SAHKTILTUN"] == "SELECTED" or
-  $avain_sel['TYOM_TYOKENTAT']) {
+  $avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+  $avain_sel['TYOM_TYOSTATUS'] == "SELECTED") {
   $tyyppi = 1;
 }
 
@@ -38,7 +39,8 @@ if ($_selitetark_4 and
     $avain_sel['TRY'] == "SELECTED" or
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel['TYOM_TYOJONO'] == "SELECTED" or
-    $avain_sel['TYOM_TYOKENTAT'] == "SELECTED")) {
+    $avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+    $avain_sel['TYOM_TYOSTATUS'] == "SELECTED")) {
   $tyyppi = 1;
 }
 

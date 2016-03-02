@@ -905,6 +905,19 @@ if ($fieldname == "kerataanko_valmistukset") {
   $jatko = 0;
 }
 
+if ($fieldname == "kerataanko_tyomaaraykset") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array($trow[$i] => "SELECTED");
+
+  $ulos .= "<option value = ''>".t("Työmääräykset kerätään")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Työmääräyksiä ei kerätä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kerayslistojen_yhdistaminen") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

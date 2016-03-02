@@ -87,6 +87,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='toim' value='TYOMAARAYS'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
         <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tm_$laskurow[tunnus]', ''); return false;\"></form><br>";
+
+        $lopetus = "";
   }
 
   if (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] == "-88") {
@@ -97,6 +99,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='toim' value='HUOLTOSAATE'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
         <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_hs_$laskurow[tunnus]', ''); return false;\"></form><br>";
+
+        $lopetus = "";
   }
 
   if ($toim == "REKLAMAATIO" or

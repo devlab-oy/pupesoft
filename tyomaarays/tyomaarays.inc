@@ -98,7 +98,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='HUOLTOSAATE'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_hs_$laskurow[tunnus]', ''); return false;\"></form><br>";
+        <input type='submit' value='".t("Näytä huoltosaate").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_hs_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
         $lopetus = "";
   }

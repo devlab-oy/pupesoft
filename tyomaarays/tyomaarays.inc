@@ -66,17 +66,17 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     require "inc/valitse_tulostin.inc";
   }
   elseif ($kappaleet > 0) {
-    if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email" and $tyomtyyppi != 'Z') {
+    if ($toim != "REKLAMAATIO" and !in_array($komento["Työmääräys"], array("email", "-88") and $tyomtyyppi != 'Z') {
       $komento["Työmääräys"] .= " -# $kappaleet ";
     }
-    elseif (isset($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "email") {
+    elseif (isset($komento["Reklamaatio"]) and !in_array($komento["Reklamaatio"], array("email", "-88")) {
       $komento["Reklamaatio"] .= " -# $kappaleet ";
     }
-    elseif (isset($komento["Takuu"]) and $komento["Takuu"] != "email") {
+    elseif (isset($komento["Takuu"]) and !in_array($komento["Takuu"], array("email", "-88")) {
       $komento["Takuu"] .= " -# $kappaleet ";
     }
 
-    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "email" and $tyomtyyppi != 'Z') {
+    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and !in_array($komento["Huoltosaate"], array("email", "-88") and $tyomtyyppi != 'Z') {
       $komento["Huoltosaate"] .= " -# {$kappaleet} ";
     }
   }

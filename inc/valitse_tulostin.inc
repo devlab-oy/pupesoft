@@ -387,7 +387,15 @@ foreach ($tulostimet as $tulostin) {
 
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-    echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+    
+    if ($tulostin == 'Työmääräys') {
+      $sel = $kukarow["kirjoitin"] == "-88" ? " selected" : "";
+      
+      echo "<option value='-88' sel>".t('PDF Ruudulle')."</option>";
+    }
+    else {
+      echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+    }
   }
 
   if ($tulostimet[0] == "Inventointi") {

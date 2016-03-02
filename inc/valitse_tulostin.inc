@@ -387,11 +387,11 @@ foreach ($tulostimet as $tulostin) {
 
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-    
-    if ($tulostin == 'Työmääräys') {
+
+    if ($tulostin == 'Työmääräys' or $tulostin == 'Huoltosaate') {
       $sel = $kukarow["kirjoitin"] == "-88" ? " selected" : "";
-      
-      echo "<option value='-88' sel>".t('PDF Ruudulle')."</option>";
+
+      echo "<option value='-88' $sel>".t('PDF Ruudulle')."</option>";
     }
     else {
       echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";

@@ -353,14 +353,42 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAM
 }
 
 if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMIS') {
+  
+  $_alatilapaiv = "";
+
+  if ($laskurow["tila"] == 'A' and !empty($yhtiorow['kerataanko_tyomaaraykset'])) {
+
+    $ttq = "SELECT tulostustapa
+            FROM toimitustapa
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND selite  = '{$laskurow['toimitustapa']}'";
+    $ttres = pupe_query($ttq);
+    $ttrow = mysql_fetch_assoc($ttres);
+
+    if ($laskurow["vienti"] == '' and $ttrow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
+
+      // Jos meillä on maksupositioita laskulla, tulee se siirtää alatilaan J
+      if ($laskurow['jaksotettu'] != 0) {
+        $_alatilapaiv = ", alatila='J' ";
+      }
+      else {
+        $_alatilapaiv = ", alatila='D' ";
+      }
+    }
+    else {
+      $_alatilapaiv = ", alatila='C' ";
+    }
+  }
+
   $query  = "UPDATE lasku
              SET tila='L'
+             {$_alatilapaiv}
              WHERE tunnus='$laskurow[tunnus]'
              and tila='A'
              and yhtio='$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  //Katotaan löytyykö tilausrivejä
+  // Katotaan löytyykö tilausrivejä
   $query = "SELECT *
             from tilausrivi
             where yhtio  = '$kukarow[yhtio]'
@@ -368,7 +396,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
             and tyyppi  != 'D'";
   $keres = pupe_query($query);
 
-  //Yhtään riviä ei ole
+  // Yhtään riviä ei ole
   if (mysql_num_rows($keres) == 0) {
     $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
     $result = pupe_query($query);
@@ -378,6 +406,16 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
     $result = pupe_query($query);
   }
   else {
+    // Tlausta on päivitetty matkan varrella, joten otetaan tuore laskurow
+    $query = "SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
+              FROM lasku
+              JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+              LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+              WHERE lasku.tunnus  = '$kukarow[kesken]'
+              AND lasku.yhtio     = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+
     require "tilauskasittely/tilaus-valmis.inc";
   }
 

@@ -1985,9 +1985,9 @@ if (!function_exists('tulosta_tarjous')) {
           <input type='hidden' name='tee' value='NAYTATILAUS'>
           <input type='submit' value='".t("Näytä tarjous").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tj_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
+      $GLOBALS["lopetus"] = "";
       return;
     }
-
 
     // Haetaan laskun tiedot
     $query = "SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.muutospvm muutospvm

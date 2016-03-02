@@ -66,19 +66,27 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     require "inc/valitse_tulostin.inc";
   }
   elseif ($kappaleet > 0) {
-    if ($toim != "REKLAMAATIO" and !in_array($komento["Työmääräys"], array("email", "-88") and $tyomtyyppi != 'Z') {
+    if ($toim != "REKLAMAATIO" and !in_array($komento["Työmääräys"], array("email", "-88")) and $tyomtyyppi != 'Z') {
       $komento["Työmääräys"] .= " -# $kappaleet ";
     }
-    elseif (isset($komento["Reklamaatio"]) and !in_array($komento["Reklamaatio"], array("email", "-88")) {
+    elseif (isset($komento["Reklamaatio"]) and !in_array($komento["Reklamaatio"], array("email", "-88"))) {
       $komento["Reklamaatio"] .= " -# $kappaleet ";
     }
-    elseif (isset($komento["Takuu"]) and !in_array($komento["Takuu"], array("email", "-88")) {
+    elseif (isset($komento["Takuu"]) and !in_array($komento["Takuu"], array("email", "-88"))) {
       $komento["Takuu"] .= " -# $kappaleet ";
     }
 
-    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and !in_array($komento["Huoltosaate"], array("email", "-88") and $tyomtyyppi != 'Z') {
+    if ($toim != "REKLAMAATIO" and !empty($komento["Huoltosaate"]) and !in_array($komento["Huoltosaate"], array("email", "-88")) and $tyomtyyppi != 'Z') {
       $komento["Huoltosaate"] .= " -# {$kappaleet} ";
     }
+  }
+
+  if ($komento["Työmääräys"] == "-88") {
+    echo "<br><form id='tulostakopioform_$laskurow[tunnus]' name='tulostakopioform_$laskurow[tunnus]' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+        <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
+        <input type='hidden' name='toim' value='TYOMAARAYS'>
+        <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskurow[tunnus]', ''); return false;\"></form><br>";
   }
 
   if ($laskurow["tila"] == 'U') {
@@ -353,7 +361,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAM
 }
 
 if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMIS') {
-  
+
   $_alatilapaiv = "";
 
   if ($laskurow["tila"] == 'A' and !empty($yhtiorow['kerataanko_tyomaaraykset'])) {

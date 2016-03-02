@@ -387,7 +387,13 @@ foreach ($tulostimet as $tulostin) {
 
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-    echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+
+    if (in_array($tulostin, array('Työmääräys', 'Huoltosaate', 'Reklamaatio', 'Takuu'))) {
+      echo "<option value='-88'>".t('PDF Ruudulle')."</option>";
+    }
+    else {
+      echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+    }
   }
 
   if ($tulostimet[0] == "Inventointi") {

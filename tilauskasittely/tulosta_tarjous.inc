@@ -1967,7 +1967,27 @@ if (!function_exists('tulosta_tarjous')) {
   function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
     $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
     $naytetaanko_tuoteno = '', $liita_tuotetiedot = "", $naytetaanko_yhteissummarivi = "") {
-    global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
+    global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus, $palvelin2;
+
+    if ($komento == "-88") {
+      js_openFormInNewWindow();
+
+      echo "<br><form id='tulostakopioform_tj_$otunnus' name='tulostakopioform_tj_$otunnus' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+          <input type='hidden' name='otunnus' value='$otunnus'>
+          <input type='hidden' name='toim' value='TARJOUS'>
+          <input type='hidden' name='kieli' value='$kieli'>
+          <input type='hidden' name='hinnat' value='$hinnat'>
+          <input type='hidden' name='verolliset_verottomat_hinnat' value='$verolliset_verottomat_hinnat'>
+          <input type='hidden' name='naytetaanko_rivihinta' value='$naytetaanko_rivihinta'>
+          <input type='hidden' name='naytetaanko_tuoteno' value='$naytetaanko_tuoteno'>
+          <input type='hidden' name='liita_tuotetiedot' value='$liita_tuotetiedot'>
+          <input type='hidden' name='naytetaanko_yhteissummarivi' value='$naytetaanko_yhteissummarivi'>
+          <input type='hidden' name='tee' value='NAYTATILAUS'>
+          <input type='submit' value='".t("Näytä tarjous").": $otunnus' onClick=\"js_openFormInNewWindow('tulostakopioform_tj_$otunnus', ''); return false;\"></form><br>";
+
+      $GLOBALS["lopetus"] = "";
+      return;
+    }
 
     // Haetaan laskun tiedot
     $query = "SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.muutospvm muutospvm

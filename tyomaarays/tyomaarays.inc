@@ -86,6 +86,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='TYOMAARAYS'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='hidden' name='kieli' value='$kieli'>
+        <input type='hidden' name='tyomtyyppi' value='$tyomtyyppi'>
         <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tm_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
         $lopetus = "";
@@ -98,6 +100,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='HUOLTOSAATE'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä huoltosaate").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_hs_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
         $lopetus = "";
@@ -110,6 +113,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='REKLAMAATIO'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä reklamaatio").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_rm_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
         $lopetus = "";
@@ -122,6 +126,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='TAKUU'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä takuu").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tk_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
         $lopetus = "";

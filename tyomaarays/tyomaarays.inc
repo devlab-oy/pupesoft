@@ -104,7 +104,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
   }
 
   if ($toim == "REKLAMAATIO" or
-    ($toim != "REKLAMAATIO" and ($komento["Työmääräys"] != "-88" or $komento["Huoltosaate"] != "-88"))
+    ($toim != "REKLAMAATIO" and
+      (!empty($komento["Työmääräys"]) and $komento["Työmääräys"] != "-88" or
+        (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "-88")))
     ) {
     if ($laskurow["tila"] == 'U') {
       $where = " uusiotunnus='$laskurow[tunnus]' ";

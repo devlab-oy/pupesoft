@@ -388,7 +388,7 @@ foreach ($tulostimet as $tulostin) {
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-    if ($tulostin == 'Työmääräys' or $tulostin == 'Huoltosaate') {
+    if (in_array($tulostin, array('Työmääräys', 'Huoltosaate', 'Reklamaatio'))) {
       echo "<option value='-88'>".t('PDF Ruudulle')."</option>";
     }
     else {

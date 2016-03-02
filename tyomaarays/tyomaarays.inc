@@ -103,7 +103,20 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $lopetus = "";
   }
 
-  if ($toim == "REKLAMAATIO" or
+  if (!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] == "-88") {
+    js_openFormInNewWindow();
+
+    echo "<br><form id='tulostakopioform_rm_$laskurow[tunnus]' name='tulostakopioform_rm_$laskurow[tunnus]' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+        <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
+        <input type='hidden' name='toim' value='REKLAMAATIO'>
+        <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='submit' value='".t("Näytä reklamaatio").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_rm_$laskurow[tunnus]', ''); return false;\"></form><br>";
+
+        $lopetus = "";
+  }
+
+  if (($toim == "REKLAMAATIO" and
+      (!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "-88")) or
     ($toim != "REKLAMAATIO" and
       (!empty($komento["Työmääräys"]) and $komento["Työmääräys"] != "-88" or
         (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "-88")))

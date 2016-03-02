@@ -115,12 +115,25 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         $lopetus = "";
   }
 
+  if (!empty($komento["Takuu"]) and $komento["Takuu"] == "-88") {
+    js_openFormInNewWindow();
+
+    echo "<br><form id='tulostakopioform_tk_$laskurow[tunnus]' name='tulostakopioform_tk_$laskurow[tunnus]' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+        <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
+        <input type='hidden' name='toim' value='TAKUU'>
+        <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='submit' value='".t("Näytä takuu").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tk_$laskurow[tunnus]', ''); return false;\"></form><br>";
+
+        $lopetus = "";
+  }
+
   if (($toim == "REKLAMAATIO" and
-      (!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "-88")) or
+      ((!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "-88") or
+        (!empty($komento["Takuu"]) and $komento["Takuu"] != "-88"))) or
     ($toim != "REKLAMAATIO" and
-      (!empty($komento["Työmääräys"]) and $komento["Työmääräys"] != "-88" or
-        (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "-88")))
-    ) {
+      ((!empty($komento["Työmääräys"]) and $komento["Työmääräys"] != "-88") or
+        (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] != "-88")))) {
+
     if ($laskurow["tila"] == 'U') {
       $where = " uusiotunnus='$laskurow[tunnus]' ";
     }

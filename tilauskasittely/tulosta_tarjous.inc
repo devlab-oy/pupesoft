@@ -1967,7 +1967,7 @@ if (!function_exists('tulosta_tarjous')) {
   function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
     $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
     $naytetaanko_tuoteno = '', $liita_tuotetiedot = "", $naytetaanko_yhteissummarivi = "") {
-    global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
+    global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus, $palvelin2;
 
     if ($komento == "-88") {
       js_openFormInNewWindow();

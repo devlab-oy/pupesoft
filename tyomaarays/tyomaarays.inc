@@ -406,6 +406,16 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
     $result = pupe_query($query);
   }
   else {
+    // Tlausta on päivitetty matkan varrella, joten otetaan tuore laskurow
+    $query = "SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
+              FROM lasku
+              JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
+              LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
+              WHERE lasku.tunnus  = '$kukarow[kesken]'
+              AND lasku.yhtio     = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+
     require "tilauskasittely/tilaus-valmis.inc";
   }
 

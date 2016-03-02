@@ -1858,10 +1858,12 @@ function piirra_ostoskoriin_lisays($row) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
-      echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
-      echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'>";
-      echo "</a>";
+      echo "<table>";
+      echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
+      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
+      echo "</td></tr>";
+      echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1'></td></tr>";
+      echo "</table>";
       echo "</td>";
       $yht_i++;
     }
@@ -2024,6 +2026,10 @@ function tarkista_tilausrivi() {
             ${'ale' . $alepostfix} = "";
           }
 
+          // Jos ale1 annettu
+          if (!empty($_REQUEST['ale1'])) {
+            $ale1 = $_REQUEST['ale1'];
+          }
           $alv = "";
           $var = "";
           $varasto = $laskurow["varasto"];

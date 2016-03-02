@@ -82,6 +82,8 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
   }
 
   if ($komento["Työmääräys"] == "-88") {
+    js_openFormInNewWindow();
+
     echo "<br><form id='tulostakopioform_$laskurow[tunnus]' name='tulostakopioform_$laskurow[tunnus]' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
         <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
         <input type='hidden' name='toim' value='TYOMAARAYS'>

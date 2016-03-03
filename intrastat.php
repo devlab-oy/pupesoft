@@ -150,8 +150,7 @@ if ($tee == "tulosta") {
                $vainnimikelisa2
                $ee_kentat
                max(lasku.laskunro) laskunro,
-               max(tuote.tuoteno) tuoteno,
-               (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
+               max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
                round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
                round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
                if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -219,8 +218,7 @@ if ($tee == "tulosta") {
           $vainnimikelisa2
           $ee_kentat
           max(lasku.laskunro) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
+          max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -263,8 +261,7 @@ if ($tee == "tulosta") {
           $vainnimikelisa2
           $ee_kentat
           max(lasku.tunnus) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
+          max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -309,8 +306,7 @@ if ($tee == "tulosta") {
             {$vainnimikelisa2_tyom}
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
-            'Huolto' AS tuoteno,
-            'Huolto' AS nimitys,
+            max(concat('Huolto','!¡!', 'Huolto')) tuoteno_nimitys,
             1 AS kpl,
             tyomaarays.bruttopaino AS paino,
             tyomaarays.tulliarvo AS rivihinta,
@@ -345,8 +341,7 @@ if ($tee == "tulosta") {
             {$vainnimikelisa2}
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
-            max(tuote.tuoteno) tuoteno,
-            (SELECT left(nimi_tuote.nimitys, 40) FROM tuote AS nimi_tuote WHERE nimi_tuote.yhtio = '{$kukarow['yhtio']}' AND nimi_tuote.tuoteno = max(tuote.tuoteno)) nimitys,
+            max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
             round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
             round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
             if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -373,7 +368,7 @@ if ($tee == "tulosta") {
     }
   }
 
-  $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
+  $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
   $result = pupe_query($query);
 
   $nim     = "";
@@ -559,6 +554,8 @@ if ($tee == "tulosta") {
   $ots .= "\r\n";
 
   while ($row = mysql_fetch_array($result)) {
+
+    list($row["tuoteno"], $row["nimitys"]) = explode("!¡!", $row["tuoteno_nimitys"]);
 
     if ($row["paino"] < 1) $row["paino"] = 1;
 

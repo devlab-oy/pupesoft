@@ -1037,6 +1037,18 @@ if ($tee == 'tulosta') {
           $dgdkomento .= " -#{$dgdkpl} ";
         }
 
+        // Katsotaan onko tämä koontikuljetus
+        if ($toitarow["toim_nimi"] != "" and ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K")) {
+          //Toimitusosoitteeksi halutaan tässä tapauksessa toimitustavan takaa löytyvät
+          $laskurow["toim_maa"]    = $toitarow["toim_maa"];
+          $laskurow["toim_nimi"]    = $toitarow["toim_nimi"];
+          $laskurow["toim_nimitark"]  = $toitarow["toim_nimitark"];
+          $laskurow["toim_osoite"]  = $toitarow["toim_osoite"];
+          $laskurow["toim_postino"]  = $toitarow["toim_postino"];
+          $laskurow["toim_postitp"]  = $toitarow["toim_postitp"];
+
+        }
+
         require "tilauskasittely/tulosta_dgd.inc";
 
         $params_dgd = array(

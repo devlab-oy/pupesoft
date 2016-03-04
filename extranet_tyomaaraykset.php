@@ -64,7 +64,7 @@ elseif ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
 }
 
 function piirra_kayttajan_tyomaaraykset() {
-  echo "<font class='head'>".t("Työmääräykset")."</font><hr>";
+  echo "<font class='head'>".t("Huoltopyynnöt")."</font><hr>";
   piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
@@ -272,7 +272,7 @@ function piirra_yhteyshenkilontiedot_taulu() {
                   ORDER BY nimi
                   LIMIT 1";
   $yhteysresult = pupe_query($yhteysquery);
-  
+
   $tilausyhteyshenkilo = '';
   if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
     $tilausyhteyshenkilo = $yhteysrow['nimi'];
@@ -295,7 +295,7 @@ function piirra_toimitusosoite_taulu($asiakas) {
 
   echo "<tr><th>".t('Postinumero')."</th>";
   echo "<td><input type='text' name='toim_postino' value='{$asiakas['toim_postino']}'></td></tr>";
-  
+
   echo "<tr><th>".t('Postitoimipaikka')."</th>";
   echo "<td><input type='text' name='toim_postitp' value='{$asiakas['toim_postitp']}'></td></tr>";
 
@@ -316,13 +316,13 @@ function piirra_laskutusosoite_taulu($asiakas) {
 
   echo "<tr><th>".t('Postinumero')."</th>";
   echo "<td><input type='text' name='laskutus_postino' value='{$asiakas['laskutus_postino']}'></td></tr>";
-  
+
   echo "<tr><th>".t('Postitoimipaikka')."</th>";
   echo "<td><input type='text' name='laskutus_postitp' value='{$asiakas['laskutus_postitp']}'></td></tr>";
 
   echo "<tr><th>".t('Maa')."</th>";
   echo "<td><input type='text' name='laskutus_maa' value='{$asiakas['laskutus_maa']}'></td></tr>";
-  echo "</table>";  
+  echo "</table>";
 }
 
 function tallenna_tyomaarays($request) {
@@ -419,7 +419,7 @@ function hae_laitteen_parametrit($laite_tunnus) {
 }
 
 function hae_asiakasdata() {
-  global $kukarow;               
+  global $kukarow;
 
   // Haetaan oletusasiakkuus
   $query = "SELECT asiakas.*,
@@ -459,7 +459,7 @@ function hae_tapahtumahistoria($tyomaaraystunnus) {
             AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tyomaaraystunnus'
             ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
   $historiares = pupe_query($query);
-  
+
   if (mysql_affected_rows() > 0) {
     $tapahtumahistoria .= t("Työmääräyksen tapahtumat")."\n";
     $tapahtumahistoria .= "\n";
@@ -475,7 +475,7 @@ function hae_tapahtumahistoria($tyomaaraystunnus) {
       $tapahtumahistoria .= "{$aika}";
     }
   }
-  return $tapahtumahistoria;     
+  return $tapahtumahistoria;
 }
 
 function email_tyomaarayskopio($request) {

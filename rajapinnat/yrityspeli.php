@@ -1,6 +1,7 @@
 <?php
 
-// Tämä ohjelma generoi myyntitilauksia kaikille yrityksille joilla ei niitä entuudestaan ole
+// Tällä ohjelmalla voidaan generoida myyntitilauksia kuluvalle viikolle yrityksille joilla ei
+// vielä sellaisia ole
 
 // Kutsutaanko CLI:stä
 $php_cli = FALSE;
@@ -80,6 +81,10 @@ function echo_yrityspeli_kayttoliittyma() {
     echo "</tr>";
   }
 
+  if (count($tilauksettomat_yhtiot) == 0) {
+    echo t('Yhtään tilauksetonta yritystä ei löytynyt');
+  }
+
   echo "</table>";
   echo "<br>";
   echo "<input type='submit' value='".t('Luo myyntitilauksia valituille yrityksille')."'>";
@@ -91,6 +96,10 @@ function hae_tilauksettomat_yhtiot() {
 
   $tilauksettomat_yhtiot = array();
 
+  // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
+  $alkuaika = date("Y-m-d", strtotime('monday this week'));
+  $loppuaika = date("Y-m-d", strtotime('sunday this week'));
+
   $query = "SELECT * 
             FROM yhtio
             WHERE yhtio NOT IN ('{$yhtiorow['yhtio']}')";
@@ -101,15 +110,16 @@ function hae_tilauksettomat_yhtiot() {
                     JOIN tilausrivi 
                      ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus) 
                     WHERE lasku.yhtio = '{$row['yhtio']}' 
-                    AND lasku.tila = 'N'";
+                    AND lasku.tila IN ('N','L')
+                    AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika'";
     $tilausresult = pupe_query($tilausquery);
+
     $tilausrow = mysql_fetch_assoc($tilausresult);
     if (empty($tilausrow['avoimia_tilauksia'])) {
       $tilauksettomat_yhtiot[] = $tilausrow['yhtio'];
     }
   }
-$tilauksettomat_yhtiot[] = 'signa';
-$tilauksettomat_yhtiot[] = 'signa';
+
   return $tilauksettomat_yhtiot;
 }
 
@@ -127,8 +137,8 @@ function generoi_myyntitilauksia($yhtiot, $painoarvo, $tilausmaara) {
 function hae_oletusasiakkuus($yhtio) {
   $query = "SELECT * 
             FROM asiakas
-            WHERE /*yhtio = '{$yhtio}'
-            AND*/ ovttunnus = '003718733595'
+            WHERE yhtio = '{$yhtio}'
+            AND ovttunnus = '003732419754'
             LIMIT 1";
   $result = pupe_query($query);
   return mysql_fetch_assoc($result);

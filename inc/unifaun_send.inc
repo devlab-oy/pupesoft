@@ -144,6 +144,9 @@ class Unifaun {
 
       $ftpfile = realpath($filenimi);
 
+      # Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
+      $ftputf8 = PUPE_UNICODE;
+
       require "inc/ftp-send.inc";
     }
   }
@@ -296,6 +299,12 @@ class Unifaun {
 
     $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($lahettajan_sopimusnro));   // Customer number
     $uni_par_val->addAttribute('n', "custno");
+
+    // DPDFI (PostNord DPD Classic) keississä laitetaan vähän extraa
+    if ($this->toitarow['rahdinkuljettaja'] == 'DPDFI') {
+      $uni_par_val = $uni_sender_partner->addChild('val', "Z14");   // custnoissuercode
+      $uni_par_val->addAttribute('n', "custnoissuercode");
+    }
 
     $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->toitarow['sopimusnro']));   // Customer number for international services
     $uni_par_val->addAttribute('n', "custno_international");

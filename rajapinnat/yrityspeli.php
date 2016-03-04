@@ -19,13 +19,15 @@ if (!$php_cli) {
   require "{$pupe_root_polku}/inc/parametrit.inc";
 
   if (!isset($tee)) $tee = '';
+  if (!isset($painoarvo)) $painoarvo = 100;
+  if (!isset($tilausmaara)) $tilausmaara = 3;
 
   if ($tee == 'GENEROI') {
     if (empty($valitut)) {
       echo "<br><font class='error'>".t('Et valinnut yht‰‰n yrityst‰')."</font><br><br>";
     }
     else {
-      $tilaukset = generoi_myyntitilauksia($valitut);
+      $tilaukset = generoi_myyntitilauksia($valitut, $painoarvo, $tilausmaara);
       echo "<br>".t('Tilaukset luotu')."<br><br>";
     }
 
@@ -49,10 +51,23 @@ function echo_yrityspeli_kayttoliittyma() {
 
   echo "<table>";
   echo "<tr>";
-  
+  echo "<th>".t('Tilausten painoarvo')."</th>";
+  echo "<td><font>Painoarvo vaikuttaa tilaussumman suuruuteen. <br> Esim. normaalitilauksen summa on n. 1000 euroa (100%),<br>
+                  painoarvo 80 antaa tilaussummaksi n. 800 euroa (80%)<br>
+                  ja painoarvo 150 antaa tilaussummaksi n. 1500 euroa (150%).</font><br>";
+  echo "<input type='text' name='painoarvo' size='3' value='100'/>%";
+  echo "</td>";
   echo "</tr>";
-  echo "</table>";
+  echo "<tr>";
 
+  echo "<th>".t('Tilausten lukum‰‰r‰')."</th>";
+  echo "<td><font>Montako automaattitilausta luodaan per yritys</font><br>";
+  echo "<input type='text' name='tilausmaara' size='2' value='3'/>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "</table>";
+  echo "<br><br>";
   echo "<table>";
   echo "<tr>";
   echo "<th colspan='10'>".t('Valitse yritykset')."</th>";
@@ -98,12 +113,12 @@ $tilauksettomat_yhtiot[] = 'signa';
   return $tilauksettomat_yhtiot;
 }
 
-function generoi_myyntitilauksia($yhtiot) {
+function generoi_myyntitilauksia($yhtiot, $painoarvo, $tilausmaara) {
   foreach ($yhtiot as $yhtio) {
     $asiakas = hae_oletusasiakkuus($yhtio);
     if (!empty($asiakas)) {
-      for ($i=0; $i < 3; $i++) { 
-        luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas);
+      for ($i=0; $i < $tilausmaara; $i++) { 
+        luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo);
       }
     }
   }
@@ -119,9 +134,10 @@ function hae_oletusasiakkuus($yhtio) {
   return mysql_fetch_assoc($result);
 }
 
-function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas) {
+function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo) {
   global $kukarow;
 
+  $painoarvokerroin = $painoarvo / 100;
   $alkuperainen_yhtio = $kukarow['yhtio'];
   $yhtiorow = hae_yhtion_parametrit($yhtio);
   $kukarow['kesken'] = '';
@@ -142,9 +158,8 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas) {
 
   // Lis‰t‰‰n tuotteet
   $tuoteriveja = rand(1, 3);
-  $painoarvokerroin = 1;
 
-  // Painoarvo, vakio 1000 eur = 1 = 100%
+  // Painoarvo, vakio 1, => Tilauksen kokonaisarvo n. 1000 euroa
   $kokonaiskustannus = 1000 * $painoarvokerroin;
 
   $hintacounter = 0;

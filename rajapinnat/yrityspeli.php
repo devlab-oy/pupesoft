@@ -49,6 +49,12 @@ function echo_yrityspeli_kayttoliittyma() {
 
   echo "<table>";
   echo "<tr>";
+  
+  echo "</tr>";
+  echo "</table>";
+
+  echo "<table>";
+  echo "<tr>";
   echo "<th colspan='10'>".t('Valitse yritykset')."</th>";
   echo "</tr>";
 
@@ -135,18 +141,27 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas) {
   $laskurow = mysql_fetch_assoc($laskures);
 
   // Lis‰t‰‰n tuotteet
-  $tuoteriveja = rand(1, 4);
+  $tuoteriveja = rand(1, 3);
+  $painoarvokerroin = 1;
 
-  for ($x = 0; $x <= $tuoteriveja; $x++) {
+  // Painoarvo, vakio 1000 eur = 1 = 100%
+  $kokonaiskustannus = 1000 * $painoarvokerroin;
+
+  $hintacounter = 0;
+  while ($hintacounter < $kokonaiskustannus) {
     $trow = tuotearvonta($yhtio);
+    $hinta = rand(55, 122);
+    $kpl = rand(1,3);
 
+    $hintacounter += ($hinta * $kpl);
     $params = array(
       'trow' => $trow,
       'laskurow' => $laskurow,
       'tuoteno' => $trow['tuoteno'],
-      'hinta' => rand(10, 200),
-      'kpl' => rand(2, 15),
-      'varataan_saldoa' => 'EI'
+      'hinta' => $hinta,
+      'kpl' => $kpl,
+      'varataan_saldoa' => 'EI',
+      'alv' => 0.0
     );
 
     lisaa_rivi($params);

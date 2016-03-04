@@ -344,33 +344,6 @@ class Unifaun {
 
     $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
-    if (!empty($this->postirow["noutopisteen_tunnus"])) {
-      // Toimituspisteen receiver segmentti
-      //<receiver rcvid="AR"> 
-      $ar_receiver = $xml->addChild('receiver');
-      $ar_receiver->addAttribute('rcvid', utf8_encode('AR'));
-      //<val n="id4user">IDXXX</val>
-      $ar_id = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->postirow['noutopisteen_tunnus']));
-      //<val n="city">XXX</val>
-      $ar_city = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_postitp']));
-      //<val n="address1">XXX</val> 
-      $ar_address = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_osoite']));
-      //<val n="country">FI</val> 
-      $ar_country = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode("FI"));
-      //<val n="phone"></val> 
-      //<val n="address2"></val> 
-      //<val n="name">XXX</val>
-      $ar_name = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow['toim_nimi']));
-      //<val n="zipcode">XXX</val>
-      $ar_zipcode = $ar_receiver->addChild('val');
-      $ar_id->addAttribute('n', utf8_encode($this->asiakasrow["toim_postino"]));
-      //</receiver>
-    }
     // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
     if ($this->toitarow['merahti'] == '') {
 
@@ -596,8 +569,8 @@ class Unifaun {
     //$uni_shi_val->addAttribute('n', "legalto");
 
     if (!empty($this->postirow["noutopisteen_tunnus"])) {
-      //<val n="agentto">AR</val> # definaa noutopisteen toimitustietosegmentin
-      $ar_shi_val = $uni_shipment->addChild('val', utf8_encode("AR")); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+      //<val n="agentto">1234</val> # definaa noutopisteen tunnuksen
+      $ar_shi_val = $uni_shipment->addChild('val', utf8_encode($postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
       $ar_shi_val->addAttribute('n', "agentto");
     }
 

@@ -159,7 +159,8 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310, 815, t("Siirtolista", $kieli),     $thispage, $iso);
       }
       elseif ($tyyppi == "REKLAMAATIO") {
-        $pdf->draw_text(240, 815, t("Reklamaatio/Purkulista", $kieli),     $thispage, $iso);
+        list($ff_string, $ff_font) = pdf_fontfit(t("Reklamaatio/Purkulista", $kieli), 200, $pdf, $iso);
+        $pdf->draw_text(240, 815, $ff_string, $thispage, $ff_font);
       }
       elseif ($tyyppi == "TAKUU") {
         $pdf->draw_text(310, 815, t("Takuu", $kieli),     $thispage, $iso);
@@ -533,7 +534,8 @@ if (!function_exists('uusi_sivu_kerayslista')) {
       $pdf->draw_text(310, 815, t("Siirtolista", $kieli),         $thispage, $iso);
     }
     elseif ($tyyppi == "REKLAMAATIO") {
-      $pdf->draw_text(310, 815, t("Reklamaatio/Purkulista", $kieli),     $thispage, $iso);
+      list($ff_string, $ff_font) = pdf_fontfit(t("Reklamaatio/Purkulista", $kieli), 200, $pdf, $iso);
+      $pdf->draw_text(240, 815, $ff_string, $thispage, $ff_font);
     }
     elseif ($tyyppi == "TAKUU") {
       $pdf->draw_text(310, 815, t("Takuu", $kieli),     $thispage, $iso);
@@ -1022,7 +1024,6 @@ if (!function_exists('rivi_kerayslista')) {
 
         $kala = $kala - $rivinkorkeus + 5;
 
-
         list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
         $pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 
@@ -1170,6 +1171,22 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         if ($row["kommentti"] != '') {
+          if ($kala-$norm["height"]-5 < 95) {
+
+            $sivu++;
+
+            // Luodaan palautettavat
+            $return = compact(array_keys($params));
+
+            $params = loppu_kerayslista($return);
+            $params = uusi_sivu_kerayslista($params);
+
+            // Luodaan muuttujat
+            extract($params);
+
+            $page[$sivu] = $thispage;
+          }
+
           $pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 60, 470, $row["kommentti"],  $thispage, $norm);
           $kala = $pohja - $rivinkorkeus;
         }

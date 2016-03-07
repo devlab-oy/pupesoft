@@ -1969,13 +1969,24 @@ if (!function_exists('loppu')) {
     }
 
     if ($laskutyyppi == 20) {
-      $pdf_lasku->draw_rectangle(130 + $vientikala + $barcode_korkeus, 207,
+      $comments = str_split($laskurow["comments"], 84);
+
+      $pdf_lasku->draw_rectangle(150 + $vientikala + $barcode_korkeus, 207,
         110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
-      $pdf_lasku->draw_text(217, 122 + $vientikala + $barcode_korkeus, t("Lisätietoja", $kieli),
+      $pdf_lasku->draw_text(217, 142 + $vientikala + $barcode_korkeus, t("Lisätietoja", $kieli),
         $thispage, $pieni);
-      $pdf_lasku->draw_text(217, 112 + $vientikala + $barcode_korkeus,
-        pdf_substr($laskurow["comments"], 363, $pdf_lasku, $norm), $thispage,
-        $norm);
+
+      $kommenttikala = 130;
+
+      foreach ($comments as $comment) {
+        if ($kommenttikala < 120) break;
+
+        $pdf_lasku->draw_text(217, $kommenttikala + $vientikala + $barcode_korkeus,
+          pdf_substr($comment, 363, $pdf_lasku, $norm), $thispage,
+          $norm);
+
+        $kommenttikala -= 10;
+      }
     }
 
     if (!kyseessa_eramaksu($laskurow)) {

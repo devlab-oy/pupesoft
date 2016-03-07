@@ -15,9 +15,20 @@ ini_set("display_errors", 1);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-echo "\n";
-echo "Anna suoritusten tunnukset pilkulla eroteltuna: ";
-$user_input = fgets(STDIN);
+// echo "\n";
+// echo "Anna suoritusten tunnukset pilkulla eroteltuna: ";
+// $user_input = fgets(STDIN);
+
+// kaikki kohdistetut suoritukset, jotka on maksettu syyskuussa
+mysql_query("set group_concat_max_len = 1000000");
+
+$query = "SELECT group_concat(suoritus.tunnus) as lista
+          FROM suoritus
+          WHERE suoritus.kohdpvm != '0000-00-00'
+          AND suoritus.maksupvm like '2015-09-%'";
+$result = pupe_query($query);
+$row = mysql_fetch_assoc($result);
+$user_input = $row['lista'];
 
 // varmistetaan, että kaikki arvot on numeroita ja pilkulla eroteltu
 $suoritus_tunnukset = array_map('intval', explode(',', $user_input));

@@ -210,9 +210,6 @@ class PrestaProducts extends PrestaClient {
     // Then add element back
     $xml->product->associations->addChild('product_bundle');
 
-    // Calculated parent price
-    $parent_price = 0;
-
     // Add child products for product bundle
     foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
       $child_id = $this->add_child_product($xml, $child_product);
@@ -221,24 +218,11 @@ class PrestaProducts extends PrestaClient {
       if ($child_id !== false) {
         // set parent product to pack
         $product_type = 'pack';
-
-        // we must fetch child from presta
-        $child = $this->get($child_id);
-
-        // calculate parent price
-        $parent_price += ($child['price'] * $child_product['kerroin'] * $child_product['hintakerroin']);
       }
     }
 
     // set product type
     $xml->product->type = $product_type;
-
-    // if it's a pack, update parent price
-    if ($product_type == 'pack') {
-      $this->logger->log("Asetettiin tuottelle hinta hinta {$parent_price}, joka laskettiin lapsituotteiden hinnoista.");
-      $xml->product->price = $parent_price;
-      $xml->product->wholesale_price = $parent_price;
-    }
 
     // First, remove all product features
     $remove_node = $xml->product->associations->product_features;

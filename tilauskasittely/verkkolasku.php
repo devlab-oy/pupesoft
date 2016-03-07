@@ -3020,7 +3020,7 @@ else {
 
       if ($yhtiorow['lasku_tulostin'] == -88 or (isset($valittu_tulostin) and $valittu_tulostin == "-88")) {
         // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin.
-        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== FALSE) {
           js_openFormInNewWindow();
 
           foreach ($tulostettavat as $lasku) {

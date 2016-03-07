@@ -101,15 +101,20 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   }
 
   // korjataan suorituksen päiväykset
-  if ($suoritus_row['kirjpvm'] != $maksupaiva or $suoritus_row['kohdpvm'] != $maksupaiva) {
+  if ($suoritus_row['kirjpvm'] != $maksupaiva or $suoritus_row['kohdpvm'] != $maksupaiva or $suoritus_row['maksupvm'] != $maksupaiva) {
     $query = "UPDATE suoritus SET
-              kirjpvm = '{$maksupaiva}',
-              kohdpvm = '{$maksupaiva}'
+              kirjpvm  = '{$maksupaiva}',
+              kohdpvm  = '{$maksupaiva}',
+              maksupvm = '{$maksupaiva}'
               WHERE tunnus = {$suoritus_row['tunnus']}";
     pupe_query($query);
 
     if ($suoritus_row['kirjpvm'] != $maksupaiva) {
       echo "Vaihdetaan suorituksen kirjauspvm {$suoritus_row['kirjpvm']} --> {$maksupaiva}\n";
+    }
+
+    if ($suoritus_row['maksupvm'] != $maksupaiva) {
+      echo "Vaihdetaan suorituksen maksupvm {$suoritus_row['maksupvm']} --> {$maksupaiva}\n";
     }
 
     if ($suoritus_row['kohdpvm'] != $maksupaiva) {
@@ -193,7 +198,8 @@ function hae_suorituksen_tilioinnit($suoritus_row) {
   // haetaan suorituksen tiliöinnit
   $query = "SELECT *
             FROM tiliointi
-            WHERE ltunnus = (SELECT ltunnus FROM tiliointi WHERE tunnus = {$tiliointi_tunnus})";
+            WHERE ltunnus = (SELECT ltunnus FROM tiliointi WHERE tunnus = {$tiliointi_tunnus})
+            AND korjattu = ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) === 0) {

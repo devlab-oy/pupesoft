@@ -2105,6 +2105,26 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   // Joka tarkoittaa että "Reklamaatio on vastaanotettu
   // tämän jälkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
 
+  if (!empty($kukarow['lahetetulostin'])) {
+
+    $komento = array('Lähete' => $kukarow['lahetetulostin']);
+
+    // Tulostetaan lähete
+    $params = array(
+      'laskurow'          => $laskurow,
+      'sellahetetyyppi'       => "",
+      'extranet_tilausvahvistus'   => "",
+      'naytetaanko_rivihinta'    => "",
+      'tee'            => "",
+      'toim'            => $toim,
+      'komento'           => $komento,
+      'lahetekpl'          => "",
+      'kieli'           => ""
+    );
+
+    pupesoft_tulosta_lahete($params);
+  }
+
   $_tilaustyyppi = ($laskurow['tilaustyyppi'] != 'U');
   $_tilaustyyppi = ($_tilaustyyppi and $yhtiorow['reklamaation_kasittely'] == 'X');
   $sahkoinen_lahete_check = !empty($sahkoinen_lahete);

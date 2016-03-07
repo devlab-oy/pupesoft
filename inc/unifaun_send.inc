@@ -743,7 +743,6 @@ class Unifaun {
     }
 
     $posti_mps = array(
-      'IT16',
       'IT14',
       'ITKY14',
       'ITKY14I',
@@ -753,7 +752,6 @@ class Unifaun {
       'IT21',
       'ITKY21',
       'ITKY09',
-      'ITSP',
       'ITVAK',
       'ITKYVAK',
     );

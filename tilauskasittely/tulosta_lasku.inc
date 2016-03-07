@@ -435,7 +435,7 @@ if (!function_exists('alku')) {
       $rivi_ind++;
     }
 
-    if ($laskutyyppi != 8) {
+    if (!in_array($laskutyyppi, array('6','8'))) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Toimituspvm", $kieli), $page_lasku[$sivu], $pieni);
 
       //  Onko meill‰ monta toimitusp‰iv‰‰ vai ei?
@@ -624,7 +624,7 @@ if (!function_exists('laskun_kommentit')) {
       $komm .= "\n";
     }
 
-    if (in_array($laskutyyppi, array(1,4,6,8,21,22))) {
+    if (in_array($laskutyyppi, array(1,4,8,21,22))) {
       $query = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
                     FROM lasku
                     WHERE yhtio = '$kukarow[yhtio]'

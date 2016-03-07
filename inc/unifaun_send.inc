@@ -570,8 +570,8 @@ class Unifaun {
 
     if (!empty($this->postirow["noutopisteen_tunnus"])) {
       //<val n="agentto">1234</val> # definaa noutopisteen tunnuksen
-      $ar_shi_val = $uni_shipment->addChild('val', utf8_encode($postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
-      $ar_shi_val->addAttribute('n', "agentto");
+      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+      $agentto_noutopiste->addAttribute('n', "agentto");
     }
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Exporter

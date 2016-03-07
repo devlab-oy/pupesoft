@@ -243,7 +243,8 @@ function hae_laskun_tilioinnit($lasku_row) {
   $query = "SELECT *
             FROM tiliointi
             WHERE ltunnus = {$laskun_tunnus}
-            AND korjattu = ''";
+            AND korjattu = ''
+            AND selite like 'Manuaalisesti kohdistettu%'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) === 0) {

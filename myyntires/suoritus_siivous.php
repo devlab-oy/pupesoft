@@ -60,6 +60,9 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
     continue;
   }
 
+  // katsotaan, että maksupäivä ei ole ennen laskun päivää
+  $maksupaiva = $lasku_row['tapvm'] > $maksupaiva ? $lasku_row['tapvm'] : $maksupaiva;
+
   // haetaan laskun tiliöinnit
   $laskun_tiliointi_rows = hae_laskun_tilioinnit($lasku_row);
 

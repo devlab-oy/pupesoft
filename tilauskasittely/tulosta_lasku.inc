@@ -1969,7 +1969,7 @@ if (!function_exists('loppu')) {
     }
 
     if ($laskutyyppi == 20) {
-      $comments = str_split($laskurow["comments"], 84);
+      $comments = explode("\n", wordwrap($laskurow["comments"], 85));
 
       $pdf_lasku->draw_rectangle(150 + $vientikala + $barcode_korkeus, 207,
         110 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);

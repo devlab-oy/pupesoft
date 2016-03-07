@@ -15,115 +15,231 @@ ini_set("display_errors", 1);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-$suoritus_tunnukset = 728;
+echo "\n";
+echo "Anna suoritusten tunnukset pilkulla eroteltuna: ";
+$user_input = fgets(STDIN);
 
-$query = "SELECT *
-          FROM suoritus
-          WHERE tunnus in ({$suoritus_tunnukset})";
-$suoritus_result = pupe_query($query);
+// varmistetaan, että kaikki arvot on numeroita ja pilkulla eroteltu
+$suoritus_tunnukset = array_map('intval', explode(',', $user_input));
 
-while ($suoritus_row = mysql_fetch_assoc($suoritus_result)) {
-  // tarvittavat tiedot
-  $maksupaiva       = $suoritus_row['maksupvm'];
-  $suoritus_tunnus  = $suoritus_row['tunnus'];
-  $tiliointi_tunnus = $suoritus_row['ltunnus'];
-  $yhtio            = $suoritus_row['yhtio'];
+echo "\n";
+
+foreach ($suoritus_tunnukset as $suoritus_tunnus) {
+  // haetaan suoritus tietue
+  $suoritus_row = hae_suoritus($suoritus_tunnus);
+
+  if ($suoritus_row === false) {
+    echo "Suoritusta {$suoritus_tunnus} ei löytynyt!\n";
+    continue;
+  }
+
+  // tämä maksupäivä kaikkialle
+  $maksupaiva = $suoritus_row['maksupvm'];
+
+  // haetaan suorituksen_kohdistus tietue
+  $suorituksen_kohdistus_row = hae_suorituksen_kohdistus($suoritus_tunnus);
+
+  if ($suorituksen_kohdistus_row === false) {
+    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n";
+    continue;
+  }
+
+  // haetaan suorituksen kaikki tiliöinnit
+  $suorituksen_tiliointi_rows = hae_suorituksen_tilioinnit($suoritus_row);
+
+  if ($suorituksen_kohdistus_row === false) {
+    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n";
+    continue;
+  }
+
+  // haetaan lasku
+  $lasku_row = hae_lasku($suorituksen_kohdistus_row);
+
+  if ($lasku_row === false) {
+    echo "Suorituksen {$suoritus_tunnus} laskua ei löytynyt!\n";
+    continue;
+  }
+
+  // haetaan laskun tiliöinnit
+  $laskun_tiliointi_rows = hae_laskun_tilioinnit($lasku_row);
+
+  if ($lasku_row === false) {
+    echo "Suorituksen {$suoritus_tunnus} laskun tiliöintejä ei löytynyt!\n";
+    continue;
+  }
+
+  echo "Lasku {$lasku_row['laskunro']}, {$lasku_row['nimi']}, {$lasku_row['summa']} {$lasku_row['valkoodi']}\n";
+
+  // lasketaan tehtyjä muutoksia
+  $muutokset = 0;
+
+  // korjataan suorituksen tiliöinnit
+  while ($row = mysql_fetch_assoc($suorituksen_tiliointi_rows)) {
+
+    if ($row['tapvm'] == $maksupaiva) {
+      continue;
+    }
+
+    $query = "UPDATE tiliointi SET tapvm = '{$maksupaiva}' WHERE tunnus = {$row['tunnus']}";
+    pupe_query($query);
+
+    echo "Vaihdetaan suorituksen tiliöinnin päiväys. {$row['tilino']}: {$row['tapvm']} --> {$maksupaiva}\n";
+    $muutokset++;
+  }
+
+  // korjataan laskun tiliöinnit
+  while ($row = mysql_fetch_assoc($laskun_tiliointi_rows)) {
+    if ($row['tapvm'] == $maksupaiva) {
+      continue;
+    }
+
+    $query = "UPDATE tiliointi SET tapvm = '{$maksupaiva}' WHERE tunnus = {$row['tunnus']}";
+    pupe_query($query);
+
+    echo "Vaihdetaan laskun tiliöinnin päiväys. {$row['tilino']}: {$row['tapvm']} --> {$maksupaiva}\n";
+    $muutokset++;
+  }
+
+  // korjataan suorituksen päiväykset
+  if ($suoritus_row['kirjpvm'] != $maksupaiva or $suoritus_row['kohdpvm'] != $maksupaiva) {
+    $query = "UPDATE suoritus SET
+              kirjpvm = '{$maksupaiva}',
+              kohdpvm = '{$maksupaiva}'
+              WHERE tunnus = {$suoritus_row['tunnus']}";
+    pupe_query($query);
+
+    if ($suoritus_row['kirjpvm'] != $maksupaiva) {
+      echo "Vaihdetaan suorituksen kirjauspvm {$suoritus_row['kirjpvm']} --> {$maksupaiva}\n";
+    }
+
+    if ($suoritus_row['kohdpvm'] != $maksupaiva) {
+      echo "Vaihdetaan suorituksen kohdistuspvm {$suoritus_row['kohdpvm']} --> {$maksupaiva}\n";
+    }
+
+    $muutokset++;
+  }
+
+  // korjataan kohdistuksen suorituspäiväys
+  if ($suorituksen_kohdistus_row['kirjauspvm'] != $maksupaiva) {
+    $query = "UPDATE suorituksen_kohdistus SET
+              kirjauspvm = '{$maksupaiva}'
+              WHERE tunnus = {$suorituksen_kohdistus_row['tunnus']}";
+    pupe_query($query);
+
+    echo "Vaihdetaan kohdistuksen suorituspvm {$suorituksen_kohdistus_row['kirjauspvm']} --> {$maksupaiva}\n";
+    $muutokset++;
+  }
+
+  // korjataan laskun maksupäivämäärä
+  if ($lasku_row['mapvm'] != $maksupaiva) {
+    $query = "UPDATE lasku SET
+              mapvm = '{$maksupaiva}'
+              WHERE tunnus = {$lasku_row['tunnus']}";
+    pupe_query($query);
+
+    echo "Vaihdetaan laskun maksupvm {$lasku_row['mapvm']} --> {$maksupaiva}\n";
+    $muutokset++;
+  }
+
+  if ($muutokset == 0) {
+    echo "Ei päivitettävää, kaikki kunnossa!\n";
+  }
+
+  echo "\n";
+}
+
+function hae_suoritus($suoritus_tunnus) {
+  if ($suoritus_tunnus === false) {
+    return false;
+  }
+
+  $query = "SELECT *
+            FROM suoritus
+            WHERE tunnus = {$suoritus_tunnus}";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) !== 1) {
+    return false;
+  }
+
+  return mysql_fetch_assoc($result);
+}
+
+function hae_suorituksen_kohdistus($suoritus_tunnus) {
+  if ($suoritus_tunnus === false) {
+    return false;
+  }
 
   // haetaan lasku, johon suoritus on kohdistettu
   $query = "SELECT *
             FROM suorituksen_kohdistus
             WHERE suoritustunnus = {$suoritus_tunnus}";
-  $kohdistus_res = pupe_query($query);
+  $result = pupe_query($query);
 
-  if (mysql_num_rows($kohdistus_res) != 1) {
-    echo "Virhe, laskua ei löytynyt suoritukselle {$suoritus_tunnus}\n";
-    continue;
+  if (mysql_num_rows($result) !== 1) {
+    return false;
   }
 
-  $kohdistus_row = mysql_fetch_assoc($kohdistus_res);
-  $laskun_tunnus = $kohdistus_row['laskutunnus'];
+  return mysql_fetch_assoc($result);
+}
+
+function hae_suorituksen_tilioinnit($suoritus_row) {
+  if ($suoritus_row === false) {
+    return false;
+  }
+
+  $tiliointi_tunnus = $suoritus_row['ltunnus'];
 
   // haetaan suorituksen tiliöinnit
   $query = "SELECT *
             FROM tiliointi
-            WHERE yhtio = '{$yhtio}'
-            AND ltunnus = (SELECT ltunnus FROM tiliointi WHERE tunnus = {$tiliointi_tunnus})";
-  $suoritus_tiliointi_res = pupe_query($query);
+            WHERE ltunnus = (SELECT ltunnus FROM tiliointi WHERE tunnus = {$tiliointi_tunnus})";
+  $result = pupe_query($query);
 
-  if (mysql_num_rows($suoritus_tiliointi_res) == 0) {
-    echo "Virhe, tiliöintejä ei löytynyt suoritukselle {$query}\n";
-    continue;
+  if (mysql_num_rows($result) === 0) {
+    return false;
   }
+
+  return $result;
+}
+
+function hae_lasku($kohdistus_row) {
+  if ($kohdistus_row === false) {
+    return false;
+  }
+
+  $laskun_tunnus = $kohdistus_row['laskutunnus'];
 
   // haetaan lasku
   $query = "SELECT *
             FROM lasku
             WHERE tunnus = {$laskun_tunnus}";
-  $lasku_res = pupe_query($query);
+  $result = pupe_query($query);
 
-  if (mysql_num_rows($lasku_res) != 1) {
-    echo "Virhe, laskua ei löytynyt {$laskun_tunnus}\n";
-    continue;
+  if (mysql_num_rows($result) !== 1) {
+    return false;
   }
 
-  $lasku_row = mysql_fetch_assoc($lasku_res);
+  return mysql_fetch_assoc($result);
+}
+
+function hae_laskun_tilioinnit($lasku_row) {
+  if ($lasku_row === false) {
+    return false;
+  }
+
+  $laskun_tunnus = $lasku_row['tunnus'];
 
   // haetaan laskun tiliöinnit
   $query = "SELECT *
             FROM tiliointi
-            WHERE yhtio = '{$yhtio}'
-            AND ltunnus = {$laskun_tunnus}
+            WHERE ltunnus = {$laskun_tunnus}
             AND korjattu = ''";
-  $lasku_tiliointi_res = pupe_query($query);
+  $result = pupe_query($query);
 
-  if (mysql_num_rows($lasku_tiliointi_res) == 0) {
-    echo "Virhe, tiliöintejä ei löytynyt laskulle {$laskun_tunnus}\n";
-    continue;
+  if (mysql_num_rows($result) === 0) {
+    return false;
   }
 
-  // täällä kun ollaan, niin kaikki info löytyi!
-
-  // korjataan suorituksen tiliöinnit
-  while ($suoritus_tiliointi_row = mysql_fetch_assoc($suoritus_tiliointi_res)) {
-    $query = "UPDATE tiliointi SET tapvm = '{$maksupaiva}'
-              WHERE tunnus = {$suoritus_tiliointi_row['tunnus']}";
-    pupe_query($query);
-
-    echo "suoritus: tili {$suoritus_tiliointi_row['tilino']}, pvm {$suoritus_tiliointi_row['tapvm']}, summa {$suoritus_tiliointi_row['summa']}\n";
-  }
-
-  // korjataan laskun tiliöinnit
-  while ($lasku_tiliointi_row = mysql_fetch_assoc($lasku_tiliointi_res)) {
-    $query = "UPDATE tiliointi SET tapvm = '{$maksupaiva}'
-              WHERE tunnus = {$lasku_tiliointi_row['tunnus']}";
-    pupe_query($query);
-
-    echo "lasku: tili {$lasku_tiliointi_row['tilino']}, pvm {$lasku_tiliointi_row['tapvm']}, summa {$lasku_tiliointi_row['summa']}\n";
-  }
-
-  // korjataan suorituksen päiväykset
-  $query = "UPDATE suoritus SET
-            kirjpvm = '{$maksupaiva}',
-            kohdpvm = '{$maksupaiva}'
-            WHERE tunnus = {$suoritus_row['tunnus']}";
-  pupe_query($query);
-
-  echo "suorituksen kirjaus {$suoritus_row['kirjpvm']} --> {$maksupaiva}\n";
-  echo "suorituksen kohdistus {$suoritus_row['kohdpvm']} --> {$maksupaiva}\n";
-
-  // korjataan kohdistuksen suorituspäiväys
-  $query = "UPDATE suorituksen_kohdistus SET
-            kirjauspvm = '{$maksupaiva}'
-            WHERE tunnus = {$kohdistus_row['tunnus']}";
-  pupe_query($query);
-
-  echo "kohdistuksen suorityspvm {$kohdistus_row['kirjauspvm']} --> {$maksupaiva}\n";
-
-  // korjataan laskun maksupäivämäärä
-  $query = "UPDATE lasku SET
-            mapvm = '{$maksupaiva}'
-            WHERE tunnus = {$lasku_row['tunnus']}";
-  pupe_query($query);
-
-  echo "laskun maksupvm {$lasku_row['mapvm']} --> {$maksupaiva}\n";
+  return $result;
 }

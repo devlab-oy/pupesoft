@@ -30,7 +30,7 @@ $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 $user_input = $row['lista'];
 
-// varmistetaan, että kaikki arvot on numeroita ja pilkulla eroteltu
+// varmistetaan, että kaikki arvot on numeroita
 $suoritus_tunnukset = array_map('intval', explode(',', $user_input));
 
 echo "\n";
@@ -89,7 +89,6 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
 
   // korjataan suorituksen tiliöinnit
   while ($row = mysql_fetch_assoc($suorituksen_tiliointi_rows)) {
-
     if ($row['tapvm'] == $maksupaiva) {
       continue;
     }

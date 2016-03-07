@@ -47,8 +47,8 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   // haetaan suorituksen kaikki tiliöinnit
   $suorituksen_tiliointi_rows = hae_suorituksen_tilioinnit($suoritus_row);
 
-  if ($suorituksen_kohdistus_row === false) {
-    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n\n";
+  if ($suorituksen_tiliointi_rows === false) {
+    echo "Suorituksen {$suoritus_tunnus} tiliöintejä ei löytynyt!\n\n";
     continue;
   }
 
@@ -66,7 +66,7 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   // haetaan laskun tiliöinnit
   $laskun_tiliointi_rows = hae_laskun_tilioinnit($lasku_row);
 
-  if ($lasku_row === false) {
+  if ($laskun_tiliointi_rows === false) {
     echo "Suorituksen {$suoritus_tunnus} laskun tiliöintejä ei löytynyt!\n\n";
     continue;
   }

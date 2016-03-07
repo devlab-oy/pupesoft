@@ -29,7 +29,7 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   $suoritus_row = hae_suoritus($suoritus_tunnus);
 
   if ($suoritus_row === false) {
-    echo "Suoritusta {$suoritus_tunnus} ei löytynyt!\n";
+    echo "Suoritusta {$suoritus_tunnus} ei löytynyt!\n\n";
     continue;
   }
 
@@ -40,7 +40,7 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   $suorituksen_kohdistus_row = hae_suorituksen_kohdistus($suoritus_tunnus);
 
   if ($suorituksen_kohdistus_row === false) {
-    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n";
+    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n\n";
     continue;
   }
 
@@ -48,7 +48,7 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   $suorituksen_tiliointi_rows = hae_suorituksen_tilioinnit($suoritus_row);
 
   if ($suorituksen_kohdistus_row === false) {
-    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n";
+    echo "Suorituksen {$suoritus_tunnus} kohdistusta ei löytynyt!\n\n";
     continue;
   }
 
@@ -56,7 +56,7 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   $lasku_row = hae_lasku($suorituksen_kohdistus_row);
 
   if ($lasku_row === false) {
-    echo "Suorituksen {$suoritus_tunnus} laskua ei löytynyt!\n";
+    echo "Suorituksen {$suoritus_tunnus} laskua ei löytynyt!\n\n";
     continue;
   }
 
@@ -64,11 +64,11 @@ foreach ($suoritus_tunnukset as $suoritus_tunnus) {
   $laskun_tiliointi_rows = hae_laskun_tilioinnit($lasku_row);
 
   if ($lasku_row === false) {
-    echo "Suorituksen {$suoritus_tunnus} laskun tiliöintejä ei löytynyt!\n";
+    echo "Suorituksen {$suoritus_tunnus} laskun tiliöintejä ei löytynyt!\n\n";
     continue;
   }
 
-  echo "Lasku {$lasku_row['laskunro']}, {$lasku_row['nimi']}, {$lasku_row['summa']} {$lasku_row['valkoodi']}\n";
+  echo "Suoritus {$suoritus_tunnus}: lasku {$lasku_row['laskunro']}, {$lasku_row['nimi']}, {$lasku_row['summa']} {$lasku_row['valkoodi']}\n";
 
   // lasketaan tehtyjä muutoksia
   $muutokset = 0;

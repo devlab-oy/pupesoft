@@ -1221,8 +1221,7 @@ if ($tila == '') {
   foreach ($kenhak_array as $i => $kentta) {
     // tarkastetaan onko hakukentässä jotakin
     if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-      if ($kentta == "toimaika" and strpos($haku[$i], ".")) {
-        $_aika = array();
+      if ($kentta == "toimaika" and strpos($haku[$i], ".") !== false) {
         $_aika = explode(".", $haku[$i]);
 
         if (count($_aika) == 2) {

@@ -1221,7 +1221,20 @@ if ($tila == '') {
   foreach ($kenhak_array as $i => $kentta) {
     // tarkastetaan onko hakukentässä jotakin
     if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-      $lisa1 .= " $kentta like '%$haku[$i]%' and";
+      if ($kentta == "toimaika" and strpos($haku[$i], ".")) {
+        $_aika = array();
+        $_aika = explode(".", $haku[$i]);
+
+        if (count($_aika) == 2) {
+          $lisa1 .= " $kentta like '%{$_aika["1"]}-{$_aika["0"]}%' and";
+        }
+        elseif (count($_aika) == 3) {
+          $lisa1 .= " $kentta like '%{$_aika["2"]}-{$_aika["1"]}-{$_aika["0"]}%' and";
+        }
+      }
+      else {
+        $lisa1 .= " $kentta like '%$haku[$i]%' and";
+      }
 
       //pidetään muistissa linkkejä varten
       $ulisa .= "&haku[$i]=$haku[$i]";

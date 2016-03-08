@@ -62,6 +62,7 @@ if ($_selitetark_3 and
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel['VARASTOLUOKKA'] == "SELECTED" or
     $avain_sel['VARTOIMTULOSTIN'] == "SELECTED" or
+    $avain_sel['TOIMVAHVISTUS'] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -920,6 +921,21 @@ if ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_2 and $trow[$i-2]
 elseif ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_2 and $trow[$i-2] != "toimitusvahvistus_email.inc") {
   $tyyppi = 0;
   $jatko  = 0;
+}
+
+if ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_3 and $trow[$i-3] == "toimitusvahvistus_email.inc") {
+
+  $sel1 = $trow[$i] == '' ? "selected" : "";
+  $sel2 = $trow[$i] == 'M' ? "selected" : "";
+  $sel3 = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos = "<td><select name = '{$nimi}'>";
+  $ulos .= "<option value = '' $sel1>".t("Vain asiakkaalle")."</option>";
+  $ulos .= "<option value = 'M' $sel2>".t("Vain myyjälle")."</option>";
+  $ulos .= "<option value = 'K' $sel3>".t("Asiakkaalle ja myyjälle")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
 }
 
 if ($avain_sel["TOIMEHTO"] == "SELECTED" and $_selitetark_4) {

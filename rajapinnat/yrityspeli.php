@@ -47,22 +47,19 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   echo "<input type='hidden' name='tee' value='GENEROI'>";
 
   echo "<table>";
+
   echo "<tr>";
-  echo "<th>".t('Tilauksen keskim‰‰r‰inen arvo')."</th>";
-
-  echo "<td>";
-  echo "<input type='text' name='kokonaiskustannus' size='10' value='{$kokonaiskustannus}'/>";
-  echo "</td>";
-
-  echo "</tr>";
-  echo "<tr>";
-
   echo "<th>".t('Tilausten lukum‰‰r‰ per yritys')."</th>";
-
   echo "<td>";
   echo "<input type='text' name='tilausmaara' size='10' value='${tilausmaara}'/>";
   echo "</td>";
+  echo "</tr>";
 
+  echo "<tr>";
+  echo "<th>".t('Tilausten keskim‰‰r‰inen arvo')."</th>";
+  echo "<td>";
+  echo "<input type='text' name='kokonaiskustannus' size='10' value='{$kokonaiskustannus}'/>";
+  echo "</td>";
   echo "</tr>";
 
   echo "</table>";

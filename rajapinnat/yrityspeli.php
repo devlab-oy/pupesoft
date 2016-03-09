@@ -7,7 +7,7 @@ require "../inc/parametrit.inc";
 require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
 if (!isset($tee)) $tee = '';
-if (!isset($painoarvo)) $painoarvo = 100;
+if (!isset($kokonaiskustannus)) $kokonaiskustannus = 1000;
 if (!isset($tilausmaara)) $tilausmaara = 3;
 
 $kauppakeskus_myyra = '003732419754';
@@ -17,19 +17,19 @@ if ($tee == 'GENEROI') {
     echo "<font class='error'>Et valinnut yht‰‰n yrityst‰</font><br><br>";
   }
   else {
-    $tilaukset = generoi_myyntitilauksia($valitut, $painoarvo, $tilausmaara, $kauppakeskus_myyra);
+    $tilaukset = generoi_myyntitilauksia($valitut, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra);
   }
 
   $tee = '';
 }
 
 if (empty($tee)) {
-  echo_yrityspeli_kayttoliittyma($painoarvo, $tilausmaara);
+  echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara);
 }
 
 require "inc/footer.inc";
 
-function echo_yrityspeli_kayttoliittyma($painoarvo, $tilausmaara) {
+function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   global $yhtiorow, $kukarow;
 
   $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot();
@@ -39,30 +39,19 @@ function echo_yrityspeli_kayttoliittyma($painoarvo, $tilausmaara) {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t('Tilausten painoarvo')."</th>";
+  echo "<th>".t('Tilauksen keskim‰‰r‰inen arvo')."</th>";
 
   echo "<td>";
-  echo "<input type='text' name='painoarvo' size='3' value='{$painoarvo}'/>%";
-  echo "</td>";
-
-  echo "<td class='back'>";
-  echo "Painoarvo vaikuttaa tilaussumman suuruuteen. <br>
-    Esim. normaalitilauksen summa on n. 1000 euroa (100%),<br>
-    painoarvo 80 antaa tilaussummaksi n. 800 euroa (80%)<br>
-    ja painoarvo 150 antaa tilaussummaksi n. 1500 euroa (150%).";
+  echo "<input type='text' name='kokonaiskustannus' size='10' value='{$kokonaiskustannus}'/>";
   echo "</td>";
 
   echo "</tr>";
   echo "<tr>";
 
-  echo "<th>".t('Tilausten lukum‰‰r‰')."</th>";
+  echo "<th>".t('Tilausten lukum‰‰r‰ per yritys')."</th>";
 
   echo "<td>";
-  echo "<input type='text' name='tilausmaara' size='2' value='${tilausmaara}'/>";
-  echo "</td>";
-
-  echo "<td class='back'>";
-  echo "Montako automaattitilausta luodaan per yritys";
+  echo "<input type='text' name='tilausmaara' size='10' value='${tilausmaara}'/>";
   echo "</td>";
 
   echo "</tr>";
@@ -122,7 +111,7 @@ function hae_tilauksettomat_yhtiot() {
   return $tilauksettomat_yhtiot;
 }
 
-function generoi_myyntitilauksia($yhtiot, $painoarvo, $tilausmaara, $kauppakeskus_myyra) {
+function generoi_myyntitilauksia($yhtiot, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra) {
   foreach ($yhtiot as $yhtio) {
     $asiakas = hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra);
 
@@ -137,7 +126,7 @@ function generoi_myyntitilauksia($yhtiot, $painoarvo, $tilausmaara, $kauppakesku
     }
 
     for ($i=0; $i < $tilausmaara; $i++) {
-      luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo);
+      luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus);
     }
   }
 }
@@ -153,10 +142,9 @@ function hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra) {
   return mysql_fetch_assoc($result);
 }
 
-function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo) {
+function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) {
   global $yhtiorow, $kukarow;
 
-  $painoarvokerroin   = $painoarvo / 100;
   $alkuperainen_yhtio = $yhtiorow;
   $alkuperainen_kuka  = $kukarow;
 
@@ -179,9 +167,6 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo) {
 
   // Lis‰t‰‰n tuotteet
   $tuoteriveja = rand(1, 3);
-
-  // Painoarvo, vakio 1, => Tilauksen kokonaisarvo n. 1000 euroa
-  $kokonaiskustannus = 1000 * $painoarvokerroin;
 
   $hintacounter = 0;
 

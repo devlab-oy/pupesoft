@@ -196,7 +196,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
 
     if ($trow === false) {
       echo "<font class='error'>";
-      echo "Yritykselle {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.<br>";
+      echo "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.<br>";
       echo "</font>";
 
       return;

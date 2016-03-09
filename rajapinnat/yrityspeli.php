@@ -14,11 +14,10 @@ $kauppakeskus_myyra = '003732419754';
 
 if ($tee == 'GENEROI') {
   if (empty($valitut)) {
-    echo "<br><font class='error'>".t('Et valinnut yhtään yritystä')."</font><br><br>";
+    echo "<font class='error'>Et valinnut yhtään yritystä</font><br><br>";
   }
   else {
     $tilaukset = generoi_myyntitilauksia($valitut, $painoarvo, $tilausmaara, $kauppakeskus_myyra);
-    echo "<br>".t('Tilaukset luotu')."<br><br>";
   }
 
   $tee = '';
@@ -128,6 +127,12 @@ function generoi_myyntitilauksia($yhtiot, $painoarvo, $tilausmaara, $kauppakesku
     $asiakas = hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra);
 
     if (empty($asiakas)) {
+      echo "<font class='error'>";
+      echo "Yhtiöllä '{$yhtio}' ei ole 'Kauppakeskus Myyrä' perustettuna, ei voitu luoda tilauksia.";
+      echo "</font>";
+
+      echo "<br><br>";
+
       continue;
     }
 
@@ -199,7 +204,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo) {
     lisaa_rivi($params);
   }
 
-  $pupe_root_polku = dirname(dirname(__FILE__));
+  echo "Perustettiin tilaus {$tilausnumero} yritykselle {$yhtiorow['nimi']}<br>";
 
   // Tilaus valmiiksi
   require "tilauskasittely/tilaus-valmis.inc";
@@ -208,7 +213,6 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $painoarvo) {
   $kukarow = $alkuperainen_kuka;
 
   $kukarow['kesken'] = '';
-  $kukarow['yhtio'] = $alkuperainen_yhtio;
 }
 
 function tuotearvonta($yhtio) {

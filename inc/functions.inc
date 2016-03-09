@@ -27330,11 +27330,12 @@ if (!function_exists('posten_outbounddelivery')) {
     $_osoite = substr($looprow['osoite'], 0, 50);
     $_postitp = substr($looprow['postitp'], 0, 30);
     $_maa = substr($looprow['maa'], 0, 10);
+    $_postino = substr($looprow['postino'], 0, 10);
 
     $orderedby->addChild('CustName', utf8_encode($_nimi));
     $orderedby->addChild('CustStreet', utf8_encode($_osoite));
     $orderedby->addChild('CustStreet2', utf8_encode($_osoite));
-    $orderedby->addChild('CustPostCode', substr($looprow['postino'], 0, 10));
+    $orderedby->addChild('CustPostCode', utf8_encode($_postino));
     $orderedby->addChild('CustCity', utf8_encode($_postitp));
     $orderedby->addChild('CustCountry', utf8_encode($_maa));
     $orderedby->addChild('Email', utf8_encode($looprow['email']));
@@ -27343,16 +27344,18 @@ if (!function_exists('posten_outbounddelivery')) {
     $_osoite = substr($looprow['toim_osoite'], 0, 50);
     $_postitp = substr($looprow['toim_postitp'], 0, 30);
     $_maa = substr($looprow['toim_maa'], 0, 10);
+    $_postino = substr($looprow['toim_postino'], 0, 10);
+    $_puhno = substr($looprow['toim_puh'], 0, 30);
 
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount', 0);
     $receiver->addChild('RecCustName', utf8_encode($_nimi));
     $receiver->addChild('RecCustStreet', utf8_encode($_osoite));
     $receiver->addChild('RecCustStreet2', utf8_encode($_osoite));
-    $receiver->addChild('RecCustPostCode', substr($looprow['toim_postino'], 0, 10));
+    $receiver->addChild('RecCustPostCode',  utf8_encode($_postino));
     $receiver->addChild('RecCustCity', utf8_encode($_postitp));
     $receiver->addChild('RecCustCountry', utf8_encode($_maa));
-    $receiver->addChild('RecCustPhone', substr($looprow['toim_puh'], 0, 30));
+    $receiver->addChild('RecCustPhone', utf8_encode($_puhno));
 
     $query = "SELECT tunnus
               FROM toimitustapa

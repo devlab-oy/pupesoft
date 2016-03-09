@@ -364,7 +364,7 @@ class MagentoClient {
             continue;
           }
           elseif ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
             continue;
           }
           if ($key == 'kauppakohtaiset_verokannat') {
@@ -536,27 +536,31 @@ class MagentoClient {
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
       if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
         try {
-          foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+          foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
+            foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+              foreach ($kauppatunnukset as $kauppatunnus) {
+                // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
+                // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+                // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+                if (empty($tuote[$tuotekentta])) continue;
+                $tuotteen_kauppakohtainen_data = array(
+                  'price' => $tuote[$tuotekentta]
+                );
 
-            foreach ($kauppatunnukset as $kauppatunnus) {
+                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                }
 
-              $tuotteen_kauppakohtainen_data = array(
-                'price' => $tuote[$tuotekentta]
-              );
-
-              if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                $this->_proxy->call($this->_session, 'catalog_product.update',
+                  array(
+                    $tuote['tuoteno'],
+                    $tuotteen_kauppakohtainen_data,
+                    $kauppatunnus
+                    )
+                );
               }
-
-              $this->_proxy->call($this->_session, 'catalog_product.update',
-                array(
-                  $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data,
-                  $kauppatunnus
-                )
-              );
+              $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
             }
-            $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
           }
         }
         catch (Exception $e) {
@@ -676,7 +680,7 @@ class MagentoClient {
           $key = $erikoisparametri['nimi'];
           if ($key == 'kieliversiot') continue;
           if ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
             continue;
           }
           if ($key == 'kauppakohtaiset_verokannat') {
@@ -810,27 +814,31 @@ class MagentoClient {
         // Päivitetään configurable-tuotteen kauppanäkymäkohtaiset hinnat
         if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
           try {
-            foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+            foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
+              foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+                foreach ($kauppatunnukset as $kauppatunnus) {
+                  // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
+                  // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+                  // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+                  if (empty($tuotteet[0][$tuotekentta])) continue;
+                  $tuotteen_kauppakohtainen_data = array(
+                    'price' => $tuotteet[0][$tuotekentta]
+                  );
 
-              foreach ($kauppatunnukset as $kauppatunnus) {
+                  if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                    $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                  }
 
-                $tuotteen_kauppakohtainen_data = array(
-                  'price' => $tuotteet[0][$tuotekentta]
-                );
-
-                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                  $this->_proxy->call($this->_session, 'catalog_product.update',
+                    array(
+                      $nimitys,
+                      $tuotteen_kauppakohtainen_data,
+                      $kauppatunnus
+                      )
+                  );
                 }
-
-                $this->_proxy->call($this->_session, 'catalog_product.update',
-                  array(
-                    $nimitys,
-                    $tuotteen_kauppakohtainen_data,
-                    $kauppatunnus
-                  )
-                );
+                $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable) " . print_r($tuotteen_kauppakohtainen_data, true));
               }
-              $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable) " . print_r($tuotteen_kauppakohtainen_data, true));
             }
           }
           catch (Exception $e) {

@@ -34,7 +34,14 @@ require "inc/footer.inc";
 function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   global $yhtiorow, $kukarow;
 
-  $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot();
+  // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
+  $alkuaika = date("Y-m-d", strtotime('monday this week'));
+  $loppuaika = date("Y-m-d", strtotime('sunday this week'));
+
+  echo "<font class='message'>Aikaväli {$alkuaika} - {$loppuaika}</font><br><br>";
+
+
+  $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot($alkuaika, $loppuaika);
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='GENEROI'>";
@@ -59,7 +66,7 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   echo "</tr>";
 
   echo "</table>";
-  echo "<br><br>";
+  echo "<br>";
 
   echo "<font class='message'>".t('Valitse yritykset')."</font><br><br>";
 
@@ -92,14 +99,10 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   echo "</form>";
 }
 
-function hae_tilauksettomat_yhtiot() {
+function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   global $kukarow, $yhtiorow;
 
   $tilauksettomat_yhtiot = array();
-
-  // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
-  $alkuaika = date("Y-m-d", strtotime('monday this week'));
-  $loppuaika = date("Y-m-d", strtotime('sunday this week'));
 
   $query = "SELECT *
             FROM yhtio

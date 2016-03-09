@@ -203,7 +203,6 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
       'tuoteno' => $trow['tuoteno'],
       'hinta' => $hinta,
       'kpl' => $kpl,
-      'var' => 'H',
       'varataan_saldoa' => 'EI',
       'alv' => 0.0
     );

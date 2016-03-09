@@ -8172,7 +8172,10 @@ if ($tee == '') {
             ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT'))) {
 
             if (empty($muokkauslukko_rivi) and (!$_luottoraja_ylivito or $_keratty_ja_ylitetty)) {
-              echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa'>
+
+              $_btn_class = $_keratty_toimitettu ? 'muokkaa_btn' : '';
+
+              echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa' class='muokkaa_form'>
                   <input type='hidden' name='toim'         value = '$toim'>
                   <input type='hidden' name='lopetus'      value = '$lopetus'>
                   <input type='hidden' name='ruutulimit'   value = '$ruutulimit'>
@@ -8188,7 +8191,8 @@ if ($tee == '') {
                   <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
                   <input type='hidden' name='tila'         value = 'MUUTA'>
                   <input type='hidden' name='tapa'         value = 'MUOKKAA'>
-                  <input type='submit' value='".t("Muokkaa")."'>
+                  <input type='hidden' id='keratty_ja_ylitetty_warning' value = '".t('Tilaus on jo kertätty ja/tai toimitettu. Oletko varma että haluat muokata riviä?')."'>
+                  <input type='submit' class='{$_btn_class}' value='".t("Muokkaa")."'>
                   </form> ";
             }
 

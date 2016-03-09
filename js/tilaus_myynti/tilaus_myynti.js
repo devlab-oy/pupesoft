@@ -1,4 +1,11 @@
 $(document).ready(function() {
+  $('.muokkaa_btn').on('click', function(e) {
+    e.preventDefault();
+    if (confirm($('#keratty_ja_ylitetty_warning').val())) {
+      $(this).closest('form').submit();
+    }
+  });
+
   $('#kertakassa').on('change', function() {
     $('#kaikkyhtTee').val('PAIVITA_KASSALIPAS');
     $('#kaikkyht').submit();

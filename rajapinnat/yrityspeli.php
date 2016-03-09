@@ -106,17 +106,18 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    $tilausquery = "SELECT lasku.yhtio,
-                    min(lasku.yhtio_nimi) as nimi,
-                    count(*) as tilauksia,
+    $tilausquery = "SELECT yhtio.yhtio,
+                    min(yhtio.nimi) as nimi,
+                    count(distinct lasku.tunnus) as tilauksia,
                     sum(tilausrivi.varattu * tilausrivi.hinta) as summa
-                    FROM lasku
-                    JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+                    FROM yhtio
+                    LEFT JOIN lasku ON (lasku.yhtio = yhtio.yhtio
+                      AND lasku.tila IN ('N','L')
+                      AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')
+                    LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
                       AND tilausrivi.otunnus = lasku.tunnus)
-                    WHERE lasku.yhtio = '{$row['yhtio']}'
-                    AND lasku.tila IN ('N','L')
-                    AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika'
-                    GROUP BY yhtio";
+                    WHERE yhtio.yhtio = '{$row['yhtio']}'
+                    GROUP BY yhtio.yhtio";
     $tilausresult = pupe_query($tilausquery);
     $tilausrow = mysql_fetch_assoc($tilausresult);
 

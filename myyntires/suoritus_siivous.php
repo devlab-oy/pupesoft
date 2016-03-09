@@ -191,7 +191,9 @@ function hae_suorituksen_kohdistus($suoritus_tunnus) {
   // haetaan lasku, johon suoritus on kohdistettu
   $query = "SELECT *
             FROM suorituksen_kohdistus
-            WHERE suoritustunnus = {$suoritus_tunnus}";
+            WHERE suoritustunnus = {$suoritus_tunnus}
+            ORDER BY tunnus DESC
+            LIMIT 1";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) !== 1) {

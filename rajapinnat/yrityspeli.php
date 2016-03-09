@@ -12,6 +12,8 @@ if (!isset($tilausmaara)) $tilausmaara = 3;
 
 $kauppakeskus_myyra = '003732419754';
 
+echo "<font class='head'>", t("Generoi myyntitilauksia yrityksille"), "</font><hr>";
+
 if ($tee == 'GENEROI') {
   if (empty($valitut)) {
     echo "<font class='error'>Et valinnut yht‰‰n yrityst‰</font><br><br>";
@@ -58,15 +60,25 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
 
   echo "</table>";
   echo "<br><br>";
+
+  echo "<font class='message'>".t('Valitse yritykset')."</font><br><br>";
+
   echo "<table>";
   echo "<tr>";
-  echo "<th colspan='10'>".t('Valitse yritykset')."</th>";
+  echo "<th>nimi</td>";
+  echo "<th>tilauksia</td>";
+  echo "<th>summa</td>";
+  echo "<th></td>";
   echo "</tr>";
 
-  foreach ($tilauksettomat_yhtiot as $tilaukseton_yhtio) {
+  foreach ($tilauksettomat_yhtiot as $yhtio) {
+    $checked = (int) $yhtio['tilauksia'] == 0 ? 'checked' : '';
+
     echo "<tr>";
-    echo "<td>$tilaukseton_yhtio</td>";
-    echo "<td><input type='checkbox' name='valitut[]' value='{$tilaukseton_yhtio}'/></td>";
+    echo "<td>{$yhtio['nimi']}</td>";
+    echo "<td>{$yhtio['tilauksia']}</td>";
+    echo "<td>{$yhtio['summa']}</td>";
+    echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['yhtio']}' $checked></td>";
     echo "</tr>";
   }
 
@@ -95,17 +107,26 @@ function hae_tilauksettomat_yhtiot() {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    $tilausquery = "SELECT count(*) as tilauksia
+    $tilausquery = "SELECT lasku.yhtio,
+                    min(lasku.yhtio_nimi) as nimi,
+                    count(*) as tilauksia,
+                    sum(tilausrivi.varattu * tilausrivi.hinta) as summa
                     FROM lasku
+                    JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+                      AND tilausrivi.otunnus = lasku.tunnus)
                     WHERE lasku.yhtio = '{$row['yhtio']}'
                     AND lasku.tila IN ('N','L')
-                    AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika'";
+                    AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika'
+                    GROUP BY yhtio";
     $tilausresult = pupe_query($tilausquery);
     $tilausrow = mysql_fetch_assoc($tilausresult);
 
-    if ($tilausrow['avoimia_tilauksia'] == 0) {
-      $tilauksettomat_yhtiot[] = $row['yhtio'];
-    }
+    $tilauksettomat_yhtiot[] = array(
+      'yhtio' => $tilausrow['yhtio'],
+      'nimi' => $tilausrow['nimi'],
+      'tilauksia' => $tilausrow['tilauksia'],
+      'summa' => round($tilausrow['summa']),
+    );
   }
 
   return $tilauksettomat_yhtiot;
@@ -182,6 +203,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
       'tuoteno' => $trow['tuoteno'],
       'hinta' => $hinta,
       'kpl' => $kpl,
+      'var' => 'H',
       'varataan_saldoa' => 'EI',
       'alv' => 0.0
     );

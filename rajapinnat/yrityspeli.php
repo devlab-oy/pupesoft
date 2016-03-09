@@ -40,7 +40,6 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
 
   echo "<font class='message'>Aikaväli {$alkuaika} - {$loppuaika}</font><br><br>";
 
-
   $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot($alkuaika, $loppuaika);
 
   echo "<form method='post'>";

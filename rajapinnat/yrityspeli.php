@@ -193,18 +193,23 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
 
   while ($hintacounter < $kokonaiskustannus) {
     $trow = tuotearvonta($yhtio);
-    $hinta = rand(55, 122);
-    $kpl = rand(1,3);
 
-    $hintacounter += ($hinta * $kpl);
+    if ($trow === false) {
+      echo "<font class='error'>";
+      echo "Yritykselle {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.<br>";
+      echo "</font>";
+
+      return;
+    }
+
+    $kpl = rand(1,3);
+    $hintacounter += ($trow['myyntihinta'] * $kpl);
+
     $params = array(
       'trow' => $trow,
       'laskurow' => $laskurow,
       'tuoteno' => $trow['tuoteno'],
-      'hinta' => $hinta,
-      'kpl' => $kpl,
-      'varataan_saldoa' => 'EI',
-      'alv' => 0.0
+      'kpl' => $kpl
     );
 
     lisaa_rivi($params);
@@ -226,9 +231,14 @@ function tuotearvonta($yhtio) {
             FROM tuote
             WHERE yhtio = '{$yhtio}'
             AND status != 'P'
+            AND myyntihinta > 0
             AND tuotetyyppi NOT in ('A','B')
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
 
   return mysql_fetch_assoc($result);
 }

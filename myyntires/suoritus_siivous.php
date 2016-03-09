@@ -25,7 +25,7 @@ mysql_query("set group_concat_max_len = 1000000");
 $query = "SELECT group_concat(suoritus.tunnus) as lista
           FROM suoritus
           WHERE suoritus.kohdpvm != '0000-00-00'
-          AND suoritus.maksupvm like '2015-09-%'";
+          AND suoritus.maksupvm != '0000-00-00'";
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 $user_input = $row['lista'];
@@ -234,7 +234,8 @@ function hae_lasku($kohdistus_row) {
   // haetaan lasku
   $query = "SELECT *
             FROM lasku
-            WHERE tunnus = {$laskun_tunnus}";
+            WHERE tunnus = {$laskun_tunnus}
+            AND mapvm != '0000-00-00'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) !== 1) {

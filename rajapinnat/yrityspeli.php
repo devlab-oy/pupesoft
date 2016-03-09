@@ -219,6 +219,8 @@ function tuotearvonta($yhtio) {
   $query = "SELECT *
             FROM tuote
             WHERE yhtio = '{$yhtio}'
+            AND status != 'P'
+            AND tuotetyyppi NOT in ('A','B')
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
 

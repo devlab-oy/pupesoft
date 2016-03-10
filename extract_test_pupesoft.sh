@@ -84,6 +84,14 @@ kasiteltava_backup=$1
 destination_database=$2
 mysql_root_password=$3
 
+if [[ -z ${mysql_root_password} ]]; then
+  echo
+  echo -n "Anna MySQL root salasana: "
+
+  read -s mysql_root_password
+  echo
+fi
+
 mysql_sock=""
 mysql_port=3306
 

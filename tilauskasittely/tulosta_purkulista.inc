@@ -8,7 +8,7 @@ require_once 'pdflib/phppdflib.class.php';
 require_once 'inc/pupeExcel.inc';
 
 // jos php-gd on installoitu niin loidataab barcode library
-if (false and in_array("gd", get_loaded_extensions())) {
+if (in_array("gd", get_loaded_extensions())) {
   if (@include_once "viivakoodi/Barcode.php") {
   }
   else {
@@ -338,7 +338,7 @@ else {
 }
 
 $result = pupe_query($query);
-echo "341 ",query_dump($query)," <br><br>";
+
 // Haetaan tulostimen parametrit
 $tulostin_query = " SELECT * FROM kirjoittimet WHERE yhtio = '{$kukarow["yhtio"]}' and komento = '{$komento["Purkulista"]}' ORDER BY tunnus ASC limit 1";
 $tulostin_result = pupe_query($tulostin_query);
@@ -897,7 +897,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       }
 
       if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
-        if (false and class_exists("Image_Barcode")) {
+        if (class_exists("Image_Barcode")) {
           //viivakoodi
           $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 

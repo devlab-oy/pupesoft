@@ -512,7 +512,7 @@ elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmk
     }
   }
 
-  if ($erpcm_virhe == '' and (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0)) {
+  if ($erpcm_virhe == '' and ($erpp != '' and (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0))) {
     if (mysql_num_rows($erpres) == 0) {
       if ($kukarow['extranet'] != '') {
         echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";

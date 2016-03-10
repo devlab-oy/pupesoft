@@ -22,8 +22,8 @@ if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_r
 }
 
 if ($toimitusvahvistus_email_lahetys) {
+  $_toimvahvistus = mysql_fetch_assoc(t_avainsana("TOIMVAHVISTUS", $kieli, " and selite = 'toimitusvahvistus_email.inc' "));
 
-  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", $kieli);
   if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
     $_hinta = "";
   }

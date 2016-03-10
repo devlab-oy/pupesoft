@@ -8191,7 +8191,7 @@ if ($tee == '') {
                   <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
                   <input type='hidden' name='tila'         value = 'MUUTA'>
                   <input type='hidden' name='tapa'         value = 'MUOKKAA'>
-                  <input type='hidden' id='keratty_ja_ylitetty_warning' value = '".t('Tilaus on jo kerättty ja/tai toimitettu. Oletko varma että haluat muokata riviä?')."'>
+                  <input type='hidden' id='keratty_ja_ylitetty_warning' value = '".t('Tilaus on jo kerätty ja/tai toimitettu. Oletko varma että haluat muokata riviä?')."'>
                   <input type='submit' class='{$_btn_class}' value='".t("Muokkaa")."'>
                   </form> ";
             }

@@ -82,7 +82,8 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     $yriti_res = pupe_query($query);
 
     if (mysql_num_rows($yriti_res) !== 1) {
-      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitiliä ei löydy")."!</font><br><br>";
+      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitiliä ei löydy")."! ({$suoritus_row['tilino']})</font><br><br>";
+
       continue;
     }
 
@@ -118,7 +119,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     $tiliointi2_res = pupe_query($query);
 
     if (mysql_num_rows($tiliointi2_res) !== 1) {
-      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitili -tiliöintiä ei löydy")."!</font><br><br>";
+      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitili -tiliöintiä ei löydy")."! ({$yriti_row['oletus_rahatili']})</font><br><br>";
 
       continue;
     }

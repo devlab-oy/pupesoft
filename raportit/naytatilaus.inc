@@ -254,7 +254,8 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   else $dpdss = "";
 
   // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen, sum(rahtikirjat.kollit) kollit
+  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen,
+            sum(rahtikirjat.kollit) kollit
             FROM rahtikirjat
             JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
             WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
@@ -280,10 +281,15 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
       }
     }
     // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-    elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE) {
+    elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE or stripos($rakirrow['sscc_ulkoinen'], "JJFI") !== FALSE) {
       $linkurl = "";
 
-      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro'], $match);
+      if ($rakirrow['rahtikirjanro'] != $rakirrow['sscc_ulkoinen']) {
+        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro']." ".$rakirrow['sscc_ulkoinen'], $match);
+      }
+      else {
+        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro'], $match);
+      }
 
       foreach ($match[0] as $nro) {
         $nro = str_replace(" ", "", $nro);

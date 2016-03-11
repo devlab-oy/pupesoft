@@ -742,6 +742,7 @@ class Unifaun {
       }
     }
 
+    // nämä tukee mps palvelua
     $posti_mps = array(
       'IT14',
       'ITKY14',
@@ -751,16 +752,17 @@ class Unifaun {
       'ITKYEXPC',
       'IT21',
       'ITKY21',
-      'ITKY09',
       'ITVAK',
       'ITKYVAK',
     );
 
-    // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää
-    if (($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
+    $_mps = $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
+
+    // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
+    if ($_mps and ($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'cons');
-      
+
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
       $uni_add_val->addAttribute('n', "reference");
     }

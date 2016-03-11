@@ -273,18 +273,11 @@ if (!function_exists("avainsanatarkista")) {
         $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
       }
 
-      if (empty($virhe) and $tem_laji == 'MAARYHMA') {
-        $query = "SELECT *
-                  FROM avainsana
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tunnus}'";
-        $oldres = pupe_query($query);
-        $oldrow = mysql_fetch_assoc($oldres);
-
+      if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite']) {
         $query = "UPDATE tuote SET
                   vienti = '{$tem_selite}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND vienti = '{$oldrow['selite']}'";
+                  AND vienti = '{$trow['selite']}'";
         $updres = pupe_query($query);
       }
     }

@@ -756,7 +756,7 @@ class Unifaun {
       'ITKYVAK',
     );
 
-    $_mps = $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
+    $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
 
     // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
     if ($_mps and ($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {

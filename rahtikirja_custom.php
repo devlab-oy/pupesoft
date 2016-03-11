@@ -463,12 +463,22 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       $etuliite = "";
     }
 
-    $asiakasrow['toim_postitp']  = $asiakasrow[$etuliite.'postitp'];
-    $asiakasrow['toim_postino']  = $asiakasrow[$etuliite.'postino'];
-    $asiakasrow['toim_osoite']   = $asiakasrow[$etuliite.'osoite'];
-    $asiakasrow['toim_nimitark'] = $asiakasrow[$etuliite.'nimitark'];
-    $asiakasrow['toim_nimi']     = $asiakasrow[$etuliite.'nimi'];
-    $asiakasrow['toim_maa']      = $asiakasrow[$etuliite.'maa'];
+    if (empty($asiakasrow[$etuliite.'postitp'])) {
+      $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
+      $asiakasrow['toim_postino']  = $asiakasrow['postino'];
+      $asiakasrow['toim_osoite']   = $asiakasrow['osoite'];
+      $asiakasrow['toim_nimitark'] = $asiakasrow['nimitark'];
+      $asiakasrow['toim_nimi']     = $asiakasrow['nimi'];
+      $asiakasrow['toim_maa']      = $asiakasrow['maa'];
+    }
+    else {
+      $asiakasrow['toim_postitp']  = $asiakasrow[$etuliite.'postitp'];
+      $asiakasrow['toim_postino']  = $asiakasrow[$etuliite.'postino'];
+      $asiakasrow['toim_osoite']   = $asiakasrow[$etuliite.'osoite'];
+      $asiakasrow['toim_nimitark'] = $asiakasrow[$etuliite.'nimitark'];
+      $asiakasrow['toim_nimi']     = $asiakasrow[$etuliite.'nimi'];
+      $asiakasrow['toim_maa']      = $asiakasrow[$etuliite.'maa'];
+    }
   }
   else {
     if (empty($asiakasrow['toim_postitp'])) {
@@ -516,7 +526,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       $sel[$kumpiosoite] = "SELECTED";
     }
     else {
-      $kumpiosoite = "";
+      $kumpiosoite = "toimitus";
     }
 
     echo "<input type=hidden name='kumpiosoite_ed' value='$kumpiosoite'>";
@@ -562,8 +572,9 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
   echo "</select></td></tr>";
 
-
-  $tpuh = $asiakasrow['gsm'] != '' ? $asiakasrow['gsm'] : ($yhteyshenkiloasiakas['tyopuhelin'] != '' ? $yhteyshenkiloasiakas['tyopuhelin'] : ($yhteyshenkiloasiakas['puhelin'] != '' ? $yhteyshenkiloasiakas['puhelin'] : ''));
+  if (empty($tpuh)) {
+    $tpuh = $asiakasrow['gsm'] != '' ? $asiakasrow['gsm'] : ($yhteyshenkiloasiakas['tyopuhelin'] != '' ? $yhteyshenkiloasiakas['tyopuhelin'] : ($yhteyshenkiloasiakas['puhelin'] != '' ? $yhteyshenkiloasiakas['puhelin'] : ''));
+  }
 
   echo "<tr>
       <td valign='top'>".t("Puhelin").": </td>
@@ -593,7 +604,6 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
       <?php
   $toimitustapa_val = array("");
   $toimtavat = pupe_toimitustapa_fetch_all();
-
   foreach ($toimtavat as $toimt): ?>
           <?php
 
@@ -603,6 +613,10 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
     $sel = "selected";
     $toimitustapa_val = $toimt;
+  }
+
+  if ($toimitustapa_val[0] == "") {
+    $toimitustapa_val = $toimtavat[0];
   }
 
 ?>
@@ -651,7 +665,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 <tr>
   <th><?php echo t('Rahtisopimus') ?></th>
   <?php
-  $toimitustapa = $toimitustapa_val;
+  $toimitustapa = $toimitustapa_val["selite"];
   if (isset($_POST['toimitustapa'])) {
     $toimitustapa = $_POST['toimitustapa'];
   }
@@ -690,9 +704,15 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     }
   }
 
-  echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
-  echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
-  echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
+  if (!isset($viitelah)) $viitelah = '';
+  if (!isset($viitevas)) $viitevas = '';
+  if (!isset($viesti)) $viesti = $asiakasrow['kuljetusohje'];
+
+  echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'>";
+  echo "<input type='text' name='viitelah' value='{$viitelah}'></td></tr>";
+  echo "<tr><th>".t('Vastaanottajan viite')."</th>";
+  echo "<td><input type='text' name='viitevas' value='{$viitevas}'></td></tr>";
+  echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$viesti}'></td></tr>";
   echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 

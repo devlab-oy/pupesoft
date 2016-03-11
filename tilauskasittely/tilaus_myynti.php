@@ -2105,9 +2105,14 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   // Joka tarkoittaa että "Reklamaatio on vastaanotettu
   // tämän jälkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
 
-  if (!empty($kukarow['lahetetulostin'])) {
+  if (count($komento) == 0) {
+    echo "<font class='head'>", t("Lähete"), ":</font><hr>";
 
-    $komento = array('Lähete' => $kukarow['lahetetulostin']);
+    $tulostimet[0] = "Lähete";
+
+    require "inc/valitse_tulostin.inc";
+  }
+  else {
 
     // Tulostetaan lähete
     $params = array(

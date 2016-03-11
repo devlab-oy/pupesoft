@@ -41,6 +41,11 @@ echo "  <script language=javascript>
     </script>";
 
 if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasuoritus_tilille") {
+  if ($yhtiorow["selvittelytili"] == "") {
+    echo "<br><font class='error'>".t("VIRHE: Yhtiön selvittelytili on tyhjää, ei voida jatkaa")."!</font><br><br>";
+
+    exit;
+  }
 
   if ($tila == "siirrasuoritus_tilille" and isset($suoritustunnukset_kaikki) and $suoritustunnukset_kaikki != "") {
     $suoritustunnukset = $suoritustunnukset_kaikki;
@@ -67,14 +72,21 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
   $suoritus_res = pupe_query($query);
 
   while ($suoritus_row = mysql_fetch_assoc($suoritus_res)) {
-
     // Haetaan suorituksen pankkitili
     $query = "SELECT oletus_rahatili
               FROM yriti
               WHERE yhtio   = '$kukarow[yhtio]'
               AND kaytossa != 'E'
-              and tilino    = '$suoritus_row[tilino]'";
+              and tilino    = '$suoritus_row[tilino]'
+              and oletus_rahatili != ''";
     $yriti_res = pupe_query($query);
+
+    if (mysql_num_rows($yriti_res) !== 1) {
+      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitiliä ei löydy")."! ({$suoritus_row['tilino']})</font><br><br>";
+
+      continue;
+    }
+
     $yriti_row = mysql_fetch_assoc($yriti_res);
 
     // Haetaan suorituksen saamiset-tiliöinti
@@ -82,97 +94,108 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
               FROM tiliointi
               WHERE yhtio  = '$kukarow[yhtio]'
               AND tunnus   = '$suoritus_row[ltunnus]'
+              AND ltunnus  > 0
               AND korjattu = ''";
     $tiliointi1_res = pupe_query($query);
+
+    if (mysql_num_rows($tiliointi1_res) !== 1) {
+      echo "<br><font class='error'>".t("VIRHE: Suorituksen saamiset -tiliöintiä ei löydy")."!</font><br><br>";
+
+      continue;
+    }
+
     $tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
 
-    if (mysql_num_rows($tiliointi1_res) == 1) {
-      // Haetaan suorituksen pankkitili-tiliöinti
-      $query = "SELECT tilino
-                FROM tiliointi
-                WHERE yhtio  = '$kukarow[yhtio]'
-                and ltunnus  = '$tiliointi1_row[ltunnus]'
-                and tilino   = '$yriti_row[oletus_rahatili]'
-                and summa    =  $tiliointi1_row[summa] * -1
-                and korjattu = ''
-                LIMIT 1";
-      $tiliointi2_res = pupe_query($query);
-      $tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
+    // Haetaan suorituksen pankkitili-tiliöinti
+    $query = "SELECT tilino
+              FROM tiliointi
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and ltunnus  = '$tiliointi1_row[ltunnus]'
+              and tilino   = '$yriti_row[oletus_rahatili]'
+              and tilino  != ''
+              and summa    =  $tiliointi1_row[summa] * -1
+              and korjattu = ''
+              LIMIT 1";
+    $tiliointi2_res = pupe_query($query);
+
+    if (mysql_num_rows($tiliointi2_res) !== 1) {
+      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitili -tiliöintiä ei löydy")."! ({$yriti_row['oletus_rahatili']})</font><br><br>";
+
+      continue;
     }
 
-    // Jos kaikki löytyy, niin ok. Else majorkäk
-    if (mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
+    $tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
 
-      if ($tila == "siirrasuoritus_tilille") {
-        $stili  = $siirtotili;
-        $tapvm  = $tiliointi1_row["tapvm"];
-        $selite = "Suoritus siirretty tilille $stili";
-      }
-      elseif ($tila == "siirrasuoritus") {
-        $stili  = $yhtiorow["selvittelytili"];
-        $tapvm  = $tiliointi1_row["tapvm"];
-        $selite = t("Suoritus siirretty selvittelytilille");
-      }
-      else {
-        $stili  = $tiliointi2_row["tilino"];
-        $tapvm  = $tiliointi1_row["tapvm"];
-        $selite = t('Suoritus poistettu');
-      }
-
-      //vertaillaan tilikauteen
-      list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
-      list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
-
-      $myrealku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
-      $myreloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
-
-      $tsekpvm = str_replace("-", "", $tapvm);
-
-      if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
-        echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
-
-        $tapvm  = date("Y-m-d");
-      }
-
-      $query = "INSERT INTO tiliointi SET
-                yhtio            = '$kukarow[yhtio]',
-                ltunnus          = '$tiliointi1_row[ltunnus]',
-                tapvm            = '$tapvm',
-                summa            =  $tiliointi1_row[summa],
-                tilino           = '$stili',
-                kustp            = '$tiliointi1_row[kustp]',
-                kohde            = '$tiliointi1_row[kohde]',
-                projekti         = '$tiliointi1_row[projekti]',
-                selite           = '$selite',
-                lukko            = 0,
-                laatija          = '$kukarow[kuka]',
-                laadittu         = now(),
-                summa_valuutassa = $tiliointi1_row[summa_valuutassa],
-                valkoodi         = '$tiliointi1_row[valkoodi]'";
-      $result = pupe_query($query);
-
-      $query = "INSERT INTO tiliointi SET
-                yhtio            = '$kukarow[yhtio]',
-                ltunnus          = '$tiliointi1_row[ltunnus]',
-                tapvm            = '$tapvm',
-                summa            =  $tiliointi1_row[summa] * -1,
-                tilino           = '$tiliointi1_row[tilino]',
-                kustp            = '$tiliointi1_row[kustp]',
-                kohde            = '$tiliointi1_row[kohde]',
-                projekti         = '$tiliointi1_row[projekti]',
-                selite           = '$selite',
-                lukko            = 1,
-                laatija          = '$kukarow[kuka]',
-                laadittu         = now(),
-                summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
-                valkoodi         = '$tiliointi1_row[valkoodi]'";
-      $result = pupe_query($query);
-
-      $query = "UPDATE suoritus
-                SET kohdpvm = '$tapvm'
-                WHERE tunnus = '$suoritus_row[tunnus]'";
-      $result = pupe_query($query);
+    // Kaikki löytyi, homma ok.
+    if ($tila == "siirrasuoritus_tilille") {
+      $stili  = $siirtotili;
+      $tapvm  = $tiliointi1_row["tapvm"];
+      $selite = "Suoritus siirretty tilille $stili";
     }
+    elseif ($tila == "siirrasuoritus") {
+      $stili  = $yhtiorow["selvittelytili"];
+      $tapvm  = $tiliointi1_row["tapvm"];
+      $selite = t("Suoritus siirretty selvittelytilille");
+    }
+    else {
+      $stili  = $tiliointi2_row["tilino"];
+      $tapvm  = $tiliointi1_row["tapvm"];
+      $selite = t('Suoritus poistettu');
+    }
+
+    //vertaillaan tilikauteen
+    list($vv1, $kk1, $pp1) = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+    list($vv2, $kk2, $pp2) = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+
+    $myrealku  = (int) date('Ymd', mktime(0, 0, 0, $kk1, $pp1, $vv1));
+    $myreloppu = (int) date('Ymd', mktime(0, 0, 0, $kk2, $pp2, $vv2));
+
+    $tsekpvm = str_replace("-", "", $tapvm);
+
+    if ($tsekpvm < $myrealku or $tsekpvm > $myreloppu) {
+      echo "<br><font class='error'>".t("HUOM: Suorituksen päivämäärä oli suljetulla kaudella. Tiliöinti tehtiin tälle päivälle")."!</font><br><br>";
+
+      $tapvm  = date("Y-m-d");
+    }
+
+    $query = "INSERT INTO tiliointi SET
+              yhtio            = '$kukarow[yhtio]',
+              ltunnus          = '$tiliointi1_row[ltunnus]',
+              tapvm            = '$tapvm',
+              summa            =  $tiliointi1_row[summa],
+              tilino           = '$stili',
+              kustp            = '$tiliointi1_row[kustp]',
+              kohde            = '$tiliointi1_row[kohde]',
+              projekti         = '$tiliointi1_row[projekti]',
+              selite           = '$selite',
+              lukko            = 0,
+              laatija          = '$kukarow[kuka]',
+              laadittu         = now(),
+              summa_valuutassa = $tiliointi1_row[summa_valuutassa],
+              valkoodi         = '$tiliointi1_row[valkoodi]'";
+    $result = pupe_query($query);
+
+    $query = "INSERT INTO tiliointi SET
+              yhtio            = '$kukarow[yhtio]',
+              ltunnus          = '$tiliointi1_row[ltunnus]',
+              tapvm            = '$tapvm',
+              summa            =  $tiliointi1_row[summa] * -1,
+              tilino           = '$tiliointi1_row[tilino]',
+              kustp            = '$tiliointi1_row[kustp]',
+              kohde            = '$tiliointi1_row[kohde]',
+              projekti         = '$tiliointi1_row[projekti]',
+              selite           = '$selite',
+              lukko            = 1,
+              laatija          = '$kukarow[kuka]',
+              laadittu         = now(),
+              summa_valuutassa = $tiliointi1_row[summa_valuutassa] * -1,
+              valkoodi         = '$tiliointi1_row[valkoodi]'";
+    $result = pupe_query($query);
+
+    $query = "UPDATE suoritus
+              SET kohdpvm = '$tapvm'
+              WHERE tunnus = '$suoritus_row[tunnus]'";
+    $result = pupe_query($query);
   }
 
   $tila = '';

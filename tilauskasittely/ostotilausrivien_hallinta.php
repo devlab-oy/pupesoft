@@ -154,7 +154,7 @@ if ($ytunnus != '') {
       else {
         $mitkakaikkipvm = " and otunnus in ({$tilaus_otunnukset}) and uusiotunnus=0 ";
       }
-echo "157 toimpp $toimpp toimkk $toimkk toimvv $toimvv toimaika $toimaika <br><br>";
+
       $query = "UPDATE tilausrivi
                 SET toimaika = '{$toimvv}-{$toimkk}-{$toimpp}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -163,7 +163,6 @@ echo "157 toimpp $toimpp toimkk $toimkk toimvv $toimvv toimaika $toimaika <br><b
     }
 
     if ($tee == "PAIVITARIVI") {
-
       foreach ($toimaikarivi as $tunnus => $toimaika) {
         if (strpos($toimaika, ".") !== false) {
            $_aika = explode(".", $toimaika);

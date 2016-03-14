@@ -38,10 +38,12 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         }
         else {
           $tulostimet[0] = "Takuu";
+          $tulostimet[1] = "Lähete";
         }
       }
       else {
         $tulostimet[0] = "Takuu";
+        $tulostimet[1] = "Lähete";
       }
     }
     else {

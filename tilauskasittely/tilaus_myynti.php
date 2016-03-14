@@ -37,6 +37,44 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
+
+  $lquery = "SELECT *
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tunnus  = '{$tilausnumero}'";
+  $lresult  = pupe_query($lquery);
+  $laskurow = mysql_fetch_assoc($lresult);
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            and  tuoteno = '{$tuoteno}'";
+  $aresult = pupe_query($query);
+  $tuoterow = mysql_fetch_assoc($aresult);
+
+  // Tutkitaan onko tämä myyty ulkomaan alvilla
+  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+  $arr = array(
+    'sarjanumeroseuranta' => '',
+    'tuoteno' => $tuoteno,
+    'varattu' => $kpl,
+    'jt' => 0,
+  );
+
+  $kate = laske_tilausrivin_kate($arr, ($hinta * $kpl), $tuoterow['kehahin']);
+
+  echo json_encode(array(
+    'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+    'netto' => $netto,
+    'ale' => $ale,
+    'kate' => $kate
+  ));
+
+  exit;
+}
+
 $e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
 $e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
 $e3 = (isset($tappi) and $tappi == "lataa_tiedosto");

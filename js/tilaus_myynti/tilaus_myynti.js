@@ -9,6 +9,74 @@ $(document).ready(function() {
     $(this).closest('form').submit();
   });
 
+  $("input[name='kpl']").on('keyup', function() {
+
+    var toim = $('#toim').val();
+
+    if ($("input[name='tuoteno']").val() != '' &&
+        ($("input[name='rivitunnus']").length == 0 || $("input[name='rivitunnus']").val() == '')) {
+
+      if ($(this).val() == '') {
+        $("input[name='hinta']").val('');
+        $("input[name='ale1']").val('');
+        $('#kate_rivi_laskenta').html('');
+
+        if (toim == 'PIKATILAUS') {
+          $("input[name='netto']").val('');
+        }
+        else {
+          $("select[name='netto']").val('');
+        }
+      }
+      else {
+        $.ajax({
+          async: false,
+          type: 'POST',
+          data: {
+            tuoteno: $("input[name='tuoteno']").val(),
+            kpl: $("input[name='kpl']").val(),
+            tilausnumero: $("input[name='tilausnumero']").val(),
+            ajax_toiminto: 'esisyotto',
+            no_head: 'yes',
+            ohje: 'off'
+          },
+          url: '../tilauskasittely/tilaus_myynti.php'
+        }).done(function(data) {
+
+          var data = jQuery.parseJSON(data);
+
+          if (data.hinta != '') {
+            $("input[name='hinta']").val(data.hinta);
+          }
+
+          if (data.netto != '') {
+
+            if (toim == 'PIKATILAUS') {
+              $("input[name='netto']").val(data.netto);
+            }
+            else {
+              $("select[name='netto']").val(data.netto);
+            }
+          }
+
+          $.each(data['ale'], function(index, value) {
+            if (value != '') {
+              $("input[name='"+key+"']").val(value);
+            }
+          });
+
+          // kate_rivi_laskenta
+          if (data.kate != '') {
+            $('#kate_rivi_laskenta').html(data.kate+'%');
+          }
+
+        }).fail(function(data) {
+          console.log('Esisyotossa virhe');
+        });
+      }
+    }
+  });
+
   $('#hintojen_vaihto').on('change', function() {
     $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
   });

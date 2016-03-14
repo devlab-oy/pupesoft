@@ -52,6 +52,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
+  if ($naytetaanko_kate and $rivitunnus == "") {
+    echo "<th align='left'>", t("Kate"), "</th>";
+  }
+
   echo "  <td valign='top' class='back'></td>
       </tr>";
 
@@ -133,6 +137,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "</select></td>";
   }
 
+  if ($naytetaanko_kate and $rivitunnus == "") {
+    echo "<td><span id='kate_rivi_laskenta'></span></td>";
+  }
+
   echo "  <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>
       <td valign='top' class='back'>
       <input type='hidden' name='perheid' value = '$perheid'>
@@ -156,6 +164,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     $nrospanni += $yhtiorow['myynnin_alekentat'] - 1;
 
     if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+      $nrospanni++;
+    }
+
+    if ($naytetaanko_kate and $rivitunnus == "") {
       $nrospanni++;
     }
 
@@ -288,6 +300,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
   if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
+  }
+
+  if ($naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
+    echo "<th align='left'>", t("Kate"), "</th>";
   }
 
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
@@ -435,6 +451,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "</select></td>";
   }
 
+  if ($naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
+    echo "<td><span id='kate_rivi_laskenta'></span></td>";
+  }
+
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
     echo "<td>";
 
@@ -478,6 +498,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   if ($yhtiorow['tilausrivi_omalle_tilaukselle'] != '' and $tuoteno != '') {
+    $nrospanni++;
+  }
+
+  if ($naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
     $nrospanni++;
   }
 

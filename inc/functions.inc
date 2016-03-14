@@ -25374,7 +25374,7 @@ if (!function_exists('hae_kaikki_oletuspaikat_try_tai_status')) {
 
     $yhtiorow["tuotteen_oletuspaikka"] = str_replace(' ', '', $yhtiorow["tuotteen_oletuspaikka"]);
     $yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
-    $kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
+    $kaikki_oletuspaikat = array_merge($yhtion_tuotteen_oletuspaikat, $oletuspaikat);
 
     return $kaikki_oletuspaikat;
   }

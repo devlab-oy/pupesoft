@@ -492,7 +492,7 @@ if (!function_exists("tuotetarkista")) {
             $paikka_chk_res = pupe_query($query);
 
             if (mysql_num_rows($paikka_chk_res) == 0) {
-              lisaa_tuotepaikka($tem_tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, "Tuoteylläpidossa", "", 0, 0, 0);
+              lisaa_tuotepaikka($tem_tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, "Tuoteylläpidossa", $oletus_x, 0, 0, 0);
 
               if ($trow["luedata_from"] == "LUEDATA") {
                 lue_data_echo("<font class='message'>".t("Lisättiin varastopaikka")." {$_tuotepaikka}</font></br>");

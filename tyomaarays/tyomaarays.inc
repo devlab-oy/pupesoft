@@ -38,10 +38,12 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         }
         else {
           $tulostimet[0] = "Takuu";
+          $tulostimet[1] = "Lähete";
         }
       }
       else {
         $tulostimet[0] = "Takuu";
+        $tulostimet[1] = "Lähete";
       }
     }
     else {
@@ -131,6 +133,37 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
         $lopetus = "";
   }
+
+  if (!empty($komento["Lähete"]) and $komento["Lähete"] == "-88") {
+    js_openFormInNewWindow();
+
+    echo "<br><form id='tulostakopioform_la_$laskurow[tunnus]' name='tulostakopioform_la_$laskurow[tunnus]' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+        <input type='hidden' name='otunnus' value='$laskurow[tunnus]'>
+        <input type='hidden' name='toim' value='LAHETE'>
+        <input type='hidden' name='tee' value='NAYTATILAUS'>
+        <input type='hidden' name='kieli' value='$kieli'>
+        <input type='submit' value='".t("Näytä lähete").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_la_$laskurow[tunnus]', ''); return false;\"></form><br>";
+
+        $lopetus = "";
+  }
+
+  if ($toim == "REKLAMAATIO" and !empty($komento["Lähete"]) and $komento["Lähete"] != "-88") {
+    // Tulostetaan lähete
+    $params = array(
+      'laskurow'          => $laskurow,
+      'sellahetetyyppi'       => "",
+      'extranet_tilausvahvistus'   => "",
+      'naytetaanko_rivihinta'    => "",
+      'tee'            => "",
+      'toim'            => $toim,
+      'komento'           => $komento,
+      'lahetekpl'          => "",
+      'kieli'           => ""
+    );
+
+    pupesoft_tulosta_lahete($params);
+  }
+
 
   if (($toim == "REKLAMAATIO" and
       ((!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] != "-88") or

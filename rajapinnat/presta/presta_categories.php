@@ -171,7 +171,8 @@ class PrestaCategories {
     }
     catch (PrestaShopWebserviceException $ex) {
       $this->logger->log($ex->getMessage());
-      return false;
+
+      return array();
     }
 
     $categories = array();

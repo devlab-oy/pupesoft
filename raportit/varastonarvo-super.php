@@ -65,6 +65,12 @@ else {
   $varastot = explode(",", $varastorow['varastot']);
   $email_osoite = $argv[2];
 
+  if (!empty($argv[3])) {
+    $pp = substr($argv[3], 8, 2);
+    $kk = substr($argv[3], 5, 2);
+    $vv = substr($argv[3], 0, 4);
+  }
+
   $epakur = 'kaikki';
   $tyyppi = 'A';
 }

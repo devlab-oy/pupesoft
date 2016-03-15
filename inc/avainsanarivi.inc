@@ -110,6 +110,7 @@ if ($_selitetark_2 and
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel["OSTOTIL_TILTYYP"] == "SELECTED" or
     $avain_sel["RELEX_TUOTEPAR"] == "SELECTED" or
+    $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -1195,6 +1196,18 @@ if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selite) {
   $ulos = "<td><select name = '$nimi'>";
   $ulos .= "<option value = 'A' $sel[A]>".t("Hae ja selaa -ohjelmassa käytetään alkuperäistä ulkoasua")."</option>";
   $ulos .= "<option value = 'B' $sel[B]>".t("Hae ja selaa -ohjelmassa käytetään uutta ulkoasua")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selitetark_2) {
+  $sel = array();
+  $sel[$trow[$i]] = "SELECTED";
+
+  $ulos = "<td><select name = '$nimi'>";
+  $ulos .= "<option value = '' {$sel['']}>".t("Hae ja selaa -ohjelmassa ei voida syöttää alennusta")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Hae ja selaa -ohjelmassa voidaan syöttää alennus")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

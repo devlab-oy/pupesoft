@@ -473,7 +473,7 @@ if ($toim == "YLLAPITO" and !empty($erpcmpp)) {
     $erpcm_virhe = "X"; // apumuuttuja
   }
 }
-elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
+elseif ($toim != "YLLAPITO" and ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '')) {
 
   $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
   $erpres = pupe_query($erpquery);
@@ -512,7 +512,7 @@ elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmk
     }
   }
 
-  if ($erpcm_virhe == '' and ($erpp != '' and (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0))) {
+  if ($erpcm_virhe == '' and (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0)) {
     if (mysql_num_rows($erpres) == 0) {
       if ($kukarow['extranet'] != '') {
         echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";

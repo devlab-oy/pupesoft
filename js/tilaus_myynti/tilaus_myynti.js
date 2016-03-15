@@ -9,6 +9,18 @@ $(document).ready(function() {
     $(this).closest('form').submit();
   });
 
+  $("input[name='ale1']").on('keyup', function() {
+    $("input[name='hinta']").trigger('keyup');
+  });
+
+  $("input[name='ale2']").on('keyup', function() {
+    $("input[name='hinta']").trigger('keyup');
+  });
+
+  $("input[name='ale3']").on('keyup', function() {
+    $("input[name='hinta']").trigger('keyup');
+  });
+
   $("input[name='hinta']").on('keyup', function() {
 
     var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");

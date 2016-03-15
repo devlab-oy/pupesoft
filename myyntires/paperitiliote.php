@@ -170,7 +170,7 @@ function rivi($tyyppi, $firstpage, $row) {
   return $firstpage;
 }
 
-function loppu($firstpage, $summat) {
+function loppu($firstpage, $summat, $astunnus) {
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
 
   if (count($summat) > 1 and  $lask > 35) {
@@ -210,10 +210,34 @@ function loppu($firstpage, $summat) {
   $pdf->draw_rectangle(90, 20, 20, 580,  $firstpage, $rectparam);
 
   $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),  $firstpage, $pieni);
-  $pdf->draw_text(30, 72,  $yhtiorow["pankkiiban1"]."      ".$yhtiorow["pankkiswift1"],  $firstpage, $norm);
-  $pdf->draw_text(217, 72, $yhtiorow["pankkiiban2"]."      ".$yhtiorow["pankkiswift2"],  $firstpage, $norm);
-  $pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]."      ".$yhtiorow["pankkiswift3"],  $firstpage, $norm);
+  
+  $query = "SELECT maksuehto.factoring
+            FROM asiakas
+            JOIN maksuehto on (asiakas.yhtio = maksuehto.yhtio
+            AND asiakas.maksuehto = maksuehto.tunnus)
+            WHERE asiakas.yhtio = '$kukarow[yhtio]'
+            and asiakas.tunnus = $astunnus";
+  $result = pupe_query($query);
+  $fcheck_row = mysql_fetch_assoc($result);
+  
+  if ($fcheck_row["factoring"] != "") {
 
+    $query = "SELECT *
+              FROM factoring
+              WHERE yhtio        = '$kukarow[yhtio]'
+              and factoringyhtio = '$fcheck_row[factoring]'
+              and valkoodi       = '$valuutta'";
+    $result = pupe_query($query);
+    $factoring_row = mysql_fetch_assoc($result);
+    
+    $pdf->draw_text(30, 72,  $factoring_row["pankkiiban1"]."      ".$frow["pankkiswift1"],  $firstpage, $norm);
+    $pdf->draw_text(217, 72, $factoring_row["pankkiiban2"]."      ".$factoring_row["pankkiswift2"],  $firstpage, $norm);
+  }
+  else {
+    $pdf->draw_text(30, 72,  $yhtiorow["pankkiiban1"]."      ".$yhtiorow["pankkiswift1"],  $firstpage, $norm);
+    $pdf->draw_text(217, 72, $yhtiorow["pankkiiban2"]."      ".$yhtiorow["pankkiswift2"],  $firstpage, $norm);
+    $pdf->draw_text(404, 72, $yhtiorow["pankkiiban3"]."      ".$yhtiorow["pankkiswift3"],  $firstpage, $norm);
+  }
 
   //Alimmat kolme laatikkoa, yhtiˆtietoja
   $pdf->draw_rectangle(70, 20, 20, 580,  $firstpage, $rectparam);
@@ -410,7 +434,7 @@ while ($row = mysql_fetch_assoc($suoritusresult)) {
   $totaali[$row['valkoodi']] += $row['summa'];
 }
 
-loppu($firstpage, $totaali);
+loppu($firstpage, $totaali, $astunnus);
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());

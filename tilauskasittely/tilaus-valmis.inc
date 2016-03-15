@@ -2240,7 +2240,7 @@ else {
                                 WHERE yhtio  = '{$kukarow['yhtio']}'
                                 AND tuoteno  = '{$jt_chk_row['tuoteno']}'
                                 AND tyyppi   = 'O'
-                                AND toimaika >= curdate()";
+                                AND laskutettuaika = '0000-00-00'";
               $tulossa_result = pupe_query($tulossa_query);
               $tulossa_row = mysql_fetch_assoc($tulossa_result);
 

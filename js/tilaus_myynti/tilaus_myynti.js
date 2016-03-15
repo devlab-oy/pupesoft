@@ -13,8 +13,10 @@ $(document).ready(function() {
 
     var toim = $('#toim').val();
 
+    var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
+
     if ($("input[name='tuoteno']").val() != '' &&
-        ($("input[name='rivitunnus']").length == 0 || $("input[name='rivitunnus']").val() == '')) {
+        (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
 
       if ($(this).val() == '') {
         $("input[name='hinta']").val('');

@@ -56,6 +56,13 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
   // Tutkitaan onko tämä myyty ulkomaan alvilla
   list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
 
+  $ale_arr = $ale;
+  $ale_arr['netto'] = $netto;
+  $ale_arr['erikoisale'] = 0;
+  $ale_arr['erikoisale_saapuminen'] = 0;
+
+  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+
   $arr = array(
     'sarjanumeroseuranta' => '',
     'tuoteno' => $tuoteno,
@@ -63,7 +70,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, ($hinta * $kpl), $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, ($kotisumma * $kpl), $tuoterow['kehahin']);
 
   echo json_encode(array(
     'hinta' => round($hinta, $yhtiorow['hintapyoristys']),

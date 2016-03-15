@@ -2192,6 +2192,7 @@ else {
                   tilausrivi.hyllynro,
                   tilausrivi.hyllyvali,
                   tilausrivi.hyllytaso,
+                  tilausrivi.varasto,
                   tuote.nimitys,
                   tuote.tuotemerkki,
                   tuote.tahtituote,
@@ -2240,11 +2241,12 @@ else {
                                 WHERE yhtio  = '{$kukarow['yhtio']}'
                                 AND tuoteno  = '{$jt_chk_row['tuoteno']}'
                                 AND tyyppi   = 'O'
-                                AND laskutettuaika = '0000-00-00'";
+                                AND laskutettuaika = '0000-00-00'
+                                AND varasto = '{$jt_chk_row['varasto']}'";
               $tulossa_result = pupe_query($tulossa_query);
               $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
-              list($_, $__, $myytavissa) = saldo_myytavissa($jt_chk_row['tuoteno'], '', '', '', $jt_chk_row["hyllyalue"], $jt_chk_row["hyllynro"], $jt_chk_row["hyllyvali"], $jt_chk_row["hyllytaso"]);
+              list($_, $__, $myytavissa) = saldo_myytavissa($jt_chk_row['tuoteno'], '', $jt_chk_row['varasto']);
 
               if ($tulossa_row['tulossa_kpl'] >= $myytavissa) {
                 continue;

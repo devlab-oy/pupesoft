@@ -230,7 +230,7 @@ function loppu($firstpage, $summat, $astunnus) {
     $result = pupe_query($query);
     $factoring_row = mysql_fetch_assoc($result);
     
-    $pdf->draw_text(30, 72,  $factoring_row["pankkiiban1"]."      ".$frow["pankkiswift1"],  $firstpage, $norm);
+    $pdf->draw_text(30, 72,  $factoring_row["pankkiiban1"]."      ".$factoring_row["pankkiswift1"],  $firstpage, $norm);
     $pdf->draw_text(217, 72, $factoring_row["pankkiiban2"]."      ".$factoring_row["pankkiswift2"],  $firstpage, $norm);
   }
   else {

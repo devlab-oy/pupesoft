@@ -1862,7 +1862,7 @@ function piirra_ostoskoriin_lisays($row) {
       echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
       echo "</td></tr>";
-      echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1'></td></tr>";
+      echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
       echo "</table>";
       echo "</td>";
       $yht_i++;
@@ -2027,8 +2027,8 @@ function tarkista_tilausrivi() {
           }
 
           // Jos ale1 annettu
-          if (!empty($_REQUEST['ale1'])) {
-            $ale1 = $_REQUEST['ale1'];
+          if (!empty($_REQUEST['ale1'][$yht_i])) {
+            $ale1 = $_REQUEST['ale1'][$yht_i];
           }
           $alv = "";
           $var = "";

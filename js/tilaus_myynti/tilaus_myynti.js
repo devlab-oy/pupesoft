@@ -61,7 +61,7 @@ $(document).ready(function() {
 
           $.each(data['ale'], function(index, value) {
             if (value != '') {
-              $("input[name='"+key+"']").val(value);
+              $("input[name='"+index+"']").val(value);
             }
           });
 

@@ -1852,7 +1852,7 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
 
   if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
@@ -1862,7 +1862,11 @@ function piirra_ostoskoriin_lisays($row) {
       echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
       echo "</td></tr>";
-      echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+      
+      if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
+        echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+      }
+
       echo "</table>";
       echo "</td>";
       $yht_i++;

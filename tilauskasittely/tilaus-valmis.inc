@@ -2236,7 +2236,7 @@ else {
             if ($yhtiorow['jt_email_tilauksessa'] == 'K') {
 
               $tulossa_query = "SELECT sum(varattu) tulossa_kpl
-                                FROM tilausrivi
+                                FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                                 WHERE yhtio  = '{$kukarow['yhtio']}'
                                 AND tuoteno  = '{$jt_chk_row['tuoteno']}'
                                 AND tyyppi   = 'O'

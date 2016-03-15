@@ -37,6 +37,49 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            and  tuoteno = '{$tuoteno}'";
+  $aresult = pupe_query($query);
+  $tuoterow = mysql_fetch_assoc($aresult);
+
+  $ale_arr = array();
+
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    $alename = 'ale'.$alepostfix;
+    if (!empty($$alename)) {
+      $ale_arr[$$alename] = str_replace(',', '.', $$alename);
+    }
+  }
+
+  $ale_arr['netto'] = $netto;
+  $ale_arr['erikoisale'] = 0;
+  $ale_arr['erikoisale_saapuminen'] = 0;
+
+  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+
+  $arr = array(
+    'sarjanumeroseuranta' => '',
+    'tuoteno' => $tuoteno,
+    'varattu' => $kpl,
+    'jt' => 0,
+  );
+
+  $kate = laske_tilausrivin_kate($arr, ($kotisumma * $kpl), $tuoterow['kehahin']);
+
+  echo json_encode(array(
+    'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+    'netto' => $netto,
+    'ale' => $ale,
+    'kate' => $kate
+  ));
+
+  exit;
+}
+
 if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
 
   $lquery = "SELECT *

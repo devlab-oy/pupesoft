@@ -45,7 +45,7 @@ else {
     $wherelisa = "";
   }
 
-  $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS tuotteen_avainsanat_tunnus
+  $query = "SELECT tuote.*, ta.selite AS synkronointi
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'

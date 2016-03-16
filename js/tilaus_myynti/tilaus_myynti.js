@@ -79,6 +79,8 @@ $(document).ready(function() {
         if ($(this).val() == '') {
           $("input[name='hinta']").val('');
           $("input[name='ale1']").val('');
+          $("input[name='ale2']").val('');
+          $("input[name='ale3']").val('');
           $('#kate_rivi_laskenta').html('');
 
           if (toim == 'PIKATILAUS') {

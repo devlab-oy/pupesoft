@@ -1929,7 +1929,7 @@ function piirra_formin_aloitus() {
  */
 function tarkista_tilausrivi() {
   global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
-  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
+  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
 
   pupemaster_start();
 

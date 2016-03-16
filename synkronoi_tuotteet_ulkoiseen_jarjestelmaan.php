@@ -45,11 +45,10 @@ else {
     $wherelisa = "";
   }
 
-  $query = "SELECT tuote.*, ta.selite AS synkronointi
+  $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS tuotteen_avainsanat_tunnus
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
-            AND tuote.status    != 'P'
             AND tuote.ei_saldoa  = ''
             {$wherelisa}
             AND ta.selite IS NULL";
@@ -115,7 +114,14 @@ else {
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
 
-        $line->addChild('Type', 'U');
+        if (is_numeric($row['tuotteen_avainsanat_tunnus'])) {
+          $type = 'M';
+        }
+        else {
+          $type = 'U';
+        }
+
+        $line->addChild('Type', $type);
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
 
@@ -147,7 +153,20 @@ else {
         $line->addChild('Length', 0);
         $line->addChild('PackageSize', 0);
         $line->addChild('PalletSize', 0);
-        $line->addChild('Status', 0);
+
+        switch ($row['status']) {
+        case 'A':
+          $status = 1;
+          break;
+        case 'P':
+          $status = 9;
+          break;
+        default:
+          $status = 0;
+          break;
+        }
+
+        $line->addChild('Status', $status);
         $line->addChild('WholesalePackageSize', 0);
         $line->addChild('EANCode', utf8_encode($eankoodi));
         $line->addChild('EANCode2', 0);

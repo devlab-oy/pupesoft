@@ -2031,7 +2031,7 @@ function tarkista_tilausrivi() {
           }
 
           // Jos ale1 annettu
-          if (!empty($_REQUEST['ale1'][$yht_i])) {
+          if (!empty($_REQUEST['ale1'][$yht_i]) and empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
             $ale1 = $_REQUEST['ale1'][$yht_i];
           }
           $alv = "";

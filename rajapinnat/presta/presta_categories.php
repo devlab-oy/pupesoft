@@ -14,7 +14,7 @@ class PrestaCategories {
   private $pupesoft_root_category_id = null;
 
   public function __construct($url, $api_key, $home_id) {
-    $this->presta_url = $url;
+    $this->presta_url = rtrim($url, '/').'/';
     $this->presta_home_category_id = $home_id;
     $this->presta_client = new PrestaShopWebservice($url, $api_key, false);
 

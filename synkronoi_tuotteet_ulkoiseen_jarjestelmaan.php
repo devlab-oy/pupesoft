@@ -114,7 +114,15 @@ else {
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
 
-        if (is_numeric($row['tuotteen_avainsanat_tunnus'])) {
+        $query = "SELECT *
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND laji = 'synkronointi'
+                  AND tuoteno = '{$row['tuoteno']}'
+                  AND selite = ''";
+        $tunnus_chkres = pupe_query($query);
+
+        if (mysql_num_rows($tunnus_chkres) > 0) {
           $type = 'M';
         }
         else {

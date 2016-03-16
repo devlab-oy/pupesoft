@@ -2808,6 +2808,19 @@ if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_email_tilauksessa") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Lähetetään jälkitoimitus-sähköposti aina")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Lähetetään jälkitoimitus-sähköposti vain jos jälkitoimitukseen jätettyä tuotetta ei ole riittävästi ostotilauksilla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -50,7 +50,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
     $alename = 'ale'.$alepostfix;
-    if (!empty($alename)) {
+    if (!empty($$alename)) {
       $ale_arr[$alename] = str_replace(',', '.', $$alename);
     }
   }

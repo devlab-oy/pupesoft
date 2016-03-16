@@ -54,6 +54,10 @@ if (trim($argv[1]) != '') {
   if ($kukarow === null) {
     die ("\n");
   }
+
+  if (!isset($yhtiorow)) {
+    die('Yhtiorow puuttuu');
+  }
 }
 else {
   die ("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [ajentaanko_kaikki] [laji,laji,...]\n");
@@ -81,18 +85,19 @@ else {
 
 // Tässä kaikki parametrit, jota voi säätää salasanat.php:ssä
 if (!isset($presta_url)) {
+  // Prestakaupan url
   die('Presta url puuttuu');
 }
 if (!isset($presta_api_key)) {
+  // Prestan API salasana
   die('Presta api key puuttuu');
 }
 if (!isset($presta_edi_folderpath)) {
+  // Mihin hakemistoon tehdään Prestan tilauksista EDI tiedosto
   die('Presta edi folder path puuttuu');
 }
-if (!isset($yhtiorow)) {
-  die('Yhtiorow puuttuu');
-}
 if (!isset($presta_home_category_id)) {
+  // Prestan "home" kategorian tunnus, jonka alle kaikki Pupesoftin kategoriat siirretään
   $presta_home_category_id = 2;
 }
 if (!isset($presta_verkkokauppa_asiakas)) {
@@ -100,6 +105,7 @@ if (!isset($presta_verkkokauppa_asiakas)) {
   $presta_verkkokauppa_asiakas = null;
 }
 if (!isset($presta_haettavat_tilaus_statukset)) {
+  // Missä tilassa olevia tilauksia haetaan Prestasta
   /* Tämä on Prestan default status list;
    * 1  Awaiting cheque payment
    * 2  Payment accepted
@@ -117,15 +123,29 @@ if (!isset($presta_haettavat_tilaus_statukset)) {
   $presta_haettavat_tilaus_statukset = array(2);
 }
 if (!isset($presta_haettu_tilaus_status)) {
+  // Mihin tilaan haettu tilaus asetataan Prestassa
   $presta_haettu_tilaus_status = 3;
 }
 if (!isset($presta_dynaamiset_tuoteparametrit)) {
-  $presta_dynaamiset_tuoteparametrit = array();
+  // Jos halutaan poikkeavan kentän arvo prestan tuotteelle
+  // nimi = prestan tuotteen kentän nimi, arvo = tuotesiirto arrayn kentän nimi
+  $presta_dynaamiset_tuoteparametrit = array(
+    // array(
+    //   'nimi' => 'price',
+    //   'arvo' => 'myymalahinta_verot_pois'
+    // ),
+    // array(
+    //   'nimi' => 'wholesale_price',
+    //   'arvo' => 'myymalahinta_verot_pois'
+    // ),
+  );
 }
 if (!isset($presta_ohita_tuoteparametrit)) {
+  // Lista Prestan tuotteen kentistä, joita ei tule päivittää rajapinnassa
   $presta_ohita_tuoteparametrit = array();
 }
 if (!isset($presta_synkronoi_tuotepuu)) {
+  // Siirretäänko Pupesoftin kategoriat. Aseta false, niin ei siirretä.
   $presta_synkronoi_tuotepuu = true;
 }
 if (!isset($presta_verokannat)) {
@@ -152,11 +172,13 @@ if (!isset($presta_valuuttakoodit)) {
   );
 }
 if (!isset($presta_tuotekasittely)) {
+  // Miten valitaan tuotteet, jotka siirretään Prestaan
   // 1 = siirretään tuotteet joiden status != 'P' ja nakyvyys != ''
   // 2 = siirretään kaikki pupen tuotteet prestaan (poistetutkin), mutta merkataan ne hiddeniksi
   $presta_tuotekasittely = 1;
 }
 if (!isset($presta_tuoteominaisuudet)) {
+  // Mikä tuotearrayn kenttä laitetaan mihinkin Prestan "Product Feature":een.
   $presta_tuoteominaisuudet = array(
     // Tuote-arrayn kenttä => Prestan product_feature_id
     // "tuotemerkki" => 6,
@@ -165,6 +187,7 @@ if (!isset($presta_tuoteominaisuudet)) {
 }
 if (!isset($presta_vakioasiakasryhmat)) {
   $presta_vakioasiakasryhmat = array(
+    // Lisätään asiakas Prestassa aina tähän ryhmään
     // Prestan customer_group_id
     // 3,
     // 6,

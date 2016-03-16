@@ -1704,7 +1704,7 @@ elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
   $miinus = 4;
 }
 elseif ($toim == "TARJOUS") {
-  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
+  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde lasku.viesti tilausviite, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
             if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">".t("Voimassa")."</font>', '<font class=\"red\">".t("Er‰‰ntynyt")."</font>') voimassa,
             DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
             if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1738,7 +1738,7 @@ elseif ($toim == "TARJOUS") {
   $miinus = 6;
 }
 elseif ($toim == "TARJOUSSUPER") {
-  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
+  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde lasku.viesti tilausviite, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
             if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">".t("Voimassa")."</font>', '<font class=\"red\">".t("Er‰‰ntynyt")."</font>') voimassa,
             DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
             if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,

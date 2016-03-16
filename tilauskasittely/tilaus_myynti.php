@@ -37,7 +37,7 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
+if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $query = "SELECT *
             FROM tuote
@@ -5619,6 +5619,8 @@ if ($tee == '') {
       echo t("Raaka-aine"), " <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
       echo t("Valmiste"), " <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
     }
+
+    echo "<input type='hidden' id='tilausrivin_esisyotto_parametri' value= '{$yhtiorow['tilausrivin_esisyotto']}' />";
 
     require "syotarivi.inc";
   }

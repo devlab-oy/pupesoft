@@ -100,8 +100,10 @@ $pp  = sprintf("%02d", trim($pp));
 $kk  = sprintf("%02d", trim($kk));
 $vv  = sprintf("%04d", trim($vv));
 
-if (!isset($kiertoviilasku)) $kiertoviilasku = "";
+if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
+if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
+if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
 
 // setataan
 $lisa = "";
@@ -327,6 +329,23 @@ if (!$php_cli) {
   echo "<input type='checkbox' name='kiertoviilasku' value='ON' $sel/>";
 
   echo "</td></tr>";
+
+  echo "<tr><th>", t("Näytä saldo myytävissä"), ":</th>";
+  echo "<td>";
+
+  $chk = !empty($saldo_myytavissa) ? 'checked' : '';
+
+  echo "<input type='checkbox' name='saldo_myytavissa' {$chk}/>";
+  echo "</td></tr>";
+
+  echo "<tr><th>", t("Näytä tuotteen ostohinta"), ":</th>";
+  echo "<td>";
+
+  $chk = !empty($nayta_ostohinta) ? 'checked' : '';
+
+  echo "<input type='checkbox' name='nayta_ostohinta' {$chk}/>";
+  echo "</td></tr>";
+
 
   $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
 
@@ -796,6 +815,16 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     fwrite($fh, pupesoft_csvstring(t("Saldo"))."\t");
   }
 
+  if (!empty($saldo_myytavissa)) {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Saldo myytävissä"),         $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Saldo myytävissä"))."\t");
+    }
+  }
+
   if (isset($varatturajaus) and $varatturajaus == "O") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Varattu saldo"), $format_bold);
@@ -807,13 +836,24 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   }
 
   if ($tallennusmuoto_check) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"),       $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"),     $format_bold);
+
+    if ($nayta_ostohinta) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Ostohinta"), $format_bold);
+      $excelsarake++;
+    }
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), $format_bold);
     $excelsarake++;
   }
   else {
     fwrite($fh, pupesoft_csvstring(t("Kehahin"))."\t");
+
+    if ($nayta_ostohinta) {
+      fwrite($fh, pupesoft_csvstring(t("Ostohinta"))."\t");
+    }
+
     fwrite($fh, pupesoft_csvstring(t("Varastonarvo"))."\t");
   }
 
@@ -1424,6 +1464,19 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $muutoskpl))."\t");
       }
 
+      if (!empty($saldo_myytavissa)) {
+
+        list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno']);
+
+        if ($tallennusmuoto_check) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myytavissa));
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $myytavissa))."\t");
+        }
+      }
+
       if (isset($varatturajaus) and $varatturajaus == "O") {
         if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $varattu_saldo));
@@ -1434,14 +1487,35 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
+      if ($nayta_ostohinta) {
+        $query = "SELECT ostohinta, IF(jarjestys = 0, 9999, jarjestys) sorttaus
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$row['tuoteno']}'
+                  ORDER BY sorttaus";
+        $ttres = pupe_query($query);
+        $ttrow = mysql_fetch_assoc($ttres);
+      }
+
       if ($tallennusmuoto_check) {
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
         $excelsarake++;
+
+        if ($nayta_ostohinta) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $ttrow['ostohinta']));
+          $excelsarake++;
+        }
+
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
         $excelsarake++;
       }
       else {
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $kehasilloin))."\t");
+
+        if ($nayta_ostohinta) {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $ttrow['ostohinta']))."\t");
+        }
+
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $muutoshinta))."\t");
       }
 

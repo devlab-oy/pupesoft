@@ -283,13 +283,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
     // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
     elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE or stripos($rakirrow['sscc_ulkoinen'], "JJFI") !== FALSE) {
       $linkurl = "";
-
-      if ($rakirrow['rahtikirjanro'] != $rakirrow['sscc_ulkoinen']) {
-        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro']." ".$rakirrow['sscc_ulkoinen'], $match);
-      }
-      else {
-        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro'], $match);
-      }
+      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro']." ".$rakirrow['sscc_ulkoinen'], $match);
 
       foreach ($match[0] as $nro) {
         $nro = str_replace(" ", "", $nro);

@@ -253,13 +253,28 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
   else $dpdss = "";
 
+  if ($laskurow["tila"] == "U") {
+    $query = "SELECT group_concat(lasku.tunnus) tunnukset
+              FROM lasku
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and tila        = 'L'
+              and laskunro    = '$laskurow[laskunro]'";
+    $otres = pupe_query($query);
+    $otrow = mysql_fetch_assoc($otres);
+
+    $otsikkonrot = $otrow["tunnukset"];
+  }
+  else {
+    $otsikkonrot = $laskurow["tunnus"];
+  }
+
   // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
   $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen,
             sum(rahtikirjat.kollit) kollit
             FROM rahtikirjat
             JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
             WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
-            AND rahtikirjat.otsikkonro = '$laskurow[tunnus]'
+            AND rahtikirjat.otsikkonro in ($otsikkonrot)
             GROUP BY 1";
   $rakre = pupe_query($query);
 

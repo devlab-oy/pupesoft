@@ -209,6 +209,7 @@ if ($fieldname == "siirtolistan_tulostustapa") {
 
   $sel1 = "";
   $sel2 = "";
+  $sel3 = "";
 
   if ($trow[$i] == 'A') {
     $sel1 = "selected";

@@ -26189,15 +26189,30 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
     if ($otunnukset == '') return false;
 
     // kotimaan myynti menee alatilaan D
-    $query = "UPDATE lasku SET alatila = 'D' WHERE tunnus IN ({$otunnukset}) AND vienti = '' AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'D'
+              WHERE tunnus IN ({$otunnukset})
+              AND vienti = ''
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // vientilaskut menee alatilaan B
-    $query = "UPDATE lasku SET alatila = 'B' WHERE tunnus IN ({$otunnukset}) AND vienti != '' AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'B'
+              WHERE tunnus IN ({$otunnukset})
+              AND vienti != ''
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // jos laskulla on maksupositioita, menee ne alatilaan J
-    $query = "UPDATE lasku SET alatila = 'J' WHERE tunnus IN ({$otunnukset}) AND jaksotettu != 0 AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'J'
+              WHERE tunnus IN ({$otunnukset})
+              AND jaksotettu != 0
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // verkkolaskutettavat EU-viennit menee alatilaan D, jos niill‰ on tarpeeksi lis‰tietoja
@@ -26210,7 +26225,8 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
               AND chn                      IN ('020', '030')
               AND maa_maara               != ''
               AND kauppatapahtuman_luonne  > 0
-              AND kuljetusmuoto           != ''";
+              AND kuljetusmuoto           != ''
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan

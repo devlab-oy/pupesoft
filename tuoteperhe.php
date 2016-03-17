@@ -439,7 +439,6 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
                 isatuoteno     = '{$isatrow['tuoteno']}',
                 tuoteno        = '{$laptrow['tuoteno']}',
                 kerroin        = '$kerroin',
-                omasivu        = '$kpl2',
                 hintakerroin   = '$hintakerroin',
                 alekerroin     = '$alekerroin',
                 #rivikommentti = '$rivikommentti',

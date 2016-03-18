@@ -152,15 +152,14 @@ if (!function_exists('alku_kerayslista')) {
       //maksuehto tekstinä
       $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
-      $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
+      $pdf->draw_text(550, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
       $prioriteetin_kuvaus = ($laskurow["hyvaksynnanmuutos"] != "") ? t_avainsana("ASIAKASLUOKKA", $kieli, "and avainsana.selite = '{$laskurow["hyvaksynnanmuutos"]}'", "", "", "selitetark") : "X";
 
       if ($tyyppi == "SIIRTOLISTA") {
         $pdf->draw_text(310, 815, t("Siirtolista", $kieli),     $thispage, $iso);
       }
       elseif ($tyyppi == "REKLAMAATIO") {
-        list($ff_string, $ff_font) = pdf_fontfit(t("Reklamaatio/Purkulista", $kieli), 200, $pdf, $iso);
-        $pdf->draw_text(240, 815, $ff_string, $thispage, $ff_font);
+        $pdf->draw_text(310, 815, t("Reklamaatio/Purkulista", $kieli), $thispage, $iso);
       }
       elseif ($tyyppi == "TAKUU") {
         $pdf->draw_text(310, 815, t("Takuu", $kieli),     $thispage, $iso);
@@ -528,14 +527,13 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 
     tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-    $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
+    $pdf->draw_text(550, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
 
     if ($tyyppi == "SIIRTOLISTA") {
       $pdf->draw_text(310, 815, t("Siirtolista", $kieli),         $thispage, $iso);
     }
     elseif ($tyyppi == "REKLAMAATIO") {
-      list($ff_string, $ff_font) = pdf_fontfit(t("Reklamaatio/Purkulista", $kieli), 200, $pdf, $iso);
-      $pdf->draw_text(240, 815, $ff_string, $thispage, $ff_font);
+      $pdf->draw_text(310, 815, t("Reklamaatio/Purkulista", $kieli),     $thispage, $iso);
     }
     elseif ($tyyppi == "TAKUU") {
       $pdf->draw_text(310, 815, t("Takuu", $kieli),     $thispage, $iso);
@@ -557,8 +555,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
       $pdf->draw_text(310, 782, $kerayseran_numero,        $thispage, $boldi);
     }
     else {
-      $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),   $thispage, $pieni);
-      $pdf->draw_text(310, 782, $tilausnumeroita,          $thispage, $boldi);
+      list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
+      $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),     $thispage, $pieni);
+      $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
     }
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);

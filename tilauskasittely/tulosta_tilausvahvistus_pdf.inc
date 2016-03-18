@@ -190,7 +190,7 @@ else {
 }
 
 $riresult = pupe_query($query);
-echo "184 $query <br><br>";
+
 // tämä siksi koska halutaan alkuperäisen tilauksen tilausnumero pdf-filuun.
 if (($laskurow["tunnusnippu"] > 0 or $yhtiorow["tilausvahvistus_lahetys"] == 1) and $laskurow['vanhatunnus'] > 0) {
   $laskurow["tunnus"] = $laskurow['vanhatunnus'];

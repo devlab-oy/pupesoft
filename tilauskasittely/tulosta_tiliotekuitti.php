@@ -44,7 +44,7 @@ $pdf->draw_text(30, 665, t("Maksupäivä"), $firstpage, $normbold);
 $pdf->draw_text(150, 665, $maksupvm, $firstpage, $norm);
 
 $pdf->draw_text(30, 650, t("Arvopäivä"), $firstpage, $normbold);
-$pdf->draw_text(150, 650, $maksupvm, $firstpage, $norm);
+$pdf->draw_text(150, 650, $arvopvm, $firstpage, $norm);
 
 $pdf->draw_text(30, 620, t("Saajan nimi"), $firstpage, $normbold);
 $pdf->draw_text(150, 620, $saajan_nimi, $firstpage, $norm);

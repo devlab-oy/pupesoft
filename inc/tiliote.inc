@@ -578,21 +578,33 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   echo "</td>";
   echo "<td class='back' style='width:200px;'>";
 
-  js_openFormInNewWindow();
+  if (!empty($tiliotekuitti_saajan_nimi)) {
+    js_openFormInNewWindow();
 
-  echo "<br><form id='tulostakopioform_tiliotekuitti_{$td_perheid}' name='tulostakopioform_tiliotekuitti_{$td_perheid}' method='post' action='{$palvelin2}tilauskasittely/tulosta_tiliotekuitti.php' autocomplete='off'>
-        <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='hidden' name='maksupvm' value='{$tiliotekuitti_maksupvm}'>
-        <input type='hidden' name='arvopvm' value='{$tiliotekuitti_arvopvm}'>
-        <input type='hidden' name='saajan_nimi' value='{$tiliotekuitti_saajan_nimi}'>
-        <input type='hidden' name='saajan_tilinumero' value='{$tiliotekuitti_saajan_tilinumero}'>
-        <input type='hidden' name='viite' value='{$tiliotekuitti_viite}'>
-        <input type='hidden' name='arkistointitunnus' value='{$tiliotekuitti_arkistointitunnus}'>
-        <input type='hidden' name='kirjausselite' value='{$tiliotekuitti_kirjausselite}'>
-        <input type='hidden' name='sisainen_viite' value='{$tiliotekuitti_sisainen_viite}'>
-        <input type='hidden' name='rahamaara' value='{$tiliotekuitti_rahamaara}'>
-        <input type='hidden' name='nayta_pdf' value='1'>
-        <input type='submit' value='".t("Tiliotekuitti", $kieli)."' onClick=\"js_openFormInNewWindow('tulostakopioform_tiliotekuitti_{$td_perheid}', ''); return false;\"></form>";
+    echo "<br><form id='tulostakopioform_tiliotekuitti_{$td_perheid}' name='tulostakopioform_tiliotekuitti_{$td_perheid}' method='post' action='{$palvelin2}tilauskasittely/tulosta_tiliotekuitti.php' autocomplete='off'>
+          <input type='hidden' name='tee' value='NAYTATILAUS'>
+          <input type='hidden' name='maksupvm' value='{$tiliotekuitti_maksupvm}'>
+          <input type='hidden' name='arvopvm' value='{$tiliotekuitti_arvopvm}'>
+          <input type='hidden' name='saajan_nimi' value='{$tiliotekuitti_saajan_nimi}'>
+          <input type='hidden' name='saajan_tilinumero' value='{$tiliotekuitti_saajan_tilinumero}'>
+          <input type='hidden' name='viite' value='{$tiliotekuitti_viite}'>
+          <input type='hidden' name='arkistointitunnus' value='{$tiliotekuitti_arkistointitunnus}'>
+          <input type='hidden' name='kirjausselite' value='{$tiliotekuitti_kirjausselite}'>
+          <input type='hidden' name='sisainen_viite' value='{$tiliotekuitti_sisainen_viite}'>
+          <input type='hidden' name='rahamaara' value='{$tiliotekuitti_rahamaara}'>
+          <input type='hidden' name='nayta_pdf' value='1'>
+          <input type='submit' value='".t("Tiliotekuitti", $kieli)."' onClick=\"js_openFormInNewWindow('tulostakopioform_tiliotekuitti_{$td_perheid}', ''); return false;\"></form>";
+  }
+
+  $tiliotekuitti_maksupvm = '';
+  $tiliotekuitti_arvopvm = '';
+  $tiliotekuitti_saajan_nimi = '';
+  $tiliotekuitti_saajan_tilinumero = '';
+  $tiliotekuitti_viite = '';
+  $tiliotekuitti_arkistointitunnus = '';
+  $tiliotekuitti_kirjausselite = '';
+  $tiliotekuitti_sisainen_viite = '';
+  $tiliotekuitti_rahamaara = '';
 
   echo "</td>";
   echo "</tr>";

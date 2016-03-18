@@ -38,9 +38,10 @@ $renameftpfile   = isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
 $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi        = basename($ftpfile);
 $ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
+$ftputf8         = isset($ftputf8) ? $ftputf8 : false;
 
 // Lähetetään oletuksena ISO-8859-15 merkistömuodossa
-if (PUPE_UNICODE and (!isset($ftputf8) or !$ftputf8)) {
+if (PUPE_UNICODE and $ftputf8 === false) {
   $encoding = exec("file -b --mime-encoding '$ftpfile'");
 
   if (strtoupper($encoding) == 'UTF-8') {

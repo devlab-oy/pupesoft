@@ -102,6 +102,27 @@ else {
 
     while ($row = mysql_fetch_assoc($res)) {
 
+      $query = "SELECT *
+                FROM tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji = 'synkronointi'
+                AND tuoteno = '{$row['tuoteno']}'
+                AND selite = ''";
+      $tunnus_chkres = pupe_query($query);
+
+      if (mysql_num_rows($tunnus_chkres) == 0 and $row['status'] == 'P') {
+
+        # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
+        $query = "UPDATE tuotteen_avainsanat SET
+                  selite      = 'x'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$row['tuoteno']}'
+                  AND laji    = 'synkronointi'";
+        pupe_query($query);
+
+        continue;
+      }
+
       if ($tee == '') {
 
         echo "<tr>";
@@ -113,14 +134,6 @@ else {
 
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
-
-        $query = "SELECT *
-                  FROM tuotteen_avainsanat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji = 'synkronointi'
-                  AND tuoteno = '{$row['tuoteno']}'
-                  AND selite = ''";
-        $tunnus_chkres = pupe_query($query);
 
         if (mysql_num_rows($tunnus_chkres) > 0) {
           $type = 'M';
@@ -206,7 +219,7 @@ else {
         $line->addChild('ModelOrder', 0);
         $line->addChild('TransportTemperature', 0);
 
-        if (is_null($row['synkronointi'])) {
+        if (is_null($row['synkronointi']) and mysql_num_rows($tunnus_chkres) == 0) {
 
           $query = "INSERT INTO tuotteen_avainsanat SET
                     yhtio      = '{$kukarow['yhtio']}',
@@ -228,7 +241,7 @@ else {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tuoteno = '{$row['tuoteno']}'
                     AND laji    = 'synkronointi'";
-          pupe_query($query_dump());
+          pupe_query($query);
         }
 
         $i++;

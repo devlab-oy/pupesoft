@@ -759,7 +759,7 @@ class Unifaun {
     $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
 
     // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
-    if ($_mps and ($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
+    if ($_mps and empty($this->rakir_row["jv"]) and empty($this->mehto['jv']) and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'cons');
 

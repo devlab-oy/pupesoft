@@ -270,6 +270,8 @@ if ($tee == 'S') {
   $tiliotekuitti_sisainen_viite = '';
   $tiliotekuitti_rahamaara = '';
 
+  $tiliotekuitti_oikeu = tarkista_oikeus('tilauskasittely/tulosta_tiliotekuitti.php');
+
   if ($tilioterivimaara == 0) {
     echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
     $tee = '';

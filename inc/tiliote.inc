@@ -578,7 +578,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   echo "</td>";
   echo "<td class='back' style='width:200px;'>";
 
-  if (!empty($tiliotekuitti_saajan_nimi)) {
+  if ($tiliotekuitti_oikeu and !empty($tiliotekuitti_saajan_nimi)) {
     js_openFormInNewWindow();
 
     echo "<br><form id='tulostakopioform_tiliotekuitti_{$td_perheid}' name='tulostakopioform_tiliotekuitti_{$td_perheid}' method='post' action='{$palvelin2}tilauskasittely/tulosta_tiliotekuitti.php' autocomplete='off'>

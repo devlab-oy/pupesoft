@@ -246,12 +246,8 @@ else {
           break;
         }
 
-        if (!PUPE_UNICODE) {
-          exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
-        }
-        else {
-          $ftputf8 = TRUE;
-        }
+        # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+        $ftputf8 = PUPE_UNICODE;
 
         require "inc/ftp-send.inc";
       }

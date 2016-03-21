@@ -1096,7 +1096,7 @@ case 'T10':
   $tiliotekuitti_maksupvm = pankkipvm($kirjpvm);
   $tiliotekuitti_arvopvm = pankkipvm($pvm);
   $tiliotekuitti_saajan_nimi = $maksaa;
-  $tiliotekuitti_rahamaara = $maara;
+  $tiliotekuitti_rahamaara = abs($maara);
 
   echo "</td>";
   echo "</tr>";

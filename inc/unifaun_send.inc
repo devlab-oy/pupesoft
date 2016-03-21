@@ -757,6 +757,31 @@ class Unifaun {
       }
     }
 
+    // nämä tukee mps palvelua
+    $posti_mps = array(
+      'IT14',
+      'ITKY14',
+      'ITKY14I',
+      'IT14I',
+      'ITEXPC',
+      'ITKYEXPC',
+      'IT21',
+      'ITKY21',
+      'ITVAK',
+      'ITKYVAK',
+    );
+
+    $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
+
+    // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
+    if ($_mps and empty($this->rakir_row["jv"]) and empty($this->mehto['jv']) and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', 'cons');
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
+      $uni_add_val->addAttribute('n', "reference");
+    }
+
     if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTSMS");

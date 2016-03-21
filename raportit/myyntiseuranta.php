@@ -2694,12 +2694,12 @@ else {
               }
 
               if (!empty($kumulatiivinen_valittu)) {
-                $_kumulalk_parts = explode("-",$kumulalkurajaus);
-                $_kumulalk = $_kumulalk_parts[0].$_kumulalk_parts[1];
+                $_kumulalk_parts = explode("-",$kumulatiivinen_alkupaiva);
+                $_kumulalk = $_kumulalk_parts[0].sprintf('%02d', $_kumulalk_parts[1]);
                 $_kumul_alkukuun_paivat = date('t', mktime(0, 0, 0, $_kumulalk_parts[1], 1, $_kumulalk_parts[0]));
 
                 // Kumulatiivinen tavoite:
-                $budj_q = "SELECT sum(summa) summa
+                $budj_q = "SELECT kausi, sum(summa) summa
                            FROM {$budj_taulu}
                            WHERE yhtio = '{$kukarow['yhtio']}'
                            and kausi   >= '{$_kumulalk}'
@@ -2707,7 +2707,6 @@ else {
                            {$bulisa}
                            GROUP BY kausi";
                 $budj_r = pupe_query($budj_q);
-                $dyprow = mysql_fetch_assoc($budj_r);
 
                 $row["tavoitekumul"] = 0;
 

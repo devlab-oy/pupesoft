@@ -47,11 +47,13 @@ else {
 
   $query = "SELECT tuote.*, ta.selite AS synkronointi
             FROM tuote
-            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
+            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
             AND tuote.ei_saldoa  = ''
             {$wherelisa}
-            AND ta.selite IS NULL";
+            HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
+                    # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
+                   (ta.tunnus IS NULL AND tuote.status != 'P')";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -109,19 +111,6 @@ else {
                 AND tuoteno = '{$row['tuoteno']}'
                 AND selite = ''";
       $tunnus_chkres = pupe_query($query);
-
-      if (mysql_num_rows($tunnus_chkres) == 0 and $row['status'] == 'P') {
-
-        # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
-        $query = "UPDATE tuotteen_avainsanat SET
-                  selite      = 'x'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$row['tuoteno']}'
-                  AND laji    = 'synkronointi'";
-        pupe_query($query);
-
-        continue;
-      }
 
       if ($tee == '') {
 

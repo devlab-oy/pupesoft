@@ -177,6 +177,7 @@ unset($arow_toimitus);
 unset($arow_terminaali);
 unset($yhtiorow);
 unset($crossdock911);
+unset($laskpp, $laskkk, $laskvv);
 
 $asiakkaan_tilausnumero       = "";
 $editilaus_alatila            = "";
@@ -195,6 +196,7 @@ $editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $editilaus_ytunnus            = "";
+$editilaus_tilausaika         = "";
 $edi_kommentti                = "";
 $id                           = "";
 $ketjutus                     = "";
@@ -872,6 +874,11 @@ while ($tietue = fgets($fd)) {
     $editilaus_ytunnus = $tieto;
     break;
 
+  case 'OSTOTIL.OT_TILAUSAIKA':
+    $editilaus_tilausaika = $tieto;
+    $toimpvm = $tieto;
+    break;
+
   case 'OSTOTIL.OT_KATUOSOITE':
     $losoite = trim($tieto);
     break;
@@ -1059,6 +1066,7 @@ while ($tietue = fgets($fd)) {
                 FROM maksuehto
                 WHERE yhtio  = '$kukarow[yhtio]'
                 AND kateinen = 'o'
+                AND kaytossa != 'E'
                 LIMIT 1";
       $editilaus_kateinen_res = pupe_query($query);
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
@@ -2432,6 +2440,16 @@ while ($tietue = fgets($fd)) {
           }
         }
 
+        // jos magento -casessa on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
+        // mikäli tilaus on maksettu (= kassalipas setattu)
+        if ($edi_tyyppi == "magento" and !empty($editilaus_tilausaika) and !empty($editilaus_kassalipas)) {
+          $_temp_date = strtotime($editilaus_tilausaika);
+
+          $laskpp = date("d", $_temp_date);
+          $laskkk = date("m", $_temp_date);
+          $laskvv = date("Y", $_temp_date);
+        }
+
         // Vientitilauksille saa kutsua tilaus-valmis.inciä vaan kerran
         // Kotimaan tilauksilel kutsutaan tilaus-valmis.inciä kahdesti,
         // koska ekalla kerralla niille luodaan pupeen lasku
@@ -2543,6 +2561,7 @@ while ($tietue = fgets($fd)) {
     unset($arow_toimitus);
     unset($arow_terminaali);
     unset($crossdock911);
+    unset($laskpp, $laskkk, $laskvv);
 
     $asiakkaan_tilausnumero       = "";
     $editilaus_alatila            = "";
@@ -2561,6 +2580,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $editilaus_ytunnus            = "";
+    $editilaus_tilausaika         = "";
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

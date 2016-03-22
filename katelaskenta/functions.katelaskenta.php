@@ -23,7 +23,6 @@ function lisaa_hintaan_kate($keskihankintahinta, $kateprosentti) {
   return $keskihankintahinta / ( 1 - ( $kateprosentti / 100 ) );
 }
 
-
 /**
  * Funktio tarkistaa, ett‰ kateprosentti on sallitulla v‰lill‰.
  *
@@ -101,11 +100,13 @@ function tarkista_katelaskenta_syotteet($taulukko) {
  * [avain] => [tunnus, myyntikate, myymalakate, nettokate, keskihankintahinta]
  */
 function luo_katelaskenta_update_komennot($taulukko) {
+  global $kukarow;
+
   // Luodaan update-komennoille taulukko, johon kaikki komennot
   // kootaan.
   $update_komennot = array();
   $sql_komento_alku = "UPDATE tuote SET ";
-  $sql_komento_loppu = "WHERE tunnus = ";
+  $sql_komento_loppu = "WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = ";
 
   // K‰yd‰‰n l‰pi jokainen valittu tuoterivi ja muodostetaan
   // ehtojen mukaan oikeanlainen update-komento.

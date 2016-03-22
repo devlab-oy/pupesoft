@@ -148,6 +148,7 @@ if (!isset($mul_toimipaikka))   $mul_toimipaikka = array();
 if (!isset($mul_kustp))         $mul_kustp = array();
 if (!isset($mul_kohde))         $mul_kohde = array();
 if (!isset($mul_projekti))      $mul_projekti = array();
+if (!isset($mul_maa))           $mul_maa = array();
 
 if (!isset($poislisa_mulsel))   $poislisa_mulsel = "";
 

@@ -11,7 +11,7 @@
  * joissa ollut enemmän työtä, on jätetty ennalleen. Osa entisestä
  * koodista siirretty functions.php tiedostoon.
  *
- * Kontrollerti ohjaa kaikki tietojen tulostukset template.katelaskenta.php
+ * Kontrolleri ohjaa kaikki tietojen tulostukset template.katelaskenta.php
  * tiedostolle. Template tiedostossa tulostetaan toistaiseksi vain
  * hakutulokset. Hakulaatikko piirretään vielä entisillä koodeilla sen
  * monimutkaisuuden takia.
@@ -82,33 +82,9 @@ if (!isset($poistetut)) {
 }
 
 if ($poistetut != "") {
-
   $poischeck = "CHECKED";
   $ulisa .= "&poistetut=checked";
-
-  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-    // Näytetään vain poistettuja tuotteita
-    $poislisa = " AND tuote.status in ('P','X')
-                  AND (SELECT sum(saldo)
-                  FROM tuotepaikat
-                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
-                  AND varastopaikat.tunnus = tuotepaikat.varasto
-                  AND varastopaikat.tyyppi = '')
-                  WHERE tuotepaikat.yhtio=tuote.yhtio
-                  AND tuotepaikat.tuoteno=tuote.tuoteno
-                  AND tuotepaikat.saldo > 0) > 0 ";
-    if (($yhtiorow["yhtio"] == 'allr')) {
-      $hinta_rajaus = " AND tuote.myymalahinta > tuote.myyntihinta ";
-    }
-    else {
-      $hinta_rajaus = " ";
-    }
-    $poislisa_mulsel = " and tuote.status in ('P','X') ";
-  }
-  else {
-    $poislisa = "";
-    //$poislisa_mulsel  = "";
-  }
+  $poislisa = "";
 }
 else {
   $poislisa = " and (tuote.status not in ('P','X')
@@ -117,7 +93,6 @@ else {
               WHERE tuotepaikat.yhtio=tuote.yhtio
               AND tuotepaikat.tuoteno=tuote.tuoteno
               AND tuotepaikat.saldo > 0) > 0) ";
-  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
   $poischeck = "";
 }
 
@@ -131,62 +106,6 @@ $ulisa = "";
 $toimtuotteet = "";
 $poislisa_mulsel = "";
 $lisa_parametri = "";
-$hinta_rajaus = "";
-
-if (!isset($ojarj)) {
-  $ojarj = '';
-}
-
-if (strlen($ojarj) > 0) {
-  $ojarj = trim(mysql_real_escape_string($ojarj));
-
-  if ($ojarj == 'tuoteno') {
-    $jarjestys = 'tuote.tuoteno';
-  }
-  elseif ($ojarj == 'toim_tuoteno') {
-    $jarjestys = 'tuote.tuoteno';
-  }
-  elseif ($ojarj == 'nimitys') {
-    $jarjestys = 'tuote.nimitys';
-  }
-  elseif ($ojarj == 'osasto') {
-    $jarjestys = 'tuote.osasto';
-  }
-  elseif ($ojarj == 'try') {
-    $jarjestys = 'tuote.try';
-  }
-  elseif ($ojarj == 'hinta') {
-    $jarjestys = 'tuote.myyntihinta';
-  }
-  elseif ($ojarj == 'nettohinta') {
-    $jarjestys = 'tuote.nettohinta';
-  }
-  elseif ($ojarj == 'aleryhma') {
-    $jarjestys = 'tuote.aleryhma';
-  }
-  elseif ($ojarj == 'status') {
-    $jarjestys = 'tuote.status';
-  }
-  else {
-    $jarjestys = 'tuote.tuoteno';
-  }
-}
-
-/**
- * Seuraavat kaksi if-lausetta liittyvät "Piilota tuoteperheen lapset"
- * -valintaan tuotehaussa.
- */
-if (!isset($piilota_tuoteperheen_lapset)) {
-  $piilota_tuoteperheen_lapset = '';
-}
-if ($piilota_tuoteperheen_lapset != '') {
-  $ptlcheck = "CHECKED";
-  $ulisa .= "&piilota_tuoteperheen_lapset=checked";
-}
-else {
-  $ptlcheck = "";
-}
-
 
 /**
  * Seuraavat kaksi if-lausetta liittyvät "Näytä vain saldolliset tuotteet"
@@ -267,7 +186,6 @@ if (trim($toim_tuoteno) != '') {
 
   $vaihtoehtoinen_tuoteno_lisa = $vaih_tuoteno_row['toim_tuoteno_tunnukset'] != '' ? " OR tunnus IN ('{$vaih_tuoteno_row['toim_tuoteno_tunnukset']}')" : "";
 
-  // Otetaan konserniyhtiöt hanskaan
   $query = "SELECT DISTINCT tuoteno
             FROM tuotteen_toimittajat
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -291,20 +209,7 @@ if (trim($toim_tuoteno) != '') {
 echo "<font class='head'>".t("Katelaskenta").":</font><br/><br/>";
 
 // Seuraavaksi aletaan piirtämään tuotehakulomaketta.
-echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
-echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
-echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
-
-if (!isset($tultiin)) {
-  $tultiin = '';
-}
-
-if ($tultiin == "futur") {
-  echo " <input type='hidden' name='tultiin' value='$tultiin'>";
-}
-
-echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+echo "<form action = '' method = 'post'>";
 echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 echo "<tr><th>" . t("Tuotenumero") . "</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
 echo "<tr><th>" . t("Toim tuoteno") . "</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
@@ -312,10 +217,6 @@ echo "<tr><th>" . t("Nimitys") . "</th><td><input type='text' size='25' name='ni
 echo "<tr><th>" . t("Poistetut") . "</th>";
 echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 echo "<tr><th>" . t("Lisätiedot") . "</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
-echo "<tr>";
-echo "<th>" . t("Piilota tuoteperherakenne") . "</th>";
-echo "<td><input type='checkbox' name='piilota_tuoteperheen_lapset' $ptlcheck></td>";
-echo "</tr>";
 echo "<tr>";
 echo "<th>" . t("Näytä vain saldolliset tuotteet") . "</th>";
 echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
@@ -335,15 +236,9 @@ $monivalintalaatikot_normaali = array();
 require "../tilauskasittely/monivalintalaatikot.inc";
 
 echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '" . t("Etsi") . "'></form>";
-echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
-  <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-  <input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
+echo "&nbsp;<form action = '' method = 'post'>
   <input type='submit' name='submit_button2' id='submit_button2' value = '" . t("Tyhjennä") . "'>
   </form>";
-
-// Haetaan tietokannasta löytyvät yhtiöt.
-// ./katelaskenta/functions.php
-$yhtiot = hae_yhtiot();
 
 /**
  *  ALKUPERÄINEN KOPIOITU KOODI PÄÄTTYY.
@@ -361,15 +256,11 @@ $yhtiot = hae_yhtiot();
 if (!isset($submit_button)) {
   $submit_button = '';
 }
-if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
+if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   // Hakukysely tuotehakuun.
   $query = "SELECT
               if (tuote.tuoteno = '$tuotenumero', 1, if(left(tuote.tuoteno, length('$tuotenumero')) = '$tuotenumero', 2, 3)) jarjestys,
-              ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
-              ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'V' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') osaluettelo,
-              ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
-              ifnull((SELECT group_concat(id) FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
               tuote.tuoteno,
               tuote.nimitys,
               tuote.osasto,
@@ -401,8 +292,7 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
               $lisa
               $extra_poislisa
               $poislisa
-              $hinta_rajaus
-              ORDER BY jarjestys, $jarjestys $sort
+              ORDER BY jarjestys, $jarjestys
               LIMIT 500";
   $result = pupe_query($query);
 
@@ -429,14 +319,13 @@ if ($submit_button != '' and ( $lisa != '' or $lisa_parametri != '')) {
   // taulukossa, voidaan jatkaa hakurivien käsittelyä.
   if (!array_key_exists("ilmoitus", $template)) {
     $rows = array();
-    $haetaan_perheet = ($piilota_tuoteperheen_lapset == "") ? TRUE : FALSE;
 
-    // Täytetään rows taulukko tuotteiden tiedoilla ja lisätään
-    // niihin vastaavat sekä korvaavat tuotteet.
-    $rows = lisaa_vastaavat_ja_korvaavat_tuotteet($result, $rows, $haetaan_perheet);
+    while ($mrow = mysql_fetch_assoc($result)) {
+      $rows[$mrow["tuoteno"]] = $mrow;
+    }
 
     // Valmistelee hakutulokset templatea varten.
-    $template["tuotteet"] = valmistele_hakutulokset($rows, $verkkokauppa);
+    $template["tuotteet"] = valmistele_hakutulokset($rows);
     $template["yhtio"] = $yhtiorow;
 
   }

@@ -104,14 +104,6 @@ else {
 
     while ($row = mysql_fetch_assoc($res)) {
 
-      $query = "SELECT *
-                FROM tuotteen_avainsanat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND laji = 'synkronointi'
-                AND tuoteno = '{$row['tuoteno']}'
-                AND selite = ''";
-      $tunnus_chkres = pupe_query($query);
-
       if ($tee == '') {
 
         echo "<tr>";
@@ -124,7 +116,7 @@ else {
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
 
-        if (mysql_num_rows($tunnus_chkres) > 0) {
+        if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
           $type = 'M';
         }
         else {
@@ -208,7 +200,7 @@ else {
         $line->addChild('ModelOrder', 0);
         $line->addChild('TransportTemperature', 0);
 
-        if (is_null($row['synkronointi']) and mysql_num_rows($tunnus_chkres) == 0) {
+        if (is_null($row['synkronointi'])) {
 
           $query = "INSERT INTO tuotteen_avainsanat SET
                     yhtio      = '{$kukarow['yhtio']}',

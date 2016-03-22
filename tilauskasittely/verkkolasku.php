@@ -186,7 +186,7 @@ else {
         }
         else {
 
-          if ($syotetty > $tanaan) {
+          if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] != 'S') {
             //tulevaisuudessa ei voida laskuttaa
             $tulos_ulos .= "<br>\n".t("VIRHE: Syötetty päivämäärä on tulevaisuudessa, ei voida laskuttaa!")."<br>\n<br>\n";
             $tee = "";
@@ -446,7 +446,6 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-
     if (isset($laskutettavat) and $laskutettavat != "") {
       // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
@@ -463,6 +462,30 @@ else {
     $laskutus_esto_saldot = array();
 
     $query_ale_lisa = generoi_alekentta('M');
+
+    if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
+      $query = "SELECT
+                count(tuote.tunnus) AS tuotteita,
+                sum(if(tuote.ei_saldoa != '', 1, 0)) AS saldottomat,
+                group_concat(distinct lasku.tunnus) AS tunnukset
+                FROM lasku
+                {$lasklisa_eikateiset}
+                JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                {$lasklisa}";
+      $saldoton_chk_res = pupe_query($query);
+      $saldoton_chk_row = mysql_fetch_assoc($saldoton_chk_res);
+
+      if ($saldoton_chk_row['saldottomat'] != $saldoton_chk_row['tuotteita']) {
+        $lasklisa .= " and lasku.tunnus not in ({$saldoton_chk_row['tunnukset']}) ";
+        $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$saldoton_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
+      }
+    }
 
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan estää tilauksen laskutus, jos tilauksen yhdeltäkin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen

@@ -588,6 +588,17 @@ if ($fieldname == "myyntilaskujen_kurssipaiva") {
   $jatko = 0;
 }
 
+if ($fieldname == "laskutus_tulevaisuuteen") {
+
+  $sel = $trow[$i] == "S" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ei sallita")."</option>";
+  $ulos .= "<option value = 'S' {$sel}>".t("Saldottomia tuotteita voi laskuttaa tulevaisuuteen")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
 
 if ($fieldname == "tyomaaraystyyppi") {
 

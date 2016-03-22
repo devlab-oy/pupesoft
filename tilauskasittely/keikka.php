@@ -21,7 +21,7 @@ if (isset($_POST["tee"])) {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
-  if ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok") {
+  if (isset($_REQUEST["toiminto"]) and ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok")) {
     // Ei käytetä pakkausta
     $compression = FALSE;
   }

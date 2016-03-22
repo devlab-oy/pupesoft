@@ -441,13 +441,28 @@ if ($tila == 'maksuehto') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
+
+      if (is_null($row['abs_pvm'])) {
+        $abs_pvm = "abs_pvm = null,";
+      }
+      else {
+        $abs_pvm = "abs_pvm = '{$row['abs_pvm']}',";
+      }
+
+      if (is_null($row['kassa_abspvm'])) {
+        $kassa_abspvm = "kassa_abspvm = null,";
+      }
+      else {
+        $kassa_abspvm = "kassa_abspvm = '{$row['kassa_abspvm']}',";
+      }
+
       $query = "INSERT INTO maksuehto SET
                 yhtio              = '$yhtio',
                 teksti             = '$row[teksti]',
                 rel_pvm            = '$row[rel_pvm]',
-                abs_pvm            = '$row[abs_pvm]',
+                {$abs_pvm}
                 kassa_relpvm       = '$row[kassa_relpvm]',
-                kassa_abspvm       = '$row[kassa_abspvm]',
+                {$kassa_abspvm}
                 kassa_alepros      = '$row[kassa_alepros]',
                 jv                 = '$row[jv]',
                 kateinen           = '$row[kateinen]',

@@ -439,7 +439,6 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
                 isatuoteno     = '{$isatrow['tuoteno']}',
                 tuoteno        = '{$laptrow['tuoteno']}',
                 kerroin        = '$kerroin',
-                omasivu        = '$kpl2',
                 hintakerroin   = '$hintakerroin',
                 alekerroin     = '$alekerroin',
                 #rivikommentti = '$rivikommentti',
@@ -648,8 +647,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         for ($i = 0; $i < count($resepti_kentat); $i++) {
           echo "<th>".t($resepti_kentat[$i]["selitetark"])."</th>";
         }
-
-        echo "<th>".t("Pituus kerroin")."</th>";
       }
 
       echo "<td class='back'></td>";
@@ -677,20 +674,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           for ($i = 0; $i < count($resepti_kentat); $i++) {
             echo "<td><input type='text' name='{$resepti_kentat[$i]["selite"]}' size='10'></td>";
           }
-
-          echo "<td>";
-          echo "<select name='kpl2' style='width: 150px;'>";
-
-          echo "<option value='' $sel1>";
-          echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-          echo "</option>";
-
-          echo "<option value='X' $sel2>";
-          echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-          echo "</option>";
-
-          echo "</select>";
-          echo "</td>";
         }
 
       }
@@ -1039,7 +1022,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Ostohinta")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin*Kerroin")."</th>";
-        echo "<th>".t("Pituus kerroin")."</th>";
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
@@ -1061,7 +1043,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Ostoh.val"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
       }
 
       echo "<td class='back'></td>";
@@ -1145,22 +1126,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
-
-          echo "<td>";
-          echo "<select name='kpl2' style='width: 150px;'>";
-
-          echo "<option value='' $sel1>";
-          echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-          echo "</option>";
-
-          echo "<option value='X' $sel2>";
-          echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-          echo "</option>";
-
-          echo "</select>";
-          echo "</td>";
-
-
 
           echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
         }
@@ -1344,17 +1309,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $worksheet->writeString($excelrivi, $excelsarake++, $chk_ei_nayteta, $style);
           }
 
-          if ($toim == "RESEPTI") {
-            if ($prow["omasivu"] != "") {
-              echo "<td>".t("Ei kerrota")."</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, t("Ei kerrota"), $style);
-            }
-            else {
-              echo "<td>".t("Kerrotaan")."</td>";
-              $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"), $style);
-            }
-          }
-
           $excelrivi++;
 
           echo "<td class='back'>";
@@ -1472,29 +1426,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "RESEPTI") {
-            $sel1 = $sel2 = "";
-
-            if ($prow["omasivu"] != "") {
-              $sel2 = "SELECTED";
-            }
-            else {
-              $sel1 = "SELECTED";
-            }
-
             echo "<td></td>";
-            echo "<td>";
-            echo "<select name='kpl2' style='width: 150px;'>";
-
-            echo "<option value='' $sel1>";
-            echo t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
-
-            echo "<option value='X' $sel2>";
-            echo t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)");
-            echo "</option>";
-
-            echo "</select>";
-            echo "</td>";
           }
 
           echo "<td class='back'>";

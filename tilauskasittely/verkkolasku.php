@@ -2685,8 +2685,8 @@ else {
               }
             }
 
-            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
-            if ($lasrow["chn"] == "666") {
+            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+            if ($lasrow["chn"] == "666" and $lasrow["laskun_loppusumma"] != 0) {
               $tulostettavat_email[] = $lasrow["tunnus"];
             }
 

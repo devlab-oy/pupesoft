@@ -80,7 +80,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   exit;
 }
 
-if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
+if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
 
   $lquery = "SELECT *
              FROM lasku
@@ -5393,7 +5393,7 @@ if ($tee == '') {
   $_kat_jv = ($_kateinen and $_jv);
 
   $_asiakas = ($laskurow['liitostunnus'] > 0);
-  $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+  $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO", "VALMISTAASIAKKAALLE"));
   $_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
 
   $_luottoraja_ylivito = false;

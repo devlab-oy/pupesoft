@@ -3052,6 +3052,19 @@ if ($fieldname == "tilausrivien_toimitettuaika") {
   $jatko = 0;
 }
 
+if ($fieldname == "tilausrivin_esisyotto") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella / tarjouksella ei esisyötetä hintaa, alennuksia ja nettoa kun syötetään tilausriville tuotenumero ja kpl")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella / tarjouksella esisyötetään hinta, alennukset ja netto kun syötetään tilausriville tuotenumero ja kpl")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kehahinarvio_ennen_ensituloa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

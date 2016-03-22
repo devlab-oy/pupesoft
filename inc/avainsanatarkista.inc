@@ -272,6 +272,14 @@ if (!function_exists("avainsanatarkista")) {
       if (mysql_num_rows($results) > 0) {
         $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
       }
+
+      if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite'] and $trow['selite'] != '') {
+        $query = "UPDATE tuote SET
+                  vienti = '{$tem_selite}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND vienti = '{$trow['selite']}'";
+        $updres = pupe_query($query);
+      }
     }
 
     $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA");

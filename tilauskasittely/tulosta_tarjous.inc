@@ -764,6 +764,19 @@ if (!function_exists('rivi_tarjous')) {
       if ($row["tilaajanrivinro"] != 0) {
         $row["kommentti"] .= "\n".t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";
       }
+
+      $askomquery = "SELECT *
+                     from asiakaskommentti
+                     where yhtio = '{$kukarow['yhtio']}'
+                     and tuoteno = '{$row['tuoteno']}'
+                     and ytunnus = '{$laskurow['ytunnus']}'";
+      $askomresul = pupe_query($askomquery);
+
+      if (mysql_num_rows($askomresul) > 0) {
+        while ($askomrow = mysql_fetch_assoc($askomresul)) {
+          $row["kommentti"] .= "\n".$askomrow["kommentti"];
+        }
+      }
     }
 
     $row["perhe_kommentti"] = "";

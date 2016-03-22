@@ -473,7 +473,7 @@ if ($toim == "YLLAPITO" and !empty($erpcmpp)) {
     $erpcm_virhe = "X"; // apumuuttuja
   }
 }
-elseif ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
+elseif ($toim != "YLLAPITO" and ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '')) {
 
   $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
   $erpres = pupe_query($erpquery);

@@ -25374,7 +25374,7 @@ if (!function_exists('hae_kaikki_oletuspaikat_try_tai_status')) {
 
     $yhtiorow["tuotteen_oletuspaikka"] = str_replace(' ', '', $yhtiorow["tuotteen_oletuspaikka"]);
     $yhtion_tuotteen_oletuspaikat = explode(",", $yhtiorow["tuotteen_oletuspaikka"]);
-    $kaikki_oletuspaikat = array_merge($oletuspaikat, $yhtion_tuotteen_oletuspaikat);
+    $kaikki_oletuspaikat = array_merge($yhtion_tuotteen_oletuspaikat, $oletuspaikat);
 
     return $kaikki_oletuspaikat;
   }
@@ -26189,15 +26189,30 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
     if ($otunnukset == '') return false;
 
     // kotimaan myynti menee alatilaan D
-    $query = "UPDATE lasku SET alatila = 'D' WHERE tunnus IN ({$otunnukset}) AND vienti = '' AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'D'
+              WHERE tunnus IN ({$otunnukset})
+              AND vienti = ''
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // vientilaskut menee alatilaan B
-    $query = "UPDATE lasku SET alatila = 'B' WHERE tunnus IN ({$otunnukset}) AND vienti != '' AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'B'
+              WHERE tunnus IN ({$otunnukset})
+              AND vienti != ''
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // jos laskulla on maksupositioita, menee ne alatilaan J
-    $query = "UPDATE lasku SET alatila = 'J' WHERE tunnus IN ({$otunnukset}) AND jaksotettu != 0 AND yhtio = '{$kukarow['yhtio']}'";
+    $query = "UPDATE lasku SET
+              alatila = 'J'
+              WHERE tunnus IN ({$otunnukset})
+              AND jaksotettu != 0
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // verkkolaskutettavat EU-viennit menee alatilaan D, jos niill‰ on tarpeeksi lis‰tietoja
@@ -26210,7 +26225,8 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
               AND chn                      IN ('020', '030')
               AND maa_maara               != ''
               AND kauppatapahtuman_luonne  > 0
-              AND kuljetusmuoto           != ''";
+              AND kuljetusmuoto           != ''
+              AND alatila != 'X'";
     $ures  = pupe_query($query);
 
     // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
@@ -27430,13 +27446,8 @@ if (!function_exists('posten_outbounddelivery')) {
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-
-      if (!PUPE_UNICODE) {
-        exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
-      }
-      else {
-        $ftputf8 = TRUE;
-      }
+      # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+      $ftputf8 = PUPE_UNICODE;
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 

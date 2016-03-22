@@ -104,6 +104,18 @@ class Unifaun {
     $tempr = pupe_query($query);
     $postirow_varasto = mysql_fetch_assoc($tempr);
 
+    // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
+    $ll_query = "SELECT noutopisteen_tunnus
+                 FROM laskun_lisatiedot
+                 WHERE yhtio  = '{$this->kukarow['yhtio']}'
+                 AND otunnus   = '{$this->postirow['tunnus']}'
+                 AND noutopisteen_tunnus != ''";
+    $ll_res = pupe_query($ll_query);
+
+    if ($ll_row = mysql_fetch_assoc($ll_res)) {
+      $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
+    }
+
     // jos varastolle on annettu joku osoite, käytetään sitä
     if ($postirow_varasto["nimi"] != "") {
       $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
@@ -565,8 +577,11 @@ class Unifaun {
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
     //$uni_shi_val->addAttribute('n', "legalto");
 
-    //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
-    //$uni_shi_val->addAttribute('n', "agentto");
+    if (!empty($this->postirow["noutopisteen_tunnus"])) {
+      //<val n="agentto">1234</val> # definaa noutopisteen tunnuksen
+      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+      $agentto_noutopiste->addAttribute('n', "agentto");
+    }
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Exporter
     //$uni_shi_val->addAttribute('n', "customsfrom");
@@ -740,6 +755,31 @@ class Unifaun {
         $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
         $uni_add_val->addAttribute('n', "reference");
       }
+    }
+
+    // nämä tukee mps palvelua
+    $posti_mps = array(
+      'IT14',
+      'ITKY14',
+      'ITKY14I',
+      'IT14I',
+      'ITEXPC',
+      'ITKYEXPC',
+      'IT21',
+      'ITKY21',
+      'ITVAK',
+      'ITKYVAK',
+    );
+
+    $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
+
+    // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
+    if ($_mps and empty($this->rakir_row["jv"]) and empty($this->mehto['jv']) and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', 'cons');
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
+      $uni_add_val->addAttribute('n', "reference");
     }
 
     if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {

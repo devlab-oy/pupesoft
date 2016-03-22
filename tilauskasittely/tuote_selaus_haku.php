@@ -1852,16 +1852,22 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
 
   if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
-      echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
-      echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'>";
-      echo "</a>";
+      echo "<table>";
+      echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
+      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
+      echo "</td></tr>";
+      
+      if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
+        echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+      }
+
+      echo "</table>";
       echo "</td>";
       $yht_i++;
     }
@@ -1923,7 +1929,7 @@ function piirra_formin_aloitus() {
  */
 function tarkista_tilausrivi() {
   global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
-  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
+  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
 
   pupemaster_start();
 
@@ -2024,6 +2030,10 @@ function tarkista_tilausrivi() {
             ${'ale' . $alepostfix} = "";
           }
 
+          // Jos ale1 annettu
+          if (!empty($_REQUEST['ale1'][$yht_i]) and empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
+            $ale1 = $_REQUEST['ale1'][$yht_i];
+          }
           $alv = "";
           $var = "";
           $varasto = $laskurow["varasto"];

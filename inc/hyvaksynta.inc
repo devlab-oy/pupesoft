@@ -21,6 +21,7 @@ if ($tee == '') {
             WHERE lasku.yhtio  = '$kukarow[yhtio]'
             and tila           = 'H'
             and hyvaksyja_nyt != ''
+            and alatila       != 'M'
             GROUP BY 1,2
             ORDER BY nimi";
   $result = pupe_query($query);

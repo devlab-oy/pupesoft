@@ -405,7 +405,7 @@ class PrestaProducts extends PrestaClient {
 
   private function get_tax_group_id($vat) {
     $vat = round($vat, 2);
-    $value = $this->tax_rates_table[$vat];
+    $value = isset($this->tax_rates_table[$vat]) ? $this->tax_rates_table[$vat] : null;
 
     if (empty($value)) {
       return null;

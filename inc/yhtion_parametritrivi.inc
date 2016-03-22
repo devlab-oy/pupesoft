@@ -209,6 +209,7 @@ if ($fieldname == "siirtolistan_tulostustapa") {
 
   $sel1 = "";
   $sel2 = "";
+  $sel3 = "";
 
   if ($trow[$i] == 'A') {
     $sel1 = "selected";
@@ -2808,6 +2809,19 @@ if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_email_tilauksessa") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Lähetetään jälkitoimitus-sähköposti aina")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Lähetetään jälkitoimitus-sähköposti vain jos jälkitoimitukseen jätettyä tuotetta ei ole riittävästi ostotilauksilla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3033,6 +3047,19 @@ if ($fieldname == "tilausrivien_toimitettuaika") {
   $ulos .= "<option value = ''>".t("Tuotteiden toimitettuaika tulostetaan laskulle normaalisti")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Saldottomien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Kaikkien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tilausrivin_esisyotto") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella / tarjouksella ei esisyötetä hintaa, alennuksia ja nettoa kun syötetään tilausriville tuotenumero ja kpl")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella / tarjouksella esisyötetään hinta, alennukset ja netto kun syötetään tilausriville tuotenumero ja kpl")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

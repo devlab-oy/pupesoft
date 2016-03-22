@@ -283,6 +283,11 @@ if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sis‰‰ntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
 }
+elseif ($edi_tyyppi == "ahkio") {
+  $edi_subj = "Sis‰‰ntuleva Ahkio -tilaus";
+  $edi_laatija = "Ahkio";
+  $edi_tyyppi = "magento"; // Ahkio toimii t‰‰ll‰ samaan tapaan kuin magento
+}
 elseif ($edi_tyyppi == "magento") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
   $edi_laatija = "Magento";

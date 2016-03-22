@@ -194,6 +194,7 @@ $editilaus_tilaustyyppi       = "";
 $editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+$editilaus_ytunnus            = "";
 $edi_kommentti                = "";
 $id                           = "";
 $ketjutus                     = "";
@@ -867,6 +868,10 @@ while ($tietue = fgets($fd)) {
     $lnimitark = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_ASIAKASOVT':
+    $editilaus_ytunnus = $tieto;
+    break;
+
   case 'OSTOTIL.OT_KATUOSOITE':
     $losoite = trim($tieto);
     break;
@@ -1203,6 +1208,12 @@ while ($tietue = fgets($fd)) {
         $arow["toim_puh"]   = $ltoim_puh;
         $arow["toim_email"] = $ltoim_email;
         $arow["vienti"]     = "";
+
+        if (!empty($editilaus_ytunnus)) {
+          // jos t‰‰ll‰ tuli ovt/ytunnus, k‰ytet‰‰n sit‰
+          $arow["ytunnus"] = $editilaus_ytunnus;
+          $arow["ovttunnus"] = $editilaus_ytunnus;
+        }
 
         $arow['laskutus_nimi']     = $lnimi;
         $arow['laskutus_nimitark'] = $lnimitark;
@@ -2549,6 +2560,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+    $editilaus_ytunnus            = "";
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

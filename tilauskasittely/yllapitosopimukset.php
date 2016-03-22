@@ -146,6 +146,9 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       $se_lopp = $soprow["sopimus_loppupvm"];
     }
 
+    $tse_alku = date("Y-m-d", mktime(0, 0, 0, $kk+1, 1, $vv));
+    $tse_lopp = date("Y-m-d", mktime(0, 0, 0, $kk+2, 0, $vv));
+
     unset($from);
     unset($to);
 
@@ -155,6 +158,9 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
     $from[]  = "/%se/i";
     $to[]  = tv1dateconv($tapahtumapvm)." - ".tv1dateconv($se_lopp);
+
+    $from[]  = "/%tse/i";
+    $to[]  = tv1dateconv($tse_alku)." - ".tv1dateconv($tse_lopp);
 
     //  Jos ei kirjoiteta oikein, poistetaan muuttuja
     $from[]  = "/%[\w]{2}/";

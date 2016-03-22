@@ -1138,10 +1138,10 @@ if ($tee2 == '') {
         echo "<$ero valign='top'>$tilrow[ytunnus]";
 
         if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-          echo "<br>$tilrow[nimi]</$ero>";
+          echo "<br>$tilrow[nimi] <br> $tilrow[nimitark]</$ero>";
         }
         else {
-          echo "<br>$tilrow[toim_nimi]</$ero>";
+          echo "<br>$tilrow[toim_nimi] <br> $tilrow[toim_nimitark]</$ero>";
         }
       }
 

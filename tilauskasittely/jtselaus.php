@@ -946,6 +946,7 @@ if ($tee == "JATKA") {
                 lasku.ytunnus,
                 tilausrivi.varattu jt,
                 lasku.nimi,
+                lasku.nimitark,
                 lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
@@ -1003,6 +1004,7 @@ if ($tee == "JATKA") {
                 lasku.ytunnus,
                 tilausrivi.jt $lisavarattu jt,
                 lasku.nimi,
+                lasku.nimitark,
                 lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
@@ -1069,7 +1071,9 @@ if ($tee == "JATKA") {
                 tilausrivi.tilaajanrivinro,
                 lasku.ytunnus,
                 tilausrivi.jt $lisavarattu jt,
-                lasku.nimi, lasku.toim_nimi,
+                lasku.nimi,
+                lasku.nimitark,
+                lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
                 tilausrivi.hinta,
@@ -1713,13 +1717,13 @@ if ($tee == "JATKA") {
                 echo "<td valign='top' $class>$jtrow[ytunnus]<br>";
 
                 if ($kukarow["extranet"] == "") {
-                  echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
+                  echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]<br>$jtrow[nimitark]</a><br>";
                 }
                 else {
-                  echo "$jtrow[nimi]<br>";
+                  echo "$jtrow[nimi]<br>$jtrow[nimitark]<br>";
                 }
 
-                echo "$jtrow[toim_nimi]";
+                echo "$jtrow[toim_nimi]<br>$jtrow[toim_nimitark] ";
 
                 if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 
@@ -2287,13 +2291,13 @@ if ($tee == "JATKA") {
                   echo "<td valign='top' $class>$perherow[ytunnus]<br>";
 
                   if ($kukarow["extranet"] == "") {
-                    echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
+                    echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]<br>$perherow[nimitark]</a><br>";
                   }
                   else {
-                    echo "$perherow[nimi]<br>";
+                    echo "$perherow[nimi]<br>$perherow[toim_nimitark]<br>";
                   }
 
-                  echo "$perherow[toim_nimi]</td>";
+                  echo "$perherow[toim_nimi]<br>$perherow[toim_nimitark]</td>";
                 }
 
                 echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";

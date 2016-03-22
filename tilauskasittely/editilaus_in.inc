@@ -2458,7 +2458,8 @@ while ($tietue = fgets($fd)) {
         // Vientitilauksille saa kutsua tilaus-valmis.inciä vaan kerran
         // Kotimaan tilauksilel kutsutaan tilaus-valmis.inciä kahdesti,
         // koska ekalla kerralla niille luodaan pupeen lasku
-        if ($laskurow["vienti"] == "") {
+        // tilaustyyppi 9 ohittaa varastoprosessin, joten siloin myös halutaan tilaus valmiiksi
+        if ($laskurow["vienti"] == "" or ($edi_tyyppi == "magento" and $editilaus_tilaustyyppi == "9")) {
           require "tilaus-valmis.inc";
         }
 

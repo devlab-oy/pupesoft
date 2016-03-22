@@ -69,9 +69,9 @@ if ($php_cli) {
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 
-  $laskkk   = "";
-  $laskpp   = "";
-  $laskvv   = "";
+  $laskkk   = isset($laskkk) ? $laskkk : "";
+  $laskpp   = isset($laskpp) ? $laskpp : "";
+  $laskvv   = isset($laskvv) ? $laskvv : "";
   $eilinen  = "";
   $eiketjut = "";
 

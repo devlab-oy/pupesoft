@@ -592,6 +592,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           <input type='hidden' name='kirjausselite' value='{$tiliotekuitti_kirjausselite}'>
           <input type='hidden' name='sisainen_viite' value='{$tiliotekuitti_sisainen_viite}'>
           <input type='hidden' name='rahamaara' value='{$tiliotekuitti_rahamaara}'>
+          <input type='hidden' name='maksajan_tilinumero' value='{$tiliotekuitti_maksajan_tilinumero}'>
           <input type='hidden' name='nayta_pdf' value='1'>
           <input type='submit' value='".t("Tiliotekuitti", $kieli)."' onClick=\"js_openFormInNewWindow('tulostakopioform_tiliotekuitti_{$td_perheid}', ''); return false;\"></form>";
   }
@@ -703,6 +704,8 @@ case 'T00':
   $maara        = 0;
   $pankkitilino = substr($tietue, 9, 14);
   $_tiliotetoim = "K";
+
+  $tiliotekuitti_maksajan_tilinumero = substr($tietue, 292, 30);
 
   if ($silent == "") {
     echo "<tr>";

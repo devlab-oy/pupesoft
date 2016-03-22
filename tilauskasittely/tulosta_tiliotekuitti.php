@@ -38,7 +38,7 @@ $pdf->draw_text(30, 710, t("Maksajan nimi"), $firstpage, $normbold);
 $pdf->draw_text(150, 710, $yhtiorow['nimi'], $firstpage, $norm);
 
 $pdf->draw_text(30, 695, t("Maksajan tilinumero"), $firstpage, $normbold);
-$pdf->draw_text(150, 695, $yhtiorow['pankkinimi1'].' '.$yhtiorow['pankkitili1'], $firstpage, $norm);
+$pdf->draw_text(150, 695, $maksajan_tilinumero, $firstpage, $norm);
 
 $pdf->draw_text(30, 665, t("Maksupäivä"), $firstpage, $normbold);
 $pdf->draw_text(150, 665, $maksupvm, $firstpage, $norm);

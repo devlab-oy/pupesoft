@@ -269,6 +269,7 @@ if ($tee == 'S') {
   $tiliotekuitti_kirjausselite = '';
   $tiliotekuitti_sisainen_viite = '';
   $tiliotekuitti_rahamaara = '';
+  $tiliotekuitti_maksajan_tilinumero = '';
 
   $tiliotekuitti_oikeu = tarkista_oikeus('tilauskasittely/tulosta_tiliotekuitti.php');
 

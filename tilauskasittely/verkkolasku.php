@@ -464,10 +464,9 @@ else {
     $query_ale_lisa = generoi_alekentta('M');
 
     if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
-      $query = "SELECT
+      $query = "SELECT lasku.tunnus,
                 count(tuote.tunnus) AS tuotteita,
-                sum(if(tuote.ei_saldoa != '', 1, 0)) AS saldottomat,
-                group_concat(distinct lasku.tunnus) AS tunnukset
+                sum(if(tuote.ei_saldoa != '', 1, 0)) AS saldottomat
                 FROM lasku
                 {$lasklisa_eikateiset}
                 JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
@@ -477,13 +476,21 @@ else {
                 and lasku.alatila  = 'D'
                 and lasku.viite    = ''
                 and lasku.chn     != '999'
-                {$lasklisa}";
+                {$lasklisa}
+                GROUP BY 1";
       $saldoton_chk_res = pupe_query($query);
-      $saldoton_chk_row = mysql_fetch_assoc($saldoton_chk_res);
 
-      if ($saldoton_chk_row['saldottomat'] != $saldoton_chk_row['tuotteita']) {
-        $lasklisa .= " and lasku.tunnus not in ({$saldoton_chk_row['tunnukset']}) ";
-        $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$saldoton_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
+      $_not_in = array();
+
+      while ($saldoton_chk_row = mysql_fetch_assoc($saldoton_chk_res)) {
+        if ($saldoton_chk_row['saldottomat'] != $saldoton_chk_row['tuotteita']) {
+          $_not_in[] = $saldoton_chk_row['tunnus'];
+        }
+      }
+
+      if (!empty($_not_in)) {
+        $lasklisa .= " and lasku.tunnus not in (".implode(',', $_not_in).") ";
+        $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." ".implode(',', $_not_in)." ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
       }
     }
 

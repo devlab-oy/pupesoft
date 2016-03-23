@@ -3,7 +3,17 @@
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+}
+
 require "../inc/parametrit.inc";
+
+if ($tee == "lataa_tiedosto") {
+  readfile("/tmp/" . $tmpfilenimi);
+  exit;
+}
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
@@ -15,9 +25,6 @@ if ($tee == 'NAYTATILAUS') {
 }
 
 echo "<font class='head'>".t("Toimitetut rivit")."</font><hr><br>";
-
-js_openFormInNewWindow();
-
 echo "<form method='post' action=''>";
 echo "<input type='hidden' name='tee' value='aja'>";
 echo "<table>";
@@ -80,6 +87,24 @@ if ($tee == 'aja') {
   echo "<th>".t("N‰yt‰")."</th>";
   echo "</tr>";
 
+  include 'inc/pupeExcel.inc';
+
+  $worksheet   = new pupeExcel();
+  $format_bold = array("bold" => TRUE);
+  $excelrivi   = 0;
+
+  $worksheet->write($excelrivi, 0, t("Tilausnumero"), $format_bold);
+  $worksheet->write($excelrivi, 1, t("Laskunumero"), $format_bold);
+  $worksheet->write($excelrivi, 2, t("Luotu"), $format_bold);
+  $worksheet->write($excelrivi, 3, t("Toimitettu"), $format_bold);
+  $worksheet->write($excelrivi, 4, t("Laskutettu"), $format_bold);
+  $worksheet->write($excelrivi, 5, t("Summa"), $format_bold);
+  $worksheet->write($excelrivi, 6, t("Arvo"), $format_bold);
+  $worksheet->write($excelrivi, 7, t("Asiakasnro"), $format_bold);
+  $worksheet->write($excelrivi, 8, t("Hyvitys"), $format_bold);
+  $worksheet->write($excelrivi, 9, t("Sis‰inen viesti"), $format_bold);
+  $worksheet->write($excelrivi,10, t("Tila"), $format_bold);
+  $excelrivi++;
 
   $summat = 0;
   $arvot = 0;
@@ -105,15 +130,22 @@ if ($tee == 'aja') {
 
     echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
     echo "<td>";
-
-    echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='".$palvelin2."raportit/toimitetut_rivit.php'>
-        <input type='hidden' name='tunnus' value='$row[tunnus]'>
-        <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='submit' value='".t("N‰yt‰ tilaus")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', ''); return false;\">
-        </form>";
-
+    echo "<a href='' onclick=\"window.open('{$palvelin2}raportit/toimitetut_rivit.php?tee=NAYTATILAUS&tunnus=$row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=600'); return false;\">".t("N‰yt‰ tilaus")."</a>";
     echo "</td>";
     echo "</tr>";
+
+    $worksheet->writeString($excelrivi, 0, $row['tunnus']);
+    $worksheet->writeString($excelrivi, 1, $row['laskunro']);
+    $worksheet->writeDate($excelrivi, 2, substr($row['luontiaika'], 0, 10));
+    $worksheet->writeDate($excelrivi, 3, substr($row['toimitettuaika'], 0, 10));
+    $worksheet->writeDate($excelrivi, 4, substr($row['tapvm'], 0, 10));
+    $worksheet->writeNumber($excelrivi, 5, $row['rivihinta_verolli']);
+    $worksheet->writeNumber($excelrivi, 6, $row['rivihinta_veroton']);
+    $worksheet->writeString($excelrivi, 7, $row['asiakasnro']);
+    $worksheet->writeString($excelrivi, 8, $row['viesti']);
+    $worksheet->writeString($excelrivi, 9, $row['sisviesti3']);
+    $worksheet->writeString($excelrivi,10, t("$laskutyyppi")." ".t("$alatila"));
+    $excelrivi++;
 
     $summat += $row['rivihinta_verolli'];
     $arvot += $row['rivihinta_veroton'];
@@ -127,6 +159,17 @@ if ($tee == 'aja') {
   echo "<td></td>";
   echo "</tr>";
   echo "</table>";
+
+  $excelnimi = $worksheet->close();
+
+  echo "<br><br><table>";
+  echo "<tr><th>".t("Tallenna Excel").":</th><td class='back'>";
+  echo "<form method='post' class='multisubmit'>";
+  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+  echo "<input type='hidden' name='kaunisnimi' value='Toimitetut_rivit.xlsx'>";
+  echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+  echo "<input type='submit' value='".t("Tallenna")."'></form></td></tr>";
+  echo "</table><br>";
 }
 
 require "inc/footer.inc";

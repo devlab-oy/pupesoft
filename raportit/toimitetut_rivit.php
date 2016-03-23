@@ -3,7 +3,7 @@
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 
-require "inc/parametrit.inc";
+require "../inc/parametrit.inc";
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
@@ -18,8 +18,9 @@ echo "<font class='head'>".t("Toimitetut rivit")."</font><hr><br>";
 
 js_openFormInNewWindow();
 
-echo "<table><form method='post'>";
+echo "<form method='post' action=''>";
 echo "<input type='hidden' name='tee' value='aja'>";
+echo "<table>";
 
 if (!isset($kka))
   $kka = date("m");
@@ -35,7 +36,7 @@ echo "<tr><th>".t("P‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
     <td class='back'></td>
     </tr>";
 echo "</table>";
-echo "<br><input type='submit' value='".t("Aja")."'>";
+echo "<br><input type='submit' value='".t("Aja raportti")."'>";
 echo "</form><br><br>";
 
 if ($tee == 'aja') {
@@ -57,9 +58,8 @@ if ($tee == 'aja') {
             AND tilausrivi.toimitettuaika > '0000-00-00 00:00:00'
             AND tilausrivi.toimitettuaika <= '$vva-$kka-$ppa 23:59:59'
             AND (tilausrivi.laskutettuaika > '$vva-$kka-$ppa' or tilausrivi.laskutettuaika = '0000-00-00')
-            GROUP BY 1,2,3,4,5,6,7,8,9
-            ORDER BY toimitettuaika
-            LIMIT 100";
+            GROUP BY 1,2,3,4,5,6,7,8,9,10
+            ORDER BY toimitettuaika";
   $result = pupe_query($query);
 
   echo "<font class='head'>Toimitettu, mutta ei laskutettu per: $ppa.$kka.$vva</font><hr><br>";

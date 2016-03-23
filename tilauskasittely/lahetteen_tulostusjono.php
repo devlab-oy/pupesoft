@@ -1138,10 +1138,20 @@ if ($tee2 == '') {
         echo "<$ero valign='top'>$tilrow[ytunnus]";
 
         if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-          echo "<br>$tilrow[nimi] <br> $tilrow[nimitark]</$ero>";
+          $_nimitark = "";
+          if (!empty($tilrow["nimitark"])) {
+            $_nimitark = "<br>".$tilrow["nimitark"];
+          }
+
+          echo "<br>$tilrow[nimi]$_nimitark</$ero>";
         }
         else {
-          echo "<br>$tilrow[toim_nimi] <br> $tilrow[toim_nimitark]</$ero>";
+          $_toim_nimitark = "";
+          if (!empty($tilrow["toim_nimitark"])) {
+            $_toim_nimitark = "<br>".$tilrow["toim_nimitark"];
+          }
+
+          echo "<br>$tilrow[toim_nimi]$_toim_nimitark</$ero>";
         }
       }
 

@@ -2672,7 +2672,8 @@ else {
             $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
-          elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
+          elseif (($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667')
+            and $lasrow["laskun_loppusumma"] != 0) {
             if ($silent == "" or $silent == "VIENTI") {
               if ($lasrow["chn"] == "666") {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
@@ -2686,7 +2687,7 @@ else {
             }
 
             // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
-            if ($lasrow["chn"] == "666" and $lasrow["laskun_loppusumma"] != 0) {
+            if ($lasrow["chn"] == "666") {
               $tulostettavat_email[] = $lasrow["tunnus"];
             }
 
@@ -2694,7 +2695,7 @@ else {
             $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
-          elseif ($silent == "") {
+          else {
             $tulos_ulos .= "\n".t("Nollasummaista laskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
           }
 

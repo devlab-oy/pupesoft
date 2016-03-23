@@ -1733,7 +1733,7 @@ if ($tee == "JATKA") {
                  $_toim_nimitark = "<br>".$jtrow["toim_nimitark"];
                 }
 
-                echo "$jtrow[toim_nimi]$_nimitark";
+                echo "$jtrow[toim_nimi]$_toim_nimitark";
 
                 if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 

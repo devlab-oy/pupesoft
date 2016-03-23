@@ -45,10 +45,10 @@ if ($tee == 'aja') {
   $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, asiakas.asiakasnro,
             concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
             lasku.tila, lasku.alatila, lasku.sisviesti3,
-            avg(date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s')) toimitettuaika,
+            from_unixtime(avg(unix_timestamp(tilausrivi.toimitettuaika))) toimitettuaika,
             round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta_verolli,
             round(sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta_veroton
-            FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
+            FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
             LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -106,7 +106,7 @@ if ($tee == 'aja') {
     echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
     echo "<td>";
 
-    echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='".$palvelin2."tervetuloa.php'>
+    echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='".$palvelin2."raportit/toimitetut_rivit.php'>
         <input type='hidden' name='tunnus' value='$row[tunnus]'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
         <input type='submit' value='".t("Näytä tilaus")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', ''); return false;\">

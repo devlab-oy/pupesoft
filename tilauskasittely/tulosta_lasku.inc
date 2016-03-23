@@ -1968,39 +1968,37 @@ if (!function_exists('loppu')) {
 
     $vakioviesti2_korkeus = 0;
 
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
-      $query = "SELECT *
-                FROM avainsana
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND kieli   = '{$kieli}'
-                AND laji    = 'VAKIOVIESTI2'
-                ORDER BY jarjestys
-                LIMIT 1";
-      $vakioviesti_result = pupe_query($query);
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kieli   = '{$kieli}'
+              AND laji    = 'VAKIOVIESTI2'
+              ORDER BY jarjestys
+              LIMIT 1";
+    $vakioviesti_result = pupe_query($query);
 
-      if (mysql_num_rows($vakioviesti_result) == 1) {
-        $vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
-        $_viesti = trim($vakioviesti_row["selite"]." ".$vakioviesti_row["selitetark"]);
+    if (mysql_num_rows($vakioviesti_result) == 1) {
+      $vakioviesti_row = mysql_fetch_assoc($vakioviesti_result);
+      $_viesti = trim($vakioviesti_row["selite"]." ".$vakioviesti_row["selitetark"]);
 
-        $vakioviestit = explode("\n", wordwrap($_viesti, 115));
+      $vakioviestit = explode("\n", wordwrap($_viesti, 115));
 
-        $viestikala = $laskutyyppi == 20 ? 190 : 150;
+      $viestikala = $laskutyyppi == 20 ? 190 : 150;
 
-        foreach ($vakioviestit as $vakioviesti) {
-          if ($laskutyyppi == 20) {
-            if ($viestikala < 170) break;
-            $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
-          }
-          else {
-            if ($viestikala < 130) break;
-            $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
-          }
-
-          $viestikala -= 10;
+      foreach ($vakioviestit as $vakioviesti) {
+        if ($laskutyyppi == 20) {
+          if ($viestikala < 170) break;
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
+        }
+        else {
+          if ($viestikala < 130) break;
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
         }
 
-        $vakioviesti2_korkeus = 20;
+        $viestikala -= 10;
       }
+
+      $vakioviesti2_korkeus = 20;
     }
 
     if ($vikasivu != "") {

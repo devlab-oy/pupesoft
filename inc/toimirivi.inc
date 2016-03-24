@@ -268,7 +268,8 @@ if (mysql_field_name($result, $i) == "toimittajaryhma") {
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $sel = $trow[$i] == $vrow['selite'] ? 'selected' : '';
-    $ulos .= "<option value = '{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+    $teksti = $vrow['selitetark'] != '' ? "{$vrow['selite']} {$vrow['selitetark']}" : $vrow['selite'];
+    $ulos .= "<option value = '{$vrow['selite']}' {$sel}>{$teksti}</option>";
   }
 
   $ulos .= "</select></td>";

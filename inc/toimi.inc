@@ -16,7 +16,7 @@ else {
   $otsikko_nappi = "toimittaja";
 
   if (mysql_num_rows(t_avainsana("TOIMITTAJARYHMA"))) {
-    $ryhmalisa = "(SELECT selitetark FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'TOIMITTAJARYHMA' AND selite = toimi.toimittajaryhma) AS toimittajaryhma,";
+    $ryhmalisa = "(SELECT IF(selitetark != '', CONCAT(selite, ' ', selitetark), selite) FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'TOIMITTAJARYHMA' AND selite = toimi.toimittajaryhma) AS toimittajaryhma,";
     $hakuryhmalisa = ', toimittajaryhma';
   }
   else {

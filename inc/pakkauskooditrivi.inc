@@ -30,7 +30,7 @@ if (mysql_field_name($result, $i) == "pakkaus") {
     $sel = '';
     if ($trow[$i] == $pakkaus_row['tunnus']) $sel = 'SELECTED';
 
-    $ulos .= "<option value='{$pakkaus_row['tunnus']}' $sel>{$pakkaus_row['selite']} - {$pakkaus_row['pakkauskuvaus']}</option>";
+    $ulos .= "<option value='{$pakkaus_row['tunnus']}' $sel>{$pakkaus_row['pakkaus']} - {$pakkaus_row['pakkauskuvaus']}</option>";
   }
 
   $ulos .= "</select></td>";

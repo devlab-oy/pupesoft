@@ -123,8 +123,8 @@ if (!function_exists('rivi_erittely')) {
       $pdf->draw_text(62, $kala-18, t("Ytunnus", $kieli)." ".$laskurow['ytunnus'],    $firstpage, $kirj);
 
       if ($toitarow['erittely'] == 'k') {
-        // jos toimitustavan takana on annettu osoitetiedot, käytetään niitä koontitilauksella
-        if (!empty($toitarow['toim_nimi']) and !empty($toitarow['toim_osoite']) and !empty($toitarow['toim_postino']) and !empty($toitarow['toim_postitp'])) {
+        // jos tulostustapa on koonti ja toimitustavan takana on annettu osoitetiedot, käytetään niitä
+        if ($toitarow['tulostustapa'] == 'K' and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
           $pdf->draw_text(62, $kala-28, $toitarow['toim_nimi']." ".$toitarow['toim_nimitark'],    $firstpage, $kirj);
           $pdf->draw_text(62, $kala-38, $toitarow['toim_osoite'],  $firstpage, $kirj);
           $pdf->draw_text(62, $kala-48, $toitarow['toim_postino']." ".$toitarow['toim_postitp'],  $firstpage, $kirj);

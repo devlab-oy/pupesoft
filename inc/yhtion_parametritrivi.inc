@@ -4030,7 +4030,6 @@ if ($fieldname == 'ennakkolaskun_tyyppi') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
-  $sel = $trow[$i] == 'E' ? ' selected' : '';
 
   $ulos .= "<option value = ''>".t("Normaali ennakkolasku");
   $ulos .= "<option value = 'E' {$sel['E']}>".t("Ennakkolaskulle jokainen rivi erikseen");

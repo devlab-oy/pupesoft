@@ -2445,9 +2445,12 @@ while ($tietue = fgets($fd)) {
           }
         }
 
+        // magentotilaus on laskutettu jos meillä on kassalipas
+        $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
+
         // jos magento -casessa on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
-        // mikäli tilaus on maksettu (= kassalipas setattu)
-        if ($edi_tyyppi == "magento" and !empty($editilaus_tilausaika) and !empty($editilaus_kassalipas)) {
+        // mikäli tilaus on maksettu
+        if ($laskutettu_magento_tilaus and !empty($editilaus_tilausaika)) {
           $_temp_date = strtotime($editilaus_tilausaika);
 
           $laskpp = date("d", $_temp_date);
@@ -2455,19 +2458,27 @@ while ($tietue = fgets($fd)) {
           $laskvv = date("Y", $_temp_date);
         }
 
-        // Vientitilauksille saa kutsua tilaus-valmis.inciä vaan kerran
-        // Kotimaan tilauksilel kutsutaan tilaus-valmis.inciä kahdesti,
-        // koska ekalla kerralla niille luodaan pupeen lasku
-        // tilaustyyppi 9 ohittaa varastoprosessin, joten siloin myös halutaan tilaus valmiiksi
-        if ($laskurow["vienti"] == "" or ($edi_tyyppi == "magento" and $editilaus_tilaustyyppi == "9")) {
+        // Ainoastaan kotimaan tilauksille kutsutaan tilaus-valmis tässä. Tämä sen takia,
+        // että tilaus mahdollisesti laskutetaan ja me ei haluta laskuttaa vientejä,
+        // koska niille pitää syöttää vielä viennin lisätiedot.
+        //
+        // Jos Magento -tilaus laskutetaan tässä, merkataan tilaus alempana takaisin avoimeksi
+        // ja kutsutaan tilaus-valmis uudestaan. Se siirtää normi tilauksen takaisin tulostusjonoon
+        // ja siirtää laskutetun vientilaskun lisätietojen syöttöön.
+        //
+        // Jos meillä on maksettu Magento -tilaus ja tilaustyyppi on 9, kutsutaan ainoastaa tässä
+        // tilaus-valmis (alempana on tilaustyyppi != 9). Silloin viennit ja normitilaukset
+        // laskuttuu tässä, eikä niitä ei siirretä takaisin tulostusjonoon.
+        if ($laskurow["vienti"] == "" or ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi == "9")) {
           require "tilaus-valmis.inc";
         }
 
         $valittu_kopio_tulostin = "";
         $saatekirje = 0;
 
-        // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-        if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+        // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon
+        // mutta ei tilaustyyppiä 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki
+        if ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9") {
           // Haetaan yrityksen ensimmäinen normivarasto. Tallennetaan tilaus tähän varastoon
           $varasto_query = "SELECT tunnus
                             from varastopaikat

@@ -501,10 +501,6 @@ if (!function_exists('alku')) {
     elseif (!empty($laskurow["viesti"])) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), $page_lasku[$sivu], $pieni);
 
-      if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K' and strpos($laskurow["viesti"], "Osuus 100%") !== false) {
-        $laskurow["viesti"] = preg_replace('/Ennakkolasku.*100\%/', '', $laskurow["viesti"]);
-      }
-
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
         pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
         $page_lasku[$sivu], $norm);
@@ -845,18 +841,6 @@ if (!function_exists('rivi_lasku')) {
 
     if ($row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and trim($row['asiakkaan_tilausnumero']) != '' and strpos($row["kommentti"], "$row[asiakkaan_tilausnumero]") === FALSE and $laskutyyppi != 6) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
-    }
-
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
-
-      if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
-        $row['tuoteno'] = $matches[0];
-        $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
-      }
-
-      if (strpos($row["kommentti"], "Osuus 100%") !== false) {
-        $row["kommentti"] = preg_replace('/Ennakkolasku.*100\%/', '', $row["kommentti"]);
-      }
     }
 
     $row["kommentti"] = trim($row["kommentti"]);
@@ -3046,19 +3030,17 @@ if (!function_exists("tulosta_lasku")) {
 
     $vakioviesti2_korkeus = 0;
 
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
-      $query = "SELECT *
-                FROM avainsana
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND kieli   = '{$kieli}'
-                AND laji    = 'VAKIOVIESTI2'
-                ORDER BY jarjestys
-                LIMIT 1";
-      $vakioviesti_result = pupe_query($query);
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kieli   = '{$kieli}'
+              AND laji    = 'VAKIOVIESTI2'
+              ORDER BY jarjestys
+              LIMIT 1";
+    $vakioviesti_result = pupe_query($query);
 
-      if (mysql_num_rows($vakioviesti_result) == 1) {
-        $vakioviesti2_korkeus = 20;
-      }
+    if (mysql_num_rows($vakioviesti_result) == 1) {
+      $vakioviesti2_korkeus = 20;
     }
 
     if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0) {

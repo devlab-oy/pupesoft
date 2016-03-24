@@ -1967,7 +1967,7 @@ if (!function_exists('loppu')) {
 
       $vakioviestit = explode("\n", wordwrap($_viesti, 115));
 
-      $viestikala = $laskutyyppi == 20 ? 190 : 150;
+      $viestikala = $laskutyyppi == 20 ? 210 : 170;
 
       foreach ($vakioviestit as $vakioviesti) {
         if ($laskutyyppi == 20) {
@@ -1980,9 +1980,8 @@ if (!function_exists('loppu')) {
         }
 
         $viestikala -= 10;
+        $vakioviesti2_korkeus += 10;
       }
-
-      $vakioviesti2_korkeus = 20;
     }
 
     if ($vikasivu != "") {

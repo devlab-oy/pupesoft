@@ -843,6 +843,17 @@ if (!function_exists('rivi_lasku')) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
     }
 
+    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
+      if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
+        $row['tuoteno'] = $matches[0];
+        $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
+      }
+      if (strpos($row["kommentti"], "100%") !== false) {
+        $_ennakkoteksti = t("Ennakkolasku");
+        $row["kommentti"] = preg_replace("/{$_ennakkoteksti}.*100\%/", '', $row["kommentti"]);
+      }
+    }
+
     $row["kommentti"] = trim($row["kommentti"]);
 
     // Kommentissa voi olla jotain sanoja jotka pitää käääntää:
@@ -1967,11 +1978,11 @@ if (!function_exists('loppu')) {
 
       $vakioviestit = explode("\n", wordwrap($_viesti, 115));
 
-      $viestikala = $laskutyyppi == 20 ? 190 : 150;
+      $viestikala = $laskutyyppi == 20 ? 220 : 180;
 
       foreach ($vakioviestit as $vakioviesti) {
 
-        if ($vakioviesti2_korkeus == 20) break;
+        if ($vakioviesti2_korkeus == 30) break;
 
         if ($laskutyyppi == 20) {
           $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
@@ -3040,7 +3051,7 @@ if (!function_exists("tulosta_lasku")) {
     $vakioviesti_result = pupe_query($query);
 
     if (mysql_num_rows($vakioviesti_result) == 1) {
-      $vakioviesti2_korkeus = 20;
+      $vakioviesti2_korkeus = 30;
     }
 
     if ($yhtiorow["viivakoodi_laskulle"] == "K" and $laskurow["maa"] == "FI" and $laskurow["summa"] > 0) {

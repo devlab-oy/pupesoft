@@ -1552,7 +1552,8 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           while ($toimittajaryhmarow = mysql_fetch_assoc($_ryhmares)) {
             $sel = (isset($haku[$i]) and $haku[$i] == "@".$toimittajaryhmarow['selite']) ? ' selected' : '';
-            echo "<option value='@{$toimittajaryhmarow['selite']}'{$sel}>{$toimittajaryhmarow['selitetark']}</option>";
+            $_teksti = $toimittajaryhmarow['selitetark'] != '' ? "{{$toimittajaryhmarow['selite']}} {{$toimittajaryhmarow['selitetark']}}" : $toimittajaryhmarow['selite'];
+            echo "<option value='@{$toimittajaryhmarow['selite']}'{$sel}>{$_teksti}</option>";
           }
 
           echo "</select>";

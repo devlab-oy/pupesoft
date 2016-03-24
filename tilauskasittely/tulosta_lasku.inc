@@ -1967,15 +1967,16 @@ if (!function_exists('loppu')) {
 
       $vakioviestit = explode("\n", wordwrap($_viesti, 115));
 
-      $viestikala = $laskutyyppi == 20 ? 210 : 170;
+      $viestikala = $laskutyyppi == 20 ? 190 : 150;
 
       foreach ($vakioviestit as $vakioviesti) {
+
+        if ($vakioviesti2_korkeus == 20) break;
+
         if ($laskutyyppi == 20) {
-          if ($viestikala < 170) break;
           $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
         }
         else {
-          if ($viestikala < 130) break;
           $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($vakioviesti, 455, $pdf_lasku, $norm), $thispage, $pieni);
         }
 

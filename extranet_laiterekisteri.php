@@ -75,8 +75,7 @@ function piirra_headerit() {
     t("Sarjanumero"),
     t("Malli"),
     t("Valmistajan sopimuksen numero"),
-    t("Valmistajan sopimuksen päättymispäivä"),
-    t("Lcm info")
+    t("Valmistajan sopimuksen päättymispäivä")
   );
   foreach ($headerit as $header) {
     echo "<th>{$header}</th>";
@@ -92,7 +91,6 @@ function piirra_laiterivi($laite) {
   echo "<td>{$laite['tuoteno']}</td>";
   echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
-  echo "<td>{$laite['kommentti']}</td>";
   echo "<td class='back'><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";
   echo "</tr>";
 }

@@ -333,8 +333,14 @@ if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
 elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
-else
+elif [[ -n ${jatketaan} ]]; then
+  # Jos ollaan kysytty jo ylempänä, otetaan siitä vastaus
   jatketaanko=$jatketaan
+else
+  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
+  echo
+  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
+  read jatketaanko
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then

@@ -439,7 +439,7 @@ else
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then
-    bundle --quiet &&
+    (bundle check || bundle install) &&
     bundle exec rake db:migrate
 
     if [[ $? -eq 0 ]]; then

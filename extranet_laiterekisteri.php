@@ -74,8 +74,8 @@ function piirra_headerit() {
     t("Valmistaja"),
     t("Sarjanumero"),
     t("Malli"),
-    t("Vc"),
-    t("Vc end"),
+    t("Valmistajan sopimuksen numero"),
+    t("Valmistajan sopimuksen p‰‰ttymisp‰iv‰"),
     t("Lcm info")
   );
   foreach ($headerit as $header) {

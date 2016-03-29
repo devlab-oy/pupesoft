@@ -124,6 +124,7 @@ tiedostofunkkarit.inc
 asiakasvalinta.inc
 extranet_tyomaaraykset.php
 extranet_laiterekisteri.php
+nayta_tyomaarayksen_tapahtumat.php
 tyomaarays/tulosta_tyomaarays.inc
 popup.js"
 

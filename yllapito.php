@@ -1573,6 +1573,11 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           echo "</select>";
         }
+        elseif ($toim == "pakkauskoodit") {
+          if (strtolower(mysql_field_name($result, $i)) == 'koodi') {
+            echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
+          }
+        }
         elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
           // jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
           if (!isset($haku[$i])) $haku[$i] = "";

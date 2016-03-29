@@ -378,7 +378,7 @@ if [[ ${bundle} = true ]]; then
 
   # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
   cd "${pupenextdir}" &&
-  bundle --quiet &&
+  (bundle check || bundle install) &&
   bundle clean &&
   bundle exec rake css:write &&
   bundle exec rake assets:precompile &&

@@ -6,7 +6,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
-  'asiakkaan_tilausnumero' => isset($_REQUEST['asiakkaan_tilausnumero']) ? $_REQUEST['asiakkaan_tilausnumero'] : '',
   'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '',
   'malli' => isset($_REQUEST['malli']) ? $_REQUEST['malli'] : '',
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -17,12 +16,14 @@ $tyom_parametrit = array(
 
 $osoite_parametrit = array(
   'toim_nimi' => isset($_REQUEST['toim_nimi']) ? $_REQUEST['toim_nimi'] : '',
+  'toim_nimitark' => isset($_REQUEST['toim_nimitark']) ? $_REQUEST['toim_nimitark'] : '',
   'toim_osoite' => isset($_REQUEST['toim_osoite']) ? $_REQUEST['toim_osoite'] : '',
   'toim_postitp' => isset($_REQUEST['toim_postitp']) ? $_REQUEST['toim_postitp'] : '',
   'toim_postino' => isset($_REQUEST['toim_postino']) ? $_REQUEST['toim_postino'] : '',
   'toim_maa' => isset($_REQUEST['toim_maa']) ? $_REQUEST['toim_maa'] : '',
 
   'laskutus_nimi' => isset($_REQUEST['laskutus_nimi']) ? $_REQUEST['laskutus_nimi'] : '',
+  'laskutus_nimitark' => isset($_REQUEST['laskutus_nimitark']) ? $_REQUEST['laskutus_nimitark'] : '',
   'laskutus_osoite' => isset($_REQUEST['laskutus_osoite']) ? $_REQUEST['laskutus_osoite'] : '',
   'laskutus_postitp' => isset($_REQUEST['laskutus_postitp']) ? $_REQUEST['laskutus_postitp'] : '',
   'laskutus_postino' => isset($_REQUEST['laskutus_postino']) ? $_REQUEST['laskutus_postino'] : '',
@@ -110,7 +111,6 @@ function hae_kayttajan_tyomaaraykset() {
             lasku.tilaustyyppi,
             lasku.ytunnus,
             lasku.toimaika,
-            lasku.asiakkaan_tilausnumero,
             tyomaarays.komm1,
             tyomaarays.komm2,
             tyomaarays.tyojono,
@@ -166,7 +166,6 @@ function hae_kayttajan_tyomaaraykset() {
 function piirra_tyomaaraysheaderit($rajattu = false) {
   $headers = array(
     t('Huoltopyyntö') => true,
-    t('Asiakkaan tilausnumero') => false,
     t('Luontiaika') => true,
     t('Valmistaja') => false,
     t('Sarjanumero')." / ".t('Malli') => false,
@@ -192,7 +191,6 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<img src='{$palvelin2}/pics/lullacons/info.png'>";
   echo "</a></div></td>";
 
-  echo "<td>{$tyomaarays['asiakkaan_tilausnumero']}</td>";
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   echo "<td>{$tyomaarays['valmistaja']}</td>";
   echo "<td>{$tyomaarays['valmnro']} / {$tyomaarays['mallivari']}</td>";
@@ -248,14 +246,12 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<br>";
   piirra_yhteyshenkilontiedot_taulu();
   piirra_toimitusosoite_taulu($asiakasdata);
-  piirra_laskutusosoite_taulu($asiakasdata);
   echo "<input type='submit' name='avaa_tyomaarays_nappi' value='".t('Avaa huoltopyyntö')."'>";
   echo "</form>";
 }
 
 function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   if (!$piilota) echo "<td></td>";
-  echo "<td><input type='text' name='asiakkaan_tilausnumero' value='{$request['tyom_parametrit']['asiakkaan_tilausnumero']}'></td>";
   if (!$piilota) echo "<td></td>";
   echo "<td><input type='text' name='valmistaja' value='{$request['tyom_parametrit']['valmistaja']}'></td>";
   echo "<td><input type='text' name='valmnro' value='{$request['tyom_parametrit']['valmnro']}'>";
@@ -268,24 +264,25 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
 function piirra_yhteyshenkilontiedot_taulu() {
   global $kukarow;
 
-  $yhteysquery = "SELECT nimi
+  $yhteysquery = "SELECT *
                   FROM yhteyshenkilo
                   where yhtio              = '$kukarow[yhtio]'
                   and liitostunnus         = '$kukarow[oletus_asiakas]'
                   and tyyppi               = 'A'
                   and tilausyhteyshenkilo != ''
-                  and oletusyhteyshenkilo != ''
                   ORDER BY nimi
                   LIMIT 1";
   $yhteysresult = pupe_query($yhteysquery);
 
   $tilausyhteyshenkilo = '';
   if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
-    $tilausyhteyshenkilo = $yhteysrow['nimi'];
+    $tilausyhteyshenkilo .= $yhteysrow['nimi']." \n";
+    $tilausyhteyshenkilo .= $yhteysrow['email']." \n";
+    $tilausyhteyshenkilo .= $yhteysrow['gsm'];
   }
   echo "<br>";
   echo "<table>";
-  echo "<tr><th colspan='4'>".t('Yhteyshenkilö')."</th><td><input type='text' name='tilausyhteyshenkilo' value='{$tilausyhteyshenkilo}'></td></tr>";
+  echo "<tr><th colspan='4'>".t('Yhteyshenkilö')."</th><td><textarea cols='40' rows='5' name='tilausyhteyshenkilo'>{$tilausyhteyshenkilo}</textarea></td></tr>";
   echo "</table>";
 }
 
@@ -308,27 +305,11 @@ function piirra_toimitusosoite_taulu($asiakas) {
   echo "<tr><th>".t('Maa')."</th>";
   echo "<td><input type='text' name='toim_maa' value='{$asiakas['toim_maa']}'></td></tr>";
   echo "</table>";
-}
 
-function piirra_laskutusosoite_taulu($asiakas) {
-  echo "<br>";
-  echo "<table>";
-  echo "<tr><th colspan='2'>".t('Laskutusosoite')."</th></tr>";
-  echo "<tr><th>".t('Nimi')."</th>";
-  echo "<td><input type='text' name='laskutus_nimi' value='{$asiakas['laskutus_nimi']}'></td></tr>";
-
-  echo "<tr><th>".t('Osoite')."</th>";
-  echo "<td><input type='text' name='laskutus_osoite' value='{$asiakas['laskutus_osoite']}'></td></tr>";
-
-  echo "<tr><th>".t('Postinumero')."</th>";
-  echo "<td><input type='text' name='laskutus_postino' value='{$asiakas['laskutus_postino']}'></td></tr>";
-
-  echo "<tr><th>".t('Postitoimipaikka')."</th>";
-  echo "<td><input type='text' name='laskutus_postitp' value='{$asiakas['laskutus_postitp']}'></td></tr>";
-
-  echo "<tr><th>".t('Maa')."</th>";
-  echo "<td><input type='text' name='laskutus_maa' value='{$asiakas['laskutus_maa']}'></td></tr>";
-  echo "</table>";
+  echo "<input type='hidden' name='laskutus_nimi' value='{$asiakas['laskutus_nimi']}'>";
+  echo "<input type='hidden' name='laskutus_osoite' value='{$asiakas['laskutus_osoite']}'>";
+  echo "<input type='hidden' name='laskutus_postino' value='{$asiakas['laskutus_postino']}'>";
+  echo "<input type='hidden' name='laskutus_postitp' value='{$asiakas['laskutus_postitp']}'>";
 }
 
 function tallenna_tyomaarays($request) {
@@ -356,8 +337,7 @@ function tallenna_tyomaarays($request) {
              liitostunnus = '{$kukarow['oletus_asiakas']}',
              tilaustyyppi = 'A',
              tila = 'A',
-             tilausyhteyshenkilo = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}',
-             asiakkaan_tilausnumero = '{$request['tyom_parametrit']['asiakkaan_tilausnumero']}'";
+             tilausyhteyshenkilo = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}'";
   $result = pupe_query($query);
   $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
 

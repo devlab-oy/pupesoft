@@ -182,10 +182,16 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
 }
 
 function piirra_tyomaaraysrivi($tyomaarays) {
-  $tapahtumahistoria = hae_tapahtumahistoria($tyomaarays['tunnus']);
+  global $palvelin2;
 
   echo "<tr style='background-color: {$tyomaarays['tyostatusvari']};'>";
-  echo "<td><a href='' title='{$tapahtumahistoria}' style='white-space:nowrap;'>{$tyomaarays['tunnus']}</a></td>";
+
+  echo "<td>{$tyomaarays['tunnus']}";
+  echo "<div align='right'>";
+  echo "<a href='nayta_tyomaarayksen_tapahtumat.php?tyomaaraystunnus=$tyomaarays[tunnus]' title='".t('Avaa työmääräyksen tapahtumat uuteen välilehteen')."' target='_blank'>";
+  echo "<img src='{$palvelin2}/pics/lullacons/info.png'>";
+  echo "</a></div></td>";
+
   echo "<td>{$tyomaarays['asiakkaan_tilausnumero']}</td>";
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   echo "<td>{$tyomaarays['valmistaja']}</td>";
@@ -439,43 +445,6 @@ function hae_asiakasdata() {
   $result = pupe_query($query);
   $asiakasdata = mysql_fetch_assoc($result);
   return $asiakasdata;
-}
-
-function hae_tapahtumahistoria($tyomaaraystunnus) {
-  global $kukarow;
-
-  $tapahtumahistoria = '';
-  $query = "SELECT tyomaarayksen_tapahtumat.*,
-            ifnull(tilataulu.selitetark, '') tilassa,
-            ifnull(jonotaulu.selitetark, '') jonossa
-            FROM tyomaarayksen_tapahtumat
-            LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-              AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
-              AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
-            LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-              AND jonotaulu.laji                           = 'TYOM_TYOJONO'
-              AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
-            WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
-            AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tyomaaraystunnus'
-            ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
-  $historiares = pupe_query($query);
-
-  if (mysql_affected_rows() > 0) {
-    $tapahtumahistoria .= t("Työmääräyksen tapahtumat")."\n";
-    $tapahtumahistoria .= "\n";
-    $tapahtumahistoria .= t("Työstatus")."\t\t";
-    $tapahtumahistoria .= t("Työjono")."\t\t";
-    $tapahtumahistoria .= t("Muutosaika")."\t\t";
-
-    while ($row = mysql_fetch_assoc($historiares)) {
-      $tapahtumahistoria .= "\n";
-      $tapahtumahistoria .= "{$row['tilassa']}\t\t";
-      $tapahtumahistoria .= "{$row['jonossa']}\t\t\t";
-      $aika = strftime("%d.%m.%y %H:%M", strtotime($row['luontiaika']));
-      $tapahtumahistoria .= "{$aika}";
-    }
-  }
-  return $tapahtumahistoria;
 }
 
 function email_tyomaarayskopio($request) {

@@ -427,6 +427,7 @@ function hae_tuotteet() {
       'nimi'                      => $row["nimitys"],
       'osasto'                    => $row["osasto"],
       'status'                    => $row["status"],
+      'tahtituote'                => $row['tahtituote'],
       'try'                       => $row["try"],
       'tunnus'                    => $row['tunnus'],
       'tuotekorkeus'              => $row['tuotekorkeus'],

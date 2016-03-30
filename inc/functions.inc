@@ -25270,7 +25270,13 @@ if (!function_exists("saako_myyda_private_label")) {
     if ($trow["hinnastoon"] == "V" or $tarkistakaikkituotteet) {
 
       //haetaan asiakkaan tiedot
-      $query = "SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri
+      $query = "SELECT tunnus liitostunnus,
+                       ytunnus,
+                       valkoodi,
+                       maa,
+                       ryhma,
+                       piiri,
+                       toimipaikka AS yhtio_toimipaikka
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$asiakastunnus'";

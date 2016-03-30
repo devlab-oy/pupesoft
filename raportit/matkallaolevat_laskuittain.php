@@ -134,12 +134,13 @@ echo "</form>";
 echo "<br><br>";
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
-  $query = "SELECT lasku.tunnus,
+  $query = "SELECT lasku.alatila,
             lasku.nimi,
             lasku.summa,
-            lasku.valkoodi,
-            lasku.tila,
             lasku.tapvm,
+            lasku.tila,
+            lasku.tunnus,
+            lasku.valkoodi,
             sum(tiliointi.summa) AS matkalla
             FROM tiliointi
             JOIN lasku on (lasku.tunnus = tiliointi.ltunnus)
@@ -148,7 +149,13 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
             AND tiliointi.tapvm >= '{$alisa}'
             AND tiliointi.tapvm <= '{$llisa}'
             AND tiliointi.korjattu = ''
-            GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tila, lasku.tapvm
+            GROUP BY lasku.alatila,
+            lasku.nimi,
+            lasku.summa,
+            lasku.tapvm,
+            lasku.tila,
+            lasku.tunnus,
+            lasku.valkoodi
             HAVING matkalla != 0
             ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
   $result = pupe_query($query);
@@ -198,6 +205,10 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
     $alvsumma = array();
 
     while ($row = mysql_fetch_assoc($result)) {
+      // skipataan avaava tase tosite
+      if ($row['tila'] == 'X' and $row['alatila'] == 'A') {
+        continue;
+      }
 
       $liotsrow = array();
       $keikrow = array();

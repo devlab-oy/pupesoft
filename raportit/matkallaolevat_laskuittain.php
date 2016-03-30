@@ -134,20 +134,26 @@ echo "</form>";
 echo "<br><br>";
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
+  $tosite_txt = t("Tosite");
 
-  $query = "SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
+  $query = "SELECT lasku.tunnus,
+            if(lasku.tila = 'X', '{$tosite_txt}', lasku.nimi) AS nimi,
+            lasku.summa,
+            lasku.valkoodi,
+            lasku.tapvm,
+            sum(tiliointi.summa) AS matkalla
             FROM lasku
             JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-                          AND tiliointi.ltunnus = lasku.tunnus
-                          AND tiliointi.tilino = '$yhtiorow[matkalla_olevat]'
-                          AND tiliointi.tapvm >= '$alisa'
-                          AND tiliointi.tapvm <= '$llisa'
-                          AND tiliointi.korjattu = '')
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND tiliointi.ltunnus = lasku.tunnus
+              AND tiliointi.tilino = '{$yhtiorow['matkalla_olevat']}'
+              AND tiliointi.tapvm >= '{$alisa}'
+              AND tiliointi.tapvm <= '{$llisa}'
+              AND tiliointi.korjattu = '')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
-            AND lasku.tapvm   >= '$alisa'
-            AND lasku.tapvm   <= '$llisa'
-            GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
+            AND lasku.tapvm >= '{$alisa}'
+            AND lasku.tapvm <= '{$llisa}'
+            GROUP BY lasku.tunnus, nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
             HAVING matkalla != 0
             ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
   $result = pupe_query($query);
@@ -212,7 +218,9 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
                 AND vanhatunnus = $row[tunnus]";
       $liotsres = pupe_query($query);
 
-      while ($liotsrow = mysql_fetch_assoc($liotsres)) {
+      if (mysql_num_rows($liotsres) == 1) {
+        $liotsrow = mysql_fetch_assoc($liotsres);
+
         // Virallinen varastoonvientipäivä
         $query = "SELECT laskunro, tunnus, mapvm, liitostunnus
                   FROM lasku
@@ -224,12 +232,12 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         $keikrow = mysql_fetch_assoc($keikres);
 
         // Milloin rivit on viety saldoille keskimäärin
-        $query = "SELECT
-                  if (laskutettuaika != '0000-00-00', DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d'), laskutettuaika) AS laskutettuaika
+        $query = "SELECT DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}
-                  AND tyyppi      = 'O'";
+                  AND tyyppi      = 'O'
+                  AND laskutettuaika != '0000-00-00'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
 
@@ -251,6 +259,9 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
                   AND tunnus  = {$keikrow['liitostunnus']}";
         $toimires = pupe_query($query);
         $toimirow = mysql_fetch_assoc($toimires);
+      }
+      elseif (mysql_num_rows($liotsres) > 1) {
+        echo "Lasku {$row['tunnus']} useassa saapumisessa<br>";
       }
 
       echo "<tr class='aktiivi'>";

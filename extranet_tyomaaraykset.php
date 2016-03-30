@@ -235,6 +235,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   if (!empty($laite_tunnus)) {
     $request['tyom_parametrit'] = hae_laitteen_parametrit($laite_tunnus);
   }
+
   $asiakasdata = hae_asiakasdata();
   echo "<form name ='uusi_tyomaarays_form'>";
   echo "<table>";
@@ -381,7 +382,6 @@ function hae_laitteen_parametrit($laite_tunnus) {
   global $kukarow;
 
   $laiteparametrit = array();
-
   $query = "SELECT
             laite.*,
             avainsana.selitetark valmistaja,
@@ -392,15 +392,20 @@ function hae_laitteen_parametrit($laite_tunnus) {
             LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
             AND avainsana.laji = 'TRY'
             AND avainsana.selite = tuote.try)
+            JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
+            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
+            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
             AND laite.tunnus = '{$laite_tunnus}'";
+
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
 
   $laiteparametrit['valmistaja'] = $row['valmistaja'];
   $laiteparametrit['malli'] = $row['malli'];
   $laiteparametrit['valmnro'] = $row['sarjanro'];
-  $laiteparametrit['tuotenro'] = $row['tuotenro'];
+  $laiteparametrit['tuotenro'] = $row['tuoteno'];
   $laiteparametrit['sla'] = $row['sla'];
 
   return $laiteparametrit;

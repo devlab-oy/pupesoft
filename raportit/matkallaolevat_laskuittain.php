@@ -217,7 +217,7 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       $varivirow = array();
 
       // Onko lasku liitetty saapumiseen?
-      $query = "SELECT laskunro
+      $query = "SELECT DISTINCT laskunro
                 FROM lasku
                 WHERE yhtio     = '$kukarow[yhtio]'
                 AND tila        = 'K'

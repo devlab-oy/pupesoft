@@ -134,26 +134,21 @@ echo "</form>";
 echo "<br><br>";
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
-  $tosite_txt = t("Tosite");
-
   $query = "SELECT lasku.tunnus,
-            if(lasku.tila = 'X', '{$tosite_txt}', lasku.nimi) AS nimi,
+            lasku.nimi,
             lasku.summa,
             lasku.valkoodi,
+            lasku.tila,
             lasku.tapvm,
             sum(tiliointi.summa) AS matkalla
-            FROM lasku
-            JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-              AND tiliointi.ltunnus = lasku.tunnus
-              AND tiliointi.tilino = '{$yhtiorow['matkalla_olevat']}'
-              AND tiliointi.tapvm >= '{$alisa}'
-              AND tiliointi.tapvm <= '{$llisa}'
-              AND tiliointi.korjattu = '')
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
-            AND lasku.tapvm >= '{$alisa}'
-            AND lasku.tapvm <= '{$llisa}'
-            GROUP BY lasku.tunnus, nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
+            FROM tiliointi
+            JOIN lasku on (lasku.tunnus = tiliointi.ltunnus)
+            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+            AND tiliointi.tilino = '{$yhtiorow['matkalla_olevat']}'
+            AND tiliointi.tapvm >= '{$alisa}'
+            AND tiliointi.tapvm <= '{$llisa}'
+            AND tiliointi.korjattu = ''
+            GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tila, lasku.tapvm
             HAVING matkalla != 0
             ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
   $result = pupe_query($query);
@@ -262,6 +257,10 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       }
       elseif (mysql_num_rows($liotsres) > 1) {
         echo "Lasku {$row['tunnus']} useassa saapumisessa<br>";
+      }
+
+      if ($row['tila'] == 'X') {
+        $row['nimi'] = t("Tosite");
       }
 
       echo "<tr class='aktiivi'>";

@@ -92,7 +92,7 @@ if (mysql_field_name($result, $i) == "yhtion_toimipaikka_id") {
     $ulos = "<tr><th><label for='yhtion_toimipaikka_id'>";
     $ulos .= t("Yhtion toimipaikka");
     $ulos .= "</label></th><td><select id='yhtion_toimipaikka_id' name='{$nimi}'><option>";
-    $ulos .= t("Ei toimipaikkaa");
+    $ulos .= t("Hinnasto voimassa kaikissa toimipaikoissa");
     $ulos .= "</option>";
 
     foreach ($toimipaikat as $toimipaikka) {

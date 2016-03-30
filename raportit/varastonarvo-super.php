@@ -1470,11 +1470,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         if ($summaustaso == 'P') {
           list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
         }
-        elseif ($summaustaso == 'S') {
-          list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $row['varastotunnus']);
-        }
         else {
-          list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno']);
+          list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $row['varastotunnus']);
         }
 
         if ($tallennusmuoto_check) {

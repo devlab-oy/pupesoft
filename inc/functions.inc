@@ -5428,7 +5428,10 @@ if (!function_exists("alehinta")) {
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id = 0
                     OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           maa DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5458,7 +5461,10 @@ if (!function_exists("alehinta")) {
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id = 0
                     OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           valkoodi DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5499,7 +5505,10 @@ if (!function_exists("alehinta")) {
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id = 0
                     OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           maa DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5529,7 +5538,10 @@ if (!function_exists("alehinta")) {
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id = 0
                     OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           valkoodi DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 

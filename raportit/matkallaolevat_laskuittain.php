@@ -270,7 +270,7 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         echo "Lasku {$row['tunnus']} useassa saapumisessa<br>";
       }
 
-      if ($row['tila'] == 'X') {
+      if ($row['tila'] == 'X' and empty($row['nimi'])) {
         $row['nimi'] = t("Tosite");
       }
 

@@ -246,7 +246,7 @@ else {
     $rivi .= "\n";
     $rivi .= "$syy\n";
 
-    pupesoft_log('ftp-send', "Tiedoston '{$ftpfile}' lähetys palvelimelle '{$ftphost}' epäonnistui: {$syy}");
+    pupesoft_log('ftp_send', "Tiedoston '{$ftpfile}' lähetys palvelimelle '{$ftphost}' epäonnistui: {$syy}");
 
     $boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
@@ -274,7 +274,7 @@ else {
   }
 
   if ($palautus == 0) {
-    pupesoft_log('ftp-send', "Lähetettiin tiedosto '{$ftpfile}' palvelimelle '{$ftphost}'");
+    pupesoft_log('ftp_send', "Lähetettiin tiedosto '{$ftpfile}' palvelimelle '{$ftphost}'");
   }
 }
 

@@ -195,6 +195,13 @@ if (!$enarimatch) {
       }
     }
 
+    if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
+      $havinglisa = "HAVING tuote.status not in ('P','X') and saldo > 0";
+    }
+    else {
+      $havinglisa = "HAVING (tuote.status not in ('P','X') or saldo > 0)";
+    }
+
     // Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
     // Joinataan korvaavat mukaan
     $query = "SELECT
@@ -222,7 +229,7 @@ if (!$enarimatch) {
               WHERE tuote.$yhtiot
               $kieltolisa
               $th_lisa1
-              HAVING (tuote.status not in ('P','X') or saldo > 0)
+              {$havinglisa}
               ORDER BY tuote.tuoteno
               LIMIT 201";
     $thresult = pupe_query($query);

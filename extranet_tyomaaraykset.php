@@ -41,14 +41,49 @@ $request = array(
   'osoite_parametrit' => $osoite_parametrit
 );
 
-
 if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
 
-if (isset($avaa_tyomaarays_nappi)) {
-  // Tallennetaan työmääräys järjestelmään
+if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
+  livesearch_laitehaku();
+  exit;
+}
+
+$avataanko_tyomaarays = false;
+
+if (isset($valmnro) and !empty($valmnro)) {
+  // Jos on valittu sarjanumero niin yritetään täyttää muut laitekentät
+  $query = "SELECT *
+            FROM laite
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND sarjanro = '{$valmnro}'
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_affected_rows() == 1) {
+    $laiterow = mysql_fetch_assoc($result);
+    $laitetiedot = hae_laitteen_parametrit($laiterow['tunnus']);
+
+    $request['tyom_parametrit']['tuotenro'] = $laitetiedot['tuotenro'];
+    $request['tyom_parametrit']['valmistaja'] = $laitetiedot['valmistaja'];
+  }
+  $avataanko_tyomaarays = true;
+}
+
+enable_ajax();
+
+if (isset($avaa_tyomaarays_nappi) and !empty($request['tyom_parametrit']['tuotenro']) 
+  and !empty($request['tyom_parametrit']['komm1']) and !empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) {
+  // Tallennetaan työmääräys järjestelmään jos kaikki järkevät tiedot syötetty
   tallenna_tyomaarays($request);
   $tyom_toiminto = '';
   unset($request['tyom_parametrit']);
+}
+elseif (isset($avaa_tyomaarays_nappi)) {
+  if (empty($request['tyom_parametrit']['komm1'])) echo "<font class='error'>".t("VIRHE: Viankuvaus on pakollinen tieto")."</font><br>";
+  if (empty($request['tyom_parametrit']['tuotenro'])) echo "<font class='error'>".t("VIRHE: Malli on pakollinen tieto")."</font><br>";
+  if (empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) echo "<font class='error'>".t("VIRHE: Yhteyshenkilö on pakollinen tieto")."</font><br>";
+
+  $request['tyom_toiminto'] = 'UUSI';
 }
 
 require "asiakasvalinta.inc";
@@ -230,6 +265,8 @@ function piirra_nayta_aktiiviset_poistetut() {
 }
 
 function uusi_tyomaarays_formi($laite_tunnus) {
+  global $request;
+ 
   echo "<font class='head'>".t("Uusi huoltopyyntö")."</font><hr>";
   // Jos ollaan tultu laiterekisteristä ja halutaan tehdä työmääräys tietylle laitteelle
   if (!empty($laite_tunnus)) {
@@ -237,7 +274,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   }
 
   $asiakasdata = hae_asiakasdata();
-  echo "<form name ='uusi_tyomaarays_form'>";
+  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form'>";
   echo "<table>";
   echo "<tr>";
   piirra_tyomaaraysheaderit(true);
@@ -249,6 +286,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<br>";
   piirra_yhteyshenkilontiedot_taulu();
   piirra_toimitusosoite_taulu($asiakasdata);
+
   echo "<input type='submit' name='avaa_tyomaarays_nappi' value='".t('Avaa huoltopyyntö')."'>";
   echo "</form>";
 }
@@ -257,7 +295,11 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   if (!$piilota) echo "<td></td>";
   if (!$piilota) echo "<td></td>";
   echo "<td><input type='text' name='valmistaja' value='{$request['tyom_parametrit']['valmistaja']}'></td>";
-  echo "<td><input type='text' name='valmnro' value='{$request['tyom_parametrit']['valmnro']}'></td>";
+
+  echo "<td>";
+  echo livesearch_kentta("tyomaarays_form", "LAITEHAKU", "valmnro", 140, $request['tyom_parametrit']['valmnro'], '', '', '', 'ei_break_all');
+  echo "</td>";
+
   echo "<td><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuotenro']}'></td>";
   if (!$piilota) echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
@@ -265,7 +307,7 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
 }
 
 function piirra_yhteyshenkilontiedot_taulu() {
-  global $kukarow;
+  global $kukarow, $request;
 
   $yhteysquery = "SELECT *
                   FROM yhteyshenkilo
@@ -283,6 +325,11 @@ function piirra_yhteyshenkilontiedot_taulu() {
     $tilausyhteyshenkilo .= $yhteysrow['email']." \n";
     $tilausyhteyshenkilo .= $yhteysrow['gsm'];
   }
+
+  if (!empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) {
+    $tilausyhteyshenkilo = $request['osoite_parametrit']['tilausyhteyshenkilo'];
+  }
+
   echo "<br>";
   echo "<table>";
   echo "<tr><th colspan='4'>".t('Yhteyshenkilö')."</th><td><textarea cols='40' rows='5' name='tilausyhteyshenkilo'>{$tilausyhteyshenkilo}</textarea></td></tr>";
@@ -392,10 +439,10 @@ function hae_laitteen_parametrit($laite_tunnus) {
             LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
             AND avainsana.laji = 'TRY'
             AND avainsana.selite = tuote.try)
-            JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
-            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            LEFT JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
+            LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
-            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+            LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
             AND laite.tunnus = '{$laite_tunnus}'";
 

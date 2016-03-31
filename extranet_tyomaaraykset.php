@@ -236,9 +236,9 @@ function piirra_tyomaaraysrivi($tyomaarays) {
     echo "</a></div>";
   }
   echo "</td>";
-
   echo "<td>{$tyomaarays['luontiaika']}</td>";
-  echo "<td>{$tyomaarays['valmistaja']}</td>";
+  $valmistajatieto = !empty($tyomaarays['valmistaja']) ? $tyomaarays['valmistaja'] : $tyomaarays['merkki'];
+  echo "<td>{$valmistajatieto}</td>";
   echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['mallivari']}</td>";
   echo "<td>{$tyomaarays['tyostatus']}</td>";
@@ -319,22 +319,9 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
 function piirra_yhteyshenkilontiedot_taulu() {
   global $kukarow, $request;
 
-  $yhteysquery = "SELECT *
-                  FROM yhteyshenkilo
-                  where yhtio              = '$kukarow[yhtio]'
-                  and liitostunnus         = '$kukarow[oletus_asiakas]'
-                  and tyyppi               = 'A'
-                  and tilausyhteyshenkilo != ''
-                  ORDER BY nimi
-                  LIMIT 1";
-  $yhteysresult = pupe_query($yhteysquery);
-
-  $tilausyhteyshenkilo = '';
-  if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
-    $tilausyhteyshenkilo .= $yhteysrow['nimi']." \n";
-    $tilausyhteyshenkilo .= $yhteysrow['email']." \n";
-    $tilausyhteyshenkilo .= $yhteysrow['gsm'];
-  }
+  $tilausyhteyshenkilo .= $kukarow['nimi']." \n";
+  $tilausyhteyshenkilo .= $kukarow['eposti']." \n";
+  $tilausyhteyshenkilo .= $kukarow['puhno'];
 
   if (!empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) {
     $tilausyhteyshenkilo = $request['osoite_parametrit']['tilausyhteyshenkilo'];

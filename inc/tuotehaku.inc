@@ -196,7 +196,7 @@ if (!$enarimatch) {
     }
 
     if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
-      $havinglisa = "HAVING tuote.status not in ('P','X') and saldo > 0";
+      $havinglisa = "HAVING tuote.status not in ('P','X') and saldo > 0 and ei_saldoa = ''";
     }
     else {
       $havinglisa = "HAVING (tuote.status not in ('P','X') or saldo > 0)";

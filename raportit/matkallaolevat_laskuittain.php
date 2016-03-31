@@ -10,6 +10,15 @@ if (isset($_POST["tee"])) {
 
 require "../inc/parametrit.inc";
 
+if ($tee == 'NAYTATILAUS') {
+  echo "<font class='head'>".t("Saapuminen")." $saapuminen:</font><hr>";
+
+  require "raportit/naytatilaus.inc";
+
+  echo "<br><br>";
+  exit;
+}
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -74,6 +83,7 @@ else {
 }
 
 echo "<form method='post'>";
+echo "<input type='hidden' name='tee' value='aja'>";
 echo "<table>";
 
 $query = "SELECT *
@@ -123,11 +133,16 @@ echo "<br><input type='submit' value='".t("N‰yt‰")."'>";
 echo "</form>";
 echo "<br><br>";
 
-if ($alisa != "" and $llisa != "") {
+if ($tee == "aja" and $alisa != "" and $llisa != "") {
 
   $query = "SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
             FROM lasku
-            JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino = '$yhtiorow[matkalla_olevat]' AND tiliointi.tapvm >= '$alisa' AND tiliointi.tapvm <= '$llisa' AND tiliointi.korjattu = '')
+            JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
+                          AND tiliointi.ltunnus = lasku.tunnus
+                          AND tiliointi.tilino = '$yhtiorow[matkalla_olevat]'
+                          AND tiliointi.tapvm >= '$alisa'
+                          AND tiliointi.tapvm <= '$llisa'
+                          AND tiliointi.korjattu = '')
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
             AND lasku.tapvm   >= '$alisa'
@@ -150,6 +165,7 @@ if ($alisa != "" and $llisa != "") {
     echo "<th>".t("Saapuminen")."</th>";
     echo "<th>".t("Saapuminen suljettu")."</th>";
     echo "<th>".t("Varastoonvientip‰iv‰")."</th>";
+    echo "<th>".t("Tuotteita varastossa").": ".tv1dateconv($llisa)."</th>";
     echo "<th>".t("Toimitusehto")."</th>";
     echo "</tr>";
 
@@ -170,6 +186,7 @@ if ($alisa != "" and $llisa != "") {
       $worksheet->write($excelrivi, $excelsarake++, t("Saapuminen"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Saapuminen suljettu"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Varastoonvientip‰iv‰"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("Tuotteita varastossa").": ".tv1dateconv($llisa), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Toimitusehto"), $format_bold);
 
       $excelrivi++;
@@ -179,12 +196,13 @@ if ($alisa != "" and $llisa != "") {
     $summa = 0;
     $alvsumma = array();
 
-    while ($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_assoc($result)) {
 
       $liotsrow = array();
-      $keikrow  = array();
-      $rivirow  = array();
+      $keikrow = array();
+      $rivirow = array();
       $toimirow = array();
+      $varivirow = array();
 
       // Onko lasku liitetty saapumiseen?
       $query = "SELECT laskunro
@@ -215,6 +233,17 @@ if ($alisa != "" and $llisa != "") {
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
 
+        // Milloin rivit on viety saldoille keskim‰‰rin
+        $query = "SELECT
+                  round(sum(rivihinta), 2) va_arvo
+                  FROM tilausrivi
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND uusiotunnus = {$keikrow['tunnus']}
+                  AND tyyppi      = 'O'
+                  AND laskutettuaika <= '$llisa'";
+        $varivires = pupe_query($query);
+        $varivirow = mysql_fetch_assoc($varivires);
+
         // Toimittajan toimitusehto
         $query = "SELECT toimitusehto
                   FROM toimi
@@ -229,25 +258,33 @@ if ($alisa != "" and $llisa != "") {
       echo "<td>".tv1dateconv($row["tapvm"])."</td>";
       echo "<td align='right'>$row[summa]</td>";
       echo "<td align='right'>$row[valkoodi]</td>";
-      echo "<td align='right'><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$palvelin2", "raportit/matkallaolevat_laskuittain.php'>$row[matkalla]</a></td>";
+      echo "<td align='right'><a href='' onclick=\"window.open('{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1200,height=800'); return false;\">$row[matkalla]</a></td>";
       echo "<td align='right'>$yhtiorow[valkoodi]</td>";
-      echo "<td>{$keikrow["laskunro"]}</td>";
+      echo "<td>";
+
+      if (!empty($keikrow["laskunro"])) {
+        echo "<a href='' onclick=\"window.open('{$palvelin2}raportit/matkallaolevat_laskuittain.php?tee=NAYTATILAUS&tunnus=$keikrow[tunnus]&saapuminen=$keikrow[laskunro]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1200,height=800'); return false;\">{$keikrow["laskunro"]}</a>";
+      }
+
+      echo "</td>";
       echo "<td>".tv1dateconv($keikrow["mapvm"])."</td>";
       echo "<td>".tv1dateconv($rivirow["laskutettuaika"])."</td>";
+      echo "<td align='right'>{$varivirow['va_arvo']}</td>";
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 
       if (isset($excel) and $excel != "") {
-        $worksheet->write($excelrivi, $excelsarake,   $row["nimi"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, tv1dateconv($row["tapvm"]), $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $row["summa"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $row["matkalla"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $keikrow["laskunro"], $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, tv1dateconv($keikrow["mapvm"]), $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, tv1dateconv(tv3dateconv($rivirow["laskutettuaika"], TRUE)), $format_bold);
-        $worksheet->write($excelrivi, $excelsarake++, $toimirow["toimitusehto"], $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake,   $row["nimi"], $format_bold);
+        $worksheet->writeDate($excelrivi, $excelsarake++, $row["tapvm"], $format_bold);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $row["summa"], $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $row["matkalla"], $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake++, $keikrow["laskunro"], $format_bold);
+        $worksheet->writeDate($excelrivi, $excelsarake++, $keikrow["mapvm"], $format_bold);
+        $worksheet->writeDate($excelrivi, $excelsarake++, $rivirow["laskutettuaika"], $format_bold);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $varivirow['va_arvo'], $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake++, $toimirow["toimitusehto"], $format_bold);
 
         $excelrivi++;
         $excelsarake = 0;
@@ -259,7 +296,7 @@ if ($alisa != "" and $llisa != "") {
     echo "<tr>";
     echo "<th colspan='4'>".t("Yhteens‰")."</th>";
     echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
-    echo "<th colspan='5'></th>";
+    echo "<th colspan='6'></th>";
     echo "</tr>";
     echo "</table>";
 

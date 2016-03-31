@@ -471,6 +471,9 @@ if (!function_exists('alku')) {
         $toimaikarow = mysql_fetch_assoc($toimaikares);
         $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tv1dateconv($toimaikarow["toimitettupaiva"]), $page_lasku[$sivu], $norm);
       }
+    }
+
+    if ($laskutyyppi != '8') {
       $rivi_ind++;
     }
 

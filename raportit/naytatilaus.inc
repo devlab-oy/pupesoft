@@ -743,7 +743,8 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
             {$ale_query_select_lisa} ale,
             concat_ws('<br>', if ('$laskurow[valkoodi]' != '$yhtiorow[valkoodi]', concat(round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]'), ' $laskurow[valkoodi]'), NULL), concat(round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if ($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi])*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]'), ' $yhtiorow[valkoodi]')) rivihinta,
             concat(round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]'), ' $yhtiorow[valkoodi]') Varastonarvo,
-            tilausrivi.kpl maara, tilausrivi.varattu,
+            tilausrivi.laskutettuaika,
+            tilausrivi.varattu,
             tilausrivi.kommentti,
             tilausrivi.tunnus,
             tilausrivi.uusiotunnus,
@@ -775,12 +776,13 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   echo "<th align='left'><a href = '{$linkkilisa}&ojarj=4'>" .t("Tuoteno")."</a></th>";
   echo "<th align='left'><a href = '{$linkkilisa}&ojarj=5'>" .t("Toim_tuoteno")."</a></th>";
   echo "<th align='left'><a href = '{$linkkilisa}&ojarj=6'>" .t("Tilattu")."<br>".t("sis/ulk")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=7'>" .t("Tulossa")."<br>".t("sis/ulk")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=8'>" .t("Varastossa")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=9'>" .t("Hinta")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=10'>".t("Ale")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=11'>".t("Rivihinta")."</a></th>";
-  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=12'>".t("Varastonarvo")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=8'>" .t("Tulossa")."<br>".t("sis/ulk")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=10'>" .t("Varastossa")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=11'>" .t("Hinta")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=12'>".t("Ale")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=13'>".t("Rivihinta")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=14'>".t("Varastonarvo")."</a></th>";
+  echo "<th align='left'><a href = '{$linkkilisa}&ojarj=15'>".t("Varastooonvientipvm")."</a></th>";
   echo "</tr>";
 
   $summa = array();
@@ -856,6 +858,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
     echo "<td align='right' valign='top'>".($prow["ale"]*1)."</td>";
     echo "<td align='right' nowrap valign='top'>$prow[rivihinta]</td>";
     echo "<td align='right' nowrap valign='top'>$prow[Varastonarvo]</td>";
+    echo "<td align='right' nowrap valign='top'>".tv1dateconv($prow["laskutettuaika"])."</td>";
 
     $osuus_kululaskuista = $osuus_eturahdista = $tulliprossa = $aputullimaara = $rivinlisakulu = "";
 

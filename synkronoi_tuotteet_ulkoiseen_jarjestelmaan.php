@@ -45,14 +45,15 @@ else {
     $wherelisa = "";
   }
 
-  $query = "SELECT tuote.*, ta.selite AS synkronointi
+  $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
             FROM tuote
-            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
+            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
-            AND tuote.status    != 'P'
             AND tuote.ei_saldoa  = ''
             {$wherelisa}
-            AND ta.selite IS NULL";
+            HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
+                    # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
+                   (ta.tunnus IS NULL AND tuote.status != 'P')";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -115,7 +116,14 @@ else {
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
 
-        $line->addChild('Type', 'U');
+        if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
+          $type = 'M';
+        }
+        else {
+          $type = 'U';
+        }
+
+        $line->addChild('Type', $type);
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
 
@@ -147,7 +155,20 @@ else {
         $line->addChild('Length', 0);
         $line->addChild('PackageSize', 0);
         $line->addChild('PalletSize', 0);
-        $line->addChild('Status', 0);
+
+        switch ($row['status']) {
+        case 'A':
+          $status = 1;
+          break;
+        case 'P':
+          $status = 9;
+          break;
+        default:
+          $status = 0;
+          break;
+        }
+
+        $line->addChild('Status', $status);
         $line->addChild('WholesalePackageSize', 0);
         $line->addChild('EANCode', utf8_encode($eankoodi));
         $line->addChild('EANCode2', 0);
@@ -201,7 +222,7 @@ else {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tuoteno = '{$row['tuoteno']}'
                     AND laji    = 'synkronointi'";
-          pupe_query($query_dump());
+          pupe_query($query);
         }
 
         $i++;

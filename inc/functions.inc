@@ -27458,6 +27458,13 @@ if (!function_exists('posten_outbounddelivery')) {
       $ftpfile = realpath($filename);
 
       require "inc/ftp-send.inc";
+
+      if ($palautus == 0) {
+        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+      }
+      else {
+        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+      }
     }
   }
 }

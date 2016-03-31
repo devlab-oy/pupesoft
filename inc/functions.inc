@@ -32510,3 +32510,30 @@ if (!function_exists('sort_array_of_arrays')) {
     array_multisort($sortarray, SORT_ASC, $array);
   }
 }
+
+if (!function_exists('pupesoft_log')) {
+  function pupesoft_log($log_file, $log_message) {
+    // tehd‰‰n full path tiedostoon
+    $log_path  = is_dir('/home/devlab/logs') ? '/home/devlab/logs/' : '/tmp/';
+    $full_path = $log_path . basename($log_file, '.log') . '.log';
+
+    if (file_exists($full_path) and !is_writable($full_path)) {
+      echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
+      return;
+    }
+
+    // tehd‰‰n full message, timestampilla
+    $timestamp = date('d.m.y H:i:s');
+    $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
+
+    // kirjoitetaan message logiiun
+    $file_handle = fopen($full_path, 'a');
+
+    if (fwrite($file_handle, $full_message) === false) {
+      echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
+      return;
+    }
+
+    fclose($file_handle);
+  }
+}

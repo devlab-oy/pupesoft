@@ -32536,6 +32536,11 @@ if (!function_exists('pupesoft_log')) {
     // kirjoitetaan message logiiun
     $file_handle = fopen($full_path, 'a');
 
+    if ($file_handle === false) {
+      echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
+      return;
+    }
+
     if (fwrite($file_handle, $full_message) === false) {
       echo "Lokiviestin kirjoitus tiedostoon {$full_path} epäonnistui.";
       return;

@@ -192,6 +192,13 @@ function hae_kayttajan_tyomaaraykset() {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
+    $historiaquery = "SELECT count(*) tapahtumahistoria_count
+                      FROM tyomaarayksen_tapahtumat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tyomaarays_tunnus = '{$row['tunnus']}'";
+    $historiaresult = pupe_query($historiaquery);
+    $historiarow = mysql_fetch_assoc($historiaresult);
+    $row['tapahtumahistoria_count'] = $historiarow['tapahtumahistoria_count'];
     $tyomaaraykset[] = $row;
   }
 
@@ -222,10 +229,13 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<tr style='background-color: {$tyomaarays['tyostatusvari']};'>";
 
   echo "<td>{$tyomaarays['tunnus']}";
-  echo "<div align='right'>";
-  echo "<a href='nayta_tyomaarayksen_tapahtumat.php?tyomaaraystunnus=$tyomaarays[tunnus]' title='".t('Avaa työmääräyksen tapahtumat uuteen välilehteen')."' target='_blank'>";
-  echo "<img src='{$palvelin2}/pics/lullacons/info.png'>";
-  echo "</a></div></td>";
+  if ($tyomaarays['tapahtumahistoria_count'] > 0) {
+    echo "<div align='right'>";
+    echo "<a href='nayta_tyomaarayksen_tapahtumat.php?tyomaaraystunnus=$tyomaarays[tunnus]' title='".t('Avaa työmääräyksen tapahtumat uuteen välilehteen')."' target='_blank'>";
+    echo "<img src='{$palvelin2}/pics/lullacons/info.png'>";
+    echo "</a></div>";
+  }
+  echo "</td>";
 
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   echo "<td>{$tyomaarays['valmistaja']}</td>";

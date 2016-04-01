@@ -119,6 +119,13 @@ echo "<th>".t("Syötä loppupäivä")."</th>";
 echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 echo "</tr>";
 
+$chk = empty($ohita_vo_laskut) ? '' : 'CHECKED';
+
+echo "<tr>";
+echo "<th>".t("Älä näytä vaihto-omaisuuslaskuja")."</th>";
+echo "<td><input type='checkbox' name='ohita_vo_laskut' value='YES' $chk></td>";
+echo "</tr>";
+
 $chk = "";
 if (isset($excel) and $excel != "") {
   $chk = "CHECKED";
@@ -136,6 +143,9 @@ echo "<br><br>";
 $create_excel = (isset($excel) and $excel != "");
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
+  // ei haluta listata vaihto-omaisuuslaskuja
+  $vo_laskut_lisa = empty($ohita_vo_laskut) ? '' : "AND lasku.vienti not in ('C','F','I')";
+
   $query = "SELECT lasku.alatila,
             lasku.nimi,
             lasku.summa,
@@ -151,6 +161,7 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
             AND tiliointi.tapvm >= '{$alisa}'
             AND tiliointi.tapvm <= '{$llisa}'
             AND tiliointi.korjattu = ''
+            {$vo_laskut_lisa}
             GROUP BY lasku.alatila,
             lasku.nimi,
             lasku.summa,

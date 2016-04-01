@@ -132,9 +132,9 @@ $chk[$key] = 'CHECKED';
 echo "<tr>";
 echo "<th>".t("Tapahtumatyyppirajaus")."</th>";
 echo "<td>";
-echo "<input type='radio' name='vo_laskurajaus' value='none' {$chk['none']}> Näytä kaikki<br>";
-echo "<input type='radio' name='vo_laskurajaus' value='vain' {$chk['vain']}> Näytä vain vaihto-omaisuuslaskuja<br>";
-echo "<input type='radio' name='vo_laskurajaus' value='muut' {$chk['muut']}> Älä näytä vaihto-omaisuuslaskuja<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='none' {$chk['none']}> ".t("Näytä kaikki")."<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='vain' {$chk['vain']}> ".t("Näytä vain vaihto-omaisuuslaskuja")."<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='muut' {$chk['muut']}> ".t("Älä näytä vaihto-omaisuuslaskuja")."<br>";
 echo "</td>";
 echo "</tr>";
 

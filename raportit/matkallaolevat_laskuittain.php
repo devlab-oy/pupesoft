@@ -119,11 +119,23 @@ echo "<th>".t("Syötä loppupäivä")."</th>";
 echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 echo "</tr>";
 
-$chk = empty($ohita_vo_laskut) ? '' : 'CHECKED';
+$chk = array(
+  "none" => "",
+  "vain" => "",
+  "muut" => "",
+);
+
+$key = empty($vo_laskurajaus) ? 'none' : $vo_laskurajaus;
+
+$chk[$key] = 'CHECKED';
 
 echo "<tr>";
-echo "<th>".t("Älä näytä vaihto-omaisuuslaskuja")."</th>";
-echo "<td><input type='checkbox' name='ohita_vo_laskut' value='YES' $chk></td>";
+echo "<th>".t("Tapahtumatyyppirajaus")."</th>";
+echo "<td>";
+echo "<input type='radio' name='vo_laskurajaus' value='none' {$chk['none']}> Näytä kaikki<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='vain' {$chk['vain']}> Näytä vain vaihto-omaisuuslaskuja<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='muut' {$chk['muut']}> Älä näytä vaihto-omaisuuslaskuja<br>";
+echo "</td>";
 echo "</tr>";
 
 $chk = "";
@@ -143,8 +155,18 @@ echo "<br><br>";
 $create_excel = (isset($excel) and $excel != "");
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
-  // ei haluta listata vaihto-omaisuuslaskuja
-  $vo_laskut_lisa = empty($ohita_vo_laskut) ? '' : "AND lasku.vienti not in ('C','F','I')";
+  switch ($vo_laskurajaus) {
+    case 'vain':
+      // halutaan listata vain vaihto-omaisuuslaskuja
+      $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
+      break;
+    case 'muut':
+      // ei haluta listata vaihto-omaisuuslaskuja
+      $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
+      break;
+    default:
+      $vo_laskurajaus_lisa = '';
+  }
 
   $query = "SELECT lasku.alatila,
             lasku.nimi,
@@ -161,7 +183,7 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
             AND tiliointi.tapvm >= '{$alisa}'
             AND tiliointi.tapvm <= '{$llisa}'
             AND tiliointi.korjattu = ''
-            {$vo_laskut_lisa}
+            {$vo_laskurajaus_lisa}
             GROUP BY lasku.alatila,
             lasku.nimi,
             lasku.summa,

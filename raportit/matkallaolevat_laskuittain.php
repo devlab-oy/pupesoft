@@ -133,6 +133,8 @@ echo "<br><input type='submit' value='".t("Näytä")."'>";
 echo "</form>";
 echo "<br><br>";
 
+$create_excel = (isset($excel) and $excel != "");
+
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
   $query = "SELECT lasku.alatila,
             lasku.nimi,
@@ -177,15 +179,15 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
     echo "<th>".t("Toimitusehto")."</th>";
     echo "</tr>";
 
-    if (isset($excel) and $excel != "") {
+    if ($create_excel) {
       include 'inc/pupeExcel.inc';
 
-      $worksheet    = new pupeExcel();
+      $worksheet   = new pupeExcel();
       $format_bold = array("bold" => TRUE);
-      $excelrivi    = 0;
+      $excelrivi   = 0;
       $excelsarake = 0;
 
-      $worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("Nimi"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Tapvm"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Summa"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Valuutta"), $format_bold);
@@ -294,16 +296,16 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 
-      if (isset($excel) and $excel != "") {
-        $worksheet->writeString($excelrivi, $excelsarake,   $row["nimi"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $row["tapvm"], $format_bold);
+      if ($create_excel) {
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["nimi"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $row["tapvm"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $row["summa"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $row["matkalla"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $keikrow["laskunro"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $keikrow["mapvm"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $rivirow["laskutettuaika"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $keikrow["mapvm"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $rivirow["laskutettuaika"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $varivirow['va_arvo'], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $toimirow["toimitusehto"], $format_bold);
 

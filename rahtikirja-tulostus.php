@@ -1546,7 +1546,7 @@ function laheta_excel_koontilahete($otunnukset) {
             JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ($otunnukset)";
-  $tilausrivi_result = pupe_query($query);
+  $result = pupe_query($query);
 
   require_once 'inc/pupeExcel.inc';
 
@@ -1568,6 +1568,20 @@ function laheta_excel_koontilahete($otunnukset) {
   foreach ($headerit as $header) {
     $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
     $excelsarake++;
+  }
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $excelsarake = 0;
+    $fields = array(
+      $row['asiakkaan_tilausnumero']
+    );
+
+    $excelrivi++;
+
+    foreach ($fields as $field) {
+      $worksheet->writeString($excelrivi, $excelsarake, $field);
+      $excelsarake++;
+    }
   }
 
   $excelnimi = $worksheet->close();

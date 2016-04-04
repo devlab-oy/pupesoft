@@ -58,7 +58,16 @@ $pdf->draw_text(50, 610, t("Huollettava laite", $kieli),   $firstpage, $norm);
 $pdf->draw_text(50, 590, t("Valmistaja", $kieli).": {$tulostettavat_tiedot['tyomaarays']['merkki']}",   $firstpage, $pieni);
 $pdf->draw_text(50, 570, t("Malli", $kieli).": {$tulostettavat_tiedot['tyomaarays']['mallivari']}",   $firstpage, $pieni);
 $pdf->draw_text(50, 550, t("Sarjanumero", $kieli).": {$tulostettavat_tiedot['tyomaarays']['valmnro']}",   $firstpage, $pieni);
-$pdf->draw_text(50, 530, t("Viankuvaus", $kieli).": {$tulostettavat_tiedot['tyomaarays']['komm1']}",   $firstpage, $pieni);
+
+$viankuvausteksti = t("Viankuvaus", $kieli).": {$tulostettavat_tiedot['tyomaarays']['komm1']}";
+$viankuvausteksti = substr($viankuvausteksti, 0, 170);
+$viankuvausrivit = explode("\n", wordwrap($viankuvausteksti, 50));
+
+$viankuvausrivi = 530;
+foreach ($viankuvausrivit as $rivi) {
+  $pdf->draw_text(50, $viankuvausrivi, $rivi, $firstpage, $pieni);
+  $viankuvausrivi -= 11;
+}
 
 $pdf->draw_rectangle(490, 40, 630, 300, $firstpage, $rectparam);
 
@@ -72,7 +81,15 @@ $pdf->draw_text(50, 260, $yhtiorow["nimi"],    $firstpage, $pieni);
 $pdf->draw_text(50, 249, $yhtiorow["osoite"],  $firstpage, $pieni);
 $pdf->draw_text(50, 238, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],  $firstpage, $pieni);
 $pdf->draw_text(50, 227, $yhtiorow["maa"],    $firstpage, $pieni);
-$pdf->draw_text(50, 200, t("Lähetäthän laitteen mukana tulosteen tästä dokumentista, tai vaihtoehtoisesti kirjoitat mukaan huoltopyynnön numeron, kiitos", $kieli),    $firstpage, $piennorm);
+
+$infoteksti = t("Lähetäthän laitteen mukana tulosteen tästä dokumentista, tai vaihtoehtoisesti kirjoitat mukaan huoltopyynnön numeron, kiitos", $kieli);
+$infotekstirivit = explode("\n", wordwrap($infoteksti, 85));
+
+$inforivi = 200;
+foreach ($infotekstirivit as $rivi) {
+  $pdf->draw_text(50, $inforivi, $rivi,    $firstpage, $piennorm);
+  $inforivi -= 11;
+}
 
 // Toimitusosoite
 $pdf->draw_text(50, 140, t("Palautusosoite", $kieli).":",     $firstpage, $norm);

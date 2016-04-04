@@ -3504,7 +3504,7 @@ if ($tila == "" and !isset($jatka)) {
     $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
 
     if (mysql_num_rows($mainostxt_res) > 0) {
-      echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td></td></tr>";
+      echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td>".t("lasku")."</td></tr>";
     }
 
     echo "</table><br>";

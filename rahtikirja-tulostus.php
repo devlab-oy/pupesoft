@@ -1139,6 +1139,10 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
     }
 
+    if (isset($excel_koontilahete) && $excel_koontilahete == 'Y') {
+       laheta_excel_koontilahete($otunnukset);
+    }
+
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
       $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus , 0 , -2); //poistetaan pilkku ja välilyönti viimosen perästä
       $otunnukset_temp = $otunnukset;
@@ -1532,4 +1536,38 @@ if ($tee == '') {
   }
 
   require "inc/footer.inc";
+}
+
+function laheta_excel_koontilahete($otunnukset) {
+  global $kukarow;
+
+  $query = "SELECT asiakkaan_tilausnumero
+            FROM lasku
+            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus IN ($otunnukset)";
+   $tilausrivi_result = pupe_query($query);
+
+   require_once 'inc/pupeExcel.inc';
+
+   $worksheet   = new pupeExcel();
+   $format_bold = array("bold" => true);
+   $excelrivi   = 0;
+   $excelsarake = 0;
+
+   $worksheet->writeString($excelrivi, $excelsarake, 'Hornbach order number', $format_bold);
+   $excelsarake++;
+
+   $excelnimi = $worksheet->close();
+
+   $email_params = array("to" => $kukarow['eposti'],
+     "subject" => t("Excel-koontilähete"),
+     "attachements" => array(0 => array(
+       "filename"    => "/tmp/{$excelnimi}",
+       "newfilename" => "Koontilahete.xlsx",
+       "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+     )
+   );
+
+   pupesoft_sahkoposti($email_params);
 }

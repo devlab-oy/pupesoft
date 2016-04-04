@@ -101,7 +101,8 @@ $pdf->draw_text(50, 87, $tulostettavat_tiedot['lasku']['toim_maa'],    $firstpag
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
-$pdffilenimi = "/tmp/huoltopyynto-{$tyomaaraystunnus}-".md5(uniqid(mt_rand(), true)).".pdf";
+$asiakasnimi = str_replace(" ","", $tulostettavat_tiedot['asiakas']['nimi']);
+$pdffilenimi = "/tmp/huoltopyynto-{$tulostettavat_tiedot['huoltopyynto']}-{$asiakasnimi}-".md5(uniqid(mt_rand(), true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");

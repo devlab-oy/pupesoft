@@ -119,6 +119,25 @@ echo "<th>".t("Syötä loppupäivä")."</th>";
 echo "<td><input type='text' name='lpp' size='5' value='$lpp'><input type='text' name='lkk' size='5' value='$lkk'><input type='text' name='lvv' size='7' value='$lvv'></td>";
 echo "</tr>";
 
+$chk = array(
+  "none" => "",
+  "vain" => "",
+  "muut" => "",
+);
+
+$key = empty($vo_laskurajaus) ? 'none' : $vo_laskurajaus;
+
+$chk[$key] = 'CHECKED';
+
+echo "<tr>";
+echo "<th>".t("Tapahtumatyyppirajaus")."</th>";
+echo "<td>";
+echo "<input type='radio' name='vo_laskurajaus' value='none' {$chk['none']}> ".t("Näytä kaikki")."<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='vain' {$chk['vain']}> ".t("Näytä vain vaihto-omaisuuslaskuja")."<br>";
+echo "<input type='radio' name='vo_laskurajaus' value='muut' {$chk['muut']}> ".t("Älä näytä vaihto-omaisuuslaskuja")."<br>";
+echo "</td>";
+echo "</tr>";
+
 $chk = "";
 if (isset($excel) and $excel != "") {
   $chk = "CHECKED";
@@ -133,21 +152,45 @@ echo "<br><input type='submit' value='".t("Näytä")."'>";
 echo "</form>";
 echo "<br><br>";
 
-if ($tee == "aja" and $alisa != "" and $llisa != "") {
+$create_excel = (isset($excel) and $excel != "");
 
-  $query = "SELECT lasku.tunnus, if(lasku.tila = 'X', '".t("Tosite")."', lasku.nimi) nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, sum(tiliointi.summa) matkalla
-            FROM lasku
-            JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
-                          AND tiliointi.ltunnus = lasku.tunnus
-                          AND tiliointi.tilino = '$yhtiorow[matkalla_olevat]'
-                          AND tiliointi.tapvm >= '$alisa'
-                          AND tiliointi.tapvm <= '$llisa'
-                          AND tiliointi.korjattu = '')
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))
-            AND lasku.tapvm   >= '$alisa'
-            AND lasku.tapvm   <= '$llisa'
-            GROUP BY lasku.tunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm
+if ($tee == "aja" and $alisa != "" and $llisa != "") {
+  switch ($vo_laskurajaus) {
+    case 'vain':
+      // halutaan listata vain vaihto-omaisuuslaskuja
+      $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
+      break;
+    case 'muut':
+      // ei haluta listata vaihto-omaisuuslaskuja
+      $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
+      break;
+    default:
+      $vo_laskurajaus_lisa = '';
+  }
+
+  $query = "SELECT lasku.alatila,
+            lasku.nimi,
+            lasku.summa,
+            lasku.tapvm,
+            lasku.tila,
+            lasku.tunnus,
+            lasku.valkoodi,
+            sum(tiliointi.summa) AS matkalla
+            FROM tiliointi
+            JOIN lasku on (lasku.tunnus = tiliointi.ltunnus)
+            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+            AND tiliointi.tilino = '{$yhtiorow['matkalla_olevat']}'
+            AND tiliointi.tapvm >= '{$alisa}'
+            AND tiliointi.tapvm <= '{$llisa}'
+            AND tiliointi.korjattu = ''
+            {$vo_laskurajaus_lisa}
+            GROUP BY lasku.alatila,
+            lasku.nimi,
+            lasku.summa,
+            lasku.tapvm,
+            lasku.tila,
+            lasku.tunnus,
+            lasku.valkoodi
             HAVING matkalla != 0
             ORDER BY lasku.nimi, lasku.tapvm, lasku.summa";
   $result = pupe_query($query);
@@ -169,15 +212,15 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
     echo "<th>".t("Toimitusehto")."</th>";
     echo "</tr>";
 
-    if (isset($excel) and $excel != "") {
+    if ($create_excel) {
       include 'inc/pupeExcel.inc';
 
-      $worksheet    = new pupeExcel();
+      $worksheet   = new pupeExcel();
       $format_bold = array("bold" => TRUE);
-      $excelrivi    = 0;
+      $excelrivi   = 0;
       $excelsarake = 0;
 
-      $worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+      $worksheet->write($excelrivi, $excelsarake++, t("Nimi"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Tapvm"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Summa"), $format_bold);
       $worksheet->write($excelrivi, $excelsarake++, t("Valuutta"), $format_bold);
@@ -197,6 +240,10 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
     $alvsumma = array();
 
     while ($row = mysql_fetch_assoc($result)) {
+      // skipataan avaava tase tosite
+      if ($row['tila'] == 'X' and $row['alatila'] == 'A') {
+        continue;
+      }
 
       $liotsrow = array();
       $keikrow = array();
@@ -205,14 +252,16 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       $varivirow = array();
 
       // Onko lasku liitetty saapumiseen?
-      $query = "SELECT laskunro
+      $query = "SELECT DISTINCT laskunro
                 FROM lasku
                 WHERE yhtio     = '$kukarow[yhtio]'
                 AND tila        = 'K'
                 AND vanhatunnus = $row[tunnus]";
       $liotsres = pupe_query($query);
 
-      while ($liotsrow = mysql_fetch_assoc($liotsres)) {
+      if (mysql_num_rows($liotsres) == 1) {
+        $liotsrow = mysql_fetch_assoc($liotsres);
+
         // Virallinen varastoonvientipäivä
         $query = "SELECT laskunro, tunnus, mapvm, liitostunnus
                   FROM lasku
@@ -224,12 +273,12 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         $keikrow = mysql_fetch_assoc($keikres);
 
         // Milloin rivit on viety saldoille keskimäärin
-        $query = "SELECT
-                  if (laskutettuaika != '0000-00-00', DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d'), laskutettuaika) AS laskutettuaika
+        $query = "SELECT DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
                   FROM tilausrivi
                   WHERE yhtio     = '{$kukarow['yhtio']}'
                   AND uusiotunnus = {$keikrow['tunnus']}
-                  AND tyyppi      = 'O'";
+                  AND tyyppi      = 'O'
+                  AND laskutettuaika != '0000-00-00'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
 
@@ -252,6 +301,13 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         $toimires = pupe_query($query);
         $toimirow = mysql_fetch_assoc($toimires);
       }
+      elseif (mysql_num_rows($liotsres) > 1) {
+        echo "Lasku {$row['tunnus']} useassa saapumisessa<br>";
+      }
+
+      if ($row['tila'] == 'X' and empty($row['nimi'])) {
+        $row['nimi'] = t("Tosite");
+      }
 
       echo "<tr class='aktiivi'>";
       echo "<td>$row[nimi]</td>";
@@ -273,16 +329,16 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       echo "<td>$toimirow[toimitusehto]</td>";
       echo "</tr>";
 
-      if (isset($excel) and $excel != "") {
-        $worksheet->writeString($excelrivi, $excelsarake,   $row["nimi"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $row["tapvm"], $format_bold);
+      if ($create_excel) {
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["nimi"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $row["tapvm"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $row["summa"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $row["matkalla"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["valkoodi"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $keikrow["laskunro"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $keikrow["mapvm"], $format_bold);
-        $worksheet->writeDate($excelrivi, $excelsarake++, $rivirow["laskutettuaika"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $keikrow["mapvm"], $format_bold);
+        $worksheet->writeDate($excelrivi,   $excelsarake++, $rivirow["laskutettuaika"], $format_bold);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $varivirow['va_arvo'], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $toimirow["toimitusehto"], $format_bold);
 

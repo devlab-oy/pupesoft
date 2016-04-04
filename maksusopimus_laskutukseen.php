@@ -81,7 +81,10 @@ if (!function_exists("ennakkolaskuta")) {
     if (mysql_num_rows($mainosteksti_result) == 1) {
       $mainosteksti_row = mysql_fetch_assoc($mainosteksti_result);
 
-      if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
+      if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) {
+        if ($mainosteksti != '') $mainosteksti .= "\n";
+        $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
+      }
     }
 
     // Tilausrivin kommentti-kentt‰‰n menev‰ kommentti

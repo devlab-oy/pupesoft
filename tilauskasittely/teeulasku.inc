@@ -322,6 +322,24 @@ if ($lisa_viestit != "") {
   $viestit = trim($lisa_viestit." ".$viestit);
 }
 
+$mainosteksti = $lasrow['mainosteksti'];
+
+// Haetaan avainsanoista mainosteksti
+$query = "SELECT *
+          FROM avainsana
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND kieli   = '$kielirow[kieli]'
+          AND laji    = 'MAINOSTXT_LASKU'
+          ORDER BY jarjestys
+          LIMIT 1";
+$mainosteksti_result = pupe_query($query);
+
+if (mysql_num_rows($mainosteksti_result) == 1) {
+  $mainosteksti_row = mysql_fetch_assoc($mainosteksti_result);
+
+  if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
+}
+
 //Siivotaan kommenteista kaikki kummalliset merkit pois
 $comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $comments);
 $viestit        = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
@@ -330,6 +348,7 @@ $sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()
 $tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $tilausyhteyshenkilo);
 $asiakkaan_tilausnumero  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
 $kohde          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $kohde);
+$mainosteksti = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $mainosteksti);
 
 $fields = "yhtio";
 $values = "'$kukarow[yhtio]'";
@@ -380,6 +399,9 @@ for ($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulas
     break;
   case 'kohde':
     $values .= ", '$kohde'";
+    break;
+  case 'mainosteksti':
+    $values .= ", '{$mainosteksti}'";
     break;
   case 'laskutettu':
     $values .= ", now()";

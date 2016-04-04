@@ -1966,28 +1966,10 @@ if (!function_exists('loppu')) {
 
     $mainostxt_lasku_korkeus = 0;
 
-    $query = "SELECT *
-              FROM avainsana
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kieli   = '{$kieli}'
-              AND laji    = 'MAINOSTXT_LASKU'
-              ORDER BY jarjestys
-              LIMIT 1";
-    $mainostxt_lasku_result = pupe_query($query);
-
-    if (mysql_num_rows($mainostxt_lasku_result) == 1) {
-      $mainostxt_lasku_row = mysql_fetch_assoc($mainostxt_lasku_result);
-      $_viesti = trim($mainostxt_lasku_row["selite"]." ".$mainostxt_lasku_row["selitetark"]);
-      $laskurow['mainosteksti'] .= "\n{$_viesti}";
-      $laskurow['mainosteksti'] = trim($laskurow['mainosteksti']);
-    }
-
     if ($laskurow['mainosteksti'] != '') {
-      $mainostxt_lasku_viestit = explode("\n", wordwrap($_viesti, 115));
-
       $viestikala = $laskutyyppi == 20 ? 220 : 180;
 
-      foreach ($mainostxt_lasku_viestit as $mainostxt) {
+      foreach (explode("\n", wordwrap($laskurow['mainosteksti'], 115)) as $mainostxt) {
 
         if ($mainostxt_lasku_korkeus == 30) break;
 

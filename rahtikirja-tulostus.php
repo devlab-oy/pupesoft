@@ -1439,6 +1439,15 @@ if ($tee == '') {
     echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
     echo "</select>&nbsp;", t("Kpl"), ": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
 
+    // Excel koontilähetteen valinta
+    echo "<tr><th><label for='excel_koontilahete'>";
+    echo t('Excel-lähete');
+    echo "</label></th><td><select id='excel_koontilahete' name='excel_koontilahete'><option value=''>";
+    echo t('Ei tulosteta');
+    echo "</option><option value='Y'>";
+    echo t('Tulostetaan');
+    echo "</option></select></td></tr>";
+
     echo "</table>";
     echo "</td>";
 

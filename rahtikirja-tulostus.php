@@ -72,7 +72,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
       }
     }
 
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&merahti=$toitarow[merahti]&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl={$dgdkpl}{$linkkilisa}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&merahti=$toitarow[merahti]&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl={$dgdkpl}{$linkkilisa}&excel_koontilahete={$excel_koontilahete}'>";
     exit;
   }
 

@@ -52,6 +52,7 @@ pdflib
 pics
 validation
 viivakoodi
+DataTables
 css"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin

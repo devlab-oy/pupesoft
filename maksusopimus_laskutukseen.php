@@ -66,6 +66,24 @@ if (!function_exists("ennakkolaskuta")) {
       return 0;
     }
 
+    $mainosteksti = $laskurow['mainosteksti'];
+
+    // Haetaan avainsanoista mainosteksti
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND kieli   = '$kielirow[kieli]'
+              AND laji    = 'MAINOSTXT_LASKU'
+              ORDER BY jarjestys
+              LIMIT 1";
+    $mainosteksti_result = pupe_query($query);
+
+    if (mysql_num_rows($mainosteksti_result) == 1) {
+      $mainosteksti_row = mysql_fetch_assoc($mainosteksti_result);
+
+      if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
+    }
+
     // Tilausrivin kommentti-kenttään menevä kommentti
     $query = "SELECT
               sum(if (uusiotunnus > 0, 1, 0)) laskutettu,
@@ -101,6 +119,9 @@ if (!function_exists("ennakkolaskuta")) {
         else {
           $query .= "tilaustyyppi='L',";
         }
+      }
+      elseif ($fieldname == 'mainosteksti') {
+        $query .= "mainosteksti='{$mainosteksti}',";
       }
       // laatijaksi klikkaaja
       elseif ($fieldname == 'laatija') {

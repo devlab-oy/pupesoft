@@ -342,7 +342,7 @@ if (mysql_num_rows($mainosteksti_result) == 1) {
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
 $comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $comments);
-$viestit        = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
+$viestit          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
 $sisviestit1      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit1);
 $sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit2);
 $tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $tilausyhteyshenkilo);

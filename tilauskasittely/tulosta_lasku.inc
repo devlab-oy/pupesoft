@@ -1969,7 +1969,9 @@ if (!function_exists('loppu')) {
     if ($laskurow['mainosteksti'] != '') {
       $viestikala = $laskutyyppi == 20 ? 220 : 180;
 
-      foreach (explode("\n", wordwrap($laskurow['mainosteksti'], 115)) as $mainostxt) {
+      $mainostekstit = explode("\n", wordwrap($laskurow['mainosteksti'], 115));
+
+      foreach ($mainostekstit as $mainostxt) {
 
         if ($mainostxt_lasku_korkeus == 30) break;
 

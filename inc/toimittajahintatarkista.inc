@@ -4,7 +4,7 @@ if (!function_exists("toimittajahintatarkista")) {
   function toimittajahintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-    static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
+    static $chytunnus, $chtuoteno, $chryhma, $chminkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
 
     if (mysql_field_name($result, $i) == "hinta") {
       if (trim($t[$i]) == '') {
@@ -139,11 +139,6 @@ if (!function_exists("toimittajahintatarkista")) {
       $chminkpl = (int) $t[$i];
     }
 
-    if (mysql_field_name($result, $i) == "maxkpl") {
-      $t[$i] = str_replace(",", ".", $t[$i]);
-      $chmaxkpl = (int) $t[$i];
-    }
-
     if (mysql_field_name($result, $i) == "alkupvm") {
       $chalkupvm = $t[$i];
 
@@ -193,7 +188,6 @@ if (!function_exists("toimittajahintatarkista")) {
       if ($chtuoteno != '')     $and .= " and tuoteno = '$chtuoteno'";
 
       $chminkpl = (int) $chminkpl;
-      $chmaxkpl = (int) $chmaxkpl;
 
       $aquery = "SELECT ytunnus
                  FROM toimittajahinta
@@ -202,7 +196,6 @@ if (!function_exists("toimittajahintatarkista")) {
                  AND alkupvm   = '$chalkupvm'
                  AND loppupvm  = '$chloppupvm'
                  AND minkpl    = $chminkpl
-                 AND maxkpl    = $chmaxkpl
                  AND tunnus   != '$trow[$i]'";
       $dsresult = pupe_query($aquery);
 

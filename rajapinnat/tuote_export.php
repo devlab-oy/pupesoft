@@ -745,7 +745,7 @@ if (in_array('hinnastot', $magento_ajolista)) {
               AND tuote.tuoteno     != ''
               AND tuote.nakyvyys    != '')
             WHERE hinnasto.yhtio     = '{$kukarow["yhtio"]}'
-            AND (hinnasto.minkpl     = 0 AND hinnasto.maxkpl = 0)
+            AND hinnasto.minkpl      = 0
             AND hinnasto.laji       != 'O'
             AND hinnasto.maa         IN ('FI', '')
             AND hinnasto.valkoodi    in ('EUR', '')

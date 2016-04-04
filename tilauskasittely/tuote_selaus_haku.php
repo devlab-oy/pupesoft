@@ -1862,7 +1862,7 @@ function piirra_ostoskoriin_lisays($row) {
       echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
       echo "</td></tr>";
-      
+
       if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
         echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
       }
@@ -2562,7 +2562,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
                                                   '9999-12-31',
                                                   loppupvm) >= current_date)
                   or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
-                AND ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
+                AND (minkpl <= 1 or minkpl = 0)
                 ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999), minkpl
                 LIMIT 1";
 

@@ -1541,9 +1541,15 @@ if ($tee == '') {
 function laheta_excel_koontilahete($otunnukset) {
   global $kukarow;
 
-  $query = "SELECT asiakkaan_tilausnumero
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+                   tilausrivi.tuoteno,
+                   asiakaskommentti.kommentti
             FROM lasku
-            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            LEFT JOIN asiakaskommentti ON asiakaskommentti.yhtio = tilausrivi.yhtio
+              AND asiakaskommentti.ytunnus = lasku.ytunnus
+              AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ($otunnukset)";
   $result = pupe_query($query);
@@ -1573,7 +1579,9 @@ function laheta_excel_koontilahete($otunnukset) {
   while ($row = mysql_fetch_assoc($result)) {
     $excelsarake = 0;
     $fields = array(
-      $row['asiakkaan_tilausnumero']
+      $row['asiakkaan_tilausnumero'],
+      $row['tuoteno'],
+      $row['kommentti']
     );
 
     $excelrivi++;

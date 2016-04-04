@@ -39,8 +39,14 @@ class PrestaCustomerGroups extends PrestaClient {
     // 1 = Tax excluded, 0 = Tax included
     $xml->group->price_display_method = $this->presta_price_display_method;
     $xml->group->show_prices = 1;
-    $xml->group->name->language[0] = utf8_encode($group['selitetark']);
-    $xml->group->name->language[1] = utf8_encode($group['selitetark']);
+
+    // Set default value from Pupesoft to all languages
+    $languages = count($xml->group->name->language);
+
+    // we must set these for all languages
+    for ($i=0; $i < $languages; $i++) {
+      $xml->group->name->language[$i] = utf8_encode($group['selitetark']);
+    }
 
     return $xml;
   }

@@ -3,6 +3,7 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaCustomerGroups extends PrestaClient {
+  private $presta_show_prices = 1;
   private $presta_price_display_method = 0;
 
   public function __construct($url, $api_key) {
@@ -38,7 +39,9 @@ class PrestaCustomerGroups extends PrestaClient {
 
     // 1 = Tax excluded, 0 = Tax included
     $xml->group->price_display_method = $this->presta_price_display_method;
-    $xml->group->show_prices = 1;
+
+    // 1 = Show prices, 0 = Don't show prices
+    $xml->group->show_prices = $this->presta_show_prices;
 
     // Set default value from Pupesoft to all languages
     $languages = count($xml->group->name->language);
@@ -118,5 +121,9 @@ class PrestaCustomerGroups extends PrestaClient {
 
   public function set_price_display_method($value) {
     $this->presta_price_display_method = $value;
+  }
+
+  public function set_show_prices($value) {
+    $this->presta_presta_show_prices = $value;
   }
 }

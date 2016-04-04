@@ -1546,28 +1546,43 @@ function laheta_excel_koontilahete($otunnukset) {
             JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus IN ($otunnukset)";
-   $tilausrivi_result = pupe_query($query);
+  $tilausrivi_result = pupe_query($query);
 
-   require_once 'inc/pupeExcel.inc';
+  require_once 'inc/pupeExcel.inc';
 
-   $worksheet   = new pupeExcel();
-   $format_bold = array("bold" => true);
-   $excelrivi   = 0;
-   $excelsarake = 0;
+  $worksheet   = new pupeExcel();
+  $format_bold = array("bold" => true);
+  $excelrivi   = 0;
+  $excelsarake = 0;
 
-   $worksheet->writeString($excelrivi, $excelsarake, 'Hornbach order number', $format_bold);
-   $excelsarake++;
+  $headerit = array(
+    'Hornbach order number',
+    'Maston Product number',
+    'Hornbach Product number',
+    'EAN Code',
+    'Product Description',
+    'Pack',
+    'QTY'
+  );
 
-   $excelnimi = $worksheet->close();
+  foreach ($headerit as $header) {
+    $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
+    $excelsarake++;
+  }
 
-   $email_params = array("to" => $kukarow['eposti'],
-     "subject" => t("Excel-koontilähete"),
-     "attachements" => array(0 => array(
-       "filename"    => "/tmp/{$excelnimi}",
-       "newfilename" => "Koontilahete.xlsx",
-       "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-     )
-   );
+  $excelnimi = $worksheet->close();
 
-   pupesoft_sahkoposti($email_params);
+  $email_params = array(
+    "to"      => $kukarow['eposti'],
+    "subject" => t("Excel-koontilähete"),
+    "attachements" => array(
+      0 => array(
+        "filename"    => "/tmp/{$excelnimi}",
+        "newfilename" => "Koontilahete.xlsx",
+        "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      )
+    )
+  );
+
+  pupesoft_sahkoposti($email_params);
 }

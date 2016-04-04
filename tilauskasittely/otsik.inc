@@ -3500,6 +3500,13 @@ if ($tila == "" and !isset($jatka)) {
     if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
       echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
     }
+
+    $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
+
+    if (mysql_num_rows($mainostxt_res) > 0) {
+      echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td></td></tr>";
+    }
+
     echo "</table><br>";
 
     echo "<table>";
@@ -4195,6 +4202,7 @@ if (isset($jatka)) {
         laskutusvkopv           = '$laskutusvkopv',
         liitostunnus            = '$liitostunnus',
         maa                     = '$maa',
+        mainosteksti            = '{$mainosteksti}',
         maksuehto               = '$maksuehto',
         maksuteksti             = '$maksuteksti',
         myyja                   = '$myyja',

@@ -3,15 +3,14 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaCustomerGroups extends PrestaClient {
-
-  const RESOURCE = 'groups';
+  private $presta_price_display_method = 0;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'groups';
   }
 
   /**
@@ -36,8 +35,9 @@ class PrestaCustomerGroups extends PrestaClient {
     else {
       $xml->group->reduction = $group['selitetark_2'];
     }
-    //1 = Tax excluded, 0 = tax included in presta
-    $xml->group->price_display_method = 0;
+
+    // 1 = Tax excluded, 0 = Tax included
+    $xml->group->price_display_method = $this->presta_price_display_method;
     $xml->group->show_prices = 1;
     $xml->group->name->language[0] = utf8_encode($group['selitetark']);
     $xml->group->name->language[1] = utf8_encode($group['selitetark']);
@@ -108,5 +108,9 @@ class PrestaCustomerGroups extends PrestaClient {
       }
       $this->delete($deleted_group);
     }
+  }
+
+  public function set_price_display_method($value) {
+    $this->presta_price_display_method = $value;
   }
 }

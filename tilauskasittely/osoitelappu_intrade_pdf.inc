@@ -187,7 +187,7 @@ else {
       $kirjainlisa = " ".chr(64+$uniq_merkki);
     }
 
-    if (isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
+    if (false and isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
       $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
     }
     elseif ($kuljetusliike_sscc) {
@@ -330,14 +330,14 @@ else {
     $pdf->draw_text(mm_pt(22),  mm_pt(120), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $iso);
 
     $pdf->draw_text(mm_pt(90), mm_pt(140), "Toimituspvm myym‰l‰‰n:",         $firstpage, $otsik);
-    
+
     if ((int) str_replace("-", "", $laskurow['toimaika']) < date("Ymd")) {
       $_toimaika = date("d.m.Y");
     }
     else {
       $_toimaika = tv1dateconv($laskurow['toimaika']);
     }
-    
+
     $pdf->draw_text(mm_pt(100), mm_pt(135), $_toimaika,                  $firstpage, $norm);
 
     // Kuljetusohjeet = viivakoodi tulee t‰h‰n

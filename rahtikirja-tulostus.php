@@ -1539,6 +1539,8 @@ if ($tee == '') {
 }
 
 function laheta_excel_koontilahete($otunnukset) {
+  require_once 'inc/pupeExcel.inc';
+
   global $kukarow;
 
   $query = "SELECT asiakaskommentti.kommentti,
@@ -1562,8 +1564,6 @@ function laheta_excel_koontilahete($otunnukset) {
               AND lasku.alatila = 'B'
               AND lasku.tunnus IN ($otunnukset)";
   $result = pupe_query($query);
-
-  require_once 'inc/pupeExcel.inc';
 
   $worksheet   = new pupeExcel();
   $format_bold = array("bold" => true);

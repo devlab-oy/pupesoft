@@ -1558,7 +1558,9 @@ function laheta_excel_koontilahete($otunnukset) {
               AND asiakaskommentti.ytunnus = lasku.ytunnus
               AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus IN ($otunnukset)";
+              AND lasku.tila = 'L'
+              AND lasku.alatila = 'B'
+              AND lasku.tunnus IN ($otunnukset)";
   $result = pupe_query($query);
 
   require_once 'inc/pupeExcel.inc';

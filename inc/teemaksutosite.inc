@@ -193,9 +193,11 @@ if ($teemaksutosite) {
 
   if ($trow["valkoodi"] != '' and $trow["valkoodi"] != $yritirow["valkoodi"]) {
     $summavaluutassa = $trow["summa"];
+    $summavaluuttakoodi = $trow["valkoodi"];
   }
   else {
     $summavaluutassa = 0;
+    $summavaluuttakoodi = '';
   }
 
   // Rahatili
@@ -209,7 +211,7 @@ if ($teemaksutosite) {
             tapvm    = '$tpv-$tpk-$tpp',
             summa    = '$maara',
             summa_valuutassa = '{$summavaluutassa}',
-            valkoodi = '$trow[valkoodi]',
+            valkoodi = '{$summavaluuttakoodi}',
             vero     = 0,
             lukko    = '',
             laatija  = 'tiliote',
@@ -230,7 +232,7 @@ if ($teemaksutosite) {
             tapvm    = '$tpv-$tpk-$tpp',
             summa    = '$trow[vietysumma]',
             summa_valuutassa = '{$summavaluutassa}',
-            valkoodi = '$trow[valkoodi]',
+            valkoodi = '{$summavaluuttakoodi}',
             vero     = 0,
             lukko    = '',
             laatija  = 'tiliote',

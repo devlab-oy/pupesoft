@@ -2695,7 +2695,7 @@ else {
             $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
-          else {
+          elseif ($silent == "") {
             $tulos_ulos .= "\n".t("Nollasummaista laskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
           }
 

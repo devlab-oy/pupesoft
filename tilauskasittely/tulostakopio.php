@@ -251,6 +251,12 @@ if ($kukarow["extranet"] != "") {
       exit;
     }
   }
+  elseif ($toim == "HUOLTOPYYNTOKOPIO" and !empty($tyom_tunnus) and !empty($pdffilenimi)) {
+    if ($tee == 'NAYTATILAUS') {
+      echo file_get_contents($pdffilenimi);
+    }
+    $tee = '';
+  }
   else {
     // Extranet kaatuu tähän
     exit;

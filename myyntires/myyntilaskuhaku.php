@@ -473,8 +473,11 @@ if (!empty($tee)) {
       }
 
       echo "<td valign='top'>{$trow["erpcm"]}</td>";
-      echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopelisa}'>{$trow['laskunro']}</td>";
-      echo "<td valign='top'><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopelisa}'>{$trow['nimi']}</a></td>";
+      
+      echo "<td>".pupe_DataTablesEchoSort($trow['laskunro']);
+      echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopelisa}'>{$trow['laskunro']}</td>";
+      echo "<td valign='top'><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopelisa}'>{$trow['nimi']}</a>";
+      echo "</td>";
       echo "<td valign='top' align='right'>{$trow['summa']}</td>";
       echo "<td valign='top'>{$trow['valkoodi']}</td>";
 

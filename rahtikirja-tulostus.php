@@ -1551,6 +1551,7 @@ function laheta_excel_koontilahete($otunnukset) {
             FROM lasku
             JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.keratty <> ''
             JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = tilausrivi.tuoteno
             LEFT JOIN asiakaskommentti ON asiakaskommentti.yhtio = tilausrivi.yhtio

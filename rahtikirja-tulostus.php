@@ -1565,6 +1565,8 @@ function laheta_excel_koontilahete($otunnukset) {
               AND lasku.tunnus IN ($otunnukset)";
   $result = pupe_query($query);
 
+  if (mysql_num_rows($result) == 0) return false;
+
   $worksheet   = new pupeExcel();
   $format_bold = array("bold" => true);
   $excelrivi   = 0;
@@ -1619,5 +1621,5 @@ function laheta_excel_koontilahete($otunnukset) {
     )
   );
 
-  pupesoft_sahkoposti($email_params);
+  return pupesoft_sahkoposti($email_params);
 }

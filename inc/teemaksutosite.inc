@@ -190,9 +190,14 @@ if ($teemaksutosite) {
   }
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
+
   if ($trow["valkoodi"] != '' and $trow["valkoodi"] != $yritirow["valkoodi"]) {
     $summavaluutassa = $trow["summa"];
   }
+  else {
+    $summavaluutassa = 0;
+  }
+
   // Rahatili
   $query = "INSERT into tiliointi set
             yhtio    = '$yritirow[yhtio]',

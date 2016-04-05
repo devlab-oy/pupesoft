@@ -474,7 +474,7 @@ if (!empty($tee)) {
 
       echo "<td valign='top'>{$trow["erpcm"]}</td>";
 
-      echo "<td>";
+      echo "<td valign='top'>";
       echo pupe_DataTablesEchoSort($trow['laskunro']);
       echo "<a href='../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopelisa}'>{$trow['laskunro']}</a>";
       echo "</td>";

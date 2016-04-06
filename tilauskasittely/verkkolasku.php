@@ -3327,7 +3327,7 @@ else {
                 return false;
               }
             }
-            if (ero < 0) {
+            if (ero < 0 && '{$yhtiorow['laskutus_tulevaisuuteen']}' != 'S') {
               var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
               alert(msg);
 

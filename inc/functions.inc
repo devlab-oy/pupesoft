@@ -32529,10 +32529,6 @@ if (!function_exists('pupesoft_log')) {
       return;
     }
 
-    // tehd‰‰n full message, timestampilla
-    $timestamp = date('d.m.y H:i:s');
-    $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
-
     // kirjoitetaan message logiiun
     $file_handle = fopen($full_path, 'a');
 
@@ -32541,9 +32537,13 @@ if (!function_exists('pupesoft_log')) {
       return;
     }
 
+    // tehd‰‰n full message, timestampilla
+    $timestamp = date('d.m.y H:i:s');
+    $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
+
     if (fwrite($file_handle, $full_message) === false) {
       echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
-      return;
+      // ei returnia t‰ss‰, koska halutaan sulkea file_handle
     }
 
     fclose($file_handle);

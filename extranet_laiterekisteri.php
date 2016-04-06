@@ -1,5 +1,8 @@
 <?php
 
+// DataTables päälle
+$pupe_DataTables = "laitetable";
+
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_laiterekisteri.php") !== FALSE) {
   require "parametrit.inc";
 }
@@ -10,24 +13,37 @@ if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus to
 
 require "asiakasvalinta.inc";
 
+// Enabloidaan ajax kikkare
+enable_ajax();
+pupe_DataTables(array(array($pupe_DataTables, 6, 5, true, true)));
+
 piirra_kayttajan_laitteet();
 
 function piirra_kayttajan_laitteet() {
+  global $pupe_DataTables;
 
   echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
 
   $naytettavat_laitteet = hae_kayttajan_laitteet();
   if (count($naytettavat_laitteet) > 0) {
     echo "<form name ='laiteformi'>";
-    echo "<table>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+
+    echo "<thead>";
+
     echo "<tr>";
     piirra_headerit();
     echo "</tr>";
 
-    foreach ($naytettavat_laitteet as $laite) {    
+    echo "<tr>";
+    piirra_hakuboksit();
+    echo "</tr>";
+
+    echo "</thead>";
+
+    foreach ($naytettavat_laitteet as $laite) {
       piirra_laiterivi($laite);
     }
-
     echo "</table>";
     echo "</form>";
   }
@@ -74,13 +90,27 @@ function piirra_headerit() {
     t("Valmistaja"),
     t("Sarjanumero"),
     t("Malli"),
-    t("Vc"),
-    t("Vc end"),
-    t("Lcm info")
+    t("Valmistajan sopimuksen numero"),
+    t("Valmistajan sopimuksen päättymispäivä")
   );
   foreach ($headerit as $header) {
     echo "<th>{$header}</th>";
   }
+}
+
+function piirra_hakuboksit() {
+  $headerit = array(
+    'valmistaja',
+    'sarjanumero',
+    'tuotenumero',
+    'valmistajan_sopimusnumero',
+    'valmistajan_sopimus_paattymispaiva'
+  );
+  foreach ($headerit as $header) {
+    echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
+  }
+  // Huoltopyyntölinkin hidden search
+  echo "<td style ='display:none'><input type='hidden' class='search_field' name='search_hidden'/></td>";
 }
 
 function piirra_laiterivi($laite) {
@@ -92,7 +122,6 @@ function piirra_laiterivi($laite) {
   echo "<td>{$laite['tuoteno']}</td>";
   echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
-  echo "<td>{$laite['kommentti']}</td>";
-  echo "<td class='back'><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";
+  echo "<td class='back' nowrap><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";
   echo "</tr>";
 }

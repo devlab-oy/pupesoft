@@ -2325,20 +2325,11 @@ if ($fieldname == "viitteen_kasinsyotto") {
 
 if ($fieldname == "poistuvat_tuotteet") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $sel = $trow[$i] == 'X' ? 'selected' : '';
 
-  $sel1="";
-  $sel2="";
-
-  if ($trow[$i] == "") {
-    $sel1 = "selected";
-  }
-  else {
-    $sel2 = "selected";
-  }
-
-  $ulos .= "<option value=''  $sel1>".t("Älä näytä poistuvia tuotteita oletuksena")."</option>";
-  $ulos .= "<option value='X' $sel2>".t("Näytä poistuvat tuotteet oletuksena")."</option>";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Näytä poistuvat tuotteet oletuksena tuotekyselyssä")."</option>";
+  $ulos .= "<option value='X' {$sel}>".t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita oletuksena tuotekyselyssä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3058,6 +3049,19 @@ if ($fieldname == "tilausrivien_toimitettuaika") {
   $ulos .= "<option value = ''>".t("Tuotteiden toimitettuaika tulostetaan laskulle normaalisti")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Saldottomien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Kaikkien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tilausrivin_esisyotto") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella / tarjouksella ei esisyötetä hintaa, alennuksia ja nettoa kun syötetään tilausriville tuotenumero ja kpl")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella / tarjouksella esisyötetään hinta, alennukset ja netto kun syötetään tilausriville tuotenumero ja kpl")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

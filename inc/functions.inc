@@ -27587,6 +27587,13 @@ if (!function_exists('posten_outbounddelivery')) {
       $ftpfile = realpath($filename);
 
       require "inc/ftp-send.inc";
+
+      if ($palautus == 0) {
+        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+      }
+      else {
+        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+      }
     }
   }
 }
@@ -32637,5 +32644,37 @@ if (!function_exists('sort_array_of_arrays')) {
     }
 
     array_multisort($sortarray, SORT_ASC, $array);
+  }
+}
+
+if (!function_exists('pupesoft_log')) {
+  function pupesoft_log($log_file, $log_message) {
+    // tehd‰‰n full path tiedostoon
+    $log_path  = is_dir('/home/devlab/logs') ? '/home/devlab/logs/' : '/tmp/';
+    $full_path = $log_path . basename($log_file, '.log') . '.log';
+
+    if (file_exists($full_path) and !is_writable($full_path)) {
+      echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
+      return;
+    }
+
+    // kirjoitetaan message logiiun
+    $file_handle = fopen($full_path, 'a');
+
+    if ($file_handle === false) {
+      echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
+      return;
+    }
+
+    // tehd‰‰n full message, timestampilla
+    $timestamp = date('d.m.y H:i:s');
+    $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
+
+    if (fwrite($file_handle, $full_message) === false) {
+      echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
+      // ei returnia t‰ss‰, koska halutaan sulkea file_handle
+    }
+
+    fclose($file_handle);
   }
 }

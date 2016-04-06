@@ -300,7 +300,8 @@ if (!function_exists("menu")) {
                 "maa" => $yhtiorow["maa"],
                 "vienti_kurssi" => 1,
                 "liitostunnus" => $asiakasrow["tunnus"],
-                "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
+                "ytunnus" => $asiakasrow["ytunnus"],
+                'yhtio_toimipaikka' => $asiakasrow['toimipaikka']) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
             if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
               $ok = 1;
@@ -394,7 +395,8 @@ if (!function_exists("menu")) {
                 "maa" => $yhtiorow["maa"],
                 "vienti_kurssi" => 1,
                 "liitostunnus" => $asiakasrow["tunnus"],
-                "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
+                "ytunnus" => $asiakasrow["ytunnus"],
+                'yhtio_toimipaikka' => $asiakasrow['toimipaikka']) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
             if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
               $ok = 1;

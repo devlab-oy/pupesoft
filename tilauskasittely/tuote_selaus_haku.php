@@ -1820,7 +1820,8 @@ function piirra_extranet_saldo($row, $oleasrow) {
 function hae_oletusasiakas($laskurow) {
   global $kukarow;
 
-  $query = "SELECT *
+  $query = "SELECT *,
+                   toimipaikka AS yhtio_toimipaikka
             FROM asiakas
             WHERE yhtio='$kukarow[yhtio]'
             AND tunnus='$kukarow[oletus_asiakas]'";

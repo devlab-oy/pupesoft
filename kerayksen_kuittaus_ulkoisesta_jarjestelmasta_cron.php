@@ -201,6 +201,8 @@ if ($handle = opendir($path)) {
                       AND mapvm   != '0000-00-00'
                       AND chn      = '999'";
             $yoimresult  = pupe_query($query);
+
+            pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
           }
           else {
             // Laitetaan s‰hkˆpostia tuplaker‰yksest‰ - ollaan yritetty merkit‰ ker‰tyksi jo k‰sin ker‰tty‰ tilausta
@@ -216,6 +218,8 @@ if ($handle = opendir($path)) {
             }
 
             $body = t("Pupessa jo ker‰tyksi merkitty tilaus %d yritettiin merkit‰ ker‰tyksi ker‰yssanomalla", "", $otunnus);
+
+            pupesoft_log('outbound_delivery', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
 
             $params = array(
               "to"      => $error_email,
@@ -246,6 +250,8 @@ if ($handle = opendir($path)) {
             );
 
             pupesoft_sahkoposti($params);
+
+            pupesoft_log('outbound_delivery', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
           }
 
           // siirret‰‰n tiedosto done-kansioon

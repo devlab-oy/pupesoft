@@ -946,6 +946,7 @@ if ($tee == "JATKA") {
                 lasku.ytunnus,
                 tilausrivi.varattu jt,
                 lasku.nimi,
+                lasku.nimitark,
                 lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
@@ -1003,6 +1004,7 @@ if ($tee == "JATKA") {
                 lasku.ytunnus,
                 tilausrivi.jt $lisavarattu jt,
                 lasku.nimi,
+                lasku.nimitark,
                 lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
@@ -1069,7 +1071,9 @@ if ($tee == "JATKA") {
                 tilausrivi.tilaajanrivinro,
                 lasku.ytunnus,
                 tilausrivi.jt $lisavarattu jt,
-                lasku.nimi, lasku.toim_nimi,
+                lasku.nimi,
+                lasku.nimitark,
+                lasku.toim_nimi,
                 lasku.viesti,
                 tilausrivi.tilkpl,
                 tilausrivi.hinta,
@@ -1712,14 +1716,24 @@ if ($tee == "JATKA") {
               if ($tilaus_on_jo == "") {
                 echo "<td valign='top' $class>$jtrow[ytunnus]<br>";
 
-                if ($kukarow["extranet"] == "") {
-                  echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]</a><br>";
-                }
-                else {
-                  echo "$jtrow[nimi]<br>";
+                $_nimitark = "";
+                if (!empty($jtrow["nimitark"])) {
+                 $_nimitark = "<br>".$jtrow["nimitark"];
                 }
 
-                echo "$jtrow[toim_nimi]";
+                if ($kukarow["extranet"] == "") {
+                  echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$jtrow[ltunnus]'>$jtrow[nimi]$_nimitark</a><br>";
+                }
+                else {
+                  echo "$jtrow[nimi]$_nimitark<br>";
+                }
+
+                $_toim_nimitark = "";
+                if (!empty($jtrow["toim_nimitark"])) {
+                 $_toim_nimitark = "<br>".$jtrow["toim_nimitark"];
+                }
+
+                echo "$jtrow[toim_nimi]$_toim_nimitark";
 
                 if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
 
@@ -2286,14 +2300,24 @@ if ($tee == "JATKA") {
                 if ($tilaus_on_jo == "") {
                   echo "<td valign='top' $class>$perherow[ytunnus]<br>";
 
-                  if ($kukarow["extranet"] == "") {
-                    echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]</a><br>";
-                  }
-                  else {
-                    echo "$perherow[nimi]<br>";
+                  $_nimitark = "";
+                  if (!empty($perherow["nimitark"])) {
+                    $_nimitark = "<br>".$perherow["nimitark"];
                   }
 
-                  echo "$perherow[toim_nimi]</td>";
+                  if ($kukarow["extranet"] == "") {
+                    echo "<a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=NAYTATILAUS&tunnus=$perherow[ltunnus]'>$perherow[nimi]$_nimitark</a><br>";
+                  }
+                  else {
+                    echo "$perherow[nimi]$_nimitark<br>";
+                  }
+
+                  $_toim_nimitark = "";
+                  if (!empty($perherow["toim_nimitark"])) {
+                    $_toim_nimitark = "<br>".$perherow["toim_nimitark"];
+                  }
+
+                  echo "$perherow[toim_nimi]$_toim_nimitark</td>";
                 }
 
                 echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";

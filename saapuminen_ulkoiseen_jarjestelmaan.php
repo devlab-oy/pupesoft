@@ -217,8 +217,11 @@ if ($xml_chk and $ftp_chk) {
               AND tila    = 'K'
               AND tunnus  = '{$saapumisnro}'";
     $updres = pupe_query($query);
+
+    pupesoft_log('inbound_delivery', "Saapuminen {$row['laskunro']} lähetetty");
   }
   else {
+    pupesoft_log('inbound_delivery', "Saapumisen {$row['laskunro']} lähetys epäonnistui");
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti epäonnistui"), "\n";

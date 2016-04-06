@@ -84,7 +84,7 @@ else {
   require_once "pdflib/phppdflib.class.php";
 
   // jos php-gd on installoitu niin loidataab barcode library
-  if (in_array("gd", get_loaded_extensions())) {
+  if (false and in_array("gd", get_loaded_extensions())) {
     if (@include_once "viivakoodi/Barcode.php");
     else include_once "Barcode.php";
   }
@@ -187,7 +187,7 @@ else {
       $kirjainlisa = " ".chr(64+$uniq_merkki);
     }
 
-    if (false and isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
+    if (isset($uniq_pakkaukset_sscc[$tulostuskpl]) and $uniq_pakkaukset_sscc[$tulostuskpl] != "") {
       $sscc = $uniq_pakkaukset_sscc[$tulostuskpl];
     }
     elseif ($kuljetusliike_sscc) {
@@ -212,7 +212,7 @@ else {
     // tehdään pdf:n uusi sivu
     $firstpage = $pdf->new_page("a5");
 
-    if (class_exists("Image_Barcode")) {
+    if (false and class_exists("Image_Barcode")) {
       //luodaan viivakoodiolio kuljetusohjeelle = postino
       $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 

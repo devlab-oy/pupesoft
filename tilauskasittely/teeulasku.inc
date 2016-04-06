@@ -336,7 +336,7 @@ $mainosteksti_result = pupe_query($query);
 
 if (mysql_num_rows($mainosteksti_result) == 1) {
   $mainosteksti_row = mysql_fetch_assoc($mainosteksti_result);
-
+  if ($mainosteksti != '') $mainosteksti .= "\n";
   if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
 }
 

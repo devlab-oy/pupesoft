@@ -646,7 +646,7 @@ else {
         break;
       case 'asmy':
         $sel_asmy = 'selected';
-        break;  
+        break;
       case 'asbuos':
         $sel_asbuos = 'selected';
         break;
@@ -2690,6 +2690,37 @@ else {
                 }
                 else {
                   $bulisa .= " and try = '' and osasto = '' ";
+                }
+              }
+
+              if (!empty($kumulatiivinen_valittu)) {
+                $_kumulalk_parts = explode("-",$kumulatiivinen_alkupaiva);
+                $_kumulalk = $_kumulalk_parts[0].sprintf('%02d', $_kumulalk_parts[1]);
+                $_kumul_alkukuun_paivat = date('t', mktime(0, 0, 0, $_kumulalk_parts[1], 1, $_kumulalk_parts[0]));
+
+                // Kumulatiivinen tavoite:
+                $budj_q = "SELECT kausi, sum(summa) summa
+                           FROM {$budj_taulu}
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           and kausi   >= '{$_kumulalk}'
+                           and kausi   <= '{$lopu_kausi}'
+                           {$bulisa}
+                           GROUP BY kausi";
+                $budj_r = pupe_query($budj_q);
+
+                $row["tavoitekumul"] = 0;
+
+                while ($dyprow = mysql_fetch_assoc($budj_r)) {
+
+                  if ($dyprow["kausi"] == $_kumulalk and (int) $ppa != 1) {
+                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$ppa)/$_kumul_alkukuun_paivat);
+                  }
+
+                  if ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
+                    $dyprow["summa"] = $dyprow["summa"] * ($ppl/$lopukuun_paivat);
+                  }
+
+                  $row["tavoitekumul"] += $dyprow["summa"];
                 }
               }
 

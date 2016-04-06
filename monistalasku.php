@@ -1718,7 +1718,7 @@ if ($tee == 'MONISTA') {
           switch ($fieldname) {
 
           case 'toimaika':
-            if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') {
+            if (($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') or $toim == 'SOPIMUS') {
               $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             else {

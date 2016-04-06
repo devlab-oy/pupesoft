@@ -193,12 +193,8 @@ if ($xml_chk and $ftp_chk) {
 
   if (file_put_contents($filename, $xml->asXML())) {
 
-    if (!PUPE_UNICODE) {
-      exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
-    }
-    else {
-      $ftputf8 = TRUE;
-    }
+    # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+    $ftputf8 = PUPE_UNICODE;
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti onnistui"), "\n";
@@ -221,8 +217,11 @@ if ($xml_chk and $ftp_chk) {
               AND tila    = 'K'
               AND tunnus  = '{$saapumisnro}'";
     $updres = pupe_query($query);
+
+    pupesoft_log('inbound_delivery', "Saapuminen {$row['laskunro']} l‰hetetty");
   }
   else {
+    pupesoft_log('inbound_delivery', "Saapumisen {$row['laskunro']} l‰hetys ep‰onnistui");
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti ep‰onnistui"), "\n";

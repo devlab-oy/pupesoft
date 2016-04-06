@@ -52,6 +52,7 @@ pdflib
 pics
 validation
 viivakoodi
+DataTables
 css"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
@@ -124,7 +125,9 @@ tiedostofunkkarit.inc
 asiakasvalinta.inc
 extranet_tyomaaraykset.php
 extranet_laiterekisteri.php
+nayta_tyomaarayksen_tapahtumat.php
 tyomaarays/tulosta_tyomaarays.inc
+huoltopyynto_pdf.inc
 popup.js"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi

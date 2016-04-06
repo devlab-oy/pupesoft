@@ -64,11 +64,15 @@ if ($handle = opendir($path)) {
 
       if ($xml) {
 
+        $saapumisnro = 0;
+
         foreach ($xml->VendPackingSlip as $node) {
           $ostotilaus = (int) $node->PurchId;
           $saapumisnro = (int) $node->ReceiptsListId;
+        }
 
-          foreach ($node->Lines->Line as $line) {
+        if (isset($xml->Lines) and isset($xml->Lines->Line)) {
+          foreach ($xml->Lines->Line as $line) {
 
             $rivitunnus = (int) $line->TransId;
             $tuoteno = (string) $line->ItemNumber;
@@ -86,12 +90,14 @@ if ($handle = opendir($path)) {
           }
         }
 
-        $query = "UPDATE lasku SET
-                  sisviesti3   = 'ok_vie_varastoon'
-                  WHERE yhtio  = '{$yhtio}'
-                  AND tila     = 'K'
-                  AND laskunro = '{$saapumisnro}'";
-        $updres = pupe_query($query);
+        if (!empty($saapumisnro)) {
+          $query = "UPDATE lasku SET
+                    sisviesti3   = 'ok_vie_varastoon'
+                    WHERE yhtio  = '{$yhtio}'
+                    AND tila     = 'K'
+                    AND laskunro = '{$saapumisnro}'";
+          $updres = pupe_query($query);
+        }
 
         rename($path.$file, $path."done/".$file);
       }

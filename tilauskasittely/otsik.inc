@@ -2467,7 +2467,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
     }
 
-    if ($toim != "MYYNTITILI") {
+    if ($toim != "MYYNTITILI" AND $toim != "ENNAKKO") {
       $oikea_sarake[$oikea] = "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
       $oikea++;
     }

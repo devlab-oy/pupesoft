@@ -1543,6 +1543,21 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           echo "</select>";
         }
+        elseif ($toim == "toimi" and mysql_field_name($result, $i) == "toimittajaryhma") {
+          echo "<br />";
+          echo "<select name='haku[{$i}]'>";
+          echo "<option value=''></option>";
+
+          $_ryhmares = t_avainsana('TOIMITTAJARYHMA');
+
+          while ($toimittajaryhmarow = mysql_fetch_assoc($_ryhmares)) {
+            $sel = (isset($haku[$i]) and $haku[$i] == "@".$toimittajaryhmarow['selite']) ? ' selected' : '';
+            $_teksti = $toimittajaryhmarow['selitetark'] != '' ? "{$toimittajaryhmarow['selite']} {$toimittajaryhmarow['selitetark']}" : $toimittajaryhmarow['selite'];
+            echo "<option value='@{$toimittajaryhmarow['selite']}'{$sel}>{$_teksti}</option>";
+          }
+
+          echo "</select>";
+        }
         elseif ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L' and mysql_field_name($result, $i) == "toimipaikka") {
 
           echo "<br />";

@@ -333,8 +333,14 @@ if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
 elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
-else
+elif [[ -n ${jatketaan} ]]; then
+  # Jos ollaan kysytty jo ylempänä, otetaan siitä vastaus
   jatketaanko=$jatketaan
+else
+  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
+  echo
+  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
+  read jatketaanko
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
@@ -378,7 +384,7 @@ if [[ ${bundle} = true ]]; then
 
   # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
   cd "${pupenextdir}" &&
-  bundle --quiet &&
+  (bundle check || bundle install) &&
   bundle clean &&
   bundle exec rake css:write &&
   bundle exec rake assets:precompile &&
@@ -439,7 +445,7 @@ else
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then
-    bundle --quiet &&
+    (bundle check || bundle install) &&
     bundle exec rake db:migrate
 
     if [[ $? -eq 0 ]]; then

@@ -3368,7 +3368,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and maa       in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                 and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-                ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+                AND (yhtion_toimipaikka_id IS NULL
+                  OR yhtion_toimipaikka_id = 0
+                  OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                ORDER BY yhtion_toimipaikka_id DESC,
+                         IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                         maa DESC
                 LIMIT 1";
       $hresult = pupe_query($query);
 
@@ -3393,7 +3398,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and maa       in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                 and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-                ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+                AND (yhtion_toimipaikka_id IS NULL
+                  OR yhtion_toimipaikka_id = 0
+                  OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                ORDER BY yhtion_toimipaikka_id DESC,
+                         IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                         valkoodi DESC
                 LIMIT 1";
       $hresult = pupe_query($query);
 
@@ -3425,7 +3435,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and maa       in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                 and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-                ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+                AND (yhtion_toimipaikka_id IS NULL
+                  OR yhtion_toimipaikka_id = 0
+                  OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                ORDER BY yhtion_toimipaikka_id DESC,
+                         IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                         maa DESC
                 LIMIT 1";
       $hresult = pupe_query($query);
 
@@ -3450,7 +3465,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and maa       in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                 and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-                ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+                AND (yhtion_toimipaikka_id IS NULL
+                  OR yhtion_toimipaikka_id = 0
+                  OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                ORDER BY yhtion_toimipaikka_id DESC,
+                         IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                         valkoodi DESC
                 LIMIT 1";
       $hresult = pupe_query($query);
 
@@ -5425,7 +5445,13 @@ if (!function_exists("alehinta")) {
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                   and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
+                  AND (yhtion_toimipaikka_id IS NULL
+                    OR yhtion_toimipaikka_id = 0
+                    OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           maa DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5452,7 +5478,13 @@ if (!function_exists("alehinta")) {
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                   and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+                  AND (yhtion_toimipaikka_id IS NULL
+                    OR yhtion_toimipaikka_id = 0
+                    OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           valkoodi DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5490,7 +5522,13 @@ if (!function_exists("alehinta")) {
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                   and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc, tunnus desc
+                  AND (yhtion_toimipaikka_id IS NULL
+                    OR yhtion_toimipaikka_id = 0
+                    OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           maa DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -5517,7 +5555,13 @@ if (!function_exists("alehinta")) {
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                   and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+                  AND (yhtion_toimipaikka_id IS NULL
+                    OR yhtion_toimipaikka_id = 0
+                    OR yhtion_toimipaikka_id = '{$laskurow["yhtio_toimipaikka"]}')
+                  ORDER BY yhtion_toimipaikka_id DESC,
+                           IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
+                           valkoodi DESC,
+                           tunnus DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -10193,6 +10237,85 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei sarjanumeroita").".</font></div>";
+      }
+
+      livesearch_trimmaa_leveys($hakuid);
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+
+    pupeslave_stop();
+  }
+}
+
+if (!function_exists("livesearch_laitehaku")) {
+  function livesearch_laitehaku($toim = '') {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      $query = "SELECT DISTINCT sarjanro
+                FROM laite
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                AND sarjanro LIKE '%{$haku}%'";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='sarjanumero_valinta_$row[sarjanro]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'sarjanumero_valinta_$row[sarjanro]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='$row[sarjanro]';";
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
+                style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
+                <font style='font-weight:bold'>{$row['sarjanro']}</font>
+                </span>
+              </div><div name='selectValues$hakuid' id='$row[sarjanro]'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla lˆytyi"), " ".mysql_num_rows($result)." ", t("laitetta"), ", ".t("n‰ytet‰‰n")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei laitteita").".</font></div>";
       }
 
       livesearch_trimmaa_leveys($hakuid);
@@ -25258,7 +25381,13 @@ if (!function_exists("saako_myyda_private_label")) {
     if ($trow["hinnastoon"] == "V" or $tarkistakaikkituotteet) {
 
       //haetaan asiakkaan tiedot
-      $query = "SELECT tunnus liitostunnus, ytunnus, valkoodi, maa, ryhma, piiri
+      $query = "SELECT tunnus liitostunnus,
+                       ytunnus,
+                       valkoodi,
+                       maa,
+                       ryhma,
+                       piiri,
+                       toimipaikka AS yhtio_toimipaikka
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$asiakastunnus'";
@@ -27458,6 +27587,13 @@ if (!function_exists('posten_outbounddelivery')) {
       $ftpfile = realpath($filename);
 
       require "inc/ftp-send.inc";
+
+      if ($palautus == 0) {
+        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+      }
+      else {
+        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+      }
     }
   }
 }
@@ -32508,5 +32644,37 @@ if (!function_exists('sort_array_of_arrays')) {
     }
 
     array_multisort($sortarray, SORT_ASC, $array);
+  }
+}
+
+if (!function_exists('pupesoft_log')) {
+  function pupesoft_log($log_file, $log_message) {
+    // tehd‰‰n full path tiedostoon
+    $log_path  = is_dir('/home/devlab/logs') ? '/home/devlab/logs/' : '/tmp/';
+    $full_path = $log_path . basename($log_file, '.log') . '.log';
+
+    if (file_exists($full_path) and !is_writable($full_path)) {
+      echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
+      return;
+    }
+
+    // kirjoitetaan message logiiun
+    $file_handle = fopen($full_path, 'a');
+
+    if ($file_handle === false) {
+      echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
+      return;
+    }
+
+    // tehd‰‰n full message, timestampilla
+    $timestamp = date('d.m.y H:i:s');
+    $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
+
+    if (fwrite($file_handle, $full_message) === false) {
+      echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
+      // ei returnia t‰ss‰, koska halutaan sulkea file_handle
+    }
+
+    fclose($file_handle);
   }
 }

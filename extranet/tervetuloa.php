@@ -266,6 +266,7 @@ if ($tee == '') {
             $temp_laskurowwi['ytunnus']      = $asiakastemprow['ytunnus'];
             $temp_laskurowwi['valkoodi']    = $asiakastemprow['valkoodi'];
             $temp_laskurowwi['maa']        = $asiakastemprow['maa'];
+            $temp_laskurowwi['yhtio_toimipaikka'] = $asiakastemprow['toimipaikka'];
 
             list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
 

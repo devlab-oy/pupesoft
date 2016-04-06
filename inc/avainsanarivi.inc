@@ -315,6 +315,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille l‰htev‰ TransportAccount")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhm‰")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";

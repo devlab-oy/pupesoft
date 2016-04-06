@@ -1109,19 +1109,17 @@ class MagentoClient {
    * @param string  $type      Kirjataanko tuote vai tilauslogiin
    */
   public function log($message, $exception = '', $type = 'product') {
-
-    if (self::LOGGING == true) {
-      $timestamp = date('d.m.y H:i:s');
-      $message = utf8_encode($message);
-
-      if ($exception != '') {
-        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-      }
-
-      $message .= "\n";
-      $log_location = $type == 'product' ? '/home/devlab/logs/magento_export.log' : '/home/devlab/logs/magento_orders.log';
-      error_log("{$timestamp}: {$message}", 3, $log_location);
+    if (self::LOGGING === false) {
+      return;
     }
+
+    if ($exception != '') {
+      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+    }
+
+    $log_name = $type == 'product' ? 'magento_export' : 'magento_orders';
+
+    pupesoft_log($log_name, $message);
   }
 
   /// Private functions ///

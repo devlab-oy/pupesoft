@@ -399,7 +399,6 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
             and tilausrivi.var     != 'O'
             AND tilausrivi.tyyppi  != 'D'
             HAVING kerattyaika != '0000-00-00 00:00:00' AND
-                   toimaika != '0000-00-00 00:00:00' AND
                    toimitettuaika != '0000-00-00 00:00:00')
             UNION
             (SELECT

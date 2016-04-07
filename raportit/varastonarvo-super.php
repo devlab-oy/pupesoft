@@ -954,13 +954,6 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $myytavissa = 0;
     $lask++;
 
-    $query = "SELECT group_concat(distinct tunnus order by tunnus) varastot
-              FROM varastopaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'";
-    $varastores = pupe_query($query);
-    $varastorow = mysql_fetch_array($varastores);
-    $varastot_kaikki = explode(",", $varastorow['varastot']);
-
     if ($variaatiosummaus != "") {
       if (!isset($ed_variaatio)) $ed_variaatio = $row['variaatio'];
       if (!isset($ed_vari)) $ed_vari = $row['vari'];
@@ -1485,7 +1478,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
             list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $varastot);
           }
           else {
-            list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $varastot_kaikki);
+            list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], 'KAIKKI');
           }
         }
 

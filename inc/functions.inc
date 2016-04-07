@@ -22708,7 +22708,7 @@ if (!function_exists("gs1_sscc")) {
       $item_id_space      = 7;
     }
 
-    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_LEFT);
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_RIGHT);
     $sscc_item_id = str_pad(substr($id, -$item_id_space), $item_id_space, 0, STR_PAD_LEFT);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 

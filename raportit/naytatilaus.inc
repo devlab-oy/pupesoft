@@ -390,9 +390,9 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
 
   $query = "SELECT
-            max(tilausrivi.kerattyaika) kerattyaika,
-            max(tilausrivi.toimaika) toimaika,
-            max(tilausrivi.toimitettuaika) toimitettuaika
+            IF(MIN(tilausrivi.kerattyaika)    = '0000-00-00 00:00:00', MAX(tilausrivi.kerattyaika),    min(tilausrivi.kerattyaika))    AS kerattyaika,
+            IF(MIN(tilausrivi.toimaika)       = '0000-00-00 00:00:00', MAX(tilausrivi.toimaika),       min(tilausrivi.toimaika))       AS toimaika,
+            IF(MIN(tilausrivi.toimitettuaika) = '0000-00-00 00:00:00', MAX(tilausrivi.toimitettuaika), min(tilausrivi.toimitettuaika)) AS toimitettuaika
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
             AND tilausrivi.otunnus  = '$laskurow[tunnus]'

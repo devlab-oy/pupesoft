@@ -2672,7 +2672,7 @@ else {
             $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
-          elseif (($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667')) {
+          elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
             if ($silent == "" or $silent == "VIENTI") {
               if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0) {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";

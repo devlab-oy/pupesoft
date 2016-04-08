@@ -55,7 +55,8 @@ echo "</thead>";
 echo "<tbody>";
 
 $query = "SELECT lasku.tunnus tilaus,
-          concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas,
+          concat(lasku.ytunnus, '!¡!', lasku.nimi) asiakas,
+          lasku.maa asiakas_maa,
           lasku.asiakkaan_tilausnumero,
           lasku.valkoodi,
           laskun_lisatiedot.sopimus_alkupvm,
@@ -97,7 +98,17 @@ while ($rivit = mysql_fetch_assoc($result)) {
   $sopimusnumero = !empty($rivit['sopimus_numero']) ? $rivit['sopimus_numero'] : '-';
   echo "<td nowrap>{$rivit["tilaus"]} / {$sopimusnumero} <br><br>{$rivit['sopimusmyyja']} </td>";
   echo "<td>{$rivit["asiakkaan_tilausnumero"]}</td>";
-  echo "<td>{$rivit["asiakas"]}</td>";
+  echo "<td>";
+
+  if (strpos($rivit["asiakas"], '!¡!') !== false) {
+    list($_ytunnus, $_nimi) = explode('!¡!', $rivit["asiakas"]);
+    echo tulosta_ytunnus($_ytunnus, $rivit['asiakas_maa']),"<br>{$_nimi}";
+  }
+  else {
+    echo $rivit["asiakas"];
+  }
+
+  echo "</td>";
   echo "<td nowrap>{$rivit["tuoteno"]}</td>";
   echo "<td>{$rivit["nimitys"]}</td>";
   echo "<td>{$rivit["kommentti"]}</td>";

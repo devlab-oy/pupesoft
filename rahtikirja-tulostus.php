@@ -1140,7 +1140,7 @@ if ($tee == 'tulosta') {
     }
 
     if (isset($excel_koontilahete) && $excel_koontilahete == 'Y') {
-       laheta_excel_koontilahete($otunnukset);
+       laheta_excel_koontilahete($otunnukset, $toitarow);
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
@@ -1538,7 +1538,7 @@ if ($tee == '') {
   require "inc/footer.inc";
 }
 
-function laheta_excel_koontilahete($otunnukset) {
+function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
   require_once 'inc/pupeExcel.inc';
 
   global $kukarow;
@@ -1571,6 +1571,15 @@ function laheta_excel_koontilahete($otunnukset) {
   $format_bold = array("bold" => true);
   $excelrivi   = 0;
   $excelsarake = 0;
+
+  if (!empty($toimitustaparow["toim_postitp"])) {
+    $worksheet->writeString($excelrivi,
+                            $excelsarake,
+                            "Deliveries to {$toimitustaparow["toim_postitp"]}",
+                            $format_bold);
+
+    for ($i=0; $i < 3; $i++) $excelrivi++;
+  }
 
   $headerit = array(
     'Hornbach order number',

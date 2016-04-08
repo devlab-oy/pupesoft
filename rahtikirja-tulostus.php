@@ -1447,9 +1447,9 @@ if ($tee == '') {
     echo "<tr><th><label for='excel_koontilahete'>";
     echo t('Excel-lähete');
     echo "</label></th><td><select id='excel_koontilahete' name='excel_koontilahete'><option value=''>";
-    echo t('Ei tulosteta');
+    echo t('Ei lähetetä');
     echo "</option><option value='Y'>";
-    echo t('Tulostetaan');
+    echo t('Sähköpostiin');
     echo "</option></select></td></tr>";
 
     echo "</table>";

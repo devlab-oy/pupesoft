@@ -210,8 +210,8 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
     t('Huoltopyyntö') => true,
     t('Luontiaika') => true,
     t('Valmistaja') => false,
-    t('Sarjanumero') => false,
     t('Malli') => false,
+    t('Sarjanumero') => false,
     t('Työstatus') => true,
     t('Viankuvaus') => false,
     t('Työn toimenpiteet') => true
@@ -305,12 +305,12 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   if (!$piilota) echo "<td></td>";
   if (!$piilota) echo "<td></td>";
   echo "<td><input type='text' name='valmistaja' value='{$request['tyom_parametrit']['valmistaja']}'></td>";
+  echo "<td><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuotenro']}'></td>";
 
   echo "<td>";
   echo livesearch_kentta("tyomaarays_form", "LAITEHAKU", "valmnro", 140, $request['tyom_parametrit']['valmnro'], '', '', '', 'ei_break_all');
   echo "</td>";
-
-  echo "<td><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuotenro']}'></td>";
+  
   if (!$piilota) echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   if (!$piilota) echo "<td></td>";

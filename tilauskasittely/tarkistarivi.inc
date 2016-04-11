@@ -1408,7 +1408,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 $vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
 
                 if ($_eivoisiirtaa) {
-                  $vastaavat_table .= "<font class='error'>".sprintf("%.2f", 0)."</font> )";
+                  $vastaavat_table .= ") <font class='error'>".sprintf("%.2f", 0)."</font>";
                 }
               }
 

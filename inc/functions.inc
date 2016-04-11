@@ -32654,7 +32654,7 @@ if (!function_exists('pupesoft_log')) {
     $full_path = $log_path . basename($log_file, '.log') . '.log';
 
     if (file_exists($full_path) and !is_writable($full_path)) {
-      echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
+      // echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
       return;
     }
 
@@ -32662,16 +32662,19 @@ if (!function_exists('pupesoft_log')) {
     $file_handle = fopen($full_path, 'a');
 
     if ($file_handle === false) {
-      echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
+      // echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
       return;
     }
+
+    // varmistetaan tiedoston kirjotusoikeudet
+    chmod($full_path, 0777);
 
     // tehd‰‰n full message, timestampilla
     $timestamp = date('d.m.y H:i:s');
     $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
 
     if (fwrite($file_handle, $full_message) === false) {
-      echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
+      // echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
       // ei returnia t‰ss‰, koska halutaan sulkea file_handle
     }
 

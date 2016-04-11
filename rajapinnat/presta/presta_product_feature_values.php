@@ -11,8 +11,12 @@ class PrestaProductFeatureValues extends PrestaClient {
 
   public function value_id_by_value($value) {
     foreach ($this->fetch_all() as $feature_value) {
+      # detect encoding from UTF8, ISO-8859-15 and write to UTF-8
+      $search_value = mb_convert_encoding($value, "UTF-8", "UTF-8, ISO-8859-15");
+      $presta_value = mb_convert_encoding($feature_value["value"]["language"][0], "UTF-8", "UTF-8, ISO-8859-15");
+
       // Match only to default language
-      if ($feature_value["value"]["language"][0] == $value) {
+      if (trim($presta_value) == trim($value)) {
         return $feature_value['id'];
       }
     }

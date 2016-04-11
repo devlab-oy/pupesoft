@@ -2621,7 +2621,7 @@ if (mysql_num_rows($result) != 0) {
         }
         elseif ($whiletoim == "YLLAPITO" and $fieldname == "asiakas") {
           list($_ytunnus, $_nimi) = explode('<br>', $row["asiakas"]);
-          echo "<td class='$class' valign='top'>",tulosta_ytunnus($_ytunnus, $row['maa']),"<br>{$_nimi}","</td>";
+          echo "<td class='$class' valign='top'>",tarkistahetu($_ytunnus),"<br>{$_nimi}","</td>";
         }
         else {
           echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";

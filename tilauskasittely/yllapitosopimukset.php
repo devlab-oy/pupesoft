@@ -411,12 +411,12 @@ if (mysql_num_rows($result) > 0) {
 
     echo "<tr class='aktiivi'>";
     echo "<td valign='top'>$row[laskutunnus]</td>";
-    echo "<td valign='top'>",tulosta_ytunnus($row["ytunnus"], $row['maa']),"</td>";
+    echo "<td valign='top'>",tarkistahetu($row["ytunnus"]),"</td>";
     echo "<td valign='top'>";
 
     if (strpos($row["nimi"], '!¡!') !== false) {
       list($_ytunnus, $_nimi) = explode('!¡!', $row["nimi"]);
-      echo tulosta_ytunnus($_ytunnus, $row['maa']),"<br>{$_nimi}";
+      echo tarkistahetu($_ytunnus),"<br>{$_nimi}";
     }
     else {
       echo $row["nimi"];

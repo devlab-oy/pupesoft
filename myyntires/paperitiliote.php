@@ -91,12 +91,12 @@ function alku() {
   return $firstpage;
 }
 
-function rivi($tyyppi, $firstpage, $row) {
+function rivi($tyyppi, $firstpage, $row, $astunnus) {
   global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $kieli, $yhtiorow, $tito_pvm, $alatila, $asiakastiedot, $on_tiliote;
 
   if ($lask == 35) {
     $sivu++;
-    loppu($firstpage, array());
+    loppu($firstpage, array(), $astunnus);
     $firstpage = alku();
     $kala = ($alatila == 'T' and $asiakastiedot["laskutus_nimi"] != "") ? 570 : 620;
     $lask = 1;
@@ -175,7 +175,7 @@ function loppu($firstpage, $summat, $astunnus) {
 
   if (count($summat) > 1 and  $lask > 35) {
     $sivu++;
-    loppu($firstpage, array());
+    loppu($firstpage, array(), $astunnus);
     $firstpage = alku();
     $kala = 605;
     $lask = 1;
@@ -419,7 +419,7 @@ $totaali = array();
 
 while ($row = mysql_fetch_assoc($result)) {
 
-  $firstpage = rivi(1, $firstpage, $row);
+  $firstpage = rivi(1, $firstpage, $row, $astunnus);
 
   if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
     $totaali[$row['valkoodi']] += $row['tiliointiavoinsaldo'];
@@ -430,7 +430,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 while ($row = mysql_fetch_assoc($suoritusresult)) {
-  $firstpage = rivi(2, $firstpage, $row);
+  $firstpage = rivi(2, $firstpage, $row, $astunnus);
   $totaali[$row['valkoodi']] += $row['summa'];
 }
 

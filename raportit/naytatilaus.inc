@@ -389,7 +389,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
 
-  $query = "(SELECT
+  $query = "SELECT
             MIN(tilausrivi.kerattyaika) AS kerattyaika,
             MIN(tilausrivi.toimaika) AS toimaika,
             MIN(tilausrivi.toimitettuaika) AS toimitettuaika
@@ -399,17 +399,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
             and tilausrivi.var     != 'O'
             AND tilausrivi.tyyppi  != 'D'
             HAVING kerattyaika != '0000-00-00 00:00:00' AND
-                   toimitettuaika != '0000-00-00 00:00:00')
-            UNION
-            (SELECT
-            MAX(tilausrivi.kerattyaika) AS kerattyaika,
-            MAX(tilausrivi.toimaika) AS toimaika,
-            MAX(tilausrivi.toimitettuaika) AS toimitettuaika
-            FROM tilausrivi
-            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-            and tilausrivi.var     != 'O'
-            AND tilausrivi.tyyppi  != 'D')";
+                   toimitettuaika != '0000-00-00 00:00:00'";
   $aikares = pupe_query($query);
   $aikarow = mysql_fetch_assoc($aikares);
 

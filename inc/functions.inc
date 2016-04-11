@@ -3352,8 +3352,9 @@ if (!function_exists("tuotteen_myyntihinta")) {
     // palautetaan tuotteen SVH laskun valuutassa
     // tämä funktion on kopsattu alehinta-funktiosta sopivilta osilta
     $hinta       = 0;
-    $netto      = "";
+    $netto       = "";
     $valuutta    = "";
+    $kpl         = (float) $kpl;
 
     // 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
     if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {

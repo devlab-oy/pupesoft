@@ -567,11 +567,11 @@ if ($tee != '' and isset($ajaraportti)) {
           $worksheet->write($excelrivi, 8, $trow["erpcm"]);
 
           if ($valuutassako == "V") {
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["summa"]));
+            $worksheet->writeNumber($excelrivi, 9, $trow["summa"]);
             $worksheet->write($excelrivi, 10, $trow["valkoodi"]);
           }
           else {
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["avoinsaldo"]));
+            $worksheet->writeNumber($excelrivi, 9, $trow["avoinsaldo"]);
             $worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
           }
 
@@ -870,13 +870,13 @@ if ($tee != '' and isset($ajaraportti)) {
           $worksheet->write($excelrivi, 7, $trow["erpcm"]);
 
           if ($valuutassako == "V") {
-            $worksheet->write($excelrivi, 8, str_replace('.', ',', $trow["tiliointisumma_valuutassa"]));
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["tiliointiavoinsaldo_valuutassa"]));
+            $worksheet->writeNumber($excelrivi, 8, $trow["tiliointisumma_valuutassa"]);
+            $worksheet->writeNumber($excelrivi, 9, $trow["tiliointiavoinsaldo_valuutassa"]);
             $worksheet->write($excelrivi, 10, $trow["valkoodi"]);
           }
           else {
-            $worksheet->write($excelrivi, 8, str_replace('.', ',', $trow["tiliointisumma"]));
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["tiliointiavoinsaldo"]));
+            $worksheet->writeNumber($excelrivi, 8, $trow["tiliointisumma"]);
+            $worksheet->writeNumber($excelrivi, 9, $trow["tiliointiavoinsaldo"]);
             $worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
           }
 
@@ -981,12 +981,12 @@ if ($tee != '' and isset($ajaraportti)) {
 
           if ($valuutassako == "V") {
             $worksheet->write($excelrivi, 8, "");
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["summa"]));
+            $worksheet->writeNumber($excelrivi, 9, $trow["summa"]);
             $worksheet->write($excelrivi, 10, $trow["valkoodi"]);
           }
           else {
             $worksheet->write($excelrivi, 8, "");
-            $worksheet->write($excelrivi, 9, str_replace('.', ',', $trow["suoritussumma"]));
+            $worksheet->writeNumber($excelrivi, 9, $trow["suoritussumma"]);
             $worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
           }
 

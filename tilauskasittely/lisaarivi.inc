@@ -2512,7 +2512,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $laskurow["tilaustyyppi"] != "U" and
       ($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
       !in_array($var, array('V', 'H', 'P'))
-      and $kpl > 0) {
+      and $kpl > 0
+      and in_array($laskurow['tila'], array('N', 'T')) and
+      and in_array($laskurow['alatila'], array('', 'F'))) {
 
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);

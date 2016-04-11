@@ -13091,7 +13091,9 @@ if (!function_exists("tarkista_oikeus")) {
       $querylisa = "";
 
       if (strpos($alanimi, "%") !== FALSE) {
-        $querylisa .= " AND alanimi like '$alanimi'";
+        $alanimi = substr($alanimi, 0, -1);
+
+        $querylisa .= " AND (alanimi = '$alanimi' or alanimi like '$alanimi!!!%')";
       }
       elseif ($alanimi != "") {
         // Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa

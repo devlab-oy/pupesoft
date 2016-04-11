@@ -484,13 +484,13 @@ if ($ytunnus != '' and $tee == '') {
       $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
     }
 
-    $asylloik = tarkista_oikeus("yllapito.php", "asiakas", "X");
+    $asylloik = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
 
     echo "<tr>";
     echo "<td>$asiakasrow[nimi]";
 
     if ($asylloik) {
-      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta asiakkaan tietoja"), "' /></a>";
+      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta asiakkaan tietoja"), "' /></a>";
     }
 
     echo "</td>";

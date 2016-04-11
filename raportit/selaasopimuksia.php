@@ -56,7 +56,6 @@ echo "<tbody>";
 
 $query = "SELECT lasku.tunnus tilaus,
           concat(lasku.ytunnus, '!¡!', lasku.nimi) asiakas,
-          lasku.maa asiakas_maa,
           lasku.asiakkaan_tilausnumero,
           lasku.valkoodi,
           laskun_lisatiedot.sopimus_alkupvm,
@@ -102,7 +101,7 @@ while ($rivit = mysql_fetch_assoc($result)) {
 
   if (strpos($rivit["asiakas"], '!¡!') !== false) {
     list($_ytunnus, $_nimi) = explode('!¡!', $rivit["asiakas"]);
-    echo tulosta_ytunnus($_ytunnus, $rivit['asiakas_maa']),"<br>{$_nimi}";
+    echo tarkistahetu($_ytunnus),"<br>{$_nimi}";
   }
   else {
     echo $rivit["asiakas"];

@@ -40,6 +40,12 @@ foreach ($files as $file) {
     continue;
   }
 
+  if (!is_writable($file)) {
+    echo "Ohitetaan $file\n";
+
+    continue;
+  }
+
   $mime = finfo_file($finfo1, $file);
   $encd = finfo_file($finfo2, $file);
 

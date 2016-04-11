@@ -1402,13 +1402,13 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 $siirrettavissa_saldon_font = $_siirrettavissa < 1 ? "error" : "ok";
 
                 if ($_eivoisiirtaa) {
-                  $vastaavat_table .= "<font class='error'>".sprintf("%.2f", 0)."</font> (siirtovarastossa ";
+                  $vastaavat_table .= "(";
                 }
 
                 $vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
 
                 if ($_eivoisiirtaa) {
-                  $vastaavat_table .= ")";
+                  $vastaavat_table .= "<font class='error'>".sprintf("%.2f", 0)."</font> )";
                 }
               }
 

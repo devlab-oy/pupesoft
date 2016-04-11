@@ -88,8 +88,8 @@ function hae_kayttajan_laitteet() {
 function piirra_headerit() {
   $headerit = array(
     t("Valmistaja"),
-    t("Sarjanumero"),
     t("Malli"),
+    t("Sarjanumero"),
     t("Valmistajan sopimuksen numero"),
     t("Valmistajan sopimuksen päättymispäivä")
   );
@@ -101,8 +101,8 @@ function piirra_headerit() {
 function piirra_hakuboksit() {
   $headerit = array(
     'valmistaja',
-    'sarjanumero',
     'tuotenumero',
+    'sarjanumero',
     'valmistajan_sopimusnumero',
     'valmistajan_sopimus_paattymispaiva'
   );
@@ -118,8 +118,8 @@ function piirra_laiterivi($laite) {
 
   echo "<tr>";
   echo "<td>{$laite['valmistaja']}</td>";
-  echo "<td>{$laite['sarjanro']}</td>";
   echo "<td>{$laite['tuoteno']}</td>";
+  echo "<td>{$laite['sarjanro']}</td>";
   echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
   echo "<td class='back' nowrap><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";

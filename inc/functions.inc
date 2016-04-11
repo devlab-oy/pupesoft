@@ -27556,6 +27556,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
 
+      $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
+
       // Laitetaan kappalemŠŠrŠt kuntoon
       $line->addChild('OrderedQuantity', $looprow['kpl']);
       $line->addChild('DeliveredQuantity', $looprow['kpl']);

@@ -32667,7 +32667,9 @@ if (!function_exists('pupesoft_log')) {
     }
 
     // varmistetaan tiedoston kirjotusoikeudet
-    chmod($full_path, 0777);
+    @chown($full_path, 'devlab');
+    @chgrp($full_path, 'apache');
+    @chmod($full_path, 0777);
 
     // tehd‰‰n full message, timestampilla
     $timestamp = date('d.m.y H:i:s');

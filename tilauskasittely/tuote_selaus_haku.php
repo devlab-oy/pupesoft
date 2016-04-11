@@ -291,7 +291,8 @@ if (!empty($variaatio)) {
             tuote.osasto,
             tuote.myyntihinta,
             tuote.myymalahinta,
-            tuote.yhtio
+            tuote.yhtio,
+            tuote.alv
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
               AND tuotteen_avainsanat.kieli  = '{$yhtiorow['kieli']}'
@@ -960,6 +961,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
             tuote.status
@@ -1863,7 +1865,7 @@ function piirra_ostoskoriin_lisays($row) {
       echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
       echo "</td></tr>";
-      
+
       if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
         echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
       }
@@ -2464,6 +2466,18 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         $ale_kaikki,
         $alehinta_alv,
         $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+
+      // alviton -> alvillinen
+      // lisätään alv
+      if ($yhtiorow['alv_kasittely'] != '' and $row['alv'] != 0) {
+        $hinta = $hinta * (1 + $row['alv'] / 100);
+      }
+
+      // alvillinen -> alviton
+      // alv pois
+      if ($yhtiorow['alv_kasittely'] == '' and $row['alv'] != 0) {
+        $hinta = $hinta / (1 + $row['alv'] / 100);
+      }
 
       $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
       $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";

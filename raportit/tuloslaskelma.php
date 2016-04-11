@@ -930,8 +930,14 @@ else {
       // mill‰ tasolla ollaan (1,2,3,4,5,6)
       $tasoluku = strlen($tasorow["taso"]);
 
-      // tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
-      $apusort = str_pad($tasorow["taso"], 20, "Z");
+      // tasonimi talteen (rightp‰dd‰t‰‰n Z:lla tai ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
+      if (PUPE_UNICODE) {
+        $apusort = str_pad($tasorow["taso"], 20, "Z");
+      }
+      else {
+        $apusort = str_pad($tasorow["taso"], 20, "÷");
+      }
+
       $tasonimi[$apusort] = $tasorow["nimi"];
 
       // Jos tasolla on oletusarvo per kk. Esim poistot, jotka kirjataan vasta tilinp‰‰tˆksess‰
@@ -1168,7 +1174,13 @@ else {
 
       $px++;
 
-      $key = str_replace("Z", "", $key_c); // ÷-kirjaimet pois
+      // P‰dd‰ykset pois
+      if (PUPE_UNICODE) {
+        $key = str_replace("Z", "", $key_c); // Z-kirjaimet pois
+      }
+      else {
+        $key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
+      }
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {

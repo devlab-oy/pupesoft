@@ -384,14 +384,15 @@ else {
         }
 
         // Haetaan asiakkaan oma hinta
-        $laskurow["ytunnus"]        = $asiakasrow["ytunnus"];
-        $laskurow["liitostunnus"]   = $asiakasrow["tunnus"];
-        $laskurow["vienti"]         = $asiakasrow["vienti"];
-        $laskurow["alv"]            = $asiakasrow["alv"];
-        $laskurow["valkoodi"]       = $asiakasrow["valkoodi"];
-        $laskurow["vienti_kurssi"]  = $kurssi['kurssi'];
-        $laskurow["maa"]            = $asiakasrow["maa"];
-        $laskurow['toim_ovttunnus'] = $asiakasrow["toim_ovttunnus"];
+        $laskurow["ytunnus"]           = $asiakasrow["ytunnus"];
+        $laskurow["liitostunnus"]      = $asiakasrow["tunnus"];
+        $laskurow["vienti"]            = $asiakasrow["vienti"];
+        $laskurow["alv"]               = $asiakasrow["alv"];
+        $laskurow["valkoodi"]          = $asiakasrow["valkoodi"];
+        $laskurow["vienti_kurssi"]     = $kurssi['kurssi'];
+        $laskurow["maa"]               = $asiakasrow["maa"];
+        $laskurow['toim_ovttunnus']    = $asiakasrow["toim_ovttunnus"];
+        $laskurow['yhtio_toimipaikka'] = $asiakasrow['toimipaikka'];
 
         $palautettavat_kentat = "hinta,netto,alehinta_alv,alehinta_val,hintaperuste,aleperuste";
 

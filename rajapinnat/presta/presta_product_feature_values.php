@@ -11,8 +11,11 @@ class PrestaProductFeatureValues extends PrestaClient {
 
   public function value_id_by_value($value) {
     foreach ($this->fetch_all() as $feature_value) {
-      // Match only to default language
-      if ($feature_value["value"]["language"][0] == $value) {
+      // Match only to default language (this is an array if multiple languages)
+      $feature = $feature_value["value"]["language"];
+      $presta_value = is_array($feature) ? $feature[0] : $feature;
+
+      if ($presta_value == $value) {
         return $feature_value['id'];
       }
     }

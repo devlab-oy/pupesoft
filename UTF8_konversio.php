@@ -40,6 +40,10 @@ foreach ($files as $file) {
     continue;
   }
 
+  if (!is_writable($file)) {
+    continue;
+  }
+
   $mime = finfo_file($finfo1, $file);
   $encd = finfo_file($finfo2, $file);
 

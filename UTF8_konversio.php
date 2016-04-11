@@ -41,8 +41,6 @@ foreach ($files as $file) {
   }
 
   if (!is_writable($file)) {
-    echo "Ohitetaan $file\n";
-
     continue;
   }
 

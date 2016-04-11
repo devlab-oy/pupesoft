@@ -13091,7 +13091,9 @@ if (!function_exists("tarkista_oikeus")) {
       $querylisa = "";
 
       if (strpos($alanimi, "%") !== FALSE) {
-        $querylisa .= " AND alanimi like '$alanimi'";
+        $alanimi = substr($alanimi, 0, -1);
+
+        $querylisa .= " AND (alanimi = '$alanimi' or alanimi like '$alanimi!!!%')";
       }
       elseif ($alanimi != "") {
         // Luetaan alanime‰ vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myˆs jotain lis‰tietoja toisessa muuttujassa
@@ -27554,6 +27556,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
 
+      $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
+
       // Laitetaan kappalemäärät kuntoon
       $line->addChild('OrderedQuantity', $looprow['kpl']);
       $line->addChild('DeliveredQuantity', $looprow['kpl']);
@@ -32667,7 +32671,9 @@ if (!function_exists('pupesoft_log')) {
     }
 
     // varmistetaan tiedoston kirjotusoikeudet
-    chmod($full_path, 0777);
+    @chown($full_path, 'devlab');
+    @chgrp($full_path, 'apache');
+    @chmod($full_path, 0777);
 
     // tehd‰‰n full message, timestampilla
     $timestamp = date('d.m.y H:i:s');

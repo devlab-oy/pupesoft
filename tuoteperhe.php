@@ -133,6 +133,7 @@ if ($tee == "KOPIOI") {
       if ($toim == "PERHE") {
         echo "<input type='hidden' name='kop_ohita_kerays[$_i]' value='$kop_ohita_kerays[$_i]'>";
         echo "<input type='hidden' name='kop_ei_nayteta[$_i]' value='$kop_ei_nayteta[$_i]'>";
+        echo "<input type='hidden' name='kop_hintatyyppi[$_i]' value='$kop_hintatyyppi[$_i]'>";
       }
     }
 
@@ -163,6 +164,7 @@ if ($tee == "KOPIOI") {
           if ($toim == "PERHE") {
             $insert_lisa = "ohita_kerays = '{$kop_ohita_kerays[$kop_index]}',";
             $insert_lisa .= "ei_nayteta = '{$kop_ei_nayteta[$kop_index]}',";
+            $insert_lisa .= "hintatyyppi = '{$kop_hintatyypp[$kop_index]}',";
           }
 
           $query = "INSERT into  tuoteperhe set
@@ -525,6 +527,15 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
     $result = pupe_query($query);
   }
 
+  if (isset($hintatyyppi)) {
+    $query = "UPDATE tuoteperhe
+              SET hintatyyppi = '$hintatyyppi'
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and tyyppi     = '$hakutyyppi'
+              and isatuoteno = '$isatuoteno'";
+    $result = pupe_query($query);
+  }
+
   echo "<br>";
   echo "<font class='message'>".t("Tiedot tallennettu")."!</font>";
   echo "<br><br>";
@@ -742,12 +753,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "</tr>";
 
       if ($toim == "PERHE") {
-        $query = "SELECT ei_nayteta
+        $query = "SELECT *
                   FROM tuoteperhe
                   WHERE yhtio     = '$kukarow[yhtio]'
                   AND tyyppi      = '$hakutyyppi'
                   AND isatuoteno  = '$isatuoteno'
-                  AND ei_nayteta != ''
                   ORDER BY isatuoteno, tuoteno
                   LIMIT 1";
         $ressu = pupe_query($query);
@@ -775,6 +785,30 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         echo "</td>";
         echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>".t("Hintamuoto")."</th>";
+        echo "<td>";
+
+        if ($faktarow["hintatyyppi"] == "") {
+          $sel_hinta1 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Hinnat m‰‰ritell‰‰n lapsituotteille");
+        }
+        elseif ($faktarow["hintatyyppi"] == "I") {
+          $sel_hinta2 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Hinta m‰‰ritell‰‰n is‰tuotteelle");
+        }
+
+        if ($oikeurow['paivitys'] == '1') {
+          echo "<select name='hintatyyppi'>";
+          echo "<option value='' $sel_hinta1>".t("Hinnat m‰‰ritell‰‰n lapsituotteille")."</option>";
+          echo "<option value='I' $sel_hinta2>".t("Hinta m‰‰ritell‰‰n is‰tuotteelle")."</option>";
+          echo "</select>";
+        }
+
+        echo "</td>";
+        echo "</tr>";
+        
       }
 
       $query = "SELECT omasivu
@@ -1071,6 +1105,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $kop_fakta   = array();
       $kop_ohita_kerays = array();
       $kop_ei_nayteta = array();
+      $kop_hintatyyppi = array();
 
       if ($oikeurow['paivitys'] == '1' and $tunnus == "") {
         echo "<form method='post' action='tuoteperhe.php' name='lisaa' autocomplete='off'>";
@@ -1086,6 +1121,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<td></td>";
 
         if ($toim == "PERHE") {
+
           echo "<td><input type='text' name='kerroin' size='10'></td>";
           echo "<td><input type='text' name='hintakerroin' size='10'></td>";
           echo "<td><input type='text' name='alekerroin' size='10'></td>";
@@ -1159,6 +1195,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           if ($toim == "PERHE") {
             $kop_ohita_kerays[$kop_index] = $prow['ohita_kerays'];
             $kop_ei_nayteta[$kop_index] = $prow['ei_nayteta'];
+            $kop_hintatyyppi[$kop_index] = $prow['hintatyyppi'];
           }
 
           $kop_index++;
@@ -1554,6 +1591,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           if ($toim == "PERHE") {
             echo "<input type='hidden' name='kop_ohita_kerays[$kop_index]' value='$kop_ohita_kerays[$kop_index]'>";
             echo "<input type='hidden' name='kop_ei_nayteta[$kop_index]' value='$kop_ei_nayteta[$kop_index]'>";
+            echo "<input type='hidden' name='kop_hintatyyppi[$kop_index]' value='$kop_hintatyyppi[$kop_index]'>";
           }
         }
 

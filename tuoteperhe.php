@@ -395,6 +395,14 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         $error .= "</font><br>";
       }
 
+      if ($hintatyyppi == 'I' and $laptrow['kehahin'] == 0) {
+        $error .= "<font class='error'>";
+        $error .= t("Tuotteella");
+        $error .= " {$tuoteno} ";
+        $error .= t("ei ole keskihankintahintaa, riviä ei voida lisätä");
+        $error .= "</font><br>";
+      }
+
       if ($error == '') {
         $kerroin      = str_replace(',', '.', $kerroin);
         $hintakerroin = str_replace(',', '.', $hintakerroin);
@@ -535,19 +543,13 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   }
 
   if (isset($hintatyyppi)) {
-    $query = "SELECT concat('\"', group_concat(tuoteno SEPARATOR '\", \"'), '\"') as tuotteet
+    $query = "SELECT tuoteperhe.tunnus
               FROM tuoteperhe
-              WHERE yhtio    = '$kukarow[yhtio]'
-              and tyyppi     = '$hakutyyppi'
-              and isatuoteno = '$isatuoteno'";
-    $result = pupe_query($query);
-    $row = mysql_fetch_assoc($result);
-
-    $query = "SELECT tuoteno
-              FROM tuote
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno in ({$row['tuotteet']})
-              AND kehahin = 0";
+              join tuote using(yhtio, tuoteno)
+              WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
+              and tuoteperhe.tyyppi = '$hakutyyppi'
+              and tuoteperhe.isatuoteno = '$isatuoteno'
+              AND tuote.kehahin = 0";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {

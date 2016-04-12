@@ -25371,6 +25371,9 @@ if (!function_exists("saako_myyda_private_label")) {
     //$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)
     global $kukarow, $yhtiorow;
 
+    # Jos param on "vain extranet" ja jos ei ole extranet niin saa myydä
+    if ($yhtiorow['extranet_private_label'] == 'E' and $kukarow['extranet'] == '') return true;
+
     //haetaan ensin tutkittavan tuotteen tiedot
     $query = "SELECT *
               FROM tuote

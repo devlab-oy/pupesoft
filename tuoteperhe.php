@@ -1,8 +1,14 @@
 <?php
 
-if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+$tee = isset($_POST["tee"]) ? $_POST["tee"] : "";
+$kaunisnimi = isset($_POST["kaunisnimi"]) ? $_POST["kaunisnimi"] : "";
+
+if ($tee == 'lataa_tiedosto') {
+  $lataa_tiedosto = 1;
+}
+
+if ($kaunisnimi != '') {
+  $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 require "inc/parametrit.inc";
@@ -447,6 +453,7 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
                 yhtio          = '$kukarow[yhtio]',
                 tyyppi         = '$hakutyyppi',
                 {$querylisa}
+                hintatyyppi    = '$hintatyyppi',
                 ei_nayteta     = '$ei_nayteta'
                 $postq";
         $result = pupe_query($query);
@@ -528,6 +535,30 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   }
 
   if (isset($hintatyyppi)) {
+    $query = "SELECT concat('\"', group_concat(tuoteno SEPARATOR '\", \"'), '\"') as tuotteet
+              FROM tuoteperhe
+              WHERE yhtio    = '$kukarow[yhtio]'
+              and tyyppi     = '$hakutyyppi'
+              and isatuoteno = '$isatuoteno'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    $query = "SELECT tuoteno
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno in ({$row['tuotteet']})
+              AND kehahin = 0";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      echo "<br>";
+      echo "<font class='error'>";
+      echo t("Kaikilla tuotteilla ei ole keskihankintahintaa, ei voida k‰ytt‰‰ t‰t‰ hintatyyppi‰.");
+      echo "</font>";
+
+      $hintatyyppi = '';
+    }
+
     $query = "UPDATE tuoteperhe
               SET hintatyyppi = '$hintatyyppi'
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -537,7 +568,7 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
   }
 
   echo "<br>";
-  echo "<font class='message'>".t("Tiedot tallennettu")."!</font>";
+  echo "<font class='error'>".t("Tiedot tallennettu")."!</font>";
   echo "<br><br>";
 
   $tee = '';
@@ -808,7 +839,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         echo "</td>";
         echo "</tr>";
-        
+
       }
 
       $query = "SELECT omasivu
@@ -851,26 +882,22 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "</tr>";
       }
 
-      echo "</table>";
-      echo "<br>";
-
-      echo "<table>";
       echo "<tr>";
 
       if ($toim == "PERHE") {
-        echo "<th>".t("Tuoteperheen faktat")."</th>";
+        echo "<th colspan='2'>".t("Tuoteperheen faktat")."</th>";
       }
       elseif ($toim == "LISAVARUSTE") {
-        echo "<th>".t("Lis‰varusteiden faktat")."</th>";
+        echo "<th colspan='2'>".t("Lis‰varusteiden faktat")."</th>";
       }
       elseif ($toim == "OSALUETTELO") {
-        echo "<th>".t("Osaluettelon faktat")."</th>";
+        echo "<th colspan='2'>".t("Osaluettelon faktat")."</th>";
       }
       elseif ($toim == "TUOTEKOOSTE") {
-        echo "<th>".t("Tuotekoosteen faktat")."</th>";
+        echo "<th colspan='2'>".t("Tuotekoosteen faktat")."</th>";
       }
       elseif ($toim == "VSUUNNITTELU") {
-        echo "<th>".t("Samankaltaisuuden faktat")."</th>";
+        echo "<th colspan='2'>".t("Samankaltaisuuden faktat")."</th>";
       }
       else {
         echo "<th>".t("Reseptin faktat")."</th>";
@@ -891,10 +918,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<td>";
+      echo "<td colspan='2'>";
 
       if ($oikeurow['paivitys'] == '1') {
-        echo "<textarea cols='35' rows='7' name='fakta'>{$faktarow["fakta"]}</textarea>";
+        echo "<textarea cols='80' rows='5' name='fakta'>{$faktarow["fakta"]}</textarea>";
       }
       else {
         echo "$faktarow[fakta]";
@@ -945,7 +972,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $excelsarake = 0;
       $worksheet->writeString($excelrivi, $excelsarake++, t("Is‰tuote"));
 
-      echo "<table class='responsive'>";
+      echo "<table>";
       echo "<tr>";
 
       if ($toim == "PERHE") {
@@ -982,7 +1009,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Alennuskerroin")."</th>";
         echo "<th>".t("Myyntihinta * Hintakerroin")."</th>";
         echo "<th>".t("Kehahin")."</th>";
-        echo "<th>".t("Kehahin*Kerroin")."</th>";
+        echo "<th>".t("Kehahin * Kerroin")."</th>";
         echo "<th>".t("Ohita ker‰ys")."</th>";
         echo "<th>".t("Ei n‰ytet‰")."</th>";
 

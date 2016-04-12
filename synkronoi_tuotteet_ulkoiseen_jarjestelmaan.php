@@ -142,19 +142,19 @@ else {
 
         $line->addChild('ItemName', utf8_encode($nimitys));
         $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', 0);
-        $line->addChild('SalesPrice', 0);
+        $line->addChild('ProdGroup2', '');
+        $line->addChild('SalesPrice', '');
         $line->addChild('Unit1', utf8_encode($yksikko));
-        $line->addChild('Unit2', 0);
-        $line->addChild('Relation', 0);
+        $line->addChild('Unit2', '');
+        $line->addChild('Relation', '');
         $line->addChild('Weight', round($row['tuotemassa'], 3));
-        $line->addChild('NetWeight', 0);
-        $line->addChild('Volume', 0);
-        $line->addChild('Height', 0);
-        $line->addChild('Width', 0);
-        $line->addChild('Length', 0);
-        $line->addChild('PackageSize', 0);
-        $line->addChild('PalletSize', 0);
+        $line->addChild('NetWeight', '');
+        $line->addChild('Volume', '');
+        $line->addChild('Height', '');
+        $line->addChild('Width', '');
+        $line->addChild('Length', '');
+        $line->addChild('PackageSize', '');
+        $line->addChild('PalletSize', '');
 
         switch ($row['status']) {
         case 'A':
@@ -169,36 +169,36 @@ else {
         }
 
         $line->addChild('Status', $status);
-        $line->addChild('WholesalePackageSize', 0);
+        $line->addChild('WholesalePackageSize', '');
         $line->addChild('EANCode', utf8_encode($eankoodi));
-        $line->addChild('EANCode2', 0);
-        $line->addChild('CustomsTariffNum', 0);
-        $line->addChild('AlarmLimit', 0);
-        $line->addChild('QualPeriod1', 0);
-        $line->addChild('QualPeriod2', 0);
-        $line->addChild('QualPeriod3', 0);
-        $line->addChild('FactoryNum', 0);
-        $line->addChild('UNCode', 0);
-        $line->addChild('BBDateCollect', 0);
-        $line->addChild('SerialNumbers', 0);
-        $line->addChild('SerialNumInArrival', 0);
-        $line->addChild('TaxCode', 0);
-        $line->addChild('CountryofOrigin', 0);
-        $line->addChild('PlatformQuantity', 0);
-        $line->addChild('PlatformType', 0);
-        $line->addChild('PurchasePrice', 0);
-        $line->addChild('ConsumerPrice', 0);
-        $line->addChild('OperRecommendation', 0);
+        $line->addChild('EANCode2', '');
+        $line->addChild('CustomsTariffNum', '');
+        $line->addChild('AlarmLimit', '');
+        $line->addChild('QualPeriod1', '');
+        $line->addChild('QualPeriod2', '');
+        $line->addChild('QualPeriod3', '');
+        $line->addChild('FactoryNum', '');
+        $line->addChild('UNCode', '');
+        $line->addChild('BBDateCollect', '');
+        $line->addChild('SerialNumbers', '');
+        $line->addChild('SerialNumInArrival', '');
+        $line->addChild('TaxCode', '');
+        $line->addChild('CountryofOrigin', '');
+        $line->addChild('PlatformQuantity', '');
+        $line->addChild('PlatformType', '');
+        $line->addChild('PurchasePrice', '');
+        $line->addChild('ConsumerPrice', '');
+        $line->addChild('OperRecommendation', '');
         $line->addChild('FreeText', utf8_encode($tuoteno));
-        $line->addChild('PurchaseUnit', 0);
-        $line->addChild('ManufactItemNum', 0);
-        $line->addChild('InternationalItemNum', 0);
-        $line->addChild('Flashpoint', 0);
-        $line->addChild('SalesCurrency', 0);
-        $line->addChild('PurchaseCurrency', 0);
-        $line->addChild('Model', 0);
-        $line->addChild('ModelOrder', 0);
-        $line->addChild('TransportTemperature', 0);
+        $line->addChild('PurchaseUnit', '');
+        $line->addChild('ManufactItemNum', '');
+        $line->addChild('InternationalItemNum', '');
+        $line->addChild('Flashpoint', '');
+        $line->addChild('SalesCurrency', '');
+        $line->addChild('PurchaseCurrency', '');
+        $line->addChild('Model', '');
+        $line->addChild('ModelOrder', '');
+        $line->addChild('TransportTemperature', '');
 
         if (is_null($row['synkronointi'])) {
 

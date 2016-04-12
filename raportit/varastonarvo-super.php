@@ -951,6 +951,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $kpl          = 0;
     $varaston_arvo      = 0;
     $bruttovaraston_arvo = 0;
+    $myytavissa = 0;
     $lask++;
 
     if ($variaatiosummaus != "") {
@@ -1466,7 +1467,20 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       if (!empty($saldo_myytavissa)) {
 
-        list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno']);
+        if ($summaustaso == 'P') {
+          list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', 0, '', $row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso']);
+        }
+        elseif ($summaustaso == 'S') {
+          list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $row['varastotunnus']);
+        }
+        else {
+          if (!empty($varastot)) {
+            list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], '', $varastot);
+          }
+          else {
+            list($_, $__, $myytavissa, $___) = saldo_myytavissa($row['tuoteno'], 'KAIKKI');
+          }
+        }
 
         if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myytavissa));

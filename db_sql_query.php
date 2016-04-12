@@ -199,7 +199,7 @@ else {
         $lresult = t_avainsana("LISATIETO");
 
         while ($lrow = mysql_fetch_assoc($lresult)) {
-          $selite = "lisatieto_$srow[selite]";
+          $selite = "lisatieto_$lrow[selite]";
           $chk = !empty($rajaus[$row[0]][$selite]) ? "CHECKED" : "";
 
           $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$selite]' value='$selite' $chk>".t("Tuotteen lisätieto").": $lrow[selitetark]<br>";

@@ -24,7 +24,7 @@ class PrestaProductStocks extends PrestaClient {
     // we need to floor quantity, as Presta does not allow decimal numbers
     $quantity = is_numeric($stock['saldo']) ? floor((float) $stock['saldo']) : 0;
 
-    $xml->stock_available->quantity = $stock['saldo'];
+    $xml->stock_available->quantity = $quantity;
     $xml->stock_available->id_product = $stock['product_id'];
 
     // Tilaustuote

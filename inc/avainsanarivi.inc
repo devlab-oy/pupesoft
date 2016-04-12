@@ -962,6 +962,23 @@ if (($avain_sel["KARHUVIESTI"] == "SELECTED"
   $jatko = 0;
 }
 
+if ($avain_sel["TUOTEMERKKI"] and $_selite) {
+  $ulos = "<td><input type='text' name='{$nimi}' value='{$trow[$i]}'></td>";
+
+  $query = "SELECT count(*) kpl
+            FROM tuote
+            WHERE yhtio       = '$kukarow[yhtio]'
+            AND tuotemerkki   = '{$trow[$i]}'";
+  $tm_result = pupe_query($query);
+
+  if (mysql_num_rows($tm_result) > 0) {
+    $tm_row = mysql_fetch_array($tm_result);
+    $ulos .= "<br>" .  t("Huom") . "! " . t("tuotemerkki on %s tuotteella käytössä", "", $tm_row['kpl']);
+  }
+
+  $jatko = 0;
+}
+
 if ($avain_sel["TUOTEMERKKI"] and $_selitetark_2) {
   $ulos = "<td><textarea rows=10 cols=50 name='{$nimi}'>{$trow[$i]}</textarea></td>";
   $jatko = 0;

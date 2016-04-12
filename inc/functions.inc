@@ -32683,3 +32683,52 @@ if (!function_exists('pupesoft_log')) {
     fclose($file_handle);
   }
 }
+
+if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
+  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    $response = array();
+
+    $query = "SELECT
+              tuote.kehahin,
+              tuoteperhe.alekerroin,
+              tuoteperhe.hintakerroin,
+              tuoteperhe.hintatyyppi,
+              tuoteperhe.kerroin,
+              tuoteperhe.tuoteno
+              FROM tuoteperhe
+              JOIN tuote USING (yhtio, tuoteno)
+              WHERE tuoteperhe.yhtio = '{$kukarow['yhtio']}'
+              AND tuoteperhe.tyyppi = '{$tyyppi}'
+              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+      return $response;
+    }
+
+    $kokonaisarvo = 0;
+
+    // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
+    // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
+    while ($row = mysql_fetch_assoc($result)) {
+      $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+    }
+
+    // resultti alkuun ja loopataan
+    mysql_data_seek($result, 0);
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $response[] = array(
+        "alekerroin"   => (float) $row['alekerroin'],
+        "arvokerroin"  => (float) $row['kerroin'] * $row['kehahin'] / $kokonaisarvo,
+        "hintakerroin" => (float) $row['hintakerroin'],
+        "kerroin"      => (float) $row['kerroin'],
+        "tuoteno"      => $row['tuoteno'],
+      );
+    }
+
+    return $response;
+  }
+}

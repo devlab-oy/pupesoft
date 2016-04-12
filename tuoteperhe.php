@@ -795,6 +795,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
                   LIMIT 1";
         $ressu = pupe_query($query);
         $faktarow = mysql_fetch_array($ressu);
+        $hintatyyppi = $faktarow['hintatyyppi'];
 
         echo "<tr>";
         echo "<th>".t("Esitysmuoto")."</th>";
@@ -1142,6 +1143,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<input type='hidden' name='tee' value='LISAA'>";
         echo "<input type='hidden' name='isatuoteno' value='$row[isatuoteno]'>";
         echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+        echo "<input type='hidden' name='hintatyyppi' value='$hintatyyppi'>";
 
         echo "<tr>";
         echo "<td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", "", '', 'X')."</td>";
@@ -1385,6 +1387,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<input type='hidden' name='tunnus' value='$prow[tunnus]'>";
             echo "<input type='hidden' name='isatuoteno' value='$isatuoteno'>";
             echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+            echo "<input type='hidden' name='hintatyyppi' value='$hintatyyppi'>";
             echo "<input type='submit' value='".t("Muuta")."'>";
             echo "</form>";
           }
@@ -1399,6 +1402,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<input type='hidden' name='tunnus' value='$prow[tunnus]'>";
             echo "<input type='hidden' name='isatuoteno' value='$isatuoteno'>";
             echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+            echo "<input type='hidden' name='hintatyyppi' value='$hintatyyppi'>";
             echo "<input type='submit' value='".t("Poista")."'>";
             echo "</form>";
           }
@@ -1425,6 +1429,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<input type='hidden' name='tee' value='LISAA'>";
           echo "<input type='hidden' name='isatuoteno' value='$zrow[isatuoteno]'>";
           echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+          echo "<input type='hidden' name='hintatyyppi' value='$hintatyyppi'>";
 
           echo "<tr>";
           echo "<td><input type='text' name='tuoteno' size='20' value='$zrow[tuoteno]'></td>";

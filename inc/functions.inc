@@ -32708,22 +32708,43 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
       return $response;
     }
 
+    // haetaan eka rivi
+    $row = mysql_fetch_assoc($result);
+
+    // onko meillä isätuotteeseen perustuva hinnoittelu
+    $hinnoittelu_isatuotteella = ($row['hintatyyppi'] == 'I');
+
+    // resultti alkuun
+    mysql_data_seek($result, 0);
+
     $kokonaisarvo = 0;
 
     // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
     // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
-    while ($row = mysql_fetch_assoc($result)) {
-      $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+    if ($hinnoittelu_isatuotteella) {
+      while ($row = mysql_fetch_assoc($result)) {
+        $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+      }
+
+      // resultti alkuun
+      mysql_data_seek($result, 0);
     }
 
-    // resultti alkuun ja loopataan
-    mysql_data_seek($result, 0);
-
     while ($row = mysql_fetch_assoc($result)) {
+      // jos hinnoitellaan isätuotteella
+      // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole käytössä
+      if ($hinnoittelu_isatuotteella) {
+        $alekerroin   = 1;
+        $hintakerroin = $row['kerroin'] * $row['kehahin'] / $kokonaisarvo;
+      }
+      else {
+        $alekerroin   = $row['alekerroin'];
+        $hintakerroin = $row['hintakerroin'];
+      }
+
       $response[] = array(
-        "alekerroin"   => (float) $row['alekerroin'],
-        "arvokerroin"  => (float) $row['kerroin'] * $row['kehahin'] / $kokonaisarvo,
-        "hintakerroin" => (float) $row['hintakerroin'],
+        "alekerroin"   => (float) $alekerroin,
+        "hintakerroin" => (float) $hintakerroin,
         "kerroin"      => (float) $row['kerroin'],
         "tuoteno"      => $row['tuoteno'],
       );

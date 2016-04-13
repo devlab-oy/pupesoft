@@ -133,8 +133,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= pupesoft_csvstring($row['ryhma']);
   
   if ($extra_asiakastiedot) {
-    $rivi .= pupesoft_csvstring($row['asiakasnro']);
-    $rivi .= pupesoft_csvstring($row['myyjanro']);
+    $rivi .= ";".pupesoft_csvstring($row['asiakasnro']);
+    $rivi .= ";".pupesoft_csvstring($row['myyjanro']);
   } 
   
   $rivi .= "\n";

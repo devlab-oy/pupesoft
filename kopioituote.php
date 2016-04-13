@@ -2,6 +2,17 @@
 
 require "inc/parametrit.inc";
 
+// Tarkistetaan oikeus
+$tuoteylloik = tarkista_oikeus("yllapito.php", "tuote%", "X", TRUE);
+
+if (empty($tuoteylloik)) {
+  echo "<font class='error'>".t("VIRHE: Sinulla ei ole oikeutta perustaa uusia tuotteita")."!</font><br><br>";
+  $tee = "XXXVIRHEXXX";
+}
+else {
+  $pertuotetoim = $tuoteylloik["alanimi"];
+}
+
 if ($tee != 'PERUSTA') {
 
   if ($livesearch_tee == "TUOTEHAKU") {
@@ -246,12 +257,11 @@ if ($tee == 'PERUSTA') {
         mail($yhtiorow["tuotekopio_email"], mb_encode_mimeheader(t("Tuotteita kopioitu"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
       }
 
-      $toim   = 'tuote';
+      $toim   = $pertuotetoim;
       $tunnus = $tuote_id;
       $tee   = '';
 
       require "yllapito.php";
-
       exit;
     }
   }

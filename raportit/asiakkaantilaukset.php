@@ -690,6 +690,9 @@ if ($ytunnus != '') {
         elseif (is_numeric(trim($row[$i])) and mysql_field_name($result, $i) != 'tilausviite' and mysql_field_name($result, $i) != 'astilno') {
           echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
         }
+        elseif (mysql_field_name($result, $i) == 'ytunnus') {
+          echo "<td valign='top' {$class}>",tarkistahetu($row[$i]),"</td>";
+        }
         else {
           echo "<td valign='top' $class>$row[$i]</td>";
         }

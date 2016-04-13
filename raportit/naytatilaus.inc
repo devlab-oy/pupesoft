@@ -112,7 +112,7 @@ if ($laskurow["tila"] == "O") {
 echo "</tr>";
 
 echo "<tr>
-    <td>$laskurow[ytunnus]</td>
+    <td>",tarkistahetu($laskurow['ytunnus']),"</td>
     <td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
 
 if ($verkkokauppa != "" and $muokkaa != "") {

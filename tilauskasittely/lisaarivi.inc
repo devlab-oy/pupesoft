@@ -1728,13 +1728,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               foreach ($myy_tuoteno as $j => $lapsituoteno) {
                 // Tuoteperheissä voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo käsitelty...
                 if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE" and !isset($myy_hintakerr[$j])) {
-                  // haetaan tuoteperheen lapsien kertoimet ja kaivetaan niistä ulos tämä tuote
-                  $tuoteperhe_kertoimet = tuoteperheen_lapsien_kertoimet($perherow['isatuoteno'], $tuoteperhe_tyyppi);
-                  $tuoteperhe_lapsi = search_array_key_for_value_recursive($tuoteperhe_kertoimet, 'tuoteno', $lapsituoteno);
-
                   // laitetaan lasten kertoimet kuntoon
-                  $myy_hintakerr[$j] = $tuoteperhe_lapsi[0]["hintakerroin"];
-                  $myy_alekerroi[$j] = $tuoteperhe_lapsi[0]["alekerroin"];
+                  $myy_hintakerr[$j] = $perherow["hintakerroin"];
+                  $myy_alekerroi[$j] = $perherow["alekerroin"];
                   $myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
                   $myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
@@ -1802,18 +1798,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
               }
 
-              // Jos meillä on tuoteperheen lapsi ja isätuotteeseen perustuva hinnoittelu,
-              // otetaan hinta isältä
-              if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
-                $lis_hinta = 100;
-                $lis_ale_kaikki['ale1'] = 0;
-                $lis_ale_kaikki['ale2'] = 0;
-                $lis_ale_kaikki['ale3'] = 0;
-              }
-              else {
-                list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
-              }
-
+              list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
               list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
               // jos ollaan laittamassa muuta tuotetta kun mitä tilattiin, lisätään rivikommentti
@@ -2388,14 +2373,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     foreach ($perhearray as $perherow) {
-      // haetaan tuoteperheen lapsien kertoimet ja kaivetaan niistä ulos tämä tuote
-      $tuoteperhe_kertoimet = tuoteperheen_lapsien_kertoimet($perherow['isatuoteno'], $tuoteperhe_tyyppi);
-      $tuoteperhe_lapsi = search_array_key_for_value_recursive($tuoteperhe_kertoimet, 'tuoteno', $perherow["tuoteno"]);
-
       $puu_tuoteno[]  = $perherow["tuoteno"];
       $puu_kpl[]     = $toimittamatta*$perherow["kerroin"];
-      $puu_hintake[]  = $tuoteperhe_lapsi[0]["hintakerroin"];
-      $puu_alekerr[]  = $tuoteperhe_lapsi[0]["alekerroin"];
+      $puu_hintake[]  = $perherow["hintakerroin"];
+      $puu_alekerr[]  = $perherow["alekerroin"];
       $puu_ein[]     = $perherow["ei_nayteta"];
       $puu_ohiker[]   = $perherow["ohita_kerays"];
       $puu_var[]    = $var;
@@ -2798,18 +2779,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $alemaara = $kpl;
       }
 
-      // Jos meillä on tuoteperheen lapsi ja isätuotteeseen perustuva hinnoittelu,
-      // otetaan hinta isältä
-      if ($puu_tyyppi[$i] == 'LAPSITUOTE') {
-        $lis_hinta = 100;
-        $lis_ale_kaikki['ale1'] = 0;
-        $lis_ale_kaikki['ale2'] = 0;
-        $lis_ale_kaikki['ale3'] = 0;
-      }
-      else {
-        list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($puu_tyyppi[$i] == 'LAPSITUOTE' ? 'X' : ''));
-      }
-
+      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($puu_tyyppi[$i] == 'LAPSITUOTE' ? 'X' : ''));
       list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
     }
 
@@ -3661,3 +3631,5 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
     }
   }
 }
+
+select * from tilaustivi rivitunnus perher != 0

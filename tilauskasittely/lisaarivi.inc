@@ -769,10 +769,12 @@ elseif ($var == "R" and substr($paikka, 0, 3) != "¡¡V" and substr($paikka, 0, 3)
 }
 
 $perhelisa = "";
+$tuoteperhe_tyyppi = "P";
 
 //Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille.
 if ($laskurow['tila'] == 'V' and $var != "W") {
   $perhelisa = " and tuoteperhe.tyyppi='R' ";
+  $tuoteperhe_tyyppi = "R";
 }
 elseif ($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
   // Asiaakkaallevalmistus ja halutaan myydä rivi varastosta
@@ -1726,10 +1728,13 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               foreach ($myy_tuoteno as $j => $lapsituoteno) {
                 // Tuoteperheissä voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo käsitelty...
                 if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE" and !isset($myy_hintakerr[$j])) {
+                  // haetaan tuoteperheen lapsien kertoimet ja kaivetaan niistä ulos tämä tuote
+                  $tuoteperhe_kertoimet = tuoteperheen_lapsien_kertoimet($perherow['isatuoteno'], $tuoteperhe_tyyppi);
+                  $tuoteperhe_lapsi = search_array_key_for_value_recursive($tuoteperhe_kertoimet, 'tuoteno', $lapsituoteno);
 
                   // laitetaan lasten kertoimet kuntoon
-                  $myy_hintakerr[$j] = $perherow["hintakerroin"];
-                  $myy_alekerroi[$j] = $perherow["alekerroin"];
+                  $myy_hintakerr[$j] = $tuoteperhe_lapsi[0]["hintakerroin"];
+                  $myy_alekerroi[$j] = $tuoteperhe_lapsi[0]["alekerroin"];
                   $myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
                   $myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
@@ -2367,10 +2372,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     foreach ($perhearray as $perherow) {
+      // haetaan tuoteperheen lapsien kertoimet ja kaivetaan niistä ulos tämä tuote
+      $tuoteperhe_kertoimet = tuoteperheen_lapsien_kertoimet($perherow['isatuoteno'], $tuoteperhe_tyyppi);
+      $tuoteperhe_lapsi = search_array_key_for_value_recursive($tuoteperhe_kertoimet, 'tuoteno', $perherow["tuoteno"]);
+
       $puu_tuoteno[]  = $perherow["tuoteno"];
       $puu_kpl[]     = $toimittamatta*$perherow["kerroin"];
-      $puu_hintake[]  = $perherow["hintakerroin"];
-      $puu_alekerr[]  = $perherow["alekerroin"];
+      $puu_hintake[]  = $tuoteperhe_lapsi[0]["hintakerroin"];
+      $puu_alekerr[]  = $tuoteperhe_lapsi[0]["alekerroin"];
       $puu_ein[]     = $perherow["ei_nayteta"];
       $puu_ohiker[]   = $perherow["ohita_kerays"];
       $puu_var[]    = $var;

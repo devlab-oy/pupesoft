@@ -13091,7 +13091,9 @@ if (!function_exists("tarkista_oikeus")) {
       $querylisa = "";
 
       if (strpos($alanimi, "%") !== FALSE) {
-        $querylisa .= " AND alanimi like '$alanimi'";
+        $alanimi = substr($alanimi, 0, -1);
+
+        $querylisa .= " AND (alanimi = '$alanimi' or alanimi like '$alanimi!!!%')";
       }
       elseif ($alanimi != "") {
         // Luetaan alanime‰ vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myˆs jotain lis‰tietoja toisessa muuttujassa
@@ -22708,7 +22710,7 @@ if (!function_exists("gs1_sscc")) {
       $item_id_space      = 7;
     }
 
-    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_LEFT);
+    $sscc_gs1_company_id = str_pad($yhtiorow['ean'], $company_id_space, 0, STR_PAD_RIGHT);
     $sscc_item_id = str_pad(substr($id, -$item_id_space), $item_id_space, 0, STR_PAD_LEFT);
     $sscc_count = str_pad((int) $n, 2, 0, STR_PAD_LEFT);
 
@@ -27553,6 +27555,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('CustItemName', 0);
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
+
+      $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
       // Laitetaan kappalemäärät kuntoon
       $line->addChild('OrderedQuantity', $looprow['kpl']);
@@ -32654,7 +32658,7 @@ if (!function_exists('pupesoft_log')) {
     $full_path = $log_path . basename($log_file, '.log') . '.log';
 
     if (file_exists($full_path) and !is_writable($full_path)) {
-      echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
+      // echo "Tiedostoon {$full_path} ei pystynyt kirjoittamaan.";
       return;
     }
 
@@ -32662,16 +32666,21 @@ if (!function_exists('pupesoft_log')) {
     $file_handle = fopen($full_path, 'a');
 
     if ($file_handle === false) {
-      echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
+      // echo "Tiedostoa {$full_path} ei pystynyt avaamaan.";
       return;
     }
+
+    // varmistetaan tiedoston kirjotusoikeudet
+    @chown($full_path, 'devlab');
+    @chgrp($full_path, 'apache');
+    @chmod($full_path, 0777);
 
     // tehd‰‰n full message, timestampilla
     $timestamp = date('d.m.y H:i:s');
     $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
 
     if (fwrite($file_handle, $full_message) === false) {
-      echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
+      // echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";
       // ei returnia t‰ss‰, koska halutaan sulkea file_handle
     }
 

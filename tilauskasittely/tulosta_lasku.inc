@@ -1975,11 +1975,15 @@ if (!function_exists('loppu')) {
 
         if ($mainostxt_lasku_korkeus == 30) break;
 
+        list($ff_string, $ff_font) = pdf_fontfit($mainostxt, 455, $pdf_lasku, $pieni);
+
+        $oikpos = $pdf_lasku->strlen($ff_string, $ff_font);
+
         if ($laskutyyppi == 20) {
-          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($mainostxt, 455, $pdf_lasku, $norm), $thispage, $pieni);
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($ff_string, 455, $pdf_lasku, $ff_font), $thispage, $pieni);
         }
         else {
-          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($mainostxt, 455, $pdf_lasku, $norm), $thispage, $pieni);
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, pdf_substr($ff_string, 455, $pdf_lasku, $ff_font), $thispage, $pieni);
         }
 
         $viestikala -= 10;

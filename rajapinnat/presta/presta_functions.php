@@ -380,7 +380,7 @@ function hae_tuotteet() {
     }
 
     // Haetaan tuotteen lapsituotteet, jos tämä on isätuote
-    $query = "SELECT tuoteno, kerroin, hintakerroin, alekerroin
+    $query = "SELECT tuoteno, kerroin
               FROM tuoteperhe
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND isatuoteno = '{$row['tuoteno']}'
@@ -389,15 +389,12 @@ function hae_tuotteet() {
     $tuotteen_lapsituotteet = array();
 
     // tämä on isätuote
-    if (mysql_num_rows($tr_result) > 0) {
-      while ($tr_row = mysql_fetch_assoc($tr_result)) {
-        $tuotteen_lapsituotteet[] = array(
-          "alekerroin"   => $tr_row['alekerroin'],
-          "hintakerroin" => $tr_row['hintakerroin'],
-          "kerroin"      => $tr_row['kerroin'],
-          "tuoteno"      => $tr_row['tuoteno'],
-        );
-      }
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      // prestassa ei lapsituotteelle voida määrittää muuta kuin tuotenumero ja kerroin
+      $tuotteen_lapsituotteet[] = array(
+        "kerroin" => $tr_row['kerroin'],
+        "tuoteno" => $tr_row['tuoteno'],
+      );
     }
 
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt

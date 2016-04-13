@@ -1925,9 +1925,14 @@ elseif ($toim == 'PROJEKTI') {
 }
 elseif ($toim == 'YLLAPITO') {
   $laitejoini = '';
+  $laiteselecti = '';
 
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-    $laitejoini = " LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
+    $laiteselecti = " group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sarjanumero,
+                      group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') vasteaika, ";
+
+    $laitejoini = " JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                    LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
                     LEFT JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus ";
   }
 
@@ -1937,8 +1942,7 @@ elseif ($toim == 'YLLAPITO') {
             lasku.luontiaika,
             if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
             concat_ws('###', sopimus_alkupvm, sopimus_loppupvm) sopimuspvm,
-            group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sarjanumero,
-            group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') vasteaika,
+            {$laiteselecti}
             lasku.alatila,
             lasku.tila,
             lasku.tunnus,
@@ -1949,7 +1953,6 @@ elseif ($toim == 'YLLAPITO') {
             laskun_lisatiedot.sopimus_numero
             FROM lasku use index (tila_index)
             JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-            JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
             LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
             LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
@@ -1976,7 +1979,7 @@ elseif ($toim == 'YLLAPITO') {
     $sumrow = mysql_fetch_assoc($sumresult);
   }
 
-  $miinus = 7;
+  $miinus = 8;
 }
 elseif ($toim == 'KESKEN') {
   $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,

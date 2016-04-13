@@ -33,6 +33,7 @@ $paiva_ajo = FALSE;
 $weekly_ajo = FALSE;
 $ajotext = "";
 $ftppath = "/data/input";
+$extra_asiakastiedot = false;
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -56,6 +57,10 @@ if (isset($argv[3]) and trim($argv[3]) != '') {
   $ftppath = trim($argv[3]);
 }
 
+if (isset($argv[4]) and trim($argv[4]) == 'extra') {
+  $extra_asiakastiedot = true;
+}
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 
@@ -70,7 +75,13 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "code;name;customer_group\n";
+if ($extra_asiakastiedot) {
+  $header = "code;name;customer_group;custnro;sellerid\n";
+}
+else {
+  $header = "code;name;customer_group\n";
+}
+
 fwrite($fp, $header);
 
 $asiakasrajaus = "";
@@ -86,12 +97,18 @@ elseif ($paiva_ajo) {
   $asiakasrajaus = " AND (asiakas.muutospvm >= date_sub(now(), interval 24 HOUR) or asiakas.luontiaika >= date_sub(now(), interval 24 HOUR))";
 }
 
+$asiakastiedot_lisa = "";
+if ($extra_asiakastiedot) {
+  $asiakastiedot_lisa = ", asiakas.asiakasnro, asiakas.myyjanro";
+}
+
 // Haetaan asiakkaat
 $query = "SELECT
           yhtio.maa,
           asiakas.tunnus,
           concat_ws(' ', asiakas.nimi, asiakas.nimitark) nimi,
           asiakas.ryhma
+          {$asiakastiedot_lisa}
           FROM asiakas
           JOIN yhtio ON (asiakas.yhtio = yhtio.yhtio)
           WHERE asiakas.yhtio = '$yhtio'
@@ -114,6 +131,12 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['maa']}-{$row['tunnus']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= pupesoft_csvstring($row['ryhma']);
+  
+  if ($extra_asiakastiedot) {
+    $rivi .= pupesoft_csvstring($row['asiakasnro']);
+    $rivi .= pupesoft_csvstring($row['myyjanro']);
+  } 
+  
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

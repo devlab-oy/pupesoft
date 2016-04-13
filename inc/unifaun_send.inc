@@ -772,7 +772,6 @@ class Unifaun {
     );
 
     $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
-    $_mps = ($_mps and $this->toitarow['selite'] == 'Itella Exp Business Day 14 vakiorahti');
 
     // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää, jos printserver
     if ($_mps and empty($this->rakir_row["jv"]) and empty($this->mehto['jv']) and in_array($this->toitarow['virallinen_selite'], $posti_mps)) {

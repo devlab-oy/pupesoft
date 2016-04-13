@@ -109,6 +109,8 @@ function presta_specific_prices() {
             FROM tuote
             LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
               AND asiakashinta.tuoteno = tuote.tuoteno
+              AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
+              AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
               AND asiakashinta.hinta > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
               AND avainsana.selite = asiakashinta.asiakas_ryhma
@@ -138,6 +140,8 @@ function presta_specific_prices() {
             FROM tuote
             INNER JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
               AND asiakasalennus.tuoteno = tuote.tuoteno
+              AND if(asiakasalennus.alkupvm  = '0000-00-00', '0001-01-01', asiakasalennus.alkupvm)  <= current_date
+              AND if(asiakasalennus.loppupvm = '0000-00-00', '9999-12-31', asiakasalennus.loppupvm) >= current_date
               AND asiakasalennus.alennus > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
               AND avainsana.selite = asiakasalennus.asiakas_ryhma
@@ -185,10 +189,9 @@ function presta_specific_prices() {
               AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
               AND hinnasto.maa = '$hintavalrow[maa]'
               AND hinnasto.laji in ('', 'N', 'E')
-              AND hinnasto.hinta > 0
-              AND ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm = '0000-00-00' and hinnasto.loppupvm = '0000-00-00'))
-              ORDER BY ifnull(to_days(current_date) - to_days(hinnasto.alkupvm), 9999999999999)
-              LIMIT 1";
+              AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
+              AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
+              AND hinnasto.hinta > 0";
     $hinnastoresult = pupe_query($query);
 
     while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
@@ -380,7 +383,7 @@ function hae_tuotteet() {
     }
 
     // Haetaan tuotteen lapsituotteet, jos tämä on isätuote
-    $query = "SELECT tuoteno, kerroin, hintakerroin, alekerroin
+    $query = "SELECT tuoteno, kerroin
               FROM tuoteperhe
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND isatuoteno = '{$row['tuoteno']}'
@@ -389,15 +392,12 @@ function hae_tuotteet() {
     $tuotteen_lapsituotteet = array();
 
     // tämä on isätuote
-    if (mysql_num_rows($tr_result) > 0) {
-      while ($tr_row = mysql_fetch_assoc($tr_result)) {
-        $tuotteen_lapsituotteet[] = array(
-          "alekerroin"   => $tr_row['alekerroin'],
-          "hintakerroin" => $tr_row['hintakerroin'],
-          "kerroin"      => $tr_row['kerroin'],
-          "tuoteno"      => $tr_row['tuoteno'],
-        );
-      }
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      // prestassa ei lapsituotteelle voida määrittää muuta kuin tuotenumero ja kerroin
+      $tuotteen_lapsituotteet[] = array(
+        "kerroin" => $tr_row['kerroin'],
+        "tuoteno" => $tr_row['tuoteno'],
+      );
     }
 
     // Jos tuote kuuluu tuotepuuhun niin haetaan kategoria_idt

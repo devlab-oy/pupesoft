@@ -32745,11 +32745,85 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
       $response[] = array(
         "alekerroin"   => (float) $alekerroin,
         "hintakerroin" => (float) $hintakerroin,
+        "hintatyyppi"  => $row['hintatyyppi'],
         "kerroin"      => (float) $row['kerroin'],
         "tuoteno"      => $row['tuoteno'],
       );
     }
 
     return $response;
+  }
+}
+
+if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
+  function tuoteperheiden_hintojen_paivitys($rivitunnukset, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    // tutkittavat rivitunnukset pitää olla array
+    if (!is_array($rivitunnukset) or count($rivitunnukset) == 0) {
+      return;
+    }
+
+    $tunnukset = implode(', ', $rivitunnukset);
+
+    // Haetaan kaikki isätuotteet
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus in ({$tunnukset})
+              AND perheid = tunnus";
+    $result = pupe_query($query);
+
+    while ($row = mysql_fetch_assoc($result)) {
+
+      // katsotaan lapsien kertoimet
+      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $laskettu_hinta = 0;
+
+      foreach ($kertoimet as $lapsituote) {
+        // jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään
+        if ($lapsituote['hintatyyppi'] != 'I') {
+          continue 2; // skip foreach and while
+        }
+
+        // lasketaan lapsituotteen hinta isän hinnasta
+        $hinta = round($row['hinta'] * $lapsituote['hintakerroin'], $yhtiorow['hintapyoristys']);
+        $laskettu_hinta += $hinta;
+
+        // päivitetään lapsituotteen hinta
+        $query = "UPDATE tilausrivi SET
+                  ale1       = '{$row['ale1']}',
+                  ale2       = '{$row['ale2']}',
+                  ale3       = '{$row['ale3']}',
+                  erikoisale = '{$row['erikoisale']}',
+                  hinta      = '{$hinta}',
+                  netto      = '{$row['netto']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$lapsituote['tuoteno']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tunnus in ({$tunnukset})";
+        $update = pupe_query($query);
+
+        // päivitetään isätuote nollaksi
+        $query = "UPDATE tilausrivi SET
+                  ale1       = 0,
+                  ale2       = 0,
+                  ale3       = 0,
+                  erikoisale = 0,
+                  hinta      = 0,
+                  netto      = ''
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = {$row['tunnus']}";
+        $update = pupe_query($query);
+      }
+
+      // katsotaan pyöristysero
+      $pyoristysero = $laskettu_hinta - $row['hinta'];
+
+      // jos on pyöristyseroa
+      if ($pyoristysero != 0) {
+        // echo "Jyvitys ei menny tasan!<br>";
+      }
+    }
   }
 }

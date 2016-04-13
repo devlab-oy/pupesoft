@@ -1134,7 +1134,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 

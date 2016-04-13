@@ -322,7 +322,7 @@ $query_ale_lisa = generoi_alekentta('M');
 
 // n‰ytet‰‰n sopparit
 $query = "SELECT lasku.*, laskun_lisatiedot.*, tilausrivi.*,
-          concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if (lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if (lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
+          concat_ws('!°!', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if (lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if (lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
           lasku.tunnus laskutunnus, kesken.tunnus keskentunnus,
           round(sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
           round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
@@ -411,8 +411,18 @@ if (mysql_num_rows($result) > 0) {
 
     echo "<tr class='aktiivi'>";
     echo "<td valign='top'>$row[laskutunnus]</td>";
-    echo "<td valign='top'>$row[ytunnus]</td>";
-    echo "<td valign='top'>$row[nimi]</td>";
+    echo "<td valign='top'>",tarkistahetu($row["ytunnus"]),"</td>";
+    echo "<td valign='top'>";
+
+    if (strpos($row["nimi"], '!°!') !== false) {
+      list($_ytunnus, $_nimi) = explode('!°!', $row["nimi"]);
+      echo tarkistahetu($_ytunnus),"<br>{$_nimi}";
+    }
+    else {
+      echo $row["nimi"];
+    }
+
+    echo "</td>";
     echo "<td valign='top'>".tv1dateconv($row["sopimus_alkupvm"])."</td>";
     echo "<td valign='top'>";
 

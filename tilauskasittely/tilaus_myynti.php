@@ -3475,7 +3475,7 @@ if ($tee == '') {
         echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'>";
       }
       else {
-        echo "<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&lopetus={$tilmyy_lopetus}'>{$laskurow['ytunnus']}</a>";
+        echo "<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&lopetus={$tilmyy_lopetus}'>",tarkistahetu($laskurow['ytunnus']),"</a>";
 
         if ($faktarow["asiakasnro"] != "") {
           echo " / $faktarow[asiakasnro]";

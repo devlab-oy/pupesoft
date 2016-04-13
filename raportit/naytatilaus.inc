@@ -400,17 +400,6 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
   $kerattyaikares = pupe_query($query);
   $kerattyaikarow = mysql_fetch_assoc($kerattyaikares);
 
-  $query = "SELECT
-            MIN(tilausrivi.toimaika) AS toimaika
-            FROM tilausrivi
-            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-            and tilausrivi.var     != 'O'
-            AND tilausrivi.tyyppi  != 'D'
-            HAVING toimaika != '0000-00-00 00:00:00'";
-  $toimaikares = pupe_query($query);
-  $toimaikarow = mysql_fetch_assoc($toimaikares);
-
   $query = "SELECT MIN(tilausrivi.toimitettuaika) AS toimitettuaika
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
@@ -423,6 +412,17 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
 
   // Rivin toimitusaika
   if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
+    $query = "SELECT
+              MIN(tilausrivi.toimaika) AS toimaika
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
+              and tilausrivi.var     != 'O'
+              AND tilausrivi.tyyppi  != 'D'
+              HAVING toimaika != '0000-00-00 00:00:00'";
+    $toimaikares = pupe_query($query);
+    $toimaikarow = mysql_fetch_assoc($toimaikares);
+
     $toimitettuaikarow["toimitettuaika"] = $toimaikarow["toimaika"];
   }
 

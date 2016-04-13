@@ -1728,6 +1728,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               foreach ($myy_tuoteno as $j => $lapsituoteno) {
                 // Tuoteperheissä voi olla samaa tuotetta monta kertaa, siksi and !isset($myy_hintakerr[$j]), muuten tuote on jo käsitelty...
                 if (strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE" and !isset($myy_hintakerr[$j])) {
+
                   // laitetaan lasten kertoimet kuntoon
                   $myy_hintakerr[$j] = $perherow["hintakerroin"];
                   $myy_alekerroi[$j] = $perherow["alekerroin"];
@@ -3632,4 +3633,7 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
   }
 }
 
-select * from tilaustivi rivitunnus perher != 0
+// Katsotaan lopuksi vielä tuoteperheiden hinnoittelu kaikille lisätyille riveille
+$kaikki_listyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
+
+tuoteperheiden_hintojen_paivitys($kaikki_listyt_rivit, $tuoteperhe_tyyppi);

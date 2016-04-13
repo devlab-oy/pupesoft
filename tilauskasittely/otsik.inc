@@ -3504,6 +3504,11 @@ if ($tila == "" and !isset($jatka)) {
     $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
 
     if (mysql_num_rows($mainostxt_res) > 0) {
+      if (!isset($mainosteksti) and empty($tilausnumero) and empty($srow['mainosteksti'])) {
+        $mainostxt_row = mysql_fetch_assoc($mainostxt_res);
+        $srow['mainosteksti'] = trim($mainostxt_row['selite']."\n".$mainostxt_row['selitetark']);
+      }
+
       echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td>".t("lasku")."</td></tr>";
     }
 

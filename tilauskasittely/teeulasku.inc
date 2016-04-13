@@ -324,22 +324,6 @@ if ($lisa_viestit != "") {
 
 $mainosteksti = $lasrow['mainosteksti'];
 
-// Haetaan avainsanoista mainosteksti
-$query = "SELECT *
-          FROM avainsana
-          WHERE yhtio = '$kukarow[yhtio]'
-          AND kieli   = '$kielirow[kieli]'
-          AND laji    = 'MAINOSTXT_LASKU'
-          ORDER BY jarjestys
-          LIMIT 1";
-$mainosteksti_result = pupe_query($query);
-
-if (mysql_num_rows($mainosteksti_result) == 1) {
-  $mainosteksti_row = mysql_fetch_assoc($mainosteksti_result);
-  if ($mainosteksti != '') $mainosteksti .= "\n";
-  if (stripos($mainosteksti, $mainosteksti_row["selite"]) === FALSE) $mainosteksti .= trim($mainosteksti_row["selite"]." ".$mainosteksti_row["selitetark"])." \n";
-}
-
 //Siivotaan kommenteista kaikki kummalliset merkit pois
 $comments         = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸’ı ".preg_quote(".,-/!|+()%#ß@:_", "/")."\r\n]/", "", $comments);
 $viestit          = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸’ı ".preg_quote(".,-/!|+()%#ß@:_", "/")."\r\n]/", "", $viestit);

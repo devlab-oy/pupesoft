@@ -41,6 +41,8 @@ if ($tee == "PAIVITA_AJAX") {
   exit;
 }
 
+if (!isset($ei_vuosikulutusta)) $ei_vuosikulutusta = '';
+
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 
 $useampi_yhtio = 0;
@@ -752,7 +754,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         if ($row["status"] != "T" or $lisa != 0) {
 
           $ostoehdotus     = $row["halytysraja"] - $vapaasaldo;
-          $ostoehdotus_lisa   = (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
+          $vku_laskenta    = !empty($ei_vuosikulutusta) ? 0 : $vku;
+
+          $ostoehdotus_lisa = (2 * (($vku_laskenta / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
 
           if ($ostoehdotus_lisa > 0) {
             $ostoehdotus += $ostoehdotus_lisa;
@@ -1125,6 +1129,10 @@ echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input ty
 $chk = "";
 if ($erikoisvarastot != "") $chk = "checked";
 echo "<tr><th>".t("Älä huomioi erikoisvarastoja")."</th><td colspan='3'><input type='checkbox' name='erikoisvarastot' $chk></td></tr>";
+
+$chk = "";
+if ($ei_vuosikulutusta != "") $chk = "checked";
+echo "<tr><th>".t("Älä huomioi vuosikulutusta")."</th><td colspan='3'><input type='checkbox' name='ei_vuosikulutusta' {$chk}></td></tr>";
 
 $chk = "";
 if ($poistetut != "") $chk = "checked";

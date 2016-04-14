@@ -51,7 +51,7 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
-  $ulos .= "<option value = '' ></option>";
+  $ulos .= "<option value=''>".t("Tuotteen toimittajan alkuperämaa")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -67,19 +67,6 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
 
 if (mysql_field_name($result, $i) == "valuutta") {
 
-  if (!isset($trow['liitostunnus']) and !empty($liitostunnus)) {
-
-    $query = "SELECT *
-              from toimi
-              where yhtio  = '{$kukarow['yhtio']}'
-              and tyyppi  != 'P'
-              and tunnus   = '{$liitostunnus}'";
-    $toimires = pupe_query($query);
-    $toimirow = mysql_fetch_assoc($toimires);
-
-    $trow[$i] = $toimirow['oletus_valkoodi'];
-  }
-
   $ulos = "<td><select name='{$nimi}'>";
 
   $query = "SELECT nimi
@@ -87,6 +74,8 @@ if (mysql_field_name($result, $i) == "valuutta") {
             WHERE yhtio = '{$kukarow['yhtio']}'
             ORDER BY jarjestys";
   $vresult = pupe_query($query);
+
+  $ulos .= "<option value=''>".t("Tuotteen toimittajan valuutta")."</option>";
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $sel = $trow[$i] == $vrow['nimi'] ? 'selected' : '';

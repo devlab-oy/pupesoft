@@ -327,8 +327,6 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function add_child_product(SimpleXMLElement &$xml, $product) {
-    $discount   = $product['alekerroin'];
-    $price      = $product['hintakerroin'];
     $qty        = $product['kerroin'];
     $sku        = $product['tuoteno'];
     $product_id = array_search($sku, $this->all_skus());

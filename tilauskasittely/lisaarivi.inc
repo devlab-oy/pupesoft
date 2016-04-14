@@ -53,7 +53,8 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
               JOIN tuote USING (yhtio, tuoteno)
               WHERE tuoteperhe.yhtio = '{$kukarow['yhtio']}'
               AND tuoteperhe.tyyppi = '{$tyyppi}'
-              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'";
+              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'
+              ORDER BY hintatyyppi DESC";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -64,7 +65,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     $row = mysql_fetch_assoc($result);
 
     // onko meill‰ is‰tuotteeseen perustuva hinnoittelu
-    $hinnoittelu_isatuotteella = ($row['hintatyyppi'] == 'I');
+    $hinnoittelu_isatuotteella = $row['hintatyyppi'];
 
     // resultti alkuun
     mysql_data_seek($result, 0);
@@ -73,7 +74,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 
     // lasketaan koko tuoteperheen kokonaisarvo, t‰t‰ tarvitaan arvokertoimen laskentaan
     // arvokerrointa k‰ytet‰‰n, mik‰li k‰ytˆss‰ on is‰tuotteen hintaan perustuva hinnoittelu
-    if ($hinnoittelu_isatuotteella) {
+    if (!empty($hinnoittelu_isatuotteella)) {
       while ($row = mysql_fetch_assoc($result)) {
         $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
       }
@@ -85,9 +86,9 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     while ($row = mysql_fetch_assoc($result)) {
       // jos hinnoitellaan is‰tuotteella
       // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole k‰ytˆss‰
-      if ($hinnoittelu_isatuotteella) {
+      if (!empty($hinnoittelu_isatuotteella)) {
         $alekerroin   = 1;
-        $hintakerroin = $row['kerroin'] * $row['kehahin'] / $kokonaisarvo;
+        $hintakerroin = $row['kehahin'] / $kokonaisarvo;
       }
       else {
         $alekerroin   = $row['alekerroin'];
@@ -97,7 +98,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
       $response[] = array(
         "alekerroin"   => (float) $alekerroin,
         "hintakerroin" => (float) $hintakerroin,
-        "hintatyyppi"  => $row['hintatyyppi'],
+        "hintatyyppi"  => $hinnoittelu_isatuotteella,
         "kerroin"      => (float) $row['kerroin'],
         "tuoteno"      => $row['tuoteno'],
       );
@@ -132,15 +133,17 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
       $laskettu_hinta = 0;
 
-      foreach ($kertoimet as $lapsituote) {
-        // jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n
-        if ($lapsituote['hintatyyppi'] != 'I') {
-          continue 2; // skip foreach and while
-        }
+      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
 
+      // jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n
+      if ($hinnoittelu_isatuotteella === FALSE) {
+        continue;
+      }
+
+      foreach ($kertoimet as $lapsituote) {
         // lasketaan lapsituotteen hinta is‰n hinnasta
         $hinta = round($row['hinta'] * $lapsituote['hintakerroin'], $yhtiorow['hintapyoristys']);
-        $laskettu_hinta += $hinta;
+        $laskettu_hinta += ($hinta * $row['tilkpl'] * $lapsituote['kerroin']);
 
         // p‰ivitet‰‰n lapsituotteen hinta
         $query = "UPDATE tilausrivi SET
@@ -153,28 +156,37 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tuoteno = '{$lapsituote['tuoteno']}'
                   AND perheid = '{$row['perheid']}'
+                  AND tilkpl  = {$row['tilkpl']} * {$lapsituote['kerroin']}
                   AND tunnus in ({$tunnukset})";
-        $update = pupe_query($query);
-
-        // p‰ivitet‰‰n is‰tuote nollaksi
-        $query = "UPDATE tilausrivi SET
-                  ale1       = 0,
-                  ale2       = 0,
-                  ale3       = 0,
-                  erikoisale = 0,
-                  hinta      = 0,
-                  netto      = ''
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = {$row['tunnus']}";
-        $update = pupe_query($query);
+        pupe_query($query);
       }
 
+      // p‰ivitet‰‰n is‰tuote nollaksi
+      $query = "UPDATE tilausrivi SET
+                ale1       = 0,
+                ale2       = 0,
+                ale3       = 0,
+                erikoisale = 0,
+                hinta      = 0,
+                netto      = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$row['tunnus']}";
+      pupe_query($query);
+
       // katsotaan pyˆristysero
-      $pyoristysero = $laskettu_hinta - $row['hinta'];
+      $pyoristysero = $laskettu_hinta - ($row['hinta'] * $row['tilkpl']);
 
       // jos on pyˆristyseroa
       if ($pyoristysero != 0) {
-        // echo "Jyvitys ei menny tasan!<br>";
+
+        $vikatunnus = array_pop($rivitunnukset);
+
+        $query = "UPDATE tilausrivi SET
+                  hinta = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tunnus = $vikatunnus";
+        pupe_query($query);
       }
     }
   }

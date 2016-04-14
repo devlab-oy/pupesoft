@@ -821,12 +821,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "</tr>";
 
         echo "<tr>";
-        echo "<th>".t("Hintamuoto")."</th>";
+        echo "<th>".t("Hinnoittelu")."</th>";
         echo "<td>";
 
         if ($faktarow["hintatyyppi"] == "") {
           $sel_hinta1 = "SELECTED";
-          if ($oikeurow['paivitys'] != '1') echo t("Hinnat m‰‰ritell‰‰n lapsituotteille");
+          if ($oikeurow['paivitys'] != '1') echo t("Hinta summataan is‰- ja lapsituotteilta");
         }
         elseif ($faktarow["hintatyyppi"] == "I") {
           $sel_hinta2 = "SELECTED";
@@ -835,14 +835,13 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         if ($oikeurow['paivitys'] == '1') {
           echo "<select name='hintatyyppi'>";
-          echo "<option value='' $sel_hinta1>".t("Hinnat m‰‰ritell‰‰n lapsituotteille")."</option>";
+          echo "<option value='' $sel_hinta1>".t("Hinta summataan is‰- ja lapsituotteilta")."</option>";
           echo "<option value='I' $sel_hinta2>".t("Hinta m‰‰ritell‰‰n is‰tuotteelle")."</option>";
           echo "</select>";
         }
 
         echo "</td>";
         echo "</tr>";
-
       }
 
       $query = "SELECT omasivu
@@ -983,8 +982,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Is‰tuote")."</th>";
         echo "<th>".t("Nimitys")."</th>";
         echo "<th></th>";
-        echo "<th></th>";
-        echo "<th></th>";
+
+        if ($hintatyyppi != 'I') {
+          echo "<th></th>";
+          echo "<th></th>";
+        }
+
         echo "<th>".t("Myyntihinta")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin")."</th>";
@@ -995,8 +998,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<td>$isarow[tuoteno]</th>";
         echo "<td>$isarow[nimitys]</th>";
         echo "<td></th>";
-        echo "<td></th>";
-        echo "<td></th>";
+
+        if ($hintatyyppi != 'I') {
+          echo "<td></th>";
+          echo "<td></th>";
+        }
+
         echo "<td class='text-right'>".round($isarow["myyntihinta"], $yhtiorow["hintapyoristys"])."</th>";
         echo "<td class='text-right'>". (float) $isarow["kehahin"]."</th>";
         echo "<td class='text-right'>". (float) $isarow["kehahin"]."</th>";
@@ -1008,8 +1015,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Lapset")."</th>";
         echo "<th>".t("Nimitys")."</th>";
         echo "<th>".t("M‰‰r‰kerroin")."</th>";
-        echo "<th>".t("Hintakerroin")."</th>";
-        echo "<th>".t("Alennuskerroin")."</th>";
+
+        if ($hintatyyppi != 'I') {
+          echo "<th>".t("Hintakerroin")."</th>";
+          echo "<th>".t("Alennuskerroin")."</th>";
+        }
+
         echo "<th>".t("Myyntihinta * Hintakerroin")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin * Kerroin")."</th>";
@@ -1019,8 +1030,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Lapset"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("M‰‰r‰kerroin"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Hintakerroin"));
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Alennuskerroin"));
+
+        if ($hintatyyppi != 'I') {
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Hintakerroin"));
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Alennuskerroin"));
+        }
+
         $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta*Hintakerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
@@ -1154,8 +1169,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         if ($toim == "PERHE") {
 
           echo "<td><input type='text' name='kerroin' size='10'></td>";
-          echo "<td><input type='text' name='hintakerroin' size='10'></td>";
-          echo "<td><input type='text' name='alekerroin' size='10'></td>";
+
+          if ($hintatyyppi != 'I') {
+            echo "<td><input type='text' name='hintakerroin' size='10'></td>";
+            echo "<td><input type='text' name='alekerroin' size='10'></td>";
+          }
+
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
@@ -1270,23 +1289,30 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "PERHE") {
-            $query = "SELECT myyntihinta
-                      FROM tuote
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tuoteno = '{$prow['tuoteno']}'";
-            $lapsituoteres = pupe_query($query);
-            $lapsituoterow = mysql_fetch_assoc($lapsituoteres);
+            if ($hintatyyppi != 'I') {
+              $query = "SELECT myyntihinta
+                        FROM tuote
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tuoteno = '{$prow['tuoteno']}'";
+              $lapsituoteres = pupe_query($query);
+              $lapsituoterow = mysql_fetch_assoc($lapsituoteres);
 
-            $lapsituote_myyntihinta = $lapsituoterow['myyntihinta'] * $prow['hintakerroin'];
-            $myyntihintayht += $lapsituote_myyntihinta;
+              $lapsituote_myyntihinta = $lapsituoterow['myyntihinta'] * $prow['hintakerroin'];
+              $myyntihintayht += $lapsituote_myyntihinta;
 
-            echo "<td class='text-right'>{$prow['hintakerroin']}</td>";
-            echo "<td class='text-right'>{$prow['alekerroin']}</td>";
-            echo "<td class='text-right'>{$lapsituote_myyntihinta}</td>";
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"], $style);
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"], $style);
-            $worksheet->writeNumber($excelrivi, $excelsarake++, $lapsituote_myyntihinta, $style);
-            //echo "<td class='text-right'>$prow[rivikommentti]</td>";
+              echo "<td class='text-right'>{$prow['hintakerroin']}</td>";
+              echo "<td class='text-right'>{$prow['alekerroin']}</td>";
+              echo "<td class='text-right'>{$lapsituote_myyntihinta}</td>";
+
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"], $style);
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"], $style);
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $lapsituote_myyntihinta, $style);
+            }
+            else {
+              echo "<td class='text-right'></td>";
+
+              $worksheet->writeString($excelrivi, $excelsarake++, "", $style);
+            }
           }
 
           if ($toim == "OSALUETTELO") {
@@ -1451,7 +1477,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             }
           }
 
-          if ($toim == "PERHE") {
+          if ($toim == "PERHE" and $hintatyyppi != 'I') {
             echo "<td>";
             echo "<input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'>";
             echo "</td>";
@@ -1472,8 +1498,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim != "VSUUNNITTELU") {
-            echo "<td>$tuoterow[kehahin]</td>";
-            echo "<td>".round($lapsiyht, 6)."</td>";
+            echo "<td></td>";
+            echo "<td style='text-align: right;'>$tuoterow[kehahin]</td>";
+            echo "<td></td>";
+
           }
 
           if ($toim == "PERHE") {
@@ -1515,7 +1543,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($tunnus == "") {
         echo "<tr>";
         if ($toim == "PERHE") {
-          echo "<td class='back' colspan='3'></td>";
+          if ($hintatyyppi != 'I') {
+            echo "<td class='back' colspan='3'></td>";
+          }
+          else {
+            echo "<td class='back'></td>";
+          }
         }
         elseif ($toim == "LISAVARUSTE") {
           echo "<td class='back'></td>";
@@ -1554,11 +1587,18 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $_yhteensa = round($resyht, 6);
           echo "<td class='tumma text-right'>{$_yhteensa}</td>";
         }
+
         echo "</tr>";
 
         if ($toim == "PERHE") {
           echo "<tr>";
-          echo "<td class='back' colspan='3'></td>";
+
+          if ($hintatyyppi != 'I') {
+            echo "<td class='back' colspan='3'></td>";
+          }
+          else {
+            echo "<td class='back'></td>";
+          }
 
           echo "<th colspan='2' class='text-right'>".t("Yhteens‰")." (".t("lapset+is‰")."):</th>";
 

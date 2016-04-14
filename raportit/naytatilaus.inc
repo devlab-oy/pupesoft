@@ -389,21 +389,40 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
 
-  $query = "SELECT
-            max(tilausrivi.kerattyaika) kerattyaika,
-            max(tilausrivi.toimaika) toimaika,
-            max(tilausrivi.toimitettuaika) toimitettuaika
+  $query = "SELECT MIN(tilausrivi.kerattyaika) AS kerattyaika
             FROM tilausrivi
-            WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
-            AND tilausrivi.otunnus  = '$laskurow[tunnus]'
+            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
             and tilausrivi.var     != 'O'
-            AND tilausrivi.tyyppi  != 'D'";
-  $aikares = pupe_query($query);
-  $aikarow = mysql_fetch_assoc($aikares);
+            AND tilausrivi.tyyppi  != 'D'
+            HAVING kerattyaika != '0000-00-00 00:00:00'";
+  $kerattyaikares = pupe_query($query);
+  $kerattyaikarow = mysql_fetch_assoc($kerattyaikares);
 
   // Rivin toimitusaika
   if ($yhtiorow["tilausrivien_toimitettuaika"] == 'K' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') {
-    $aikarow["toimitettuaika"] = $aikarow["toimaika"];
+    $query = "SELECT MIN(tilausrivi.toimaika) AS toimaika
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
+              and tilausrivi.var     != 'O'
+              AND tilausrivi.tyyppi  != 'D'
+              HAVING toimaika != '0000-00-00 00:00:00'";
+    $toimaikares = pupe_query($query);
+    $toimaikarow = mysql_fetch_assoc($toimaikares);
+
+    $toimitettuaikarow["toimitettuaika"] = $toimaikarow["toimaika"];
+  }
+  else {
+    $query = "SELECT MIN(tilausrivi.toimitettuaika) AS toimitettuaika
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
+              and tilausrivi.var     != 'O'
+              AND tilausrivi.tyyppi  != 'D'
+              HAVING toimitettuaika != '0000-00-00 00:00:00'";
+    $toimitettuaikares = pupe_query($query);
+    $toimitettuaikarow = mysql_fetch_assoc($toimitettuaikares);
   }
 
   echo "<tr>
@@ -418,8 +437,8 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
       <td>".tv1dateconv($laskurow["luontiaika"], "P", "")."</td>
       <td>".tv1dateconv($laskurow["h1time"], "P", "")."</td>
       <td>".tv1dateconv($laskurow["lahetepvm"], "P", "")."</td>
-      <td>".tv1dateconv($aikarow["kerattyaika"], "P", "")."</td>
-      <td>".tv1dateconv($aikarow["toimitettuaika"], "P", "")."</td>
+      <td>".tv1dateconv($kerattyaikarow["kerattyaika"], "P", "")."</td>
+      <td>".tv1dateconv($toimitettuaikarow["toimitettuaika"], "P", "")."</td>
       <td>".tv1dateconv($laskurow["laskutettu"], "P", "")."</td>
     </tr>";
 }

@@ -215,6 +215,21 @@ if ($tee == 'LISAA') {
       $lkello = $lkello.":00";
     }
 
+    if ($kukarow["kieli"] != 'fi') {
+      $query = "SELECT selite from avainsana
+          where yhtio = '$kukarow[yhtio]'
+          and laji       = 'KALETAPA'
+          and selitetark = '$tapa'
+          and kieli      = '$kukarow[kieli]'";
+      $tapa_res = pupe_query($query);
+      $tapa_row = mysql_fetch_assoc($tapa_res);
+
+      $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
+      $tapa_row = mysql_fetch_assoc($tapa_res);
+    
+      if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
+    }
+    
     $query = "INSERT INTO kalenteri
               SET
               yhtio        = '$kyhtio',

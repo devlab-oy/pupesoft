@@ -178,14 +178,14 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
 
       // jos on pyöristyseroa
       if ($pyoristysero != 0) {
-
-        $vikatunnus = array_pop($rivitunnukset);
-
+        // Lisätään pyöristys tämän perheen vikalle lapselle
         $query = "UPDATE tilausrivi SET
                   hinta = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND perheid = '{$row['perheid']}'
-                  AND tunnus = $vikatunnus";
+                  AND tunnus != perheid
+                  ORDER BY tunnus DESC
+                  LIMIT 1";
         pupe_query($query);
       }
     }

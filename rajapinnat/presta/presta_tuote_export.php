@@ -193,6 +193,14 @@ if (!isset($presta_vakioasiakasryhmat)) {
     // 6,
   );
 }
+if (!isset($presta_asiakasryhmien_hinta)) {
+  // 1 = Näytetään hinta, 0 = Ei näytetä hintoja
+  $presta_asiakasryhmien_hinta = 1;
+}
+if (!isset($presta_asiakasryhmien_hinnat)) {
+  // 0 = Verolliset hinnat, 1 = Verottomat hinnat
+  $presta_asiakasryhmien_hinnat = 0;
+}
 if (!isset($presta_varastot)) {
   // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
   $presta_varastot = array(0);
@@ -247,6 +255,8 @@ if (array_key_exists('asiakasryhmat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirretään asiakasryhmät.\n";
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+  $presta_customer_groups->set_show_prices($presta_asiakasryhmien_hinta);
+  $presta_customer_groups->set_price_display_method($presta_asiakasryhmien_hinnat);
   $presta_customer_groups->sync_groups($groups);
 }
 

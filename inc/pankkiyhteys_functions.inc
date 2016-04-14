@@ -466,6 +466,8 @@ function sepa_download_files($params) {
     return false;
   }
 
+  $viitteet = array_unique($viitteet);
+
   $bank = $pankkiyhteys['bank'];
 
   // Varmistetaan, että ei kutsuta väärällä filetypellä

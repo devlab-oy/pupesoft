@@ -54,7 +54,7 @@ else {
     $yhtvarTOT=0;
 
     $ulos  = "";
-    $ulos .= t("Os")."\t";
+    $ulos .= t("Osasto")."\t";
     $ulos .= t("Try")."\t";
     $ulos .= t("Myyn 30pv")."\t";
     $ulos .= t("Kate 30pv")."\t";
@@ -69,7 +69,7 @@ else {
     $ulos .= t("K% VA")."\t";
     $ulos .= t("Kpl VA")."\t";
     $ulos .= t("Varasto (arvio)")."\t";
-    $ulos .= t("Kierto")."\t";
+    $ulos .= t("Kierto");
     $ulos .= "\n";
 
     $edosasto = '';
@@ -160,7 +160,6 @@ else {
           if ($myynVA > 0)
             $kateVApros = sprintf("%.02f", round($kateVA/$myynVA*100, 2));
 
-
           $ulos .= t("Osasto")." $edosasto ".t("yhteensä").":\t\t";
           $ulos .= "$myyn30\t";
           $ulos .= "$kate30\t";
@@ -174,7 +173,7 @@ else {
           $ulos .= "$kateVA\t";
           $ulos .= "$kateVApros\t";
           $ulos .= "$kplVA\t";
-          $ulos .= "$varTOT\t";
+          $ulos .= "$varTOT";
           $ulos .= "\n";
 
           $ulos .= "\n";
@@ -245,7 +244,7 @@ else {
         $ulos .= "$kateVApros\t";
         $ulos .= "$row[kplVA]\t";
         $ulos .= "$varastonarvo\t";
-        $ulos .= "$kierto\t";
+        $ulos .= "$kierto";
         $ulos .= "\n";
       }
 
@@ -296,7 +295,6 @@ else {
       if ($yhtmyynVA > 0)
         $yhtkateVApros = sprintf("%.02f", round($yhtkateVA/$yhtmyynVA*100, 2));
 
-
       ///* Kaikkiyhteensä *///
       $ulos .= t("Kaikki yhteensä").":\t\t";
       $ulos .= "$yhtmyyn30\t";
@@ -315,77 +313,55 @@ else {
       $ulos .= "\n";
     }
 
-    if (include 'Spreadsheet/Excel/Writer.php') {
+    include 'inc/pupeExcel.inc';
 
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+    $worksheet   = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+    $excelrivi   = 0;
 
-      $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $workbook->setVersion(8);
-      $worksheet = $workbook->addWorksheet('Myynnit tuoteryhmittäin');
+    $rivit = explode("\n", $ulos);
 
-      $format_bold = $workbook->addFormat();
-      $format_bold->setBold();
+    $rivi = explode("\t", $rivit[0]);
 
-      $excelrivi = 0;
+    echo "<br><br><table>";
+    echo "<tr>";
+
+    for ($i=0; $i < count($rivi); $i++) {
+      $worksheet->write($excelrivi, $i, $rivi[$i], $format_bold);
+      echo "<th>{$rivi[$i]}</th>";
     }
 
-    if (isset($workbook)) {
-      $rivit = explode("\n", $ulos);
+    $excelrivi++;
+    echo "</tr>";
 
-      $rivi = explode("\t", $rivit[0]);
-      for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i], $format_bold);
-      $excelrivi++;
+    for ($j = 1; $j<count($rivit); $j++) {
+      $rivi = explode("\t", $rivit[$j]);
+      echo "<tr>";
+      $worksheet->write($excelrivi, 0, $rivi[0]);
+      echo "<td class='spec'>{$rivi[0]}</th>";
 
-      for ($j = 1; $j<count($rivit); $j++) {
-        $rivi = explode("\t", $rivit[$j]);
-        for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i]);
-        $excelrivi++;
+      for ($i=1; $i < count($rivi); $i++) {
+        $worksheet->writeNumber($excelrivi, $i, $rivi[$i]);
+        echo "<td style='text-align: right;'>". (float) $rivi[$i]."</td>";
       }
+
+      $excelrivi++;
+      echo "</tr>";
     }
 
-    if (isset($workbook)) {
+    echo "</table>";
 
-      // We need to explicitly close the workbook
-      $workbook->close();
+    $excelnimi = $worksheet->close();
 
-      echo "<br><table>";
-      echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-      echo "<form method='post' class='multisubmit'>";
-      echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.xls'>";
-      echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-      echo "</table><br>";
-    }
-
-    list($usec, $sec) = explode(' ', microtime());
-    mt_srand((float) $sec + ((float) $usec * 100000));
-    $txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-
-    file_put_contents("/tmp/$txtnimi", $ulos);
-
-    echo "<table>";
-    echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
+    echo "<br><table>";
+    echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.txt'>";
-    echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
-    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-    echo "</table><br>";
-
-    echo "<table>";
-    echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
-    echo "<form method='post' class='multisubmit'>";
-    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.csv'>";
-    echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
+    echo "<input type='hidden' name='kaunisnimi' value='Myynnit_tuoteryhmittain_$pp$kk$vv.xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
     echo "</table><br>";
   }
-
 
   //Käyttöliittymä
   echo "<br>";

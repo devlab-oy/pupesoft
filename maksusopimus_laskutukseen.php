@@ -173,7 +173,13 @@ if (!function_exists("ennakkolaskuta")) {
         $query .= "jaksotettu = '".($laskurow['jaksotettu'] * -1)."',";
       }
       elseif ($fieldname == 'viesti' and !empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-        $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
+        if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K' and $posrow["osuus"] == 100) {
+          $viesti = '';
+        }
+        else {
+          $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
+        }
+
         $query .= "viesti = '".$viesti."',";
       }
       elseif ($fieldname != 'tunnus') {
@@ -264,7 +270,7 @@ if (!function_exists("ennakkolaskuta")) {
     $result = pupe_query($query);
     $sumrow = mysql_fetch_assoc($result);
 
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
+    if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K'))) {
 
       $alet = generoi_alekentta_select('erikseen', 'M');
 
@@ -301,7 +307,13 @@ if (!function_exists("ennakkolaskuta")) {
 
     if (mysql_num_rows($sresult) == 0) {
       $nimitys     = t($posrow["kuvaus"], $kielirow["kieli"]);
-      $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
+
+      if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K' and $posrow["osuus"] == 100) {
+        $rivikommentti = "";
+      }
+      else {
+        $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
+      }
 
       if ($posrow["lisatiedot"] != "") {
         $rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -321,7 +333,7 @@ if (!function_exists("ennakkolaskuta")) {
         $summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-          $nimitys     = $row['tuoteno'].' - '.$row['nimitys'];
+          $nimitys = $row['tuoteno'].' - '.$row['nimitys'];
           $rivikommentti   = $row['kommentti'];
         }
         else {
@@ -333,13 +345,13 @@ if (!function_exists("ennakkolaskuta")) {
           }
         }
 
-        $varattu = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['varattu'] : 1;
-        $tilkpl = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? $row['tilkpl'] : 1;
+        $varattu = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? $row['varattu'] : 1;
+        $tilkpl = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? $row['tilkpl'] : 1;
 
         $ale_kentat = "";
         $ale_arvot = "";
 
-        if ($yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
+        if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K'))) {
           for ($i = 1; $i <= $yhtiorow['myynnin_alekentat']; $i++) {
             $ale_kentat .=  ",ale{$i}";
             $ale_arvot .= ", '".$row["ale{$i}"]."'";
@@ -348,10 +360,10 @@ if (!function_exists("ennakkolaskuta")) {
 
         $summa = round($summa, 6);
 
-        $laitetaanko_netto = $yhtiorow['ennakkolaskun_tyyppi'] == 'E' ? "" : "N";
+        $laitetaanko_netto = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? "" : "N";
 
         $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
-                   ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
+                   ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '{$yhtiorow['ennakkomaksu_tuotenumero']}', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";
         $addtil = pupe_query($query);
 
         if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";

@@ -62,7 +62,7 @@ class pupeExcel {
 
   function writeDate($excelrivi, $excelsarake, $date, $style = array()) {
 
-    if ((string) $date == "") {
+    if ((string) $date == "" or substr($date, 0, 10) == "0000-00-00") {
       return;
     }
 

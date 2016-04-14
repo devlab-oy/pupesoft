@@ -511,6 +511,10 @@ if (!function_exists('finvoice_otsikko_loput')) {
 
     if ($err_finvoice == 0) {
 
+      if ($lasrow['mainosteksti'] != '') {
+        $lasrow['sisviesti1'] .= "|{$lasrow['mainosteksti']}";
+      }
+
       $InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
 
       foreach ($InvoiceFreeTexts as $InvoiceFreeText) {

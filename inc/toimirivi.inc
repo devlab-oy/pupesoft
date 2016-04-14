@@ -259,6 +259,23 @@ if (mysql_field_name($result, $i) == "oletus_vienti") { //oletusvienti
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "toimittajaryhma") {
+  $vresult = t_avainsana("TOIMITTAJARYHMA");
+
+  $ulos = "<td><select name='{$nimi}'>";
+
+  $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
+
+  while ($vrow = mysql_fetch_assoc($vresult)) {
+    $sel = $trow[$i] == $vrow['selite'] ? 'selected' : '';
+    $teksti = $vrow['selitetark'] != '' ? "{$vrow['selite']} {$vrow['selitetark']}" : $vrow['selite'];
+    $ulos .= "<option value = '{$vrow['selite']}' {$sel}>{$teksti}</option>";
+  }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
   $vresult = t_avainsana("KT");
 

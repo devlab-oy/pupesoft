@@ -275,6 +275,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI")     $ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>        ".t("Laskun vakioviesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAINOSTXT_LASKU") $ulos .= "<option value='MAINOSTXT_LASKU' {$avain_sel['MAINOSTXT_LASKU']}> ".t("Laskun mainosteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL") $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>  ".t("Tilausvahvistuksen vakioviesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")  $ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>    ".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY")          $ulos .= "<option value='LITETY' $avain_sel[LITETY]>            ".t("Liitetiedostotyyppi")."</option>";
@@ -287,7 +288,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO")    $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>      ".t("Tilausvahvistuksen lis‰tiedot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI")      $ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>        ".t("Inventoinnin laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA")    $ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>      ".t("Hae ja selaa -ohjelman parametrit")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")    $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")  $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM")       $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>          ".t("Puuterivin kommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA")  $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>    ".t("Extranet ulkoasuteema")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA")  $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>    ".t("Yll‰pitosopimuksen rivien kent‰t")."</option>";
@@ -314,6 +315,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille l‰htev‰ TransportAccount")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhm‰")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -976,7 +978,7 @@ if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] 
   $jatko = 0;
 }
 
-if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and ($_selite or $_selitetark)) {
+if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['MAINOSTXT_LASKU'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL'] == "SELECTED") and ($_selite or $_selitetark)) {
   $ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }

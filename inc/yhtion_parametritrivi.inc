@@ -2314,20 +2314,11 @@ if ($fieldname == "viitteen_kasinsyotto") {
 
 if ($fieldname == "poistuvat_tuotteet") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $sel = $trow[$i] == 'X' ? 'selected' : '';
 
-  $sel1="";
-  $sel2="";
-
-  if ($trow[$i] == "") {
-    $sel1 = "selected";
-  }
-  else {
-    $sel2 = "selected";
-  }
-
-  $ulos .= "<option value=''  $sel1>".t("Älä näytä poistuvia tuotteita oletuksena")."</option>";
-  $ulos .= "<option value='X' $sel2>".t("Näytä poistuvat tuotteet oletuksena")."</option>";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Näytä poistuvat tuotteet oletuksena tuotekyselyssä")."</option>";
+  $ulos .= "<option value='X' {$sel}>".t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita oletuksena tuotekyselyssä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4029,10 +4020,11 @@ if ($fieldname == 'ennakkotilausten_toimitus') {
 if ($fieldname == 'ennakkolaskun_tyyppi') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'E' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
 
   $ulos .= "<option value = ''>".t("Normaali ennakkolasku");
-  $ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Ennakkolaskulle jokainen rivi erikseen ja ennakkolasku-tekstit piilotetaan");
   $ulos .= "</select></td>";
 
   $jatko = 0;

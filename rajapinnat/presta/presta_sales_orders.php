@@ -210,7 +210,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:");
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:");
     $this->add_row("OSTOTIL.OT_TOIMITUS_YRITYS:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI::{$delivery_address['lastname']} {$delivery_address['firstname']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI:{$delivery_address['lastname']} {$delivery_address['firstname']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$delivery_address['address1']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$delivery_address['city']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_POSTINRO:{$delivery_address['postcode']}");

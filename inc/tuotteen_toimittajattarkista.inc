@@ -151,8 +151,40 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
     }
 
     if (mysql_field_name($result, $i) == "alkuperamaa") {
-      if ($t[$i] == "") {
-        $virhe[$i] =  t("Tieto puuttuu")."!";
+      if ($t[$i] == "" and !empty($liitostunnus_static)) {
+        if ($lue_datasta) {
+          $virhe[$i] =  t("Tieto puuttuu")."!";
+        }
+        else {
+          $query = "SELECT *
+                    from toimi
+                    where yhtio  = '{$kukarow['yhtio']}'
+                    and tyyppi  != 'P'
+                    and tunnus   = '{$liitostunnus_static}'";
+          $toimires = pupe_query($query);
+          $toimirow = mysql_fetch_assoc($toimires);
+
+          $t[$i] = $toimirow['maa'];
+        }
+      }
+    }
+
+    if (mysql_field_name($result, $i) == "valuutta") {
+      if ($t[$i] == "" and !empty($liitostunnus_static)) {
+        if ($lue_datasta) {
+          $virhe[$i] =  t("Tieto puuttuu")."!";
+        }
+        else {
+          $query = "SELECT *
+                    from toimi
+                    where yhtio  = '{$kukarow['yhtio']}'
+                    and tyyppi  != 'P'
+                    and tunnus   = '{$liitostunnus_static}'";
+          $toimires = pupe_query($query);
+          $toimirow = mysql_fetch_assoc($toimires);
+
+          $t[$i] = $toimirow['oletus_valkoodi'];
+        }
       }
     }
 

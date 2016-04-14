@@ -2467,16 +2467,10 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         $alehinta_alv,
         $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
 
-      // alviton -> alvillinen
-      // lisätään alv
-      if ($yhtiorow['alv_kasittely'] != '') {
-        $hinta = $hinta * (1 + $oleasrow['alv'] / 100);
-      }
-
       // alvillinen -> alviton
       // alv pois
-      if ($yhtiorow['alv_kasittely'] == '') {
-        $hinta = $hinta / (1 + $oleasrow['alv'] / 100);
+      if ($yhtiorow['alv_kasittely'] == '' and $oleasrow['alv'] == 0 and $row['alv'] != 0) {
+        $hinta = $hinta / (1 + $row['alv'] / 100);
       }
 
       $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');

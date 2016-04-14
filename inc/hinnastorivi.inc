@@ -84,3 +84,27 @@ if (mysql_field_name($result, $i) == "maa") {
   $jatko = 0;
 
 }
+
+if (mysql_field_name($result, $i) == "yhtion_toimipaikka_id") {
+  $toimipaikat = hae_toimipaikat();
+
+  if (!empty($toimipaikat)) {
+    $ulos = "<tr><th><label for='yhtion_toimipaikka_id'>";
+    $ulos .= t("Yhtion toimipaikka");
+    $ulos .= "</label></th><td><select id='yhtion_toimipaikka_id' name='{$nimi}'><option>";
+    $ulos .= t("Hinnasto voimassa kaikissa toimipaikoissa");
+    $ulos .= "</option>";
+
+    foreach ($toimipaikat as $toimipaikka) {
+      $sel = $toimipaikka["tunnus"] == $trow[$i] ? " selected" : "";
+
+      $ulos .= "<option value='{$toimipaikka["tunnus"]}'{$sel}>{$toimipaikka["nimi"]}</option>";
+    }
+
+    $ulos .= "</select></td></tr>";
+
+    $jatko  = 0;
+  }
+
+  $tyyppi = 0;
+}

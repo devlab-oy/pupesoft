@@ -471,6 +471,9 @@ if (!function_exists('alku')) {
         $toimaikarow = mysql_fetch_assoc($toimaikares);
         $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tv1dateconv($toimaikarow["toimitettupaiva"]), $page_lasku[$sivu], $norm);
       }
+    }
+
+    if ($laskutyyppi != '8') {
       $rivi_ind++;
     }
 
@@ -500,6 +503,7 @@ if (!function_exists('alku')) {
     }
     elseif (!empty($laskurow["viesti"])) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Tilausviite", $kieli), $page_lasku[$sivu], $pieni);
+
       $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
         pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
         $page_lasku[$sivu], $norm);
@@ -840,6 +844,17 @@ if (!function_exists('rivi_lasku')) {
 
     if ($row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and trim($row['asiakkaan_tilausnumero']) != '' and strpos($row["kommentti"], "$row[asiakkaan_tilausnumero]") === FALSE and $laskutyyppi != 6) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
+    }
+
+    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
+      if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
+        $row['tuoteno'] = $matches[0];
+        $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
+      }
+      if (strpos($row["kommentti"], "100%") !== false) {
+        $_ennakkoteksti = t("Ennakkolasku");
+        $row["kommentti"] = preg_replace("/{$_ennakkoteksti}.*100\%/", '', $row["kommentti"]);
+      }
     }
 
     $row["kommentti"] = trim($row["kommentti"]);
@@ -1947,6 +1962,33 @@ if (!function_exists('loppu')) {
     else {
       $piirra_viivakoodi = false;
       $barcode_korkeus = 0;
+    }
+
+    $mainostxt_lasku_korkeus = 0;
+
+    if ($laskurow['mainosteksti'] != '') {
+      $viestikala = $laskutyyppi == 20 ? 190 : 150;
+
+      $mainostekstit = explode("\n", wordwrap($laskurow['mainosteksti'], 115));
+
+      foreach ($mainostekstit as $mainostxt) {
+
+        if ($mainostxt_lasku_korkeus == 30) break;
+
+        list($ff_string, $ff_font) = pdf_fontfit($mainostxt, 380, $pdf_lasku, $pieni);
+
+        $oikpos = $pdf_lasku->strlen($ff_string, $ff_font);
+
+        if ($laskutyyppi == 20) {
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, $ff_string, $thispage, $ff_font);
+        }
+        else {
+          $pdf_lasku->draw_text(210, $viestikala + $vientikala + $barcode_korkeus, $ff_string, $thispage, $ff_font);
+        }
+
+        $viestikala -= 10;
+        $mainostxt_lasku_korkeus += 10;
+      }
     }
 
     if ($vikasivu != "") {

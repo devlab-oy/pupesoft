@@ -172,6 +172,15 @@ class PrestaProducts extends PrestaClient {
       }
 
       $xml->product->id_category_default = $category_id;
+
+      // tähtituote means "upsell", so we need to add this product also to the home category
+      if (!empty($product['tahtituote'])) {
+        $this->logger->log("Tähtituote, liitettiin myös kategoriaan {$this->presta_home_category_id}");
+
+        $category = $xml->product->associations->categories->addChild('category');
+        $category->addChild('id');
+        $category->id = $this->presta_home_category_id;
+      }
     }
 
     // Dynamic product parameters
@@ -318,8 +327,6 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function add_child_product(SimpleXMLElement &$xml, $product) {
-    $discount   = $product['alekerroin'];
-    $price      = $product['hintakerroin'];
     $qty        = $product['kerroin'];
     $sku        = $product['tuoteno'];
     $product_id = array_search($sku, $this->all_skus());

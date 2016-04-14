@@ -251,6 +251,12 @@ if ($kukarow["extranet"] != "") {
       exit;
     }
   }
+  elseif ($toim == "HUOLTOPYYNTOKOPIO" and !empty($tyom_tunnus) and !empty($pdffilenimi)) {
+    if ($tee == 'NAYTATILAUS') {
+      echo file_get_contents($pdffilenimi);
+    }
+    $tee = '';
+  }
   else {
     // Extranet kaatuu tähän
     exit;
@@ -1128,7 +1134,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 

@@ -927,12 +927,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $laitelisa = '';
 
     if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-      $laitelisa = " or laite.sarjanro like '%{$etsi}%' ";
+      $laitelisa = " or laite.sarjanro like '%{$etsi}%'
+                     or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
+                     or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'";
     }
 
-    $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
-               or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'
-               or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
+    $haku .= " or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
                $laitelisa) ";
   }
 

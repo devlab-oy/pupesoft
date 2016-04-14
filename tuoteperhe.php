@@ -1297,7 +1297,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
               $lapsituoteres = pupe_query($query);
               $lapsituoterow = mysql_fetch_assoc($lapsituoteres);
 
-              $lapsituote_myyntihinta = $lapsituoterow['myyntihinta'] * $prow['hintakerroin'];
+              $lapsituote_myyntihinta = $lapsituoterow['myyntihinta'] * $prow['kerroin'] * $prow['hintakerroin'];
               $myyntihintayht += $lapsituote_myyntihinta;
 
               echo "<td class='text-right'>{$prow['hintakerroin']}</td>";

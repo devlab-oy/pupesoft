@@ -9,11 +9,16 @@ class PrestaSalesOrders extends PrestaClient {
   private $edi_order = '';
   private $fetch_statuses = array();
   private $fetched_status = null;
+  private $presta_addresses = null;
+  private $presta_countries = null;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
+
+    $this->presta_addresses = new PrestaAddresses($url, $api_key);
+    $this->presta_countries = new PrestaCountries($url, $api_key);
   }
 
   protected function resource_name() {
@@ -65,7 +70,22 @@ class PrestaSalesOrders extends PrestaClient {
       $this->logger->log("[{$current}/{$total}] Myyntitilaus {$sales_order['id']}");
 
       try {
-        $this->convert_to_edi($sales_order);
+        // fetch associated addresses
+        $address_invoice  = $this->presta_addresses->get($sales_order['id_address_invoice']);
+        $invoice_country  = $this->presta_countries->get($address_invoice['id_country']);
+
+        $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery']);
+        $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
+
+        $params = array(
+          "delivery_address" => $address_delivery,
+          "delivery_country" => $delivery_country,
+          "invoice_address"  => $address_invoice,
+          "invoice_country"  => $invoice_country,
+          "order"            => $sales_order,
+        );
+
+        $this->convert_to_edi($params);
         $this->mark_as_fetched($sales_order);
       }
       catch (Exception $e) {
@@ -116,7 +136,13 @@ class PrestaSalesOrders extends PrestaClient {
    * @param array   $presta_order
    * @return array
    */
-  private function convert_to_edi($order) {
+  private function convert_to_edi($params) {
+    $delivery_address = $params["delivery_address"];
+    $delivery_country = $params["delivery_country"];
+    $invoice_address  = $params["invoice_address"];
+    $invoice_country  = $params["invoice_country"];
+    $order            = $params["order"];
+
     $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
 
     if (empty($pupesoft_customer)) {
@@ -169,12 +195,12 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_FAKSI:");
     $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer['asiakasnro']}");
     $this->add_row("OSTOTIL.OT_YRITYS:");
-    $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$pupesoft_customer['nimi']}");
-    $this->add_row("OSTOTIL.OT_KATUOSOITE:{$pupesoft_customer['osoite']}");
-    $this->add_row("OSTOTIL.OT_POSTITOIMIPAIKKA:{$pupesoft_customer['postitp']}");
-    $this->add_row("OSTOTIL.OT_POSTINRO:{$pupesoft_customer['postino']}");
-    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONPUH:{$pupesoft_customer['puhelin']}");
-    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONFAX:{$pupesoft_customer['fax']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$invoice_address['lastname']} {$invoice_address['firstname']}");
+    $this->add_row("OSTOTIL.OT_KATUOSOITE:{$invoice_address['address1']}");
+    $this->add_row("OSTOTIL.OT_POSTITOIMIPAIKKA:{$invoice_address['city']}");
+    $this->add_row("OSTOTIL.OT_POSTINRO:{$invoice_address['postcode']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONPUH:{$invoice_address['phone']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILONFAX:");
     $this->add_row("OSTOTIL.OT_MYYNTI_YRITYS:");
     $this->add_row("OSTOTIL.OT_MYYNTI_KATUOSOITE:");
     $this->add_row("OSTOTIL.OT_MYYNTI_POSTITOIMIPAIKKA:");
@@ -184,12 +210,12 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:");
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:");
     $this->add_row("OSTOTIL.OT_TOIMITUS_YRITYS:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_KATUOSOITE:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTINRO:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_MAAKOODI:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_PUH:");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI::{$delivery_address['lastname']} {$delivery_address['firstname']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$delivery_address['address1']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$delivery_address['city']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_POSTINRO:{$delivery_address['postcode']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_MAAKOODI:{$delivery_country['iso_code']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_PUH:{$delivery_address['phone']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_EMAIL:");
     $this->add_row("*RE OSTOTIL");
 

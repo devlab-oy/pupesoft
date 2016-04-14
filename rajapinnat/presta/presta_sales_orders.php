@@ -180,7 +180,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
-    $this->add_row("OSTOTIL.OT_MAKSETTU:complete"); // tarkoittaa, että on jo maksettu
+    $this->add_row("OSTOTIL.OT_MAKSETTU:"); // complete tarkoittaa, että on jo maksettu
     $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");
     $this->add_row("OSTOTIL.OT_VIITTEEMME:");
     $this->add_row("OSTOTIL.OT_VIITTEENNE:");

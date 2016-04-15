@@ -1629,11 +1629,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     }
 
     $tilausvahvistus_onkin_kerayslista = '';
+    $excel_lahete_hinnoilla = '';
     $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
+    $pos2 = strpos($komento['Tilausvahvistus'], "excel_lahete_hinnoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";
+    }
+
+    if ($pos2 !== FALSE and $toim == "TILAUSVAHVISTUS") {
+      $toim = "KERAYSLISTA";
+      $excel_lahete_hinnoilla = "JOO";
     }
 
     if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
@@ -2231,7 +2238,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $pjat_sortlisa = "";
       $kerayslistatyyppi = "";
 
-      if ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
+      if ($excel_lahete_hinnoilla != '') {
+        $kerayslistatyyppi = "EXCEL3";
+      }
+      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
         $kerayslistatyyppi = "EXCEL2";
       }
       elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
@@ -2389,8 +2399,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif (isset($komento["Keräyslista"])) {
         $params_kerayslista["komento"] = $komento["Keräyslista"];
       }
+
       if ($tilausvahvistus_onkin_kerayslista != '') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
+      }
+      elseif ($excel_lahete_hinnoilla != '') {
+        $params_kerayslista['uusiotsikko'] = "Toimitusvahvistus";
       }
       //tulostetaan sivu
       print_pdf_kerayslista($params_kerayslista);

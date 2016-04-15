@@ -40,8 +40,10 @@ if ($crm_haas_check) {
   $_mm = (int) $haas_opp_proj_date_mm;
   $_yy = (int) $haas_opp_proj_date_yy;
 
-  if (!empty($_dd) and !empty($_mm) and !empty($_yy) and checkdate($mm, $dd, $yy)) {
-    $crm_haas_lisa .= "kentta05 = '{$_yy}-{$_mm}-{$_dd}',";
+  echo "if (".(int) !empty($_dd)." and ".(int) !empty($_mm)." and ".(int) !empty($_yy)." and ".(int) checkdate($_mm, $_dd, $_yy).")<br>";
+
+  if (!empty($_dd) and !empty($_mm) and !empty($_yy) and checkdate($_mm, $_dd, $_yy)) {
+    $crm_haas_lisa .= "kentta05 = '".date('Y-m-d', mktime(0, 0, 0, $_mm, $_dd, $_yy))."',";
   }
 
   if (!empty($haas_end_reason))  $crm_haas_lisa .= "kentta06 = '{$haas_end_reason}',";
@@ -1058,6 +1060,24 @@ if ($ytunnus != '' and $tee == '') {
 
       if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
         echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
+      }
+
+      if ($crm_haas_check) {
+        echo "<tr>";
+        echo "<th>CALL_TYPE</th>";
+        echo "<th>OPPORTUNITY</th>";
+        echo "<th>QTY</th>";
+        echo "<th>OPP_PROJ_DATE</th>";
+        echo "<th colspan='2'>END_REASON</th>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<td>{$memorow['kentta02']}</td>";
+        echo "<td>{$memorow['kentta03']}</td>";
+        echo "<td>{$memorow['kentta04']}</td>";
+        echo "<td>".tv1dateconv($memorow['kentta05'])."</td>";
+        echo "<td colspan='2'>{$memorow['kentta06']}</td>";
+        echo "</tr>";
       }
 
       if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {

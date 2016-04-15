@@ -25,6 +25,28 @@ if (!isset($haas_opp_proj_date_mm)) $haas_opp_proj_date_mm = date('m');
 if (!isset($haas_opp_proj_date_yy)) $haas_opp_proj_date_yy = date('Y');
 if (!isset($haas_end_reason))       $haas_end_reason = '';
 
+$crm_haas_res = t_avainsana("CRM_HAAS");
+$crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+$crm_haas_check = (mysql_num_rows($crm_haas_res) > 0 and $crm_haas_row['selite'] == 'K');
+
+$crm_haas_lisa = "";
+
+if ($crm_haas_check) {
+  if (!empty($haas_call_type))   $crm_haas_lisa .= "kentta02 = '{$haas_call_type}',";
+  if (!empty($haas_opportunity)) $crm_haas_lisa .= "kentta03 = '{$haas_opportunity}',";
+  if (!empty($haas_qty))         $crm_haas_lisa .= "kentta04 = '{$haas_qty}',";
+
+  $_dd = (int) $haas_opp_proj_date_dd;
+  $_mm = (int) $haas_opp_proj_date_mm;
+  $_yy = (int) $haas_opp_proj_date_yy;
+
+  if (!empty($_dd) and !empty($_mm) and !empty($_yy) and checkdate($mm, $dd, $yy)) {
+    $crm_haas_lisa .= "kentta05 = '{$_yy}-{$_mm}-{$_dd}',";
+  }
+
+  if (!empty($haas_end_reason))  $crm_haas_lisa .= "kentta06 = '{$haas_end_reason}',";
+}
+
 echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
@@ -107,6 +129,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                  tyyppi       = 'Memo',
                  pvmalku      = now(),
                  kentta01     = '$eviesti',
+                 {$crm_haas_lisa}
                  perheid      = '$row[tunnus]',
                  laatija      = '$kukarow[kuka]',
                  luontiaika   = now()";
@@ -124,6 +147,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                    tyyppi          = '$row[tyyppi]',
                    pvmalku         = '$row[pvmalku]',
                    kentta01        = '$row[kentta01]',
+                   {$crm_haas_lisa}
                    kuittaus        = '$row[kuittaus]',
                    laatija         = '$kukarow[kuka]',
                    luontiaika      = now()";
@@ -202,6 +226,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                    tyyppi          = '$tyyppi',
                    pvmalku         = $pvmalku,
                    kentta01        = '$viesti',
+                   {$crm_haas_lisa}
                    kuittaus        = '$kuittaus',
                    laatija         = '$kukarow[kuka]',
                    luontiaika      = now()";
@@ -265,6 +290,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                  tyyppi          = '$tyyppi',
                  pvmalku         = $pvmalku,
                  kentta01        = '$viesti',
+                 {$crm_haas_lisa}
                  kuittaus        = '$kuittaus',
                  muuttaja        = '$kukarow[kuka]',
                  muutospvm       = now()
@@ -645,10 +671,7 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "</select></td></tr>";
 
-    $crm_haas_res = t_avainsana("CRM_HAAS");
-    $crm_haas_row = mysql_fetch_assoc($crm_haas_res);
-
-    if (mysql_num_rows($crm_haas_res) > 0 and $crm_haas_row['selite'] == 'K') {
+    if ($crm_haas_check) {
 
       $call_types = array(
         'Prospecting Call' => '',

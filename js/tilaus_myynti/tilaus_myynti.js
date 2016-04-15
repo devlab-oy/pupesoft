@@ -56,6 +56,7 @@ $(document).ready(function() {
             ale2: $("input[name='ale2']").val(),
             ale3: $("input[name='ale3']").val(),
             netto: netto,
+            toim: toim,
             tilausnumero: $("input[name='tilausnumero']").val(),
             ajax_toiminto: 'esisyotto_kate',
             no_head: 'yes',
@@ -105,6 +106,7 @@ $(document).ready(function() {
               tuoteno: $("input[name='tuoteno']").val(),
               kpl: $("input[name='kpl']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
+              toim: toim,
               ajax_toiminto: 'esisyotto',
               no_head: 'yes',
               ohje: 'off'

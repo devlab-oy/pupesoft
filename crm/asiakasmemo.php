@@ -637,6 +637,109 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "</select></td>";
 
+    $crm_haas_res = t_avainsana("CRM_HAAS");
+    $crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+
+    if (mysql_num_rows($crm_haas_res) > 0 and $crm_haas_row['selite'] == 'K') {
+
+      $call_types = array(
+        'prospecting_call' => '',
+        'qualifying_call'  => '',
+        'quoting_call'     => '',
+        'closing_call'     => '',
+        'won_call'         => '',
+        'lost_call'        => '',
+        'dead_call'        => '',
+      );
+
+      $call_type_sel = array($haas_call_type => 'selected') + $call_types;
+
+      echo "<tr>";
+      echo "<th>CALL_TYPE</th>";
+      echo "<td>";
+      echo "<select name='haas_call_type'>";
+      echo "<option value='prospecting_call' {$call_type_sel['prospecting_call']}>Prospecting Call</th>";
+      echo "<option value='qualifying_call'  {$call_type_sel['qualifying_call']}>Qualifying Call</th>";
+      echo "<option value='quoting_call'     {$call_type_sel['quoting_call']}>Quoting Call</th>";
+      echo "<option value='closing_call'     {$call_type_sel['closing_call']}>Closing Call</th>";
+      echo "<option value='won_call'         {$call_type_sel['won_call']}>Won Call</th>";
+      echo "<option value='lost_call'        {$call_type_sel['lost_call']}>Lost Call</th>";
+      echo "<option value='dead_call'        {$call_type_sel['dead_call']}>Dead Call</th>";
+      echo "</select>";
+      echo "</td>";
+      echo "</tr>";
+
+      $opportunities = array(
+        'oms'           => '',
+        'tms'           => '',
+        'mms'           => '',
+        'vf_12s'        => '',
+        'vf_345'        => '',
+        'vf_6'          => '',
+        'grs'           => '',
+        'dt_dms'        => '',
+        'umcs'          => '',
+        'ec400_500'     => '',
+        'ec1600'        => '',
+        'ol'            => '',
+        'tls'           => '',
+        'st10_15'       => '',
+        'st20_25'       => '',
+        'st30_35'       => '',
+        'st40_45_50_55' => '',
+        'dss'           => '',
+        'rotary'        => '',
+        'barfeeder'     => '',
+      );
+
+      $opportunity_sel = array($haas_opportunity => 'selected') + $opportunities;
+
+      echo "<tr>";
+      echo "<th>OPPORTUNITY</th>";
+      echo "<td>";
+      echo "<select name='haas_opportunity'>";
+      echo "<option value='oms'           {$opportunity_sel['oms']}>OMs</th>";
+      echo "<option value='tms'           {$opportunity_sel['tms']}>TMs</th>";
+      echo "<option value='mms'           {$opportunity_sel['mms']}>MMs</th>";
+      echo "<option value='vf_12s'        {$opportunity_sel['vf_12s']}>VF-1/2s</th>";
+      echo "<option value='vf_345'        {$opportunity_sel['vf_345']}>VF-3/4/5</th>";
+      echo "<option value='vf_6'          {$opportunity_sel['vf_6']}>VF-6+</th>";
+      echo "<option value='grs'           {$opportunity_sel['grs']}>GRs</th>";
+      echo "<option value='dt_dms'        {$opportunity_sel['dt_dms']}>DT/DMs</th>";
+      echo "<option value='umcs'          {$opportunity_sel['umcs']}>UMCs</th>";
+      echo "<option value='ec400_500'     {$opportunity_sel['ec400_500']}>EC400/500</th>";
+      echo "<option value='ec1600'        {$opportunity_sel['ec1600']}>EC1600</th>";
+      echo "<option value='ol'            {$opportunity_sel['ol']}>OL</th>";
+      echo "<option value='tls'           {$opportunity_sel['tls']}>TLs</th>";
+      echo "<option value='st10_15'       {$opportunity_sel['st10_15']}>ST10/15</th>";
+      echo "<option value='st20_25'       {$opportunity_sel['st20_25']}>ST20/25</th>";
+      echo "<option value='st30_35'       {$opportunity_sel['st30_35']}>ST30/35</th>";
+      echo "<option value='st40_45_50_55' {$opportunity_sel['st40_45_50_55']}>ST40/45/50/55</th>";
+      echo "<option value='dss'           {$opportunity_sel['dss']}>DSs</th>";
+      echo "<option value='rotary'        {$opportunity_sel['rotary']}>ROTARY</th>";
+      echo "<option value='barfeeder'     {$opportunity_sel['barfeeder']}>BARFEEDER</th>";
+      echo "</select>";
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>QTY</th>";
+      echo "<td>";
+      echo "<input type='text' name='haas_qty' value='{$haas_qty}' />";
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>OPP_PROJ_DATE</th>";
+      echo "<td>";
+      echo "<input type='text' name='haas_opp_proj_date_dd' value='{$haas_opp_proj_date_dd}' size='3' maxlength='2' />";
+      echo "<input type='text' name='haas_opp_proj_date_mm' value='{$haas_opp_proj_date_mm}' size='3' maxlength='2' />";
+      echo "<input type='text' name='haas_opp_proj_date_yy' value='{$haas_opp_proj_date_yy}' size='5' maxlength='4' />";
+      echo "</td>";
+      echo "</tr>";
+
+    }
+
     echo "  <tr><th>".t("Tallenna tiedosto liitteeksi")."</th>";
     echo "  <td colspan='2'><input type = 'file' name = 'userfile' />";
     echo "  <input type='hidden' name='teeliite'  value='tallenna_pdf'>";

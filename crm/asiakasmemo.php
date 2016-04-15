@@ -40,8 +40,6 @@ if ($crm_haas_check) {
   $_mm = (int) $haas_opp_proj_date_mm;
   $_yy = (int) $haas_opp_proj_date_yy;
 
-  echo "if (".(int) !empty($_dd)." and ".(int) !empty($_mm)." and ".(int) !empty($_yy)." and ".(int) checkdate($_mm, $_dd, $_yy).")<br>";
-
   if (!empty($_dd) and !empty($_mm) and !empty($_yy) and checkdate($_mm, $_dd, $_yy)) {
     $crm_haas_lisa .= "kentta05 = '".date('Y-m-d', mktime(0, 0, 0, $_mm, $_dd, $_yy))."',";
   }

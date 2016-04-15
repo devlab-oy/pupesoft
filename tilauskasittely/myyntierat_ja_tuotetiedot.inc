@@ -109,6 +109,7 @@ elseif (isset($lajit) and count($lajit) > 0) {
   $worksheet->write($excelrivi, $excelsarake++, t("Tuotemerkki"),       $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Määrä"),             $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Myyntihinta"),       $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Myymälähinta"),      $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Alennusprosentti"),  $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Alennettu hinta"),   $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Alv"),               $format_bold);
@@ -204,6 +205,8 @@ elseif (isset($lajit) and count($lajit) > 0) {
     $worksheet->write($excelrivi, $excelsarake++, $kpl_ruudulle);
     // myyntihinta
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myyntihinta'])));
+    // myymälähinta
+    $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", hintapyoristys($tuoterowi['myymalahinta'])));
     // ale1
     $worksheet->write($excelrivi, $excelsarake++, str_replace(".", ",", $tilausrivi['ale1']));
     // alennettu hinta

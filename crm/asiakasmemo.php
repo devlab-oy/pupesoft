@@ -406,6 +406,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $kuittaus       = $korjrow["kuittaus"];
     $myyntipaallikko   = $korjrow["myyntipaallikko"];
 
+    if ($crm_haas_check) {
+      $haas_call_type = $korjrow['kentta02'];
+      $haas_opportunity = $korjrow['kentta03'];
+      $haas_qty = $korjrow['kentta04'];
+      $haas_opp_proj_date_dd = substr($korjrow['kentta05'], 8);
+      $haas_opp_proj_date_mm = substr($korjrow['kentta05'], 5, 2);
+      $haas_opp_proj_date_yy = substr($korjrow['kentta05'], 0, 4);
+      $haas_end_reason = $korjrow['kentta06'];
+    }
+
     if ($tyyppi == "Muistutus") {
       $muistutusko   = 'Muistutus';
     }

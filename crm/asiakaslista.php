@@ -19,11 +19,28 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   fwrite($toot, "SALESPERSON_ID;addressNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
   fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL");
 
-  if (!empty($crm_haas['call_type']))     fwrite($toot, ";CALL_TYPE");
-  if (!empty($crm_haas['opportunity']))   fwrite($toot, ";OPPORTUNITY");
-  if (!empty($crm_haas['qty']))           fwrite($toot, ";QTY");
-  if (!empty($crm_haas['opp_proj_date'])) fwrite($toot, ";OPP_PROJ_DATE");
-  if (!empty($crm_haas['end_reason']))    fwrite($toot, ";END_REASON");
+  $haaslisa = "";
+
+  if (!empty($crm_haas['call_type'])) {
+    fwrite($toot, ";CALL_TYPE");
+    $haaslisa ." AND kalenteri.kentta02 != '' ";
+  }
+  if (!empty($crm_haas['opportunity'])) {
+    fwrite($toot, ";OPPORTUNITY");
+    $haaslisa .= " AND kalenteri.kentta03 != '' ";
+  }
+  if (!empty($crm_haas['qty'])) {
+    fwrite($toot, ";QTY");
+    $haaslisa .= " AND kalenteri.kentta04 != '' ";
+  }
+  if (!empty($crm_haas['opp_proj_date'])) {
+    fwrite($toot, ";OPP_PROJ_DATE");
+    $haaslisa .= " AND kalenteri.kentta05 != '' ";
+  }
+  if (!empty($crm_haas['end_reason'])) {
+    fwrite($toot, ";END_REASON");
+    $haaslisa .= " AND kalenteri.kentta06 != '' ";
+  }
 
   fwrite($toot, "\r\n");
 
@@ -124,6 +141,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     }
   }
 
+  $pvmlisa = "";
+
   if (!empty($crm_haas_date_alku) and !empty($crm_haas_date_loppu)) {
     $_alku_d = (int) $crm_haas_date_alku[0];
     $_alku_m = (int) $crm_haas_date_alku[1];
@@ -132,8 +151,6 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     $_loppu_d = (int) $crm_haas_date_loppu[0];
     $_loppu_m = (int) $crm_haas_date_loppu[1];
     $_loppu_y = (int) $crm_haas_date_loppu[2];
-
-    $pvmlisa = "";
 
     if (checkdate($_alku_m, $_alku_d, $_alku_y) and checkdate($_loppu_m, $_loppu_d, $_loppu_y)) {
       $pvmlisa  = " AND kalenteri.luontiaika >= '{$_alku_y}-{$_alku_m}-{$_alku_d} 00:00:00' ";
@@ -156,6 +173,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             AND kalenteri.tapa           != 'asiakasanalyysi'
             AND kalenteri.yhtio           = '{$kukarow['yhtio']}'
             AND (kalenteri.perheid = 0 or kalenteri.tunnus = kalenteri.perheid)
+            {$pvmlisa}
+            {$haaslisa}
             ORDER BY asiakas.tunnus";
   $res = pupe_query($query);
 

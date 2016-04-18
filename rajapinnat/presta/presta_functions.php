@@ -161,6 +161,10 @@ function presta_specific_prices() {
     }
 
     // Hinnastohinnat, haetaan aluksi kaikki mahdolliset tuoteno/valuutta/maa kombot
+    // Lajit:
+    // '' Bruttohinta Myyntihinta
+    // 'N' N-Nettohinta Myyntihinta
+    // 'E' E-Nettohinta Myyntihinta
     $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
               FROM hinnasto
               WHERE hinnasto.yhtio = '{$kukarow['yhtio']}'

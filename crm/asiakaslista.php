@@ -16,8 +16,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
   $toot = fopen("/tmp/".$tiedostonimi, "w");
 
-  fwrite($toot, "SALESPERSON_ID;addressNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
-  fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL");
+  fwrite($toot, "SALESPERSON_ID;addressNo;CustomerNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
+  fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL;CALL_DATE");
 
   $haaslisa = "";
 
@@ -161,12 +161,21 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   $query = "SELECT kalenteri.*,
             kalenteri.tunnus AS kalenteritunnus,
             asiakas.*,
-            asiakas.tunnus AS asiakastunnus
+            asiakas.tunnus AS asiakastunnus,
+            yhteyshenkilo.nimi AS yhteyshenkilo,
+            IF(asiakas.gsm != '', asiakas.gsm,
+            IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+            IF(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
             FROM kalenteri
             JOIN asiakas ON (
               asiakas.yhtio = kalenteri.yhtio AND
               asiakas.laji != 'P'
               {$asiakaslisa}
+            )
+            LEFT JOIN yhteyshenkilo ON (
+              kalenteri.yhtio = yhteyshenkilo.yhtio AND
+              kalenteri.henkilo = yhteyshenkilo.tunnus AND
+              yhteyshenkilo.rooli = 'haas'
             )
             WHERE kalenteri.liitostunnus  = asiakas.tunnus
             AND kalenteri.tyyppi          IN ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
@@ -180,12 +189,51 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
   while ($row = mysql_fetch_assoc($res)) {
     fwrite($toot, "{$row['kuka']};");
-    fwrite($toot, "addressNo;");
-    fwrite("{$row['nimi']};");
-    fwrite("CONTACT;");
-    fwrite("CUST_CITY;");
-    fwrite("CUST_STREET;");
-    fwrite("\r\n");
+
+    # Halutaan regexpillä numerot ja raput ensimmäiseksi
+    # Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
+    preg_match('/\d.*/', $row['osoite'], $matches);
+    $address1 = $matches[0];
+
+    preg_match('/^[^ \d]*/', $row['osoite'], $matches);
+    $address2 = $matches[0];
+
+    $address = $address1." ".$address2;
+
+    fwrite($toot, "{$row['asiakastunnus']};");
+
+    fwrite($toot, "{$row['ytunnus']};");
+
+    $nimi = trim($row['nimi'].' '.$row['nimitark']);
+    fwrite($toot, "{$nimi};");
+
+    fwrite($toot, "{$row['yhteyshenkilo']};");
+    fwrite($toot, "{$row['postitp']};");
+    fwrite($toot, "{$address};");
+    fwrite($toot, "{$row['postino']};");
+    fwrite($toot, "{$row['postitp']};");
+    fwrite($toot, "{$row['maa']};");
+    fwrite($toot, "{$row['puhelin']};");
+    fwrite($toot, "{$row['email']};");
+    fwrite($toot, "{$row['luontiaika']}");
+
+    if (!empty($crm_haas['call_type'])) {
+      fwrite($toot, ";{$row['kentta02']}");
+    }
+    if (!empty($crm_haas['opportunity'])) {
+      fwrite($toot, ";{$row['kentta03']}");
+    }
+    if (!empty($crm_haas['qty'])) {
+      fwrite($toot, ";{$row['kentta04']}");
+    }
+    if (!empty($crm_haas['opp_proj_date'])) {
+      fwrite($toot, ";{$row['kentta05']}");
+    }
+    if (!empty($crm_haas['end_reason'])) {
+      fwrite($toot, ";{$row['kentta06']}");
+    }
+
+    fwrite($toot, "\r\n");
   }
 
   fclose($toot);

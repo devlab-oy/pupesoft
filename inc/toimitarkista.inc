@@ -142,7 +142,7 @@ if (!function_exists("toimitarkista")) {
           $hetu = tarkistahetu($hetu);
 
           // ei ollu oikee hetukaan
-          if (strpos($hetu, "XXXX") !== false) {
+          if (strpos($hetu, "XXXX") === false) {
             $virhe[$i] = t("Virheellinen henkilötunnus!");
           }
         }

@@ -80,122 +80,125 @@ function hae_asiakasryhmat() {
 function presta_specific_prices() {
   global $kukarow, $yhtiorow;
 
+  // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niitä käsitellään samalla tavalla
   $specific_prices = array();
-  $tuoterajaus = presta_tuoterajaus();
 
   // HUOM! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa, että sama asiakashintarivi
   // voi tulla monta kertaa, koska asiakas has_many yhteyshenkilö.
   // Näin pitääkin, koska yhteyshenkilö on Prestassa asiakas.
 
-  // HUOM! pakko hakea kaikki alennukset, koska asiakkaalta poistetaan aina kaikki alennukset.
+  // HUOM! pakko hakea aina kaikki alennukset,
+  // koska asiakkaalta poistetaan aina aluksi kaikki alennukset.
 
-  // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niitä käsitellään samalla tavalla
+  // Query pitää olla sama kun hae_tuotteet (ilman muutospäivää)
+  $tuoterajaus = presta_tuoterajaus();
 
-  // HUOM! Haetaan from tuote, koska pitää saada kaikki tuotteet, jotka on menossa prestaan.
-  // Vaikka ei olisi hintaa, koska muuten ei saada poistettua hintoja/alennuksia tuotteilta
-  // vain ekassa queryssä pitää olla from tuote, koska silloin on kaikki tuotteet jo mukana arrayssä
-
-  // Asiakashinnat kaikille tuotetteilla
-  $query = "SELECT
-            tuote.tuoteno,
-            asiakashinta.alkupvm,
-            asiakashinta.loppupvm,
-            asiakashinta.minkpl,
-            asiakashinta.hinta,
-            asiakashinta.valkoodi,
-            avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
-            'asiakashinta' AS tyyppi
+  $query = "SELECT tuote.tuoteno
             FROM tuote
-            LEFT JOIN asiakashinta ON (asiakashinta.yhtio = tuote.yhtio
-              AND asiakashinta.tuoteno = tuote.tuoteno
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            {$tuoterajaus}";
+  $result = pupe_query($query);
+
+  while ($tuote = mysql_fetch_assoc($result)) {
+    // Katsotaan tällä löytyykö tuotteelle hintoja
+    $tuotehintoja = 0;
+
+    // Asiakashinnat
+    $query = "SELECT
+              asiakashinta.tuoteno,
+              asiakashinta.alkupvm,
+              asiakashinta.loppupvm,
+              asiakashinta.minkpl,
+              asiakashinta.hinta,
+              asiakashinta.valkoodi,
+              avainsana.selitetark_5 AS presta_customergroup_id,
+              yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+              'asiakashinta' AS tyyppi
+              FROM asiakashinta
+              LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
+                AND avainsana.selite = asiakashinta.asiakas_ryhma
+                AND avainsana.laji = 'ASIAKASRYHMA')
+              LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
+                AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
+              WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
+              AND asiakashinta.tuoteno = '{$tuote['tuoteno']}'
               AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
               AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
-              AND asiakashinta.hinta > 0)
-            LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
-              AND avainsana.selite = asiakashinta.asiakas_ryhma
-              AND avainsana.laji = 'ASIAKASRYHMA')
-            LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
-              AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            {$tuoterajaus}";
-  $result = pupe_query($query);
+              AND asiakashinta.hinta > 0";
+    $asiakashintaresult = pupe_query($query);
 
-  while ($asiakashinta = mysql_fetch_assoc($result)) {
-    $specific_prices[] = $asiakashinta;
-  }
+    while ($asiakashinta = mysql_fetch_assoc($asiakashintaresult)) {
+      $specific_prices[] = $asiakashinta;
+      $tuotehintoja += 1;
+    }
 
-  // Asiakasalennukset kaikille tuotteille
-  // Ei tarvitse olla tässä left joinia, koska ensimmäisessä queryssä on jo.
-  // Joten meillä on kaikki tuotteet arrayssä ja presta hanskaa homman
-  $query = "SELECT
-            tuote.tuoteno,
-            asiakasalennus.alkupvm,
-            asiakasalennus.loppupvm,
-            asiakasalennus.minkpl,
-            asiakasalennus.alennus,
-            avainsana.selitetark_5 AS presta_customergroup_id,
-            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
-            'asiakasalennus' AS tyyppi
-            FROM tuote
-            INNER JOIN asiakasalennus ON (asiakasalennus.yhtio = tuote.yhtio
-              AND asiakasalennus.tuoteno = tuote.tuoteno
+    // Asiakasalennukset
+    $query = "SELECT
+              asiakasalennus.tuoteno,
+              asiakasalennus.alkupvm,
+              asiakasalennus.loppupvm,
+              asiakasalennus.minkpl,
+              asiakasalennus.alennus,
+              avainsana.selitetark_5 AS presta_customergroup_id,
+              yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+              'asiakasalennus' AS tyyppi
+              FROM asiakasalennus
+              LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
+                AND avainsana.selite = asiakasalennus.asiakas_ryhma
+                AND avainsana.laji = 'ASIAKASRYHMA')
+              LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
+                AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
+              WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
+              AND asiakasalennus.tuoteno = '{$tuote['tuoteno']}'
               AND if(asiakasalennus.alkupvm  = '0000-00-00', '0001-01-01', asiakasalennus.alkupvm)  <= current_date
               AND if(asiakasalennus.loppupvm = '0000-00-00', '9999-12-31', asiakasalennus.loppupvm) >= current_date
-              AND asiakasalennus.alennus > 0)
-            LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
-              AND avainsana.selite = asiakasalennus.asiakas_ryhma
-              AND avainsana.laji = 'ASIAKASRYHMA')
-            LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
-              AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            {$tuoterajaus}";
-  $result = pupe_query($query);
+              AND asiakasalennus.alennus > 0";
+    $asiakasalennusresult = pupe_query($query);
 
-  while ($asiakasalennus = mysql_fetch_assoc($result)) {
-    $specific_prices[] = $asiakasalennus;
-  }
+    while ($asiakasalennus = mysql_fetch_assoc($asiakasalennusresult)) {
+      $specific_prices[] = $asiakasalennus;
+      $tuotehintoja += 1;
+    }
 
-  // Tuotteen hinnastohinnat kaikille tuotteille. lajit:
-  // '' Bruttohinta Myyntihinta
-  // 'N' N-Nettohinta Myyntihinta
-  // 'E' E-Nettohinta Myyntihinta
-  //
-  // Ei tarvitse olla tässä left joinia, koska ensimmäisessä queryssä on jo.
-  // Joten meillä on kaikki tuotteet arrayssä ja presta hanskaa homman
-  $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
-            FROM tuote
-            INNER JOIN hinnasto ON (hinnasto.yhtio = tuote.yhtio
-              AND hinnasto.tuoteno = tuote.tuoteno
-              AND hinnasto.laji in ('', 'N', 'E')
-              AND hinnasto.hinta > 0)
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-            {$tuoterajaus}";
-  $result = pupe_query($query);
-
-  while ($hintavalrow = mysql_fetch_assoc($result)) {
-    // katotaan onko tuotteelle voimassa hinnastohintoja
-    $query = "SELECT hinnasto.tuoteno,
-              hinnasto.alkupvm,
-              hinnasto.loppupvm,
-              hinnasto.minkpl,
-              hinnasto.hinta,
-              hinnasto.valkoodi,
-              hinnasto.maa,
-              'hinnastohinta' AS tyyppi
+    // Hinnastohinnat, haetaan aluksi kaikki mahdolliset tuoteno/valuutta/maa kombot
+    $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
               FROM hinnasto
-              WHERE hinnasto.yhtio = '$kukarow[yhtio]'
-              AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
-              AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
-              AND hinnasto.maa = '$hintavalrow[maa]'
+              WHERE hinnasto.yhtio = '{$kukarow['yhtio']}'
+              AND hinnasto.tuoteno = '{$tuote['tuoteno']}'
               AND hinnasto.laji in ('', 'N', 'E')
-              AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
-              AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
               AND hinnasto.hinta > 0";
-    $hinnastoresult = pupe_query($query);
+    $hintavalresult = pupe_query($query);
 
-    while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
-      $specific_prices[] = $hinnasto;
+    while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
+      // katotaan onko tuotteelle voimassa hinnastohintoja
+      $query = "SELECT hinnasto.tuoteno,
+                hinnasto.alkupvm,
+                hinnasto.loppupvm,
+                hinnasto.minkpl,
+                hinnasto.hinta,
+                hinnasto.valkoodi,
+                hinnasto.maa,
+                'hinnastohinta' AS tyyppi
+                FROM hinnasto
+                WHERE hinnasto.yhtio = '$kukarow[yhtio]'
+                AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
+                AND hinnasto.tuoteno = '{$hintavalrow['tuoteno']}'
+                AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
+                AND hinnasto.maa = '$hintavalrow[maa]'
+                AND hinnasto.laji in ('', 'N', 'E')
+                AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
+                AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
+                AND hinnasto.hinta > 0
+                ORDER BY yhtion_toimipaikka_id DESC,
+                         IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999),
+                         tunnus DESC
+                LIMIT 1";
+      $hinnastoresult = pupe_query($query);
+
+      while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
+        $specific_prices[] = $hinnasto;
+        $tuotehintoja += 1;
+      }
     }
   }
 
@@ -221,7 +224,24 @@ function presta_specific_prices() {
 
     while ($asiakashinta = mysql_fetch_assoc($result)) {
       $specific_prices[] = $asiakashinta;
+      $tuotehintoja += 1;
     }
+  }
+
+  // Jos tuotteelle ei ole yhtään hintoja, lisätään se tyhjänä.
+  // Silloin saadaan poistettua tältä tuotteelta alet Prestasta
+  if ($tuotehintoja == 0) {
+    $specific_prices[] = array(
+      "alkupvm"                 => "",
+      "hinta"                   => "",
+      "loppupvm"                => "",
+      "minkpl"                  => "",
+      "presta_customer_id"      => "",
+      "presta_customergroup_id" => "",
+      "tuoteno"                 => $tuote['tuoteno'],
+      "tyyppi"                  => "",
+      "valkoodi"                => "",
+    );
   }
 
   // sortataan array tuotejärjestykseen, silloin tuote ei ole ikinä kauaa ilman alennuksia

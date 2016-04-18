@@ -78,6 +78,7 @@ inc/parametrit.inc
 inc/ProgressBar.class.php
 inc/pupeExcel.inc
 inc/sahkoposti.inc
+inc/tarkistahetu.inc
 inc/tuotehaku.inc
 indexvas.php
 index.php

@@ -143,7 +143,7 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_country  = $params["invoice_country"];
     $order            = $params["order"];
 
-    $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
+    $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
 
     if (empty($pupesoft_customer)) {
       $msg = "Asiakasta {$order['id_customer']} ei löytynyt Pupesoftista! ";

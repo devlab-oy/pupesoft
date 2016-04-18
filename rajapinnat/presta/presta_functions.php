@@ -34,7 +34,7 @@ function presta_hae_asiakkaat() {
   return $asiakkaat;
 }
 
-function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) {
+function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) {
   global $kukarow, $yhtiorow;
 
   if (empty($asiakasnumero)) {

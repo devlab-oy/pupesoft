@@ -46,6 +46,9 @@ require_once "{$pupe_root_polku}/rajapinnat/presta/presta_functions.php";
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
 
+// Laitetaan isompi allowed memory size
+ini_set("memory_limit", "2G");
+
 if (trim($argv[1]) != '') {
   $yhtio = mysql_real_escape_string($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);

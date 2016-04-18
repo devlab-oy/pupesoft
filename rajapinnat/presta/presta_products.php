@@ -526,7 +526,7 @@ class PrestaProducts extends PrestaClient {
 
   private function xml_value($value) {
     $value = utf8_encode($value);
-    $value = htmlspecialchars($value, ENT_XML1 | ENT_SUBSTITUTE);
+    $value = htmlspecialchars($value, ENT_IGNORE);
 
     return $value;
   }

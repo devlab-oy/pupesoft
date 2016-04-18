@@ -605,11 +605,11 @@ if ($crm_haas_check) {
   echo "<tr>";
   echo "<th>",t("Valitse CRM Haas -kentät"),"</th>";
   echo "<td>";
-  echo "<input type='checkbox' name='crm_haas[call_type]' /> CALL_TYPE<br>";
-  echo "<input type='checkbox' name='crm_haas[opportunity]' /> OPPORTUNITY<br>";
-  echo "<input type='checkbox' name='crm_haas[qty]' /> QTY<br>";
-  echo "<input type='checkbox' name='crm_haas[opp_proj_date]' /> OPP_PROJ_DATE<br>";
-  echo "<input type='checkbox' name='crm_haas[end_reason]' /> END_REASON";
+  echo "<input type='checkbox' name='crm_haas[call_type]' checked /> CALL_TYPE<br>";
+  echo "<input type='checkbox' name='crm_haas[opportunity]' checked /> OPPORTUNITY<br>";
+  echo "<input type='checkbox' name='crm_haas[qty]' checked /> QTY<br>";
+  echo "<input type='checkbox' name='crm_haas[opp_proj_date]' checked /> OPP_PROJ_DATE<br>";
+  echo "<input type='checkbox' name='crm_haas[end_reason]' checked /> END_REASON";
   echo "</tr>";
 
   echo "<tr>";

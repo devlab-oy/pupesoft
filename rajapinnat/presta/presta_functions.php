@@ -189,9 +189,7 @@ function presta_specific_prices() {
                 AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
                 AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
                 AND hinnasto.hinta > 0
-                ORDER BY yhtion_toimipaikka_id DESC,
-                         IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999),
-                         tunnus DESC
+                ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999), tunnus DESC
                 LIMIT 1";
       $hinnastoresult = pupe_query($query);
 

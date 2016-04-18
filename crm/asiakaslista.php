@@ -135,7 +135,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     if (isset($lisa_dynaaminen_liitokset) and count($lisa_dynaaminen_liitokset) > 0) {
       foreach ($lisa_dynaaminen_liitokset as $d_param => $d_liitokset) {
         if ($d_liitokset != "") {
-          $asiaskaslisa .= " and asiakas.tunnus in ($d_liitokset) ";
+          $asiakaslisa .= " and asiakas.tunnus in ($d_liitokset) ";
         }
       }
     }

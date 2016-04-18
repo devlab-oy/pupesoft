@@ -404,6 +404,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='toimittajaemail{$editoimrow['email']}'>".t("Toimittajan sähköpostiin").": {$editoimrow['email']}</option>";
   }
 
+  if (!empty($yhtiorow['ostotilaus_email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
+    echo "<option value='{$yhtiorow['ostotilaus_email']}'>".t("Ostotilaus sähköpostiin").": {$yhtiorow['ostotilaus_email']}</option>";
+  }
+
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
   }

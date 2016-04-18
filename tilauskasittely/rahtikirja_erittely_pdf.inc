@@ -135,6 +135,12 @@ if (!function_exists('rivi_erittely')) {
           $pdf->draw_text(62, $kala-48, $laskurow['postino']." ".$laskurow['postitp'],  $firstpage, $kirj);
         }
       }
+      elseif ($toitarow['erittely'] == 'L' and $toitarow['tulostustapa'] == 'K' and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
+        // jos tulostustapa on koontierä, tulostustapa koonti sekä toimitustavan takana on annettu osoitetiedot, käytetään niitä
+        $pdf->draw_text(62, $kala-28, $toitarow['toim_nimi']." ".$toitarow['toim_nimitark'],    $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-38, $toitarow['toim_osoite'],  $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-48, $toitarow['toim_postino']." ".$toitarow['toim_postitp'],  $firstpage, $kirj);
+      }
       else {
         $pdf->draw_text(62, $kala-28, $laskurow['toim_nimi']." ".$laskurow['toim_nimitark'],    $firstpage, $kirj);
         $pdf->draw_text(62, $kala-38, $laskurow['toim_osoite'],  $firstpage, $kirj);

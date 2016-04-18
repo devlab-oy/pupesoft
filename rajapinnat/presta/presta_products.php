@@ -59,8 +59,8 @@ class PrestaProducts extends PrestaClient {
 
     unset($xml->product->position_in_category);
 
-    $xml->product->reference = utf8_encode($product['tuoteno']);
-    $xml->product->supplier_reference = utf8_encode($product['tuoteno']);
+    $xml->product->reference = $this->xml_value($product['tuoteno']);
+    $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
     $xml->product->ean13 = is_numeric($product['ean']) ? $product['ean'] : '';
 
     $xml->product->price = $product['myyntihinta'];
@@ -120,8 +120,8 @@ class PrestaProducts extends PrestaClient {
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
       $xml->product->name->language[$i]              = empty($product['nimi']) ? '-' : utf8_encode($product['nimi']);
-      $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
-      $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
+      $xml->product->description->language[$i]       = nl2br($this->xml_value($product['kuvaus']));
+      $xml->product->description_short->language[$i] = nl2br($this->xml_value($product['lyhytkuvaus']));
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
       $xml->product->available_later                 = $out_of_stock;
     }
@@ -136,7 +136,7 @@ class PrestaProducts extends PrestaClient {
         continue;
       }
 
-      $value = utf8_encode($translation['teksti']);
+      $value = $this->xml_value($translation['teksti']);
 
       // set translation to correct field
       switch ($translation['kentta']) {
@@ -190,7 +190,7 @@ class PrestaProducts extends PrestaClient {
       foreach ($product_parameters as $parameter) {
         $_key = $parameter['arvo'];
         $_attribute = $parameter['nimi'];
-        $_value = utf8_encode($product[$_key]);
+        $_value = $this->xml_value($product[$_key]);
 
         $this->logger->log("Poikkeava arvo product.{$_attribute} -kenttään. Asetetaan {$_key} kentän arvo {$_value}");
 
@@ -243,7 +243,7 @@ class PrestaProducts extends PrestaClient {
 
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
-      $value = trim($product[$field_name]);
+      $value = $this->xml_value($product[$field_name]);
 
       // if we don't have a value, don't add anything.
       if (empty($value)) {
@@ -255,7 +255,7 @@ class PrestaProducts extends PrestaClient {
       if (empty($value_id)) {
         $feature_value = array(
           "id_feature" => $feature_id,
-          "value" => $value,
+          "value" => substr($value, 0, 255), // max 255 characters
         );
 
         // Create feature value
@@ -522,6 +522,13 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  private function xml_value($value) {
+    $value = utf8_encode($value);
+    $value = htmlspecialchars($value, ENT_XML1 | ENT_SUBSTITUTE);
+
+    return $value;
   }
 
   public function set_removable_fields($fields) {

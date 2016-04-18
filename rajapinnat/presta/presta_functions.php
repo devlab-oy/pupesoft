@@ -58,7 +58,7 @@ function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) 
   return mysql_fetch_assoc($result);
 }
 
-function hae_asiakasryhmat() {
+function presta_hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
   // HUOM. pakko hakea aina kaikki, koska muuten ei osata deletoida poistettuja
@@ -90,7 +90,7 @@ function presta_specific_prices() {
   // HUOM! pakko hakea aina kaikki alennukset,
   // koska asiakkaalta poistetaan aina aluksi kaikki alennukset.
 
-  // Query pit‰‰ olla sama kun hae_tuotteet (ilman muutosp‰iv‰‰)
+  // Query pit‰‰ olla sama kun presta_hae_tuotteet (ilman muutosp‰iv‰‰)
   $tuoterajaus = presta_tuoterajaus();
 
   $query = "SELECT tuote.tuoteno
@@ -253,7 +253,7 @@ function presta_specific_prices() {
   return $specific_prices;
 }
 
-function hae_kategoriat() {
+function presta_hae_kategoriat() {
   global $kukarow, $yhtiorow;
 
   // haetaan kaikki kategoriat ja niiden parent_id
@@ -284,7 +284,7 @@ function hae_kategoriat() {
   return $kategoriat;
 }
 
-function hae_kaikki_tuotteet() {
+function presta_hae_kaikki_tuotteet() {
   global $kukarow, $yhtiorow, $presta_varastot;
 
   $tuoterajaus = presta_tuoterajaus();
@@ -294,7 +294,7 @@ function hae_kaikki_tuotteet() {
   }
 
   // Haetaan kaikki siirrett‰v‰t tuotteet, t‰m‰ on poistettujen dellausta varten
-  // query pit‰‰ olla sama kun hae_tuotteet (ilman muutosp‰iv‰‰)
+  // query pit‰‰ olla sama kun presta_hae_tuotteet (ilman muutosp‰iv‰‰)
   $query = "SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
             FROM tuote
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
@@ -346,7 +346,7 @@ function hae_kaikki_tuotteet() {
   return $tuotteet;
 }
 
-function hae_tuotteet() {
+function presta_hae_tuotteet() {
   global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
 
   $tuoterajaus = presta_tuoterajaus();

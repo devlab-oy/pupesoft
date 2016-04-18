@@ -224,7 +224,7 @@ echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop p‰ivitys.\n";
 
 if (array_key_exists('kategoriat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotekategoriat.\n";
-  $kategoriat = hae_kategoriat();
+  $kategoriat = presta_hae_kategoriat();
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tuotekategoriat.\n";
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
@@ -234,8 +234,8 @@ if (array_key_exists('kategoriat', $synkronoi)) {
 
 if (array_key_exists('tuotteet', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
-  $tuotteet = hae_tuotteet();
-  $kaikki_tuotteet = hae_kaikki_tuotteet();
+  $tuotteet = presta_hae_tuotteet();
+  $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tuotetiedot.\n";
   $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
@@ -254,7 +254,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
 
 if (array_key_exists('asiakasryhmat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan asiakasryhm‰t.\n";
-  $groups = hae_asiakasryhmat();
+  $groups = presta_hae_asiakasryhmat();
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakasryhm‰t.\n";
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);

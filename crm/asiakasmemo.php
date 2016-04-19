@@ -699,6 +699,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<th>CALL_TYPE</th>";
       echo "<td colspan='2'>";
       echo "<select name='haas_call_type'>";
+      echo "<option value=''>",t("Valitse"),"</option>";
 
       foreach ($call_types as $key => $value) {
         echo "<option value='{$key}' {$call_type_sel[$key]}>{$key}</th>";
@@ -737,6 +738,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<th>OPPORTUNITY</th>";
       echo "<td colspan='2'>";
       echo "<select name='haas_opportunity'>";
+      echo "<option value=''>",t("Valitse"),"</option>";
 
       foreach ($opportunities as $key => $value) {
         echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
@@ -781,6 +783,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<th>END_REASON</th>";
       echo "<td colspan='2'>";
       echo "<select name='haas_end_reason'>";
+      echo "<option value=''>",t("Valitse"),"</option>";
 
       foreach ($end_reasons as $key => $value) {
         echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";

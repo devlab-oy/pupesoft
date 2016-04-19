@@ -4,16 +4,15 @@ require_once 'rajapinnat/logger.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
-
   private $url = null;
   private $api_key = null;
+  private $shop_ids = null;
+  private $presta_shops = null;
 
   /**
    *
    * @var PrestaShopWebservice REST-client
    */
-
-
   protected $ws = null;
 
   /**
@@ -39,13 +38,10 @@ abstract class PrestaClient {
     }
 
     $this->logger = new Logger("presta_export");
-
-    if (substr($url, -1) == '/') {
-      $url = substr($url, 0, -1);
-    }
-    $this->url = $url;
+    $this->url = rtrim($url, '/').'/';
     $this->api_key = $api_key;
     $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
+    $this->presta_shops = new PrestaShops($this->url, $this->api_key);
   }
 
   /**
@@ -165,9 +161,14 @@ abstract class PrestaClient {
     try {
       $this->get_empty_schema();
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
-      $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin Prestaan uusi " . $this->resource_name());
+      // loop all shops we need
+      foreach ($this->all_shop_ids() as $id_shop) {
+        $opt['id_shop'] = $id_shop;
+        $response_xml = $this->ws->add($opt);
+
+        $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
+      }
     }
     catch (Exception $e) {
       $msg = "Resurssin " . $this->resource_name() . " luonti Prestaan epäonnistui";
@@ -214,8 +215,14 @@ abstract class PrestaClient {
 
     try {
       $opt['putXml'] = $xml->asXML();
-      $response_xml = $this->ws->edit($opt);
-      $this->logger->log("Päivitettiin " . $this->resource_name() . " id $id");
+
+      // loop all shops we need
+      foreach ($this->all_shop_ids() as $id_shop) {
+        $opt['id_shop'] = $id_shop;
+        $response_xml = $this->ws->edit($opt);
+
+        $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
+      }
     }
     catch (Exception $e) {
       $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";
@@ -377,6 +384,26 @@ abstract class PrestaClient {
    */
   protected function saniteze_link_rewrite($string) {
     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+  }
+
+  protected function set_shop_ids($value) {
+    if ((!is_array($value) or count($value) < 1) and !is_null($value)) {
+      throw new Exception('Shop id pitää olla array tai null');
+    }
+
+    $this->shop_ids = $value;
+  }
+
+  protected function all_shop_ids() {
+    if (is_null($this->shop_ids)) {
+      $shop = $this->presta_shops->first_shop();
+      $shops = array($shop['id']);
+    }
+    else {
+      $shops = $this->shop_ids;
+    }
+
+    return $shops;
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

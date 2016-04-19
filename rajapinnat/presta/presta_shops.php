@@ -41,16 +41,8 @@ class PrestaShops extends PrestaClient {
    * @throws Exception
    */
   public function first_shop() {
-    try {
-      $shops = $this->all();
-      $shop = $shops[0];
-    }
-    catch (Exception $e) {
-      $msg = "first_shop haku epäonnistui";
-      $this->logger->log($msg, $e);
-
-      throw $e;
-    }
+    $shops = $this->fetch_all();
+    $shop = $shops[0];
 
     return $shop;
   }

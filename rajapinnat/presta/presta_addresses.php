@@ -57,10 +57,6 @@ class PrestaAddresses extends PrestaClient {
     return $xml;
   }
 
-  public function create(array $address) {
-    parent::create($address);
-  }
-
   public function update_with_customer_id(array $address) {
     $presta_address = $this->find_address_by_customer_id($address['presta_customer_id']);
     parent::update($presta_address['id'], $address);

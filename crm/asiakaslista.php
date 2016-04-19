@@ -21,24 +21,25 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
   $haaslisa = "";
 
+  fwrite($toot, ";CALL_TYPE");
+  fwrite($toot, ";OPPORTUNITY");
+  fwrite($toot, ";QTY");
+  fwrite($toot, ";OPP_PROJ_DATE");
+  fwrite($toot, ";END_REASON");
+
   if (!empty($crm_haas['call_type'])) {
-    fwrite($toot, ";CALL_TYPE");
     $haaslisa ." AND kalenteri.kentta02 != '' ";
   }
   if (!empty($crm_haas['opportunity'])) {
-    fwrite($toot, ";OPPORTUNITY");
     $haaslisa .= " AND kalenteri.kentta03 != '' ";
   }
   if (!empty($crm_haas['qty'])) {
-    fwrite($toot, ";QTY");
     $haaslisa .= " AND kalenteri.kentta04 != '' ";
   }
   if (!empty($crm_haas['opp_proj_date'])) {
-    fwrite($toot, ";OPP_PROJ_DATE");
     $haaslisa .= " AND kalenteri.kentta05 != '' ";
   }
   if (!empty($crm_haas['end_reason'])) {
-    fwrite($toot, ";END_REASON");
     $haaslisa .= " AND kalenteri.kentta06 != '' ";
   }
 
@@ -165,7 +166,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             yhteyshenkilo.nimi AS yhteyshenkilo,
             IF(asiakas.gsm != '', asiakas.gsm,
             IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-            IF(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin
+            IF(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
+            kuka.myyja
             FROM kalenteri
             JOIN asiakas ON (
               asiakas.yhtio = kalenteri.yhtio AND
@@ -176,6 +178,10 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
               kalenteri.yhtio = yhteyshenkilo.yhtio AND
               kalenteri.henkilo = yhteyshenkilo.tunnus AND
               yhteyshenkilo.rooli = 'haas'
+            )
+            JOIN kuka ON (
+              kuka.yhtio = kalenteri.yhtio AND
+              kuka.kuka = kalenteri.kuka
             )
             WHERE kalenteri.liitostunnus  = asiakas.tunnus
             AND kalenteri.tyyppi          IN ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
@@ -188,7 +194,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
-    fwrite($toot, "{$row['kuka']};");
+    fwrite($toot, "{$row['myyja']};");
 
     # Halutaan regexpillä numerot ja raput ensimmäiseksi
     # Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
@@ -211,27 +217,16 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     fwrite($toot, "{$row['postitp']};");
     fwrite($toot, "{$address};");
     fwrite($toot, "{$row['postino']};");
-    fwrite($toot, "{$row['postitp']};");
-    fwrite($toot, "{$row['maa']};");
+    fwrite($toot, ";"); # region
+    fwrite($toot, "{$row['maa']};"); # country
     fwrite($toot, "{$row['puhelin']};");
     fwrite($toot, "{$row['email']};");
     fwrite($toot, "{$row['luontiaika']}");
-
-    if (!empty($crm_haas['call_type'])) {
-      fwrite($toot, ";{$row['kentta02']}");
-    }
-    if (!empty($crm_haas['opportunity'])) {
-      fwrite($toot, ";{$row['kentta03']}");
-    }
-    if (!empty($crm_haas['qty'])) {
-      fwrite($toot, ";{$row['kentta04']}");
-    }
-    if (!empty($crm_haas['opp_proj_date'])) {
-      fwrite($toot, ";{$row['kentta05']}");
-    }
-    if (!empty($crm_haas['end_reason'])) {
-      fwrite($toot, ";{$row['kentta06']}");
-    }
+    fwrite($toot, ";{$row['kentta02']}");
+    fwrite($toot, ";{$row['kentta03']}");
+    fwrite($toot, ";{$row['kentta04']}");
+    fwrite($toot, ";{$row['kentta05']}");
+    fwrite($toot, ";{$row['kentta06']}");
 
     fwrite($toot, "\r\n");
   }

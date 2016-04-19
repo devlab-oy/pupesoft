@@ -164,7 +164,7 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
           $toimires = pupe_query($query);
           $toimirow = mysql_fetch_assoc($toimires);
 
-          $t[$i] = $toimirow['maa'];
+          $t[$i] = $toimirow['maa_lahetys'];
         }
       }
     }

@@ -143,7 +143,7 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_country  = $params["invoice_country"];
     $order            = $params["order"];
 
-    $pupesoft_customer = hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
+    $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
 
     if (empty($pupesoft_customer)) {
       $msg = "Asiakasta {$order['id_customer']} ei löytynyt Pupesoftista! ";
@@ -250,6 +250,9 @@ class PrestaSalesOrders extends PrestaClient {
       $this->add_row("OSTOTILRIV.OTR_RIVINRO:{$row_number}");
       $this->add_row("OSTOTILRIV.OTR_TOIMITTAJANRO:");
       $this->add_row("OSTOTILRIV.OTR_TUOTEKOODI:{$row['product_reference']}");
+      // pack_rows on custom presta kenttä. Mikäli kyseessä on pack -tuote (tuoteperhe), niin
+      // kentässä tulee lapsituotteiden tiedot muodossa "tuotekoodi1:hinta1;tuotekoodi1:hinta2..."
+      $this->add_row("OSTOTILRIV.OTR_TUOTERAKENNE:{$row['pack_rows']}");
       $this->add_row("OSTOTILRIV.OTR_NIMI:{$row['product_name']}");
       $this->add_row("OSTOTILRIV.OTR_TILATTUMAARA:{$row['product_quantity']}");
       $this->add_row("OSTOTILRIV.OTR_RIVISUMMA:");

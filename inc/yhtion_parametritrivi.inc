@@ -4020,10 +4020,11 @@ if ($fieldname == 'ennakkotilausten_toimitus') {
 if ($fieldname == 'ennakkolaskun_tyyppi') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'E' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
 
   $ulos .= "<option value = ''>".t("Normaali ennakkolasku");
-  $ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Ennakkolaskulle jokainen rivi erikseen ja ennakkolasku-tekstit piilotetaan");
   $ulos .= "</select></td>";
 
   $jatko = 0;

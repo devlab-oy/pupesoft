@@ -582,6 +582,10 @@ if (!function_exists('finvoice_otsikko_loput')) {
       //  }
       //}
 
+      if ($lasrow['mainosteksti'] != '') {
+        $lasrow['sisviesti1'] .= "|{$lasrow['mainosteksti']}";
+      }
+
       xml_add("InvoiceFreeText", substr(str_replace("|", " ## ", trim($lasrow["sisviesti1"])), 0, 512), $tootfinvoice, 512);
 
       fputs($tootfinvoice, "<PaymentTermsDetails>\r\n");

@@ -36,6 +36,164 @@
 // Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 // Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 
+if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
+  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    $response = array();
+
+    $query = "SELECT
+              tuote.kehahin,
+              tuoteperhe.alekerroin,
+              tuoteperhe.hintakerroin,
+              tuoteperhe.hintatyyppi,
+              tuoteperhe.kerroin,
+              tuoteperhe.tuoteno
+              FROM tuoteperhe
+              JOIN tuote USING (yhtio, tuoteno)
+              WHERE tuoteperhe.yhtio = '{$kukarow['yhtio']}'
+              AND tuoteperhe.tyyppi = '{$tyyppi}'
+              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'
+              ORDER BY hintatyyppi DESC";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+      return $response;
+    }
+
+    // haetaan eka rivi
+    $row = mysql_fetch_assoc($result);
+
+    // onko meillä isätuotteeseen perustuva hinnoittelu
+    $hinnoittelu_isatuotteella = $row['hintatyyppi'];
+
+    // resultti alkuun
+    mysql_data_seek($result, 0);
+
+    $kokonaisarvo = 0;
+
+    // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
+    // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
+    if (!empty($hinnoittelu_isatuotteella)) {
+      while ($row = mysql_fetch_assoc($result)) {
+        $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+      }
+
+      // resultti alkuun
+      mysql_data_seek($result, 0);
+    }
+
+    while ($row = mysql_fetch_assoc($result)) {
+      // jos hinnoitellaan isätuotteella
+      // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole käytössä
+      if (!empty($hinnoittelu_isatuotteella)) {
+        $alekerroin   = 1;
+        $hintakerroin = $row['kehahin'] / $kokonaisarvo;
+      }
+      else {
+        $alekerroin   = $row['alekerroin'];
+        $hintakerroin = $row['hintakerroin'];
+      }
+
+      $response[] = array(
+        "alekerroin"   => (float) $alekerroin,
+        "hintakerroin" => (float) $hintakerroin,
+        "hintatyyppi"  => $hinnoittelu_isatuotteella,
+        "kerroin"      => (float) $row['kerroin'],
+        "tuoteno"      => $row['tuoteno'],
+      );
+    }
+
+    return $response;
+  }
+}
+
+if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
+  function tuoteperheiden_hintojen_paivitys($isatunnukset, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    // tutkittavat rivitunnukset pitää olla array
+    if (!is_array($isatunnukset) or count($isatunnukset) == 0) {
+      return;
+    }
+
+    foreach($isatunnukset as $isa => $perhe) {
+
+      $tunnukset = implode(", ", $perhe);
+
+      // Haetaan kaikki isätuotteet
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = $isa
+                AND perheid = tunnus";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      // katsotaan lapsien kertoimet
+      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $laskettu_hinta = 0;
+
+      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
+
+      // jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään
+      if ($hinnoittelu_isatuotteella === FALSE) {
+        continue;
+      }
+
+      foreach ($kertoimet as $lapsituote) {
+        // lasketaan lapsituotteen hinta isän hinnasta
+        $hinta = round($row['hinta'] * $lapsituote['hintakerroin'], $yhtiorow['hintapyoristys']);
+        $laskettu_hinta += ($hinta * $row['tilkpl'] * $lapsituote['kerroin']);
+
+        // päivitetään lapsituotteen hinta
+        $query = "UPDATE tilausrivi SET
+                  ale1       = '{$row['ale1']}',
+                  ale2       = '{$row['ale2']}',
+                  ale3       = '{$row['ale3']}',
+                  erikoisale = '{$row['erikoisale']}',
+                  hinta      = '{$hinta}',
+                  netto      = '{$row['netto']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$lapsituote['tuoteno']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tilkpl  = {$row['tilkpl']} * {$lapsituote['kerroin']}
+                  AND tunnus != perheid
+                  AND tunnus in ({$tunnukset})";
+        pupe_query($query);
+      }
+
+      // päivitetään isätuote nollaksi
+      $query = "UPDATE tilausrivi SET
+                ale1       = 0,
+                ale2       = 0,
+                ale3       = 0,
+                erikoisale = 0,
+                hinta      = 0,
+                netto      = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$row['tunnus']}";
+      pupe_query($query);
+
+      // katsotaan pyöristysero
+      $pyoristysero = $laskettu_hinta - ($row['hinta'] * $row['tilkpl']);
+
+      // jos on pyöristyseroa
+      if ($pyoristysero != 0) {
+        $vikalapsi = array_pop($perhe);
+
+        // Lisätään pyöristys tämän perheen vikalle lapselle
+        $query = "UPDATE tilausrivi SET
+                  hinta = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tunnus  = $vikalapsi";
+        pupe_query($query);
+      }
+    }
+  }
+}
+
 if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
   $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -422,6 +580,7 @@ $myy_lapsi_ein       = array();
 $myy_ohita_kerays    = array();
 $lisatyt_rivit1      = array();
 $lisatyt_rivit2      = array();
+$lisatyt_perheet     = array();
 $korkieltokommi      = array();
 $korlisakommi        = array();
 $myyntierahuom       = array();
@@ -769,10 +928,12 @@ elseif ($var == "R" and substr($paikka, 0, 3) != "¡¡V" and substr($paikka, 0, 3)
 }
 
 $perhelisa = "";
+$tuoteperhe_tyyppi = "P";
 
 //Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille.
 if ($laskurow['tila'] == 'V' and $var != "W") {
   $perhelisa = " and tuoteperhe.tyyppi='R' ";
+  $tuoteperhe_tyyppi = "R";
 }
 elseif ($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
   // Asiaakkaallevalmistus ja halutaan myydä rivi varastosta
@@ -2240,6 +2401,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                   $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
                   $result = pupe_query($query);
+
+                  $lisatyt_perheet[$perheid_lisaarivi][] = $lisatty_tun;
                 }
               }
 
@@ -2279,6 +2442,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
   $puu_ein     = array();
   $puu_ohiker  = array();
   $puu_var     = array();
+  $puu_tyyppi  = array();
 
   if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
     // Kappalemäärää ei voida lisätä
@@ -2305,6 +2469,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     // Lisätään syötetyt ja laitetaan loput JT:seen tai puutteiksi
     $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
     $puu_kpl[]     = $toimittamatta;
+    $puu_tyyppi[]   = 'NORMAALI';
     $puu_hintake[]  = "X";
     $puu_alekerr[]  = "X";
     $puu_ein[]    = "";
@@ -2314,6 +2479,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     if (substr($var, 0, 8) == "LOJ#!¡!#" and substr($var, 8) - $toimittamatta > 0) {
       $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
       $puu_kpl[]     = substr($var, 8) - $toimittamatta;
+      $puu_tyyppi[]   = 'NORMAALI';
       $puu_hintake[]  = "X";
       $puu_alekerr[]  = "X";
       $puu_ein[]    = "";
@@ -2323,6 +2489,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     elseif (substr($lop, 0, 8) == "LOP#!¡!#" and substr($lop, 8) - $toimittamatta > 0) {
       $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
       $puu_kpl[]     = substr($lop, 8) - $toimittamatta;
+      $puu_tyyppi[]   = 'NORMAALI';
       $puu_hintake[]  = "X";
       $puu_alekerr[]  = "X";
       $puu_ein[]    = "";
@@ -2335,6 +2502,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $puu_tuoteno[]   = (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
     $puu_kpl[]     = $toimittamatta;
+    $puu_tyyppi[]   = 'NORMAALI';
     $puu_hintake[]  = "X";
     $puu_alekerr[]  = "X";
     $puu_ein[]    = "";
@@ -2374,6 +2542,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $puu_ein[]     = $perherow["ei_nayteta"];
       $puu_ohiker[]   = $perherow["ohita_kerays"];
       $puu_var[]    = $var;
+      $puu_tyyppi[] = 'LAPSITUOTE';
     }
   }
   elseif ($perheid != 0 and !isset($einayres["ei_nayteta"])) {
@@ -2772,7 +2941,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $alemaara = $kpl;
       }
 
-      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
+      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($puu_tyyppi[$i] == 'LAPSITUOTE' ? 'X' : ''));
       list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
     }
 
@@ -3532,6 +3701,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
         $result = pupe_query($query);
+
+        $lisatyt_perheet[$perheid_lisaarivi][] = $lisatty_tun;
       }
     }
 
@@ -3623,4 +3794,9 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
       pupe_query($query);
     }
   }
+}
+
+// Katsotaan lopuksi vielä tuoteperheiden hinnoittelu kaikille lisätyille riveille
+if (!empty($lisatyt_perheet)) {
+  tuoteperheiden_hintojen_paivitys($lisatyt_perheet, $tuoteperhe_tyyppi);
 }

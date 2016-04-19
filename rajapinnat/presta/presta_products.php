@@ -373,12 +373,14 @@ class PrestaProducts extends PrestaClient {
           // update/create product in these stores
           $this->set_shop_ids($shop_ids);
 
-          if (in_array($product['tuoteno'], $existing_products)) {
-            $id = array_search($product['tuoteno'], $existing_products);
-            $this->update($id, $product);
-          }
-          else {
-            $this->create($product);
+          foreach ($this->all_shop_ids() as $id_shop) {
+            if (in_array($product['tuoteno'], $existing_products)) {
+              $id = array_search($product['tuoteno'], $existing_products);
+              $this->update($id, $product);
+            }
+            else {
+              $this->create($product);
+            }
           }
         }
         catch (Exception $e) {

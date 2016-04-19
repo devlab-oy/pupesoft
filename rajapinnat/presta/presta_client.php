@@ -386,12 +386,12 @@ abstract class PrestaClient {
   }
 
   protected function set_shop_ids($value) {
-    if ((!is_array($value) or count($value) < 1) and !is_null($value)) {
-      throw new Exception('Shop id pitää olla array tai null');
+    if ((!is_array($value) or count($value) < 1) and !empty($value)) {
+      throw new Exception('Shop id pitää olla array tai tyhjä');
     }
 
     // if we want to reset
-    if (is_null($value)) {
+    if (empty($value)) {
       $this->shop_ids = null;
       return;
     }

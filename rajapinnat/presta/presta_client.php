@@ -303,11 +303,15 @@ abstract class PrestaClient {
     return $response;
   }
 
-  protected function id_exists($id) {
-    $opt = array(
-      'resource' => $this->resource_name(),
-      'id'       => $id,
-    );
+  protected function id_exists($id, $id_shop = null) {
+    // generate url here, bacause PrestaShopWebservice head request does not support shop id
+    $url = "{$this->url}/api/{$this->resource_name()}/{$id}";
+
+    if (!is_null($id_shop)) {
+      $url .= "?id_shop={$id_shop}";
+    }
+
+    $opt = array('url' => $url);
 
     try {
       $response = $this->ws->head($opt);

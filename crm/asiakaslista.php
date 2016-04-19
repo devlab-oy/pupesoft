@@ -194,7 +194,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
-    fwrite($toot, "{$row['myyja']};");
+    fwrite($toot, substr($row['myyja'], 0, 10).";");
 
     # Halutaan regexpillä numerot ja raput ensimmäiseksi
     # Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
@@ -206,27 +206,28 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
     $address = $address1." ".$address2;
 
-    fwrite($toot, "{$row['asiakastunnus']};");
+    fwrite($toot, substr($row['asiakastunnus'], 0, 10).";");
 
     fwrite($toot, "{$row['ytunnus']};");
 
     $nimi = trim($row['nimi'].' '.$row['nimitark']);
+    $nimi = substr($nimi, 0, 140);
     fwrite($toot, "{$nimi};");
 
-    fwrite($toot, "{$row['yhteyshenkilo']};");
-    fwrite($toot, "{$row['postitp']};");
-    fwrite($toot, "{$address};");
-    fwrite($toot, "{$row['postino']};");
+    fwrite($toot, substr($row['yhteyshenkilo'], 0, 140).";");
+    fwrite($toot, substr($row['postitp'], 0, 25).";");
+    fwrite($toot, substr($address, 0, 60).";");
+    fwrite($toot, substr($row['postino'], 0, 10).";");
     fwrite($toot, ";"); # region
     fwrite($toot, "{$row['maa']};"); # country
-    fwrite($toot, "{$row['puhelin']};");
-    fwrite($toot, "{$row['email']};");
-    fwrite($toot, "{$row['luontiaika']}");
-    fwrite($toot, ";{$row['kentta02']}");
-    fwrite($toot, ";{$row['kentta03']}");
-    fwrite($toot, ";{$row['kentta04']}");
+    fwrite($toot, substr($row['puhelin'], 0, 30).";");
+    fwrite($toot, substr($row['email'], 0, 241).";");
+    fwrite($toot, substr($row['luontiaika'], 0, 10).";");
+    fwrite($toot, ";".substr($row['kentta02'], 0, 100));
+    fwrite($toot, ";".substr($row['kentta03'], 0, 8));
+    fwrite($toot, ";".(int) $row['kentta04']);
     fwrite($toot, ";{$row['kentta05']}");
-    fwrite($toot, ";{$row['kentta06']}");
+    fwrite($toot, ";".substr($row['kentta06'], 0, 100));
 
     fwrite($toot, "\r\n");
   }

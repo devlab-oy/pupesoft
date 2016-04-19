@@ -41,7 +41,6 @@ abstract class PrestaClient {
     $this->url = rtrim($url, '/').'/';
     $this->api_key = $api_key;
     $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
-    $this->presta_shops = new PrestaShops($this->url, $this->api_key);
   }
 
   /**
@@ -397,6 +396,10 @@ abstract class PrestaClient {
       return;
     }
 
+    if (is_null($this->presta_shops)) {
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+    }
+
     $valid_values = array();
 
     // if we want to set, check ids are valid
@@ -423,6 +426,10 @@ abstract class PrestaClient {
   }
 
   protected function all_shop_ids() {
+    if (is_null($this->presta_shops)) {
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+    }
+
     if (is_null($this->shop_ids)) {
       $shop = $this->presta_shops->first_shop();
       $shops = array($shop['id']);

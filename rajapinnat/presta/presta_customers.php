@@ -5,15 +5,16 @@ require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
   private $default_groups = array();
-
-  const RESOURCE = 'customers';
+  private $presta_addresses = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
+
+    $this->presta_addresses = new PrestaAddresses($url, $api_key);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'customers';
   }
 
   /**
@@ -85,9 +86,6 @@ class PrestaCustomers extends PrestaClient {
     $this->logger->log('---------Start customer sync---------');
 
     try {
-      $existing_customers = $this->all(array('id'));
-      $existing_customers = array_column($existing_customers, 'id');
-
       $total = count($customers);
       $current = 0;
 
@@ -95,22 +93,29 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
+        // store ids are in nakyvyys delimetered by space
+        $shop_ids = explode(' ', $customer['verkkokauppa_nakyvyys']);
+
+        // update/create customers and addresses in these stores
+        $this->set_shop_ids($shop_ids);
+
+        $id = $customer['ulkoinen_asiakasnumero'];
+
         try {
-          $presta_address = new PrestaAddresses($this->url(), $this->api_key());
-          $id = $customer['ulkoinen_asiakasnumero'];
+          foreach ($this->all_shop_ids() as $id_shop) {
+            if ($this->id_exists($id)) {
+              $this->update($id, $customer);
 
-          if (in_array($id, $existing_customers)) {
-            $this->update($id, $customer);
+              $customer['presta_customer_id'] = $id;
+              $this->presta_addresses->update_with_customer_id($customer);
+            }
+            else {
+              $response = $this->create($customer);
+              $id = (string) $response['customer']['id'];
 
-            $customer['presta_customer_id'] = $id;
-            $presta_address->update_with_customer_id($customer);
-          }
-          else {
-            $response = $this->create($customer);
-            $id = (string) $response['customer']['id'];
-
-            $customer['presta_customer_id'] = $id;
-            $presta_address->create($customer);
+              $customer['presta_customer_id'] = $id;
+              $this->presta_addresses->create($customer);
+            }
           }
 
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);

@@ -391,6 +391,34 @@ abstract class PrestaClient {
       throw new Exception('Shop id pitää olla array tai null');
     }
 
+    // if we want to reset
+    if (is_null($value)) {
+      $this->shop_ids = null;
+      return;
+    }
+
+    $valid_values = array();
+
+    // if we want to set, check ids are valid
+    foreach ($value as $shop_id) {
+      $shop = $this->presta_shops->shop_by_id($shop_id);
+
+      if (is_null($shop)) {
+        $this->logger->log("Virheellinen shop_id '{$shop_id}', ei voida lisätä.");
+      }
+      else {
+        $valid_values[] = $shop_id;
+      }
+    }
+
+    // set to null if we don't have any valid values. Presta will add thise to the default store
+    if (count($valid_values) == 0) {
+      $value = null;
+    }
+    else {
+      $value = $valid_values;
+    }
+
     $this->shop_ids = $value;
   }
 

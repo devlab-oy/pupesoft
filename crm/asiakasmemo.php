@@ -237,9 +237,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
       }
     }
 
-    if ((!empty($_dd) or !empty($_mm) or !empty($_yy)) and !checkdate($_mm, $_dd, $_yy)) {
-      echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
-      $tee = '';
+    if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
+      if (!checkdate($_mm, $_dd, $_yy)) {
+        echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
+        $tee = '';
+      }
+      if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
+        echo "<font class='error'>",t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."),"</font><br>";
+        $tee = '';
+      }
     }
   }
 

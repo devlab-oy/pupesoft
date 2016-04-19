@@ -311,6 +311,22 @@ abstract class PrestaClient {
     return $response;
   }
 
+  protected function id_exists($id) {
+    $opt = array(
+      'resource' => $this->resource_name(),
+      'id'       => $id,
+    );
+
+    try {
+      $response = $this->ws->head($opt);
+    }
+    catch (Exception $e) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    *
    * @param int     $id

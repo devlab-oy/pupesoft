@@ -196,6 +196,53 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $muistutusko   = "";
   }
 
+  if ($tee == "UUSIMEMO" and $crm_haas_check) {
+
+    $_dd = $haas_opp_proj_date_dd;
+    $_mm = $haas_opp_proj_date_mm;
+    $_yy = $haas_opp_proj_date_yy;
+
+    if (!empty($haas_call_type) and $haas_call_type != 'Prospecting Call') {
+      if (empty($haas_opportunity)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPPORTUNITY'),"</font><br>";
+        $tee = '';
+      }
+
+      if (empty($qty)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'QTY'),"</font><br>";
+        $tee = '';
+      }
+
+      if (empty($_dd) or empty($_mm) or empty($_yy)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPP_PROJ_DATE'),"</font><br>";
+        $tee = '';
+      }
+
+      if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call')) and empty($haas_end_reason)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'END_REASON'),"</font><br>";
+        $tee = '';
+      }
+    }
+
+    if (!empty($haas_qty)) {
+
+      if (!is_numeric($haas_qty)) {
+        echo "<font class='error'>",t("Kappalem‰‰r‰n t‰ytyy olla numero."),"</font><br>";
+        $tee = '';
+      }
+
+      if (strlen($haas_qty) > 2) {
+        echo "<font class='error'>",t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."),"</font><br>";
+        $tee = '';
+      }
+    }
+
+    if ((!empty($_dd) or !empty($_mm) or !empty($_yy)) and !checkdate($_mm, $_dd, $_yy)) {
+      echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
+      $tee = '';
+    }
+  }
+
   if ($tee == "UUSIMEMO") {
 
     if (checkdate($mkka, $mppa, $mvva)) {

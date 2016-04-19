@@ -103,18 +103,18 @@ class PrestaCustomers extends PrestaClient {
 
         try {
           foreach ($this->all_shop_ids() as $id_shop) {
-            if ($this->id_exists($id)) {
-              $this->update($id, $customer);
+            if ($this->id_exists($id, $id_shop)) {
+              $this->update($id, $customer, $id_shop);
 
               $customer['presta_customer_id'] = $id;
-              $this->presta_addresses->update_with_customer_id($customer);
+              $this->presta_addresses->update_with_customer_id($customer, $id_shop);
             }
             else {
-              $response = $this->create($customer);
+              $response = $this->create($customer, $id_shop);
               $id = (string) $response['customer']['id'];
 
               $customer['presta_customer_id'] = $id;
-              $this->presta_addresses->create($customer);
+              $this->presta_addresses->create($customer, $id_shop);
             }
           }
 

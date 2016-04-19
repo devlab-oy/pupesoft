@@ -52,9 +52,9 @@ class PrestaShops extends PrestaClient {
       return $this->all_shops;
     }
 
-    $display = array('id', 'name');
+    $this->logger->log("Haetaan kaikki kaupat");
 
-    $this->logger->log("Haetaan kaikki kaupat.");
+    $display = array('id', 'name');
     $this->all_shops = $this->all($display);
 
     return $this->all_shops;

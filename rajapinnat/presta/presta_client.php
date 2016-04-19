@@ -152,7 +152,7 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function create(array $resource) {
+  protected function create(array $resource, $id_shop = null) {
     $opt = array(
       'resource' => $this->resource_name()
     );
@@ -160,14 +160,10 @@ abstract class PrestaClient {
     try {
       $this->get_empty_schema();
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
+      $opt['id_shop'] = $id_shop;
+      $response_xml = $this->ws->add($opt);
 
-      // loop all shops we need
-      foreach ($this->all_shop_ids() as $id_shop) {
-        $opt['id_shop'] = $id_shop;
-        $response_xml = $this->ws->add($opt);
-
-        $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
-      }
+      $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
     }
     catch (Exception $e) {
       $msg = "Resurssin " . $this->resource_name() . " luonti Prestaan epäonnistui";
@@ -206,7 +202,7 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function update_xml($id, SimpleXMLElement $xml) {
+  protected function update_xml($id, SimpleXMLElement $xml, $id_shop = null) {
     $opt = array(
       'id'       => $id,
       'resource' => $this->resource_name(),
@@ -214,14 +210,10 @@ abstract class PrestaClient {
 
     try {
       $opt['putXml'] = $xml->asXML();
+      $opt['id_shop'] = $id_shop;
+      $response_xml = $this->ws->edit($opt);
 
-      // loop all shops we need
-      foreach ($this->all_shop_ids() as $id_shop) {
-        $opt['id_shop'] = $id_shop;
-        $response_xml = $this->ws->edit($opt);
-
-        $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
-      }
+      $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
     }
     catch (Exception $e) {
       $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";

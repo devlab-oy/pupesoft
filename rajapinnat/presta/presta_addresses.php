@@ -52,9 +52,15 @@ class PrestaAddresses extends PrestaClient {
     return $xml;
   }
 
-  public function update_with_customer_id(array $address, $id_shop = null) {
-    $presta_address = $this->find_address_by_customer_id($address['presta_customer_id'], $id_shop);
-    parent::update($presta_address['id'], $address, $id_shop);
+  public function update_with_customer_id(array $customer, $id_shop = null) {
+    $presta_address = $this->find_address_by_customer_id($customer['presta_customer_id'], $id_shop);
+
+    if (is_null($presta_address)) {
+      parent::create($customer, $id_shop);
+    }
+    else {
+      parent::update($presta_address['id'], $customer, $id_shop);
+    }
   }
 
   private function find_address_by_customer_id($customer_id, $id_shop = null) {
@@ -63,7 +69,7 @@ class PrestaAddresses extends PrestaClient {
 
     $addresses = $this->all($display, $filter, $id_shop);
 
-    $address = $addresses[0];
+    $address = isset($addresses[0]) ? $addresses[0] : null;
 
     return $address;
   }

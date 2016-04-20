@@ -175,7 +175,7 @@ $query = "(SELECT
            if (tapahtuma.laji = 'siirto' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto,
            tilausrivi.kate,
            lasku.laskunro,
-           tilausrivi.tilaajanrivinro,
+           tilausrivi.tunnus AS rivinro,
            if (tilausrivi.tyyppi = 'O', tilausrivi.laskutettuaika, tilausrivi.toimitettuaika) AS toimitettuaika,
            tilausrivi.otunnus
            FROM tapahtuma
@@ -212,7 +212,7 @@ $query = "(SELECT
            if (tilausrivi.tyyppi = 'G' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto,
            tilausrivi.kate,
            lasku.laskunro,
-           tilausrivi.tilaajanrivinro,
+           tilausrivi.tunnus AS rivinro,
            tilausrivi.toimitettuaika,
            tilausrivi.otunnus
            FROM tilausrivi
@@ -362,7 +362,7 @@ foreach ($relex_transactions as $row) {
   if ($extra_laskutiedot) {
     $rivi .= ";{$row['kate']}";
     $rivi .= ";{$row['laskunro']}";
-    $rivi .= ";{$row['tilaajanrivinro']}";
+    $rivi .= ";{$row['rivinro']}";
     $rivi .= ";{$row['toimitettuaika']}";
     $rivi .= ";{$row['otunnus']}";
   }

@@ -367,20 +367,12 @@ class PrestaProducts extends PrestaClient {
         $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
 
         try {
-          // store ids are in nakyvyys delimetered by space
-          $shop_ids = explode(' ', $product['nakyvyys']);
-
-          // update/create product in these stores
-          $this->set_shop_ids($shop_ids);
-
-          foreach ($this->all_shop_ids() as $id_shop) {
-            if (in_array($product['tuoteno'], $existing_products)) {
-              $id = array_search($product['tuoteno'], $existing_products);
-              $this->update($id, $product, $id_shop);
-            }
-            else {
-              $this->create($product, $id_shop);
-            }
+          if (in_array($product['tuoteno'], $existing_products)) {
+            $id = array_search($product['tuoteno'], $existing_products);
+            $this->update($id, $product);
+          }
+          else {
+            $this->create($product);
           }
         }
         catch (Exception $e) {

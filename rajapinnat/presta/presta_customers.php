@@ -86,6 +86,8 @@ class PrestaCustomers extends PrestaClient {
     $this->logger->log('---------Start customer sync---------');
 
     try {
+      $existing_customers = $this->fetch_all_ids();
+
       $total = count($customers);
       $current = 0;
 
@@ -93,29 +95,23 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
-        // store ids are in nakyvyys delimetered by space
-        $shop_ids = explode(' ', $customer['verkkokauppa_nakyvyys']);
-
-        // update/create customers and addresses in these stores
-        $this->set_shop_ids($shop_ids);
-
+        // customers are not shared between stores, so only one store per customer
         $id = $customer['ulkoinen_asiakasnumero'];
+        $id_shop = empty($customer['verkkokauppa_nakyvyys']) ? null : $customer['verkkokauppa_nakyvyys'];
 
         try {
-          foreach ($this->all_shop_ids() as $id_shop) {
-            if ($this->id_exists($id, $id_shop)) {
-              $this->update($id, $customer, $id_shop);
+          if (in_array($id, $existing_customers)) {
+            $this->update($id, $customer, $id_shop);
 
-              $customer['presta_customer_id'] = $id;
-              $this->presta_addresses->update_with_customer_id($customer, $id_shop);
-            }
-            else {
-              $response = $this->create($customer, $id_shop);
-              $id = (string) $response['customer']['id'];
+            $customer['presta_customer_id'] = $id;
+            $this->presta_addresses->update_with_customer_id($customer, $id_shop);
+          }
+          else {
+            $response = $this->create($customer, $id_shop);
+            $id = (string) $response['customer']['id'];
 
-              $customer['presta_customer_id'] = $id;
-              $this->presta_addresses->create($customer, $id_shop);
-            }
+            $customer['presta_customer_id'] = $id;
+            $this->presta_addresses->create($customer, $id_shop);
           }
 
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);
@@ -165,6 +161,21 @@ class PrestaCustomers extends PrestaClient {
     pupe_query($query);
 
     return true;
+  }
+
+  // fetch all ids from all shops
+  private function fetch_all_ids() {
+    $display = array('id');
+    $existing_customers = array();
+    $filter = array();
+
+    // fetch customer ids from all shops
+    foreach ($this->all_shop_ids() as $id_shop) {
+      $customers = $this->all($display, $filter, $id_shop);
+      $existing_customers = array_merge($existing_customers, $customers);
+    }
+
+    return $existing_customers;
   }
 
   /**

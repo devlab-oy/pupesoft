@@ -78,8 +78,24 @@ if ($handle = opendir($path)) {
           // Fallback to pickinglist id
           if ($otunnus == 0) $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
-          list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
-          $toimaika = "{$vv}-{$kk}-{$pp}";
+          #Voi tulla muodossa:
+          #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
+          #<DeliveryDate>20-04-2016</DeliveryDate>
+          if (isset($xml->CustPackingSlip->DeliveryDate)) {
+            list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
+            $toimaika = "{$vv}-{$kk}-{$pp}";
+          }
+          elseif (isset($xml->CustPackingSlip->Deliverydate)) {
+            $vv = substr($xml->CustPackingSlip->Deliverydate, 0, 4);
+            $kk = substr($xml->CustPackingSlip->Deliverydate, 5, 2);
+            $pp = substr($xml->CustPackingSlip->Deliverydate, 8, 2);
+
+            $toimaika = "{$vv}-{$kk}-{$pp}";
+          }
+          else {
+            $toimaika = '0000-00-00';
+          }
+
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
           $query = "SELECT *

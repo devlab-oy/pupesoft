@@ -178,15 +178,6 @@ class PrestaCustomers extends PrestaClient {
     return array_column($existing_customers, 'id');
   }
 
-  /**
-   * Overrides parents get
-   *
-   * @param int     $id
-   */
-  public function get($id) {
-    return parent::get($id);
-  }
-
   public function set_default_groups($value) {
     if (is_array($value)) {
       $this->default_groups = $value;

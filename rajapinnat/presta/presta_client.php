@@ -305,26 +305,6 @@ abstract class PrestaClient {
     return $response;
   }
 
-  protected function id_exists($id, $id_shop = null) {
-    // generate url here, bacause PrestaShopWebservice head request does not support shop id
-    $url = "{$this->url}/api/{$this->resource_name()}/{$id}";
-
-    if (!is_null($id_shop)) {
-      $url .= "?id_shop={$id_shop}";
-    }
-
-    $opt = array('url' => $url);
-
-    try {
-      $response = $this->ws->head($opt);
-    }
-    catch (Exception $e) {
-      return false;
-    }
-
-    return true;
-  }
-
   /**
    *
    * @param int     $id
@@ -392,6 +372,14 @@ abstract class PrestaClient {
   }
 
   /**
+   *
+   * @return array
+   */
+  protected function shop_ids() {
+    return $this->shop_ids;
+  }
+
+  /**
    * Sanitezes string for presta link_rewrite column
    *
    * @param string  $string
@@ -446,13 +434,8 @@ abstract class PrestaClient {
       $this->presta_shops = new PrestaShops($this->url, $this->api_key);
     }
 
-    if (is_null($this->shop_ids)) {
-      $shop = $this->presta_shops->first_shop();
-      $shops = array($shop['id']);
-    }
-    else {
-      $shops = $this->shop_ids;
-    }
+    $all = $this->presta_shops->fetch_all();
+    $shops = array_column($all, 'id');
 
     return $shops;
   }

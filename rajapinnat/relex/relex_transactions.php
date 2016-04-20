@@ -176,7 +176,7 @@ $query = "(SELECT
            tilausrivi.kate,
            lasku.laskunro,
            tilausrivi.tilaajanrivinro,
-           if (tilausrivi.tyyppi = 'O', tilausrivi.toimitettuaika, tilausrivi.laskutettuaika) AS toimitettuaika,
+           if (tilausrivi.tyyppi = 'O', tilausrivi.laskutettuaika, tilausrivi.toimitettuaika) AS toimitettuaika,
            tilausrivi.otunnus
            FROM tapahtuma
            JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio

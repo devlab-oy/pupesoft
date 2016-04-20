@@ -333,13 +333,7 @@ if (!function_exists("ennakkolaskuta")) {
         $summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-          if ($yhtiorow["kieli"] != $kielirow["kieli"]) {
-              $nimitys_kaannos = t_tuotteen_avainsanat($row, 'nimitys', $kielirow["kieli"]);
-              $nimitys = $row['tuoteno'].' - '.$nimitys_kaannos;
-          }
-          else  {
-            $nimitys = $row['tuoteno'].' - '.t($row['nimitys'], $kielirow["kieli"]);
-          }
+          $nimitys = $row['tuoteno'].' - '.t_tuotteen_avainsanat($row, 'nimitys', $kielirow["kieli"]);
           $rivikommentti   = $row['kommentti'];
         }
         else {

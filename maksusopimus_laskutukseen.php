@@ -334,19 +334,8 @@ if (!function_exists("ennakkolaskuta")) {
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
           if ($yhtiorow["kieli"] != $kielirow["kieli"]) {
-            $query = "SELECT *
-                      FROM tuotteen_avainsanat
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND kieli   = '$kielirow[kieli]'
-                      AND tuoteno = '$row[tuoteno]'";
-            $kaannos_result = pupe_query($query);
-            if (mysql_num_rows($kaannos_result) == 1) {
-              $kaannos_row = mysql_fetch_assoc($kaannos_result);
-              $nimitys = $row['tuoteno'].' - '.t($kaannos_row['selite'], $kielirow["kieli"]);
-            }
-            else  {
-              $nimitys = $row['tuoteno'].' - '.$row['nimitys'];
-            }
+              $nimitys_kaannos = t_tuotteen_avainsanat($row, 'nimitys', $kielirow["kieli"]);
+              $nimitys = $row['tuoteno'].' - '.$nimitys_kaannos;
           }
           else  {
             $nimitys = $row['tuoteno'].' - '.t($row['nimitys'], $kielirow["kieli"]);

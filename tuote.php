@@ -1228,6 +1228,7 @@ if (isset($ajax)) {
               tilausrivi.jaksotettu,
               tilausrivin_lisatiedot.osto_vai_hyvitys,
               tilausrivin_lisatiedot.korvamerkinta,
+              tilausrivi.tilkpl,
               lasku2.comments,
               lasku2.laatija,
               lasku2.luontiaika
@@ -1240,10 +1241,8 @@ if (isset($ajax)) {
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
               and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
-              and tilausrivi.varattu + tilausrivi.jt != 0
               and tilausrivi.tuoteno         = '$tuoteno'
               and tilausrivi.laskutettuaika  = '0000-00-00'
-              and tilausrivi.var            != 'P'
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 
@@ -1295,8 +1294,11 @@ if (isset($ajax)) {
         $laskutunnus = $jtrow['tunnus'];
         $tyyppi_url  = "MYYNTI";
 
-        if ($jtrow["tyyppi"] == "O") {
-
+        if ($jtrow["var"] == "P") {
+         $tyyppi = t("Puute");
+         $merkki = "";
+        }
+        elseif ($jtrow["tyyppi"] == "O") {
           if ($jtrow["laskutila"] == "K") {
             $tyyppi = t("Lisätty suoraan saapumiselle");
 
@@ -1386,6 +1388,10 @@ if (isset($ajax)) {
         }
 
         $yhteensa[$tyyppi] += $jtrow["kpl"];
+        
+        if ($tyyppi == t("Puute")) {
+          $yhteensa[$tyyppi] += $jtrow['tilkpl'];
+        }
 
         if ($jtrow["varasto"] != "") {
           $tyyppi = $tyyppi." - ".$jtrow["varasto"];
@@ -1469,10 +1475,17 @@ if (isset($ajax)) {
 
         $_return .= "</td>";
 
+        if ($tyyppi == t('Puute')) {
+          $kappalemaara = $jtrow["tilkpl"];
+        }
+        else {
+          $kappalemaara = $jtrow["kpl"]; 
+        }
+        
         $_return .= "
             <td>".tv1dateconv($jtrow["laadittu"])."</td>
             <td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
-            <td align='right'>$merkki".abs($jtrow["kpl"])."</td>
+            <td align='right'>$merkki".abs($kappalemaara)."</td>
             <td align='right'>".sprintf('%.2f', $jtrow["myytavissa"])."</td>
             </tr>";
 

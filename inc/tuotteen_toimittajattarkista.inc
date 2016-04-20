@@ -2,7 +2,8 @@
 
 if (!function_exists("tuotteen_toimittajattarkista")) {
   function tuotteen_toimittajattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
-    global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno, $lue_datasta, $toimi_liitostunnus;
+    global $kukarow, $yhtiorow, $alias_set, $alasveto, $liitostunnus_static, $chtuoteno;
+    global $lue_datasta, $toimi_liitostunnus, $maa_static, $valuutta_static;
 
     if (mysql_field_name($result, $i) == "tuoteno") {
       $chtuoteno = $t[$i];
@@ -143,6 +144,18 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
         if (mysql_num_rows($sresult) > 0) {
           $virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
         }
+        else {
+          $query = "SELECT oletus_valkoodi, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
+                    from toimi
+                    where yhtio  = '{$kukarow['yhtio']}'
+                    and tyyppi  != 'P'
+                    and tunnus   = '{$liitostunnus_static}'";
+          $toimires = pupe_query($query);
+          $toimirow = mysql_fetch_assoc($toimires);
+
+          $maa_static = $toimirow['maa'];
+          $valuutta_static = $toimirow['oletus_valkoodi'];
+        }
       }
 
       if ($liitostunnus_static == 0) {
@@ -150,40 +163,30 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "alkuperamaa") {
-      if ($t[$i] == "" and !empty($liitostunnus_static)) {
-        if ($lue_datasta) {
-          $virhe[$i] =  t("Tieto puuttuu")."!";
+    if (mysql_field_name($result, $i) == "alkuperamaa" and $t[$i] == "" and !empty($liitostunnus_static)) {
+      if ($lue_datasta) {
+        $virhe[$i] =  t("Tieto puuttuu")."!";
+      }
+      else {
+        if (!empty($maa_static)) {
+          $t[$i] = $maa_static;
         }
         else {
-          $query = "SELECT *
-                    from toimi
-                    where yhtio  = '{$kukarow['yhtio']}'
-                    and tyyppi  != 'P'
-                    and tunnus   = '{$liitostunnus_static}'";
-          $toimires = pupe_query($query);
-          $toimirow = mysql_fetch_assoc($toimires);
-
-          $t[$i] = $toimirow['maa_lahetys'];
+          $virhe[$i] =  t("Valitse maa")."!";
         }
       }
     }
 
-    if (mysql_field_name($result, $i) == "valuutta") {
-      if ($t[$i] == "" and !empty($liitostunnus_static)) {
-        if ($lue_datasta) {
-          $virhe[$i] =  t("Tieto puuttuu")."!";
+    if (mysql_field_name($result, $i) == "valuutta" and $t[$i] == "" and !empty($liitostunnus_static)) {
+      if ($lue_datasta) {
+        $virhe[$i] =  t("Tieto puuttuu")."!";
+      }
+      else {
+        if (!empty($valuutta_static)) {
+          $t[$i] = $valuutta_static;
         }
         else {
-          $query = "SELECT *
-                    from toimi
-                    where yhtio  = '{$kukarow['yhtio']}'
-                    and tyyppi  != 'P'
-                    and tunnus   = '{$liitostunnus_static}'";
-          $toimires = pupe_query($query);
-          $toimirow = mysql_fetch_assoc($toimires);
-
-          $t[$i] = $toimirow['oletus_valkoodi'];
+          $virhe[$i] =  t("Valitse valuutta")."!";
         }
       }
     }

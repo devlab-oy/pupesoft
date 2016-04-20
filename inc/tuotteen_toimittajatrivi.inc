@@ -51,7 +51,7 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
-  $ulos .= "<option value=''>".t("Tuotteen toimittajan alkuperämaa")."</option>";
+  $ulos .= "<option value=''>".t("Toimittajan alkuperämaa")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -75,7 +75,7 @@ if (mysql_field_name($result, $i) == "valuutta") {
             ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
-  $ulos .= "<option value=''>".t("Tuotteen toimittajan valuutta")."</option>";
+  $ulos .= "<option value=''>".t("Toimittajan valuutta")."</option>";
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $sel = $trow[$i] == $vrow['nimi'] ? 'selected' : '';

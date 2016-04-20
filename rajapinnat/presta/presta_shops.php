@@ -47,7 +47,7 @@ class PrestaShops extends PrestaClient {
     return $shop;
   }
 
-  private function fetch_all() {
+  public function fetch_all() {
     if (isset($this->all_shops)) {
       return $this->all_shops;
     }

@@ -3092,6 +3092,7 @@ if (!function_exists("tulosta_lasku")) {
               group_concat(tilausrivi.tunnus) rivitunnukset,
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
+              lasku.tilausyhteyshenkilo,
               $lisa
               $sorttauskentta
               FROM tilausrivi
@@ -3231,15 +3232,8 @@ if (!function_exists("tulosta_lasku")) {
 
           $yhteensa_rivikommentti_lisatty = 10;
 
-          // Haetaan tilausyhteyshenkilö aina tilauksen takaa
-          $t_query = "SELECT tilausyhteyshenkilo
-                      FROM lasku
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$row['otunnus']}'";
-          $t_result = pupe_query($t_query);
-          $t_row = mysql_fetch_assoc($t_result);
-          if (trim($t_row['tilausyhteyshenkilo']) != '') {
-            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$t_row['tilausyhteyshenkilo'])."\n".$row["kommentti"];
+          if (trim($row['tilausyhteyshenkilo']) != '') {
+            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$row['tilausyhteyshenkilo'])."\n".$row["kommentti"];
             $yhteensa_rivikommentti_lisatty += 10;
           }
         }

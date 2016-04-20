@@ -175,7 +175,7 @@ class PrestaCustomers extends PrestaClient {
       $existing_customers = array_merge($existing_customers, $customers);
     }
 
-    return $existing_customers;
+    return array_column($existing_customers, 'id');
   }
 
   /**

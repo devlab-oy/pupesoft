@@ -5,6 +5,8 @@ $maara = (float) str_replace(",", ".", $maara);
 // Lopetetaan jos tilattava m‰‰r‰ on nolla
 if ($maara > 0) {
 
+  $tuoteno = utf8_decode($tuoteno);
+
   //p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
   $query = "UPDATE kuka
             SET kesken = 0

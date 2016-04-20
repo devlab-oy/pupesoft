@@ -98,7 +98,12 @@ class PrestaCustomers extends PrestaClient {
         try {
           // customers are not shared between stores, so only one store per customer
           $id = $customer['ulkoinen_asiakasnumero'];
-          $id_shop = empty($customer['verkkokauppa_nakyvyys']) ? null : $customer['verkkokauppa_nakyvyys'];
+          $shop = empty($customer['verkkokauppa_nakyvyys']) ? null : array($customer['verkkokauppa_nakyvyys']);
+
+          // use set_shop_ids, so we'll do validation
+          // set id_shop as the first shop, since customers can only have one
+          $this->set_shop_ids($shop);
+          $id_shop = is_array($this->shop_ids()) ? $this->shop_ids()[0] : null;
 
           if (in_array($id, $existing_customers)) {
             $this->update($id, $customer, $id_shop);

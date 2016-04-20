@@ -720,8 +720,10 @@ if (!function_exists('rivi_kerayslista')) {
       }
       
       if ($kerayslistatyyppi == 'EXCEL3') {
-        $alennus = (float) $row['hinta'] * $row['ale1'] / 100;
-        $thispage->writeString($kala, 5, (float) round((($row['hinta'] - $alennus) * $row['tilkpl']), 2));
+        if ($row["var"] == "" or  $row["var"] == "H") {
+          $alennus = (float) $row['hinta'] * $row['ale1'] / 100;
+          $thispage->writeString($kala, 5, (float) round((($row['hinta'] - $alennus) * $row['tilkpl']), 2));
+        }
       }
 
       $kala++;

@@ -95,11 +95,11 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
-        // customers are not shared between stores, so only one store per customer
-        $id = $customer['ulkoinen_asiakasnumero'];
-        $id_shop = empty($customer['verkkokauppa_nakyvyys']) ? null : $customer['verkkokauppa_nakyvyys'];
-
         try {
+          // customers are not shared between stores, so only one store per customer
+          $id = $customer['ulkoinen_asiakasnumero'];
+          $id_shop = empty($customer['verkkokauppa_nakyvyys']) ? null : $customer['verkkokauppa_nakyvyys'];
+
           if (in_array($id, $existing_customers)) {
             $this->update($id, $customer, $id_shop);
 

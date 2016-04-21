@@ -759,6 +759,8 @@ class Unifaun {
 
     // nämä tukee mps palvelua
     $posti_mps = array(
+      'IT09',
+      'ITKY09',
       'IT14',
       'ITKY14',
       'ITKY14I',

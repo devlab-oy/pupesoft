@@ -32738,6 +32738,7 @@ if (!function_exists('pupesoft_log')) {
     // tehd‰‰n full message, timestampilla
     $timestamp = date('d.m.y H:i:s');
     $full_message = "[{$timestamp}] " . $log_message . PHP_EOL;
+    $full_message = utf8_encode($full_message);
 
     if (fwrite($file_handle, $full_message) === false) {
       // echo "Lokiviestin kirjoitus tiedostoon {$full_path} ep‰onnistui.";

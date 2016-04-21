@@ -4,15 +4,12 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 
 class PrestaAddresses extends PrestaClient {
-
-  const RESOURCE = 'addresses';
-
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'addresses';
   }
 
   /**
@@ -21,8 +18,6 @@ class PrestaAddresses extends PrestaClient {
    * @param SimpleXMLElement $existing_address
    * @return \SimpleXMLElement
    */
-
-
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
     if (is_null($existing_address)) {
       $xml = $this->empty_xml();
@@ -57,22 +52,24 @@ class PrestaAddresses extends PrestaClient {
     return $xml;
   }
 
-  public function create(array $address) {
-    parent::create($address);
+  public function update_with_customer_id(array $customer, $id_shop = null) {
+    $presta_address = $this->find_address_by_customer_id($customer['presta_customer_id'], $id_shop);
+
+    if (is_null($presta_address)) {
+      parent::create($customer, $id_shop);
+    }
+    else {
+      parent::update($presta_address['id'], $customer, $id_shop);
+    }
   }
 
-  public function update_with_customer_id(array $address) {
-    $presta_address = $this->find_address_by_customer_id($address['presta_customer_id']);
-    parent::update($presta_address['id'], $address);
-  }
-
-  private function find_address_by_customer_id($customer_id) {
+  private function find_address_by_customer_id($customer_id, $id_shop = null) {
     $display = $filter = array();
     $filter['id_customer'] = $customer_id;
 
-    $addresses = $this->all($display, $filter);
+    $addresses = $this->all($display, $filter, $id_shop);
 
-    $address = $addresses[0];
+    $address = isset($addresses[0]) ? $addresses[0] : null;
 
     return $address;
   }

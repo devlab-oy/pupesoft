@@ -21,6 +21,7 @@ $(document).ready(function() {
     var toim = $('#toim').val();
 
     $("input[name='tuoteno']").on('keyup', function() {
+      $("input[name='kpl']").val('');
       $("input[name='hinta']").val('');
       $("input[name='ale1']").val('');
       $("input[name='ale2']").val('');

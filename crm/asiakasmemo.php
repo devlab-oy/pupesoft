@@ -20,9 +20,9 @@ if (!isset($nayta_kaikki_merkinnat)) {
 if (!isset($haas_call_type))        $haas_call_type = '';
 if (!isset($haas_opportunity))      $haas_opportunity = '';
 if (!isset($haas_qty))              $haas_qty = '';
-if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = date('d');
-if (!isset($haas_opp_proj_date_mm)) $haas_opp_proj_date_mm = date('m');
-if (!isset($haas_opp_proj_date_yy)) $haas_opp_proj_date_yy = date('Y');
+if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = '';
+if (!isset($haas_opp_proj_date_mm)) $haas_opp_proj_date_mm = '';
+if (!isset($haas_opp_proj_date_yy)) $haas_opp_proj_date_yy = '';
 if (!isset($haas_end_reason))       $haas_end_reason = '';
 
 $crm_haas_res = t_avainsana("CRM_HAAS");
@@ -208,7 +208,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
         $tee = '';
       }
 
-      if (empty($qty)) {
+      if (empty($haas_qty)) {
         echo "<font class='error'>",t("%s on pakollinen.", '', 'QTY'),"</font><br>";
         $tee = '';
       }
@@ -366,6 +366,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     }
 
     $tee = "";
+
+    if ($crm_haas_check) {
+      $haas_call_type = '';
+      $haas_opportunity = '';
+      $haas_qty = '';
+      $haas_opp_proj_date_dd = '';
+      $haas_opp_proj_date_mm = '';
+      $haas_opp_proj_date_yy = '';
+      $haas_end_reason = '';
+    }
   }
 
   // tallenetaan uutena ominaisuutena liitetiedostoja memolle.
@@ -687,7 +697,7 @@ if ($ytunnus != '' and $tee == '') {
     echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
 
     if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
-      echo "<tr><td colspan='2'>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
+      echo "<tr><td colspan='2'><b>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</b></td><td colspan='2'>$yfakta</td></tr>";
     }
 
     echo "</table><br>";
@@ -712,13 +722,6 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "<tr><th>".t("Lisää")."</th>";
 
-    if ($yhtunnus > 0) {
-      echo "<th>".t("Yhteyshenkilö").": $ynimi</th>";
-    }
-    else {
-      echo "<td></td>";
-    }
-
     $sel = array();
     $sel[$tyyppi] = "SELECTED";
 
@@ -734,7 +737,7 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "</select></td></tr>";
 
-    if ($crm_haas_check) {
+    if ($crm_haas_check and ($tyyppi == 'Memo' or $tyyppi == '')) {
 
       $call_types = array(
         'Prospecting Call' => '',
@@ -750,7 +753,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "<tr>";
       echo "<th>CALL_TYPE</th>";
-      echo "<td colspan='2'>";
+      echo "<td>";
       echo "<select name='haas_call_type'>";
       echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -789,7 +792,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "<tr>";
       echo "<th>OPPORTUNITY</th>";
-      echo "<td colspan='2'>";
+      echo "<td>";
       echo "<select name='haas_opportunity'>";
       echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -803,14 +806,14 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "<tr>";
       echo "<th>QTY</th>";
-      echo "<td colspan='2'>";
+      echo "<td>";
       echo "<input type='text' name='haas_qty' value='{$haas_qty}' size='8' maxlength='7' />";
       echo "</td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>OPP_PROJ_DATE</th>";
-      echo "<td colspan='2'>";
+      echo "<td>";
       echo "<input type='text' name='haas_opp_proj_date_dd' value='{$haas_opp_proj_date_dd}' size='3' maxlength='2' />";
       echo "<input type='text' name='haas_opp_proj_date_mm' value='{$haas_opp_proj_date_mm}' size='3' maxlength='2' />";
       echo "<input type='text' name='haas_opp_proj_date_yy' value='{$haas_opp_proj_date_yy}' size='5' maxlength='4' />";
@@ -834,7 +837,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "<tr>";
       echo "<th>END_REASON</th>";
-      echo "<td colspan='2'>";
+      echo "<td>";
       echo "<select name='haas_end_reason'>";
       echo "<option value=''>",t("Valitse"),"</option>";
 
@@ -848,19 +851,19 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "  <tr><th>".t("Tallenna tiedosto liitteeksi")."</th>";
-    echo "  <td colspan='2'><input type = 'file' name = 'userfile' />";
+    echo "  <td><input type = 'file' name = 'userfile' />";
     echo "  <input type='hidden' name='teeliite'  value='tallenna_pdf'>";
     echo "  <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
         <input type='hidden' name='ytunnus'   value='$ytunnus'>
         <input type='hidden' name='asiakasid'   value='$asiakasid'>";
     echo "  </td></tr>";
 
-    echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
+    echo "<tr><td colspan='2'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
 
     if ($tyyppi == "Muistutus") {
       echo "  <tr>
           <th>".t("Yhteydenottaja").":</th>
-          <td colspan='2'><select name='kuka'>
+          <td><select name='kuka'>
           <option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
@@ -896,7 +899,7 @@ if ($ytunnus != '' and $tee == '') {
         $mmm = "00";
 
       echo "<tr><th>".t("Muistutuspäivämäärä (pp-kk-vvvv tt:mm)")."</th>
-          <td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
+          <td><input type='text' name='mppa' value='$mppa' size='3'>-
           <input type='text' name='mkka' value='$mkka' size='3'>-
           <input type='text' name='mvva' value='$mvva' size='5'>
           &nbsp;&nbsp;
@@ -919,7 +922,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "  <tr>
           <th>".t("Leadia valvoo").":</th>
-          <td colspan='2'><select name='myyntipaallikko'>";
+          <td><select name='myyntipaallikko'>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
                 FROM kuka
@@ -945,7 +948,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "  <tr>
           <th>".t("Leadia hoitaa").":</th>
-          <td colspan='2'><select name='kuka'>
+          <td><select name='kuka'>
           <option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
@@ -976,7 +979,7 @@ if ($ytunnus != '' and $tee == '') {
       if (!isset($lmm))  $lmm = "00";
 
       echo "<tr><th>".t("Muistutuspäivämäärä (pp-kk-vvvv tt:mm)")."</th>
-          <td colspan='2'><input type='text' name='mppa' value='$lppa' size='3'>-
+          <td><input type='text' name='mppa' value='$lppa' size='3'>-
           <input type='text' name='mkka' value='$lkka' size='3'>-
           <input type='text' name='mvva' value='$lvva' size='5'>
           &nbsp;&nbsp;
@@ -988,7 +991,7 @@ if ($ytunnus != '' and $tee == '') {
 
     $vresult = t_avainsana("KALETAPA");
 
-    echo "<td colspan='2'><select name='tapa'>";
+    echo "<td><select name='tapa'>";
 
     while ($vrow = mysql_fetch_array($vresult)) {
       $sel="";
@@ -1002,12 +1005,12 @@ if ($ytunnus != '' and $tee == '') {
     echo "</select></td></tr>";
 
     echo "  <tr>
-        <td colspan='3' align='right' class='back'>
+        <td colspan='2' align='right' class='back'>
         <input type='submit' value='".t("Tallenna")."'>
         </form>
         </td></tr>";
 
-    echo "  <td colspan='3' align='right' class='back'>
+    echo "  <td colspan='2' align='right' class='back'>
         <form method='POST'>
         <input type='hidden' name='tee'     value='KORJAAMEMO'>
         <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
@@ -1126,21 +1129,37 @@ if ($ytunnus != '' and $tee == '') {
         echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
       }
 
-      if ($crm_haas_check) {
+      $crm_haas_column_check = !empty($memorow['kentta02']);
+      $crm_haas_column_check = (!empty($memorow['kentta03']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta04']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta05']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta06']) or $crm_haas_column_check);
+
+      if ($crm_haas_check and $crm_haas_column_check) {
         echo "<tr>";
-        echo "<th>CALL_TYPE</th>";
-        echo "<th>OPPORTUNITY</th>";
-        echo "<th>QTY</th>";
-        echo "<th>OPP_PROJ_DATE</th>";
-        echo "<th colspan='2'>END_REASON</th>";
+        echo "<th colspan='2'>CALL_TYPE</th>";
+        echo "<td colspan='4'>{$memorow['kentta02']}</td>";
         echo "</tr>";
 
         echo "<tr>";
-        echo "<td>{$memorow['kentta02']}</td>";
-        echo "<td>{$memorow['kentta03']}</td>";
-        echo "<td>{$memorow['kentta04']}</td>";
-        echo "<td>".tv1dateconv($memorow['kentta05'])."</td>";
-        echo "<td colspan='2'>{$memorow['kentta06']}</td>";
+        echo "<th colspan='2'>OPPORTUNITY</th>";
+        echo "<td colspan='4'>{$memorow['kentta03']}</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th colspan='2'>QTY</th>";
+        echo "<td colspan='4'>{$memorow['kentta04']}</td>";
+        echo "</tr>";
+
+
+        echo "<tr>";
+        echo "<th colspan='2'>OPP_PROJ_DATE</th>";
+        echo "<td colspan='4'>".tv1dateconv($memorow['kentta05'])."</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th colspan='2'>END_REASON</th>";
+        echo "<td colspan='4'>{$memorow['kentta06']}</td>";
         echo "</tr>";
       }
 
@@ -1173,6 +1192,8 @@ if ($ytunnus != '' and $tee == '') {
         echo "<input type='submit' value='".t("Lähetä viesti")."'>";
         echo "</form>";
         echo "</td></tr>";
+
+        echo "<tr><td colspan='6' class='back'>&nbsp;</td></tr>";
       }
     }
 

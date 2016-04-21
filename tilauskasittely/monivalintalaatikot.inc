@@ -804,7 +804,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
@@ -900,7 +900,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
@@ -1013,7 +1013,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 

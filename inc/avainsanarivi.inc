@@ -446,16 +446,33 @@ if ($_siirtovarastot and $_selitetark_2) {
   $tyyppi = 1;
 }
 
-if ($avain_sel['CRM_HAAS'] == 'SELECTED' and $_selite) {
-  $sel = $trow[$i] == 'K' ? "selected" : "";
+if ($avain_sel['CRM_HAAS'] == 'SELECTED') {
 
-  $ulos .= "<td>";
-  $ulos .= "<select name = '{$nimi}'>";
-  $ulos .= "<option value = ''>".t("Ei n‰ytet‰")."</option>";
-  $ulos .= "<option value = 'K' {$sel}>".t("N‰ytet‰‰n")."</option>";
-  $ulos .= "</select>";
-  $ulos .= "</td>";
-  $jatko = 0;
+  if ($_selite) {
+    $sel = $trow[$i] == 'K' ? "selected" : "";
+
+    $ulos .= "<td>";
+    $ulos .= "<select name = '{$nimi}'>";
+    $ulos .= "<option value = ''>".t("Ei n‰ytet‰")."</option>";
+    $ulos .= "<option value = 'K' {$sel}>".t("N‰ytet‰‰n")."</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
+
+  if ($_selitetark) {
+    $vresult = t_avainsana("CRM_ROOLI");
+
+    $ulos = "<td><select name='{$nimi}'><option value=''>".t("Ei roolia")."</option>";
+
+    while ($row = mysql_fetch_assoc($vresult)) {
+      $sel = $row["selite"] == $trow[$i] ? 'selected' : '';
+      $ulos .= "<option value='{$row['selite']}' {$sel}>{$row['selite']} - {$row['selitetark']}</option>";
+    }
+
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
 }
 
 if ($avain_sel['KOPIOITUOTE'] == 'SELECTED') {

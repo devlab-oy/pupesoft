@@ -159,6 +159,15 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     }
   }
 
+  $crm_haas_res = t_avainsana("CRM_HAAS");
+  $crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+
+  $yhteyshenkilo_rooli_lisa = "";
+
+  if ($crm_haas_row['selitetark'] != '') {
+    $yhteyshenkilo_rooli_lisa = " AND yhteyshenkilo.rooli = '{$crm_haas_row['selitetark']}' ";
+  }
+
   $query = "SELECT kalenteri.*,
             kalenteri.tunnus AS kalenteritunnus,
             asiakas.*,
@@ -176,8 +185,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             )
             LEFT JOIN yhteyshenkilo ON (
               kalenteri.yhtio = yhteyshenkilo.yhtio AND
-              kalenteri.henkilo = yhteyshenkilo.tunnus AND
-              yhteyshenkilo.rooli = 'haas'
+              kalenteri.henkilo = yhteyshenkilo.tunnus
+              {$yhteyshenkilo_rooli_lisa}
             )
             JOIN kuka ON (
               kuka.yhtio = kalenteri.yhtio AND

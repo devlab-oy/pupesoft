@@ -103,7 +103,8 @@ class PrestaCustomers extends PrestaClient {
           // use set_shop_ids, so we'll do validation
           // set id_shop as the first shop, since customers can only have one
           $this->set_shop_ids($shop);
-          $id_shop = is_array($this->shop_ids()) ? $this->shop_ids()[0] : null;
+          $shop_ids = $this->shop_ids();
+          $id_shop = is_array($shop_ids) ? $shop_ids[0] : null;
 
           if (in_array($id, $existing_customers)) {
             $this->update($id, $customer, $id_shop);

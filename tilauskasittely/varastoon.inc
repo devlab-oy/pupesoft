@@ -1,7 +1,7 @@
 <?php
 
 // tarvitaan $laskurow array, jossa on meid‰n keikan otsikko
-$debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
+$debug = 1; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
 // Muuttuja kun vied‰‰n tilausrivi kerrallaan.
 $varastoon_tilausrivirajaus = "";
@@ -501,9 +501,13 @@ else {
 
     // lasketaan itse rahtikulut
     // Lasketaan kuluprosentti rivien summasta + pyˆristyseroista, ja lis‰t‰‰n lopuksi pyˆristysero + rahtietu rahtikuluihin mukaan
+echo "509: $rahtikulut, $laskurow[summa] <br><br>";
     $rahtikulut = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+echo "511: $rahtikulut, $hintarow[kulut], $rahtikulut, $laskurow[rahti] <br><br>";
     $rahtikulut = $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP' ? $hintarow['kulut'] : $rahtikulut * ($laskurow['rahti'] / 100);
+echo "513: $rahtikulut, $laskurow[rahti_etu] <br><br>";
     $rahtikulut += ($laskurow['rahti_etu'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+echo "515: $rahtikulut, $hintarow[kulut], $rahtikulut, $laskurow[rahti] <br><br>";
     $rahtikulut = round($rahtikulut, 6);
     $rahtitapa  = $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP' ? t("Tuotteiden kuluprosentit") : t("Kuluprosentti") . " " . $laskurow['rahti'] . "%";
   }
@@ -622,21 +626,27 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   $ale_lisa_apu_kala = generoi_alekentta_php($tilrivirow, 'O', 'kerto');
-
+  $kuluprosenttiosuus = 0;
   // lasketaan rivin hinta
   $osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
-
+  echo "628: $rahtikulut <br><br>";
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
+    $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
     if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
       // alvittoman rivihinnan osuus
-      $osuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $alvit / $rahtikulut;
+      $kuluprosenttiosuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $alvit;    // kuluprosentin osuus
+      if ($tilrivirow["kuluprosentti"] == 0) {
+        $rahtios = $osuus * $rahtikulut;
+      }
+      else {
+        $rahtios = ($osuus * $rahtikulut) + $kuluprosenttiosuus;
+      }
+echo "634: $osuus, $tilrivirow[kuluprosentti], $osuus_apu_hinta, $alvit, $rahtikulut, $rahtios, $laskurow[summa], $kuluprosenttiosuus <br><br>";
     }
     else {
-      $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
+      $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista t‰lle riville
     }
-
-    $rahtios = $osuus*$rahtikulut;            // lasketaan sama osuus rahtikuluista t‰lle riville
   }
   else {
     $rahtios = 0;
@@ -660,10 +670,15 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   $ohinta = round($ohinta+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
-
+  echo "682: $hankintakulut, $osuus, $rahtios <br><br>";
   // Osuus kululaskuista # Osuus eturahdista
-  $hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
-
+  if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
+    $hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".$rahtios;
+    #$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round(($laskurow['rahti_etu'] + $osuus) * $laskurow['vienti_kurssi'], 6);
+  }
+  else {
+    $hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
+  }
   $tulliprossa   = 0;
   $aputullimaara = 0;
   $tv_nimrow     = "";
@@ -686,7 +701,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   // Tulli% # Aputullim‰‰r‰
-  $hankintakulut .= "#".sprintf('%.02f', $tulliprossa)."#".sprintf('%.02f', $aputullimaara);
+  $hankintakulut .= "#".sprintf('%.02f', $tulliprossa)."#".sprintf('%.02f', $aputullimaara)."#".sprintf('%.02f', $kuluprosenttiosuus);
   $kuluteksti = "";
 
   // lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
@@ -725,7 +740,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $varastoon_msg .= "</tr>";
     continue;
   }
-
+  echo "747: $tilrivirow[kate] <br><br>";
   // Rivinlis‰kulu
   $hankintakulut .= "#$tilrivirow[kate]";
 
@@ -740,6 +755,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $kehahin = $ohinta;
   }
   else {
+echo "763: $salrow[saldo], $tilrivirow[varattu], $salrow[saldo], $salrow[saldo], $tuorow[kehahin], $ohinta, $tilrivirow[varattu] <br><br>";
     if ($salrow['saldo'] + $tilrivirow['varattu'] != 0 and $salrow['saldo'] != 0 and $salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu'] != 0) {
       // kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
       $kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
@@ -1185,13 +1201,25 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $varastoon_msg .= "<td>{$sscc_row['sscc']}</td>";
     }
   }
+echo "1201: $osuus, $rahtikulut, $laskurow[summa] <br><br>";
+  if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') { 
+    if ($tilrivirow['kuluprosentti'] == 0) {
+       $rahtikulutyht = $rahtios;
+    }
+    else {
+       $rahtikulutyht = $rahtios + $osuus;
+    }
+  }
+  else {
+    $rahtikulutyht = $osuus * $rahtikulut;
+  }
 
   $varastoon_msg .= "  <td valign='top'>$tilrivirow[tuoteno]</td>
             <td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
             <td align='right' valign='top'>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtiorow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
             <td align='right' valign='top'>".$tilrivirow["alennuksetyht"]."%</td>
             <td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
-            <td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>";
+            <td align='right' valign='top'>".sprintf('%.6f', $rahtikulutyht)."</td>";
 
   if ($tv_kaytossa) {
     // Tulliprosentti

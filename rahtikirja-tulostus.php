@@ -1543,22 +1543,33 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   global $kukarow;
 
-  $query = "SELECT asiakaskommentti.kommentti,
-                   lasku.asiakkaan_tilausnumero,
-                   tilausrivi.tilkpl,
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+                   asiakaskommentti.kommentti,
                    tilausrivi.tuoteno,
+                   tilausrivi.tilkpl,
                    tuote.eankoodi,
-                   tuote.kuvaus,
-                   tuote.myynti_era
+                   tuote.myynti_era,
+                   IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
             FROM lasku
-            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
               AND tilausrivi.keratty <> ''
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
+            JOIN tuote
+              ON tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = tilausrivi.tuoteno
-            LEFT JOIN asiakaskommentti ON asiakaskommentti.yhtio = tilausrivi.yhtio
+            JOIN asiakas
+              ON asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus = lasku.liitostunnus
+            LEFT JOIN asiakaskommentti
+              ON asiakaskommentti.yhtio = tilausrivi.yhtio
               AND asiakaskommentti.ytunnus = lasku.ytunnus
               AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+            LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
+              ON avainsana_nimitys.yhtio = tuote.yhtio
+              AND avainsana_nimitys.kieli = asiakas.kieli
+              AND avainsana_nimitys.laji = 'nimitys'
+              AND avainsana_nimitys.tuoteno = tuote.tuoteno
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'L'
               AND lasku.alatila = 'B'

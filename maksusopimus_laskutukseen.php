@@ -180,6 +180,10 @@ if (!function_exists("ennakkolaskuta")) {
           $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
         }
 
+        if (!empty($laskurow['viesti'])) {
+          $viesti .= $laskurow['viesti'];
+        }
+
         $query .= "viesti = '".$viesti."',";
       }
       elseif ($fieldname != 'tunnus') {

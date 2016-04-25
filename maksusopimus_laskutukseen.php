@@ -333,7 +333,7 @@ if (!function_exists("ennakkolaskuta")) {
         $summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-          $nimitys = $row['tuoteno'].' - '.$row['nimitys'];
+          $nimitys = $row['tuoteno'].' - '.t_tuotteen_avainsanat($row, 'nimitys', $kielirow["kieli"]);
           $rivikommentti   = $row['kommentti'];
         }
         else {

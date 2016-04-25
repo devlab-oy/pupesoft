@@ -11,7 +11,6 @@ class PrestaProducts extends PrestaClient {
   private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
-  private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
@@ -422,18 +421,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  private function get_language_id($code) {
-    $value = $this->languages_table[$code];
-
-    if (empty($value)) {
-      return null;
-    }
-    else {
-      // substract one, since API key starts from zero
-      return ($value - 1);
-    }
-  }
-
   private function delete_all_unnecessary_products() {
     $pupesoft_products = $this->pupesoft_all_products;
 
@@ -554,12 +541,6 @@ class PrestaProducts extends PrestaClient {
   public function set_tax_rates_table($value) {
     if (is_array($value)) {
       $this->tax_rates_table = $value;
-    }
-  }
-
-  public function set_languages_table($value) {
-    if (is_array($value)) {
-      $this->languages_table = $value;
     }
   }
 

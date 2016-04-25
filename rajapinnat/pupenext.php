@@ -34,3 +34,16 @@ $params   = json_decode($params);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);
+
+echo json_encode(call_user_func($function, $params));
+echo "\n";
+
+function pupenext_luo_myyntitilausotsikko($params) {
+  require 'tilauskasittely/luo_myyntitilausotsikko.inc';
+
+  $customer_id = $params->customer_id;
+
+  $sales_order_id = luo_myyntitilausotsikko('RIVISYOTTO', $customer_id);
+
+  return json_encode(array('sales_order_id' => $sales_order_id));
+}

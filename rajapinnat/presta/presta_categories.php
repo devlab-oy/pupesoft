@@ -64,7 +64,7 @@ class PrestaCategories extends PrestaClient {
       }
     }
 
-    $this->delete_unnecessary_categories();
+    $this->delete_unnecessary_categories($pupesoft_categories);
 
     $this->logger->log("---Stop category import---");
   }
@@ -111,9 +111,25 @@ class PrestaCategories extends PrestaClient {
     $languages = count($xml->category->name->language);
 
     for ($i=0; $i < $languages; $i++) {
-      $xml->category->name->language[$i] = utf8_encode($record['nimi']);
-      $xml->category->link_rewrite->language[$i] = utf8_encode($friendly_url);
+      $xml->category->name->language[$i] = $this->xml_value($record['nimi']);
+      $xml->category->link_rewrite->language[$i] = $this->xml_value($friendly_url);
       $xml->category->meta_keywords->language[$i] = $record['node_tunnus'];
+    }
+
+    // loop all translations and overwrite defaults
+    foreach ($record['kaannokset'] as $translation) {
+      $tr_id = $this->get_language_id($translation['kieli']);
+
+      // if we don't have the language in presta
+      if ($tr_id === null) {
+        $this->logger->log("VIRHE! kieltä {$translation['kieli']} ei löydy Prestasta!");
+        continue;
+      }
+
+      $value = $this->xml_value($translation['nimi']);
+      $xml->category->name->language[$tr_id] = $value;
+
+      $this->logger->log("Käännös {$translation['kieli']}, $value");
     }
 
     return $xml;

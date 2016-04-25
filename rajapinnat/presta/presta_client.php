@@ -473,6 +473,13 @@ abstract class PrestaClient {
     }
   }
 
+  protected function xml_value($value) {
+    $value = utf8_encode($value);
+    $value = htmlspecialchars($value, ENT_IGNORE);
+
+    return $value;
+  }
+
   public function set_languages_table($value) {
     if (is_array($value)) {
       $this->languages_table = $value;

@@ -511,13 +511,6 @@ class PrestaProducts extends PrestaClient {
     return false;
   }
 
-  private function xml_value($value) {
-    $value = utf8_encode($value);
-    $value = htmlspecialchars($value, ENT_IGNORE);
-
-    return $value;
-  }
-
   public function set_removable_fields($fields) {
     $this->_removable_fields = $fields;
   }

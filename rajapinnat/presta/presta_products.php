@@ -36,6 +36,14 @@ class PrestaProducts extends PrestaClient {
     return 'products';
   }
 
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    unset($xml->product->manufacturer_name);
+    unset($xml->product->quantity);
+    unset($xml->product->position_in_category);
+
+    return $xml;
+  }
+
   /**
    *
    * @param array   $product
@@ -48,13 +56,7 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       $xml = $existing_product;
-
-      unset($xml->product->position_in_category);
-      unset($xml->product->manufacturer_name);
-      unset($xml->product->quantity);
     }
-
-    unset($xml->product->position_in_category);
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);

@@ -278,7 +278,30 @@ function presta_hae_kategoriat() {
   $kategoriat = array();
 
   while ($kategoria = mysql_fetch_assoc($result)) {
-    $kategoriat[] = $kategoria;
+    // Haetaan kategorian käännökset
+    $query = "SELECT kieli, tarkenne
+              FROM dynaaminen_puu_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$kategoria['node_tunnus']}'
+              AND laji = 'tuote'
+              AND avainsana = 'nimi'";
+    $tr_result = pupe_query($query);
+    $kaannokset = array();
+
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      $kaannokset[] = array(
+        "kieli" => $tr_row['kieli'],
+        "nimi"  => $tr_row['tarkenne']
+      );
+    }
+
+    $kategoriat[] = array(
+      "kaannokset"    => $kaannokset,
+      "koodi"         => $kategoria['koodi'],
+      "nimi"          => $kategoria['nimi'],
+      "node_tunnus"   => $kategoria['node_tunnus'],
+      "parent_tunnus" => $kategoria['parent_tunnus'],
+    );
   }
 
   return $kategoriat;

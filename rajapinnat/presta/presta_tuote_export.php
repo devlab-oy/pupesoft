@@ -240,11 +240,12 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotetiedot.\n";
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
 
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
+  $presta_products->set_home_category_id($presta_home_category_id);
   $presta_products->set_languages_table($presta_kieliversiot);
   $presta_products->set_product_features($presta_tuoteominaisuudet);
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);

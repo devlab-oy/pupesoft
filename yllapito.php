@@ -1937,6 +1937,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     //Haetaan tietokantasarakkeen nimialias
     $al_nimi   = mysql_field_name($result, $i);
+    $al_row    = array();
 
     $query = "SELECT *
               FROM avainsana
@@ -2042,7 +2043,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $infolinkki = "";
 
       // Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
-      if ($al_row['selitetark_5'] != '') {
+      if (!empty($al_row) and $al_row['selitetark_5'] != '') {
         $siistiselite = str_replace('.', '_', $al_row['selite']);
         $infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 

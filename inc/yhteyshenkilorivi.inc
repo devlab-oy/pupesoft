@@ -2,12 +2,13 @@
 $ulos = "";
 $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
+$kentan_nimi = mysql_field_name($result, $i);
 
 if ($i == 0) { //yhtiötä ei näytetä
   $tyyppi = 0;
 }
 
-if (mysql_field_name($result, $i) == "liitostunnus") {
+if ($kentan_nimi == "liitostunnus") {
   if ($lukitse_avaimeen != "") {
     $tyyppi = 4;
     $ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
@@ -18,7 +19,7 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
   }
 }
 
-if (mysql_field_name($result, $i) == "tyyppi") {
+if ($kentan_nimi == "tyyppi") {
   if ($laji == "A") {
     $trow[$i] = "A";
   }
@@ -29,7 +30,7 @@ if (mysql_field_name($result, $i) == "tyyppi") {
   $tyyppi = 4;
 }
 
-if (mysql_field_name($result, $i) == "rooli") {
+if ($kentan_nimi == "rooli") {
   $vresult = t_avainsana("CRM_ROOLI");
 
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei roolia")."</option>";
@@ -44,7 +45,7 @@ if (mysql_field_name($result, $i) == "rooli") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "suoramarkkinointi") {
+if ($kentan_nimi == "suoramarkkinointi") {
 
   $vresult = t_avainsana("CRM_SUORAMARKKI");
 
@@ -60,7 +61,7 @@ if (mysql_field_name($result, $i) == "suoramarkkinointi") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "tilausyhteyshenkilo") {
+if ($kentan_nimi == "tilausyhteyshenkilo") {
 
   $sel = "";
   if ($trow[$i] != "" or (isset($tyhthenkilo) and $tyhthenkilo != "")) $sel = "SELECTED";
@@ -72,7 +73,7 @@ if (mysql_field_name($result, $i) == "tilausyhteyshenkilo") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "oletusyhteyshenkilo") {
+if ($kentan_nimi == "oletusyhteyshenkilo") {
 
   $sel = "";
   if ($trow[$i] != "") $sel = "SELECTED";
@@ -84,14 +85,14 @@ if (mysql_field_name($result, $i) == "oletusyhteyshenkilo") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "verkkokauppa_salasana") {
+if ($kentan_nimi == "verkkokauppa_salasana" or $kentan_nimi == "verkkokauppa_nakyvyys") {
   if (!isset($presta_api_key)) {
     $tyyppi = 0;
     $jatko = 0;
   }
 }
 
-if (mysql_field_name($result, $i) == "aktivointikuittaus") {
+if ($kentan_nimi == "aktivointikuittaus") {
 
   $sel = "";
   if ($trow[$i] != "") $sel = "SELECTED";

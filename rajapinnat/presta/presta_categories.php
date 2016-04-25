@@ -69,6 +69,13 @@ class PrestaCategories extends PrestaClient {
     $this->logger->log("---Stop category import---");
   }
 
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    unset($xml->category->level_depth);
+    unset($xml->category->nb_products_recursive);
+
+    return $xml;
+  }
+
   protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
     if (is_null($existing_record)) {
       $xml = $this->empty_xml();
@@ -76,10 +83,6 @@ class PrestaCategories extends PrestaClient {
     else {
       $xml = $existing_record;
     }
-
-    // remove read only fields
-    unset($xml->category->level_depth);
-    unset($xml->category->nb_products_recursive);
 
     $parent_tunnus = $record['parent_tunnus'];
 

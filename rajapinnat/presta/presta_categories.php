@@ -33,13 +33,14 @@ class PrestaCategories extends PrestaClient {
       $current += 1;
       $tunnus = $category['node_tunnus'];
       $parent_tunnus = $category['parent_tunnus'];
+      $nimi = $category['nimi'];
 
-      $this->logger->log("[$current/$count] {$category['nimi']}");
+      $this->logger->log("[$current/$count] {$nimi}");
 
       // this is pupesoft root category
       if ($parent_tunnus === null) {
         $this->pupesoft_root_category_id = $tunnus;
-        $this->logger->log("Ohitetaan root kategoria {$category['nimi']}");
+        $this->logger->log("Ohitetaan root kategoria");
         continue;
       }
 
@@ -52,6 +53,9 @@ class PrestaCategories extends PrestaClient {
 
           // reset all values, so we'll fetch all again next loop
           $this->all_values = null;
+        }
+        elseif ($nimi == $presta_category['name']['language'][0]) {
+          $this->logger->log("Ei muutoksia, ei tehdä mitään");
         }
         else {
           $id = $presta_category['id'];
@@ -94,6 +98,8 @@ class PrestaCategories extends PrestaClient {
         $this->logger->log("Isäkategoria $parent_tunnus ei löytynyt!");
         throw new Exception("Isäkategoria $parent_tunnus ei löytynyt!");
       }
+
+      $parent = $presta_category['id'];
     }
 
     $friendly_url = $this->saniteze_link_rewrite($record['nimi']);

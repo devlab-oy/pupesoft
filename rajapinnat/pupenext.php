@@ -23,9 +23,11 @@ elseif ($function == '') {
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . dirname(__FILE__));
 
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 // otetaan tietokanta connect ja funktiot
-require "inc/connect.inc";
-require "inc/functions.inc";
+require "{$pupe_root_polku}/inc/connect.inc";
+require "{$pupe_root_polku}/inc/functions.inc";
 
 $yhtio    = mysql_real_escape_string($yhtio);
 $kuka     = mysql_real_escape_string($kuka);
@@ -39,11 +41,13 @@ echo json_encode(call_user_func($function, $params));
 echo "\n";
 
 function pupenext_luo_myyntitilausotsikko($params) {
-  require 'tilauskasittely/luo_myyntitilausotsikko.inc';
+  global $pupe_root_polku;
+
+  require "{$pupe_root_polku}/tilauskasittely/luo_myyntitilausotsikko.inc";
 
   $customer_id = $params->customer_id;
 
   $sales_order_id = luo_myyntitilausotsikko('RIVISYOTTO', $customer_id);
 
-  return json_encode(array('sales_order_id' => $sales_order_id));
+  return array('sales_order_id' => $sales_order_id);
 }

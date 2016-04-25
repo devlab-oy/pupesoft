@@ -37,8 +37,13 @@ $params   = json_decode($params);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);
 
-echo json_encode(call_user_func("pupenext_$function", $params));
-echo "\n";
+ob_start();
+
+$response = json_encode(call_user_func("pupenext_$function", $params));
+
+ob_end_clean();
+
+echo $response;
 
 function pupenext_luo_myyntitilausotsikko($params) {
   global $pupe_root_polku;
@@ -50,4 +55,31 @@ function pupenext_luo_myyntitilausotsikko($params) {
   $sales_order_id = luo_myyntitilausotsikko('RIVISYOTTO', $customer_id);
 
   return array('sales_order_id' => $sales_order_id);
+}
+
+function pupenext_tilaus_valmis($params) {
+  global $kukarow, $yhtiorow, $pupe_root_polku;
+
+  $order_id = $params->order_id;
+
+  $kukarow['kesken'] = $order_id;
+
+  $query = "SELECT *
+            FROM lasku
+            WHERE tunnus = {$order_id}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  $laskurow = mysql_fetch_assoc($result);
+
+  require "{$pupe_root_polku}/tilauskasittely/tilaus-valmis.inc";
+
+  $status_raw = ob_get_contents();
+
+  $status_html = new DOMDocument();
+  $status_html->loadHTML($status_raw);
+
+  $status = $status_html->getElementsByTagName('font')->item(0)->textContent;
+
+  return array('status' => $status);
 }

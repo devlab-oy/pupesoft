@@ -17,10 +17,15 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 // Enaboidaan ajax kikkare
 enable_ajax();
 
+if ($toiminto == 'NAYTALAITTEET' and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku))) {
+  echo "<font class='error'>".t("Anna v‰hint‰‰n yksi rajaus")."!</font><br/>";
+  $toiminto = 'RAJAALAITTEET'; 
+}
+
 if ($toiminto == 'LINKKAA') {
   pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));
 }
-else {
+elseif ($toiminto != 'RAJAALAITTEET') {
   pupe_DataTables(array(array($pupe_DataTables, 16, 16, true, true)));
 }
 
@@ -237,21 +242,22 @@ if (empty($toiminto)) {
   echo "</form>";
 }
 
-// Ekotellaan headerit
-echo "<form id='laiterekisteriformi' name='laiterekisteriformi'>";
-echo "<input type='hidden' name='toiminto' value='$toiminto'>";
-echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
-echo "<input type='hidden' name='lopetus' value='$lopetus' />";
-echo "<table class='display dataTable' id='$pupe_DataTables'>";
-echo "<thead>";
-echo "<tr>";
-foreach ($headerit as $hiid) {
-  echo "<th>".t($hiid)."</th>";
+if ($toiminto != 'RAJAALAITTEET') {
+  // Ekotellaan headerit
+  echo "<form id='laiterekisteriformi' name='laiterekisteriformi'>";
+  echo "<input type='hidden' name='toiminto' value='$toiminto'>";
+  echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
+  echo "<input type='hidden' name='lopetus' value='$lopetus' />";
+  echo "<table class='display dataTable' id='$pupe_DataTables'>";
+  echo "<thead>";
+  echo "<tr>";
+  foreach ($headerit as $hiid) {
+    echo "<th>".t($hiid)."</th>";
+  }
+  echo "</tr>";
 }
-echo "</tr>";
-
 // Hakukent‰t
-if (empty($toiminto) or $toiminto == 'LINKKAA') {
+if (empty($toiminto) or $toiminto == 'LINKKAA' or $toiminto == 'NAYTALAITTEET') {
   echo "<tr>";
   foreach ($headerit as $hiid) {
     echo "<td><input type='text' class='search_field' name='search_{$hiid}'/></td>";
@@ -263,25 +269,54 @@ echo "</thead>";
 if (empty($toiminto) or $toiminto == 'LINKKAA') {
   echo "<br><input type='submit' name='linkkaus' value='Liit‰ valitut laitteet'/><br><br>";
 }
-// Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
-$query = "SELECT
-          laite.*,
-          avainsana.selitetark valmistaja,
-          tuote.tuotemerkki malli,
-          if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyll‰','Ei') sopimusrivi,
-          group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
-          FROM laite
-          LEFT JOIN tuote on tuote.yhtio = laite.yhtio
-            AND tuote.tuoteno    = laite.tuoteno
-          LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
-            AND avainsana.laji   = 'TRY'
-            AND avainsana.selite = tuote.try
-          LEFT JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
-          WHERE laite.yhtio      = '{$kukarow['yhtio']}'
-          {$laiterajaus}
-          GROUP BY laite.sarjanro,laite.tuoteno";
 
-$res = pupe_query($query);
+if ($toiminto == 'NAYTALAITTEET') {
+  if (!empty($valmistajahaku)) {
+    $valmistajajoini = " JOIN avainsana on avainsana.yhtio = tuote.yhtio 
+                         AND avainsana.laji = 'TRY'
+                         AND avainsana.selite = tuote.try
+                         AND avainsana.selitetark like '%$valmistajahaku%' ";
+  }
+  else {
+    $valmistajajoini = " LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio 
+                         AND avainsana.laji = 'TRY'
+                         AND avainsana.selite = tuote.try ";
+  }
+
+  $mallihakulisa = '';
+  if (!empty($mallihaku)) {
+    $mallihakulisa = " AND laite.tuoteno like '%$mallihaku%' ";
+  }
+
+  $sarjanumerohakulisa = '';
+  if (!empty($sarjanumerohaku)) {
+    $sarjanumerohakulisa = " AND laite.sarjanro like '%$sarjanumerohaku%' ";
+  }
+
+  $sopimusjoinilisa = ' LEFT ';
+  if (!empty($sopimushaku)) {
+    $sopimusjoinilisa = '';
+  }
+
+  // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
+  $query = "SELECT
+            laite.*,
+            avainsana.selitetark valmistaja,
+            tuote.tuotemerkki malli,
+            if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyll‰','Ei') sopimusrivi,
+            group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
+            FROM laite
+            LEFT JOIN tuote on tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno    = laite.tuoteno
+            {$valmistajajoini}
+            {$sopimusjoinilisa} JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
+            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            {$mallihakulisa}
+            {$sarjanumerohakulisa}
+            {$laiterajaus}
+            GROUP BY laite.sarjanro,laite.tuoteno";
+  $res = pupe_query($query);
+}
 
 if ($toiminto == 'MUOKKAA') {
 
@@ -379,7 +414,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "</form>";
   echo "</tr>";
 }
-else {
+elseif ($toiminto == 'NAYTALAITTEET') {
 
   while ($rowi = mysql_fetch_assoc($res)) {
     $asiakas = '';
@@ -500,4 +535,36 @@ else {
   echo "<br><br>";
   echo "</table>";
   echo "</form>";
+}
+else {
+  echo "<form id='laiterajausformi' name='laiterajausformi'>";
+  echo "<input type='hidden' name='toiminto' value='NAYTALAITTEET' />";
+  echo "<table>";
+
+  echo "<tr><th colspan='2'>".t('Anna v‰hint‰‰n yksi hakuehto')."</th></tr>";
+
+  echo "<tr>";
+  echo "<th>".t("Valmistaja")."</th>";
+  echo "<td><input type='text' name='valmistajahaku'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>".t("Malli")."</th>";
+  echo "<td><input type='text' name='mallihaku'></td>";
+  echo "</tr>";
+  
+  echo "<tr>";
+  echo "<th>".t("Sarjanumero")."</th>";
+  echo "<td><input type='text' name='sarjanumerohaku'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>".t("Vain laitteet joilla on sopimus")."</th>";
+  echo "<td><input type='checkbox' name='sopimushaku' value='joo'></td>";
+  echo "</tr>";
+  
+  echo "</table>";
+  echo "<br>";
+  echo "<input type='submit' name='hae_laitteet' value='Hae laitteet'/>";
+  echo "</form>"; 
 }

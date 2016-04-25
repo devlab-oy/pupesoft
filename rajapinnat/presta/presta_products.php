@@ -22,10 +22,8 @@ class PrestaProducts extends PrestaClient {
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key, $presta_home_category_id) {
-    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
-    $this->presta_home_category_id = $presta_home_category_id;
-
+  public function __construct($url, $api_key) {
+    $this->presta_categories = new PrestaCategories($url, $api_key);
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
@@ -315,7 +313,7 @@ class PrestaProducts extends PrestaClient {
       return null;
     }
 
-    $category_id = $response->category->id;
+    $category_id = $response['id'];
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
@@ -545,5 +543,9 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->features_table = $value;
     }
+  }
+
+  public function set_home_category_id($value) {
+    $this->presta_home_category_id = $value;
   }
 }

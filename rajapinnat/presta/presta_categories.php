@@ -190,6 +190,9 @@ class PrestaCategories extends PrestaClient {
     // all ids found in all_presta_ids that are not found in keep_presta_ids
     $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
 
+    $count = count($delete_presta_ids);
+    $this->logger->log("Poistettavia kategorioita {$count} kpl");
+
     // we should delete them from presta
     foreach ($delete_presta_ids as $id) {
       $result = $this->delete($id);

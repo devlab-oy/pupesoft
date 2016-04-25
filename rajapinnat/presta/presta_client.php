@@ -160,7 +160,6 @@ abstract class PrestaClient {
     );
 
     try {
-      $this->get_empty_schema();
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
       $response_xml = $this->ws->add($opt);
 
@@ -186,8 +185,6 @@ abstract class PrestaClient {
   protected function update($id, array $resource, $id_shop = null) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id, $id_shop);
-    $this->get_empty_schema();
-
     $xml = $this->generate_xml($resource, $existing_resource);
 
     return $this->update_xml($id, $xml, $id_shop);

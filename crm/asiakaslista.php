@@ -231,7 +231,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     fwrite($toot, "{$row['maa']};"); # country
     fwrite($toot, substr($row['puhelin'], 0, 30).";");
     fwrite($toot, substr($row['email'], 0, 241).";");
-    fwrite($toot, substr($row['luontiaika'], 0, 10).";");
+    fwrite($toot, substr($row['luontiaika'], 0, 10));
     fwrite($toot, ";".substr($row['kentta02'], 0, 100));
     fwrite($toot, ";".substr($row['kentta03'], 0, 8));
     fwrite($toot, ";".(int) $row['kentta04']);

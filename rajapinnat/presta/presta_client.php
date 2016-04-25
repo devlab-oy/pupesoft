@@ -135,6 +135,8 @@ abstract class PrestaClient {
       'resource' => $resource,
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $msg = "Haetaan {$resource} id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg);
@@ -161,6 +163,8 @@ abstract class PrestaClient {
       'id_shop'  => $id_shop,
       'resource' => $this->resource_name(),
     );
+
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
 
     try {
       $xml = $this->generate_xml($resource);
@@ -230,6 +234,8 @@ abstract class PrestaClient {
       'resource' => $this->resource_name(),
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $xml = $this->remove_read_only_fields($xml);
       $opt['putXml'] = $xml->asXML();
@@ -238,7 +244,7 @@ abstract class PrestaClient {
       $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
     }
     catch (Exception $e) {
-      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";
+      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id kauppaan {$id_shop}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -278,13 +284,15 @@ abstract class PrestaClient {
       $opt[$key] = $value;
     }
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Kaikki {$resource} rivit haettu";
+      $msg = "Kaikki {$resource} rivit haettu kaupasta {$id_shop}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku kaupasta {$id_shop} epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -339,13 +347,15 @@ abstract class PrestaClient {
       'resource' => $this->resource_name(),
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $response_bool = $this->ws->delete($opt);
-      $msg = "Poistettiin " . $this->resource_name() . " id {$id}";
+      $msg = "Poistettiin " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id}";
+      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg, $e);
       throw $e;
     }

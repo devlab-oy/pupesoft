@@ -230,6 +230,7 @@ if (array_key_exists('kategoriat', $synkronoi)) {
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_categories->set_home_category_id($presta_home_category_id);
+  $presta_categories->set_languages_table($presta_kieliversiot);
   $presta_categories->sync_categories($kategoriat);
 }
 

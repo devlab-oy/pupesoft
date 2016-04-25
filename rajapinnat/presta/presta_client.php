@@ -197,7 +197,18 @@ abstract class PrestaClient {
   protected function update($id, array $resource, $id_shop = null) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id, $id_shop);
+    $existing_xml = $existing_resource->asXML();
+
     $xml = $this->generate_xml($resource, $existing_resource);
+    $new_xml = $xml->asXML();
+
+    // if nothing has changed, don't update
+    if ($existing_xml == $new_xml) {
+      $this->logger->log("Ei muutoksia, ei päivitetä");
+
+      // update_xml returns an array aswell
+      return xml_to_array($existing_xml);
+    }
 
     return $this->update_xml($id, $xml, $id_shop);
   }

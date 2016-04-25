@@ -475,7 +475,7 @@ class PrestaProducts extends PrestaClient {
 
     foreach ($pupesoft_products as $product_row) {
       $sku = $product_row['tuoteno'];
-      $saldo = $product_row['saldo'];
+      $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
       $status = $product_row['status'];
 
       $product_id = array_search($sku, $this->all_skus());

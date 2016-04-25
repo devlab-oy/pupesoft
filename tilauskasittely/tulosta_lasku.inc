@@ -852,8 +852,8 @@ if (!function_exists('rivi_lasku')) {
     if ($_ennakkolaskun_tyyppi_check) {
       if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
 
-        $row['tuoteno'] = $matches[0];
         if ($yhtiorow['ennakkomaksu_tuotenumero'] == $row['tuoteno']) {
+          $row['tuoteno'] = $matches[0];
           $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
         }
       }

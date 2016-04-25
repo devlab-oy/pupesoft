@@ -227,8 +227,9 @@ if (array_key_exists('kategoriat', $synkronoi)) {
   $kategoriat = presta_hae_kategoriat();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotekategoriat.\n";
-  $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
+  $presta_categories->set_home_category_id($presta_home_category_id);
   $presta_categories->sync_categories($kategoriat);
 }
 

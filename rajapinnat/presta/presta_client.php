@@ -4,16 +4,15 @@ require_once 'rajapinnat/logger.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
-
   private $url = null;
   private $api_key = null;
+  private $shop_ids = null;
+  private $presta_shops = null;
 
   /**
    *
    * @var PrestaShopWebservice REST-client
    */
-
-
   protected $ws = null;
 
   /**
@@ -39,11 +38,7 @@ abstract class PrestaClient {
     }
 
     $this->logger = new Logger("presta_export");
-
-    if (substr($url, -1) == '/') {
-      $url = substr($url, 0, -1);
-    }
-    $this->url = $url;
+    $this->url = rtrim($url, '/').'/';
     $this->api_key = $api_key;
     $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
   }
@@ -93,9 +88,9 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function get($id) {
+  protected function get($id, $id_shop = null) {
     try {
-      $response_xml = $this->get_as_xml($id);
+      $response_xml = $this->get_as_xml($id, $id_shop);
     }
     catch (Exception $e) {
       throw $e;
@@ -129,20 +124,21 @@ abstract class PrestaClient {
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_as_xml($id) {
+  protected function get_as_xml($id, $id_shop = null) {
     $resource = $this->resource_name();
     $opt = array(
-      'resource' => $resource,
       'id'       => $id,
+      'id_shop'  => $id_shop,
+      'resource' => $resource,
     );
 
     try {
-      $msg = "Haetaan {$resource} id {$id} Prestasta";
+      $msg = "Haetaan {$resource} id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg);
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Haku {$resource} id {$id} Prestasta epäonnistui!";
+      $msg = "Haku {$resource} id {$id} kaupasta {$id_shop} epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -157,9 +153,10 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function create(array $resource) {
+  protected function create(array $resource, $id_shop = null) {
     $opt = array(
-      'resource' => $this->resource_name()
+      'id_shop'  => $id_shop,
+      'resource' => $this->resource_name(),
     );
 
     try {
@@ -167,10 +164,10 @@ abstract class PrestaClient {
       $opt['postXml'] = $this->generate_xml($resource)->asXML();
       $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin Prestaan uusi " . $this->resource_name());
+      $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti Prestaan epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti kauppaan {$id_shop} epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -186,14 +183,14 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function update($id, array $resource) {
+  protected function update($id, array $resource, $id_shop = null) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
-    $existing_resource = $this->get_as_xml($id);
+    $existing_resource = $this->get_as_xml($id, $id_shop);
     $this->get_empty_schema();
 
     $xml = $this->generate_xml($resource, $existing_resource);
 
-    return $this->update_xml($id, $xml);
+    return $this->update_xml($id, $xml, $id_shop);
   }
 
   /**
@@ -206,16 +203,18 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function update_xml($id, SimpleXMLElement $xml) {
+  protected function update_xml($id, SimpleXMLElement $xml, $id_shop = null) {
     $opt = array(
       'id'       => $id,
+      'id_shop'  => $id_shop,
       'resource' => $this->resource_name(),
     );
 
     try {
       $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
-      $this->logger->log("Päivitettiin " . $this->resource_name() . " id $id");
+
+      $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
     }
     catch (Exception $e) {
       $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";
@@ -235,7 +234,7 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function all($display = array(), $filters = array()) {
+  protected function all($display = array(), $filters = array(), $id_shop = null) {
     $resource = $this->resource_name();
 
     // esim. 'display' => '[name,value]'
@@ -247,8 +246,9 @@ abstract class PrestaClient {
     }
 
     $opt = array(
-      'resource' => $resource,
       'display'  => $display,
+      'id_shop'  => $id_shop,
+      'resource' => $resource,
     );
 
     // esim: 'filter[id]' => '[1|5]'
@@ -311,10 +311,11 @@ abstract class PrestaClient {
    * @return boolean
    * @throws Exception
    */
-  protected function delete($id) {
+  protected function delete($id, $id_shop = null) {
     $opt = array(
-      'resource' => $this->resource_name(),
       'id'       => $id,
+      'id_shop'  => $id_shop,
+      'resource' => $this->resource_name(),
     );
 
     try {
@@ -333,6 +334,7 @@ abstract class PrestaClient {
 
   protected function delete_all() {
     $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
+    # TODO, this only fetches records from the default shop
     $existing_resources = $this->all(array('id'));
     $existing_resources = array_column($existing_resources, 'id');
 
@@ -370,6 +372,14 @@ abstract class PrestaClient {
   }
 
   /**
+   *
+   * @return array
+   */
+  protected function shop_ids() {
+    return $this->shop_ids;
+  }
+
+  /**
    * Sanitezes string for presta link_rewrite column
    *
    * @param string  $string
@@ -377,6 +387,57 @@ abstract class PrestaClient {
    */
   protected function saniteze_link_rewrite($string) {
     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+  }
+
+  protected function set_shop_ids($value) {
+    if ((!is_array($value) or count($value) < 1) and !empty($value)) {
+      throw new Exception('Shop id pitää olla array tai tyhjä');
+    }
+
+    // if we want to reset
+    if (empty($value)) {
+      $this->shop_ids = null;
+      return;
+    }
+
+    if (is_null($this->presta_shops)) {
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+    }
+
+    $valid_values = array();
+
+    // if we want to set, check ids are valid
+    foreach ($value as $shop_id) {
+      $shop = $this->presta_shops->shop_by_id($shop_id);
+
+      if (is_null($shop)) {
+        $this->logger->log("Virheellinen shop_id '{$shop_id}', ei voida lisätä.");
+      }
+      else {
+        $valid_values[] = $shop_id;
+      }
+    }
+
+    // set to null if we don't have any valid values. Presta will add thise to the default store
+    if (count($valid_values) == 0) {
+      $value = null;
+    }
+    else {
+      $value = $valid_values;
+    }
+
+    $this->shop_ids = $value;
+  }
+
+  protected function all_shop_ids() {
+    if (is_null($this->presta_shops)) {
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+    }
+
+    $all = $this->presta_shops->fetch_all();
+    $shops = array_column($all, 'id');
+
+    return $shops;
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

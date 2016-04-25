@@ -54,9 +54,6 @@ class PrestaCategories extends PrestaClient {
           // reset all values, so we'll fetch all again next loop
           $this->all_values = null;
         }
-        elseif ($nimi == $presta_category['name']['language'][0]) {
-          $this->logger->log("Ei muutoksia, ei tehdä mitään");
-        }
         else {
           $id = $presta_category['id'];
           $this->logger->log("Päivitetään kategoria {$id} (node {$tunnus}, parent {$parent_tunnus})");

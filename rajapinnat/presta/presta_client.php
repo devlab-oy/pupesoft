@@ -163,7 +163,10 @@ abstract class PrestaClient {
     );
 
     try {
-      $opt['postXml'] = $this->generate_xml($resource)->asXML();
+      $xml = $this->generate_xml($resource);
+      $xml = $this->remove_read_only_fields($xml);
+      $opt['postXml'] = $xml->asXML();
+
       $response_xml = $this->ws->add($opt);
 
       $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
@@ -175,6 +178,12 @@ abstract class PrestaClient {
     }
 
     return xml_to_array($response_xml);
+  }
+
+  // removes all readonly files from XML
+  // this gets called before update/create. implement this if needed.
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    return $xml;
   }
 
   /**
@@ -211,6 +220,7 @@ abstract class PrestaClient {
     );
 
     try {
+      $xml = $this->remove_read_only_fields($xml);
       $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
 

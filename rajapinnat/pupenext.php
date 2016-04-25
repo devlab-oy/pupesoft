@@ -20,14 +20,19 @@ elseif ($function == '') {
   die ("Et antanut kutsuttavan funktion nimeä!\n");
 }
 
-// lisätään includepathiin pupe-root
-ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . dirname(__FILE__));
-
-$pupe_root_polku = dirname(dirname(__FILE__));
+// otetaan includepath aina rootista
+ini_set("include_path",
+        ini_get("include_path") .
+          PATH_SEPARATOR .
+          dirname(dirname(__FILE__)) .
+          PATH_SEPARATOR .
+          "/usr/share/pear" .
+          PATH_SEPARATOR .
+          "/usr/share/php/");
 
 // otetaan tietokanta connect ja funktiot
-require "{$pupe_root_polku}/inc/connect.inc";
-require "{$pupe_root_polku}/inc/functions.inc";
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $yhtio    = mysql_real_escape_string($yhtio);
 $kuka     = mysql_real_escape_string($kuka);
@@ -46,9 +51,7 @@ ob_end_clean();
 echo $response;
 
 function pupenext_luo_myyntitilausotsikko($params) {
-  global $pupe_root_polku;
-
-  require "{$pupe_root_polku}/tilauskasittely/luo_myyntitilausotsikko.inc";
+  require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
   $customer_id = $params->customer_id;
 
@@ -58,7 +61,7 @@ function pupenext_luo_myyntitilausotsikko($params) {
 }
 
 function pupenext_tilaus_valmis($params) {
-  global $kukarow, $yhtiorow, $pupe_root_polku;
+  global $kukarow, $yhtiorow;
 
   $order_id = $params->order_id;
 
@@ -72,7 +75,7 @@ function pupenext_tilaus_valmis($params) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  require "{$pupe_root_polku}/tilauskasittely/tilaus-valmis.inc";
+  require "tilauskasittely/tilaus-valmis.inc";
 
   $status_raw = ob_get_contents();
 

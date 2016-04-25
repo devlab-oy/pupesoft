@@ -37,7 +37,7 @@ $params   = json_decode($params);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);
 
-echo json_encode(call_user_func($function, $params));
+echo json_encode(call_user_func("pupenext_$function", $params));
 echo "\n";
 
 function pupenext_luo_myyntitilausotsikko($params) {

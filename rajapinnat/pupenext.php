@@ -5,11 +5,10 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 }
 
-$yhtio       = trim($argv[1]);
-$kuka        = trim($argv[2]);
-$kohdetyyppi = trim($argv[3]);
-$kohde       = trim($argv[4]);
-$tuote       = trim($argv[5]);
+$yhtio    = trim($argv[1]);
+$kuka     = trim($argv[2]);
+$function = trim($argv[3]);
+$params   = trim($argv[4]);
 
 if ($yhtio == '') {
   die ("Et antanut yhtiötä!\n");
@@ -17,28 +16,21 @@ if ($yhtio == '') {
 elseif ($kuka == '') {
   die ("Et antanut käyttäjää!\n");
 }
-elseif ($kohdetyyppi == '') {
-  die ("Et antanut kohdetyyppiä!\n");
-}
-elseif ($kohde == '') {
-  die ("Et antanut kohdetta!\n");
-}
-elseif ($tuote == '') {
-  die ("Et antanut tuotetta!\n");
+elseif ($function == '') {
+  die ("Et antanut kutsuttavan funktion nimeä!\n");
 }
 
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
-require "../inc/connect.inc";
-require "../inc/functions.inc";
+require "inc/connect.inc";
+require "inc/functions.inc";
 
-$yhtio       = mysql_real_escape_string($yhtio);
-$kuka        = mysql_real_escape_string($kuka);
-$kohde       = mysql_real_escape_string($kohde);
-$kohdetyyppi = mysql_real_escape_string($kohdetyyppi);
-$tuote       = mysql_real_escape_string($tuote);
+$yhtio    = mysql_real_escape_string($yhtio);
+$kuka     = mysql_real_escape_string($kuka);
+$function = mysql_real_escape_string($function);
+$params   = json_decode($params);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);

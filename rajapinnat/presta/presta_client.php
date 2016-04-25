@@ -9,6 +9,9 @@ abstract class PrestaClient {
   private $shop_ids = null;
   private $presta_shops = null;
 
+  // ids of installed languages
+  protected $languages_table = null;
+
   /**
    *
    * @var PrestaShopWebservice REST-client
@@ -435,6 +438,24 @@ abstract class PrestaClient {
     $shops = array_column($all, 'id');
 
     return $shops;
+  }
+
+  protected function get_language_id($code) {
+    $value = $this->languages_table[$code];
+
+    if (empty($value)) {
+      return null;
+    }
+    else {
+      // substract one, since API key starts from zero
+      return ($value - 1);
+    }
+  }
+
+  public function set_languages_table($value) {
+    if (is_array($value)) {
+      $this->languages_table = $value;
+    }
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

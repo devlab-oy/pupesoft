@@ -43,10 +43,10 @@ class PrestaCategories extends PrestaClient {
         continue;
       }
 
-      $id = $this->find_category_by_tunnus($tunnus);
+      $presta_category = $this->find_category_by_tunnus($tunnus);
 
       try {
-        if ($id === false) {
+        if ($presta_category === false) {
           $this->logger->log("Luodaan kategoria (node {$tunnus}, parent {$parent_tunnus})");
           $this->create($category);
 
@@ -54,6 +54,7 @@ class PrestaCategories extends PrestaClient {
           $this->all_values = null;
         }
         else {
+          $id = $presta_category['id'];
           $this->logger->log("Päivitetään kategoria {$id} (node {$tunnus}, parent {$parent_tunnus})");
           $this->update($id, $category);
         }
@@ -87,9 +88,9 @@ class PrestaCategories extends PrestaClient {
     }
     // otherwise we need to fetch the id of the parent id
     else {
-      $parent = $this->find_category_by_tunnus($parent_tunnus);
+      $presta_category = $this->find_category_by_tunnus($parent_tunnus);
 
-      if ($parent === false) {
+      if ($presta_category === false) {
         $this->logger->log("Isäkategoria $parent_tunnus ei löytynyt!");
         throw new Exception("Isäkategoria $parent_tunnus ei löytynyt!");
       }
@@ -119,7 +120,7 @@ class PrestaCategories extends PrestaClient {
       $presta_value = is_array($meta) ? $meta[0] : $meta;
 
       if ($presta_value == $tunnus) {
-        return $category['id'];
+        return $category;
       }
     }
 
@@ -131,7 +132,7 @@ class PrestaCategories extends PrestaClient {
       return $this->all_values;
     }
 
-    $display = array('id', 'meta_keywords');
+    $display = array('id', 'meta_keywords', 'name');
 
     $this->logger->log("Haetaan kaikki kategoriat");
     $this->all_values = $this->all($display);
@@ -152,7 +153,7 @@ class PrestaCategories extends PrestaClient {
 
       // add presta id to array
       if ($presta_category !== false) {
-        $keep_presta_ids[] = (int) $presta_category->category->id;
+        $keep_presta_ids[] = (int) $presta_category['id'];
       }
     }
 

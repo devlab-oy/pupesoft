@@ -847,16 +847,16 @@ if (!function_exists('rivi_lasku')) {
     }
 
     $_ennakkolaskun_tyyppi_check = ($yhtiorow['ennakkolaskun_tyyppi'] == 'K');
-    $_ennakkolaskun_tyyppi_check = ($_ennakkolaskun_tyyppi_check and $row['clearing'] == 'ENNAKKOLASKU');
+    $_ennakkolaskun_tyyppi_check = ($_ennakkolaskun_tyyppi_check and $laskurow['clearing'] == 'ENNAKKOLASKU');
 
     if ($_ennakkolaskun_tyyppi_check) {
-      if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
 
-        if ($yhtiorow['ennakkomaksu_tuotenumero'] == $row['tuoteno']) {
-          $row['tuoteno'] = $matches[0];
-          $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
-        }
+      // Ennakkomaksu_tuotenumerolle tehdään tuotenumero ja nimitys kuin olisi myyty normaalisti
+      if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
+        $row['tuoteno'] = $matches[0];
+        $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
       }
+
       if (strpos($row["kommentti"], "100%") !== false) {
         $_ennakkoteksti = t("Ennakkolasku");
         $row["kommentti"] = preg_replace("/{$_ennakkoteksti}.*100\%/", '', $row["kommentti"]);
@@ -3075,7 +3075,6 @@ if (!function_exists("tulosta_lasku")) {
               lasku.viesti laskuviesti,
               lasku.asiakkaan_tilausnumero,
               lasku.luontiaika tilauspaiva,
-              lasku.clearing,
               CONCAT(tuote.tullinimike1, IF(tuote.tullinimike2 NOT IN ('', '00', '0'), tuote.tullinimike2, '')) AS tullinimike,
               if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
               if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
@@ -3109,7 +3108,7 @@ if (!function_exists("tulosta_lasku")) {
               and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               and tilausrivi.varattu+tilausrivi.kpl != 0
               $where
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
               ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $result = pupe_query($query);
 

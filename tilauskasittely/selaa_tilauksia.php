@@ -502,11 +502,16 @@ if (mysql_num_rows($result) > 0) {
   }
 
   if ($arvo != 0 or $summa != 0) {
-    echo "<tr>";
-    $i = 3;
+    if ($toim == "MYYNTI_KATE") {
+      $i = 3;
+    }
+    else {
+      $i = 2;
+    }
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
       $i = 6;
     }
+    echo "<tr>";
     echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
     echo "<th align='right'>".sprintf('%.02f', $summa)."</td>";
     echo "<th align='right'>".sprintf('%.02f', $arvo)."</td>";
@@ -516,9 +521,9 @@ if (mysql_num_rows($result) > 0) {
     if ($kate < 0) {
       $kateprosyht = abs($kateprosyht) * -1;
     }
-
-    echo "<th align='right'>".sprintf('%.02f', $kateprosyht)."</td>";
-
+    if ($toim == "MYYNTI_KATE") {
+      echo "<th align='right'>".sprintf('%.02f', $kateprosyht)."</td>";
+    }
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
       echo "<th align='right'>&nbsp;</td>";
       echo "<th align='right'>&nbsp;$ostohinta_yhteesa</td>";

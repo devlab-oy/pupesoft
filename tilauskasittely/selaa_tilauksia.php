@@ -384,7 +384,7 @@ if (mysql_num_rows($result) > 0) {
 
   for ($i = 0; $i < mysql_num_fields($result); $i++) {
     if (mysql_field_name($result, $i) == "hankintakulut") {
-      echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th>";      }
+      echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Pyöristyserot")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th><th>".t("Saapumisen kulut")."</th>";      }
     else {
       echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }
@@ -397,9 +397,11 @@ if (mysql_num_rows($result) > 0) {
   $teemita = "";
   $osuus_kululaskuista_yhteensa = "";
   $osuus_eturahdista_yhteensa = "";
+  $osuus_pyoristyseroista_yhteensa = "";
   $ostohinta_yhteesa = "";
   $aputullimaara_yhteensa = "";
   $rivinlisakulu_yhteensa = "";
+  $saapumisenkulut_yhteensa = "";
 
   if ($tee == "kk") {
     $teemita = "paiva";
@@ -438,17 +440,25 @@ if (mysql_num_rows($result) > 0) {
         echo "<td align='right'>$row[$i]</td>";
       }
       elseif (mysql_field_name($result, $i) == "hankintakulut") {
-        $osuus_kululaskuista = $osuus_eturahdista = $tulliprossa = $aputullimaara = $rivinlisakulu = "";
+        $osuus_kululaskuista = $osuus_eturahdista = $osuus_pyoristyseroista = $tulliprossa = $aputullimaara = $rivinlisakulu = $saapumisenkulut ="";
 
         if (strpos($row[$i], "#") !== FALSE) {
-          list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $row[$i]);
+          list($osuus_kululaskuista, $osuus_eturahdista, $osuus_pyoristyseroista, $tulliprossa, $aputullimaara, $rivinlisakulu, $saapumisenkulut) = explode("#", $row[$i]);
           $osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
           $osuus_eturahdista_yhteensa += $osuus_eturahdista;
+          $osuus_pyoristyseroista_yhteensa += $osuus_pyoristyseroista;
           $aputullimaara_yhteensa += $aputullimaara;
           $rivinlisakulu_yhteensa += $rivinlisakulu;
+          $saapumisenkulut_yhteensa += $saapumisenkulut;
         }
 
-        echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$osuus_pyoristyseroista $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$tulliprossa %</td>";
+        echo "<td align='right'>$aputullimaara $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+        echo "<td align='right'>$saapumisenkulut $yhtiorow[valkoodi]</td>";
       }
       elseif (mysql_field_name($result, $i) == "tuoteno") {
         echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></td>";
@@ -508,8 +518,8 @@ if (mysql_num_rows($result) > 0) {
     else {
       $i = 2;
     }
-    if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
-      $i = 6;
+    if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $osuus_pyoristyseroista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "" or $saapumisenkulut_yhteensa != "") {
+      $i = 8;
     }
     echo "<tr>";
     echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
@@ -524,15 +534,17 @@ if (mysql_num_rows($result) > 0) {
     if ($toim == "MYYNTI_KATE") {
       echo "<th align='right'>".sprintf('%.02f', $kateprosyht)."</td>";
     }
-    if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
+    if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $osuus_pyoristyseroista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "" or $saapumisenkulut_yhteensa != "") {
       echo "<th align='right'>&nbsp;</td>";
       echo "<th align='right'>&nbsp;$ostohinta_yhteesa</td>";
       echo "<th align='right'>&nbsp;</td>";
       echo "<th align='right'>".sprintf('%.02f', $osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
       echo "<th align='right'>".sprintf('%.02f', $osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $osuus_pyoristyseroista_yhteensa)." $yhtiorow[valkoodi]</td>";
       echo "<th align='right'>&nbsp;</td>";
       echo "<th align='right'>".sprintf('%.02f', $aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
       echo "<th align='right'>".sprintf('%.02f', $rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $saapumisenkulut_yhteensa)." $yhtiorow[valkoodi]</td>";
     }
     echo "</tr>";
   }

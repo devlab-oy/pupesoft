@@ -846,11 +846,17 @@ if (!function_exists('rivi_lasku')) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
     }
 
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
+    $_ennakkolaskun_tyyppi_check = ($yhtiorow['ennakkolaskun_tyyppi'] == 'K');
+    $_ennakkolaskun_tyyppi_check = ($_ennakkolaskun_tyyppi_check and $laskurow['clearing'] == 'ENNAKKOLASKU');
+
+    if ($_ennakkolaskun_tyyppi_check) {
+
+      // Ennakkomaksu_tuotenumerolle tehd‰‰n tuotenumero ja nimitys kuin olisi myyty normaalisti
       if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
         $row['tuoteno'] = $matches[0];
         $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
       }
+
       if (strpos($row["kommentti"], "100%") !== false) {
         $_ennakkoteksti = t("Ennakkolasku");
         $row["kommentti"] = preg_replace("/{$_ennakkoteksti}.*100\%/", '', $row["kommentti"]);

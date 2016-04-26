@@ -35,7 +35,7 @@ class PrestaManufacturers extends PrestaClient {
       $xml = $existing_record;
     }
 
-    $xml->manufacturer->name = $record['name'];
+    $xml->manufacturer->name = $this->xml_value($record['name']);
     $xml->manufacturer->active = 1;
 
     return $xml;

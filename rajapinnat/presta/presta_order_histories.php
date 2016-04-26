@@ -25,8 +25,4 @@ class PrestaOrderHistories extends PrestaClient {
 
     return $xml;
   }
-
-  public function create(array $resource) {
-    parent::create($resource);
-  }
 }

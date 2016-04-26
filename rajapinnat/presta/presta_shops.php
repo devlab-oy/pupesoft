@@ -3,15 +3,14 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaShops extends PrestaClient {
-
-  const RESOURCE = 'shops';
+  private $all_shops = null;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'shops';
   }
 
   /**
@@ -21,34 +20,18 @@ class PrestaShops extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
-
   protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
     throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
   }
 
-  /**
-   * This function updates the first shops category_id
-   * This is used in PrestaCategories sync_categories();
-   *
-   * @param string  $category_id
-   */
-  public function update_shops_category($category_id) {
-    try {
-      $shop = $this->first_shop();
-      $shop_id = $shop['id'];
-
-      $shop = $this->get_as_xml($shop_id);
-
-      $shop->shop->id_category = $category_id;
-
-      $this->update_xml($shop_id, $shop);
+  public function shop_by_id($value) {
+    foreach ($this->fetch_all() as $record) {
+      if ($record['id'] == $value) {
+        return $record;
+      }
     }
-    catch (Exception $e) {
-      $msg = "update_shops_category category_id: {$category_id} epäonnistui";
-      $this->logger->log($msg, $e);
 
-      throw $e;
-    }
+    return null;
   }
 
   /**
@@ -58,17 +41,22 @@ class PrestaShops extends PrestaClient {
    * @throws Exception
    */
   public function first_shop() {
-    try {
-      $shops = $this->all();
-      $shop = $shops[0];
-    }
-    catch (Exception $e) {
-      $msg = "first_shop haku epäonnistui";
-      $this->logger->log($msg, $e);
-
-      throw $e;
-    }
+    $shops = $this->fetch_all();
+    $shop = $shops[0];
 
     return $shop;
+  }
+
+  public function fetch_all() {
+    if (isset($this->all_shops)) {
+      return $this->all_shops;
+    }
+
+    $this->logger->log("Haetaan kaikki kaupat");
+
+    $display = array('id', 'name');
+    $this->all_shops = $this->all($display);
+
+    return $this->all_shops;
   }
 }

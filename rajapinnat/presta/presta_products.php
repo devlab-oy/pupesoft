@@ -11,7 +11,6 @@ class PrestaProducts extends PrestaClient {
   private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
-  private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
@@ -23,10 +22,8 @@ class PrestaProducts extends PrestaClient {
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key, $presta_home_category_id) {
-    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
-    $this->presta_home_category_id = $presta_home_category_id;
-
+  public function __construct($url, $api_key) {
+    $this->presta_categories = new PrestaCategories($url, $api_key);
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
@@ -37,6 +34,14 @@ class PrestaProducts extends PrestaClient {
 
   protected function resource_name() {
     return 'products';
+  }
+
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    unset($xml->product->manufacturer_name);
+    unset($xml->product->quantity);
+    unset($xml->product->position_in_category);
+
+    return $xml;
   }
 
   /**
@@ -51,13 +56,7 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       $xml = $existing_product;
-
-      unset($xml->product->position_in_category);
-      unset($xml->product->manufacturer_name);
-      unset($xml->product->quantity);
     }
-
-    unset($xml->product->position_in_category);
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
@@ -316,7 +315,7 @@ class PrestaProducts extends PrestaClient {
       return null;
     }
 
-    $category_id = $response->category->id;
+    $category_id = $response['id'];
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
@@ -422,18 +421,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  private function get_language_id($code) {
-    $value = $this->languages_table[$code];
-
-    if (empty($value)) {
-      return null;
-    }
-    else {
-      // substract one, since API key starts from zero
-      return ($value - 1);
-    }
-  }
-
   private function delete_all_unnecessary_products() {
     $pupesoft_products = $this->pupesoft_all_products;
 
@@ -488,7 +475,7 @@ class PrestaProducts extends PrestaClient {
 
     foreach ($pupesoft_products as $product_row) {
       $sku = $product_row['tuoteno'];
-      $saldo = $product_row['saldo'];
+      $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
       $status = $product_row['status'];
 
       $product_id = array_search($sku, $this->all_skus());
@@ -524,13 +511,6 @@ class PrestaProducts extends PrestaClient {
     return false;
   }
 
-  private function xml_value($value) {
-    $value = utf8_encode($value);
-    $value = htmlspecialchars($value, ENT_IGNORE);
-
-    return $value;
-  }
-
   public function set_removable_fields($fields) {
     $this->_removable_fields = $fields;
   }
@@ -557,12 +537,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  public function set_languages_table($value) {
-    if (is_array($value)) {
-      $this->languages_table = $value;
-    }
-  }
-
   public function set_visibility_type($value) {
     $this->visibility_type = $value;
   }
@@ -571,5 +545,9 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->features_table = $value;
     }
+  }
+
+  public function set_home_category_id($value) {
+    $this->presta_home_category_id = $value;
   }
 }

@@ -3074,6 +3074,7 @@ if (!function_exists("tulosta_lasku")) {
               if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
               if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
               tuote.myyntihinta,
+              lasku.tilausyhteyshenkilo,
               min(tilausrivi.hyllyalue) hyllyalue,
               min(tilausrivi.hyllynro) hyllynro,
               min(tilausrivi.keratty) keratty,
@@ -3092,7 +3093,6 @@ if (!function_exists("tulosta_lasku")) {
               group_concat(tilausrivi.tunnus) rivitunnukset,
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
-              lasku.tilausyhteyshenkilo,
               $lisa
               $sorttauskentta
               FROM tilausrivi

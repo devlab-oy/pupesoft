@@ -1935,7 +1935,7 @@ echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
 if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
   echo "<td class='back'>";
   echo "<input type='checkbox' name='poistuvat_tuotteet' /> ";
-  echo t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
   echo "</td>";
 }
 echo "</form>";
@@ -1965,7 +1965,7 @@ echo "</td>";
 if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
   echo "<td class='back'>";
   echo "<input type='checkbox' name='poistuvat_tuotteet' /> ";
-  echo t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
   echo "</td>";
 }
 

@@ -1130,9 +1130,11 @@ $chk = "";
 if ($erikoisvarastot != "") $chk = "checked";
 echo "<tr><th>".t("Älä huomioi erikoisvarastoja")."</th><td colspan='3'><input type='checkbox' name='erikoisvarastot' $chk></td></tr>";
 
-$chk = "";
-if ($ei_vuosikulutusta != "") $chk = "checked";
-echo "<tr><th>".t("Älä huomioi vuosikulutusta")."</th><td colspan='3'><input type='checkbox' name='ei_vuosikulutusta' {$chk}></td></tr>";
+if ($toim == "") {
+  $chk = "";
+  if ($ei_vuosikulutusta != "") $chk = "checked";
+  echo "<tr><th>".t("Älä huomioi vuosikulutusta")."</th><td colspan='3'><input type='checkbox' name='ei_vuosikulutusta' {$chk}></td></tr>";
+}
 
 $chk = "";
 if ($poistetut != "") $chk = "checked";

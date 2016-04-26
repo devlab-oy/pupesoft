@@ -90,10 +90,16 @@ function pupenext_tilaus_valmis($params) {
 function capture_status() {
   $status_raw = ob_get_contents();
 
+  if (empty($status_raw)) return null;
+
   $status_html = new DOMDocument();
   $status_html->loadHTML($status_raw);
 
-  $status = $status_html->getElementsByTagName('font')->item(0)->textContent;
+  $elements = $status_html->getElementsByTagName('font');
+
+  if ($elements->length < 1) return null;
+
+  $status = $elements->item(0)->textContent;
 
   return $status;
 }

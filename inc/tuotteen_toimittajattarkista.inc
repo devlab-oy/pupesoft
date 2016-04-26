@@ -68,7 +68,7 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
           $toimittaja_haku = pupesoft_cleanstring($t[$i]);
 
           // Kokeillaan ovttunnuksella
-          $query = "SELECT *
+          $query = "SELECT toimi.*, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
                     FROM toimi
                     WHERE yhtio    = '$kukarow[yhtio]'
                     AND tyyppi    != 'P'
@@ -78,7 +78,7 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
 
           // Kokeillaan ytunnuksella
           if (mysql_num_rows($sresult) != 1) {
-            $query = "SELECT *
+            $query = "SELECT toimi.*, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
                       FROM toimi
                       WHERE yhtio  = '$kukarow[yhtio]'
                       AND tyyppi  != 'P'
@@ -89,7 +89,7 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
 
           // Kokeillaan toimittajanumerolla
           if (mysql_num_rows($sresult) != 1) {
-            $query = "SELECT *
+            $query = "SELECT toimi.*, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
                       FROM toimi
                       WHERE yhtio        = '$kukarow[yhtio]'
                       AND tyyppi        != 'P'
@@ -100,7 +100,7 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
 
           // Kokeillaan vanhalla mallilla
           if (mysql_num_rows($sresult) != 1) {
-            $query = "SELECT *
+            $query = "SELECT toimi.*, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
                       from toimi
                       where yhtio  = '$kukarow[yhtio]'
                       and tyyppi  != 'P'
@@ -113,6 +113,8 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
             $srow = mysql_fetch_assoc($sresult);
             $liitostunnus_static = $srow["tunnus"];
             $t[$i] = $liitostunnus_static;
+            $maa_static = $srow['maa'];
+            $valuutta_static = $srow['oletus_valkoodi'];
           }
           elseif (mysql_num_rows($sresult) > 1) {
 
@@ -143,18 +145,6 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
 
         if (mysql_num_rows($sresult) > 0) {
           $virhe[$i] = t("Tämä toimittaja on jo tällä tuotteella")."!";
-        }
-        else {
-          $query = "SELECT oletus_valkoodi, IF(maa_lahetys != '', maa_lahetys, maa) AS maa
-                    from toimi
-                    where yhtio  = '{$kukarow['yhtio']}'
-                    and tyyppi  != 'P'
-                    and tunnus   = '{$liitostunnus_static}'";
-          $toimires = pupe_query($query);
-          $toimirow = mysql_fetch_assoc($toimires);
-
-          $maa_static = $toimirow['maa'];
-          $valuutta_static = $toimirow['oletus_valkoodi'];
         }
       }
 

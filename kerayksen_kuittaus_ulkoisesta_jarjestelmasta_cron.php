@@ -53,6 +53,8 @@ $path = substr($path, -1) != '/' ? $path.'/' : $path;
 
 $error_email = trim($argv[3]);
 
+$hhv = !empty($argv[4]) ? true : false;
+
 if ($handle = opendir($path)) {
 
   while (false !== ($file = readdir($handle))) {
@@ -80,6 +82,25 @@ if ($handle = opendir($path)) {
 
           list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
           $toimaika = "{$vv}-{$kk}-{$pp}";
+
+          if (isset($xml->CustPackingSlip->DeliveryDate)) {
+            #<DeliveryDate>20-04-2016</DeliveryDate>
+            list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
+            $toimaika = "{$vv}-{$kk}-{$pp}";
+          }
+          elseif (isset($xml->CustPackingSlip->Deliverydate)) {
+            #HHV-case
+            #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
+            $vv = substr($xml->CustPackingSlip->Deliverydate, 0, 4);
+            $kk = substr($xml->CustPackingSlip->Deliverydate, 5, 2);
+            $pp = substr($xml->CustPackingSlip->Deliverydate, 8, 2);
+
+            $toimaika = "{$vv}-{$kk}-{$pp}";
+          }
+          else {
+            $toimaika = '0000-00-00';
+          }
+
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
           $query = "SELECT *
@@ -96,7 +117,15 @@ if ($handle = opendir($path)) {
           $kerayspoikkeama = array();
 
           if (mysql_num_rows($laskures) > 0) {
-            foreach ($xml->CustPackingSlip->Lines as $line) {
+
+            if ($hhv) {
+              $lines = $xml->Lines;
+            }
+            else {
+              $lines = $xml->CustPackingSlip->Lines;
+            }
+
+            foreach ($lines as $line) {
 
               $tilausrivin_tunnus = (int) $line->TransId;
               $eankoodi = mysql_real_escape_string($line->ItemNumber);

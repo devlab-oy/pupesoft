@@ -677,7 +677,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   $ohinta = round($ohinta+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
   // Osuus kululaskuista # Osuus eturahdista
-  $hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6);
+  $hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 6)."#".round($laskurow['pyoristys_erot'] * $laskurow['vienti_kurssi'] * $osuus, 6);
 
   $tulliprossa   = 0;
   $aputullimaara = 0;
@@ -701,7 +701,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   }
 
   // Tulli% # Aputullim‰‰r‰
-  $hankintakulut .= "#".sprintf('%.02f', $tulliprossa)."#".sprintf('%.02f', $aputullimaara)."#".sprintf('%.02f', $kuluprosenttiosuus);
+  $hankintakulut .= "#".sprintf('%.02f', $tulliprossa)."#".sprintf('%.02f', $aputullimaara);
   $kuluteksti = "";
 
   // lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
@@ -740,13 +740,30 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $varastoon_msg .= "</tr>";
     continue;
   }
-  echo "747: $tilrivirow[kate], $kuluprosenttiosuus <br><br>";
-  // Rivinlis‰kulu
+
+  $hankintakulut .= "#$tilrivirow[kate]";
+
+  // Kuluprosentteja hankintakuluihin talteen
   if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
+    $kuluprosenttiosuus = round($kuluprosenttiosuus, 6);
     $hankintakulut .= "#$kuluprosenttiosuus";
   }
+  elseif ($laskurow["saldo_maksettu"] == 0) { // Ei saa olla kululaskuja liitettyn‰
+
+    // jos kulusumma niin k‰ytet‰‰n sit‰
+    if ($laskurow["rahti_huolinta"] != 0) {
+      $kulusumma = $laskurow["rahti_huolinta"] * $osuus;
+      $hankintakulut .= "#$kulusumma";
+    }
+    else {
+      // t‰ss‰ on k‰ytetty kuluprosenttia
+      $kuluosuuslaskenta = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+      $kuluosuuslaskenta = round($osuus * $kuluosuuslaskenta * ($laskurow['rahti'] / 100), 6);
+      $hankintakulut .= "#$kuluosuuslaskenta";
+    }
+  }
   else {
-    $hankintakulut .= "#$tilrivirow[kate]";
+    $hankintakulut .= "#0.00";
   }
 
   $rivihin = round($ohinta, $yhtiorow['hintapyoristys']);  // tilausrivin rivihinta talteen

@@ -222,29 +222,29 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
         echo "<font class='error'>",t("%s on pakollinen.", '', 'END_REASON'),"</font><br>";
         $tee = '';
       }
-    }
 
-    if (!empty($haas_qty)) {
+      if (!empty($haas_qty)) {
 
-      if (!is_numeric($haas_qty)) {
-        echo "<font class='error'>",t("Kappalem‰‰r‰n t‰ytyy olla numero."),"</font><br>";
-        $tee = '';
+        if (!is_numeric($haas_qty)) {
+          echo "<font class='error'>",t("Kappalem‰‰r‰n t‰ytyy olla numero."),"</font><br>";
+          $tee = '';
+        }
+
+        if (strlen($haas_qty) > 2) {
+          echo "<font class='error'>",t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."),"</font><br>";
+          $tee = '';
+        }
       }
 
-      if (strlen($haas_qty) > 2) {
-        echo "<font class='error'>",t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."),"</font><br>";
-        $tee = '';
-      }
-    }
-
-    if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
-      if (!checkdate($_mm, $_dd, $_yy)) {
-        echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
-        $tee = '';
-      }
-      if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
-        echo "<font class='error'>",t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."),"</font><br>";
-        $tee = '';
+      if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
+        if (!checkdate($_mm, $_dd, $_yy)) {
+          echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
+          $tee = '';
+        }
+        if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
+          echo "<font class='error'>",t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."),"</font><br>";
+          $tee = '';
+        }
       }
     }
   }

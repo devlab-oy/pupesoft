@@ -28,7 +28,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   fwrite($toot, ";END_REASON");
 
   if (!empty($crm_haas['call_type'])) {
-    $haaslisa ." AND kalenteri.kentta02 != '' ";
+    $haaslisa .= " AND kalenteri.kentta02 != '' ";
   }
   if (!empty($crm_haas['opportunity'])) {
     $haaslisa .= " AND kalenteri.kentta03 != '' ";

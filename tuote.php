@@ -1930,7 +1930,16 @@ echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
+
+if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
+  echo "<td class='back'>";
+  echo "<input type='checkbox' name='poistuvat_tuotteet' /> ";
+  echo t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo "</td>";
+}
+echo "</form>";
+
 echo "</tr>";
 
 echo "<tr>";
@@ -1951,8 +1960,16 @@ echo "</td>";
 
 echo "<td class='back'>";
 echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
-echo "</form>";
 echo "</td>";
+
+if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
+  echo "<td class='back'>";
+  echo "<input type='checkbox' name='poistuvat_tuotteet' /> ";
+  echo t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo "</td>";
+}
+
+echo "</form>";
 
 //Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 if ($ulos == '' and $tee == 'Z') {

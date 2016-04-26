@@ -5,10 +5,10 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 }
 
-$yhtio    = trim($argv[1]);
-$kuka     = trim($argv[2]);
-$function = trim($argv[3]);
-$params   = trim($argv[4]);
+$yhtio    = isset($argv[1]) ? trim($argv[1]) : null;
+$kuka     = isset($argv[2]) ? trim($argv[2]) : null;
+$function = isset($argv[3]) ? trim($argv[3]) : null;
+$params   = isset($argv[4]) ? trim($argv[4]) : null;
 
 if (empty($yhtio)) {
   die ("Et antanut yhtiötä!\n");
@@ -22,13 +22,11 @@ elseif (empty($function)) {
 
 // otetaan includepath aina rootista
 ini_set("include_path",
-        ini_get("include_path") .
-          PATH_SEPARATOR .
-          dirname(dirname(__FILE__)) .
-          PATH_SEPARATOR .
-          "/usr/share/pear" .
-          PATH_SEPARATOR .
-          "/usr/share/php/");
+  ini_get("include_path")    . PATH_SEPARATOR .
+  dirname(dirname(__FILE__)) . PATH_SEPARATOR .
+  "/usr/share/pear"          . PATH_SEPARATOR .
+  "/usr/share/php/"          . PATH_SEPARATOR
+);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";

@@ -35,11 +35,13 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       $res = pupe_query($query);
       $row = mysql_fetch_assoc($res);
       $val = $row['tarkenne'];
+      $lang = $row['kieli'];
 
       echo "<input type='hidden' id='avainsanan_tunnus' name='avainsanan_tunnus' value='{$avainsanan_tunnus}' />";
     }
 
-    echo "<input type='text' id='keywords_value' name='keywords_value' value='{$val}' />";
+    echo "<input type='text' id='keywords_value' name='keywords_value' value='{$val}' /><br>";
+    echo "<input type='text' id='keywords_language' name='keywords_language' value='{$lang}' />";
 
     exit;
   }
@@ -61,7 +63,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
       }
 
-      echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
+      echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne] $dp_row[kieli]";
 
 
       echo "<br />";
@@ -139,7 +141,8 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
             $query = "UPDATE dynaaminen_puu_avainsanat SET
                       avainsana   = '{$laji}',
-                      tarkenne    = '{$avainsana}'
+                      tarkenne    = '{$avainsana}',
+                      kieli       = '{$kieli}'
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tunnus  = '{$avainsanan_tunnus}'";
             $updres = pupe_query($query);
@@ -160,7 +163,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
               $query = "INSERT INTO dynaaminen_puu_avainsanat SET
                         yhtio        = '{$kukarow['yhtio']}',
                         liitostunnus = '{$nodeid}',
-                        kieli        = '{$kukarow['kieli']}',
+                        kieli        = '{$kieli}',
                         laji         = '{$toim}',
                         avainsana    = '{$laji}',
                         tarkenne     = '{$avainsana}',
@@ -381,6 +384,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       var addboxbutton_keywords  = jQuery("#showaddbox_keywords");
       var keywords_category     = jQuery("#keywords_category");
       var keywords_value       = jQuery("#keywords_value");
+      var keywords_language    = jQuery("#keywords_language");
 
       addboxbutton.click(function() {
         tee.val("lisaa");
@@ -397,6 +401,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         addboxbutton_keywords.hide();
         addboxbutton_keywords.after(nodebox_keywords);
         jQuery('#keywords_value').hide();
+        jQuery('#keywords_language').hide();
         nodebox_keywords.show();
         return false;
       });
@@ -445,6 +450,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       jQuery("#keywordsform").live('submit', function() {
         params["laji"]       = jQuery("#keywords_category option:selected").html();
         params["avainsana"]   = jQuery("#keywords_value").val();
+        params["kieli"]       = jQuery("#keywords_language").val();
         params["tee"]      = 'lisaa_avainsana';
         params["toim"]      = jQuery("#toim").val();
 
@@ -528,7 +534,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
         }
 
-        echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne]";
+        echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne] $dp_row[kieli]";
 
         echo "<br />";
       }

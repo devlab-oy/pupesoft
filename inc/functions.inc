@@ -27476,8 +27476,18 @@ if (!function_exists('posten_outbounddelivery')) {
               tuote.eankoodi
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu + tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+              JOIN tilausrivi ON (
+                tilausrivi.yhtio = lasku.yhtio AND
+                tilausrivi.otunnus = lasku.tunnus AND
+                (tilausrivi.varattu + tilausrivi.kpl) > 0 AND
+                tilausrivi.tyyppi IN ('L', 'G') AND
+                tilausrivi.var != 'J'
+              )
+              JOIN tuote ON (
+                tuote.yhtio = tilausrivi.yhtio AND
+                tuote.tuoteno = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
+              )
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
     $loopres = pupe_query($query);

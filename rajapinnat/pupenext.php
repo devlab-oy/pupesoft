@@ -10,13 +10,13 @@ $kuka     = trim($argv[2]);
 $function = trim($argv[3]);
 $params   = trim($argv[4]);
 
-if ($yhtio == '') {
+if (empty($yhtio)) {
   die ("Et antanut yhtiötä!\n");
 }
-elseif ($kuka == '') {
+elseif (empty($kuka)) {
   die ("Et antanut käyttäjää!\n");
 }
-elseif ($function == '') {
+elseif (empty($function)) {
   die ("Et antanut kutsuttavan funktion nimeä!\n");
 }
 
@@ -51,12 +51,28 @@ ob_end_clean();
 echo $response;
 
 function pupenext_luo_myyntitilausotsikko($params) {
+  global $kukarow, $yhtiorow;
+
   require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
-  $customer_id = $params->customer_id;
+  $customer_id = (int) $params->customer_id;
+
+  if (empty($customer_id)) {
+    return null;
+  }
+
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$customer_id}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
 
   $sales_order_id = luo_myyntitilausotsikko('RIVISYOTTO', $customer_id);
-
   $status = capture_status();
 
   return array(
@@ -68,15 +84,24 @@ function pupenext_luo_myyntitilausotsikko($params) {
 function pupenext_tilaus_valmis($params) {
   global $kukarow, $yhtiorow;
 
-  $order_id = $params->order_id;
+  $order_id = (int) $params->order_id;
+
+  if (empty($order_id)) {
+    return null;
+  }
 
   $kukarow['kesken'] = $order_id;
 
   $query = "SELECT *
             FROM lasku
-            WHERE tunnus = {$order_id}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$order_id}
             LIMIT 1";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
 
   $laskurow = mysql_fetch_assoc($result);
 

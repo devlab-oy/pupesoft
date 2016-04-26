@@ -42,6 +42,10 @@ $params   = json_decode($params);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow($kuka, $yhtiorow['yhtio']);
 
+if (empty($kukarow)) {
+  die ("Käyttäjää ei löytynyt!\n");
+}
+
 ob_start();
 
 $response = json_encode(call_user_func("pupenext_$function", $params));

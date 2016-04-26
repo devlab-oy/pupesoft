@@ -8921,7 +8921,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and {$hakukentta} like ('$haku%') ";
+        $haku_query .= "and {$hakukentta} like ('%$haku%') ";
       }
 
       if ($hakukentta != "asiakkaan_tilausnumero") {
@@ -31571,7 +31571,7 @@ if (!function_exists("tee_ennakkolasku")) {
         pupe_query($query);
       }
 
-      // Jos alkuperäisellä tilauksella on käsinsyötetty viite niin kopsataan se ennakkolaskulle
+      // Jos alkuperäisellä tilauksella on käsinsyötetty viite tai viesti niin kopsataan se ennakkolaskulle
       if (!empty($laskurow["viite"])) {
         $query  = "UPDATE lasku
                    SET viite = '{$laskurow["viite"]}'

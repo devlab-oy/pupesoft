@@ -250,8 +250,8 @@ elseif ($otunnus > 0) {
   if ($row["laskunro"] > 0) {
     $laskunro = $row["laskunro"];
   }
-  if ($row["jaksotettu"] > 0) {
-    $jaksotettu = $row["jaksotettu"];
+  if ($row["jaksotettu"] <> 0) {
+    $jaksotettu = abs($row["jaksotettu"]);
   }
   $ytunnus   = $row["ytunnus"];
 
@@ -305,8 +305,8 @@ elseif ($laskunro > 0) {
     $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
-    if ($row["jaksotettu"] > 0) {
-      $jaksotettu = $row["jaksotettu"];
+    if ($row["jaksotettu"] <> 0) {
+      $jaksotettu = abs($row["jaksotettu"]);
     }
 
     $laskunro     = $row["laskunro"];
@@ -338,8 +338,8 @@ elseif ($astilnro != '' or $tilausviite != '') {
     $otunnus = $row["tunnus"];
   }
   
-  if ($row["jaksotettu"] > 0) {
-    $jaksotettu = $row["jaksotettu"];
+  if ($row["jaksotettu"] <> 0) {
+    $jaksotettu = abs($row["jaksotettu"]);
   }
   
   $ytunnus   = $row["ytunnus"];
@@ -458,7 +458,7 @@ if ($ytunnus != '') {
                  WHERE lasku.$logistiikka_yhtiolisa
                  and lasku.liitostunnus = '$litunn'
                  and $til
-                 and lasku.jaksotettu='$jaksotettu'";
+                 and (lasku.jaksotettu='{$jaksotettu}' or lasku.jaksotettu='-{$jaksotettu}'";
     }
     elseif ($laskunro > 0) {
       $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio

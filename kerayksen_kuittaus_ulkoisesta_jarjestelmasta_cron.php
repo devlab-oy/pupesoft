@@ -161,8 +161,15 @@ if ($handle = opendir($path)) {
                                       tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
               }
 
+              if ($hhv) {
+                $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
+              }
+              else {
+                $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
+              }
+
               $query = "UPDATE tilausrivi
-                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                         SET tilausrivi.keratty = '{$kukarow['kuka']}',
                         tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
                         {$toimitettu_lisa}

@@ -543,7 +543,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
         }
 
-        echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne] $dp_row[kieli]";
+        echo "<span style='font-weight: bold;'>{$_selitetark}</span> &raquo; $dp_row[tarkenne] ($dp_row[kieli])";
 
         echo "<br />";
       }

@@ -80,9 +80,6 @@ if ($handle = opendir($path)) {
           // Fallback to pickinglist id
           if ($otunnus == 0) $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
-          list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
-          $toimaika = "{$vv}-{$kk}-{$pp}";
-
           if (isset($xml->CustPackingSlip->DeliveryDate)) {
             #<DeliveryDate>20-04-2016</DeliveryDate>
             list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);

@@ -113,15 +113,13 @@ if ($handle = opendir($path)) {
           if (mysql_num_rows($laskures) > 0) {
 
             if ($hhv) {
-              $lines = $xml->Lines;
+              $lines = $xml->Lines->Line;
             }
             else {
               $lines = $xml->CustPackingSlip->Lines;
             }
 
             foreach ($lines as $line) {
-
-              if ($hhv) $line = $line->Line;
 
               $tilausrivin_tunnus = (int) $line->TransId;
               $eankoodi = mysql_real_escape_string($line->ItemNumber);

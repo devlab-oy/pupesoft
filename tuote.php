@@ -3182,21 +3182,19 @@ if ($tee == 'Z') {
 
 if ($ulos != "") {
 
-  if ($yhtiorow['poistuvat_tuotteet'] == 'X') {
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='toim' value='{$toim}'>";
-    echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-    echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
-    echo "<input type='hidden' name='tee' value='Z'>";
-    echo "<table><tr>";
-    echo "<td class='back'>";
-    $chk = !empty($poistuvat_tuotteet) ? 'checked' : '';
-    echo "<input type='checkbox' name='poistuvat_tuotteet' {$chk} onchange='submit();' /> ";
-    echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
-    echo "</td>";
-    echo "</tr></table>";
-    echo "</form>";
-  }
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='toim' value='{$toim}'>";
+  echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+  echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
+  echo "<input type='hidden' name='tee' value='Z'>";
+  echo "<table><tr>";
+  echo "<td class='back'>";
+  $chk = !empty($poistuvat_tuotteet) ? 'checked' : '';
+  echo "<input type='checkbox' name='poistuvat_tuotteet' {$chk} onchange='submit();' /> ";
+  echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo "</td>";
+  echo "</tr></table>";
+  echo "</form>";
 
   echo "<form method='post' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";

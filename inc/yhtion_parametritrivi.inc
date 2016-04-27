@@ -2312,18 +2312,6 @@ if ($fieldname == "viitteen_kasinsyotto") {
   $jatko = 0;
 }
 
-if ($fieldname == "poistuvat_tuotteet") {
-
-  $sel = $trow[$i] == 'X' ? 'selected' : '';
-
-  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
-  $ulos .= "<option value=''>".t("Näytä poistuvat tuotteet oletuksena tuotekyselyssä")."</option>";
-  $ulos .= "<option value='X' {$sel}>".t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita oletuksena tuotekyselyssä")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "automaattinen_tuotehaku") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

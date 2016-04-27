@@ -384,7 +384,7 @@ if (mysql_num_rows($result) > 0) {
 
   for ($i = 0; $i < mysql_num_fields($result); $i++) {
     if (mysql_field_name($result, $i) == "hankintakulut") {
-      echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Pyöristyserot")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th><th>".t("Saapumisen kulut")."</th>";      }
+      echo "<th>".t("Kululaskut")."</th><th>".t("Eturahti")."</th><th>".t("Pyöristyserot")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th><th>".t("Saapumisen kulut")."<br>(".t("Summan tai prosentin osuus").")</th>";      }
     else {
       echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }

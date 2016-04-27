@@ -518,12 +518,16 @@ if (mysql_num_rows($result) > 0) {
     else {
       $i = 2;
     }
+    
+    $summa = sprintf('%.02f', $summa);
+    
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $osuus_pyoristyseroista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "" or $saapumisenkulut_yhteensa != "") {
-      $i = 8;
+      $i = 6;
+      $summa = "";
     }
     echo "<tr>";
     echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
-    echo "<th align='right'>".sprintf('%.02f', $summa)."</td>";
+    echo "<th align='right'>$summa</td>";
     echo "<th align='right'>".sprintf('%.02f', $arvo)."</td>";
 
     $kateprosyht = round($kate / $arvo * 100, 2);

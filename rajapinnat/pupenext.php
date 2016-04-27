@@ -147,11 +147,10 @@ function pupenext_lisaa_rivi($params) {
     'tuoteno'  => $trow['tuoteno'],
   );
 
-  list($added_rows_1, $added_rows_2) = lisaa_rivi($parametrit);
+  $added_rows = lisaa_rivi($parametrit);
 
   return array(
-    'added_rows_1' => $added_rows_1,
-    'added_rows_2' => $added_rows_2,
+    'added_row' => $added_rows[0][0],
   );
 }
 

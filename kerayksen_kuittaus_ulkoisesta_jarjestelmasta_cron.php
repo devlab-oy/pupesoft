@@ -127,7 +127,8 @@ if ($handle = opendir($path)) {
             }
 
             foreach ($lines as $line) {
-              $line = $line->Line;
+
+              if ($hhv) $line = $line->Line;
 
               $tilausrivin_tunnus = (int) $line->TransId;
               $eankoodi = mysql_real_escape_string($line->ItemNumber);

@@ -3308,6 +3308,19 @@ if ($fieldname == "extranet_keraysprioriteetti") {
   $jatko = 0;
 }
 
+if ($fieldname == "extranet_private_label") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'E' ? ' selected' : '';
+
+  $ulos .= "<option value=''>".t("Oletus")."</option>";
+  $ulos .= "<option value='E' {$sel}>".t("Private label -ominaisuus toimii vain extranetissä")."</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

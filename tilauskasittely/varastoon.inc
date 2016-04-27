@@ -642,10 +642,10 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
 
     if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
-      
+
       // kuluprosentin osuus
       $kuluprosenttiosuus = $tilrivirow["kuluprosentti"] / 100 * $osuus_apu_hinta / $alvit;
-      
+
       // osuus * rahtikulut ilman rivikohtaisia kuluja + t‰m‰n rivin kuluprosentin osuus
       $rahtios = round($osuus*($rahtikulut - $rivikohtaisetkulut)+$kuluprosenttiosuus, 6);
     }
@@ -741,14 +741,23 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     continue;
   }
 
+  // Rivinlis‰kulu
   $hankintakulut .= "#$tilrivirow[kate]";
 
-  // Kuluprosentteja hankintakuluihin talteen
-  if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
-    $kuluprosenttiosuus = round($kuluprosenttiosuus, 6);
-    $hankintakulut .= "#$kuluprosenttiosuus";
+  // Rivin kulusumman tai kuluprosentin osuus
+  if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') { // T‰ss‰ huomioidaan rivikohtaiset kuluprosentit
+
+    // jos kulusumma niin k‰ytet‰‰n sit‰
+    if ($laskurow["rahti_huolinta"] != 0) {
+      $kulusumma = $laskurow["rahti_huolinta"] * $osuus;
+      $hankintakulut .= "#$kulusumma";
+    }
+    else { // muuten kuluprosentin osuus
+      $kuluprosenttiosuus = round($kuluprosenttiosuus, 6);
+      $hankintakulut .= "#$kuluprosenttiosuus";
+    }
   }
-  elseif ($laskurow["saldo_maksettu"] == 0) { // Ei saa olla kululaskuja liitettyn‰
+  elseif ($laskurow["saldo_maksettu"] == 0) { // Jos ei ole kululaskua k‰ytet‰‰n normaalia kuluprosenttia tai kulusummaa
 
     // jos kulusumma niin k‰ytet‰‰n sit‰
     if ($laskurow["rahti_huolinta"] != 0) {
@@ -756,13 +765,13 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
       $hankintakulut .= "#$kulusumma";
     }
     else {
-      // t‰ss‰ on k‰ytetty kuluprosenttia
+      //  muuten kuluprosentin osuus
       $kuluosuuslaskenta = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
       $kuluosuuslaskenta = round($osuus * $kuluosuuslaskenta * ($laskurow['rahti'] / 100), 6);
       $hankintakulut .= "#$kuluosuuslaskenta";
     }
   }
-  else {
+  else { // Kululaskuja k‰ytett‰ess‰ ei k‰ytet‰ kuluprosenttia tai kulusummaa
     $hankintakulut .= "#0.00";
   }
 

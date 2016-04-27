@@ -72,18 +72,30 @@ if ($handle = opendir($path)) {
         }
 
         if (isset($xml->Lines) and isset($xml->Lines->Line)) {
+
+          # Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
+          # koska aineistossa on OIKEAT saapuneet ostotilauksen rivit
+          $query = "UPDATE tilausrivi SET
+                    uusiotunnus     = 0
+                    WHERE yhtio     = '{$yhtio}'
+                    AND tyyppi      = 'O'
+                    AND otunnus     = '{$ostotilaus}'
+                    AND uusiotunnus = '{$saapumisnro}'";
+          $updres = pupe_query($query);
+
           foreach ($xml->Lines->Line as $line) {
 
             $rivitunnus = (int) $line->TransId;
             $tuoteno = (string) $line->ItemNumber;
             $kpl = (float) $line->ArrivedQuantity;
 
+            # P‰ivitet‰‰n varattu ja kohdistetaan rivi
             $query = "UPDATE tilausrivi SET
-                      varattu         = '{$kpl}'
+                      varattu         = '{$kpl}',
+                      uusiotunnus     = '{$saapumisnro}'
                       WHERE yhtio     = '{$yhtio}'
                       AND tyyppi      = 'O'
                       AND otunnus     = '{$ostotilaus}'
-                      AND uusiotunnus = '{$saapumisnro}'
                       AND tuoteno     = '{$tuoteno}'
                       AND tunnus      = '{$rivitunnus}'";
             $updres = pupe_query($query);

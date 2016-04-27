@@ -458,7 +458,7 @@ if ($ytunnus != '') {
                  WHERE lasku.$logistiikka_yhtiolisa
                  and lasku.liitostunnus = '$litunn'
                  and $til
-                 and (lasku.jaksotettu='{$jaksotettu}' or lasku.jaksotettu='-{$jaksotettu}'";
+                 and (lasku.jaksotettu='{$jaksotettu}' or lasku.jaksotettu='-{$jaksotettu}')";
     }
     elseif ($laskunro > 0) {
       $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio

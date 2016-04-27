@@ -53,6 +53,8 @@ $path = substr($path, -1) != '/' ? $path.'/' : $path;
 
 $error_email = trim($argv[3]);
 
+$hhv = empty($argv[4]) ? false : true;
+
 if ($handle = opendir($path)) {
 
   while (false !== ($file = readdir($handle))) {
@@ -78,8 +80,21 @@ if ($handle = opendir($path)) {
           // Fallback to pickinglist id
           if ($otunnus == 0) $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
-          list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
-          $toimaika = "{$vv}-{$kk}-{$pp}";
+          if (isset($xml->CustPackingSlip->DeliveryDate)) {
+            #<DeliveryDate>20-04-2016</DeliveryDate>
+            $delivery_date = $xml->CustPackingSlip->DeliveryDate;
+            $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
+          }
+          elseif (isset($xml->CustPackingSlip->Deliverydate)) {
+            #HHV-case
+            #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
+            $delivery_date = $xml->CustPackingSlip->Deliverydate;
+            $toimaika = date("Y-m-d H:i:s", strtotime($delivery_date));
+          }
+          else {
+            $toimaika = '0000-00-00 00:00:00';
+          }
+
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
 
           $query = "SELECT *
@@ -96,7 +111,17 @@ if ($handle = opendir($path)) {
           $kerayspoikkeama = array();
 
           if (mysql_num_rows($laskures) > 0) {
-            foreach ($xml->CustPackingSlip->Lines as $line) {
+
+            if ($hhv) {
+              $lines = $xml->Lines;
+            }
+            else {
+              $lines = $xml->CustPackingSlip->Lines;
+            }
+
+            foreach ($lines as $line) {
+
+              if ($hhv) $line = $line->Line;
 
               $tilausrivin_tunnus = (int) $line->TransId;
               $eankoodi = mysql_real_escape_string($line->ItemNumber);
@@ -131,13 +156,20 @@ if ($handle = opendir($path)) {
               }
               else {
                 $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                                      tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
+                                      tilausrivi.toimitettuaika = '{$toimaika}'";
+              }
+
+              if ($hhv) {
+                $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
+              }
+              else {
+                $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
               }
 
               $query = "UPDATE tilausrivi
-                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
+                        JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                         SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                        tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
+                        tilausrivi.kerattyaika = '{$toimaika}'
                         {$toimitettu_lisa}
                         {$varattuupdate}
                         WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

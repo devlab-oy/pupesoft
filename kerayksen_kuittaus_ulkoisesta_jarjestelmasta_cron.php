@@ -84,6 +84,7 @@ if ($handle = opendir($path)) {
             #<DeliveryDate>20-04-2016</DeliveryDate>
             list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
             $toimaika = "{$vv}-{$kk}-{$pp}";
+            $kellonaika = "00:00:00";
           }
           elseif (isset($xml->CustPackingSlip->Deliverydate)) {
             #HHV-case
@@ -93,9 +94,12 @@ if ($handle = opendir($path)) {
             $pp = substr($xml->CustPackingSlip->Deliverydate, 8, 2);
 
             $toimaika = "{$vv}-{$kk}-{$pp}";
+
+            $kellonaika = substr($xml->CustPackingSlip->Deliverydate, 11);
           }
           else {
             $toimaika = '0000-00-00';
+            $kellonaika = "00:00:00";
           }
 
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
@@ -158,7 +162,7 @@ if ($handle = opendir($path)) {
               }
               else {
                 $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                                      tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
+                                      tilausrivi.toimitettuaika = '{$toimaika} {$kellonaika}'";
               }
 
               if ($hhv) {
@@ -171,7 +175,7 @@ if ($handle = opendir($path)) {
               $query = "UPDATE tilausrivi
                         JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                         SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                        tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
+                        tilausrivi.kerattyaika = '{$toimaika} {$kellonaika}'
                         {$toimitettu_lisa}
                         {$varattuupdate}
                         WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

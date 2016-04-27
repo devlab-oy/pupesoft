@@ -463,41 +463,11 @@ else {
 
     $query_ale_lisa = generoi_alekentta('M');
 
-    if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
-      $query = "SELECT lasku.tunnus,
-                count(tuote.tunnus) AS tuotteita,
-                sum(if(tuote.ei_saldoa != '', 1, 0)) AS saldottomat
-                FROM lasku
-                {$lasklisa_eikateiset}
-                JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.var not in ('P','J','O','S'))
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-                and lasku.tila     = 'L'
-                and lasku.alatila  = 'D'
-                and lasku.viite    = ''
-                and lasku.chn     != '999'
-                {$lasklisa}
-                GROUP BY 1";
-      $saldoton_chk_res = pupe_query($query);
-
-      $_not_in = array();
-
-      while ($saldoton_chk_row = mysql_fetch_assoc($saldoton_chk_res)) {
-        if ($saldoton_chk_row['saldottomat'] != $saldoton_chk_row['tuotteita']) {
-          $_not_in[] = $saldoton_chk_row['tunnus'];
-        }
-      }
-
-      if (!empty($_not_in)) {
-        $lasklisa .= " and lasku.tunnus not in (".implode(',', $_not_in).") ";
-        $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." ".implode(',', $_not_in)." ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eiv‰t olleet saldottomia")."!<br>\n";
-      }
-    }
-
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan est‰‰ tilauksen laskutus, jos tilauksen yhdelt‰kin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
     // Eutuk‰teeen lmaksettu verkkokauppatilaus ($editil_cli) laskutetaan vaikka saldo ei ihan riitt‰isik‰‰n
-    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N')) {
+    // Mik‰li halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet t‰ytyy olla saldottomia
+    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N' or $yhtiorow['laskutus_tulevaisuuteen'] == 'S')) {
 
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -519,6 +489,13 @@ else {
       $lasku_chk_res = pupe_query($query);
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+
+        # Mik‰li halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet t‰ytyy olla saldottomia
+        if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
+          $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
+          $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eiv‰t olleet saldottomia")."!<br>\n";
+        }
+
         // Mik‰li laskutuksessa tuotteen varastosaldo v‰henee negatiiviseksi, hyl‰t‰‰n KAIKKI tilaukset, joilla on kyseist‰ tuotetta
         if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo

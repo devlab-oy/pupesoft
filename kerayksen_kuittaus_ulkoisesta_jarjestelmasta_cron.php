@@ -53,7 +53,7 @@ $path = substr($path, -1) != '/' ? $path.'/' : $path;
 
 $error_email = trim($argv[3]);
 
-$hhv = !empty($argv[4]) ? true : false;
+$hhv = empty($argv[4]) ? false : true;
 
 if ($handle = opendir($path)) {
 
@@ -82,24 +82,17 @@ if ($handle = opendir($path)) {
 
           if (isset($xml->CustPackingSlip->DeliveryDate)) {
             #<DeliveryDate>20-04-2016</DeliveryDate>
-            list($pp, $kk, $vv) = explode("-", $xml->CustPackingSlip->DeliveryDate);
-            $toimaika = "{$vv}-{$kk}-{$pp}";
-            $kellonaika = "00:00:00";
+            $delivery_date = $xml->CustPackingSlip->DeliveryDate;
+            $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
           }
           elseif (isset($xml->CustPackingSlip->Deliverydate)) {
             #HHV-case
             #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
-            $vv = substr($xml->CustPackingSlip->Deliverydate, 0, 4);
-            $kk = substr($xml->CustPackingSlip->Deliverydate, 5, 2);
-            $pp = substr($xml->CustPackingSlip->Deliverydate, 8, 2);
-
-            $toimaika = "{$vv}-{$kk}-{$pp}";
-
-            $kellonaika = substr($xml->CustPackingSlip->Deliverydate, 11);
+            $delivery_date = $xml->CustPackingSlip->Deliverydate;
+            $toimaika = date("Y-m-d H:i:s", strtotime($delivery_date));
           }
           else {
-            $toimaika = '0000-00-00';
-            $kellonaika = "00:00:00";
+            $toimaika = '0000-00-00 00:00:00';
           }
 
           $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
@@ -163,7 +156,7 @@ if ($handle = opendir($path)) {
               }
               else {
                 $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                                      tilausrivi.toimitettuaika = '{$toimaika} {$kellonaika}'";
+                                      tilausrivi.toimitettuaika = '{$toimaika}'";
               }
 
               if ($hhv) {
@@ -176,7 +169,7 @@ if ($handle = opendir($path)) {
               $query = "UPDATE tilausrivi
                         JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                         SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                        tilausrivi.kerattyaika = '{$toimaika} {$kellonaika}'
+                        tilausrivi.kerattyaika = '{$toimaika}'
                         {$toimitettu_lisa}
                         {$varattuupdate}
                         WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

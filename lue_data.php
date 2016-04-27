@@ -175,6 +175,7 @@ if (!$cli and $oikeurow['paivitys'] != '1') {
 }
 
 if (!isset($table)) $table = '';
+$lue_datasta = true;
 
 $kasitellaan_tiedosto = FALSE;
 require "inc/pakolliset_sarakkeet.inc";

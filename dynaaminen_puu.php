@@ -41,7 +41,16 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     }
 
     echo "<input type='text' id='keywords_value' name='keywords_value' value='{$val}' /><br>";
-    echo "<input type='text' id='keywords_language' name='keywords_language' value='{$lang}' />";
+
+    echo "<select name='lang' id='keywords_language' name='keywords_language'>";
+
+    foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+      $sel = $lang == $sanakirja_kieli ? "selected" : '';
+
+      echo "<option value='{$sanakirja_kieli}' {$sel}>".t($sanakirja_kieli_nimi)."</option>";
+    }
+
+    echo "</select>";
 
     exit;
   }
@@ -552,16 +561,16 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "</div>";
 
     // tason avainsana lisäyslaatikko
+    $vresult = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark_2 = '{$toim}'");
+
     echo "<div id='nodebox_keywords' style='display: none'>
       <form id='keywordsform'>
       <fieldset>
         <legend style='font-weight: bold' id='nodebox_keywords_title'></legend>
-        <ul style='list-style:none; padding: 5px'>
-          <li style='padding: 3px'>
-            <label style='display: inline-block; width: 50px'>".t("Laji")." <font class='error'>*</font></label>";
+        <ul style='list-style:none; padding: 5px'>";
 
-    $vresult = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark_2 = '{$toim}'");
-
+    echo "<li style='padding: 3px'>";
+    echo "<label style='display: inline-block; width: 50px'>".t("Laji")." <font class='error'>*</font></label>";
     echo "<select id='keywords_category' name='keywords_category' style='float: right;'>";
     echo "<option value=''>", t("Valitse laji"), "</option>";
 
@@ -570,13 +579,14 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     }
 
     echo "</select>";
+    echo "</li>";
 
-    echo "    </li>
-          <li style='padding: 3px' id='keywords_value_box'>
-            <label style='display: inline-block; width: 50px;'>".t("Avainsana")."</label>
-            <span style='float: right;' id='keywords_value_select'></span>";
-    echo "    </li>
-        </ul>
+    echo "<li style='padding: 3px' id='keywords_value_box'>";
+    echo "<label style='display: inline-block; width: 50px;'>".t("Avainsana")."</label>";
+    echo "<span style='float: right;' id='keywords_value_select'></span>";
+    echo "</li>";
+
+    echo "</ul>
         <input type='hidden' id='tee' value='' />
         <input type='hidden' id='toim' value='{$toim}' />
         <p style='display: none; color: red' id='nodebox_keywords_err'>".t("Laji ja avainsana ei saa olla tyhjiä").".</p>

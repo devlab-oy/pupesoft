@@ -28,7 +28,7 @@ cron_log();
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
 pupesoft_flock();
 
-$yhtio = mysql_escape_string(trim($argv[1]));
+$yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
 // Haetaan kukarow
@@ -64,11 +64,22 @@ if ($handle = opendir($path)) {
 
       if ($xml) {
 
-        $saapumisnro = 0;
+        $saapumisnro = $saapumistunnus = 0;
 
         foreach ($xml->VendPackingSlip as $node) {
           $ostotilaus = (int) $node->PurchId;
           $saapumisnro = (int) $node->ReceiptsListId;
+
+          $query = "SELECT tunnus
+                    FROM lasku
+                    WHERE yhtio  = '{$yhtio}'
+                    AND tila     = 'K'
+                    AND vanhatunnus != 0
+                    AND laskunro = '{$saapumisnro}'";
+          $selectres = pupe_query($query);
+          $selectrow = mysql_fetch_assoc($selectres);
+
+          $saapumistunnus = $selectrow['tunnus'];
         }
 
         if (isset($xml->Lines) and isset($xml->Lines->Line)) {
@@ -80,7 +91,7 @@ if ($handle = opendir($path)) {
                     WHERE yhtio     = '{$yhtio}'
                     AND tyyppi      = 'O'
                     AND otunnus     = '{$ostotilaus}'
-                    AND uusiotunnus = '{$saapumisnro}'";
+                    AND uusiotunnus = '{$saapumistunnus}'";
           $updres = pupe_query($query);
 
           foreach ($xml->Lines->Line as $line) {
@@ -92,7 +103,7 @@ if ($handle = opendir($path)) {
             # P‰ivitet‰‰n varattu ja kohdistetaan rivi
             $query = "UPDATE tilausrivi SET
                       varattu         = '{$kpl}',
-                      uusiotunnus     = '{$saapumisnro}'
+                      uusiotunnus     = '{$saapumistunnus}'
                       WHERE yhtio     = '{$yhtio}'
                       AND tyyppi      = 'O'
                       AND otunnus     = '{$ostotilaus}'
@@ -102,12 +113,12 @@ if ($handle = opendir($path)) {
           }
         }
 
-        if (!empty($saapumisnro)) {
+        if (!empty($saapumistunnus)) {
           $query = "UPDATE lasku SET
                     sisviesti3   = 'ok_vie_varastoon'
                     WHERE yhtio  = '{$yhtio}'
                     AND tila     = 'K'
-                    AND laskunro = '{$saapumisnro}'";
+                    AND tunnus = '{$saapumistunnus}'";
           $updres = pupe_query($query);
         }
 

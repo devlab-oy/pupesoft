@@ -195,7 +195,7 @@ if (!$enarimatch) {
       }
     }
 
-    if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "" and $yhtiorow['poistuvat_tuotteet'] == 'X') {
+    if (strpos($_SERVER['SCRIPT_NAME'], "tuote.php") !== false and $kukarow["extranet"] == "" and !empty($poistuvat_tuotteet)) {
       $havinglisa = "HAVING tuote.status not in ('P','X') and saldo > 0 and ei_saldoa = ''";
     }
     else {

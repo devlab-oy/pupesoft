@@ -1,12 +1,16 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
+require_once 'rajapinnat/presta/presta_products.php';
 
 class PrestaProductStocks extends PrestaClient {
   private $all_stocks = null;
+  private $presta_products = null;
   private $pupesoft_all_products = array();
 
   public function __construct($url, $api_key) {
+    $this->presta_products = new PrestaProducts($url, $api_key);
+
     parent::__construct($url, $api_key);
   }
 
@@ -40,8 +44,6 @@ class PrestaProductStocks extends PrestaClient {
   public function update_stock() {
     $this->logger->log('---------Aloitetaan saldojen päivitys---------');
 
-    // set all products null, so we'll fetch all_skus again from presta
-    $this->presta_all_products = null;
     $pupesoft_products = $this->pupesoft_all_products;
 
     $current = 0;
@@ -52,7 +54,7 @@ class PrestaProductStocks extends PrestaClient {
       $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
       $status = $product_row['status'];
 
-      $product_id = array_search($sku, $this->all_skus());
+      $product_id = array_search($sku, $this->presta_products->all_skus());
 
       $current++;
       $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
@@ -69,7 +71,7 @@ class PrestaProductStocks extends PrestaClient {
         'status'     => $status,
       );
 
-      $this->presta_stock->create_or_update($stock);
+      $this->create_or_update($stock);
     }
 
     $this->logger->log('---------Saldojen päivitys valmis---------');

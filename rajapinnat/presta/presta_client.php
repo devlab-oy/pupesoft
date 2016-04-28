@@ -9,6 +9,9 @@ abstract class PrestaClient {
   private $shop_ids = null;
   private $presta_shops = null;
 
+  // ids of installed languages
+  protected $languages_table = null;
+
   /**
    *
    * @var PrestaShopWebservice REST-client
@@ -132,6 +135,8 @@ abstract class PrestaClient {
       'resource' => $resource,
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $msg = "Haetaan {$resource} id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg);
@@ -159,9 +164,13 @@ abstract class PrestaClient {
       'resource' => $this->resource_name(),
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
-      $this->get_empty_schema();
-      $opt['postXml'] = $this->generate_xml($resource)->asXML();
+      $xml = $this->generate_xml($resource);
+      $xml = $this->remove_read_only_fields($xml);
+      $opt['postXml'] = $xml->asXML();
+
       $response_xml = $this->ws->add($opt);
 
       $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
@@ -175,6 +184,12 @@ abstract class PrestaClient {
     return xml_to_array($response_xml);
   }
 
+  // removes all readonly files from XML
+  // this gets called before update/create. implement this if needed.
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    return $xml;
+  }
+
   /**
    * Updates given resource
    *
@@ -186,9 +201,18 @@ abstract class PrestaClient {
   protected function update($id, array $resource, $id_shop = null) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id, $id_shop);
-    $this->get_empty_schema();
+    $existing_xml = $existing_resource->asXML();
 
     $xml = $this->generate_xml($resource, $existing_resource);
+    $new_xml = $xml->asXML();
+
+    // if nothing has changed, don't update
+    if ($existing_xml == $new_xml) {
+      $this->logger->log("Ei muutoksia, ei päivitetä");
+
+      // update_xml returns an array aswell
+      return xml_to_array($existing_xml);
+    }
 
     return $this->update_xml($id, $xml, $id_shop);
   }
@@ -210,14 +234,17 @@ abstract class PrestaClient {
       'resource' => $this->resource_name(),
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
+      $xml = $this->remove_read_only_fields($xml);
       $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
 
       $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
     }
     catch (Exception $e) {
-      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id";
+      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id kauppaan {$id_shop}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -257,13 +284,15 @@ abstract class PrestaClient {
       $opt[$key] = $value;
     }
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Kaikki {$resource} rivit haettu";
+      $msg = "Kaikki {$resource} rivit haettu kaupasta {$id_shop}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku kaupasta {$id_shop} epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -318,13 +347,15 @@ abstract class PrestaClient {
       'resource' => $this->resource_name(),
     );
 
+    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+
     try {
       $response_bool = $this->ws->delete($opt);
-      $msg = "Poistettiin " . $this->resource_name() . " id {$id}";
+      $msg = "Poistettiin " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id}";
+      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -438,6 +469,31 @@ abstract class PrestaClient {
     $shops = array_column($all, 'id');
 
     return $shops;
+  }
+
+  protected function get_language_id($code) {
+    $value = $this->languages_table[$code];
+
+    if (empty($value)) {
+      return null;
+    }
+    else {
+      // substract one, since API key starts from zero
+      return ($value - 1);
+    }
+  }
+
+  protected function xml_value($value) {
+    $value = utf8_encode($value);
+    $value = htmlspecialchars($value, ENT_IGNORE);
+
+    return $value;
+  }
+
+  public function set_languages_table($value) {
+    if (is_array($value)) {
+      $this->languages_table = $value;
+    }
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

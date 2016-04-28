@@ -124,7 +124,7 @@ if (!function_exists('rivi_erittely')) {
 
       if ($toitarow['erittely'] == 'k') {
         // jos tulostustapa on koonti ja toimitustavan takana on annettu osoitetiedot, käytetään niitä
-        if ($toitarow['tulostustapa'] == 'K' and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
+        if (in_array($toitarow['tulostustapa'], array('K', 'L')) and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
           $pdf->draw_text(62, $kala-28, $toitarow['toim_nimi']." ".$toitarow['toim_nimitark'],    $firstpage, $kirj);
           $pdf->draw_text(62, $kala-38, $toitarow['toim_osoite'],  $firstpage, $kirj);
           $pdf->draw_text(62, $kala-48, $toitarow['toim_postino']." ".$toitarow['toim_postitp'],  $firstpage, $kirj);

@@ -8921,7 +8921,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and {$hakukentta} like ('$haku%') ";
+        $haku_query .= "and {$hakukentta} like ('%$haku%') ";
       }
 
       if ($hakukentta != "asiakkaan_tilausnumero") {
@@ -25431,6 +25431,9 @@ if (!function_exists("saako_myyda_private_label")) {
     //$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)
     global $kukarow, $yhtiorow;
 
+    # Jos param on "vain extranet" ja jos ei ole extranet niin saa myydä
+    if ($yhtiorow['extranet_private_label'] == 'E' and $kukarow['extranet'] == '') return true;
+
     //haetaan ensin tutkittavan tuotteen tiedot
     $query = "SELECT *
               FROM tuote
@@ -27476,8 +27479,18 @@ if (!function_exists('posten_outbounddelivery')) {
               tuote.eankoodi
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu + tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+              JOIN tilausrivi ON (
+                tilausrivi.yhtio = lasku.yhtio AND
+                tilausrivi.otunnus = lasku.tunnus AND
+                (tilausrivi.varattu + tilausrivi.kpl) > 0 AND
+                tilausrivi.tyyppi IN ('L', 'G') AND
+                tilausrivi.var != 'J'
+              )
+              JOIN tuote ON (
+                tuote.yhtio = tilausrivi.yhtio AND
+                tuote.tuoteno = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
+              )
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
     $loopres = pupe_query($query);
@@ -31571,7 +31584,7 @@ if (!function_exists("tee_ennakkolasku")) {
         pupe_query($query);
       }
 
-      // Jos alkuperäisellä tilauksella on käsinsyötetty viite niin kopsataan se ennakkolaskulle
+      // Jos alkuperäisellä tilauksella on käsinsyötetty viite tai viesti niin kopsataan se ennakkolaskulle
       if (!empty($laskurow["viite"])) {
         $query  = "UPDATE lasku
                    SET viite = '{$laskurow["viite"]}'

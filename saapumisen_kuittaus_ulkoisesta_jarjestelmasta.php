@@ -74,7 +74,7 @@ if ($handle = opendir($path)) {
                     FROM lasku
                     WHERE yhtio  = '{$yhtio}'
                     AND tila     = 'K'
-                    AND vanhatunnus != 0
+                    AND vanhatunnus = 0
                     AND laskunro = '{$saapumisnro}'";
           $selectres = pupe_query($query);
           $selectrow = mysql_fetch_assoc($selectres);
@@ -90,20 +90,26 @@ if ($handle = opendir($path)) {
                     uusiotunnus     = 0
                     WHERE yhtio     = '{$yhtio}'
                     AND tyyppi      = 'O'
-                    AND otunnus     = '{$ostotilaus}'
                     AND uusiotunnus = '{$saapumistunnus}'";
           $updres = pupe_query($query);
 
-          foreach ($xml->Lines->Line as $line) {
+          foreach ($xml->Lines->Line as $key => $line) {
 
             $rivitunnus = (int) $line->TransId;
             $tuoteno = (string) $line->ItemNumber;
             $kpl = (float) $line->ArrivedQuantity;
 
+            if ($kpl != 0) {
+              $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
+            }
+            else {
+              $uusiotunnuslisa = "";
+            }
+
             # P‰ivitet‰‰n varattu ja kohdistetaan rivi
             $query = "UPDATE tilausrivi SET
-                      varattu         = '{$kpl}',
-                      uusiotunnus     = '{$saapumistunnus}'
+                      varattu         = '{$kpl}'
+                      {$uusiotunnuslisa}
                       WHERE yhtio     = '{$yhtio}'
                       AND tyyppi      = 'O'
                       AND otunnus     = '{$ostotilaus}'

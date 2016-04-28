@@ -31,6 +31,7 @@ class PrestaProductStocks extends PrestaClient {
 
     $xml->stock_available->quantity = $quantity;
     $xml->stock_available->id_product = $stock['product_id'];
+    $xml->stock_available->id_shop = $stock['id_shop'];
 
     // Tilaustuote
     // 0 = deny orders, 1 = allow orders, 2 = default
@@ -60,18 +61,22 @@ class PrestaProductStocks extends PrestaClient {
       $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
 
       // could not find product or
-      // this is a virtual product, no stock management
-      if ($product_id === false or $saldo === null) {
+      // this is a virtual product, no stock management (saldo === null)
+      if ($product_id === false or $product_row['saldo'] === null) {
         continue;
       }
 
-      $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $saldo,
-        'status'     => $status,
-      );
+      // loop all shops
+      foreach ($this->all_shop_ids() as $id_shop) {
+        $stock = array(
+          'product_id' => $product_id,
+          'saldo'      => $saldo,
+          'status'     => $status,
+          'id_shop'    => $id_shop,
+        );
 
-      $this->create_or_update($stock);
+        $this->create_or_update($stock);
+      }
     }
 
     $this->logger->log('---------Saldojen päivitys valmis---------');
@@ -80,18 +85,19 @@ class PrestaProductStocks extends PrestaClient {
   private function create_or_update($stock) {
     $product_id = $stock['product_id'];
     $qty = $stock['saldo'];
+    $id_shop = $stock['id_shop'];
 
     // Needs to be inside try-catch so that we wont interrupt product create loop.
     // In catch we only log the error. Do not rethrow the exception because that interrupts
     // the product create loop
     try {
-      $stock_id = $this->stock_id_by_product_id($product_id);
+      $stock_id = $this->stock_id_by_product_id($product_id, $id_shop);
 
       if ($stock_id === false) {
-        $this->create($stock);
+        $this->create($stock, $id_shop);
       }
       else {
-        $this->update($stock_id, $stock);
+        $this->update($stock_id, $stock, $id_shop);
       }
     }
     catch (Exception $e) {
@@ -104,21 +110,19 @@ class PrestaProductStocks extends PrestaClient {
     return true;
   }
 
-  private function stock_id_by_product_id($product_id) {
-    if (is_null($this->all_stocks)) {
-      // fetch all stocks
-      $this->logger->log("Haetaan kaikki saldot Prestasta");
-      $display = array('id', 'id_product');
-      $this->all_stocks = $this->all($display);
+  private function stock_id_by_product_id($product_id, $id_shop) {
+    $display = array('id');
+    $filter = array('id_product' => $product_id);
+
+    try {
+      $stock = $this->all($display, $filter, $id_shop);
+    }
+    catch (Exception $e) {
+      return false;
     }
 
-    foreach ($this->all_stocks as $stock) {
-      if ($product_id == $stock['id_product']) {
-        return $stock['id'];
-      }
-    }
-
-    return false;
+    $return = isset($stock[0]['id']) ? $stock[0]['id'] : false;
+    return $return;
   }
 
   public function set_all_products($value) {

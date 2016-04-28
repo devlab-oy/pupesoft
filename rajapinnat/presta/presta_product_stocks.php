@@ -111,18 +111,27 @@ class PrestaProductStocks extends PrestaClient {
   }
 
   private function stock_id_by_product_id($product_id, $id_shop) {
-    $display = array('id');
-    $filter = array('id_product' => $product_id);
+    if (is_null($this->all_stocks)) {
+      $all_stocks = array();
+      $display = array('id', 'id_product', 'id_shop');
+      $filter = array();
 
-    try {
-      $stock = $this->all($display, $filter, $id_shop);
-    }
-    catch (Exception $e) {
-      return false;
+      // loop all shops
+      foreach ($this->all_shop_ids() as $shop) {
+        $stock = $this->all($display, $filter, $shop);
+        $all_stocks = array_merge($all_stocks, $stock);
+      }
+
+      $this->all_stocks = $all_stocks;
     }
 
-    $return = isset($stock[0]['id']) ? $stock[0]['id'] : false;
-    return $return;
+    foreach ($this->all_stocks as $stock) {
+      if ($product_id == $stock['id_product'] and $id_shop == $stock['id_shop']) {
+        return $stock['id'];
+      }
+    }
+
+    return false;
   }
 
   public function set_all_products($value) {

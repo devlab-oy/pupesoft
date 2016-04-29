@@ -4,7 +4,6 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
-require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
@@ -17,7 +16,6 @@ class PrestaProducts extends PrestaClient {
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
-  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
@@ -27,7 +25,6 @@ class PrestaProducts extends PrestaClient {
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
-    $this->presta_stock = new PrestaProductStocks($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -389,7 +386,6 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->delete_all_unnecessary_products();
-    $this->update_stock();
 
     $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
@@ -461,44 +457,6 @@ class PrestaProducts extends PrestaClient {
       catch (Exception $e) {
       }
     }
-  }
-
-  private function update_stock() {
-    $this->logger->log('---------Aloitetaan saldojen päivitys---------');
-
-    // set all products null, so we'll fetch all_skus again from presta
-    $this->presta_all_products = null;
-    $pupesoft_products = $this->pupesoft_all_products;
-
-    $current = 0;
-    $total = count($pupesoft_products);
-
-    foreach ($pupesoft_products as $product_row) {
-      $sku = $product_row['tuoteno'];
-      $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
-      $status = $product_row['status'];
-
-      $product_id = array_search($sku, $this->all_skus());
-
-      $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
-
-      // could not find product or
-      // this is a virtual product, no stock management
-      if ($product_id === false or $saldo === null) {
-        continue;
-      }
-
-      $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $saldo,
-        'status'     => $status,
-      );
-
-      $this->presta_stock->create_or_update($stock);
-    }
-
-    $this->logger->log('---------Saldojen päivitys valmis---------');
   }
 
   private function find_product_from_all_products($sku) {

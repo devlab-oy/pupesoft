@@ -3052,8 +3052,6 @@ if (!function_exists("tulosta_lasku")) {
               tilausrivi.ale1,
               tilausrivi.ale2,
               tilausrivi.ale3,
-              tilausrivi.tunnus,
-              tilausrivi.otunnus,
               $ale_query_select_lisa aleyhteensa,
               tilausrivi.alv,
               tuote.eankoodi,
@@ -3105,8 +3103,8 @@ if (!function_exists("tulosta_lasku")) {
               and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               and tilausrivi.varattu+tilausrivi.kpl != 0
               $where
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30
-              ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
+              ORDER BY otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tunnus";
     $result = pupe_query($query);
 
     $kaanteinen_verotus = FALSE;

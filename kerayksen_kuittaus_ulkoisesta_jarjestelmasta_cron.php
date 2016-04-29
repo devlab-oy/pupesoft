@@ -185,22 +185,20 @@ if ($handle = opendir($path)) {
               $tuotteiden_paino += $painorow['paino'];
             }
 
-            if ($hhv) {
-              # Päivitetään saldottomat tuotteet myös toimitetuksi
-              $query = "UPDATE tilausrivi
-                        JOIN tuote ON (
-                          tuote.yhtio = tilausrivi.yhtio AND
-                          tuote.tuoteno = tilausrivi.tuoteno AND
-                          tuote.ei_saldoa != ''
-                        )
-                        SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                        tilausrivi.kerattyaika = '{$toimaika}',
-                        tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                        tilausrivi.toimitettuaika = '{$toimaika}'
-                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                        AND tilausrivi.otunnus  = '{$otunnus}'";
-              pupe_query($query);
-            }
+            # Päivitetään saldottomat tuotteet myös toimitetuksi
+            $query = "UPDATE tilausrivi
+                      JOIN tuote ON (
+                        tuote.yhtio = tilausrivi.yhtio AND
+                        tuote.tuoteno = tilausrivi.tuoteno AND
+                        tuote.ei_saldoa != ''
+                      )
+                      SET tilausrivi.keratty = '{$kukarow['kuka']}',
+                      tilausrivi.kerattyaika = '{$toimaika}',
+                      tilausrivi.toimitettu = '{$kukarow['kuka']}',
+                      tilausrivi.toimitettuaika = '{$toimaika}'
+                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivi.otunnus  = '{$otunnus}'";
+            pupe_query($query);
 
             $query  = "INSERT INTO rahtikirjat SET
                        toimitustapa   = '{$laskurow['toimitustapa']}',

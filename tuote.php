@@ -1930,7 +1930,9 @@ echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
+echo "</form>";
+
 echo "</tr>";
 
 echo "<tr>";
@@ -1951,8 +1953,8 @@ echo "</td>";
 
 echo "<td class='back'>";
 echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
-echo "</form>";
 echo "</td>";
+echo "</form>";
 
 //Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 if ($ulos == '' and $tee == 'Z') {
@@ -3179,6 +3181,21 @@ if ($tee == 'Z') {
 }
 
 if ($ulos != "") {
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='toim' value='{$toim}'>";
+  echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+  echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
+  echo "<input type='hidden' name='tee' value='Z'>";
+  echo "<table><tr>";
+  echo "<td class='back'>";
+  $chk = !empty($poistuvat_tuotteet) ? 'checked' : '';
+  echo "<input type='checkbox' name='poistuvat_tuotteet' {$chk} onchange='submit();' /> ";
+  echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo "</td>";
+  echo "</tr></table>";
+  echo "</form>";
+
   echo "<form method='post' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";

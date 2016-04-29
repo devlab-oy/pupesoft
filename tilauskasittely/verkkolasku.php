@@ -186,7 +186,7 @@ else {
         }
         else {
 
-          if ($syotetty > $tanaan) {
+          if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] != 'S') {
             //tulevaisuudessa ei voida laskuttaa
             $tulos_ulos .= "<br>\n".t("VIRHE: Syötetty päivämäärä on tulevaisuudessa, ei voida laskuttaa!")."<br>\n<br>\n";
             $tee = "";
@@ -446,7 +446,6 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-
     if (isset($laskutettavat) and $laskutettavat != "") {
       // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
@@ -467,7 +466,8 @@ else {
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan estää tilauksen laskutus, jos tilauksen yhdeltäkin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
     // Eutukäteeen lmaksettu verkkokauppatilaus ($editil_cli) laskutetaan vaikka saldo ei ihan riittäisikään
-    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N')) {
+    // Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N' or $yhtiorow['laskutus_tulevaisuuteen'] == 'S')) {
 
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -489,6 +489,13 @@ else {
       $lasku_chk_res = pupe_query($query);
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+
+        # Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+        if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
+          $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
+          $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
+        }
+
         // Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta
         if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
@@ -3297,7 +3304,7 @@ else {
                 return false;
               }
             }
-            if (ero < 0) {
+            if (ero < 0 && '{$yhtiorow['laskutus_tulevaisuuteen']}' != 'S') {
               var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
               alert(msg);
 

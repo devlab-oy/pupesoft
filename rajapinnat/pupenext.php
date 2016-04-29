@@ -114,6 +114,50 @@ function pupenext_tilaus_valmis($params) {
   return array('status' => $status);
 }
 
+function pupenext_lisaa_rivi($params) {
+  global $kukarow;
+
+  $count      = isset($params->count)      ? $params->count      : 1;
+  $order_id   = isset($params->order_id)   ? $params->order_id   : die("Et antanut tilausnumeroa\n");
+  $product_id = isset($params->product_id) ? $params->product_id : die("Et antanut tuotteen tunnusta\n");
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.tunnus = $product_id
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) die('Tuotetta ei löytynyt');
+
+  $trow = mysql_fetch_assoc($result);
+
+  $query = "SELECT *
+            FROM lasku
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus = $order_id";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) die('Tilausta ei löytynyt');
+
+  $laskurow = mysql_fetch_assoc($result);
+
+  $kukarow['kesken'] = $laskurow['tunnus'];
+
+  $parametrit = array(
+    'kpl'      => $count,
+    'laskurow' => $laskurow,
+    'trow'     => $trow,
+    'tuoteno'  => $trow['tuoteno'],
+  );
+
+  $added_rows = lisaa_rivi($parametrit);
+
+  return array(
+    'added_row' => $added_rows[0][0],
+  );
+}
+
 function capture_status() {
   $status_raw = ob_get_contents();
 

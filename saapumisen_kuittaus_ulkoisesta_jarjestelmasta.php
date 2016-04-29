@@ -80,6 +80,8 @@ if ($handle = opendir($path)) {
 
         $saapumistunnus = (int) $selectrow['tunnus'];
 
+        $tilausrivit = array();
+
         if (isset($xml->Lines) and isset($xml->Lines->Line)) {
 
           # Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
@@ -93,33 +95,53 @@ if ($handle = opendir($path)) {
             $updres = pupe_query($query);
           }
 
+          # Loopataan rivit tilausrivit-arrayseen
+          # koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
           foreach ($xml->Lines->Line as $key => $line) {
 
             $rivitunnus = (int) $line->TransId;
-            $tuoteno = (string) $line->ItemNumber;
-            $kpl = (float) $line->ArrivedQuantity;
+            $tuoteno    = (string) $line->ItemNumber;
+            $kpl        = (float) $line->ArrivedQuantity;
 
-            if ($kpl != 0 and $saapumistunnus != 0) {
-              $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
+            if (!isset($tilausrivit[$rivitunnus])) {
+              $tilausrivit[$rivitunnus] = array(
+                'tuoteno' => $tuoteno,
+                'kpl'     => $kpl
+              );
             }
             else {
-              $uusiotunnuslisa = "";
+              $tilausrivit[$rivitunnus]['kpl'] += $kpl;
             }
+          }
 
-            # Päivitetään varattu ja kohdistetaan rivi
-            $query = "UPDATE tilausrivi SET
-                      varattu         = '{$kpl}'
-                      {$uusiotunnuslisa}
-                      WHERE yhtio     = '{$yhtio}'
-                      AND tyyppi      = 'O'
-                      AND otunnus     = '{$ostotilaus}'
-                      AND tuoteno     = '{$tuoteno}'
-                      AND tunnus      = '{$rivitunnus}'";
-            $updres = pupe_query($query);
+          if (count($tilausrivit) > 0) {
+            foreach ($tilausrivit as $rivitunnus => $data) {
+
+              $tuoteno = $data['tuoteno'];
+              $kpl     = $data['kpl'];
+
+              if ($kpl != 0 and $saapumistunnus != 0) {
+                $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
+              }
+              else {
+                $uusiotunnuslisa = "";
+              }
+
+              # Päivitetään varattu ja kohdistetaan rivi
+              $query = "UPDATE tilausrivi SET
+                        varattu         = '{$kpl}'
+                        {$uusiotunnuslisa}
+                        WHERE yhtio     = '{$yhtio}'
+                        AND tyyppi      = 'O'
+                        AND otunnus     = '{$ostotilaus}'
+                        AND tuoteno     = '{$tuoteno}'
+                        AND tunnus      = '{$rivitunnus}'";
+              $updres = pupe_query($query);
+            }
           }
         }
 
-        if (!empty($saapumistunnus)) {
+        if (!empty($saapumistunnus) and count($tilausrivit) > 0) {
           $query = "UPDATE lasku SET
                     sisviesti3   = 'ok_vie_varastoon'
                     WHERE yhtio  = '{$yhtio}'

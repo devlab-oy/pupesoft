@@ -64,23 +64,21 @@ if ($handle = opendir($path)) {
 
       if ($xml) {
 
-        $saapumisnro = $saapumistunnus = 0;
+        $node = $xml->VendPackingSlip;
 
-        foreach ($xml->VendPackingSlip as $node) {
-          $ostotilaus = (int) $node->PurchId;
-          $saapumisnro = (int) $node->ReceiptsListId;
+        $ostotilaus = (int) $node->PurchId;
+        $saapumisnro = (int) $node->ReceiptsListId;
 
-          $query = "SELECT tunnus
-                    FROM lasku
-                    WHERE yhtio  = '{$yhtio}'
-                    AND tila     = 'K'
-                    AND vanhatunnus = 0
-                    AND laskunro = '{$saapumisnro}'";
-          $selectres = pupe_query($query);
-          $selectrow = mysql_fetch_assoc($selectres);
+        $query = "SELECT tunnus
+                  FROM lasku
+                  WHERE yhtio  = '{$yhtio}'
+                  AND tila     = 'K'
+                  AND vanhatunnus = 0
+                  AND laskunro = '{$saapumisnro}'";
+        $selectres = pupe_query($query);
+        $selectrow = mysql_fetch_assoc($selectres);
 
-          $saapumistunnus = $selectrow['tunnus'];
-        }
+        $saapumistunnus = (int) $selectrow['tunnus'];
 
         if (isset($xml->Lines) and isset($xml->Lines->Line)) {
 

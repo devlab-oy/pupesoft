@@ -75,14 +75,14 @@ class PrestaProductStocks extends PrestaClient {
           'id_shop'    => $id_shop,
         );
 
-        $this->create_or_update($stock);
+        $this->update_stock_availables($stock);
       }
     }
 
     $this->logger->log('---------Saldojen päivitys valmis---------');
   }
 
-  private function create_or_update($stock) {
+  private function update_stock_availables($stock) {
     $product_id = $stock['product_id'];
     $qty = $stock['saldo'];
     $id_shop = $stock['id_shop'];
@@ -94,7 +94,8 @@ class PrestaProductStocks extends PrestaClient {
       $stock_id = $this->stock_id_by_product_id($product_id, $id_shop);
 
       if ($stock_id === false) {
-        $this->create($stock, $id_shop);
+        // stocks can only be updated, cannot create via API
+        $this->logger->log("Tuotteelle ei löydy stock_availables tietuetta kaupasta {$id_shop}. Ei voida päivittää.");
       }
       else {
         $this->update($stock_id, $stock, $id_shop);

@@ -128,6 +128,8 @@ function pupenext_lisaa_rivi($params) {
             LIMIT 1";
   $result = pupe_query($query);
 
+  if (mysql_num_rows($result) != 1) die('Tuotetta ei löytynyt');
+
   $trow = mysql_fetch_assoc($result);
 
   $query = "SELECT *
@@ -135,6 +137,8 @@ function pupenext_lisaa_rivi($params) {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tunnus = $order_id";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) die('Tilausta ei löytynyt');
 
   $laskurow = mysql_fetch_assoc($result);
 

@@ -1475,7 +1475,7 @@ if (isset($ajax)) {
 
         $_return .= "</td>";
 
-        if ($tyyppi == t('Puute')) {
+        if (strpos($tyyppi, t("Puute")) !== false) { 
           $kappalemaara = $jtrow["tilkpl"];
         }
         else {

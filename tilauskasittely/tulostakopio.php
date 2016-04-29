@@ -2278,9 +2278,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         }
       }
 
+      $ale_query_select_lisa_y = generoi_alekentta_select('yhteen', 'M');
+
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
         $query = "SELECT tilausrivi.*,
+                  $ale_query_select_lisa_y aleyhteensa,
                   tuote.sarjanumeroseuranta,
                   kerayserat.kpl as tilkpl,
                   kerayserat.kpl as varattu,
@@ -2298,6 +2301,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       }
       else {
         $query = "SELECT tilausrivi.*,
+                  $ale_query_select_lisa_y aleyhteensa,
                   $select_lisa
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -2404,7 +2408,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
       }
       elseif ($excel_lahete_hinnoilla != '') {
-        $params_kerayslista['uusiotsikko'] = "Toimitusvahvistus";
+        $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
       }
       //tulostetaan sivu
       print_pdf_kerayslista($params_kerayslista);

@@ -84,12 +84,14 @@ if ($handle = opendir($path)) {
 
           # Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
           # koska aineistossa on OIKEAT saapuneet ostotilauksen rivit
-          $query = "UPDATE tilausrivi SET
-                    uusiotunnus     = 0
-                    WHERE yhtio     = '{$yhtio}'
-                    AND tyyppi      = 'O'
-                    AND uusiotunnus = '{$saapumistunnus}'";
-          $updres = pupe_query($query);
+          if ($saapumistunnus != 0) {
+            $query = "UPDATE tilausrivi SET
+                      uusiotunnus     = 0
+                      WHERE yhtio     = '{$yhtio}'
+                      AND tyyppi      = 'O'
+                      AND uusiotunnus = '{$saapumistunnus}'";
+            $updres = pupe_query($query);
+          }
 
           foreach ($xml->Lines->Line as $key => $line) {
 
@@ -97,7 +99,7 @@ if ($handle = opendir($path)) {
             $tuoteno = (string) $line->ItemNumber;
             $kpl = (float) $line->ArrivedQuantity;
 
-            if ($kpl != 0) {
+            if ($kpl != 0 and $saapumistunnus != 0) {
               $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
             }
             else {

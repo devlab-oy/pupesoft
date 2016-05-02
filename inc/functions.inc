@@ -31013,14 +31013,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31051,14 +31051,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno

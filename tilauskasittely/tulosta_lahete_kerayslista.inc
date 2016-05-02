@@ -721,8 +721,7 @@ if (!function_exists('rivi_kerayslista')) {
       
       if ($kerayslistatyyppi == 'EXCEL3') {
         if ($row["var"] == "" or  $row["var"] == "H") {
-          $alennus = (float) $row['hinta'] * $row['aleyhteensa'] / 100;
-          $thispage->writeString($kala, 5, (float) round((($row['hinta'] - $alennus) * $row['tilkpl']), 2)); 
+          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2)); 
         }
       }
 

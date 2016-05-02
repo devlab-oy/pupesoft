@@ -172,14 +172,8 @@ if (!function_exists("ennakkolaskuta")) {
         // mutta kuitenkin niin, etteivät ne sekoitu maksusopimuksen alkuperäisiin tilauksiin
         $query .= "jaksotettu = '".($laskurow['jaksotettu'] * -1)."',";
       }
-      elseif ($fieldname == 'viesti' and !empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-        if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K' and $posrow["osuus"] == 100) {
-          $viesti = '';
-        }
-        else {
-          $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
-        }
-
+      elseif ($fieldname == 'viesti' and $yhtiorow['ennakkolaskun_tyyppi'] == 'E') {
+        $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
         $query .= "viesti = '".$viesti."',";
       }
       elseif ($fieldname != 'tunnus') {
@@ -333,7 +327,7 @@ if (!function_exists("ennakkolaskuta")) {
         $summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
         if (!empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-          $nimitys = $row['tuoteno'].' - '.$row['nimitys'];
+          $nimitys = $row['tuoteno'].' - '.t_tuotteen_avainsanat($row, 'nimitys', $kielirow["kieli"]);
           $rivikommentti   = $row['kommentti'];
         }
         else {

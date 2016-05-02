@@ -267,7 +267,7 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
   }
 }
 
-if (empty($toiminto)) {
+if (empty($toiminto) or empty($vanhatoiminto)) {
   echo "<form>";
   echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";
   echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";

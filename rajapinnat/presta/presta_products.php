@@ -4,39 +4,41 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
-require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
   private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
-  private $languages_table = null;
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
-  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key, $presta_home_category_id) {
-    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
-    $this->presta_home_category_id = $presta_home_category_id;
-
+  public function __construct($url, $api_key) {
+    $this->presta_categories = new PrestaCategories($url, $api_key);
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
-    $this->presta_stock = new PrestaProductStocks($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
     return 'products';
+  }
+
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    unset($xml->product->manufacturer_name);
+    unset($xml->product->quantity);
+    unset($xml->product->position_in_category);
+
+    return $xml;
   }
 
   /**
@@ -51,13 +53,7 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       $xml = $existing_product;
-
-      unset($xml->product->position_in_category);
-      unset($xml->product->manufacturer_name);
-      unset($xml->product->quantity);
     }
-
-    unset($xml->product->position_in_category);
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
@@ -316,7 +312,7 @@ class PrestaProducts extends PrestaClient {
       return null;
     }
 
-    $category_id = $response->category->id;
+    $category_id = $response['id'];
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
@@ -390,7 +386,6 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->delete_all_unnecessary_products();
-    $this->update_stock();
 
     $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
@@ -419,18 +414,6 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       return $value;
-    }
-  }
-
-  private function get_language_id($code) {
-    $value = $this->languages_table[$code];
-
-    if (empty($value)) {
-      return null;
-    }
-    else {
-      // substract one, since API key starts from zero
-      return ($value - 1);
     }
   }
 
@@ -476,44 +459,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  private function update_stock() {
-    $this->logger->log('---------Aloitetaan saldojen päivitys---------');
-
-    // set all products null, so we'll fetch all_skus again from presta
-    $this->presta_all_products = null;
-    $pupesoft_products = $this->pupesoft_all_products;
-
-    $current = 0;
-    $total = count($pupesoft_products);
-
-    foreach ($pupesoft_products as $product_row) {
-      $sku = $product_row['tuoteno'];
-      $saldo = $product_row['saldo'];
-      $status = $product_row['status'];
-
-      $product_id = array_search($sku, $this->all_skus());
-
-      $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
-
-      // could not find product or
-      // this is a virtual product, no stock management
-      if ($product_id === false or $saldo === null) {
-        continue;
-      }
-
-      $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $saldo,
-        'status'     => $status,
-      );
-
-      $this->presta_stock->create_or_update($stock);
-    }
-
-    $this->logger->log('---------Saldojen päivitys valmis---------');
-  }
-
   private function find_product_from_all_products($sku) {
     foreach ($this->pupesoft_all_products as $product_row) {
       if ($sku == $product_row['tuoteno']) {
@@ -522,13 +467,6 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
-  }
-
-  private function xml_value($value) {
-    $value = utf8_encode($value);
-    $value = htmlspecialchars($value, ENT_IGNORE);
-
-    return $value;
   }
 
   public function set_removable_fields($fields) {
@@ -557,12 +495,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  public function set_languages_table($value) {
-    if (is_array($value)) {
-      $this->languages_table = $value;
-    }
-  }
-
   public function set_visibility_type($value) {
     $this->visibility_type = $value;
   }
@@ -571,5 +503,9 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->features_table = $value;
     }
+  }
+
+  public function set_home_category_id($value) {
+    $this->presta_home_category_id = $value;
   }
 }

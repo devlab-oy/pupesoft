@@ -588,6 +588,17 @@ if ($fieldname == "myyntilaskujen_kurssipaiva") {
   $jatko = 0;
 }
 
+if ($fieldname == "laskutus_tulevaisuuteen") {
+
+  $sel = $trow[$i] == "S" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ei sallita")."</option>";
+  $ulos .= "<option value = 'S' {$sel}>".t("Saldottomia tuotteita voi laskuttaa tulevaisuuteen")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
 
 if ($fieldname == "tyomaaraystyyppi") {
 
@@ -2312,18 +2323,6 @@ if ($fieldname == "viitteen_kasinsyotto") {
   $jatko = 0;
 }
 
-if ($fieldname == "poistuvat_tuotteet") {
-
-  $sel = $trow[$i] == 'X' ? 'selected' : '';
-
-  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
-  $ulos .= "<option value=''>".t("Näytä poistuvat tuotteet oletuksena tuotekyselyssä")."</option>";
-  $ulos .= "<option value='X' {$sel}>".t("Älä näytä poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita oletuksena tuotekyselyssä")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "automaattinen_tuotehaku") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3302,6 +3301,19 @@ if ($fieldname == "extranet_keraysprioriteetti") {
   $ulos .= "<option value='A' {$sel}>";
   $ulos .= t("Extranet-tilaukset kerätään asiakkaan prioriteetilla");
   $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "extranet_private_label") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'E' ? ' selected' : '';
+
+  $ulos .= "<option value=''>".t("Oletus")."</option>";
+  $ulos .= "<option value='E' {$sel}>".t("Private label -ominaisuus toimii vain extranetissä")."</option>";
 
   $ulos .= "</select></td>";
 

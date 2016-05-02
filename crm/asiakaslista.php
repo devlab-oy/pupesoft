@@ -3,7 +3,249 @@
 // käsittämätön juttu, mutta ei voi muuta
 if ($_POST["voipcall"] != "") $_GET["voipcall"]  = "";
 
+if (isset($_POST["tee"])) {
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+}
+
 require "../inc/parametrit.inc";
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+
+  $tiedostonimi = $tmpfilenimi;
+
+  $toot = fopen("/tmp/".$tiedostonimi, "w");
+
+  fwrite($toot, "SALESPERSON_ID;addressNo;CustomerNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
+  fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL;CALL_DATE");
+
+  $haaslisa = "";
+
+  fwrite($toot, ";CALL_TYPE");
+  fwrite($toot, ";OPPORTUNITY");
+  fwrite($toot, ";QTY");
+  fwrite($toot, ";OPP_PROJ_DATE");
+  fwrite($toot, ";END_REASON");
+
+  if (!empty($crm_haas['call_type'])) {
+    $haaslisa .= " AND kalenteri.kentta02 != '' ";
+  }
+  if (!empty($crm_haas['opportunity'])) {
+    $haaslisa .= " AND kalenteri.kentta03 != '' ";
+  }
+  if (!empty($crm_haas['qty'])) {
+    $haaslisa .= " AND kalenteri.kentta04 != '' ";
+  }
+  if (!empty($crm_haas['opp_proj_date'])) {
+    $haaslisa .= " AND kalenteri.kentta05 != '' ";
+  }
+  if (!empty($crm_haas['end_reason'])) {
+    $haaslisa .= " AND kalenteri.kentta06 != '' ";
+  }
+
+  fwrite($toot, "\r\n");
+
+  $asiakaslisa = "";
+
+  if (!empty($mul_asiakasosasto)) {
+    $asiakaslisa .= " AND asiakas.osasto IN ('".implode("','", $mul_asiakasosasto)."')";
+  }
+
+  if (!empty($mul_asiakasryhma)) {
+    $asiakaslisa .= " AND asiakas.ryhma IN ('".implode("','", $mul_asiakasryhma)."')";
+  }
+
+  if (!empty($mul_asiakaspiiri)) {
+    $asiakaslisa .= " AND asiakas.piiri IN ('".implode("','", $mul_asiakaspiiri)."')";
+  }
+
+  if (!empty($mul_asiakasmyyja)) {
+    $asiakaslisa .= " AND asiakas.myyjanro IN ('".implode("','", $mul_asiakasmyyja)."')";
+  }
+
+  if (!empty($mul_asiakastila)) {
+    $asiakaslisa .= " AND asiakas.tila IN ('".implode("','", $mul_asiakastila)."')";
+  }
+
+  $dynaaminen_check = false;
+  $param = 'asiakas';
+
+  $query = "SELECT DISTINCT (COUNT(node.tunnus) - 1) AS syvyys
+            FROM dynaaminen_puu AS node
+            JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+            WHERE node.yhtio = '{$kukarow['yhtio']}'
+            AND node.laji    = '{$param}'
+            AND node.lft     > 1
+            GROUP BY node.lft
+            ORDER BY syvyys";
+  $dynpuu_count_result = pupe_query($query, $link);
+
+  while ($count_row = mysql_fetch_assoc($dynpuu_count_result)) {
+
+    if (!isset(${"mul_".$param.$count_row['syvyys']})) {
+      ${"mul_".$param.$count_row['syvyys']} = array();
+    }
+    else {
+      $dynaaminen_check = true;
+    }
+  }
+
+  if ($dynaaminen_check) {
+    mysql_data_seek($dynpuu_count_result, 0);
+
+    while ($count_row = mysql_fetch_assoc($dynpuu_count_result)) {
+
+      if (count(${"mul_".$param.$count_row['syvyys']}) > 0) {
+        $dynaamiset = '';
+
+        foreach (${"mul_".$param.$count_row['syvyys']} as $dynaaminenx) {
+          if (trim($dynaaminenx) != '') {
+            $dynaaminenx = trim(mysql_real_escape_string($dynaaminenx));
+            $dynaamiset .= "'$dynaaminenx',";
+          }
+        }
+
+        $dynaamiset = substr($dynaamiset, 0, -1);
+
+        if (trim($dynaamiset) != '') {
+
+          $liitoksetlisa = ", GROUP_CONCAT(DISTINCT puun_alkio.liitos) liitokset ";
+          $liitoksetlisawhere = " and puun_alkio.liitos != '' ";
+
+          $query = "SELECT GROUP_CONCAT(DISTINCT node.tunnus) tunnukset
+                    {$liitoksetlisa}
+                    FROM dynaaminen_puu AS node
+                    JOIN puun_alkio ON (puun_alkio.yhtio = node.yhtio AND puun_alkio.puun_tunnus = node.tunnus AND puun_alkio.laji = node.laji)
+                    JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.tunnus IN ($dynaamiset))
+                    WHERE node.yhtio = '{$kukarow['yhtio']}'
+                    AND node.laji    = '{$param}'
+                    AND node.lft     > 1
+                    {$liitoksetlisawhere}
+                    ORDER BY node.lft";
+          $kaikki_puun_tunnukset_res = pupe_query($query, $link);
+          $kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
+
+          if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
+            $lisa_dynaaminen_liitokset[$param] = $kaikki_puun_tunnukset_row["liitokset"];
+          }
+        }
+      }
+    }
+
+    // Dynaamisen puun rajaukset2
+    if (isset($lisa_dynaaminen_liitokset) and count($lisa_dynaaminen_liitokset) > 0) {
+      foreach ($lisa_dynaaminen_liitokset as $d_param => $d_liitokset) {
+        if ($d_liitokset != "") {
+          $asiakaslisa .= " and asiakas.tunnus in ($d_liitokset) ";
+        }
+      }
+    }
+  }
+
+  $pvmlisa = "";
+
+  if (!empty($crm_haas_date_alku) and !empty($crm_haas_date_loppu)) {
+    $_alku_d = (int) $crm_haas_date_alku[0];
+    $_alku_m = (int) $crm_haas_date_alku[1];
+    $_alku_y = (int) $crm_haas_date_alku[2];
+
+    $_loppu_d = (int) $crm_haas_date_loppu[0];
+    $_loppu_m = (int) $crm_haas_date_loppu[1];
+    $_loppu_y = (int) $crm_haas_date_loppu[2];
+
+    if (checkdate($_alku_m, $_alku_d, $_alku_y) and checkdate($_loppu_m, $_loppu_d, $_loppu_y)) {
+      $pvmlisa  = " AND kalenteri.luontiaika >= '{$_alku_y}-{$_alku_m}-{$_alku_d} 00:00:00' ";
+      $pvmlisa .= " AND kalenteri.luontiaika <= '{$_loppu_y}-{$_loppu_m}-{$_loppu_d} 23:59:59' ";
+    }
+  }
+
+  $crm_haas_res = t_avainsana("CRM_HAAS");
+  $crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+
+  $yhteyshenkilo_rooli_lisa = "";
+
+  if ($crm_haas_row['selitetark'] != '') {
+    $yhteyshenkilo_rooli_lisa = " AND yhteyshenkilo.rooli = '{$crm_haas_row['selitetark']}' ";
+  }
+
+  $query = "SELECT kalenteri.*,
+            kalenteri.tunnus AS kalenteritunnus,
+            asiakas.*,
+            asiakas.tunnus AS asiakastunnus,
+            yhteyshenkilo.nimi AS yhteyshenkilo,
+            IF(asiakas.gsm != '', asiakas.gsm,
+            IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+            IF(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
+            kuka.myyja
+            FROM kalenteri
+            JOIN asiakas ON (
+              asiakas.yhtio = kalenteri.yhtio AND
+              asiakas.laji != 'P'
+              {$asiakaslisa}
+            )
+            LEFT JOIN yhteyshenkilo ON (
+              kalenteri.yhtio = yhteyshenkilo.yhtio AND
+              kalenteri.henkilo = yhteyshenkilo.tunnus
+              {$yhteyshenkilo_rooli_lisa}
+            )
+            JOIN kuka ON (
+              kuka.yhtio = kalenteri.yhtio AND
+              kuka.kuka = kalenteri.kuka
+            )
+            WHERE kalenteri.liitostunnus  = asiakas.tunnus
+            AND kalenteri.tyyppi          IN ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
+            AND kalenteri.tapa           != 'asiakasanalyysi'
+            AND kalenteri.yhtio           = '{$kukarow['yhtio']}'
+            AND (kalenteri.perheid = 0 or kalenteri.tunnus = kalenteri.perheid)
+            {$pvmlisa}
+            {$haaslisa}
+            ORDER BY asiakas.tunnus";
+  $res = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($res)) {
+    fwrite($toot, substr($row['myyja'], 0, 10).";");
+
+    # Halutaan regexpillä numerot ja raput ensimmäiseksi
+    # Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
+    preg_match('/\d.*/', $row['osoite'], $matches);
+    $address1 = $matches[0];
+
+    preg_match('/^[^ \d]*/', $row['osoite'], $matches);
+    $address2 = $matches[0];
+
+    $address = $address1." ".$address2;
+
+    fwrite($toot, substr($row['asiakastunnus'], 0, 10).";");
+
+    fwrite($toot, "{$row['ytunnus']};");
+
+    $nimi = trim($row['nimi'].' '.$row['nimitark']);
+    $nimi = substr($nimi, 0, 140);
+    fwrite($toot, "{$nimi};");
+
+    fwrite($toot, substr($row['yhteyshenkilo'], 0, 140).";");
+    fwrite($toot, substr($row['postitp'], 0, 25).";");
+    fwrite($toot, substr($address, 0, 60).";");
+    fwrite($toot, substr($row['postino'], 0, 10).";");
+    fwrite($toot, ";"); # region
+    fwrite($toot, "{$row['maa']};"); # country
+    fwrite($toot, substr($row['puhelin'], 0, 30).";");
+    fwrite($toot, substr($row['email'], 0, 241).";");
+    fwrite($toot, substr($row['luontiaika'], 0, 10));
+    fwrite($toot, ";".substr($row['kentta02'], 0, 100));
+    fwrite($toot, ";".substr($row['kentta03'], 0, 8));
+    fwrite($toot, ";".(int) $row['kentta04']);
+    fwrite($toot, ";{$row['kentta05']}");
+    fwrite($toot, ";".substr($row['kentta06'], 0, 100));
+
+    fwrite($toot, "\r\n");
+  }
+
+  fclose($toot);
+
+  readfile("/tmp/".basename($tmpfilenimi));
+  exit;
+}
 
 if (!isset($konserni))   $konserni = '';
 if (!isset($tee))     $tee = '';
@@ -344,5 +586,54 @@ if (mysql_num_rows($asosresult) > 0) {
 }
 
 echo "</form>";
+
+$crm_haas_res = t_avainsana("CRM_HAAS");
+$crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+$crm_haas_check = (mysql_num_rows($crm_haas_res) > 0 and $crm_haas_row['selite'] == 'K');
+
+if ($crm_haas_check) {
+  echo "<br><br>";
+
+  $tiedostonimi = "crm-haas-{$kukarow['yhtio']}-".date("YmdHis").".csv";
+
+  echo "<form method='post' class='multisubmit' action='?{$ulisa}'>";
+  echo "<table>";
+
+  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+  echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
+  echo "<input type='hidden' name='tmpfilenimi' value='$tiedostonimi'>";
+
+  echo "<tr><td class='back'><font class='info'>";
+  echo t("Huom. taulukon omat rajaukset eivät vaikuta aineiston luontiin");
+  echo "</font></td></tr>";
+
+  echo "<tr>";
+  echo "<th>",t("Valitse CRM Haas -kentät"),"</th>";
+  echo "<td>";
+  echo "<input type='checkbox' name='crm_haas[call_type]' checked /> CALL_TYPE<br>";
+  echo "<input type='checkbox' name='crm_haas[opportunity]' /> OPPORTUNITY<br>";
+  echo "<input type='checkbox' name='crm_haas[qty]' /> QTY<br>";
+  echo "<input type='checkbox' name='crm_haas[opp_proj_date]' /> OPP_PROJ_DATE<br>";
+  echo "<input type='checkbox' name='crm_haas[end_reason]' /> END_REASON";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>",t("Aikarajaus"),"</th>";
+  echo "<td>";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='",date('d', mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='",date("m", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='",date("Y", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='5' maxlength='4' /> ";
+  echo " - ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("d"),"' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("m"),"' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("Y"),"' size='5' maxlength='4' /> ";
+  echo "</td>";
+  echo "</tr>";
+  echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Tallenna CSV"),"' /></td></tr>";
+  echo "</td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</form>";
+}
 
 require "inc/footer.inc";

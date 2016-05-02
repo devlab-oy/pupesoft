@@ -7,6 +7,24 @@ if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+echo "<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+  <!--
+
+  function toggleAll(toggleBox) {
+
+    var currForm = toggleBox.form;
+    var isChecked = toggleBox.checked;
+    var nimi = toggleBox.name;
+    for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+      if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,26) == nimi) {
+        currForm.elements[elementIdx].checked = isChecked;
+      }
+    }
+  }
+
+  //-->
+</script>";
+
 if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
@@ -16,13 +34,25 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 
 // Enaboidaan ajax kikkare
 enable_ajax();
+echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
 
-if ($toiminto == 'NAYTALAITTEET' and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku))) {
+if (($toiminto == 'NAYTALAITTEET' or !isset($toiminto)) and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku))) {
   echo "<font class='error'>".t("Anna vähintään yksi rajaus")."!</font><br/>";
-  $toiminto = 'RAJAALAITTEET'; 
+  $toiminto = 'RAJAALAITTEET';
+}
+else {
+  // Uusi haku-vaihtoehto
+  echo "<form name='uusihaku'>";
+  echo "<input type='hidden' name='toiminto' value='$toiminto'>";
+  echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
+  echo "<input type='hidden' name='lopetus' value='$lopetus' />";
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
+  echo "<input type='submit' name='uusi_haku' value='".t('Tee uusi haku')."'/>";
+  echo "</form>";
+  echo "<br><br>";
 }
 
-if ($toiminto == 'LINKKAA') {
+if ($toiminto == 'LINKKAA' or $vanhatoiminto == 'LINKKAA') {
   pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));
 }
 elseif ($toiminto != 'RAJAALAITTEET') {
@@ -31,7 +61,7 @@ elseif ($toiminto != 'RAJAALAITTEET') {
 
 $maara_paivitetty = false;
 
-if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_laite_sopimusrivilta)) {
+if (($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") and isset($tilausrivin_tunnus) and isset($poista_laite_sopimusrivilta)) {
   // Poistetaan laite sopimusriviltä
   $query = "DELETE FROM laitteen_sopimukset
             WHERE laitteen_tunnus   = '{$poista_laite_sopimusrivilta}'
@@ -40,7 +70,7 @@ if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_lait
   pupe_query($query);
   $maara_paivitetty = true;
 }
-elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville) and count($lisaa_laite_sopimusriville) > 0) {
+elseif (($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville) and count($lisaa_laite_sopimusriville) > 0) {
   // Lisätään laite sopimusriville
   foreach ($lisaa_laite_sopimusriville as $laitetunnus) {
     $query = "INSERT INTO laitteen_sopimukset
@@ -50,6 +80,9 @@ elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_l
     pupe_query($query);
   }
   $maara_paivitetty = true;
+}
+elseif (!empty($tilausrivin_tunnus)) {
+  $vanhatoiminto = 'LINKKAA';
 }
 
 if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
@@ -125,8 +158,6 @@ elseif (isset($peruuta_uusi) or isset($peruuta)) {
   unset($sopimuspaattyypvm);
 }
 
-echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
-
 $laiterajaus = '';
 if (isset($laitetunnus) and $laitetunnus > 0) {
   $laiterajaus = " AND laite.tunnus = '{$laitetunnus}'";
@@ -151,7 +182,7 @@ $headerit = array(
   "mac"
 );
 
-if ($toiminto == "LINKKAA") {
+if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
   // Halutaan linkata laitteita sopimuksen palveluriville
   if (!isset($tilausrivin_tunnus) or $tilausrivin_tunnus < 1) {
     echo "Et voi linkata laitteita ilman tilausrivin tunnusta";
@@ -166,6 +197,7 @@ if ($toiminto == "LINKKAA") {
   echo "<input type='hidden' name='toiminto' value='$toiminto'>";
   echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus' />";
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
   echo "<font class='head'>".t("Sopimusriviin %s liitetyt laitteet", '', $tilausrivin_tunnus)."</font>";
   echo "<br><br>";
   echo "<table>";
@@ -238,6 +270,7 @@ if ($toiminto == "LINKKAA") {
 if (empty($toiminto)) {
   echo "<form>";
   echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
   echo "<input type='submit' name='uusi_laite' value='Uusi laite' />";
   echo "</form>";
 }
@@ -246,6 +279,7 @@ if ($toiminto != 'RAJAALAITTEET') {
   // Ekotellaan headerit
   echo "<form id='laiterekisteriformi' name='laiterekisteriformi'>";
   echo "<input type='hidden' name='toiminto' value='$toiminto'>";
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
   echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus' />";
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
@@ -263,11 +297,16 @@ if (empty($toiminto) or $toiminto == 'LINKKAA' or $toiminto == 'NAYTALAITTEET') 
     echo "<td><input type='text' class='search_field' name='search_{$hiid}'/></td>";
   }
   echo "</tr>";
+  echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
+  
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
+  echo "<input type='hidden' name='lopetus' value='$lopetus' />";
 }
 echo "</thead>";
 
-if (empty($toiminto) or $toiminto == 'LINKKAA') {
+if (empty($toiminto) or $toiminto == 'LINKKAA' or $vanhatoiminto == 'LINKKAA') {
   echo "<br><input type='submit' name='linkkaus' value='Liitä valitut laitteet'/><br><br>";
+  if ($toiminto == "NAYTALAITTEET" and $vanhatoiminto == "LINKKAA")  echo "<br><br>".t("Valitse kaikki taulukon laitteet")." <input type='checkbox' name='lisaa_laite_sopimusriville' onclick='toggleAll(this);'>";
 }
 
 if ($toiminto == 'NAYTALAITTEET') {
@@ -415,12 +454,11 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "</tr>";
 }
 elseif ($toiminto == 'NAYTALAITTEET') {
-
   while ($rowi = mysql_fetch_assoc($res)) {
     $asiakas = '';
 
     echo "<tr>";
-    if ($toiminto == "LINKKAA") {
+    if ($vanhatoiminto == "LINKKAA") {
       echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville[]'  value='{$rowi['tunnus']}'/></td>";
       echo "<td>{$rowi['tunnus']}</td>";
     }
@@ -539,6 +577,9 @@ elseif ($toiminto == 'NAYTALAITTEET') {
 else {
   echo "<form id='laiterajausformi' name='laiterajausformi'>";
   echo "<input type='hidden' name='toiminto' value='NAYTALAITTEET' />";
+  echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
+  echo "<input type='hidden' name='lopetus' value='$lopetus' />";
+  echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
   echo "<table>";
 
   echo "<tr><th colspan='2'>".t('Anna vähintään yksi hakuehto')."</th></tr>";

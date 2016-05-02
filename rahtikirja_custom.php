@@ -99,6 +99,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   // kerrotaan että tämä on custom rahtikirja == ei haeta laskulta mitään
   $GLOBALS['tyhja'] = 1;
 
+  $osoitelappurow = array();
+
   if ($data['merahti'] == 'K') {
     $rahdinmaksaja = 'Lähettäjä';
     $toitarow = array(
@@ -113,9 +115,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       'selite'           => $data['toimitustapa'],
       'rahdinkuljettaja' => '',
     );
-  }
 
-  $osoitelappurow = array();
+    if (!empty($data["rahtisopimus"])) {
+      $osoitelappurow["rahtisopimus"] = $data["rahtisopimus"];
+    }
+  }
 
   if (isset($tulostakopio)) {
     $osoitelappurow = unserialize($data['tyhjanrahtikirjan_otsikkotiedot'][0]);

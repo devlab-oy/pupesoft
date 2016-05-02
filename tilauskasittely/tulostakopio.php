@@ -2277,13 +2277,16 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
         }
       }
+      $query_ale_lisa = generoi_alekentta('M');
 
+      $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
       $ale_query_select_lisa_y = generoi_alekentta_select('yhteen', 'M');
 
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
+                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   tuote.sarjanumeroseuranta,
                   kerayserat.kpl as tilkpl,
                   kerayserat.kpl as varattu,
@@ -2302,6 +2305,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       else {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
+                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   $select_lisa
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

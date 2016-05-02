@@ -820,7 +820,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   if ($_tulostakopio) {
     $lopetus .= $palvelin2;
     $lopetus .= "tilauskasittely/tulostakopio.php";
-    $lopetus .= "////toim=OSTO";
+    $lopetus .= "////toim=$toim";
     $lopetus .= "//tee=NAYTAHTML";
     $lopetus .= "//asiakasid=$asiakasid";
     $lopetus .= "//toimittajaid=$toimittajaid";

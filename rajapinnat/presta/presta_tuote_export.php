@@ -79,6 +79,7 @@ else {
   $synkronoi = array(
     'kategoriat'    => t('Kategoriat'),
     'tuotteet'      => t('Tuotteet ja tuotekuvat'),
+    'saldot'        => t('Saldot'),
     'asiakasryhmat' => t('Asiakasryhmät'),
     'asiakkaat'     => t('Asiakkaat'),
     'asiakashinnat' => t('Asiakashinnat'),
@@ -227,8 +228,10 @@ if (array_key_exists('kategoriat', $synkronoi)) {
   $kategoriat = presta_hae_kategoriat();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotekategoriat.\n";
-  $presta_categories = new PrestaCategories($presta_url, $presta_api_key, $presta_home_category_id);
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
+  $presta_categories->set_home_category_id($presta_home_category_id);
+  $presta_categories->set_languages_table($presta_kieliversiot);
   $presta_categories->sync_categories($kategoriat);
 }
 
@@ -238,11 +241,12 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
   echo date("d.m.Y @ G:i:s")." - Siirretään tuotetiedot.\n";
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key, $presta_home_category_id);
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
 
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_products->set_dynamic_fields($presta_dynaamiset_tuoteparametrit);
+  $presta_products->set_home_category_id($presta_home_category_id);
   $presta_products->set_languages_table($presta_kieliversiot);
   $presta_products->set_product_features($presta_tuoteominaisuudet);
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
@@ -250,6 +254,20 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_visibility_type($presta_tuotekasittely);
 
   $presta_products->sync_products($tuotteet);
+}
+
+if (array_key_exists('saldot', $synkronoi)) {
+  // tämä on voitu jo hakea tuotetietojen yhteydessä, ei tartte uutta queryä
+  if (empty($kaikki_tuotteet)) {
+    echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
+    $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
+  }
+
+  echo date("d.m.Y @ G:i:s")." - Siirretään saldot.\n";
+  $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key);
+
+  $presta_stocks->set_all_products($kaikki_tuotteet);
+  $presta_stocks->update_stock();
 }
 
 if (array_key_exists('asiakasryhmat', $synkronoi)) {

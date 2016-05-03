@@ -933,6 +933,7 @@ if ($tee == "file") {
     $perheid   = '';
     $perheid2    = '';
     $tee     = 'Y';
+    $lopetus = '';
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'ale'.$alepostfix} = '';
@@ -954,6 +955,7 @@ if ($tee == "file") {
     $perheid   = '';
     $perheid2    = '';
     $tee     = 'Y';
+    $lopetus = '';
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'ale'.$alepostfix} = '';

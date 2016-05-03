@@ -278,7 +278,30 @@ function presta_hae_kategoriat() {
   $kategoriat = array();
 
   while ($kategoria = mysql_fetch_assoc($result)) {
-    $kategoriat[] = $kategoria;
+    // Haetaan kategorian käännökset
+    $query = "SELECT kieli, tarkenne
+              FROM dynaaminen_puu_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$kategoria['node_tunnus']}'
+              AND laji = 'tuote'
+              AND avainsana = 'nimi'";
+    $tr_result = pupe_query($query);
+    $kaannokset = array();
+
+    while ($tr_row = mysql_fetch_assoc($tr_result)) {
+      $kaannokset[] = array(
+        "kieli" => $tr_row['kieli'],
+        "nimi"  => $tr_row['tarkenne']
+      );
+    }
+
+    $kategoriat[] = array(
+      "kaannokset"    => $kaannokset,
+      "koodi"         => $kategoria['koodi'],
+      "nimi"          => $kategoria['nimi'],
+      "node_tunnus"   => $kategoria['node_tunnus'],
+      "parent_tunnus" => $kategoria['parent_tunnus'],
+    );
   }
 
   return $kategoriat;
@@ -352,12 +375,16 @@ function presta_hae_tuotteet() {
   $tuoterajaus = presta_tuoterajaus();
 
   if ($ajetaanko_kaikki == "NO") {
-    $tuoterajaus .= " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
+    $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}') ";
   }
 
   // Haetaan pupesta tuotteen tiedot
-  $query = "SELECT tuote.*
+  $query = "SELECT distinct tuote.*
             FROM tuote
+            LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
+              AND puun_alkio.laji = 'tuote'
+              AND puun_alkio.liitos = tuote.tuoteno)
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);

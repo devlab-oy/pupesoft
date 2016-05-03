@@ -39,6 +39,13 @@ else exit;
 
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
+  $lquery = "SELECT *
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tunnus  = '{$tilausnumero}'";
+  $lresult  = pupe_query($lquery);
+  $laskurow = mysql_fetch_assoc($lresult);
+
   $query = "SELECT *
             FROM tuote
             WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -68,7 +75,11 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, ($kotisumma * $kpl), $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
+
+  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+  }
 
   echo json_encode(array(
     'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
@@ -113,7 +124,11 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, ($kotisumma * $kpl), $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
+
+  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+  }
 
   echo json_encode(array(
     'hinta' => round($hinta, $yhtiorow['hintapyoristys']),

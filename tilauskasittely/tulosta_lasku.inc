@@ -846,11 +846,17 @@ if (!function_exists('rivi_lasku')) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
     }
 
-    if ($yhtiorow['ennakkolaskun_tyyppi'] == 'K') {
+    $_ennakkolaskun_tyyppi_check = ($yhtiorow['ennakkolaskun_tyyppi'] == 'K');
+    $_ennakkolaskun_tyyppi_check = ($_ennakkolaskun_tyyppi_check and $laskurow['clearing'] == 'ENNAKKOLASKU');
+
+    if ($_ennakkolaskun_tyyppi_check) {
+
+      // Ennakkomaksu_tuotenumerolle tehd‰‰n tuotenumero ja nimitys kuin olisi myyty normaalisti
       if (preg_match('/^[^ ]*/', $row['nimitys'], $matches)) {
         $row['tuoteno'] = $matches[0];
         $row["nimitys"] = str_replace($row['tuoteno'].' - ', '', $row['nimitys']);
       }
+
       if (strpos($row["kommentti"], "100%") !== false) {
         $_ennakkoteksti = t("Ennakkolasku");
         $row["kommentti"] = preg_replace("/{$_ennakkoteksti}.*100\%/", '', $row["kommentti"]);
@@ -3020,11 +3026,11 @@ if (!function_exists("tulosta_lasku")) {
       $laskurow["tapvm"] = date("Y-m-d");
 
       $lisa = " sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta,
-                sum(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
+                sum(tilausrivi.varattu+tilausrivi.kpl) kpl ";
     }
     else {
       $lisa = " sum(tilausrivi.rivihinta) rivihinta,
-                sum(tilausrivi.kpl) kpl,";
+                sum(tilausrivi.kpl) kpl ";
     }
 
     $sivu = 1;
@@ -3074,6 +3080,8 @@ if (!function_exists("tulosta_lasku")) {
               if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
               if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
               tuote.myyntihinta,
+              $sorttauskentta,
+              lasku.tilausyhteyshenkilo,
               min(tilausrivi.hyllyalue) hyllyalue,
               min(tilausrivi.hyllynro) hyllynro,
               min(tilausrivi.keratty) keratty,
@@ -3093,7 +3101,6 @@ if (!function_exists("tulosta_lasku")) {
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
               $lisa
-              $sorttauskentta
               FROM tilausrivi
               JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -3102,8 +3109,8 @@ if (!function_exists("tulosta_lasku")) {
               and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               and tilausrivi.varattu+tilausrivi.kpl != 0
               $where
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-              ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
+              ORDER BY otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tunnus";
     $result = pupe_query($query);
 
     $kaanteinen_verotus = FALSE;
@@ -3231,8 +3238,8 @@ if (!function_exists("tulosta_lasku")) {
 
           $yhteensa_rivikommentti_lisatty = 10;
 
-          if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])."\n".$row["kommentti"];
+          if (trim($row['tilausyhteyshenkilo']) != '') {
+            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$row['tilausyhteyshenkilo'])."\n".$row["kommentti"];
             $yhteensa_rivikommentti_lisatty += 10;
           }
         }

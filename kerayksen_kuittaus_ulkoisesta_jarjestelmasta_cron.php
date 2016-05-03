@@ -108,7 +108,7 @@ if ($handle = opendir($path)) {
 
           $tuotteiden_paino = 0;
 
-          $kerayspoikkeama = array();
+          $kerayspoikkeama = $tilausrivit = array();
 
           if (mysql_num_rows($laskures) > 0) {
 
@@ -120,10 +120,23 @@ if ($handle = opendir($path)) {
             }
 
             foreach ($lines as $line) {
+              $tunnus = (int) $line->TransId;
 
-              $tilausrivin_tunnus = (int) $line->TransId;
-              $eankoodi = mysql_real_escape_string($line->ItemNumber);
-              $keratty = (float) $line->DeliveredQuantity;
+              if (!isset($tilausrivit[$tunnus])) {
+                $tilausrivit[$tunnus] = array(
+                  'eankoodi' => mysql_real_escape_string($line->ItemNumber),
+                  'keratty' => (float) $line->DeliveredQuantity
+                );
+              }
+              else {
+                $tilausrivit[$tunnus]['keratty'] += (float) $line->DeliveredQuantity;
+              }
+            }
+
+            foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
+
+              $eankoodi = $data['eankoodi'];
+              $keratty  = $data['keratty'];
 
               $query = "SELECT *
                         FROM tilausrivi

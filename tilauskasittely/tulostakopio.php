@@ -1084,7 +1084,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th valign='top'>";
 
-    if ($toim != 'VASTAANOTTORAPORTTI') {
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
       echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
     }
 
@@ -1130,7 +1130,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U" and $toim != 'VASTAANOTTORAPORTTI') {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
         echo $row['tunnus'];
       }
 

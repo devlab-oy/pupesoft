@@ -31600,7 +31600,7 @@ if (!function_exists("tee_ennakkolasku")) {
       $laskutettavat    = $ennakkolasku;
       $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
 
-      require "verkkolasku.php";
+      require "{$pupe_root_polku}/tilauskasittely/verkkolasku.php";
     }
 
     // P‰ivitet‰‰n alkuper‰iselle tilaukselle "jaksotettu" maksuehto

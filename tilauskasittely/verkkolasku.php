@@ -25,7 +25,7 @@
 ini_set("memory_limit", "5G");
 
 // Kutsutaanko CLI:stä
-$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli))) && $no_cli === false;
+$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli))) && (!isset($no_cli) || $no_cli === false);
 
 if ($php_cli) {
 

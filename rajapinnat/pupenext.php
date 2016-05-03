@@ -159,6 +159,17 @@ function pupenext_lisaa_rivi($params) {
   );
 }
 
+function pupenext_tuoteperheiden_hintojen_paivitys($params) {
+  $parent_row_ids = isset($params->parent_row_ids) ? $params->parent_row_ids : die('Tuoteperheiden tunnukset täytyy antaa');
+
+  $_params = array(
+    'isatunnukset' => (array) $parent_row_ids,
+    'override'     => true,
+  );
+
+  return array('status' => tuoteperheiden_hintojen_paivitys($_params));
+}
+
 function capture_status() {
   $status_raw = ob_get_contents();
 

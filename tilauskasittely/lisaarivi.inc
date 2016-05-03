@@ -109,8 +109,12 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 }
 
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
-  function tuoteperheiden_hintojen_paivitys($isatunnukset, $tyyppi = 'P') {
+  function tuoteperheiden_hintojen_paivitys($params) {
     global $yhtiorow, $kukarow;
+
+    $isatunnukset = isset($params['isatunnukset']) ? $params['isatunnukset'] : [];
+    $tyyppi       = isset($params['tyyppi'])       ? $params['tyyppi']       : 'P';
+    $override     = isset($params['override'])     ? $params['override']     : false;
 
     // tutkittavat rivitunnukset pitää olla array
     if (!is_array($isatunnukset) or count($isatunnukset) == 0) {
@@ -3798,5 +3802,10 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
 
 // Katsotaan lopuksi vielä tuoteperheiden hinnoittelu kaikille lisätyille riveille
 if (!empty($lisatyt_perheet)) {
-  tuoteperheiden_hintojen_paivitys($lisatyt_perheet, $tuoteperhe_tyyppi);
+  $params = array(
+    'isatunnukset' => $lisatyt_perheet,
+    'tyyppi'       => $tuoteperhe_tyyppi,
+  );
+
+  tuoteperheiden_hintojen_paivitys($params);
 }

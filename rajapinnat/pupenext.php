@@ -28,6 +28,8 @@ ini_set("include_path",
   "/usr/share/php/"          . PATH_SEPARATOR
 );
 
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
@@ -84,10 +86,11 @@ function pupenext_luo_myyntitilausotsikko($params) {
 }
 
 function pupenext_tilaus_valmis($params) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $pupe_root_polku;
 
   $order_id             = (int) $params->order_id;
   $tee_100_ennakkolasku = isset($params->create_preliminary_invoice) ? $params->create_preliminary_invoice : false;
+  $no_cli               = true;
 
   if (empty($order_id)) {
     return null;

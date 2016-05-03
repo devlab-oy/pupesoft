@@ -32838,7 +32838,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {
     global $yhtiorow, $kukarow;
 
-    $isatunnukset = isset($params['isatunnukset']) ? $params['isatunnukset'] : [];
+    $isatunnukset = isset($params['isatunnukset']) ? $params['isatunnukset'] : array();
     $tyyppi       = isset($params['tyyppi'])       ? $params['tyyppi']       : 'P';
     $override     = isset($params['override'])     ? $params['override']     : false;
 
@@ -32866,8 +32866,9 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
 
       $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
 
-      // jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n
-      if ($hinnoittelu_isatuotteella === FALSE) {
+      // Jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n,
+      // jos asetusta ei ole yliajettu parametreiss‰
+      if ($hinnoittelu_isatuotteella === false && $override === false) {
         continue;
       }
 

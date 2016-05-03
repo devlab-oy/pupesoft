@@ -8511,6 +8511,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
+            and $yhtiorow["puute_jt_oletus"] != "H"
           ) {
 
             echo "<br />";

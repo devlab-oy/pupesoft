@@ -21,14 +21,14 @@ elseif (empty($function)) {
 }
 
 // otetaan includepath aina rootista
-ini_set("include_path",
-  ini_get("include_path")    . PATH_SEPARATOR .
-  dirname(dirname(__FILE__)) . PATH_SEPARATOR .
-  "/usr/share/pear"          . PATH_SEPARATOR .
-  "/usr/share/php/"          . PATH_SEPARATOR
-);
-
 $pupe_root_polku = dirname(dirname(__FILE__));
+
+ini_set("include_path",
+  ini_get("include_path") . PATH_SEPARATOR .
+  $pupe_root_polku        . PATH_SEPARATOR .
+  "/usr/share/pear"       . PATH_SEPARATOR .
+  "/usr/share/php/"       . PATH_SEPARATOR
+);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";

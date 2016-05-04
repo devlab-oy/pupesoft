@@ -142,7 +142,7 @@ if ($handle = opendir($path)) {
           }
         }
 
-        if (!empty($saapumistunnus) and count($tilausrivit) > 0) {
+        if ($saapumistunnus != 0 and count($tilausrivit) > 0) {
           $query = "UPDATE lasku SET
                     sisviesti3   = 'ok_vie_varastoon'
                     WHERE yhtio  = '{$yhtio}'

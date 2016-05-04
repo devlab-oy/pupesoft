@@ -392,6 +392,9 @@ if [[ ${bundle} = true ]]; then
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
 
+  # Write cron file
+  bundle exec whenever --update-crontab pupesoft_cronjobs
+
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&
   RAILS_ENV=${environment} TERM_CHILD=1 BACKGROUND=yes QUEUES=* bundle exec rake resque:work

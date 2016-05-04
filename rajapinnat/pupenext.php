@@ -90,7 +90,7 @@ function pupenext_tilaus_valmis($params) {
 
   $order_id             = (int) $params->order_id;
   $tee_100_ennakkolasku = isset($params->create_preliminary_invoice) ? $params->create_preliminary_invoice : false;
-  $no_cli               = true;
+  $force_web            = true;
 
   if (empty($order_id)) {
     return null;

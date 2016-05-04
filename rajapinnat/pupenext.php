@@ -21,11 +21,13 @@ elseif (empty($function)) {
 }
 
 // otetaan includepath aina rootista
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 ini_set("include_path",
-  ini_get("include_path")    . PATH_SEPARATOR .
-  dirname(dirname(__FILE__)) . PATH_SEPARATOR .
-  "/usr/share/pear"          . PATH_SEPARATOR .
-  "/usr/share/php/"          . PATH_SEPARATOR
+  ini_get("include_path") . PATH_SEPARATOR .
+  $pupe_root_polku        . PATH_SEPARATOR .
+  "/usr/share/pear"       . PATH_SEPARATOR .
+  "/usr/share/php/"       . PATH_SEPARATOR
 );
 
 // otetaan tietokanta connect ja funktiot
@@ -84,10 +86,11 @@ function pupenext_luo_myyntitilausotsikko($params) {
 }
 
 function pupenext_tilaus_valmis($params) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $pupe_root_polku;
 
   $order_id             = (int) $params->order_id;
   $tee_100_ennakkolasku = isset($params->create_preliminary_invoice) ? $params->create_preliminary_invoice : false;
+  $force_web            = true;
 
   if (empty($order_id)) {
     return null;
@@ -157,6 +160,17 @@ function pupenext_lisaa_rivi($params) {
   return array(
     'added_row' => $added_rows[0][0],
   );
+}
+
+function pupenext_tuoteperheiden_hintojen_paivitys($params) {
+  $parent_row_ids = isset($params->parent_row_ids) ? $params->parent_row_ids : die('Tuoteperheiden tunnukset täytyy antaa');
+
+  $_params = array(
+    'isatunnukset' => (array) $parent_row_ids,
+    'override'     => true,
+  );
+
+  return array('status' => tuoteperheiden_hintojen_paivitys($_params));
 }
 
 function capture_status() {

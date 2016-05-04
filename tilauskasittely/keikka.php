@@ -829,10 +829,33 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             $laatijalisa
             {$kohdistuslisa}
             {$toimipaikkalisa}
-            GROUP BY lasku.liitostunnus
+            GROUP BY lasku.tunnus
             {$havinglisa}
-            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY lasku.liitostunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus";
   $result = pupe_query($query);
+echo "836 Q $query <br><br>";
+  $rivit = array();
+  $lask;
+
+  while ($row = mysql_fetch_assoc($result)) {
+    if ($row["liitostunnus"] == $rivit[$lask]["liitostunnus"]) {
+      $rivit[$lask]["varastossaarvo"] = $rivit[$lask]["varastossaarvo"] + $row["varastossaarvo"];
+      $rivit[$lask]["varastoonvietyarvo"] = $rivit[$lask]["varastoonvietyarvo"] + $row["varastoonvietyarvo"];
+      $rivit[$lask]["kohdistettuarvo"] = $rivit[$lask]["kohdistettuarvo"] + $row["kohdistettuarvo"];
+
+
+
+    }
+    else {
+      $rivit[] = $row;
+    }
+
+
+    $lask = $lask + 1;
+
+
+
+  }
 
   if (mysql_num_rows($result) > 0) {
 
@@ -843,7 +866,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
     $toimipaikka = isset($toimipaikka) ? $toimipaikka : 'kaikki';
 
-    while ($row = mysql_fetch_assoc($result)) {
+    foreach ($rivit as $row) {
 
       $query = "SELECT count(*) num,
                 sum(if(vienti in ('C','F','I','J','K','L'), 1, 0)) volasku,

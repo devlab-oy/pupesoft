@@ -7168,8 +7168,14 @@ if (!function_exists("paivita_toimitukset")) {
 }
 
 if (!function_exists("tulosta_ytunnus")) {
-  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "") {
+  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;
+
+    $ytunnus_vai_hetu = tarkistahetu($ytunnus);
+
+    if (strpos($ytunnus_vai_hetu, "XXXX") !== false) {
+      return $hetu_tarkenne ? $ytunnus : $ytunnus_vai_hetu;
+    }
 
     if ($maa == "") {
       $maa = $yhtiorow["maa"];

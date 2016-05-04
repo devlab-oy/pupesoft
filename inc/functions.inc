@@ -31600,7 +31600,7 @@ if (!function_exists("tee_ennakkolasku")) {
       $laskutettavat    = $ennakkolasku;
       $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
 
-      require "verkkolasku.php";
+      require "{$pupe_root_polku}/tilauskasittely/verkkolasku.php";
     }
 
     // Päivitetään alkuperäiselle tilaukselle "jaksotettu" maksuehto
@@ -32759,5 +32759,168 @@ if (!function_exists('pupesoft_log')) {
     }
 
     fclose($file_handle);
+  }
+}
+
+if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
+  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    $response = array();
+
+    $query = "SELECT
+              tuote.kehahin,
+              tuoteperhe.alekerroin,
+              tuoteperhe.hintakerroin,
+              tuoteperhe.hintatyyppi,
+              tuoteperhe.kerroin,
+              tuoteperhe.tuoteno
+              FROM tuoteperhe
+              JOIN tuote USING (yhtio, tuoteno)
+              WHERE tuoteperhe.yhtio = '{$kukarow['yhtio']}'
+              AND tuoteperhe.tyyppi = '{$tyyppi}'
+              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'
+              ORDER BY hintatyyppi DESC";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+      return $response;
+    }
+
+    // haetaan eka rivi
+    $row = mysql_fetch_assoc($result);
+
+    // onko meillä isätuotteeseen perustuva hinnoittelu
+    $hinnoittelu_isatuotteella = $row['hintatyyppi'];
+
+    // resultti alkuun
+    mysql_data_seek($result, 0);
+
+    $kokonaisarvo = 0;
+
+    // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
+    // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
+    if (!empty($hinnoittelu_isatuotteella)) {
+      while ($row = mysql_fetch_assoc($result)) {
+        $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+      }
+
+      // resultti alkuun
+      mysql_data_seek($result, 0);
+    }
+
+    while ($row = mysql_fetch_assoc($result)) {
+      // jos hinnoitellaan isätuotteella
+      // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole käytössä
+      if (!empty($hinnoittelu_isatuotteella)) {
+        $alekerroin   = 1;
+        $hintakerroin = $row['kehahin'] / $kokonaisarvo;
+      }
+      else {
+        $alekerroin   = $row['alekerroin'];
+        $hintakerroin = $row['hintakerroin'];
+      }
+
+      $response[] = array(
+        "alekerroin"   => (float) $alekerroin,
+        "hintakerroin" => (float) $hintakerroin,
+        "hintatyyppi"  => $hinnoittelu_isatuotteella,
+        "kerroin"      => (float) $row['kerroin'],
+        "tuoteno"      => $row['tuoteno'],
+      );
+    }
+
+    return $response;
+  }
+}
+
+if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
+  function tuoteperheiden_hintojen_paivitys($params) {
+    global $yhtiorow, $kukarow;
+
+    $isatunnukset = isset($params['isatunnukset']) ? $params['isatunnukset'] : array();
+    $tyyppi       = isset($params['tyyppi'])       ? $params['tyyppi']       : 'P';
+    $override     = isset($params['override'])     ? $params['override']     : false;
+
+    // tutkittavat rivitunnukset pitää olla array
+    if (!is_array($isatunnukset) or count($isatunnukset) == 0) {
+      return;
+    }
+
+    foreach($isatunnukset as $isa => $perhe) {
+
+      $tunnukset = implode(", ", $perhe);
+
+      // Haetaan kaikki isätuotteet
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = $isa
+                AND perheid = tunnus";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      // katsotaan lapsien kertoimet
+      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $laskettu_hinta = 0;
+
+      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
+
+      // Jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään,
+      // jos asetusta ei ole yliajettu parametreissä
+      if ($hinnoittelu_isatuotteella === false && $override === false) {
+        continue;
+      }
+
+      foreach ($kertoimet as $lapsituote) {
+        // lasketaan lapsituotteen hinta isän hinnasta
+        $hinta = round($row['hinta'] * $lapsituote['hintakerroin'], $yhtiorow['hintapyoristys']);
+        $laskettu_hinta += ($hinta * $row['tilkpl'] * $lapsituote['kerroin']);
+
+        // päivitetään lapsituotteen hinta
+        $query = "UPDATE tilausrivi SET
+                  ale1       = '{$row['ale1']}',
+                  ale2       = '{$row['ale2']}',
+                  ale3       = '{$row['ale3']}',
+                  erikoisale = '{$row['erikoisale']}',
+                  hinta      = '{$hinta}',
+                  netto      = '{$row['netto']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$lapsituote['tuoteno']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tilkpl  = {$row['tilkpl']} * {$lapsituote['kerroin']}
+                  AND tunnus != perheid
+                  AND tunnus in ({$tunnukset})";
+        pupe_query($query);
+      }
+
+      // päivitetään isätuote nollaksi
+      $query = "UPDATE tilausrivi SET
+                ale1       = 0,
+                ale2       = 0,
+                ale3       = 0,
+                erikoisale = 0,
+                hinta      = 0,
+                netto      = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$row['tunnus']}";
+      pupe_query($query);
+
+      // katsotaan pyöristysero
+      $pyoristysero = $laskettu_hinta - ($row['hinta'] * $row['tilkpl']);
+
+      // jos on pyöristyseroa
+      if ($pyoristysero != 0) {
+        $vikalapsi = array_pop($perhe);
+
+        // Lisätään pyöristys tämän perheen vikalle lapselle
+        $query = "UPDATE tilausrivi SET
+                  hinta = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tunnus  = $vikalapsi";
+        pupe_query($query);
+      }
+    }
   }
 }

@@ -24,8 +24,9 @@
 // Tämä vaatii paljon muistia
 ini_set("memory_limit", "5G");
 
-// Kutsutaanko CLI:stä
-$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli))) && (!isset($no_cli) || $no_cli === false);
+// Kutsutaanko CLI:stä, jos setataan force_web saadaan aina "ei cli" -versio
+$force_web = (isset($force_web) and $force_web === true);
+$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli)) and $force_web === false);
 
 if ($php_cli) {
 

@@ -114,30 +114,31 @@ if ($handle = opendir($path)) {
             }
           }
 
-          if (count($tilausrivit) > 0) {
-            foreach ($tilausrivit as $rivitunnus => $data) {
+          foreach ($tilausrivit as $rivitunnus => $data) {
 
-              $tuoteno = $data['tuoteno'];
-              $kpl     = $data['kpl'];
+            $tuoteno = $data['tuoteno'];
+            $kpl     = $data['kpl'];
 
-              if ($kpl != 0 and $saapumistunnus != 0) {
-                $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
-              }
-              else {
-                $uusiotunnuslisa = "";
-              }
-
-              # P‰ivitet‰‰n varattu ja kohdistetaan rivi
-              $query = "UPDATE tilausrivi SET
-                        varattu         = '{$kpl}'
-                        {$uusiotunnuslisa}
-                        WHERE yhtio     = '{$yhtio}'
-                        AND tyyppi      = 'O'
-                        AND otunnus     = '{$ostotilaus}'
-                        AND tuoteno     = '{$tuoteno}'
-                        AND tunnus      = '{$rivitunnus}'";
-              $updres = pupe_query($query);
+            # Jos sanomassa on kappaleita ja tiedet‰‰n saapuminen
+            # Kohdistetaan t‰m‰ rivi saapumiseen
+            # Aiemmin ollaan poistettu kaikki t‰m‰n saapumisen kohdistukset
+            if ($kpl != 0 and $saapumistunnus != 0) {
+              $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
             }
+            else {
+              $uusiotunnuslisa = "";
+            }
+
+            # P‰ivitet‰‰n varattu ja kohdistetaan rivi
+            $query = "UPDATE tilausrivi SET
+                      varattu         = '{$kpl}'
+                      {$uusiotunnuslisa}
+                      WHERE yhtio     = '{$yhtio}'
+                      AND tyyppi      = 'O'
+                      AND otunnus     = '{$ostotilaus}'
+                      AND tuoteno     = '{$tuoteno}'
+                      AND tunnus      = '{$rivitunnus}'";
+            $updres = pupe_query($query);
           }
         }
 

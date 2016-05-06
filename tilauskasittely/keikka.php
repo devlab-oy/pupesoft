@@ -835,9 +835,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
   $result = pupe_query($query);
 echo "836 Q $query <br><br>";
   $rivit = array();
-  $lask;
+  $lask = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
+echo "841 lask $lask rowLiitostunnus {$row["liitostunnus"]} == rivitLaskLiitostunnus ",var_dump($rivit)," <br><br>";
     if ($row["liitostunnus"] == $rivit[$lask]["liitostunnus"]) {
       $rivit[$lask]["varastossaarvo"] = $rivit[$lask]["varastossaarvo"] + $row["varastossaarvo"];
       $rivit[$lask]["varastoonvietyarvo"] = $rivit[$lask]["varastoonvietyarvo"] + $row["varastoonvietyarvo"];
@@ -856,7 +857,7 @@ echo "836 Q $query <br><br>";
 
 
   }
-
+echo "<br><br> 859 ",var_dump($rivit[0]["liitostunnus"]),"<br><br><br>";
   if (mysql_num_rows($result) > 0) {
 
     echo "<br><font class='head'>".t("Keskeneräiset saapumiset")."</font><hr>";

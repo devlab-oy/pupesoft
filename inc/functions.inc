@@ -31498,7 +31498,7 @@ if (!function_exists("vapauta_maksusopimus")) {
 
 if (!function_exists("tee_ennakkolasku")) {
   function tee_ennakkolasku($jaks_alkup_tilaus, $sisainen = FALSE) {
-    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku, $force_web;
 
     // Otetaan sopparin tiedot talteen jos sellanen on olemassa.
     $jaksquery = "SELECT *

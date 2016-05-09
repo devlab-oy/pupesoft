@@ -268,7 +268,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
     if ($korjaus == '') {
       if ($viesti != '') {
-        
+
         if ($kukarow["kieli"] != 'fi') {
           $query = "SELECT selite from avainsana
               where yhtio = '$kukarow[yhtio]'
@@ -280,7 +280,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
           $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
           $tapa_row = mysql_fetch_assoc($tapa_res);
-    
+
           if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
         }
         $kysely = "INSERT INTO kalenteri
@@ -382,7 +382,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
     $tee = "";
 
-    if ($crm_haas_check) {
+    if ($crm_haas_check and ($korjaus != '' or $viesti != '')) {
       $haas_call_type = '';
       $haas_opportunity = '';
       $haas_qty = '';
@@ -769,7 +769,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<tr>";
       echo "<th>CALL_TYPE</th>";
       echo "<td>";
-      echo "<select name='haas_call_type'>";
+      echo "<select name='haas_call_type' onchange='submit();'>";
       echo "<option value=''>",t("Valitse"),"</option>";
 
       foreach ($call_types as $key => $value) {
@@ -780,89 +780,93 @@ if ($ytunnus != '' and $tee == '') {
       echo "</td>";
       echo "</tr>";
 
-      $opportunities = array(
-        'OMs'           => '',
-        'TMs'           => '',
-        'MMs'           => '',
-        'VF-1/2s'        => '',
-        'VF-3/4/5'        => '',
-        'VF-6+'          => '',
-        'GRs'           => '',
-        'DT/DMs'        => '',
-        'UMCs'          => '',
-        'EC400/500'     => '',
-        'EC1600'        => '',
-        'OL'            => '',
-        'TLs'           => '',
-        'ST10/15'       => '',
-        'ST20/25'       => '',
-        'ST30/35'       => '',
-        'ST40/45/50/55' => '',
-        'DSs'           => '',
-        'ROTARY'        => '',
-        'BARFEEDER'     => '',
-      );
+      if ($haas_call_type != 'Prospecting Call') {
+        $opportunities = array(
+          'OMs'           => '',
+          'TMs'           => '',
+          'MMs'           => '',
+          'VF-1/2s'        => '',
+          'VF-3/4/5'        => '',
+          'VF-6+'          => '',
+          'GRs'           => '',
+          'DT/DMs'        => '',
+          'UMCs'          => '',
+          'EC400/500'     => '',
+          'EC1600'        => '',
+          'OL'            => '',
+          'TLs'           => '',
+          'ST10/15'       => '',
+          'ST20/25'       => '',
+          'ST30/35'       => '',
+          'ST40/45/50/55' => '',
+          'DSs'           => '',
+          'ROTARY'        => '',
+          'BARFEEDER'     => '',
+        );
 
-      $opportunity_sel = array($haas_opportunity => 'selected') + $opportunities;
+        $opportunity_sel = array($haas_opportunity => 'selected') + $opportunities;
 
-      echo "<tr>";
-      echo "<th>OPPORTUNITY</th>";
-      echo "<td>";
-      echo "<select name='haas_opportunity'>";
-      echo "<option value=''>",t("Valitse"),"</option>";
+        echo "<tr>";
+        echo "<th>OPPORTUNITY</th>";
+        echo "<td>";
+        echo "<select name='haas_opportunity'>";
+        echo "<option value=''>",t("Valitse"),"</option>";
 
-      foreach ($opportunities as $key => $value) {
-        echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
+        foreach ($opportunities as $key => $value) {
+          echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
+        }
+
+        echo "</select>";
+        echo "</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>QTY</th>";
+        echo "<td>";
+        echo "<input type='text' name='haas_qty' value='{$haas_qty}' size='8' maxlength='7' />";
+        echo "</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>OPP_PROJ_DATE</th>";
+        echo "<td>";
+        echo "<input type='text' name='haas_opp_proj_date_dd' value='{$haas_opp_proj_date_dd}' size='3' maxlength='2' />";
+        echo "<input type='text' name='haas_opp_proj_date_mm' value='{$haas_opp_proj_date_mm}' size='3' maxlength='2' />";
+        echo "<input type='text' name='haas_opp_proj_date_yy' value='{$haas_opp_proj_date_yy}' size='5' maxlength='4' />";
+        echo "</td>";
+        echo "</tr>";
+
+        if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call'))) {
+          $end_reasons = array(
+            'Price Win'               => '',
+            'Specification Win'       => '',
+            'Delivery Win'            => '',
+            'Builder/Distributor Win' => '',
+            'Price Loss'              => '',
+            'Specification Loss'      => '',
+            'Delivery Loss'           => '',
+            'Distributor Loss'        => '',
+            'Competitor Loss'         => '',
+            'Dead'                    => '',
+          );
+
+          $end_reason_sel = array($haas_end_reason => 'selected') + $end_reasons;
+
+          echo "<tr>";
+          echo "<th>END_REASON</th>";
+          echo "<td>";
+          echo "<select name='haas_end_reason'>";
+          echo "<option value=''>",t("Valitse"),"</option>";
+
+          foreach ($end_reasons as $key => $value) {
+            echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";
+          }
+
+          echo "</select>";
+          echo "</td>";
+          echo "</tr>";
+        }
       }
-
-      echo "</select>";
-      echo "</td>";
-      echo "</tr>";
-
-      echo "<tr>";
-      echo "<th>QTY</th>";
-      echo "<td>";
-      echo "<input type='text' name='haas_qty' value='{$haas_qty}' size='8' maxlength='7' />";
-      echo "</td>";
-      echo "</tr>";
-
-      echo "<tr>";
-      echo "<th>OPP_PROJ_DATE</th>";
-      echo "<td>";
-      echo "<input type='text' name='haas_opp_proj_date_dd' value='{$haas_opp_proj_date_dd}' size='3' maxlength='2' />";
-      echo "<input type='text' name='haas_opp_proj_date_mm' value='{$haas_opp_proj_date_mm}' size='3' maxlength='2' />";
-      echo "<input type='text' name='haas_opp_proj_date_yy' value='{$haas_opp_proj_date_yy}' size='5' maxlength='4' />";
-      echo "</td>";
-      echo "</tr>";
-
-      $end_reasons = array(
-        'Price Win'               => '',
-        'Specification Win'       => '',
-        'Delivery Win'            => '',
-        'Builder/Distributor Win' => '',
-        'Price Loss'              => '',
-        'Specification Loss'      => '',
-        'Delivery Loss'           => '',
-        'Distributor Loss'        => '',
-        'Competitor Loss'         => '',
-        'Dead'                    => '',
-      );
-
-      $end_reason_sel = array($haas_end_reason => 'selected') + $end_reasons;
-
-      echo "<tr>";
-      echo "<th>END_REASON</th>";
-      echo "<td>";
-      echo "<select name='haas_end_reason'>";
-      echo "<option value=''>",t("Valitse"),"</option>";
-
-      foreach ($end_reasons as $key => $value) {
-        echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";
-      }
-
-      echo "</select>";
-      echo "</td>";
-      echo "</tr>";
     }
 
     echo "  <tr><th>".t("Tallenna tiedosto liitteeksi")."</th>";

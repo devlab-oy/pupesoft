@@ -808,15 +808,15 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             max(lasku.nimitark) nimitark,
             max(lasku.osoite)   osoite,
             max(lasku.postitp)  postitp,
-            group_concat(distinct if(lasku.comments!='',lasku.comments,NULL) SEPARATOR '<br><br>') comments,
+            lasku.comments,
             count(distinct lasku.tunnus) kpl,
-            group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
+            lasku.laskunro AS keikat,
             round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,
             ROUND(SUM(tilausrivi.kpl * tilausrivi.hinta * {$query_ale_lisa}), 2) varastoonvietyarvo,
             round(sum((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * {$query_ale_lisa}),2) kohdistettuarvo,
             SUM(tilausrivi.kpl) var_kpl,
             SUM(tilausrivi.varattu) var_varattu,
-            GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
+            lasku.tunnus AS tilauksien_tunnukset
             FROM lasku
             {$left_join}JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' {$tilriv_joinlisa})
             {$joinlisa}
@@ -833,31 +833,33 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$havinglisa}
             ORDER BY lasku.liitostunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus";
   $result = pupe_query($query);
-echo "836 Q $query <br><br>";
+
   $rivit = array();
-  $lask = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
-echo "841 lask $lask rowLiitostunnus {$row["liitostunnus"]} == rivitLaskLiitostunnus ",var_dump($rivit)," <br><br>";
-    if ($row["liitostunnus"] == $rivit[$lask]["liitostunnus"]) {
-      $rivit[$lask]["varastossaarvo"] = $rivit[$lask]["varastossaarvo"] + $row["varastossaarvo"];
-      $rivit[$lask]["varastoonvietyarvo"] = $rivit[$lask]["varastoonvietyarvo"] + $row["varastoonvietyarvo"];
-      $rivit[$lask]["kohdistettuarvo"] = $rivit[$lask]["kohdistettuarvo"] + $row["kohdistettuarvo"];
+    if (isset($rivit[$row["liitostunnus"]])) {
+      $liitostunnus = $row["liitostunnus"];
 
+      $rivit[$liitostunnus]["varastossaarvo"] = $rivit[$liitostunnus]["varastossaarvo"] + $row["varastossaarvo"];
+      $rivit[$liitostunnus]["varastoonvietyarvo"] = $rivit[$liitostunnus]["varastoonvietyarvo"] + $row["varastoonvietyarvo"];
+      $rivit[$liitostunnus]["kohdistettuarvo"] = $rivit[$liitostunnus]["kohdistettuarvo"] + $row["kohdistettuarvo"];
+      $rivit[$liitostunnus]["keikat"] = "{$rivit[$liitostunnus]["keikat"]}, {$row["keikat"]}";
+      $rivit[$liitostunnus]["tilauksien_tunnukset"] = "{$rivit[$liitostunnus]["tilauksien_tunnukset"]}, {$row["tilauksien_tunnukset"]}";
 
+      $rivit[$liitostunnus]["kpl"] = $rivit[$liitostunnus]["kpl"] + 1;
 
+      if (!empty($row["comments"]) and !empty($rivit[$liitostunnus]["comments"])) {
+        $rivit[$liitostunnus]["comments"] = "{$rivit[$liitostunnus]["comments"]} <br><br> {$row["comments"]}";
+      }
+      elseif (!empty($row["comments"])) {
+        $rivit[$liitostunnus]["comments"] = "{$row["comments"]}";
+      }
     }
     else {
-      $rivit[] = $row;
+      $rivit[$row["liitostunnus"]] = $row;
     }
-
-
-    $lask = $lask + 1;
-
-
-
   }
-echo "<br><br> 859 ",var_dump($rivit[0]["liitostunnus"]),"<br><br><br>";
+
   if (mysql_num_rows($result) > 0) {
 
     echo "<br><font class='head'>".t("Keskeneräiset saapumiset")."</font><hr>";

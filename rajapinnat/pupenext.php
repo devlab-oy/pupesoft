@@ -86,7 +86,7 @@ function pupenext_luo_myyntitilausotsikko($params) {
 }
 
 function pupenext_tilaus_valmis($params) {
-  global $kukarow, $yhtiorow, $pupe_root_polku;
+  global $kukarow, $yhtiorow, $pupe_root_polku, $force_web;
 
   $order_id             = (int) $params->order_id;
   $tee_100_ennakkolasku = isset($params->create_preliminary_invoice) ? $params->create_preliminary_invoice : false;

@@ -831,7 +831,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$toimipaikkalisa}
             GROUP BY lasku.tunnus
             {$havinglisa}
-            ORDER BY lasku.liitostunnus, lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
   $result = pupe_query($query);
 
   $rivit = array();

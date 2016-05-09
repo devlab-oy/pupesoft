@@ -31555,7 +31555,7 @@ if (!function_exists("tee_ennakkolasku")) {
 
     $ennakkokuvaus = mysql_fetch_assoc($kuvares);
 
-    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares) -1);
     $loppukuvaus = mysql_fetch_assoc($kuvares);
 
     if (!empty($soprow["maksuehto"])) {

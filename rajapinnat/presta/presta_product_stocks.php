@@ -55,7 +55,7 @@ class PrestaProductStocks extends PrestaClient {
       $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
       $status = $product_row['status'];
 
-      $product_id = array_search($sku, $this->presta_products->all_skus());
+      $product_id = $this->presta_products->product_id_by_sku($sku);
 
       $current++;
       $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");

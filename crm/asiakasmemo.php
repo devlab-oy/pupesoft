@@ -18,6 +18,7 @@ if (!isset($nayta_kaikki_merkinnat)) {
 }
 
 if (!isset($haas_call_type))        $haas_call_type = '';
+if (!isset($haas_call_type_ed))    $haas_call_type_ed = '';
 if (!isset($haas_opportunity))      $haas_opportunity = '';
 if (!isset($haas_qty))              $haas_qty = '';
 if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = '';
@@ -201,6 +202,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $_dd = $haas_opp_proj_date_dd;
     $_mm = $haas_opp_proj_date_mm;
     $_yy = $haas_opp_proj_date_yy;
+
+    if ($haas_call_type != $haas_call_type_ed) {
+      $tee = '';
+    }
 
     if (!empty($haas_call_type) and $haas_call_type != 'Prospecting Call') {
       if (empty($haas_opportunity)) {
@@ -777,6 +782,7 @@ if ($ytunnus != '' and $tee == '') {
       }
 
       echo "</select>";
+      echo "<input type='hidden' name='haas_call_type_ed' value='{$haas_call_type}' />";
       echo "</td>";
       echo "</tr>";
 

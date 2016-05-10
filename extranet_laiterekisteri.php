@@ -57,8 +57,15 @@ function hae_kayttajan_laitteet() {
 
   $laitteet = array();
 
-  if ($kukarow['oletus_asiakas'] == '') {
+  $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+  if ($kukarow['oletus_asiakas'] == '' and empty($toimipistetunnukset)) {
     return $laitteet;
+  }
+
+  $toimipistelisa = '';
+  if (!empty($toimipistetunnukset)) {
+    $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
   }
 
   $query = "SELECT
@@ -77,6 +84,7 @@ function hae_kayttajan_laitteet() {
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
             AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
+            {$toimipistelisa}
             GROUP BY laite.sarjanro,laite.tuoteno";
   $result = pupe_query($query);
   while ($row = mysql_fetch_assoc($result)) {

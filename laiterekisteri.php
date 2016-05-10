@@ -32,11 +32,16 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
   exit;
 }
 
+if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
+  livesearch_asiakashaku();
+  exit;
+}
+
 // Enaboidaan ajax kikkare
 enable_ajax();
 echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
 
-if (($toiminto == 'NAYTALAITTEET' or !isset($toiminto)) and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku))) {
+if (($toiminto == 'NAYTALAITTEET' or !isset($toiminto)) and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku) and empty($toimipistehaku))) {
   echo "<font class='error'>".t("Anna v‰hint‰‰n yksi rajaus")."!</font><br/>";
   $toiminto = 'RAJAALAITTEET';
 }
@@ -53,10 +58,10 @@ else {
 }
 
 if ($toiminto == 'LINKKAA' or $vanhatoiminto == 'LINKKAA') {
-  pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 18, 18, true, true)));
 }
 elseif ($toiminto != 'RAJAALAITTEET') {
-  pupe_DataTables(array(array($pupe_DataTables, 16, 16, true, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));
 }
 
 $maara_paivitetty = false;
@@ -134,6 +139,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               kommentti                          = '{$kommentti}',
               sla                                = '{$sla}',
               sd_sla                             = '{$sd_sla}',
+              toimipiste                         = '{$toimipistetunnus}',
               valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
               luontiaika                         = now(),
@@ -171,6 +177,7 @@ $headerit = array(
   "sarjanumero",
   "tuotenumero",
   "sopimustiedot",
+  "toimipiste",
   "asiakastiedot",
   "sla",
   "sd_sla",
@@ -208,6 +215,7 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
   echo "<th>".t("Malli")."</th>";
   echo "<th>".t("Sarjanumero")."</th>";
   echo "<th>".t("Tuotenumero")."</th>";
+  echo "<th>".t("Toimipiste")."</th>";
   echo "<th>".t("SLA")."</th>";
   echo "<th>".t("SD SLA")."</th>";
   echo "<th>".t("VC")."</th>";
@@ -222,13 +230,16 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
   $query = "SELECT
             laite.*,
             avainsana.selitetark valmistaja,
-            tuote.tuotemerkki malli
+            tuote.tuotemerkki malli,
+            concat(asiakas.toim_nimi, '<br>', asiakas.toim_postitp) toimipiste
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno                           = laite.tuoteno
             LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
+            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+              AND laite.toimipiste = asiakas.tunnus
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
               AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
             WHERE laite.yhtio                             = '{$kukarow['yhtio']}'
@@ -243,6 +254,7 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
     echo "<td nowrap>{$vanhalaiterivi['malli']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['sarjanro']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['tuoteno']}</td>";
+    echo "<td nowrap>{$vanhalaiterivi['toimipiste']}</td>";
     echo "<td>{$vanhalaiterivi['sla']}</td>";
     echo "<td>{$vanhalaiterivi['sd_sla']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimusnumero']}</td>";
@@ -314,7 +326,7 @@ if ($toiminto == 'NAYTALAITTEET') {
     $valmistajajoini = " JOIN avainsana on avainsana.yhtio = tuote.yhtio 
                          AND avainsana.laji = 'TRY'
                          AND avainsana.selite = tuote.try
-                         AND avainsana.selitetark like '%$valmistajahaku%' ";
+                         AND avainsana.selitetark like '$valmistajahaku%' ";
   }
   else {
     $valmistajajoini = " LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio 
@@ -324,12 +336,12 @@ if ($toiminto == 'NAYTALAITTEET') {
 
   $mallihakulisa = '';
   if (!empty($mallihaku)) {
-    $mallihakulisa = " AND laite.tuoteno like '%$mallihaku%' ";
+    $mallihakulisa = " AND laite.tuoteno like '$mallihaku%' ";
   }
 
   $sarjanumerohakulisa = '';
   if (!empty($sarjanumerohaku)) {
-    $sarjanumerohakulisa = " AND laite.sarjanro like '%$sarjanumerohaku%' ";
+    $sarjanumerohakulisa = " AND laite.sarjanro like '$sarjanumerohaku%' ";
   }
 
   $sopimusjoinilisa = ' LEFT ';
@@ -337,17 +349,27 @@ if ($toiminto == 'NAYTALAITTEET') {
     $sopimusjoinilisa = '';
   }
 
+  $asiakasjoinilisa = " LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+    AND laite.toimipiste = asiakas.tunnus ";
+  if (!empty($toimipistehaku)) {
+    $asiakasjoinilisa = " JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+      AND laite.toimipiste = asiakas.tunnus AND asiakas.tunnus = '{$toimipistehaku}' ";  
+  }
+
   // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
   $query = "SELECT
             laite.*,
             avainsana.selitetark valmistaja,
             tuote.tuotemerkki malli,
+            concat(asiakas.toim_nimi, '<br>', asiakas.toim_postitp) toimipiste,
+            asiakas.tunnus toimipistetunnus,
             if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyll‰','Ei') sopimusrivi,
             group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno    = laite.tuoteno
             {$valmistajajoini}
+            {$asiakasjoinilisa}
             {$sopimusjoinilisa} JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
             WHERE laite.yhtio      = '{$kukarow['yhtio']}'
             {$mallihakulisa}
@@ -370,6 +392,7 @@ if ($toiminto == 'MUOKKAA') {
     echo "<td nowrap>{$rowi['malli']}</td>";
     echo "<td nowrap>{$rowi['sarjanro']}</td>";
     echo "<td nowrap>{$rowi['tuoteno']}</td>";
+    echo "<td nowrap>{$rowi['toimipistetunnus']}</td>";
     echo "<td></td><td></td>";
     echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
     echo "<td><input type='text' name='sd_sla' value='{$rowi['sd_sla']}'/></td>";
@@ -436,7 +459,14 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "</td>";
 
   echo "<td><input type='text' name='uusilaite_tuotenumero' value='{$esiv_tuotenumero}'/></td>";
-  echo "<td></td><td></td>";
+
+  echo "<td></td>";
+  // Toimipisteen valinta
+  echo "<td>";
+  echo livesearch_kentta("laiterekisteriformi", "ASIAKASHAKU", "toimipistetunnus", 140, $toimipistetunnus, '', '', '', 'ei_break_all');
+  echo "</td>";
+
+  echo "<td></td>";
   echo "<td><input type='text' name='sla'/></td>";
   echo "<td><input type='text' name='sd_sla'/></td>";
   echo "<td><input type='text' name='valmistajan_sopimusnumero'/></td>";
@@ -559,6 +589,7 @@ elseif ($toiminto == 'NAYTALAITTEET') {
     echo "<td nowrap>{$rowi['sarjanro']}</td>";
     echo "<td nowrap>{$rowi['tuoteno']}</td>";
     echo "<td>{$puuttuja}</td>";
+    echo "<td nowrap>{$rowi['toimipiste']}</td>";
     echo "<td nowrap>{$asiakas}</td>";
     echo "<td>{$rowi['sla']}</td>";
     echo "<td>{$rowi['sd_sla']}</td>";
@@ -599,6 +630,13 @@ else {
   echo "<td><input type='text' name='sarjanumerohaku'></td>";
   echo "</tr>";
 
+  echo "<tr>";
+  echo "<th>".t("Toimipiste")."</th>";
+  echo "<td>";
+  echo livesearch_kentta("laiterekisteriformi", "ASIAKASHAKU", "toimipistehaku", 140, $toimipistehaku, '', '', '', 'ei_break_all');
+  echo "</td>";
+  echo "</tr>";
+  
   echo "<tr>";
   echo "<th>".t("Vain laitteet joilla on sopimus")."</th>";
   echo "<td><input type='checkbox' name='sopimushaku' value='joo'></td>";

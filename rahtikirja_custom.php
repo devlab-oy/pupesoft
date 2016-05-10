@@ -2,7 +2,7 @@
 
 require "inc/parametrit.inc";
 
-echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
+if (empty($nayta_pdf)) echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
@@ -301,22 +301,40 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
 
-  if ((int) $tulostin > 0 and $kollityht > 0) {
-    $query = "SELECT komento
-              from kirjoittimet
-              where tunnus = '$tulostin'
-              AND yhtio    = '$kukarow[yhtio]'";
-    $res = pupe_query($query);
-    $k = mysql_fetch_assoc($res);
+  if (((int) $tulostin > 0 and $kollityht > 0) or ($tulostin == '-88' or $kirjoitin == 'PDF_RUUDULLE')) {
 
-    $kirjoitin   = $k['komento'];
-    $tulostuskpl = $kollityht;
+    if ($tulostin != '-88' and $kirjoitin != 'PDF_RUUDULLE') {
+      $query = "SELECT komento
+                from kirjoittimet
+                where tunnus = '$tulostin'
+                AND yhtio    = '$kukarow[yhtio]'";
+      $res = pupe_query($query);
+      $k = mysql_fetch_assoc($res);
+
+      $kirjoitin   = $k['komento'];
+      $tulostuskpl = $kollityht;
+    }
 
     $kuljetusohjeet = $osoitelappurow["viesti"];
 
-    include "tilauskasittely/$toitarow[rahtikirja]";
+    if ($tulostin == "-88") {
+      js_openFormInNewWindow();
 
-    echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
+      echo "<br><form id='customform_rahtikirja_{$osoitelappurow['tunnus']}' name='customform_rahtikirja_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
+            <input type='hidden' name='tulostakopio' value='JOO'>
+            <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
+            <input type='hidden' name='kirjoitin' value='PDF_RUUDULLE'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='hidden' name='tulostuskpl' value='{$kollityht}' />
+            <input type='submit' value='".t("Rahtikirja").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_rahtikirja_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
+    }
+    else {
+
+      include "tilauskasittely/$toitarow[rahtikirja]";
+
+      if (empty($nayta_pdf)) echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
+      else exit;
+    }
   }
 
   // Tallennetaan customrahtikirjan tiedot järjestelmään
@@ -331,28 +349,45 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $kirres = pupe_query($query);
   }
 
-  if ((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) {
+  if (((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) or ($valittu_oslapp_tulostin == '-88' or $tee == 'NAYTATILAUS')) {
 
-    //haetaan osoitelapun tulostuskomento
-    $query  = "SELECT *
-               from kirjoittimet
-               where yhtio = '$kukarow[yhtio]'
-               and tunnus  = '$valittu_oslapp_tulostin'";
-    $kirres = pupe_query($query);
-    $kirrow = mysql_fetch_assoc($kirres);
-    $oslapp = $kirrow['komento'];
-
-    if ($toitarow['osoitelappu'] == 'intrade') {
-      require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+    if ($valittu_oslapp_tulostin != '-88' and $tee != 'NAYTATILAUS') {
+      //haetaan osoitelapun tulostuskomento
+      $query  = "SELECT *
+                 from kirjoittimet
+                 where yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$valittu_oslapp_tulostin'";
+      $kirres = pupe_query($query);
+      $kirrow = mysql_fetch_assoc($kirres);
+      $oslapp = $kirrow['komento'];
     }
-    elseif ($toitarow['osoitelappu'] == 'hornbach') {
-      require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+
+    if ($valittu_oslapp_tulostin == "-88") {
+      js_openFormInNewWindow();
+
+      echo "<br><form id='customform_rahtikirja_{$osoitelappurow['tunnus']}' name='customform_rahtikirja_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
+            <input type='hidden' name='tulostakopio' value='JOO'>
+            <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='hidden' name='oslappkpl' value='{$kollityht}' />
+            <input type='submit' value='".t("Osoitelappu").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_rahtikirja_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
     }
     else {
-      require "tilauskasittely/osoitelappu_pdf.inc";
+
+      if ($toitarow['osoitelappu'] == 'intrade') {
+        require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+      }
+      elseif ($toitarow['osoitelappu'] == 'hornbach') {
+        require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+      }
+      else {
+        require "tilauskasittely/osoitelappu_pdf.inc";
+      }
     }
 
-    echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
+    if (empty($nayta_pdf)) echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
+    else exit;
   }
 
   unset($asiakasid);
@@ -434,6 +469,8 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
             <select name='kopiotulostin'>";
 
         mysql_data_seek($kirre, 0);
+
+        echo "<option value='-88'>",t("PDF ruudulle"),"</option>";
 
         while ($kirow = mysql_fetch_assoc($kirre)) {
           echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
@@ -742,6 +779,8 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
             ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
+  echo "<option value='-88'>".t("PDF ruudulle")."</option>";
+
   while ($kirow = mysql_fetch_assoc($kires)) {
     echo "<option value='$kirow[tunnus]' ".$sel_lahete[$kirow["tunnus"]].">$kirow[kirjoitin]</option>\n";
   }
@@ -753,6 +792,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
   echo "<select name='valittu_oslapp_tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
+  echo "<option value='-88'>".t("PDF ruudulle")."</option>";
 
   mysql_data_seek($kires, 0);
 

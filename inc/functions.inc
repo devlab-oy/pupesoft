@@ -10252,6 +10252,25 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
+  function hae_kayttajan_toimipistetunnukset() {
+    global $kukarow;
+  
+    $asiakastunnukset = '';
+    $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
+              FROM customers_users 
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+              WHERE user_id = '{$kukarow['tunnus']}'";
+    $result = pupe_query($query);
+    if (mysql_affected_rows() == 1) {
+      while ($row = mysql_fetch_assoc($result)) {
+        $asiakastunnukset = $row['toimipistetunnukset'];
+      }
+    }
+    return $asiakastunnukset;
+  }
+}
+
 if (!function_exists("livesearch_laitehaku")) {
   function livesearch_laitehaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -10272,9 +10291,17 @@ if (!function_exists("livesearch_laitehaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
       </script>";
 
+      $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+      $toimipistelisa = '';
+      if (!empty($toimipistetunnukset)) {
+        $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
+      }
+
       $query = "SELECT DISTINCT sarjanro
                 FROM laite
                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                {$toimipistelisa}
                 AND sarjanro LIKE '%{$haku}%'";
       $result = pupe_query($query);
 

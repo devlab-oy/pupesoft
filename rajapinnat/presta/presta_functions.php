@@ -375,12 +375,16 @@ function presta_hae_tuotteet() {
   $tuoterajaus = presta_tuoterajaus();
 
   if ($ajetaanko_kaikki == "NO") {
-    $tuoterajaus .= " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
+    $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}') ";
   }
 
   // Haetaan pupesta tuotteen tiedot
-  $query = "SELECT tuote.*
+  $query = "SELECT distinct tuote.*
             FROM tuote
+            LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
+              AND puun_alkio.laji = 'tuote'
+              AND puun_alkio.liitos = tuote.tuoteno)
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);

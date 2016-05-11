@@ -325,7 +325,7 @@ class PrestaProducts extends PrestaClient {
   private function add_child_product(SimpleXMLElement &$xml, $product) {
     $qty        = $product['kerroin'];
     $sku        = $product['tuoteno'];
-    $product_id = array_search($sku, $this->all_skus());
+    $product_id = $this->product_id_by_sku($sku);
 
     if ($product_id === false) {
       $this->logger->log("VIRHE! Lapsituotetta {$sku} ei löytynyt!");
@@ -355,34 +355,27 @@ class PrestaProducts extends PrestaClient {
     $row_counter = 0;
     $total_counter = count($products);
 
-    try {
-      $existing_products = $this->all_skus();
+    foreach ($products as $product) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
 
-      foreach ($products as $product) {
-        $row_counter++;
-        $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
+      try {
+        // check do we have this product in this store
+        $id = $this->product_id_by_sku($product['tuoteno']);
 
-        try {
-          if (in_array($product['tuoteno'], $existing_products)) {
-            $id = array_search($product['tuoteno'], $existing_products);
-            $this->update($id, $product);
-          }
-          else {
-            $this->create($product);
-          }
+        if ($id !== false) {
+          $this->update($id, $product);
         }
-        catch (Exception $e) {
+        else {
+            $this->create($product);
+        }
+      }
+      catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
-        }
-
-        $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
       }
-    }
-    catch (Exception $e) {
-      //Exception logging happens in create / update.
 
-      return false;
+      $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
     }
 
     $this->delete_all_unnecessary_products();
@@ -433,7 +426,7 @@ class PrestaProducts extends PrestaClient {
       $product = $product_row['tuoteno'];
 
       // do we have this product in presta
-      $presta_id = array_search($product, $presta_products);
+      $presta_id = $this->product_id_by_sku($product);
 
       // if we found product from presta, add presta id to array
       if ($presta_id !== false) {
@@ -467,6 +460,12 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  public function product_id_by_sku($sku) {
+    $product_id = array_search($sku, $this->all_skus());
+
+    return $product_id;
   }
 
   public function set_removable_fields($fields) {

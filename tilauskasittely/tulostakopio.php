@@ -1082,7 +1082,14 @@ if ($tee == "ETSILASKU") {
 
     $hreffi .= "&ascdesc={$ascdesc}";
 
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
+    echo "<th valign='top'>";
+
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+      echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
+    }
+
+    echo "<a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
+
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>", t("Ytunnus"), "</a><br><a href='{$hreffi}&jarj=lasku.nimi'>", t("Nimi"), "</a></th>";
     echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>", t("Pvm"), "</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>", t("Toimaika"), "</a></th>";
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>", t("Laatija"), "</a></th>";
@@ -1123,7 +1130,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U") {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
         echo $row['tunnus'];
       }
 

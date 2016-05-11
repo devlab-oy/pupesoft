@@ -807,8 +807,10 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $summa = array();
   $osuus_kululaskuista_yhteensa   = "";
   $osuus_eturahdista_yhteensa   = "";
+  $osuus_pyoristyseroista_yhteensa = "";
   $aputullimaara_yhteensa     = "";
   $rivinlisakulu_yhteensa     = "";
+  $saapumisenkulut_yhteensa = "";
 
   if ($lopetus != '') {
     $_lopetus_talteen       = $lopetus;
@@ -820,7 +822,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   if ($_tulostakopio) {
     $lopetus .= $palvelin2;
     $lopetus .= "tilauskasittely/tulostakopio.php";
-    $lopetus .= "////toim=OSTO";
+    $lopetus .= "////toim=$toim";
     $lopetus .= "//tee=NAYTAHTML";
     $lopetus .= "//asiakasid=$asiakasid";
     $lopetus .= "//toimittajaid=$toimittajaid";
@@ -879,21 +881,25 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
     echo "<td align='right' nowrap valign='top'>$prow[Varastonarvo]</td>";
     echo "<td align='right' nowrap valign='top'>".tv1dateconv($prow["laskutettuaika"])."</td>";
 
-    $osuus_kululaskuista = $osuus_eturahdista = $tulliprossa = $aputullimaara = $rivinlisakulu = "";
+    $osuus_kululaskuista = $osuus_eturahdista = $osuus_pyoristyseroista = $tulliprossa = $aputullimaara = $rivinlisakulu = $saapumisenkulut = "";
 
     if (strpos($prow["hankintakulut"], "#") !== false) {
-      list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $prow["hankintakulut"]);
+      list($osuus_kululaskuista, $osuus_eturahdista, $osuus_pyoristyseroista, $tulliprossa, $aputullimaara, $rivinlisakulu, $saapumisenkulut) = explode("#", $prow["hankintakulut"]);
 
       $osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
       $osuus_eturahdista_yhteensa += $osuus_eturahdista;
+      $osuus_pyoristyseroista_yhteensa += $osuus_pyoristyseroista;
       $aputullimaara_yhteensa += $aputullimaara;
       $rivinlisakulu_yhteensa += $rivinlisakulu;
+      $saapumisenkulut_yhteensa += $saapumisenkulut;
 
-      if ((float) $osuus_kululaskuista != 0) $prow["kommentti"] .= "\n".t("Kulut").": ".$osuus_kululaskuista;
+      if ((float) $osuus_kululaskuista != 0) $prow["kommentti"] .= "\n".t("Kululaskut").": ".$osuus_kululaskuista;
       if ((float) $osuus_eturahdista != 0) $prow["kommentti"] .= "\n".t("Eturahti").": ".$osuus_eturahdista;
+      if ((float) $osuus_eturahdista != 0) $prow["kommentti"] .= "\n".t("Pyöristyserot").": ".$osuus_pyoristyseroista;
       if ((float) $tulliprossa != 0) $prow["kommentti"] .= "\n".t("Tulli%").": ".$tulliprossa;
       if ((float) $aputullimaara != 0) $prow["kommentti"] .= "\n".t("Tulli").": ".$aputullimaara;
       if ((float) $rivinlisakulu != 0) $prow["kommentti"] .= "\n".t("Lisäkulu").": ".$rivinlisakulu;
+      if ((float) $rivinlisakulu != 0) $prow["kommentti"] .= "\n".t("Saapumisen kulut").": ".$saapumisenkulut;
     }
 
     echo "</tr>";
@@ -950,11 +956,13 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
     echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Yhteensä").":</td><td class='spec' align='right'>".hintapyoristys($sum)." $val</td></tr>";
   }
 
-  if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
-    if ((float) $osuus_kululaskuista_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Kulut").":</td><td class='spec' align='right'>".$osuus_kululaskuista_yhteensa."</td></tr>";
+  if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $osuus_pyoristyseroista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "" or $saapumisenkulut_yhteensa != "") {
+    if ((float) $osuus_kululaskuista_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Kululaskut").":</td><td class='spec' align='right'>".$osuus_kululaskuista_yhteensa."</td></tr>";
     if ((float) $osuus_eturahdista_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Eturahti").":</td><td class='spec' align='right'>".$osuus_eturahdista_yhteensa."</td></tr>";
+    if ((float) $osuus_pyoristyseroista_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Pyöristyserot").":</td><td class='spec' align='right'>".$osuus_pyoristyseroista_yhteensa."</td></tr>";
     if ((float) $aputullimaara_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Tulli").":</td><td class='spec' align='right'>".$aputullimaara_yhteensa."</td></tr>";
     if ((float) $rivinlisakulu_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Lisäkulu").":</td><td class='spec' align='right'>".$rivinlisakulu_yhteensa."</td></tr>";
+    if ((float) $saapumisenkulut_yhteensa != 0) echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Saapumisen kulut").":</td><td class='spec' align='right'>".$saapumisenkulut_yhteensa."</td></tr>";
   }
   echo "</table>";
 }

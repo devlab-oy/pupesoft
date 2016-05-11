@@ -304,7 +304,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     eval ${nrfile}
   fi
 elif [[ "${jatketaanko}" = "skip" ]]; then
-  echo "${green}Pupesoft ajantasalla, ei pävitettävää!${normal}"
+  echo "${green}Pupesoft ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
@@ -391,6 +391,9 @@ if [[ ${bundle} = true ]]; then
   # Restart rails App
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
+
+  # Write cron file
+  bundle exec whenever --update-crontab &&
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&

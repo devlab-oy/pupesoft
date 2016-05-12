@@ -259,6 +259,27 @@ if ($tee == "pankin_sertifikaatti") {
   echo "</form>";
 }
 
+// Haetaan uusi sertifikaatti, oikeellisuustarkastus
+if ($tee == "uusi_sertifikaatti_hae") {
+  if (empty($salasana)) {
+    virhe("Salasana t‰ytyy antaa!");
+    $virheet_count++;
+  }
+  else {
+    $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+    if ($pankkiyhteys === false) {
+      virhe("Antamasi salasana on v‰‰r‰!");
+      $virheet_count++;
+    }
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "uusi_sertifikaatti";
+  }
+}
+
 // Haetaan uusi sertifikaatti, kysyt‰‰n salasana
 if ($tee == "uusi_sertifikaatti") {
   echo "<h2>" . t('Sertifikaatin uusiminen') . "</h2>";

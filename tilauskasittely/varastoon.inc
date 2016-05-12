@@ -482,8 +482,21 @@ else {
       $maara_peruste = "and tilausrivi.varattu != 0";
     }
 
+    // jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+    if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+      if ($simualv > 0) {
+        $alvit = " (1 + $simualv / 100) ";
+      }
+      else {
+        $alvit = " (1 + if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) / 100) ";
+      }
+    }
+    else {
+      $alvit = 1;
+    }
+
     // lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
-    $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa,
+    $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $alvit * {$query_ale_lisa}) summa,
                  sum((if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) / 100) * ((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa})) kulut
                  FROM tilausrivi use index (uusiotunnus_index)
                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -531,14 +544,14 @@ if ($mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tullaan_automaattik
   echo "<font class='message'>".t("Rahdin ja kulujen m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 }
 
-$summa        = 0;
-$jtrivit      = array();
-$jtrivit_paikat   = array();
-$jtvarastot      = array();
-$rivia         = 0;
+$summa = 0;
+$jtrivit = array();
+$jtrivit_paikat = array();
+$jtvarastot = array();
+$rivia = 0;
 $korjattavat_valmistukset = array();
 $korjattavat_valmistukset_ind = 0;
-$suoralisa   = "";
+$suoralisa = "";
 
 if ($yhtiorow['automaattinen_jt_toimitus'] == 'S') {
   $suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
@@ -636,10 +649,12 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   // lasketaan rivin hinta
   $osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
-  // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
-  if ($laskurow['summa'] != 0 and ($osuus_apu_hinta / $alvit) <= $laskurow["summa"] + 0.01) {
+  echo "$laskurow[summa]<br>";
 
-    $osuus = ($osuus_apu_hinta / $alvit) / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
+  // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
+  if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
+
+    $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon t‰m‰ rivi on koko keikasta
 
     if ($laskurow["rahti_huolinta"] == 0 && $yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
 

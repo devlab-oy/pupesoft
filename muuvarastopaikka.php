@@ -1122,21 +1122,28 @@ if ($tee == 'M') {
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      #Tarkistetaan varaako reklamaatio tuotepaikkaa
-      $query = "SELECT *
-                FROM lasku
-                JOIN tilausrivi ON (
-                  tilausrivi.yhtio = lasku.yhtio AND
-                  tilausrivi.otunnus = lasku.tunnus
-                )
-                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.tila = 'C'
-                AND lasku.alatila IN ('', 'A')
-                AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
-                AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
-                AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
-                AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'";
-      $reklares = pupe_query($query);
+      if ($saldorow["saldo"] == 0 and $hyllyssa == 0 and $myytavissa == 0) {
+        #Tarkistetaan varaako reklamaatio tuotepaikkaa
+        $query = "SELECT *
+                  FROM lasku
+                  JOIN tilausrivi ON (
+                    tilausrivi.yhtio = lasku.yhtio AND
+                    tilausrivi.otunnus = lasku.tunnus
+                  )
+                  WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                  AND lasku.tila = 'C'
+                  AND lasku.alatila IN ('', 'A')
+                  AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
+                  AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
+                  AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
+                  AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'";
+        $reklares = pupe_query($query);
+
+        $reklacheck = (mysql_num_rows($reklares) > 0);
+      }
+      else {
+        $reklacheck = false;
+      }
 
       echo "<tr>";
       echo "<td>$saldorow[nimitys]</td>";
@@ -1182,9 +1189,9 @@ if ($tee == 'M') {
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
-      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or mysql_num_rows($reklares) > 0) {
+      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
 
-        if (mysql_num_rows($reklares) > 0) {
+        if ($reklacheck) {
           $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
         }
 

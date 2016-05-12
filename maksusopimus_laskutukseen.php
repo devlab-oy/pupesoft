@@ -470,12 +470,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $query = "UPDATE lasku SET
                   alatila     = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND jaksotettu = '{$laskurow['tunnus']}'
+                  AND tunnus = '{$laskurow['tunnus']}'
                   AND tila    = 'N'
                   AND alatila = 'B'";
         $upd_res = pupe_query($query);
 
-        $laskurow['alatila'] = '';
+        if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';
+
         $kukarow['kesken'] = $laskurow['tunnus'];
 
         require 'tilauskasittely/tilaus-valmis.inc';

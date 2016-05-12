@@ -104,6 +104,7 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             lcm_info                           = '{$lcm_info}',
             ip_osoite                          = '{$ip_osoite}',
             mac_osoite                         = '{$mac_osoite}',
+            toimipiste                         = '{$toimipistetunnus}',
             valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
             valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
             muutospvm                          = now(),
@@ -379,39 +380,66 @@ if ($toiminto == 'NAYTALAITTEET') {
   $res = pupe_query($query);
 }
 
-if ($toiminto == 'MUOKKAA') {
-
+if ($toiminto == 'MUOKKAA' and !empty($laiterajaus)) {
+  // Haetaan laitteen kaikki tiedot, rajataan vain laitteen tunnuksella
+  $query = "SELECT
+            laite.*,
+            avainsana.selitetark valmistaja,
+            tuote.tuotemerkki malli,
+            concat(asiakas.toim_nimi, '<br>', asiakas.toim_postitp) toimipiste,
+            asiakas.tunnus toimipistetunnus,
+            if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyll‰','Ei') sopimusrivi,
+            group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
+            FROM laite
+            LEFT JOIN tuote on tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno    = laite.tuoteno
+            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio 
+              AND avainsana.laji = 'TRY'
+              AND avainsana.selite = tuote.try
+            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+              AND laite.toimipiste = asiakas.tunnus
+            LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
+            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            {$laiterajaus}
+            GROUP BY laite.sarjanro,laite.tuoteno";
+  $res = pupe_query($query);
   // Halutaan muuttaa laitteen tietoja
-  while ($rowi = mysql_fetch_assoc($res)) {
+  $rowi = mysql_fetch_assoc($res);
 
-    echo "<tr>";
-    echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
-    echo "<td nowrap>{$rowi['tunnus']}</td>";
-    echo "<td>{$rowi['sopimusrivi']}</td>";
-    echo "<td nowrap>{$rowi['valmistaja']}</td>";
-    echo "<td nowrap>{$rowi['malli']}</td>";
-    echo "<td nowrap>{$rowi['sarjanro']}</td>";
-    echo "<td nowrap>{$rowi['tuoteno']}</td>";
-    echo "<td nowrap>{$rowi['toimipistetunnus']}</td>";
-    echo "<td></td><td></td>";
-    echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
-    echo "<td><input type='text' name='sd_sla' value='{$rowi['sd_sla']}'/></td>";
-    echo "<td><input type='text' name='valmistajan_sopimusnumero' value='{$rowi['valmistajan_sopimusnumero']}'/></td>";
-    // Taivutellaan p‰iv‰m‰‰r‰
-    list ($vcloppuvv, $vcloppukk, $vcloppupp) = explode("-", $rowi['valmistajan_sopimus_paattymispaiva']);
-    list ($vcloppupp) = explode(" ", $vcloppupp);
-    echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2' value='{$vcloppupp}'/>
-      <input type='text' name='vcloppukk' maxlength='2' size='2' value='{$vcloppukk}'/>
-      <input type='text' name='vcloppuvv' maxlength='4' size='4' value='{$vcloppuvv}'/></td>";
-    echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
-    echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
-    echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'/></td>";
-    echo "<td><input type='text' name='mac_osoite' value='{$rowi['mac_osoite']}'/></td>";
-    echo "<td class='back'><input type='submit' name='tallennetaan_muutokset' value='Tallenna'/></td>";
-    echo "<td class='back'><input type='submit' name='peruuta'  value='Peruuta'/></td>";
-    echo "</form>";
-    echo "</tr>";
-  }
+  echo "<tr>";
+  echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
+  echo "<td nowrap>{$rowi['tunnus']}</td>";
+  echo "<td>{$rowi['sopimusrivi']}</td>";
+  echo "<td nowrap>{$rowi['valmistaja']}</td>";
+  echo "<td nowrap>{$rowi['malli']}</td>";
+  echo "<td nowrap>{$rowi['sarjanro']}</td>";
+  echo "<td nowrap>{$rowi['tuoteno']}</td>";
+  echo "<td></td>";
+  
+  $toimipistetunnus = $rowi['toimipistetunnus'];
+  // Toimipistevalinta
+  echo "<td>";
+  echo livesearch_kentta("laiterekisteriformi", "ASIAKASHAKU", "toimipistetunnus", 140, $toimipistetunnus, 'EISUBMIT', '', '', 'ei_break_all');
+  echo "</td>";
+  
+  echo "<td></td>";
+  echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
+  echo "<td><input type='text' name='sd_sla' value='{$rowi['sd_sla']}'/></td>";
+  echo "<td><input type='text' name='valmistajan_sopimusnumero' value='{$rowi['valmistajan_sopimusnumero']}'/></td>";
+  // Taivutellaan p‰iv‰m‰‰r‰
+  list ($vcloppuvv, $vcloppukk, $vcloppupp) = explode("-", $rowi['valmistajan_sopimus_paattymispaiva']);
+  list ($vcloppupp) = explode(" ", $vcloppupp);
+  echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2' value='{$vcloppupp}'/>
+    <input type='text' name='vcloppukk' maxlength='2' size='2' value='{$vcloppukk}'/>
+    <input type='text' name='vcloppuvv' maxlength='4' size='4' value='{$vcloppuvv}'/></td>";
+  echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
+  echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
+  echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'/></td>";
+  echo "<td><input type='text' name='mac_osoite' value='{$rowi['mac_osoite']}'/></td>";
+  echo "<td class='back'><input type='submit' name='tallennetaan_muutokset' value='Tallenna'/></td>";
+  echo "<td class='back'><input type='submit' name='peruuta'  value='Peruuta'/></td>";
+  echo "</form>";
+  echo "</tr>";
 
   echo "</table>";
 }

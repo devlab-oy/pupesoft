@@ -83,10 +83,10 @@ function hae_kayttajan_laitteet() {
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
             {$toimipistelisa}
             GROUP BY laite.sarjanro,laite.tuoteno";
   $result = pupe_query($query);
+
   while ($row = mysql_fetch_assoc($result)) {
     $laitteet[] = $row;
   }

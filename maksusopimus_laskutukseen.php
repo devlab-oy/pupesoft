@@ -434,24 +434,28 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $query = "UPDATE lasku SET
-              alatila     = ''
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$tunnus}'
-              AND tila    = 'N'
-              AND alatila = 'B'";
-    $upd_res = pupe_query($query);
-
-    $kukarow['kesken'] = $tunnus;
-
+    #Vapautetaan kaikki maksusopimuksen tilaukset keräykseen
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$tunnus}'";
+              AND jaksotettu = '{$tunnus}'";
     $laskures = pupe_query($query);
-    $laskurow = mysql_fetch_assoc($laskures);
 
-    require 'tilauskasittely/tilaus-valmis.inc';
+    while ($laskurow = mysql_fetch_assoc($laskures)) {
+      $query = "UPDATE lasku SET
+                alatila     = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND jaksotettu = '{$laskurow['tunnus']}'
+                AND tila    = 'N'
+                AND alatila = 'B'";
+      $upd_res = pupe_query($query);
+
+      $laskurow['alatila'] = '';
+
+      $kukarow['kesken'] = $laskurow['tunnus'];
+
+      require 'tilauskasittely/tilaus-valmis.inc';
+    }
 
     $tee = "";
   }

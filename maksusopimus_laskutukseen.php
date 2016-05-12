@@ -434,7 +434,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $jtcheckerror = false;
+    $jtcheckerror = array();
 
     #Vapautetaan kaikki maksusopimuksen tilaukset keräykseen
     $query = "SELECT *
@@ -454,13 +454,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
       $jtcheckres = pupe_query($query);
 
       if (mysql_num_rows($jtcheckres) != 0) {
-        $jtcheckerror = true;
-        break;
+        $jtcheckerror[] = $laskurow['tunnus'];
       }
     }
 
-    if ($jtcheckerror) {
-      echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä"),"</font><br>";
+    if (count($jtcheckerror) > 0) {
+      echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä (%s)", "", implode(", ", $jtcheckerror)),"</font><br>";
     }
     else {
 

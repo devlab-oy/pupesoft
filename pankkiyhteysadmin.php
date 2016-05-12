@@ -259,6 +259,30 @@ if ($tee == "pankin_sertifikaatti") {
   echo "</form>";
 }
 
+// Haetaan uusi sertifikaatti, kysyt‰‰n salasana
+if ($tee == "uusi_sertifikaatti") {
+  echo "<h2>" . t('Sertifikaatin uusiminen') . "</h2>";
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='uusi_sertifikaatti_hae'/>";
+  echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'/>";
+
+  echo "<table>";
+
+  echo "<tr>";
+  echo "<th><label for='salasana'>";
+  echo t("Salasana");
+  echo "</label></th>";
+  echo "<td><input type='password' name='salasana'></td>";
+  echo "</tr>";
+
+  echo "</table>";
+  echo "<br>";
+
+  echo "<input type='submit' value='" . t("Jatka") . "'/>";
+  echo "</form>";
+}
+
 // Uuden pankkiyhteyden oikeellisuustarkistus
 if ($tee == "luo") {
   $virheet_count = 0;

@@ -613,6 +613,16 @@ if ($tee == "") {
         echo "</td>";
       }
 
+      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH'))) {
+        echo "<td class='back'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tee' value='uusi_sertifikaatti'/>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "'/>";
+        echo "</form>";
+        echo "</td>";
+      }
+
       echo "</tr>";
     }
 

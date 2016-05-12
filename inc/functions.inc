@@ -10257,15 +10257,19 @@ if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
     global $kukarow;
   
     $asiakastunnukset = '';
+    if (!empty($kukarow['oletus_asiakas'])) {
+      $asiakastunnukset = $kukarow['oletus_asiakas'];
+    }
+
     $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
               FROM customers_users 
               JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
               WHERE user_id = '{$kukarow['tunnus']}'";
     $result = pupe_query($query);
     if (mysql_affected_rows() == 1) {
-      while ($row = mysql_fetch_assoc($result)) {
-        $asiakastunnukset = $row['toimipistetunnukset'];
-      }
+      $row = mysql_fetch_assoc($result);
+      
+      $asiakastunnukset = empty($asiakastunnukset) ? $row['toimipistetunnukset'] : $asiakastunnukset.",".$row['toimipistetunnukset'];
     }
     return $asiakastunnukset;
   }

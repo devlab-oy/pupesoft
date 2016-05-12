@@ -27,6 +27,18 @@ else {
   liite_popup("JS");
 }
 
+function url_or_text($str) {
+  $array = array("http://", "https://");
+
+  foreach($array as $a) {
+    if (stripos($str, $a) !== false) {
+      return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
+    }
+  }
+
+  return $str;
+}
+
 if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
@@ -1501,7 +1513,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if (count($tuotteen_lisatiedot) > 0) {
         $row["nimitys"] .= "<ul>";
         foreach ($tuotteen_lisatiedot as $tuotteen_lisatiedot_arvo) {
-          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; $tuotteen_lisatiedot_arvo[selite]</li>";
+          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; ".url_or_text($tuotteen_lisatiedot_arvo['selite'])."</li>";
         }
         $row["nimitys"] .= "</ul>";
       }

@@ -434,6 +434,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
+    $jtcheckerror = false;
+
     #Vapautetaan kaikki maksusopimuksen tilaukset keräykseen
     $query = "SELECT *
               FROM lasku
@@ -442,19 +444,43 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     $laskures = pupe_query($query);
 
     while ($laskurow = mysql_fetch_assoc($laskures)) {
-      $query = "UPDATE lasku SET
-                alatila     = ''
+
+      #Tarkistetaan onko tilauksella JT-rivejä
+      $query = "SELECT *
+                FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND jaksotettu = '{$laskurow['tunnus']}'
-                AND tila    = 'N'
-                AND alatila = 'B'";
-      $upd_res = pupe_query($query);
+                AND otunnus = '{$laskurow['tunnus']}'
+                AND var = 'J'";
+      $jtcheckres = pupe_query($query);
 
-      $laskurow['alatila'] = '';
+      if (mysql_num_rows($jtcheckres) != 0) {
+        $jtcheckerror = true;
+        break;
+      }
+    }
 
-      $kukarow['kesken'] = $laskurow['tunnus'];
+    if ($jtcheckerror) {
+      echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä"),"</font><br>";
+    }
+    else {
 
-      require 'tilauskasittely/tilaus-valmis.inc';
+      mysql_data_seek($laskures, 0);
+
+      while ($laskurow = mysql_fetch_assoc($laskures)) {
+
+        $query = "UPDATE lasku SET
+                  alatila     = ''
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND jaksotettu = '{$laskurow['tunnus']}'
+                  AND tila    = 'N'
+                  AND alatila = 'B'";
+        $upd_res = pupe_query($query);
+
+        $laskurow['alatila'] = '';
+        $kukarow['kesken'] = $laskurow['tunnus'];
+
+        require 'tilauskasittely/tilaus-valmis.inc';
+      }
     }
 
     $tee = "";

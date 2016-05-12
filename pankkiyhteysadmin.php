@@ -304,6 +304,43 @@ if ($tee == "uusi_sertifikaatti") {
   echo "</form>";
 }
 
+// Haetaan ja tallennetaan uusi sertifikaatti
+if ($tee == "uusi_sertifikaatti_hae") {
+  $params = array(
+    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
+    "salasana"            => $salasana,
+    "bank"                => $pankkiyhteys['bank'],
+  );
+
+  $uudet_tunnukset = sepa_renew_certificate($params);
+
+  if (!$uudet_tunnukset) {
+    virhe("Sertifikaatin uusiminen epäonnistui!");
+  }
+  else {
+    // Salataan sertifikaatit
+    $oss = salaa($uudet_tunnukset["own_signing_certificate"], $salasana);
+    $sk  = salaa($uudet_tunnukset["signing_private_key"],     $salasana);
+
+    // Haetaan sertifikaatin expire date
+    $_temp    = parse_sertificate($uudet_tunnukset["own_signing_certificate"]);
+    $oss_time = $_temp['valid_to'];
+
+    $query = "UPDATE pankkiyhteys
+              SET signing_certificate          = '{$oss}',
+                  signing_private_key          = '{$sk}',
+                  signing_certificate_valid_to = '{$oss_time}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$pankkiyhteys_tunnus}";
+    $result = pupe_query($query);
+
+    ok("Sertifikaatti päivitetty!");
+    echo "<br>";
+  }
+
+  $tee = "";
+}
+
 // Uuden pankkiyhteyden oikeellisuustarkistus
 if ($tee == "luo") {
   $virheet_count = 0;

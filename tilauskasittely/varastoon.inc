@@ -649,8 +649,6 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
   // lasketaan rivin hinta
   $osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
-  echo "$laskurow[summa]<br>";
-
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
   if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
 

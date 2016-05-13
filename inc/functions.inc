@@ -31455,6 +31455,38 @@ if (!function_exists('xml_to_array')) {
   }
 }
 
+if (!function_exists('voidaanko_vapauttaa_maksusopimus')) {
+  function voidaanko_vapauttaa_maksusopimus($tunnus) {
+    global $kukarow;
+
+    $jtcheckerror = array();
+
+    #Vapautetaan kaikki maksusopimuksen tilaukset keräykseen
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND jaksotettu = '{$tunnus}'";
+    $laskures = pupe_query($query);
+
+    while ($laskurow = mysql_fetch_assoc($laskures)) {
+
+      #Tarkistetaan onko tilauksella JT-rivejä
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'
+                AND var = 'J'";
+      $jtcheckres = pupe_query($query);
+
+      if (mysql_num_rows($jtcheckres) != 0) {
+        $jtcheckerror[] = $laskurow['tunnus'];
+      }
+    }
+
+    return $jtcheckerror;
+  }
+}
+
 if (!function_exists("vapauta_maksusopimus")) {
   function vapauta_maksusopimus($maksusoppari) {
     global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
@@ -31479,24 +31511,33 @@ if (!function_exists("vapauta_maksusopimus")) {
 
     if (mysql_num_rows($posres)) {
 
+      $jtcheckerror = voidaanko_vapauttaa_maksusopimus($maksusoppari);
+
+      if (count($jtcheckerror) > 0) {
+        echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä (%s)", "", implode(", ", $jtcheckerror)),"</font><br>";
+        return false;
+      }
+
       $silent = 'Nyt hiljaa, hiljaa hiivitään näin Kardemumman yössä';
       $vapauta_tilaus_keraykseen = true;
-      $kukarow['kesken'] = $maksusoppari;
-
-      $query = "UPDATE lasku SET
-                alatila     = ''
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$maksusoppari}'";
-      pupe_query($query);
 
       $query = "SELECT *
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$maksusoppari}'";
+                AND jaksotettu = '{$maksusoppari}'";
       $laskures = pupe_query($query);
-      $laskurow = mysql_fetch_assoc($laskures);
 
-      require 'tilauskasittely/tilaus-valmis.inc';
+      while ($laskurow = mysql_fetch_assoc($laskures)) {
+        $query = "UPDATE lasku SET
+                  alatila     = ''
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['tunnus']}'";
+        pupe_query($query);
+
+        $kukarow['kesken'] = $laskurow['tunnus'];
+
+        require 'tilauskasittely/tilaus-valmis.inc';
+      }
     }
   }
 }

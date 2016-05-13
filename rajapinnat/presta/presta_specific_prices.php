@@ -1,20 +1,23 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
+require_once 'rajapinnat/presta/presta_products.php';
 require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaSpecificPrices extends PrestaClient {
   private $all_prices = null;
   private $already_removed_product = array();
   private $currency_codes = null;
-  private $product_ids;
-  private $shop;
+  private $presta_products = null;
+  private $presta_shops = null;
+  private $product_ids = array();
+  private $shop = null;
 
   public function __construct($url, $api_key, $log_file) {
-    parent::__construct($url, $api_key, $log_file);
+    $this->presta_products = new PrestaProducts($url, $api_key, $log_file);
+    $this->presta_shops = new PrestaShops($url, $api_key, $log_file);
 
-    $this->shop = null;
-    $this->product_ids = array();
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -99,11 +102,8 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->logger->log('---------Start specific price sync---------');
 
     try {
-      $presta_shop = new PrestaShops($this->url(), $this->api_key());
-      $this->shop = $presta_shop->first_shop();
-
-      $presta_product = new PrestaProducts($this->url(), $this->api_key(), null);
-      $this->product_ids = $presta_product->all_skus();
+      $this->product_ids = $this->presta_products->all_skus();
+      $this->shop = $this->presta_shops->first_shop();
 
       $total = count($prices);
       $current = 0;

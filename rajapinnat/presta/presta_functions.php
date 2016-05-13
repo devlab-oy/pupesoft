@@ -1,7 +1,9 @@
 <?php
 
 function presta_hae_asiakkaat() {
-  global $kukarow, $yhtiorow, $ajetaanko_kaikki, $datetime_checkpoint;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PRESTA_ASIAKAS_EXPORT');
 
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa = " AND (yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'
@@ -370,7 +372,9 @@ function presta_hae_kaikki_tuotteet() {
 }
 
 function presta_hae_tuotteet() {
-  global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PRESTA_TUOTE_EXPORT');
 
   $tuoterajaus = presta_tuoterajaus();
 
@@ -546,4 +550,37 @@ function presta_ajetaanko_sykronointi($ajo, $ajolista) {
   }
 
   return $status;
+}
+
+function presta_export_checkpoint($checkpoint) {
+  global $kukarow, $yhtiorow;
+
+  // Haetaan timestamp avainsanoista
+  $checkpoint_res = t_avainsana($checkpoint);
+
+  // otetaan viimeisen ajon timestamppi talteen ja p‰ivitet‰‰n t‰m‰ hetki
+  if (mysql_num_rows($checkpoint_res) != 0) {
+    $row = mysql_fetch_assoc($checkpoint_res);
+    $selite = $row['selite'];
+
+    // P‰ivitet‰‰n timestamppi t‰h‰n hetkeen
+    $query = "UPDATE avainsana SET
+              selite = now()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = '{$checkpoint}'";
+    pupe_query($query);
+  }
+  else {
+    // timestamppia ei lˆydy, eli t‰m‰ on ensimm‰inen ajo
+    $selite = date('Y-m-d H:i:s', mktime(0, 0, 0, 1, 1, 1970));
+
+    // P‰ivitet‰‰n timestamppi talteen
+    $query = "INSERT INTO avainsana SET
+              yhtio = '{$kukarow['yhtio']}',
+              selite = now(),
+              laji = '{$checkpoint}'";
+    pupe_query($query);
+  }
+
+  return $selite;
 }

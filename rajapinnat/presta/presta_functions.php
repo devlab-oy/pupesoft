@@ -525,3 +525,25 @@ function presta_tuoterajaus() {
 
   return $tuoterajaus;
 }
+
+function presta_ajetaanko_sykronointi($ajo, $ajolista) {
+  // jos ajo ei ole ajolistalla, ei ajeta
+  if (array_search($ajo, $ajolista) === false) {
+    return false;
+  }
+
+  // Sallitaan vain yksi instanssi tästä ajosta kerrallaan
+  $lock_params = array(
+    "lockfile" => "{$ajo}-flock.lock",
+    "locktime" => 5400,
+    "return"   => true,
+  );
+
+  $status = pupesoft_flock($lock_params);
+
+  if ($status === false) {
+    echo date("d.m.Y @ G:i:s")." - {$ajo} -ajo on jo käynnissä, ei ajetan uudestaan.\n";
+  }
+
+  return $status;
+}

@@ -31760,7 +31760,7 @@ if (!function_exists('hae_lahete_printteri')) {
 
       $apuprintteri = $prirow["printteri{$printterinro}"]; // läheteprintteri tai haluttu printteri
 
-      require "varaston_tulostusalue.inc";
+      require "tilauskasittely/varaston_tulostusalue.inc";
 
       if (isset($kirjoitin) and $kirjoitin != '') {
         $apuprintteri = $kirjoitin;

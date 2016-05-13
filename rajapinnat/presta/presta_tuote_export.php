@@ -48,7 +48,7 @@ if (trim($argv[1]) != '') {
 
   $kukarow = hae_kukarow('admin', $yhtio);
 
-  if (empty($kukarow) {
+  if (empty($kukarow)) {
     die ("Admin -käyttäjä ei löydy.");
   }
 }

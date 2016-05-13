@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
+require_once 'rajapinnat/presta/presta_shop_groups.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
@@ -16,6 +17,7 @@ class PrestaProducts extends PrestaClient {
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
+  private $presta_shop_groups = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
@@ -25,6 +27,7 @@ class PrestaProducts extends PrestaClient {
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+    $this->presta_shop_groups = new PrestaShopGroups($url, $api_key);
 
     parent::__construct($url, $api_key);
   }
@@ -355,6 +358,9 @@ class PrestaProducts extends PrestaClient {
     $row_counter = 0;
     $total_counter = count($products);
 
+    // fetch the first shop group id, we will add all products to this shop group (for now)
+    $shop_group_id = $this->shop_group_id();
+
     foreach ($products as $product) {
       $row_counter++;
       $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
@@ -364,10 +370,10 @@ class PrestaProducts extends PrestaClient {
         $id = $this->product_id_by_sku($product['tuoteno']);
 
         if ($id !== false) {
-          $this->update($id, $product);
+          $this->update($id, $product, null, $shop_group_id);
         }
         else {
-            $this->create($product);
+          $this->create($product, null, $shop_group_id);
         }
       }
       catch (Exception $e) {
@@ -391,7 +397,11 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('Haetaan kaikki tuotteet Prestashopista');
 
-    $existing_products = $this->all(array('id', 'reference'));
+    $display = array('id', 'reference');
+    $filter = array();
+    $shop_group_id = $this->shop_group_id();
+
+    $existing_products = $this->all($display, $filter, null, $shop_group_id);
     $existing_products = array_column($existing_products, 'reference', 'id');
 
     $this->presta_all_products = $existing_products;
@@ -460,6 +470,14 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  private function shop_group_id() {
+    // fetch the first shop group id, we'll use it for now for all products
+    $shop_group = $this->presta_shop_groups->first_shop_group();
+    $shop_group_id = isset($shop_group['id']) ? (int) $shop_group['id'] : null;
+
+    return $shop_group_id;
   }
 
   public function product_id_by_sku($sku) {

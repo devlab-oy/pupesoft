@@ -91,9 +91,9 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function get($id, $id_shop = null) {
+  protected function get($id, $id_shop = null, $id_group_shop = null) {
     try {
-      $response_xml = $this->get_as_xml($id, $id_shop);
+      $response_xml = $this->get_as_xml($id, $id_shop, $id_group_shop);
     }
     catch (Exception $e) {
       throw $e;
@@ -127,12 +127,13 @@ abstract class PrestaClient {
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_as_xml($id, $id_shop = null) {
+  protected function get_as_xml($id, $id_shop = null, $id_group_shop = null) {
     $resource = $this->resource_name();
     $opt = array(
-      'id'       => $id,
-      'id_shop'  => $id_shop,
-      'resource' => $resource,
+      'id'            => $id,
+      'id_group_shop' => $id_group_shop,
+      'id_shop'       => $id_shop,
+      'resource'      => $resource,
     );
 
     $id_shop = is_null($id_shop) ? 'default' : $id_shop;
@@ -158,10 +159,11 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function create(array $resource, $id_shop = null) {
+  protected function create(array $resource, $id_shop = null, $id_group_shop = null) {
     $opt = array(
-      'id_shop'  => $id_shop,
-      'resource' => $this->resource_name(),
+      'id_group_shop' => $id_group_shop,
+      'id_shop'       => $id_shop,
+      'resource'      => $this->resource_name(),
     );
 
     $id_shop = is_null($id_shop) ? 'default' : $id_shop;
@@ -198,7 +200,7 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function update($id, array $resource, $id_shop = null) {
+  protected function update($id, array $resource, $id_shop = null, $id_group_shop = null) {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id, $id_shop);
     $existing_xml = $existing_resource->asXML();
@@ -214,7 +216,7 @@ abstract class PrestaClient {
       return xml_to_array($existing_xml);
     }
 
-    return $this->update_xml($id, $xml, $id_shop);
+    return $this->update_xml($id, $xml, $id_shop, $id_group_shop);
   }
 
   /**
@@ -227,11 +229,12 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function update_xml($id, SimpleXMLElement $xml, $id_shop = null) {
+  protected function update_xml($id, SimpleXMLElement $xml, $id_shop = null, $id_group_shop = null) {
     $opt = array(
-      'id'       => $id,
-      'id_shop'  => $id_shop,
-      'resource' => $this->resource_name(),
+      'id'            => $id,
+      'id_group_shop' => $id_group_shop,
+      'id_shop'       => $id_shop,
+      'resource'      => $this->resource_name(),
     );
 
     $id_shop = is_null($id_shop) ? 'default' : $id_shop;
@@ -261,7 +264,7 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function all($display = array(), $filters = array(), $id_shop = null) {
+  protected function all($display = array(), $filters = array(), $id_shop = null, $id_group_shop = null) {
     $resource = $this->resource_name();
 
     // esim. 'display' => '[name,value]'
@@ -273,9 +276,10 @@ abstract class PrestaClient {
     }
 
     $opt = array(
-      'display'  => $display,
-      'id_shop'  => $id_shop,
-      'resource' => $resource,
+      'display'       => $display,
+      'id_group_shop' => $id_group_shop,
+      'id_shop'       => $id_shop,
+      'resource'      => $resource,
     );
 
     // esim: 'filter[id]' => '[1|5]'
@@ -340,11 +344,12 @@ abstract class PrestaClient {
    * @return boolean
    * @throws Exception
    */
-  protected function delete($id, $id_shop = null) {
+  protected function delete($id, $id_shop = null, $id_group_shop = null) {
     $opt = array(
-      'id'       => $id,
-      'id_shop'  => $id_shop,
-      'resource' => $this->resource_name(),
+      'id'            => $id,
+      'id_group_shop' => $id_group_shop,
+      'id_shop'       => $id_shop,
+      'resource'      => $this->resource_name(),
     );
 
     $id_shop = is_null($id_shop) ? 'default' : $id_shop;

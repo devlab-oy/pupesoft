@@ -194,7 +194,7 @@ if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
   $kategoriat = presta_hae_kategoriat();
 
   presta_echo("Siirretään tuotekategoriat.");
-  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key, 'presta_kategoriat');
 
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_categories->set_home_category_id($presta_home_category_id);
@@ -207,7 +207,7 @@ if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
   presta_echo("Siirretään tuotetiedot.");
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key, 'presta_tuotteet');
 
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
@@ -228,7 +228,7 @@ if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
   }
 
   presta_echo("Siirretään saldot.");
-  $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key);
+  $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key, 'presta_saldot');
 
   $presta_stocks->set_all_products($kaikki_tuotteet);
   $presta_stocks->update_stock();
@@ -238,7 +238,7 @@ if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
   $groups = presta_hae_asiakasryhmat();
 
   presta_echo("Siirretään asiakasryhmät.");
-  $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+  $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key, 'presta_asiakasryhmat');
 
   $presta_customer_groups->set_show_prices($presta_asiakasryhmien_hinta);
   $presta_customer_groups->set_price_display_method($presta_asiakasryhmien_hinnat);
@@ -249,7 +249,7 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
   $asiakkaat = presta_hae_asiakkaat();
 
   presta_echo("Siirretään asiakkaat.");
-  $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');
 
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
@@ -259,7 +259,7 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   $hinnat = presta_specific_prices();
 
   presta_echo("Siirretään specific prices.");
-  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
+  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');
 
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
   $presta_prices->sync_prices($hinnat);
@@ -267,7 +267,7 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
 
 if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   presta_echo("Haetaan tilaukset.");
-  $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+  $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key, 'presta_tilaukset');
 
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
   $presta_orders->set_yhtiorow($yhtiorow);

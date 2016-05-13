@@ -471,7 +471,7 @@ if (!function_exists("pupesoft_flock")) {
     }
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-      if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+      if ($locktime > 0 and time() - filemtime($lockfile) >= $locktime) {
         // Onko nagios monitor asennettu?
         if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
           file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);

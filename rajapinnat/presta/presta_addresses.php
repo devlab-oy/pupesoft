@@ -4,8 +4,12 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 
 class PrestaAddresses extends PrestaClient {
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  private $presta_countries = null;
+
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
+
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -26,8 +30,7 @@ class PrestaAddresses extends PrestaClient {
       $xml = $existing_address;
     }
 
-    $presta_country = new PrestaCountries($this->url(), $this->api_key());
-    $finland = $presta_country->find_findland();
+    $finland = $this->presta_countries->find_findland();
 
     // Mandatory fields
     $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);

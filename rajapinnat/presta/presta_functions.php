@@ -528,7 +528,7 @@ function presta_tuoterajaus() {
 
 function presta_ajetaanko_sykronointi($ajo, $ajolista) {
   // jos ajo ei ole ajolistalla, ei ajeta
-  if (array_search($ajo, $ajolista) === false) {
+  if (array_search(strtolower(trim($ajo)), $ajolista) === false) {
     return false;
   }
 

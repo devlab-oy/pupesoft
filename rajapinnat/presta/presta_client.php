@@ -437,7 +437,7 @@ abstract class PrestaClient {
     }
 
     if (is_null($this->presta_shops)) {
-      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key, $this->logger->log_file());
     }
 
     $valid_values = array();
@@ -467,7 +467,7 @@ abstract class PrestaClient {
 
   protected function all_shop_ids() {
     if (is_null($this->presta_shops)) {
-      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key, $this->logger->log_file());
     }
 
     $all = $this->presta_shops->fetch_all();

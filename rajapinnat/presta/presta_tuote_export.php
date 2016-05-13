@@ -200,17 +200,6 @@ if (!isset($presta_varastot)) {
   $presta_varastot = array(0);
 }
 
-// Haetaan timestamp
-$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
-
-if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  exit("VIRHE: Timestamp ei lˆydy avainsanoista!\n");
-}
-
-$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mik‰ tilanne on jo k‰sitelty
-$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
-
 echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop p‰ivitys.\n";
 
 if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
@@ -219,6 +208,7 @@ if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tuotekategoriat.\n";
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_categories->set_home_category_id($presta_home_category_id);
   $presta_categories->set_languages_table($presta_kieliversiot);
@@ -242,7 +232,6 @@ if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_visibility_type($presta_tuotekasittely);
-
   $presta_products->sync_products($tuotteet);
 }
 
@@ -266,6 +255,7 @@ if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakasryhm‰t.\n";
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+
   $presta_customer_groups->set_show_prices($presta_asiakasryhmien_hinta);
   $presta_customer_groups->set_price_display_method($presta_asiakasryhmien_hinnat);
   $presta_customer_groups->sync_groups($groups);
@@ -277,6 +267,7 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakkaat.\n";
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
 }
@@ -287,36 +278,21 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
 
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakashinnat ja alennukset.\n";
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
+
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
   $presta_prices->sync_prices($hinnat);
 }
 
 if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tilaukset.\n";
-
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
   $presta_orders->set_yhtiorow($yhtiorow);
   $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
   $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
   $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
   $presta_orders->transfer_orders_to_pupesoft();
-}
-
-// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-mysql_close($link);
-unset($link);
-require "inc/connect.inc";
-
-// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen
-$query = "UPDATE avainsana SET
-          selite      = '{$datetime_checkpoint_uusi}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji    = 'TUOTE_EXP_CRON'";
-pupe_query($query);
-
-if (mysql_affected_rows() != 1) {
-  echo date("d.m.Y @ G:i:s")." - Timestamp p‰ivitys ep‰onnistui!\n";
 }
 
 echo date("d.m.Y @ G:i:s")." - Prestashop p‰ivitys valmis.\n";

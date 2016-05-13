@@ -21,27 +21,16 @@ ini_set("display_errors", 1);
 
 require "inc/connect.inc";
 require "inc/functions.inc";
-
-$lock_params = array(
-  "locktime" => 5400
-);
-
-// Logitetaan ajo
-cron_log();
-
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
-pupesoft_flock($lock_params);
-
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_customers.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_customer_groups.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_sales_orders.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_product_stocks.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_shops.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_specific_prices.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_addresses.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_functions.php";
+require_once "rajapinnat/presta/presta_products.php";
+require_once "rajapinnat/presta/presta_categories.php";
+require_once "rajapinnat/presta/presta_customers.php";
+require_once "rajapinnat/presta/presta_customer_groups.php";
+require_once "rajapinnat/presta/presta_sales_orders.php";
+require_once "rajapinnat/presta/presta_product_stocks.php";
+require_once "rajapinnat/presta/presta_shops.php";
+require_once "rajapinnat/presta/presta_specific_prices.php";
+require_once "rajapinnat/presta/presta_addresses.php";
+require_once "rajapinnat/presta/presta_functions.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -70,20 +59,17 @@ $ajetaanko_kaikki = (isset($argv[2]) and trim($argv[2]) != '') ? "YES" : "NO";
 
 if (isset($argv[3])) {
   $synkronoi = explode(',', $argv[3]);
-  $synkronoi = array_flip($synkronoi);
-}
-elseif (isset($synkronoi_prestaan) and count($synkronoi_prestaan) > 0) {
-  $synkronoi = $synkronoi_prestaan;
 }
 else {
+  // ajetaan kaikki
   $synkronoi = array(
-    'kategoriat'    => t('Kategoriat'),
-    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
-    'saldot'        => t('Saldot'),
-    'asiakasryhmat' => t('Asiakasryhm‰t'),
-    'asiakkaat'     => t('Asiakkaat'),
-    'asiakashinnat' => t('Asiakashinnat'),
-    'tilaukset'     => t('Tilauksien haku'),
+    'asiakashinnat',
+    'asiakasryhmat',
+    'asiakkaat',
+    'kategoriat',
+    'saldot',
+    'tilaukset',
+    'tuotteet',
   );
 }
 
@@ -223,7 +209,7 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop p‰ivitys.\n";
 
-if (array_key_exists('kategoriat', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotekategoriat.\n";
   $kategoriat = presta_hae_kategoriat();
 
@@ -235,7 +221,7 @@ if (array_key_exists('kategoriat', $synkronoi)) {
   $presta_categories->sync_categories($kategoriat);
 }
 
-if (array_key_exists('tuotteet', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
   $tuotteet = presta_hae_tuotteet();
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
@@ -256,7 +242,7 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->sync_products($tuotteet);
 }
 
-if (array_key_exists('saldot', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
   // t‰m‰ on voitu jo hakea tuotetietojen yhteydess‰, ei tartte uutta query‰
   if (empty($kaikki_tuotteet)) {
     echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
@@ -270,7 +256,7 @@ if (array_key_exists('saldot', $synkronoi)) {
   $presta_stocks->update_stock();
 }
 
-if (array_key_exists('asiakasryhmat', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan asiakasryhm‰t.\n";
   $groups = presta_hae_asiakasryhmat();
 
@@ -281,7 +267,7 @@ if (array_key_exists('asiakasryhmat', $synkronoi)) {
   $presta_customer_groups->sync_groups($groups);
 }
 
-if (array_key_exists('asiakkaat', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
   $asiakkaat = presta_hae_asiakkaat();
 
@@ -291,7 +277,7 @@ if (array_key_exists('asiakkaat', $synkronoi)) {
   $presta_customer->sync_customers($asiakkaat);
 }
 
-if (array_key_exists('asiakashinnat', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat ja alennukset.\n";
   $hinnat = presta_specific_prices();
 
@@ -301,7 +287,7 @@ if (array_key_exists('asiakashinnat', $synkronoi)) {
   $presta_prices->sync_prices($hinnat);
 }
 
-if (array_key_exists('tilaukset', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tilaukset.\n";
 
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);

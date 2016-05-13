@@ -41,14 +41,15 @@ ini_set("memory_limit", "2G");
 if (trim($argv[1]) != '') {
   $yhtio = mysql_real_escape_string($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
-  $kukarow = hae_kukarow('admin', $yhtio);
 
-  if ($kukarow === null) {
-    die ("\n");
+  if (empty($yhtiorow)) {
+    die("Yhtiö ei löydy.");
   }
 
-  if (!isset($yhtiorow)) {
-    die('Yhtiorow puuttuu');
+  $kukarow = hae_kukarow('admin', $yhtio);
+
+  if (empty($kukarow) {
+    die ("Admin -käyttäjä ei löydy.");
   }
 }
 else {
@@ -132,7 +133,10 @@ if (!isset($presta_dynaamiset_tuoteparametrit)) {
 }
 if (!isset($presta_ohita_tuoteparametrit)) {
   // Lista Prestan tuotteen kentistä, joita ei tule päivittää rajapinnassa
-  $presta_ohita_tuoteparametrit = array();
+  $presta_ohita_tuoteparametrit = array(
+    // "price",
+    // "description",
+  );
 }
 if (!isset($presta_synkronoi_tuotepuu)) {
   // Siirretäänko Pupesoftin kategoriat. Aseta false, niin ei siirretä.

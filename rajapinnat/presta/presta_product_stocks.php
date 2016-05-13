@@ -8,10 +8,10 @@ class PrestaProductStocks extends PrestaClient {
   private $presta_products = null;
   private $pupesoft_all_products = array();
 
-  public function __construct($url, $api_key) {
-    $this->presta_products = new PrestaProducts($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_products = new PrestaProducts($url, $api_key, $log_file);
 
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {

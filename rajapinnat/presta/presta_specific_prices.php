@@ -10,8 +10,8 @@ class PrestaSpecificPrices extends PrestaClient {
   private $product_ids;
   private $shop;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
 
     $this->shop = null;
     $this->product_ids = array();

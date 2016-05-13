@@ -1,23 +1,18 @@
 <?php
 
 // Kutsutaanko CLI:stä
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli') {
-  $php_cli = TRUE;
+if (php_sapi_name() != 'cli') {
+  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-date_default_timezone_set('Europe/Helsinki');
+$pupe_root_polku = dirname(dirname(dirname(__FILE__)));
 
-// Kutsutaanko CLI:stä
-if (!$php_cli) {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
-}
-
-$pupe_root_polku=dirname(dirname(dirname(__FILE__)));
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
-error_reporting(E_ALL);
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku);
 ini_set("display_errors", 1);
+ini_set("max_execution_time", 0); // unlimited execution time
+ini_set("memory_limit", "2G");
+error_reporting(E_ALL);
+date_default_timezone_set('Europe/Helsinki');
 
 require "inc/connect.inc";
 require "inc/functions.inc";
@@ -32,31 +27,24 @@ require_once "rajapinnat/presta/presta_specific_prices.php";
 require_once "rajapinnat/presta/presta_addresses.php";
 require_once "rajapinnat/presta/presta_functions.php";
 
-// Laitetaan unlimited execution time
-ini_set("max_execution_time", 0);
-
-// Laitetaan isompi allowed memory size
-ini_set("memory_limit", "2G");
-
-if (trim($argv[1]) != '') {
-  $yhtio = mysql_real_escape_string($argv[1]);
-  $yhtiorow = hae_yhtion_parametrit($yhtio);
-
-  if (empty($yhtiorow)) {
-    die("Yhtiö ei löydy.");
-  }
-
-  $kukarow = hae_kukarow('admin', $yhtio);
-
-  if (empty($kukarow)) {
-    die ("Admin -käyttäjä ei löydy.");
-  }
-}
-else {
-  die ("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [ajentaanko_kaikki] [laji,laji,...]\n");
+if (empty($argv[1])) {
+  die("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [ajentaanko_kaikki] [laji,laji,...]\n");
 }
 
-$ajetaanko_kaikki = (isset($argv[2]) and trim($argv[2]) != '') ? "YES" : "NO";
+$yhtio = mysql_real_escape_string($argv[1]);
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+
+if (empty($yhtiorow)) {
+  die("Yhtiö ei löydy.");
+}
+
+$kukarow = hae_kukarow('admin', $yhtio);
+
+if (empty($kukarow)) {
+  die("Admin -käyttäjä ei löydy.");
+}
+
+$ajetaanko_kaikki = (!empty($argv[2])) ? "YES" : "NO";
 
 if (isset($argv[3])) {
   $synkronoi = explode(',', $argv[3]);
@@ -200,13 +188,12 @@ if (!isset($presta_varastot)) {
   $presta_varastot = array(0);
 }
 
-echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop päivitys.\n";
+presta_echo("Aloitetaan Prestashop päivitys.");
 
 if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotekategoriat.\n";
   $kategoriat = presta_hae_kategoriat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään tuotekategoriat.\n";
+  presta_echo("Siirretään tuotekategoriat.");
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
 
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
@@ -216,11 +203,10 @@ if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
   $tuotteet = presta_hae_tuotteet();
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään tuotetiedot.\n";
+  presta_echo("Siirretään tuotetiedot.");
   $presta_products = new PrestaProducts($presta_url, $presta_api_key);
 
   $presta_products->set_all_products($kaikki_tuotteet);
@@ -238,11 +224,10 @@ if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
 if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
   // tämä on voitu jo hakea tuotetietojen yhteydessä, ei tartte uutta queryä
   if (empty($kaikki_tuotteet)) {
-    echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
     $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
   }
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään saldot.\n";
+  presta_echo("Siirretään saldot.");
   $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key);
 
   $presta_stocks->set_all_products($kaikki_tuotteet);
@@ -250,10 +235,9 @@ if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakasryhmät.\n";
   $groups = presta_hae_asiakasryhmat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään asiakasryhmät.\n";
+  presta_echo("Siirretään asiakasryhmät.");
   $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
 
   $presta_customer_groups->set_show_prices($presta_asiakasryhmien_hinta);
@@ -262,10 +246,9 @@ if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
   $asiakkaat = presta_hae_asiakkaat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään asiakkaat.\n";
+  presta_echo("Siirretään asiakkaat.");
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
 
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
@@ -273,10 +256,9 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat ja alennukset.\n";
   $hinnat = presta_specific_prices();
 
-  echo date("d.m.Y @ G:i:s")." - Siirretään asiakashinnat ja alennukset.\n";
+  presta_echo("Siirretään specific prices.");
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
 
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
@@ -284,7 +266,7 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Siirretään tilaukset.\n";
+  presta_echo("Haetaan tilaukset.");
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
 
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
@@ -295,4 +277,4 @@ if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   $presta_orders->transfer_orders_to_pupesoft();
 }
 
-echo date("d.m.Y @ G:i:s")." - Prestashop päivitys valmis.\n";
+presta_echo("Prestashop päivitys valmis.");

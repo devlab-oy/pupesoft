@@ -125,7 +125,7 @@ while (false !== ($file = readdir($handle))) {
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
-  $kerayspoikkeama = array();
+  $kerayspoikkeama = $tilausrivit = array();
 
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
@@ -139,8 +139,22 @@ while (false !== ($file = readdir($handle))) {
 
     foreach ($lines as $line) {
       $tilausrivin_tunnus = (int) $line->TransId;
-      $eankoodi = mysql_real_escape_string($line->ItemNumber);
-      $keratty = (float) $line->DeliveredQuantity;
+
+      if (!isset($tilausrivit[$tilausrivin_tunnus])) {
+        $tilausrivit[$tilausrivin_tunnus] = array(
+          'eankoodi' => mysql_real_escape_string($line->ItemNumber),
+          'keratty'  => (float) $line->DeliveredQuantity
+        );
+      }
+      else {
+        $tilausrivit[$tilausrivin_tunnus]['keratty'] += (float) $line->DeliveredQuantity;
+      }
+    }
+
+    foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
+
+      $eankoodi = $data['eankoodi'];
+      $keratty  = $data['keratty'];
 
       $query = "SELECT *
                 FROM tilausrivi

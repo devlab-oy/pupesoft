@@ -555,7 +555,7 @@ function presta_ajetaanko_sykronointi($ajo, $ajolista) {
 
   // Sallitaan vain yksi instanssi tästä ajosta kerrallaan
   $lock_params = array(
-    "lockfile" => "{$ajo}-flock.lock",
+    "lockfile" => "presta-{$ajo}-flock.lock",
     "locktime" => 5400,
     "return"   => true,
   );

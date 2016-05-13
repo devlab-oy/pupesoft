@@ -22,14 +22,14 @@ class PrestaProducts extends PrestaClient {
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key) {
-    $this->presta_categories = new PrestaCategories($url, $api_key);
-    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
-    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
-    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
-    $this->presta_shop_groups = new PrestaShopGroups($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $log_file);
+    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key, $log_file);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key, $log_file);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key, $log_file);
+    $this->presta_shop_groups = new PrestaShopGroups($url, $api_key, $log_file);
 
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {

@@ -32,7 +32,7 @@ abstract class PrestaClient {
    */
   protected $logger = null;
 
-  public function __construct($url, $api_key) {
+  public function __construct($url, $api_key, $log_file) {
     if (empty($url)) {
       throw new Exception('Presta URL puuttuu');
     }
@@ -40,7 +40,7 @@ abstract class PrestaClient {
       throw new Exception('Presta API key puuttuu');
     }
 
-    $this->logger = new Logger("presta_export");
+    $this->logger = new Logger($log_file);
     $this->url = rtrim($url, '/').'/';
     $this->api_key = $api_key;
     $this->ws = new PrestaShopWebservice($this->url, $this->api_key, false);
@@ -437,7 +437,7 @@ abstract class PrestaClient {
     }
 
     if (is_null($this->presta_shops)) {
-      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key, $this->logger->log_file());
     }
 
     $valid_values = array();
@@ -467,7 +467,7 @@ abstract class PrestaClient {
 
   protected function all_shop_ids() {
     if (is_null($this->presta_shops)) {
-      $this->presta_shops = new PrestaShops($this->url, $this->api_key);
+      $this->presta_shops = new PrestaShops($this->url, $this->api_key, $this->logger->log_file());
     }
 
     $all = $this->presta_shops->fetch_all();

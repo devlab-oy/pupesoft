@@ -31475,6 +31475,7 @@ if (!function_exists('voidaanko_vapauttaa_maksusopimus')) {
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = '{$laskurow['tunnus']}'
+                AND tyyppi = 'L'
                 AND var = 'J'";
       $jtcheckres = pupe_query($query);
 
@@ -31535,6 +31536,7 @@ if (!function_exists("vapauta_maksusopimus")) {
         pupe_query($query);
 
         $kukarow['kesken'] = $laskurow['tunnus'];
+        $laskurow['alatila'] = '';
 
         require 'tilauskasittely/tilaus-valmis.inc';
       }

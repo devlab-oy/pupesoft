@@ -563,7 +563,7 @@ function presta_ajetaanko_sykronointi($ajo, $ajolista) {
   $status = pupesoft_flock($lock_params);
 
   if ($status === false) {
-    presta_echo("{$ajo} -ajo on jo käynnissä, ei ajetan uudestaan.");
+    presta_echo("{$ajo} -ajo on jo käynnissä, ei ajeta uudestaan.");
   }
 
   return $status;

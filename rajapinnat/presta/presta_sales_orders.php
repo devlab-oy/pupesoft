@@ -14,11 +14,11 @@ class PrestaSalesOrders extends PrestaClient {
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
 
-    $this->presta_addresses = new PrestaAddresses($url, $api_key);
-    $this->presta_countries = new PrestaCountries($url, $api_key);
+    $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
   }
 
   protected function resource_name() {

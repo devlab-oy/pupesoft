@@ -434,36 +434,18 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $jtcheckerror = array();
-
-    #Vapautetaan kaikki maksusopimuksen tilaukset keräykseen
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND jaksotettu = '{$tunnus}'";
-    $laskures = pupe_query($query);
-
-    while ($laskurow = mysql_fetch_assoc($laskures)) {
-
-      #Tarkistetaan onko tilauksella JT-rivejä
-      $query = "SELECT *
-                FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'
-                AND var = 'J'";
-      $jtcheckres = pupe_query($query);
-
-      if (mysql_num_rows($jtcheckres) != 0) {
-        $jtcheckerror[] = $laskurow['tunnus'];
-      }
-    }
+    $jtcheckerror = voidaanko_vapauttaa_maksusopimus($tunnus);
 
     if (count($jtcheckerror) > 0) {
       echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä (%s)", "", implode(", ", $jtcheckerror)),"</font><br>";
     }
     else {
 
-      mysql_data_seek($laskures, 0);
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND jaksotettu = '{$tunnus}'";
+      $laskures = pupe_query($query);
 
       while ($laskurow = mysql_fetch_assoc($laskures)) {
 

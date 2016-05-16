@@ -113,15 +113,12 @@ class PrestaProductStocks extends PrestaClient {
 
   private function stock_id_by_product_id($product_id, $id_shop) {
     if (is_null($this->all_stocks)) {
-      $all_stocks = array();
       $display = array('id', 'id_product', 'id_shop');
       $filter = array();
+      $id_group_shop = $this->shop_group_id();
 
-      // loop all shops
-      foreach ($this->all_shop_ids() as $shop) {
-        $stock = $this->all($display, $filter, $shop);
-        $all_stocks = array_merge($all_stocks, $stock);
-      }
+      // fetch from all shops
+      $all_stocks = $this->all($display, $filter, null, $id_group_shop);
 
       $this->all_stocks = $all_stocks;
     }

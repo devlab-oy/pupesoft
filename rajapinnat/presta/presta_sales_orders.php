@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_addresses.php';
+require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_customers.php';
@@ -12,6 +13,7 @@ class PrestaSalesOrders extends PrestaClient {
   private $fetch_statuses = array();
   private $fetched_status = null;
   private $presta_addresses = null;
+  private $presta_carriers = null;
   private $presta_countries = null;
   private $presta_order_histories = null;
   private $verkkokauppa_customer = null;
@@ -19,6 +21,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   public function __construct($url, $api_key, $log_file) {
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
     $this->presta_order_histories = new PrestaOrderHistories($url, $api_key, $log_file);
 
@@ -81,7 +84,11 @@ class PrestaSalesOrders extends PrestaClient {
         $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery']);
         $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
 
+        // fetch carrier
+        $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+
         $params = array(
+          "carrier"          => $carrier,
           "delivery_address" => $address_delivery,
           "delivery_country" => $delivery_country,
           "invoice_address"  => $address_invoice,
@@ -141,6 +148,7 @@ class PrestaSalesOrders extends PrestaClient {
    * @return array
    */
   private function convert_to_edi($params) {
+    $carrier          = $params["carrier"];
     $delivery_address = $params["delivery_address"];
     $delivery_country = $params["delivery_country"];
     $invoice_address  = $params["invoice_address"];
@@ -182,7 +190,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_TILAUSAIKA:");
     $this->add_row("OSTOTIL.OT_KASITTELIJA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
-    $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:{$carrier['name']}");
     $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
     $this->add_row("OSTOTIL.OT_MAKSETTU:"); // complete tarkoittaa, että on jo maksettu
     $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");

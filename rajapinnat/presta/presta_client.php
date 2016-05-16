@@ -1,6 +1,8 @@
 <?php
 
 require_once 'rajapinnat/logger.php';
+require_once 'rajapinnat/presta/presta_shop_groups.php';
+require_once 'rajapinnat/presta/presta_shops.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
@@ -8,6 +10,7 @@ abstract class PrestaClient {
   private $api_key = null;
   private $shop_ids = null;
   private $presta_shops = null;
+  private $presta_shop_groups = null;
 
   // ids of installed languages
   protected $languages_table = null;
@@ -474,6 +477,18 @@ abstract class PrestaClient {
     $shops = array_column($all, 'id');
 
     return $shops;
+  }
+
+  protected function shop_group_id() {
+    if (is_null($this->presta_shop_groups)) {
+      $this->presta_shop_groups = new PrestaShopGroups($this->url, $this->api_key, $this->logger->log_file());
+    }
+
+    // fetch the first shop group id, we'll use it for now for all products
+    $shop_group = $this->presta_shop_groups->first_shop_group();
+    $shop_group_id = isset($shop_group['id']) ? (int) $shop_group['id'] : null;
+
+    return $shop_group_id;
   }
 
   protected function get_language_id($code) {

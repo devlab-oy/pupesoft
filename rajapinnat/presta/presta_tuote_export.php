@@ -28,9 +28,10 @@ require_once "rajapinnat/presta/presta_addresses.php";
 require_once "rajapinnat/presta/presta_functions.php";
 
 if (empty($argv[1])) {
-  die("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [ajentaanko_kaikki] [laji,laji,...]\n");
+  die("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");
 }
 
+// ensimmäinen parametri yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
@@ -44,10 +45,9 @@ if (empty($kukarow)) {
   die("Admin -käyttäjä ei löydy.");
 }
 
-$ajetaanko_kaikki = (!empty($argv[2])) ? "YES" : "NO";
-
-if (isset($argv[3])) {
-  $synkronoi = explode(',', $argv[3]);
+// toinen parametri ajettavat siirrot
+if (!empty($argv[2])) {
+  $synkronoi = explode(',', $argv[2]);
 }
 else {
   // ajetaan kaikki
@@ -61,6 +61,9 @@ else {
     'tuotteet',
   );
 }
+
+// kolmas parametri ajetaanko kaikki
+$ajetaanko_kaikki = (!empty($argv[3])) ? "YES" : "NO";
 
 // Tässä kaikki parametrit, jota voi säätää salasanat.php:ssä
 if (!isset($presta_url)) {

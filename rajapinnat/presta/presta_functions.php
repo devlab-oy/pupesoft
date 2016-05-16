@@ -487,6 +487,7 @@ function presta_hae_tuotteet() {
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
       'ei_saldoa'                 => $row["ei_saldoa"],
+      'keraysvyohyke'             => $row["keraysvyohyke"],
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],

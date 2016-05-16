@@ -53,7 +53,6 @@ else {
 
 // Kevyt tuloutusprosessi
 if (substr($toim, 0, 4) == "OSTO") {
-  $oletusvarasto_chk = 0;
   $paivamaaran_kasisyotto = "";
   $laaja_inventointilista = FALSE;
   $lista = "";

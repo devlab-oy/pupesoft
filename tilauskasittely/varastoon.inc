@@ -496,7 +496,9 @@ else {
     }
 
     // lasketaan nyt varastoon vietävien rivien summa yhteensä
-    $query    = "SELECT sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $alvit * {$query_ale_lisa}) summa,
+    $query    = "SELECT
+                 sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa}) summa_veroton,
+                 sum((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $alvit * {$query_ale_lisa}) summa,
                  sum((if(tuote.kuluprosentti = 0, lasku.rahti, tuote.kuluprosentti) / 100) * ((tilausrivi.varattu + tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin <= 0 or tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa})) kulut
                  FROM tilausrivi use index (uusiotunnus_index)
                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -515,7 +517,7 @@ else {
     // lasketaan itse rahtikulut
     // Lasketaan kuluprosentti rivien summasta + pyöristyseroista, ja lisätään lopuksi pyöristysero + rahtietu rahtikuluihin mukaan
 
-    $rahtikulut = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+    $rahtikulut = ($laskurow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
 
     if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
       $rahtikulut = $hintarow['kulut'];

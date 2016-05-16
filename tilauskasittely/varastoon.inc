@@ -517,7 +517,7 @@ else {
     // lasketaan itse rahtikulut
     // Lasketaan kuluprosentti rivien summasta + pyöristyseroista, ja lisätään lopuksi pyöristysero + rahtietu rahtikuluihin mukaan
 
-    $rahtikulut = ($laskurow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+    $rahtikulut = ($hintarow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
 
     if ($yhtiorow['jalkilaskenta_kuluperuste'] == 'TP') {
       $rahtikulut = $hintarow['kulut'];
@@ -781,7 +781,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     }
     else {
       //  muuten kuluprosentin osuus
-      $kuluosuuslaskenta = ($laskurow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+      $kuluosuuslaskenta = ($hintarow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
       $kuluosuuslaskenta = round($osuus * $kuluosuuslaskenta * ($laskurow['rahti'] / 100), 6);
       $hankintakulut .= "#$kuluosuuslaskenta";
     }

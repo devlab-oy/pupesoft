@@ -146,11 +146,11 @@ $query = "SELECT
           concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
           IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
           FROM lasku
-          {$lasku_join_lisa}
           JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio
             AND tilausrivi.tyyppi = 'O'
             AND tilausrivi.varattu != 0
             {$join_lisa})
+          {$lasku_join_lisa}
           LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
             AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'

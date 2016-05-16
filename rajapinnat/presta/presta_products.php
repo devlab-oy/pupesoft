@@ -20,13 +20,13 @@ class PrestaProducts extends PrestaClient {
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key) {
-    $this->presta_categories = new PrestaCategories($url, $api_key);
-    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
-    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
-    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $log_file);
+    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key, $log_file);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key, $log_file);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key, $log_file);
 
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -355,6 +355,9 @@ class PrestaProducts extends PrestaClient {
     $row_counter = 0;
     $total_counter = count($products);
 
+    // fetch the first shop group id, we will add all products to this shop group (for now)
+    $shop_group_id = $this->shop_group_id();
+
     foreach ($products as $product) {
       $row_counter++;
       $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
@@ -364,10 +367,10 @@ class PrestaProducts extends PrestaClient {
         $id = $this->product_id_by_sku($product['tuoteno']);
 
         if ($id !== false) {
-          $this->update($id, $product);
+          $this->update($id, $product, null, $shop_group_id);
         }
         else {
-            $this->create($product);
+          $this->create($product, null, $shop_group_id);
         }
       }
       catch (Exception $e) {
@@ -391,7 +394,11 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('Haetaan kaikki tuotteet Prestashopista');
 
-    $existing_products = $this->all(array('id', 'reference'));
+    $display = array('id', 'reference');
+    $filter = array();
+    $shop_group_id = $this->shop_group_id();
+
+    $existing_products = $this->all($display, $filter, null, $shop_group_id);
     $existing_products = array_column($existing_products, 'reference', 'id');
 
     $this->presta_all_products = $existing_products;

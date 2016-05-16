@@ -92,6 +92,12 @@ $query = "SELECT *
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 
+if ($row['sisviesti3'] == 'ok_vie_varastoon') {
+  pupesoft_log('inbound_delivery', "Saapuminen {$saapumisnro} on jo kuitattu");
+
+  exit;
+}
+
 $header = $xml->addChild('MessageHeader');
 
 $header->addChild('MessageType', 'inboundDelivery');

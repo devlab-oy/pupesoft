@@ -135,7 +135,7 @@ if (isset($valmnro) and !empty($valmnro)) {
             LIMIT 1";
   $result = pupe_query($query);
 
-  if (mysql_affected_rows() == 1) {
+  if (mysql_num_rows($result) == 1) {
     $laiterow = mysql_fetch_assoc($result);
     $laitetiedot = hae_laitteen_parametrit($laiterow['tunnus']);
 
@@ -622,7 +622,7 @@ function puuttuuko_laite_jarjestelmasta($sarjanumero, $tuotenumero) {
             AND tuoteno = '{$tuotenumero}'
             AND sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
-  if (mysql_affected_rows() != 0) {
+  if (mysql_num_rows($result) != 0) {
     $puuttuu = false;
   }
   return $puuttuu;
@@ -640,7 +640,7 @@ function puuttuuko_laitteelta_sopimus($sarjanumero, $tuotenumero) {
             AND laite.tuoteno = '{$tuotenumero}'
             AND laite.sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
-  if (mysql_affected_rows() != 0) {
+  if (mysql_num_rows($result) != 0) {
     $puuttuu = false;
   }
   return $puuttuu;

@@ -32,8 +32,8 @@ class PrestaSalesOrders extends PrestaClient {
     return 'orders';
   }
 
-  protected function generate_xml($sales_order, SimpleXMLElement $existing_sales_order = null) {
-    die('You should not be here! Order update() or create() are not implemented');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function set_edi_filepath($filepath) {
@@ -130,7 +130,8 @@ class PrestaSalesOrders extends PrestaClient {
 
       $this->logger->log("Haetaan tilaukset rajauksella current_state = {$states_str}");
 
-      $sales_orders = $this->all(null, $filters);
+      $id_group_shop = $this->shop_group_id();
+      $sales_orders = $this->all(null, $filters, null, $id_group_shop);
     }
     catch (Exception $e) {
       return array();

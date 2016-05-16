@@ -4,7 +4,6 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
-require_once 'rajapinnat/presta/presta_shop_groups.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
@@ -17,7 +16,6 @@ class PrestaProducts extends PrestaClient {
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
-  private $presta_shop_groups = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
@@ -27,7 +25,6 @@ class PrestaProducts extends PrestaClient {
     $this->presta_manufacturers = new PrestaManufacturers($url, $api_key, $log_file);
     $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key, $log_file);
     $this->presta_product_features = new PrestaProductFeatures($url, $api_key, $log_file);
-    $this->presta_shop_groups = new PrestaShopGroups($url, $api_key, $log_file);
 
     parent::__construct($url, $api_key, $log_file);
   }
@@ -470,14 +467,6 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
-  }
-
-  private function shop_group_id() {
-    // fetch the first shop group id, we'll use it for now for all products
-    $shop_group = $this->presta_shop_groups->first_shop_group();
-    $shop_group_id = isset($shop_group['id']) ? (int) $shop_group['id'] : null;
-
-    return $shop_group_id;
   }
 
   public function product_id_by_sku($sku) {

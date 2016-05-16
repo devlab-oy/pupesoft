@@ -1,6 +1,8 @@
 <?php
 
 require_once 'rajapinnat/logger.php';
+require_once 'rajapinnat/presta/presta_shop_groups.php';
+require_once 'rajapinnat/presta/presta_shops.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
@@ -8,6 +10,7 @@ abstract class PrestaClient {
   private $api_key = null;
   private $shop_ids = null;
   private $presta_shops = null;
+  private $presta_shop_groups = null;
 
   // ids of installed languages
   protected $languages_table = null;
@@ -136,15 +139,17 @@ abstract class PrestaClient {
       'resource'      => $resource,
     );
 
-    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+    $kauppa  = "";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
 
     try {
-      $msg = "Haetaan {$resource} id {$id} kaupasta {$id_shop}";
+      $msg = "Haetaan {$resource} id {$id} {$kauppa}";
       $this->logger->log($msg);
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Haku {$resource} id {$id} kaupasta {$id_shop} epäonnistui!";
+      $msg = "Haku {$resource} id {$id} {$kauppa} epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -166,7 +171,9 @@ abstract class PrestaClient {
       'resource'      => $this->resource_name(),
     );
 
-    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+    $kauppa  = "";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmään {$id_group_shop}";
 
     try {
       $xml = $this->generate_xml($resource);
@@ -175,10 +182,10 @@ abstract class PrestaClient {
 
       $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin kauppaan {$id_shop} uusi " . $this->resource_name());
+      $this->logger->log("Luotiin {$kauppa} uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti kauppaan {$id_shop} epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa} epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -237,17 +244,19 @@ abstract class PrestaClient {
       'resource'      => $this->resource_name(),
     );
 
-    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+    $kauppa  = "";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmään {$id_group_shop}";
 
     try {
       $xml = $this->remove_read_only_fields($xml);
       $opt['putXml'] = $xml->asXML();
       $response_xml = $this->ws->edit($opt);
 
-      $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} kauppaan {$id_shop}");
+      $this->logger->log("Päivitettiin {$this->resource_name()} id {$id} {$kauppa}");
     }
     catch (Exception $e) {
-      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id kauppaan {$id_shop}";
+      $msg = "Päivittäminen epäonnistui " . $this->resource_name() . " id $id {$kauppa}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -288,15 +297,17 @@ abstract class PrestaClient {
       $opt[$key] = $value;
     }
 
-    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+    $kauppa  = "";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
 
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Kaikki {$resource} rivit haettu kaupasta {$id_shop}";
+      $msg = "Kaikki {$resource} rivit haettu {$kauppa}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku kaupasta {$id_shop} epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku {$kauppa} epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -352,15 +363,17 @@ abstract class PrestaClient {
       'resource'      => $this->resource_name(),
     );
 
-    $id_shop = is_null($id_shop) ? 'default' : $id_shop;
+    $kauppa  = "";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
 
     try {
       $response_bool = $this->ws->delete($opt);
-      $msg = "Poistettiin " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
+      $msg = "Poistettiin " . $this->resource_name() . " id {$id} {$kauppa}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id} kaupasta {$id_shop}";
+      $msg = "Poistaminen epäonnistui! " . $this->resource_name() . " id {$id} {$kauppa}";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -474,6 +487,18 @@ abstract class PrestaClient {
     $shops = array_column($all, 'id');
 
     return $shops;
+  }
+
+  protected function shop_group_id() {
+    if (is_null($this->presta_shop_groups)) {
+      $this->presta_shop_groups = new PrestaShopGroups($this->url, $this->api_key, $this->logger->log_file());
+    }
+
+    // fetch the first shop group id, we'll use it for now for all products
+    $shop_group = $this->presta_shop_groups->first_shop_group();
+    $shop_group_id = isset($shop_group['id']) ? (int) $shop_group['id'] : null;
+
+    return $shop_group_id;
   }
 
   protected function get_language_id($code) {

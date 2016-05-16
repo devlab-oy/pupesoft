@@ -74,11 +74,16 @@ if ($handle = opendir($path)) {
                   WHERE yhtio  = '{$yhtio}'
                   AND tila     = 'K'
                   AND vanhatunnus = 0
-                  AND laskunro = '{$saapumisnro}'";
+                  AND laskunro = '{$saapumisnro}'
+                  AND sisviesti3 = 'ei_vie_varastoon'";
         $selectres = pupe_query($query);
         $selectrow = mysql_fetch_assoc($selectres);
 
         $saapumistunnus = (int) $selectrow['tunnus'];
+
+        if ($saapumistunnus == 0) {
+          continue;
+        }
 
         $tilausrivit = array();
 
@@ -91,6 +96,7 @@ if ($handle = opendir($path)) {
                       uusiotunnus     = 0
                       WHERE yhtio     = '{$yhtio}'
                       AND tyyppi      = 'O'
+                      AND kpl         = 0
                       AND uusiotunnus = '{$saapumistunnus}'";
             $updres = pupe_query($query);
           }
@@ -135,6 +141,7 @@ if ($handle = opendir($path)) {
                       {$uusiotunnuslisa}
                       WHERE yhtio     = '{$yhtio}'
                       AND tyyppi      = 'O'
+                      AND kpl         = 0
                       AND otunnus     = '{$ostotilaus}'
                       AND tuoteno     = '{$tuoteno}'
                       AND tunnus      = '{$rivitunnus}'";

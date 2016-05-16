@@ -10266,9 +10266,8 @@ if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
               JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
               WHERE user_id = '{$kukarow['tunnus']}'";
     $result = pupe_query($query);
-    if (mysql_num_rows($result) == 1) {
-      $row = mysql_fetch_assoc($result);
-      
+    $row = mysql_fetch_assoc($result);
+    if (!empty($row['toimipistetunnukset'])) {
       $asiakastunnukset = empty($asiakastunnukset) ? $row['toimipistetunnukset'] : $asiakastunnukset.",".$row['toimipistetunnukset'];
     }
     return $asiakastunnukset;

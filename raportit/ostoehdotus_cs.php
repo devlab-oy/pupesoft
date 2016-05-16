@@ -657,6 +657,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   // loopataan tuotteet läpi
   while ($row = mysql_fetch_assoc($res)) {
 
+    // Paljonko ehdotetaan ostettavaksi
+    $ostoehdotus = 0;
+
     $toimilisa = "";
     if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
@@ -728,12 +731,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
           $ostoehdotus = $row["tpaikka_tilausmaara"] - $vapaasaldo;
           $ostoehdotus = floor($ostoehdotus / $osto_era) * $osto_era;
         }
-        else {
-          $ostoehdotus = 0;
-        }
-      }
-      else {
-        $ostoehdotus = 0;
       }
     }
     elseif ($toim == "BIO") {
@@ -767,12 +764,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
           $ostoehdotus = round($ostoehdotus, 2);
         }
-        else {
-          $ostoehdotus = 0;
-        }
-      }
-      else {
-        $ostoehdotus = 0;
       }
     }
 

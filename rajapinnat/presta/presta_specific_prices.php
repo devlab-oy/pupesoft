@@ -212,16 +212,23 @@ class PrestaSpecificPrices extends PrestaClient {
       return true;
     }
 
+    $id_group_shop = $this->shop_group_id();
+    $id_shop = null;
+
     if ($this->all_prices === null) {
       $this->logger->log('Haetaan kaikki Prestan alennukset');
-      $this->all_prices = $this->all(array('id', 'id_product'));
+
+      $display = array('id', 'id_product');
+      $filters = array();
+
+      $this->all_prices = $this->all($display, $filters, $id_shop, $id_group_shop);
     }
 
     foreach ($this->all_prices as $price) {
       if ($price['id_product'] == $id) {
         try {
           $price_id = $price['id'];
-          $this->delete($price_id);
+          $this->delete($price_id, $id_shop, $id_group_shop);
         }
         catch (Exception $e) {
           $this->logger->log("Tuotteen {$id} hinnan {$price_id} poisto epäonnistui!");

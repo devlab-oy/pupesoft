@@ -8352,6 +8352,7 @@ if (!function_exists("aja_kysely")) {
           }
 
           ${$row["var"]} = $row["value"];
+          $_POST[$row["var"]] = $row["value"];
         }
       }
 

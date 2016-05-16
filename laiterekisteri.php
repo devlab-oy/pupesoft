@@ -127,7 +127,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
             AND sarjanro  = '{$uusilaite_sarjanumero}'
             AND yhtio     = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
-  if (mysql_affected_rows() == 0) {
+  if (mysql_num_rows($result) == 0) {
     // Lis‰t‰‰n uusi laite
     $kveri = "INSERT INTO laite
               SET yhtio = '{$kukarow['yhtio']}',

@@ -3,33 +3,18 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaCountries extends PrestaClient {
-
-  const RESOURCE = 'countries';
-
   public function __construct($url, $api_key, $log_file) {
     parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'countries';
   }
 
-  /**
-   *
-   * @param array   $country
-   * @param SimpleXMLElement $existing_country
-   * @return \SimpleXMLElement
-   */
-
-
-  protected function generate_xml($country, SimpleXMLElement $existing_country = null) {
-    throw new Exception('You shouldnt be here! Country does not have CRUD yet');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
-  /**
-   *
-   * @return array
-   */
   public function find_findland() {
     $display = $filter = array();
     $filter['iso_code'] = 'FI';

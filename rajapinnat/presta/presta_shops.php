@@ -13,15 +13,8 @@ class PrestaShops extends PrestaClient {
     return 'shops';
   }
 
-  /**
-   *
-   * @param array   $shop
-   * @param SimpleXMLElement $existing_shop
-   * @return \SimpleXMLElement
-   */
-
-  protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
-    throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function shop_by_id($value) {
@@ -34,12 +27,6 @@ class PrestaShops extends PrestaClient {
     return null;
   }
 
-  /**
-   * Fetches the first shop in presta
-   *
-   * @return array
-   * @throws Exception
-   */
   public function first_shop() {
     $shops = $this->fetch_all();
     $shop = $shops[0];

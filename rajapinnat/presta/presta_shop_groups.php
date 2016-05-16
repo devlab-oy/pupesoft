@@ -13,8 +13,8 @@ class PrestaShopGroups extends PrestaClient {
     return 'shop_groups';
   }
 
-  protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
-    throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function first_shop_group() {

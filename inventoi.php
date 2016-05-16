@@ -52,7 +52,7 @@ else {
 }
 
 // Kevyt tuloutusprosessi
-if ($toim == "OSTO") {
+if (substr($toim, 0, 4) == "OSTO") {
   $oletusvarasto_chk = 0;
   $paivamaaran_kasisyotto = "";
   $laaja_inventointilista = FALSE;
@@ -102,7 +102,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
   }
 }
 
-if ($toim == "OSTO") {
+if (substr($toim, 0, 4) == "OSTO") {
   echo "<font class='head'>".t("Tavaran tuloutus")."</font><hr>";
 }
 elseif ($mobiili != "YES") {
@@ -496,7 +496,7 @@ if ($tee == 'VALMIS') {
         $lisaselite = $selis[$i];
       }
 
-      if ($toim == "OSTO") {
+      if (substr($toim, 0, 4) == "OSTO") {
         $kpl = (float) preg_replace("/[^0-9\.]/", "", $kpl);
 
         if (!empty($kpl)) {
@@ -1078,7 +1078,7 @@ if ($tee == 'VALMIS') {
               $lisaselite .=  t("Inv.lista")." {$lista}";
             }
 
-            if ($toim == "OSTO") {
+            if (substr($toim, 0, 4) == "OSTO") {
 
               $query = "SELECT *, if (jarjestys = 0, 9999, jarjestys) sorttaus
                         FROM tuotteen_toimittajat
@@ -1922,7 +1922,7 @@ if ($tee == 'INVENTOI') {
 
   echo "<table>";
 
-  if ($toim != "OSTO") {
+  if (substr($toim, 0, 4) != "OSTO") {
     echo "<tr><td colspan='7' class='back'>".t("Syötä joko hyllyssä oleva määrä, tai lisättävä määrä + etuliitteellä, tai vähennettävä määrä - etuliitteellä")."</td></tr>";
   }
 
@@ -1934,7 +1934,7 @@ if ($tee == 'INVENTOI') {
 
   echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Kerätty")."</th><th>".t("Hyllyssä")."</th>";
 
-  if ($toim == "OSTO") {
+  if (substr($toim, 0, 4) == "OSTO") {
     echo "<th>".t("Tuloutettava määrä")."</th>";
   }
   else {
@@ -2304,7 +2304,7 @@ if ($tee == 'INVENTOI') {
     echo "</select></td></tr>";
   }
 
-  if ($toim != "OSTO") {
+  if (substr($toim, 0, 4) != "OSTO") {
     echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
     echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
   }
@@ -2330,7 +2330,7 @@ if ($tee == 'INVENTOI') {
     if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
       echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
     }
-    elseif ($toim == "OSTO") {
+    elseif (substr($toim, 0, 4) == "OSTO") {
       echo "<input type='submit' name='valmis' value='".t("Tulouta")."'>";
     }
     else {
@@ -2459,7 +2459,7 @@ if ($tee == '') {
 
   echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' id='ean_koodi' name='ean_koodi'></td></tr>";
 
-  if ($toim != "OSTO") {
+  if (substr($toim, 0, 4) != "OSTO") {
     echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td>";
     echo "<td class='back'><input type='submit' value='".t("Inventoi")."'></td>";
   }
@@ -2472,7 +2472,7 @@ if ($tee == '') {
   echo "</form>";
   echo "<br><br>";
 
-  if ($toim == "OSTO") {
+  if (substr($toim, 0, 4) == "OSTO") {
     echo "<br><br><font class='head'>".t("Tulouta tiedostosta")."</font><hr>";
   }
   else {

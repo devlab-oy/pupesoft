@@ -1,20 +1,20 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
-require_once 'rajapinnat/presta/presta_shops.php';
+require_once 'rajapinnat/presta/presta_products.php';
 
 class PrestaSpecificPrices extends PrestaClient {
   private $all_prices = null;
   private $already_removed_product = array();
   private $currency_codes = null;
-  private $product_ids;
-  private $shop;
+  private $presta_products = null;
+  private $product_ids = array();
+  private $shop = null;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_products = new PrestaProducts($url, $api_key, $log_file);
 
-    $this->shop = null;
-    $this->product_ids = array();
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -68,7 +68,8 @@ class PrestaSpecificPrices extends PrestaClient {
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = 0;
-    $xml->specific_price->id_shop = $this->shop['id'];
+    $xml->specific_price->id_shop = 0;       // leave this empty, we'll add shop group to crete request
+    $xml->specific_price->id_shop_group = 0; // leave this empty, we'll add shop group to crete request
     $xml->specific_price->id_cart = 0;
     $xml->specific_price->id_currency = $currency_id;
     $xml->specific_price->id_country = 0;
@@ -99,11 +100,8 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->logger->log('---------Start specific price sync---------');
 
     try {
-      $presta_shop = new PrestaShops($this->url(), $this->api_key());
-      $this->shop = $presta_shop->first_shop();
-
-      $presta_product = new PrestaProducts($this->url(), $this->api_key(), null);
-      $this->product_ids = $presta_product->all_skus();
+      $this->product_ids = $this->presta_products->all_skus();
+      $shop_group_id = $this->shop_group_id();
 
       $total = count($prices);
       $current = 0;
@@ -138,7 +136,7 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
-          $this->create($price);
+          $this->create($price, null, $shop_group_id);
 
           $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
 
@@ -214,16 +212,23 @@ class PrestaSpecificPrices extends PrestaClient {
       return true;
     }
 
+    $id_group_shop = $this->shop_group_id();
+    $id_shop = null;
+
     if ($this->all_prices === null) {
       $this->logger->log('Haetaan kaikki Prestan alennukset');
-      $this->all_prices = $this->all(array('id', 'id_product'));
+
+      $display = array('id', 'id_product');
+      $filters = array();
+
+      $this->all_prices = $this->all($display, $filters, $id_shop, $id_group_shop);
     }
 
     foreach ($this->all_prices as $price) {
       if ($price['id_product'] == $id) {
         try {
           $price_id = $price['id'];
-          $this->delete($price_id);
+          $this->delete($price_id, $id_shop, $id_group_shop);
         }
         catch (Exception $e) {
           $this->logger->log("Tuotteen {$id} hinnan {$price_id} poisto epäonnistui!");

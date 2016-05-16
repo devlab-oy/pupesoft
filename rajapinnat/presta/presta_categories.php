@@ -12,8 +12,8 @@ class PrestaCategories extends PrestaClient {
     return 'categories';
   }
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   public function sync_categories($pupesoft_categories) {

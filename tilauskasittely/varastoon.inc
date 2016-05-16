@@ -781,7 +781,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     }
     else {
       //  muuten kuluprosentin osuus
-      $kuluosuuslaskenta = ($laskurow['summa'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
+      $kuluosuuslaskenta = ($laskurow['summa_veroton'] + $laskurow['pyoristys_erot']) * $laskurow['vienti_kurssi'];
       $kuluosuuslaskenta = round($osuus * $kuluosuuslaskenta * ($laskurow['rahti'] / 100), 6);
       $hankintakulut .= "#$kuluosuuslaskenta";
     }

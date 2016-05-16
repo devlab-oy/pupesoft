@@ -193,12 +193,12 @@ $headerit = array(
 if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
   // Halutaan linkata laitteita sopimuksen palveluriville
   if (!isset($tilausrivin_tunnus) or $tilausrivin_tunnus < 1) {
-    echo "Et voi linkata laitteita ilman tilausrivin tunnusta";
+    echo t("Et voi linkata laitteita ilman tilausrivin tunnusta");
     exit;
   }
 
   // Uusi sarake mihin piirretään checkboxit
-  array_unshift($headerit, 'Valitse');
+  array_unshift($headerit, t('Valitse'));
 
   // Valitut laitteet
   echo "<form>";
@@ -318,7 +318,7 @@ if (empty($toiminto) or $toiminto == 'LINKKAA' or $toiminto == 'NAYTALAITTEET') 
 echo "</thead>";
 
 if (empty($toiminto) or $toiminto == 'LINKKAA' or $vanhatoiminto == 'LINKKAA') {
-  echo "<br><input type='submit' name='linkkaus' value='Liitä valitut laitteet'/><br><br>";
+  echo "<br><input type='submit' name='linkkaus' value=".t('Liitä valitut laitteet')."/><br><br>";
   if ($toiminto == "NAYTALAITTEET" and $vanhatoiminto == "LINKKAA")  echo "<br><br>".t("Valitse kaikki taulukon laitteet")." <input type='checkbox' name='lisaa_laite_sopimusriville' onclick='toggleAll(this);'>";
 }
 
@@ -436,8 +436,8 @@ if ($toiminto == 'MUOKKAA' and !empty($laiterajaus)) {
   echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
   echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'/></td>";
   echo "<td><input type='text' name='mac_osoite' value='{$rowi['mac_osoite']}'/></td>";
-  echo "<td class='back'><input type='submit' name='tallennetaan_muutokset' value='Tallenna'/></td>";
-  echo "<td class='back'><input type='submit' name='peruuta'  value='Peruuta'/></td>";
+  echo "<td class='back'><input type='submit' name='tallennetaan_muutokset' value=".t('Tallenna')."/></td>";
+  echo "<td class='back'><input type='submit' name='peruuta'  value=".t('Peruuta')."/></td>";
   echo "</form>";
   echo "</tr>";
 
@@ -506,8 +506,8 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "<td><textarea name='lcm_info' rows='5' columns='30'></textarea></td>";
   echo "<td><input type='text' name='ip_osoite'/></td>";
   echo "<td><input type='text' name='mac_osoite'/></td>";
-  echo "<td class='back'><input type='submit' name='tallenna_uusi_laite' value='Tallenna'/></td>";
-  echo "<td class='back'><input type='submit' name='peruuta_uusi'  value='Peruuta'/></td>";
+  echo "<td class='back'><input type='submit' name='tallenna_uusi_laite' value=".t('Tallenna')."/></td>";
+  echo "<td class='back'><input type='submit' name='peruuta_uusi'  value=".t('Peruuta')."/></td>";
   echo "</form>";
   echo "</tr>";
 }
@@ -556,7 +556,7 @@ elseif ($toiminto == 'NAYTALAITTEET') {
 
           $ed_sop_tun = $lelo['sopimusnumero'];
           $sopimuslinkki = "<a href='{$palvelin2}/tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$lelo[sopimusnumero]'>{$lelo['sopimusnumero']}</a><br>";
-          $puuttuja .= "<br>Sopimusnumero: {$sopimuslinkki}<table><tr><th>Nimitys</th><th>Hinta</th><th>Alkupvm</th><th>Loppupvm</th></tr>";
+          $puuttuja .= "<br>".t('Sopimusnumero').": {$sopimuslinkki}<table><tr><th>".t('Nimitys')."</th><th>".t('Hinta')."</th><th>".t('Alkupvm')."</th><th>".t('Loppupvm')."</th></tr>";
           $kveeri = "SELECT
                      lasku.nimi asiakas,
                      lasku.*,
@@ -672,6 +672,6 @@ else {
   
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' name='hae_laitteet' value='Hae laitteet'/>";
+  echo "<input type='submit' name='hae_laitteet' value=".t('Hae laitteet')."/>";
   echo "</form>"; 
 }

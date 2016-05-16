@@ -895,11 +895,11 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 
       if ((float) $osuus_kululaskuista != 0) $prow["kommentti"] .= "\n".t("Kululaskut").": ".$osuus_kululaskuista;
       if ((float) $osuus_eturahdista != 0) $prow["kommentti"] .= "\n".t("Eturahti").": ".$osuus_eturahdista;
-      if ((float) $osuus_eturahdista != 0) $prow["kommentti"] .= "\n".t("Pyöristyserot").": ".$osuus_pyoristyseroista;
+      if ((float) $osuus_pyoristyseroista != 0) $prow["kommentti"] .= "\n".t("Pyöristyserot").": ".$osuus_pyoristyseroista;
       if ((float) $tulliprossa != 0) $prow["kommentti"] .= "\n".t("Tulli%").": ".$tulliprossa;
       if ((float) $aputullimaara != 0) $prow["kommentti"] .= "\n".t("Tulli").": ".$aputullimaara;
       if ((float) $rivinlisakulu != 0) $prow["kommentti"] .= "\n".t("Lisäkulu").": ".$rivinlisakulu;
-      if ((float) $rivinlisakulu != 0) $prow["kommentti"] .= "\n".t("Saapumisen kulut").": ".$saapumisenkulut;
+      if ((float) $saapumisenkulut != 0) $prow["kommentti"] .= "\n".t("Saapumisen kulut").": ".$saapumisenkulut;
     }
 
     echo "</tr>";

@@ -10262,15 +10262,15 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
   function hae_kayttajan_toimipistetunnukset() {
     global $kukarow;
-  
+
     $asiakastunnukset = '';
     if (!empty($kukarow['oletus_asiakas'])) {
       $asiakastunnukset = $kukarow['oletus_asiakas'];
     }
 
     $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
-              FROM customers_users 
-              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+              FROM customers_users
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
               WHERE user_id = '{$kukarow['tunnus']}'";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
@@ -32791,7 +32791,7 @@ if (!function_exists("loppulaskuta")) {
 
     // P‰ivitet‰‰n positiolle laskutustunnus
     $query = "UPDATE maksupositio SET
-              uusiotunnus = '{$ennakkolaskun_tunnus}'
+              uusiotunnus = '{$tunnus}'
               WHERE tunnus = '{$posrow['tunnus']}'";
     $result = pupe_query($query);
 

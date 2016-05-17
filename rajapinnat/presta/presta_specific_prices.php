@@ -139,7 +139,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->create($price, null, $shop_group_id);
 
-          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}:";
 
           if (isset($price['alennus'])) {
             $message .= " alennus '{$price['alennus']}'";

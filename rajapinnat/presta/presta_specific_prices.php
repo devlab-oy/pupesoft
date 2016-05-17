@@ -68,6 +68,7 @@ class PrestaSpecificPrices extends PrestaClient {
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = 0;
+    $xml->specific_price->reduction_tax = 0;
     $xml->specific_price->id_shop = 0;       // leave this empty, we'll add shop group to crete request
     $xml->specific_price->id_shop_group = 0; // leave this empty, we'll add shop group to crete request
     $xml->specific_price->id_cart = 0;

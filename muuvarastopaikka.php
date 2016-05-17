@@ -1132,7 +1132,7 @@ if ($tee == 'M') {
                   )
                   WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                   AND lasku.tila = 'C'
-                  AND lasku.alatila IN ('', 'A')
+                  AND lasku.alatila IN ('', 'A', 'B', 'C')
                   AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
                   AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
                   AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'

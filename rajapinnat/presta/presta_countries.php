@@ -3,7 +3,7 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaCountries extends PrestaClient {
-  private $finland = null;
+  private $all_countries = null;
 
   public function __construct($url, $api_key, $log_file) {
     parent::__construct($url, $api_key, $log_file);
@@ -17,20 +17,33 @@ class PrestaCountries extends PrestaClient {
     throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
-  public function find_finland() {
-    if (!is_null($this->finland)) {
-      return $this->finland;
+  public find_country_by_code($iso_code) {
+    $iso_code = strtoupper($iso_code);
+
+    foreach ($this->all_countries() as $country) {
+      if ($iso_code == $country['iso_code']) {
+        return $country['id'];
+      }
     }
 
-    $display = $filter = array();
-    $filter['iso_code'] = 'FI';
+    return null;
+  }
 
-    $countries = $this->all($display, $filter);
+  private all_countries() {
+    if ($this->all_countries !== null) {
+      return $this->all_countries;
+    }
 
-    $country = $countries[0];
+    $this->logger->log('Haetaan kaikki maat Prestashopista');
 
-    $this->finland = $country;
+    $display = array('id', 'iso_code');
+    $filter = array();
+    $shop_group_id = $this->shop_group_id();
 
-    return $country;
+    $countries = $this->all($display, $filter, null, $shop_group_id);
+
+    $this->all_countries = $countries;
+
+    return $countries;
   }
 }

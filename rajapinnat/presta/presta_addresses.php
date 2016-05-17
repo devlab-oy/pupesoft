@@ -30,7 +30,7 @@ class PrestaAddresses extends PrestaClient {
       $xml = $existing_address;
     }
 
-    $finland = $this->presta_countries->find_findland();
+    $finland = $this->presta_countries->find_finland();
 
     // Mandatory fields
     $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);

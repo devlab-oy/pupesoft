@@ -17,7 +17,7 @@ class PrestaCountries extends PrestaClient {
     throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
-  public find_country_by_code($iso_code) {
+  public function find_country_by_code($iso_code) {
     $iso_code = strtoupper($iso_code);
 
     foreach ($this->all_countries() as $country) {
@@ -29,7 +29,7 @@ class PrestaCountries extends PrestaClient {
     return null;
   }
 
-  private all_countries() {
+  private function all_countries() {
     if ($this->all_countries !== null) {
       return $this->all_countries;
     }

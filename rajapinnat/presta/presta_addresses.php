@@ -41,24 +41,24 @@ class PrestaAddresses extends PrestaClient {
     }
 
     // Mandatory fields
-    $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);
-    $_postitp = empty($address['postitp']) ? "-" : utf8_encode($address['postitp']);
+    $_osoite = empty($address['osoite']) ? "-" : $address['osoite'];
+    $_postitp = empty($address['postitp']) ? "-" : $address['postitp'];
     $_puh = empty($address['puh']) ? "-" : $address['puh'];
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
     $xml->address->id_country = $country['id'];
     $xml->address->id_customer = $address['presta_customer_id'];
     $xml->address->alias = 'Home';
-    $xml->address->lastname = $_nimi;
+    $xml->address->lastname = $this->xml_value($_nimi);
     $xml->address->firstname = '-';
-    $xml->address->address1 = $_osoite;
-    $xml->address->postcode = $address['postino'];
-    $xml->address->city = $_postitp;
-    $xml->address->phone = $_puh;
-    $xml->address->phone_mobile = $address['gsm'];
+    $xml->address->address1 = $this->xml_value($_osoite);
+    $xml->address->postcode = $this->xml_value($address['postino']);
+    $xml->address->city = $this->xml_value($_postitp);
+    $xml->address->phone = $this->xml_value($_puh);
+    $xml->address->phone_mobile = $this->xml_value($address['gsm']);
 
     return $xml;
   }

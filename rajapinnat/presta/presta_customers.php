@@ -126,6 +126,8 @@ class PrestaCustomers extends PrestaClient {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
         }
+
+        $this->logger->log("\n");
       }
     }
     catch (Exception $e) {

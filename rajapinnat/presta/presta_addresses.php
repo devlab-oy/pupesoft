@@ -36,7 +36,7 @@ class PrestaAddresses extends PrestaClient {
     }
 
     // default to finland
-    if (empty($country) {
+    if (empty($country)) {
       $country = $this->presta_countries->find_country_by_code('FI');
     }
 

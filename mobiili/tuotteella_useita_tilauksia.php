@@ -45,13 +45,13 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '' or $saapumisnro
       foreach ($tuotenumerot as $_tuoteno => $_arr) {
         foreach ($_arr as $_liitostunnus) {
           if (trim($_liitostunnus) != "") {
-            array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+            array_push($param_viivakoodi, "(tilausrivi.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
           }
         }
       }
 
       if (empty($param_viivakoodi)) {
-        $params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
+        $params['viivakoodi'] = "tilausrivi.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
       }
       else {
         $params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";

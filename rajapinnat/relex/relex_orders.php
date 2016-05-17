@@ -113,7 +113,7 @@ $query = "(SELECT
            AND tilausrivi.tyyppi          = 'O'
            AND tilausrivi.laskutettuaika  = 0)
 
-           UNION
+           UNION ALL
 
            (SELECT
            tilausrivi.laadittu,
@@ -138,7 +138,7 @@ $query = "(SELECT
            AND tilausrivi.tyyppi          in ('L','V')
            AND tilausrivi.kerattyaika     = 0)
 
-           UNION
+           UNION ALL
 
            (SELECT
            tilausrivi.laadittu,

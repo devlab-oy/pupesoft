@@ -1554,7 +1554,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster) {
+    if ($onkologmaster and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -2320,7 +2320,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster) {
+    if ($onkologmaster and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

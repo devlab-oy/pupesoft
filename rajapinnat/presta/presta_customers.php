@@ -127,7 +127,7 @@ class PrestaCustomers extends PrestaClient {
           //Exception is not thrown because we still want to continue syncing for other products
         }
 
-        $this->logger->log("\n");
+        $this->logger->log("Asiakas {$customer['nimi']} käsitelty\n");
       }
     }
     catch (Exception $e) {

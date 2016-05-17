@@ -708,7 +708,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         echo "</td>";
       }
       else {
-        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").". 3</font>";
+        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 
         if (mysql_num_rows($tila_chk_res) > 0 or mysql_num_rows($onko_maksettu_res) > 0) {
 

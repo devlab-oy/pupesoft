@@ -32648,8 +32648,6 @@ if (!function_exists("loppulaskuta")) {
       }
     }
 
-    $ennakkolaskun_tunnus = $tunnus * -1;
-
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -32776,7 +32774,7 @@ if (!function_exists("loppulaskuta")) {
                   kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu
                 )
                 VALUES (
-                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$ennakkolaskun_tunnus}',
+                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$tunnus}',
                   '{$yhtiorow['ennakkomaksu_tuotenumero']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L',
                   '{$row['alv']}', '{$rivikommentti}', '{$kukarow['kuka']}', now(), '{$kukarow['kuka']}',
                   now(), '{$kukarow['kuka']}', now()
@@ -32785,7 +32783,7 @@ if (!function_exists("loppulaskuta")) {
 
       if ($debug == 1) {
         echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys");
-        echo " -{$row['laskutettu']} alv {$row['alv']}% otunnus {$ennakkolaskun_tunnus}<br>";
+        echo " -{$row['laskutettu']} alv {$row['alv']}% otunnus {$tunnus}<br>";
       }
     }
 

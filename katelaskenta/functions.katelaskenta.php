@@ -144,8 +144,7 @@ function luo_katelaskenta_update_komennot($taulukko) {
     // komennon lopuksi mukaan.
     $update_kysely .= "myyntikate = {$rivin_myyntikate}, ";
     $update_kysely .= "myymalakate = {$rivin_myymalakate}, ";
-    $update_kysely .= "nettokate = {$rivin_nettokate}, ";
-    $update_kysely .= "hintamuutospvm = NOW() ";
+    $update_kysely .= "nettokate = {$rivin_nettokate}";
 
     // Kyselyn where -ehdon lis‰‰minen.
     $update_kysely .= $sql_komento_loppu . $rivin_tunnus;

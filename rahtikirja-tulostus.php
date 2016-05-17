@@ -677,6 +677,9 @@ if ($tee == 'tulosta') {
         $lavatyht   += $pak["lavametri"];
       }
 
+      // $kolliyht yliajetaan jossain requiressa, joten otetaan tässä kohtaa arvo talteen ainakin osoitelappujen tulostusta varten
+      $_kolliyht = $kollityht;
+
       // Kuljetusohjeet
       $query = "SELECT trim(group_concat(DISTINCT viesti SEPARATOR ' ')) viesti
                 FROM rahtikirjat
@@ -1061,6 +1064,9 @@ if ($tee == 'tulosta') {
         $params_dgd["komento"] = $dgdkomento;
         print_pdf_dgd($params_dgd);
       }
+
+      // Palautetaan $kolliyht-muuttujalle arvo, jota ei ole yliajettu requireissa, jotta saadaan tulostettua osoitelaput.
+      $kollityht = $_kolliyht;
 
       // Tulostetaan osoitelappu
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {

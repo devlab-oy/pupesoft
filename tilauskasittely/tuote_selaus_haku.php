@@ -27,18 +27,6 @@ else {
   liite_popup("JS");
 }
 
-function url_or_text($str) {
-  $array = array("http://", "https://");
-
-  foreach($array as $a) {
-    if (stripos($str, $a) !== false) {
-      return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
-    }
-  }
-
-  return $str;
-}
-
 if (function_exists("js_popup")) {
   echo js_popup(-100);
 }

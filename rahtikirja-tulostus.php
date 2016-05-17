@@ -1092,7 +1092,8 @@ if ($tee == 'tulosta') {
           if ($toitarow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
-          elseif ($toitarow['osoitelappu'] == 'hornbach') {
+          // Hornbach-tyyppisiä osoitelappuja ei tulosteta, kun ollaan tulostamassa koontirahtikirjaa.
+          elseif ($toitarow['osoitelappu'] == 'hornbach' && !in_array($toitarow['tulostustapa'], array('K', 'L'))) {
             require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
           }
           elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {

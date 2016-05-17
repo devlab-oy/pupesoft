@@ -32840,6 +32840,20 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
   }
 }
 
+if (!function_exists('url_or_text')) {
+  function url_or_text($str) {
+    $array = array("http://", "https://");
+  
+    foreach($array as $a) {
+      if (stripos($str, $a) !== false) {
+        return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
+      }
+    }
+  
+    return $str;
+  }
+}
+
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {
     global $yhtiorow, $kukarow;

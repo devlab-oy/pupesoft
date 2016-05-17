@@ -611,6 +611,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
                 AND tunnus  = '{$row['jaksotettu']}'";
       $tila_chk_res = pupe_query($query);
 
+      #Onko ennakkolasku jo maksettu
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'U'
+                AND alatila = 'X'
+                AND mapvm != '0000-00-00'
+                AND jaksotettu = '-{$row['jaksotettu']}'";
+      $onko_maksettu_res = pupe_query($query);
+
       // loppulaskutetaan maksusopimus
       if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
         // tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
@@ -630,7 +640,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
           echo "<td class='back'>";
           echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 
-          if (mysql_num_rows($tila_chk_res) > 0) {
+          if (mysql_num_rows($tila_chk_res) > 0 or mysql_num_rows($onko_maksettu_res) > 0) {
             echo "<br />";
 
             $msg = t("Oletko varma, että haluat vapauttaa tilauksen keräykseen")."? {$row['jaksotettu']}";
@@ -681,7 +691,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
             <input type='submit' name = 'submit' value='".t("Laskuta kaikki ennakot")."'>
             </form>";
 
-        if (mysql_num_rows($tila_chk_res) > 0) {
+        if (mysql_num_rows($tila_chk_res) > 0 or mysql_num_rows($onko_maksettu_res) > 0) {
 
           echo "<br />";
 
@@ -698,9 +708,9 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         echo "</td>";
       }
       else {
-        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
+        echo "<td class='back'><font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").". 3</font>";
 
-        if (mysql_num_rows($tila_chk_res) > 0) {
+        if (mysql_num_rows($tila_chk_res) > 0 or mysql_num_rows($onko_maksettu_res) > 0) {
 
           echo "<br />";
 

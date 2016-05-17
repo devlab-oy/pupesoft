@@ -1136,7 +1136,8 @@ if ($tee == 'M') {
                   AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
                   AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
                   AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
-                  AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'";
+                  AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
+                  AND tilausrivi.tuoteno = '{$saldorow["tuoteno"]}'";
         $reklares = pupe_query($query);
 
         $reklacheck = (mysql_num_rows($reklares) > 0);

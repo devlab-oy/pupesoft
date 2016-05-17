@@ -1128,13 +1128,45 @@ if ($tee == "") {
   echo "</form><br>";
 
   $haku='';
+
   if (is_string($etsi)) {
     $haku = "AND (lasku.nimi LIKE '%{$etsi}%'
                   OR lasku.toim_nimi LIKE '%{$etsi}%'
                   OR lasku.nimitark LIKE '%{$etsi}%'
                   OR lasku.toim_nimitark LIKE '%{$etsi}%')";
   }
-  if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
+
+  if (is_numeric($etsi)) {
+    $haku="and lasku.tunnus='$etsi'";
+
+    #Tarkistetaan onko haettu lasku splittaantunut loppulaskutettava maksusopimus
+    $query = "SELECT jaksotettu
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila = 'L'
+              AND alatila = 'D'
+              AND jaksotettu != 0
+              AND tunnus = '{$etsi}'";
+    $jaksotettures = pupe_query($query);
+
+    if (mysql_num_rows($jaksotettures) != 0) {
+      $jaksotetturow = mysql_fetch_assoc($jaksotettures);
+
+      $query = "SELECT COUNT(*) AS kpl
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'L'
+                AND alatila = 'D'
+                AND jaksotettu = '{$jaksotetturow['jaksotettu']}'";
+      $checkres = pupe_query($query);
+      $checkrow = mysql_fetch_assoc($checkres);
+
+      if ($checkrow['kpl'] > 1) {
+        echo "<br /><font class='error'>",t("Maksusopimuksen tilaukset laskutettava samalla kertaa"),"</font><br /><br />";
+        $haku = '';
+      }
+    }
+  }
 
   if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
     $ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";

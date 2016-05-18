@@ -1068,6 +1068,9 @@ if ($tee == 'tulosta') {
       // Palautetaan $kolliyht-muuttujalle arvo, jota ei ole yliajettu requireissa, jotta saadaan tulostettua osoitelaput.
       $kollityht = $_kolliyht;
 
+      // Kun ollaan koontierätulostuksessa ja unifaun on käytössä, ei tulosteta osoitelappuja.
+      if ($_onko_unifaun && $toitarow['tulostustapa'] == 'L') $kollityht = 0;
+
       // Tulostetaan osoitelappu
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
         if ($valittu_rakiroslapp_tulostin != "" and $oslapp != '' and $kollityht > 0) {

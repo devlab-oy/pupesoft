@@ -3012,14 +3012,16 @@ if ($tee == '') {
           </form>";
     }
 
-    echo "<form action='tuote_selaus_haku.php' method='post'>
-        <input type='hidden' name='toim_kutsu' value='$toim'>
-        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-        <input type='hidden' name='tyojono' value='$tyojono'>
-        <input type='hidden' name='orig_tila' value = '$orig_tila'>
-        <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-        <input type='submit' value='".t("Selaa tuotteita")."'>
-        </form>";
+    if (tarkista_oikeus('tuote_selaus_haku.php')) {
+      echo "<form action='tuote_selaus_haku.php' method='post'>
+          <input type='hidden' name='toim_kutsu' value='$toim'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='tyojono' value='$tyojono'>
+          <input type='hidden' name='orig_tila' value = '$orig_tila'>
+          <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+          <input type='submit' value='".t("Selaa tuotteita")."'>
+          </form>";
+    }
 
     // aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
     if ($kukarow["extranet"] == "" and ($kukarow["yhtio"] == "artr" or $kukarow['yhtio'] == 'orum')) {

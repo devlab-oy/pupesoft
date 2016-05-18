@@ -243,7 +243,9 @@ fi
 ####################################################################################################
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+if [[ -n "${PUPESOFT_BRANCH}" ]]; then
+  pupebranch=${PUPESOFT_BRANCH}
+elif [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
   pupebranch=$(cat ${branchfile} | tr -d '\n')
 else
   pupebranch="master"
@@ -304,7 +306,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     eval ${nrfile}
   fi
 elif [[ "${jatketaanko}" = "skip" ]]; then
-  echo "${green}Pupesoft ajantasalla, ei pävitettävää!${normal}"
+  echo "${green}Pupesoft ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
@@ -319,7 +321,9 @@ echo
 export RAILS_ENV=${environment}
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+if [[ -n "${PUPENEXT_BRANCH}" ]]; then
+  pupenextbranch=${PUPENEXT_BRANCH}
+elif [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
   pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
 else
   pupenextbranch="master"
@@ -379,7 +383,6 @@ if [[ ${bundle} = true ]]; then
   # Päivitetään bundler oikeaan versioon
   if [[ -n "${bundled_with}" && "${bundler_version}" != "${bundled_with}" ]]; then
     gem install bundler -v ${bundled_with}
-    gem cleanup
   fi
 
   # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
@@ -392,6 +395,9 @@ if [[ ${bundle} = true ]]; then
   # Restart rails App
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
+
+  # Write cron file
+  bundle exec whenever --update-crontab &&
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&

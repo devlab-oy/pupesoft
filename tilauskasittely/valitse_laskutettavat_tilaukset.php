@@ -1063,7 +1063,7 @@ if ($tee == "VALITSE") {
             }
 
             // ALERT errorit ennen confirmi‰, n‰in estet‰‰n ettei vahingossakaan p‰‰st‰ l‰pi.
-            if (ero < 0) {
+            if (ero < 0 && '{$yhtiorow['laskutus_tulevaisuuteen']}' != 'S') {
               var msg = msg+'".t("VIRHE: Laskua ei voi p‰iv‰t‰ tulevaisuuteen!")." ';
             }
 

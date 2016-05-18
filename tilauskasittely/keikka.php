@@ -786,11 +786,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
     $tilriv_joinlisa = "";
   }
 
-  $havinglisa = $selectlisa = "";
+  $ei_lasku_lisa = "";
 
   if ($lisarajaus == 'ei_liitetty_lasku') {
-    $selectlisa = "count(distinct liitetty_lasku.tunnus) liitetty_lasku_kpl,";
-    $havinglisa = "HAVING liitetty_lasku_kpl = 0";
+    $ei_lasku_lisa = "and liitetty_lasku.tunnus is null";
   }
 
   if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
@@ -802,7 +801,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
   // näytetään millä toimittajilla on keskeneräisiä keikkoja
   $query = "SELECT lasku.liitostunnus,
-            {$selectlisa}
             max(lasku.ytunnus)  ytunnus,
             max(lasku.nimi)     nimi,
             max(lasku.nimitark) nimitark,
@@ -829,8 +827,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             $laatijalisa
             {$kohdistuslisa}
             {$toimipaikkalisa}
+            {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            {$havinglisa}
             ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
   $result = pupe_query($query);
 

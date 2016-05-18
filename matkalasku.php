@@ -2605,158 +2605,41 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
           }
 
           if ($trow['myymalahinta'] > 0 and strpos($trow['nimitys'], 'Kilometrikorvaus') !== false) {
-            // Kilometriraja
-            $kilometriraja = 3000;
+            // Kilometriraja HUOM! Tätä pitää muuttaa jos TES muuttuu
+            $kilometriraja = 5000;
 
             $korvatut_kilometrit = hae_kayttajan_kilometrit($tuoteno);
 
             $kokonaiskappalemaara = $ins_kpl;
             $jaljellaoleva_maara = 0;
+
+            // Kun rivin hintaa tarvitsee muuttaa
             if ($korvatut_kilometrit + $ins_kpl > $kilometriraja) {
-              echo "SEPPONEN ISKEE $ins_kpl kappaletta <br>";
-              $ins_kpl = $kilometriraja - $korvatut_kilometrit;
-              #$hinta = $trow['myymalahinta'];
+
+              if ($korvatut_kilometrit <= $kilometriraja) {                
+                $ins_kpl = $kilometriraja - $korvatut_kilometrit;
+              }
+              else {
+                $ins_kpl = 0;
+              }
+
               $jaljellaoleva_maara = $kokonaiskappalemaara - $ins_kpl;
+              // Jos normihinnalla jää vielä lisättävää
+              if ($ins_kpl > 0) {
+                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+              }
+
+              // Jos erikoishinnalla on lisättävää
+              if ($jaljellaoleva_maara > 0) {
+                $ins_kpl = $jaljellaoleva_maara;
+                $hinta = $trow['myymalahinta'];
+                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+              }
             }
-
-            echo "<br> jäljelle jää vielä $jaljellaoleva_maara kilsaa <br>";
+            else {
+              tee_matkalaskurivin_kirjaukset(get_defined_vars());
+            }
           }
-
-          $rivihinta = round($ins_kpl*$hinta, 2);
-
-          if ((int) $rivitunnus > 0) dellaa_mitatoity_rivi($tilausnumero, $rivitunnus);
-
-          $query = "INSERT into tilausrivi set
-                    hyllyalue      = '0',
-                    hyllynro       = '0',
-                    hyllytaso      = '0',
-                    hyllyvali      = '0',
-                    laatija        = '$kukarow[kuka]',
-                    laadittu       = now(),
-                    yhtio          = '$kukarow[yhtio]',
-                    tuoteno        = '$lisaa_tuoteno',
-                    varattu        = '0',
-                    yksikko        = '$trow[yksikko]',
-                    kpl            = '$ins_kpl',
-                    tilkpl         = '$ins_kpl',
-                    ale1           = '0',
-                    erikoisale     = '{$ilmaiset_lounaat}',
-                    alv            = '$vero',
-                    netto          = 'N',
-                    hinta          = '$hinta',
-                    rivihinta      = '$rivihinta',
-                    otunnus        = '$tilausnumero',
-                    tyyppi         = 'M',
-                    toimaika       = '',
-                    kommentti      = '{$kommentti}',
-                    var            = '$var',
-                    try            = '$trow[try]',
-                    osasto         = '$trow[osasto]',
-                    perheid        = '$perheid',
-                    perheid2       = '$perheid2',
-                    tunnus         = '$rivitunnus',
-                    nimitys        = '$nimitys',
-                    kerattyaika    = '$_alkuaika',
-                    toimitettuaika = '$_loppuaika'";
-          $insres = pupe_query($query);
-
-          $perhe_id = ($perhe_id == null) ? mysql_insert_id($GLOBALS["masterlink"]) : $perhe_id;
-          $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
-
-          //  Jos meillä on splitattu rivi niin pidetään nippu kasassa
-          if (count($tuoteno_array) > 1) {
-            $query = "UPDATE tilausrivi
-                      SET perheid = '$perhe_id'
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and tunnus  = '$lisatty_tun'";
-            $updres = pupe_query($query);
-          }
-
-          if ((int) $perheid2 == 0) {
-            $perheid2 = $lisatty_tun;
-
-            $query = "UPDATE tilausrivi
-                      SET perheid2 = '$lisatty_tun'
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and tunnus  = '$lisatty_tun'";
-            $updres = pupe_query($query);
-          }
-
-          //  Jos muokattiin perheen isukkia halutaan oikea kommentti!
-          if ((int) $perheid2 == 0 or $perheid2 == $lisatty_tun) {
-            $tapahtumarow["kommentti"] = $kommentti;
-          }
-
-          $rivitunnus = 0;
-
-          // lisätään tiliointiin tilausrivikohtaisesti tiliöintejä
-          // Netotetaan alvi
-          if ($vero != 0) {
-            $alv = round($rivihinta - $rivihinta / (1 + ($vero / 100)), 2);
-            $rivihinta -= $alv;
-          }
-
-          if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos tätä ei tarvita
-
-          if ($toim == "SUPER" and $tilino > 0 and $trow["tilino"] != $tilino) {
-            echo "<font class='message'>".t("HUOM: tiliöidään poikkeavalle tilille '$tilino'<br>");
-            $trow["tilino"] = $tilino;
-          }
-
-          list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp, $kohde, $projekti);
-
-          // Kulutili
-          $query = "INSERT into tiliointi set
-                    yhtio    = '$kukarow[yhtio]',
-                    ltunnus  = '$tilausnumero',
-                    tilino   = '{$tilino}',
-                    kustp    = '{$kustp_ins}',
-                    kohde    = '{$kohde_ins}',
-                    projekti = '{$projekti_ins}',
-                    tapvm    = '$laskurow[tapvm]',
-                    summa    = '$rivihinta',
-                    vero     = '$vero',
-                    selite   = '".mysql_real_escape_string($selite_array[$indeksi])."',
-                    lukko    = '',
-                    tosite   = '$tositenro',
-                    laatija  = '$kukarow[kuka]',
-                    laadittu = now()";
-          $result = pupe_query($query);
-          $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
-
-          if ($vero != 0) {
-            // jos tilausrivillä on alvi tehdään sille oma tiliointi
-            $query = "INSERT into tiliointi set
-                      yhtio     = '$kukarow[yhtio]',
-                      ltunnus   = '$tilausnumero',
-                      tilino    = '$yhtiorow[alv]',
-                      kustp     = 0,
-                      kohde     = 0,
-                      projekti  = 0,
-                      tapvm     = '$laskurow[tapvm]',
-                      summa     = '$alv',
-                      vero      = 0,
-                      selite    = '".mysql_real_escape_string($selite_array[$indeksi])."',
-                      lukko     = '1',
-                      laatija   = '$kukarow[kuka]',
-                      laadittu  = now(),
-                      aputunnus = $isa";
-            $result = pupe_query($query);
-          }
-
-          // koska tilointi tehdään tilausrivi kohtaisesti, niin jokaiselle tilausriville pitää liittää myös tilausrivin_lisatiedot,
-          // jotta pystymme linkkaamaan tilausrivin sekä sen tiliointirivin
-          $query = "INSERT INTO tilausrivin_lisatiedot SET
-                    yhtio               = '$kukarow[yhtio]',
-                    luontiaika          = now(),
-                    tilausrivitunnus    = '$lisatty_tun',
-                    laatija             = '$kukarow[kuka]',
-                    tiliointirivitunnus = '$isa',
-                    kulun_kohdemaa      = '$maa',
-                    kulun_kohdemaan_alv = '$alvulk',
-                    muutospvm           = now(),
-                    muuttaja            = '$kukarow[kuka]'";
-          $updres = pupe_query($query);
         }
       }
       else {
@@ -3137,6 +3020,147 @@ function hae_kayttajan_kilometrit($tuoteno) {
     $kilometrit = floor($row['yhteensa']);
   }
   return $kilometrit;
+}
+
+function tee_matkalaskurivin_kirjaukset($variables) {
+  extract($variables);
+
+  $rivihinta = round($ins_kpl*$hinta, 2);
+  if ((int) $rivitunnus > 0) dellaa_mitatoity_rivi($tilausnumero, $rivitunnus);
+
+  $query = "INSERT into tilausrivi set
+            hyllyalue      = '0',
+            hyllynro       = '0',
+            hyllytaso      = '0',
+            hyllyvali      = '0',
+            laatija        = '$kukarow[kuka]',
+            laadittu       = now(),
+            yhtio          = '$kukarow[yhtio]',
+            tuoteno        = '$lisaa_tuoteno',
+            varattu        = '0',
+            yksikko        = '$trow[yksikko]',
+            kpl            = '$ins_kpl',
+            tilkpl         = '$ins_kpl',
+            ale1           = '0',
+            erikoisale     = '{$ilmaiset_lounaat}',
+            alv            = '$vero',
+            netto          = 'N',
+            hinta          = '$hinta',
+            rivihinta      = '$rivihinta',
+            otunnus        = '$tilausnumero',
+            tyyppi         = 'M',
+            toimaika       = '',
+            kommentti      = '{$kommentti}',
+            var            = '$var',
+            try            = '$trow[try]',
+            osasto         = '$trow[osasto]',
+            perheid        = '$perheid',
+            perheid2       = '$perheid2',
+            tunnus         = '$rivitunnus',
+            nimitys        = '$nimitys',
+            kerattyaika    = '$_alkuaika',
+            toimitettuaika = '$_loppuaika'";
+  $insres = pupe_query($query);
+
+  $perhe_id = ($perhe_id == null) ? mysql_insert_id($GLOBALS["masterlink"]) : $perhe_id;
+  $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
+
+  //  Jos meillä on splitattu rivi niin pidetään nippu kasassa
+  if (count($tuoteno_array) > 1) {
+    $query = "UPDATE tilausrivi
+              SET perheid = '$perhe_id'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$lisatty_tun'";
+    $updres = pupe_query($query);
+  }
+
+  if ((int) $perheid2 == 0) {
+    $perheid2 = $lisatty_tun;
+
+    $query = "UPDATE tilausrivi
+              SET perheid2 = '$lisatty_tun'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$lisatty_tun'";
+    $updres = pupe_query($query);
+  }
+
+  //  Jos muokattiin perheen isukkia halutaan oikea kommentti!
+  if ((int) $perheid2 == 0 or $perheid2 == $lisatty_tun) {
+    $tapahtumarow["kommentti"] = $kommentti;
+  }
+
+  $rivitunnus = 0;
+
+  // lisätään tiliointiin tilausrivikohtaisesti tiliöintejä
+  // Netotetaan alvi
+  if ($vero != 0) {
+    $alv = round($rivihinta - $rivihinta / (1 + ($vero / 100)), 2);
+    $rivihinta -= $alv;
+  }
+
+  if ($kpexport != 1 and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos tätä ei tarvita
+
+  if ($toim == "SUPER" and $tilino > 0 and $trow["tilino"] != $tilino) {
+    echo "<font class='message'>".t("HUOM: tiliöidään poikkeavalle tilille '$tilino'<br>");
+    $trow["tilino"] = $tilino;
+  }
+
+  list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp, $kohde, $projekti);
+
+  // Kulutili
+  $query = "INSERT into tiliointi set
+            yhtio    = '$kukarow[yhtio]',
+            ltunnus  = '$tilausnumero',
+            tilino   = '{$tilino}',
+            kustp    = '{$kustp_ins}',
+            kohde    = '{$kohde_ins}',
+            projekti = '{$projekti_ins}',
+            tapvm    = '$laskurow[tapvm]',
+            summa    = '$rivihinta',
+            vero     = '$vero',
+            selite   = '".mysql_real_escape_string($selite_array[$indeksi])."',
+            lukko    = '',
+            tosite   = '$tositenro',
+            laatija  = '$kukarow[kuka]',
+            laadittu = now()";
+  $result = pupe_query($query);
+  $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
+
+  if ($vero != 0) {
+    // jos tilausrivillä on alvi tehdään sille oma tiliointi
+    $query = "INSERT into tiliointi set
+              yhtio     = '$kukarow[yhtio]',
+              ltunnus   = '$tilausnumero',
+              tilino    = '$yhtiorow[alv]',
+              kustp     = 0,
+              kohde     = 0,
+              projekti  = 0,
+              tapvm     = '$laskurow[tapvm]',
+              summa     = '$alv',
+              vero      = 0,
+              selite    = '".mysql_real_escape_string($selite_array[$indeksi])."',
+              lukko     = '1',
+              laatija   = '$kukarow[kuka]',
+              laadittu  = now(),
+              aputunnus = $isa";
+    $result = pupe_query($query);
+  }
+
+  // koska tilointi tehdään tilausrivi kohtaisesti, niin jokaiselle tilausriville pitää liittää myös tilausrivin_lisatiedot,
+  // jotta pystymme linkkaamaan tilausrivin sekä sen tiliointirivin
+  $query = "INSERT INTO tilausrivin_lisatiedot SET
+            yhtio               = '$kukarow[yhtio]',
+            luontiaika          = now(),
+            tilausrivitunnus    = '$lisatty_tun',
+            laatija             = '$kukarow[kuka]',
+            tiliointirivitunnus = '$isa',
+            kulun_kohdemaa      = '$maa',
+            kulun_kohdemaan_alv = '$alvulk',
+            muutospvm           = now(),
+            muuttaja            = '$kukarow[kuka]'";
+  $updres = pupe_query($query);
+
+  return true;
 }
 
 require "inc/footer.inc";

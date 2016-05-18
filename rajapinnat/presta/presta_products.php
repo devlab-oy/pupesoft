@@ -414,10 +414,10 @@ class PrestaProducts extends PrestaClient {
 
         // do we have this image already
         if (presta_image_exists($product['sku'], $image['id'])) {
-          $this->logger->log("Tuottelle {$product['sku']} löytyy jo kuva {$image['id']}");
+          $this->logger->log("Kuva {$image['id']} löytyy Pupesoftista");
         }
         else {
-          $this->logger->log("Tallennetaan tuotteelle {$product['sku']} kuva {$image['href']}");
+          $this->logger->log("Haetaan ja tallennetaan kuva {$image['href']}");
 
           // this requires changing PrestaShopWebservice executeRequest -method to public
           // otherwise we don't have any way to get a binary response from presta

@@ -1,5 +1,6 @@
 <?php
 
+require_once 'rajapinnat/presta/presta_categories.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
@@ -385,6 +386,53 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
+  }
+
+  public function fetch_and_save_images() {
+    $this->logger->log('---------Aloitetaan tuotekuvien siirto---------');
+
+    $all_product_images = array();
+    $all_skus = $this->all_skus();
+    $row_counter = 0;
+    $total_counter = count($all_skus);
+
+    // loop all products
+    foreach ($all_skus as $sku) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$sku}");
+
+      // fetch product as xml, because we need to preserve the attributes
+      $product_id = $this->product_id_by_sku($sku);
+      $product = $this->get_as_xml($product_id);
+
+      // product images are under associations
+      $images = $product->product->associations->images->image;
+
+      $product_images = array();
+
+      // loop images
+      foreach ($images as $image) {
+        $image_id = (int) $image->id;
+        $image_href = (string) $image->attributes("http://www.w3.org/1999/xlink")['href'];
+
+        // collect products images urls
+        $product_images[] = array(
+          "href" => $image_href,
+          "id" => $image_id,
+        );
+      }
+
+      // add products images to an array
+      $all_product_images[] = array(
+        "images" => $product_images,
+        "product_id" => $product_id,
+        "sku" => $sku,
+      );
+    }
+
+    var_dump($all_product_images);
+
+    $this->logger->log('---------Tuotekuvien siirto valmis---------');
   }
 
   public function all_skus() {

@@ -1,13 +1,19 @@
 <?php
 
 function presta_hae_asiakkaat() {
-  global $kukarow, $yhtiorow, $ajetaanko_kaikki, $datetime_checkpoint;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
 
   if ($ajetaanko_kaikki == "NO") {
+    presta_echo("Haetaan asiakkaat, joita muutettu {$datetime_checkpoint} j‰lkeen.");
+
     $muutoslisa = " AND (yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'
       OR asiakas.muutospvm >= '{$datetime_checkpoint}') ";
   }
   else {
+    presta_echo("Haetaan kaikki asiakkaat.");
+
     $muutoslisa = "";
   }
 
@@ -61,6 +67,8 @@ function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasn
 function presta_hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
+  presta_echo("Haetaan kaikki asiakasryhm‰t.");
+
   // HUOM. pakko hakea aina kaikki, koska muuten ei osata deletoida poistettuja
   $query = "SELECT avainsana.*,
             avainsana.selitetark_5 AS presta_customergroup_id
@@ -79,6 +87,8 @@ function presta_hae_asiakasryhmat() {
 
 function presta_specific_prices() {
   global $kukarow, $yhtiorow;
+
+  presta_echo("Haetaan kaikki asiakashinnat, asiakasalennukset sek‰ hinnastohinnat.");
 
   // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niit‰ k‰sitell‰‰n samalla tavalla
   $specific_prices = array();
@@ -256,6 +266,8 @@ function presta_specific_prices() {
 function presta_hae_kategoriat() {
   global $kukarow, $yhtiorow;
 
+  presta_echo("Haetaan kaikki tuotekategoriat.");
+
   // haetaan kaikki kategoriat ja niiden parent_id
   // HUOM! pakko hakea aina kaikki, ett‰ osataan poistaa poistetut/siirretyt
   $query = "SELECT node.nimi,
@@ -309,6 +321,8 @@ function presta_hae_kategoriat() {
 
 function presta_hae_kaikki_tuotteet() {
   global $kukarow, $yhtiorow, $presta_varastot;
+
+  presta_echo("Haetaan kaikki tuotteet ja varastosaldot.");
 
   $tuoterajaus = presta_tuoterajaus();
 
@@ -370,17 +384,28 @@ function presta_hae_kaikki_tuotteet() {
 }
 
 function presta_hae_tuotteet() {
-  global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PSTS_TUOTE');
 
   $tuoterajaus = presta_tuoterajaus();
 
   if ($ajetaanko_kaikki == "NO") {
-    $tuoterajaus .= " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
+    presta_echo("Haetaan tuotteet, joita on muokattu {$datetime_checkpoint} j‰lkeen.");
+
+    $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}') ";
+  }
+  else {
+    presta_echo("Haetaan kaikki tuotteet.");
   }
 
   // Haetaan pupesta tuotteen tiedot
-  $query = "SELECT tuote.*
+  $query = "SELECT distinct tuote.*
             FROM tuote
+            LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
+              AND puun_alkio.laji = 'tuote'
+              AND puun_alkio.liitos = tuote.tuoteno)
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);
@@ -462,6 +487,7 @@ function presta_hae_tuotteet() {
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
       'ei_saldoa'                 => $row["ei_saldoa"],
+      'keraysvyohyke'             => $row["keraysvyohyke"],
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
@@ -520,4 +546,68 @@ function presta_tuoterajaus() {
   }
 
   return $tuoterajaus;
+}
+
+function presta_ajetaanko_sykronointi($ajo, $ajolista) {
+  // jos ajo ei ole ajolistalla, ei ajeta
+  if (array_search(strtolower(trim($ajo)), $ajolista) === false) {
+    return false;
+  }
+
+  // Sallitaan vain yksi instanssi t‰st‰ ajosta kerrallaan
+  $lock_params = array(
+    "lockfile" => "presta-{$ajo}-flock.lock",
+    "locktime" => 5400,
+    "return"   => true,
+  );
+
+  $status = pupesoft_flock($lock_params);
+
+  if ($status === false) {
+    presta_echo("{$ajo} -ajo on jo k‰ynniss‰, ei ajeta uudestaan.");
+  }
+
+  return $status;
+}
+
+function presta_export_checkpoint($checkpoint) {
+  global $kukarow, $yhtiorow;
+
+  // Haetaan timestamp avainsanoista
+  $checkpoint_res = t_avainsana($checkpoint, 'fi');
+
+  // otetaan viimeisen ajon timestamppi talteen ja p‰ivitet‰‰n t‰m‰ hetki
+  if (mysql_num_rows($checkpoint_res) != 0) {
+    $row = mysql_fetch_assoc($checkpoint_res);
+    $selite = $row['selite'];
+
+    // P‰ivitet‰‰n timestamppi t‰h‰n hetkeen
+    $query = "UPDATE avainsana SET
+              selite = now()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = '{$checkpoint}'";
+    pupe_query($query);
+  }
+  else {
+    // timestamppia ei lˆydy, eli t‰m‰ on ensimm‰inen ajo
+    $selite = date('Y-m-d H:i:s', mktime(0, 0, 0, 1, 1, 1970));
+
+    // P‰ivitet‰‰n timestamppi talteen
+    $query = "INSERT INTO avainsana SET
+              kieli      = 'fi',
+              laatija    = '{$kukarow['kuka']}',
+              laji       = '{$checkpoint}',
+              luontiaika = now(),
+              muutospvm  = now(),
+              muuttaja   = '{$kukarow['kuka']}',
+              selite     = now(),
+              yhtio      = '{$kukarow['yhtio']}'";
+    pupe_query($query);
+  }
+
+  return $selite;
+}
+
+function presta_echo($string) {
+  echo date("d.m.Y @ G:i:s")." - {$string}\n";
 }

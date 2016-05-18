@@ -471,7 +471,7 @@ if (!function_exists("pupesoft_flock")) {
     }
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-      if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+      if ($locktime > 0 and time() - filemtime($lockfile) >= $locktime) {
         // Onko nagios monitor asennettu?
         if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
           file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
@@ -7168,8 +7168,14 @@ if (!function_exists("paivita_toimitukset")) {
 }
 
 if (!function_exists("tulosta_ytunnus")) {
-  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "") {
+  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;
+
+    $ytunnus_vai_hetu = tarkistahetu($ytunnus);
+
+    if (strpos($ytunnus_vai_hetu, "XXXX") !== false) {
+      return $hetu_tarkenne ? $ytunnus : $ytunnus_vai_hetu;
+    }
 
     if ($maa == "") {
       $maa = $yhtiorow["maa"];
@@ -8346,6 +8352,7 @@ if (!function_exists("aja_kysely")) {
           }
 
           ${$row["var"]} = $row["value"];
+          $_POST[$row["var"]] = $row["value"];
         }
       }
 
@@ -10252,6 +10259,28 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
+  function hae_kayttajan_toimipistetunnukset() {
+    global $kukarow;
+  
+    $asiakastunnukset = '';
+    if (!empty($kukarow['oletus_asiakas'])) {
+      $asiakastunnukset = $kukarow['oletus_asiakas'];
+    }
+
+    $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
+              FROM customers_users 
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+              WHERE user_id = '{$kukarow['tunnus']}'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+    if (!empty($row['toimipistetunnukset'])) {
+      $asiakastunnukset = empty($asiakastunnukset) ? $row['toimipistetunnukset'] : $asiakastunnukset.",".$row['toimipistetunnukset'];
+    }
+    return $asiakastunnukset;
+  }
+}
+
 if (!function_exists("livesearch_laitehaku")) {
   function livesearch_laitehaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -10272,9 +10301,17 @@ if (!function_exists("livesearch_laitehaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
       </script>";
 
+      $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+      $toimipistelisa = '';
+      if (!empty($toimipistetunnukset)) {
+        $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
+      }
+
       $query = "SELECT DISTINCT sarjanro
                 FROM laite
                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                {$toimipistelisa}
                 AND sarjanro LIKE '%{$haku}%'";
       $result = pupe_query($query);
 
@@ -31026,14 +31063,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin pŠivitetŠŠn kappalemŠŠrŠ
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31064,14 +31101,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin pŠivitetŠŠn kappalemŠŠrŠ
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31498,7 +31535,7 @@ if (!function_exists("vapauta_maksusopimus")) {
 
 if (!function_exists("tee_ennakkolasku")) {
   function tee_ennakkolasku($jaks_alkup_tilaus, $sisainen = FALSE) {
-    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku, $force_web;
 
     // Otetaan sopparin tiedot talteen jos sellanen on olemassa.
     $jaksquery = "SELECT *
@@ -31555,7 +31592,7 @@ if (!function_exists("tee_ennakkolasku")) {
 
     $ennakkokuvaus = mysql_fetch_assoc($kuvares);
 
-    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares) -1);
     $loppukuvaus = mysql_fetch_assoc($kuvares);
 
     if (!empty($soprow["maksuehto"])) {
@@ -31600,7 +31637,7 @@ if (!function_exists("tee_ennakkolasku")) {
       $laskutettavat    = $ennakkolasku;
       $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
 
-      require "verkkolasku.php";
+      require "{$pupe_root_polku}/tilauskasittely/verkkolasku.php";
     }
 
     // Päivitetään alkuperäiselle tilaukselle "jaksotettu" maksuehto
@@ -32759,5 +32796,168 @@ if (!function_exists('pupesoft_log')) {
     }
 
     fclose($file_handle);
+  }
+}
+
+if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
+  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+    global $yhtiorow, $kukarow;
+
+    $response = array();
+
+    $query = "SELECT
+              tuote.kehahin,
+              tuoteperhe.alekerroin,
+              tuoteperhe.hintakerroin,
+              tuoteperhe.hintatyyppi,
+              tuoteperhe.kerroin,
+              tuoteperhe.tuoteno
+              FROM tuoteperhe
+              JOIN tuote USING (yhtio, tuoteno)
+              WHERE tuoteperhe.yhtio = '{$kukarow['yhtio']}'
+              AND tuoteperhe.tyyppi = '{$tyyppi}'
+              AND tuoteperhe.isatuoteno = '{$isa_tuoteno}'
+              ORDER BY hintatyyppi DESC";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+      return $response;
+    }
+
+    // haetaan eka rivi
+    $row = mysql_fetch_assoc($result);
+
+    // onko meillä isätuotteeseen perustuva hinnoittelu
+    $hinnoittelu_isatuotteella = $row['hintatyyppi'];
+
+    // resultti alkuun
+    mysql_data_seek($result, 0);
+
+    $kokonaisarvo = 0;
+
+    // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
+    // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
+    if (!empty($hinnoittelu_isatuotteella)) {
+      while ($row = mysql_fetch_assoc($result)) {
+        $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
+      }
+
+      // resultti alkuun
+      mysql_data_seek($result, 0);
+    }
+
+    while ($row = mysql_fetch_assoc($result)) {
+      // jos hinnoitellaan isätuotteella
+      // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole käytössä
+      if (!empty($hinnoittelu_isatuotteella)) {
+        $alekerroin   = 1;
+        $hintakerroin = $row['kehahin'] / $kokonaisarvo;
+      }
+      else {
+        $alekerroin   = $row['alekerroin'];
+        $hintakerroin = $row['hintakerroin'];
+      }
+
+      $response[] = array(
+        "alekerroin"   => (float) $alekerroin,
+        "hintakerroin" => (float) $hintakerroin,
+        "hintatyyppi"  => $hinnoittelu_isatuotteella,
+        "kerroin"      => (float) $row['kerroin'],
+        "tuoteno"      => $row['tuoteno'],
+      );
+    }
+
+    return $response;
+  }
+}
+
+if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
+  function tuoteperheiden_hintojen_paivitys($params) {
+    global $yhtiorow, $kukarow;
+
+    $isatunnukset = isset($params['isatunnukset']) ? $params['isatunnukset'] : array();
+    $tyyppi       = isset($params['tyyppi'])       ? $params['tyyppi']       : 'P';
+    $override     = isset($params['override'])     ? $params['override']     : false;
+
+    // tutkittavat rivitunnukset pitää olla array
+    if (!is_array($isatunnukset) or count($isatunnukset) == 0) {
+      return;
+    }
+
+    foreach($isatunnukset as $isa => $perhe) {
+
+      $tunnukset = implode(", ", $perhe);
+
+      // Haetaan kaikki isätuotteet
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = $isa
+                AND perheid = tunnus";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      // katsotaan lapsien kertoimet
+      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $laskettu_hinta = 0;
+
+      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
+
+      // Jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään,
+      // jos asetusta ei ole yliajettu parametreissä
+      if ($hinnoittelu_isatuotteella === false && $override === false) {
+        continue;
+      }
+
+      foreach ($kertoimet as $lapsituote) {
+        // lasketaan lapsituotteen hinta isän hinnasta
+        $hinta = round($row['hinta'] * $lapsituote['hintakerroin'], $yhtiorow['hintapyoristys']);
+        $laskettu_hinta += ($hinta * $row['tilkpl'] * $lapsituote['kerroin']);
+
+        // päivitetään lapsituotteen hinta
+        $query = "UPDATE tilausrivi SET
+                  ale1       = '{$row['ale1']}',
+                  ale2       = '{$row['ale2']}',
+                  ale3       = '{$row['ale3']}',
+                  erikoisale = '{$row['erikoisale']}',
+                  hinta      = '{$hinta}',
+                  netto      = '{$row['netto']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$lapsituote['tuoteno']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tilkpl  = {$row['tilkpl']} * {$lapsituote['kerroin']}
+                  AND tunnus != perheid
+                  AND tunnus in ({$tunnukset})";
+        pupe_query($query);
+      }
+
+      // päivitetään isätuote nollaksi
+      $query = "UPDATE tilausrivi SET
+                ale1       = 0,
+                ale2       = 0,
+                ale3       = 0,
+                erikoisale = 0,
+                hinta      = 0,
+                netto      = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$row['tunnus']}";
+      pupe_query($query);
+
+      // katsotaan pyöristysero
+      $pyoristysero = $laskettu_hinta - ($row['hinta'] * $row['tilkpl']);
+
+      // jos on pyöristyseroa
+      if ($pyoristysero != 0) {
+        $vikalapsi = array_pop($perhe);
+
+        // Lisätään pyöristys tämän perheen vikalle lapselle
+        $query = "UPDATE tilausrivi SET
+                  hinta = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND perheid = '{$row['perheid']}'
+                  AND tunnus  = $vikalapsi";
+        pupe_query($query);
+      }
+    }
   }
 }

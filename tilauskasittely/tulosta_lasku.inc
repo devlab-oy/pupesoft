@@ -314,7 +314,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi != 8) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 
@@ -431,7 +431,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi == 8) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 
@@ -3026,11 +3026,11 @@ if (!function_exists("tulosta_lasku")) {
       $laskurow["tapvm"] = date("Y-m-d");
 
       $lisa = " sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta,
-                sum(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
+                sum(tilausrivi.varattu+tilausrivi.kpl) kpl ";
     }
     else {
       $lisa = " sum(tilausrivi.rivihinta) rivihinta,
-                sum(tilausrivi.kpl) kpl,";
+                sum(tilausrivi.kpl) kpl ";
     }
 
     $sivu = 1;
@@ -3080,6 +3080,8 @@ if (!function_exists("tulosta_lasku")) {
               if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
               if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
               tuote.myyntihinta,
+              $sorttauskentta,
+              lasku.tilausyhteyshenkilo,
               min(tilausrivi.hyllyalue) hyllyalue,
               min(tilausrivi.hyllynro) hyllynro,
               min(tilausrivi.keratty) keratty,
@@ -3099,7 +3101,6 @@ if (!function_exists("tulosta_lasku")) {
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
               $lisa
-              $sorttauskentta
               FROM tilausrivi
               JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -3108,8 +3109,8 @@ if (!function_exists("tulosta_lasku")) {
               and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               and tilausrivi.varattu+tilausrivi.kpl != 0
               $where
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-              ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28
+              ORDER BY otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tunnus";
     $result = pupe_query($query);
 
     $kaanteinen_verotus = FALSE;
@@ -3237,8 +3238,8 @@ if (!function_exists("tulosta_lasku")) {
 
           $yhteensa_rivikommentti_lisatty = 10;
 
-          if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])."\n".$row["kommentti"];
+          if (trim($row['tilausyhteyshenkilo']) != '') {
+            $row["kommentti"] = trim(t("Tilaaja", $kieli).": ".$row['tilausyhteyshenkilo'])."\n".$row["kommentti"];
             $yhteensa_rivikommentti_lisatty += 10;
           }
         }

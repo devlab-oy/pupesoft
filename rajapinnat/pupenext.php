@@ -21,11 +21,13 @@ elseif (empty($function)) {
 }
 
 // otetaan includepath aina rootista
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 ini_set("include_path",
-  ini_get("include_path")    . PATH_SEPARATOR .
-  dirname(dirname(__FILE__)) . PATH_SEPARATOR .
-  "/usr/share/pear"          . PATH_SEPARATOR .
-  "/usr/share/php/"          . PATH_SEPARATOR
+  ini_get("include_path") . PATH_SEPARATOR .
+  $pupe_root_polku        . PATH_SEPARATOR .
+  "/usr/share/pear"       . PATH_SEPARATOR .
+  "/usr/share/php/"       . PATH_SEPARATOR
 );
 
 // otetaan tietokanta connect ja funktiot
@@ -84,9 +86,11 @@ function pupenext_luo_myyntitilausotsikko($params) {
 }
 
 function pupenext_tilaus_valmis($params) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $pupe_root_polku, $force_web;
 
-  $order_id = (int) $params->order_id;
+  $order_id             = (int) $params->order_id;
+  $tee_100_ennakkolasku = isset($params->create_preliminary_invoice) ? $params->create_preliminary_invoice : false;
+  $force_web            = true;
 
   if (empty($order_id)) {
     return null;
@@ -112,6 +116,61 @@ function pupenext_tilaus_valmis($params) {
   $status = capture_status();
 
   return array('status' => $status);
+}
+
+function pupenext_lisaa_rivi($params) {
+  global $kukarow;
+
+  $count      = isset($params->count)      ? $params->count      : 1;
+  $order_id   = isset($params->order_id)   ? $params->order_id   : die("Et antanut tilausnumeroa\n");
+  $product_id = isset($params->product_id) ? $params->product_id : die("Et antanut tuotteen tunnusta\n");
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuote.tunnus = $product_id
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) die('Tuotetta ei löytynyt');
+
+  $trow = mysql_fetch_assoc($result);
+
+  $query = "SELECT *
+            FROM lasku
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus = $order_id";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) die('Tilausta ei löytynyt');
+
+  $laskurow = mysql_fetch_assoc($result);
+
+  $kukarow['kesken'] = $laskurow['tunnus'];
+
+  $parametrit = array(
+    'kpl'      => $count,
+    'laskurow' => $laskurow,
+    'trow'     => $trow,
+    'tuoteno'  => $trow['tuoteno'],
+  );
+
+  $added_rows = lisaa_rivi($parametrit);
+
+  return array(
+    'added_row' => $added_rows[0][0],
+  );
+}
+
+function pupenext_tuoteperheiden_hintojen_paivitys($params) {
+  $parent_row_ids = isset($params->parent_row_ids) ? $params->parent_row_ids : die('Tuoteperheiden tunnukset täytyy antaa');
+
+  $_params = array(
+    'isatunnukset' => (array) $parent_row_ids,
+    'override'     => true,
+  );
+
+  return array('status' => tuoteperheiden_hintojen_paivitys($_params));
 }
 
 function capture_status() {

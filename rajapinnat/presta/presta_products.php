@@ -4,7 +4,6 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
-require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
@@ -17,19 +16,17 @@ class PrestaProducts extends PrestaClient {
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
-  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key) {
-    $this->presta_categories = new PrestaCategories($url, $api_key);
-    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
-    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
-    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
-    $this->presta_stock = new PrestaProductStocks($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $log_file);
+    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key, $log_file);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key, $log_file);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key, $log_file);
 
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -328,7 +325,7 @@ class PrestaProducts extends PrestaClient {
   private function add_child_product(SimpleXMLElement &$xml, $product) {
     $qty        = $product['kerroin'];
     $sku        = $product['tuoteno'];
-    $product_id = array_search($sku, $this->all_skus());
+    $product_id = $this->product_id_by_sku($sku);
 
     if ($product_id === false) {
       $this->logger->log("VIRHE! Lapsituotetta {$sku} ei löytynyt!");
@@ -358,38 +355,33 @@ class PrestaProducts extends PrestaClient {
     $row_counter = 0;
     $total_counter = count($products);
 
-    try {
-      $existing_products = $this->all_skus();
+    // fetch the first shop group id, we will add all products to this shop group (for now)
+    $shop_group_id = $this->shop_group_id();
 
-      foreach ($products as $product) {
-        $row_counter++;
-        $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
+    foreach ($products as $product) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
 
-        try {
-          if (in_array($product['tuoteno'], $existing_products)) {
-            $id = array_search($product['tuoteno'], $existing_products);
-            $this->update($id, $product);
-          }
-          else {
-            $this->create($product);
-          }
+      try {
+        // check do we have this product in this store
+        $id = $this->product_id_by_sku($product['tuoteno']);
+
+        if ($id !== false) {
+          $this->update($id, $product, null, $shop_group_id);
         }
-        catch (Exception $e) {
+        else {
+          $this->create($product, null, $shop_group_id);
+        }
+      }
+      catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
-        }
-
-        $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
       }
-    }
-    catch (Exception $e) {
-      //Exception logging happens in create / update.
 
-      return false;
+      $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
     }
 
     $this->delete_all_unnecessary_products();
-    $this->update_stock();
 
     $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
@@ -402,7 +394,11 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('Haetaan kaikki tuotteet Prestashopista');
 
-    $existing_products = $this->all(array('id', 'reference'));
+    $display = array('id', 'reference');
+    $filter = array();
+    $shop_group_id = $this->shop_group_id();
+
+    $existing_products = $this->all($display, $filter, null, $shop_group_id);
     $existing_products = array_column($existing_products, 'reference', 'id');
 
     $this->presta_all_products = $existing_products;
@@ -437,7 +433,7 @@ class PrestaProducts extends PrestaClient {
       $product = $product_row['tuoteno'];
 
       // do we have this product in presta
-      $presta_id = array_search($product, $presta_products);
+      $presta_id = $this->product_id_by_sku($product);
 
       // if we found product from presta, add presta id to array
       if ($presta_id !== false) {
@@ -463,44 +459,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  private function update_stock() {
-    $this->logger->log('---------Aloitetaan saldojen päivitys---------');
-
-    // set all products null, so we'll fetch all_skus again from presta
-    $this->presta_all_products = null;
-    $pupesoft_products = $this->pupesoft_all_products;
-
-    $current = 0;
-    $total = count($pupesoft_products);
-
-    foreach ($pupesoft_products as $product_row) {
-      $sku = $product_row['tuoteno'];
-      $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
-      $status = $product_row['status'];
-
-      $product_id = array_search($sku, $this->all_skus());
-
-      $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
-
-      // could not find product or
-      // this is a virtual product, no stock management
-      if ($product_id === false or $saldo === null) {
-        continue;
-      }
-
-      $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $saldo,
-        'status'     => $status,
-      );
-
-      $this->presta_stock->create_or_update($stock);
-    }
-
-    $this->logger->log('---------Saldojen päivitys valmis---------');
-  }
-
   private function find_product_from_all_products($sku) {
     foreach ($this->pupesoft_all_products as $product_row) {
       if ($sku == $product_row['tuoteno']) {
@@ -509,6 +467,12 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  public function product_id_by_sku($sku) {
+    $product_id = array_search($sku, $this->all_skus());
+
+    return $product_id;
   }
 
   public function set_removable_fields($fields) {

@@ -11,6 +11,7 @@ class PrestaProducts extends PrestaClient {
   private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
+  private $image_fetch = false;
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
@@ -389,6 +390,10 @@ class PrestaProducts extends PrestaClient {
   }
 
   public function fetch_and_save_images() {
+    if ($this->image_fetch !== true) {
+      return;
+    }
+
     $this->logger->log('---------Aloitetaan tuotekuvien siirto---------');
 
     $all_product_images = array();
@@ -561,5 +566,9 @@ class PrestaProducts extends PrestaClient {
 
   public function set_home_category_id($value) {
     $this->presta_home_category_id = $value;
+  }
+
+  public function set_image_fetch($value) {
+    $this->image_fetch = $value;
   }
 }

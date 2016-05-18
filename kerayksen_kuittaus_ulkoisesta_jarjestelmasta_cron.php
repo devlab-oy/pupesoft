@@ -277,14 +277,7 @@ while (false !== ($file = readdir($handle))) {
               AND tunnus  = '{$laskurow['tunnus']}'";
     $upd_res = pupe_query($query);
 
-    // Etukäteen maksetut tilaukset pitää muuttaa takaisin "maksettu"-tilaan
-    $query = "UPDATE lasku SET
-              alatila      = 'X'
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tunnus   = '$laskurow[tunnus]'
-              AND mapvm   != '0000-00-00'
-              AND chn      = '999'";
-    $yoimresult  = pupe_query($query);
+    paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
     pupesoft_log('outbound_delivery', "Keräyskuittaus tilauksesta {$otunnus} vastaanotettu");
   }

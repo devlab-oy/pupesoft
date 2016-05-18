@@ -561,7 +561,8 @@ class PrestaProducts extends PrestaClient {
       // loop images
       foreach ($images as $image) {
         $image_id = (int) $image->id;
-        $image_href = (string) $image->attributes("http://www.w3.org/1999/xlink")['href'];
+        $attributes = $image->attributes("http://www.w3.org/1999/xlink");
+        $image_href = (string) $attributes['href'];
 
         // collect products images urls
         $product_images[] = array(

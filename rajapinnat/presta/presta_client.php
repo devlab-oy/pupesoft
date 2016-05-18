@@ -6,7 +6,7 @@ require_once 'rajapinnat/presta/presta_shops.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
-  private $url = null;
+  public $url = null;
   private $api_key = null;
   private $shop_ids = null;
   private $presta_shops = null;

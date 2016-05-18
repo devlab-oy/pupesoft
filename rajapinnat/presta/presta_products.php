@@ -398,8 +398,38 @@ class PrestaProducts extends PrestaClient {
 
     $all_product_images = $this->all_product_images();
 
+    // loop all products
     foreach ($all_product_images as $product) {
-      var_dump($product);
+      // loop all product images
+      foreach ($product['images'] as $image) {
+
+        // do we have this image already
+        if (presta_image_exists($product['sku'], $image['id'])) {
+          $this->logger->log("Tuottelle {$product['sku']} löytyy jo kuva {$image['href']}");
+        }
+        else {
+          $this->logger->log("Tallennetaan tuotteelle {$product['sku']} kuva {$image['href']}");
+
+          // this requires changing PrestaShopWebservice executeRequest -method to public
+          // otherwise we don't have any way to get a binary response from presta
+          // without rewriting the whole curl call
+          $url = "{$this->url}api/images/products/{$product['product_id']}/{$image['id']}";
+          $response = $this->ws->executeRequest($url);
+
+          // tallennetaan kuva tmp dirikkaan
+          $temp_file = tempnam('/tmp', 'presta');
+          file_put_contents($temp_file, $response['response']);
+
+          // save image to pupesoft liitetiedostot
+          $params = array(
+            "filename" => $temp_file,
+            "id"       => $image['id'],
+            "sku"      => $product['sku'],
+          );
+
+          presta_tallenna_liite($params);
+        }
+      }
     }
 
     $this->logger->log('---------Tuotekuvien siirto valmis---------');
@@ -490,6 +520,7 @@ class PrestaProducts extends PrestaClient {
   private function all_product_images() {
     $all_product_images = array();
     $all_skus = $this->all_skus();
+
     $row_counter = 0;
     $total_counter = count($all_skus);
 
@@ -502,8 +533,17 @@ class PrestaProducts extends PrestaClient {
       $product_id = $this->product_id_by_sku($sku);
       $product = $this->get_as_xml($product_id);
 
-      // product images are under associations
-      $images = $product->product->associations->images->image;
+      // product images are under associations, sometimes singular, sometimes plural
+      $xml_images = $product->product->associations->images;
+      if (isset($xml_images->image)) {
+        $images = $xml_images->image;
+      }
+      elseif (isset($xml_images->images)) {
+        $images = $xml_images->images;
+      }
+      else {
+        $images = array();
+      }
 
       $product_images = array();
 

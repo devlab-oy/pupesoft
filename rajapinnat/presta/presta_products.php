@@ -396,46 +396,11 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('---------Aloitetaan tuotekuvien siirto---------');
 
-    $all_product_images = array();
-    $all_skus = $this->all_skus();
-    $row_counter = 0;
-    $total_counter = count($all_skus);
+    $all_product_images = $this->all_product_images();
 
-    // loop all products
-    foreach ($all_skus as $sku) {
-      $row_counter++;
-      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$sku}");
-
-      // fetch product as xml, because we need to preserve the attributes
-      $product_id = $this->product_id_by_sku($sku);
-      $product = $this->get_as_xml($product_id);
-
-      // product images are under associations
-      $images = $product->product->associations->images->image;
-
-      $product_images = array();
-
-      // loop images
-      foreach ($images as $image) {
-        $image_id = (int) $image->id;
-        $image_href = (string) $image->attributes("http://www.w3.org/1999/xlink")['href'];
-
-        // collect products images urls
-        $product_images[] = array(
-          "href" => $image_href,
-          "id" => $image_id,
-        );
-      }
-
-      // add products images to an array
-      $all_product_images[] = array(
-        "images" => $product_images,
-        "product_id" => $product_id,
-        "sku" => $sku,
-      );
+    foreach ($all_product_images as $product) {
+      var_dump($product);
     }
-
-    var_dump($all_product_images);
 
     $this->logger->log('---------Tuotekuvien siirto valmis---------');
   }
@@ -520,6 +485,49 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  private function all_product_images() {
+    $all_product_images = array();
+    $all_skus = $this->all_skus();
+    $row_counter = 0;
+    $total_counter = count($all_skus);
+
+    // loop all products
+    foreach ($all_skus as $sku) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$sku}");
+
+      // fetch product as xml, because we need to preserve the attributes
+      $product_id = $this->product_id_by_sku($sku);
+      $product = $this->get_as_xml($product_id);
+
+      // product images are under associations
+      $images = $product->product->associations->images->image;
+
+      $product_images = array();
+
+      // loop images
+      foreach ($images as $image) {
+        $image_id = (int) $image->id;
+        $image_href = (string) $image->attributes("http://www.w3.org/1999/xlink")['href'];
+
+        // collect products images urls
+        $product_images[] = array(
+          "href" => $image_href,
+          "id" => $image_id,
+        );
+      }
+
+      // add products images to an array
+      $all_product_images[] = array(
+        "images" => $product_images,
+        "product_id" => $product_id,
+        "sku" => $sku,
+      );
+    }
+
+    return $all_product_images;
   }
 
   public function product_id_by_sku($sku) {

@@ -58,6 +58,7 @@ else {
     'kategoriat',
     'saldot',
     'tilaukset',
+    'tuotekuvat',
     'tuotteet',
   );
 }
@@ -235,6 +236,13 @@ if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
 
   $presta_stocks->set_all_products($kaikki_tuotteet);
   $presta_stocks->update_stock();
+}
+
+if (presta_ajetaanko_sykronointi('tuotekuvat', $synkronoi)) {
+  presta_echo("Haetaan tuotekuvat.");
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key, 'presta_tuotekuvat');
+
+  $presta_products->fetch_and_save_images();
 }
 
 if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {

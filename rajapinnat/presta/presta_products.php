@@ -425,7 +425,7 @@ class PrestaProducts extends PrestaClient {
           $url = "{$this->url}api/images/products/{$product['product_id']}/{$image['id']}";
           $response = $this->ws->executeRequest($url);
 
-          // tallennetaan kuva tmp dirikkaan
+          // save file to tmp dir
           $temp_file = tempnam('/tmp', 'presta');
           file_put_contents($temp_file, $response['response']);
 
@@ -437,6 +437,9 @@ class PrestaProducts extends PrestaClient {
           );
 
           presta_tallenna_liite($params);
+
+          // delete temp file
+          unlink($temp_file);
         }
       }
 

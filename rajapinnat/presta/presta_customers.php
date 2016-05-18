@@ -7,10 +7,10 @@ class PrestaCustomers extends PrestaClient {
   private $default_groups = array();
   private $presta_addresses = null;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
 
-    $this->presta_addresses = new PrestaAddresses($url, $api_key);
+    $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -172,14 +172,11 @@ class PrestaCustomers extends PrestaClient {
   // fetch all ids from all shops
   private function fetch_all_ids() {
     $display = array('id');
-    $existing_customers = array();
     $filter = array();
+    $id_group_shop = $this->shop_group_id();
 
     // fetch customer ids from all shops
-    foreach ($this->all_shop_ids() as $id_shop) {
-      $customers = $this->all($display, $filter, $id_shop);
-      $existing_customers = array_merge($existing_customers, $customers);
-    }
+    $existing_customers = $this->all($display, $filter, null, $id_group_shop);
 
     return array_column($existing_customers, 'id');
   }

@@ -5,16 +5,16 @@ require_once 'rajapinnat/presta/presta_client.php';
 class PrestaShopGroups extends PrestaClient {
   private $all_shop_groups = null;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
     return 'shop_groups';
   }
 
-  protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
-    throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function first_shop_group() {

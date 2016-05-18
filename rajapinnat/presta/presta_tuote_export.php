@@ -1,91 +1,69 @@
 <?php
 
 // Kutsutaanko CLI:st‰
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli') {
-  $php_cli = TRUE;
+if (php_sapi_name() != 'cli') {
+  die("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 }
 
-date_default_timezone_set('Europe/Helsinki');
+$pupe_root_polku = dirname(dirname(dirname(__FILE__)));
 
-// Kutsutaanko CLI:st‰
-if (!$php_cli) {
-  die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
-}
-
-$pupe_root_polku=dirname(dirname(dirname(__FILE__)));
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
-error_reporting(E_ALL);
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku);
 ini_set("display_errors", 1);
+ini_set("max_execution_time", 0); // unlimited execution time
+ini_set("memory_limit", "2G");
+error_reporting(E_ALL);
+date_default_timezone_set('Europe/Helsinki');
 
 require "inc/connect.inc";
 require "inc/functions.inc";
+require_once "rajapinnat/presta/presta_products.php";
+require_once "rajapinnat/presta/presta_categories.php";
+require_once "rajapinnat/presta/presta_customers.php";
+require_once "rajapinnat/presta/presta_customer_groups.php";
+require_once "rajapinnat/presta/presta_sales_orders.php";
+require_once "rajapinnat/presta/presta_product_stocks.php";
+require_once "rajapinnat/presta/presta_shops.php";
+require_once "rajapinnat/presta/presta_specific_prices.php";
+require_once "rajapinnat/presta/presta_addresses.php";
+require_once "rajapinnat/presta/presta_functions.php";
 
-$lock_params = array(
-  "locktime" => 5400
-);
+if (empty($argv[1])) {
+  die("ERROR! Aja n‰in:\npresta_tuote_export.php yhtiˆ [laji,laji,...] [ajentaanko_kaikki]\n");
+}
 
-// Logitetaan ajo
-cron_log();
+// ensimm‰inen parametri yhtiˆ
+$yhtio = mysql_real_escape_string($argv[1]);
+$yhtiorow = hae_yhtion_parametrit($yhtio);
 
-// Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
-pupesoft_flock($lock_params);
+if (empty($yhtiorow)) {
+  die("Yhtiˆ ei lˆydy.");
+}
 
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_customers.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_customer_groups.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_sales_orders.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_product_stocks.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_shops.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_specific_prices.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_addresses.php";
-require_once "{$pupe_root_polku}/rajapinnat/presta/presta_functions.php";
+$kukarow = hae_kukarow('admin', $yhtio);
 
-// Laitetaan unlimited execution time
-ini_set("max_execution_time", 0);
+if (empty($kukarow)) {
+  die("Admin -k‰ytt‰j‰ ei lˆydy.");
+}
 
-// Laitetaan isompi allowed memory size
-ini_set("memory_limit", "2G");
-
-if (trim($argv[1]) != '') {
-  $yhtio = mysql_real_escape_string($argv[1]);
-  $yhtiorow = hae_yhtion_parametrit($yhtio);
-  $kukarow = hae_kukarow('admin', $yhtio);
-
-  if ($kukarow === null) {
-    die ("\n");
-  }
-
-  if (!isset($yhtiorow)) {
-    die('Yhtiorow puuttuu');
-  }
+// toinen parametri ajettavat siirrot
+if (!empty($argv[2])) {
+  $synkronoi = explode(',', $argv[2]);
 }
 else {
-  die ("ERROR! Aja n‰in:\npresta_tuote_export.php yhtiˆ [ajentaanko_kaikki] [laji,laji,...]\n");
-}
-
-$ajetaanko_kaikki = (isset($argv[2]) and trim($argv[2]) != '') ? "YES" : "NO";
-
-if (isset($argv[3])) {
-  $synkronoi = explode(',', $argv[3]);
-  $synkronoi = array_flip($synkronoi);
-}
-elseif (isset($synkronoi_prestaan) and count($synkronoi_prestaan) > 0) {
-  $synkronoi = $synkronoi_prestaan;
-}
-else {
+  // ajetaan kaikki
   $synkronoi = array(
-    'kategoriat'    => t('Kategoriat'),
-    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
-    'saldot'        => t('Saldot'),
-    'asiakasryhmat' => t('Asiakasryhm‰t'),
-    'asiakkaat'     => t('Asiakkaat'),
-    'asiakashinnat' => t('Asiakashinnat'),
-    'tilaukset'     => t('Tilauksien haku'),
+    'asiakashinnat',
+    'asiakasryhmat',
+    'asiakkaat',
+    'kategoriat',
+    'saldot',
+    'tilaukset',
+    'tuotteet',
   );
 }
+
+// kolmas parametri ajetaanko kaikki
+$ajetaanko_kaikki = (!empty($argv[3])) ? "YES" : "NO";
 
 // T‰ss‰ kaikki parametrit, jota voi s‰‰t‰‰ salasanat.php:ss‰
 if (!isset($presta_url)) {
@@ -146,7 +124,10 @@ if (!isset($presta_dynaamiset_tuoteparametrit)) {
 }
 if (!isset($presta_ohita_tuoteparametrit)) {
   // Lista Prestan tuotteen kentist‰, joita ei tule p‰ivitt‰‰ rajapinnassa
-  $presta_ohita_tuoteparametrit = array();
+  $presta_ohita_tuoteparametrit = array(
+    // "price",
+    // "description",
+  );
 }
 if (!isset($presta_synkronoi_tuotepuu)) {
   // Siirret‰‰nko Pupesoftin kategoriat. Aseta false, niin ei siirret‰.
@@ -210,38 +191,26 @@ if (!isset($presta_varastot)) {
   $presta_varastot = array(0);
 }
 
-// Haetaan timestamp
-$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
+presta_echo("Aloitetaan Prestashop p‰ivitys.");
 
-if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  exit("VIRHE: Timestamp ei lˆydy avainsanoista!\n");
-}
-
-$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mik‰ tilanne on jo k‰sitelty
-$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
-
-echo date("d.m.Y @ G:i:s")." - Aloitetaan Prestashop p‰ivitys.\n";
-
-if (array_key_exists('kategoriat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotekategoriat.\n";
+if (presta_ajetaanko_sykronointi('kategoriat', $synkronoi)) {
   $kategoriat = presta_hae_kategoriat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tuotekategoriat.\n";
-  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n tuotekategoriat.");
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key, 'presta_kategoriat');
+
   $presta_categories->set_category_sync($presta_synkronoi_tuotepuu);
   $presta_categories->set_home_category_id($presta_home_category_id);
   $presta_categories->set_languages_table($presta_kieliversiot);
   $presta_categories->sync_categories($kategoriat);
 }
 
-if (array_key_exists('tuotteet', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
+if (presta_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $tuotteet = presta_hae_tuotteet();
   $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tuotetiedot.\n";
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n tuotetiedot.");
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key, 'presta_tuotteet');
 
   $presta_products->set_all_products($kaikki_tuotteet);
   $presta_products->set_category_sync($presta_synkronoi_tuotepuu);
@@ -252,59 +221,57 @@ if (array_key_exists('tuotteet', $synkronoi)) {
   $presta_products->set_removable_fields($presta_ohita_tuoteparametrit);
   $presta_products->set_tax_rates_table($presta_verokannat);
   $presta_products->set_visibility_type($presta_tuotekasittely);
-
   $presta_products->sync_products($tuotteet);
 }
 
-if (array_key_exists('saldot', $synkronoi)) {
+if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
   // t‰m‰ on voitu jo hakea tuotetietojen yhteydess‰, ei tartte uutta query‰
   if (empty($kaikki_tuotteet)) {
-    echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
     $kaikki_tuotteet = presta_hae_kaikki_tuotteet();
   }
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n saldot.\n";
-  $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n saldot.");
+  $presta_stocks = new PrestaProductStocks($presta_url, $presta_api_key, 'presta_saldot');
 
   $presta_stocks->set_all_products($kaikki_tuotteet);
   $presta_stocks->update_stock();
 }
 
-if (array_key_exists('asiakasryhmat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakasryhm‰t.\n";
+if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
   $groups = presta_hae_asiakasryhmat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakasryhm‰t.\n";
-  $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n asiakasryhm‰t.");
+  $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key, 'presta_asiakasryhmat');
+
   $presta_customer_groups->set_show_prices($presta_asiakasryhmien_hinta);
   $presta_customer_groups->set_price_display_method($presta_asiakasryhmien_hinnat);
   $presta_customer_groups->sync_groups($groups);
 }
 
-if (array_key_exists('asiakkaat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
+if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
   $asiakkaat = presta_hae_asiakkaat();
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakkaat.\n";
-  $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n asiakkaat.");
+  $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');
+
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->sync_customers($asiakkaat);
 }
 
-if (array_key_exists('asiakashinnat', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakashinnat ja alennukset.\n";
+if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   $hinnat = presta_specific_prices();
 
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n asiakashinnat ja alennukset.\n";
-  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
+  presta_echo("Siirret‰‰n specific prices.");
+  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');
+
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
   $presta_prices->sync_prices($hinnat);
 }
 
-if (array_key_exists('tilaukset', $synkronoi)) {
-  echo date("d.m.Y @ G:i:s")." - Siirret‰‰n tilaukset.\n";
+if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
+  presta_echo("Haetaan tilaukset.");
+  $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key, 'presta_tilaukset');
 
-  $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
   $presta_orders->set_yhtiorow($yhtiorow);
   $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
@@ -313,20 +280,4 @@ if (array_key_exists('tilaukset', $synkronoi)) {
   $presta_orders->transfer_orders_to_pupesoft();
 }
 
-// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-mysql_close($link);
-unset($link);
-require "inc/connect.inc";
-
-// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen
-$query = "UPDATE avainsana SET
-          selite      = '{$datetime_checkpoint_uusi}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji    = 'TUOTE_EXP_CRON'";
-pupe_query($query);
-
-if (mysql_affected_rows() != 1) {
-  echo date("d.m.Y @ G:i:s")." - Timestamp p‰ivitys ep‰onnistui!\n";
-}
-
-echo date("d.m.Y @ G:i:s")." - Prestashop p‰ivitys valmis.\n";
+presta_echo("Prestashop p‰ivitys valmis.");

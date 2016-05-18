@@ -1112,6 +1112,11 @@ if ($tee == "MUOKKAA") {
       echo "<font class='error'>".t("HUOM: Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
     }
 
+    if ($trow['myymalahinta'] > 0 and strpos($trow['nimitys'], 'Kilometrikorvaus') !== false) {
+      $korvatut_kilometrit = hae_kayttajan_kilometrit($tuoteno);
+      echo "<br><font class='message'>".t("K‰ytt‰j‰lle kirjatut kilometrit").": $korvatut_kilometrit</font><hr>";
+    }
+
     echo "<table><tr>";
 
     if ($tapa != "MUOKKAA" and $perheid2 > 0) {
@@ -2599,6 +2604,24 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
             }
           }
 
+          if ($trow['myymalahinta'] > 0 and strpos($trow['nimitys'], 'Kilometrikorvaus') !== false) {
+            // Kilometriraja
+            $kilometriraja = 3000;
+
+            $korvatut_kilometrit = hae_kayttajan_kilometrit($tuoteno);
+
+            $kokonaiskappalemaara = $ins_kpl;
+            $jaljellaoleva_maara = 0;
+            if ($korvatut_kilometrit + $ins_kpl > $kilometriraja) {
+              echo "SEPPONEN ISKEE $ins_kpl kappaletta <br>";
+              $ins_kpl = $kilometriraja - $korvatut_kilometrit;
+              #$hinta = $trow['myymalahinta'];
+              $jaljellaoleva_maara = $kokonaiskappalemaara - $ins_kpl;
+            }
+
+            echo "<br> j‰ljelle j‰‰ viel‰ $jaljellaoleva_maara kilsaa <br>";
+          }
+
           $rivihinta = round($ins_kpl*$hinta, 2);
 
           if ((int) $rivitunnus > 0) dellaa_mitatoity_rivi($tilausnumero, $rivitunnus);
@@ -3095,6 +3118,25 @@ function listdir($start_dir = '.') {
   }
 
   return $files;
+}
+
+function hae_kayttajan_kilometrit($tuoteno) {
+  global $kukarow;
+  
+  $kilometrit = 0;
+  $query = "SELECT sum(kpl) yhteensa
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}' 
+              AND laatija = '{$kukarow['kuka']}'
+              AND tyyppi = 'M'
+              AND tuoteno = '{$tuoteno}'";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+
+  if (!empty($row['yhteensa'])) {
+    $kilometrit = floor($row['yhteensa']);
+  }
+  return $kilometrit;
 }
 
 require "inc/footer.inc";

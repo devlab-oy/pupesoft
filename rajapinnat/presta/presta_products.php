@@ -395,11 +395,20 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->logger->log('---------Aloitetaan tuotekuvien siirto---------');
+    $this->logger->log('Haetaan kaikkien tuotteiden kuvatiedot');
 
     $all_product_images = $this->all_product_images();
 
+    $this->logger->log('Haetaan kuvatiedostot Prestasta');
+
+    $row_counter = 0;
+    $total_counter = count($all_product_images);
+
     // loop all products
     foreach ($all_product_images as $product) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['sku']}");
+
       // loop all product images
       foreach ($product['images'] as $image) {
 
@@ -430,6 +439,8 @@ class PrestaProducts extends PrestaClient {
           presta_tallenna_liite($params);
         }
       }
+
+      $this->logger->log("Tuote {$product['sku']} käsitelty");
     }
 
     $this->logger->log('---------Tuotekuvien siirto valmis---------');

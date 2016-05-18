@@ -191,6 +191,10 @@ if (!isset($presta_varastot)) {
   // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
   $presta_varastot = array(0);
 }
+if (!isset($presta_tuotekuvien_nouto)) {
+  // Siirretäänkö Prestashopin tuotekuvat Pupesoftiin
+  $presta_tuotekuvien_nouto = false;
+}
 
 presta_echo("Aloitetaan Prestashop päivitys.");
 
@@ -242,6 +246,7 @@ if (presta_ajetaanko_sykronointi('tuotekuvat', $synkronoi)) {
   presta_echo("Haetaan tuotekuvat.");
   $presta_products = new PrestaProducts($presta_url, $presta_api_key, 'presta_tuotekuvat');
 
+  $presta_products->set_image_fetch($presta_tuotekuvien_nouto);
   $presta_products->fetch_and_save_images();
 }
 

@@ -370,6 +370,7 @@ elseif ($tee != "") {
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$otun'
                 and tila    = 'L'
+                and jaksotettu = 0
                 and alatila NOT IN ('X', 'J')";
       $result = pupe_query($query);
 

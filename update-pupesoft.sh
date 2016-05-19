@@ -243,10 +243,10 @@ fi
 ####################################################################################################
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
-  pupebranch=$(cat ${branchfile} | tr -d '\n')
-elif [[ -n "${PUPESOFT_BRANCH}" ]]; then
+if [[ -n "${PUPESOFT_BRANCH}" ]]; then
   pupebranch=${PUPESOFT_BRANCH}
+elif [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+  pupebranch=$(cat ${branchfile} | tr -d '\n')
 else
   pupebranch="master"
 fi
@@ -321,10 +321,10 @@ echo
 export RAILS_ENV=${environment}
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
-  pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
-elif [[ -n "${PUPENEXT_BRANCH}" ]]; then
+if [[ -n "${PUPENEXT_BRANCH}" ]]; then
   pupenextbranch=${PUPENEXT_BRANCH}
+elif [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+  pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
 else
   pupenextbranch="master"
 fi

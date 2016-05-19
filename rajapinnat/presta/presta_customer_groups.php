@@ -57,11 +57,17 @@ class PrestaCustomerGroups extends PrestaClient {
   public function sync_groups($groups) {
     $this->logger->log('---------Start group sync---------');
 
+    $current = 0;
+    $total = count($groups);
+
     try {
       $existing_groups = $this->all(array('id'));
       $existing_groups = array_column($existing_groups, 'id');
 
       foreach ($groups as $group) {
+        $current++;
+        $this->logger->log("[{$current}/{$total}] Asiakasryhmä {$group['selitetark']}");
+
         try {
           if (in_array($group['presta_customergroup_id'], $existing_groups)) {
             $id = $group['presta_customergroup_id'];

@@ -860,7 +860,7 @@ elseif ($tee == '') {
     $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}'))";
   }
   else {
-    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E')";
+    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E','J')";
   }
 
   if ($toim == "TYOMAARAYS") {
@@ -966,7 +966,15 @@ elseif ($tee == '') {
       for ($i=0; $i < mysql_num_fields($tilre)-18; $i++) {
         $fieldname = mysql_field_name($tilre, $i);
 
-        echo "<td>$tilrow[$fieldname]</td>";
+        echo "<td>";
+
+        if ($fieldname == 'laadittu') {
+          echo tv1dateconv($tilrow[$fieldname], "PITKA");
+        }
+        else {
+          echo $tilrow[$fieldname];
+        }
+        echo "</td>";
       }
 
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
@@ -980,7 +988,7 @@ elseif ($tee == '') {
       }
       echo "<td>$teksti</td>";
 
-      if ($tilrow['alatila'] == 'E'
+      if (in_array($tilrow['alatila'], array('E','J'))
         and $tilrow['vienti'] == 'K'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -990,7 +998,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif (($tilrow['alatila'] == 'E' or $toim == "TYOMAARAYS")
+      elseif ((in_array($tilrow['alatila'], array('E','J')) or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0

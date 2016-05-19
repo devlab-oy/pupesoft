@@ -381,7 +381,7 @@ elseif ($tee != "") {
                 and tunnus  = '{$otun}'
                 and tila    = 'L'
                 and jaksotettu > 0
-                and alatila NOT IN ('X', 'J')";
+                and alatila NOT IN ('X', 'J', 'D')";
       $result = pupe_query($query);
     }
 

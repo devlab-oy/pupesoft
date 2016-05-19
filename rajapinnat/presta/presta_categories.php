@@ -129,7 +129,7 @@ class PrestaCategories extends PrestaClient {
       $value = $this->xml_value($translation['nimi']);
       $xml->category->name->language[$tr_id] = $value;
 
-      $this->logger->log("Käännös {$translation['kieli']}, $value");
+      $this->logger->log("Käännös {$translation['kieli']} ({$tr_id}): $value");
     }
 
     return $xml;

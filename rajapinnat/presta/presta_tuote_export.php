@@ -16,16 +16,15 @@ date_default_timezone_set('Europe/Helsinki');
 
 require "inc/connect.inc";
 require "inc/functions.inc";
-require_once "rajapinnat/presta/presta_products.php";
+require "rajapinnat/presta/presta_functions.php";
+
 require_once "rajapinnat/presta/presta_categories.php";
-require_once "rajapinnat/presta/presta_customers.php";
 require_once "rajapinnat/presta/presta_customer_groups.php";
-require_once "rajapinnat/presta/presta_sales_orders.php";
+require_once "rajapinnat/presta/presta_customers.php";
 require_once "rajapinnat/presta/presta_product_stocks.php";
-require_once "rajapinnat/presta/presta_shops.php";
+require_once "rajapinnat/presta/presta_products.php";
+require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once "rajapinnat/presta/presta_specific_prices.php";
-require_once "rajapinnat/presta/presta_addresses.php";
-require_once "rajapinnat/presta/presta_functions.php";
 
 if (empty($argv[1])) {
   die("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");

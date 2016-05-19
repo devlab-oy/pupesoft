@@ -2546,7 +2546,7 @@ if ($tee == 'Z') {
       echo "<ul>";
 
       foreach ($lisatiedot as $lisatieto) {
-        echo "<li>{$lisatieto["kentta"]} &raquo; {$lisatieto["selite"]}</li>";
+        echo "<li>{$lisatieto["kentta"]} &raquo; ".url_or_text($lisatieto["selite"])."</li>";
       }
 
       echo "</ul>";

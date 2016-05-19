@@ -293,6 +293,9 @@ class PrestaProducts extends PrestaClient {
         $this->presta_manufacturers->reset_all_records();
         $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
       }
+      else {
+        $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
+      }
 
       $xml->product->id_manufacturer = $manufacturer_id;
     }

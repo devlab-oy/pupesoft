@@ -8658,7 +8658,7 @@ if (!function_exists('tarkasta_liite')) {
 
     // otetaan file extensio
     $path_parts = pathinfo($file['name']);
-    $ext = strtoupper($path_parts['extension']);
+    $ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
     if ($ext == "JPEG") $ext = "jpg";
 
     //  Sallitut tiedostot on aina upper
@@ -10262,15 +10262,15 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
 if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
   function hae_kayttajan_toimipistetunnukset() {
     global $kukarow;
-  
+
     $asiakastunnukset = '';
     if (!empty($kukarow['oletus_asiakas'])) {
       $asiakastunnukset = $kukarow['oletus_asiakas'];
     }
 
     $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
-              FROM customers_users 
-              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+              FROM customers_users
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
               WHERE user_id = '{$kukarow['tunnus']}'";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);

@@ -483,10 +483,10 @@ if ($tee == 'N') {
   //tähän erroriin tullaan vain jos kyseessä ei ole siirtolista
   //koska jos meillä on kerätty siirtolista niin ne määrät myös halutaan siirtää vaikka saldo menisikin nollille tai miinukselle
   $saldook = 0;
-  //siirretäänkö varattua saldoa
-  $siirretaan_varattua = false;
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
+    //siirretäänkö varattua saldoa
+    $siirretaan_varattua = false;
 
     // Tutkitaan lisävarusteiden tuotepaikkoja
     $query = "SELECT *

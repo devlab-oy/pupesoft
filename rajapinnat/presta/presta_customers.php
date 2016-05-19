@@ -39,11 +39,11 @@ class PrestaCustomers extends PrestaClient {
     $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
 
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = $_nimi;
-    $xml->customer->email = $_email;
+    $xml->customer->lastname = $this->xml_value($_nimi);
+    $xml->customer->email = $this->xml_value($_email);
 
     if (!empty($customer['verkkokauppa_salasana'])) {
-      $xml->customer->passwd = $customer['verkkokauppa_salasana'];
+      $xml->customer->passwd = $this->xml_value($customer['verkkokauppa_salasana']);
       $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
     }
 
@@ -126,6 +126,8 @@ class PrestaCustomers extends PrestaClient {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
         }
+
+        $this->logger->log("Asiakas {$customer['nimi']} käsitelty\n");
       }
     }
     catch (Exception $e) {

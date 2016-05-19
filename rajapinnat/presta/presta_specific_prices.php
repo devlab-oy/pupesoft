@@ -68,6 +68,7 @@ class PrestaSpecificPrices extends PrestaClient {
     $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = 0;
+    $xml->specific_price->reduction_tax = 0;
     $xml->specific_price->id_shop = 0;       // leave this empty, we'll add shop group to crete request
     $xml->specific_price->id_shop_group = 0; // leave this empty, we'll add shop group to crete request
     $xml->specific_price->id_cart = 0;
@@ -138,7 +139,7 @@ class PrestaSpecificPrices extends PrestaClient {
 
           $this->create($price, null, $shop_group_id);
 
-          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}: ";
+          $message = "Lisätty tuotteelle '{$price['tuoteno']}' {$price['tyyppi']}:";
 
           if (isset($price['alennus'])) {
             $message .= " alennus '{$price['alennus']}'";

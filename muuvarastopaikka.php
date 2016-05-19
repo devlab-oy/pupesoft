@@ -513,7 +513,7 @@ if ($tee == 'N') {
       }
 
       
-      if ($kappaleet[$iii] <= $hyllyssa and $myytavissa < $hyllyssa) {
+      if ($kappaleet[$iii] <= $hyllyssa and $myytavissa < $hyllyssa and $myytavissa < $kappaleet[$iii]) {
         $siirretaan_varattua = true;
       }
       elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
@@ -958,7 +958,7 @@ if ($tee == 'M') {
         $invalisa2 = "";
       }
 
-      if ($myytavissa > 0) {
+      if ($myytavissa > 0 or $hyllyssa > $myytavissa) {
         echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
       }
     }

@@ -372,6 +372,16 @@ elseif ($tee != "") {
                 and tila    = 'L'
                 and alatila NOT IN ('X', 'J')";
       $result = pupe_query($query);
+
+      //p‰ivitet‰‰n alatila vain jos tilauksella on maksupositioita
+      $query = "UPDATE lasku SET
+                alatila = 'J'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                and tunnus  = '{$otun}'
+                and tila    = 'L'
+                and jaksotettu != 0
+                and alatila NOT IN ('X', 'J')";
+      $result = pupe_query($query);
     }
 
     $tee = '';

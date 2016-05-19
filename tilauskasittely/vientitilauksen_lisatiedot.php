@@ -893,7 +893,8 @@ elseif ($tee == '') {
             lasku.sisamaan_kuljetusmuoto,
             lasku.poistumistoimipaikka,
             lasku.poistumistoimipaikka_koodi,
-            lasku.alatila
+            lasku.alatila,
+            lasku.jaksotettu
             FROM lasku
             {$tyomaaraysjoin}
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -988,7 +989,7 @@ elseif ($tee == '') {
       }
       echo "<td>$teksti</td>";
 
-      if (in_array($tilrow['alatila'], array('E','J'))
+      if ((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] < 0))
         and $tilrow['vienti'] == 'K'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -998,7 +999,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif ((in_array($tilrow['alatila'], array('E','J')) or $toim == "TYOMAARAYS")
+      elseif (((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] < 0)) or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0

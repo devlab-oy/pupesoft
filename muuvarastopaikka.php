@@ -483,6 +483,8 @@ if ($tee == 'N') {
   //tähän erroriin tullaan vain jos kyseessä ei ole siirtolista
   //koska jos meillä on kerätty siirtolista niin ne määrät myös halutaan siirtää vaikka saldo menisikin nollille tai miinukselle
   $saldook = 0;
+  //siirretäänkö varattua saldoa
+  $siirretaan_varattua = false;
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
 
@@ -510,7 +512,11 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
+      
+      if ($kappaleet[$iii] <= $hyllyssa and $myytavissa < $hyllyssa) {
+        $siirretaan_varattua = true;
+      }
+      elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirtää. Saldo ei riittänyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
@@ -558,6 +564,23 @@ if ($tee == 'N') {
         if ($lisavaruste[$iii] == "LISAVARUSTE") {
           $siirretaan[$iii] = $lisavartprow["tunnus"];
         }
+      }
+      // Päivitetään uusi paikka varatuille tilausriveille
+      if ($siirretaan_varattua) {
+        $query = "UPDATE tilausrivi
+                  SET hyllyalue = '$minnerow[hyllyalue]',
+                    hyllynro    = '$minnerow[hyllynro]',
+                    hyllyvali   = '$minnerow[hyllyvali]',
+                    hyllytaso   = '$minnerow[hyllytaso]'
+                  WHERE tuoteno   = '$tuotteet[$iii]'
+                    AND yhtio     = '$kukarow[yhtio]'
+                    AND tyyppi    = 'L'
+                    AND varattu > 0
+                    AND hyllyalue = '$mistarow[hyllyalue]'
+                    AND hyllynro  = '$mistarow[hyllynro]'
+                    AND hyllyvali = '$mistarow[hyllyvali]'
+                    AND hyllytaso = '$mistarow[hyllytaso]'";
+        pupe_query($query);
       }
     }
   }

@@ -114,10 +114,11 @@ class PrestaProducts extends PrestaClient {
 
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
+    $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
-      $xml->product->name->language[$i]              = empty($product['nimi']) ? '-' : utf8_encode($product['nimi']);
+      $xml->product->name->language[$i]              = $this->xml_value($_nimi);
       $xml->product->description->language[$i]       = nl2br($this->xml_value($product['kuvaus']));
       $xml->product->description_short->language[$i] = nl2br($this->xml_value($product['lyhytkuvaus']));
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");

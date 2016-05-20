@@ -36,7 +36,7 @@ class PrestaCustomers extends PrestaClient {
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
     $xml->customer->firstname = "-";
     $xml->customer->lastname = $this->xml_value($_nimi);

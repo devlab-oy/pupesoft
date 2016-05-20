@@ -6,7 +6,7 @@ require_once 'rajapinnat/presta/presta_shops.php';
 require_once 'rajapinnat/presta/PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
-  private $url = null;
+  public $url = null;
   private $api_key = null;
   private $shop_ids = null;
   private $presta_shops = null;
@@ -173,7 +173,7 @@ abstract class PrestaClient {
 
     $kauppa  = "";
     $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
 
     try {
       $xml = $this->generate_xml($resource);
@@ -246,7 +246,7 @@ abstract class PrestaClient {
 
     $kauppa  = "";
     $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
 
     try {
       $xml = $this->remove_read_only_fields($xml);

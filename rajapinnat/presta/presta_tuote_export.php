@@ -16,16 +16,15 @@ date_default_timezone_set('Europe/Helsinki');
 
 require "inc/connect.inc";
 require "inc/functions.inc";
-require_once "rajapinnat/presta/presta_products.php";
+require "rajapinnat/presta/presta_functions.php";
+
 require_once "rajapinnat/presta/presta_categories.php";
-require_once "rajapinnat/presta/presta_customers.php";
 require_once "rajapinnat/presta/presta_customer_groups.php";
-require_once "rajapinnat/presta/presta_sales_orders.php";
+require_once "rajapinnat/presta/presta_customers.php";
 require_once "rajapinnat/presta/presta_product_stocks.php";
-require_once "rajapinnat/presta/presta_shops.php";
+require_once "rajapinnat/presta/presta_products.php";
+require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once "rajapinnat/presta/presta_specific_prices.php";
-require_once "rajapinnat/presta/presta_addresses.php";
-require_once "rajapinnat/presta/presta_functions.php";
 
 if (empty($argv[1])) {
   die("ERROR! Aja näin:\npresta_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");
@@ -58,6 +57,7 @@ else {
     'kategoriat',
     'saldot',
     'tilaukset',
+    'tuotekuvat',
     'tuotteet',
   );
 }
@@ -190,6 +190,10 @@ if (!isset($presta_varastot)) {
   // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
   $presta_varastot = array(0);
 }
+if (!isset($presta_tuotekuvien_nouto)) {
+  // Siirretäänkö Prestashopin tuotekuvat Pupesoftiin
+  $presta_tuotekuvien_nouto = false;
+}
 
 presta_echo("Aloitetaan Prestashop päivitys.");
 
@@ -235,6 +239,14 @@ if (presta_ajetaanko_sykronointi('saldot', $synkronoi)) {
 
   $presta_stocks->set_all_products($kaikki_tuotteet);
   $presta_stocks->update_stock();
+}
+
+if (presta_ajetaanko_sykronointi('tuotekuvat', $synkronoi)) {
+  presta_echo("Haetaan tuotekuvat.");
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key, 'presta_tuotekuvat');
+
+  $presta_products->set_image_fetch($presta_tuotekuvien_nouto);
+  $presta_products->fetch_and_save_images();
 }
 
 if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {

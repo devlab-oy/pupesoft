@@ -48,7 +48,7 @@ class PrestaCustomerGroups extends PrestaClient {
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
-      $xml->group->name->language[$i] = utf8_encode($group['selitetark']);
+      $xml->group->name->language[$i] = $this->xml_value($group['selitetark']);
     }
 
     return $xml;

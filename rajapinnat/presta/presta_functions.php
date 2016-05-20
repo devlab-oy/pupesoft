@@ -611,3 +611,62 @@ function presta_export_checkpoint($checkpoint) {
 function presta_echo($string) {
   echo date("d.m.Y @ G:i:s")." - {$string}\n";
 }
+
+function presta_image_exists($sku, $id) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // katsotaan onko meillä jo tämä tuotekuva tallessa
+  $query = "SELECT tunnus
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND liitos = 'tuote'
+            AND liitostunnus = {$liitostunnus}
+            AND kayttotarkoitus = 'TK'
+            AND selite = '{$id}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+
+  return true;
+}
+
+function presta_tallenna_liite($params) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  $filename = $params['filename'];
+  $image_id = $params['id'];
+  $sku      = $params['sku'];
+
+  if (empty($sku) or empty($filename) or empty($image_id) or empty($kukarow) or empty($yhtiorow)) {
+    return false;
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
+  tallenna_liite($filename, 'tuote', $liitostunnus, $image_id, 'TK');
+}

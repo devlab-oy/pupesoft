@@ -216,17 +216,23 @@ class PrestaProducts extends PrestaClient {
     $dom_node->parentNode->removeChild($dom_node);
 
     // Then add element back
-    $xml->product->associations->addChild('product_bundle');
+    if (count($product['tuotteen_lapsituotteet']) > 0) {
+      $xml->product->associations->addChild('product_bundle');
 
-    // Add child products for product bundle
-    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
-      $child_id = $this->add_child_product($xml, $child_product);
+      // Add child products for product bundle
+      foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+        $child_id = $this->add_child_product($xml, $child_product);
 
-      // added the child successfully
-      if ($child_id !== false) {
-        // set parent product to pack
-        $product_type = 'pack';
+        // added the child successfully
+        if ($child_id !== false) {
+          // set parent product to pack
+          $product_type = 'pack';
+        }
       }
+    }
+
+    if ($product_type == "virtual") {
+      $xml->product->is_virtual = 1;
     }
 
     // set product type
@@ -254,7 +260,7 @@ class PrestaProducts extends PrestaClient {
       if (empty($value_id)) {
         $feature_value = array(
           "id_feature" => $feature_id,
-          "value" => substr($value, 0, 255), // max 255 characters
+          "value" => $value,
         );
 
         // Create feature value

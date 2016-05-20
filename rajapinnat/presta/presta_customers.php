@@ -95,6 +95,11 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
+        if (empty($customer['presta_customergroup_id'])) {
+          $this->logger->log("Asiakas ei kuulu mihink‰‰n asiakasryhm‰‰n, ei voida lis‰t‰!");
+          continue;
+        }
+
         try {
           // customers are not shared between stores, so only one store per customer
           $id = $customer['ulkoinen_asiakasnumero'];

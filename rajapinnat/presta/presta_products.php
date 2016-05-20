@@ -254,7 +254,7 @@ class PrestaProducts extends PrestaClient {
       if (empty($value_id)) {
         $feature_value = array(
           "id_feature" => $feature_id,
-          "value" => substr($value, 0, 255), // max 255 characters
+          "value" => $value,
         );
 
         // Create feature value

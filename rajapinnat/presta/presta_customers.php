@@ -36,7 +36,7 @@ class PrestaCustomers extends PrestaClient {
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-Z‰ˆÂƒ÷≈ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
     $xml->customer->firstname = "-";
     $xml->customer->lastname = $this->xml_value($_nimi);
@@ -94,6 +94,11 @@ class PrestaCustomers extends PrestaClient {
       foreach ($customers as $customer) {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
+
+        if (empty($customer['presta_customergroup_id'])) {
+          $this->logger->log("Asiakas ei kuulu mihink‰‰n asiakasryhm‰‰n, ei voida lis‰t‰!");
+          continue;
+        }
 
         try {
           // customers are not shared between stores, so only one store per customer

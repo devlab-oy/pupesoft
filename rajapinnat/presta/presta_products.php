@@ -534,8 +534,14 @@ class PrestaProducts extends PrestaClient {
     // return the values that are not present keep_presta_ids
     $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
 
+    $total = count($delete_presta_ids);
+    $current = 0;
+
     // delete products from presta
     foreach ($delete_presta_ids as $presta_id) {
+      $current++;
+      $this->logger->log("[{$current}/{$total}] Poistetaan tuote {$presta_id}");
+
       try {
         $this->delete($presta_id);
       }

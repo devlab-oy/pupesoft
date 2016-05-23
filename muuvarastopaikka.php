@@ -579,7 +579,8 @@ if ($tee == 'N') {
                     AND hyllyalue = '$mistarow[hyllyalue]'
                     AND hyllynro  = '$mistarow[hyllynro]'
                     AND hyllyvali = '$mistarow[hyllyvali]'
-                    AND hyllytaso = '$mistarow[hyllytaso]'";
+                    AND hyllytaso = '$mistarow[hyllytaso]'
+                    AND keratty   = ''";
         pupe_query($query);
       }
     }

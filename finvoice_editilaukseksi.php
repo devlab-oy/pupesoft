@@ -16,6 +16,8 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 require "rajapinnat/edi.php";
 
+$pupe_root_polku = dirname(__FILE__);
+
 // Logitetaan ajo
 cron_log();
 

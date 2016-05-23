@@ -13,7 +13,7 @@ class Edi {
 
 
   static function create($order, $tyyppi = "magento") {
-    global $pupesoft_tilaustyyppi;
+    global $pupesoft_tilaustyyppi, $pupe_root_polku;
 
     if (empty($pupesoft_tilaustyyppi)) {
       exit("Parametrejä puuttuu\n");
@@ -308,10 +308,9 @@ class Edi {
     }
 
     if ($tyyppi == "finvoice") {
-      $filename =
-        # @todo Vaihda pathi oikeaksi
-        "/tmp/finvoice-orders/finvoice-order-{$order['increment_id']}-" . date("Ymd") . "-" .
-        md5(uniqid(rand(), true)) . ".txt";
+      $polku    = "{$pupe_root_polku}/datain/finvoice-orders";
+      $filenimi = "finvoice-order-{$order['increment_id']}-" . date("Ymd") . "-" . md5(uniqid(rand(), true)) . ".txt";
+      $filename = "{$polku}/{$filenimi}";
     }
     else {
       $filename =

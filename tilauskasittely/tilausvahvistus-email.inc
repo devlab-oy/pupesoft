@@ -69,9 +69,7 @@ if (!empty($laskuttajan_email)) {
 
 // l‰hetet‰‰n PDF vahvistus jos meill‰ on P kirjain vahvistuksessa tai, jos tilaus tulee
 // finvoicesta, jolloin laskuttajan email on m‰‰ritelty
-if (($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== false) or
-    !empty($laskuttajan_email)
-) {
+if (($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== false) or !empty($laskuttajan_email)) {
   $toim_save = $toim;
   if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 

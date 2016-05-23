@@ -726,8 +726,7 @@ while ($tietue = fgets($fd)) {
 
       if (mysql_num_rows($result) == 1) {
         $arow = mysql_fetch_assoc($result);
-        $edi_ulos .= "{$arow["nimi"]} {$arow["nimitark"]} {$arow["toim_nimi"]} " .
-                     "{$arow["toim_nimitark"]} {$arow["toim_postitp"]}\n";
+        $edi_ulos .= "{$arow["nimi"]} {$arow["nimitark"]} {$arow["toim_nimi"]} {$arow["toim_nimitark"]} {$arow["toim_postitp"]}\n";
       }
     }
 
@@ -2210,10 +2209,7 @@ while ($tietue = fgets($fd)) {
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
-          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and
-                                                              $trow["ei_saldoa"] == "" and
-                                                              $tilauksen_lahde != "finvoice"
-          ) {
+          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "" and $tilauksen_lahde != "finvoice") {
 
             list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
 

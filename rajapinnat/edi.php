@@ -313,9 +313,7 @@ class Edi {
       $filename = "{$polku}/{$filenimi}";
     }
     else {
-      $filename =
-        $magento_api_ht_edi . "/magento-order-{$order['increment_id']}-" . date("Ymd") . "-" .
-        md5(uniqid(rand(), true)) . ".txt";
+      $filename = $magento_api_ht_edi . "/magento-order-{$order['increment_id']}-" . date("Ymd") . "-" . md5(uniqid(rand(), true)) . ".txt";
     }
 
     file_put_contents($filename, $edi_order);

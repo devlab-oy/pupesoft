@@ -116,6 +116,9 @@ class PrestaProducts extends PrestaClient {
     $languages = count($xml->product->name->language);
     $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
 
+    // remove forbidden characters
+    $_nimi = preg_replace("/[&]+/", "", $_nimi);
+
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
       $xml->product->name->language[$i]              = $this->xml_value($_nimi);

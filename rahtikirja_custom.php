@@ -364,13 +364,13 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     if ($valittu_oslapp_tulostin == "-88") {
       js_openFormInNewWindow();
 
-      echo "<br><form id='customform_rahtikirja_{$osoitelappurow['tunnus']}' name='customform_rahtikirja_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
+      echo "<br><form id='customform_osoitelappu_{$osoitelappurow['tunnus']}' name='customform_osoitelappu_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
             <input type='hidden' name='tulostakopio' value='JOO'>
             <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='hidden' name='nayta_pdf' value='1'>
             <input type='hidden' name='oslappkpl' value='{$kollityht}' />
-            <input type='submit' value='".t("Osoitelappu").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_rahtikirja_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
+            <input type='submit' value='".t("Osoitelappu").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_osoitelappu_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
     }
     else {
 

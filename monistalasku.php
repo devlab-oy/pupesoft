@@ -619,6 +619,10 @@ if ($tee == "ETSILASKU") {
                      name='sailyta_rivikommentit[{$row['tilaus']}]'
                      value='on'>" . t('S‰ilyt‰ rivikommentit') . "<br>";
 
+        echo "<input type='checkbox'
+                     name='verkkotunnus_asiakkaalta[{$row['tilaus']}]'
+                     value='on'>" . t('K‰yt‰ asiakkaan nykyist‰ verkkolaskutunnusta') . "<br>";
+
         if ($toim == '') {
 
           $display_none = "style='display:none;'";
@@ -1071,7 +1075,6 @@ if ($tee == 'MONISTA') {
         case 'yhtio_ovttunnus':
         case 'yhtio_kotipaikka':
         case 'yhtio_toimipaikka':
-        case 'verkkotunnus':
         case 'myyja':
         case 'kassalipas':
         case 'ovttunnus':
@@ -1083,6 +1086,16 @@ if ($tee == 'MONISTA') {
           }
           else {
             $values .= ", '".$monistarow[$fieldname]."'";
+          }
+          break;
+        case 'verkkotunnus':
+          if (empty($verkkotunnus_asiakkaalta[$lasku])) {
+            // halutaan k‰ytt‰‰ verkkolaskutunnusta vanhalta laskulta
+            $values .= ", '{$monistarow['verkkotunnus']}'";
+          }
+          else {
+            // halutaan k‰ytt‰‰ asiakkaan nykyist‰ verkkolaskutunnusta
+            $values .= ", '{$asiakrow['verkkotunnus']}'";
           }
           break;
         case 'maksuehto':

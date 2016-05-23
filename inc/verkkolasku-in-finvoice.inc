@@ -57,7 +57,6 @@ $kauttalaskutus = xml_string($xml->DeliveryDetails->TerminalAddressText);
 $laskun_toimitunnus = xml_string($xml->SellerPartyDetails->SellerPupesoftId);
 $tilausyhteyshenkilo = xml_string($xml->BuyerContactPersonName);
 $laskuttajan_email = xml_string($xml->SellerCommunicationDetails->SellerEmailaddressIdentifier);
-$laskuttajan_puh = xml_string($xml->SellerCommunicationDetails->SellerPhoneNumberIdentifier);
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->DeliveryOrganisationUnitNumber);
@@ -88,8 +87,7 @@ $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPo
 
 // Parsitaan mahdolliset tiedot kommenttikentästä
 $kommenttiteksti = xml_string($xml->InvoiceDetails->InvoiceFreeText);
-$kohde = teksti_valista("Kohde:", "##", $kommenttiteksti);
-$kommentti = teksti_valista("Kommentti:", "##", $kommenttiteksti);
+$kohde           = teksti_valista("Kohde:", "##", $kommenttiteksti);
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;

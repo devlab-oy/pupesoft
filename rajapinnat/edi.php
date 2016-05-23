@@ -37,11 +37,11 @@ class Edi {
                        "{$order['billing_address']['firstname']}";
     }
     else {
-      $ovt_tunnus = $order["laskuttajan_ovt"];
+      $ovt_tunnus              = $order["laskuttajan_ovt"];
       $verkkokauppa_asiakasnro = $order["asiakasnumero"];
-      $viitteenne = $order["laskun_numero"];
-      $viitteemme = $order["kommenttiteksti"];
-      $yhteyshenkilo = $order["tilausyhteyshenkilo"];
+      $viitteemme              = "";
+      $viitteenne              = $order["laskun_numero"];
+      $yhteyshenkilo           = $order["tilausyhteyshenkilo"];
     }
 
     //Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella

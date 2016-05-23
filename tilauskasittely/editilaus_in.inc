@@ -643,14 +643,8 @@ while ($tietue = fgets($fd)) {
 
   case 'ORFFABONU' :
   case 'OSTOTIL.OT_VIITTEEMME' :
-    if ($tilauksen_lahde == "finvoice") {
-      $sisviesti1 = base64_decode($tieto);
-    }
-    else {
-      //Asiakkaan viite
-      $viite .= $tieto. ' ';
-    }
-
+    //Asiakkaan viite
+    $viite .= $tieto. ' ';
     break;
 
   case 'ICHG_SNDR' :
@@ -1616,8 +1610,6 @@ while ($tietue = fgets($fd)) {
         $tpuh = $arow['toim_puh'];
       }
 
-      $sisviesti1 = !empty($sisviesti1) ? $sisviesti1 : $arow["sisviesti1"];
-
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1668,7 +1660,7 @@ while ($tietue = fgets($fd)) {
                 prioriteettinro         = '{$prioriteettinro}',
                 rahtivapaa              = '$editilaus_rahtivapaa',
                 sisainen                = '$editilaus_sisainen',
-                sisviesti1              = '{$sisviesti1}',
+                sisviesti1              = '$arow[sisviesti1]',
                 sisviesti2              = '$lopviesti',
                 sisviesti3              = '{$merkkitieto}',
                 splittauskielto         = '$splittauskielto',

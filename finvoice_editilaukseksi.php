@@ -51,17 +51,6 @@ foreach ($files as $file) {
     $tilausyhteyshenkilo    = isset($tilausyhteyshenkilo)    ? $tilausyhteyshenkilo    : "";
     $kohde                  = isset($kohde)                  ? $kohde                  : "";
 
-    $erotin = str_repeat("-", 98);
-    $kommenttiteksti = "{$erotin}\n" .
-                       "Toimittava liike: {$laskuttajan_nimi}\n" .
-                       "Laskunumero: {$laskun_numero}\n" .
-                       "Tiedustelut tilauksesta ja laskusta:\n" .
-                       "Sähköposti: {$laskuttajan_email}\n" .
-                       "Puhelin: {$laskuttajan_puh}\n" .
-                       "{$erotin}\n\n" .
-                       "{$kommentti}";
-    $kommenttiteksti = base64_encode($kommenttiteksti);
-
     $items = array();
 
     foreach ($rtuoteno as $tilausrivi) {
@@ -85,7 +74,6 @@ foreach ($files as $file) {
       "laskun_numero"       => $laskun_numero,
       "tilausyhteyshenkilo" => $tilausyhteyshenkilo,
       "target"              => $kohde,
-      "kommenttiteksti"     => $kommenttiteksti,
       "customer_email"      => $laskuttajan_email
     );
 

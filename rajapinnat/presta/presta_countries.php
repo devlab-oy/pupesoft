@@ -29,6 +29,12 @@ class PrestaCountries extends PrestaClient {
     return null;
   }
 
+  public function first_country() {
+    $all = $this->all_countries();
+
+    return $all[0]['id'];
+  }
+
   private function all_countries() {
     if ($this->all_countries !== null) {
       return $this->all_countries;

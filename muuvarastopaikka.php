@@ -960,7 +960,7 @@ if ($tee == 'M') {
       }
 
       if ($myytavissa > 0 or $hyllyssa > $myytavissa) {
-        echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+        echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($hyllyssa) $invalisa2</option>";
       }
     }
   }
@@ -1002,7 +1002,7 @@ if ($tee == 'M') {
         $invalisa2 = "";
       }
 
-      echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+      echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($hyllyssa) $invalisa2</option>";
     }
   }
   echo "</select></td>";

@@ -88,11 +88,7 @@ class Edi {
     $valittu_ovt_tunnus = (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$valittu_ovt_tunnus."\n";
-
-    if (!empty($pupesoft_tilaustyyppi)) {
-      $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
-    }
-
+    $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:".str_replace("\n", " ", $order['reference_number'])."\n";

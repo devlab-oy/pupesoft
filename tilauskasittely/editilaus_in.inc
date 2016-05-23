@@ -27,28 +27,20 @@ if ($php_cli) {
   // ja parametri komentoriviltä
   $filename = $argv[1];
 
-  if (trim($argv[2]) == 'futursoft' and
-      (substr(strtolower(basename($filename)), 0, 13) == 'magento-order' or
-       substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
-    $argv[2] = 'magento';
-  }
-
-  if (substr(strtolower(basename($filename)), 0, 14) == "finvoice_order") {
-    $argv[2] = 'magento';
-
-    $asiakastiedot_kannasta = true;
-    $tilauksen_lahde        = "finvoice";
-  }
-
   // ja toinen parametri komentoriviltä
   $edi_tyyppi  = trim($argv[2]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
-  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
+  $verkkokauppa_filenamet = "/^(anvia|finvoice|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
   if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'magento';
+  }
+
+  if (substr(strtolower(basename($filename)), 0, 14) == "finvoice-order") {
+    $tilauksen_lahde        = "finvoice";
+    $asiakastiedot_kannasta = true;
   }
 
   // Pupeasennuksen root

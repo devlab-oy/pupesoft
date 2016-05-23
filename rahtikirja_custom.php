@@ -60,14 +60,13 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
     }
   }
 
-  // korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
-  $query = sprintf(
-    "UPDATE rahtikirjat set otsikkonro = '%s', rahtikirjanro = '%s' where tunnus = '%s'",
-    (int) $otsikkonro * -1,
-    (int) $otsikkonro * -1,
-    (int) $otsikkonro
-  );
+  $otsikkonro = (int) $otsikkonro;
 
+  // korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
+  $query = "UPDATE rahtikirjat SET
+            otsikkonro = '".($otsikkonro * -1)."',
+            rahtikirjanro = '".($otsikkonro * -1)."'
+            WHERE tunnus = '{$otsikkonro}'";
   pupe_query($query);
 
   $tulosta = "JOO";
@@ -423,7 +422,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
              FROM rahtikirjat
              where yhtio    = '$kukarow[yhtio]'
              and otsikkonro < 0
-             and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
+             #and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
              GROUP BY rahtikirjanro, otsikkonro
              ORDER BY tulostettu desc";
   $kirres = pupe_query($query);
@@ -568,7 +567,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
     echo "<input type=hidden name='kumpiosoite_ed' value='$kumpiosoite'>";
     echo "<select name='kumpiosoite' onchange='submit();'>";
-    echo "<option value='toimitus' $sel[toimitus]>".t("Toimitusosite")."</option>";
+    echo "<option value='toimitus' $sel[toimitus]>".t("Toimitusosoite")."</option>";
     echo "<option value='virallinen' $sel[virallinen]>".t("Virallinen osoite")."</option>";
     echo "<option value='laskutus' $sel[laskutus]>".t("Laskutusosoite")."</option>";
     echo "</select>";

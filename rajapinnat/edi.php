@@ -21,15 +21,11 @@ class Edi {
 
     // require 'magento_salasanat.php' muuttujat, jos kyseessä on magento
     if ($tyyppi == "magento") {
-      global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $magento_maksuehto_ohjaus,
-             $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys,
-             $verkkokauppa_erikoiskasittely;
+      global $magento_api_ht_edi, $ovt_tunnus, $magento_maksuehto_ohjaus;
+      global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
 
-      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($verkkokauppa_asiakasnro) or
-          empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
-      ) {
-        exit("Parametrejä puuttuu\n");
-      }
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
+      if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrejä puuttuu\n");
 
       $viitteenne = "";
       $viitteemme = "";

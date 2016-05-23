@@ -592,6 +592,8 @@ while ($tietue = fgets($fd)) {
 
   case 'OBGMINUMB' :
   case 'OSTOTIL.OT_NRO' :
+    if ($tilauksen_lahde == "finvoice") break;
+
     //Asiakkkaan tilausnumero
     $asiakkaan_tilausnumero = $tieto;
     $viite = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
@@ -1154,6 +1156,12 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_VIITTEENNE':
+    // Finvoicessa halutaan tämä tieto tilausviitteeseen
+    if ($tilauksen_lahde == "finvoice") {
+      $viite = trim($tieto);
+      break;
+    }
+
     // halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
     $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
     $lopviesti = trim($orig_tieto);

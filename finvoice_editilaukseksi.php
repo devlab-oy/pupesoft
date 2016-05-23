@@ -1,19 +1,12 @@
 <?php
 
 // Kutsutaanko CLI:stä
-if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
-}
+if (php_sapi_name() != 'cli') die ("Tätä scriptiä voi ajaa vain komentoriviltä!\n");
 
 date_default_timezone_set('Europe/Helsinki');
 
-if (trim($argv[1]) == '') {
-  die ("Et antanut yhtiötä!\n");
-}
-
-if (trim($argv[2]) == '') {
-  die ("Et antanut luettavien tiedostojen polkua!\n");
-}
+if (trim($argv[1]) == '') die ("Et antanut yhtiötä!\n");
+if (trim($argv[2]) == '') die ("Et antanut luettavien tiedostojen polkua!\n");
 
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path") . PATH_SEPARATOR . dirname(__FILE__));
@@ -40,21 +33,21 @@ $files = glob("{$path}/*.xml");
 
 foreach ($files as $file) {
   $file = file_get_contents($file);
-  $xml = simplexml_load_string($file);
+  $xml  = simplexml_load_string($file);
 
   require "inc/verkkolasku-in-finvoice.inc";
 
   $laskuttajan_ovt = isset($laskuttajan_ovt) ? $laskuttajan_ovt : "";
 
   if ($laskuttajan_ovt == $finvoice_kauttalaskutus_ovt) {
-    $rtuoteno = isset($rtuoteno) ? $rtuoteno : array();
-    $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
-    $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
-    $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
-    $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
+    $rtuoteno               = isset($rtuoteno)               ? $rtuoteno               : array();
+    $laskun_summa_eur       = isset($laskun_summa_eur)       ? $laskun_summa_eur       : "";
+    $laskuttajan_valkoodi   = isset($laskuttajan_valkoodi)   ? $laskuttajan_valkoodi   : "";
+    $toim_asiakkaantiedot   = isset($toim_asiakkaantiedot)   ? $toim_asiakkaantiedot   : array();
+    $laskun_numero          = isset($laskun_numero)          ? $laskun_numero          : "";
     $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
-    $tilausyhteyshenkilo = isset($tilausyhteyshenkilo) ? $tilausyhteyshenkilo : "";
-    $kohde = isset($kohde) ? $kohde : "";
+    $tilausyhteyshenkilo    = isset($tilausyhteyshenkilo)    ? $tilausyhteyshenkilo    : "";
+    $kohde                  = isset($kohde)                  ? $kohde                  : "";
 
     $erotin = str_repeat("-", 98);
     $kommenttiteksti = "{$erotin}\n" .
@@ -71,27 +64,27 @@ foreach ($files as $file) {
 
     foreach ($rtuoteno as $tilausrivi) {
       $item = array(
-        "sku" => $tilausrivi["tuoteno"],
+        "sku"         => $tilausrivi["tuoteno"],
         "qty_ordered" => $tilausrivi["kpl"],
         "tax_percent" => $tilausrivi["alv"],
-        "price" => $tilausrivi["hinta"]
+        "price"       => $tilausrivi["hinta"]
       );
 
       array_push($items, $item);
     }
 
     $order = array(
-      "increment_id" => $laskun_asiakkaan_tilausnumero,
-      "grand_total" => $laskun_summa_eur,
+      "increment_id"        => $laskun_asiakkaan_tilausnumero,
+      "grand_total"         => $laskun_summa_eur,
       "order_currency_code" => $laskuttajan_valkoodi,
-      "items" => $items,
-      "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
-      "asiakasnumero" => $toim_asiakkaantiedot["asiakasnumero"],
-      "laskun_numero" => $laskun_numero,
+      "items"               => $items,
+      "laskuttajan_ovt"     => $ostaja_asiakkaantiedot["toim_ovttunnus"],
+      "asiakasnumero"       => $toim_asiakkaantiedot["asiakasnumero"],
+      "laskun_numero"       => $laskun_numero,
       "tilausyhteyshenkilo" => $tilausyhteyshenkilo,
-      "target" => $kohde,
-      "kommenttiteksti" => $kommenttiteksti,
-      "customer_email" => $laskuttajan_email
+      "target"              => $kohde,
+      "kommenttiteksti"     => $kommenttiteksti,
+      "customer_email"      => $laskuttajan_email
     );
 
     Edi::create($order, "finvoice");

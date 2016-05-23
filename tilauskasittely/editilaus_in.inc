@@ -27,13 +27,16 @@ if ($php_cli) {
   // ja parametri komentoriviltä
   $filename = $argv[1];
 
-  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order'
-      or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
-    $argv[2] = 'magento';
-  }
-
   // ja toinen parametri komentoriviltä
-  $edi_tyyppi  = $argv[2];
+  $edi_tyyppi  = trim($argv[2]);
+
+  $verkkokauppa_filename = strtolower(basename($filename));
+  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
+
+  // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
+  if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'magento';
+  }
 
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));

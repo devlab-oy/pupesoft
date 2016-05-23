@@ -641,6 +641,53 @@ function sepa_get_certificate($params) {
   return $return;
 }
 
+function sepa_renew_certificate($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
+  $tunnus   = parameter($params["pankkiyhteys_tunnus"]);
+  $salasana = parameter($params["salasana"]);
+  $bank     = parameter($params["bank"]);
+
+  if (empty($tunnus) or empty($salasana) or empty($bank)) return false;
+
+  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($tunnus, $salasana);
+
+  $old_cert_info = openssl_x509_parse(base64_decode($pankkiyhteys['signing_certificate']));
+
+  $csr_params = array(
+    'pankki'       => $bank,
+    'customer_id'  => $old_cert_info['subject']['serialNumber'],
+    'company_name' => $old_cert_info['subject']['CN'],
+  );
+
+  $generoidut_tunnukset = generoi_private_key_ja_csr($csr_params);
+
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "customer_id"             => $old_cert_info['subject']['serialNumber'],
+      "environment"             => SEPA_ENVIRONMENT,
+      "signing_csr"             => base64_encode($generoidut_tunnukset['csr']),
+      "own_signing_certificate" => $pankkiyhteys['signing_certificate'],
+      "signing_private_key"     => $pankkiyhteys['signing_private_key'],
+    ),
+    "url" => SEPA_ADDRESS . "/{$bank}/renew_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
+    )
+  );
+
+  list($code, $response) = pupesoft_rest($parameters);
+
+  if (!vastaus_kunnossa($code)) return false;
+
+  return array(
+    "own_signing_certificate" => base64_decode($response["ownSigningCertificate"]),
+    "signing_private_key"     => $generoidut_tunnukset['private_key'],
+  );
+}
+
 function sepa_get_bank_certificate($params) {
   global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
 

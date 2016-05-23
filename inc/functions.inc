@@ -471,7 +471,7 @@ if (!function_exists("pupesoft_flock")) {
     }
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-      if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+      if ($locktime > 0 and time() - filemtime($lockfile) >= $locktime) {
         // Onko nagios monitor asennettu?
         if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
           file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
@@ -7168,8 +7168,14 @@ if (!function_exists("paivita_toimitukset")) {
 }
 
 if (!function_exists("tulosta_ytunnus")) {
-  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "") {
+  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;
+
+    $ytunnus_vai_hetu = tarkistahetu($ytunnus);
+
+    if (strpos($ytunnus_vai_hetu, "XXXX") !== false) {
+      return $hetu_tarkenne ? $ytunnus : $ytunnus_vai_hetu;
+    }
 
     if ($maa == "") {
       $maa = $yhtiorow["maa"];
@@ -8346,6 +8352,7 @@ if (!function_exists("aja_kysely")) {
           }
 
           ${$row["var"]} = $row["value"];
+          $_POST[$row["var"]] = $row["value"];
         }
       }
 
@@ -8651,7 +8658,7 @@ if (!function_exists('tarkasta_liite')) {
 
     // otetaan file extensio
     $path_parts = pathinfo($file['name']);
-    $ext = strtoupper($path_parts['extension']);
+    $ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
     if ($ext == "JPEG") $ext = "jpg";
 
     //  Sallitut tiedostot on aina upper
@@ -10252,6 +10259,28 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
+  function hae_kayttajan_toimipistetunnukset() {
+    global $kukarow;
+
+    $asiakastunnukset = '';
+    if (!empty($kukarow['oletus_asiakas'])) {
+      $asiakastunnukset = $kukarow['oletus_asiakas'];
+    }
+
+    $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
+              FROM customers_users
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
+              WHERE user_id = '{$kukarow['tunnus']}'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+    if (!empty($row['toimipistetunnukset'])) {
+      $asiakastunnukset = empty($asiakastunnukset) ? $row['toimipistetunnukset'] : $asiakastunnukset.",".$row['toimipistetunnukset'];
+    }
+    return $asiakastunnukset;
+  }
+}
+
 if (!function_exists("livesearch_laitehaku")) {
   function livesearch_laitehaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -10272,9 +10301,17 @@ if (!function_exists("livesearch_laitehaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
       </script>";
 
+      $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+      $toimipistelisa = '';
+      if (!empty($toimipistetunnukset)) {
+        $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
+      }
+
       $query = "SELECT DISTINCT sarjanro
                 FROM laite
                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                {$toimipistelisa}
                 AND sarjanro LIKE '%{$haku}%'";
       $result = pupe_query($query);
 
@@ -31026,14 +31063,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31064,14 +31101,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -32831,6 +32868,20 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     }
 
     return $response;
+  }
+}
+
+if (!function_exists('url_or_text')) {
+  function url_or_text($str) {
+    $array = array("http://", "https://");
+  
+    foreach($array as $a) {
+      if (stripos($str, $a) !== false) {
+        return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
+      }
+    }
+  
+    return $str;
   }
 }
 

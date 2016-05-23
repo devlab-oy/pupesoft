@@ -786,11 +786,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
     $tilriv_joinlisa = "";
   }
 
-  $havinglisa = $selectlisa = "";
+  $ei_lasku_lisa = "";
 
   if ($lisarajaus == 'ei_liitetty_lasku') {
-    $selectlisa = "count(distinct liitetty_lasku.tunnus) liitetty_lasku_kpl,";
-    $havinglisa = "HAVING liitetty_lasku_kpl = 0";
+    $ei_lasku_lisa = "and liitetty_lasku.tunnus is null";
   }
 
   if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka != 'kaikki') {
@@ -802,7 +801,6 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
   // näytetään millä toimittajilla on keskeneräisiä keikkoja
   $query = "SELECT lasku.liitostunnus,
-            {$selectlisa}
             max(lasku.ytunnus)  ytunnus,
             max(lasku.nimi)     nimi,
             max(lasku.nimitark) nimitark,
@@ -829,8 +827,8 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             $laatijalisa
             {$kohdistuslisa}
             {$toimipaikkalisa}
+            {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            {$havinglisa}
             ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
   $result = pupe_query($query);
 
@@ -1132,7 +1130,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             lasku.rahti_etu,
             lasku.kohdistettu,
             lasku.sisviesti3,
-            lasku.yhtio_toimipaikka
+            lasku.yhtio_toimipaikka,
+            lasku.varasto
             {$selectlisa}
             FROM lasku
             {$joinlisa}
@@ -1397,7 +1396,9 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
-        $logmaster_chk = (!$onkologmaster or ($onkologmaster and $row['sisviesti3'] == 'ok_vie_varastoon'));
+        $varastorow = hae_varasto($row['varasto']);
+
+        $logmaster_chk = (!$onkologmaster or $varastorow['ulkoinen_jarjestelma'] != 'L' or ($onkologmaster and $row['sisviesti3'] == 'ok_vie_varastoon'));
 
         // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
         if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S' and $logmaster_chk) {
@@ -1590,7 +1591,9 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
-  $logmaster_chk = (!$onkologmaster or ($onkologmaster and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
+  $varastorow = hae_varasto($tsekkirow['varasto']);
+
+  $logmaster_chk = (!$onkologmaster or $varastorow['ulkoinen_jarjestelma'] != 'L' or ($onkologmaster and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
 
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
   if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $logmaster_chk) {

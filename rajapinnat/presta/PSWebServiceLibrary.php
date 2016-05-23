@@ -106,7 +106,11 @@ class PrestaShopWebservice
    * @param mixed $curl_params CURL parameters (sent to curl_set_opt)
    * @return array status_code, response
    */
-  protected function executeRequest($url, $curl_params = array())
+  // CUSTOM HACK
+  // This functions has been changed public, we need to get a raw response from presta
+  // if we want to fetch the images. this is called from PrestaProducts
+  // CUSTOM HACK
+  public function executeRequest($url, $curl_params = array())
   {
     $defaultParams = array(
       CURLOPT_HEADER => TRUE,

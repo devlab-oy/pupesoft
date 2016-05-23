@@ -12,8 +12,8 @@ class PrestaCategories extends PrestaClient {
     return 'categories';
   }
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   public function sync_categories($pupesoft_categories) {
@@ -24,6 +24,7 @@ class PrestaCategories extends PrestaClient {
       return;
     }
 
+    $shop_group_id = $this->shop_group_id();
     $count = count($pupesoft_categories) - 1;
     $current = 0;
 
@@ -49,7 +50,7 @@ class PrestaCategories extends PrestaClient {
       try {
         if ($presta_category === false) {
           $this->logger->log("Luodaan kategoria (node {$tunnus}, parent {$parent_tunnus})");
-          $this->create($category);
+          $this->create($category, null, $shop_group_id);
 
           // reset all values, so we'll fetch all again next loop
           $this->all_values = null;
@@ -57,7 +58,7 @@ class PrestaCategories extends PrestaClient {
         else {
           $id = $presta_category['id'];
           $this->logger->log("Päivitetään kategoria {$id} (node {$tunnus}, parent {$parent_tunnus})");
-          $this->update($id, $category);
+          $this->update($id, $category, null, $shop_group_id);
         }
       }
       catch (Exception $e) {
@@ -129,7 +130,7 @@ class PrestaCategories extends PrestaClient {
       $value = $this->xml_value($translation['nimi']);
       $xml->category->name->language[$tr_id] = $value;
 
-      $this->logger->log("Käännös {$translation['kieli']}, $value");
+      $this->logger->log("Käännös {$translation['kieli']} ({$tr_id}): $value");
     }
 
     return $xml;
@@ -155,9 +156,11 @@ class PrestaCategories extends PrestaClient {
     }
 
     $display = array('id', 'meta_keywords', 'name');
+    $filters = array();
+    $shop_group_id = $this->shop_group_id();
 
     $this->logger->log("Haetaan kaikki kategoriat");
-    $this->all_values = $this->all($display);
+    $this->all_values = $this->all($display, $filters, null, $shop_group_id);
 
     return $this->all_values;
   }
@@ -193,9 +196,11 @@ class PrestaCategories extends PrestaClient {
     $count = count($delete_presta_ids);
     $this->logger->log("Poistettavia kategorioita {$count} kpl");
 
+    $shop_group_id = $this->shop_group_id();
+
     // we should delete them from presta
     foreach ($delete_presta_ids as $id) {
-      $result = $this->delete($id);
+      $result = $this->delete($id, null, $shop_group_id);
     }
 
     return true;

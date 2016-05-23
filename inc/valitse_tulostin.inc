@@ -418,6 +418,7 @@ foreach ($tulostimet as $tulostin) {
 
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

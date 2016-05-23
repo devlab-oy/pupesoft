@@ -230,7 +230,7 @@ else {
           $logoparam['scale'] = 40  / $isizelogo[1];
         }
 
-        $placement = $pdf->image_place($image, 580-($logoparam['scale']*$isizelogo[1]), 410-($logoparam['scale']*$isizelogo[0]), $firstpage, $logoparam);
+        $placement = $pdf->image_place($image, 560-($logoparam['scale']*$isizelogo[1]), 410-($logoparam['scale']*$isizelogo[0]), $firstpage, $logoparam);
       }
     }
 
@@ -263,14 +263,14 @@ else {
     $pdf->draw_text(mm_pt(22), mm_pt(152), $toitarow['selite'],  $firstpage, $norm);
 
     $pdf->draw_text(mm_pt(100), mm_pt(140), t("Toimituspvm", $kieli).":",    $firstpage, $otsik);
-    
+
     if ((int) str_replace("-", "", $laskurow['toimaika']) < date("Ymd")) {
       $_toimaika = date("d.m.Y");
     }
     else {
       $_toimaika = tv1dateconv($laskurow['toimaika']);
     }
-    
+
     $pdf->draw_text(mm_pt(100), mm_pt(135), $_toimaika,                  $firstpage, $norm);
 
     $pdf->draw_text(mm_pt(22),  mm_pt(140), t("Minne", $kieli).":",   $firstpage, $otsik);
@@ -280,7 +280,7 @@ else {
     $pdf->draw_text(mm_pt(22),  mm_pt(125), $laskurow['toim_osoite'],     $firstpage, $norm);
     $pdf->draw_text(mm_pt(22),  mm_pt(121), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $norm);
   }
-  
+
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/osoitelappu-hornbach-".md5(uniqid(rand(), true)).".pdf";
 

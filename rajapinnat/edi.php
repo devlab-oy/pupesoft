@@ -94,6 +94,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+    $edi_order .= "OSTOTIL.OT_TILAUSVIESTI:".$order['customer_note']."\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";

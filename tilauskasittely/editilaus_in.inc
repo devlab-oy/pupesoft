@@ -630,6 +630,11 @@ while ($tietue = fgets($fd)) {
     $viite .= $tieto. ' ';
     break;
 
+  case 'OSTOTIL.OT_TILAUSVIESTI' :
+    //Asiakkaan tilausviesti
+    $merkkitieto .= $tieto. ' ';
+    break;
+
   case 'ICHG_SNDR' :
     // Otetaan asiakkaan ovttunnus talteen
     if (isset($tieto) and $tieto != "") {

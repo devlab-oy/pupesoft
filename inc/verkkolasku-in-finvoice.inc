@@ -87,7 +87,11 @@ $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPo
 
 // Parsitaan mahdolliset tiedot kommenttikentästä
 $kommenttiteksti = xml_string($xml->InvoiceDetails->InvoiceFreeText);
-$kohde           = teksti_valista("Kohde:", "##", $kommenttiteksti);
+$matches         = array();
+
+if (preg_match('/Kohde:\s?(.*?)\s?##/', $kommenttiteksti, $matches)) {
+  $kohde = $matches[1];
+}
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;

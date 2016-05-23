@@ -59,7 +59,16 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
-    $xml->product->ean13 = (is_numeric($product['ean']) and strlen($product['ean']) < 14) ? $product['ean'] : '';
+
+    if (is_numeric($product['ean']) and strlen($product['ean']) < 14) {
+      $_ean = $product['ean'];
+    }
+    elseif (!empty($product['ean'])) {
+      $this->logger->log("Virheellinen EAN koodi '{$product['ean']}'");
+      $_ean = '';
+    }
+
+    $xml->product->ean13 = $_ean;
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];

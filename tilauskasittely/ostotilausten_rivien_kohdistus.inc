@@ -25,7 +25,21 @@ $result = pupe_query($query);
 if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
 
-  $varastorow = hae_varasto($laskurow['varasto']);
+  $query = "SELECT DISTINCT varasto
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND uusiotunnus = '{$otunnus}'";
+  $varastocheckres = pupe_query($query);
+
+  while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+    $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+    if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
+      $onkologmaster = false;
+      break;
+    }
+  }
+
 }
 else {
   echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
@@ -1556,7 +1570,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster and $varastorow['ulkoinen_jarjestelma'] == 'L' and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -2322,7 +2336,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster and $varastorow['ulkoinen_jarjestelma'] == 'L' and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

@@ -151,6 +151,8 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
+    $paivitettiin_tilausrivi_onnistuneesti = false;
+
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
       $eankoodi = $data['eankoodi'];
@@ -213,6 +215,8 @@ while (false !== ($file = readdir($handle))) {
                 AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
       pupe_query($query);
 
+      $paivitettiin_tilausrivi_onnistuneesti = true;
+
       $query = "SELECT SUM(tuote.tuotemassa) paino
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -252,32 +256,37 @@ while (false !== ($file = readdir($handle))) {
                viesti         = ''";
     $result_rk = pupe_query($query);
 
-    if ($laskurow["tila"] == "G") {
-      if ($laskurow["tilaustyyppi"] != 'M') {
-        $tilalisa = "tila = 'G', alatila = 'C'";
+    if ($paivitettiin_tilausrivi_onnistuneesti) {
+
+      if ($laskurow["tila"] == "G") {
+        if ($laskurow["tilaustyyppi"] != 'M') {
+          $tilalisa = "tila = 'G', alatila = 'C'";
+        }
+        else {
+          $tilalisa = "tila = 'G', alatila = 'D'";
+        }
+
+      }
+      elseif ($laskurow["tila"] == "V") {
+        $tilalisa = "tila = 'V', alatila = 'C'";
+      }
+      elseif ($laskurow["tila"] == "S") {
+        $tilalisa = "tila = 'S', alatila = 'C'";
       }
       else {
-        $tilalisa = "tila = 'G', alatila = 'D'";
+        $tilalisa = "tila = 'L', alatila = 'D'";
       }
 
-    }
-    elseif ($laskurow["tila"] == "V") {
-      $tilalisa = "tila = 'V', alatila = 'C'";
-    }
-    elseif ($laskurow["tila"] == "S") {
-      $tilalisa = "tila = 'S', alatila = 'C'";
-    }
-    else {
-      $tilalisa = "tila = 'L', alatila = 'D'";
-    }
+      $query = "UPDATE lasku SET
+                {$tilalisa}
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['tunnus']}'";
+      $upd_res = pupe_query($query);
 
-    $query = "UPDATE lasku SET
-              {$tilalisa}
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$laskurow['tunnus']}'";
-    $upd_res = pupe_query($query);
+      paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-    paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
+      pupesoft_log('outbound_delivery', "Keräyskuittaus tilauksesta {$otunnus} päivitettiin toimitetuksi");
+    }
 
     pupesoft_log('outbound_delivery', "Keräyskuittaus tilauksesta {$otunnus} vastaanotettu");
   }

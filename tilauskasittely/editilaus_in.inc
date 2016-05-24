@@ -632,7 +632,7 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_TILAUSVIESTI' :
     //Asiakkaan tilausviesti
-    $merkkitieto .= $tieto. ' ';
+    $edi_kommentti .= $tieto." \n";
     break;
 
   case 'ICHG_SNDR' :

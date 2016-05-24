@@ -513,7 +513,7 @@ if ($tee == 'N') {
       }
 
       
-      if ($kappaleet[$iii] <= $hyllyssa and $myytavissa < $hyllyssa and $myytavissa < $kappaleet[$iii]) {
+      if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii]) {
         $siirretaan_varattua = true;
       }
       elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
@@ -527,7 +527,11 @@ if ($tee == 'N') {
     }
   }
 
-  if ($saldook > 0) { //Taravat myytiin alta!
+  if ($saldook > 0 and ($kappaleet[$iii] < $myytavissa or $kappaleet[$iii] < $hyllyssa)) {
+    echo "<font class='error'>".t("Voit siirt‰‰ vain myyt‰viss‰ olevaa m‰‰r‰‰ tai koko hyllyss‰ olevan m‰‰r‰n")."</font><br><br>";
+    $tee = $uusitee;
+  }
+  elseif ($saldook > 0) { //Taravat myytiin alta!
     echo "<font class='error'>".t("Siirett‰v‰ m‰‰r‰ on liian iso")."</font><br><br>";
     $tee = $uusitee;
   }

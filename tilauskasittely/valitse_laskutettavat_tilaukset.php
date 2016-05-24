@@ -1347,8 +1347,8 @@ if ($tee == "") {
 
     if ($arvoyhteensa != 0) {
       echo "<br><table>";
-      echo "<tr><th>".t("Tilausten arvo yhteensä")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
-      echo "<tr><th>".t("Tilausten summa yhteensä").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten arvo yhteensä")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>".sprintf('%.2f', $arvoyhteensa)." $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten summa yhteensä").": </th><td align='right'>".sprintf('%.2f', $summayhteensa)." $yhtiorow[valkoodi]</td></tr>";
       echo "</table>";
     }
   }

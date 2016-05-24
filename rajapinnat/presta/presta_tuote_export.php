@@ -194,6 +194,14 @@ if (!isset($presta_tuotekuvien_nouto)) {
   // Siirret‰‰nkˆ Prestashopin tuotekuvat Pupesoftiin
   $presta_tuotekuvien_nouto = false;
 }
+if (!isset($presta_siirrettavat_hinnat)) {
+  // Mit‰ hintoja siirret‰‰n Prestan Specific Prices hinnoiksi
+  $presta_siirrettavat_hinnat = array(
+    'asiakasalennukset',
+    'asiakashinnat',
+    'hinnastohinnat',
+  );
+}
 
 presta_echo("Aloitetaan Prestashop p‰ivitys.");
 
@@ -271,7 +279,7 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
-  $hinnat = presta_specific_prices();
+  $hinnat = presta_specific_prices($presta_siirrettavat_hinnat);
 
   presta_echo("Siirret‰‰n specific prices.");
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');

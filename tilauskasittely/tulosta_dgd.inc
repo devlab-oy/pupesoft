@@ -56,7 +56,7 @@ if (!function_exists('alku_dgd')) {
 
     $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
     // jos tulostustapa on koonti ja toimitustavan takana on annettu osoitetiedot, käytetään niitä
-    if ($toitarow['tulostustapa'] == 'K' and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
+    if (in_array($toitarow['tulostustapa'], array('K', 'L')) and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
       $pdf->pages[$sivu]->drawText($toitarow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
       $pdf->pages[$sivu]->drawText($toitarow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
       $pdf->pages[$sivu]->drawText($toitarow["toim_postino"]." ".$toitarow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');

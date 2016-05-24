@@ -59,7 +59,17 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
-    $xml->product->ean13 = is_numeric($product['ean']) ? $product['ean'] : '';
+
+    $_ean = '';
+
+    if (is_numeric($product['ean']) and strlen($product['ean']) < 14) {
+      $_ean = $product['ean'];
+    }
+    elseif (!empty($product['ean'])) {
+      $this->logger->log("Virheellinen EAN koodi '{$product['ean']}'");
+    }
+
+    $xml->product->ean13 = $_ean;
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
@@ -115,6 +125,9 @@ class PrestaProducts extends PrestaClient {
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
     $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
+
+    // remove forbidden characters
+    $_nimi = preg_replace("/[&]+/", "", $_nimi);
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
@@ -216,17 +229,23 @@ class PrestaProducts extends PrestaClient {
     $dom_node->parentNode->removeChild($dom_node);
 
     // Then add element back
-    $xml->product->associations->addChild('product_bundle');
+    if (count($product['tuotteen_lapsituotteet']) > 0) {
+      $xml->product->associations->addChild('product_bundle');
 
-    // Add child products for product bundle
-    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
-      $child_id = $this->add_child_product($xml, $child_product);
+      // Add child products for product bundle
+      foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+        $child_id = $this->add_child_product($xml, $child_product);
 
-      // added the child successfully
-      if ($child_id !== false) {
-        // set parent product to pack
-        $product_type = 'pack';
+        // added the child successfully
+        if ($child_id !== false) {
+          // set parent product to pack
+          $product_type = 'pack';
+        }
       }
+    }
+
+    if ($product_type == "virtual") {
+      $xml->product->is_virtual = 1;
     }
 
     // set product type
@@ -254,7 +273,7 @@ class PrestaProducts extends PrestaClient {
       if (empty($value_id)) {
         $feature_value = array(
           "id_feature" => $feature_id,
-          "value" => substr($value, 0, 255), // max 255 characters
+          "value" => $value,
         );
 
         // Create feature value
@@ -515,8 +534,14 @@ class PrestaProducts extends PrestaClient {
     // return the values that are not present keep_presta_ids
     $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
 
+    $total = count($delete_presta_ids);
+    $current = 0;
+
     // delete products from presta
     foreach ($delete_presta_ids as $presta_id) {
+      $current++;
+      $this->logger->log("[{$current}/{$total}] Poistetaan tuote {$presta_id}");
+
       try {
         $this->delete($presta_id);
       }

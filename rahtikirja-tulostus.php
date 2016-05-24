@@ -1150,7 +1150,13 @@ if ($tee == 'tulosta') {
     }
 
     if (isset($excel_koontilahete) && $excel_koontilahete == 'Y') {
-       laheta_excel_koontilahete($otunnukset, $toitarow);
+      laheta_excel_koontilahete($otunnukset, $toitarow);
+    }
+    elseif (isset($excel_koontilahete) && $excel_koontilahete == 'E') {
+      foreach (explode(',', $otunnukset) as $otunnus) {
+        $otunnus = str_replace("'", "", $otunnus);
+        laheta_excel_koontilahete($otunnus, $toitarow);
+      }
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
@@ -1460,6 +1466,8 @@ if ($tee == '') {
     echo t('Ei lähetetä');
     echo "</option><option value='Y'>";
     echo t('Sähköpostiin');
+    echo "</option><option value='E'>";
+    echo t("Sähköpostiin tilauksittain");
     echo "</option></select></td></tr>";
 
     echo "</table>";

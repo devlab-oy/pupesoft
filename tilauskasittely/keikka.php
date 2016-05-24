@@ -1395,30 +1395,30 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
-        if ($onkologmaster) {
+        $onkologmaster_varasto = 0;
+        $normivarastoja = 0;
 
-          $onkologmaster_varasto = true;
+        if ($onkologmaster) {
 
           $query = "SELECT DISTINCT varasto
                     FROM tilausrivi
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND uusiotunnus = '{$row['otunnus']}'";
+                    AND uusiotunnus = '{$row['tunnus']}'";
           $varastocheckres = pupe_query($query);
 
           while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
             $varastorow = hae_varasto($varastocheckrow['varasto']);
 
-            if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
-              $onkologmaster_varasto = false;
-              break;
+            if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
+              $onkologmaster_varasto++;
+            }
+            else {
+              $normivarastoja++;
             }
           }
         }
-        else {
-          $onkologmaster_varasto = false;
-        }
 
-        $logmaster_chk = (!$onkologmaster or !$onkologmaster_varasto or ($onkologmaster and $onkologmaster_varasto and $row['sisviesti3'] == 'ok_vie_varastoon'));
+        $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $row['sisviesti3'] == 'ok_vie_varastoon'));
 
         // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
         if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S' and $logmaster_chk) {
@@ -1611,6 +1611,9 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
+  $onkologmaster_varasto = 0;
+  $normivarastoja = 0;
+
   if ($onkologmaster) {
 
     $onkologmaster_varasto = true;
@@ -1624,17 +1627,16 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
       $varastorow = hae_varasto($varastocheckrow['varasto']);
 
-      if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
-        $onkologmaster_varasto = false;
-        break;
+      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
+        $onkologmaster_varasto++;
+      }
+      else {
+        $normivarastoja++;
       }
     }
   }
-  else {
-    $onkologmaster_varasto = false;
-  }
 
-  $logmaster_chk = (!$onkologmaster or !$onkologmaster_varasto or ($onkologmaster and $onkologmaster_varasto and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
+  $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
 
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
   if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $logmaster_chk) {

@@ -31556,7 +31556,9 @@ if (!function_exists("vapauta_maksusopimus")) {
       $query = "SELECT *
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND jaksotettu = '{$maksusoppari}'";
+                AND jaksotettu = '{$maksusoppari}'
+                AND tila = 'N'
+                AND alatila = 'B'";
       $laskures = pupe_query($query);
 
       while ($laskurow = mysql_fetch_assoc($laskures)) {
@@ -32949,13 +32951,13 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 if (!function_exists('url_or_text')) {
   function url_or_text($str) {
     $array = array("http://", "https://");
-  
+
     foreach($array as $a) {
       if (stripos($str, $a) !== false) {
         return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
       }
     }
-  
+
     return $str;
   }
 }

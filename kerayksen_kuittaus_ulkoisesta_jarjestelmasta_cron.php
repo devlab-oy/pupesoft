@@ -162,7 +162,10 @@ while (false !== ($file = readdir($handle))) {
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$tilausrivin_tunnus}'
-                AND tunnus != 0";
+                AND tunnus != 0
+                AND otunnus = '{$laskurow['tunnus']}'
+                AND keratty = ''
+                AND toimitettu = ''";
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {

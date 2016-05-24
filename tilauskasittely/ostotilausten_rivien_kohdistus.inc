@@ -24,22 +24,6 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
-
-  $query = "SELECT DISTINCT varasto
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND uusiotunnus = '{$otunnus}'";
-  $varastocheckres = pupe_query($query);
-
-  while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-    $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-    if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
-      $onkologmaster = false;
-      break;
-    }
-  }
-
 }
 else {
   echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
@@ -1083,6 +1067,21 @@ if ($tila == 'tee_kohdistus') {
         $sarjares = pupe_query($query);
       }
     }
+  }
+}
+
+$query = "SELECT DISTINCT varasto
+          FROM tilausrivi
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND uusiotunnus = '{$otunnus}'";
+$varastocheckres = pupe_query($query);
+
+while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+  $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+  if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
+    $onkologmaster = false;
+    break;
   }
 }
 

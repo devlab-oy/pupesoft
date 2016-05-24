@@ -2640,6 +2640,9 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
               tee_matkalaskurivin_kirjaukset(get_defined_vars());
             }
           }
+          else {
+            tee_matkalaskurivin_kirjaukset(get_defined_vars());
+          }
         }
       }
       else {

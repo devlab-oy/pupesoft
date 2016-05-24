@@ -61,11 +61,12 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
   }
 
   $otsikkonro = (int) $otsikkonro;
+  $rahtikirjanro = $otsikkonro * -1;
 
   // korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
   $query = "UPDATE rahtikirjat SET
-            otsikkonro = '".($otsikkonro * -1)."',
-            rahtikirjanro = '".($otsikkonro * -1)."'
+            otsikkonro = '{$rahtikirjanro}',
+            rahtikirjanro = '{$rahtikirjanro}'
             WHERE tunnus = '{$otsikkonro}'";
   pupe_query($query);
 
@@ -879,11 +880,9 @@ function pupe_rahtikirja_insert($data) {
     $val = mysql_real_escape_string($val, $GLOBALS['link']);
   }
 
-  $query = sprintf(
-    "INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti, tulostuspaikka)
-    values('%s')",
-    implode("','", array_values($data))
-  );
+  $query = "INSERT INTO rahtikirjat
+            (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti, tulostuspaikka)
+            values('".implode("','", array_values($data))."')";
   pupe_query($query);
 
   return mysql_insert_id($GLOBALS["masterlink"]);

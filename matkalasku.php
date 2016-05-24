@@ -2630,7 +2630,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
               }
 
               // Jos erikoishinnalla on lisättävää
-              if ($jaljellaoleva_maara > 0) {
+              if ($jaljellaoleva_maara > 0 and $trow['myymalahinta'] > 0) {
                 $ins_kpl = $jaljellaoleva_maara;
                 $hinta = $trow['myymalahinta'];
                 tee_matkalaskurivin_kirjaukset(get_defined_vars());

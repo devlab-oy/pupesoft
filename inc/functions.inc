@@ -8658,7 +8658,7 @@ if (!function_exists('tarkasta_liite')) {
 
     // otetaan file extensio
     $path_parts = pathinfo($file['name']);
-    $ext = strtoupper($path_parts['extension']);
+    $ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
     if ($ext == "JPEG") $ext = "jpg";
 
     //  Sallitut tiedostot on aina upper

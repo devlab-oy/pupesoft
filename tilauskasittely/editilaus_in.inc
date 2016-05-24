@@ -31,7 +31,7 @@ if ($php_cli) {
   $edi_tyyppi  = trim($argv[2]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
-  $verkkokauppa_filenamet = "/^(anvia-order|magento-order|presta-order)/";
+  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
   if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {

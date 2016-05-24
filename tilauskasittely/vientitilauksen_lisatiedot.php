@@ -929,6 +929,7 @@ elseif ($tee == '') {
     $maksuehto      = '';
     $lisattava_era    = '';
     $vahennettava_era  = '';
+    $jaksotettu = '';
 
     while ($tilrow = mysql_fetch_assoc($tilre)) {
       $query = "SELECT sum(if(varattu>0,1,0))  veloitus, sum(if(varattu<0,1,0)) hyvitys
@@ -938,7 +939,7 @@ elseif ($tee == '') {
       $hyvre = pupe_query($query);
       $hyvrow = mysql_fetch_assoc($hyvre);
 
-      if ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"]) {
+      if (($tilrow['jaksotettu'] != 0 and $jaksotettu == $tilrow['jaksotettu']) or ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"])) {
         $tunnukset .= $tilrow["tilaus"].",";
         $lask++;
         echo "</tr>\n";
@@ -1033,6 +1034,7 @@ elseif ($tee == '') {
       $maksuehto      = $tilrow["maksuehto"];
       $lisattava_era    = $tilrow["lisattava_era"];
       $vahennettava_era  = $tilrow["vahennettava_era"];
+      $jaksotettu = $tilrow['jaksotettu'];
     }
 
     if ($tunnukset != '' and $lask >= 1) {

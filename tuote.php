@@ -2017,6 +2017,7 @@ if ($tee == 'Z') {
   if ($tuoterow["ei_saldoa"] == '') {
     $query = "SELECT tuotteen_toimittajat.*,
               toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.oletus_valkoodi,
+              IF(tuotteen_toimittajat.toimitusaika != 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) AS toimitusaika,
               if (jarjestys = 0, 9999, jarjestys) sorttaus
               FROM tuotteen_toimittajat
               LEFT JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)

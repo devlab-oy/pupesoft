@@ -443,8 +443,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
       $query = "SELECT *
                 FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND jaksotettu = '{$tunnus}'";
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND jaksotettu = '{$tunnus}'
+                AND tila       = 'N'
+                AND alatila    = 'B'";
       $laskures = pupe_query($query);
 
       while ($laskurow = mysql_fetch_assoc($laskures)) {
@@ -452,9 +454,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $query = "UPDATE lasku SET
                   alatila     = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$laskurow['tunnus']}'
-                  AND tila    = 'N'
-                  AND alatila = 'B'";
+                  AND tunnus = '{$laskurow['tunnus']}'";
         $upd_res = pupe_query($query);
 
         if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';

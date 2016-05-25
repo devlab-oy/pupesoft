@@ -9,18 +9,38 @@ class PrestaProductFeatureValues extends PrestaClient {
     parent::__construct($url, $api_key, $log_file);
   }
 
-  public function value_id_by_value($value) {
-    foreach ($this->fetch_all() as $feature_value) {
-      // Match only to default language (this is an array if multiple languages)
-      $feature = $feature_value["value"]["language"];
-      $presta_value = is_array($feature) ? $feature[0] : $feature;
+  public function add_by_value($feature_id, $value) {
+    $value = trim($value);
 
-      if ($presta_value == $value) {
-        return $feature_value['id'];
+    if (empty($value)) {
+      return 0;
+    }
+
+    $value_id = $this->fetch_id_by_name($value);
+
+    if (empty($value_id)) {
+      $feature_value = array(
+        "id_feature" => $feature_id,
+        "value" => $value,
+      );
+
+      // Create feature value
+      try {
+        $response = $this->create($feature_value);
+        $value_id = $response['product_feature_value']['id'];
+
+        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
+        $this->presta_product_feature_values->reset_all_values();
+        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
+      }
+      catch (Exception $e) {
+        $this->logger->log("Ominaisuuden arvon '{$value}' perustaminen epäonnistui!");
+
+        $value_id = 0;
       }
     }
 
-    return false;
+    return $value_id;
   }
 
   public function reset_all_values() {
@@ -62,5 +82,19 @@ class PrestaProductFeatureValues extends PrestaClient {
     $this->all_values = $this->all($display);
 
     return $this->all_values;
+  }
+
+  private function fetch_id_by_name($name) {
+    foreach ($this->fetch_all() as $feature_value) {
+      // Match only to default language (this is an array if multiple languages)
+      $feature = $feature_value["value"]["language"];
+      $presta_value = is_array($feature) ? $feature[0] : $feature;
+
+      if ($presta_value == $name) {
+        return $feature_value['id'];
+      }
+    }
+
+    return null;
   }
 }

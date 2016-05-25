@@ -262,62 +262,24 @@ class PrestaProducts extends PrestaClient {
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
       $value = $this->xml_value($product[$field_name]);
+      $value_id = $this->presta_product_feature_values->add_by_value($feature_id, $value);
 
-      // if we don't have a value, don't add anything.
-      if (empty($value)) {
-        continue;
+      if ($value_id != 0) {
+        $feature = $xml->product->associations->product_features->addChild('product_features');
+        $feature->id = $feature_id;
+        $feature->id_feature_value = $value_id;
+
+        $this->logger->log("Liitettiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
       }
-
-      $value_id = $this->presta_product_feature_values->value_id_by_value($value);
-
-      if (empty($value_id)) {
-        $feature_value = array(
-          "id_feature" => $feature_id,
-          "value" => $value,
-        );
-
-        // Create feature value
-        $response = $this->presta_product_feature_values->create($feature_value);
-        $value_id = $response['product_feature_value']['id'];
-
-        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
-        $this->presta_product_feature_values->reset_all_values();
-        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
-      }
-
-      $feature = $xml->product->associations->product_features->addChild('product_features');
-      $feature->id = $feature_id;
-      $feature->id_feature_value = $value_id;
-
-      $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
     }
 
     $manufacturer_name = $product['tuotemerkki'];
+    $manufacturer_id = $this->presta_manufacturers->add_manufacturer_by_name($manufacturer_name);
 
-    $xml->product->id_manufacturer = 0;
+    $xml->product->id_manufacturer = $manufacturer_id;
 
-    // add manufacturer
-    if (!empty($manufacturer_name)) {
-      $manufacturer_id = $this->presta_manufacturers->manufacturer_id_by_name($manufacturer_name);
-
-      if (empty($manufacturer_id)) {
-        $manufacturer = array(
-          "name" => $manufacturer_name,
-        );
-
-        // Create manufacturer
-        $response = $this->presta_manufacturers->create($manufacturer);
-        $manufacturer_id = $response['manufacturer']['id'];
-
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->reset_all_records();
-        $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-      else {
-        $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-
-      $xml->product->id_manufacturer = $manufacturer_id;
+    if ($manufacturer_id != 0) {
+      $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
     }
 
     return $xml;

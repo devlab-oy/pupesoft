@@ -1611,9 +1611,9 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
   }
 
   $headerit = array(
-    'Hornbach order number',
-    'Maston Product number',
-    'Hornbach Product number',
+    'Customer order number',
+    'Company Product number',
+    'Customer Product number',
     'EAN Code',
     'Product Description',
     'Pack',

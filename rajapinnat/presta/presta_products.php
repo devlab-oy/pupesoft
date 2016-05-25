@@ -293,31 +293,12 @@ class PrestaProducts extends PrestaClient {
     }
 
     $manufacturer_name = $product['tuotemerkki'];
+    $manufacturer_id = $this->presta_manufacturers->add_manufacturer_by_name($manufacturer_name);
 
-    $xml->product->id_manufacturer = 0;
+    $xml->product->id_manufacturer = $manufacturer_id;
 
-    // add manufacturer
-    if (!empty($manufacturer_name)) {
-      $manufacturer_id = $this->presta_manufacturers->manufacturer_id_by_name($manufacturer_name);
-
-      if (empty($manufacturer_id)) {
-        $manufacturer = array(
-          "name" => $manufacturer_name,
-        );
-
-        // Create manufacturer
-        $response = $this->presta_manufacturers->create($manufacturer);
-        $manufacturer_id = $response['manufacturer']['id'];
-
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->reset_all_records();
-        $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-      else {
-        $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-
-      $xml->product->id_manufacturer = $manufacturer_id;
+    if ($manufacturer_id != 0) {
+      $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
     }
 
     return $xml;

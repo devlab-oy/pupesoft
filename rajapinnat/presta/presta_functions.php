@@ -679,3 +679,43 @@ function presta_tallenna_liite($params) {
   // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
   tallenna_liite($filename, 'tuote', $liitostunnus, $image_id, 'TK');
 }
+
+function presta_poista_ylimaaraiset_kuvat($sku, Array $all_ids) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // meillä ei ole yhtään kuvaan prestassa, dellataan kaikki
+  if (count($all_ids) == 0) {
+    $selite_query = "AND selite != ''";
+  }
+  else {
+    $presta_product_ids = implode(',', $all_ids);
+    $selite_query = "AND selite not in ({$presta_product_ids})";
+  }
+
+  // dellataan kuvat
+  $query = "DELETE
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND liitos = 'tuote'
+            AND liitostunnus = {$liitostunnus}
+            AND kayttotarkoitus = 'TK'
+            {$selite_query}";
+  $result = pupe_query($query);
+  $count = mysql_affected_rows();
+
+  return $count;
+}

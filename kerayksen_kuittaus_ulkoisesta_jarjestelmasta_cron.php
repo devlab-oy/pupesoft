@@ -158,14 +158,22 @@ while (false !== ($file = readdir($handle))) {
       $eankoodi = $data['eankoodi'];
       $keratty  = $data['keratty'];
 
-      $query = "SELECT *
+      if ($hhv) {
+        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
+      }
+      else {
+        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
+      }
+
+      $query = "SELECT tilausrivi.*
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$tilausrivin_tunnus}'
-                AND tunnus != 0
-                AND otunnus = '{$laskurow['tunnus']}'
-                AND keratty = ''
-                AND toimitettu = ''";
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'
+                AND tilausrivi.tunnus != 0
+                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+                AND tilausrivi.keratty = ''
+                AND tilausrivi.toimitettu = ''";
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
@@ -199,13 +207,6 @@ while (false !== ($file = readdir($handle))) {
       else {
         $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
                               tilausrivi.toimitettuaika = '{$toimaika}'";
-      }
-
-      if ($hhv) {
-        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
-      }
-      else {
-        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
       }
 
       $query = "UPDATE tilausrivi

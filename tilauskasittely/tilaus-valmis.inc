@@ -14,14 +14,15 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
   exit;
 }
 
-// jos tilauksen varasto on setattu ja on laaja toimipaikkak‰sittely,
-// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+// k‰ytet‰‰n laskun varastoa jos se on, muuten varasto alkuper‰iselt‰ tilaukselta
+$vanha_varasto = empty($alkuperainen_varasto) ? 0 : $alkuperainen_varasto;
+$_varasto      = empty($laskurow['varasto']) ? $vanha_varasto : $laskurow['varasto'];
 
+if ($_varasto != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
   $query = "SELECT toimipaikka
             FROM varastopaikat
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$laskurow['varasto']}";
+            AND tunnus  = {$_varasto}";
   $_tp_res = pupe_query($query);
   $_tp_row = mysql_fetch_assoc($_tp_res);
 

@@ -84,7 +84,14 @@ class PrestaSalesOrders extends PrestaClient {
         $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
 
         // fetch carrier
-        $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+        if (!empty($sales_order['id_carrier'])) {
+          $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+        }
+        else {
+          $carrier = array(
+            "name" => ''
+          );
+        }
 
         $params = array(
           "carrier"          => $carrier,

@@ -388,6 +388,7 @@ class PrestaProducts extends PrestaClient {
 
     $row_counter = 0;
     $total_counter = count($all_product_images);
+    $all_presta_images = array();
 
     // loop all products
     foreach ($all_product_images as $product) {
@@ -396,6 +397,9 @@ class PrestaProducts extends PrestaClient {
 
       // loop all product images
       foreach ($product['images'] as $image) {
+
+        // collect all presta image ids to an array
+        $all_presta_images[] = $image['id'];
 
         // do we have this image already
         if (presta_image_exists($product['sku'], $image['id'])) {
@@ -427,6 +431,11 @@ class PrestaProducts extends PrestaClient {
           unlink($temp_file);
         }
       }
+
+      // remove all images, that are not in Presta
+      $removed = presta_poista_ylimaaraiset_kuvat($product['sku'], $all_presta_images);
+
+      $this->logger->log("Poistettiin {$removed} tuotekuvaa Pupesoftista.");
 
       $this->logger->log("Tuote {$product['sku']} käsitelty");
     }

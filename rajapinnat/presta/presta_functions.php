@@ -350,33 +350,31 @@ function presta_hae_kaikki_tuotteet() {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    if ($row['ei_saldoa'] != '') {
+    // Katsotaan onko t‰m‰ is‰tuote
+    $query = "SELECT tunnus
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$tuoteno}'
+              AND tyyppi = 'P'
+              LIMIT 1";
+    $tr_result = pupe_query($query);
+
+    if (mysql_num_rows($tr_result) == 1) {
+      // is‰tuote
+      $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+    }
+    elseif ($row['ei_saldoa'] != '') {
       // saldottomille tuoteteilla null, jotta presta tiet‰‰ olla lis‰‰m‰tt‰ t‰t‰ saldoa
       $myytavissa = null;
     }
     else {
-      // Katsotaan onko t‰m‰ is‰tuote
-      $query = "SELECT tunnus
-                FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND isatuoteno = '{$tuoteno}'
-                AND tyyppi = 'P'
-                LIMIT 1";
-      $tr_result = pupe_query($query);
-
-      if (mysql_num_rows($tr_result) == 1) {
-        // is‰tuote
-        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
-        $myytavissa = 0;
-
-        foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
-          $myytavissa += $isa_saldo;
-        }
-      }
-      else {
-        // normituote
-        list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
-      }
+      // normituote
+      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
     }
 
     // lis‰t‰‰n saldon p‰ivitt‰miseen tarvittavat tiedot

@@ -1616,7 +1616,7 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
     $filename    = "Koontilahete.xlsx";
   }
   else {
-    $header_nimi = $laskurow['nimi'];
+    $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
     $subject     = t("Excel-lähete");
     $filename    = "Lahete.xlsx";
   }

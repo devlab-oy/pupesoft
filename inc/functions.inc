@@ -32803,11 +32803,14 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
   function tuoteperheen_lapsien_kertoimet($params) {
     global $yhtiorow, $kukarow;
 
-    $isa_tuoteno = isset($params['isa_tuoteno']) ? $params['isa_tuoteno'] : die('Is‰tuoteno pit‰‰ antaa');
+    $isa_tuoteno = isset($params['isa_tuoteno']) ? $params['isa_tuoteno'] : null;
     $tyyppi      = isset($params['tyyppi'])      ? $params['tyyppi']      : 'P';
     $override    = isset($params['override'])    ? $params['override']    : false;
 
     $response = array();
+
+    if (!$isa_tuoteno) return $response;
+
 
     $query = "SELECT
               tuote.kehahin,

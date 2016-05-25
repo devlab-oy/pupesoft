@@ -262,34 +262,15 @@ class PrestaProducts extends PrestaClient {
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
       $value = $this->xml_value($product[$field_name]);
+      $value_id = $this->presta_product_feature_values->add_by_value($feature_id, $value);
 
-      // if we don't have a value, don't add anything.
-      if (empty($value)) {
-        continue;
+      if ($value_id != 0) {
+        $feature = $xml->product->associations->product_features->addChild('product_features');
+        $feature->id = $feature_id;
+        $feature->id_feature_value = $value_id;
+
+        $this->logger->log("Liitettiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
       }
-
-      $value_id = $this->presta_product_feature_values->value_id_by_value($value);
-
-      if (empty($value_id)) {
-        $feature_value = array(
-          "id_feature" => $feature_id,
-          "value" => $value,
-        );
-
-        // Create feature value
-        $response = $this->presta_product_feature_values->create($feature_value);
-        $value_id = $response['product_feature_value']['id'];
-
-        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
-        $this->presta_product_feature_values->reset_all_values();
-        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
-      }
-
-      $feature = $xml->product->associations->product_features->addChild('product_features');
-      $feature->id = $feature_id;
-      $feature->id_feature_value = $value_id;
-
-      $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
     }
 
     $manufacturer_name = $product['tuotemerkki'];

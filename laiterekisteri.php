@@ -41,7 +41,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
 enable_ajax();
 echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
 
-if (($toiminto == 'NAYTALAITTEET' or !isset($toiminto)) and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku) and empty($toimipistehaku) and empty($sopimusasiakashaku))) {
+if (($toiminto == 'NAYTALAITTEET' or !isset($toiminto)) and (empty($valmistajahaku) and empty($mallihaku) and empty($sarjanumerohaku) and empty($sopimushaku) and empty($toimipistehaku) and empty($sopimusasiakashaku) and empty($sarjanumeroseurantahaku))) {
   echo "<font class='error'>".t("Anna vähintään yksi rajaus")."!</font><br/>";
   $toiminto = 'RAJAALAITTEET';
 }
@@ -351,11 +351,17 @@ if ($toiminto == 'NAYTALAITTEET') {
   }
 
   $sopimusasiakasjoini = "";
+  $sarjanumeroseurantajoini = "";
   if (!empty($sopimusasiakashaku)) {
     // Sopimusasiakashakua varten tarvitaan myös laitteen_sopimukset
     $sopimusjoinilisa = '';
     $sopimusasiakasjoini = " JOIN tilausrivi ON (tilausrivi.yhtio = laite.yhtio and tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus)	
                              JOIN lasku ON (lasku.yhtio = laite.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.toim_nimi like '%{$sopimusasiakashaku}%') ";
+  }
+  elseif (!empty($sarjanumeroseurantahaku)) {
+    $sarjanumeroseurantajoini = " JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = laite.yhtio AND sarjanumeroseuranta.sarjanumero = laite.sarjanro AND sarjanumeroseuranta.tuoteno = laite.tuoteno)
+                                  JOIN tilausrivi ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+                                  JOIN lasku ON (lasku.yhtio = sarjanumeroseuranta.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.toim_nimi like '%{$sarjanumeroseurantahaku}%') ";
   }
 
   $asiakasjoinilisa = " LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
@@ -381,6 +387,7 @@ if ($toiminto == 'NAYTALAITTEET') {
             {$asiakasjoinilisa}
             {$sopimusjoinilisa} JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
             {$sopimusasiakasjoini}
+            {$sarjanumeroseurantajoini}
             WHERE laite.yhtio      = '{$kukarow['yhtio']}'
             {$mallihakulisa}
             {$sarjanumerohakulisa}
@@ -671,6 +678,12 @@ else {
   echo "<tr>";
   echo "<th>".t("Sopimusasiakas")."</th>";
   echo "<td><input type='text' name='sopimusasiakashaku'></td>";
+  echo "</tr>";
+
+  // sarjanumeroseeuranta-asiakashaku
+  echo "<tr>";
+  echo "<th>".t("Sarjanumeroseuranta-asiakas")."</th>";
+  echo "<td><input type='text' name='sarjanumeroseurantahaku'></td>";
   echo "</tr>";
 
   echo "<tr>";

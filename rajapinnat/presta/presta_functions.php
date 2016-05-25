@@ -350,33 +350,31 @@ function presta_hae_kaikki_tuotteet() {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    if ($row['ei_saldoa'] != '') {
+    // Katsotaan onko tämä isätuote
+    $query = "SELECT tunnus
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$tuoteno}'
+              AND tyyppi = 'P'
+              LIMIT 1";
+    $tr_result = pupe_query($query);
+
+    if (mysql_num_rows($tr_result) == 1) {
+      // isätuote
+      $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+    }
+    elseif ($row['ei_saldoa'] != '') {
       // saldottomille tuoteteilla null, jotta presta tietää olla lisäämättä tätä saldoa
       $myytavissa = null;
     }
     else {
-      // Katsotaan onko tämä isätuote
-      $query = "SELECT tunnus
-                FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND isatuoteno = '{$tuoteno}'
-                AND tyyppi = 'P'
-                LIMIT 1";
-      $tr_result = pupe_query($query);
-
-      if (mysql_num_rows($tr_result) == 1) {
-        // isätuote
-        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
-        $myytavissa = 0;
-
-        foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
-          $myytavissa += $isa_saldo;
-        }
-      }
-      else {
-        // normituote
-        list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
-      }
+      // normituote
+      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
     }
 
     // lisätään saldon päivittämiseen tarvittavat tiedot
@@ -401,7 +399,8 @@ function presta_hae_tuotteet() {
     presta_echo("Haetaan tuotteet, joita on muokattu {$datetime_checkpoint} jälkeen.");
 
     $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
-    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}') ";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}') ";
   }
   else {
     presta_echo("Haetaan kaikki tuotteet.");
@@ -413,6 +412,9 @@ function presta_hae_tuotteet() {
             LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
               AND puun_alkio.laji = 'tuote'
               AND puun_alkio.liitos = tuote.tuoteno)
+            LEFT JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji IN ('nimitys', 'kuvaus', 'lyhytkuvaus'))
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);

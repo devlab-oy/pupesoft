@@ -401,7 +401,8 @@ function presta_hae_tuotteet() {
     presta_echo("Haetaan tuotteet, joita on muokattu {$datetime_checkpoint} jälkeen.");
 
     $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
-    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}') ";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}') ";
   }
   else {
     presta_echo("Haetaan kaikki tuotteet.");
@@ -413,6 +414,9 @@ function presta_hae_tuotteet() {
             LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
               AND puun_alkio.laji = 'tuote'
               AND puun_alkio.liitos = tuote.tuoteno)
+            LEFT JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji IN ('nimitys', 'kuvaus', 'lyhytkuvaus'))
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);

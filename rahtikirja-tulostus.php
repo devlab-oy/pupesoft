@@ -1149,13 +1149,17 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
     }
 
-    if (isset($excel_koontilahete) && $excel_koontilahete == 'Y') {
-      laheta_excel_koontilahete($otunnukset, $toitarow);
-    }
-    elseif (isset($excel_koontilahete) && $excel_koontilahete == 'E') {
-      foreach (explode(',', $otunnukset) as $otunnus) {
-        $otunnus = str_replace("'", "", $otunnus);
-        laheta_excel_koontilahete($otunnus, $toitarow);
+    if (!empty($excel_koontilahete)) {
+      $_otunnukset = explode(',', $otunnukset);
+
+      switch ($excel_koontilahete) {
+      case 'Y':
+        laheta_excel_koontilahete($_otunnukset, $toitarow);
+        break;
+      case 'E':
+        foreach ($_otunnukset as $_otunnus) {
+          laheta_excel_koontilahete(array($_otunnus), $toitarow);
+        }
       }
     }
 
@@ -1561,7 +1565,10 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   global $kukarow;
 
+  $_otunnukset = implode(',', $otunnukset);
+
   $query = "SELECT lasku.asiakkaan_tilausnumero,
+                   lasku.nimi,
                    asiakaskommentti.kommentti,
                    tilausrivi.tuoteno,
                    tilausrivi.tilkpl,
@@ -1591,20 +1598,33 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'L'
               AND lasku.alatila = 'B'
-              AND lasku.tunnus IN ($otunnukset)";
+              AND lasku.tunnus IN ($_otunnukset)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) return false;
+
+  $laskurow = mysql_fetch_assoc($result);
 
   $worksheet   = new pupeExcel();
   $format_bold = array("bold" => true);
   $excelrivi   = 0;
   $excelsarake = 0;
 
-  if (!empty($toimitustaparow["toim_postitp"])) {
+  if (count($otunnukset) > 1) {
+    $header_nimi = $toimitustaparow["toim_postitp"];
+    $subject     = t("Excel-koontilähete");
+    $filename    = "Koontilahete.xlsx";
+  }
+  else {
+    $header_nimi = $laskurow['nimi'];
+    $subject     = t("Excel-lähete");
+    $filename    = "Lahete.xlsx";
+  }
+
+  if (!empty($header_nimi)) {
     $worksheet->writeString($excelrivi,
                             $excelsarake,
-                            "Deliveries to {$toimitustaparow["toim_postitp"]}",
+                            "Deliveries to {$header_nimi}",
                             $format_bold);
 
     for ($i=0; $i < 3; $i++) $excelrivi++;
@@ -1624,6 +1644,8 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
     $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
     $excelsarake++;
   }
+
+  mysql_data_seek($result, 0);
 
   while ($row = mysql_fetch_assoc($result)) {
     $excelsarake = 0;
@@ -1649,11 +1671,11 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   $email_params = array(
     "to"      => $kukarow['eposti'],
-    "subject" => t("Excel-koontilähete"),
+    "subject" => $subject,
     "attachements" => array(
       0 => array(
         "filename"    => "/tmp/{$excelnimi}",
-        "newfilename" => "Koontilahete.xlsx",
+        "newfilename" => $filename,
         "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       )
     )

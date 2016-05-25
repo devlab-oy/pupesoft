@@ -181,6 +181,20 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
+    // choose pupesoft customer number
+    if (!empty($pupesoft_customer['asiakasnro'])) {
+      $pupesoft_customer_id = $pupesoft_customer['asiakasnro'];
+    }
+    elseif (!empty($pupesoft_customer['toim_ovttunnus'])) {
+      $pupesoft_customer_id = $pupesoft_customer['toim_ovttunnus'];
+    }
+    elseif (!empty($pupesoft_customer['ovttunnus'])) {
+      $pupesoft_customer_id = $pupesoft_customer['ovttunnus'];
+    }
+    else {
+      $pupesoft_customer_id = '';
+    }
+
     // empty edi_order
     $this->edi_order = '';
     $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
@@ -212,7 +226,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_LAHETYSTAPA:");
     $this->add_row("OSTOTIL.OT_VAHVISTUS_FAKSILLA:");
     $this->add_row("OSTOTIL.OT_FAKSI:");
-    $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer['asiakasnro']}");
+    $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer_id}");
     $this->add_row("OSTOTIL.OT_YRITYS:");
     $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$invoice_address['lastname']} {$invoice_address['firstname']}");
     $this->add_row("OSTOTIL.OT_KATUOSOITE:{$invoice_address['address1']}");

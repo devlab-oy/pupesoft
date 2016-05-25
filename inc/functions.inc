@@ -32800,8 +32800,12 @@ if (!function_exists('pupesoft_log')) {
 }
 
 if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
-  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+  function tuoteperheen_lapsien_kertoimet($params) {
     global $yhtiorow, $kukarow;
+
+    $isa_tuoteno = isset($params['isa_tuoteno']) ? $params['isa_tuoteno'] : die('Isätuoteno pitää antaa');
+    $tyyppi      = isset($params['tyyppi'])      ? $params['tyyppi']      : 'P';
+    $override    = isset($params['override'])    ? $params['override']    : false;
 
     $response = array();
 
@@ -32837,7 +32841,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 
     // lasketaan koko tuoteperheen kokonaisarvo, tätä tarvitaan arvokertoimen laskentaan
     // arvokerrointa käytetään, mikäli käytössä on isätuotteen hintaan perustuva hinnoittelu
-    if (!empty($hinnoittelu_isatuotteella)) {
+    if (!empty($hinnoittelu_isatuotteella) || $override) {
       while ($row = mysql_fetch_assoc($result)) {
         $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
       }
@@ -32849,7 +32853,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     while ($row = mysql_fetch_assoc($result)) {
       // jos hinnoitellaan isätuotteella
       // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole käytössä
-      if (!empty($hinnoittelu_isatuotteella)) {
+      if (!empty($hinnoittelu_isatuotteella) || $override) {
         $alekerroin   = 1;
         $hintakerroin = $row['kehahin'] / $kokonaisarvo;
       }
@@ -32874,13 +32878,13 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 if (!function_exists('url_or_text')) {
   function url_or_text($str) {
     $array = array("http://", "https://");
-  
+
     foreach($array as $a) {
       if (stripos($str, $a) !== false) {
         return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
       }
     }
-  
+
     return $str;
   }
 }
@@ -32912,7 +32916,12 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       $row = mysql_fetch_assoc($result);
 
       // katsotaan lapsien kertoimet
-      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $_params = array(
+        'isa_tuoteno' => $row['tuoteno'],
+        'tyyppi'      => $tyyppi,
+        'override'    => $override,
+      );
+      $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
 
       $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");

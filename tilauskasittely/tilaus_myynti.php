@@ -1309,9 +1309,27 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // valmistusriveille var tyhjäksi, että osataan mitätöidä ne seuraavassa updatessa
+  // Valmistusten valmisteriveiltä pitää osata poistaa myös sarjanumerot
   if ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') {
     $query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
     $result = pupe_query($query);
+
+    // Katsotaan onko tämän valmistuksen valmisteelle jo lisätty sarjanumero
+    $query = "SELECT sarjanumeroseuranta.tunnus AS sarjariviTunnus
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus)
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              AND tilausrivi.tyyppi = 'W'
+              AND tilausrivi.otunnus = '$kukarow[kesken]'";
+    $sarjanumero_result = pupe_query($query);
+
+    // Poistetaan valmistuksen poistamisen yhteydessä myös valmsiteen sarjanumero
+    while ($sarjanumero_tunnus = mysql_fetch_assoc($sarjanumero_result)) {
+      $query = "DELETE FROM sarjanumeroseuranta
+                WHERE yhtio = 'granu'
+                AND tunnus = '$sarjanumero_tunnus[sarjariviTunnus]'";
+      pupe_query($query);
+    }
   }
 
   // poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...

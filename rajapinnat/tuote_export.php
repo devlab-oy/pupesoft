@@ -1081,6 +1081,11 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
   }
 
+  // Tuoteparametrit joita k‰ytet‰‰n url_key:n‰
+  if (isset($magento_url_key_attributes) and !empty($magento_url_key_attributes)) {
+    $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

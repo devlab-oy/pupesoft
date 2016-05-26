@@ -1,5 +1,7 @@
 <?php
 
+$koontirahtikirja = in_array($toitarow['tulostustapa'], array('K', 'L'));
+
 //  Jos tämä on osa "kokonaistoimitusta", merkataan alkuperäinen tilausnumero alkuun
 if ($rakir_row["tunnusnippu"]>0) {
   foreach ($lotsikot as &$o) {
@@ -326,15 +328,24 @@ else {
       $pdf->draw_text(65,  731,  $postirow["yhtio_postino"]."  ".$postirow["yhtio_postitp"]."  ".$postirow["yhtio_maa"]."    ".$yhtiorow["puhelin"],    $firstpage, $kirj);
 
       //vastaanottaja
+
+      $vastaanottaja = array(
+        'nimi'    => $koontirahtikirja ? $rakir_row['toim_nimi']    : $rakir_row['nimi'],
+        'osoite'  => $koontirahtikirja ? $rakir_row['toim_osoite']  : $rakir_row['osoite'],
+        'postino' => $koontirahtikirja ? $rakir_row['toim_postino'] : $rakir_row['postino'],
+        'postitp' => $koontirahtikirja ? $rakir_row['toim_postitp'] : $rakir_row['postitp'],
+        'maa'     => $koontirahtikirja ? $rakir_row['toim_maa']     : $rakir_row['maa'],
+      );
+
       $pdf->draw_rectangle(713, 60, 696, 300,                      $firstpage, $rectparam);
       $pdf->draw_text(62,  707,  t("Vastaanottaja Mottagare"),            $firstpage, $norm);
       $pdf->draw_text(240, 707,  t("Asiakasnro Kundnr"),                $firstpage, $norm);
-      $pdf->draw_text(65,  699,  $rakir_row["nimi"],                  $firstpage, $kirj);
+      $pdf->draw_text(65, 699, $vastaanottaja["nimi"], $firstpage, $kirj);
       $pdf->draw_text(240, 699,  $rakir_row['rahtisopimus'],              $firstpage, $kirj);
       $pdf->draw_rectangle(696, 60, 684, 300,                      $firstpage, $rectparam);
-      $pdf->draw_text(65,  687,  $rakir_row["osoite"],                $firstpage, $kirj);
+      $pdf->draw_text(65, 687, $vastaanottaja["osoite"], $firstpage, $kirj);
       $pdf->draw_rectangle(684, 60, 672, 300,                      $firstpage, $rectparam);
-      $pdf->draw_text(65,  675,  $rakir_row["postino"]."  ".$rakir_row["postitp"]."  ".$rakir_row["maa"]."    ".$rakir_row["puhelin"],  $firstpage, $kirj);
+      $pdf->draw_text(65, 675, $vastaanottaja["postino"] . "  " . $vastaanottaja["postitp"] . "  " . $vastaanottaja["maa"] . "    " . $rakir_row["puhelin"],  $firstpage, $kirj);
 
       //toimitusosoite
       $pdf->draw_rectangle(657, 60, 640, 300,                        $firstpage, $rectparam);

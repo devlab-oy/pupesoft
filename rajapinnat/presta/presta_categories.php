@@ -200,7 +200,11 @@ class PrestaCategories extends PrestaClient {
 
     // we should delete them from presta
     foreach ($delete_presta_ids as $id) {
-      $result = $this->delete($id, null, $shop_group_id);
+      try {
+        $result = $this->delete($id, null, $shop_group_id);
+      }
+      catch (Exception $e) {
+      }
     }
 
     return true;

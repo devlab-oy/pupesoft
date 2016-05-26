@@ -40,6 +40,11 @@ class PrestaAddresses extends PrestaClient {
       $country = $this->presta_countries->find_country_by_code('FI');
     }
 
+    // default to first country
+    if (empty($country)) {
+      $country = $this->presta_countries->first_country();
+    }
+
     // Mandatory fields
     $_osoite = empty($address['osoite']) ? "-" : $address['osoite'];
     $_postitp = empty($address['postitp']) ? "-" : $address['postitp'];
@@ -49,7 +54,7 @@ class PrestaAddresses extends PrestaClient {
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
     $_nimi = empty($_nimi) ? '-' : $_nimi;
 
-    $xml->address->id_country = $country['id'];
+    $xml->address->id_country = $country;
     $xml->address->id_customer = $address['presta_customer_id'];
     $xml->address->alias = 'Home';
     $xml->address->lastname = $this->xml_value($_nimi);

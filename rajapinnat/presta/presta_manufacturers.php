@@ -9,14 +9,41 @@ class PrestaManufacturers extends PrestaClient {
     parent::__construct($url, $api_key, $log_file);
   }
 
-  public function manufacturer_id_by_name($value) {
-    foreach ($this->fetch_all() as $record) {
-      if ($record['name'] == $value) {
-        return $record['id'];
+  public function add_manufacturer_by_name($name) {
+    $name = trim($name);
+
+    // empty means no manufacturer (= 0)
+    if (empty($name)) {
+      return 0;
+    }
+
+    // check do we have this already
+    $manufacturer_id = $this->fetch_id_by_name($name);
+
+    // nope, create
+    if (empty($manufacturer_id)) {
+      $manufacturer = array(
+        "name" => $name,
+      );
+
+      // Create manufacturer
+      try {
+        $response = $this->create($manufacturer);
+        $manufacturer_id = $response['manufacturer']['id'];
+
+        $this->logger->log("Perustettiin valmistaja '{$name}' ({$manufacturer_id})");
+
+        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
+        $this->reset_all_records();
+      }
+      catch (Exception $e) {
+        $this->logger->log("Valmistajan '{$name}' perustaminen epäonnistui!");
+
+        $manufacturer_id = 0;
       }
     }
 
-    return null;
+    return $manufacturer_id;
   }
 
   public function reset_all_records() {
@@ -52,5 +79,15 @@ class PrestaManufacturers extends PrestaClient {
     $this->all_records = $this->all($display);
 
     return $this->all_records;
+  }
+
+  private function fetch_id_by_name($name) {
+    foreach ($this->fetch_all() as $record) {
+      if ($record['name'] == $name) {
+        return $record['id'];
+      }
+    }
+
+    return null;
   }
 }

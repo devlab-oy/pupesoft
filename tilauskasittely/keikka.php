@@ -1395,27 +1395,10 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
-        $onkologmaster_varasto = 0;
-        $normivarastoja = 0;
+        $onkologmaster_varasto = $normivarastoja = 0;
 
         if ($onkologmaster) {
-
-          $query = "SELECT DISTINCT varasto
-                    FROM tilausrivi
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND uusiotunnus = '{$row['tunnus']}'";
-          $varastocheckres = pupe_query($query);
-
-          while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-            $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-            if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
-              $onkologmaster_varasto++;
-            }
-            else {
-              $normivarastoja++;
-            }
-          }
+          list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($row['tunnus']);
         }
 
         $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $row['sisviesti3'] == 'ok_vie_varastoon'));
@@ -1611,29 +1594,10 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
-  $onkologmaster_varasto = 0;
-  $normivarastoja = 0;
+  $onkologmaster_varasto = $normivarastoja = 0;
 
   if ($onkologmaster) {
-
-    $onkologmaster_varasto = true;
-
-    $query = "SELECT DISTINCT varasto
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND uusiotunnus = '{$otunnus}'";
-    $varastocheckres = pupe_query($query);
-
-    while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-      $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
-        $onkologmaster_varasto++;
-      }
-      else {
-        $normivarastoja++;
-      }
-    }
+    list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($otunnus);
   }
 
   $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));

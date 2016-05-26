@@ -137,6 +137,11 @@ class MagentoClient {
   private $_magento_poista_asiakasdefaultit = array();
 
   /**
+   * Url-keyn luontia varten käytettävät parametrit
+   */
+  private $_magento_url_key_attributes = array();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -386,6 +391,7 @@ class MagentoClient {
         'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
         'weight'                => $tuote['tuotemassa'],
         'status'                => self::ENABLED,
+        'url_key'               => $this->getUrlKeyForProduct($tuote['tuoteno'], $multi_data),
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
         'tax_class_id'          => $this->getTaxClassID(),
@@ -2419,4 +2425,33 @@ class MagentoClient {
       $this->log(__METHOD__, $e);
     }
   }
+
+  /**
+  * Rakentaa url_key:n tuotteelle
+  */
+  private function getUrlKeyForProduct($tuotenumero, $parametrit) {
+    $halutut_array = $this->_magento_url_key_attributes;
+    $url_key = $tuotenumero;
+
+    if (count($halutut_array) > 0) {
+      foreach ($halutut_array as $key => $value) {
+        if (!empty($parametrit[$value])) {
+          $safe_part1 = sanitize_link_rewrite($value);
+          $safe_part2 = sanitize_link_rewrite($parametrit[$value]);
+          $url_key .= "-{$safe_part1}-{$safe_part2}";
+        }
+      }
+    }
+    return $url_key;
+  }
+
+  /**
+    * Sanitizes string for magento url_key column
+    *
+    * @param string  $string
+    * @return string
+    */
+   private function sanitize_link_rewrite($string) {
+     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+   }
 }

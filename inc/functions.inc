@@ -32772,11 +32772,11 @@ if (!function_exists("loppulaskuta")) {
     while ($row = mysql_fetch_assoc($sresult)) {
 
       $query  = "INSERT INTO tilausrivi (
-                  hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv,
+                  hinta, netto, varattu, tilkpl, otunnus, jaksotettu, tuoteno, nimitys, yhtio, tyyppi, alv,
                   kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu
                 )
                 VALUES (
-                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$tunnus}',
+                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$tunnus}', '{$tunnus}',
                   '{$yhtiorow['ennakkomaksu_tuotenumero']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L',
                   '{$row['alv']}', '{$rivikommentti}', '{$kukarow['kuka']}', now(), '{$kukarow['kuka']}',
                   now(), '{$kukarow['kuka']}', now()

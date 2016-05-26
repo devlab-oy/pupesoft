@@ -1569,6 +1569,7 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
                    lasku.nimi,
+                   lasku.toim_nimi,
                    asiakaskommentti.kommentti,
                    tilausrivi.tuoteno,
                    tilausrivi.tilkpl,

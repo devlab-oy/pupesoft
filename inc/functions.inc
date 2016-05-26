@@ -32769,14 +32769,34 @@ if (!function_exists("loppulaskuta")) {
       $rivikommentti .= "\n ".$posrow["lisatiedot"];
     }
 
+    # Tarkistetaan että ennakkolaskun hyvitysrivi menee kunnolliselle otsikolle
+    # (Voi olla case jossa ennakon kaikki rivit ovat olleet JT-rivejä ja otsikko on mitätöitynyt)
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND jaksotettu = '{$tunnus}'
+              AND tila = 'L'
+              AND alatila != 'X'
+              ORDER BY tunnus ASC
+              LIMIT 1";
+    $tunnus_chk_res = pupe_query($query);
+    $tunnus_chk_row = mysql_fetch_assoc($tunnus_chk_res);
+
+    if (!empty($tunnus_chk_row['tunnus']) and $tunnus_chk_row['tunnus'] != $tunnus) {
+      $ennakkolaskun_hyvitys_otunnus = $tunnus_chk_row['tunnus'];
+    }
+    else {
+      $ennakkolaskun_hyvitys_otunnus = $tunnus;
+    }
+
     while ($row = mysql_fetch_assoc($sresult)) {
 
       $query  = "INSERT INTO tilausrivi (
-                  hinta, netto, varattu, tilkpl, otunnus, jaksotettu, tuoteno, nimitys, yhtio, tyyppi, alv,
+                  hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv,
                   kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu
                 )
                 VALUES (
-                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$tunnus}', '{$tunnus}',
+                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$ennakkolaskun_hyvitys_otunnus}',
                   '{$yhtiorow['ennakkomaksu_tuotenumero']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L',
                   '{$row['alv']}', '{$rivikommentti}', '{$kukarow['kuka']}', now(), '{$kukarow['kuka']}',
                   now(), '{$kukarow['kuka']}', now()
@@ -32785,13 +32805,13 @@ if (!function_exists("loppulaskuta")) {
 
       if ($debug == 1) {
         echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys");
-        echo " -{$row['laskutettu']} alv {$row['alv']}% otunnus {$tunnus}<br>";
+        echo " -{$row['laskutettu']} alv {$row['alv']}% otunnus {$ennakkolaskun_hyvitys_otunnus}<br>";
       }
     }
 
     // Päivitetään positiolle laskutustunnus
     $query = "UPDATE maksupositio SET
-              uusiotunnus = '{$tunnus}'
+              uusiotunnus = '{$ennakkolaskun_hyvitys_otunnus}'
               WHERE tunnus = '{$posrow['tunnus']}'";
     $result = pupe_query($query);
 

@@ -1786,6 +1786,18 @@ else {
         }
       }
 
+      //haetaan kaikki laskutettavat tilaukset uudestaan
+      $query = "SELECT lasku.*
+                FROM lasku
+                {$lasklisa_eikateiset}
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                $lasklisa";
+      $res = pupe_query($query);
+
       // laskutetaan kaikki tilaukset (siis teh‰‰n kaikki tarvittava matikka)
       // rullataan eka query alkuun
       if (mysql_num_rows($res) != 0) {

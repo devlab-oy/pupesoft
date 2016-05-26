@@ -3433,6 +3433,7 @@ function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
     $query = "SELECT count(*) yhteensa
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila != 'D'
               AND jaksotettu != 0
               AND jaksotettu = '{$key}'";
     $result = pupe_query($query);

@@ -887,21 +887,21 @@ elseif ($tee == '') {
             lasku.maksuehto,
             lasku.lisattava_era,
             lasku.vahennettava_era,
+            lasku.jaksotettu,
             lasku.ketjutus,
             {$selectlisa}
             lasku.sisamaan_kuljetus,
             lasku.sisamaan_kuljetusmuoto,
             lasku.poistumistoimipaikka,
             lasku.poistumistoimipaikka_koodi,
-            lasku.alatila,
-            lasku.jaksotettu
+            lasku.alatila
             FROM lasku
             {$tyomaaraysjoin}
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilaehto}
             AND lasku.vienti  in ('K','E')
             {$haku}
-            ORDER by 5,6,7,8,9,10,11,12,13,14";
+            ORDER by 5,6,7,8,9,10,11,12,13,14,15";
   $tilre = pupe_query($query);
 
   echo "<br><br>";

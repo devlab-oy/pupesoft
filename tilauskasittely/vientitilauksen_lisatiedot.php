@@ -939,7 +939,7 @@ elseif ($tee == '') {
       $hyvre = pupe_query($query);
       $hyvrow = mysql_fetch_assoc($hyvre);
 
-      if (($tilrow['jaksotettu'] != 0 and $jaksotettu == $tilrow['jaksotettu']) or ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"])) {
+      if (($tilrow['jaksotettu'] != 0 and $jaksotettu == $tilrow['jaksotettu']) or ($tilrow['jaksotettu'] == 0 and $ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"])) {
         $tunnukset .= $tilrow["tilaus"].",";
         $lask++;
         echo "</tr>\n";

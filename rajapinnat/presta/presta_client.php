@@ -141,7 +141,7 @@ abstract class PrestaClient {
 
     $kauppa  = "";
     $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
 
     try {
       $msg = "Haetaan {$resource} id {$id} {$kauppa}";
@@ -299,7 +299,7 @@ abstract class PrestaClient {
 
     $kauppa  = "";
     $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
 
     try {
       $response_xml = $this->ws->get($opt);
@@ -365,7 +365,7 @@ abstract class PrestaClient {
 
     $kauppa  = "";
     $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
 
     try {
       $response_bool = $this->ws->delete($opt);

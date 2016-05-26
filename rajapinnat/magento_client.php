@@ -1935,6 +1935,14 @@ class MagentoClient {
   }
 
   /**
+   * Mitä tuotteen parametrejä käytetään url_key:n luomiseen
+   * Oletus tyhja array
+   */
+  public function setUrlKeyAttributes(array $url_key_attributes) {
+    $this->_magento_url_key_attributes = $url_key_attributes;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus

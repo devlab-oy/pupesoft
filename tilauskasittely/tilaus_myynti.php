@@ -1314,7 +1314,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
     $query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
     $result = pupe_query($query);
 
-    // Katsotaan onko tämän valmistuksen valmisteelle jo lisätty sarjanumero
+    // Katsotaan onko tämän valmistuksen valmisteille jo lisätty sarjanumeroita
     $query = "SELECT sarjanumeroseuranta.tunnus AS sarjariviTunnus
               FROM tilausrivi
               JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus)
@@ -1323,10 +1323,10 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
               AND tilausrivi.otunnus = '$kukarow[kesken]'";
     $sarjanumero_result = pupe_query($query);
 
-    // Poistetaan valmistuksen poistamisen yhteydessä myös valmsiteen sarjanumero
+    // Poistetaan valmistuksen poistamisen yhteydessä myös valmsiteiden sarjanumerot
     while ($sarjanumero_tunnus = mysql_fetch_assoc($sarjanumero_result)) {
       $query = "DELETE FROM sarjanumeroseuranta
-                WHERE yhtio = 'granu'
+                WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus = '$sarjanumero_tunnus[sarjariviTunnus]'";
       pupe_query($query);
     }

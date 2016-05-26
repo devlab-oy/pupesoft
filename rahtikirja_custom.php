@@ -324,6 +324,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
             <input type='hidden' name='tulostakopio' value='JOO'>
             <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
             <input type='hidden' name='kirjoitin' value='PDF_RUUDULLE'>
+            <input type='hidden' name='tee' value='tulosta'>
             <input type='hidden' name='nayta_pdf' value='1'>
             <input type='hidden' name='tulostuskpl' value='{$kollityht}' />
             <input type='submit' value='".t("Rahtikirja").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_rahtikirja_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";

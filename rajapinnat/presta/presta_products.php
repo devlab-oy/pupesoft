@@ -59,7 +59,17 @@ class PrestaProducts extends PrestaClient {
 
     $xml->product->reference = $this->xml_value($product['tuoteno']);
     $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
-    $xml->product->ean13 = is_numeric($product['ean']) ? $product['ean'] : '';
+
+    $_ean = '';
+
+    if (is_numeric($product['ean']) and strlen($product['ean']) < 14) {
+      $_ean = $product['ean'];
+    }
+    elseif (!empty($product['ean'])) {
+      $this->logger->log("Virheellinen EAN koodi '{$product['ean']}'");
+    }
+
+    $xml->product->ean13 = $_ean;
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
@@ -115,6 +125,9 @@ class PrestaProducts extends PrestaClient {
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
     $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
+
+    // remove forbidden characters
+    $_nimi = preg_replace("/[&]+/", "", $_nimi);
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
@@ -216,17 +229,23 @@ class PrestaProducts extends PrestaClient {
     $dom_node->parentNode->removeChild($dom_node);
 
     // Then add element back
-    $xml->product->associations->addChild('product_bundle');
+    if (count($product['tuotteen_lapsituotteet']) > 0) {
+      $xml->product->associations->addChild('product_bundle');
 
-    // Add child products for product bundle
-    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
-      $child_id = $this->add_child_product($xml, $child_product);
+      // Add child products for product bundle
+      foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+        $child_id = $this->add_child_product($xml, $child_product);
 
-      // added the child successfully
-      if ($child_id !== false) {
-        // set parent product to pack
-        $product_type = 'pack';
+        // added the child successfully
+        if ($child_id !== false) {
+          // set parent product to pack
+          $product_type = 'pack';
+        }
       }
+    }
+
+    if ($product_type == "virtual") {
+      $xml->product->is_virtual = 1;
     }
 
     // set product type
@@ -243,62 +262,24 @@ class PrestaProducts extends PrestaClient {
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
       $value = $this->xml_value($product[$field_name]);
+      $value_id = $this->presta_product_feature_values->add_by_value($feature_id, $value);
 
-      // if we don't have a value, don't add anything.
-      if (empty($value)) {
-        continue;
+      if ($value_id != 0) {
+        $feature = $xml->product->associations->product_features->addChild('product_features');
+        $feature->id = $feature_id;
+        $feature->id_feature_value = $value_id;
+
+        $this->logger->log("Liitettiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
       }
-
-      $value_id = $this->presta_product_feature_values->value_id_by_value($value);
-
-      if (empty($value_id)) {
-        $feature_value = array(
-          "id_feature" => $feature_id,
-          "value" => $value,
-        );
-
-        // Create feature value
-        $response = $this->presta_product_feature_values->create($feature_value);
-        $value_id = $response['product_feature_value']['id'];
-
-        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
-        $this->presta_product_feature_values->reset_all_values();
-        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
-      }
-
-      $feature = $xml->product->associations->product_features->addChild('product_features');
-      $feature->id = $feature_id;
-      $feature->id_feature_value = $value_id;
-
-      $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
     }
 
     $manufacturer_name = $product['tuotemerkki'];
+    $manufacturer_id = $this->presta_manufacturers->add_manufacturer_by_name($manufacturer_name);
 
-    $xml->product->id_manufacturer = 0;
+    $xml->product->id_manufacturer = $manufacturer_id;
 
-    // add manufacturer
-    if (!empty($manufacturer_name)) {
-      $manufacturer_id = $this->presta_manufacturers->manufacturer_id_by_name($manufacturer_name);
-
-      if (empty($manufacturer_id)) {
-        $manufacturer = array(
-          "name" => $manufacturer_name,
-        );
-
-        // Create manufacturer
-        $response = $this->presta_manufacturers->create($manufacturer);
-        $manufacturer_id = $response['manufacturer']['id'];
-
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->reset_all_records();
-        $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-      else {
-        $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-
-      $xml->product->id_manufacturer = $manufacturer_id;
+    if ($manufacturer_id != 0) {
+      $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
     }
 
     return $xml;
@@ -407,6 +388,7 @@ class PrestaProducts extends PrestaClient {
 
     $row_counter = 0;
     $total_counter = count($all_product_images);
+    $all_presta_images = array();
 
     // loop all products
     foreach ($all_product_images as $product) {
@@ -415,6 +397,9 @@ class PrestaProducts extends PrestaClient {
 
       // loop all product images
       foreach ($product['images'] as $image) {
+
+        // collect all presta image ids to an array
+        $all_presta_images[] = $image['id'];
 
         // do we have this image already
         if (presta_image_exists($product['sku'], $image['id'])) {
@@ -446,6 +431,11 @@ class PrestaProducts extends PrestaClient {
           unlink($temp_file);
         }
       }
+
+      // remove all images, that are not in Presta
+      $removed = presta_poista_ylimaaraiset_kuvat($product['sku'], $all_presta_images);
+
+      $this->logger->log("Poistettiin {$removed} tuotekuvaa Pupesoftista.");
 
       $this->logger->log("Tuote {$product['sku']} käsitelty");
     }
@@ -515,8 +505,14 @@ class PrestaProducts extends PrestaClient {
     // return the values that are not present keep_presta_ids
     $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
 
+    $total = count($delete_presta_ids);
+    $current = 0;
+
     // delete products from presta
     foreach ($delete_presta_ids as $presta_id) {
+      $current++;
+      $this->logger->log("[{$current}/{$total}] Poistetaan tuote {$presta_id}");
+
       try {
         $this->delete($presta_id);
       }

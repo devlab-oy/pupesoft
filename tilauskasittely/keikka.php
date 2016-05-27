@@ -806,7 +806,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             max(lasku.nimitark) nimitark,
             max(lasku.osoite)   osoite,
             max(lasku.postitp)  postitp,
-            group_concat(distinct if(lasku.comments!='',lasku.comments,NULL) SEPARATOR '<br><br>') comments,
+            group_concat(distinct if(lasku.comments!='',CONCAT(lasku.laskunro, ': ', lasku.comments),NULL) SEPARATOR '<br><br>') comments,
             count(distinct lasku.tunnus) kpl,
             group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
             round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,

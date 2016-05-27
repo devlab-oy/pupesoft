@@ -2443,7 +2443,7 @@ class MagentoClient {
   */
   private function getUrlKeyForProduct($tuotedata) {
     $halutut_array = $this->_magento_url_key_attributes;
-    $url_key = $this->sanitize_link_rewrite(str_replace(" ", "",$tuotedata['nimi']));
+    $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
     $parametrit = array();
 
     foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {

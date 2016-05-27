@@ -27623,14 +27623,8 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $transport = $custpickinglist->addChild('Transport');
 
-    $toim_ta = t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark');
-
-    if (empty($toim_ta)) {
-      $transport_account = substr($toimitustapa_chk_row['tunnus'], 0, 10);
-    }
-    else {
-      $transport_account = $toim_ta;
-    }
+    $toim_ta           = $looprow['ohjelma_moduli'] == 'MAGENTO' ? t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark') : null;
+    $transport_account = $toim_ta ? $toim_ta : substr($toimitustapa_chk_row['tunnus'], 0, 10);
 
     $transport->addChild('TransportAccount', $transport_account);
 

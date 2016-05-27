@@ -1113,8 +1113,8 @@ if ($tee == "MUOKKAA") {
     }
 
     if ($trow['myymalahinta'] > 0 and strpos($trow['nimitys'], 'Kilometrikorvaus') !== false) {
-      $korvatut_kilometrit = hae_kayttajan_kilometrit($tuoteno);
-      echo "<br><font class='message'>".t("K‰ytt‰j‰lle kirjatut kilometrit").": $korvatut_kilometrit</font><hr>";
+      $korvatut_kilometrit = hae_matkustajan_kilometrit($tuoteno, $laskurow['toim_ovttunnus']);
+      echo "<br><font class='message'>".t("Matkustajalle kirjatut kilometrit").": $korvatut_kilometrit</font><hr>";
     }
 
     echo "<table><tr>";
@@ -2608,7 +2608,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
             // Kilometriraja HUOM! T‰t‰ pit‰‰ muuttaa jos TES muuttuu
             $kilometriraja = 5000;
 
-            $korvatut_kilometrit = hae_kayttajan_kilometrit($tuoteno);
+            $korvatut_kilometrit = hae_matkustajan_kilometrit($tuoteno, $laskurow['toim_ovttunnus']);
 
             $kokonaiskappalemaara = $ins_kpl;
             $jaljellaoleva_maara = 0;
@@ -3006,16 +3006,17 @@ function listdir($start_dir = '.') {
   return $files;
 }
 
-function hae_kayttajan_kilometrit($tuoteno) {
+function hae_matkustajan_kilometrit($tuoteno, $kuka) {
   global $kukarow;
   
   $kilometrit = 0;
-  $query = "SELECT sum(kpl) yhteensa
+  $query = "SELECT sum(tilausrivi.kpl) yhteensa
             FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}' 
-              AND laatija = '{$kukarow['kuka']}'
-              AND tyyppi = 'M'
-              AND tuoteno = '{$tuoteno}'";
+            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+              AND tilausrivi.tyyppi = 'M'
+              AND tilausrivi.tuoteno = 'km-16'
+              AND lasku.toim_ovttunnus = '{$kuka}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
 

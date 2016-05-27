@@ -578,8 +578,8 @@ if ($tee == 'N') {
                     hyllytaso   = '$minnerow[hyllytaso]'
                   WHERE tuoteno   = '$tuotteet[$iii]'
                     AND yhtio     = '$kukarow[yhtio]'
-                    AND tyyppi    = 'L'
-                    AND varattu > 0
+                    AND tyyppi IN ('L','G','V')
+                    AND varattu <> 0
                     AND hyllyalue = '$mistarow[hyllyalue]'
                     AND hyllynro  = '$mistarow[hyllynro]'
                     AND hyllyvali = '$mistarow[hyllyvali]'

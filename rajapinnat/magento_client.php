@@ -391,7 +391,6 @@ class MagentoClient {
         'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
         'weight'                => $tuote['tuotemassa'],
         'status'                => self::ENABLED,
-        'url_key'               => $this->getUrlKeyForProduct($tuote['tuoteno'], $multi_data),
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
         'tax_class_id'          => $this->getTaxClassID(),
@@ -404,6 +403,11 @@ class MagentoClient {
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
       );
+
+      // Asetetaan tuotteen url_key mikäli parametrit määritelty
+      if (count($this->_magento_url_key_attributes) > 0) {
+        $tuote_data['url_key'] = $this->getUrlKeyForProduct($tuote);
+      }
 
       $poista_defaultit = $this->_magento_poistadefaultit;
 
@@ -2437,20 +2441,26 @@ class MagentoClient {
   /**
   * Rakentaa url_key:n tuotteelle
   */
-  private function getUrlKeyForProduct($tuotenumero, $parametrit) {
+  private function getUrlKeyForProduct($tuotedata) {
     $halutut_array = $this->_magento_url_key_attributes;
-    $url_key = $tuotenumero;
+    $url_key = $this->sanitize_link_rewrite(str_replace(" ", "",$tuotedata['nimi']));
+    $parametrit = array();
 
+    foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {
+      $key = $parametri['option_name'];
+      $value = $parametri['arvo'];
+      $parametrit[$key] = $value;
+    }
     if (count($halutut_array) > 0) {
       foreach ($halutut_array as $key => $value) {
         if (!empty($parametrit[$value])) {
-          $safe_part1 = sanitize_link_rewrite($value);
-          $safe_part2 = sanitize_link_rewrite($parametrit[$value]);
+          $safe_part1 = $this->sanitize_link_rewrite($value);
+          $safe_part2 = $this->sanitize_link_rewrite($parametrit[$value]);
           $url_key .= "-{$safe_part1}-{$safe_part2}";
         }
       }
     }
-    return $url_key;
+    return utf8_encode($url_key);
   }
 
   /**

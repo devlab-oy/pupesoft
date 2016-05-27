@@ -1082,6 +1082,9 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   }
 
   // Tuoteparametrit joita käytetään url_key:nä
+  // Salasanat.phpssä voidaan määritellä esim: $magento_url_key_attributes = array('vari', 'koko'); joka enabloi simpletuotteiden luontiin/päivitykseen url_keyn generoinnin.
+  // Url-key generoidaan tuotteen nimityksestä ja annetuista parametreistä ja niiden arvoista esimerkiksi. Esimerkiksi "T-PAITA-vari-BLACK-koko-XL". Kyseiseltä tuotteelta löytyy
+  // tuotteen_avainsanoista parametri vari ja parametri koko esimerkin mukaisessa tapauksessa.
   if (isset($magento_url_key_attributes) and !empty($magento_url_key_attributes)) {
     $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
   }

@@ -2392,7 +2392,8 @@ while ($tietue = fgets($fd)) {
         // Vientitilauksille saa kutsua tilaus-valmis.inciä vaan kerran
         // Kotimaan tilauksilel kutsutaan tilaus-valmis.inciä kahdesti,
         // koska ekalla kerralla niille luodaan pupeen lasku
-        if ($laskurow["vienti"] == "") {
+        if ($laskurow["vienti"] == "" or 
+          ($laskurow["vienti"] != "" and $edi_tyyppi == "" and $laskurow['h1time'] == '0000-00-00 00:00:00')) {
           require "tilaus-valmis.inc";
         }
 

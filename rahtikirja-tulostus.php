@@ -1561,6 +1561,10 @@ if ($tee == '') {
 }
 
 function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
+  $otunnukset = (array) $otunnukset;
+
+  if (empty($otunnukset)) return false;
+
   require_once 'inc/pupeExcel.inc';
 
   global $kukarow;

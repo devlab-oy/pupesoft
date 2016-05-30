@@ -1138,34 +1138,6 @@ if ($tee == "") {
 
   if (is_numeric($etsi)) {
     $haku="and lasku.tunnus='$etsi'";
-
-    #Tarkistetaan onko haettu lasku splittaantunut loppulaskutettava maksusopimus
-    $query = "SELECT jaksotettu
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tila = 'L'
-              AND alatila = 'D'
-              AND jaksotettu != 0
-              AND tunnus = '{$etsi}'";
-    $jaksotettures = pupe_query($query);
-
-    if (mysql_num_rows($jaksotettures) != 0) {
-      $jaksotetturow = mysql_fetch_assoc($jaksotettures);
-
-      $query = "SELECT COUNT(*) AS kpl, GROUP_CONCAT(tunnus) AS tunnukset
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila = 'L'
-                AND alatila = 'D'
-                AND jaksotettu = '{$jaksotetturow['jaksotettu']}'";
-      $checkres = pupe_query($query);
-      $checkrow = mysql_fetch_assoc($checkres);
-
-      if ($checkrow['kpl'] > 1) {
-        echo "<br /><font class='info'>",t("Maksusopimuksen tilaukset laskutettava samalla kertaa"),"</font><br /><br />";
-        $haku = "and lasku.tunnus IN ({$checkrow['tunnukset']})";
-      }
-    }
   }
 
   if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {

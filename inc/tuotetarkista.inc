@@ -76,11 +76,12 @@ if (!function_exists("tuotetarkista")) {
       }
     }
 
-    if ($fieldname == "osasto"
+    if ($laji != "V" and
+      ($fieldname == "osasto"
       or $fieldname == "try"
       or $fieldname == "tuotemerkki"
       or $fieldname == "malli"
-      or $fieldname == "mallitarkenne") {
+      or $fieldname == "mallitarkenne")) {
 
       // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
       if (empty($t[$i])) {

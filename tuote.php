@@ -1390,7 +1390,7 @@ if (isset($ajax)) {
 
         $yhteensa[$tyyppi] += $jtrow["kpl"];
         
-        if ($tyyppi == t("Puute")) {
+        if ($jtrow["var"] == "P") {
           $yhteensa[$tyyppi] += $jtrow['tilkpl'];
         }
 
@@ -1476,7 +1476,7 @@ if (isset($ajax)) {
 
         $_return .= "</td>";
 
-        if (strpos($tyyppi, t("Puute")) !== false) { 
+        if ($jtrow["var"] == "P") { 
           $kappalemaara = $jtrow["tilkpl"];
         }
         else {

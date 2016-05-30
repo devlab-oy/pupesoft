@@ -67,6 +67,7 @@ class PrestaSalesOrders extends PrestaClient {
     }
 
     $sales_orders = $this->fetch_sales_orders();
+    $id_group_shop = $this->shop_group_id();
 
     $total = count($sales_orders);
     $current = 0;
@@ -77,15 +78,15 @@ class PrestaSalesOrders extends PrestaClient {
 
       try {
         // fetch associated addresses
-        $address_invoice  = $this->presta_addresses->get($sales_order['id_address_invoice']);
-        $invoice_country  = $this->presta_countries->get($address_invoice['id_country']);
+        $address_invoice  = $this->presta_addresses->get($sales_order['id_address_invoice'], null, $id_group_shop);
+        $invoice_country  = $this->presta_countries->get($address_invoice['id_country'], null, $id_group_shop);
 
-        $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery']);
-        $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
+        $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery'], null, $id_group_shop);
+        $delivery_country = $this->presta_countries->get($address_delivery['id_country'], null, $id_group_shop);
 
         // fetch carrier
         if (!empty($sales_order['id_carrier'])) {
-          $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+          $carrier = $this->presta_carriers->get($sales_order['id_carrier'], null, $id_group_shop);
         }
         else {
           $carrier = array(

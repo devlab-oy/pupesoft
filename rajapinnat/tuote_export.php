@@ -1081,6 +1081,15 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
     $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
   }
 
+  // Tuoteparametrit, joita k‰ytet‰‰n url_key:n‰. url_key generoidaan tuotteen nimityksest‰
+  // sek‰ annetuista parametreist‰ ja niiden arvoista.
+  //
+  // $magento_url_key_attributes = array('vari', 'koko');
+  // => "T-PAITA-vari-BLACK-koko-XL"
+  if (isset($magento_url_key_attributes) and !empty($magento_url_key_attributes)) {
+    $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
+  }
+
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
     echo date("d.m.Y @ G:i:s")." - P‰ivitet‰‰n tuotekategoriat\n";

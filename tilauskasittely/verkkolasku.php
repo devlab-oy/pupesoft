@@ -992,12 +992,12 @@ else {
       }
 
       // tarkistetaan jaksotetut tunnukset
-      if (!empty($jaksotetut_tunnukset)) {  
+      if (!empty($jaksotetut_tunnukset)) {
         list($ok_tunnukset, $puuttuvat_tunnukset) = tarkista_jaksotetut_laskutunnukset($jaksotetut_by_jaksotettu);
-        
+
         // ohitetaan virheellisen jaksotettujen laskujen käsittely
         if (!empty($puuttuvat_tunnukset)) {
-          $tulos_ulos .= "<br>\n".t("Valituista laskuista ei käsitelty seuraavia").": {$puuttuvat_tunnukset}<br>\n";
+          $tulos_ulos .= "<br>\n".t("HUOM: Laskuta kaikki maksusopimustilauksen toimitukset kerralla. Valituista laskuista ei käsitelty seuraavia").": {$puuttuvat_tunnukset}<br>\n";
           $lasklisa .= " and lasku.tunnus NOT IN ({$puuttuvat_tunnukset}) ";
         }
 
@@ -3427,7 +3427,7 @@ function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
 
   $hyvat = "";
   $vialliset = "";
-  
+
   foreach ($jaksotetut_array as $key => $value) {
 
     $query = "SELECT count(*) yhteensa
@@ -3439,7 +3439,7 @@ function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
     $tarkastettu_maara = $row['yhteensa'];
-    
+
     if (count($value) != $tarkastettu_maara) {
       $vialliset .= implode(',', $value).",";
     }

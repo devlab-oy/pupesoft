@@ -434,35 +434,27 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $jtcheckerror = voidaanko_vapauttaa_maksusopimus($tunnus);
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND jaksotettu = '{$tunnus}'
+              AND tila       = 'N'
+              AND alatila    = 'B'";
+    $laskures = pupe_query($query);
 
-    if (count($jtcheckerror) > 0) {
-      echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivejä (%s)", "", implode(", ", $jtcheckerror)),"</font><br>";
-    }
-    else {
+    while ($laskurow = mysql_fetch_assoc($laskures)) {
 
-      $query = "SELECT *
-                FROM lasku
-                WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND jaksotettu = '{$tunnus}'
-                AND tila       = 'N'
-                AND alatila    = 'B'";
-      $laskures = pupe_query($query);
+      $query = "UPDATE lasku SET
+                alatila     = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$laskurow['tunnus']}'";
+      $upd_res = pupe_query($query);
 
-      while ($laskurow = mysql_fetch_assoc($laskures)) {
+      if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';
 
-        $query = "UPDATE lasku SET
-                  alatila     = ''
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$laskurow['tunnus']}'";
-        $upd_res = pupe_query($query);
+      $kukarow['kesken'] = $laskurow['tunnus'];
 
-        if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';
-
-        $kukarow['kesken'] = $laskurow['tunnus'];
-
-        require 'tilauskasittely/tilaus-valmis.inc';
-      }
+      require 'tilauskasittely/tilaus-valmis.inc';
     }
 
     $tee = "";

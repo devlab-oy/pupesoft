@@ -214,6 +214,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
   and $laskurow['tila'] == 'N'
   and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+  and vapauta_maksusopimus_kysely($laskurow['jaksotettu']) == 0
   and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
 
   if ($laskurow['alatila'] == '') {

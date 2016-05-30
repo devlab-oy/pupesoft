@@ -287,6 +287,29 @@ while (false !== ($file = readdir($handle))) {
     $yoimresult  = pupe_query($query);
 
     pupesoft_log('outbound_delivery', "Keräyskuittaus tilauksesta {$otunnus} vastaanotettu");
+
+    $avainsanaresult = t_avainsana("ULKJARJLAHETE");
+    $avainsanarow = mysql_fetch_assoc($avainsanaresult);
+
+    if ($avainsanarow['selite'] != '') {
+
+      // Tulostetaan lähete
+      $params = array(
+        'laskurow'          => $laskurow,
+        'sellahetetyyppi'       => "",
+        'extranet_tilausvahvistus'   => "",
+        'naytetaanko_rivihinta'    => "",
+        'tee'            => "",
+        'toim'            => "",
+        'komento'           => "asiakasemail{$avainsanarow['selite']}",
+        'lahetekpl'          => "",
+        'kieli'           => ""
+      );
+
+      pupesoft_tulosta_lahete($params);
+
+      pupesoft_log('outbound_delivery', "Lähetettiin lähete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+    }
   }
   else {
     // Laitetaan sähköpostia tuplakeräyksestä - ollaan yritetty merkitä kerätyksi jo käsin kerättyä tilausta

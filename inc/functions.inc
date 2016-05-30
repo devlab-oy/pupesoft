@@ -27698,34 +27698,6 @@ if (!function_exists('posten_outbounddelivery')) {
 
       if ($palautus == 0) {
         pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
-
-        $avainsanaresult = t_avainsana("ULKJARJLAHETE");
-        $avainsanarow = mysql_fetch_assoc($avainsanaresult);
-
-        if ($avainsanarow['selite'] != '') {
-
-          $query = "SELECT *
-                    FROM lasku
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$otunnus}'";
-          $laskures = pupe_query($query);
-          $laskurow = mysql_fetch_assoc($laskures);
-
-          // Tulostetaan l‰hete
-          $params = array(
-            'laskurow'          => $laskurow,
-            'sellahetetyyppi'       => "",
-            'extranet_tilausvahvistus'   => "",
-            'naytetaanko_rivihinta'    => "",
-            'tee'            => "",
-            'toim'            => "",
-            'komento'           => "asiakasemail{$avainsanarow['selite']}",
-            'lahetekpl'          => "",
-            'kieli'           => ""
-          );
-
-          pupesoft_tulosta_lahete($params);
-        }
       }
       else {
         pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");

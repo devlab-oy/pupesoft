@@ -311,6 +311,7 @@ if (!isset($ppa4)) $ppa4 = date("d", mktime(0, 0, 0, date("m")-12, date("d"), da
 if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
+if (!isset($ei_nollariveja)) $ei_nollariveja = "";
 
 // katsotaan tarvitaanko mennä toimittajahakuun
 if (($ytunnus != "" and $toimittajaid == "") or (isset($edytunnus) and $edytunnus != "" and $edytunnus != $ytunnus)) {
@@ -767,7 +768,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       }
     }
 
-    if ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["status"] == 'T') {
+    if ($ei_nollariveja != "" and $ostot+$enp == 0) {
+      $naytetaan = "nope";
+    }
+    elseif ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["status"] == 'T') {
       $naytetaan = "nope";
     }
     else {
@@ -1131,6 +1135,9 @@ if ($toim == "") {
   $chk = "";
   if ($ei_vuosikulutusta != "") $chk = "checked";
   echo "<tr><th>".t("Älä huomioi vuosikulutusta")."</th><td colspan='3'><input type='checkbox' name='ei_vuosikulutusta' {$chk}></td></tr>";
+
+  $chk = $ei_nollariveja != "" ? "checked" : "";
+  echo "<tr><th>".t("Ei ehdoteta ostettavaksi jos oston ja myynnin erotus on 0")."</th><td colspan='3'><input type='checkbox' name='ei_nollariveja' {$chk}></td></tr>";
 }
 
 $chk = "";

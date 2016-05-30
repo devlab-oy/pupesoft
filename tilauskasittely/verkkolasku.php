@@ -977,10 +977,34 @@ else {
     if (mysql_num_rows($res) > 0) {
 
       $tunnukset = "";
+      $jaksotetut_tunnukset = "";
+      $jaksotetut_by_jaksotettu = array();
 
       // otetaan tunnukset talteen
       while ($row = mysql_fetch_assoc($res)) {
-        $tunnukset .= "'$row[tunnus]',";
+        if ($row['jaksotettu'] > 0) {
+          $jaksotetut_tunnukset .= "'$row[tunnus]',";
+          $jaksotetut_by_jaksotettu[$row['jaksotettu']][] = $row['tunnus'];
+        }
+        else {
+          $tunnukset .= "'$row[tunnus]',";
+        }
+      }
+
+      // tarkistetaan jaksotetut tunnukset
+      if (!empty($jaksotetut_tunnukset)) {
+        list($ok_tunnukset, $puuttuvat_tunnukset) = tarkista_jaksotetut_laskutunnukset($jaksotetut_by_jaksotettu);
+
+        // ohitetaan virheellisen jaksotettujen laskujen k‰sittely
+        if (!empty($puuttuvat_tunnukset)) {
+          $tulos_ulos .= "<br>\n".t("HUOM: Laskuta kaikki maksusopimustilauksen toimitukset kerralla. Valituista laskuista ei k‰sitelty seuraavia").": {$puuttuvat_tunnukset}<br>\n";
+          $lasklisa .= " and lasku.tunnus NOT IN ({$puuttuvat_tunnukset}) ";
+        }
+
+        // lis‰t‰‰n oikeelliset jaksotetut laskut tunnuksiin
+        if (!empty($ok_tunnukset)) {
+          $tunnukset .= $ok_tunnukset;
+        }
       }
 
       // vika pilkku pois
@@ -1761,6 +1785,18 @@ else {
           }
         }
       }
+
+      //haetaan kaikki laskutettavat tilaukset uudestaan
+      $query = "SELECT lasku.*
+                FROM lasku
+                {$lasklisa_eikateiset}
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                $lasklisa";
+      $res = pupe_query($query);
 
       // laskutetaan kaikki tilaukset (siis teh‰‰n kaikki tarvittava matikka)
       // rullataan eka query alkuun
@@ -3381,6 +3417,40 @@ else {
     echo "<br>\n<input type='submit' value='".t("Jatka")."'>";
     echo "</form>";
   }
+}
+
+// Ottaa sis‰‰n arrayn jossa keyn‰ 'jaksotettu' ja valuena array laskutunnuksia
+// Tarkistaa lˆytyykˆ tarvittava m‰‰r‰ laskutunnuksia
+// palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
+function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
+  global $kukarow;
+
+  $hyvat = "";
+  $vialliset = "";
+
+  foreach ($jaksotetut_array as $key => $value) {
+
+    $query = "SELECT count(*) yhteensa
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila != 'D'
+              AND jaksotettu != 0
+              AND jaksotettu = '{$key}'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+    $tarkastettu_maara = $row['yhteensa'];
+
+    if (count($value) != $tarkastettu_maara) {
+      $vialliset .= implode(',', $value).",";
+    }
+    else {
+      $hyvat .= implode(',', $value).",";
+    }
+  }
+
+  if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
+
+  return array($hyvat, $vialliset);
 }
 
 if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {

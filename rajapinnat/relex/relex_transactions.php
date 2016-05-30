@@ -191,7 +191,7 @@ $query = "(SELECT
            {$tapahtumarajaus}
            HAVING keratty_siirto = 0 AND keratty_myynti = 0 AND sisainen_tai_kir_siirto = 0)
 
-           UNION
+           UNION ALL
 
            (SELECT
            yhtio.maa,

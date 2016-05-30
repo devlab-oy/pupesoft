@@ -471,8 +471,21 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       }
 
       $kommentti  = $coprivirow['kommentti'];
-      $kerayspvm  = $coprivirow['kerayspvm'];
-      $toimaika  = $coprivirow['toimaika'];
+
+      if ($coprivirow['kerayspvm'] >= date("Y-m-d")) {
+        $kerayspvm = $coprivirow['kerayspvm'];
+      }
+      else {
+        $kerayspvm = date("Y-m-d");
+      }
+
+      if ($coprivirow['toimaika'] >= date("Y-m-d")) {
+        $toimaika = $coprivirow['toimaika'];
+      }
+      else {
+        $toimaika = date("Y-m-d");
+      }
+
       $alv    = $coprivirow['alv'];
       $ytunnus  = $laskurow["ytunnus"];
       $rivinumero = $coprivirow['tilaajanrivinro'];

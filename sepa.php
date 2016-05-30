@@ -432,7 +432,7 @@ require "inc/pankkiyhteys_functions.inc";
 $tee = empty($tee) ? '' : $tee;
 
 // Onko maksuaineistoille annettu salasanat.php:ssä oma polku jonne tallennetaan
-if ($tee == "KIRJOITAKOPIO") {
+if ($tee == "KIRJOITAKOPIO" || isset($vanhatee) && $vanhatee == "KIRJOITAKOPIO") {
   $pankkitiedostot_polku = "/tmp";
 }
 elseif (!empty($maksuaineiston_siirto[$kukarow["yhtio"]]["local_dir"])) {
@@ -984,6 +984,7 @@ if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
 
     echo "<form method='post' action='sepa.php'>";
     echo "<input type='hidden' name='tee' value='laheta_pankkiin'/>";
+    echo "<input type='hidden' name='vanhatee' value='{$tee}'/>";
     echo "<input type='hidden' name='pankkitili_tunnus' value='{$pankkitili_tunnus}'/>";
     echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$row['pankkiyhteys_tunnus']}'/>";
     echo "<input type='hidden' name='pankkiyhteys_tiedosto' value='$pankkiyhteys_tiedosto'/>";

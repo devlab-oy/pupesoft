@@ -82,7 +82,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     $yriti_res = pupe_query($query);
 
     if (mysql_num_rows($yriti_res) !== 1) {
-      echo "<br><font class='error'>".t("VIRHE: Suorituksen pankkitiliä ei löydy")."! ({$suoritus_row['tilino']})</font><br><br>";
+      echo "<br><font class='error'>".t("VIRHE: Suorituksella olevaa pankkitiliä ei löydy yritykseltä")."! ({$suoritus_row['tilino']})</font><br><br>";
 
       continue;
     }
@@ -98,10 +98,39 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
               AND korjattu = ''";
     $tiliointi1_res = pupe_query($query);
 
+    // saamiset ei löydy
     if (mysql_num_rows($tiliointi1_res) !== 1) {
-      echo "<br><font class='error'>".t("VIRHE: Suorituksen saamiset -tiliöintiä ei löydy")."!</font><br><br>";
+      // katsotaan onko tiliöinti poistettu, ja etsitään tosite poistetun tiliöinnin kautta
+      $query = "SELECT *
+                FROM tiliointi
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tunnus   = '{$suoritus_row['ltunnus']}'
+                AND ltunnus  > 0";
+      $tiliointi1_res = pupe_query($query);
 
-      continue;
+      if (mysql_num_rows($tiliointi1_res) !== 1) {
+        echo "<br><font class='error'>".t("VIRHE: Suorituksen tositetta ei löydy")."!</font><br><br>";
+
+        continue;
+      }
+
+      $tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
+
+      // etsitään tilinumerolla, joka löydettiin alkuperäiseltä (poistetulta) tiliöinniltä
+      $query = "SELECT *
+                FROM tiliointi
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tilino   = '{$tiliointi1_row['tilino']}'
+                AND ltunnus  = '{$tiliointi1_row['ltunnus']}'
+                AND ltunnus  > 0
+                AND korjattu = ''";
+      $tiliointi1_res = pupe_query($query);
+
+      if (mysql_num_rows($tiliointi1_res) !== 1) {
+        echo "<br><font class='error'>".t("VIRHE: Suorituksen alkuperäistä saamiset -tiliöintiä ei löydy, tilinumerolla:")." {$tiliointi1_row['tilino']}</font><br><br>";
+
+        continue;
+      }
     }
 
     $tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);

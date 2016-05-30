@@ -137,6 +137,11 @@ class MagentoClient {
   private $_magento_poista_asiakasdefaultit = array();
 
   /**
+   * Url-keyn luontia varten käytettävät parametrit
+   */
+  private $_magento_url_key_attributes = array();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -398,6 +403,11 @@ class MagentoClient {
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
       );
+
+      // Asetetaan tuotteen url_key mikäli parametrit määritelty
+      if (count($this->_magento_url_key_attributes) > 0) {
+        $tuote_data['url_key'] = $this->getUrlKeyForProduct($tuote);
+      }
 
       $poista_defaultit = $this->_magento_poistadefaultit;
 
@@ -1929,6 +1939,14 @@ class MagentoClient {
   }
 
   /**
+   * Mitä tuotteen parametrejä käytetään url_key:n luomiseen
+   * Oletus tyhja array
+   */
+  public function setUrlKeyAttributes(array $url_key_attributes) {
+    $this->_magento_url_key_attributes = $url_key_attributes;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -2419,4 +2437,39 @@ class MagentoClient {
       $this->log(__METHOD__, $e);
     }
   }
+
+  /**
+  * Rakentaa url_key:n tuotteelle
+  */
+  private function getUrlKeyForProduct($tuotedata) {
+    $halutut_array = $this->_magento_url_key_attributes;
+    $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
+    $parametrit = array();
+
+    foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {
+      $key = $parametri['option_name'];
+      $value = $parametri['arvo'];
+      $parametrit[$key] = $value;
+    }
+    if (count($halutut_array) > 0) {
+      foreach ($halutut_array as $key => $value) {
+        if (!empty($parametrit[$value])) {
+          $safe_part1 = $this->sanitize_link_rewrite($value);
+          $safe_part2 = $this->sanitize_link_rewrite($parametrit[$value]);
+          $url_key .= "-{$safe_part1}-{$safe_part2}";
+        }
+      }
+    }
+    return utf8_encode($url_key);
+  }
+
+  /**
+    * Sanitizes string for magento url_key column
+    *
+    * @param string  $string
+    * @return string
+    */
+   private function sanitize_link_rewrite($string) {
+     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+   }
 }

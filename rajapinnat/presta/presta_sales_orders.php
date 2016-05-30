@@ -1,7 +1,9 @@
 <?php
 
+require_once 'rajapinnat/presta/presta_addresses.php';
+require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_client.php';
-require_once 'rajapinnat/presta/presta_customers.php';
+require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {
@@ -10,23 +12,27 @@ class PrestaSalesOrders extends PrestaClient {
   private $fetch_statuses = array();
   private $fetched_status = null;
   private $presta_addresses = null;
+  private $presta_carriers = null;
   private $presta_countries = null;
+  private $presta_order_histories = null;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
+    $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
+    $this->presta_order_histories = new PrestaOrderHistories($url, $api_key, $log_file);
 
-    $this->presta_addresses = new PrestaAddresses($url, $api_key);
-    $this->presta_countries = new PrestaCountries($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
     return 'orders';
   }
 
-  protected function generate_xml($sales_order, SimpleXMLElement $existing_sales_order = null) {
-    die('You should not be here! Order update() or create() are not implemented');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function set_edi_filepath($filepath) {
@@ -77,7 +83,18 @@ class PrestaSalesOrders extends PrestaClient {
         $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery']);
         $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
 
+        // fetch carrier
+        if (!empty($sales_order['id_carrier'])) {
+          $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+        }
+        else {
+          $carrier = array(
+            "name" => ''
+          );
+        }
+
         $params = array(
+          "carrier"          => $carrier,
           "delivery_address" => $address_delivery,
           "delivery_country" => $delivery_country,
           "invoice_address"  => $address_invoice,
@@ -119,7 +136,8 @@ class PrestaSalesOrders extends PrestaClient {
 
       $this->logger->log("Haetaan tilaukset rajauksella current_state = {$states_str}");
 
-      $sales_orders = $this->all(null, $filters);
+      $id_group_shop = $this->shop_group_id();
+      $sales_orders = $this->all(null, $filters, null, $id_group_shop);
     }
     catch (Exception $e) {
       return array();
@@ -137,6 +155,7 @@ class PrestaSalesOrders extends PrestaClient {
    * @return array
    */
   private function convert_to_edi($params) {
+    $carrier          = $params["carrier"];
     $delivery_address = $params["delivery_address"];
     $delivery_country = $params["delivery_country"];
     $invoice_address  = $params["invoice_address"];
@@ -162,6 +181,20 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
+    // choose pupesoft customer number
+    if (!empty($pupesoft_customer['asiakasnro'])) {
+      $pupesoft_customer_id = $pupesoft_customer['asiakasnro'];
+    }
+    elseif (!empty($pupesoft_customer['toim_ovttunnus'])) {
+      $pupesoft_customer_id = $pupesoft_customer['toim_ovttunnus'];
+    }
+    elseif (!empty($pupesoft_customer['ovttunnus'])) {
+      $pupesoft_customer_id = $pupesoft_customer['ovttunnus'];
+    }
+    else {
+      $pupesoft_customer_id = '';
+    }
+
     // empty edi_order
     $this->edi_order = '';
     $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
@@ -178,7 +211,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_TILAUSAIKA:");
     $this->add_row("OSTOTIL.OT_KASITTELIJA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
-    $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:");
+    $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:{$carrier['name']}");
     $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
     $this->add_row("OSTOTIL.OT_MAKSETTU:"); // complete tarkoittaa, että on jo maksettu
     $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");
@@ -193,7 +226,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_LAHETYSTAPA:");
     $this->add_row("OSTOTIL.OT_VAHVISTUS_FAKSILLA:");
     $this->add_row("OSTOTIL.OT_FAKSI:");
-    $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer['asiakasnro']}");
+    $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer_id}");
     $this->add_row("OSTOTIL.OT_YRITYS:");
     $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$invoice_address['lastname']} {$invoice_address['firstname']}");
     $this->add_row("OSTOTIL.OT_KATUOSOITE:{$invoice_address['address1']}");
@@ -219,7 +252,17 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_TOIMITUS_EMAIL:");
     $this->add_row("*RE OSTOTIL");
 
-    $rows = $order['associations']['order_rows']['order_row'];
+    $order_rows = $order['associations']['order_rows'];
+
+    if (isset($order_rows['order_rows'])) {
+      $rows = $order_rows['order_rows'];
+    }
+    elseif(isset($order_rows['order_row'])) {
+      $rows = $order_rows['order_row'];
+    }
+    else {
+      throw new Exception("Tilaukselta ei löydy tilausrivejä, ei voida jatkaa");
+    }
 
     // One row fix
     if (isset($rows['id'])) {
@@ -245,14 +288,16 @@ class PrestaSalesOrders extends PrestaClient {
     foreach ($rows as $row) {
       $row_number += 1;
 
+      // pack_rows on custom presta kenttä. Mikäli kyseessä on pack -tuote (tuoteperhe), niin
+      // kentässä tulee lapsituotteiden tiedot muodossa "tuotekoodi1:hinta1;tuotekoodi1:hinta2..."
+      $pack_rows = isset($row['pack_rows']) ? $row['pack_rows'] : '';
+
       $this->add_row("*RS OSTOTILRIV {$row_number}");
       $this->add_row("OSTOTILRIV.OTR_NRO:{$order['id']}");
       $this->add_row("OSTOTILRIV.OTR_RIVINRO:{$row_number}");
       $this->add_row("OSTOTILRIV.OTR_TOIMITTAJANRO:");
       $this->add_row("OSTOTILRIV.OTR_TUOTEKOODI:{$row['product_reference']}");
-      // pack_rows on custom presta kenttä. Mikäli kyseessä on pack -tuote (tuoteperhe), niin
-      // kentässä tulee lapsituotteiden tiedot muodossa "tuotekoodi1:hinta1;tuotekoodi1:hinta2..."
-      $this->add_row("OSTOTILRIV.OTR_TUOTERAKENNE:{$row['pack_rows']}");
+      $this->add_row("OSTOTILRIV.OTR_TUOTERAKENNE:{$pack_rows}");
       $this->add_row("OSTOTILRIV.OTR_NIMI:{$row['product_name']}");
       $this->add_row("OSTOTILRIV.OTR_TILATTUMAARA:{$row['product_quantity']}");
       $this->add_row("OSTOTILRIV.OTR_RIVISUMMA:");
@@ -294,8 +339,7 @@ class PrestaSalesOrders extends PrestaClient {
 
       $this->logger->log("Merkattiin tilaus {$id} tilaan {$this->fetched_status}.");
 
-      $presta_order_history = new PrestaOrderHistories($this->url(), $this->api_key());
-      $presta_order_history->create($order_history);
+      $this->presta_order_histories->create($order_history);
     }
     catch (Exception $e) {
       $msg = "Tilauksen {$sales_order['id']} haetuksi merkkaaminen epäonnistui";

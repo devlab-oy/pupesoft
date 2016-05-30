@@ -530,10 +530,7 @@ if (!function_exists("tuotetarkista")) {
             if (mysql_num_rows($paikka_chk_res) == 0) {
               lisaa_tuotepaikka($tem_tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, "Tuoteylläpidossa", $oletus_x, 0, 0, 0);
 
-              if ($trow["luedata_from"] == "LUEDATA") {
-                lue_data_echo("<font class='message'>".t("Lisättiin varastopaikka")." {$_tuotepaikka}</font></br>");
-              }
-              else {
+              if (empty($trow["luedata_from"])) {
                 echo "<font class='message'>".t("Lisättiin varastopaikka")." {$_tuotepaikka}</font></br>";
               }
 

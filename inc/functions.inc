@@ -471,7 +471,7 @@ if (!function_exists("pupesoft_flock")) {
     }
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
-      if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
+      if ($locktime > 0 and time() - filemtime($lockfile) >= $locktime) {
         // Onko nagios monitor asennettu?
         if (file_exists("/home/nagios/nagios-pupesoft.sh")) {
           file_put_contents("/home/nagios/nagios-pupesoft.log", $error_message, FILE_APPEND);
@@ -7168,8 +7168,14 @@ if (!function_exists("paivita_toimitukset")) {
 }
 
 if (!function_exists("tulosta_ytunnus")) {
-  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "") {
+  function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;
+
+    $ytunnus_vai_hetu = tarkistahetu($ytunnus);
+
+    if (strpos($ytunnus_vai_hetu, "XXXX") !== false) {
+      return $hetu_tarkenne ? $ytunnus : $ytunnus_vai_hetu;
+    }
 
     if ($maa == "") {
       $maa = $yhtiorow["maa"];
@@ -8346,6 +8352,7 @@ if (!function_exists("aja_kysely")) {
           }
 
           ${$row["var"]} = $row["value"];
+          $_POST[$row["var"]] = $row["value"];
         }
       }
 
@@ -8651,7 +8658,7 @@ if (!function_exists('tarkasta_liite')) {
 
     // otetaan file extensio
     $path_parts = pathinfo($file['name']);
-    $ext = strtoupper($path_parts['extension']);
+    $ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
     if ($ext == "JPEG") $ext = "jpg";
 
     //  Sallitut tiedostot on aina upper
@@ -10252,6 +10259,28 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
+  function hae_kayttajan_toimipistetunnukset() {
+    global $kukarow;
+
+    $asiakastunnukset = '';
+    if (!empty($kukarow['oletus_asiakas'])) {
+      $asiakastunnukset = $kukarow['oletus_asiakas'];
+    }
+
+    $query = "SELECT group_concat(asiakas.tunnus) toimipistetunnukset
+              FROM customers_users
+              JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
+              WHERE user_id = '{$kukarow['tunnus']}'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+    if (!empty($row['toimipistetunnukset'])) {
+      $asiakastunnukset = empty($asiakastunnukset) ? $row['toimipistetunnukset'] : $asiakastunnukset.",".$row['toimipistetunnukset'];
+    }
+    return $asiakastunnukset;
+  }
+}
+
 if (!function_exists("livesearch_laitehaku")) {
   function livesearch_laitehaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
@@ -10272,9 +10301,17 @@ if (!function_exists("livesearch_laitehaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
       </script>";
 
+      $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+      $toimipistelisa = '';
+      if (!empty($toimipistetunnukset)) {
+        $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
+      }
+
       $query = "SELECT DISTINCT sarjanro
                 FROM laite
                 WHERE yhtio     = '{$kukarow['yhtio']}'
+                {$toimipistelisa}
                 AND sarjanro LIKE '%{$haku}%'";
       $result = pupe_query($query);
 
@@ -27586,14 +27623,8 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $transport = $custpickinglist->addChild('Transport');
 
-    $toim_ta = t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark');
-
-    if (empty($toim_ta)) {
-      $transport_account = substr($toimitustapa_chk_row['tunnus'], 0, 10);
-    }
-    else {
-      $transport_account = $toim_ta;
-    }
+    $toim_ta           = $looprow['ohjelma_moduli'] == 'MAGENTO' ? t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark') : null;
+    $transport_account = $toim_ta ? $toim_ta : substr($toimitustapa_chk_row['tunnus'], 0, 10);
 
     $transport->addChild('TransportAccount', $transport_account);
 
@@ -31054,14 +31085,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31092,14 +31123,14 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
                   varattu          = '{$paivitettava_kpl}'
                   WHERE tunnus     = '{$muokattu_sopimusrivi}'
                   AND yhtio        = '{$kukarow['yhtio']}'
-                  AND NOT EXISTS (SELECT *
+                  AND EXISTS (SELECT *
                     FROM tuotteen_avainsanat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND tuoteno    = tilausrivi.tuoteno
@@ -31526,7 +31557,7 @@ if (!function_exists("vapauta_maksusopimus")) {
 
 if (!function_exists("tee_ennakkolasku")) {
   function tee_ennakkolasku($jaks_alkup_tilaus, $sisainen = FALSE) {
-    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku, $force_web;
 
     // Otetaan sopparin tiedot talteen jos sellanen on olemassa.
     $jaksquery = "SELECT *
@@ -31583,7 +31614,7 @@ if (!function_exists("tee_ennakkolasku")) {
 
     $ennakkokuvaus = mysql_fetch_assoc($kuvares);
 
-    mysql_data_seek($kuvares, mysql_num_rows($kuvares));
+    mysql_data_seek($kuvares, mysql_num_rows($kuvares) -1);
     $loppukuvaus = mysql_fetch_assoc($kuvares);
 
     if (!empty($soprow["maksuehto"])) {
@@ -32791,10 +32822,17 @@ if (!function_exists('pupesoft_log')) {
 }
 
 if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
-  function tuoteperheen_lapsien_kertoimet($isa_tuoteno, $tyyppi = 'P') {
+  function tuoteperheen_lapsien_kertoimet($params) {
     global $yhtiorow, $kukarow;
 
+    $isa_tuoteno = isset($params['isa_tuoteno']) ? $params['isa_tuoteno'] : null;
+    $tyyppi      = isset($params['tyyppi'])      ? $params['tyyppi']      : 'P';
+    $override    = isset($params['override'])    ? $params['override']    : false;
+
     $response = array();
+
+    if (!$isa_tuoteno) return $response;
+
 
     $query = "SELECT
               tuote.kehahin,
@@ -32828,7 +32866,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
 
     // lasketaan koko tuoteperheen kokonaisarvo, t‰t‰ tarvitaan arvokertoimen laskentaan
     // arvokerrointa k‰ytet‰‰n, mik‰li k‰ytˆss‰ on is‰tuotteen hintaan perustuva hinnoittelu
-    if (!empty($hinnoittelu_isatuotteella)) {
+    if (!empty($hinnoittelu_isatuotteella) || $override) {
       while ($row = mysql_fetch_assoc($result)) {
         $kokonaisarvo += $row['kerroin'] * $row['kehahin'];
       }
@@ -32840,7 +32878,7 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     while ($row = mysql_fetch_assoc($result)) {
       // jos hinnoitellaan is‰tuotteella
       // hintakerroin on lapsituotteen osuus kokonaisarvosta ja alekerroin ei ole k‰ytˆss‰
-      if (!empty($hinnoittelu_isatuotteella)) {
+      if (!empty($hinnoittelu_isatuotteella) || $override) {
         $alekerroin   = 1;
         $hintakerroin = $row['kehahin'] / $kokonaisarvo;
       }
@@ -32859,6 +32897,20 @@ if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
     }
 
     return $response;
+  }
+}
+
+if (!function_exists('url_or_text')) {
+  function url_or_text($str) {
+    $array = array("http://", "https://");
+
+    foreach($array as $a) {
+      if (stripos($str, $a) !== false) {
+        return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
+      }
+    }
+
+    return $str;
   }
 }
 
@@ -32889,7 +32941,12 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       $row = mysql_fetch_assoc($result);
 
       // katsotaan lapsien kertoimet
-      $kertoimet = tuoteperheen_lapsien_kertoimet($row['tuoteno'], $tyyppi);
+      $_params = array(
+        'isa_tuoteno' => $row['tuoteno'],
+        'tyyppi'      => $tyyppi,
+        'override'    => $override,
+      );
+      $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
 
       $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");

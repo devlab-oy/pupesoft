@@ -2616,7 +2616,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
             // Kun rivin hintaa tarvitsee muuttaa
             if ($korvatut_kilometrit + $ins_kpl > $kilometriraja) {
 
-              if ($korvatut_kilometrit <= $kilometriraja) {                
+              if ($korvatut_kilometrit <= $kilometriraja) {
                 $ins_kpl = $kilometriraja - $korvatut_kilometrit;
               }
               else {
@@ -3008,12 +3008,12 @@ function listdir($start_dir = '.') {
 
 function hae_matkustajan_kilometrit($tuoteno, $kuka) {
   global $kukarow;
-  
+
   $kilometrit = 0;
   $query = "SELECT sum(tilausrivi.kpl) yhteensa
             FROM tilausrivi
-            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}' 
+            JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND lasku.tila in ('H','Y','M','P','Q'))
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND tilausrivi.tyyppi = 'M'
               AND tilausrivi.tuoteno = 'km-16'
               AND lasku.toim_ovttunnus = '{$kuka}'";

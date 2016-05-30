@@ -168,4 +168,4 @@ foreach ($files as $file) {
 finfo_close($finfo1);
 finfo_close($finfo2);
 
-echo "Valmis!\n";
+echo ". Valmis!\n";

@@ -243,7 +243,9 @@ fi
 ####################################################################################################
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+if [[ -n "${PUPESOFT_BRANCH}" ]]; then
+  pupebranch=${PUPESOFT_BRANCH}
+elif [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
   pupebranch=$(cat ${branchfile} | tr -d '\n')
 else
   pupebranch="master"
@@ -319,7 +321,9 @@ echo
 export RAILS_ENV=${environment}
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+if [[ -n "${PUPENEXT_BRANCH}" ]]; then
+  pupenextbranch=${PUPENEXT_BRANCH}
+elif [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
   pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
 else
   pupenextbranch="master"
@@ -392,8 +396,12 @@ if [[ ${bundle} = true ]]; then
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
 
-  # Write cron file
-  bundle exec whenever --update-crontab &&
+  # Write cron file (Skip this if we are updating a demo Pupesoft)
+  DEMO=$(echo ${pupenextdir} | grep asiakasdemot)
+
+  if [ -z $DEMO ]; then
+    bundle exec whenever --update-crontab
+  fi
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&

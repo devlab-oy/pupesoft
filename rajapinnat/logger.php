@@ -14,4 +14,8 @@ class Logger {
 
     pupesoft_log($this->log_file, $message);
   }
+
+  public function log_file() {
+    return $this->log_file;
+  }
 }

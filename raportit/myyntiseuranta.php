@@ -291,6 +291,7 @@ else {
     if ($naytaennakko != '')    $naytaennakkochk     = "CHECKED";
     if ($vertailubu != '')      ${"sel_".$vertailubu}  = "SELECTED";
     if ($naytakaikkiasiakkaat != '') $naytakaikkiasiakkaatchk = "CHECKED";
+    if ($alanaytapoistettujaasiakkaita != '') $alanaytapoistettujaasiakkaitachk = "CHECKED";
     if ($naytakaikkituotteet != '') $naytakaikkituotteetchk  = "CHECKED";
     if ($laskutuspaiva != '')    $laskutuspaivachk    = "CHECKED";
     if ($ytunnus_mistatiedot != '')  $ytun_mistatiedot_sel  = "SELECTED";
@@ -587,6 +588,11 @@ else {
       <th>", t("Näytä kaikki asiakkaat"), "</th>
       <td colspan='3'><input type='checkbox' name='naytakaikkiasiakkaat' {$naytakaikkiasiakkaatchk}></td>
       <td class='back'>", t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"), "</td>
+      </tr>
+      <tr>
+      <th>", t("Näytä vain aktiiviset asiakkaat"), "</th>
+      <td colspan='3'><input type='checkbox' name='alanaytapoistettujaasiakkaita' {$alanaytapoistettujaasiakkaitachk}></td>
+      <td class='back'>", t("(Ei näytetä poistettuja asiakkaita)"), "</td>
       </tr>
       <tr>
       <th>", t("Näytä kaikki tuotteet"), "</th>
@@ -1848,6 +1854,10 @@ else {
 
       if ($naytakaikkiasiakkaat == "") {
         $asiakaslisa = " and asiakas.myynninseuranta = '' ";
+      }
+
+      if ($alanaytapoistettujaasiakkaita != '') {
+        $asiakaslisa .= " and asiakas.laji != 'P' ";
       }
 
       if ($naytaennakko == "") {

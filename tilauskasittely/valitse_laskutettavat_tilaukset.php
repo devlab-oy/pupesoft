@@ -677,7 +677,7 @@ if ($tee == "VALITSE") {
       }
 
       echo "<td>$row[toimitustapa] $rahti_hinta</td>";
-      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
+      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&kaytiin_otsikolla=NOJOO!&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
 
       //Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupositiot kerralla
       if ($jaksotettuja) {

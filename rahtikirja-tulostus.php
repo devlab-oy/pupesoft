@@ -1149,7 +1149,7 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
     }
 
-    if (!empty($excel_koontilahete)) {
+    if (!empty($excel_koontilahete) && !empty($otunnukset)) {
       $_otunnukset = explode(',', $otunnukset);
 
       switch ($excel_koontilahete) {

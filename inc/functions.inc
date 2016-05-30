@@ -27668,7 +27668,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
-      // Laitetaan kappalemäärät kuntoon
+      // Laitetaan kappalem‰‰r‰t kuntoon
       $line->addChild('OrderedQuantity', $looprow['kpl']);
       $line->addChild('DeliveredQuantity', $looprow['kpl']);
 
@@ -31063,7 +31063,7 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin p‰ivitet‰‰n kappalem‰‰r‰
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
@@ -31101,7 +31101,7 @@ if (!function_exists("paivita_sopimusrivit")) {
 
         $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
 
-        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin päivitetään kappalemäärä
+        // Jos tuote on asetettu avainsanalla ohittamaan rivikohtaisuus niin p‰ivitet‰‰n kappalem‰‰r‰
         $query = "UPDATE tilausrivi
                   SET
                   tilkpl           = '{$paivitettava_kpl}',
@@ -31486,44 +31486,10 @@ if (!function_exists('xml_to_array')) {
   }
 }
 
-if (!function_exists('voidaanko_vapauttaa_maksusopimus')) {
-  function voidaanko_vapauttaa_maksusopimus($tunnus) {
-    global $kukarow;
-
-    $jtcheckerror = array();
-
-    #Vapautetaan kaikki maksusopimuksen tilaukset ker‰ykseen
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND jaksotettu = '{$tunnus}'";
-    $laskures = pupe_query($query);
-
-    while ($laskurow = mysql_fetch_assoc($laskures)) {
-
-      #Tarkistetaan onko tilauksella JT-rivej‰
-      $query = "SELECT *
-                FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'
-                AND tyyppi = 'L'
-                AND var = 'J'";
-      $jtcheckres = pupe_query($query);
-
-      if (mysql_num_rows($jtcheckres) != 0) {
-        $jtcheckerror[] = $laskurow['tunnus'];
-      }
-    }
-
-    return $jtcheckerror;
-  }
-}
-
-if (!function_exists("vapauta_maksusopimus")) {
-  function vapauta_maksusopimus($maksusoppari) {
+if (!function_exists("vapauta_maksusopimus_kysely")) {
+  function vapauta_maksusopimus_kysely($maksusoppari) {
     global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
 
-    // Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
     $query = "SELECT maksupositio.otunnus,
               sum(if(ifnull(uusiolasku_ux.mapvm, '0000-00-00') != '0000-00-00', 1, 0)) laskutettu_ux_kpl,
               count(*) yhteensa_kpl
@@ -31541,15 +31507,16 @@ if (!function_exists("vapauta_maksusopimus")) {
               ORDER BY 1, maksupositio.tunnus";
     $posres = pupe_query($query);
 
-    if (mysql_num_rows($posres)) {
+    return mysql_num_rows($posres);
+  }
+}
 
-      $jtcheckerror = voidaanko_vapauttaa_maksusopimus($maksusoppari);
+if (!function_exists("vapauta_maksusopimus")) {
+  function vapauta_maksusopimus($maksusoppari) {
+    global $yhtiorow, $kukarow, $palvelin2, $pupe_root_polku;
 
-      if (count($jtcheckerror) > 0) {
-        echo "<br><font class='error'>",t("Ei voida vapauttaa, koska tilauksella jt-rivej‰ (%s)", "", implode(", ", $jtcheckerror)),"</font><br>";
-        return false;
-      }
-
+    // Vapautetaan holdissa oleva tilaus, jos/kun ennakkolaskut on maksettu
+    if (vapauta_maksusopimus_kysely($maksusoppari)) {
       $silent = 'Nyt hiljaa, hiljaa hiivit‰‰n n‰in Kardemumman yˆss‰';
       $vapauta_tilaus_keraykseen = true;
 
@@ -32251,21 +32218,21 @@ if (!function_exists("choose_correct_date")) {
       return '';
     }
 
-    // Päivämäärä oli ymmärrettävässä muodossa
+    // P‰iv‰m‰‰r‰ oli ymm‰rrett‰v‰ss‰ muodossa
     if (strtotime($date) !== false) {
       // Palautetaan Y-m-d
       return date('Y-m-d', strtotime($date));
     }
 
-    // Excelissä date voi tulla integerinä
+    // Exceliss‰ date voi tulla integerin‰
     if (is_numeric($date)) {
       /*  the date fields have integers that are the amount of days from 1900-00-00 */
       return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
     }
 
-    // Ei osattu valita sopivaa päivää
+    // Ei osattu valita sopivaa p‰iv‰‰
     echo "<font class='error'>";
-    echo t("Virheellinen päivämäärä");
+    echo t("Virheellinen p‰iv‰m‰‰r‰");
     echo " \"{$date}\"";
     echo "</font><br>";
 
@@ -32696,7 +32663,7 @@ if (!function_exists("loppulaskuta")) {
 
     $lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
-    // varmistetaan että laskutus näyttäisi olevan OK!!
+    // varmistetaan ett‰ laskutus n‰ytt‰isi olevan OK!!
     if ($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
       echo "<font class='error'>";
       echo t("VIRHE: Loppulaskutus ei onnistu koska positioita on j‰ljell‰ enemm‰n kuin yksi!");
@@ -32718,7 +32685,7 @@ if (!function_exists("loppulaskuta")) {
       $meapurow = mysql_fetch_assoc($meapu);
     }
     else {
-      echo "<font class='error'>".t("VIRHE: Maksuposition maksuehto puuttuu!")."</font><br><br>";
+      echo "<font class='error'>".t("VIRHE: Maksuposition maksuehto puuttuu!")." $apuqu</font><br><br>";
       return 0;
     }
 
@@ -32734,7 +32701,7 @@ if (!function_exists("loppulaskuta")) {
 
     echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." {$tunnus}<br></font><br>";
 
-    //Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
+    //Lasketaan paljonko ollaan jo laskutettu ja mill‰ verokannoilla
     $query = "SELECT ROUND(SUM(rivihinta * IF('$yhtiorow[alv_kasittely]' = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1)), 2) laskutettu,
               tilausrivi.alv
               FROM lasku
@@ -32775,14 +32742,15 @@ if (!function_exists("loppulaskuta")) {
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND jaksotettu = '{$tunnus}'
+              AND tunnus != '{$tunnus}'
               AND tila = 'L'
               AND alatila != 'X'
-              ORDER BY tunnus ASC
+              ORDER BY tunnus DESC
               LIMIT 1";
     $tunnus_chk_res = pupe_query($query);
     $tunnus_chk_row = mysql_fetch_assoc($tunnus_chk_res);
 
-    if (!empty($tunnus_chk_row['tunnus']) and $tunnus_chk_row['tunnus'] != $tunnus) {
+    if (!empty($tunnus_chk_row['tunnus'])) {
       $ennakkolaskun_hyvitys_otunnus = $tunnus_chk_row['tunnus'];
     }
     else {

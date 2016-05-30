@@ -118,11 +118,24 @@ function maksusopimus_uusi($laskurow) {
     $result = pupe_query($query);
   }
 
+  // Laitetaan oletusmaksuehto
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and jaksotettu = ''
+            and kaytossa   = ''
+            and kateinen   = ''
+            ORDER BY jarjestys
+            LIMIT 1";
+  $mres = pupe_query($query);
+  $mrow = mysql_fetch_assoc($mres);
+
   $query = "INSERT INTO maksupositio
-            SET yhtio   = '$kukarow[yhtio]',
-            otunnus = '$laskurow[jaksotettu]',
-            luotu   = now(),
-            luonut  = '$kukarow[kuka]'";
+            SET yhtio = '$kukarow[yhtio]',
+            otunnus   = '$laskurow[jaksotettu]',
+            maksuehto = '$mrow[tunnus]',
+            luotu     = now(),
+            luonut    = '$kukarow[kuka]'";
   $result = pupe_query($query);
   $lisatty_maksupositio = mysql_insert_id($GLOBALS["masterlink"]);
 

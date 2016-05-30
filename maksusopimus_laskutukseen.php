@@ -434,24 +434,28 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
     $vapauta_tilaus_keraykseen = true;
 
-    $query = "UPDATE lasku SET
-              alatila     = ''
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$tunnus}'
-              AND tila    = 'N'
-              AND alatila = 'B'";
-    $upd_res = pupe_query($query);
-
-    $kukarow['kesken'] = $tunnus;
-
     $query = "SELECT *
               FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$tunnus}'";
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND jaksotettu = '{$tunnus}'
+              AND tila       = 'N'
+              AND alatila    = 'B'";
     $laskures = pupe_query($query);
-    $laskurow = mysql_fetch_assoc($laskures);
 
-    require 'tilauskasittely/tilaus-valmis.inc';
+    while ($laskurow = mysql_fetch_assoc($laskures)) {
+
+      $query = "UPDATE lasku SET
+                alatila     = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$laskurow['tunnus']}'";
+      $upd_res = pupe_query($query);
+
+      if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';
+
+      $kukarow['kesken'] = $laskurow['tunnus'];
+
+      require 'tilauskasittely/tilaus-valmis.inc';
+    }
 
     $tee = "";
   }
@@ -596,7 +600,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tila    = 'N'
                 AND alatila = 'B'
-                AND tunnus  = '{$row['jaksotettu']}'";
+                AND jaksotettu  = '{$row['jaksotettu']}'";
       $tila_chk_res = pupe_query($query);
 
       // loppulaskutetaan maksusopimus

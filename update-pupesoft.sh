@@ -396,8 +396,12 @@ if [[ ${bundle} = true ]]; then
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
 
-  # Write cron file
-  bundle exec whenever --update-crontab &&
+  # Write cron file (Skip this if we are updating a demo Pupesoft)
+  DEMO=$(echo ${pupenextdir} | grep asiakasdemot)
+
+  if [ -z $DEMO ]; then
+    bundle exec whenever --update-crontab
+  fi
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&

@@ -151,16 +151,29 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
+    $paivitettiin_tilausrivi_onnistuneesti = false;
+
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
       $eankoodi = $data['eankoodi'];
       $keratty  = $data['keratty'];
 
-      $query = "SELECT *
+      if ($hhv) {
+        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
+      }
+      else {
+        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
+      }
+
+      $query = "SELECT tilausrivi.*
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$tilausrivin_tunnus}'
-                AND tunnus != 0";
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'
+                AND tilausrivi.tunnus != 0
+                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+                AND tilausrivi.keratty = ''
+                AND tilausrivi.toimitettu = ''";
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
@@ -196,13 +209,6 @@ while (false !== ($file = readdir($handle))) {
                               tilausrivi.toimitettuaika = '{$toimaika}'";
       }
 
-      if ($hhv) {
-        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
-      }
-      else {
-        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
-      }
-
       $query = "UPDATE tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                 SET tilausrivi.keratty = '{$kukarow['kuka']}',
@@ -212,6 +218,8 @@ while (false !== ($file = readdir($handle))) {
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
       pupe_query($query);
+
+      $paivitettiin_tilausrivi_onnistuneesti = true;
 
       $query = "SELECT SUM(tuote.tuotemassa) paino
                 FROM tilausrivi
@@ -252,39 +260,37 @@ while (false !== ($file = readdir($handle))) {
                viesti         = ''";
     $result_rk = pupe_query($query);
 
-    if ($laskurow["tila"] == "G") {
-      if ($laskurow["tilaustyyppi"] != 'M') {
-        $tilalisa = "tila = 'G', alatila = 'C'";
+    if ($paivitettiin_tilausrivi_onnistuneesti) {
+
+      if ($laskurow["tila"] == "G") {
+        if ($laskurow["tilaustyyppi"] != 'M') {
+          $tilalisa = "tila = 'G', alatila = 'C'";
+        }
+        else {
+          $tilalisa = "tila = 'G', alatila = 'D'";
+        }
+
+      }
+      elseif ($laskurow["tila"] == "V") {
+        $tilalisa = "tila = 'V', alatila = 'C'";
+      }
+      elseif ($laskurow["tila"] == "S") {
+        $tilalisa = "tila = 'S', alatila = 'C'";
       }
       else {
-        $tilalisa = "tila = 'G', alatila = 'D'";
+        $tilalisa = "tila = 'L', alatila = 'D'";
       }
 
-    }
-    elseif ($laskurow["tila"] == "V") {
-      $tilalisa = "tila = 'V', alatila = 'C'";
-    }
-    elseif ($laskurow["tila"] == "S") {
-      $tilalisa = "tila = 'S', alatila = 'C'";
-    }
-    else {
-      $tilalisa = "tila = 'L', alatila = 'D'";
-    }
+      $query = "UPDATE lasku SET
+                {$tilalisa}
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['tunnus']}'";
+      $upd_res = pupe_query($query);
 
-    $query = "UPDATE lasku SET
-              {$tilalisa}
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$laskurow['tunnus']}'";
-    $upd_res = pupe_query($query);
+      paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-    // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
-    $query = "UPDATE lasku SET
-              alatila      = 'X'
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND tunnus   = '$laskurow[tunnus]'
-              AND mapvm   != '0000-00-00'
-              AND chn      = '999'";
-    $yoimresult  = pupe_query($query);
+      pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
+    }
 
     pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
   }

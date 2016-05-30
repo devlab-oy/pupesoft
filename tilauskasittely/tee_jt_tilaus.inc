@@ -535,25 +535,37 @@ if (!function_exists("tee_jt_tilaus")) {
             }
           }
           elseif ($fieldname=='maksuehto') {
-            //katsotaan onko asiakkaan maksuehto muuttunut jälkivaatimukseksi
-            $maksuehto_query = "SELECT maksuehto.jv, maksuehto.tunnus
-                                FROM asiakas
-                                join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
-                                where asiakas.yhtio = '$yhtiorow[yhtio]'
-                                and asiakas.tunnus  = '$otsikkorivi[liitostunnus]'";
+
+            $_maksuehto = $otsikkorivi[$fieldname];
+
+            // katsotaan onko asiakkaan maksuehto muuttunut jälkivaatimukseksi
+            // Tätä ei tehdä jos tilauksen maksuehto on "jaksotettu"
+            $maksuehto_query = "SELECT tunnus
+                                FROM maksuehto
+                                where yhtio = '$kukarow[yhtio]'
+                                and tunnus  = '$otsikkorivi[maksuehto]'
+                                and jaksotettu != ''";
             $maksuehto_result = pupe_query($maksuehto_query);
-            $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
-            if ($maksuehtorow['jv'] != '') {
-              $query .= "maksuehto='$maksuehtorow[tunnus]',";
-            }
-            else {
-              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            if (mysql_num_rows($maksuehto_result) == 0) {
+
+              $maksuehto_query = "SELECT maksuehto.jv, maksuehto.tunnus
+                                  FROM asiakas
+                                  join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
+                                  where asiakas.yhtio = '$yhtiorow[yhtio]'
+                                  and asiakas.tunnus  = '$otsikkorivi[liitostunnus]'";
+              $maksuehto_result = pupe_query($maksuehto_query);
+              $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
+
+              if ($maksuehtorow['jv'] != '') {
+                 $_maksuehto = $maksuehtorow["tunnus"];
+              }
             }
 
+            $query .= $fieldname."='$_maksuehto',";
           }
           // ja kaikki muut paitsi tunnus sellaisenaan
-          elseif ($fieldname!='tunnus') {
+          elseif ($fieldname != 'tunnus') {
             $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
           }
         }

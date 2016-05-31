@@ -55,8 +55,10 @@ if ($magento->getErrorCount() > 0) {
 }
 
 try {
+  $haettava_tila = 'Processing';
+  if (!empty($magento_tilaushaku)) $haettava_tila = $magento_tilaushaku;
   // Haetaan maksetut tilaukset magentosta
-  $tilaukset = $magento->hae_tilaukset('Processing');
+  $tilaukset = $magento->hae_tilaukset($haettava_tila);
 }
 catch (Exception $e) {
   $message = "Tilausten haku epäonnistui";

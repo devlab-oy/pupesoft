@@ -502,14 +502,12 @@ abstract class PrestaClient {
   }
 
   protected function get_language_id($code) {
-    $value = $this->languages_table[$code];
-
-    if (empty($value)) {
+    if (empty($this->languages_table[$code])) {
       return null;
     }
     else {
       // substract one, since API key starts from zero
-      return ($value - 1);
+      return ($this->languages_table[$code] - 1);
     }
   }
 

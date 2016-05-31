@@ -1570,6 +1570,27 @@ while ($tietue = fgets($fd)) {
         $tpuh = $arow['toim_puh'];
       }
 
+      // Katsotaan verkkokauppatapauksessa tilauksen valuutta
+      if ($edi_tyyppi == 'magento'
+          and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
+          and !empty($editilaus_valuuttakoodi)) {
+        // escapetaan
+        $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
+
+        $query = "SELECT tunnus
+                  FROM valuu
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND nimi = '{$valkoodi}'";
+        $valuu_result = pupe_query($query);
+
+        if (mysql_num_rows($valuu_result) != 1) {
+          $valkoodi = $yhtiorow['valkoodi'];
+        }
+      }
+      else {
+        $valkoodi = $yhtiorow['valkoodi'];
+      }
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1642,7 +1663,7 @@ while ($tietue = fgets($fd)) {
                 toim_postitp            = '$arow[toim_postitp]',
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
-                valkoodi                = '$yhtiorow[valkoodi]',
+                valkoodi                = '{$valkoodi}',
                 varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',

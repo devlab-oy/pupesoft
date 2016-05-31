@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_addresses.php';
 require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
+require_once 'rajapinnat/presta/presta_currencies.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {

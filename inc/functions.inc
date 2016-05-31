@@ -32951,6 +32951,34 @@ if (!function_exists('url_or_text')) {
   }
 }
 
+if (!function_exists('ulkoinen_jarjestelma_varastot')) {
+  function ulkoinen_jarjestelma_varastot($otunnus) {
+    global $kukarow;
+
+    $logmaster_varasto = 0;
+    $normivarastoja = 0;
+
+    $query = "SELECT DISTINCT varasto
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND uusiotunnus = '{$otunnus}'";
+    $varastocheckres = pupe_query($query);
+
+    while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+      $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
+        $logmaster_varasto++;
+      }
+      else {
+        $normivarastoja++;
+      }
+    }
+
+    return array($logmaster_varasto, $normivarastoja);
+  }
+}
+
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {
     global $yhtiorow, $kukarow;

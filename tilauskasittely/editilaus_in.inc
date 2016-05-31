@@ -191,6 +191,7 @@ $editilaus_rahtivapaa         = "";
 $editilaus_sisainen           = "";
 $editilaus_tila               = "N"; // laskun tila
 $editilaus_tilaustyyppi       = "";
+$editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $edi_kommentti                = "";
@@ -457,6 +458,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_TILAUSTYYPPI' :
     //Tilaustyyppi
     $editilaus_tilaustyyppi = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_VALUUTTAKOODI' :
+    // Tilauksen valuutta
+    $editilaus_valuuttakoodi = $tieto;
     break;
 
   case 'OSTOTIL.VERKKOKAUPPA' :
@@ -2514,6 +2520,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_sisainen           = "";
     $editilaus_tila               = "N"; // laskun tila
     $editilaus_tilaustyyppi       = "";
+    $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $edi_kommentti                = "";

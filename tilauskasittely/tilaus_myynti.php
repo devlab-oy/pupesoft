@@ -1307,29 +1307,15 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
       echo "<font class='message'>", t("Jälkitoimitus palautettiin tilaukselle"), " $jt_rivien_muisti_row[vanha_otunnus], ", t("ota yhteys asiakaspalveluun"), ".</font><br><br>";
     }
   }
-
+echo "1310 toim $toim kukarowKesken {$kukarow["kesken"]} <br><br>";
   // valmistusriveille var tyhjäksi, että osataan mitätöidä ne seuraavassa updatessa
   // Valmistusten valmisteriveiltä pitää osata poistaa myös sarjanumerot
   if ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') {
     $query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
     $result = pupe_query($query);
-
-    // Katsotaan onko tämän valmistuksen valmisteille jo lisätty sarjanumeroita
-    $query = "SELECT sarjanumeroseuranta.tunnus AS sarjariviTunnus
-              FROM tilausrivi
-              JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus)
-              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              AND tilausrivi.tyyppi = 'W'
-              AND tilausrivi.otunnus = '$kukarow[kesken]'";
-    $sarjanumero_result = pupe_query($query);
-
+echo "1316 {$kukarow["kesken"]} <br><br>";
     // Poistetaan valmistuksen poistamisen yhteydessä myös valmsiteiden sarjanumerot
-    while ($sarjanumero_tunnus = mysql_fetch_assoc($sarjanumero_result)) {
-      $query = "DELETE FROM sarjanumeroseuranta
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$sarjanumero_tunnus[sarjariviTunnus]'";
-      pupe_query($query);
-    }
+    vapauta_sarjanumerot("", $kukarow["kesken"]);
   }
 
   // poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...

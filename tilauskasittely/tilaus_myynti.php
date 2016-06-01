@@ -1314,7 +1314,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
     $query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
     $result = pupe_query($query);
 
-    // Poistetaan valmistuksen poistamisen yhteydessä myös valmsiteiden sarjanumerot
+    // Poistetaan valmistuksen poistamisen yhteydessä myös valmisteiden sarjanumerot
     vapauta_sarjanumerot("", $kukarow["kesken"]);
   }
 

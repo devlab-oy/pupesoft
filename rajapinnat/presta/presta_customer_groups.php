@@ -6,8 +6,8 @@ class PrestaCustomerGroups extends PrestaClient {
   private $presta_show_prices = 1;
   private $presta_price_display_method = 0;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -48,7 +48,7 @@ class PrestaCustomerGroups extends PrestaClient {
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
-      $xml->group->name->language[$i] = utf8_encode($group['selitetark']);
+      $xml->group->name->language[$i] = $this->xml_value($group['selitetark']);
     }
 
     return $xml;
@@ -57,11 +57,17 @@ class PrestaCustomerGroups extends PrestaClient {
   public function sync_groups($groups) {
     $this->logger->log('---------Start group sync---------');
 
+    $current = 0;
+    $total = count($groups);
+
     try {
       $existing_groups = $this->all(array('id'));
       $existing_groups = array_column($existing_groups, 'id');
 
       foreach ($groups as $group) {
+        $current++;
+        $this->logger->log("[{$current}/{$total}] Asiakasryhmä {$group['selitetark']}");
+
         try {
           if (in_array($group['presta_customergroup_id'], $existing_groups)) {
             $id = $group['presta_customergroup_id'];

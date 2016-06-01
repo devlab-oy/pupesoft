@@ -412,43 +412,52 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     }
 
     // katotaan ollaanko haluttu optimoida johonki varastoon
+    // ja tilausrivill‰ ei ole hyllypaikkaa
     if ($laskurow["varasto"] != 0) {
 
-      $query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'
+                AND tyyppi = 'O'
+                AND hyllyalue = ''
+                AND hyllynro = ''
+                AND hyllyvali = ''
+                AND hyllytaso = ''";
       $result = pupe_query($query);
 
       // k‰yd‰‰n l‰pi kaikki tilausrivit
       while ($ostotilausrivit = mysql_fetch_assoc($result)) {
 
         // k‰yd‰‰n l‰pi kaikki tuotteen varastopaikat
-        $query = "SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+        $query = "SELECT *,
+                  concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
                   hyllyalue, hyllynro, hyllytaso, hyllyvali
-                   from tuotepaikat
-                  where yhtio='$kukarow[yhtio]' and tuoteno='$ostotilausrivit[tuoteno]'
-                  order by sorttauskentta";
+                  FROM tuotepaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$ostotilausrivit['tuoteno']}'
+                  AND varasto = '{$laskurow['varasto']}'
+                  ORDER BY oletus DESC, sorttauskentta";
         $tuopaires = pupe_query($query);
 
         // apulaskuri
         $kuuluu = 0;
 
-        while ($tuopairow = mysql_fetch_assoc($tuopaires)) {
-          // katotaan kuuluuko tuotepaikka haluttuun varastoon
-          if (kuuluukovarastoon($tuopairow["hyllyalue"], $tuopairow["hyllynro"], $laskurow["varasto"]) != 0) {
+        if (mysql_num_rows($tuopaires) != 0) {
+          $tuopairow = mysql_fetch_assoc($tuopaires);
 
-            // jos kuului niin p‰ivitet‰‰n info tilausriville
-            $query = "UPDATE tilausrivi set
-                      hyllyalue   = '$tuopairow[hyllyalue]',
-                      hyllynro    = '$tuopairow[hyllynro]',
-                      hyllytaso   = '$tuopairow[hyllytaso]',
-                      hyllyvali   = '$tuopairow[hyllyvali]'
-                      where yhtio = '$kukarow[yhtio]' and
-                      tunnus      = '$ostotilausrivit[tunnus]'";
-            $tuopaiupd = pupe_query($query);
+          // jos kuului niin p‰ivitet‰‰n info tilausriville
+          $query = "UPDATE tilausrivi set
+                    hyllyalue   = '$tuopairow[hyllyalue]',
+                    hyllynro    = '$tuopairow[hyllynro]',
+                    hyllytaso   = '$tuopairow[hyllytaso]',
+                    hyllyvali   = '$tuopairow[hyllyvali]'
+                    where yhtio = '$kukarow[yhtio]' and
+                    tunnus      = '$ostotilausrivit[tunnus]'";
+          $tuopaiupd = pupe_query($query);
 
-            $kuuluu++;
-            break; // breakataan niin ei looppailla en‰‰ turhaa
-          }
-        } // end while tuopairow
+          $kuuluu = 1;
+        }
 
         // tuotteella ei ollut varastopaikkaa halutussa varastossa, tehd‰‰n sellainen
         if ($kuuluu == 0) {

@@ -19,6 +19,7 @@ else {
 
   echo "<font class='head'>", t("Top 10 Raportti"), "</font><hr>";
 
+  echo "<form method='post' action='topten.php'>";
   // p‰iv‰m‰‰r‰rajaus
   echo "<table>";
   echo "<tr>
@@ -34,4 +35,14 @@ else {
     </tr>\n";
   echo "</table><br>";
 
+  $monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
+  $monivalintalaatikot_normaali = array();
+
+  require "tilauskasittely/monivalintalaatikot.inc";
+  echo "<input type='submit' name='aja_raportti' value='", t("N‰yt‰"), "'>";
+  echo "</form>";
+}
+
+if (isset($aja_raportti)) {
+  var_dump($_REQUEST);
 }

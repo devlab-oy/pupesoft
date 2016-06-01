@@ -1295,8 +1295,8 @@ if (isset($ajax)) {
         $tyyppi_url  = "MYYNTI";
 
         if ($jtrow["var"] == "P") {
-         $tyyppi = t("Puute");
-         $merkki = "";
+          $tyyppi = t("Puute");
+          $merkki = "";
         }
         elseif ($jtrow["tyyppi"] == "O") {
           if ($jtrow["laskutila"] == "K") {

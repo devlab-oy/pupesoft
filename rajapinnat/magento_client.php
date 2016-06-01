@@ -137,6 +137,11 @@ class MagentoClient {
   private $_magento_poista_asiakasdefaultit = array();
 
   /**
+   * Url-keyn luontia varten käytettävät parametrit
+   */
+  private $_magento_url_key_attributes = array();
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -364,7 +369,7 @@ class MagentoClient {
             continue;
           }
           elseif ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
             continue;
           }
           if ($key == 'kauppakohtaiset_verokannat') {
@@ -398,6 +403,11 @@ class MagentoClient {
         'tier_price'            => $tuote_ryhmahinta_data,
         'additional_attributes' => array('multi_data' => $multi_data),
       );
+
+      // Asetetaan tuotteen url_key mikäli parametrit määritelty
+      if (count($this->_magento_url_key_attributes) > 0) {
+        $tuote_data['url_key'] = $this->getUrlKeyForProduct($tuote);
+      }
 
       $poista_defaultit = $this->_magento_poistadefaultit;
 
@@ -536,27 +546,31 @@ class MagentoClient {
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
       if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
         try {
-          foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+          foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
+            foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+              foreach ($kauppatunnukset as $kauppatunnus) {
+                // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
+                // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+                // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+                if (empty($tuote[$tuotekentta])) continue;
+                $tuotteen_kauppakohtainen_data = array(
+                  'price' => $tuote[$tuotekentta]
+                );
 
-            foreach ($kauppatunnukset as $kauppatunnus) {
+                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                }
 
-              $tuotteen_kauppakohtainen_data = array(
-                'price' => $tuote[$tuotekentta]
-              );
-
-              if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                $this->_proxy->call($this->_session, 'catalog_product.update',
+                  array(
+                    $tuote['tuoteno'],
+                    $tuotteen_kauppakohtainen_data,
+                    $kauppatunnus
+                    )
+                );
               }
-
-              $this->_proxy->call($this->_session, 'catalog_product.update',
-                array(
-                  $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data,
-                  $kauppatunnus
-                )
-              );
+              $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
             }
-            $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
           }
         }
         catch (Exception $e) {
@@ -676,7 +690,7 @@ class MagentoClient {
           $key = $erikoisparametri['nimi'];
           if ($key == 'kieliversiot') continue;
           if ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
             continue;
           }
           if ($key == 'kauppakohtaiset_verokannat') {
@@ -810,27 +824,31 @@ class MagentoClient {
         // Päivitetään configurable-tuotteen kauppanäkymäkohtaiset hinnat
         if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
           try {
-            foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+            foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
+              foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+                foreach ($kauppatunnukset as $kauppatunnus) {
+                  // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
+                  // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+                  // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+                  if (empty($tuotteet[0][$tuotekentta])) continue;
+                  $tuotteen_kauppakohtainen_data = array(
+                    'price' => $tuotteet[0][$tuotekentta]
+                  );
 
-              foreach ($kauppatunnukset as $kauppatunnus) {
+                  if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+                    $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                  }
 
-                $tuotteen_kauppakohtainen_data = array(
-                  'price' => $tuotteet[0][$tuotekentta]
-                );
-
-                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+                  $this->_proxy->call($this->_session, 'catalog_product.update',
+                    array(
+                      $nimitys,
+                      $tuotteen_kauppakohtainen_data,
+                      $kauppatunnus
+                      )
+                  );
                 }
-
-                $this->_proxy->call($this->_session, 'catalog_product.update',
-                  array(
-                    $nimitys,
-                    $tuotteen_kauppakohtainen_data,
-                    $kauppatunnus
-                  )
-                );
+                $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable) " . print_r($tuotteen_kauppakohtainen_data, true));
               }
-              $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable) " . print_r($tuotteen_kauppakohtainen_data, true));
             }
           }
           catch (Exception $e) {
@@ -1101,19 +1119,17 @@ class MagentoClient {
    * @param string  $type      Kirjataanko tuote vai tilauslogiin
    */
   public function log($message, $exception = '', $type = 'product') {
-
-    if (self::LOGGING == true) {
-      $timestamp = date('d.m.y H:i:s');
-      $message = utf8_encode($message);
-
-      if ($exception != '') {
-        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-      }
-
-      $message .= "\n";
-      $log_location = $type == 'product' ? '/home/devlab/logs/magento_export.log' : '/home/devlab/logs/magento_orders.log';
-      error_log("{$timestamp}: {$message}", 3, $log_location);
+    if (self::LOGGING === false) {
+      return;
     }
+
+    if ($exception != '') {
+      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+    }
+
+    $log_name = $type == 'product' ? 'magento_export' : 'magento_orders';
+
+    pupesoft_log($log_name, $message);
   }
 
   /// Private functions ///
@@ -1923,6 +1939,14 @@ class MagentoClient {
   }
 
   /**
+   * Mitä tuotteen parametrejä käytetään url_key:n luomiseen
+   * Oletus tyhja array
+   */
+  public function setUrlKeyAttributes(array $url_key_attributes) {
+    $this->_magento_url_key_attributes = $url_key_attributes;
+  }
+
+  /**
    * Hakee tax_class_id:n
    *
    * @return int   Veroluokan tunnus
@@ -2413,4 +2437,39 @@ class MagentoClient {
       $this->log(__METHOD__, $e);
     }
   }
+
+  /**
+  * Rakentaa url_key:n tuotteelle
+  */
+  private function getUrlKeyForProduct($tuotedata) {
+    $halutut_array = $this->_magento_url_key_attributes;
+    $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
+    $parametrit = array();
+
+    foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {
+      $key = $parametri['option_name'];
+      $value = $parametri['arvo'];
+      $parametrit[$key] = $value;
+    }
+    if (count($halutut_array) > 0) {
+      foreach ($halutut_array as $key => $value) {
+        if (!empty($parametrit[$value])) {
+          $safe_part1 = $this->sanitize_link_rewrite($value);
+          $safe_part2 = $this->sanitize_link_rewrite($parametrit[$value]);
+          $url_key .= "-{$safe_part1}-{$safe_part2}";
+        }
+      }
+    }
+    return utf8_encode($url_key);
+  }
+
+  /**
+    * Sanitizes string for magento url_key column
+    *
+    * @param string  $string
+    * @return string
+    */
+   private function sanitize_link_rewrite($string) {
+     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+   }
 }

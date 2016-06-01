@@ -1930,7 +1930,9 @@ echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
+echo "</form>";
+
 echo "</tr>";
 
 echo "<tr>";
@@ -1951,8 +1953,8 @@ echo "</td>";
 
 echo "<td class='back'>";
 echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
-echo "</form>";
 echo "</td>";
+echo "</form>";
 
 //Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 if ($ulos == '' and $tee == 'Z') {
@@ -2015,6 +2017,7 @@ if ($tee == 'Z') {
   if ($tuoterow["ei_saldoa"] == '') {
     $query = "SELECT tuotteen_toimittajat.*,
               toimi.ytunnus, toimi.nimi, toimi.nimitark, toimi.oletus_valkoodi,
+              IF(tuotteen_toimittajat.toimitusaika != 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) AS toimitusaika,
               if (jarjestys = 0, 9999, jarjestys) sorttaus
               FROM tuotteen_toimittajat
               LEFT JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
@@ -2447,12 +2450,20 @@ if ($tee == 'Z') {
 
     //5
     echo "<tr>";
+    echo "<th>".t("Toimittajan toimitusaika")."</th>";
     echo "<th>".t("Tullinimike")." / %</th>";
-    echo "<th colspan='4'>".t("Tullinimikkeen kuvaus")."</th>";
+    echo "<th colspan='3'>".t("Tullinimikkeen kuvaus")."</th>";
     echo "<th>".t("Toinen paljous")."</th>";
     echo "</tr>";
 
     echo "<tr>";
+    echo "<td>";
+    foreach ($ttrow as $tt_rivi) {
+      if (!empty($tt_rivi['toimitusaika'])) {
+        echo $tt_rivi['toimitusaika']." ".t("pv")."<br />";
+      }
+    }
+    echo "</td>";
     echo "<td>$tullirow1[cn] $prossat</td>";
     echo "<td colspan='4'>".wordwrap(substr($tullirow3['dm'], 0, 20)." - ".substr($tullirow2['dm'], 0, 20)." - ".substr($tullirow1['dm'], 0, 20), 70, "<br>")."</td>";
     echo "<td>$tullirow1[su]</td>";
@@ -2544,7 +2555,7 @@ if ($tee == 'Z') {
       echo "<ul>";
 
       foreach ($lisatiedot as $lisatieto) {
-        echo "<li>{$lisatieto["kentta"]} &raquo; {$lisatieto["selite"]}</li>";
+        echo "<li>{$lisatieto["kentta"]} &raquo; ".url_or_text($lisatieto["selite"])."</li>";
       }
 
       echo "</ul>";
@@ -3179,6 +3190,21 @@ if ($tee == 'Z') {
 }
 
 if ($ulos != "") {
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='toim' value='{$toim}'>";
+  echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+  echo "<input type='hidden' name='tuoteno' value='{$tuoteno}'>";
+  echo "<input type='hidden' name='tee' value='Z'>";
+  echo "<table><tr>";
+  echo "<td class='back'>";
+  $chk = !empty($poistuvat_tuotteet) ? 'checked' : '';
+  echo "<input type='checkbox' name='poistuvat_tuotteet' {$chk} onchange='submit();' /> ";
+  echo t("Älä näytä listauksessa poistuvia, poistettuja, saldottomia ja varastoimattomia tuotteita");
+  echo "</td>";
+  echo "</tr></table>";
+  echo "</form>";
+
   echo "<form method='post' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";

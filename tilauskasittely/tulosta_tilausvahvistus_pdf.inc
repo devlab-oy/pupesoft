@@ -121,11 +121,21 @@ if (in_array($naytatvale, array(10, 11))) {
   $jtsort_lisa = "IF(tilausrivi.tuoteno='{$yhtiorow['rahti_tuotenumero']}', 2, 0) jtsort,";
 }
 
+$_alekentta_kpl = substr_count($ale_query_select_lisa, "tilausrivi.");
+$_groupby = "";
+$_kentat = 19;
+
+for ($i = 0; $i < $_alekentta_kpl; $i++) {
+  $_kentat = $_kentat + 1;
+  $_groupby .= ",$_kentat";
+}
+
 // generoidaan lähetteelle ja keräyslistalle rivinumerot
 // Rivit groupataan tilausvahvistukselle
 if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
   $query = "SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, {$ale_query_select_lisa}
             tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
+            tilausrivi.alv,
             $ale_query_select_lisa_y aleyhteensa,
             $sorttauskentta,
             {$jtsort_lisa}
@@ -152,7 +162,7 @@ if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
             $tyyppilisa
             and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
             and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+            GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 $_groupby
             ORDER BY $pjat_sortlisa jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 }
 else {

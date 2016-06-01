@@ -21,9 +21,6 @@ else {
         var isChecked = toggleBox.checked;
 
         for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-
-            alert(currForm.elements[elementIdx].className);
-
           if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].className == 'toggle shift') {
               currForm.elements[elementIdx].checked = isChecked;
           }
@@ -202,7 +199,7 @@ else {
         $lresult = t_avainsana("LISATIETO");
 
         while ($lrow = mysql_fetch_assoc($lresult)) {
-          $selite = "lisatieto_$srow[selite]";
+          $selite = "lisatieto_$lrow[selite]";
           $chk = !empty($rajaus[$row[0]][$selite]) ? "CHECKED" : "";
 
           $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$selite]' value='$selite' $chk>".t("Tuotteen lisätieto").": $lrow[selitetark]<br>";
@@ -351,7 +348,7 @@ else {
         $liitos = " and tuotteen_toimittajat.liitostunnus = (select liitostunnus from tuotteen_toimittajat where yhtio = tuote.yhtio and tuoteno = tuote.tuoteno ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1)";
       }
       else {
-        $liitos = " and tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'";
+        $liitos = " and tuotteen_toimittajat.liitostunnus = '{$rajaus["tuotteen_toimittajat.liitostunnus"]}'";
       }
 
       $joinit["tuotteen_toimittajat"] = "\nLEFT JOIN tuotteen_toimittajat ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno {$liitos}";

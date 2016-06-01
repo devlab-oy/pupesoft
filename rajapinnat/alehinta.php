@@ -72,10 +72,11 @@ function alehinta_asiakas($asiakas, $tuote) {
   $asiakas = mysql_fetch_assoc($asiakas);
 
   $laskurow = array(
-    "liitostunnus" => $asiakas["tunnus"],
-    "maa"          => '',
-    "valkoodi"     => '',
-    "ytunnus"      => $asiakas["ytunnus"],
+    "liitostunnus"      => $asiakas["tunnus"],
+    "maa"               => '',
+    "valkoodi"          => '',
+    "ytunnus"           => $asiakas["ytunnus"],
+    'yhtio_toimipaikka' => $asiakas['toimipaikka']
   );
 
   $kpl   = 1;

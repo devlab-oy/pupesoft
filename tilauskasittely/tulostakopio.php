@@ -251,6 +251,12 @@ if ($kukarow["extranet"] != "") {
       exit;
     }
   }
+  elseif ($toim == "HUOLTOPYYNTOKOPIO" and !empty($tyom_tunnus) and !empty($pdffilenimi)) {
+    if ($tee == 'NAYTATILAUS') {
+      echo file_get_contents($pdffilenimi);
+    }
+    $tee = '';
+  }
   else {
     // Extranet kaatuu tähän
     exit;
@@ -1076,7 +1082,14 @@ if ($tee == "ETSILASKU") {
 
     $hreffi .= "&ascdesc={$ascdesc}";
 
-    echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br><a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
+    echo "<th valign='top'>";
+
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+      echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
+    }
+
+    echo "<a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
+
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>", t("Ytunnus"), "</a><br><a href='{$hreffi}&jarj=lasku.nimi'>", t("Nimi"), "</a></th>";
     echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>", t("Pvm"), "</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>", t("Toimaika"), "</a></th>";
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>", t("Laatija"), "</a></th>";
@@ -1117,7 +1130,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U") {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
         echo $row['tunnus'];
       }
 
@@ -1128,7 +1141,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 
@@ -1623,11 +1636,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     }
 
     $tilausvahvistus_onkin_kerayslista = '';
+    $excel_lahete_hinnoilla = '';
     $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
+    $pos2 = strpos($komento['Tilausvahvistus'], "excel_lahete_hinnoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";
+    }
+
+    if ($pos2 !== FALSE and $toim == "TILAUSVAHVISTUS") {
+      $toim = "KERAYSLISTA";
+      $excel_lahete_hinnoilla = "JOO";
     }
 
     if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
@@ -2225,7 +2245,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $pjat_sortlisa = "";
       $kerayslistatyyppi = "";
 
-      if ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
+      if ($excel_lahete_hinnoilla != '') {
+        $kerayslistatyyppi = "EXCEL3";
+      }
+      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
         $kerayslistatyyppi = "EXCEL2";
       }
       elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
@@ -2261,10 +2284,16 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
         }
       }
+      $query_ale_lisa = generoi_alekentta('M');
+
+      $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
+      $ale_query_select_lisa_y = generoi_alekentta_select('yhteen', 'M');
 
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
         $query = "SELECT tilausrivi.*,
+                  $ale_query_select_lisa_y aleyhteensa,
+                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   tuote.sarjanumeroseuranta,
                   kerayserat.kpl as tilkpl,
                   kerayserat.kpl as varattu,
@@ -2282,6 +2311,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       }
       else {
         $query = "SELECT tilausrivi.*,
+                  $ale_query_select_lisa_y aleyhteensa,
+                  round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
                   $select_lisa
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -2383,8 +2414,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif (isset($komento["Keräyslista"])) {
         $params_kerayslista["komento"] = $komento["Keräyslista"];
       }
+
       if ($tilausvahvistus_onkin_kerayslista != '') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
+      }
+      elseif ($excel_lahete_hinnoilla != '') {
+        $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
       }
       //tulostetaan sivu
       print_pdf_kerayslista($params_kerayslista);

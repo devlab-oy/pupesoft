@@ -150,8 +150,7 @@ if ($tee == "tulosta") {
                $vainnimikelisa2
                $ee_kentat
                max(lasku.laskunro) laskunro,
-               max(tuote.tuoteno) tuoteno,
-               left(max(tuote.nimitys), 40) nimitys,
+               max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
                round(sum(tilausrivi.kpl * if(tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
                round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
                if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -219,8 +218,7 @@ if ($tee == "tulosta") {
           $vainnimikelisa2
           $ee_kentat
           max(lasku.laskunro) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
+          max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -263,8 +261,7 @@ if ($tee == "tulosta") {
           $vainnimikelisa2
           $ee_kentat
           max(lasku.tunnus) laskunro,
-          max(tuote.tuoteno) tuoteno,
-          left(max(tuote.nimitys), 40) nimitys,
+          max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
           round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
           round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
           if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -309,8 +306,7 @@ if ($tee == "tulosta") {
             {$vainnimikelisa2_tyom}
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
-            'Huolto' AS tuoteno,
-            'Huolto' AS nimitys,
+            max(concat('Huolto','!¡!', 'Huolto')) tuoteno_nimitys,
             1 AS kpl,
             tyomaarays.bruttopaino AS paino,
             tyomaarays.tulliarvo AS rivihinta,
@@ -345,8 +341,7 @@ if ($tee == "tulosta") {
             {$vainnimikelisa2}
             {$ee_kentat}
             max(lasku.tunnus) laskunro,
-            max(tuote.tuoteno) tuoteno,
-            left(max(tuote.nimitys), 40) nimitys,
+            max(concat(tuote.tuoteno,'!¡!',left(tuote.nimitys, 40))) tuoteno_nimitys,
             round(sum(tilausrivi.kpl * if (tuote.toinenpaljous_muunnoskerroin = 0, 1, tuote.toinenpaljous_muunnoskerroin)),0) kpl,
             round(sum(if(tuote.tuotemassa > 0, tilausrivi.kpl * tuote.tuotemassa, if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino)), 0) as paino,
             if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -373,7 +368,7 @@ if ($tee == "tulosta") {
     }
   }
 
-  $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
+  $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
   $result = pupe_query($query);
 
   $nim     = "";
@@ -559,6 +554,8 @@ if ($tee == "tulosta") {
   $ots .= "\r\n";
 
   while ($row = mysql_fetch_array($result)) {
+
+    list($row["tuoteno"], $row["nimitys"]) = explode("!¡!", $row["tuoteno_nimitys"]);
 
     if ($row["paino"] < 1) $row["paino"] = 1;
 
@@ -934,7 +931,7 @@ if ($tee == "tulosta") {
 
     $recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>";         // tämä on tullin virallinen avain
 
-    if ($lahetys == "test") {
+    if ($lahetys == "test" or $lahetys == "teme") {
       $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>";   // tämä on tullin testiavain
     }
 
@@ -947,7 +944,7 @@ if ($tee == "tulosta") {
     //PGP-encryptaus atktietue
     $recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>";         // tämä on tullin virallinen avain
 
-    if ($lahetys == "test") {
+    if ($lahetys == "test" or $lahetys == "teme") {
       $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>";   // tämä on tullin testiavain
     }
 
@@ -997,6 +994,12 @@ if ($tee == "tulosta") {
       echo "<font class='message'>".t("Tietoja EI lähetetty tulliin").".</font><br><br>";
     }
 
+    // katotaan lähetetäänkö meili käyttäjälle
+    if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test" or $lahetys == "teme") and $kukarow["eposti"] != "") {
+      // jä lähetetään käyttäjälle
+      mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+    }
+
     // liitetään mukaan myös salaamattomat tiedostot
     $content .= "Content-Type: text/plain;\n" ;
     $content .= "Content-Transfer-Encoding: base64\n" ;
@@ -1014,15 +1017,8 @@ if ($tee == "tulosta") {
 
     $content .= "--$bound\n";
 
-    // katotaan lähetetäänkö meili käyttäjälle
-    if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test") and $kukarow["eposti"] != "") {
-      // jä lähetetään käyttäjälle
-      mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    }
-
     // ja aina adminille
     mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-
   }
   else {
     if ($virhe != 0) {
@@ -1164,6 +1160,7 @@ echo "<tr>
     <option value='tuli' $sel3[tuli]>".t("Lähetä aineisto vain tulliin")."</option>
     <option value='mole' $sel3[mole]>".t("Lähetä aineisto tulliin sekä minulle")."</option>
     <option value='test' $sel3[test]>".t("Lähetä testiaineisto tullin testipalvelimelle")."</option>
+    <option value='teme' $sel3[teme]>".t("Lähetä testiaineisto vain minulle")."</option>
     </select>
   </tr>
   <tr>

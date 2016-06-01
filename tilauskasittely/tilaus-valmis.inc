@@ -214,6 +214,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
   and $laskurow['tila'] == 'N'
   and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+  and vapauta_maksusopimus_kysely($laskurow['jaksotettu']) == 0
   and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
 
   if ($laskurow['alatila'] == '') {
@@ -2192,6 +2193,7 @@ else {
                   tilausrivi.hyllynro,
                   tilausrivi.hyllyvali,
                   tilausrivi.hyllytaso,
+                  tilausrivi.varasto,
                   tuote.nimitys,
                   tuote.tuotemerkki,
                   tuote.tahtituote,
@@ -2216,6 +2218,7 @@ else {
 
           $kutsu = "";
           $subject = "";
+          $content_body_header = "";
           $content_body = "";
 
           $jt_chk_row = mysql_fetch_assoc($jt_chk_res);
@@ -2224,13 +2227,33 @@ else {
 
           $kutsu = "Jälkitoimitus";
           $subject = t("Tuotetta jätetty jälkitoimitukseen");
-          $content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
-          $content_body .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
-          $content_body .= t("Asiakasnumero", $kieli).": $jt_chk_row[asiakasnro]\n\n";
+          $content_body_header  = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
+          $content_body_header .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
+          $content_body_header .= t("Asiakasnumero", $kieli).": $jt_chk_row[asiakasnro]\n\n";
 
           mysql_data_seek($jt_chk_res, 0);
 
           while ($jt_chk_row = mysql_fetch_assoc($jt_chk_res)) {
+
+            if ($yhtiorow['jt_email_tilauksessa'] == 'K') {
+
+              $tulossa_query = "SELECT sum(varattu) tulossa_kpl
+                                FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+                                WHERE yhtio  = '{$kukarow['yhtio']}'
+                                AND tuoteno  = '{$jt_chk_row['tuoteno']}'
+                                AND tyyppi   = 'O'
+                                AND laskutettuaika = '0000-00-00'
+                                AND varasto = '{$jt_chk_row['varasto']}'";
+              $tulossa_result = pupe_query($tulossa_query);
+              $tulossa_row = mysql_fetch_assoc($tulossa_result);
+
+              list($_, $__, $myytavissa) = saldo_myytavissa($jt_chk_row['tuoteno'], '', $jt_chk_row['varasto']);
+
+              if ($tulossa_row['tulossa_kpl'] >= $myytavissa) {
+                continue;
+              }
+            }
+
             $content_body .= "$jt_chk_row[kpl] kpl ".t("jälkitoimituksen tuotenumerosta")." $jt_chk_row[tuoteno] ".t("tilauksella")." $tilausnumero\n\n";
             $content_body .= t("Tuotepaikka").": $jt_chk_row[hyllyalue]-$jt_chk_row[hyllynro]-$jt_chk_row[hyllyvali]-$jt_chk_row[hyllyvtaso]\n\n";
             $content_body .= t("Nimitys").": $jt_chk_row[nimitys]\n";
@@ -2240,19 +2263,23 @@ else {
             $content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
           }
 
-          // Sähköpostin lähetykseen parametrit
-          $parametri = array(
-            "to"           => $yhtiorow["jt_email"],
-            "cc"           => "",
-            "subject"      => $subject,
-            "ctype"        => "text",
-            "body"         => $content_body,
-            "attachements" => "",
-          );
+          if (!empty($content_body)) {
+            $content_body = $content_body_header.$content_body;
 
-          pupesoft_sahkoposti($parametri);
+            // Sähköpostin lähetykseen parametrit
+            $parametri = array(
+              "to"           => $yhtiorow["jt_email"],
+              "cc"           => "",
+              "subject"      => $subject,
+              "ctype"        => "text",
+              "body"         => $content_body,
+              "attachements" => "",
+            );
 
-          echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
+            pupesoft_sahkoposti($parametri);
+
+            echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
+          }
         }
       }
 

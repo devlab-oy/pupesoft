@@ -24,8 +24,9 @@
 // Tämä vaatii paljon muistia
 ini_set("memory_limit", "5G");
 
-// Kutsutaanko CLI:stä
-$php_cli = (php_sapi_name() == 'cli' or isset($editil_cli));
+// Kutsutaanko CLI:stä, jos setataan force_web saadaan aina "ei cli" -versio
+$force_web = (isset($force_web) and $force_web === true);
+$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli)) and $force_web === false);
 
 if ($php_cli) {
 
@@ -186,7 +187,7 @@ else {
         }
         else {
 
-          if ($syotetty > $tanaan) {
+          if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] != 'S') {
             //tulevaisuudessa ei voida laskuttaa
             $tulos_ulos .= "<br>\n".t("VIRHE: Syötetty päivämäärä on tulevaisuudessa, ei voida laskuttaa!")."<br>\n<br>\n";
             $tee = "";
@@ -446,7 +447,6 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-
     if (isset($laskutettavat) and $laskutettavat != "") {
       // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
@@ -466,7 +466,9 @@ else {
 
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan estää tilauksen laskutus, jos tilauksen yhdeltäkin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
-    if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
+    // Eutukäteeen lmaksettu verkkokauppatilaus ($editil_cli) laskutetaan vaikka saldo ei ihan riittäisikään
+    // Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N' or $yhtiorow['laskutus_tulevaisuuteen'] == 'S')) {
 
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -488,6 +490,13 @@ else {
       $lasku_chk_res = pupe_query($query);
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+
+        # Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+        if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
+          $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
+          $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
+        }
+
         // Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta
         if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
@@ -968,10 +977,34 @@ else {
     if (mysql_num_rows($res) > 0) {
 
       $tunnukset = "";
+      $jaksotetut_tunnukset = "";
+      $jaksotetut_by_jaksotettu = array();
 
       // otetaan tunnukset talteen
       while ($row = mysql_fetch_assoc($res)) {
-        $tunnukset .= "'$row[tunnus]',";
+        if ($row['jaksotettu'] > 0) {
+          $jaksotetut_tunnukset .= "'$row[tunnus]',";
+          $jaksotetut_by_jaksotettu[$row['jaksotettu']][] = $row['tunnus'];
+        }
+        else {
+          $tunnukset .= "'$row[tunnus]',";
+        }
+      }
+
+      // tarkistetaan jaksotetut tunnukset
+      if (!empty($jaksotetut_tunnukset)) {
+        list($ok_tunnukset, $puuttuvat_tunnukset) = tarkista_jaksotetut_laskutunnukset($jaksotetut_by_jaksotettu);
+
+        // ohitetaan virheellisen jaksotettujen laskujen käsittely
+        if (!empty($puuttuvat_tunnukset)) {
+          $tulos_ulos .= "<br>\n".t("HUOM: Laskuta kaikki maksusopimustilauksen toimitukset kerralla. Valituista laskuista ei käsitelty seuraavia").": {$puuttuvat_tunnukset}<br>\n";
+          $lasklisa .= " and lasku.tunnus NOT IN ({$puuttuvat_tunnukset}) ";
+        }
+
+        // lisätään oikeelliset jaksotetut laskut tunnuksiin
+        if (!empty($ok_tunnukset)) {
+          $tunnukset .= $ok_tunnukset;
+        }
       }
 
       // vika pilkku pois
@@ -1752,6 +1785,18 @@ else {
           }
         }
       }
+
+      //haetaan kaikki laskutettavat tilaukset uudestaan
+      $query = "SELECT lasku.*
+                FROM lasku
+                {$lasklisa_eikateiset}
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                $lasklisa";
+      $res = pupe_query($query);
 
       // laskutetaan kaikki tilaukset (siis tehään kaikki tarvittava matikka)
       // rullataan eka query alkuun
@@ -2673,7 +2718,7 @@ else {
           }
           elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
             if ($silent == "" or $silent == "VIENTI") {
-              if ($lasrow["chn"] == "666") {
+              if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0) {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
               }
               elseif ($lasrow["chn"] == "667") {
@@ -2684,8 +2729,8 @@ else {
               }
             }
 
-            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
-            if ($lasrow["chn"] == "666") {
+            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+            if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0) {
               $tulostettavat_email[] = $lasrow["tunnus"];
             }
 
@@ -3019,7 +3064,7 @@ else {
 
       if ($yhtiorow['lasku_tulostin'] == -88 or (isset($valittu_tulostin) and $valittu_tulostin == "-88")) {
         // Tämä näytetään vain kun laskutetaan käsin.
-        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== FALSE) {
           js_openFormInNewWindow();
 
           foreach ($tulostettavat as $lasku) {
@@ -3296,7 +3341,7 @@ else {
                 return false;
               }
             }
-            if (ero < 0) {
+            if (ero < 0 && '{$yhtiorow['laskutus_tulevaisuuteen']}' != 'S') {
               var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
               alert(msg);
 
@@ -3372,6 +3417,40 @@ else {
     echo "<br>\n<input type='submit' value='".t("Jatka")."'>";
     echo "</form>";
   }
+}
+
+// Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
+// Tarkistaa löytyykö tarvittava määrä laskutunnuksia
+// palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
+function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
+  global $kukarow;
+
+  $hyvat = "";
+  $vialliset = "";
+
+  foreach ($jaksotetut_array as $key => $value) {
+
+    $query = "SELECT count(*) yhteensa
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila != 'D'
+              AND jaksotettu != 0
+              AND jaksotettu = '{$key}'";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+    $tarkastettu_maara = $row['yhteensa'];
+
+    if (count($value) != $tarkastettu_maara) {
+      $vialliset .= implode(',', $value).",";
+    }
+    else {
+      $hyvat .= implode(',', $value).",";
+    }
+  }
+
+  if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
+
+  return array($hyvat, $vialliset);
 }
 
 if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {

@@ -284,6 +284,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
         $nimitysloput = substr($tvtilausrivirow['nimitys'], 29);
         $tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'], 0, 29);
       }
+      else {
+        $nimitysloput = '';
+      }
 
       $ulos .= sprintf("%03.0f", $rivino)." ";
       $ulos .= sprintf("%-30.s", $tvtilausrivirow['nimitys']);

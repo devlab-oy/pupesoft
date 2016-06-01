@@ -491,11 +491,11 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   echo "<td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'>";
 
   //Jos t‰m‰ on selvittelyss‰, niin annetaan mahdollisuus suorittaa!
-  if (isset($tiliointirow) and $kuitattu_checked == '' 
-    and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00" 
-      or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") 
-    and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] 
-      or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) 
+  if (isset($tiliointirow) and $kuitattu_checked == ''
+    and ($tiliointirow['korjattu'] == "0000-00-00 00:00:00"
+      or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00")
+    and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']
+      or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili'])
     and ($kuittikoodi == ' ' or $kuittikoodi == 'P')) {
     //Olisiko t‰m‰ meid‰n toimittaja
     $tpv = substr($pvm, 0, 2);
@@ -575,7 +575,40 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&tiliote=Z&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm&ohje=off');\">".t("Tee tiliotes‰‰ntˆ")."</a>";
   }
 
-  echo "</td><td class='back' style='width:200px;'></td></tr>";
+  echo "</td>";
+  echo "<td class='back' style='width:200px;'>";
+
+  if ($tiliotekuitti_oikeu and !empty($tiliotekuitti_saajan_nimi)) {
+    js_openFormInNewWindow();
+
+    echo "<br><form id='tulostakopioform_tiliotekuitti_{$td_perheid}' name='tulostakopioform_tiliotekuitti_{$td_perheid}' method='post' action='{$palvelin2}tilauskasittely/tulosta_tiliotekuitti.php' autocomplete='off'>
+          <input type='hidden' name='tee' value='NAYTATILAUS'>
+          <input type='hidden' name='maksupvm' value='{$tiliotekuitti_maksupvm}'>
+          <input type='hidden' name='arvopvm' value='{$tiliotekuitti_arvopvm}'>
+          <input type='hidden' name='saajan_nimi' value='{$tiliotekuitti_saajan_nimi}'>
+          <input type='hidden' name='saajan_tilinumero' value='{$tiliotekuitti_saajan_tilinumero}'>
+          <input type='hidden' name='viite' value='{$tiliotekuitti_viite}'>
+          <input type='hidden' name='arkistointitunnus' value='{$tiliotekuitti_arkistointitunnus}'>
+          <input type='hidden' name='kirjausselite' value='{$tiliotekuitti_kirjausselite}'>
+          <input type='hidden' name='sisainen_viite' value='{$tiliotekuitti_sisainen_viite}'>
+          <input type='hidden' name='rahamaara' value='{$tiliotekuitti_rahamaara}'>
+          <input type='hidden' name='maksajan_tilinumero' value='{$tiliotekuitti_maksajan_tilinumero}'>
+          <input type='hidden' name='nayta_pdf' value='1'>
+          <input type='submit' value='".t("Tiliotekuitti", $kieli)."' onClick=\"js_openFormInNewWindow('tulostakopioform_tiliotekuitti_{$td_perheid}', ''); return false;\"></form>";
+  }
+
+  $tiliotekuitti_maksupvm = '';
+  $tiliotekuitti_arvopvm = '';
+  $tiliotekuitti_saajan_nimi = '';
+  $tiliotekuitti_saajan_tilinumero = '';
+  $tiliotekuitti_viite = '';
+  $tiliotekuitti_arkistointitunnus = '';
+  $tiliotekuitti_kirjausselite = '';
+  $tiliotekuitti_sisainen_viite = '';
+  $tiliotekuitti_rahamaara = '';
+
+  echo "</td>";
+  echo "</tr>";
 
   $maksu = 0; // Maksu on k‰sitelty
   $maara = 0;
@@ -671,6 +704,8 @@ case 'T00':
   $maara        = 0;
   $pankkitilino = substr($tietue, 9, 14);
   $_tiliotetoim = "K";
+
+  $tiliotekuitti_maksajan_tilinumero = substr($tietue, 292, 30);
 
   if ($silent == "") {
     echo "<tr>";
@@ -1045,6 +1080,8 @@ case 'T10':
     echo "</td>";
   }
 
+  $tiliotekuitti_arkistointitunnus = trim(substr($tietue, 12, 18));
+
   echo "<td name='td_{$td_perheid}' class='$class'>".substr($tietue, 12, 18)."</td>";
   echo "<td name='td_{$td_perheid}' class='$class'>".pankkipvm($kirjpvm)."</td>";
   echo "<td name='td_{$td_perheid}' class='$class'>$maksaa</td>";
@@ -1057,10 +1094,20 @@ case 'T10':
 
   echo "</td>";
   echo "<td name='td_{$td_perheid}' class='$class' style='text-align:right;'>$maara</td>";
-  echo "<td class='back' style='width:200px;'></td></tr>";
+  echo "<td class='back' style='width:200px;'>";
+
+  $tiliotekuitti_maksupvm = pankkipvm($kirjpvm);
+  $tiliotekuitti_arvopvm = pankkipvm($pvm);
+  $tiliotekuitti_saajan_nimi = $maksaa;
+  $tiliotekuitti_rahamaara = abs($maara);
+
+  echo "</td>";
+  echo "</tr>";
   echo "<tr class='aktiivi'>";
 
   if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
+
+  $tiliotekuitti_kirjausselite = "{$koodi} {$koodiselite}";
 
   echo "<td name='td_{$td_perheid}' class='$class'>$tilino</td>";
   echo "<td name='td_{$td_perheid}' class='$class'>".pankkipvm($pvm)."</td>";
@@ -1267,10 +1314,14 @@ case 'T11':
     $selite .= trim(substr($arvo, 35, 35));
     $sisviite = trim(substr($arvo, 0, 35));
 
+    $tiliotekuitti_sisainen_viite = trim(substr($arvo, 0, 35));
+
     //T‰m‰ on (kai) ongelma Analysten pankkisoftassa. Lis‰‰v‰t joskus oman tunnuksen
     //ekaan sis‰inenviite kentt‰‰n, silloin meid‰n onkin toisessa.
     if ((trim(substr($arvo, 35, 35))*1 != 0) and (trim(substr($arvo, 0, 35))*1 != 0)) {
       $sisviite = trim(substr($arvo, 35, 35));
+
+      $tiliotekuitti_sisainen_viite = trim(substr($arvo, 35, 35));
     }
 
     // sepa-aineistoon lisat‰‰n t‰h‰n kentt‰‰n merkill‰ '-' erotettuna timestamp,
@@ -1323,6 +1374,9 @@ case 'T11':
       // Otetaan IBAN talteen
       $iban = trim(substr($arvo, 35,  35));
     }
+
+    $tiliotekuitti_saajan_tilinumero = trim(substr($arvo, 35,  35));
+    $tiliotekuitti_viite = trim(substr($arvo, 0,   35));
 
     if (trim(substr($arvo, 70,  35)) != "") $selite .= t("BIC-koodi").": ".        trim(substr($arvo, 70,  35))."<br>\n";
     if (trim(substr($arvo, 105, 70)) != "") $selite .= t("Saajan nimitarkenne").": ".  trim(substr($arvo, 105, 70))."<br>\n";

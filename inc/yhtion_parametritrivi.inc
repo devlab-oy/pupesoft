@@ -209,6 +209,7 @@ if ($fieldname == "siirtolistan_tulostustapa") {
 
   $sel1 = "";
   $sel2 = "";
+  $sel3 = "";
 
   if ($trow[$i] == 'A') {
     $sel1 = "selected";
@@ -587,6 +588,17 @@ if ($fieldname == "myyntilaskujen_kurssipaiva") {
   $jatko = 0;
 }
 
+if ($fieldname == "laskutus_tulevaisuuteen") {
+
+  $sel = $trow[$i] == "S" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ei sallita")."</option>";
+  $ulos .= "<option value = 'S' {$sel}>".t("Saldottomia tuotteita voi laskuttaa tulevaisuuteen")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
 
 if ($fieldname == "tyomaaraystyyppi") {
 
@@ -900,6 +912,19 @@ if ($fieldname == "kerataanko_valmistukset") {
 
   $ulos .= "<option value = ''>".t("Valmistukset kerätään")."</option>";
   $ulos .= "<option value = 'E' $sel[E]>".t("Valmistuksia ei kerätä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "kerataanko_tyomaaraykset") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array($trow[$i] => "SELECTED");
+
+  $ulos .= "<option value = ''>".t("Työmääräykset kerätään")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Työmääräyksiä ei kerätä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2298,27 +2323,6 @@ if ($fieldname == "viitteen_kasinsyotto") {
   $jatko = 0;
 }
 
-if ($fieldname == "poistuvat_tuotteet") {
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel1="";
-  $sel2="";
-
-  if ($trow[$i] == "") {
-    $sel1 = "selected";
-  }
-  else {
-    $sel2 = "selected";
-  }
-
-  $ulos .= "<option value=''  $sel1>".t("Älä näytä poistuvia tuotteita oletuksena")."</option>";
-  $ulos .= "<option value='X' $sel2>".t("Näytä poistuvat tuotteet oletuksena")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "automaattinen_tuotehaku") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2795,6 +2799,19 @@ if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_email_tilauksessa") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Lähetetään jälkitoimitus-sähköposti aina")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Lähetetään jälkitoimitus-sähköposti vain jos jälkitoimitukseen jätettyä tuotetta ei ole riittävästi ostotilauksilla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3020,6 +3037,19 @@ if ($fieldname == "tilausrivien_toimitettuaika") {
   $ulos .= "<option value = ''>".t("Tuotteiden toimitettuaika tulostetaan laskulle normaalisti")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Saldottomien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
   $ulos .= "<option value = 'X' $sel[X]>".t("Kaikkien tuotteiden toimitettuajaksi tulostetaan laskulle rivin toimitusaika")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tilausrivin_esisyotto") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksella / tarjouksella ei esisyötetä hintaa, alennuksia ja nettoa kun syötetään tilausriville tuotenumero ja kpl")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella / tarjouksella esisyötetään hinta, alennukset ja netto kun syötetään tilausriville tuotenumero ja kpl")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3271,6 +3301,19 @@ if ($fieldname == "extranet_keraysprioriteetti") {
   $ulos .= "<option value='A' {$sel}>";
   $ulos .= t("Extranet-tilaukset kerätään asiakkaan prioriteetilla");
   $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "extranet_private_label") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'E' ? ' selected' : '';
+
+  $ulos .= "<option value=''>".t("Oletus")."</option>";
+  $ulos .= "<option value='E' {$sel}>".t("Private label -ominaisuus toimii vain extranetissä")."</option>";
 
   $ulos .= "</select></td>";
 
@@ -3989,10 +4032,11 @@ if ($fieldname == 'ennakkotilausten_toimitus') {
 if ($fieldname == 'ennakkolaskun_tyyppi') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'E' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('E' => '', 'K' => '');
 
   $ulos .= "<option value = ''>".t("Normaali ennakkolasku");
-  $ulos .= "<option value = 'E' $sel>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Ennakkolaskulle jokainen rivi erikseen");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Ennakkolaskulle jokainen rivi erikseen ja ennakkolasku-tekstit piilotetaan");
   $ulos .= "</select></td>";
 
   $jatko = 0;

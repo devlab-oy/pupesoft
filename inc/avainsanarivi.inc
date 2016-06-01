@@ -26,7 +26,8 @@ if ($_selitetark_5 or
 if ($_selitetark_5 and
   $avain_sel['MYSQLALIAS'] == "SELECTED" or
   $avain_sel["SAHKTILTUN"] == "SELECTED" or
-  $avain_sel['TYOM_TYOKENTAT']) {
+  $avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+  $avain_sel['TYOM_TYOSTATUS'] == "SELECTED") {
   $tyyppi = 1;
 }
 
@@ -38,7 +39,8 @@ if ($_selitetark_4 and
     $avain_sel['TRY'] == "SELECTED" or
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel['TYOM_TYOJONO'] == "SELECTED" or
-    $avain_sel['TYOM_TYOKENTAT'] == "SELECTED")) {
+    $avain_sel['TYOM_TYOKENTAT'] == "SELECTED" or
+    $avain_sel['TYOM_TYOSTATUS'] == "SELECTED")) {
   $tyyppi = 1;
 }
 
@@ -62,6 +64,7 @@ if ($_selitetark_3 and
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel['VARASTOLUOKKA'] == "SELECTED" or
     $avain_sel['VARTOIMTULOSTIN'] == "SELECTED" or
+    $avain_sel['TOIMVAHVISTUS'] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -110,6 +113,7 @@ if ($_selitetark_2 and
     $avain_sel["SAHKTILTUN"] == "SELECTED" or
     $avain_sel["OSTOTIL_TILTYYP"] == "SELECTED" or
     $avain_sel["RELEX_TUOTEPAR"] == "SELECTED" or
+    $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -265,12 +269,14 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("CRM avainsanat")."'>";
-  if ($lukitse_laji== "" or $lukitse_laji == "CRM_ROOLI")     $ulos .= "<option value='CRM_ROOLI' $avain_sel[CRM_ROOLI]>          ".t("Yhteyshenkilön rooli")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "CRM_SUORAMARKKI")   $ulos .= "<option value='CRM_SUORAMARKKI' $avain_sel[CRM_SUORAMARKKI]>    ".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "CRM_ROOLI")       $ulos .= "<option value='CRM_ROOLI' $avain_sel[CRM_ROOLI]>              ".t("Yhteyshenkilön rooli")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "CRM_SUORAMARKKI") $ulos .= "<option value='CRM_SUORAMARKKI' $avain_sel[CRM_SUORAMARKKI]>  ".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "CRM_HAAS")        $ulos .= "<option value='CRM_HAAS' {$avain_sel['CRM_HAAS']}>            ".t("Haas USR-kentät")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI")     $ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>        ".t("Laskun vakioviesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAINOSTXT_LASKU") $ulos .= "<option value='MAINOSTXT_LASKU' {$avain_sel['MAINOSTXT_LASKU']}> ".t("Laskun mainosteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL") $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>  ".t("Tilausvahvistuksen vakioviesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")  $ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>    ".t("Tilauksen/Laskun käänteisen verotuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY")          $ulos .= "<option value='LITETY' $avain_sel[LITETY]>            ".t("Liitetiedostotyyppi")."</option>";
@@ -283,7 +289,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO")    $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>      ".t("Tilausvahvistuksen lisätiedot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI")      $ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>        ".t("Inventoinnin laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA")    $ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>      ".t("Hae ja selaa -ohjelman parametrit")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")    $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY")  $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>      ".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM")       $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>          ".t("Puuterivin kommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA")  $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>    ".t("Extranet ulkoasuteema")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA")  $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>    ".t("Ylläpitosopimuksen rivien kentät")."</option>";
@@ -310,6 +316,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka lähetetään asiakkalle, kun jälkitoimitustuotteet on kerätty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka lähetetään asiakkalle, kun työmääräys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille lähtevä TransportAccount")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhmä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -437,6 +444,35 @@ if ($_siirtovarastot and $_selitetark_2) {
 
   $jatko = 0;
   $tyyppi = 1;
+}
+
+if ($avain_sel['CRM_HAAS'] == 'SELECTED') {
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'K' ? "selected" : "";
+
+    $ulos .= "<td>";
+    $ulos .= "<select name = '{$nimi}'>";
+    $ulos .= "<option value = ''>".t("Ei näytetä")."</option>";
+    $ulos .= "<option value = 'K' {$sel}>".t("Näytetään")."</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
+
+  if ($_selitetark) {
+    $vresult = t_avainsana("CRM_ROOLI");
+
+    $ulos = "<td><select name='{$nimi}'><option value=''>".t("Ei roolia")."</option>";
+
+    while ($row = mysql_fetch_assoc($vresult)) {
+      $sel = $row["selite"] == $trow[$i] ? 'selected' : '';
+      $ulos .= "<option value='{$row['selite']}' {$sel}>{$row['selite']} - {$row['selitetark']}</option>";
+    }
+
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
 }
 
 if ($avain_sel['KOPIOITUOTE'] == 'SELECTED') {
@@ -922,6 +958,21 @@ elseif ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_2 and $trow[$
   $jatko  = 0;
 }
 
+if ($avain_sel["TOIMVAHVISTUS"] == "SELECTED" and $_selitetark_3 and $trow[$i-3] == "toimitusvahvistus_email.inc") {
+
+  $sel1 = $trow[$i] == '' ? "selected" : "";
+  $sel2 = $trow[$i] == 'M' ? "selected" : "";
+  $sel3 = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos = "<td><select name = '{$nimi}'>";
+  $ulos .= "<option value = '' $sel1>".t("Vain asiakkaalle")."</option>";
+  $ulos .= "<option value = 'M' $sel2>".t("Vain myyjälle")."</option>";
+  $ulos .= "<option value = 'K' $sel3>".t("Asiakkaalle ja myyjälle")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($avain_sel["TOIMEHTO"] == "SELECTED" and $_selitetark_4) {
   $tyyppi = 0;
   $jatko  = 0;
@@ -957,7 +1008,7 @@ if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] 
   $jatko = 0;
 }
 
-if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) and ($_selite or $_selitetark)) {
+if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['MAINOSTXT_LASKU'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL'] == "SELECTED") and ($_selite or $_selitetark)) {
   $ulos = "<td><textarea rows=5 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }
@@ -1195,6 +1246,18 @@ if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selite) {
   $ulos = "<td><select name = '$nimi'>";
   $ulos .= "<option value = 'A' $sel[A]>".t("Hae ja selaa -ohjelmassa käytetään alkuperäistä ulkoasua")."</option>";
   $ulos .= "<option value = 'B' $sel[B]>".t("Hae ja selaa -ohjelmassa käytetään uutta ulkoasua")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selitetark_2) {
+  $sel = array();
+  $sel[$trow[$i]] = "SELECTED";
+
+  $ulos = "<td><select name = '$nimi'>";
+  $ulos .= "<option value = '' {$sel['']}>".t("Hae ja selaa -ohjelmassa ei voida syöttää alennusta")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Hae ja selaa -ohjelmassa voidaan syöttää alennus")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

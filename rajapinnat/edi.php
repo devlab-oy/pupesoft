@@ -94,6 +94,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+    $edi_order .= "OSTOTIL.OT_TILAUSVIESTI:".$order['customer_note']."\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
@@ -149,6 +150,15 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:".$order['shipping_address']['country_id']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:".$order['shipping_address']['telephone']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:".$order['customer_email']."\n";
+
+    $noutopistetunnus = '';
+    $tunnisteosa = 'matkahuoltoNearbyParcel_';
+    // Jos shipping_method sisältää tunnisteosan ja sen perässä on numero niin otetaan talteen
+    if (!empty($order['shipping_method']) and strpos($order['shipping_method'], $tunnisteosa) !== false) {
+       $tunnistekoodi = str_replace($tunnisteosa, '', $order['shipping_method']);
+       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
+    }
+    $edi_order .= "OSTOTIL.OT_TOIMITUS_NOUTOPISTE_TUNNUS:".$noutopistetunnus."\n";
     $edi_order .= "*RE OSTOTIL\n";
 
     $i = 1;
@@ -191,7 +201,8 @@ class Edi {
         $alennusmaara = $_item['base_discount_amount'];
 
         // Jos alennusprosentti on 0, tarkistetaan vielä onko annettu euromääräistä alennusta
-        if ($alennusprosentti == 0 and $alennusmaara > 0) {
+        // Lahjakorttia ja euromääräistä alennusta ei voi käyttää samalla tilauksella, Magentossa estetty
+        if ($alennusprosentti == 0 and $alennusmaara > 0 and $giftcard_sum == 0) {
           // Lasketaan alennusmäärä alennusprosentiksi
           $alennusprosentti = round(($alennusmaara * 100 / ($verollinen_hinta * $kpl)), 6);
         }

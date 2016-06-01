@@ -2026,7 +2026,7 @@ if ($tila == '') {
             JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
             WHERE suoritus.yhtio = '$kukarow[yhtio]'
             AND suoritus.kohdpvm = '0000-00-00'
-            and suoritus.ltunnus > 0
+            AND suoritus.ltunnus > 0
             ORDER BY yriti.nimi";
   $result = pupe_query($query);
 
@@ -2037,7 +2037,7 @@ if ($tila == '') {
 
   while ($row = mysql_fetch_assoc($result)) {
     $sel = '';
-    if ($tilino == $row["tilino"]) $sel = 'selected';
+    if ($tilino == $row["tilino"] and !empty($tilino)) $sel = 'selected';
     echo "<option value='$row[tilino]' $sel>$row[nimi] $row[tilino] $row[valkoodi]</option>\n";
   }
   echo "</select></td></tr>";

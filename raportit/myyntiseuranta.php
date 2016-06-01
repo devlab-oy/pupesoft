@@ -215,7 +215,7 @@ else {
       $noautosubmit = true;
     }
 
-    $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA", "KUSTP", "KOHDE", "PROJEKTI");
+    $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "<br>DYNAAMINEN_ASIAKAS", "<br>OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK", "parametri_vari", "parametri_koko", "<br>DYNAAMINEN_TUOTE", "<br>LASKUMYYJA", "TUOTEMYYJA", "ASIAKASMYYJA", "TUOTEOSTAJA", "<br>TOIMIPAIKKA", "KUSTP", "KOHDE", "PROJEKTI");
     $monivalintalaatikot_normaali = array();
 
     require "tilauskasittely/monivalintalaatikot.inc";
@@ -291,6 +291,7 @@ else {
     if ($naytaennakko != '')    $naytaennakkochk     = "CHECKED";
     if ($vertailubu != '')      ${"sel_".$vertailubu}  = "SELECTED";
     if ($naytakaikkiasiakkaat != '') $naytakaikkiasiakkaatchk = "CHECKED";
+    if ($alanaytapoistettujaasiakkaita != '') $alanaytapoistettujaasiakkaitachk = "CHECKED";
     if ($naytakaikkituotteet != '') $naytakaikkituotteetchk  = "CHECKED";
     if ($laskutuspaiva != '')    $laskutuspaivachk    = "CHECKED";
     if ($ytunnus_mistatiedot != '')  $ytun_mistatiedot_sel  = "SELECTED";
@@ -589,6 +590,11 @@ else {
       <td class='back'>", t("(Näyttää myös asiakkaat joita ei huomioida myynninseurannassa)"), "</td>
       </tr>
       <tr>
+      <th>", t("Näytä vain aktiiviset asiakkaat"), "</th>
+      <td colspan='3'><input type='checkbox' name='alanaytapoistettujaasiakkaita' {$alanaytapoistettujaasiakkaitachk}></td>
+      <td class='back'>", t("(Ei näytetä poistettuja asiakkaita)"), "</td>
+      </tr>
+      <tr>
       <th>", t("Näytä kaikki tuotteet"), "</th>
       <td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
       <td class='back'>", t("(Näyttää tuotteet joita ei huomioida myynninseurannassa)"), "</td>
@@ -646,7 +652,7 @@ else {
         break;
       case 'asmy':
         $sel_asmy = 'selected';
-        break;  
+        break;
       case 'asbuos':
         $sel_asbuos = 'selected';
         break;
@@ -1850,6 +1856,10 @@ else {
         $asiakaslisa = " and asiakas.myynninseuranta = '' ";
       }
 
+      if ($alanaytapoistettujaasiakkaita != '') {
+        $asiakaslisa .= " and asiakas.laji != 'P' ";
+      }
+
       if ($naytaennakko == "") {
         $lisa .= " and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}' ";
       }
@@ -2690,6 +2700,37 @@ else {
                 }
                 else {
                   $bulisa .= " and try = '' and osasto = '' ";
+                }
+              }
+
+              if (!empty($kumulatiivinen_valittu)) {
+                $_kumulalk_parts = explode("-",$kumulatiivinen_alkupaiva);
+                $_kumulalk = $_kumulalk_parts[0].sprintf('%02d', $_kumulalk_parts[1]);
+                $_kumul_alkukuun_paivat = date('t', mktime(0, 0, 0, $_kumulalk_parts[1], 1, $_kumulalk_parts[0]));
+
+                // Kumulatiivinen tavoite:
+                $budj_q = "SELECT kausi, sum(summa) summa
+                           FROM {$budj_taulu}
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           and kausi   >= '{$_kumulalk}'
+                           and kausi   <= '{$lopu_kausi}'
+                           {$bulisa}
+                           GROUP BY kausi";
+                $budj_r = pupe_query($budj_q);
+
+                $row["tavoitekumul"] = 0;
+
+                while ($dyprow = mysql_fetch_assoc($budj_r)) {
+
+                  if ($dyprow["kausi"] == $_kumulalk and (int) $ppa != 1) {
+                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$ppa)/$_kumul_alkukuun_paivat);
+                  }
+
+                  if ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
+                    $dyprow["summa"] = $dyprow["summa"] * ($ppl/$lopukuun_paivat);
+                  }
+
+                  $row["tavoitekumul"] += $dyprow["summa"];
                 }
               }
 

@@ -1387,10 +1387,13 @@ if (isset($ajax)) {
           $vahvistettu = " (".t("Vahvistettu").")";
         }
 
-        $yhteensa[$tyyppi] += $jtrow["kpl"];
-        
         if ($jtrow["var"] == "P") {
           $yhteensa[$tyyppi] += $jtrow['tilkpl'];
+          $kappalemaara = $jtrow["tilkpl"];
+        }
+        else {
+          $yhteensa[$tyyppi] += $jtrow["kpl"];
+          $kappalemaara = $jtrow["kpl"];
         }
 
         if ($jtrow["varasto"] != "") {
@@ -1475,13 +1478,6 @@ if (isset($ajax)) {
 
         $_return .= "</td>";
 
-        if ($jtrow["var"] == "P") { 
-          $kappalemaara = $jtrow["tilkpl"];
-        }
-        else {
-          $kappalemaara = $jtrow["kpl"]; 
-        }
-        
         $_return .= "
             <td>".tv1dateconv($jtrow["laadittu"])."</td>
             <td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>

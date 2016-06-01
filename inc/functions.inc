@@ -3558,11 +3558,28 @@ if (!function_exists("alv")) {
       $alv = 0; //ostotilaus --> ei alvia riveille
     }
     elseif ($alv >= 600) {
-      //Tässä keississä on käänteisen verotuksen
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
-      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 600;              // Vienti EU:n ulkopuolelle on aina alviton
+      //Tässä keississä on käänteisen verotuksen alaista myyntiä
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) {
+        // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
+        $alv = 600;
+      }
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) {
+        // Otsikolla on valittu verollinen kotimaan myynti
+        if ($trow["alv"] >= 600) {
+         $alv = $trow["alv"];
+        }
+        else {
+          $alv = $trow["alv"]+600;
+        }
+      }
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") {
+        // EU-vienti yritykselle --> alviton
+        $alv = 600;
+      }
+      if ($laskurow["vienti"] == "K") {
+        // Vienti EU:n ulkopuolelle on aina alviton
+        $alv = 600;
+      }
 
       $alv = (float) $alv;
     }
@@ -32948,6 +32965,34 @@ if (!function_exists('url_or_text')) {
     }
 
     return $str;
+  }
+}
+
+if (!function_exists('ulkoinen_jarjestelma_varastot')) {
+  function ulkoinen_jarjestelma_varastot($otunnus) {
+    global $kukarow;
+
+    $logmaster_varasto = 0;
+    $normivarastoja = 0;
+
+    $query = "SELECT DISTINCT varasto
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND uusiotunnus = '{$otunnus}'";
+    $varastocheckres = pupe_query($query);
+
+    while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+      $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
+        $logmaster_varasto++;
+      }
+      else {
+        $normivarastoja++;
+      }
+    }
+
+    return array($logmaster_varasto, $normivarastoja);
   }
 }
 

@@ -1149,8 +1149,18 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
     }
 
-    if (isset($excel_koontilahete) && $excel_koontilahete == 'Y') {
-       laheta_excel_koontilahete($otunnukset, $toitarow);
+    if (!empty($excel_koontilahete) && !empty($otunnukset)) {
+      $_otunnukset = explode(',', $otunnukset);
+
+      switch ($excel_koontilahete) {
+      case 'Y':
+        laheta_excel_koontilahete($_otunnukset, $toitarow);
+        break;
+      case 'E':
+        foreach ($_otunnukset as $_otunnus) {
+          laheta_excel_koontilahete(array($_otunnus), $toitarow);
+        }
+      }
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
@@ -1460,6 +1470,8 @@ if ($tee == '') {
     echo t('Ei lähetetä');
     echo "</option><option value='Y'>";
     echo t('Sähköpostiin');
+    echo "</option><option value='E'>";
+    echo t("Sähköpostiin tilauksittain");
     echo "</option></select></td></tr>";
 
     echo "</table>";
@@ -1549,11 +1561,19 @@ if ($tee == '') {
 }
 
 function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
+  $otunnukset = (array) $otunnukset;
+
+  if (empty($otunnukset)) return false;
+
   require_once 'inc/pupeExcel.inc';
 
   global $kukarow;
 
+  $_otunnukset = implode(',', $otunnukset);
+
   $query = "SELECT lasku.asiakkaan_tilausnumero,
+                   lasku.nimi,
+                   lasku.toim_nimi,
                    asiakaskommentti.kommentti,
                    tilausrivi.tuoteno,
                    tilausrivi.tilkpl,
@@ -1583,29 +1603,42 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tila = 'L'
               AND lasku.alatila = 'B'
-              AND lasku.tunnus IN ($otunnukset)";
+              AND lasku.tunnus IN ($_otunnukset)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) return false;
+
+  $laskurow = mysql_fetch_assoc($result);
 
   $worksheet   = new pupeExcel();
   $format_bold = array("bold" => true);
   $excelrivi   = 0;
   $excelsarake = 0;
 
-  if (!empty($toimitustaparow["toim_postitp"])) {
+  if (count($otunnukset) > 1) {
+    $header_nimi = $toimitustaparow["toim_postitp"];
+    $subject     = t("Excel-koontilähete");
+    $filename    = "Koontilahete.xlsx";
+  }
+  else {
+    $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
+    $subject     = t("Excel-lähete");
+    $filename    = "Lahete.xlsx";
+  }
+
+  if (!empty($header_nimi)) {
     $worksheet->writeString($excelrivi,
                             $excelsarake,
-                            "Deliveries to {$toimitustaparow["toim_postitp"]}",
+                            "Deliveries to {$header_nimi}",
                             $format_bold);
 
     for ($i=0; $i < 3; $i++) $excelrivi++;
   }
 
   $headerit = array(
-    'Hornbach order number',
-    'Maston Product number',
-    'Hornbach Product number',
+    'Customer order number',
+    'Company Product number',
+    'Customer Product number',
     'EAN Code',
     'Product Description',
     'Pack',
@@ -1616,6 +1649,8 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
     $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
     $excelsarake++;
   }
+
+  mysql_data_seek($result, 0);
 
   while ($row = mysql_fetch_assoc($result)) {
     $excelsarake = 0;
@@ -1641,11 +1676,11 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   $email_params = array(
     "to"      => $kukarow['eposti'],
-    "subject" => t("Excel-koontilähete"),
+    "subject" => $subject,
     "attachements" => array(
       0 => array(
         "filename"    => "/tmp/{$excelnimi}",
-        "newfilename" => "Koontilahete.xlsx",
+        "newfilename" => $filename,
         "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       )
     )

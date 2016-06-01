@@ -40,6 +40,11 @@ if (empty($magento_api_ht_edi)
   exit("Parametrejä puuttuu\n");
 }
 
+// Missä tilassa olevat tilaukset haetaan, default 'Processing'
+if (empty($magento_tilaushaku)) {
+  $magento_tilaushaku = 'Processing';
+}
+
 // Magenton soap client
 $magento = new MagentoClient($magento_api_ht_url, $magento_api_ht_usr, $magento_api_ht_pas);
 
@@ -55,8 +60,8 @@ if ($magento->getErrorCount() > 0) {
 }
 
 try {
-  // Haetaan maksetut tilaukset magentosta
-  $tilaukset = $magento->hae_tilaukset('Processing');
+  // Haetaan tilaukset magentosta
+  $tilaukset = $magento->hae_tilaukset($magento_tilaushaku);
 }
 catch (Exception $e) {
   $message = "Tilausten haku epäonnistui";

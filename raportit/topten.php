@@ -68,12 +68,12 @@ else {
 }
 
 if (isset($aja_raportti)) {
-  $alkupvm = strtotime("$vva-$kka-$ppa");
-  $loppupvm = strtotime("$vvl-$kkl-$ppl");
-# piirra_taulukko(hae_data('asiakas'));
- piirra_taulukko(hae_asiakasryhmadata());
-# piirra_taulukko(hae_data('tuote'));
-# piirra_taulukko(hae_data('myyjä'));
+  $alkupvm = "$vva-$kka-$ppa";
+  $loppupvm = "$vvl-$kkl-$ppl";
+  #piirra_taulukko(hae_asiakasdata());
+  piirra_taulukko(hae_asiakasryhmadata());
+  #piirra_taulukko(hae_tuotedata());
+  #piirra_taulukko(hae_myyjadata());
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "topten.php") !== FALSE) {
@@ -146,11 +146,11 @@ function hae_asiakasryhmadata($limitti = " LIMIT 10 ") {
     'otsikko' => t('Asiakasryhmät')
   );
 
-  $query = "SELECT asiakas.ryhma 'asiakasryhmä', group_concat(DISTINCT asiakas.tunnus) 'asiakaslista', sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.rivihinta, 0)) myyntied, round(sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.rivihinta, 0)) / sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.rivihinta, 0)), 2) myyntiind, sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt, sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokateed, sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) / sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokateind, sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kate, 0)) katenyt, sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kate, 0)) kateed, round(sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kate, 0)) /sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kate, 0)), 2) kateind, sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kpl, 0)) myykplnyt, sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kpl, 0)) myykpled, round(sum(if(tilausrivi.laskutettuaika >= '2016-05-02' and tilausrivi.laskutettuaika <= '2016-06-02', tilausrivi.kpl, 0)) / sum(if(tilausrivi.laskutettuaika >= '2015-05-02' and tilausrivi.laskutettuaika <= '2015-06-02', tilausrivi.kpl, 0)), 2) myykplind FROM lasku use index (yhtio_tila_tapvm) JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi='L') JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno) JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '' ) LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite) WHERE lasku.yhtio in ('gyms') and lasku.tila in ('U') and lasku.alatila='X' and ((lasku.tapvm >= '2016-05-02' and lasku.tapvm <= '2016-06-02') or (lasku.tapvm >= '2015-05-02' and lasku.tapvm <= '2015-06-02') ) and tuote.myynninseuranta = '' and tilausrivi.tuoteno != 'ADVANCE PAYMENT' GROUP BY asiakas.ryhma ORDER BY myyntinyt desc {$limitti}";
+  $query = "SELECT asiakas.ryhma 'asiakasryhmä', group_concat(DISTINCT asiakas.tunnus) 'asiakaslista', sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt FROM lasku use index (yhtio_tila_tapvm) JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi='L') JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno) JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.myynninseuranta = '' ) LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite) WHERE lasku.yhtio in ('gyms') and lasku.tila in ('U') and lasku.alatila='X' and (lasku.tapvm >= '{$alkupvm}' and lasku.tapvm <= '{$loppupvm}') and tuote.myynninseuranta = '' and tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}' GROUP BY asiakas.ryhma ORDER BY myyntinyt desc {$limitti}";
 
   $result = pupe_query($query);
   $summayhteensa = 0;
-
+query_dump($query);
   //  Haetaan rivit
   while ($row = mysql_fetch_assoc($result)) {
     $osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '{$row['asiakasryhmä']}'", "'{$kukarow['yhtio']}'");

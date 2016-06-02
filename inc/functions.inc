@@ -1304,8 +1304,8 @@ if (!function_exists("vapauta_sarjanumerot")) {
         if ($srow["tyyppi"] == "W") {
           // Poistetaan valmistusrivin sarjanumero poiston yhteydessä
           $query = "DELETE FROM sarjanumeroseuranta
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    AND tuoteno          = '$srow[tuoteno]'
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    AND tuoteno        = '$srow[tuoteno]'
                     AND ostorivitunnus = '$srow[tunnus]'";
           pupe_query($query);
         }

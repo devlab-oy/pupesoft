@@ -463,6 +463,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VALUUTTAKOODI' :
     // Tilauksen valuutta
     $editilaus_valuuttakoodi = $tieto;
+
+    if (!empty($tieto)) {
+      $edi_ulos .= t("Valuuttakoodi")." $tieto\n";
+    }
+
     break;
 
   case 'OSTOTIL.VERKKOKAUPPA' :

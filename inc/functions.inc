@@ -1325,8 +1325,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
                       and tuoteno          = '$srow[tuoteno]'
                       and myyntirivitunnus = '$srow[tunnus]'";
             pupe_query($query);
-        }
-
+          }
         }
       }
     }

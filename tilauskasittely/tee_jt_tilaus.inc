@@ -10,7 +10,7 @@
 
 if (!function_exists("tee_jt_tilaus")) {
   function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikat = array(), $tilaus_on_jo = '', $varastosta = '', $jt_huomioi_pvm = '', $mista_tullaan = '') {
-    global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta;
+    global $yhtiorow, $kukarow, $toim, $automaattinen_poiminta, $alkuperainen_varasto;
 
     $debug = 0;
 
@@ -599,6 +599,9 @@ if (!function_exists("tee_jt_tilaus")) {
 
         if ($debug==1) echo t("Perustin laskun")." $otsikkorivi[nimi] $id<br>";
       }
+
+      // Otetaan alkuperäinen varasto talteen, jotta osataan hakea $yhtiorow oikein tilaus-valmis.inc:ssä
+      $alkuperainen_varasto = $otsikkorivi['varasto'];
 
       ///* Tässä meillä on otsikko hallussa se on $id muuttujassa*///
 

@@ -10,6 +10,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "topten.php") !== FALSE) {
   require 'validation/Validation.php';
 }
 
+if (!isset($limitit)) $limitit = array();
+
 if (!isset($aja_raportti)) {
   if (!isset($pvmvalinta)) $pvmvalinta = 'tkk';
   // Haetaan alku ja loppup‰iv‰m‰‰r‰t valinnan mukaan
@@ -47,16 +49,36 @@ else {
   echo "</select>";
   echo "</td></tr>";
   echo "<tr>
-    <th>", t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
-    <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
-    <td><input type='text' name='kka' value='{$kka}' size='3'></td>
-    <td><input type='text' name='vva' value='{$vva}' size='5'></td>
-    </tr>\n
-    <tr><th>", t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
-    <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
-    <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
-    <td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
-    </tr>\n";
+        <th>", t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
+        <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
+        <td><input type='text' name='kka' value='{$kka}' size='3'></td>
+        <td><input type='text' name='vva' value='{$vva}' size='5'></td>
+        </tr>\n
+        <tr><th>", t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
+        <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
+        <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
+        <td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
+        </tr>\n";
+  echo "</table><br>";
+
+  $as_sel = in_array('asiakas', $limitit) ? 'checked' : '';
+  $tuo_sel = in_array('tuote', $limitit)  ? 'checked' : '';
+  $asry_sel = in_array('asiakasryhma', $limitit) ? 'checked' : '';
+  $asmy_sel = in_array('asiakasmyyja', $limitit) ? 'checked' : '';
+
+  echo "<table>";
+  echo "<tr><th>".t('N‰yt‰ kaikki')."</th>";
+  echo "<td>";
+  echo t("Asiakkaat");
+  echo "<input type='checkbox' name='limitit[]' value = 'asiakas' $as_sel>";
+  echo t("Tuotteet");
+  echo "<input type='checkbox' name='limitit[]' value = 'tuote' $tuo_sel>";
+  echo t("Asiakasryhm‰t");
+  echo "<input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
+  echo t("Myyj‰t");
+  echo "<input type='checkbox' name='limitit[]' value = 'asiakasmyyja' $asmy_sel>";
+  echo "</td>";
+  echo "</tr>";
   echo "</table><br>";
 
   $monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
@@ -72,10 +94,10 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa)
   $alkupvm = "$vva-$kka-$ppa";
   $loppupvm = "$vvl-$kkl-$ppl";
   
-  piirra_taulukko(hae_asiakasdata(' LIMIT 10 '));
-  piirra_taulukko(hae_asiakasryhmadata(' LIMIT 10 ', $mul_asiakasryhma));
-  piirra_taulukko(hae_asiakasmyyjadata(' LIMIT 10 ', $mul_asiakasmyyja));
-  piirra_taulukko(hae_tuotedata(' LIMIT 10 ', $mul_try));
+  piirra_taulukko(hae_asiakasdata($limitit));
+  piirra_taulukko(hae_asiakasryhmadata($limitit, $mul_asiakasryhma));
+  piirra_taulukko(hae_asiakasmyyjadata($limitit, $mul_asiakasmyyja));
+  piirra_taulukko(hae_tuotedata($limitit, $mul_try));
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "topten.php") !== FALSE) {
@@ -126,13 +148,11 @@ function piirra_taulukko($data) {
   echo "<tr><th>#</th><th>".t($data['otsikko'])."</th><th>".t('Laskutus')."</th></tr>";
   $jarjestys = 1;
   foreach ($data['rivit'] as $row) {
-
     echo "<tr>";
     echo "<td>{$jarjestys}</td>";
     echo "<td>{$row['nimi']}</td>";
     echo "<td>".hintapyoristys($row['myyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
     echo "</tr>";
-
     $jarjestys++;
   }
 echo "<tr><th colspan ='2'>".t('Yhteens‰')."</th><th>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</th></tr>";
@@ -140,7 +160,7 @@ echo "</table>";
 echo "<br>";
 }
 
-function hae_asiakasryhmadata($limitti, $rajaus) {
+function hae_asiakasryhmadata($limitit, $rajaus) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $haettu_data = array(
@@ -156,6 +176,8 @@ function hae_asiakasryhmadata($limitti, $rajaus) {
     $ryhmarajaus = substr($ryhmarajaus, 0, -1);
     $ryhmarajaus .= ") ";
   }
+
+  $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
 
   $query = "SELECT ifnull(avainsana.selitetark,'".t("Ei asiakasryhm‰‰")."') nimi,
             group_concat(DISTINCT asiakas.tunnus) 'asiakaslista',
@@ -192,7 +214,7 @@ function hae_asiakasryhmadata($limitti, $rajaus) {
   return $haettu_data;
 }
 
-function hae_asiakasmyyjadata($limitti, $rajaus) {
+function hae_asiakasmyyjadata($limitit, $rajaus) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $haettu_data = array(
@@ -208,6 +230,8 @@ function hae_asiakasmyyjadata($limitti, $rajaus) {
     $myyjarajaus = substr($myyjarajaus, 0, -1);
     $myyjarajaus .= ") ";
   }
+
+  $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
 
   $query = "SELECT ifnull(kuka.nimi,'".t("Ei asiakasmyyj‰‰")."') nimi,
             group_concat(DISTINCT asiakas.tunnus) 'asiakaslista',
@@ -240,12 +264,14 @@ function hae_asiakasmyyjadata($limitti, $rajaus) {
   return $haettu_data;
 }
 
-function hae_asiakasdata($limitti) {
+function hae_asiakasdata($limitit) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $haettu_data = array(
     'otsikko' => t('Asiakkaat')
   );
+
+  $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
 
   $query = "SELECT asiakas.nimi,
             sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
@@ -276,22 +302,24 @@ function hae_asiakasdata($limitti) {
   return $haettu_data;
 }
 
-function hae_tuotedata($limitti, $rajaus) {
+function hae_tuotedata($limitit, $rajaus) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $haettu_data = array(
-     'otsikko' => t('Tuotteet')
-   );
+    'otsikko' => t('Tuotteet')
+  );
 
-   $tuoterajaus = '';
-   if (!empty($rajaus) and count($rajaus) > 0) {
-     $tuoterajaus = " AND tuote.try IN (";
-     foreach ($rajaus as $value) {
-       $tuoterajaus .= "'{$value}',";
-     }
-     $tuoterajaus = substr($tuoterajaus, 0, -1);
-     $tuoterajaus .= ") ";
-   }
+  $tuoterajaus = '';
+  if (!empty($rajaus) and count($rajaus) > 0) {
+    $tuoterajaus = " AND tuote.try IN (";
+    foreach ($rajaus as $value) {
+      $tuoterajaus .= "'{$value}',";
+    }
+    $tuoterajaus = substr($tuoterajaus, 0, -1);
+    $tuoterajaus .= ") ";
+  }
+
+  $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
 
   $query = "SELECT tuote.nimitys nimi, 
             sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,

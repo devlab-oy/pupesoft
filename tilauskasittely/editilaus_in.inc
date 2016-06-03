@@ -2445,7 +2445,7 @@ while ($tietue = fgets($fd)) {
           }
         }
 
-        // magentotilaus on laskutettu jos meill‰ on kassalipas
+        // magentotilaus on laskutettu, jos meill‰ on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
 
         // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon

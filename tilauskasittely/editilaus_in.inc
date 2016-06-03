@@ -2448,6 +2448,10 @@ while ($tietue = fgets($fd)) {
         // magentotilaus on laskutettu jos meill‰ on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
 
+        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
+        // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
+        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+
         // jos magento -casessa on annettu toimitusaika, asetetaan se laskun tapahtumap‰iv‰ksi
         // mik‰li tilaus on maksettu
         if ($laskutettu_magento_tilaus and !empty($editilaus_tilausaika)) {
@@ -2458,27 +2462,19 @@ while ($tietue = fgets($fd)) {
           $laskvv = date("Y", $_temp_date);
         }
 
-        // Ainoastaan kotimaan tilauksille kutsutaan tilaus-valmis t‰ss‰. T‰m‰ sen takia,
-        // ett‰ tilaus mahdollisesti laskutetaan ja me ei haluta laskuttaa vientej‰,
-        // koska niille pit‰‰ syˆtt‰‰ viel‰ viennin lis‰tiedot.
-        //
-        // Jos Magento -tilaus laskutetaan t‰ss‰, merkataan tilaus alempana takaisin avoimeksi
-        // ja kutsutaan tilaus-valmis uudestaan. Se siirt‰‰ normi tilauksen takaisin tulostusjonoon
-        // ja siirt‰‰ laskutetun vientilaskun lis‰tietojen syˆttˆˆn.
-        //
-        // Jos meill‰ on maksettu Magento -tilaus ja tilaustyyppi on 9, kutsutaan ainoastaa t‰ss‰
-        // tilaus-valmis (alempana on tilaustyyppi != 9). Silloin viennit ja normitilaukset
-        // laskuttuu t‰ss‰, eik‰ niit‰ ei siirret‰ takaisin tulostusjonoon.
-        if ($laskurow["vienti"] == "" or ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi == "9")) {
+        // Laitetaan tilaus valmiiksi
+        if ($paivita_takaisin_keraysjonoon and $laskurow["vienti"] != "") {
+          // Paitsi jos meill‰ on vientitilaus, joka tulee laittaa takaisin ker‰ysjonoon
+        }
+        else {
           require "tilaus-valmis.inc";
         }
 
         $valittu_kopio_tulostin = "";
         $saatekirje = 0;
 
-        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
-        // mutta ei tilaustyyppi‰ 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki
-        if ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9") {
+        // P‰ivitet‰‰n tilaus takaisin ker‰ysjonoon
+        if ($paivita_takaisin_keraysjonoon) {
           // Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
           $varasto_query = "SELECT tunnus
                             from varastopaikat

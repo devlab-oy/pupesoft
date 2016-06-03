@@ -129,7 +129,41 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 else {
-
+  // Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
+  // Tarkistaa löytyykö tarvittava määrä laskutunnuksia
+  // palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
+  if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
+    function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
+      global $kukarow;
+  
+      $hyvat = "";
+      $vialliset = "";
+  
+      foreach ($jaksotetut_array as $key => $value) {
+  
+        $query = "SELECT count(*) yhteensa
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tila != 'D'
+                  AND jaksotettu != 0
+                  AND jaksotettu = '{$key}'";
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+        $tarkastettu_maara = $row['yhteensa'];
+  
+        if (count($value) != $tarkastettu_maara) {
+          $vialliset .= implode(',', $value).",";
+        }
+        else {
+          $hyvat .= implode(',', $value).",";
+        }
+      }
+  
+      if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
+  
+      return array($hyvat, $vialliset);
+    }
+  }
   //Nollataan muuttujat
   $tulostettavat       = array();
   $tulostettavat_email = array();
@@ -3419,41 +3453,7 @@ else {
   }
 }
 
-// Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
-// Tarkistaa löytyykö tarvittava määrä laskutunnuksia
-// palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
-if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
-  function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
-    global $kukarow;
-  
-    $hyvat = "";
-    $vialliset = "";
-  
-    foreach ($jaksotetut_array as $key => $value) {
-  
-      $query = "SELECT count(*) yhteensa
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila != 'D'
-                AND jaksotettu != 0
-                AND jaksotettu = '{$key}'";
-      $result = pupe_query($query);
-      $row = mysql_fetch_assoc($result);
-      $tarkastettu_maara = $row['yhteensa'];
-  
-      if (count($value) != $tarkastettu_maara) {
-        $vialliset .= implode(',', $value).",";
-      }
-      else {
-        $hyvat .= implode(',', $value).",";
-      }
-    }
-  
-    if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
-  
-    return array($hyvat, $vialliset);
-  }
-}
+
 if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
   require "inc/footer.inc";
 }

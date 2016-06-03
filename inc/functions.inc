@@ -9160,6 +9160,11 @@ if (!function_exists("livesearch_tuotehaku")) {
           $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
           $muuta_haku_query .= " and tuote.muuta like ('%{$haku}%') ";
         }
+        elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('J', 'K'))) {
+          $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+          $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
+          $muuta_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+        }
         elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
           $tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
           $nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
@@ -9263,7 +9268,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K'))) {
 
           $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
 
@@ -9312,7 +9317,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 

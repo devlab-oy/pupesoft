@@ -1,13 +1,9 @@
 <?php
 
-if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
-}
-
 if (strpos($_SERVER['SCRIPT_NAME'], "topten.php") !== FALSE) {
   require "../inc/parametrit.inc";
   require 'validation/Validation.php';
+  require "inc/connect.inc";
 }
 
 if (!isset($limitit)) $limitit = array();
@@ -21,73 +17,65 @@ if (!isset($aja_raportti)) {
   }
 }
 
-if (isset($tee) and $tee == "lataa_tiedosto") {
-  readfile("/tmp/".$tmpfilenimi);
-  exit;
-}
-else {
-  require "inc/connect.inc";
+echo "<font class='head'>", t("Top 10 Raportti"), "</font><hr>";
 
-  echo "<font class='head'>", t("Top 10 Raportti"), "</font><hr>";
+echo "<form method='post' action='topten.php'>";
 
-  echo "<form method='post' action='topten.php'>";
-  
-  // p‰iv‰m‰‰r‰rajaus
-  echo "<table>";
-  echo "<tr><th>".t('Valitse p‰iv‰m‰‰r‰rajaus tai syˆt‰ k‰sin')."</th>";
-  
-  echo "<td>";
-  echo "<select name='pvmvalinta' value='' onchange='submit();'>";
+// p‰iv‰m‰‰r‰rajaus
+echo "<table>";
+echo "<tr><th>".t('Valitse p‰iv‰m‰‰r‰rajaus tai syˆt‰ k‰sin')."</th>";
 
-  $tvv_sel = $pvmvalinta == 'tvv' ? 'selected' : '';
-  $tkk_sel = $pvmvalinta == 'tkk' ? 'selected' : '';
-  $tvvv_sel = $pvmvalinta == 'tvvv' ? 'selected' : '';
+echo "<td>";
+echo "<select name='pvmvalinta' value='' onchange='submit();'>";
 
-  echo "<option value='tvv' $tvv_sel>".t("T‰ll‰ viikolla")."</option>";
-  echo "<option value='tkk' $tkk_sel>".t("T‰ss‰ kuussa")."</option>";
-  echo "<option value='tvvv' $tvvv_sel>".t("T‰n‰ vuonna")."</option>";
-  echo "</select>";
-  echo "</td></tr>";
-  echo "<tr>
-        <th>", t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
-        <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
-        <td><input type='text' name='kka' value='{$kka}' size='3'></td>
-        <td><input type='text' name='vva' value='{$vva}' size='5'></td>
-        </tr>\n
-        <tr><th>", t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
-        <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
-        <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
-        <td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
-        </tr>\n";
-  echo "</table><br>";
+$tvv_sel = $pvmvalinta == 'tvv' ? 'selected' : '';
+$tkk_sel = $pvmvalinta == 'tkk' ? 'selected' : '';
+$tvvv_sel = $pvmvalinta == 'tvvv' ? 'selected' : '';
 
-  $as_sel = in_array('asiakas', $limitit) ? 'checked' : '';
-  $tuo_sel = in_array('tuote', $limitit)  ? 'checked' : '';
-  $asry_sel = in_array('asiakasryhma', $limitit) ? 'checked' : '';
-  $asmy_sel = in_array('asiakasmyyja', $limitit) ? 'checked' : '';
+echo "<option value='tvv' $tvv_sel>".t("T‰ll‰ viikolla")."</option>";
+echo "<option value='tkk' $tkk_sel>".t("T‰ss‰ kuussa")."</option>";
+echo "<option value='tvvv' $tvvv_sel>".t("T‰n‰ vuonna")."</option>";
+echo "</select>";
+echo "</td></tr>";
+echo "<tr>
+      <th>", t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
+      <td><input type='text' name='ppa' value='{$ppa}' size='3'></td>
+      <td><input type='text' name='kka' value='{$kka}' size='3'></td>
+      <td><input type='text' name='vva' value='{$vva}' size='5'></td>
+      </tr>\n
+      <tr><th>", t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
+      <td><input type='text' name='ppl' value='{$ppl}' size='3'></td>
+      <td><input type='text' name='kkl' value='{$kkl}' size='3'></td>
+      <td><input type='text' name='vvl' value='{$vvl}' size='5'></td>
+      </tr>\n";
+echo "</table><br>";
 
-  echo "<table>";
-  echo "<tr><th>".t('N‰yt‰ kaikki')."</th>";
-  echo "<td>";
-  echo t("Asiakkaat");
-  echo "<input type='checkbox' name='limitit[]' value = 'asiakas' $as_sel>";
-  echo t("Tuotteet");
-  echo "<input type='checkbox' name='limitit[]' value = 'tuote' $tuo_sel>";
-  echo t("Asiakasryhm‰t");
-  echo "<input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
-  echo t("Myyj‰t");
-  echo "<input type='checkbox' name='limitit[]' value = 'asiakasmyyja' $asmy_sel>";
-  echo "</td>";
-  echo "</tr>";
-  echo "</table><br>";
+$as_sel = in_array('asiakas', $limitit) ? 'checked' : '';
+$tuo_sel = in_array('tuote', $limitit)  ? 'checked' : '';
+$asry_sel = in_array('asiakasryhma', $limitit) ? 'checked' : '';
+$asmy_sel = in_array('asiakasmyyja', $limitit) ? 'checked' : '';
 
-  $monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
-  $monivalintalaatikot_normaali = array();
+echo "<table>";
+echo "<tr><th>".t('N‰yt‰ kaikki')."</th>";
+echo "<td>";
+echo t("Tuotteet");
+echo "<input type='checkbox' name='limitit[]' value = 'tuote' $tuo_sel>";
+echo t("Asiakkaat");
+echo "<input type='checkbox' name='limitit[]' value = 'asiakas' $as_sel>";
+echo t("Myyj‰t");
+echo "<input type='checkbox' name='limitit[]' value = 'asiakasmyyja' $asmy_sel>";
+echo t("Asiakasryhm‰t");
+echo "<input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
+echo "</td>";
+echo "</tr>";
+echo "</table><br>";
 
-  require "tilauskasittely/monivalintalaatikot.inc";
-  echo "<input type='submit' name='aja_raportti' value='", t("N‰yt‰"), "'>";
-  echo "</form>";
-}
+$monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
+$monivalintalaatikot_normaali = array();
+
+require "tilauskasittely/monivalintalaatikot.inc";
+echo "<input type='submit' name='aja_raportti' value='", t("N‰yt‰"), "'>";
+echo "</form>";
 
 if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa)
   and !empty($vvl) and !empty($kkl) and !empty($ppl)) {

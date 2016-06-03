@@ -93,11 +93,22 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa)
   and !empty($vvl) and !empty($kkl) and !empty($ppl)) {
   $alkupvm = "$vva-$kka-$ppa";
   $loppupvm = "$vvl-$kkl-$ppl";
-  
-  piirra_taulukko(hae_asiakasdata($limitit));
-  piirra_taulukko(hae_asiakasryhmadata($limitit, $mul_asiakasryhma));
-  piirra_taulukko(hae_asiakasmyyjadata($limitit, $mul_asiakasmyyja));
-  piirra_taulukko(hae_tuotedata($limitit, $mul_try));
+  echo "<table>";
+  echo "<tr><td>";
+  piirra_taulukko(hae_data('tuotteet', $limitit, $mul_try));  
+  echo "</td>";
+
+  echo "<td>";
+  piirra_taulukko(hae_data('asiakkaat', $limitit));
+  echo "</td>";
+
+  echo "<tr><td>";
+  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $mul_asiakasmyyja));
+  echo "</td>";
+
+  echo "<td>";
+  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $mul_asiakasryhma));
+  echo "</td></tr></table>";
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "topten.php") !== FALSE) {
@@ -155,197 +166,102 @@ function piirra_taulukko($data) {
     echo "</tr>";
     $jarjestys++;
   }
-echo "<tr><th colspan ='2'>".t('Yhteensä')."</th><th>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</th></tr>";
-echo "</table>";
-echo "<br>";
+  echo "<tr><th colspan ='2'>".t('Yhteensä')."</th><th>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</th></tr>";
+  echo "</table>";
 }
 
-function hae_asiakasryhmadata($limitit, $rajaus) {
+function hae_data($tyyppi, $limitit, $rajaus) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
-
-  $haettu_data = array(
-    'otsikko' => t('Asiakasryhmät')
-  );
-
-  $ryhmarajaus = '';
-  if (!empty($rajaus) and count($rajaus) > 0) {
-    $ryhmarajaus = " AND asiakas.ryhma IN (";
-    foreach ($rajaus as $value) {
-      $ryhmarajaus .= "'{$value}',";
-    }
-    $ryhmarajaus = substr($ryhmarajaus, 0, -1);
-    $ryhmarajaus .= ") ";
-  }
-
-  $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
-
-  $query = "SELECT ifnull(avainsana.selitetark,'".t("Ei asiakasryhmää")."') nimi,
-            group_concat(DISTINCT asiakas.tunnus) 'asiakaslista',
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt
-            FROM lasku use index (yhtio_tila_tapvm)
-            JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
-            JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio
-              AND tilausrivi.uusiotunnus=lasku.tunnus AND tilausrivi.tyyppi='L')
-            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio AND tuote.tuoteno=tilausrivi.tuoteno)
-            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '' {$ryhmarajaus})
-            LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASRYHMA' AND avainsana.selite = asiakas.ryhma)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila in ('U')
-            AND lasku.alatila='X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
-            AND tuote.myynninseuranta = ''
-            AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}'
-            GROUP BY asiakas.ryhma
-            ORDER BY myyntinyt DESC
-            {$limitti}";
-
-  $result = pupe_query($query);
-  $summayhteensa = 0;
-
-  //  Haetaan rivit
-  while ($row = mysql_fetch_assoc($result)) {
-    $haettu_data['rivit'][] = $row;
-    $summayhteensa += $row['myyntinyt'];
-  }
-
-  $haettu_data['yhteensa'] = $summayhteensa;
-  return $haettu_data;
-}
-
-function hae_asiakasmyyjadata($limitit, $rajaus) {
-  global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
-
-  $haettu_data = array(
-    'otsikko' => t('Asiakasmyyjät')
-  );
-
-  $myyjarajaus = '';
-  if (!empty($rajaus) and count($rajaus) > 0) {
-    $myyjarajaus = " AND asiakas.myyjanro IN (";
-    foreach ($rajaus as $value) {
-      $myyjarajaus .= "'{$value}',";
-    }
-    $myyjarajaus = substr($myyjarajaus, 0, -1);
-    $myyjarajaus .= ") ";
-  }
-
-  $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
-
-  $query = "SELECT ifnull(kuka.nimi,'".t("Ei asiakasmyyjää")."') nimi,
-            group_concat(DISTINCT asiakas.tunnus) 'asiakaslista',
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt
-            FROM lasku use index (yhtio_tila_tapvm) 
-            JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) 
-            JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.uusiotunnus=lasku.tunnus AND tilausrivi.tyyppi='L' AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
-            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio AND tuote.tuoteno=tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '' {$myyjarajaus})
-            LEFT JOIN kuka ON (kuka.myyja=asiakas.myyjanro AND kuka.yhtio=asiakas.yhtio and kuka.myyja > 0)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila in ('U') 
-            AND lasku.alatila='X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
-            GROUP BY asiakas.myyjanro 
-            ORDER BY myyntinyt DESC
-            {$limitti}";
-  $result = pupe_query($query);
-  $summayhteensa = 0;
-  
-  //  Haetaan rivit
-  while ($row = mysql_fetch_assoc($result)) {
-    $haettu_data['rivit'][] = $row;
-    $summayhteensa += $row['myyntinyt'];
-  }
-  
-  $haettu_data['yhteensa'] = $summayhteensa;
-  return $haettu_data;
-}
-
-function hae_asiakasdata($limitit) {
-  global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
-
-  $haettu_data = array(
-    'otsikko' => t('Asiakkaat')
-  );
-
-  $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
-
-  $query = "SELECT asiakas.nimi,
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt
-            FROM lasku use index (yhtio_tila_tapvm) 
-            JOIN yhtio ON (yhtio.yhtio = lasku.yhtio) 
-            JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.uusiotunnus=lasku.tunnus AND tilausrivi.tyyppi='L' AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
-            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio AND tuote.tuoteno=tilausrivi.tuoteno AND tuote.myynninseuranta = '')
-            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila in ('U') 
-            AND lasku.alatila='X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
-            GROUP BY asiakas.tunnus 
-            ORDER BY myyntinyt DESC
-            {$limitti}";
-  $result = pupe_query($query);
-  $summayhteensa = 0;
-
-  //  Haetaan rivit
-  while ($row = mysql_fetch_assoc($result)) {
-    $haettu_data['rivit'][] = $row;
-    $summayhteensa += $row['myyntinyt'];
-  }
-
-  $haettu_data['yhteensa'] = $summayhteensa;
-  return $haettu_data;
-}
-
-function hae_tuotedata($limitit, $rajaus) {
-  global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
-
-  $haettu_data = array(
-    'otsikko' => t('Tuotteet')
-  );
 
   $tuoterajaus = '';
-  if (!empty($rajaus) and count($rajaus) > 0) {
-    $tuoterajaus = " AND tuote.try IN (";
-    foreach ($rajaus as $value) {
-      $tuoterajaus .= "'{$value}',";
-    }
-    $tuoterajaus = substr($tuoterajaus, 0, -1);
-    $tuoterajaus .= ") ";
-  }
+  $ryhmarajaus = '';
+  $myyjarajaus = '';
+  $kukajoin = '';
+  $avainsanajoin = '';
+  $haettu_data = array();
+  $nimikentta = ' tuote.nimitys ';
+  $grouppauskentta = ' tuote.tunnus ';
 
-  $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
+  switch ($tyyppi) {
+    case "tuotteet":
+      $haettu_data['otsikko'] = t('Tuotteet');
+      if (!empty($rajaus) and count($rajaus) > 0) {
+        $tuoterajaus = " AND tuote.try IN (";
+        foreach ($rajaus as $value) {
+          $tuoterajaus .= "'{$value}',";
+        }
+        $tuoterajaus = substr($tuoterajaus, 0, -1);
+        $tuoterajaus .= ") ";
+      }
+      $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
+      break;
+    case "asiakkaat":
+      $haettu_data['otsikko'] = t('Asiakkaat');
+      $nimikentta = " asiakas.nimi ";
+      $grouppauskentta = " asiakas.tunnus ";
+      $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
+      break;
+    case "asiakasryhmat":
+      $haettu_data['otsikko'] = t('Asiakasryhmät');
+       if (!empty($rajaus) and count($rajaus) > 0) {
+         $ryhmarajaus = " AND asiakas.ryhma IN (";
+         foreach ($rajaus as $value) {
+           $ryhmarajaus .= "'{$value}',";
+         }
+         $ryhmarajaus = substr($ryhmarajaus, 0, -1);
+         $ryhmarajaus .= ") ";
+       }
+      $nimikentta = " ifnull(avainsana.selitetark,'".t("Ei asiakasryhmää")."') ";
+      $grouppauskentta = " asiakas.ryhma ";
+      $avainsanajoin = " LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio AND avainsana.laji = 'ASIAKASRYHMA' AND avainsana.selite = asiakas.ryhma) ";
+      $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
+      break;
+    case "asiakasmyyjat":
+      $haettu_data['otsikko'] = t('Asiakasmyyjät');
+      if (!empty($rajaus) and count($rajaus) > 0) {
+        $myyjarajaus = " AND asiakas.myyjanro IN (";
+        foreach ($rajaus as $value) {
+          $myyjarajaus .= "'{$value}',";
+        }
+        $myyjarajaus = substr($myyjarajaus, 0, -1);
+        $myyjarajaus .= ") ";
+      }
+      $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyjää")."') ";
+      $grouppauskentta = " asiakas.myyjanro ";
+      $kukajoin = " LEFT JOIN kuka ON (kuka.myyja=asiakas.myyjanro AND kuka.yhtio=asiakas.yhtio and kuka.myyja > 0) ";
+      $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
+      break;
+   }
 
-  $query = "SELECT tuote.nimitys nimi, 
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
-            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt
-            FROM lasku use index (yhtio_tila_tapvm)
-            JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
-            JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.uusiotunnus=lasku.tunnus AND tilausrivi.tyyppi='L' AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
-            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno AND tuote.myynninseuranta = '' {$tuoterajaus})
-            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '')
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila in ('U')
-            AND lasku.alatila='X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
-            GROUP BY tuote.tunnus
-            ORDER BY myyntinyt DESC
-            {$limitti}";
-  $result = pupe_query($query);
-  $summayhteensa = 0;
+   $query = "SELECT {$nimikentta} nimi, 
+             sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
+             sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt
+             FROM lasku use index (yhtio_tila_tapvm)
+             JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
+             JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio AND tilausrivi.uusiotunnus=lasku.tunnus AND tilausrivi.tyyppi='L' AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
+             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno AND tuote.myynninseuranta = '' {$tuoterajaus})
+             JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.myynninseuranta = '' {$myyjarajaus} {$ryhmarajaus})
+             {$kukajoin}
+             {$avainsanajoin}
+             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+             AND lasku.tila in ('U')
+             AND lasku.alatila='X'
+             AND lasku.tapvm >= '{$alkupvm}'
+             AND lasku.tapvm <= '{$loppupvm}'
+             GROUP BY {$grouppauskentta}
+             ORDER BY myyntinyt DESC
+             {$limitti}";
+   $result = pupe_query($query);
+   $summayhteensa = 0;
+   
+// asiakasmyyjakeissistä ----> group_concat(DISTINCT asiakas.tunnus) 'asiakaslista',
 
-  //  Haetaan rivit
-  while ($row = mysql_fetch_assoc($result)) {
-    $haettu_data['rivit'][] = $row;
-    $summayhteensa += $row['myyntinyt'];
-  }
+   //  Haetaan rivit
+   while ($row = mysql_fetch_assoc($result)) {
+     $haettu_data['rivit'][] = $row;
+     $summayhteensa += $row['myyntinyt'];
+   }
 
-  $haettu_data['yhteensa'] = $summayhteensa;
-  return $haettu_data;
+   $haettu_data['yhteensa'] = $summayhteensa;
+   return $haettu_data;  
 }

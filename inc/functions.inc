@@ -27689,7 +27689,14 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('CurrencyCode', 0);
       $line->addChild('TaxCode', 0);
 
-      $_kommentti = substr($looprow['kommentti'], 0, 92);
+      $_kommentti = '';
+      if (!empty($looprow['kommentti'])) {
+        $_kommentti = substr($looprow['kommentti'], 0, 92);
+      }
+      elseif(!empty($looprow['kerayskommentti'])) {
+        $_kommentti = substr($looprow['kerayskommentti'], 0, 92);
+      }
+
       $line->addChild('LineInfo', utf8_encode($_kommentti));
 
       $_line_i++;

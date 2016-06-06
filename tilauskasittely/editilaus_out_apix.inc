@@ -75,9 +75,28 @@ $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$toim_postino}\n";
 $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:{$toim_maa}\n";
 $edi_order .= "*RE OSTOTIL\n";
 
+$query = "SELECT *
+          FROM rahtikirjat
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND otsikkonro = '{$laskurow['tunnus']}'";
+$rahtikirjares = pupe_query($query);
+
+while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
+  $edi_order .= "OSTOTILPAK.OTP_SSCC:\n";
+  $edi_order .= "OSTOTILPAK.OTP_BRUTTOPAINO:{$rahtikirjarow['kilot']}\n";
+  $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
+  $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
+}
+
+# Koontirahtikirjan pakkaus
+$edi_order .= "OSTOTILPAK.OTP_KOONTISSCC:\n";
+$edi_order .= "OSTOTILPAK.OTP_KOONTIBRUTTOPAINO:\n";
+$edi_order .= "OSTOTILPAK.OTP_KOONTITILAVUUS:\n";
+$edi_order .= "OSTOTILPAK.OTP_KOONTITILAVUUSYKS:\n";
+
 $i = 1;
 
-$query = "SELECT tilausrivi.*
+$query = "SELECT tilausrivi.*, tuote.eankoodi
           FROM tilausrivi
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
@@ -101,11 +120,15 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   // nettorivihinta
   $rivihinta = $kpl * $hinta;
 
+  $tuotenumero = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $tilausrivi_row['tuoteno']);
+
   $edi_order .= "*RS OSTOTILRIV {$i}\n";
   $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
   $edi_order .= "OSTOTILRIV.OTR_RIVINRO:{$tilausrivi_row['tunnus']}\n";
   $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
-  $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tilausrivi_row['tuoteno']}\n";
+  $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tuotenumero}\n";
+  $edi_order .= "OSTOTILRIV.OTR_EANKOODI:{$tilausrivi_row['eankoodi']}\n";
+  $edi_order .= "OSTOTILRIV.OTR_SSCC:\n";
   $edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";
 
   $kpl = round($kpl);
@@ -133,4 +156,15 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
                WHERE yhtio     = '{$kukarow['yhtio']}'
                AND tunnus      = '{$tilausrivi_row['tunnus']}'";
   $tresult = pupe_query($sqlquery, $GLOBALS["masterlink"]);
+}
+
+if ($i > 1) {
+
+  $edi_order .= "*ME\n";
+  $edi_order .= "*IE\n";
+
+  $edipolku = "/tmp";
+
+  $filename = $edipolku."/{$laskurow['tunnus']}.dat";
+  file_put_contents($filename, $edi_order);
 }

@@ -32628,12 +32628,10 @@ if (!function_exists("loppulaskuta")) {
       }
     }
 
-    $query = "SELECT *
+    $query = "SELECT *, if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) vienti_kurssi
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
-              and tunnus  = '{$tunnus}'
-              ORDER BY tunnus
-              LIMIT 1";
+              and tunnus  = '{$tunnus}'";
     $rahres = pupe_query($query);
     $laskurow = mysql_fetch_assoc($rahres);
 
@@ -32712,16 +32710,20 @@ if (!function_exists("loppulaskuta")) {
 
     echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." {$tunnus}<br></font><br>";
 
-    //Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
-    $query = "SELECT ROUND(SUM(rivihinta * IF('$yhtiorow[alv_kasittely]' = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1)), 2) laskutettu,
+    $query_ale_lisa = generoi_alekentta('M');
+
+    // Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
+    $query = "SELECT
+              sum(round(tilausrivi.hinta * tilausrivi.kpl * {$query_ale_lisa}, 2)) laskutettu,
+              sum(round((tilausrivi.hinta / lasku.vienti_kurssi) * tilausrivi.kpl * {$query_ale_lisa}, 2)) laskutettu_valuutassa,
               tilausrivi.alv
               FROM lasku
               JOIN tilausrivi ON (
-                tilausrivi.yhtio = lasku.yhtio AND
-                tilausrivi.otunnus = lasku.tunnus AND
-                kpl <> 0 AND
-                uusiotunnus > 0 AND
-                tilausrivi.tuoteno = '{$yhtiorow['ennakkomaksu_tuotenumero']}'
+                tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.kpl != 0
+                AND tilausrivi.uusiotunnus > 0
+                AND tilausrivi.tuoteno = '{$yhtiorow['ennakkomaksu_tuotenumero']}'
               )
               WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
               AND lasku.jaksotettu = '".($tunnus * -1)."'
@@ -32740,8 +32742,8 @@ if (!function_exists("loppulaskuta")) {
       $kielirow["kieli"] = $yhtiorow["kieli"];
     }
 
-    $nimitys     = t($posrow["kuvaus"], $kielirow["kieli"]);
-    $rivikommentti   = t("Ennakkolaskutuksen hyvitys", $kielirow["kieli"])." {$lahteva_lasku}. ";
+    $nimitys = t($posrow["kuvaus"], $kielirow["kieli"]);
+    $rivikommentti = t("Ennakkolaskutuksen hyvitys", $kielirow["kieli"])." {$lahteva_lasku}. ";
 
     if ($posrow["lisatiedot"] != "") {
       $rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -32749,7 +32751,7 @@ if (!function_exists("loppulaskuta")) {
 
     # Tarkistetaan että ennakkolaskun hyvitysrivi menee kunnolliselle otsikolle
     # (Voi olla case jossa ennakon kaikki rivit ovat olleet JT-rivejä ja otsikko on mitätöitynyt)
-    $query = "SELECT tunnus
+    $query = "SELECT tunnus, if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) vienti_kurssi
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND jaksotettu = '{$tunnus}'
@@ -32763,19 +32765,27 @@ if (!function_exists("loppulaskuta")) {
 
     if (!empty($tunnus_chk_row['tunnus'])) {
       $ennakkolaskun_hyvitys_otunnus = $tunnus_chk_row['tunnus'];
+      $vientikurssi = $tunnus_chk_row["vienti_kurssi"];
     }
     else {
       $ennakkolaskun_hyvitys_otunnus = $tunnus;
+      $vientikurssi = $laskurow["vienti_kurssi"];
     }
 
     while ($row = mysql_fetch_assoc($sresult)) {
+
+      $laskutettu = $row['laskutettu'];
+
+      if ($vientikurssi != 1) {
+        $laskutettu = round($row['laskutettu_valuutassa'] * $vientikurssi, 6);
+      }
 
       $query  = "INSERT INTO tilausrivi (
                   hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv,
                   kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu
                 )
                 VALUES (
-                  '{$row['laskutettu']}', 'N', '-1', '-1', '{$ennakkolaskun_hyvitys_otunnus}',
+                  '{$laskutettu}', 'N', '-1', '-1', '{$ennakkolaskun_hyvitys_otunnus}',
                   '{$yhtiorow['ennakkomaksu_tuotenumero']}', '{$nimitys}', '{$kukarow['yhtio']}', 'L',
                   '{$row['alv']}', '{$rivikommentti}', '{$kukarow['kuka']}', now(), '{$kukarow['kuka']}',
                   now(), '{$kukarow['kuka']}', now()
@@ -32792,7 +32802,7 @@ if (!function_exists("loppulaskuta")) {
     $query = "UPDATE maksupositio SET
               uusiotunnus = '{$ennakkolaskun_hyvitys_otunnus}'
               WHERE tunnus = '{$posrow['tunnus']}'";
-    $result = pupe_query($query);
+    pupe_query($query);
 
     // Alkuperäinen tilaus/tilaukset menee laskutukseen
     $query = "UPDATE lasku SET
@@ -32804,7 +32814,7 @@ if (!function_exists("loppulaskuta")) {
               WHERE yhtio     = '{$kukarow['yhtio']}'
               and jaksotettu  = '{$tunnus}'
               and tila       != 'R'";
-    $result = pupe_query($query);
+    pupe_query($query);
 
     //  Merkataan projekti valmiiksi
     $query = "UPDATE lasku SET
@@ -32812,7 +32822,7 @@ if (!function_exists("loppulaskuta")) {
               WHERE yhtio    = '{$kukarow['yhtio']}'
               and jaksotettu = '{$tunnus}'
               and tila       = 'R'";
-    $result = pupe_query($query);
+    pupe_query($query);
 
     $query = "SELECT GROUP_CONCAT(DISTINCT tunnus) tunnukset
               FROM lasku

@@ -121,6 +121,7 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   $rivihinta = $kpl * $hinta;
 
   $tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tilausrivi_row['tuoteno']);
+  $tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tilausrivi_row['nimitys']);
 
   $edi_order .= "*RS OSTOTILRIV {$i}\n";
   $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
@@ -129,7 +130,7 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tuotenumero}\n";
   $edi_order .= "OSTOTILRIV.OTR_EANKOODI:{$tilausrivi_row['eankoodi']}\n";
   $edi_order .= "OSTOTILRIV.OTR_SSCC:\n";
-  $edi_order .= "OSTOTILRIV.OTR_NIMI:{$tilausrivi_row['nimitys']}\n";
+  $edi_order .= "OSTOTILRIV.OTR_NIMI:{$tuotteen_nimitys}\n";
 
   $kpl = round($kpl);
 

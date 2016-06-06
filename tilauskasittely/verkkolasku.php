@@ -28,6 +28,108 @@ ini_set("memory_limit", "5G");
 $force_web = (isset($force_web) and $force_web === true);
 $php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli)) and $force_web === false);
 
+if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
+  // Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
+  // Tarkistaa löytyykö tarvittava määrä laskutunnuksia
+  // palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
+  function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
+    global $kukarow;
+
+    $hyvat = "";
+    $vialliset = "";
+
+    foreach ($jaksotetut_array as $key => $value) {
+
+      $query = "SELECT count(*) yhteensa
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila != 'D'
+                AND jaksotettu != 0
+                AND jaksotettu = '{$key}'";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+      $tarkastettu_maara = $row['yhteensa'];
+
+      if (count($value) != $tarkastettu_maara) {
+        $vialliset .= implode(',', $value).",";
+      }
+      else {
+        $hyvat .= implode(',', $value).",";
+      }
+    }
+
+    if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
+
+    return array($hyvat, $vialliset);
+  }
+}
+
+if (!function_exists("vlas_dateconv")) {
+  function vlas_dateconv($date) {
+    //kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+    return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
+  }
+}
+
+if (!function_exists("spyconv")) {
+  //tehdään viitteestä SPY standardia eli 20 merkkiä etunollilla
+  function spyconv($spy) {
+    return $spy = sprintf("%020.020s", $spy);
+  }
+}
+
+if (!function_exists("laskunkieli")) {
+  function laskunkieli($liitostunnus, $kieli) {
+    global $kukarow, $yhtiorow;
+
+    $asiakas_apu_query = "SELECT *
+                          FROM asiakas
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND tunnus  = '$liitostunnus'";
+    $asiakas_apu_res = pupe_query($asiakas_apu_query);
+    $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
+
+    if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
+      $laskun_kieli = "SE";
+    }
+    elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
+      $laskun_kieli = "EE";
+    }
+    elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
+      $laskun_kieli = "FI";
+    }
+    else {
+      $laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
+    }
+
+    if ($kieli != "") {
+      $laskun_kieli = trim(strtoupper($kieli));
+    }
+
+    return $laskun_kieli;
+  }
+}
+
+if (!function_exists("pp")) {
+  //pilkut pisteiksi
+  function pp($muuttuja, $round="", $rmax="", $rmin="") {
+
+    if (strlen($round)>0) {
+      if (strlen($rmax)>0 and $rmax<$round) {
+        $round = $rmax;
+      }
+      if (strlen($rmin)>0 and $rmin>$round) {
+        $round = $rmin;
+      }
+
+      return $muuttuja = number_format($muuttuja, $round, ",", "");
+    }
+    else {
+      return $muuttuja = str_replace(".", ",", $muuttuja);
+    }
+  }
+}
+
 if ($php_cli) {
 
   if (empty($argv[1])) {
@@ -129,41 +231,6 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 else {
-  // Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
-  // Tarkistaa löytyykö tarvittava määrä laskutunnuksia
-  // palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
-  if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
-    function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
-      global $kukarow;
-  
-      $hyvat = "";
-      $vialliset = "";
-  
-      foreach ($jaksotetut_array as $key => $value) {
-  
-        $query = "SELECT count(*) yhteensa
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tila != 'D'
-                  AND jaksotettu != 0
-                  AND jaksotettu = '{$key}'";
-        $result = pupe_query($query);
-        $row = mysql_fetch_assoc($result);
-        $tarkastettu_maara = $row['yhteensa'];
-  
-        if (count($value) != $tarkastettu_maara) {
-          $vialliset .= implode(',', $value).",";
-        }
-        else {
-          $hyvat .= implode(',', $value).",";
-        }
-      }
-  
-      if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
-  
-      return array($hyvat, $vialliset);
-    }
-  }
   //Nollataan muuttujat
   $tulostettavat       = array();
   $tulostettavat_email = array();
@@ -251,73 +318,6 @@ else {
   }
 
   if ($tee == "LASKUTA") {
-
-    if (!function_exists("vlas_dateconv")) {
-      function vlas_dateconv($date) {
-        //kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-        return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
-      }
-    }
-
-    //tehdään viitteestä SPY standardia eli 20 merkkiä etunollilla
-    if (!function_exists("spyconv")) {
-      function spyconv($spy) {
-        return $spy = sprintf("%020.020s", $spy);
-      }
-    }
-
-    if (!function_exists("laskunkieli")) {
-      function laskunkieli($liitostunnus, $kieli) {
-        global $kukarow, $yhtiorow;
-
-        $asiakas_apu_query = "SELECT *
-                              FROM asiakas
-                              WHERE yhtio = '$kukarow[yhtio]'
-                              AND tunnus  = '$liitostunnus'";
-        $asiakas_apu_res = pupe_query($asiakas_apu_query);
-        $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
-
-        if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
-          $laskun_kieli = "SE";
-        }
-        elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
-          $laskun_kieli = "EE";
-        }
-        elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
-          $laskun_kieli = "FI";
-        }
-        else {
-          $laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
-        }
-
-        if ($kieli != "") {
-          $laskun_kieli = trim(strtoupper($kieli));
-        }
-
-        return $laskun_kieli;
-      }
-    }
-
-    //pilkut pisteiksi
-    if (!function_exists("pp")) {
-      function pp($muuttuja, $round="", $rmax="", $rmin="") {
-
-        if (strlen($round)>0) {
-          if (strlen($rmax)>0 and $rmax<$round) {
-            $round = $rmax;
-          }
-          if (strlen($rmin)>0 and $rmin>$round) {
-            $round = $rmin;
-          }
-
-          return $muuttuja = number_format($muuttuja, $round, ",", "");
-        }
-        else {
-          return $muuttuja = str_replace(".", ",", $muuttuja);
-        }
-      }
-    }
-
     //Tiedostojen polut ja nimet
     //keksitään uudelle failille joku varmasti uniikki nimi:
     $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";

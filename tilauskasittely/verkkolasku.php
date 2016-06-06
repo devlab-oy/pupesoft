@@ -113,7 +113,6 @@ if (!function_exists("laskunkieli")) {
 if (!function_exists("pp")) {
   //pilkut pisteiksi
   function pp($muuttuja, $round="", $rmax="", $rmin="") {
-
     if (strlen($round)>0) {
       if (strlen($rmax)>0 and $rmax<$round) {
         $round = $rmax;
@@ -3452,7 +3451,6 @@ else {
     echo "</form>";
   }
 }
-
 
 if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
   require "inc/footer.inc";

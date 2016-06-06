@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_addresses.php';
 require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
+require_once 'rajapinnat/presta/presta_currencies.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {
@@ -14,6 +15,7 @@ class PrestaSalesOrders extends PrestaClient {
   private $presta_addresses = null;
   private $presta_carriers = null;
   private $presta_countries = null;
+  private $presta_currencies = null;
   private $presta_order_histories = null;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
@@ -22,6 +24,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
     $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
+    $this->presta_currencies = new PrestaCurrencies($url, $api_key, $log_file);
     $this->presta_order_histories = new PrestaOrderHistories($url, $api_key, $log_file);
 
     parent::__construct($url, $api_key, $log_file);
@@ -67,6 +70,7 @@ class PrestaSalesOrders extends PrestaClient {
     }
 
     $sales_orders = $this->fetch_sales_orders();
+    $id_group_shop = $this->shop_group_id();
 
     $total = count($sales_orders);
     $current = 0;
@@ -77,15 +81,18 @@ class PrestaSalesOrders extends PrestaClient {
 
       try {
         // fetch associated addresses
-        $address_invoice  = $this->presta_addresses->get($sales_order['id_address_invoice']);
-        $invoice_country  = $this->presta_countries->get($address_invoice['id_country']);
+        $address_invoice  = $this->presta_addresses->get($sales_order['id_address_invoice'], null, $id_group_shop);
+        $invoice_country  = $this->presta_countries->get($address_invoice['id_country'], null, $id_group_shop);
 
-        $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery']);
-        $delivery_country = $this->presta_countries->get($address_delivery['id_country']);
+        $address_delivery = $this->presta_addresses->get($sales_order['id_address_delivery'], null, $id_group_shop);
+        $delivery_country = $this->presta_countries->get($address_delivery['id_country'], null, $id_group_shop);
+
+        // fetch currency
+        $currency = $this->presta_currencies->get($sales_order['id_currency'], null, $id_group_shop);
 
         // fetch carrier
         if (!empty($sales_order['id_carrier'])) {
-          $carrier = $this->presta_carriers->get($sales_order['id_carrier']);
+          $carrier = $this->presta_carriers->get($sales_order['id_carrier'], null, $id_group_shop);
         }
         else {
           $carrier = array(
@@ -95,6 +102,7 @@ class PrestaSalesOrders extends PrestaClient {
 
         $params = array(
           "carrier"          => $carrier,
+          "currency"         => $currency,
           "delivery_address" => $address_delivery,
           "delivery_country" => $delivery_country,
           "invoice_address"  => $address_invoice,
@@ -156,6 +164,7 @@ class PrestaSalesOrders extends PrestaClient {
    */
   private function convert_to_edi($params) {
     $carrier          = $params["carrier"];
+    $currency         = $params["currency"];
     $delivery_address = $params["delivery_address"];
     $delivery_country = $params["delivery_country"];
     $invoice_address  = $params["invoice_address"];
@@ -219,7 +228,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_VIITTEENNE:");
     $this->add_row("OSTOTIL.OT_VEROMAARA:");
     $this->add_row("OSTOTIL.OT_SUMMA:{$order['total_paid_tax_incl']}");
-    $this->add_row("OSTOTIL.OT_VALUUTTAKOODI:{$order['id_currency']}");
+    $this->add_row("OSTOTIL.OT_VALUUTTAKOODI:{$currency['iso_code']}");
     $this->add_row("OSTOTIL.OT_KLAUSUULI1:");
     $this->add_row("OSTOTIL.OT_KLAUSUULI2:");
     $this->add_row("OSTOTIL.OT_KULJETUSOHJE:");

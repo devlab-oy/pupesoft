@@ -55,6 +55,7 @@ if (!isset($myyja)) $myyja = "";
 if (!isset($automaattinen_poiminta)) $automaattinen_poiminta = "";
 if (!isset($mista_tullaan)) $mista_tullaan = "";
 if (!isset($jt_tyyppi)) $jt_tyyppi = "";
+if (!isset($alkuperainen_varasto)) $alkuperainen_varasto = "";
 
 // ennakoissa ei setata jt_huomioi_pvm automaattisesti
 // jälkkäreissä setataan jos ei tulla jtselauksen kautta

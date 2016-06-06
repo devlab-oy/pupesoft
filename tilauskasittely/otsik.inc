@@ -4175,7 +4175,24 @@ if (isset($jatka)) {
     $tilaustyyppi = 'H';
   }
 
+  $maksettulisa = '';
+  if ($vienti == ''and !isset($otsikon_laskurow['mapvm']) and ($otsikon_laskurow['label'] != '' or $label != '')) {
+    $kassalipasquery = "SELECT tunnus
+                        FROM kassalipas
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        AND nimi = 'Verkkokauppa'";
+    $kassalipas_res = pupe_query($kassalipasquery);
+    if (mysql_num_rows($kassalipas_res) == 1) {
+      $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
+      $kassalipas = $kassalipas_row['tunnus'];
+      $maksettulisa = " mapvm = now(), ";
+      // Laskutuskielto
+      $chn = 999;
+    }
+  }
+
   $query .= "  lasku SET
+        {$maksettulisa}
         aktiivinen_kuljetus     = '',
         alatila                 = '$alatila',
         alv                     = '$alv',

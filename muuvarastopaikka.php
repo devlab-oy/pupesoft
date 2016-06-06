@@ -485,6 +485,8 @@ if ($tee == 'N') {
   $saldook = 0;
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
+    //siirret‰‰nkˆ varattua saldoa
+    $siirretaan_varattua = false;
 
     // Tutkitaan lis‰varusteiden tuotepaikkoja
     $query = "SELECT *
@@ -510,7 +512,11 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
+      
+      if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii]) {
+        $siirretaan_varattua = true;
+      }
+      elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirt‰‰. Saldo ei riitt‰nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
@@ -521,7 +527,11 @@ if ($tee == 'N') {
     }
   }
 
-  if ($saldook > 0) { //Taravat myytiin alta!
+  if ($saldook > 0 and ($kappaleet[$iii] < $myytavissa or $kappaleet[$iii] < $hyllyssa)) {
+    echo "<font class='error'>".t("Voit siirt‰‰ vain myyt‰viss‰ olevaa m‰‰r‰‰ tai koko hyllyss‰ olevan m‰‰r‰n")."</font><br><br>";
+    $tee = $uusitee;
+  }
+  elseif ($saldook > 0) { //Taravat myytiin alta!
     echo "<font class='error'>".t("Siirett‰v‰ m‰‰r‰ on liian iso")."</font><br><br>";
     $tee = $uusitee;
   }
@@ -558,6 +568,24 @@ if ($tee == 'N') {
         if ($lisavaruste[$iii] == "LISAVARUSTE") {
           $siirretaan[$iii] = $lisavartprow["tunnus"];
         }
+      }
+      // P‰ivitet‰‰n uusi paikka varatuille tilausriveille
+      if ($siirretaan_varattua) {
+        $query = "UPDATE tilausrivi
+                  SET hyllyalue = '$minnerow[hyllyalue]',
+                    hyllynro    = '$minnerow[hyllynro]',
+                    hyllyvali   = '$minnerow[hyllyvali]',
+                    hyllytaso   = '$minnerow[hyllytaso]'
+                  WHERE tuoteno   = '$tuotteet[$iii]'
+                    AND yhtio     = '$kukarow[yhtio]'
+                    AND tyyppi IN ('L','G','V')
+                    AND varattu <> 0
+                    AND hyllyalue = '$mistarow[hyllyalue]'
+                    AND hyllynro  = '$mistarow[hyllynro]'
+                    AND hyllyvali = '$mistarow[hyllyvali]'
+                    AND hyllytaso = '$mistarow[hyllytaso]'
+                    AND keratty   = ''";
+        pupe_query($query);
       }
     }
   }
@@ -935,8 +963,8 @@ if ($tee == 'M') {
         $invalisa2 = "";
       }
 
-      if ($myytavissa > 0) {
-        echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+      if ($myytavissa > 0 or $hyllyssa > $myytavissa) {
+        echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($hyllyssa) $invalisa2</option>";
       }
     }
   }
@@ -978,7 +1006,7 @@ if ($tee == 'M') {
         $invalisa2 = "";
       }
 
-      echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
+      echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[nimitys]: $saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($hyllyssa) $invalisa2</option>";
     }
   }
   echo "</select></td>";

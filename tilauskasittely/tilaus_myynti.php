@@ -4673,11 +4673,11 @@ if ($tee == '') {
 
       if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
         // valittu ei näytetä alveja vaikka hinnat alvillisina
-        if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
+        if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $alv < 500) {
           $hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
         }
         // valittu näytetään alvit vaikka hinnat alvittomia
-        if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
+        if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $alv < 500) {
           $hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
         }
       }
@@ -8203,7 +8203,7 @@ if ($tee == '') {
           if ($yhtiorow["alv_kasittely"] == "") {
 
             // Oletuksena verolliset hinnat ja ei käännettyä arvonlisäverovelvollisuutta
-            if ($tilausrivi_alvillisuus == "E" and $row["alv"] < 600) {
+            if ($tilausrivi_alvillisuus == "E" and $row["alv"] < 500) {
               $alvillisuus_jako = 1 + $row["alv"] / 100;
             }
             else {
@@ -8513,6 +8513,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
+            and $yhtiorow["puute_jt_oletus"] != "H"
           ) {
 
             echo "<br />";

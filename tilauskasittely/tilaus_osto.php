@@ -290,12 +290,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
   $toimittajarow = mysql_fetch_assoc($toimittajaresult);
 
   if ($tee == "vahvista") {
+    $tilausrivilisa = "";
+    if ($rivitunnus > 0) {
+      $tilausrivilisa = " and tunnus = '{$rivitunnus}' ";
+    }
+
     $query = "UPDATE tilausrivi
               SET jaksotettu = 1
               WHERE yhtio     = '$kukarow[yhtio]'
               and otunnus     = '$kukarow[kesken]'
               and tyyppi      = 'O'
-              and uusiotunnus = 0";
+              and uusiotunnus = 0
+              {$tilausrivilisa}";
     $result = pupe_query($query);
 
     if (mysql_affected_rows() > 0) {
@@ -1613,6 +1619,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                   <input type='hidden' name='tee'         value = 'OOKOOAA'>
                   <input type='submit' value='".t("Hyväksy")."'>
                   </form></td> ";
+            }
+
+            if ($prow['jaksotettu'] == 0) {
+              echo "  <td valign='top' class='back''>
+                  <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+                  <input type='hidden' name='toim'          value = '$toim'>
+                  <input type='hidden' name='lopetus'        value = '$lopetus'>
+                  <input type='hidden' name='tilausnumero'      value = '$tilausnumero'>
+                  <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
+                  <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
+                  <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
+                  <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+                  <input type='hidden' name='tee'          value = 'vahvista'>
+                  <input type='submit' value='".t("Vahvista rivin toimitus")."'>
+                  </form>
+                  </td>";
             }
 
             if ($varaosavirhe != '') {

@@ -182,8 +182,6 @@ if ($i > 1) {
   $edi_order .= "*ME\n";
   $edi_order .= "*IE\n";
 
-  $edipolku = "/tmp";
-
-  $filename = $edipolku."/{$laskurow['tunnus']}.dat";
+  $filename = "/tmp/out_apix_{$laskurow['tunnus']}.dat";
   file_put_contents($filename, $edi_order);
 }

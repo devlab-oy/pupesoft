@@ -6600,7 +6600,7 @@ if ($tee == '') {
     }
     else {
       echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-      echo "<font class='head'>".t("6586 Tilausrivit")."</font>";
+      echo "<font class='head'>".t("Tilausrivit")."</font>";
 
       $sele = array("K" => "", "E" => "");
 

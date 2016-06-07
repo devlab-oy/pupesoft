@@ -4176,7 +4176,9 @@ if (isset($jatka)) {
   }
 
   $maksettulisa = '';
-  if ($vienti == ''and !isset($otsikon_laskurow['mapvm']) and ($otsikon_laskurow['label'] != '' or $label != '')) {
+  $verkkokauppa_avainsanatunnus = t_avainsana("LABEL", "", " and avainsana.selite='Verkkokauppatilaus'", "", "", "tunnus");
+  if (!empty($verkkokauppa_avainsanatunnus) and $vienti == '' and (!isset($otsikon_laskurow['mapvm']) or $otsikon_laskurow['mapvm'] = '0000-00-00') and 
+     ($otsikon_laskurow['label'] == "{$verkkokauppa_avainsanatunnus}" or $label == $verkkokauppa_avainsanatunnus)) {
     $kassalipasquery = "SELECT tunnus
                         FROM kassalipas
                         WHERE yhtio = '$kukarow[yhtio]'

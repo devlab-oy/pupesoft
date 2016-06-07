@@ -7,6 +7,13 @@ $query = "SELECT *
 $lisatiedot_result = pupe_query($query);
 $laskun_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
 
+$query = "SELECT *
+          FROM asiakas
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus = '{$laskurow['liitostunnus']}'";
+$asiakasres = pupe_query($query);
+$asiakasrow = mysql_fetch_assoc($asiakasres);
+
 $query = "SELECT *, IF(puh != '', puh, gsm) AS puhelin
           FROM yhteyshenkilo
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -26,8 +33,6 @@ $toim_osoite   = substr(trim($laskurow['toim_osoite']), 0, 25);
 $toim_postitp  = substr(trim($laskurow['toim_postitp']), 0, 25);
 $toim_postino  = trim($laskurow['toim_postino']);
 $toim_maa      = trim($laskurow['toim_maa']);
-
-$asiakasnumero = $yhtiorow['ovttunnus'];
 
 $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
 $edi_order .= "*MS {$laskurow['tunnus']}\n";
@@ -52,7 +57,7 @@ $edi_order .= "OSTOTIL.OT_KULJETUSOHJE:\n";
 $edi_order .= "OSTOTIL.OT_LAHETYSTAPA:\n";
 $edi_order .= "OSTOTIL.OT_VAHVISTUS_FAKSILLA:\n";
 $edi_order .= "OSTOTIL.OT_FAKSI:\n";
-$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$asiakasnumero}\n";
+$edi_order .= "OSTOTIL.OT_ASIAKASNRO:{$yhtiorow['ovttunnus']}\n";
 $edi_order .= "OSTOTIL.OT_YRITYS:{$lask_yritys}\n";
 $edi_order .= "OSTOTIL.OT_KATUOSOITE:{$lask_osoite}\n";
 $edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:{$lask_postitp}\n";
@@ -73,6 +78,19 @@ $edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$toim_osoite}\n";
 $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$toim_postitp}\n";
 $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$toim_postino}\n";
 $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:{$toim_maa}\n";
+
+$edi_order .= "OSTOTIL.OT_OVTTUNNUS:{$asiakasrow['ovttunnus']}\n";
+$edi_order .= "OSTOTIL.OT_MAKSETTU:\n";
+$edi_order .= "OSTOTIL.OT_VEROMAARA:\n";
+$edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:\n";
+$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
+$edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:\n";
+$edi_order .= "OSTOTIL.VERKKOKAUPPA:\n";
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:\n";
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:\n";
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:\n";
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:\n";
+
 $edi_order .= "*RE OSTOTIL\n";
 
 $query = "SELECT *

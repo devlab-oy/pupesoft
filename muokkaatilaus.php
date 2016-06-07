@@ -2444,7 +2444,9 @@ if (mysql_num_rows($result) != 0) {
 
         if (mysql_num_rows($label_result) == 1) {
           $label_row = mysql_fetch_assoc($label_result);
-          $label_color = "style = 'background-color: {$label_row['selite']};'";
+          if (substr($label_row['selite'], 0, 1) == '#') {
+            $label_color = "style = 'background-color: {$label_row['selite']};'";
+          }
         }
       }
 

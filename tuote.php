@@ -1242,8 +1242,8 @@ if (isset($ajax)) {
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
               and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
               and tilausrivi.tuoteno         = '$tuoteno'
-              and ((tilausrivi.laskutettuaika = '0000-00-00' and tilausrivi.tyyppi != 'G') or (tilausrivi.toimitettuaika = '0000-00-00' and tilausrivi.tyyppi = 'G'))
-              and (tilausrivi.var != 'P' or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila != 'X'))
+              and tilausrivi.laskutettuaika = '0000-00-00'
+              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0 ) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila != 'X'))
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 

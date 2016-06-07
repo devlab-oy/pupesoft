@@ -83,13 +83,13 @@ $edi_order .= "OSTOTIL.OT_TOIMITUS_EMAIL:{$laskurow['toim_email']}\n";
 $edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:{$laskurow['toim_puh']}\n";
 
 $edi_order .= "OSTOTIL.OT_OVTTUNNUS:{$asiakasrow['ovttunnus']}\n";
-$edi_order .= "OSTOTIL.OT_MAKSETTU:\n";
-$edi_order .= "OSTOTIL.OT_VEROMAARA:\n";
-$edi_order .= "OSTOTIL.VERKKOKAUPPA:\n";
-$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:\n";
-$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:\n";
-$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:\n";
-$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:\n";
+$edi_order .= "OSTOTIL.OT_MAKSETTU:\n"; #Verkkokauppa-kentt‰, kertoo Pupesoftille onko tilaus maksettu verkkokaupassa vai ei.
+$edi_order .= "OSTOTIL.OT_VEROMAARA:\n"; #Verkkokauppa-kentt‰, verollisen tilauksen veron m‰‰r‰.
+$edi_order .= "OSTOTIL.VERKKOKAUPPA:\n"; #Verkkokauppa-kentt‰, kertoo Pupesoftille mink‰tyyppinen verkkokauppa kyseess‰.
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:\n"; #Verkkokauppa-kentt‰, asiakkaan asiakasnumero verkkokaupassa.
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:\n"; #Verkkokauppa-kentt‰, asiakkaan antama kohdetieto verkkokaupassa.
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:\n"; #Verkkokauppa-kentt‰, asiakkaan tilausnumero verkkokaupassa.
+$edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:\n"; #Verkkokauppa-kentt‰, asiakkaan antama tilausviite verkkokaupassa.
 
 $edi_order .= "*RE OSTOTIL\n";
 

@@ -1,5 +1,5 @@
 <?php
-
+#TODO
 if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
 
 require 'inc/parametrit.inc';

@@ -1,5 +1,5 @@
 <?php
-
+#TODO
 if (isset($_POST["tee"])) $tee = $_POST["tee"];
 else $tee = "";
 if (isset($_POST["kaunisnimi"])) $kaunisnimi = $_POST["kaunisnimi"];

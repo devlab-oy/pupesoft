@@ -1,4 +1,5 @@
 <?php
+#TODO
 require 'inc/parametrit.inc';
 
 echo "<font class='head'>Danskebank Factoring</font><hr><br>";

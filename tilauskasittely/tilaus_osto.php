@@ -386,7 +386,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $tee = "Y";
   }
 
-  if ($tee =='valmis') {
+  if ($tee == 'valmis' or $tee == 'valmis_ja_saavuta') {
 
     //tulostetaan tilaus kun se on valmis
     $otunnus = $kukarow["kesken"];
@@ -498,6 +498,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         }
       } // end while ostotilausrivit
     } // end if varasto != 0
+
+    if ($tee == 'valmis_ja_saavuta') {
+      // Luodaan uusi saapuminen
+      $saapumisen_tunnus = uusi_saapuminen($toimittajarow);
+
+      // Kohdistetaan rivit valmiiksi
+      $kohdistus_q = "UPDATE tilausrivi SET
+                      uusiotunnus = '{$saapumisen_tunnus}',
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND otunnus = '{$laskurow['tunnus']}'
+                      AND tyyppi = 'O'
+                      AND uusiotunnus = 0";
+      pupe_query($kohdistus_q);
+      // L‰hetet‰‰n ulkoiseen varastoon
+      //TODO
+    }    
 
     if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
 
@@ -1973,6 +1989,20 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             </form>
             </td>";
       }
+      
+       echo "  <td class='back'>
+            <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+            <input type='hidden' name='toim'          value = '$toim'>
+            <input type='hidden' name='lopetus'        value = '$lopetus'>
+            <input type='hidden' name='tilausnumero'      value = '$tilausnumero'>
+            <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
+            <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
+            <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+            <input type='hidden' name='toimittajaid'      value = '$laskurow[liitostunnus]'>
+            <input type='hidden' name='tee'          value = 'valmis_ja_saavuta'>
+            <input type='submit' value='".t("Tilaus valmis ja luo saapuminen")."' {$saldo_tarkistus_onclick}>
+            </form>
+            </td>";
     }
 
     if ($eimitatoi != "EISAA" and $kukarow["mitatoi_tilauksia"] == "") {

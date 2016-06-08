@@ -569,7 +569,7 @@ if ($tee == "VALITSE") {
 
       // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
       // niin tehdään nollalasku
-      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
+      if ($row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
         $row['summa'] = 0.00;
       }
 
@@ -677,7 +677,7 @@ if ($tee == "VALITSE") {
       }
 
       echo "<td>$row[toimitustapa] $rahti_hinta</td>";
-      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
+      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&kaytiin_otsikolla=NOJOO!&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
 
       //Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupositiot kerralla
       if ($jaksotettuja) {

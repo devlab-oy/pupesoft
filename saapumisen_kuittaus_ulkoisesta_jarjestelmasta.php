@@ -47,6 +47,8 @@ $kukarow = mysql_fetch_assoc($kukares);
 $path = trim($argv[2]);
 $path = substr($path, -1) != '/' ? $path.'/' : $path;
 
+$email = isset($argv[3]) ? trim($argv[3]) : "";
+
 if ($handle = opendir($path)) {
 
   while (false !== ($file = readdir($handle))) {
@@ -177,6 +179,31 @@ if ($handle = opendir($path)) {
                   AND tila     = 'K'
                   AND tunnus = '{$saapumistunnus}'";
         $updres = pupe_query($query);
+
+        if (!empty($email)) {
+          $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br><br>\n\n";
+          $body .= t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":<br><br>\n\n";
+          $body .= t("Tuoteno")." ".t("Kappaleita")."<br>\n";
+
+          foreach ($tilausrivit as $rivitunnus => $data) {
+            $body .= "{$data['tuoteno']} {$data['kpl']}<br>\n";
+          }
+
+          $params = array(
+            'to' => $email,
+            'cc' => '',
+            'subject' => t("Saapumisen kuittaus")." - {$saapumisnro}",
+            'ctype' => 'html',
+            'body' => $body,
+          );
+
+          if (pupesoft_sahkoposti($params)) {
+            pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
+          }
+          else {
+            pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
+          }
+        }
       }
       else {
         pupesoft_log('inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");

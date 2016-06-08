@@ -4653,32 +4653,32 @@ if ($tee == '') {
         ${'ale'.$alepostfix} = $tilausrivi["ale{$alepostfix}"];
       }
 
-      $netto          = $tilausrivi['netto'];
-      $alv           = $tilausrivi['alv'];
-      $kommentti        = $tilausrivi['kommentti'];
-      $ale_peruste      = $tilausrivi['ale_peruste'];
-      $kerayspvm        = $tilausrivi['kerayspvm'];
-      $toimaika        = $tilausrivi['toimaika'];
-      $hyllyalue        = $tilausrivi['hyllyalue'];
-      $hyllynro        = $tilausrivi['hyllynro'];
-      $hyllytaso        = $tilausrivi['hyllytaso'];
-      $hyllyvali        = $tilausrivi['hyllyvali'];
-      $rivinumero        = $tilausrivi['tilaajanrivinro'];
-      $jaksotettu       = $tilausrivi['jaksotettu'];
-      $perheid2         = $tilausrivi["perheid2"];
-      $sopimuksen_lisatieto1  = $tilausrivi["sopimuksen_lisatieto1"];
-      $sopimuksen_lisatieto2  = $tilausrivi["sopimuksen_lisatieto2"];
-      $omalle_tilaukselle    = $tilausrivi['omalle_tilaukselle'];
-      $valmistuslinja      = $tilausrivi['positio'];
+      $netto = $tilausrivi['netto'];
+      $alv = $tilausrivi['alv'];
+      $kommentti = $tilausrivi['kommentti'];
+      $ale_peruste = $tilausrivi['ale_peruste'];
+      $kerayspvm = $tilausrivi['kerayspvm'];
+      $toimaika = $tilausrivi['toimaika'];
+      $hyllyalue = $tilausrivi['hyllyalue'];
+      $hyllynro = $tilausrivi['hyllynro'];
+      $hyllytaso = $tilausrivi['hyllytaso'];
+      $hyllyvali = $tilausrivi['hyllyvali'];
+      $rivinumero = $tilausrivi['tilaajanrivinro'];
+      $jaksotettu = $tilausrivi['jaksotettu'];
+      $perheid2 = $tilausrivi["perheid2"];
+      $sopimuksen_lisatieto1 = $tilausrivi["sopimuksen_lisatieto1"];
+      $sopimuksen_lisatieto2 = $tilausrivi["sopimuksen_lisatieto2"];
+      $omalle_tilaukselle = $tilausrivi['omalle_tilaukselle'];
+      $valmistuslinja = $tilausrivi['positio'];
 
-      if ($yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+      if ($tuoterow["alv"] < 500 and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
         // valittu ei näytetä alveja vaikka hinnat alvillisina
         if ($tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '') {
-          $hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
+          $hinta = round($hinta / (1+$tuoterow["alv"]/100), $yhtiorow['hintapyoristys']);
         }
         // valittu näytetään alvit vaikka hinnat alvittomia
         if ($tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o') {
-          $hinta = round($hinta * (1+$alv/100), $yhtiorow['hintapyoristys']);
+          $hinta = round($hinta * (1+$tuoterow["alv"]/100), $yhtiorow['hintapyoristys']);
         }
       }
 
@@ -8203,7 +8203,7 @@ if ($tee == '') {
           if ($yhtiorow["alv_kasittely"] == "") {
 
             // Oletuksena verolliset hinnat ja ei käännettyä arvonlisäverovelvollisuutta
-            if ($tilausrivi_alvillisuus == "E" and $row["alv"] < 600) {
+            if ($tilausrivi_alvillisuus == "E" and $row["alv"] < 500) {
               $alvillisuus_jako = 1 + $row["alv"] / 100;
             }
             else {
@@ -8513,6 +8513,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
+            and $yhtiorow["puute_jt_oletus"] != "H"
           ) {
 
             echo "<br />";

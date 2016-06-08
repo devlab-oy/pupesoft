@@ -103,21 +103,15 @@ $i = 1;
 
 $query = "SELECT tilausrivi.*, tuote.eankoodi
           FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.panttitili = '' AND tuote.ei_saldoa = '')
-          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
           WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
           AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-          AND tilausrivi.var     not in ('U','J')
-          AND ta.tunnus IS NULL";
+          AND tilausrivi.var     not in ('U','J','P')";
 $tilausrivi_res = pupe_query($query);
 
 while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
-  $kpl = $tilausrivi_row['jt'] + $tilausrivi_row['varattu'];
-
-  if ($tilausrivi_row['var'] == 'P') {
-    $kpl = $tilausrivi_row['tilkpl'] * 1;
-  }
+  $kpl = $tilausrivi_row['varattu'];
 
   // HUOM: Reklamaatioissa laitetaan nettohyvitysyksikköhinta
   $hinta = $tilausrivi_row['hinta'] * generoi_alekentta_php($tilausrivi_row, 'M', 'kerto');
@@ -136,9 +130,6 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   $edi_order .= "OSTOTILRIV.OTR_EANKOODI:{$tilausrivi_row['eankoodi']}\n";
   $edi_order .= "OSTOTILRIV.OTR_SSCC:\n";
   $edi_order .= "OSTOTILRIV.OTR_NIMI:{$tuotteen_nimitys}\n";
-
-  $kpl = round($kpl);
-
   $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
   $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rivihinta}\n";
   $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
@@ -148,11 +139,9 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
     $edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:".$ale["ale".$alepostfix]."\n";
   }
 
+  $edi_order .= "OSTOTILRIV.OTR_ERIKOISALENNUS:{$laskurow['erikoisale']}\n";
   $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
-
   $edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
-  $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
-  $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
   $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:{$tilausrivi_row['yksikko']}\n";
   $edi_order .= "*RE  OSTOTILRIV {$i}\n";
   $i++;

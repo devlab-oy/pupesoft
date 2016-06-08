@@ -768,7 +768,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       }
     }
 
-    if ($ei_nollariveja != "" and $ostot+$enp == 0) {
+    if ($ei_nollariveja != "" and $ostot-$enp == 0) {
       $naytetaan = "nope";
     }
     elseif ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["status"] == 'T') {

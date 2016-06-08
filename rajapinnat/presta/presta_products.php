@@ -148,7 +148,9 @@ class PrestaProducts extends PrestaClient {
       $value = $this->xml_value($translation['teksti']);
 
       // set translation to correct field
-      switch ($translation['kentta']) {
+      $field = strtolower($translation['kentta']);
+
+      switch ($field) {
         case 'nimitys':
           $xml->product->name->language[$tr_id] = $value;
           $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");

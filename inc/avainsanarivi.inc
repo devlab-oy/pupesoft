@@ -65,6 +65,7 @@ if ($_selitetark_3 and
     $avain_sel['VARASTOLUOKKA'] == "SELECTED" or
     $avain_sel['VARTOIMTULOSTIN'] == "SELECTED" or
     $avain_sel['TOIMVAHVISTUS'] == "SELECTED" or
+    $avain_sel["MYYNTITILASTO"] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -114,6 +115,7 @@ if ($_selitetark_2 and
     $avain_sel["OSTOTIL_TILTYYP"] == "SELECTED" or
     $avain_sel["RELEX_TUOTEPAR"] == "SELECTED" or
     $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
+    $avain_sel["MYYNTITILASTO"] == "SELECTED" or
     $avain_sel['Y'] == "SELECTED")) {
   $tyyppi = 1;
 }
@@ -317,6 +319,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka lähetetään asiakkalle, kun työmääräys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille lähtevä TransportAccount")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MYYNTITILASTO")   $ulos .= "<option value='MYYNTITILASTO' {$avain_sel['MYYNTITILASTO']}>".t("Myyntitilasto raportin parametrit")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -987,18 +990,24 @@ if (($avain_sel["KARHUVIESTI"] == "SELECTED"
     or $avain_sel["TV_LISATIETO"] == "SELECTED"
     or $avain_sel['KAANTALVVIESTI'] == "SELECTED"
     or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED"
-    or $avain_sel["SALDOVAHVISTUS"] == "SELECTED")
+    or $avain_sel["SALDOVAHVISTUS"] == "SELECTED"
+    or $avain_sel["MYYNTITILASTO"] == "SELECTED")
   and $_selitetark) {
   $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }
 
-if ($avain_sel["TUOTEMERKKI"] and $_selitetark_2) {
+if (($avain_sel["TUOTEMERKKI"] == "SELECTED"
+    or $avain_sel["MYYNTITILASTO"] == "SELECTED")
+  and $_selitetark_2) {
   $ulos = "<td><textarea rows=10 cols=50 name='{$nimi}'>{$trow[$i]}</textarea></td>";
   $jatko = 0;
 }
 
-if (($avain_sel["OSASTO"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and $_selitetark_3) {
+if (($avain_sel["OSASTO"] == "SELECTED"
+    or $avain_sel["MYYNTITILASTO"] == "SELECTED"
+    or $avain_sel["TRY"] == "SELECTED")
+  and $_selitetark_3) {
   $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }

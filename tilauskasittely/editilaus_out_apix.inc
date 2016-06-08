@@ -145,12 +145,6 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:{$tilausrivi_row['yksikko']}\n";
   $edi_order .= "*RE  OSTOTILRIV {$i}\n";
   $i++;
-
-  $sqlquery = "UPDATE tilausrivi SET
-               tilaajanrivinro = tunnus
-               WHERE yhtio     = '{$kukarow['yhtio']}'
-               AND tunnus      = '{$tilausrivi_row['tunnus']}'";
-  $tresult = pupe_query($sqlquery, $GLOBALS["masterlink"]);
 }
 
 if ($i > 1) {

@@ -143,7 +143,7 @@ while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
   $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
   $edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
   $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:{$tilausrivi_row['yksikko']}\n";
-  $edi_order .= "*RE  OSTOTILRIV {$i}\n";
+  $edi_order .= "*RE OSTOTILRIV {$i}\n";
   $i++;
 }
 

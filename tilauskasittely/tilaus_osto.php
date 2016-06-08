@@ -500,19 +500,33 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     } // end if varasto != 0
 
     if ($tee == 'valmis_ja_saavuta') {
-      // Luodaan uusi saapuminen
-      $saapumisen_tunnus = uusi_saapuminen($toimittajarow);
-
-      // Kohdistetaan rivit valmiiksi
-      $kohdistus_q = "UPDATE tilausrivi SET
-                      uusiotunnus = '{$saapumisen_tunnus}',
+      // Tarkistetaan löytyykö kohdistettuja rivejä
+      $tarkistus_q = "SELECT DISTINCT uusiotunnus
+                      FROM tilausrivi
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND otunnus = '{$laskurow['tunnus']}'
                       AND tyyppi = 'O'
-                      AND uusiotunnus = 0";
-      pupe_query($kohdistus_q);
-      // Lähetetään ulkoiseen varastoon
-      //TODO
+                      AND uusiotunnus != 0";
+      $tarkistus_r = pupe_query($tarkistus_q);
+      if (mysql_num_rows($tarkistus_r) == 0) {
+        // Luodaan uusi saapuminen
+        $saapumisnro = uusi_saapuminen($toimittajarow);
+
+        // Kohdistetaan rivit valmiiksi
+        $kohdistus_q = "UPDATE tilausrivi SET
+                        uusiotunnus = '{$saapumisnro}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND otunnus = '{$laskurow['tunnus']}'
+                        AND tyyppi = 'O'
+                        AND uusiotunnus = 0";
+        pupe_query($kohdistus_q);
+
+        // Lähetetään ulkoiseen järjestelmään
+        require "saapuminen_ulkoiseen_jarjestelmaan.php";
+      }
+      else {
+        echo "<font class='error'>".t("Tilaukselta löytyi kohdistettuja rivejä, joten uutta saapumista ei luotu")."</font><br/><br/>";
+      }
     }    
 
     if (isset($nayta_pdf)) $tee = "NAYTATILAUS";

@@ -7,7 +7,10 @@ if (!isset($maksuehto)) $maksuehto = 0;
 if (!isset($laskuno)) $laskuno = 0;
 if (!isset($tunnus)) $tunnus = 0;
 
-if ($toim == 'KATEINEN') {
+if ($toim == 'KATEISESTAKATEINEN') {
+  echo "<font class='head'>", t("Vaihda laskun k‰teismaksutyyppi"), "</font><hr />";
+}
+elseif ($toim == 'KATEINEN') {
   echo "<font class='head'>", t("Lasku halutaankin maksaa k‰teisell‰"), "</font><hr />";
 }
 else {
@@ -18,7 +21,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
   $laskupvmerror      = FALSE;
   $laskumaksettuerror = FALSE;
 
-  if ($toim == 'KATEINEN') {
+  if ($toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') {
     $tapahtumapaiva  = date('Y-m-d', mktime(0, 0, 0, $tapahtumapaiva_kk, $tapahtumapaiva_pp, $tapahtumapaiva_vv));
   }
   else {
@@ -39,23 +42,23 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
   $tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
   $tilikausi_lasku = tarkista_saako_laskua_muuttaa($laskurow['tapvm']);
 
-  if (empty($tilikausi) and (empty($tilikausi_lasku) or $toim == 'KATEINEN') and !$laskupvmerror and !$laskumaksettuerror) {
-    $mehtorow     = hae_maksuehto($maksuehto);
-    $konsrow      = hae_asiakas($laskurow);
-    $kassalipasrow   = hae_kassalipas($kassalipas);
+  if (empty($tilikausi) and (empty($tilikausi_lasku) or $toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') and !$laskupvmerror and !$laskumaksettuerror) {
+    $mehtorow = hae_maksuehto($maksuehto);
+    $konsrow = hae_asiakas($laskurow);
+    $kassalipasrow = hae_kassalipas($kassalipas);
 
     $params = array(
-      'konsrow'     => $konsrow,
-      'mehtorow'     => $mehtorow,
-      'laskurow'     => $laskurow,
-      'maksuehto'     => $maksuehto,
-      'tunnus'     => $tunnus,
-      'toim'       => $toim,
+      'konsrow' => $konsrow,
+      'mehtorow' => $mehtorow,
+      'laskurow' => $laskurow,
+      'maksuehto' => $maksuehto,
+      'tunnus' => $tunnus,
+      'toim' => $toim,
       'tapahtumapaiva' => $tapahtumapaiva,
-      'kassalipas'   => $kassalipas
+      'kassalipas' => $kassalipas
     );
 
-    if ($toim == 'KATEINEN' and $kateinen != '') {
+    if (($toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') and $kateinen != '') {
       // Lasku oli ennest‰‰n k‰teinen ja nyt p‰ivitet‰‰n sille joku toinen k‰teismaksuehto
       list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
       $_tmp = korjaa_erapaivat_ja_alet_ja_paivita_lasku($params);
@@ -81,7 +84,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
     yliviivaa_alet_ja_pyoristykset($tunnus);
     tarkista_pyoristys_erotukset($laskurow, $tunnus);
 
-    if ($toim == 'KATEINEN') {
+    if ($toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') {
       vapauta_kateistasmaytys($kassalipasrow, $tapahtumapaiva);
     }
 
@@ -100,7 +103,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
   elseif ($laskupvmerror) {
     echo "<font class='error'>".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ on pienempi kuin laskun p‰iv‰m‰‰r‰ %s", "", $laskurow['tapvm'])."!</font>";
   }
-  elseif (!empty($tilikausi_lasku) and $toim != 'KATEINEN') {
+  elseif (!empty($tilikausi_lasku) and $toim != 'KATEINEN' and $toim != 'KATEISESTAKATEINEN') {
     echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi merkit‰ laskua maksetuksi p‰iv‰lle %s", "", $tilikausi_lasku, $laskurow['tapvm'])."!</font>";
   }
   else {
@@ -178,7 +181,7 @@ function hae_asiakas($laskurow) {
 function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
   global $kukarow, $yhtiorow;
 
-  if ($params['toim'] == 'KATEINEN') {
+  if ($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') {
     $query   = "UPDATE lasku set
                 erpcm       = '{$params['tapahtumapaiva']}',
                 mapvm       = '{$params['tapahtumapaiva']}',
@@ -263,7 +266,7 @@ function hae_kassalipas($kassalipas_tunnus) {
 function tee_kirjanpito_muutokset($params) {
   global $kukarow, $yhtiorow;
 
-  if ($params['toim'] == 'KATEINEN') {
+  if ($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') {
     $uusitili  = $params['_kassalipas'];
     $vanhatili = '(' . $params['myysaatili'] . ')';
     $tapvmlisa = ", tapvm = '{$params['tapahtumapaiva']}' ";
@@ -290,7 +293,7 @@ function tee_kirjanpito_muutokset($params) {
     // Tehd‰‰n vastakirjaus alkuper‰iselle tiliˆinnille
     $tilid = kopioitiliointi($vanharow['tunnus'], "");
 
-    if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+    if (($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') and $params['laskurow']['saldo_maksettu'] != 0) {
       $summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
     }
     else {
@@ -311,7 +314,7 @@ function tee_kirjanpito_muutokset($params) {
 
     $kustplisa = $params['kustp'] != '' ? ", kustp = '{$params['kustp']}'" : "";
 
-    if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+    if (($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') and $params['laskurow']['saldo_maksettu'] != 0) {
       $summalisa = $params['laskurow']['summa'] - $params['laskurow']['saldo_maksettu'];
     }
     else {
@@ -336,10 +339,10 @@ function tee_kirjanpito_muutokset($params) {
       echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehd‰! Korjaa kirjanpito k‰sin")."!</font><br>";
     }
     if ($params['laskurow']['summa'] > 0) {
-      $summalisa = ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
+      $summalisa = (($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') and $params['laskurow']['saldo_maksettu'] != 0) ? 0 : ($params['laskurow']['summa'] - $vanharow['summa']);
     }
     else {
-      if ($params['toim'] == 'KATEINEN' and $params['laskurow']['saldo_maksettu'] != 0) {
+      if (($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') and $params['laskurow']['saldo_maksettu'] != 0) {
         $summalisa = 0;
       }
       else {
@@ -407,7 +410,7 @@ function tarkista_pyoristys_erotukset($laskurow, $tunnus) {
 function hae_lasku2($laskuno, $toim) {
   global $kukarow;
 
-  if ($toim == 'KATEINEN') {
+  if ($toim == 'KATEINEN'  or $toim == 'KATEISESTAKATEINEN') {
     $query = "SELECT lasku.ytunnus,
               lasku.liitostunnus,
               lasku.*,
@@ -483,7 +486,7 @@ function hae_lasku2($laskuno, $toim) {
     echo "<font class='error'>".t("VIRHE: Lasku on jo maksettu")."!</font><br><br>";
     return FALSE;
   }
-  elseif (!empty($tilikausi) and $toim != 'KATEINEN') {
+  elseif (!empty($tilikausi) and $toim != 'KATEINEN' and $toim != 'KATEISESTAKATEINEN') {
     echo "<font class='error'>".t("VIRHE: Tilikausi on p‰‰ttynyt %s. Et voi muuttaa k‰teist‰ laskuksi %s", "", $tilikausi, $row['tapvm'])."!</font>";
     return FALSE;
   }
@@ -521,7 +524,7 @@ function echo_lasku_table($laskurow, $toim) {
   echo $osasuoritus_string;
   echo "<tr><th>", t("Maksuehto"), "</th><td>", t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"), "</td></tr>";
 
-  if ($toim == 'KATEINEN') {
+  if ($toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') {
     $now = date('Y-m-d');
     $now = explode('-' , $now);
     // haetaan kaikki k‰teisen maksuehdot
@@ -575,7 +578,8 @@ function echo_lasku_table($laskurow, $toim) {
   echo "<select name='maksuehto'>";
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
-    echo "<option value='$vrow[tunnus]'>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
+    $sel = $laskurow['maksuehto'] == $vrow['tunnus'] ? "SELECTED" : "";
+    echo "<option value='$vrow[tunnus]' $sel>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
   }
 
   echo "</select>";

@@ -7617,7 +7617,13 @@ if (!function_exists("js_openFormInNewWindow")) {
           thistee = formi.elements["tee"].value;
           formi.elements["tee"].value = "NAYTATILAUS";
 
-          window.open('', name, 'top=100,left=100,resizable=yes');
+          leveys = ''
+
+          if (arguments[2] > 0) {
+            leveys = ",width="+arguments[2]+",height=800"
+          }
+
+          window.open('', name, 'top=100,left=100,resizable=yes'+leveys);
 
           formi.target=name;
 

@@ -87,6 +87,7 @@ $rahtikirjares = pupe_query($query);
 while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
 
   $expansion_code = "";
+  $sscc_array = array();
 
   if (!empty($yhtiorow['ean'])) {
     $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
@@ -101,10 +102,15 @@ while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
   }
 
   if (!empty($rahtikirjarow['sscc_ulkoinen'])) {
-    $sscc = $rahtikirjarow['sscc_ulkoinen'];
+    if (strpos($rahtikirjarow['sscc_ulkoinen'], "\n") !== false) {
+      $sscc_array = explode("\n", $rahtikirjarow['sscc_ulkoinen']);
+    }
+    else {
+      $sscc_array[] = $rahtikirjarow['sscc_ulkoinen'];
+    }
   }
   elseif ($expansioncode != "") {
-    $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $x);
+    $sscc_array[] = gs1_sscc($expansioncode, $laskurow['tunnus'], $x);
   }
   else {
     // tehd‰‰n SSCC :
@@ -120,14 +126,18 @@ while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
     $sscc .= sprintf('%02.2s', $uniq_merkki);
     $loppu = tarkiste($sscc);
     $sscc  = $sscc.$loppu;
+
+    $sscc_array[] = $sscc;
   }
 
-  $edi_order .= "*RS OSTOTILPAK {$uniq_merkki}\n";
-  $edi_order .= "OSTOTILPAK.OTP_SSCC:{$sscc}\n";
-  $edi_order .= "OSTOTILPAK.OTP_BRUTTOPAINO:{$rahtikirjarow['kilot']}\n";
-  $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
-  $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
-  $edi_order .= "*RE OSTOTILPAK {$uniq_merkki}\n";
+  foreach($sscc_array as $sscc) {
+    $edi_order .= "*RS OSTOTILPAK {$uniq_merkki}\n";
+    $edi_order .= "OSTOTILPAK.OTP_SSCC:{$sscc}\n";
+    $edi_order .= "OSTOTILPAK.OTP_BRUTTOPAINO:{$rahtikirjarow['kilot']}\n";
+    $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
+    $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
+    $edi_order .= "*RE OSTOTILPAK {$uniq_merkki}\n";
+  }
 
   $uniq_merkki++;
 }

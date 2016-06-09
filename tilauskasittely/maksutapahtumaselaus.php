@@ -133,7 +133,7 @@ function hae_tilaukset($rajaus) {
             kuka.nimi AS myyja,
             lasku.summa,
             lasku.asiakkaan_tilausnumero,
-            lasku.viite,
+            lasku.viesti,
             lasku.yhtio,
             myyntilasku.tunnus AS myyntilaskun_tunnus
             FROM lasku
@@ -229,7 +229,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<td>{$tilaus["myyja"]}</td>";
     echo "<td class='text-right'>{$tilaus["summa"]}</td>";
     echo "<td class='text-right'>{$tilaus["asiakkaan_tilausnumero"]}</td>";
-    echo "<td class='text-right'>{$tilaus["viite"]}</td>";
+    echo "<td class='text-right'>{$tilaus["viesti"]}</td>";
 
     if ($maksupaate_kassamyynti) {
       echo "<td class='back'>";
@@ -266,22 +266,11 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     }
 
     echo "<td class='back'>";
-    echo "<form action='../raportit/asiakkaantilaukset.php'>";
-    echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
+    echo "<form id='asiakkaantilaus_{$tilaus["laskunro"]}' action='../raportit/asiakkaantilaukset.php'>";
+    echo "<input type='hidden' name='tee' value='NAYTA'>";
     echo "<input type='hidden' name='toim' value='MYYNTI'>";
-    echo "<input type='hidden' name='asiakasid' value='{$tilaus["asiakkaan_tunnus"]}'>";
-    echo "<input type='hidden' name='laskunro' value='{$tilaus["laskunro"]}'>";
-    echo "<input type='hidden' name='lasku_yhtio' value='{$tilaus["yhtio"]}'>";
     echo "<input type='hidden' name='tunnus' value='{$tilaus["tunnus"]}'>";
-    echo "<input type='hidden' name='ytunnus' value='{$tilaus["asiakasnro"]}'>";
-    echo "<input type='hidden' name='ppa' value='{$rajaus["alku"]["paiva"]}'>";
-    echo "<input type='hidden' name='kka' value='{$rajaus["alku"]["kuukausi"]}'>";
-    echo "<input type='hidden' name='vva' value='{$rajaus["alku"]["vuosi"]}'>";
-    echo "<input type='hidden' name='ppl' value='{$rajaus["loppu"]["paiva"]}'>";
-    echo "<input type='hidden' name='kkl' value='{$rajaus["loppu"]["kuukausi"]}'>";
-    echo "<input type='hidden' name='vvl' value='{$rajaus["loppu"]["vuosi"]}'>";
-    echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-    echo "<input type='submit' value='" . t("Näytä tilaus") . "'>";
+    echo "<input type='submit' onClick=\"js_openFormInNewWindow('asiakkaantilaus_{$tilaus["laskunro"]}', '', 900); return false;\" value='" . t("Näytä tilaus") . "'>";
     echo "</form>";
     echo "</td>";
 

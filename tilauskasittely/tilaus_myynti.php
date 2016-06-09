@@ -2980,7 +2980,7 @@ if ($tee == '') {
     if (mysql_num_rows($result)==1) {
       $maksuehtorow = mysql_fetch_assoc($result);
 
-      if ($maksuehtorow['jaksotettu']!='') {
+      if ($maksuehtorow['jaksotettu'] != '' and $kukarow["extranet"] == "") {
         echo "  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
             <input type='hidden' name='tilausnumero' value='$tilausnumero'>
             <input type='hidden' name='mista' value='$mista'>
@@ -10289,7 +10289,7 @@ if ($tee == '') {
       if ($laskurow['sisainen'] != '' and $maksuehtorow['jaksotettu'] != '') {
         echo "<font class='error'>".t("VIRHE: Sisäisellä laskulla ei voi olla maksusopimusta!")."</font>";
       }
-      elseif ($maksuehtorow['jaksotettu'] != '' and mysql_num_rows($jaksoresult) == 0) {
+      elseif ($maksuehtorow['jaksotettu'] != '' and mysql_num_rows($jaksoresult) == 0 and $kukarow["extranet"] == "") {
         echo "<font class='error'>".t("VIRHE: Tilauksella ei ole maksusopimusta!")."</font>";
       }
       elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and

@@ -56,10 +56,10 @@ else {
                         max: 50,
                         redFrom: 25,
                         redTo: 30,
-                        greenFrom: 40,
-                        greenTo: 50,
                         yellowFrom: 30,
                         yellowTo: 40,
+                        greenFrom: 40,
+                        greenTo: 50,
                         minorTicks: 2,
                         majorTicks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]";
 }

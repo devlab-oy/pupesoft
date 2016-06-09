@@ -76,6 +76,8 @@ $edi_order .= "OSTOTIL.OT_TOIMITUS_PUH:{$laskurow['toim_puh']}\n";
 
 $edi_order .= "*RE OSTOTIL\n";
 
+$uniq_merkki = 1;
+
 $query = "SELECT *
           FROM rahtikirjat
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -83,12 +85,51 @@ $query = "SELECT *
 $rahtikirjares = pupe_query($query);
 
 while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
-  $edi_order .= "*RS OSTOTILPAK\n";
-  $edi_order .= "OSTOTILPAK.OTP_SSCC:\n";
+
+  $expansion_code = "";
+
+  if (!empty($yhtiorow['ean'])) {
+    $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
+
+    if ($_selitetark == '') {
+      $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = 'kaikki'", "", "", "selitetark");
+    }
+
+    if ($_selitetark != '') {
+      $expansioncode = $_selitetark;
+    }
+  }
+
+  if (!empty($rahtikirjarow['sscc_ulkoinen'])) {
+    $sscc = $rahtikirjarow['sscc_ulkoinen'];
+  }
+  elseif ($expansioncode != "") {
+    $sscc = gs1_sscc($expansioncode, $laskurow['tunnus'], $x);
+  }
+  else {
+    // tehd‰‰n SSCC :
+    // (00)
+    // 1
+    // ean (8)
+    // l‰hetenro (6) viimeist‰
+    // tulostuskpl (2)
+    // tarkiste (1)
+    $sscc  = 1;
+    $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
+    $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
+    $sscc .= sprintf('%02.2s', $uniq_merkki);
+    $loppu = tarkiste($sscc);
+    $sscc  = $sscc.$loppu;
+  }
+
+  $edi_order .= "*RS OSTOTILPAK {$uniq_merkki}\n";
+  $edi_order .= "OSTOTILPAK.OTP_SSCC:{$sscc}\n";
   $edi_order .= "OSTOTILPAK.OTP_BRUTTOPAINO:{$rahtikirjarow['kilot']}\n";
   $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
   $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
-  $edi_order .= "*RE OSTOTILPAK\n";
+  $edi_order .= "*RE OSTOTILPAK {$uniq_merkki}\n";
+
+  $uniq_merkki++;
 }
 
 # Koontirahtikirjan pakkaus

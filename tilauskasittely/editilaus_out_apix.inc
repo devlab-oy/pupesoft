@@ -193,6 +193,11 @@ if ($i > 1) {
   $edi_order .= "*ME\n";
   $edi_order .= "*IE\n";
 
-  $filename = "/tmp/out_apix_{$laskurow['tunnus']}.dat";
-  file_put_contents($filename, $edi_order);
+  $dir = "/tmp/";
+  $filename = "out_apix_{$laskurow['tunnus']}.dat";
+
+  file_put_contents($dir.$filename, $edi_order);
+
+  $status = apix_edi_put_file($filename, $laskurow['tunnus'], "PupesoftEdi");
+  echo "APIX-lähetys {$status}<br>\n";
 }

@@ -3330,6 +3330,12 @@ if (!function_exists("tulosta_lasku")) {
     if (fwrite($fh, $pdf_lasku->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdf_laskufilenimi");
     fclose($fh);
 
+    $laskuvaikuitti = t("Lasku", $kieli);
+
+    if (!empty($laskurow["kateistyyppi"])) {
+      $laskuvaikuitti = t("Kuitti", $kieli);
+    }
+
     // jos t‰m‰ haluttiin suoraan asiakkaalle s‰hkˆpostiin
     if ($tee == 'NAYTATILAUS') {
       //Tyˆnnet‰‰n tuo pdf vaan putkeen!
@@ -3352,7 +3358,7 @@ if (!function_exists("tulosta_lasku")) {
         $GLOBALS['vientierittelymail'] = $komento;
 
         // l‰hetet‰‰n meili
-        $kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
+        $kutsu = $laskuvaikuitti." ".$laskurow["laskunro"];
         $liite = $pdf_laskufilenimi;
 
         // l‰hetet‰‰n cc aina talhal/postittaja osoitteeseen
@@ -3416,8 +3422,7 @@ if (!function_exists("tulosta_lasku")) {
 
       if (($komento == "email" and $kukarow["eposti"] != '') or substr($komento, 0, 12) == 'asiakasemail') {
         // l‰hetet‰‰n meili
-
-        $kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
+        $kutsu = $laskuvaikuitti." ".$laskurow["laskunro"];
 
         if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
           $kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3463,7 +3468,7 @@ if (!function_exists("tulosta_lasku")) {
           // l‰hetet‰‰n meili
           $komento = $asiakasemail_kaytossa ? $valittu_kopio_tulostin : "";
 
-          $kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
+          $kutsu = $laskuvaikuitti." ".$laskurow["laskunro"];
 
           if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
             $kutsu .= ", ".trim($laskurow["nimi"]);

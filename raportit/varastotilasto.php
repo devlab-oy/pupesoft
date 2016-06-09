@@ -148,7 +148,7 @@ echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia
 echo "</form>";
 echo "<br><br>";
 
-if ($toim == "" and $tee != "" and isset($painoinnappia) and $lisa == "" and $toimittajaid == "") {
+if ($tee != "" and isset($painoinnappia) and empty($lisa) and empty($toimittajaid) and empty($valitut_varastot)) {
   echo "<font class='error'>", t("Anna jokin rajaus"), "!</font>";
   $tee = "";
 }
@@ -226,8 +226,8 @@ if ($tee != "" and isset($painoinnappia)) {
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("EAN-koodi"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
 
     if ($nayta_vapaa_saldo == "on") {
@@ -278,6 +278,7 @@ if ($tee != "" and isset($painoinnappia)) {
     }
 
     $varastotilasto_table = "";
+    $varastonarvo_tot = 0;
 
     while ($row = mysql_fetch_assoc($eresult)) {
 
@@ -379,6 +380,13 @@ if ($tee != "" and isset($painoinnappia)) {
         }
       }
 
+      if ($nayta_vapaa_saldo == "on") {
+        $varattu = ((float) $varattu == 0) ? "" : (float) $varattu;
+        $vapaa_saldo = ((float) $myytavissa == 0) ? "" : (float) $myytavissa;
+      }
+
+      $saldo = ((float) $row['saldo'] == 0) ? "" : (float) $row['saldo'];
+
       if ($toim == "") {
         $row["varmuus_varasto"] = ((int) $row["varmuus_varasto"] == 0) ? "" : $row["varmuus_varasto"];
 
@@ -389,15 +397,10 @@ if ($tee != "" and isset($painoinnappia)) {
         else   $kehahin = $row["kehahin"];
 
         $varastonarvo = round($saldo * $kehahin, 2);
+        $varastonarvo_tot += $varastonarvo;
+
         $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       }
-
-      if ($nayta_vapaa_saldo == "on") {
-        $varattu = ((float) $varattu == 0) ? "" : (float) $varattu;
-        $vapaa_saldo = ((float) $myytavissa == 0) ? "" : (float) $myytavissa;
-      }
-
-      $saldo = ((float) $row['saldo'] == 0) ? "" : (float) $row['saldo'];
 
       if ($total_rows <= 1000) {
         $varastotilasto_table .= "<tr class='aktiivi'>";
@@ -445,6 +448,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
+      $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
 
       if ($nayta_vapaa_saldo == "on") {
@@ -454,7 +458,6 @@ if ($tee != "" and isset($painoinnappia)) {
 
       if ($toim == "") {
         $worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
-        $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
         $worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
@@ -584,6 +587,8 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "</tbody>";
       echo "</table>";
     }
+
+    echo "<br><br><table><tr><th>".t("Varastonarvo yhteensä").":</th><td>$varastonarvo_tot</td></tr></table>";
   }
 
   if ($total_rows == 0) {

@@ -4,6 +4,9 @@ require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("K‰teismyynnit")." $myy:</font><hr>";
 
+// Tarkistetaan oikeus
+$muutositeoik = tarkista_oikeus("muutosite.php");
+
 // Tarkistetaan ett‰ jos ei ole t‰sm‰ys p‰‰ll‰ niin lukitaan t‰sm‰yksen p‰iv‰m‰‰r‰t. Jos t‰sm‰ys on p‰‰ll‰, lukitaan normaalin raportin p‰iv‰m‰‰r‰t
 echo "<script type='text/javascript' language='JavaScript'>
 
@@ -1535,7 +1538,16 @@ elseif ($tee != '') {
           echo "<td>$row[kassanimi]</td>";
           echo "<td>".substr($row["nimi"], 0, 23)."</td>";
           echo "<td>$row[ytunnus]</td>";
-          echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
+          echo "<td>";
+
+          if ($muutositeoik) {
+            echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a>";
+          }
+          else {
+            echo "$row[laskunro]";
+          }
+
+          echo "</td>";
           echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
           echo "<td align='right'>$echolisa".sprintf('%.2f', $row['tilsumma'])."</td></tr>";
 
@@ -1784,7 +1796,16 @@ elseif ($tee != '') {
             echo "<td>$row[kassanimi]</td>";
             echo "<td>".substr($row["nimi"], 0, 23)."</td>";
             echo "<td>$row[ytunnus]</td>";
-            echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
+            echo "<td>";
+
+            if ($muutositeoik) {
+              echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a>";
+            }
+            else {
+              echo "$row[laskunro]";
+            }
+
+            echo "</td>";
             echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
             echo "<td align='right'>".sprintf('%.2f', $row['tilsumma'])."</td></tr>";
 
@@ -1882,7 +1903,16 @@ elseif ($tee != '') {
             echo "<td>$row[kassanimi]</td>";
             echo "<td>".substr($row["nimi"], 0, 23)."</td>";
             echo "<td>$row[ytunnus]</td>";
-            echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
+            echo "<td>";
+
+            if ($muutositeoik) {
+              echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a>";
+            }
+            else {
+              echo "$row[laskunro]";
+            }
+
+            echo "</td>";
             echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
             echo "<td align='right'>$echolisa".sprintf('%.2f', $row['tilsumma'])."</td></tr>";
 
@@ -2028,17 +2058,26 @@ elseif ($tee != '') {
         echo "<td>$row[kassanimi]</td>";
         echo "<td>".substr($row["nimi"], 0, 23)."</td>";
         echo "<td>$row[ytunnus]</td>";
-        echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
+        echo "<td>";
+
+        if ($muutositeoik) {
+          echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a>";
+        }
+        else {
+          echo "$row[laskunro]";
+        }
+
+        echo "</td>";
         echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
         echo "<td align='right'>$echolisa".sprintf('%.2f', $row['tilsumma'])."</td></tr>";
 
-        $kateinen        = $row["tilino"];
-        $edkassa        = $row["kassa"];
-        $edkassanimi     = $row["kassanimi"];
-        $edkateismaksu     = $kateismaksu;
-        $edtyyppi       = $row["tyyppi"];
-        $kateismaksu     = $row['tyyppi'];
-        $kateismaksuekotus   = t(str_replace("kateinen", "K‰teinen", $kateismaksu));
+        $kateinen = $row["tilino"];
+        $edkassa = $row["kassa"];
+        $edkassanimi = $row["kassanimi"];
+        $edkateismaksu = $kateismaksu;
+        $edtyyppi = $row["tyyppi"];
+        $kateismaksu = $row['tyyppi'];
+        $kateismaksuekotus = t(str_replace("kateinen", "K‰teinen", $kateismaksu));
 
         if ($vaiht == 1) {
           if ($rivit >= 60) {
@@ -2141,7 +2180,16 @@ elseif ($tee != '') {
           echo "<td>".t("K‰teissuoritus")."</td>";
           echo "<td>".substr($row["nimi"], 0, 23)."</td>";
           echo "<td>$row[ytunnus]</td>";
-          echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a></td>";
+          echo "<td>";
+
+          if ($muutositeoik) {
+            echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]$lisakenttialinkkiin'>$row[laskunro]</a>";
+          }
+          else {
+            echo "$row[laskunro]";
+          }
+
+          echo "</td>";
           echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
           echo "<td align='right'>".sprintf('%.2f', $row['summa'])."</td></tr>";
 

@@ -2349,8 +2349,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
     echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
 
-    echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp]</td>";
-    echo "<th align='left'>".t("Toimitusosoite")."</th><td>$otsik[toim_nimi] $otsik[toim_nimitark]<br>$otsik[toim_osoite]<br>$otsik[toim_postino] $otsik[toim_postitp]</td></tr>";
+    $_maa = maa($otsik["maa"], $kukarow["kieli"]);
+    $_toim_maa = maa($otsik["toim_maa"], $kukarow["kieli"]);
+
+    echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp] <br> $_maa </td>";
+    echo "<th align='left'>".t("Toimitusosoite")."</th><td>$otsik[toim_nimi] $otsik[toim_nimitark]<br>$otsik[toim_osoite]<br>$otsik[toim_postino] $otsik[toim_postitp] <br> $_toim_maa </td></tr>";
 
     echo "<tr><th align='left'>".t("Kerätty")."</th><td>$otsik[kerayspvm]</td>";
     echo "<th align='left'>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($marow, "teksti", "MAKSUEHTOKV", $kieli)."</td></tr>";

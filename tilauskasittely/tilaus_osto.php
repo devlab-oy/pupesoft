@@ -290,12 +290,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
   $toimittajarow = mysql_fetch_assoc($toimittajaresult);
 
   if ($tee == "vahvista") {
+    $tilausrivilisa = "";
+    if ($rivitunnus > 0) {
+      $tilausrivilisa = " and tunnus = '{$rivitunnus}' ";
+    }
+
     $query = "UPDATE tilausrivi
               SET jaksotettu = 1
               WHERE yhtio     = '$kukarow[yhtio]'
               and otunnus     = '$kukarow[kesken]'
               and tyyppi      = 'O'
-              and uusiotunnus = 0";
+              and uusiotunnus = 0
+              {$tilausrivilisa}";
     $result = pupe_query($query);
 
     if (mysql_affected_rows() > 0) {
@@ -391,10 +397,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $result = pupe_query($query);
 
       if ($toim == "HAAMU") {
-        echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
+        echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr>";
       }
       else {
-        echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+        echo "<font class='head'>".t("Ostotilaus").":</font><hr>";
       }
 
       $tulostimet[0] = "Ostotilaus";
@@ -1021,10 +1027,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     js_openFormInNewWindow();
 
     if ($toim == "HAAMU") {
-      echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
+      echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr>";
     }
     else {
-      echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+      echo "<font class='head'>".t("Ostotilaus").":</font><hr>";
     }
 
     echo "<table>";
@@ -1097,7 +1103,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     }
 
     echo "</tr>";
-    echo "</table><br>";
+    echo "</table>";
+    echo "<hr>";
 
     $tilausok = 0;
 
@@ -1107,29 +1114,46 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     }
 
     echo "<table>";
-    echo "<tr><th>".t("Ytunnus")."</th><th colspan='3'>".t("Toimittaja")."</th></tr>";
-    echo "<tr><td>".tarkistahetu($laskurow["ytunnus"])."</td><td colspan='3'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td></tr>";
-
-    echo "<tr><th colspan='4'>".t("Toimitusosoite")."</th></tr>";
-    echo "<tr><td colspan='4'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
-
-    echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
-    echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td></tr>";
+    echo "<tr><th>".t("Ytunnus")."</th><th colspan='2'>".t("Toimittaja")."</th><th>".t("Toimitusosoite")."</th>";
 
     if ($toimittajarow["fakta"] != "") {
-      echo "<tr><th>".t("Fakta")."</th><td colspan='3'>$toimittajarow[fakta]&nbsp;</td></tr>";
+      echo "<th>".t("Fakta")."</th>";
     }
 
+    echo "</tr>";
+    echo "<tr>
+          <td>".tarkistahetu($laskurow["ytunnus"])."</td>
+          <td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td>
+          <td>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td>";
+
+    if ($toimittajarow["fakta"] != "") {
+      echo "<td rowspan='3' class='ptop' style='max-width: 200px;'>$toimittajarow[fakta]&nbsp;<br><br></td>";
+    }
+
+    echo "</tr>";
+
+    echo "<tr><th>".t("Tilausnumero")."</th><th>".t("Laadittu")."</th><th>".t("Toimaika")."</th><th>".t("Valuutta")."</th><td class='back'></td></tr>";
+    echo "<tr><td>$laskurow[tunnus]</td><td>".tv1dateconv($laskurow["luontiaika"])."</td><td>".tv1dateconv($laskurow["toimaika"])."</td><td>{$laskurow["valkoodi"]}</td>";
+    echo "</tr>";
     echo "</table><br>";
 
-    echo "<font class='head'>".t("Lisää rivi").": </font><hr>";
+    echo "<font class='head'>".t("Lisää rivi")."</font>";
+
     if (empty($toim_tuoteno)) {
       $toim_tuoteno = "toim_tuoteno_omat";
     }
-    $sel = array();
-    $sel[$toim_tuoteno] = "CHECKED";
 
     if ($toim != "HAAMU") {
+      echo "
+        <script>
+            $(document).ready(function(){
+              $('#rivientoiminnot').click(function(){
+                 $('#div_rivientoiminnot').toggle();
+              });
+            });
+            </script>";
+
+      echo "<div id='div_rivientoiminnot' class='popup'>";
       echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
           <input type='hidden' name='toim'         value = '$toim'>
           <input type='hidden' name='lopetus'       value = '$lopetus'>
@@ -1137,11 +1161,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
           <input type='hidden' name='tee'         value = 'Y'>";
-      echo "<font class='info'>";
+
+      $sel = array();
+      $sel[$toim_tuoteno] = "CHECKED";
+
       echo t("Tuotenumerot").": <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_omat' {$sel["toim_tuoteno_omat"]}> ".t("Tuoteno")." <input onclick='submit();' type='radio' name='toim_tuoteno' value='toim_tuoteno_toimittajan' {$sel["toim_tuoteno_toimittajan"]}> ".t("Toimittajan tuoteno");
-      echo "</font>";
       echo "</form>";
+      echo "</div>";
+      echo "<img id='rivientoiminnot' src='$palvelin2/pics/lullacons/mini-edit.png' style='padding-bottom: 5px; padding-left: 15px; padding-right: 15px;'>";
     }
+
+    echo "<hr>";
 
     require 'syotarivi_ostotilaus.inc';
 
@@ -1150,29 +1180,42 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $huomio = '';
     }
 
-    echo "<font class='head'>".t("Tilausrivit").": </font><hr>";
+    echo "<font class='head'>".t("Tilausrivit")."</font>";
 
-    if (!isset($toim_nimitykset)) {
+    if (empty($toim_nimitykset)) {
       $toim_nimitykset = "ME";
     }
 
     if ($toim != "HAAMU") {
+      echo "
+        <script>
+            $(document).ready(function(){
+              $('#riviennaytto').click(function(){
+                 $('#div_riviennaytto').toggle();
+              });
+            });
+            </script>";
+
+      echo "<div id='div_riviennaytto' class='popup'>";
+
       $sel = array();
       $sel[$toim_nimitykset] = "CHECKED";
 
       echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
-          <input type='hidden' name='toim'         value = '$toim'>
-          <input type='hidden' name='lopetus'       value = '$lopetus'>
-          <input type='hidden' name='tilausnumero'     value = '$tilausnumero'>
-          <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
-          <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
-          <input type='hidden' name='tee'         value = 'Y'>";
+          <input type='hidden' name='toim' value = '$toim'>
+          <input type='hidden' name='lopetus' value = '$lopetus'>
+          <input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+          <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+          <input type='hidden' name='toim_tuoteno' value = '$toim_tuoteno'>
+          <input type='hidden' name='tee' value = 'Y'>";
 
-      echo "<font class='info'>";
       echo t("Nimitykset").": <input onclick='submit();' type='radio' name='toim_nimitykset' value='ME' {$sel["ME"]}> ".t("Omat")." <input onclick='submit();' type='radio' name='toim_nimitykset' value='HE' {$sel["HE"]}> ".t("Toimittajan");
-      echo "</font>";
       echo "</form>";
+      echo "</div>";
+      echo "<img id='riviennaytto' src='$palvelin2/pics/lullacons/mini-edit.png' style='padding-bottom: 5px; padding-left: 15px; padding-right: 15px;'>";
     }
+
+    echo "<hr>";
 
     // katotaan onko joku rivi jo liitetty johonkin saapumiseen ja jos on niin annetaan mahdollisuus piilottaa lukitut rivit
     $query = "SELECT * from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[tunnus]' and uusiotunnus != 0";
@@ -1307,8 +1350,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       echo "<th>#</th>";
       echo "<th align='left'>".t("Nimitys")."</th>";
       echo "<th align='left'>".t("Paikka")."</th>";
-      echo "<th align='left'>".t("Tuote")."</th>";
-      echo "<th align='left'>".t("Toim Tuote")."</th>";
+      echo "<th align='left'>".t("Tuote")."<br>".t("Toim Tuote")."</th>";
       echo "<th align='left'>".t("Määrä")."<br>".t("Määrä/Ulk")."</th>";
       echo "<th align='left'>".t("Hinta")."</th>";
 
@@ -1347,11 +1389,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       while ($prow = mysql_fetch_assoc($presult)) {
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
-        $yhteensa       += $prow["rivihinta"];
-        $paino_yhteensa   += ($prow["tilattu"]*$prow["tuotemassa"]);
-        $tilavuus_yhteensa   += ($prow["tilattu"]*$prow["tuotetilavuus"]);
+        $yhteensa += $prow["rivihinta"];
+        $paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
+        $tilavuus_yhteensa += ($prow["tilattu"]*$prow["tuotetilavuus"]);
 
-        $class = "";
+        $class = "class='ptop'";
 
         if ($prow["uusiotunnus"] == 0 or $naytetaankolukitut != "EI") {
 
@@ -1404,10 +1446,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $borderlask = $pkrow['kpl2'];
 
 
-            echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$lask</td>";
+            echo "<td rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$lask</td>";
           }
           elseif ($prow["perheid"] == 0 and $prow["perheid2"] == 0) {
-            echo "<td rowspan = '2' valign='top'>$lask</td>";
+            echo "<td rowspan = '2' class='ptop'>$lask</td>";
 
             $pkrow['kpl1']  = 1;
             $pkrow['kpl2']  = 1;
@@ -1416,7 +1458,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           }
 
           $lask--;
-          $classlisa = "";
+          $classlisa = $class;
 
           if ($borderlask == 1 and $pkrow['kpl2'] == 1 and $pknum == 1) {
             $classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
@@ -1444,17 +1486,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           if ($toim != "HAAMU") {
             if ($toim_nimitykset == "HE") {
-              echo "<td valign='top' $class>{$prow["toim_tuoteno"]} {$prow["toim_nimitys"]}</td>";
+              echo "<td $class>{$prow["toim_tuoteno"]} {$prow["toim_nimitys"]}</td>";
             }
             else {
-              echo "<td valign='top' $class>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
+              echo "<td $class>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
             }
           }
           else {
-            echo "<td valign='top' $class>{$prow["nimitys"]}</td>";
+            echo "<td $class>{$prow["nimitys"]}</td>";
           }
 
-          echo "<td valign='top' $class>$prow[paikka]</td>";
+          echo "<td $class>$prow[paikka]</td>";
 
           // tehdään pop-up divi jos keikalla on kommentti...
           if ($prow["tunnus"] != "") {
@@ -1470,14 +1512,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 "&ostohinta={$prow["ostohinta"]}" .
                 "&vanhatunnus={$laskurow["vanhatunnus"]}";
 
-              echo "<td valign='top' $class>
+              echo "<td $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
                          id='$prow[tunnus]'
                          data-content-url='{$parametrit}'>$prow[tuoteno]</a>";
             }
             else {
-              echo "<td valign='top' $class>
+              echo "<td $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
                          id='$prow[tunnus]'
@@ -1487,10 +1529,33 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           }
           else {
             if ($toim != "HAAMU") {
-              echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
+              echo "<td $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
             }
             else {
-              echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
+              echo "<td $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>$prow[tuoteno]</a>";
+            }
+          }
+
+          echo "<br>$prow[toim_tuoteno] ";
+
+          if ($yhtiorow["ostoera_pyoristys"] == "K") {
+            $_pakkaukset = tuotteen_toimittajat_pakkauskoot($prow['tt_tunnus']);
+
+            if (count($_pakkaukset)) {
+              echo " <img class='tooltip' id='$divnolla' src='$palvelin2/pics/lullacons/info.png'>";
+              echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
+
+              // pientä kaunistelua, ei turhia desimaaleja
+              $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]);
+
+              // tähän pakkauskoot..
+              echo "<ul><li>".t("Oletuskoko").": {$prow["osto_era"]}</li>";
+
+              foreach ($_pakkaukset as $_pak) {
+                echo "<li>{$_pak[0]} {$_pak[1]}</li>";
+              }
+
+              echo "</ul></div>";
             }
           }
 
@@ -1502,63 +1567,42 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $sarjarow = mysql_fetch_assoc($sarjares);
 
             if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='green'>".t("S:nro ok")."</font></a>)";
+              echo "<br>(<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='green'>".t("S:nro ok")."</font></a>)";
             }
             else {
-              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";
+              echo "<br>(<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";
             }
           }
 
           echo "</td>";
-          echo "<td valign='top' class='tooltip' id='$divnolla'>$prow[toim_tuoteno]";
-
-          $_pakkaukset = tuotteen_toimittajat_pakkauskoot($prow['tt_tunnus']);
-
-          if ($yhtiorow["ostoera_pyoristys"] == "K" and count($_pakkaukset)) {
-            echo "<br><img src='$palvelin2/pics/lullacons/info.png'>";
-            echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
-
-            // pientä kaunistelua, ei turhia desimaaleja
-            $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]);
-
-            // tähän pakkauskoot..
-            echo "<ul><li>".t("Oletuskoko").": {$prow["osto_era"]}</li>";
-
-            foreach ($_pakkaukset as $_pak) {
-              echo "<li>{$_pak[0]} {$_pak[1]}</li>";
-            }
-
-            echo "</ul></div>";
-          }
-          echo "</td>";
-          echo "<td valign='top' $class align='right'>";
+          echo "<td $class align='right'>";
 
           if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
             echo "<div class='availability {$prow['tunnus']}_availability' /> <span class='{$prow['tunnus']}_loading'></span></div>&nbsp;";
           }
 
           echo ($prow["tilattu"]*1)." ", strtolower($prow['yksikko']), "<br />".($prow["tilattu_ulk"]*1)." ", strtolower($prow['toim_yksikko']), "</td>";
-          echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
+          echo "<td $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
           $alespan = 8;
-          $backspan1 = 1;
-          $backspan2 = 5;
+          $backspan1 = 0;
+          $backspan2 = 4;
 
           for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-            echo "<td valign='top' $class align='right'>".((float) $prow["ale{$alepostfix}"])."</td>";
+            echo "<td $class align='right'>".((float) $prow["ale{$alepostfix}"])."</td>";
             $alespan++;
             $backspan1++;
             $backspan2++;
           }
 
-          echo "<td valign='top' $class align='right'>".((float) $prow["alv"])."</td>";
-          echo "<td valign='top' $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
+          echo "<td $class align='right'>".((float) $prow["alv"])."</td>";
+          echo "<td $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
 
           if ($prow["valuutta"] == "" and $toimittajarow["oletus_valkoodi"] != "") {
             $prow["valuutta"] = $toimittajarow["oletus_valkoodi"];
           }
 
-          echo "<td valign='top' $classlisa align='right'>$prow[valuutta]</td>";
+          echo "<td $classlisa align='right'>$prow[valuutta]</td>";
 
           if ($prow["uusiotunnus"] == 0) {
 
@@ -1567,7 +1611,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               require "tarkistarivi_ostotilaus.inc";
             }
 
-            echo "  <td valign='top' class='back' nowrap>
+            echo "  <td class='ptop back' nowrap>
                 <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
                 <input type='hidden' name='toim'         value = '$toim'>
                 <input type='hidden' name='lopetus'       value = '$lopetus'>
@@ -1586,7 +1630,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 </form>
                 </td>";
 
-            echo "  <td valign='top' class='back' nowrap>
+            echo "  <td class='ptop back' nowrap>
                 <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
                 <input type='hidden' name='toim'         value = '$toim'>
                 <input type='hidden' name='lopetus'       value = '$lopetus'>
@@ -1596,12 +1640,12 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
                 <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                 <input type='hidden' name='tee'         value = 'POISTA_RIVI'>
-                <input type='submit' value='".t("Poista")."'>
+                <input type='submit' class='poista_btn' value='".t("Poista")."'>
                 </form>
                 </td>";
 
             if ($saako_hyvaksya > 0) {
-              echo "<td valign='top' class='back'>
+              echo "<td class='ptop back'>
                   <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
                   <input type='hidden' name='toim'         value = '$toim'>
                   <input type='hidden' name='lopetus'       value = '$lopetus'>
@@ -1615,8 +1659,24 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                   </form></td> ";
             }
 
+            if ($prow['jaksotettu'] == 0) {
+              echo "  <td class='ptop back''>
+                  <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+                  <input type='hidden' name='toim'          value = '$toim'>
+                  <input type='hidden' name='lopetus'        value = '$lopetus'>
+                  <input type='hidden' name='tilausnumero'      value = '$tilausnumero'>
+                  <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
+                  <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
+                  <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
+                  <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+                  <input type='hidden' name='tee'          value = 'vahvista'>
+                  <input type='submit' value='".t("Vahvista rivin toimitus")."'>
+                  </form>
+                  </td>";
+            }
+
             if ($varaosavirhe != '') {
-              echo "<td valign='top' class='back'>$varaosavirhe</td>";
+              echo "<td class='ptop back'>$varaosavirhe</td>";
             }
 
             if ($varaosavirhe == "") {
@@ -1713,8 +1773,9 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $kommclass2 = "";
           }
 
+          echo "<td $kommclass1 colspan='$alespan'>";
+
           if ($prow["jaksotettu"] == 1) {
-            echo "<td $kommclass2>";
 
             if (!is_null($prow['vahvistettu_maara'])) {
 
@@ -1735,21 +1796,19 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             else {
               echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
             }
-
-            echo "</td>";
           }
           else {
             if (isset($paivitetty_ok) and $paivitetty_ok == "YES") {
-              echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($ehdotus_pvm)."</td>";
+              echo t("Toimitusaika").": ".tv1dateconv($ehdotus_pvm);
             }
             else {
-              echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
+              echo t("Toimitusaika").": ".tv1dateconv($prow["toimaika"]);
             }
           }
 
-          echo "<td colspan='$alespan' $kommclass1>";
-
-          if (trim($prow["kommentti"]) != "") echo t("Kommentti").": $prow[kommentti]";
+          if (trim($prow["kommentti"]) != "") {
+            echo " / ".t("Kommentti").": $prow[kommentti]";
+          }
 
           if (!empty($prow['tilausrivilinkki'])) {
             $query = "SELECT tilausrivi.otunnus as otunnus, lasku.nimi as nimi
@@ -1775,7 +1834,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
             echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
             echo "<td></td>";
-            echo "<td colspan='".($alespan + 1)."' $kommclass1>";
+            echo "<td colspan='$alespan' $kommclass1>";
             if (!empty($prow['tilausrivilinkki'])) {
               echo '<font class="message">'.t("Huom: vaihtamalla tuotteen vaihdetaan myös myyntitilauksen %s %s tilausrivi", '', $linkattu_myyntitilaus_row['otunnus'], $linkattu_myyntitilaus_row['nimi']).'</font>';
               echo "<br/>";
@@ -1798,8 +1857,44 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $kopiotoim = "OSTO";
       }
 
+      if ($laskurow['erikoisale'] > 0) {
+        echo "<tr>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t('Tilauksen arvo yhteensä')."</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+          <td class='spec'>$laskurow[valkoodi]</td>
+          </td>
+          </tr>";
+        echo "<tr>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
+          <td class='spec'>$laskurow[valkoodi]</td>
+          </tr>";
+        echo "<tr>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa + $erikoisale_summa)."</td>
+          <td class='spec'>$laskurow[valkoodi]</td>
+          </tr>";
+      }
+      else {
+        echo "<td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
+          <td class='spec'>$laskurow[valkoodi]</td>
+          </tr>";
+      }
+
       echo "  <tr>
-          <th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
+          <td class='back' colspan='$backspan2'></td>
+          <td colspan='3' class='spec'>".t("Tilauksen paino").":</td>
+          <td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
+          <td class='spec'>kg</td>
+          </tr>";
+
+      echo "  <tr>
+          <td colspan='2' nowrap>".t("Ostotilaus").":</td>
           <td colspan='2' nowrap>
           <form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_tosto' id='tulostaform_tosto' class='multisubmit'>
           <input type='hidden' name='otunnus'     value = '$tilausnumero'>
@@ -1815,45 +1910,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           </form>
           </td>";
 
-      if ($laskurow['erikoisale'] > 0) {
-        $_colspan = $backspan1 - 1;
-        echo "<td>
-          <td class='back' colspan='$_colspan'></td>
-          <td colspan='3' class='spec'>".t('Tilauksen arvo yhteensä')."</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
-          <td class='spec'>$laskurow[valkoodi]</td>
-          </td>
-          </tr>";
-        $_colspan = $backspan1 + 4;
-        echo "<tr>
-          <td class='back' colspan='$_colspan'></td>
-          <td colspan='3' class='spec'>".t('Erikoisalennus')." ".$laskurow['erikoisale']."%</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $erikoisale_summa)."</td>
-          <td class='spec'>$laskurow[valkoodi]</td>
-          </tr>";
-        echo "<tr>
-          <td class='back' colspan='$_colspan'></td>
-          <td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa + $erikoisale_summa)."</td>
-          <td class='spec'>$laskurow[valkoodi]</td>
-          </tr>";
-      }
-      else {
-        echo "<td class='back' colspan='$backspan1'></td>
-          <td colspan='3' class='spec'>".t("Tilauksen arvo").":</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $yhteensa)."</td>
-          <td class='spec'>$laskurow[valkoodi]</td>
-          </tr>";
-      }
-
-      echo "  <tr>
-          <td class='back' colspan='$backspan2'></td>
-          <td colspan='3' class='spec'>".t("Tilauksen paino").":</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $paino_yhteensa)."</td>
-          <td class='spec'>kg</td>
-          </tr>";
-      echo "  <tr>
-          <td class='back' colspan='$backspan2'></td>
+      echo "<td class='back' colspan='$backspan1'></td>
           <td colspan='3' class='spec'>".t("Tilauksen tilavuus").":</td>
           <td align='right' class='spec'>".sprintf("%.2f", $tilavuus_yhteensa)."</td>
           <td class='spec'>m3</td>
@@ -1942,7 +1999,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista'>
-          <input type='submit' value='*".t("Mitätöi koko tilaus")."*'>
+          <input type='submit' class='poista_btn' value='*".t("Mitätöi koko tilaus")."*'>
           </form>
           </td>";
 
@@ -1957,7 +2014,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista_kohdistamattomat'>
-          <input type='submit' value='*".t("Mitätöi kohdistamattomat rivit")."*'>
+          <input type='submit' class='poista_btn' value='*".t("Mitätöi kohdistamattomat rivit")."*'>
           </form>
           </td>";
 

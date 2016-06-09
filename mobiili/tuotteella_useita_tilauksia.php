@@ -152,7 +152,8 @@ $query = "SELECT
             {$join_lisa})
           {$lasku_join_lisa}
           LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-            AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+            AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
+            AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
           {$where_lisa}
@@ -192,7 +193,8 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
               {$join_lisa})
             {$lasku_join_lisa}
             LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+              AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
             {$where_lisa}

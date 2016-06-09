@@ -755,35 +755,38 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 
   // Hetaan varaston tulostimet
-  if ($varasto > 0) {
-    $query = "SELECT *
-              from varastopaikat
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$varasto'
-              order by alkuhyllyalue, alkuhyllynro";
-  }
+  $query = "SELECT *
+            from varastopaikat
+            where yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$varasto}'
+            order by alkuhyllyalue, alkuhyllynro";
   $kirre = pupe_query($query);
 
   if (mysql_num_rows($kirre) > 0) {
     $prirow = mysql_fetch_assoc($kirre);
 
     $sel_lahete[$prirow['printteri1']] = "SELECTED";
+    $sel_osoitelappu[$prirow['printteri3']] = "SELECTED";
   }
   else {
     $sel_lahete[$tulostin] = "SELECTED";
+    $sel_osoitelappu[$valittu_oslapp_tulostin] = "SELECTED";
   }
 
   $query = "SELECT *
             from kirjoittimet
-            where yhtio  = '$kukarow[yhtio]'
+            where yhtio  = '{$kukarow['yhtio']}'
             AND komento != 'EDI'
             ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
-  echo "<option value='-88'>".t("PDF ruudulle")."</option>";
+  $sel = !empty($sel_lahete["-88"]) ? "selected" : "";
+
+  echo "<option value='-88' {$sel}>".t("PDF ruudulle")."</option>";
 
   while ($kirow = mysql_fetch_assoc($kires)) {
-    echo "<option value='$kirow[tunnus]' ".$sel_lahete[$kirow["tunnus"]].">$kirow[kirjoitin]</option>\n";
+    $sel = !empty($sel_lahete[$kirow["tunnus"]]) ? "selected" : "";
+    echo "<option value='{$kirow['tunnus']}' {$sel}>{$kirow['kirjoitin']}</option>\n";
   }
 
   echo "</select></td></tr>";
@@ -791,14 +794,17 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   echo "<tr><th>".t("Osoitelappu")."</th>";
   echo "<td>";
 
+  $sel = !empty($sel_osoitelappu["-88"]) ? "selected" : "";
+
   echo "<select name='valittu_oslapp_tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
-  echo "<option value='-88'>".t("PDF ruudulle")."</option>";
+  echo "<option value='-88' {$sel}>".t("PDF ruudulle")."</option>";
 
   mysql_data_seek($kires, 0);
 
   while ($kirow = mysql_fetch_assoc($kires)) {
-    echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+    $sel = !empty($sel_osoitelappu[$kirow["tunnus"]]) ? "selected" : "";
+    echo "<option value='{$kirow['tunnus']}' {$sel}>{$kirow['kirjoitin']}</option>";
   }
 
   echo "</select></td></tr>";

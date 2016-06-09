@@ -463,6 +463,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VALUUTTAKOODI' :
     // Tilauksen valuutta
     $editilaus_valuuttakoodi = $tieto;
+
+    if (!empty($tieto)) {
+      $edi_ulos .= t("Valuuttakoodi")." $tieto\n";
+    }
+
     break;
 
   case 'OSTOTIL.VERKKOKAUPPA' :
@@ -2416,18 +2421,26 @@ while ($tietue = fgets($fd)) {
           }
         }
 
-        // Vientitilauksille saa kutsua tilaus-valmis.inci‰ vaan kerran
-        // Kotimaan tilauksilel kutsutaan tilaus-valmis.inci‰ kahdesti,
-        // koska ekalla kerralla niille luodaan pupeen lasku
-        if ($laskurow["vienti"] == "") {
+        // magentotilaus on laskutettu, jos meill‰ on kassalipas
+        $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
+
+        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
+        // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
+        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+
+        // Laitetaan tilaus valmiiksi
+        if ($paivita_takaisin_keraysjonoon and $laskurow["vienti"] != "") {
+          // Paitsi jos meill‰ on vientitilaus, joka tulee laittaa takaisin ker‰ysjonoon
+        }
+        else {
           require "tilaus-valmis.inc";
         }
 
         $valittu_kopio_tulostin = "";
         $saatekirje = 0;
 
-        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-        if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+        // P‰ivitet‰‰n tilaus takaisin ker‰ysjonoon
+        if ($paivita_takaisin_keraysjonoon) {
           // Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
           $varasto_query = "SELECT tunnus
                             from varastopaikat

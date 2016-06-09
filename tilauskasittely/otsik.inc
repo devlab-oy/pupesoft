@@ -3488,7 +3488,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
       echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
     }
 

@@ -2132,6 +2132,48 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
         echo "</table><br>";
 
+        require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+        $kuitti_params = array(
+          "pdf_kuitti" => true,
+          "pdf_kuitti_printdialog" => true,
+          "avaa_lipas_lopuksi" => false
+        );
+
+        $kuittiurl = tulosta_asiakkaan_kuitti($laskurow["laskunro"], "", $kuitti_params);
+
+        echo "<script type=\"text/javascript\">
+                function printIframePdf(){
+                  window.frames[\"printf\"].focus();
+                  try {
+                    window.frames[\"printf\"].print();
+                  }
+                  catch(e){
+                    window.print();
+                    console.log(e);
+                  }
+                }
+
+                function printObjectPdf() {
+                  try{
+                    document.getElementById('idPdf').print();
+                  }
+                  catch(e){
+                    printIframePdf();
+                    console.log(e);
+                  }
+                }
+        </script>
+
+        <form><input type='button' onClick='printIframePdf()' class='btn' value='".t("Tulosta kuitti")."'/></form><br><br>
+
+        <iframe id='printf' name='printf' src='$kuittiurl' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
+
+        <object id='idPdf'
+            width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf'
+            data='{$palvelin2}{$filenimi}'>
+        </object>";
+
         $formi  = "laskuri";
         $kentta = "kateisraha";
       }
@@ -3369,11 +3411,7 @@ if ($tee == '') {
 
     //  Tarkistetaan, ettei asiakas ole prospekti, tarjoukselle voi liittää prospektiasiakkaan, josta voi tehdä suoraan tilauksen. Herjataan siis jos asiakas pitää päivittää ja tarkistaa
     if (($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
-      $prosque = "SELECT tunnus
-                  FROM asiakas
-                  WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
-      $prosres = pupe_query($prosque);
-      if (mysql_num_rows($prosres)==1) {
+      if ($asiakasrow['laji'] == "R") {
         $asiakasOnProspekti = "JOO";
         echo "<br><font class='error'>".t("HUOM: Asiakas on prospektiasiakas, tarkista asiakasrekisterissä asiakkaan tiedot ja päivitä tiedot tilauksen otsikolle.")."</font>";
       }
@@ -3447,15 +3485,8 @@ if ($tee == '') {
   // jos asiakasnumero on annettu
   if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma, toimitustapa
-              FROM asiakas
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              and tunnus  = '{$laskurow['liitostunnus']}'";
-    $faktaresult = pupe_query($query);
-    $faktarow = mysql_fetch_assoc($faktaresult);
-
     // KAUTTALASKUTUSKIKKARE
-    if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $faktarow['osasto'] != '6')) {
+    if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and ($koti_yhtio != $kukarow['yhtio'] or $asiakasrow['osasto'] != '6')) {
       $GLOBALS['eta_yhtio'] = "";
     }
 
@@ -3480,7 +3511,7 @@ if ($tee == '') {
 
       echo "<th>".t("Ytunnus");
 
-      if ($faktarow["asiakasnro"] != "") {
+      if ($asiakasrow["asiakasnro"] != "") {
         echo " / ".t("Asiakasnro");
       }
 
@@ -3494,12 +3525,12 @@ if ($tee == '') {
       else {
         echo "<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&lopetus={$tilmyy_lopetus}'>",tarkistahetu($laskurow['ytunnus']),"</a>";
 
-        if ($faktarow["asiakasnro"] != "") {
-          echo " / $faktarow[asiakasnro]";
+        if ($asiakasrow["asiakasnro"] != "") {
+          echo " / $asiakasrow[asiakasnro]";
         }
 
-        if ($faktarow["ryhma"] != "") {
-          echo " / {$faktarow['ryhma']}";
+        if ($asiakasrow["ryhma"] != "") {
+          echo " / {$asiakasrow['ryhma']}";
         }
       }
 
@@ -3539,8 +3570,8 @@ if ($tee == '') {
 
       if ($kukarow['extranet'] == "" and $yhtiorow['konserni'] == "indu") {
         echo "<br />";
-        echo hae_chn_teksti($faktarow['chn']);
-        if ($faktarow['verkkotunnus'] != '') echo " / {$faktarow['verkkotunnus']}";
+        echo hae_chn_teksti($asiakasrow['chn']);
+        if ($asiakasrow['verkkotunnus'] != '') echo " / {$asiakasrow['verkkotunnus']}";
       }
 
       echo "</span>";
@@ -3604,7 +3635,7 @@ if ($tee == '') {
         if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
           or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
           or $toimitustapa['selite'] == $laskurow['toimitustapa']
-          or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
+          or $toimitustapa['selite'] == $asiakasrow['toimitustapa']) {
 
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
@@ -3868,9 +3899,9 @@ if ($tee == '') {
       echo $options;
       echo "</select></td></tr>";
 
-      if (trim($faktarow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+      if (trim($asiakasrow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
         echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
-        echo "<font class='asiakasfakta'>".str_replace("\n", "<br>", $faktarow['fakta'])."</font>&nbsp;</td></tr>\n";
+        echo "<font class='asiakasfakta'>".str_replace("\n", "<br>", $asiakasrow['fakta'])."</font>&nbsp;</td></tr>\n";
       }
 
       // Katsotaan onko liitetiedostoja
@@ -4052,7 +4083,7 @@ if ($tee == '') {
         }
       }
 
-      if ($faktarow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
+      if ($asiakasrow["laji"] == "K" and $yhtiorow["yhtio"] == "artr") {
         echo "<tr>$jarjlisa<td class='back'></td>";
         echo "<td colspan='3' class='back'>";
         echo "<p class='error'>".t("HUOM: Tämä on korjaamo-asiakas, älä myy tälle asiakkaalle")."</p>";
@@ -4248,14 +4279,7 @@ if ($tee == '') {
 
   // Tarkastetaan onko asiakas myyntikiellossa
   if ($laskurow['liitostunnus'] > 0) {
-    $query = "SELECT myyntikielto
-              FROM asiakas
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus  = '$laskurow[liitostunnus]'";
-    $myyntikielto_res = pupe_query($query);
-    $myyntikielto_row = mysql_fetch_assoc($myyntikielto_res);
-
-    if ($myyntikielto_row['myyntikielto'] == 'K') {
+    if ($asiakasrow['myyntikielto'] == 'K') {
       if ($kukarow['extranet'] != '') {
         echo "<font class='error'>", t("Luottorajasi on täynnä, ota yhteys asiakaspalveluun"), ".</font><br/>";
       }
@@ -4317,14 +4341,6 @@ if ($tee == '') {
   }
 
   if ($tila == "SYOTASMS") {
-
-    $query  = "SELECT gsm
-               FROM asiakas
-               WHERE yhtio = '$kukarow[yhtio]'
-               and tunnus  = '$laskurow[liitostunnus]'";
-    $numres = pupe_query($query);
-    $asiakr = mysql_fetch_assoc($numres);
-
     if ($smsviesti == "") {
       $smsviesti = "\n\n\nTerv. ".$kukarow["nimi"]."\n".$yhtiorow["nimi"];
     }
@@ -4332,7 +4348,7 @@ if ($tee == '') {
     echo "<table>
         <tr>
           <th>Puh.</th>
-          <td><input type='text' size='20' name='smsnumero' value='$asiakr[gsm]'></td>
+          <td><input type='text' size='20' name='smsnumero' value='$asiakasrow[gsm]'></td>
         </tr>
         <tr>
           <th>Viesti</th>
@@ -5569,16 +5585,7 @@ if ($tee == '') {
   elseif ($_mika_toim and $_kat_jv) {
 
     if (!empty($laskurow['luottoraja'])) {
-
-      $query = "SELECT luottoraja
-                FROM asiakas
-                WHERE yhtio     = '{$kukarow['yhtio']}'
-                and tunnus      = '{$laskurow['liitostunnus']}'
-                AND luottoraja != 0";
-      $asresult = pupe_query($query);
-      $asrow = mysql_fetch_assoc($asresult);
-
-      if (!empty($asrow['luottoraja'])) {
+      if (!empty($asiakasrow['luottoraja'])) {
 
         $query_ale_lisa = generoi_alekentta('M');
 
@@ -5594,7 +5601,7 @@ if ($tee == '') {
         $tilauksen_rivihinnat_res = pupe_query($query);
         $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);
 
-        if ($tilauksen_rivihinnat_row['rivihinta'] + $laskurow['luottoraja'] > $asrow['luottoraja']) {
+        if ($tilauksen_rivihinnat_row['rivihinta'] + $laskurow['luottoraja'] > $asiakasrow['luottoraja']) {
 
           $luottorajavirhe = 'kyllä';
 
@@ -6182,7 +6189,7 @@ if ($tee == '') {
   // jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
   if ((int) $kukarow["kesken"] > 0) {
 
-    if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $faktarow['rahtivapaa'] == '' and ($faktarow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
+    if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $asiakasrow['rahtivapaa'] == '' and ($asiakasrow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
 
       $query_ale_lisa = generoi_alekentta('M');
 
@@ -6201,7 +6208,7 @@ if ($tee == '') {
 
       if ($tilriv_chk_row['rivihinta'] != '') {
 
-        $rahtivapaa_alarajasumma = $faktarow['rahtivapaa_alarajasumma'] != 0 ? $faktarow['rahtivapaa_alarajasumma'] : $yhtiorow['rahtivapaa_alarajasumma'];
+        $rahtivapaa_alarajasumma = $asiakasrow['rahtivapaa_alarajasumma'] != 0 ? $asiakasrow['rahtivapaa_alarajasumma'] : $yhtiorow['rahtivapaa_alarajasumma'];
         $_jaljella = $rahtivapaa_alarajasumma - $tilriv_chk_row['rivihinta'];
 
         echo "<br /><table>";
@@ -7821,7 +7828,7 @@ if ($tee == '') {
                        "&yksikko={$row["yksikko"]}" .
                        "&paikka={$row["paikka"]}" .
                        "&keskihinta={$row["kehahin"]}" .
-                       "&valuutta={$row["valuutta"]}" .
+                       "&valuutta={$laskurow["valkoodi"]}" .
                        "&varasto={$laskurow["varasto"]}" .
                        "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
@@ -9182,14 +9189,6 @@ if ($tee == '') {
           $ulkom_huom = "";
         }
 
-        // Etsitään asiakas
-        $query = "SELECT laskunsummapyoristys, osasto
-                  FROM asiakas
-                  WHERE tunnus = '$laskurow[liitostunnus]'
-                  and yhtio    = '$kukarow[yhtio]'";
-        $asres = pupe_query($query);
-        $asrow = mysql_fetch_assoc($asres);
-
         if ($toim != 'SIIRTOLISTA') {
 
           if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A'))) {
@@ -9198,7 +9197,7 @@ if ($tee == '') {
               echo "<tr>$jarjlisa
                   <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
                   <th colspan='5' align='right'>".t("Asiakasosasto").":</th>
-                  <td class='spec' colspan='3' align='center'>{$asrow['osasto']}</td>";
+                  <td class='spec' colspan='3' align='center'>{$asiakasrow['osasto']}</td>";
             }
 
             echo "<tr>$jarjlisa
@@ -9367,7 +9366,7 @@ if ($tee == '') {
         }
 
         // Jos laskun loppusumma pyöristetään lähimpään tasalukuun
-        if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+        if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asiakasrow["laskunsummapyoristys"] == 'o') {
           $summa = sprintf("%.2f", round($summa , 0));
         }
 
@@ -9385,18 +9384,10 @@ if ($tee == '') {
 
         echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-        $as_que = "SELECT rahtivapaa_alarajasumma
-                   FROM asiakas
-                   WHERE yhtio                 = '$kukarow[yhtio]'
-                   AND tunnus                  = '$laskurow[liitostunnus]'
-                   AND rahtivapaa_alarajasumma > 0";
-        $as_res = pupe_query($as_que);
-
         $rahtivapaa_alarajasumma = 0;
 
-        if (mysql_num_rows($as_res) == 1) {
-          $as_row = mysql_fetch_assoc($as_res);
-          $rahtivapaa_alarajasumma = (float) $as_row["rahtivapaa_alarajasumma"];
+        if (!empty($asiakasrow['rahtivapaa_alarajasumma'])) {
+          $rahtivapaa_alarajasumma = (float) $asiakasrow["rahtivapaa_alarajasumma"];
         }
         else {
           $rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
@@ -9912,11 +9903,7 @@ if ($tee == '') {
     if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] != 0 and $toim != "TYOMAARAYS" and $toim != "TYOMAARAYS_ASENTAJA" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
 
       //katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
-      $asjtq = "SELECT jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-      $asjtapu = pupe_query($asjtq);
-      $asjtrow = mysql_fetch_assoc($asjtapu);
-
-      if (mysql_num_rows($asjtapu) == 1 and $asjtrow["jtrivit"] == 0) {
+      if (isset($asiakasrow) and $asiakasrow["jtrivit"] == 0) {
 
         echo "<br>";
 
@@ -10604,18 +10591,16 @@ if ($tee == '') {
           echo "<option value=''>".t("Ei kuittikopiota")."</option>";
 
           // Tarkistetaan onko asiakkaalla sähköpostiosoitteet setattu
-          $query = "SELECT IF(lasku_email != '', lasku_email, email) AS email
-                    FROM asiakas
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$laskurow['liitostunnus']}'
-                    AND (email != '' or lasku_email != '')";
-          $asiakasemail_chk_res = pupe_query($query);
+          if (!empty($asiakasrow["lasku_email"])) {
+            echo "<option value='asiakasemail{$asiakasrow['lasku_email']}'>", t("Asiakkaan laskutussähköpostiin"), ": {$asiakasrow['lasku_email']}</option>";
+          }
 
-          if (mysql_num_rows($asiakasemail_chk_res) != 0) {
+          if (!empty($asiakasrow["email"]) and $asiakasrow["email"] != $asiakasrow['lasku_email']) {
+            echo "<option value='asiakasemail{$asiakasrow['email']}'>", t("Asiakkaan sähköpostiin"), ": {$asiakasrow['email']}</option>";
+          }
 
-            $asiakasemail_chk_row = mysql_fetch_assoc($asiakasemail_chk_res);
-
-            echo "<option value='asiakasemail{$asiakasemail_chk_row['email']}'>", t("Asiakkaan sähköpostiin"), ": {$asiakasemail_chk_row['email']}</option>";
+          if (!empty($laskurow['toim_email'])) {
+            echo "<option value='asiakasemail{$laskurow['toim_email']}'>", t("Asiakkaan sähköpostiin"), ": {$laskurow['toim_email']}</option>";
           }
 
           $querykieli = "SELECT *

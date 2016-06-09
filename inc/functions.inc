@@ -1224,6 +1224,98 @@ if (!function_exists("apix_invoice_put_file")) {
   }
 }
 
+if (!function_exists("apix_edi_put_file")) {
+  function apix_edi_put_file($apixzipfile, $apix_ordernum) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // siirret‰‰n laskutiedosto operaattorille
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
+    $transferkey     = $yhtiorow['apix_avain'];
+    $transferid      = $yhtiorow['apix_tunnus'];
+    $software        = "PupesoftEdi";
+    $version         = "1.0";
+
+    $timestamp       = gmdate("YmdHis");
+    $apix_ulos       = "";
+    $apixerrorreport = "";
+
+    // Filen koko ja pointteri siihen
+    $apixfilesize = filesize("{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+    $apix_fh = fopen("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", 'r');
+
+    // Siirret‰‰n aineisto APIXiin
+    $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+    $dt = substr(hash('sha256', $digest_src), 0, 64);
+
+    $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+    $ch = curl_init($real_url);
+    curl_setopt($ch, CURLOPT_PUT, true);
+    curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+    curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
+    $response = curl_exec($ch);
+
+    curl_close($ch);
+    fclose($apix_fh);
+
+    $xml = simplexml_load_string($response);
+
+    if ($xml->Status == "OK") {
+      $apix_ulos .= t("APIX-EDI %s l‰hetys onnistui", "", $apix_ordernum)."!";
+    }
+    else {
+      $apix_ulos .= "EDI $apix_ordernum l‰hetys ep‰onnistui:<br>\n";
+      $apix_ulos .= "Tila: ".$xml->Status."<br>\n";
+      $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
+
+      // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
+      $apixerrorreport .= t("APIX-EDI %s l‰hetys ep‰onnistui", "", $apix_ordernum)."!\n";
+      $apixerrorreport .= t("L‰hetetyn tiedoston nimi").": $apixzipfile \n\n";
+      $apixerrorreport .= utf8_decode($xml->FreeText[1])."\n\n";
+      $apixerrorreport .= utf8_decode($xml->Value[0])."\n\n";
+
+      // Laitetaan s‰hkˆposti admin osoitteeseen siin‰ tapauksessa,
+      // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+      $error_email = $yhtiorow["admin_email"];
+
+      if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+        $error_email = $yhtiorow["talhal_email"];
+      }
+      elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+        $error_email = $yhtiorow["alert_email"];
+      }
+
+      $params = array(
+        "to"      => $error_email,
+        "subject" => t("APIX-EDI %s l‰hetys ep‰onnistui", "", $apix_ordernum),
+        "ctype"   => "text",
+        "body"    => $apixerrorreport,
+        "attachements"  => array(0 => array(
+            "filename"    => "{$pupe_root_polku}/dataout/apix_error/$apixzipfile",
+            "newfilename" => ""))
+      );
+
+      pupesoft_sahkoposti($params);
+
+      foreach ($xml->FreeText as $teksti) {
+        $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
+      }
+    }
+
+    if (!empty($xml->Status)) {
+      // Siirret‰‰n dataout kansioon jos Apixilta on saatu jokin vastaus
+      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", "{$pupe_root_polku}/dataout/$apixzipfile");
+    }
+
+    return $apix_ulos;
+  }
+}
+
 if (!function_exists("hae_liitteet_verkkolaskuun")) {
   function hae_liitteet_verkkolaskuun($verkkolaskuoperaattori, $tilausnumerot) {
     global $kukarow;

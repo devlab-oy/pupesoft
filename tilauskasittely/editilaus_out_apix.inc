@@ -137,9 +137,9 @@ while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
     $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
     $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
     $edi_order .= "*RE OSTOTILPAK {$uniq_merkki}\n";
-  }
 
-  $uniq_merkki++;
+    $uniq_merkki++;
+  }
 }
 
 # Koontirahtikirjan pakkaus

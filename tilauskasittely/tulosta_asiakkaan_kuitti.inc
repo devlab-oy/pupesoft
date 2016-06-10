@@ -80,7 +80,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     }
   }
   elseif ($maksupaatesumma_num < $yhteensa_num) {
-    $kateinen = sprintf("%34.34s", number_format($yhteensa_num - $maksupaatesumma_num, 2));
+    $kateinen = sprintf("%34.34s", sprintf("%.2f", $yhteensa_num - $maksupaatesumma_num));
   }
 
   $verorivit = array();
@@ -100,6 +100,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $norm["height"] = 10;
     $norm["font"] = "Helvetica";
 
+    $pieni["height"] = 8;
+    $pieni["font"] = "Helvetica";
+
     $pdf = new pdffile;
     $pdf->set_default('margin-top', 0);
     $pdf->set_default('margin-bottom', 0);
@@ -112,7 +115,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
     $firstpage = $pdf->new_page("204x$korkeus");
 
-    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus, 60, 0, 0);
+    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, 42, 40, 120);
 
     $kala = $korkeus-60;
 
@@ -140,24 +143,18 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
     foreach ($tilausrivit as $tilausrivi) {
       $kappalehinta = hintapyoristys($tilausrivi["yksikkohinta"]);
-      $kappalehinta = sprintf("%14.14s", "a {$kappalehinta}");
-      $bruttohinta  = $tilausrivi['rivihinta_verollinen'];
-      $bruttohinta  = sprintf("%14.14s", $bruttohinta);
-      $tuoteno      = sprintf("%-42.42s", $tilausrivi['tuoteno']);
-      $nimitys      = sprintf("%-42.42s", $tilausrivi['nimitys']);
-      $kpl          = sprintf("%-14.14s", "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}");
+      $kappalehinta = "á {$kappalehinta}";
 
-
-      $pdf->draw_text(0, $kala, "{$tuoteno}", $firstpage, $norm);
+      $pdf->draw_text(0, $kala, $tilausrivi['tuoteno'], $firstpage, $pieni);
       $kala-=10;
 
-      $pdf->draw_text(0, $kala, "{$nimitys}", $firstpage, $norm);
+      $pdf->draw_text(0, $kala, $tilausrivi['nimitys'], $firstpage, $norm);
       $kala-=10;
 
-      $pdf->draw_text(0, $kala, trim($kpl), $firstpage, $norm);
-      $pdf->draw_text(100, $kala, trim($kappalehinta), $firstpage, $norm);
-      $pdf->draw_text(160, $kala, trim($bruttohinta), $firstpage, $norm);
-      $kala-=10;
+      $pdf->draw_text(0, $kala, "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}", $firstpage, $norm);
+      $pdf->draw_text(100, $kala, $kappalehinta, $firstpage, $norm);
+      $pdf->draw_text(160, $kala, $tilausrivi['rivihinta_verollinen'], $firstpage, $norm);
+      $kala-=15;
     }
 
     // Hinta yhteensä
@@ -226,7 +223,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
     // Footer
     draw_center_aligned($pdf, $firstpage, t("Kuittinumero", $asiakkaan_kieli).": {$lasku['laskunro']}", $norm, $kala);
-    $kala-=20;
+    $kala-=10;
 
     draw_center_aligned($pdf, $firstpage, t($tilausnumero_teksti, $asiakkaan_kieli) . ": ".implode(", ", $tilausnumerot), $norm, $kala);
     $kala-=20;

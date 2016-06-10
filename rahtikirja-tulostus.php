@@ -954,7 +954,7 @@ if ($tee == 'tulosta') {
 
         if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
 
-          if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+          if (in_array($rakir_row["toimitusvahvistus"], array("editilaus_out_futur.inc", "editilaus_out_apix.inc"))) {
 
             // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan tämän jälkeen
             $tmp_laskurow = $laskurow;
@@ -968,7 +968,7 @@ if ($tee == 'tulosta') {
 
           require "tilauskasittely/$rakir_row[toimitusvahvistus]";
 
-          if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+          if (in_array($rakir_row["toimitusvahvistus"], array("editilaus_out_futur.inc", "editilaus_out_apix.inc"))) {
             $laskurow = $tmp_laskurow;
           }
         }

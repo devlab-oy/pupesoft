@@ -61,7 +61,6 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
   $edi_order .= "OSTOTIL.OT_KULJETUSOHJE:\n";
   $edi_order .= "OSTOTIL.OT_LAHETYSTAPA:\n";
-  $edi_order .= "OSTOTIL.OT_FAKSI:\n";
 
   $edi_order .= "OSTOTIL.OT_OVTTUNNUS:{$laskurow['ovttunnus']}\n";
   $edi_order .= "OSTOTIL.OT_YRITYS:{$lask_yritys}\n";

@@ -153,9 +153,9 @@ if (in_array('asiakkaat', $magento_ajolista)) {
   tuote_export_echo("Haetaan asiakkaat.");
 
   $params = array(
-    "ajetaanko_kaikki"             => $ajetaanko_kaikki,
-    "datetime_checkpoint"          => $datetime_checkpoint,
-    "magento_siirretaan_asiakkaat" => $magento_siirretaan_asiakkaat,
+    "ajetaanko_kaikki"    => $ajetaanko_kaikki,
+    "datetime_checkpoint" => $datetime_checkpoint,
+    "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
 
   $dnsasiakas = tuote_export_hae_asiakkaat($params);
@@ -321,7 +321,7 @@ if ($verkkokauppatyyppi == "magento") {
   }
 
   // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
-  if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
+  if (count($dnsasiakas) > 0) {
     tuote_export_echo("Päivitetään asiakkaat");
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
     tuote_export_echo("Päivitettiin $count asiakkaan tiedot");

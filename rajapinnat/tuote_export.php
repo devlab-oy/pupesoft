@@ -1,73 +1,63 @@
 <?php
 
 // Kutsutaanko CLI:stä
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli') {
-  $php_cli = TRUE;
-}
-
-date_default_timezone_set('Europe/Helsinki');
-
-// Kutsutaanko CLI:stä
-if (!$php_cli) {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+if (php_sapi_name() != 'cli') {
+  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-require "{$pupe_root_polku}/inc/connect.inc";
-require "{$pupe_root_polku}/inc/functions.inc";
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku);
+ini_set("display_errors", 1);
+ini_set("max_execution_time", 0); // unlimited execution time
+ini_set("memory_limit", "2G");
+error_reporting(E_ALL);
+date_default_timezone_set('Europe/Helsinki');
 
-$lock_params = array(
-  "locktime" => 5400
-);
+require "inc/connect.inc";
+require "inc/functions.inc";
+require "rajapinnat/magento_client.php";
+require "rajapinnat/tuote_export_functions.php";
 
-// Logitetaan ajo
-cron_log();
-
-// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
-pupesoft_flock($lock_params);
-
-require "{$pupe_root_polku}/rajapinnat/magento_client.php";
-require "{$pupe_root_polku}/rajapinnat/tuote_export_functions.php";
-
-// Laitetaan unlimited execution time
-ini_set("max_execution_time", 0);
-
-if (trim($argv[1]) != '') {
-  $yhtio = mysql_real_escape_string($argv[1]);
-  $yhtiorow = hae_yhtion_parametrit($yhtio);
-  $kukarow = hae_kukarow('admin', $yhtio);
-
-  if ($kukarow === null) {
-    die ("\n");
-  }
-}
-else {
+if (empty($argv[1])) {
   die ("Et antanut yhtiötä.\n");
+}
+
+// ensimmäinen parametri yhtiö
+$yhtio = mysql_real_escape_string($argv[1]);
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+
+if (empty($yhtiorow)) {
+  die("Yhtiö ei löydy.");
+}
+
+$kukarow = hae_kukarow('admin', $yhtio);
+
+if (empty($kukarow)) {
+  die("Admin -käyttäjä ei löydy.");
 }
 
 $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
 if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
-  die ("Et antanut verkkokaupan tyyppiä.\n");
+  die("Et antanut verkkokaupan tyyppiä.\n");
 }
 
-if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
-
+if ($verkkokauppatyyppi == "magento") {
   // Varmistetaan, että kaikki muuttujat on kunnossa
   if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas) or empty($magento_tax_class_id)) {
-    echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
-    exit;
+    die("Magento parametrit puuttuu, päivitystä ei voida ajaa.");
   }
 }
 
-$ajetaanko_kaikki = (isset($argv[3]) and trim($argv[3]) != '') ? "YES" : "NO";
-if (!isset($verkkokauppa_saldo_varasto)) $verkkokauppa_saldo_varasto = array();
+$ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
+
+if (empty($verkkokauppa_saldo_varasto)) {
+  $verkkokauppa_saldo_varasto = array();
+}
 
 if (!is_array($verkkokauppa_saldo_varasto)) {
-  echo "verkkokauppa_saldo_varasto pitää olla array!";
+  die("verkkokauppa_saldo_varasto pitää olla array!");
   exit;
 }
 
@@ -75,10 +65,10 @@ if (!is_array($verkkokauppa_saldo_varasto)) {
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
 
 if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
+  die("VIRHE: Timestamp ei löydy avainsanoista!\n");
 }
 
-if (!isset($magento_ajolista)) {
+if (empty($magento_ajolista)) {
   $magento_ajolista = array(
     'tuotteet',
     'lajitelmatuotteet',
@@ -93,10 +83,26 @@ $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
 $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
-
 // alustetaan arrayt
-$dnstuote = $dnsryhma = $dnstuoteryhma = $dnstock = $dnsasiakas = $dnshinnasto = $dnslajitelma =
-  $kaikki_tuotteet = $individual_tuotteet = array();
+$dnsasiakas = array();
+$dnshinnasto = array();
+$dnslajitelma = array();
+$dnsryhma = array();
+$dnstock = array();
+$dnstuote = array();
+$dnstuoteryhma = array();
+$individual_tuotteet = array();
+$kaikki_tuotteet = array();
+
+$lock_params = array(
+  "locktime" => 5400
+);
+
+// Logitetaan ajo
+cron_log();
+
+// Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
+pupesoft_flock($lock_params);
 
 echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 

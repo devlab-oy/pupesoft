@@ -1,12 +1,10 @@
 <?php
 
-if (!isset($kaikki_lotsikot)) $kaikki_lotsikot = $laskurow['tunnus'];
-
 # Tilauksien tunnukset tulevat $kaikki_lotsikot muuttujassa
 $query = "SELECT *
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus IN ({$kaikki_lotsikot})";
+          AND tunnus IN ({$otunnukset})";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {

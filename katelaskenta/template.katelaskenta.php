@@ -38,7 +38,6 @@
                     <td><input type="text" name="myymalakate['']" value="" size=4 /></td>
                     <td>&nbsp;</td>
                     <td><input type="text" name="nettokate['']" value="" size=4 /></td>
-                    <td>&nbsp;</td>
                     <td><a href="#">Laske kaikki</a></td>
                 </tr>
             </tfoot>
@@ -49,11 +48,10 @@
                     <th>Tuoteno</th>
                     <th>Nimitys</th>
                     <th>Osasto<br>Try</th>
-                    <th>Keskihankintahinta</th>
-                    <th colspan="2">Myyntihinta - Kate%</th>
-                    <th colspan="2">Myymälähinta - Kate%</th>
-                    <th colspan="2">Nettohinta - Kate%</th>
-                    <th>Myytävissä</th>
+                    <th>Kehain</th>
+                    <th colspan="2">Myyntihin - Kate%</th>
+                    <th colspan="2">Myymälähin - Kate%</th>
+                    <th colspan="2">Nettohin - Kate%</th>
                     <th>&nbsp</th>
                 </tr>
                 <?php
@@ -76,7 +74,6 @@
                         <td><input type="text" name="myymalakate['<?php echo $tuotetunnus; ?>']" value="<?php echo $tuote["myymalakate"]; ?>" size=4 /></td>
                         <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["nettohinta"]; ?></span> <?php echo $template["yhtio"]["valkoodi"]; ?></td>
                         <td><input type="text" name="nettokate['<?php echo $tuotetunnus; ?>']" value="<?php echo $tuote["nettokate"]; ?>" size=4 /></td>
-                        <?php hae_ja_piirra_saldo($tuote); // funktio ./katelaskenta/functions.php -tiedostossa. ?>
                         <td><a href="#">Laske</a></td>
                     </tr>
 

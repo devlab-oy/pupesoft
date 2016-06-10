@@ -9,7 +9,7 @@
  * Ohjelmakoodissa on vielä osioita entisestä tiedostota, josta pohja
  * on otettu. Osittain pohjaa on refaktoroitu mutta isommat osiot,
  * joissa ollut enemmän työtä, on jätetty ennalleen. Osa entisestä
- * koodista siirretty functions.php tiedostoon.
+ * koodista siirretty katelaskenta_functions.php tiedostoon.
  *
  * Kontrolleri ohjaa kaikki tietojen tulostukset template.katelaskenta.php
  * tiedostolle. Template tiedostossa tulostetaan toistaiseksi vain
@@ -20,14 +20,14 @@
  *
  * /controller.katelaskenta.php
  * /functions.katelaskenta.php
- * /functions.php
+ * /katelaskenta_functions.php
  * /scripts.katelaskenta.js
  * /template.katelaskenta.php
  * /tietokantamuutokset-katelaskenta.sql
  *
  * Tiedossa olevat riippuvuudet muualle
  *
- * ../inc/functions.php
+ * ../inc/katelaskenta_functions.php
  * ../tilauskasittely/monivalintalaatikot.inc
  *
  */
@@ -37,7 +37,7 @@ $useslave = 1;
 require "../inc/parametrit.inc";
 
 // Haetaan _funktiot.php -tiedosto, jossa katelaskennan toimintalogiikka.
-require "functions.php";
+require "katelaskenta_functions.php";
 require "functions.katelaskenta.php";
 
 // Tempalte array on luotu sivupohjan tietoja varten.

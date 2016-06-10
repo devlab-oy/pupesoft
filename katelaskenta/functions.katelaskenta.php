@@ -106,7 +106,7 @@ function luo_katelaskenta_update_komennot($taulukko) {
   // kootaan.
   $update_komennot = array();
   $sql_komento_alku = "UPDATE tuote SET ";
-  $sql_komento_loppu = "WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = ";
+  $sql_komento_loppu = " WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = ";
 
   // Käydään läpi jokainen valittu tuoterivi ja muodostetaan
   // ehtojen mukaan oikeanlainen update-komento.
@@ -122,19 +122,19 @@ function luo_katelaskenta_update_komennot($taulukko) {
     $update_kysely .= $sql_komento_alku;
 
     // Jos komennossa m, lasketaan myyntihinta.
-    if ($rivin_myyntikate > 0) {
+    if ($rivin_myyntikate > 0 and $rivin_keskihankintahinta > 0) {
       $uusi_hinta = lisaa_hintaan_kate($rivin_keskihankintahinta, $rivin_myyntikate);
       $uusi_hinta = hintapyoristys($uusi_hinta, 2);
       $update_kysely .= "myyntihinta = {$uusi_hinta}, ";
     }
     // Jos komennossa y, lasketaan myymalahinta.
-    if ($rivin_myymalakate > 0) {
+    if ($rivin_myymalakate > 0 and $rivin_keskihankintahinta > 0) {
       $uusi_hinta = lisaa_hintaan_kate($rivin_keskihankintahinta, $rivin_myymalakate);
       $uusi_hinta = hintapyoristys($uusi_hinta, 2);
       $update_kysely .= "myymalahinta = {$uusi_hinta}, ";
     }
     // Jos komennossa n, lasketaan nettohinta.
-    if ($rivin_nettokate > 0) {
+    if ($rivin_nettokate > 0 and $rivin_keskihankintahinta > 0) {
       $uusi_hinta = lisaa_hintaan_kate($rivin_keskihankintahinta, $rivin_nettokate);
       $uusi_hinta = hintapyoristys($uusi_hinta, 2);
       $update_kysely .= "nettohinta = {$uusi_hinta}, ";

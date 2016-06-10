@@ -43,6 +43,8 @@ if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
   die("Et antanut verkkokaupan tyyppiä.\n");
 }
 
+$ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
+
 if ($verkkokauppatyyppi == "magento") {
   // Varmistetaan, että kaikki muuttujat on kunnossa
   if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas) or empty($magento_tax_class_id)) {
@@ -50,7 +52,11 @@ if ($verkkokauppatyyppi == "magento") {
   }
 }
 
-$ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
+if ($verkkokauppatyyppi == "anvia") {
+  if (empty($anvia_ftphost) or empty($anvia_ftpuser) or empty($anvia_ftppass) or empty($anvia_ftppath)) {
+    die("Anvia parametrit puuttuu, päivitystä ei voida ajaa.");
+  }
+}
 
 if (empty($verkkokauppa_saldo_varasto)) {
   $verkkokauppa_saldo_varasto = array();
@@ -58,7 +64,6 @@ if (empty($verkkokauppa_saldo_varasto)) {
 
 if (!is_array($verkkokauppa_saldo_varasto)) {
   die("verkkokauppa_saldo_varasto pitää olla array!");
-  exit;
 }
 
 // Haetaan timestamp
@@ -333,43 +338,34 @@ if ($verkkokauppatyyppi == "magento") {
   echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
 }
 elseif ($verkkokauppatyyppi == "anvia") {
-  if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
-    $ftphost = $anvia_ftphost;
-    $ftpuser = $anvia_ftpuser;
-    $ftppass = $anvia_ftppass;
-    $ftppath = $anvia_ftppath;
-  }
-  else {
-    $ftphost = "";
-    $ftpuser = "";
-    $ftppass = "";
-    $ftppath = "";
-  }
-
+  $ftphost = $anvia_ftphost;
+  $ftpuser = $anvia_ftpuser;
+  $ftppass = $anvia_ftppass;
+  $ftppath = $anvia_ftppath;
   $tulos_ulos = "";
 
   if (count($dnstuote) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/tuotexml.inc";
+    require "rajapinnat/tuotexml.inc";
   }
 
   if (count($dnstock) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/varastoxml.inc";
+    require "rajapinnat/varastoxml.inc";
   }
 
   if (count($dnsryhma) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/ryhmaxml.inc";
+    require "rajapinnat/ryhmaxml.inc";
   }
 
   if (count($dnsasiakas) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/asiakasxml.inc";
+    require "rajapinnat/asiakasxml.inc";
   }
 
   if (count($dnshinnasto) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/hinnastoxml.inc";
+    require "rajapinnat/hinnastoxml.inc";
   }
 
   if (count($dnslajitelma) > 0) {
-    require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
+    require "rajapinnat/lajitelmaxml.inc";
   }
 }
 

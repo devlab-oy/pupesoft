@@ -120,6 +120,8 @@ function tuote_export_hae_tuotetiedot($params) {
   $tuotteiden_asiakashinnat_magentoon   = $params['tuotteiden_asiakashinnat_magentoon'];
   $verkkokauppatyyppi                   = $params['verkkokauppatyyppi'];
 
+  $dnstuote = array();
+
   if ($ajetaanko_kaikki == "NO") {
     $muuttuneet_tuotenumerot = $muuttuneet_tuoteryhmat = '';
 
@@ -381,6 +383,8 @@ function tuote_export_hae_saldot($params) {
   $datetime_checkpoint        = $params['datetime_checkpoint'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
+  $dnstock = array();
+
   if ($ajetaanko_kaikki == "NO") {
     $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
     $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
@@ -443,4 +447,96 @@ function tuote_export_hae_saldot($params) {
       'myytavissa'  => $myytavissa,
     );
   }
+}
+
+function tuote_export_hae_tuoteryhmat($params) {
+  global $kukarow, $yhtiorow;
+
+  $ajetaanko_kaikki           = $params['ajetaanko_kaikki'];
+  $datetime_checkpoint        = $params['datetime_checkpoint'];
+
+  $dnsryhma = array();
+  $dnstuoteryhma = array();
+
+  if ($ajetaanko_kaikki == "NO") {
+    $muutoslisa = "AND (try_fi.muutospvm    >= '{$datetime_checkpoint}'
+                     OR try_se.muutospvm    >= '{$datetime_checkpoint}'
+                     OR try_en.muutospvm    >= '{$datetime_checkpoint}'
+                     OR osasto_fi.muutospvm >= '{$datetime_checkpoint}'
+                     OR osasto_se.muutospvm >= '{$datetime_checkpoint}'
+                     OR osasto_en.muutospvm >= '{$datetime_checkpoint}')";
+  }
+  else {
+    $muutoslisa = "";
+  }
+
+  // Haetaan kaikki TRY ja OSASTO:t, niiden muutokset.
+  $query = "SELECT DISTINCT  tuote.osasto,
+            tuote.try,
+            try_fi.selitetark try_fi_nimi,
+            try_se.selitetark try_se_nimi,
+            try_en.selitetark try_en_nimi,
+            osasto_fi.selitetark osasto_fi_nimi,
+            osasto_se.selitetark osasto_se_nimi,
+            osasto_en.selitetark osasto_en_nimi
+            FROM tuote
+            LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+              and try_fi.selite     = tuote.try
+              and try_fi.laji       = 'try'
+              and try_fi.kieli      = 'fi')
+            LEFT JOIN avainsana as try_se ON (try_se.yhtio = tuote.yhtio
+              and try_se.selite     = tuote.try
+              and try_se.laji       = 'try'
+              and try_se.kieli      = 'se')
+            LEFT JOIN avainsana as try_en ON (try_en.yhtio = tuote.yhtio
+              and try_en.selite     = tuote.try
+              and try_en.laji       = 'try'
+              and try_en.kieli      = 'en')
+            LEFT JOIN avainsana as osasto_fi ON (osasto_fi.yhtio = tuote.yhtio
+              and osasto_fi.selite  = tuote.osasto
+              and osasto_fi.laji    = 'osasto'
+              and osasto_fi.kieli   = 'fi')
+            LEFT JOIN avainsana as osasto_se ON (osasto_se.yhtio = tuote.yhtio
+              and osasto_se.selite  = tuote.osasto
+              and osasto_se.laji    = 'osasto'
+              and osasto_se.kieli   = 'se')
+            LEFT JOIN avainsana as osasto_en ON (osasto_en.yhtio = tuote.yhtio
+              and osasto_en.selite  = tuote.osasto
+              and osasto_en.laji    = 'osasto'
+              and osasto_en.kieli   = 'en')
+            WHERE tuote.yhtio       = '{$kukarow["yhtio"]}'
+            AND tuote.status       != 'P'
+            AND tuote.tuotetyyppi   NOT in ('A','B')
+            AND tuote.tuoteno      != ''
+            AND tuote.nakyvyys     != ''
+            $muutoslisa
+            ORDER BY 1, 2";
+  $try_result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($try_result)) {
+    // Osasto/tuoteryhmä array
+    $dnsryhma[$row["osasto"]][$row["try"]] = array(  'osasto'  => $row["osasto"],
+      'try'       => $row["try"],
+      'osasto_fi' => $row["osasto_fi_nimi"],
+      'try_fi'    => $row["try_fi_nimi"],
+      'osasto_se' => $row["osasto_se_nimi"],
+      'try_se'    => $row["try_se_nimi"],
+      'osasto_en' => $row["osasto_en_nimi"],
+      'try_en'    => $row["try_en_nimi"],
+    );
+
+    // Kerätään myös pelkät tuotenumerot Magentoa varten
+    $dnstuoteryhma[$row["try"]] = array(  'try'    => $row["try"],
+      'try_fi'  => $row["try_fi_nimi"],
+      'try_se'  => $row["try_se_nimi"],
+      'try_en'  => $row["try_en_nimi"],
+    );
+  }
+
+  $response = array(
+    "dnsryhma"      => $dnsryhma,
+    "dnstuoteryhma" => $dnstuoteryhma,
+  );
+
+  return $response;
 }

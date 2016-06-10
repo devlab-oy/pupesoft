@@ -544,9 +544,9 @@ function tuote_export_hae_tuoteryhmat($params) {
 function tuote_export_hae_asiakkaat($params) {
   global $kukarow, $yhtiorow;
 
-  $ajetaanko_kaikki             = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint          = $params['datetime_checkpoint'];
-  $magento_siirretaan_asiakkaat = $params['magento_siirretaan_asiakkaat'];
+  $ajetaanko_kaikki     = $params['ajetaanko_kaikki'];
+  $datetime_checkpoint  = $params['datetime_checkpoint'];
+  $verkkokauppatyyppi   = $params['verkkokauppatyyppi'];
 
   $dnsasiakas = array();
 
@@ -559,7 +559,7 @@ function tuote_export_hae_asiakkaat($params) {
 
   $asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
 
-  if (isset($magento_siirretaan_asiakkaat)) {
+  if ($verkkokauppatyyppi == "magento")) {
     $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
                            yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
                            yhteyshenkilo.tunnus yhenk_tunnus,

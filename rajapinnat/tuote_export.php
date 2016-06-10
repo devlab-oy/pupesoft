@@ -82,6 +82,7 @@ if (empty($magento_ajolista)) {
 $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
 $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
+$tuote_export_error_count = 0;
 
 $lock_params = array(
   "locktime" => 5400
@@ -179,12 +180,9 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
   $dnslajitelma = tuote_export_hae_lajitelmatuotteet($params);
 }
 
-$tuote_export_error_count = 0;
-
 echo date("d.m.Y @ G:i:s")." - Aloitetaan päivitys verkkokauppaan.\n";
 
-if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
-
+if ($verkkokauppatyyppi == "magento") {
   $time_start = microtime(true);
 
   $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
@@ -334,8 +332,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
 }
-elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
-
+elseif ($verkkokauppatyyppi == "anvia") {
   if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
     $ftphost = $anvia_ftphost;
     $ftpuser = $anvia_ftpuser;
@@ -376,20 +373,5 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
   }
 }
 
-// Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-unset($link);
-$link = mysql_connect($dbhost, $dbuser, $dbpass, true) or die ("Ongelma tietokantapalvelimessa $dbhost (tuote_export)");
-mysql_select_db($dbkanta, $link) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (tuote_export)");
-mysql_set_charset("latin1", $link);
-mysql_query("set group_concat_max_len=1000000", $link);
-
 // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
-$query = "UPDATE avainsana SET
-          selite      = '{$datetime_checkpoint_uusi}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND laji    = 'TUOTE_EXP_CRON'";
-pupe_query($query);
-
-if (mysql_affected_rows() != 1) {
-  echo "Timestamp päivitys epäonnistui!\n";
-}
+tuote_export_paivita_avainsana($datetime_checkpoint_uusi);

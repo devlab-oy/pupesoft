@@ -93,6 +93,17 @@ $lock_params = array(
   "locktime" => 5400
 );
 
+// alustetaan arrayt
+$dnsasiakas = array();
+$dnshinnasto = array();
+$dnslajitelma = array();
+$dnsryhma = array();
+$dnstock = array();
+$dnstuote = array();
+$dnstuoteryhma = array();
+$individual_tuotteet = array();
+$kaikki_tuotteet = array();
+
 // Logitetaan ajo
 cron_log();
 
@@ -215,6 +226,11 @@ if ($verkkokauppatyyppi == "magento") {
     $categoryaccesscontrol = false;
   }
 
+  // Poistetaanko tuotteita
+  if (empty($magento_salli_tuotepoistot)) {
+    $magento_salli_tuotepoistot = false;
+  }
+
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
   if (empty($magento_configurable_tuote_nimityskentta)) {
     $magento_configurable_tuote_nimityskentta = "nimitys";
@@ -291,23 +307,24 @@ if ($verkkokauppatyyppi == "magento") {
   $time_start = microtime(true);
 
   $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
-  $magento_client->setTaxClassID($magento_tax_class_id);
-  $magento_client->setParentID($magento_parent_id);
-  $magento_client->setHintakentta($magento_hintakentta);
-  $magento_client->setKategoriat($magento_kategoriat);
-  $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
-  $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
-  $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
-  $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
-  $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
-  $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
-  $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
-  $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
-  $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
+  $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
+  $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+  $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  $magento_client->setHintakentta($magento_hintakentta);
+  $magento_client->setKategoriat($magento_kategoriat);
+  $magento_client->setParentID($magento_parent_id);
   $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
+  $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
+  $magento_client->setRemoveProducts($magento_salli_tuotepoistot);
+  $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
+  $magento_client->setTaxClassID($magento_tax_class_id);
+  $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
   $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
+  $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
 
   if ($magento_client->getErrorCount() > 0) {
     exit;
@@ -349,9 +366,8 @@ if ($verkkokauppatyyppi == "magento") {
   }
 
   // Poistetaan tuotteet jota ei ole kaupassa
-  if (count($kaikki_tuotteet) > 0 and !isset($magento_esta_tuotepoistot)) {
+  if (count($kaikki_tuotteet) > 0) {
     tuote_export_echo("Poistetaan ylimääräiset tuotteet");
-    // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     tuote_export_echo("Poistettiin $count tuotetta");
   }

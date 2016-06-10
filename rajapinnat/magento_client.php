@@ -146,6 +146,10 @@ class MagentoClient {
    */
   private $_error_count = 0;
 
+  /**
+   * Poistetaanko tuotteita oletuksena
+   */
+  private $_magento_poista_tuotteita = false;
 
   /**
    * Constructor
@@ -1053,6 +1057,12 @@ class MagentoClient {
    * @return   Poistettujen tuotteiden määrä
    */
   public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
+    // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet,
+    // methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
+
+    if ($this->_magento_poista_tuotteita !== true) {
+      return 0;
+    }
 
     $count = 0;
     $skus = $this->getProductList(true, $exclude_giftcards);
@@ -1949,6 +1959,13 @@ class MagentoClient {
    */
   public function setUrlKeyAttributes(array $url_key_attributes) {
     $this->_magento_url_key_attributes = $url_key_attributes;
+  }
+
+  /**
+   * Poistetaanko tuotteita magentosta
+   */
+  public function setRemoveProducts($value) {
+    $this->_magento_poista_tuotteita = $value;
   }
 
   /**

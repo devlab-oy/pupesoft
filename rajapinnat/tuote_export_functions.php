@@ -540,3 +540,115 @@ function tuote_export_hae_tuoteryhmat($params) {
 
   return $response;
 }
+
+function tuote_export_hae_asiakkaat($params) {
+  global $kukarow, $yhtiorow;
+
+  $ajetaanko_kaikki             = $params['ajetaanko_kaikki'];
+  $datetime_checkpoint          = $params['datetime_checkpoint'];
+  $magento_siirretaan_asiakkaat = $params['magento_siirretaan_asiakkaat'];
+
+  $dnsasiakas = array();
+
+  if ($ajetaanko_kaikki == "NO") {
+    $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
+  }
+  else {
+    $muutoslisa = "";
+  }
+
+  $asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
+
+  if (isset($magento_siirretaan_asiakkaat)) {
+    $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
+                           yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
+                           yhteyshenkilo.tunnus yhenk_tunnus,
+                           yhteyshenkilo.nimi yhenk_nimi,
+                           yhteyshenkilo.email yhenk_email,
+                           yhteyshenkilo.puh yhenk_puh,";
+
+    $asiakasjoinilisa = " JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
+                          LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')";
+
+    $asiakaswherelisa = " AND yhteyshenkilo.rooli  = 'magento'
+                          AND yhteyshenkilo.email != ''";
+
+    if (!empty($muutoslisa)) {
+      $muutoslisa .= " OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
+    }
+  }
+
+  // Haetaan kaikki asiakkaat
+  // Asiakassiirtoa varten poimitaan myös lisäkenttiä yhteyshenkilo-tauluista
+  $query = "SELECT
+            asiakas.*,
+            $asiakasselectlisa
+            asiakas.yhtio ayhtio
+            FROM asiakas
+            $asiakasjoinilisa
+            WHERE asiakas.yhtio  = '{$kukarow["yhtio"]}'
+            AND asiakas.laji    != 'P'
+            $asiakaswherelisa
+            $muutoslisa";
+  $res = pupe_query($query);
+
+  // pyöräytetään asiakkaat läpi
+  while ($row = mysql_fetch_array($res)) {
+    // Osoite laskutusosoitteeksi jos tyhjä
+    if (empty($row['laskutus_nimi'])) {
+      $row["laskutus_nimi"]    = $row['nimi'];
+      $row["laskutus_osoite"]  = $row['osoite'];
+      $row["laskutus_postino"] = $row['postino'];
+      $row["laskutus_postitp"] = $row['postitp'];
+    }
+    // Osoite toimitusosoitteeksi jos tyhjä
+    if (empty($row['toim_nimi'])) {
+      $row['toim_nimi']    = $row['nimi'];
+      $row["toim_osoite"]  = $row['osoite'];
+      $row["toim_postino"] = $row['postino'];
+      $row["toim_postitp"] = $row['postitp'];
+    }
+    // Yhteyshenkilön nimestä otetaan etunimi ja sukunimi
+    if (!empty($row["yhenk_nimi"])) {
+      // Viimeinen osa nimestä on sukunimi
+      $yhenk_sukunimi = end(explode(' ', $row['yhenk_nimi']));
+      // Ensimmäiset osat etunimiä
+      $yhenk_etunimi = explode(' ', $row['yhenk_nimi']);
+      array_pop($yhenk_etunimi);
+      $yhenk_etunimi = implode(' ', $yhenk_etunimi);
+    }
+
+    $dnsasiakas[] = array(
+      'nimi'               => $row["nimi"],
+      'osoite'             => $row["osoite"],
+      'postino'            => $row["postino"],
+      'postitp'            => $row["postitp"],
+      'email'              => $row["email"],
+      'aleryhma'           => $row["ryhma"],
+      'asiakasnro'         => $row["asiakasnro"],
+      'ytunnus'            => $row["ytunnus"],
+      'tunnus'             => $row["tunnus"],
+      'maa'                => $row["maa"],
+      'yhtio'              => $row["ayhtio"],
+      'magento_website_id' => $magento_website_id,
+      'toimitus_nimi'      => $row["toim_nimi"],
+      'toimitus_osoite'    => $row["toim_osoite"],
+      'toimitus_postino'   => $row["toim_postino"],
+      'toimitus_postitp'   => $row["toim_postitp"],
+      'laskutus_nimi'      => $row["laskutus_nimi"],
+      'laskutus_osoite'    => $row["laskutus_osoite"],
+      'laskutus_postino'   => $row["laskutus_postino"],
+      'laskutus_postitp'   => $row["laskutus_postitp"],
+      'yhenk_nimi'         => $row["yhenk_nimi"],
+      'yhenk_etunimi'      => $yhenk_etunimi,
+      'yhenk_sukunimi'     => $yhenk_sukunimi,
+      'yhenk_email'        => $row["yhenk_email"],
+      'yhenk_puh'          => $row["yhenk_puh"],
+      'yhenk_tunnus'       => $row["yhenk_tunnus"],
+      'magento_tunnus'     => $row["magento_tunnus"],
+      'asiakasryhma'       => $row['asiakasryhma']
+    );
+  }
+
+  return $dnsasiakas;
+}

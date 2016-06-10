@@ -188,99 +188,129 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 echo date("d.m.Y @ G:i:s")." - Aloitetaan päivitys verkkokauppaan.\n";
 
 if ($verkkokauppatyyppi == "magento") {
-  $time_start = microtime(true);
-
-  $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
-
-  if ($magento_client->getErrorCount() > 0) {
-    exit;
-  }
+  // Tässä kaikki magentorajapinnan configurointimuuttujat
 
   // tax_class_id, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-  $magento_client->setTaxClassID($magento_tax_class_id);
+  if (empty($magento_tax_class_id)) {
+    $magento_tax_class_id = 1;
+  }
 
   // Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea tätä mistään. Pitää käydä katsomassa magentosta
-  if (isset($magento_parent_id)) $magento_client->setParentID($magento_parent_id);
+  if (empty($magento_parent_id)) {
+    $magento_parent_id = 1;
+  }
 
   // Verkkokaupanhintakenttä, joko myyntihinta tai myymalahinta
-  if (isset($magento_hintakentta)) $magento_client->setHintakentta($magento_hintakentta);
+  if (empty($magento_hintakentta)) {
+    $magento_hintakentta = "myyntihinta";
+  }
 
   // Käytetäänkö tuoteryhminä tuoteryhmiä(default) vai tuotepuuta
-  if (isset($magento_kategoriat)) $magento_client->setKategoriat($magento_kategoriat);
+  if (empty($magento_kategoriat)) {
+    $magento_kategoriat = "tuoteryhma";
+  }
 
   // Onko "Category access control"-moduli on asennettu
-  if (isset($categoryaccesscontrol)) $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+  if (empty($categoryaccesscontrol)) {
+    $categoryaccesscontrol = false;
+  }
 
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
-  if (isset($magento_configurable_tuote_nimityskentta) and !empty($magento_configurable_tuote_nimityskentta)) {
-    $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  if (empty($magento_configurable_tuote_nimityskentta)) {
+    $magento_configurable_tuote_nimityskentta = "nimitys";
   }
 
   // Miten configurable-tuotteen lapsituotteet näkyvät verkkokaupassa.
   // Vaihtoehdot: NOT_VISIBLE_INDIVIDUALLY, CATALOG, SEARCH, CATALOG_SEARCH
-  // Default on NOT_VISIBLE_INDIVIDUALLY
-  if (isset($magento_configurable_lapsituote_nakyvyys) and !empty($magento_configurable_lapsituote_nakyvyys)) {
-    $magento_configurable_lapsituote_nakyvyys = strtoupper($magento_configurable_lapsituote_nakyvyys);
-    $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  if (empty($magento_configurable_lapsituote_nakyvyys)) {
+    $magento_configurable_lapsituote_nakyvyys = "NOT_VISIBLE_INDIVIDUALLY";
   }
 
   // Asetetaan custom simple-tuotekentät jotka eivät tule dynaamisista parametreistä. Array joka sisältää jokaiselle erikoisparametrille
   // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'tuotteen_kentän_nimi_mistä_arvo_halutaan') esim. array ('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki')
-  if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
-    $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
+  if (empty($verkkokauppatuotteet_erikoisparametrit)) {
+    $verkkokauppatuotteet_erikoisparametrit = array();
   }
+
   // Asetetaan custom asiakaskentät. Array joka sisältää jokaiselle erikoisparametrille
   // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'asiakkaan_kentän_nimi_mistä arvo_halutaan') esim. array ('nimi' => 'lastname', 'arvo' => 'yhenk_sukunimi')
   // näillä arvoilla ylikirjoitetaan asiakkaan tiedot sekä laskutus/toimitusosoitetiedot
-  if (isset($asiakkaat_erikoisparametrit) and count($asiakkaat_erikoisparametrit) > 0) {
-    $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
+  if (empty($asiakkaat_erikoisparametrit)) {
+    $asiakkaat_erikoisparametrit = array();
   }
+
   // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
-  if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
-    $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
+  if (empty($magento_sticky_kategoriat)) {
+    $magento_sticky_kategoriat = array();
   }
+
   // Halutaanko estää tilausten tuplasisäänluku, eli jos tilaushistoriasta löytyy käsittely
   // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
-  // Default on: YES
-  if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
-    $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  if (empty($magento_sisaanluvun_esto)) {
+    $magento_sisaanluvun_esto = 'YES';
   }
 
   // Halutaanko merkata kaikki uudet tuotteet aina samaan tuoteryhmään ja
   // estää tuoteryhmän yliajo tuotepäivityksessä
-  if (isset($magento_universal_tuoteryhma) and !empty($magento_universal_tuoteryhma)) {
-    $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
+  if (empty($magento_universal_tuoteryhma)) {
+    $magento_universal_tuoteryhma = '';
   }
 
   // Aktivoidaanko asiakas luonnin yhteydessä Magentoon
-  //   HUOM! Vaatii Magenton customointia
-  if (isset($magento_asiakas_aktivointi) and !empty($magento_asiakas_aktivointi)) {
-    $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
+  // HUOM! Vaatii Magenton customointia
+  if (empty($magento_asiakas_aktivointi)) {
+    $magento_asiakas_aktivointi = false;
   }
 
   // Aktivoidaanko asiakaskohtaiset tuotehinnat
-  //   HUOM! Vaatii Magenton customointia
-  if (isset($magento_asiakaskohtaiset_tuotehinnat) and !empty($magento_asiakaskohtaiset_tuotehinnat)) {
-    $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
+  // HUOM! Vaatii Magenton customointia
+  if (empty($magento_asiakaskohtaiset_tuotehinnat)) {
+    $magento_asiakaskohtaiset_tuotehinnat = false;
   }
 
   // Poistetaanko/yliajetaanko Magenton default-tuoteparametrejä
-  if (isset($magento_poista_defaultit) and !empty($magento_poista_defaultit)) {
-    $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
+  if (empty($magento_poista_defaultit)) {
+    $magento_poista_defaultit = array();
   }
 
   // Poistetaanko/yliajetaanko Magenton default-asiakasparametrejä
-  if (isset($magento_poista_asiakasdefaultit) and !empty($magento_poista_asiakasdefaultit)) {
-    $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
+  if (empty($magento_poista_asiakasdefaultit)) {
+    $magento_poista_asiakasdefaultit = array();
   }
 
   // Tuoteparametrit, joita käytetään url_key:nä. url_key generoidaan tuotteen nimityksestä
   // sekä annetuista parametreistä ja niiden arvoista.
-  //
-  // $magento_url_key_attributes = array('vari', 'koko');
-  // => "T-PAITA-vari-BLACK-koko-XL"
-  if (isset($magento_url_key_attributes) and !empty($magento_url_key_attributes)) {
-    $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
+  if (empty($magento_url_key_attributes)) {
+    $magento_url_key_attributes = array(
+      // 'vari',
+      // 'koko',
+    );
+    // => "T-PAITA-vari-BLACK-koko-XL"
+  }
+
+  $time_start = microtime(true);
+
+  $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
+  $magento_client->setTaxClassID($magento_tax_class_id);
+  $magento_client->setParentID($magento_parent_id);
+  $magento_client->setHintakentta($magento_hintakentta);
+  $magento_client->setKategoriat($magento_kategoriat);
+  $magento_client->setCategoryaccesscontrol($categoryaccesscontrol);
+  $magento_client->setConfigurableNimityskentta($magento_configurable_tuote_nimityskentta);
+  $magento_client->setConfigurableLapsituoteNakyvyys($magento_configurable_lapsituote_nakyvyys);
+  $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
+  $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
+  $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
+  $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
+  $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
+  $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
+  $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
+  $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
+  $magento_client->setUrlKeyAttributes($magento_url_key_attributes);
+
+  if ($magento_client->getErrorCount() > 0) {
+    exit;
   }
 
   // lisaa_kategoriat

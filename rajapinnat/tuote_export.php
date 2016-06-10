@@ -88,7 +88,6 @@ $dnsasiakas = array();
 $dnshinnasto = array();
 $dnslajitelma = array();
 $dnsryhma = array();
-$dnstock = array();
 $dnstuoteryhma = array();
 
 $lock_params = array(
@@ -129,68 +128,13 @@ if (in_array('tuotteet', $magento_ajolista)) {
 if (in_array('saldot', $magento_ajolista)) {
   echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
 
-  if ($ajetaanko_kaikki == "NO") {
-    $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
-    $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
-    $muutoslisa3 = "AND tuote.muutospvm     >= '{$datetime_checkpoint}'";
-  }
-  else {
-    $muutoslisa1 = "";
-    $muutoslisa2 = "";
-    $muutoslisa3 = "";
-  }
+  $params = array(
+    "ajetaanko_kaikki"           => $ajetaanko_kaikki,
+    "datetime_checkpoint"        => $datetime_checkpoint,
+    "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
+  );
 
-  // Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
-  $query =  "(SELECT tapahtuma.tuoteno,
-              tuote.eankoodi
-              FROM tapahtuma
-              JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-                AND tuote.tuoteno      = tapahtuma.tuoteno
-                AND tuote.status      != 'P'
-                AND tuote.tuotetyyppi  NOT in ('A','B')
-                AND tuote.tuoteno     != ''
-                AND tuote.nakyvyys    != '')
-              WHERE tapahtuma.yhtio    = '{$kukarow["yhtio"]}'
-              $muutoslisa1)
-
-              UNION
-
-              (SELECT tilausrivi.tuoteno,
-              tuote.eankoodi
-              FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-                AND tuote.tuoteno      = tilausrivi.tuoteno
-                AND tuote.status      != 'P'
-                AND tuote.tuotetyyppi  NOT in ('A','B')
-                AND tuote.tuoteno     != ''
-                AND tuote.nakyvyys    != '')
-              WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}'
-              $muutoslisa2)
-
-              UNION
-
-              (SELECT tuote.tuoteno,
-              tuote.eankoodi
-              FROM tuote
-              WHERE tuote.yhtio        = '{$kukarow["yhtio"]}'
-              AND tuote.status        != 'P'
-              AND tuote.tuotetyyppi    NOT in ('A','B')
-              AND tuote.tuoteno       != ''
-              AND tuote.nakyvyys      != ''
-              $muutoslisa3)
-
-              ORDER BY 1";
-  $result = pupe_query($query);
-
-  while ($row = mysql_fetch_assoc($result)) {
-    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
-
-    $dnstock[] = array(
-      'tuoteno'     => $row["tuoteno"],
-      'ean'         => $row["eankoodi"],
-      'myytavissa'  => $myytavissa,
-    );
-  }
+  $dnstock = tuote_export_hae_saldot($params);
 }
 
 if (in_array('tuoteryhmat', $magento_ajolista)) {

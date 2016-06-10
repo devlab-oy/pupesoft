@@ -99,10 +99,10 @@ cron_log();
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 
-echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
+tuote_export_echo("Aloitetaan tuote-export.");
 
 if (in_array('tuotteet', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
+  tuote_export_echo("Haetaan tuotetiedot.");
 
   $params = array(
     "ajetaanko_kaikki"                     => $ajetaanko_kaikki,
@@ -116,7 +116,7 @@ if (in_array('tuotteet', $magento_ajolista)) {
 
   // Magentoa varten pitää hakea kaikki tuotteet, jotta voidaan poistaa ne jota ei ole olemassa
   if ($verkkokauppatyyppi == 'magento') {
-    echo date("d.m.Y @ G:i:s")." - Haetaan poistettavat tuotteet.\n";
+    tuote_export_echo("Haetaan poistettavat tuotteet.");
 
     $response = tuote_export_hae_poistettavat_tuotteet();
     $kaikki_tuotteet     = $response['kaikki'];
@@ -125,7 +125,7 @@ if (in_array('tuotteet', $magento_ajolista)) {
 }
 
 if (in_array('saldot', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan saldot.\n";
+  tuote_export_echo("Haetaan saldot.");
 
   $params = array(
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
@@ -137,7 +137,7 @@ if (in_array('saldot', $magento_ajolista)) {
 }
 
 if (in_array('tuoteryhmat', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan osastot/tuoteryhmät.\n";
+  tuote_export_echo("Haetaan osastot/tuoteryhmät.");
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
@@ -150,7 +150,7 @@ if (in_array('tuoteryhmat', $magento_ajolista)) {
 }
 
 if (in_array('asiakkaat', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan asiakkaat.\n";
+  tuote_export_echo("Haetaan asiakkaat.");
 
   $params = array(
     "ajetaanko_kaikki"             => $ajetaanko_kaikki,
@@ -162,7 +162,7 @@ if (in_array('asiakkaat', $magento_ajolista)) {
 }
 
 if (in_array('hinnastot', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan hinnastot.\n";
+  tuote_export_echo("Haetaan hinnastot.");
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
@@ -174,7 +174,7 @@ if (in_array('hinnastot', $magento_ajolista)) {
 }
 
 if (in_array('lajitelmatuotteet', $magento_ajolista)) {
-  echo date("d.m.Y @ G:i:s")." - Haetaan tuotteiden variaatiot.\n";
+  tuote_export_echo("Haetaan tuotteiden variaatiot.");
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
@@ -185,7 +185,7 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
   $dnslajitelma = tuote_export_hae_lajitelmatuotteet($params);
 }
 
-echo date("d.m.Y @ G:i:s")." - Aloitetaan päivitys verkkokauppaan.\n";
+tuote_export_echo("Aloitetaan päivitys verkkokauppaan.");
 
 if ($verkkokauppatyyppi == "magento") {
   // Tässä kaikki magentorajapinnan configurointimuuttujat
@@ -315,57 +315,57 @@ if ($verkkokauppatyyppi == "magento") {
 
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään tuotekategoriat\n";
+    tuote_export_echo("Päivitetään tuotekategoriat");
     $count = $magento_client->lisaa_kategoriat($dnstuoteryhma);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count kategoriaa\n";
+    tuote_export_echo("Päivitettiin $count kategoriaa");
   }
 
   // Päivitetaan magento-asiakkaat ja osoitetiedot kauppaan
   if (count($dnsasiakas) > 0 and isset($magento_siirretaan_asiakkaat)) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään asiakkaat\n";
+    tuote_export_echo("Päivitetään asiakkaat");
     $count = $magento_client->lisaa_asiakkaat($dnsasiakas);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count asiakkaan tiedot\n";
+    tuote_export_echo("Päivitettiin $count asiakkaan tiedot");
   }
 
   // Tuotteet (Simple)
   if (count($dnstuote) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään simple tuotteet\n";
+    tuote_export_echo("Päivitetään simple tuotteet");
     $count = $magento_client->lisaa_simple_tuotteet($dnstuote, $individual_tuotteet);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (simple)\n";
+    tuote_export_echo("Päivitettiin $count tuotetta (simple)");
   }
 
   // Tuotteet (Configurable)
   if (count($dnslajitelma) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään configurable tuotteet\n";
+    tuote_export_echo("Päivitetään configurable tuotteet");
     $count = $magento_client->lisaa_configurable_tuotteet($dnslajitelma);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotetta (configurable)\n";
+    tuote_export_echo("Päivitettiin $count tuotetta (configurable)");
   }
 
   // Saldot
   if (count($dnstock) > 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivitetään tuotteiden saldot\n";
+    tuote_export_echo("Päivitetään tuotteiden saldot");
     $count = $magento_client->paivita_saldot($dnstock);
-    echo date("d.m.Y @ G:i:s")." - Päivitettiin $count tuotteen saldot\n";
+    tuote_export_echo("Päivitettiin $count tuotteen saldot");
   }
 
   // Poistetaan tuotteet jota ei ole kaupassa
   if (count($kaikki_tuotteet) > 0 and !isset($magento_esta_tuotepoistot)) {
-    echo date("d.m.Y @ G:i:s")." - Poistetaan ylimääräiset tuotteet\n";
+    tuote_export_echo("Poistetaan ylimääräiset tuotteet");
     // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet, methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
-    echo date("d.m.Y @ G:i:s")." - Poistettiin $count tuotetta\n";
+    tuote_export_echo("Poistettiin $count tuotetta");
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();
 
   if ($tuote_export_error_count != 0) {
-    echo date("d.m.Y @ G:i:s")." - Päivityksessä tapahtui {$tuote_export_error_count} virhettä!\n";
+    tuote_export_echo("Päivityksessä tapahtui {$tuote_export_error_count} virhettä!");
   }
 
   $time_end = microtime(true);
   $time = round($time_end - $time_start);
 
-  echo date("d.m.Y @ G:i:s")." - Tuote-export valmis! (Magento API {$time} sekuntia)\n";
+  tuote_export_echo("Tuote-export valmis! (Magento API {$time} sekuntia)");
 }
 elseif ($verkkokauppatyyppi == "anvia") {
   $ftphost = $anvia_ftphost;

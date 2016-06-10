@@ -956,3 +956,7 @@ function tuote_export_paivita_avainsana($timestamp) {
     echo "Timestamp päivitys epäonnistui!\n";
   }
 }
+
+function tuote_export_echo($string) {
+  echo date("d.m.Y @ G:i:s")." - {$string}\n";
+}

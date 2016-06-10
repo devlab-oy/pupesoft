@@ -84,7 +84,6 @@ $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo
 $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 
 // alustetaan arrayt
-$dnshinnasto = array();
 $dnslajitelma = array();
 
 $lock_params = array(
@@ -160,66 +159,15 @@ if (in_array('asiakkaat', $magento_ajolista)) {
 }
 
 if (in_array('hinnastot', $magento_ajolista)) {
-
   echo date("d.m.Y @ G:i:s")." - Haetaan hinnastot.\n";
 
-  if ($ajetaanko_kaikki == "NO") {
-    $muutoslisa = "AND hinnasto.muutospvm >= '{$datetime_checkpoint}'";
-  }
-  else {
-    $muutoslisa = "";
-  }
+  $params = array(
+    "ajetaanko_kaikki"    => $ajetaanko_kaikki,
+    "datetime_checkpoint" => $datetime_checkpoint,
+    "verkkokauppatyyppi"  => $verkkokauppatyyppi,
+  );
 
-  // Haetaan kaikki hinnastot ja alv
-  $query = "SELECT hinnasto.tuoteno,
-            hinnasto.selite,
-            hinnasto.alkupvm,
-            hinnasto.loppupvm,
-            hinnasto.hinta,
-            tuote.alv
-            FROM hinnasto
-            JOIN tuote on (tuote.yhtio = hinnasto.yhtio
-              AND tuote.tuoteno      = hinnasto.tuoteno
-              AND tuote.status      != 'P'
-              AND tuote.tuotetyyppi  NOT in ('A','B')
-              AND tuote.tuoteno     != ''
-              AND tuote.nakyvyys    != '')
-            WHERE hinnasto.yhtio     = '{$kukarow["yhtio"]}'
-            AND (hinnasto.minkpl     = 0 AND hinnasto.maxkpl = 0)
-            AND hinnasto.laji       != 'O'
-            AND hinnasto.maa         IN ('FI', '')
-            AND hinnasto.valkoodi    in ('EUR', '')
-            $muutoslisa";
-  $res = pupe_query($query);
-
-  // Tehdään hinnastot läpi
-  while ($row = mysql_fetch_array($res)) {
-
-    // Jos yhtiön hinnat eivät sisällä alv:tä
-    if ($yhtiorow["alv_kasittely"] != "") {
-
-      // Anviassa myyntihintaan verot päälle
-      if ($verkkokauppatyyppi == 'anvia') {
-        $hinta          = hintapyoristys($row["hinta"] * (1+($row["alv"]/100)));
-      }
-      else {
-        $hinta          = $row["hinta"];
-      }
-      $hinta_veroton    = $row["hinta"];
-    }
-    else {
-      $hinta            = $row["hinta"];
-      $hinta_veroton    = hintapyoristys($row["hinta"] / (1+($row["alv"]/100)));
-    }
-
-    $dnshinnasto[] = array(  'tuoteno'        => $row["tuoteno"],
-      'selite'        => $row["selite"],
-      'alkupvm'        => $row["alkupvm"],
-      'loppupvm'        => $row["loppupvm"],
-      'hinta'          => $hinta,
-      'hinta_veroton'      => $hinta_veroton,
-    );
-  }
+  $dnshinnasto = tuote_export_hae_hinnastot($params);
 }
 
 if (in_array('lajitelmatuotteet', $magento_ajolista)) {

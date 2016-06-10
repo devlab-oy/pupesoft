@@ -722,3 +722,219 @@ function tuote_export_hae_hinnastot($params) {
 
   return $dnshinnasto;
 }
+
+function tuote_export_hae_lajitelmatuotteet($params) {
+  global $kukarow, $yhtiorow;
+
+  $ajetaanko_kaikki    = $params['ajetaanko_kaikki'];
+  $datetime_checkpoint = $params['datetime_checkpoint'];
+  $verkkokauppatyyppi  = $params['verkkokauppatyyppi'];
+
+  $dnslajitelma = array();
+
+  // Magentoon vain tuotteet joiden näkyvyys != ''
+  $nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
+
+  // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
+  $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
+            FROM tuotteen_avainsanat
+            JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
+            AND tuote.tuoteno                = tuotteen_avainsanat.tuoteno
+            AND tuote.status                != 'P'
+            AND tuote.tuotetyyppi            NOT IN ('A','B')
+            AND tuote.tuoteno               != ''
+            $nakyvyys_lisa)
+            WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
+            AND trim(tuotteen_avainsanat.selite) != ''";
+  $resselite = pupe_query($query);
+
+  if ($ajetaanko_kaikki == "NO") {
+    $muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+              OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
+              OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
+              OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
+              OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
+  }
+  else {
+    $muutoslisa = "";
+  }
+
+  // loopataan variaatio-nimitykset
+  while ($rowselite = mysql_fetch_assoc($resselite)) {
+    // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
+    $aliselect = "SELECT
+                  tuote.*,
+                  tuotteen_avainsanat.tuoteno,
+                  tuotteen_avainsanat.jarjestys,
+                  ta_nimitys_se.selite nimi_swe,
+                  ta_nimitys_en.selite nimi_eng,
+                  tuote.mallitarkenne campaign_code,
+                  tuote.malli target,
+                  tuote.leimahduspiste onsale,
+                  try_fi.selitetark try_nimi
+                  FROM tuotteen_avainsanat
+                  JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
+                    AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
+                    AND tuote.status              != 'P'
+                    AND tuote.tuotetyyppi          NOT in ('A','B')
+                    AND tuote.tuoteno             != ''
+                    $nakyvyys_lisa)
+                  LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+                    and try_fi.selite              = tuote.try
+                    and try_fi.laji                = 'try'
+                    and try_fi.kieli               = 'fi')
+                  LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio
+                    and tuote.tuoteno              = ta_nimitys_se.tuoteno
+                    and ta_nimitys_se.laji         = 'nimitys'
+                    and ta_nimitys_se.kieli        = 'se')
+                  LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio
+                    and tuote.tuoteno              = ta_nimitys_en.tuoteno
+                    and ta_nimitys_en.laji         = 'nimitys'
+                    and ta_nimitys_en.kieli        = 'en')
+                  WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+                  AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
+                  {$muutoslisa}
+                  ORDER BY tuote.tuoteno";
+    $alires = pupe_query($aliselect);
+
+    while ($alirow = mysql_fetch_assoc($alires)) {
+      // Haetaan kaikki tuotteen atribuutit
+      $alinselect = "SELECT
+                     tuotteen_avainsanat.selite,
+                     avainsana.selitetark,
+                     avainsana.selite option_name
+                     FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
+                     JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
+                       AND avainsana.laji             = 'PARAMETRI'
+                       AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                     WHERE tuotteen_avainsanat.yhtio ='{$kukarow['yhtio']}'
+                     AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                     AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                     AND tuotteen_avainsanat.laji     like 'parametri_%'
+                     AND tuotteen_avainsanat.tuoteno  = '{$alirow['tuoteno']}'
+                     AND tuotteen_avainsanat.kieli    = 'fi'
+                     ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
+      $alinres = pupe_query($alinselect);
+      $properties = array();
+
+      while ($syvinrow = mysql_fetch_assoc($alinres)) {
+        $properties[] = array(
+          "nimi"        => $syvinrow["selitetark"],
+          "option_name" => $syvinrow["option_name"],
+          "arvo"        => $syvinrow["selite"],
+        );
+      }
+
+      // Jos yhtiön hinnat eivät sisällä alv:tä
+      if ($yhtiorow["alv_kasittely"] != "") {
+
+        // Anviassa myyntihintaan verot päälle
+        if ($verkkokauppatyyppi == 'anvia') {
+          $myyntihinta = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
+        }
+        else {
+          $myyntihinta = $alirow["myyntihinta"];
+        }
+
+        $myyntihinta_veroton = $alirow["myyntihinta"];
+      }
+      else {
+        $myyntihinta = $alirow["myyntihinta"];
+        $myyntihinta_veroton = hintapyoristys($row["myyntihinta"] / (1+($alirow["alv"]/100)));
+      }
+
+      $myymalahinta = $alirow["myymalahinta"];
+      $myymalahinta_veroton = hintapyoristys($alirow["myymalahinta"] / (1+($alirow["alv"]/100)));
+
+      // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
+      $query = "SELECT t0.nimi node, t0.lft,
+                tuote.tuoteno,
+                GROUP_CONCAT(t5.nimi SEPARATOR '\n') children,
+                (SELECT GROUP_CONCAT(t6.nimi SEPARATOR '\n')
+                 FROM dynaaminen_puu t6
+                 WHERE t6.lft<t0.lft AND t6.rgt>t0.rgt
+                 AND t6.laji      = 'tuote'
+                 ORDER BY t6.lft) ancestors
+                FROM dynaaminen_puu t0
+                LEFT JOIN
+                (SELECT *
+                 FROM (SELECT t1.lft node,
+                 MAX(t2.lft) nodeparent
+                 FROM dynaaminen_puu t1
+                 INNER JOIN
+                 dynaaminen_puu t2 ON t1.lft>t2.lft AND t1.rgt<t2.rgt
+                 GROUP BY t1.lft) t3
+                 LEFT JOIN
+                 dynaaminen_puu t4 ON t3.node=t4.lft) t5 ON t0.lft=t5.nodeparent
+                LEFT JOIN puun_alkio ON puun_alkio.puun_tunnus = t0.tunnus AND puun_alkio.yhtio = t0.yhtio
+                 JOIN tuote ON tuote.tuoteno = puun_alkio.liitos AND tuote.yhtio = puun_alkio.yhtio
+                WHERE t0.yhtio ='{$kukarow['yhtio']}'
+                AND t0.laji       = 'tuote'
+                AND tuote.tuoteno = '{$alirow['tuoteno']}'
+                GROUP BY t0.nimi
+                ORDER BY t0.lft";
+      $result_tp = pupe_query($query);
+
+      $tuotepuun_nodet = array();
+
+      while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
+        $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n", $tuotepuurow['ancestors']);
+        $breadcrumbs[] = $tuotepuurow['node'];
+
+        if (count($breadcrumbs) > 1) {
+          array_shift($breadcrumbs);
+        }
+
+        $tuotepuun_nodet[] = $breadcrumbs;
+      }
+
+      // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
+      $query = "SELECT *
+                FROM hinnasto
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$alirow['tuoteno']}'
+                  AND maa     = '{$yhtiorow['maa']}'
+                  AND laji    = ''
+                  AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+                LIMIT 1";
+      $hinnastoq = pupe_query($query);
+      $hinnastoresult = mysql_fetch_assoc($hinnastoq);
+
+      // Nollataan tämä jos query lyö tyhjää, muuten vanhentunut tarjoushinta ei ylikirjoitu magentossa
+      if (!isset($hinnastoresult['hinta'])) $hinnastoresult['hinta'] = '';
+
+      $dnslajitelma[$rowselite["selite"]][] = array(
+        'tuoteno'               => $alirow["tuoteno"],
+        'tunnus'                => $alirow["tunnus"],
+        'nimitys'               => $alirow["nimitys"],
+        'kuvaus'                => $alirow["kuvaus"],
+        'lyhytkuvaus'           => $alirow["lyhytkuvaus"],
+        'tuotemassa'            => $alirow["tuotemassa"],
+        'nakyvyys'              => $alirow["nakyvyys"],
+        'try_nimi'              => $alirow["try_nimi"],
+        'nimi_swe'              => $alirow["nimi_swe"],
+        'nimi_eng'              => $alirow["nimi_eng"],
+        'campaign_code'         => $alirow["campaign_code"],
+        'target'                => $alirow["target"],
+        'onsale'                => $alirow["onsale"],
+        'jarjestys'             => $alirow["jarjestys"],
+        'myyntihinta'           => $myyntihinta,
+        'myyntihinta_veroton'   => $myyntihinta_veroton,
+        'myymalahinta'          => $myymalahinta,
+        'myymalahinta_veroton'  => $myymalahinta_veroton,
+        'hinnastohinta'         => $hinnastoresult['hinta'],
+        'kuluprosentti'         => $alirow['kuluprosentti'],
+        'ean'                   => $alirow["eankoodi"],
+        'muuta'                 => $alirow['muuta'],
+        'tuotemerkki'           => $alirow['tuotemerkki'],
+        'parametrit'            => $properties,
+        'tuotepuun_nodet'       => $tuotepuun_nodet
+      );
+    }
+  }
+
+  return $dnslajitelma;
+}

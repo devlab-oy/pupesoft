@@ -2780,7 +2780,7 @@ if (!function_exists("synkronoi")) {
                       where yhtio       = '$kohderow[yhtio]'
                       and abs_pvm       = '$aburow[abs_pvm]'
                       and erapvmkasin   = '$aburow[erapvmkasin]'
-                      and factoring     = '$aburow[factoring]'
+                      and factoring_id  = '$aburow[factoring_id]'
                       and jaksotettu    = '$aburow[jaksotettu]'
                       and jv            = '$aburow[jv]'
                       and kassa_abspvm  = '$aburow[kassa_abspvm]'

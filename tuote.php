@@ -2117,7 +2117,7 @@ if ($tee == 'Z') {
     }
 
     // Varastoon
-    if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P') {
+    if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P' or $tuoterow["ei_saldoa"] == 'o') {
       $tuoterow['ei_varastoida'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {

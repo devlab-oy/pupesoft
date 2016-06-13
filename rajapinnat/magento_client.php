@@ -726,6 +726,11 @@ class MagentoClient {
         'associated_skus'       => $lapsituotteet_array,
       );
 
+      // Asetetaan configurable-tuotteen url_key mikäli parametrit määritelty
+      if (count($this->_magento_url_key_attributes) > 0) {
+        $configurable['url_key'] = utf8_encode($this->sanitize_link_rewrite($nimitys));
+      }
+
       $poista_defaultit = $this->_magento_poistadefaultit;
 
       // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta

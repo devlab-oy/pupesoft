@@ -152,6 +152,11 @@ class MagentoClient {
   private $_magento_poista_tuotteita = false;
 
   /**
+   * Lisätäänkö tuotekuvat
+   */
+  private $magento_lisaa_tuotekuvat = true;
+
+  /**
    * Constructor
    *
    * @param string  $url  SOAP Web service URL
@@ -582,11 +587,13 @@ class MagentoClient {
         }
       }
 
-      // Haetaan tuotekuvat Pupesoftista
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
+      if ($this->magento_lisaa_tuotekuvat) {
+        // Haetaan tuotekuvat Pupesoftista
+        $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
-      // Lisätään kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+        // Lisätään kuvat Magentoon
+        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+      }
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if ($this->_asiakaskohtaiset_tuotehinnat) {
@@ -1966,6 +1973,10 @@ class MagentoClient {
    */
   public function setRemoveProducts($value) {
     $this->_magento_poista_tuotteita = $value;
+  }
+
+  public function set_magento_lisaa_tuotekuvat($value) {
+    $this->magento_lisaa_tuotekuvat = $value;
   }
 
   /**

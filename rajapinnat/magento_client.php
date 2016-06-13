@@ -260,17 +260,15 @@ class MagentoClient {
    * @return int               Lisättyjen tuotteiden määrä
    */
   public function lisaa_simple_tuotteet(array $dnstuote, array $individual_tuotteet) {
-
     $this->log("Lisätään tuotteita (simple)");
 
     $hintakentta = $this->_hintakentta;
-
     $selected_category = $this->_kategoriat;
-
     $verkkokauppatuotteet_erikoisparametrit = $this->_verkkokauppatuotteet_erikoisparametrit;
 
     // Tuote countteri
     $count = 0;
+    $total_count = count($dnstuote);
 
     try {
       // Tarvitaan kategoriat
@@ -308,7 +306,7 @@ class MagentoClient {
       $tuoteryhmanimi   = $tuote['try_nimi'];
 
       // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
-      if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+      if (!empty($tuoteryhmayliajo)) {
         $tuoteryhmanimi = $tuoteryhmayliajo;
       }
 
@@ -327,6 +325,7 @@ class MagentoClient {
           }
         }
       }
+
       // Jos tuote ei oo osa configurable_grouppia, niin niitten kuuluu olla visibleja.
       if (isset($individual_tuotteet[$tuote_clean])) {
         $visibility = self::CATALOG_SEARCH;
@@ -357,7 +356,6 @@ class MagentoClient {
       }
 
       $multi_data = array();
-
       $tuetut_kieliversiot = array();
       $kauppakohtaiset_hinnat = array();
       $kauppakohtaiset_verokannat = array();
@@ -368,27 +366,25 @@ class MagentoClient {
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
-      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
-        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
-          $key = $erikoisparametri['nimi'];
-          // Kieliversiot ja kauppakohtaiset_hinnat sekä kauppakohtaiset_verokannat
-          // poimitaan talteen koska niitä käytetään toisaalla
-          if ($key == 'kieliversiot') {
-            $tuetut_kieliversiot = $erikoisparametri['arvo'];
-            continue;
-          }
-          elseif ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
-            continue;
-          }
-          if ($key == 'kauppakohtaiset_verokannat') {
-            $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
-            continue;
-          }
+      foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+        $key = $erikoisparametri['nimi'];
+        // Kieliversiot ja kauppakohtaiset_hinnat sekä kauppakohtaiset_verokannat
+        // poimitaan talteen koska niitä käytetään toisaalla
+        if ($key == 'kieliversiot') {
+          $tuetut_kieliversiot = $erikoisparametri['arvo'];
+          continue;
+        }
+        elseif ($key == 'kauppakohtaiset_hinnat') {
+          $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
+          continue;
+        }
+        if ($key == 'kauppakohtaiset_verokannat') {
+          $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
+          continue;
+        }
 
-          if (isset($tuote[$erikoisparametri['arvo']])) {
-            $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
-          }
+        if (isset($tuote[$erikoisparametri['arvo']])) {
+          $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
         }
       }
 
@@ -486,7 +482,7 @@ class MagentoClient {
           }
 
           // Ei muuteta tuoteryhmiä jos yliajo on päällä
-          if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+          if (!empty($tuoteryhmayliajo)) {
             $tuote_data['categories'] = $current_categories;
           }
 
@@ -496,8 +492,8 @@ class MagentoClient {
               $tuote_data)
           );
 
-          $this->log("Tuote '{$tuote['tuoteno']}' päivitetty (simple) " . print_r($tuote_data, true));
-
+          $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' päivitetty (simple)");
+          // $this->log(print_r($tuote_data, true));
           // Update tier prices
           /*$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
 
@@ -587,13 +583,11 @@ class MagentoClient {
         }
       }
 
-      if ($this->magento_lisaa_tuotekuvat) {
-        // Haetaan tuotekuvat Pupesoftista
-        $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
+      // Haetaan tuotekuvat Pupesoftista
+      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
-        // Lisätään kuvat Magentoon
-        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-      }
+      // Lisätään kuvat Magentoon
+      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if ($this->_asiakaskohtaiset_tuotehinnat) {
@@ -658,7 +652,7 @@ class MagentoClient {
       $tuoteryhmanimi = $tuotteet[0]['try_nimi'];
 
       // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
-      if (isset($tuoteryhmayliajo) and !empty($tuoteryhmayliajo)) {
+      if (!empty($tuoteryhmayliajo)) {
         $tuoteryhmanimi = $tuoteryhmayliajo;
       }
 
@@ -1431,6 +1425,9 @@ class MagentoClient {
    * @return array          Tiedostonimet
    */
   public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+    if (count($tuotekuvat) == 0 or empty($product_id)) {
+      return;
+    }
 
     $types = array('image', 'small_image', 'thumbnail');
 
@@ -1511,6 +1508,10 @@ class MagentoClient {
    * @return bool   $return     Palauttaa boolean
    */
   public function poista_tuotekuva($product_id, $filename) {
+    // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      return;
+    }
 
     $return = false;
 
@@ -1540,6 +1541,11 @@ class MagentoClient {
    */
   public function hae_tuotekuvat($tunnus) {
     global $kukarow;
+
+    // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      return array();
+    }
 
     // Populoidaan tuotekuvat array
     $tuotekuvat = array();
@@ -2106,10 +2112,8 @@ class MagentoClient {
       // Haetaan tuotteen kuvat Pupesta
       $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
-      if (count($tuotekuvat) > 0 and !empty($product_id)) {
-        // Lisataan tuotteen kuvat Magentoon
-        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-      }
+      // Lisataan tuotteen kuvat Magentoon
+      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
     }
   }
 

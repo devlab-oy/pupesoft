@@ -201,22 +201,22 @@ tuote_export_echo("Aloitetaan p‰ivitys verkkokauppaan.");
 if ($verkkokauppatyyppi == "magento") {
   // T‰ss‰ kaikki magentorajapinnan configurointimuuttujat
 
-  // tax_class_id, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
+  // Verkkokaupan "tax_class_id" tunnus
   if (empty($magento_tax_class_id)) {
     $magento_tax_class_id = 1;
   }
 
-  // Verkkokaupan "root" kategorian tunnus, magenton API ei anna hakea t‰t‰ mist‰‰n. Pit‰‰ k‰yd‰ katsomassa magentosta
+  // Verkkokaupan "root" kategorian tunnus
   if (empty($magento_parent_id)) {
     $magento_parent_id = 1;
   }
 
-  // Verkkokaupanhintakentt‰, joko myyntihinta tai myymalahinta
+  // Verkkokaupan hinta -kentt‰, joko "myyntihinta" tai "myymalahinta"
   if (empty($magento_hintakentta)) {
     $magento_hintakentta = "myyntihinta";
   }
 
-  // K‰ytet‰‰nkˆ tuoteryhmin‰ tuoteryhmi‰(default) vai tuotepuuta
+  // K‰ytet‰‰nkˆ tuoteryhmin‰ "tuoteryhm‰" tai "tuotepuu"
   if (empty($magento_kategoriat)) {
     $magento_kategoriat = "tuoteryhma";
   }
@@ -242,26 +242,29 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_configurable_lapsituote_nakyvyys = "NOT_VISIBLE_INDIVIDUALLY";
   }
 
-  // Asetetaan custom simple-tuotekent‰t jotka eiv‰t tule dynaamisista parametreist‰. Array joka sis‰lt‰‰ jokaiselle erikoisparametrille
-  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'tuotteen_kent‰n_nimi_mist‰_arvo_halutaan') esim. array ('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki')
+  // Custom simple-tuotekent‰t, jotka eiv‰t tule dynaamisista parametreist‰.
   if (empty($verkkokauppatuotteet_erikoisparametrit)) {
-    $verkkokauppatuotteet_erikoisparametrit = array();
+    $verkkokauppatuotteet_erikoisparametrit = array(
+      // array('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki'),
+      // array('nimi' => 'description',  'arvo' => 'lyhytkuvaus'),
+    );
   }
 
-  // Asetetaan custom asiakaskent‰t. Array joka sis‰lt‰‰ jokaiselle erikoisparametrille
-  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'asiakkaan_kent‰n_nimi_mist‰ arvo_halutaan') esim. array ('nimi' => 'lastname', 'arvo' => 'yhenk_sukunimi')
-  // n‰ill‰ arvoilla ylikirjoitetaan asiakkaan tiedot sek‰ laskutus/toimitusosoitetiedot
+  // Custom asiakaskent‰t.
+  // N‰ill‰ arvoilla ylikirjoitetaan asiakkaan tiedot sek‰ laskutus/toimitusosoitetiedot
   if (empty($asiakkaat_erikoisparametrit)) {
-    $asiakkaat_erikoisparametrit = array();
+    $asiakkaat_erikoisparametrit = array(
+      // array('nimi' => 'lastname', 'arvo' => 'yhenk_sukunimi'),
+    );
   }
 
-  // Magentossa k‰sin hallitut kategoriat jotka s‰ilytet‰‰n aina tuotep‰ivityksess‰
+  // Magentossa k‰sin hallitut kategoriatm jotka s‰ilytet‰‰n aina tuotep‰ivityksess‰
   if (empty($magento_sticky_kategoriat)) {
     $magento_sticky_kategoriat = array();
   }
 
-  // Halutaanko est‰‰ tilausten tuplasis‰‰nluku, eli jos tilaushistoriasta lˆytyy k‰sittely
-  // 'processing_pupesoft'-tilassa niin tilausta ei lueta sis‰‰n jos sis‰‰nluvun esto on p‰‰ll‰
+  // Halutaanko est‰‰ tilausten tuplasis‰‰nluku. Jos tilaushistoriasta lˆytyy tilaus
+  // 'processing_pupesoft' -tilassa, niin tilausta ei lueta sis‰‰n, jos sis‰‰nluvun esto on p‰‰ll‰
   if (empty($magento_sisaanluvun_esto)) {
     $magento_sisaanluvun_esto = 'YES';
   }

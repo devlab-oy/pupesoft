@@ -1306,7 +1306,8 @@ if (!function_exists("vapauta_sarjanumerot")) {
           $query = "DELETE FROM sarjanumeroseuranta
                     WHERE yhtio        = '$kukarow[yhtio]'
                     AND tuoteno        = '$srow[tuoteno]'
-                    AND ostorivitunnus = '$srow[tunnus]'";
+                    AND ostorivitunnus = '$srow[tunnus]'
+                    AND myyntirivitunnus = 0";
           pupe_query($query);
         }
         else {

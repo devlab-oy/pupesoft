@@ -58,8 +58,9 @@ if ($verkkokauppatyyppi == "anvia") {
   }
 }
 
+// Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
 if (empty($verkkokauppa_saldo_varasto)) {
-  $verkkokauppa_saldo_varasto = array();
+  $verkkokauppa_saldo_varasto = array(0);
 }
 
 if (!is_array($verkkokauppa_saldo_varasto)) {

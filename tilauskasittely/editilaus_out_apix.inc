@@ -109,6 +109,9 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     $sscc_array = array();
 
+    $rahtikirjarow['kilot'] = $rahtikirjarow['kilot'] / $rahtikirjarow['kollit'];
+    $rahtikirjarow['kuutiot'] = $rahtikirjarow['kuutiot'] / $rahtikirjarow['kollit'];
+
     for (;$rahtikirjarow['kollit'] > 0; $rahtikirjarow['kollit']--) {
 
       if (!empty($rahtikirjarow['sscc_ulkoinen'])) {

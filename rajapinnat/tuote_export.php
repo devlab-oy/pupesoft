@@ -83,6 +83,11 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_salli_tuotepoistot = false;
   }
 
+  // Lisätäänkö tuotekuvat
+  if (empty($magento_lisaa_tuotekuvat)) {
+    $magento_lisaa_tuotekuvat = true;
+  }
+
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
   if (empty($magento_configurable_tuote_nimityskentta)) {
     $magento_configurable_tuote_nimityskentta = "nimitys";
@@ -316,6 +321,7 @@ if ($verkkokauppatyyppi == "magento") {
   $time_start = microtime(true);
 
   $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
+  $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
   $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);

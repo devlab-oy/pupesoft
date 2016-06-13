@@ -784,10 +784,27 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
+    $aikalisa = "";
+
+    // Haetaan uuden otsikon kerayspvm ja toimaika siirrettäville tilausriveille
+    // mikäli EI ole käytössä näiden tietojen käsinsyöttö
+    if ($yhtiorow["splittauskielto"] != 'K') {
+      $ajat_query = "SELECT kerayspvm,
+                     toimaika
+                     FROM lasku
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND tunnus = $valitsetoimitus_vaihdarivi";
+      $ajat = mysql_fetch_assoc(pupe_query($ajat_query));
+
+      $aikalisa = ", kerayspvm = '{$ajat["kerayspvm"]}', toimaika = '{$ajat["toimaika"]}'";
+    }
+
     while ($aburow = mysql_fetch_assoc($result)) {
       // Vaihdetaan rivin otunnus
       $query = "UPDATE tilausrivi
-                SET otunnus = '$valitsetoimitus_vaihdarivi'
+                SET
+                otunnus = '$valitsetoimitus_vaihdarivi'
+                $aikalisa
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and otunnus        = '$edtilausnumero'
                 and tunnus         = '$aburow[tunnus]'

@@ -3857,6 +3857,13 @@ if (isset($jatka)) {
     $ylatila = "";
   }
   else {
+    // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
+    if ($naytetaanko_tarjouksella != 'on' and ($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
+      $toimvv = "0000";
+      $toimkk = "00";
+      $toimpp = "00";
+    }
+
     // Pidetään huolta tilausrivien toimituspäivistä ja kerayspaivasta
     $query = "UPDATE tilausrivi
               SET kerayspvm = '{$kervv}-{$kerkk}-{$kerpp}'

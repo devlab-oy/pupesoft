@@ -125,7 +125,7 @@ function tuote_export_hae_tuotetiedot($params) {
   if ($ajetaanko_kaikki == "NO") {
     $muuttuneet_tuotenumerot = $muuttuneet_tuoteryhmat = '';
 
-    if (!empty($magento_asiakaskohtaiset_tuotehinnat)) {
+    if ($magento_asiakaskohtaiset_tuotehinnat !== false) {
       $muuttuneet_tuotenumerot = tuote_export_hae_hintamuutoksia_sisaltavat_tuotenumerot($datetime_checkpoint);
       $muuttuneet_tuoteryhmat = tuote_export_hae_hintamuutoksia_sisaltavat_tuoteryhmat($datetime_checkpoint);
     }
@@ -195,7 +195,7 @@ function tuote_export_hae_tuotetiedot($params) {
 
     $asiakashinnat = array();
 
-    if (isset($tuotteiden_asiakashinnat_magentoon)) {
+    if ($tuotteiden_asiakashinnat_magentoon !== false) {
       $query = "SELECT
                 avainsana.selitetark AS asiakasryhma,
                 asiakashinta.tuoteno,

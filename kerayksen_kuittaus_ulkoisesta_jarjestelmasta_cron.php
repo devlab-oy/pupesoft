@@ -301,15 +301,15 @@ while (false !== ($file = readdir($handle))) {
 
       // Tulostetaan lähete
       $params = array(
-        'laskurow'          => $laskurow,
-        'sellahetetyyppi'       => "",
-        'extranet_tilausvahvistus'   => "",
+        'laskurow'                 => $laskurow,
+        'sellahetetyyppi'          => "",
+        'extranet_tilausvahvistus' => "",
         'naytetaanko_rivihinta'    => "",
-        'tee'            => "",
-        'toim'            => "",
-        'komento'           => "asiakasemail{$avainsanarow['selite']}",
-        'lahetekpl'          => "",
-        'kieli'           => ""
+        'tee'                      => "",
+        'toim'                     => "",
+        'komento'                  => "asiakasemail{$avainsanarow['selite']}",
+        'lahetekpl'                => "",
+        'kieli'                    => ""
       );
 
       pupesoft_tulosta_lahete($params);
@@ -353,11 +353,11 @@ while (false !== ($file = readdir($handle))) {
     }
 
     $params = array(
-      'to' => $error_email,
-      'cc' => '',
+      'to'      => $error_email,
+      'cc'      => '',
       'subject' => t("Posten keräyspoikkeama")." - {$otunnus}",
-      'ctype' => 'html',
-      'body' => $body,
+      'ctype'   => 'html',
+      'body'    => $body,
     );
 
     pupesoft_sahkoposti($params);

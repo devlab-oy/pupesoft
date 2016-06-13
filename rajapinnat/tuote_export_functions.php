@@ -559,7 +559,7 @@ function tuote_export_hae_asiakkaat($params) {
 
   $asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
 
-  if ($verkkokauppatyyppi == "magento")) {
+  if ($verkkokauppatyyppi == "magento") {
     $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
                            yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
                            yhteyshenkilo.tunnus yhenk_tunnus,

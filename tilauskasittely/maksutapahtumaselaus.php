@@ -161,11 +161,11 @@ function hae_tilaukset($rajaus) {
 function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   global $yhtiorow, $kukarow, $palvelin2;
 
-
   $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
       $kukarow["maksupaate_kassamyynti"] == "") or
     $kukarow["maksupaate_kassamyynti"] == "K");
 
+  $kateisvaihto = tarkista_oikeus("eikateinen.php", "KATEISESTAKATEINEN");
 
   $totcol =  13;
 
@@ -221,7 +221,16 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
       "rajaus[limit]={$rajaus["limit"]}";
 
     echo "<tr>";
-    echo "<td class='text-right'>{$tilaus["laskunro"]}</td>";
+    echo "<td class='text-right'><a name='{$tilaus["laskunro"]}'>";
+
+    if ($kateisvaihto) {
+      echo "<a href='{$palvelin2}myyntires/eikateinen.php?toim=KATEISESTAKATEINEN&laskuno={$tilaus["laskunro"]}&lopetus=$lopetus///{$tilaus["laskunro"]}'>{$tilaus["laskunro"]}</a>";
+    }
+    else {
+      echo "{$tilaus["laskunro"]}";
+    }
+
+    echo "</td>";
     echo "<td class='text-right'>{$tilaus["tunnus"]}</td>";
     echo "<td>{$tilaus["asiakas"]}</td>";
     echo "<td class='text-right'>{$tilaus["asiakasnro"]}</td>";
@@ -243,7 +252,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
       echo "<input type='hidden' name='rajaus[limit]' value='{$rajaus["limit"]}'>";
       echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
       echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
-      echo "<input type='submit' value='" . t("Kuittikopio") . "'>";
+      echo "<input type='submit' style='min-width: 0px;' value='" . t("Kuittikopio") . "'>";
       echo "</form>";
       echo "</td>";
     }
@@ -260,7 +269,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
       echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
       echo "<input type='hidden' name='tilaus[toiminto]' value='pdf_kuitti_ruudulle'>";
       echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
-      echo "<input type='submit' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tilaus["laskunro"]}', '', 500); return false;\" value='" . t("Kuittikopio") . "'>";
+      echo "<input type='submit' style='min-width: 0px;' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tilaus["laskunro"]}', '', 500); return false;\" value='" . t("Kuittikopio") . "'>";
       echo "</form>";
       echo "</td>";
     }
@@ -270,7 +279,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<input type='hidden' name='tee' value='NAYTA'>";
     echo "<input type='hidden' name='toim' value='MYYNTI'>";
     echo "<input type='hidden' name='tunnus' value='{$tilaus["tunnus"]}'>";
-    echo "<input type='submit' onClick=\"js_openFormInNewWindow('asiakkaantilaus_{$tilaus["laskunro"]}', '', 900); return false;\" value='" . t("Näytä tilaus") . "'>";
+    echo "<input type='submit' style='min-width: 0px;' onClick=\"js_openFormInNewWindow('asiakkaantilaus_{$tilaus["laskunro"]}', '', 900); return false;\" value='" . t("Näytä") . "'>";
     echo "</form>";
     echo "</td>";
 
@@ -280,7 +289,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<input type='hidden' name='monistettavat[{$tilaus["myyntilaskun_tunnus"]}]' value='HYVITA'>";
     echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
     echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-    echo "<input type='submit' value='" . t("Korjaa kuitti") . "'>";
+    echo "<input type='submit' style='min-width: 0px;' value='" . t("Korjaa") . "'>";
     echo "</form>";
     echo "</td>";
 
@@ -291,7 +300,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<input type='hidden' name='monistettavat[{$tilaus["myyntilaskun_tunnus"]}]' value='MONISTA'>";
     echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
     echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
-    echo "<input type='submit' value='" . t("Monista kuitti") . "'>";
+    echo "<input type='submit' style='min-width: 0px;' value='" . t("Monista") . "'>";
     echo "</form>";
     echo "</td>";
 

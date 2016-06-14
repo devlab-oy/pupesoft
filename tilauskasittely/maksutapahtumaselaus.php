@@ -221,7 +221,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
       "rajaus[limit]={$rajaus["limit"]}";
 
     echo "<tr>";
-    echo "<td class='text-right'><a name='{$tilaus["laskunro"]}'>";
+    echo "<td class='text-right'><a name='{$tilaus["laskunro"]}'></a>";
 
     if ($kateisvaihto) {
       echo "<a href='{$palvelin2}myyntires/eikateinen.php?toim=KATEISESTAKATEINEN&laskuno={$tilaus["laskunro"]}&lopetus=$lopetus///{$tilaus["laskunro"]}'>{$tilaus["laskunro"]}</a>";

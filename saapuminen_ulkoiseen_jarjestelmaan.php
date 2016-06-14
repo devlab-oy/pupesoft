@@ -88,6 +88,7 @@ $query = "SELECT *
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tila    = 'K'
           AND alatila = ''
+          AND vanhatunnus = 0
           AND tunnus  = '{$saapumisnro}'";
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
@@ -104,96 +105,81 @@ $header->addChild('MessageType', 'inboundDelivery');
 $header->addChild('Sender', utf8_encode($yhtiorow['nimi']));
 $header->addChild('Receiver', 'LogMaster');
 
-$query = "SELECT DISTINCT otunnus
+$body = $xml->addChild('VendReceiptsList');
+$body->addChild('PurchId', $row['laskunro']);
+$body->addChild('ReceiptsListId', '');
+
+// U = new
+// M = change
+// P = delete
+$body->addChild('OrderCode', $ordercode);
+$body->addChild('OrderType', 'PO');
+$body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
+$body->addChild('DeliveryDate', $row['toimaika']);
+$body->addChild('Warehouse', '');
+
+$query = "SELECT *
+          FROM toimi
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus  = '{$row['liitostunnus']}'";
+$toimires = pupe_query($query);
+$toimirow = mysql_fetch_assoc($toimires);
+
+$vendor = $body->addChild('Vendor');
+$vendor->addChild('VendAccount',  $toimirow['toimittajanro']);
+$vendor->addChild('VendName',     utf8_encode($row['nimi']));
+$vendor->addChild('VendStreet',   utf8_encode($row['osoite']));
+$vendor->addChild('VendPostCode', $row['postino']);
+$vendor->addChild('VendCity',     utf8_encode($row['postitp']));
+$vendor->addChild('VendCountry',  utf8_encode($ow['maa']));
+$vendor->addChild('VendInfo', '');
+
+$purchaser = $body->addChild('Purchaser');
+$purchaser->addChild('PurcAccount',  $yhtiorow['ytunnus']);
+$purchaser->addChild('PurcName',     utf8_encode($yhtiorow['nimi']));
+$purchaser->addChild('PurcStreet',   utf8_encode($yhtiorow['osoite']));
+$purchaser->addChild('PurcPostCode', $yhtiorow['postino']);
+$purchaser->addChild('PurcCity',     utf8_encode($yhtiorow['postitp']));
+$purchaser->addChild('PurcCountry',  utf8_encode($yhtiorow['maa']));
+
+$query = "SELECT *
           FROM tilausrivi
           WHERE yhtio     = '{$kukarow['yhtio']}'
           AND tyyppi      = 'O'
+          AND kpl         = 0
+          AND varattu     > 0
           AND uusiotunnus = '{$saapumisnro}'";
-$otunnukset_res = pupe_query($query);
+$rivit_res = pupe_query($query);
 
+$i = 1;
 $ostotilaukset = array();
 
-while ($otunnukset_row = mysql_fetch_assoc($otunnukset_res)) {
+while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 
-  $ostotilaukset[] = $otunnukset_row['otunnus'];
+  $ostotilaukset[] = $rivit_row['otunnus'];
 
-  $query = "SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila    = 'O'
-            AND tunnus  = '{$otunnukset_row['otunnus']}'";
-  $ostotilaus_res = pupe_query($query);
-  $ostotilaus_row = mysql_fetch_assoc($ostotilaus_res);
+  $lines = $body->addChild('Lines');
 
-  $body = $xml->addChild('VendReceiptsList');
-  $body->addChild('PurchId', $ostotilaus_row['tunnus']);
-  $body->addChild('ReceiptsListId', $row['laskunro']);
+  $line = $lines->addChild('Line');
+  $line->addAttribute('No', $i);
 
-  // U = new
-  // M = change
-  // P = delete
-  $body->addChild('OrderCode', $ordercode);
-  $body->addChild('OrderType', 'PO');
-  $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
-  $body->addChild('DeliveryDate', tv1dateconv($ostotilaus_row['toimaika']));
-  $body->addChild('Warehouse', $ostotilaus_row['varasto']);
+  $line->addChild('TransId',         $rivit_row['tunnus']);
+  $line->addChild('ItemNumber',      utf8_encode($rivit_row['tuoteno']));
+  $line->addChild('OrderedQuantity', $rivit_row['varattu']);
+  $line->addChild('Unit',            utf8_encode($rivit_row['yksikko']));
+  $line->addChild('Price',           $rivit_row['hinta']);
+  $line->addChild('CurrencyCode',    utf8_encode($row['valkoodi']));
+  $line->addChild('RowInfo',         utf8_encode($rivit_row['kommentti']));
 
-  $query = "SELECT *
-            FROM toimi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$ostotilaus_row['liitostunnus']}'";
-  $toimires = pupe_query($query);
-  $toimirow = mysql_fetch_assoc($toimires);
-
-  $vendor = $body->addChild('Vendor');
-  $vendor->addChild('VendAccount',  $toimirow['toimittajanro']);
-  $vendor->addChild('VendName',     utf8_encode($ostotilaus_row['nimi']));
-  $vendor->addChild('VendStreet',   utf8_encode($ostotilaus_row['osoite']));
-  $vendor->addChild('VendPostCode', $ostotilaus_row['postino']);
-  $vendor->addChild('VendCity',     utf8_encode($ostotilaus_row['postitp']));
-  $vendor->addChild('VendCountry',  utf8_encode($ostotilaus_row['maa']));
-  $vendor->addChild('VendInfo', '');
-
-  $purchaser = $body->addChild('Purchaser');
-  $purchaser->addChild('PurcAccount',  $yhtiorow['ytunnus']);
-  $purchaser->addChild('PurcName',     utf8_encode($yhtiorow['nimi']));
-  $purchaser->addChild('PurcStreet',   utf8_encode($yhtiorow['osoite']));
-  $purchaser->addChild('PurcPostCode', $yhtiorow['postino']);
-  $purchaser->addChild('PurcCity',     utf8_encode($yhtiorow['postitp']));
-  $purchaser->addChild('PurcCountry',  utf8_encode($yhtiorow['maa']));
-
-  $query = "SELECT *
-            FROM tilausrivi
-            WHERE yhtio     = '{$kukarow['yhtio']}'
-            AND tyyppi      = 'O'
-            AND otunnus     = '{$otunnukset_row['otunnus']}'
-            AND uusiotunnus = '{$saapumisnro}'";
-  $rivit_res = pupe_query($query);
-
-  $i = 1;
-
-  while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
-
-    $lines = $body->addChild('Lines');
-
-    $line = $lines->addChild('Line');
-    $line->addAttribute('No', $i);
-
-    $line->addChild('TransId',         $rivit_row['tunnus']);
-    $line->addChild('ItemNumber',      utf8_encode($rivit_row['tuoteno']));
-    $line->addChild('OrderedQuantity', $rivit_row['varattu']);
-    $line->addChild('Unit',            utf8_encode($rivit_row['yksikko']));
-    $line->addChild('Price',           $rivit_row['hinta']);
-    $line->addChild('CurrencyCode',    utf8_encode($ostotilaus_row['valkoodi']));
-    $line->addChild('RowInfo',         utf8_encode($rivit_row['kommentti']));
-
-    $i++;
-  }
+  $i++;
 }
 
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
+
+  $ostotilaukset = array_unique($ostotilaukset);
+
   $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 

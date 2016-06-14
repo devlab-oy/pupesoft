@@ -86,8 +86,7 @@ if ($handle = opendir($path)) {
 
       $node = $xml->VendPackingSlip;
 
-      $ostotilaus = (int) $node->PurchId;
-      $saapumisnro = (int) $node->ReceiptsListId;
+      $saapumisnro = (int) $node->PurchId;
 
       $query = "SELECT tunnus
                 FROM lasku
@@ -115,13 +114,14 @@ if ($handle = opendir($path)) {
 
       $tilausrivit = array();
 
-      # Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
-      # koska aineistossa on OIKEAT saapuneet ostotilauksen rivit
+      # Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä aineistossa mukana
+      # Joten laitetaan varastoon = 0
       $query = "UPDATE tilausrivi SET
-                uusiotunnus     = 0
+                varastoon       = 0
                 WHERE yhtio     = '{$yhtio}'
                 AND tyyppi      = 'O'
                 AND kpl         = 0
+                AND varattu    != 0
                 AND uusiotunnus = '{$saapumistunnus}'";
       $updres = pupe_query($query);
 
@@ -149,30 +149,37 @@ if ($handle = opendir($path)) {
         $tuoteno = $data['tuoteno'];
         $kpl     = $data['kpl'];
 
-        # Jos sanomassa on kappaleita ja tiedetään saapuminen
-        # Kohdistetaan tämä rivi saapumiseen
-        # Aiemmin ollaan poistettu kaikki tämän saapumisen kohdistukset
-        if ($kpl != 0 and $saapumistunnus != 0) {
-          $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
-        }
-        else {
-          $uusiotunnuslisa = "";
-        }
-
         # Päivitetään varattu ja kohdistetaan rivi
         $query = "UPDATE tilausrivi SET
-                  varattu         = '{$kpl}'
-                  {$uusiotunnuslisa}
+                  varattu         = '{$kpl}',
+                  varastoon       = 1
                   WHERE yhtio     = '{$yhtio}'
                   AND tyyppi      = 'O'
                   AND kpl         = 0
-                  AND otunnus     = '{$ostotilaus}'
                   AND tuoteno     = '{$tuoteno}'
                   AND tunnus      = '{$rivitunnus}'";
         $updres = pupe_query($query);
       }
 
       if (count($tilausrivit) > 0) {
+
+        pupesoft_log('inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
+
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tila = 'K'
+                  AND tunnus  = '{$saapumistunnus}'";
+        $laskures = pupe_query($query);
+        $laskurow = mysql_fetch_assoc($laskures);
+
+        # Setataan parametrit varastoon.incille
+        $tullaan_automaattikohdistuksesta = true;
+        $toiminto = "kalkyyli";
+        $tee = "varastoon";
+
+        require "tilauskasittely/varastoon.inc";
+
         $query = "UPDATE lasku SET
                   sisviesti3   = 'ok_vie_varastoon'
                   WHERE yhtio  = '{$yhtio}'

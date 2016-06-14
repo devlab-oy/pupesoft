@@ -1268,7 +1268,12 @@ if (!function_exists("vapauta_sarjanumerot")) {
   function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
     global $kukarow, $yhtiorow;
 
-    $query = "SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
+    $query = "SELECT tilausrivi.tyyppi,
+              tilausrivi.tunnus,
+              (tilausrivi.varattu+tilausrivi.jt) varattu,
+              tilausrivi.tuoteno,
+              tuote.sarjanumeroseuranta,
+              tilausrivin_lisatiedot.tilausrivilinkki
               FROM tilausrivi use index (yhtio_otunnus)
               JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
               LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -1296,21 +1301,32 @@ if (!function_exists("vapauta_sarjanumerot")) {
         }
       }
       else {
-        // merkataan myyntirivitunnus nollaks
-        if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
+        if ($srow["tyyppi"] == "W") {
+          // Poistetaan valmistusrivin sarjanumero poiston yhteydessä
           $query = "DELETE FROM sarjanumeroseuranta
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$srow[tuoteno]'
-                    and myyntirivitunnus = '$srow[tunnus]'";
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    AND tuoteno        = '$srow[tuoteno]'
+                    AND ostorivitunnus = '$srow[tunnus]'
+                    AND myyntirivitunnus = 0";
           pupe_query($query);
         }
         else {
-          $query = "UPDATE sarjanumeroseuranta
-                    SET myyntirivitunnus = 0
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$srow[tuoteno]'
-                    and myyntirivitunnus = '$srow[tunnus]'";
-          pupe_query($query);
+          // merkataan myyntirivitunnus nollaks
+          if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
+            $query = "DELETE FROM sarjanumeroseuranta
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and tuoteno          = '$srow[tuoteno]'
+                      and myyntirivitunnus = '$srow[tunnus]'";
+            pupe_query($query);
+          }
+          else {
+            $query = "UPDATE sarjanumeroseuranta
+                      SET myyntirivitunnus = 0
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and tuoteno          = '$srow[tuoteno]'
+                      and myyntirivitunnus = '$srow[tunnus]'";
+            pupe_query($query);
+          }
         }
       }
     }

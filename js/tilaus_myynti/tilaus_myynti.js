@@ -245,6 +245,11 @@ function Vaihda_toimenpide_modal() {
           dialog.dialog("close");
           $('#refresh_form').submit();
         });
+		toimenpiteen_vaihto.error(function(){
+          console.log('jossain meni pieleen');
+          dialog.dialog("close");
+          $('#refresh_form').submit();
+	    });
       },
       Cancel: function() {
         dialog.dialog("close");
@@ -261,7 +266,6 @@ function Vaihda_toimenpide_modal() {
 function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno, uuden_rivin_hinta) {
   return $.ajax({
     async: true,
-    dataType: 'json',
     type: 'POST',
     url: 'tilaus_myynti.php?toim=TYOMAARAYS&no_head=yes&ajax_toiminto=true&action="vaihda_toimenpide"',
     data: {

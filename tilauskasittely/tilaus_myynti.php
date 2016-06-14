@@ -1326,9 +1326,13 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // valmistusriveille var tyhjäksi, että osataan mitätöidä ne seuraavassa updatessa
+  // Valmistusten valmisteriveiltä pitää osata poistaa myös sarjanumerot
   if ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') {
     $query = "UPDATE tilausrivi SET var='' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var='P'";
     $result = pupe_query($query);
+
+    // Poistetaan valmistuksen poistamisen yhteydessä myös valmisteiden sarjanumerot
+    vapauta_sarjanumerot("", $kukarow["kesken"]);
   }
 
   // poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...

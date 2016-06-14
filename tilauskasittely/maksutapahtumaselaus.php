@@ -167,9 +167,9 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
 
   $kateisvaihto = tarkista_oikeus("eikateinen.php", "KATEISESTAKATEINEN");
 
-  $totcol =  13;
+  $totcol = 12;
 
-  pupe_DataTables(array(array($pupe_DataTables, 9, $totcol)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, $totcol)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";
@@ -182,7 +182,6 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   echo "<th>" . t("Aika") . "</th>";
   echo "<th>" . t("Myyjä") . "</th>";
   echo "<th>" . t("Summa") . "</th>";
-  echo "<th>" . t("Astilno") . "</th>";
   echo "<th>" . t("Tilausviite") . "</th>";
   echo "<th class='back'></th>";
   echo "<th class='back'></th>";
@@ -198,7 +197,6 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   echo "<td><input type='text' class='search_field' name='search_aika'></td>";
   echo "<td><input type='text' class='search_field' name='search_myyja'></td>";
   echo "<td><input type='text' class='search_field' name='search_summa'></td>";
-  echo "<td><input type='text' class='search_field' name='search_astilno'></td>";
   echo "<td><input type='text' class='search_field' name='search_tilausviite'></td>";
   echo "<td class='back'></td>";
   echo "<td class='back'></td>";
@@ -237,7 +235,6 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<td>{$tilaus["laskutettu"]}</td>";
     echo "<td>{$tilaus["myyja"]}</td>";
     echo "<td class='text-right'>{$tilaus["summa"]}</td>";
-    echo "<td class='text-right'>{$tilaus["asiakkaan_tilausnumero"]}</td>";
     echo "<td class='text-right'>{$tilaus["viesti"]}</td>";
 
     if ($maksupaate_kassamyynti) {

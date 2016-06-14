@@ -1598,6 +1598,7 @@ if ($tee == "VALMIS"
 
       while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
         echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+        echo "<input type='hidden' name='poikkeava_kpvm' value='' class='poikkeava_kpvm'>";
         echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
         echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
         echo "<input type='hidden' name='mista' value='$mista'>";
@@ -1616,6 +1617,7 @@ if ($tee == "VALMIS"
       }
 
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+      echo "<input type='hidden' name='poikkeava_kpvm' value='' class='poikkeava_kpvm'>";
       echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
       echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
       echo "<input type='hidden' name='mista' value='$mista'>";
@@ -1631,6 +1633,7 @@ if ($tee == "VALMIS"
       echo "</form>";
 
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+      echo "<input type='hidden' name='poikkeava_kpvm' value='' class='poikkeava_kpvm'>";
       echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
       echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
       echo "<input type='hidden' name='mista' value='$mista'>";
@@ -1645,7 +1648,26 @@ if ($tee == "VALMIS"
       echo "<td><input type='submit' value='".t("Ei vielä laskuteta, siirrä tilaus keräykseen")."'></td>";
       echo "</form></tr>";
 
+      if ($kukarow['yhtio'] == "activ") {
+        echo "<tr><th>".t("Poikkeava päivämäärä").":</th><td colspan='2'>";
+        echo "<input type='text' size='3' name='poikkeava_kpvmpp' id='poikkeava_kpvmpp' class='poikkeava_kpvm_syotto'> - ";
+        echo "<input type='text' size='3' name='poikkeava_kpvmkk' id='poikkeava_kpvmkk' class='poikkeava_kpvm_syotto'> - ";
+        echo "<input type='text' size='5' name='poikkeava_kpvmvv' id='poikkeava_kpvmvv' class='poikkeava_kpvm_syotto'> ";
+        echo "(".t("pp-kk-vvvv").")</td></tr>";
+      }
+
       echo "</table>";
+
+      echo "<script type='text/javascript'>
+          $(document).ready(function() {
+           $('input.poikkeava_kpvm_syotto').on('input',function(e){
+            $('input.poikkeava_kpvm').each(function(i) {
+              dateval = $('#poikkeava_kpvmvv').attr('value')+'-'+$('#poikkeava_kpvmkk').attr('value')+'-'+$('#poikkeava_kpvmpp').attr('value');
+              $(this).attr('value', dateval);
+            });
+           });
+         });
+          </script>";
 
       if (@include "inc/footer.inc");
       elseif (@include "footer.inc");
@@ -1661,7 +1683,7 @@ if ($tee == "VALMIS"
   elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
     $query_maksuehto = "SELECT *
                         FROM maksuehto
-                        WHERE yhtio='$kukarow[yhtio]'
+                        WHERE yhtio = '$kukarow[yhtio]'
                          AND kateinen != ''
                          AND kaytossa  = ''
                          AND (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
@@ -2777,7 +2799,7 @@ if ($tee == '') {
       (isset($viesti) and $viesti != $laskurow["viesti"]) or
       (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
-      (isset($myyjanro) and $myyjanro > 0) or
+      (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
       (isset($maksutapa) and $maksutapa != ''))) {
 
@@ -2792,10 +2814,9 @@ if ($tee == '') {
       if (mysql_num_rows($meapu) == 1) {
         $apuro = mysql_fetch_assoc($meapu);
         $myyja = $apuro['tunnus'];
-
         $pika_paiv_myyja = " myyja = '$myyja', ";
       }
-      elseif (mysql_num_rows($meapu)>1) {
+      elseif (mysql_num_rows($meapu) > 1) {
         echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("löytyi usealla käyttäjällä")."!</font><br><br>";
       }
       else {
@@ -2913,7 +2934,7 @@ if ($tee == '') {
                maksuehto       = '$laskurow[maksuehto]'
                WHERE yhtio     = '$kukarow[yhtio]'
                and tunnus      = '$kukarow[kesken]'";
-    $result = pupe_query($query);
+    pupe_query($query);
 
     //Haetaan laskurow uudestaan
     if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
@@ -3895,7 +3916,7 @@ if ($tee == '') {
 
       while ($row = mysql_fetch_assoc($yresult)) {
         $sel = "";
-        if ($laskurow['myyja'] == '' or $laskurow['myyja'] == 0) {
+        if (empty($laskurow['myyja'])) {
           if ($row['nimi'] == $kukarow['nimi']) {
             $sel = 'selected';
           }
@@ -3910,6 +3931,7 @@ if ($tee == '') {
       }
 
       echo "<td>
+              <input type='hidden' name='v_myyjanro' value='$myyjanumero'>
               <input id='myyjanro_id' name='myyjanro' size='8' value='{$myyjanumero}' {$required}
                      {$state}> " . t("tai")." ";
       echo "<select id='myyja_id' name='myyja' {$state}>";

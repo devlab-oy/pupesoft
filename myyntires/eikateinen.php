@@ -31,7 +31,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
   // Haetaan laskun tiedot
   $laskurow = hae_lasku($tunnus);
 
-  if (strtotime($tapahtumapaiva) < strtotime($laskurow['tapvm'])) {
+  if (strtotime($tapahtumapaiva) < strtotime($laskurow['tapvm']) and $toim != 'KATEISESTAKATEINEN') {
     $laskupvmerror = TRUE;
   }
 
@@ -172,7 +172,7 @@ function hae_asiakas($laskurow) {
   $query = "SELECT konserniyhtio
             FROM asiakas
             WHERE yhtio = '{$kukarow['yhtio']}'
-            and tunnus  = '{$laskurow['liitostunnus']}'";
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
   $konsres = pupe_query($query);
 
   return mysql_fetch_assoc($konsres);
@@ -182,18 +182,62 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
   global $kukarow, $yhtiorow;
 
   if ($params['toim'] == 'KATEINEN' or $params['toim'] == 'KATEISESTAKATEINEN') {
+
+    $updlisa = "";
+
+    if ($params['toim'] == "KATEISESTAKATEINEN") {
+      $updlisa = "tapvm = '{$params['tapahtumapaiva']}',";
+
+      $query = "UPDATE lasku set
+                tapvm = '{$params['tapahtumapaiva']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'L'
+                AND alatila = 'X'
+                AND laskunro = {$params['laskurow']['laskunro']}";
+      pupe_query($query);
+
+      $query = "UPDATE tiliointi set
+                tapvm = '{$params['tapahtumapaiva']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND korjattu = ''
+                AND tapvm = '{$params['laskurow']['tapvm']}'
+                AND ltunnus  = '{$params['tunnus']}'";
+      pupe_query($query);
+
+      $query = "SELECT tunnus
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND uusiotunnus  = '{$params['tunnus']}'
+                AND laskutettuaika > 0";
+      $rivires = pupe_query($query);
+
+      while ($rivirow = mysql_fetch_assoc($rivires)) {
+        $query = "UPDATE tilausrivi set
+                  laskutettuaika = '{$params['tapahtumapaiva']}'
+                  WHERE tunnus = {$rivirow['tunnus']}";
+        pupe_query($query);
+
+        $query = "UPDATE tapahtuma set
+                  laadittu = '{$params['tapahtumapaiva']} 23:59:59'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND laji = 'laskutus'
+                  AND rivitunnus = {$rivirow['tunnus']}";
+        pupe_query($query);
+      }
+    }
+
     $query   = "UPDATE lasku set
+                {$updlisa}
                 erpcm       = '{$params['tapahtumapaiva']}',
                 mapvm       = '{$params['tapahtumapaiva']}',
                 maksuehto   = '{$params['maksuehto']}',
                 kassalipas  = '{$params['kassalipas']}',
                 kasumma     = 0
-                where yhtio = '{$kukarow['yhtio']}'
-                and tunnus  = '{$params['tunnus']}'";
-    $result = pupe_query($query);
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$params['tunnus']}'";
+    pupe_query($query);
 
     echo "<font class='message'>".t("Muutettin laskun")." {$params['laskurow']['laskunro']} ".t("maksuehdoksi")." ".t_tunnus_avainsanat($params['mehtorow'], "teksti", "MAKSUEHTOKV")."!</font><br>";
-
   }
   else {
     // korjaillaan eräpäivät ja kassa-alet
@@ -525,8 +569,14 @@ function echo_lasku_table($laskurow, $toim) {
   echo "<tr><th>", t("Maksuehto"), "</th><td>", t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV"), "</td></tr>";
 
   if ($toim == 'KATEINEN' or $toim == 'KATEISESTAKATEINEN') {
-    $now = date('Y-m-d');
-    $now = explode('-' , $now);
+    if ($toim == 'KATEINEN') {
+      $now = date('Y-m-d');
+      $now = explode('-' , $now);
+    }
+    else {
+      $now = explode('-' , $laskurow['tapvm']);
+    }
+
     // haetaan kaikki käteisen maksuehdot
     $query = "SELECT *
               FROM kassalipas

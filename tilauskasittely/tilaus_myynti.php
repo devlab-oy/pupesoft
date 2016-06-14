@@ -914,14 +914,15 @@ if ((int) $kukarow["kesken"] > 0) {
                      ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno)
                    WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                      AND tilausrivi.otunnus = '{$kukarow['kesken']}'
-                     AND tuote.tuotetyyppi = 'K'";
+                     AND tuote.tuotetyyppi = 'K'
+                     AND tilausrivi.var != 'P'";
     $tpideresult = pupe_query($tpidequery);
     $tpiderow = mysql_fetch_assoc($tpideresult);
 
     $laskurow['toimenpidetuotteet_lkm'] = $tpiderow['tuotteita'];
 
     // Jos ollaan poistamassa yksi näistä toimenpideriveistä niin otetaan se huomioon
-    if ($tapa == 'POISTA' and strpos($tpiderow['tunnukset'], $kukarow['kesken']) !== FALSE) {
+    if ($tapa == 'POISTA' and strpos($tpiderow['tunnukset'], $rivitunnus) !== FALSE) {
       $laskurow['toimenpidetuotteet_lkm'] -= 1;
     }
   }
@@ -8310,10 +8311,11 @@ if ($tee == '') {
               //kyseessä JT-rivi tai JT-muiden mukana, joka tulee asiakkaan edellisiltä tilauksilta. Näille riveille halutaan poista nappiin alertti
               $poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
             }
-
             // Näytetään poista nappi laitehuollossa vain silloin kun sen painaminen ei johda virheeseen
             $toimenpide_lkm = isset($laskurow['toimenpidetuotteet_lkm']) ? $laskurow['toimenpidetuotteet_lkm'] : 0;
-            $voiko_poistaa_toimenpiteen = $toimenpide_lkm > 2 ? true : false;
+
+            $voiko_poistaa_toimenpiteen = $toimenpide_lkm >= 2 ? true : false;
+
             if (!$_laite_huolto_ja_muokkaus_lukko and (($tuotetyyppi == 1 and $voiko_poistaa_toimenpiteen) or $tuotetyyppi != 1)) {
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
                   <input type='hidden' name='toim'       value = '$toim'>

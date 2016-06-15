@@ -107,6 +107,11 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_lisaa_tuotekuvat = true;
   }
 
+  // Mitä tuotteen kenttää käytetään simple-tuotteen nimityksessä
+  if (empty($magento_simple_tuote_nimityskentta)) {
+    $magento_simple_tuote_nimityskentta = 'nimitys';
+  }
+
   // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
   if (empty($magento_configurable_tuote_nimityskentta)) {
     $magento_configurable_tuote_nimityskentta = "nimitys";
@@ -372,6 +377,7 @@ if ($verkkokauppatyyppi == "magento") {
   $magento_client->set_magento_fetch_order_status($magento_tilaushaku);
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
   $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
+  $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
   $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);

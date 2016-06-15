@@ -87,6 +87,7 @@ class MagentoClient {
    * Configurable-tuotteella käytettävä nimityskenttä, oletuksena nimitys
    */
   private $_configurable_tuote_nimityskentta = "nimitys";
+  private $magento_simple_tuote_nimityskentta = "nimitys";
 
   /**
    * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
@@ -363,7 +364,9 @@ class MagentoClient {
       $tuetut_kieliversiot = array();
       $kauppakohtaiset_hinnat = array();
       $kauppakohtaiset_verokannat = array();
-      $tuotteen_nimitys = $tuote['nimi'];
+
+      $_key = $this->magento_simple_tuote_nimityskentta;
+      $tuotteen_nimitys = $tuote[$_key];
 
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
@@ -2057,6 +2060,10 @@ class MagentoClient {
 
   public function set_magento_nimitykseen_parametrien_arvot($value) {
     $this->magento_nimitykseen_parametrien_arvot = $value;
+  }
+
+  public function set_magento_simple_tuote_nimityskentta($value) {
+    $this->magento_simple_tuote_nimityskentta = $value;
   }
 
   /**

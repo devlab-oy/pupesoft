@@ -33,7 +33,6 @@ if (empty($magento_api_ht_edi)
   or empty($magento_api_ht_usr)
   or empty($magento_api_ht_pas)
   or empty($ovt_tunnus)
-  or empty($pupesoft_tilaustyyppi)
   or empty($verkkokauppa_asiakasnro)
   or empty($rahtikulu_tuoteno)
   or empty($rahtikulu_nimitys)) {
@@ -43,6 +42,11 @@ if (empty($magento_api_ht_edi)
 // Missä tilassa olevat tilaukset haetaan, default 'Processing'
 if (empty($magento_tilaushaku)) {
   $magento_tilaushaku = 'Processing';
+}
+
+// Pupesoftin tilaustyyppi.
+if (empty($pupesoft_tilaustyyppi)) {
+  $pupesoft_tilaustyyppi = '';
 }
 
 // Magenton soap client

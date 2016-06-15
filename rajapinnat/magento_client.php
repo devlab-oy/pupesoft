@@ -9,6 +9,8 @@
  * Hakee maksettuja tilauksia pupesoftiin.
  */
 
+require_once "rajapinnat/edi.php";
+
 class MagentoClient {
 
   /**
@@ -155,6 +157,9 @@ class MagentoClient {
    * Lisätäänkö tuotekuvat
    */
   private $magento_lisaa_tuotekuvat = true;
+
+  // Missä tilassa olevia tilauksia haetaan
+  private $magento_fetch_order_status = 'Processing';
 
   /**
    * Constructor
@@ -961,6 +966,26 @@ class MagentoClient {
 
     // Palautetaan löydetyt tilaukset
     return $orders;
+  }
+
+  // Hakee kaikki tilaukset Magentosta ja tallentaa ne edi_tilauksiksi
+  public function tallenna_tilaukset() {
+    $status = $this->magento_fetch_order_status;
+
+    // Haetaan tilaukset magentosta
+    try {
+      $tilaukset = $this->hae_tilaukset($status);
+    }
+    catch (Exception $e) {
+      $message = "Tilausten haku epäonnistui";
+      $this->log($message, $e, "order");
+      exit;
+    }
+
+    // Tallennetaan EDI-tilauksina
+    foreach ($tilaukset as $tilaus) {
+      Edi::create($tilaus);
+    }
   }
 
   /**
@@ -2003,6 +2028,10 @@ class MagentoClient {
 
   public function set_magento_lisaa_tuotekuvat($value) {
     $this->magento_lisaa_tuotekuvat = $value;
+  }
+
+  public function set_magento_fetch_order_status($value) {
+    $this->magento_fetch_order_status = $value;
   }
 
   /**

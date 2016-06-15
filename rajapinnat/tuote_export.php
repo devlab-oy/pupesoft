@@ -139,6 +139,11 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_sticky_kategoriat = array();
   }
 
+  // Missä tilassa olevat tilaukset haetaan Magentosta
+  if (empty($magento_tilaushaku)) {
+    $magento_tilaushaku = 'Processing';
+  }
+
   // Halutaanko estää tilausten tuplasisäänluku. Jos tilaushistoriasta löytyy tilaus
   // 'processing_pupesoft' -tilassa, niin tilausta ei lueta sisään, jos sisäänluvun esto on päällä
   if (empty($magento_sisaanluvun_esto)) {
@@ -186,6 +191,37 @@ if ($verkkokauppatyyppi == "magento") {
   // Siirretäänkö asiakashinnta Magentoon
   if (empty($tuotteiden_asiakashinnat_magentoon)) {
     $tuotteiden_asiakashinnat_magentoon = false;
+  }
+
+  // Mihin hakemistoon EDI-tilaukset siirretään
+  if (empty($magento_api_ht_edi)) {
+    $magento_api_ht_edi = '/tmp';
+  }
+
+  // Mille yritykselle tilaukset luetaan Pupesoftissa sisään
+  if (empty($ovt_tunnus)) {
+    $ovt_tunnus = $yhtiorow['ovttunnus'];
+  }
+
+  // Mikä on luodussa EDI-tilauksessa tilaustyyppi
+  if (empty($pupesoft_tilaustyyppi)) {
+    $pupesoft_tilaustyyppi = '';
+  }
+
+  // Mitä tuotetta käytetään rahtikuluna
+  if (empty($rahtikulu_tuoteno)) {
+    $rahtikulu_tuoteno = $yhtiorow['rahti_tuotenumero'];
+  }
+
+  // Mikä nimitys laitetaan rahtikululle Pupesoftin tilaukselle
+  if (empty($rahtikulu_nimitys)) {
+    $rahtikulu_nimitys = 'Lähetyskulut';
+  }
+
+  // Mikä on verkkokauppa -asiakkaan ovttunnus/ytunnus/asiakasnumero Pupesoftissa
+  // Pakollinen tieto
+  if (empty($verkkokauppa_asiakasnro)) {
+    $verkkokauppa_asiakasnro = null;
   }
 }
 
@@ -322,6 +358,7 @@ if ($verkkokauppatyyppi == "magento") {
   $time_start = microtime(true);
 
   $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
+  $magento_client->set_magento_fetch_order_status($magento_tilaushaku);
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
@@ -386,6 +423,11 @@ if ($verkkokauppatyyppi == "magento") {
     tuote_export_echo("Poistetaan ylimääräiset tuotteet");
     $count = $magento_client->poista_poistetut($kaikki_tuotteet, true);
     tuote_export_echo("Poistettiin $count tuotetta");
+  }
+
+  if (in_array('tilaukset', $magento_ajolista)) {
+    tuote_export_echo("Haetaan tilaukset");
+    $magento_client->tallenna_tilaukset();
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();

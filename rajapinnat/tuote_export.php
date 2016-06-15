@@ -156,6 +156,12 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_universal_tuoteryhma = '';
   }
 
+  // Halutaanko perustaa tuotteet aina 'disabled' -tilaan
+  // estää tuoteryhmän yliajo tuotepäivityksessä
+  if (empty($magento_perusta_disabled)) {
+    $magento_perusta_disabled = false;
+  }
+
   // Aktivoidaanko asiakas luonnin yhteydessä Magentoon
   // HUOM! Vaatii Magenton customointia
   if (empty($magento_asiakas_aktivointi)) {
@@ -360,6 +366,7 @@ if ($verkkokauppatyyppi == "magento") {
   $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
   $magento_client->set_magento_fetch_order_status($magento_tilaushaku);
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
+  $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
   $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
   $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);

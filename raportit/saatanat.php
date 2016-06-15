@@ -308,6 +308,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
              and lasku.tapvm   > '0000-00-00'
              and lasku.tila    = 'U'
              and lasku.alatila = 'X'
+             and lasku.jaksotettu >= 0
              {$generoitumuuttuja}
              {$salisa1}
              {$having})
@@ -322,6 +323,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
              and lasku.tapvm   > '0000-00-00'
              and lasku.tila    = 'U'
              and lasku.alatila = 'X'
+             and lasku.jaksotettu >= 0
              {$generoitumuuttuja}
              {$salisa1}
              {$having})";

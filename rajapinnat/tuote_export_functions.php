@@ -451,6 +451,8 @@ function tuote_export_hae_saldot($params) {
       'myytavissa'  => $myytavissa,
     );
   }
+
+  return $dnstock;
 }
 
 function tuote_export_hae_tuoteryhmat($params) {

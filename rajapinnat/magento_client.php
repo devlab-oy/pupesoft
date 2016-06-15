@@ -975,7 +975,9 @@ class MagentoClient {
    */
   public function paivita_saldot(array $dnstock) {
     $this->log("Päivitetään saldot");
+
     $count = 0;
+    $total_count = count($dnstock);
 
     // Loopataan päivitettävät tuotteet läpi (aina simplejä)
     foreach ($dnstock as $tuote) {
@@ -1004,7 +1006,8 @@ class MagentoClient {
             $stock_data
           )
         );
-        $this->log("Päivitetty tuotteen {$product_sku} saldo {$qty}.");
+
+        $this->log("[{$count}/{$total_count}] Päivitetty tuotteen {$product_sku} saldo {$qty}.");
       }
       catch (Exception $e) {
         $this->_error_count++;

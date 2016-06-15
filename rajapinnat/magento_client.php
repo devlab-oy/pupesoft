@@ -296,7 +296,7 @@ class MagentoClient {
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
 
         // Lisätään lapsituotteen nimeen variaatioiden arvot
-        if ($this->$magento_nimitykseen_parametrien_arvot === true) {
+        if ($this->magento_nimitykseen_parametrien_arvot === true) {
           $tuotteen_nimitys .= " - {$parametri['arvo']}";
         }
       }

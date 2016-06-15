@@ -393,7 +393,7 @@ class MagentoClient {
         'name'                  => utf8_encode($tuote['nimi']),
         'description'           => utf8_encode($tuote['kuvaus']),
         'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
-        'weight'                => $tuote['tuotemassa'],
+        'weight'                => $tuote['paino'],
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
@@ -718,7 +718,7 @@ class MagentoClient {
         'onsale'                => utf8_encode($tuotteet[0]['onsale']),
         'target'                => utf8_encode($tuotteet[0]['target']),
         'featured_priority'     => utf8_encode($tuotteet[0]['jarjestys']),
-        'weight'                => $tuotteet[0]['tuotemassa'],
+        'weight'                => $tuotteet[0]['paino'],
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
@@ -2544,7 +2544,7 @@ class MagentoClient {
 
   // debug level logging
   private function debug($string) {
-    if (self::LOGGING === false) {
+    if (self::DEBUG === false) {
       return;
     }
 

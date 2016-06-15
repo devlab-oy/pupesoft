@@ -2645,6 +2645,8 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
     and (int) $kukarow['kesken'] > 0
     and $kaytiin_otsikolla == "NOJOO!"
     and $tee == ''
+    and $laskurow["tila"] == "N"
+    and in_array($laskurow["alatila"], array("", "A"))
   )
 ) {
 

@@ -45,6 +45,20 @@ if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
 
 $ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
 
+if (!empty($argv[4])) {
+  $magento_ajolista = explode(',', $argv[4]);
+}
+elseif (empty($magento_ajolista)) {
+  $magento_ajolista = array(
+    'tuotteet',
+    'lajitelmatuotteet',
+    'tuoteryhmat',
+    'asiakkaat',
+    'hinnastot',
+    'saldot'
+  );
+}
+
 if ($verkkokauppatyyppi == "magento") {
   // Tässä kaikki magentorajapinnan configurointimuuttujat
 
@@ -190,17 +204,6 @@ $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
 
 if (mysql_num_rows($datetime_checkpoint_res) != 1) {
   die("VIRHE: Timestamp ei löydy avainsanoista!\n");
-}
-
-if (empty($magento_ajolista)) {
-  $magento_ajolista = array(
-    'tuotteet',
-    'lajitelmatuotteet',
-    'tuoteryhmat',
-    'asiakkaat',
-    'hinnastot',
-    'saldot'
-  );
 }
 
 $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);

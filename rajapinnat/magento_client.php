@@ -335,7 +335,7 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => $visibility,
         'price'                 => sprintf('%0.2f', $tuote[$hintakentta]),
-        'tax_class_id'          => $this->getTaxClassID(),
+        'tax_class_id'          => $this->_tax_class_id,
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
@@ -659,7 +659,7 @@ class MagentoClient {
         'status'                => self::ENABLED,
         'visibility'            => self::CATALOG_SEARCH, // Configurablet nakyy kaikkialla
         'price'                 => $tuotteet[0][$hintakentta],
-        'tax_class_id'          => $this->getTaxClassID(), // 24%
+        'tax_class_id'          => $this->_tax_class_id,
         'meta_title'            => '',
         'meta_keyword'          => '',
         'meta_description'      => '',
@@ -1557,11 +1557,6 @@ class MagentoClient {
 
   public function set_magento_simple_tuote_nimityskentta($value) {
     $this->magento_simple_tuote_nimityskentta = $value;
-  }
-
-  // Hakee tax_class_id:n
-  private function getTaxClassID() {
-    return $this->_tax_class_id;
   }
 
   // Hakee error_countin:n

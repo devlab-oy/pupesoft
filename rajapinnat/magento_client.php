@@ -20,6 +20,7 @@ class MagentoClient {
    * Logging päällä/pois
    */
   const LOGGING = true;
+  const DEBUG = false;
 
   /**
    * Visibility
@@ -416,10 +417,8 @@ class MagentoClient {
 
       // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
       // tai jos ne halutaan korvata additional_attributesin mukana
-      if (count($poista_defaultit) > 0) {
-        foreach ($poista_defaultit as $poistettava_key) {
-          unset($tuote_data[$poistettava_key]);
-        }
+      foreach ($poista_defaultit as $poistettava_key) {
+        unset($tuote_data[$poistettava_key]);
       }
 
       // Lisätään tai päivitetään tuote
@@ -438,7 +437,7 @@ class MagentoClient {
           );
 
           $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' lisätty (simple)");
-          // $this->log(print_r($tuote_data, true));
+          $this->debug(print_r($tuote_data, true));
 
           // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
           $stock_data = array(
@@ -493,7 +492,8 @@ class MagentoClient {
           );
 
           $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' päivitetty (simple)");
-          // $this->log(print_r($tuote_data, true));
+          $this->debug(print_r($tuote_data, true));
+
           // Update tier prices
           /*$result = $this->_proxy->call($this->_session, 'product_tier_price.update', array($tuote['tuoteno'], $tuote_ryhmahinta_data));
 
@@ -687,25 +687,23 @@ class MagentoClient {
       $kauppakohtaiset_verokannat = array();
 
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
-      if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
-        foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
-          $key = $erikoisparametri['nimi'];
+      foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+        $key = $erikoisparametri['nimi'];
 
-          if ($key == 'kieliversiot') continue;
+        if ($key == 'kieliversiot') continue;
 
-          if ($key == 'kauppakohtaiset_hinnat') {
-            $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
-            continue;
-          }
+        if ($key == 'kauppakohtaiset_hinnat') {
+          $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
+          continue;
+        }
 
-          if ($key == 'kauppakohtaiset_verokannat') {
-            $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
-            continue;
-          }
+        if ($key == 'kauppakohtaiset_verokannat') {
+          $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
+          continue;
+        }
 
-          if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
-            $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
-          }
+        if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
+          $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
         }
       }
 
@@ -741,10 +739,8 @@ class MagentoClient {
 
       // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
       // tai jos ne halutaan korvata additional_attributesin mukana
-      if (count($poista_defaultit) > 0) {
-        foreach ($poista_defaultit as $poistettava_key) {
-          unset($configurable[$poistettava_key]);
-        }
+      foreach ($poista_defaultit as $poistettava_key) {
+        unset($configurable[$poistettava_key]);
       }
 
       try {
@@ -2525,13 +2521,11 @@ class MagentoClient {
       $parametrit[$key] = $value;
     }
 
-    if (count($halutut_array) > 0) {
-      foreach ($halutut_array as $key => $value) {
-        if (!empty($parametrit[$value])) {
-          $safe_part1 = $this->sanitize_link_rewrite($value);
-          $safe_part2 = $this->sanitize_link_rewrite($parametrit[$value]);
-          $url_key .= "-{$safe_part1}-{$safe_part2}";
-        }
+    foreach ($halutut_array as $key => $value) {
+      if (!empty($parametrit[$value])) {
+        $safe_part1 = $this->sanitize_link_rewrite($value);
+        $safe_part2 = $this->sanitize_link_rewrite($parametrit[$value]);
+        $url_key .= "-{$safe_part1}-{$safe_part2}";
       }
     }
 
@@ -2544,7 +2538,16 @@ class MagentoClient {
     * @param string  $string
     * @return string
     */
-   private function sanitize_link_rewrite($string) {
-     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
-   }
+  private function sanitize_link_rewrite($string) {
+    return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
+  }
+
+  // debug level logging
+  private function debug($string) {
+    if (self::LOGGING === false) {
+      return;
+    }
+
+    $this->log($string);
+  }
 }

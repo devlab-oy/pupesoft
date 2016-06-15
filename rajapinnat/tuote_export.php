@@ -157,7 +157,6 @@ if ($verkkokauppatyyppi == "magento") {
   }
 
   // Halutaanko perustaa tuotteet aina 'disabled' -tilaan
-  // est‰‰ tuoteryhm‰n yliajo tuotep‰ivityksess‰
   if (empty($magento_perusta_disabled)) {
     $magento_perusta_disabled = false;
   }

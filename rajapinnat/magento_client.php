@@ -9,7 +9,6 @@
  * Hakee maksettuja tilauksia pupesoftiin.
  */
 
-
 class MagentoClient {
 
   /**
@@ -438,7 +437,8 @@ class MagentoClient {
             )
           );
 
-          $this->log("Tuote '{$tuote['tuoteno']}' lis‰tty (simple) " . print_r($tuote_data, true));
+          $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' lis‰tty (simple)");
+          // $this->log(print_r($tuote_data, true));
 
           // Pit‰‰ k‰yd‰ tekem‰ss‰ viel‰ stock.update kutsu, ett‰ saadaan Manage Stock: YES
           $stock_data = array(

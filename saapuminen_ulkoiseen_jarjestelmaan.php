@@ -131,7 +131,7 @@ $vendor->addChild('VendName',     utf8_encode($row['nimi']));
 $vendor->addChild('VendStreet',   utf8_encode($row['osoite']));
 $vendor->addChild('VendPostCode', $row['postino']);
 $vendor->addChild('VendCity',     utf8_encode($row['postitp']));
-$vendor->addChild('VendCountry',  utf8_encode($ow['maa']));
+$vendor->addChild('VendCountry',  utf8_encode($row['maa']));
 $vendor->addChild('VendInfo', '');
 
 $purchaser = $body->addChild('Purchaser');

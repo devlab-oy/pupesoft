@@ -161,6 +161,9 @@ class MagentoClient {
   // Missä tilassa olevia tilauksia haetaan
   private $magento_fetch_order_status = 'Processing';
 
+  // Perusteaanko tuotteet aina 'disabled' -tilassa
+  private $magento_perusta_disabled = false;
+
   /**
    * Constructor
    *
@@ -431,6 +434,10 @@ class MagentoClient {
       // Jos tuotetta ei ole olemassa niin lisätään se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {
         try {
+          // jos halutaan perustaa tuote disabled tilassa, muutetaan status
+          if ($this->magento_perusta_disabled === true) {
+            $tuote_data['status'] = self::DISABLED;
+          }
 
           $product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
             array(
@@ -784,6 +791,11 @@ class MagentoClient {
 
         // Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
         if (!in_array($nimitys, $skus_in_store)) {
+          // jos halutaan perustaa tuote disabled tilassa, muutetaan status
+          if ($this->magento_perusta_disabled === true) {
+            $configurable['status'] = self::DISABLED;
+          }
+
           $product_id = $this->_proxy->call(
             $this->_session,
             'catalog_product.create',
@@ -2032,6 +2044,10 @@ class MagentoClient {
 
   public function set_magento_fetch_order_status($value) {
     $this->magento_fetch_order_status = $value;
+  }
+
+  public function set_magento_perusta_disabled($value) {
+    $this->magento_perusta_disabled = $value;
   }
 
   /**

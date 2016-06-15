@@ -383,6 +383,10 @@ function tuote_export_hae_saldot($params) {
   $datetime_checkpoint        = $params['datetime_checkpoint'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
+  if (!is_array($verkkokauppa_saldo_varasto)) {
+    die("verkkokauppa_saldo_varasto pit‰‰ olla array!");
+  }
+
   $dnstock = array();
 
   if ($ajetaanko_kaikki == "NO") {

@@ -6,157 +6,99 @@
  * tarvittavat tiedot pupesoftista.
  *
  * Lisää tai päivittää kategoriat, tuotteet ja saldot.
- * Hakee maksettuja tilauksia pupesoftiin.
+ * Hakee tilauksia pupesoftiin.
  */
 
 require_once "rajapinnat/edi.php";
 
 class MagentoClient {
 
-  /**
-   * Kutsujen määrä multicall kutsulla
-   */
+  // Kutsujen määrä multicall kutsulla
   const MULTICALL_BATCH_SIZE = 100;
-
-  /**
-   * Logging päällä/pois
-   */
   const LOGGING = true;
   const DEBUG = false;
 
-  /**
-   * Visibility
-   */
+  // Product visibility
   const NOT_VISIBLE_INDIVIDUALLY = 1;
   const CATALOG                  = 2;
   const SEARCH                   = 3;
   const CATALOG_SEARCH           = 4;
 
-  /**
-   * Status
-   */
+  // Product Status
   const ENABLED  = 1;
   const DISABLED = 2;
 
-  /**
-   * Soap client
-   */
+  // Soap client
   private $_proxy;
 
-  /**
-   * Soap clientin sessio
-   */
+  // Soap clientin sessio
   private $_session;
 
-  /**
-   * Magenton oletus attributeSet
-   */
+  // Magenton oletus attributeSet
   private $_attributeSet;
 
-  /**
-   * Tuotekategoriat
-   */
+  // Tuotekategoriat
   private $_category_tree;
 
-  /**
-   * Verkkokaupan veroluokan tunnus
-   */
+  // Verkkokaupan veroluokan tunnus
   private $_tax_class_id = 0;
 
-  /**
-   * Verkkokaupan "root" kategorian tunnus, tämän alle lisätään kaikki tuoteryhmät
-   */
+  // Verkkokaupan "root" kategorian tunnus, tämän alle lisätään kaikki tuoteryhmät
   private $_parent_id = 3;
 
-  /**
-   * Verkkokaupan "hinta"-kenttä, joko myymalahinta tai myyntihinta
-   */
+  // Verkkokaupan "hinta"-kenttä, joko myymalahinta tai myyntihinta
   private $_hintakentta = "myymalahinta";
 
-  /**
-   * Verkkokaupassa käytettävät tuoteryhmät, default tuoteryhmä tai tuotepuu
-   */
+  // Verkkokaupassa käytettävät tuoteryhmät, default tuoteryhmä tai tuotepuu
   private $_kategoriat = "tuoteryhma";
 
-  /**
-   * Onko "Category access control"-moduli on asennettu? Oletukena ei oo.
-   */
-  private $_categoryaccesscontrol = FALSE;
+  // Onko "Category access control"-moduli on asennettu?
+  private $_categoryaccesscontrol = false;
 
-  /**
-   * Configurable-tuotteella käytettävä nimityskenttä, oletuksena nimitys
-   */
+  // Tuotteella käytettävä nimityskenttä
   private $_configurable_tuote_nimityskentta = "nimitys";
   private $magento_simple_tuote_nimityskentta = "nimitys";
 
-  /**
-   * Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa, oletuksena NOT_VISIBLE_INDIVIDUALLY
-   */
+  // Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa
   private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
 
-  /**
-   * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
-   */
+  // Tuotteen erikoisparametrit, jotka tulevat jostain muualta kuin dynaamisista parametreistä
   private $_verkkokauppatuotteet_erikoisparametrit = array();
 
-  /**
-   * Asiakkaan erikoisparametrit joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
-   */
+  // Asiakkaan erikoisparametrit, joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
   private $_asiakkaat_erikoisparametrit = array();
 
-  /**
-   * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
-   */
+  // Magentossa käsin hallitut kategoria id:t, joita ei poisteta tuotteelta tuotepäivityksessä
   private $_sticky_kategoriat = array();
 
-  /**
-   * Estetäänkö tilauksen sisäänluku, jos se on jo kerran merkattu "processing_pupesoft"-tilaan
-   */
+  // Estetäänkö tilauksen sisäänluku, jos se on jo kerran merkattu "processing_pupesoft"-tilaan
   private $_sisaanluvun_esto = "YES";
 
-  /**
-   * Asetetaanko uusille tuotteille aina sama tuoteryhmä ja poistetaan try tuotepäivityksestä
-   */
+  // Asetetaan uusille tuotteille aina sama tämä tuoteryhmä, päivityksessä ei kosketa tuoteryhmiin
   private $_universal_tuoteryhma = "";
 
-  /**
-   * Aktivoidaanko asiakas luonnin yhteydessä Magentoon
-   */
+  // Aktivoidaanko uusi asiakas Magentoon
   private $_asiakkaan_aktivointi = false;
 
-  /**
-   * Siirretäänkö asiakaskohtaiset tuotehinnat Magentoon
-   */
+  // Siirretäänkö asiakaskohtaiset tuotehinnat Magentoon
   private $_asiakaskohtaiset_tuotehinnat = false;
 
-  /**
-   * Magenton default-tuoteparametrien yliajo
-   */
+  // Lista Magenton default-tuoteparametreistä, jota ei ikinä päivitetä
   private $_magento_poistadefaultit = array();
 
-  /**
-   * Magenton default-tuoteparametrien yliajo
-   */
+  // Lista Magenton default-asiakasparametreistä, jota ei ikinä päivitetä
   private $_magento_poista_asiakasdefaultit = array();
 
-  /**
-   * Url-keyn luontia varten käytettävät parametrit
-   */
+  // Url-keyn luontia varten käytettävät parametrit
   private $_magento_url_key_attributes = array();
 
-  /**
-   * Tämän yhteyden aikana sattuneiden virheiden määrä
-   */
+  // Tämän yhteyden aikana sattuneiden virheiden määrä
   private $_error_count = 0;
 
-  /**
-   * Poistetaanko tuotteita oletuksena
-   */
+  // Poistetaanko tuotteita oletuksena
   private $_magento_poista_tuotteita = false;
 
-  /**
-   * Lisätäänkö tuotekuvat
-   */
+  // Käsitelläänkö tuotekuvia magentossa
   private $magento_lisaa_tuotekuvat = true;
 
   // Missä tilassa olevia tilauksia haetaan
@@ -168,13 +110,6 @@ class MagentoClient {
   // Lisätäänkö lapsituotteiden nimeen kaikki variaatioiden arvot
   private $magento_nimitykseen_parametrien_arvot = false;
 
-  /**
-   * Constructor
-   *
-   * @param string  $url  SOAP Web service URL
-   * @param string  $user API User
-   * @param string  $pass API Key
-   */
   function __construct($url, $user, $pass) {
     try {
       $this->_proxy = new SoapClient($url);
@@ -187,19 +122,11 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Destructor
-   */
   function __destruct() {
     $this->log("Päivitysskripti päättyi\n");
   }
 
-  /**
-   * Lisää kaikki tai puuttuvat kategoriat Magento-verkkokauppaan.
-   *
-   * @param array   $dnsryhma Pupesoftin tuote_exportin palauttama array
-   * @return int             Lisättyjen kategorioiden määrä
-   */
+  // Lisää kaikki tai puuttuvat kategoriat Magento-verkkokauppaan.
   public function lisaa_kategoriat(array $dnsryhma) {
     $this->log("Lisätään kategoriat");
 
@@ -263,12 +190,7 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Lisää päivitettyjä Simple tuotteita Magento-verkkokauppaan.
-   *
-   * @param array   $dnstuote Pupesoftin tuote_exportin palauttama tuote array
-   * @return int               Lisättyjen tuotteiden määrä
-   */
+  // lisää Simple -tuotteet Magentoon
   public function lisaa_simple_tuotteet(array $dnstuote, array $individual_tuotteet) {
     $this->log("Lisätään tuotteita (simple)");
 
@@ -620,12 +542,7 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Lisää päivitettyjä Configurable tuotteita Magento-verkkokauppaan.
-   *
-   * @param array   $dnslajitelma Pupesoftin tuote_exportin palauttama tuote array
-   * @return int                 Lisättyjen tuotteiden määrä
-   */
+  // Lisää Configurable -tuotteet Magentoon
   public function lisaa_configurable_tuotteet(array $dnslajitelma) {
     $this->log("Lisätään tuotteet (configurable)");
 
@@ -918,13 +835,8 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Hakee maksetut tilaukset Magentosta ja luo editilaus tiedoston.
-   * Merkkaa haetut tilaukset noudetuksi.
-   *
-   * @param string  $status Haettavien tilausten status, esim 'prorcessing'
-   * @return array       Löydetyt tilaukset
-   */
+  // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
+  // Palauttaa arrayn tilauksista
   public function hae_tilaukset($status = 'processing') {
     $this->log("Haetaan tilauksia", '', $type = 'order');
 
@@ -1008,12 +920,7 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Päivittää tuotteiden saldot
-   *
-   * @param array   $dnstock Pupesoftin tuote_exportin array
-   * @param int     $count
-   */
+  // Päivitetään sadot
   public function paivita_saldot(array $dnstock) {
     $this->log("Päivitetään saldot");
 
@@ -1063,12 +970,7 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Päivittää tuotteiden hinnat
-   *
-   * @param array   $dnshinnasto Tuotteiden päivitety hinnat
-   * @param int     $count       Päivitettyjen tuotteiden määrän
-   */
+  // Päivittää tuotteiden hinnat
   public function paivita_hinnat(array $dnshinnasto) {
     $count = 0;
     $batch_count = 0;
@@ -1101,15 +1003,10 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Poistaa magentosta tuotteita
-   *
-   * @param array   $kaikki_tuotteet Kaikki tuotteet, jotka pitää LÖYTYÄ Magentosta
-   * @return   Poistettujen tuotteiden määrä
-   */
+  // Poistaa magentosta tuotteita
+  // HUOM, tähän passataan aina **KAIKKI** verkkokauppatuotteet.
+  // Methodi katsoo, että kaikki nämä on kaupassa, ja muut paitsi gifcard-tuotteet dellataan!
   public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
-    // HUOM, tähän passataan **KAIKKI** verkkokauppatuotteet,
-    // methodi katsoo että kaikki nämä on kaupassa, muut paitsi gifcard-tuotteet dellataan!
     if ($this->_magento_poista_tuotteita !== true) {
       return 0;
     }
@@ -1145,18 +1042,15 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Poistaa magentosta kategorioita
-   *
-   * @param array   $kaikki_kategoriat Kaikki kategoriat jotka pitää löytyä Magentosta
-   * @return   Poistettujen tuotteiden määrä
-   */
+  // Poistaa magentosta kategorioita
+  // HUOM, tähän passataan aina **KAIKKI** verkkokauppakategoriat.
   public function poista_kategorioita(array $kaikki_kategoriat) {
     // Work in progress, don't use :)
     return;
 
+    // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään
+    $parent_id = $this->_parent_id;
     $count = 0;
-    $parent_id = $this->_parent_id; // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään (pitää katsoa magentosta)
 
     // Haetaan kaikki kategoriat, joiden parent_id on parent id
     $magento_kategoriat = $this->_proxy->call($this->_session, 'catalog_category.level',
@@ -1174,13 +1068,7 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Virhelogi
-   *
-   * @param string  $message   Virheviesti
-   * @param exception $exception Exception
-   * @param string  $type      Kirjataanko tuote vai tilauslogiin
-   */
+  // Tapahtumaloki
   public function log($message, $exception = '', $type = 'product') {
     if (self::LOGGING === false) {
       return;
@@ -1195,282 +1083,7 @@ class MagentoClient {
     pupesoft_log($log_name, $message);
   }
 
-  /// Private functions ///
-
-  /**
-   * Parametrinä tulee yhden tuotteen koko tuotepolku
-   * eli tuotepuun tuoteryhmät järjestyksessä rootista lähtien
-   *
-   * @return syvimmän kategorian id
-   */
-  private function createCategoryTree($ancestors) {
-    $cat_id = $this->_parent_id;
-
-    foreach ($ancestors as $nimi) {
-      $cat_id = $this->createSubCategory($nimi, $cat_id);
-    }
-
-    return $cat_id;
-  }
-
-  /**
-   * Lisää tuotepuun kategorian annettun category_id:n alle
-   * jos sellaista ei ole jo olemassa
-   *
-   * @return luodun tai löydetyn kategorian id
-   */
-  private function createSubCategory($name, $parent_cat_id) {
-    // otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
-    // sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
-    // lopuksi palautetaan id
-    $name = utf8_encode($name);
-    $categoryaccesscontrol = $this->_categoryaccesscontrol;
-    $magento_tree = $this->getCategories();
-    $results = $this->getParentArray($magento_tree, "$parent_cat_id");
-
-    // Etsitään kategoriaa
-    foreach ($results[0]['children'] as $k => $v) {
-      if (strcasecmp($name, $v['name']) == 0) {
-        return $v['category_id'];
-      }
-    }
-
-    // Lisätään kategoria, jos ei löytynyt
-    $category_data = array(
-      'name'                  => $name,
-      'is_active'             => 1,
-      'position'              => 1,
-      'default_sort_by'       => 'position',
-      'available_sort_by'     => 'position',
-      'include_in_menu'       => 1,
-      'is_anchor'             => 1
-    );
-
-    if ($categoryaccesscontrol) {
-      // HUOM: Vain jos "Category access control"-moduli on asennettu
-      $category_data['accesscontrol_show_group'] = 0;
-    }
-
-    // Kutsutaan soap rajapintaa
-    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-      array($parent_cat_id, $category_data)
-    );
-
-    $this->log("Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
-
-    unset($this->_category_tree);
-
-    return $category_id;
-  }
-
-  /**
-   *  Tonkii arraysta key->value pairia ja jos löytyy nii palauttaa sen
-   */
-  private function getParentArray($tree, $parent_cat_id) {
-    //etsitään keytä "category_id" valuella isatunnus ja return sen lapset
-    return search_array_key_for_value_recursive($tree, 'category_id', $parent_cat_id);
-  }
-
-  /**
-   * Hakee oletus attribuuttisetin
-   *
-   * @return AttributeSet
-   */
-  private function getAttributeSet() {
-    if (empty($this->_attributeSet)) {
-      $attributeSets = $this->_proxy->call($this->_session, 'product_attribute_set.list');
-      $this->_attributeSet = current($attributeSets);
-    }
-
-    return $this->_attributeSet;
-  }
-
-  /**
-   * Hakee kaikki attribuutit magentosta
-   *
-   * @return     Kaikki attribuutit
-   */
-  private function getAttributeList() {
-    if (empty($this->_attribute_list)) {
-      $this->_attribute_list = $this->_proxy->call(
-        $this->_session,
-        "product_attribute.list",
-        array($this->_attributeSet['set_id'])
-      );
-    }
-
-    return $this->_attribute_list;
-  }
-
-  /**
-   * Hakee kaikki kategoriat
-   */
-  private function getCategories() {
-    try {
-      if (empty($this->_category_tree)) {
-        // Haetaan kaikki defaulttia suuremmat kategoriat (2)
-        $this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree');
-        //$this->_category_tree = $this->_category_tree['children'][0]; # Skipataan rootti categoria
-      }
-
-      return $this->_category_tree;
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Kategorioiden hakemisessa", $e);
-    }
-  }
-
-  /**
-   * Etsii kategoriaa nimeltä Magenton kategoria puusta.
-   */
-  private function findCategory($name, $root) {
-    $category_id = false;
-
-    foreach ($root as $i => $category) {
-
-      // Jos löytyy tästä tasosta nii palautetaan id
-      if (strcasecmp($name, $category['name']) == 0) {
-
-        // Jos kyseisen kategorian alla on saman niminen kategoria,
-        // palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
-        if (!empty($category['children']) and strcasecmp($category['children'][0]['name'], $name) == 0) {
-          return $category['children'][0]['category_id'];
-        }
-
-        return $category_id = $category['category_id'];
-      }
-
-      // Muuten jatketaan ettimistä
-      $r = $this->findCategory($name, $category['children']);
-
-      if ($r != null) {
-        return $r;
-      }
-    }
-
-    // Mitään ei löytyny
-    return $category_id;
-  }
-
-  // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
-  private function findCustomerGroup($name) {
-    $customer_groups = $this->_proxy->call(
-      $this->_session,
-      'customer_group.list'
-    );
-
-    $id = 0;
-
-    foreach ($customer_groups as $asryhma) {
-      if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
-        $id = $asryhma['customer_group_id'];
-        break;
-      }
-    }
-
-    return $id;
-  }
-
-  /**
-   * Palauttaa attribuutin option id:n
-   *
-   * Esimerkiksi koko, S palauttaa jonkun numeron jolla tuotteen päivityksessä saadaan attribuutti
-   * oikein.
-   *
-   * @param string  $name  Attribuutin nimi, koko tai vari
-   * @param string  $value Atrribuutin arvo, S, M, XL...
-   * @return int             Options_id
-   */
-  private function get_option_id($name, $value) {
-    $name = utf8_encode($name);
-    $value = utf8_encode($value);
-    $attribute_list = $this->getAttributeList();
-    $attribute_id = '';
-
-    // Etsitään halutun attribuutin id
-    foreach ($attribute_list as $attribute) {
-      if (strcasecmp($attribute['code'], $name) == 0) {
-        $attribute_id = $attribute['attribute_id'];
-        $attribute_type = $attribute['type'];
-        break;
-      }
-    }
-
-    // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
-    if (empty($attribute_id)) return 0;
-
-    // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
-    if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
-      return $value;
-    }
-
-    // Haetaan kaikki attribuutin optionssit
-    $options = $this->_proxy->call(
-      $this->_session,
-      "product_attribute.options",
-      array(
-        $attribute_id
-      )
-    );
-
-    // Etitään optionsin value
-    foreach ($options as $option) {
-      if (strcasecmp($option['label'], $value) == 0) {
-        return $option['value'];
-      }
-    }
-
-    // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
-    if ($attribute_type == "select" or $attribute_type == "multiselect") {
-      $optionToAdd = array(
-        "label" => array(
-          array(
-            "store_id" => 0,
-            "value" => $value
-          )
-        ),
-        "is_default" => 0
-      );
-
-      $this->_proxy->call($this->_session,
-        "product_attribute.addOption",
-        array(
-          $attribute_id,
-          $optionToAdd
-        )
-      );
-
-      $this->log("Luotiin uusi attribuutti $value optioid $attribute_id");
-
-      // Haetaan kaikki attribuutin optionssit uudestaan..
-      $options = $this->_proxy->call(
-        $this->_session,
-        "product_attribute.options",
-        array(
-          $attribute_id
-        )
-      );
-
-      // Etitään optionsin value uudestaan..
-      foreach ($options as $option) {
-        if (strcasecmp($option['label'], $value) == 0) {
-          return $option['value'];
-        }
-      }
-    }
-
-    // Mitään ei löytyny
-    return 0;
-  }
-
-  /**
-   * Lisää tuotteen tuotekuvat
-   *
-   * @param string  $product_id Tuotteen tunnus
-   * @param array   $tuotekuvat Tuotteen kuvatiedostot
-   * @return array          Tiedostonimet
-   */
+  // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
   public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
     if (count($tuotekuvat) == 0 or empty($product_id)) {
       return;
@@ -1520,12 +1133,7 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Hakee tuotteen tuotekuvat Magentosta
-   *
-   * @param int     $product_id Tuoteen tunnus (Magento ID)
-   * @return array   $return     Palauttaa arrayn, jossa tuotekuvien filenamet
-   */
+  // Hakee tuotteen tuotekuvat Magentosta
   public function listaa_tuotekuvat($product_id) {
     $pictures = array();
     $return = array();
@@ -1549,12 +1157,7 @@ class MagentoClient {
     return $return;
   }
 
-  /**
-   * Poistaa tuotteen tuotekuvan Magentosta
-   *
-   * @param int     $product_id Tuoteen tunnus (Magento ID)
-   * @return bool   $return     Palauttaa boolean
-   */
+  // Poistaa tuotteen tuotekuvan Magentosta
   public function poista_tuotekuva($product_id, $filename) {
     // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
     if ($this->magento_lisaa_tuotekuvat === false) {
@@ -1586,12 +1189,7 @@ class MagentoClient {
     return $return;
   }
 
-  /**
-   * Hakee tuotteen tuotekuvat Pupesoftista
-   *
-   * @param int     $tunnus Tuoteen tunnus (tuote.tunnus)
-   * @return array   $tuotekuvat   Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
-   */
+  // Hakee tuotteen tuotekuvat Pupesoftista
   public function hae_tuotekuvat($tunnus) {
     global $kukarow;
 
@@ -1636,12 +1234,7 @@ class MagentoClient {
     return $tuotekuvat;
   }
 
-  /**
-   * Lisää päivitettyjä asiakkaita Magento-verkkokauppaan.
-   *
-   * @param array   $dnsasiakas Pupesoftin tuote_exportin palauttama asiakas array
-   * @return int               Lisättyjen asiakkaiden määrä
-   */
+  // Lisää asiakkaita Magento-verkkokauppaan.
   public function lisaa_asiakkaat(array $dnsasiakas) {
     $this->log("Lisätään asiakkaita");
     // Asiakas countteri
@@ -1838,19 +1431,7 @@ class MagentoClient {
     return $count;
   }
 
-  /**
-   * Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
-   *
-   * @param string  $tuotenumero Tuotteen tuotenumero (tuote.tuoteno)
-   * @return array   $kieliversiot_data   Palauttaa arrayn joka on valmiiksi utf8-enkoodattu
-   *
-   * Esim.
-   * $kieliversiot_data['en'] = array(
-   *   'nimitys' => 'ADAPTOR',
-   *   'kuvaus' => 'ADAPTOR circular IP44- 2 components'
-   * );
-   *
-   */
+  // Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
   public function hae_kieliversiot($tuotenumero) {
     global $kukarow;
 
@@ -1884,164 +1465,76 @@ class MagentoClient {
     return $kieliversiot_data;
   }
 
-  /**
-   * Asettaa tax_class_id:n
-   * Oletus 0
-   *
-   * @param int     $tax_clas_id Veroluokan tunnus
-   */
   public function setTaxClassID($tax_class_id) {
     $this->_tax_class_id = $tax_class_id;
   }
 
-  /**
-   * Asettaa parent_id:n
-   * Oletus 3
-   *
-   * @param int     $parent_id Root kategorian tunnus
-   */
   public function setParentID($parent_id) {
     $this->_parent_id = $parent_id;
   }
 
-  /**
-   * Asettaa hinta-kentän
-   * Oletus myymalahinta
-   *
-   * @param string  $hintakentta joko myyntihinta tai myymalahinta
-   */
   public function setHintakentta($hintakentta) {
     $this->_hintakentta = $hintakentta;
   }
 
-  /**
-   * Asettaa _kategoriat-muuttujan, parametri säätelee
-   * perustetaanko magenton tuoteryhmärakenne tuoteryhmien vai tuotepuun pohjalta
-   * Oletus 'tuoteryhma', vaihtoehtoisesti tuotepuu
-   *
-   * @param string  $magento_kategoriat
-   */
   public function setKategoriat($magento_kategoriat) {
     $this->_kategoriat = $magento_kategoriat;
   }
 
-  /**
-   * Asettaa categoryaccesscontrol-muuttujan
-   * Oletus FALSE
-   *
-   * @param string  $categoryaccesscontrol BOOLEAN
-   */
   public function setCategoryaccesscontrol($categoryaccesscontrol) {
     $this->_categoryaccesscontrol = $categoryaccesscontrol;
   }
 
-  /**
-   * Asettaa configurable_nimityskentta-muuttujan
-   * Oletus 'nimitys'
-   *
-   * @param string  $configurable_nimityskentta
-   */
   public function setConfigurableNimityskentta($configurable_tuote_nimityskentta) {
     $this->_configurable_tuote_nimityskentta = $configurable_tuote_nimityskentta;
   }
 
-  /**
-   * Asettaa configurable_lapsituote_nakyvyys-muuttujan
-   * Oletus 'NOT_VISIBLE_INDIVIDUALLY'
-   *
-   * @param string  $configurable_lapsituote_nakyvyys
-   */
   public function setConfigurableLapsituoteNakyvyys($configurable_lapsituote_nakyvyys) {
     $this->_configurable_lapsituote_nakyvyys = $configurable_lapsituote_nakyvyys;
   }
 
-  /**
-   * Asettaa verkkokauppatuotteiden erikoisparametrit
-   *
-   * @param array   $verkkokauppatuotteet_erikoisparametrit
-   */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
   }
 
-  /**
-   * Asettaa verkkokauppa-asiakkaiden erikoisparametrit
-   *
-   * @param array   $asiakkaat_erikoisparametrit
-   */
   public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
     $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;
   }
 
-  /**
-   * Magentossa käsin hallitut kategoriat joita ei poisteta tuotteelta tuotepäivityksessä
-   */
   public function setStickyKategoriat($magento_sticky_kategoriat) {
     $this->_sticky_kategoriat = $magento_sticky_kategoriat;
   }
 
-  /**
-   * Estetäänkö tilauksen sisäänluku jos sitä on jo historian aikana käsitelty tilassa
-   * 'processing_pupesoft' Oletus YES
-   */
   public function setSisaanluvunEsto($sisaanluvun_esto) {
     $this->_sisaanluvun_esto = $sisaanluvun_esto;
   }
 
-  /**
-   * Asetetaanko uudet tuotteet aina samaan kategoriaan
-   * ja estetään tuotepäivityksessä tuoteryhmän päivitys
-   * Oletus tyhja
-   */
   public function setUniversalTuoteryhma($universal_tuoteryhma) {
     $this->_universal_tuoteryhma = $universal_tuoteryhma;
   }
 
-  /**
-   * Aktivoidaanko asiakas luonnin yhteydessä Magentoon
-   * Oletus false
-   */
   public function setAsiakasAktivointi($asiakas_aktivointi) {
     $tila = $asiakas_aktivointi ? $asiakas_aktivointi : false;
     $this->_asiakkaan_aktivointi = $tila;
   }
 
-  /**
-   * Siirretäänkö asiakaskohtaiset tuotehinnat Magentoon
-   * Oletus false
-   */
   public function setAsiakaskohtaisetTuotehinnat($asiakaskohtaiset_tuotehinnat) {
     $tila = $asiakaskohtaiset_tuotehinnat ? $asiakaskohtaiset_tuotehinnat : false;
     $this->_asiakaskohtaiset_tuotehinnat = $tila;
   }
 
-  /**
-   * Poistetaanko/yliajetaanko Magenton default-tuoteparametrejä
-   * Oletus tyhja array
-   */
   public function setPoistaDefaultTuoteparametrit(array $poistettavat) {
     $this->_magento_poistadefaultit = $poistettavat;
   }
 
-  /**
-   * Poistetaanko/yliajetaanko Magenton asiakkaan default-parametrejä
-   * Oletus tyhja array
-   */
   public function setPoistaDefaultAsiakasparametrit(array $poistettavat_asiakasparamit) {
     $this->_magento_poista_asiakasdefaultit = $poistettavat_asiakasparamit;
   }
 
-  /**
-   * Mitä tuotteen parametrejä käytetään url_key:n luomiseen
-   * Oletus tyhja array
-   */
   public function setUrlKeyAttributes(array $url_key_attributes) {
     $this->_magento_url_key_attributes = $url_key_attributes;
   }
 
-  /**
-   * Poistetaanko tuotteita magentosta
-   */
   public function setRemoveProducts($value) {
     $this->_magento_poista_tuotteita = $value;
   }
@@ -2066,31 +1559,18 @@ class MagentoClient {
     $this->magento_simple_tuote_nimityskentta = $value;
   }
 
-  /**
-   * Hakee tax_class_id:n
-   *
-   * @return int   Veroluokan tunnus
-   */
+  // Hakee tax_class_id:n
   private function getTaxClassID() {
     return $this->_tax_class_id;
   }
 
-  /**
-   * Hakee error_countin:n
-   *
-   * @return int  virheiden määrä
-   */
+  // Hakee error_countin:n
   public function getErrorCount() {
     return $this->_error_count;
   }
 
-  /**
-   * Kuittaa asiakkaan aktivoiduksi Magentossa
-   *   HUOM! Vaatii räätälöidyn Magenton
-   *
-   * @param yhtio,  yhteyshenkilön tunnus
-   * @return boolean reply (onnistuiko toiminto)
-   */
+  // Kuittaa asiakkaan aktivoiduksi Magentossa
+  // HUOM! Vaatii räätälöidyn Magenton
   public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
     $reply = false;
 
@@ -2135,13 +1615,8 @@ class MagentoClient {
     return $reply;
   }
 
-  /**
-   * Hakee ja siirtää tuotteen asiakaskohtaiset hinnat Magentoon
-   *   HUOM! Vaatii räätälöidyn Magenton
-   *
-   * @param tuotenumero, magenton tuotenumero
-   * @return true/false
-   */
+  // Hakee ja siirtää tuotteen asiakaskohtaiset hinnat Magentoon
+  // HUOM! Vaatii räätälöidyn Magenton
   public function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
     global $kukarow;
 
@@ -2181,11 +1656,7 @@ class MagentoClient {
     return $reply;
   }
 
-  /**
-   * Hakee ja siirtää tuotteiden kuvat Magentoon
-   *
-   * @param array   tuotteet
-   */
+  // Hakee ja siirtää tuotteiden kuvat Magentoon
   public function lisaa_tuotteiden_kuvat(array $tuotteet) {
     global $kukarow, $yhtiorow;
 
@@ -2205,11 +1676,7 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Hakee verkkokauppatuotteet Pupesta
-   *
-   * @return array(0 => array kaikki_tuotenumerot, 1 => array individual_tuotenumerot)
-   */
+  // Hakee verkkokauppatuotteet Pupesta
   public function hae_kaikki_tuotteet() {
     global $kukarow, $yhtiorow;
 
@@ -2477,12 +1944,7 @@ class MagentoClient {
     return $asiakaskohtaiset_hinnat_data;
   }
 
-  /**
-   * Tarkistaa onko tämä asiakkaan yhteyshenkilö merkattu kuitattavaksi
-   *
-   * @param asiakastunnus, asiakkaan magentotunnus(yhteyshenkilo.ulkoinen_asiakasnumero)
-   * @return true/false
-   */
+  // Tarkistaa onko tämä asiakkaan yhteyshenkilö merkattu kuitattavaksi
   private function aktivoidaankoAsiakas($asiakastunnus, $asiakkaan_magentotunnus) {
     global $kukarow;
 
@@ -2501,12 +1963,7 @@ class MagentoClient {
     return $vastaus;
   }
 
-  /**
-   * Hakee verkkokaupan tuotteet
-   *
-   * @param boolean $only_skus Palauttaa vain tuotenumerot (true)
-   * @return array
-   */
+  // Hakee verkkokaupan tuotteet
   private function getProductList($only_skus = false, $exclude_giftcards = false) {
     try {
       $result = $this->_proxy->call($this->_session, 'catalog_product.list');
@@ -2538,9 +1995,7 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Hakee storen tiedot
-   */
+  // Hakee storen tiedot
   private function getStoreInfo($store_id = 1) {
     try {
       $result = $this->_proxy->call($this->_session, 'store.info', $store_id);
@@ -2553,9 +2008,7 @@ class MagentoClient {
     }
   }
 
-  /**
-   * Verkkokaupan lista luoduista storeista
-   */
+  // Verkkokaupan lista luoduista storeista
   private function getStoreList() {
     try {
       $result = $this->_proxy->call($this->_session, 'store.list');
@@ -2568,9 +2021,7 @@ class MagentoClient {
     }
   }
 
-  /**
-  * Rakentaa url_key:n tuotteelle
-  */
+  // Rakentaa url_key:n tuotteelle
   private function getUrlKeyForProduct($tuotedata) {
     $halutut_array = $this->_magento_url_key_attributes;
     $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
@@ -2593,12 +2044,7 @@ class MagentoClient {
     return utf8_encode($url_key);
   }
 
-  /**
-    * Sanitizes string for magento url_key column
-    *
-    * @param string  $string
-    * @return string
-    */
+  // Sanitizes string for magento url_key column
   private function sanitize_link_rewrite($string) {
     return preg_replace('/[^a-zA-Z0-9_]/', '', $string);
   }
@@ -2610,5 +2056,239 @@ class MagentoClient {
     }
 
     $this->log($string);
+  }
+
+  // Palauttaa syvimmän kategoria id:n annetusta tuotteen koko tuotepolusta
+  private function createCategoryTree($ancestors) {
+    $cat_id = $this->_parent_id;
+
+    foreach ($ancestors as $nimi) {
+      $cat_id = $this->createSubCategory($nimi, $cat_id);
+    }
+
+    return $cat_id;
+  }
+
+  // Lisää tuotepuun kategorian annettun category_id:n alle, jos sellaista ei ole jo olemassa
+  private function createSubCategory($name, $parent_cat_id) {
+    // otetaan koko tuotepuu, valitaan siitä eka solu idn perusteella
+    // sen lapsista etsitään nimeä, jos ei löydy, luodaan viimeisimmän idn alle
+    // lopuksi palautetaan id
+    $name = utf8_encode($name);
+    $categoryaccesscontrol = $this->_categoryaccesscontrol;
+    $magento_tree = $this->getCategories();
+    $results = $this->getParentArray($magento_tree, "$parent_cat_id");
+
+    // Etsitään kategoriaa
+    foreach ($results[0]['children'] as $k => $v) {
+      if (strcasecmp($name, $v['name']) == 0) {
+        return $v['category_id'];
+      }
+    }
+
+    // Lisätään kategoria, jos ei löytynyt
+    $category_data = array(
+      'name'                  => $name,
+      'is_active'             => 1,
+      'position'              => 1,
+      'default_sort_by'       => 'position',
+      'available_sort_by'     => 'position',
+      'include_in_menu'       => 1,
+      'is_anchor'             => 1
+    );
+
+    if ($categoryaccesscontrol) {
+      // HUOM: Vain jos "Category access control"-moduli on asennettu
+      $category_data['accesscontrol_show_group'] = 0;
+    }
+
+    // Kutsutaan soap rajapintaa
+    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
+      array($parent_cat_id, $category_data)
+    );
+
+    $this->log("Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
+
+    unset($this->_category_tree);
+
+    return $category_id;
+  }
+
+  // Etsii arraysta key->value paria, ja jos löytyy niin palauttaa sen
+  private function getParentArray($tree, $parent_cat_id) {
+    //etsitään keytä "category_id" valuella isatunnus ja return sen lapset
+    return search_array_key_for_value_recursive($tree, 'category_id', $parent_cat_id);
+  }
+
+  // Hakee oletus attribuuttisetin Magentosta
+  private function getAttributeSet() {
+    if (empty($this->_attributeSet)) {
+      $attributeSets = $this->_proxy->call($this->_session, 'product_attribute_set.list');
+      $this->_attributeSet = current($attributeSets);
+    }
+
+    return $this->_attributeSet;
+  }
+
+  // Hakee kaikki attribuutit magentosta
+  private function getAttributeList() {
+    if (empty($this->_attribute_list)) {
+      $this->_attribute_list = $this->_proxy->call(
+        $this->_session,
+        "product_attribute.list",
+        array($this->_attributeSet['set_id'])
+      );
+    }
+
+    return $this->_attribute_list;
+  }
+
+  // Hakee kaikki kategoriat
+  private function getCategories() {
+    try {
+      if (empty($this->_category_tree)) {
+        // Haetaan kaikki defaulttia suuremmat kategoriat (2)
+        $this->_category_tree = $this->_proxy->call($this->_session, 'catalog_category.tree');
+        //$this->_category_tree = $this->_category_tree['children'][0]; # Skipataan rootti categoria
+      }
+
+      return $this->_category_tree;
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Kategorioiden hakemisessa", $e);
+    }
+  }
+
+  // Etsii kategoriaa nimeltä Magenton kategoria puusta.
+  private function findCategory($name, $root) {
+    $category_id = false;
+
+    foreach ($root as $i => $category) {
+
+      // Jos löytyy tästä tasosta nii palautetaan id
+      if (strcasecmp($name, $category['name']) == 0) {
+
+        // Jos kyseisen kategorian alla on saman niminen kategoria,
+        // palautetaan sen id nykyisen sijasta (osasto ja try voivat olla saman niminisä).
+        if (!empty($category['children']) and strcasecmp($category['children'][0]['name'], $name) == 0) {
+          return $category['children'][0]['category_id'];
+        }
+
+        return $category_id = $category['category_id'];
+      }
+
+      // Muuten jatketaan ettimistä
+      $r = $this->findCategory($name, $category['children']);
+
+      if ($r != null) {
+        return $r;
+      }
+    }
+
+    // Mitään ei löytyny
+    return $category_id;
+  }
+
+  // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
+  private function findCustomerGroup($name) {
+    $customer_groups = $this->_proxy->call(
+      $this->_session,
+      'customer_group.list'
+    );
+
+    $id = 0;
+
+    foreach ($customer_groups as $asryhma) {
+      if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
+        $id = $asryhma['customer_group_id'];
+        break;
+      }
+    }
+
+    return $id;
+  }
+
+  // Palauttaa attribuutin option id:n annetulle atribuutille ja arvolle
+  private function get_option_id($name, $value) {
+    $name = utf8_encode($name);
+    $value = utf8_encode($value);
+    $attribute_list = $this->getAttributeList();
+    $attribute_id = '';
+
+    // Etsitään halutun attribuutin id
+    foreach ($attribute_list as $attribute) {
+      if (strcasecmp($attribute['code'], $name) == 0) {
+        $attribute_id = $attribute['attribute_id'];
+        $attribute_type = $attribute['type'];
+        break;
+      }
+    }
+
+    // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
+    if (empty($attribute_id)) return 0;
+
+    // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
+    if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
+      return $value;
+    }
+
+    // Haetaan kaikki attribuutin optionssit
+    $options = $this->_proxy->call(
+      $this->_session,
+      "product_attribute.options",
+      array(
+        $attribute_id
+      )
+    );
+
+    // Etitään optionsin value
+    foreach ($options as $option) {
+      if (strcasecmp($option['label'], $value) == 0) {
+        return $option['value'];
+      }
+    }
+
+    // Jos optionssia ei ole mutta tyyppi on select niin luodaan se
+    if ($attribute_type == "select" or $attribute_type == "multiselect") {
+      $optionToAdd = array(
+        "label" => array(
+          array(
+            "store_id" => 0,
+            "value" => $value
+          )
+        ),
+        "is_default" => 0
+      );
+
+      $this->_proxy->call($this->_session,
+        "product_attribute.addOption",
+        array(
+          $attribute_id,
+          $optionToAdd
+        )
+      );
+
+      $this->log("Luotiin uusi attribuutti $value optioid $attribute_id");
+
+      // Haetaan kaikki attribuutin optionssit uudestaan..
+      $options = $this->_proxy->call(
+        $this->_session,
+        "product_attribute.options",
+        array(
+          $attribute_id
+        )
+      );
+
+      // Etitään optionsin value uudestaan..
+      foreach ($options as $option) {
+        if (strcasecmp($option['label'], $value) == 0) {
+          return $option['value'];
+        }
+      }
+    }
+
+    // Mitään ei löytyny
+    return 0;
   }
 }

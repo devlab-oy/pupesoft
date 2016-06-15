@@ -98,7 +98,7 @@ if ($verkkokauppatyyppi == "magento") {
   }
 
   // Lisätäänkö tuotekuvat
-  if (empty($magento_lisaa_tuotekuvat)) {
+  if (!isset($magento_lisaa_tuotekuvat)) {
     $magento_lisaa_tuotekuvat = true;
   }
 

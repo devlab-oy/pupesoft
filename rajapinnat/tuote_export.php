@@ -59,6 +59,11 @@ elseif (empty($magento_ajolista)) {
   );
 }
 
+// Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
+if (empty($verkkokauppa_saldo_varasto)) {
+  $verkkokauppa_saldo_varasto = array(0);
+}
+
 if ($verkkokauppatyyppi == "magento") {
   // T‰ss‰ kaikki magentorajapinnan configurointimuuttujat
 
@@ -185,18 +190,11 @@ if ($verkkokauppatyyppi == "magento") {
 }
 
 if ($verkkokauppatyyppi == "anvia") {
+  // T‰ss‰ kaikki anviarajapinnan configurointimuuttujat
+
   if (empty($anvia_ftphost) or empty($anvia_ftpuser) or empty($anvia_ftppass) or empty($anvia_ftppath)) {
     die("Anvia parametrit puuttuu, p‰ivityst‰ ei voida ajaa.");
   }
-}
-
-// Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
-if (empty($verkkokauppa_saldo_varasto)) {
-  $verkkokauppa_saldo_varasto = array(0);
-}
-
-if (!is_array($verkkokauppa_saldo_varasto)) {
-  die("verkkokauppa_saldo_varasto pit‰‰ olla array!");
 }
 
 // Haetaan timestamp

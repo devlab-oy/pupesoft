@@ -1703,7 +1703,7 @@ if (!function_exists('rivi_lahete')) {
     }
 
     // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
-    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"]);
+    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"], $kieli);
 
     if (!empty($row["kommentti"]) and !empty($saapumisaika)) {
       $row["kommentti"] .= "\n{$saapumisaika}";

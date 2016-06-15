@@ -67,7 +67,7 @@ if (empty($verkkokauppa_saldo_varasto)) {
 if ($verkkokauppatyyppi == "magento") {
   // Tässä kaikki magentorajapinnan configurointimuuttujat
 
-  // Varmistetaan, että kaikki muuttujat on kunnossa
+  // Varmistetaan, että pakolliset muuttujat on asetettu
   if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas)) {
     die("Magento parametrit puuttuu, päivitystä ei voida ajaa.");
   }

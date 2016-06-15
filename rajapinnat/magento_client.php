@@ -96,17 +96,17 @@ class MagentoClient {
   /**
    * Tuotteen erikoisparametrit jotka tulevat jostain muualta kuin dynaamisista parametreistä
    */
-  private $_verkkokauppatuotteet_erikoisparametrit = array ();
+  private $_verkkokauppatuotteet_erikoisparametrit = array();
 
   /**
    * Asiakkaan erikoisparametrit joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
    */
-  private $_asiakkaat_erikoisparametrit = array ();
+  private $_asiakkaat_erikoisparametrit = array();
 
   /**
    * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
    */
-  private $_sticky_kategoriat = array ();
+  private $_sticky_kategoriat = array();
 
   /**
    * Estetäänkö tilauksen sisäänluku, jos se on jo kerran merkattu "processing_pupesoft"-tilaan
@@ -163,6 +163,9 @@ class MagentoClient {
 
   // Perusteaanko tuotteet aina 'disabled' -tilassa
   private $magento_perusta_disabled = false;
+
+  // Lisätäänkö lapsituotteiden nimeen kaikki variaatioiden arvot
+  private $magento_nimitykseen_parametrien_arvot = false;
 
   /**
    * Constructor
@@ -296,7 +299,7 @@ class MagentoClient {
     foreach ($dnstuote as $tuote) {
       $tuote_clean = $tuote['tuoteno'];
 
-      $category_ids = array ();
+      $category_ids = array();
 
       if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
@@ -339,24 +342,20 @@ class MagentoClient {
         $visibility = self::NOT_VISIBLE_INDIVIDUALLY;
       }
 
-      $tuote_ryhmahinta_data = array ();
+      $tuote_ryhmahinta_data = array();
 
-      if (isset($tuote['asiakashinnat']) and count($tuote['asiakashinnat'])> 0) {
-        foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
+      foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
+        $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
+        $asiakashinta = $asiakashintarivi['hinta'];
+        $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
 
-          $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
-          $asiakashinta = $asiakashintarivi['hinta'];
-
-          $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
-
-          if ($asiakasryhma_tunnus != 0) {
-            $tuote_ryhmahinta_data[] = array(
-              'websites' => explode(" ", $tuote['nakyvyys']),
-              'customer_group_id' => $asiakasryhma_tunnus,
-              'qty' => 1,
-              'price' => $asiakashinta
-            );
-          }
+        if ($asiakasryhma_tunnus != 0) {
+          $tuote_ryhmahinta_data[] = array(
+            'customer_group_id' => $asiakasryhma_tunnus,
+            'price'             => $asiakashinta,
+            'qty'               => 1,
+            'websites'          => explode(" ", $tuote['nakyvyys']),
+          );
         }
       }
 
@@ -364,11 +363,17 @@ class MagentoClient {
       $tuetut_kieliversiot = array();
       $kauppakohtaiset_hinnat = array();
       $kauppakohtaiset_verokannat = array();
+      $tuotteen_nimitys = $tuote['nimi'];
 
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
         $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+
+        // Lisätään lapsituotteen nimeen variaatioiden arvot
+        if ($this->$magento_nimitykseen_parametrien_arvot === true) {
+          $tuotteen_nimitys .= " - {$parametri['arvo']}";
+        }
       }
 
       foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
@@ -398,7 +403,7 @@ class MagentoClient {
       $tuote_data = array(
         'categories'            => $category_ids,
         'websites'              => explode(" ", $tuote['nakyvyys']),
-        'name'                  => utf8_encode($tuote['nimi']),
+        'name'                  => utf8_encode($tuotteen_nimitys),
         'description'           => utf8_encode($tuote['kuvaus']),
         'short_description'     => utf8_encode($tuote['lyhytkuvaus']),
         'weight'                => $tuote['paino'],
@@ -644,7 +649,7 @@ class MagentoClient {
 
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
-      $category_ids = array ();
+      $category_ids = array();
 
       // Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
       if ($tuotteet[0]['lyhytkuvaus'] == '') {
@@ -2048,6 +2053,10 @@ class MagentoClient {
 
   public function set_magento_perusta_disabled($value) {
     $this->magento_perusta_disabled = $value;
+  }
+
+  public function set_magento_nimitykseen_parametrien_arvot($value) {
+    $this->magento_nimitykseen_parametrien_arvot = $value;
   }
 
   /**

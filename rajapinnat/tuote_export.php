@@ -223,6 +223,12 @@ if ($verkkokauppatyyppi == "magento") {
     $rahtikulu_nimitys = 'Lähetyskulut';
   }
 
+  // Lisätäänkö lapsituotteen nimitykseen parametrien arvot
+  // Esim. nimitys: Kettlebell, parametri_paino: 10 kg --> nimitys: Kettlebell - 10 kg
+  if (empty($magento_nimitykseen_parametrien_arvot)) {
+    $magento_nimitykseen_parametrien_arvot = false;
+  }
+
   // Mikä on verkkokauppa -asiakkaan ovttunnus/ytunnus/asiakasnumero Pupesoftissa
   // Pakollinen tieto
   if (empty($verkkokauppa_asiakasnro)) {

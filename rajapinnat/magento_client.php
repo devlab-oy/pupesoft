@@ -1026,10 +1026,11 @@ class MagentoClient {
   // Methodi katsoo, että kaikki nämä on kaupassa, ja muut paitsi gifcard-tuotteet dellataan!
   public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
     if ($this->_magento_poista_tuotteita !== true) {
+      $this->log("Tuoteiden poisto kytketty pois päältä.");
+
       return 0;
     }
 
-    $count = 0;
     $skus = $this->getProductList(true, $exclude_giftcards);
 
     // Loopataan $kaikki_tuotteet-läpi ja tehdään numericmuutos
@@ -1040,18 +1041,21 @@ class MagentoClient {
     // Poistetaan tuottee jotka löytyvät arraysta $kaikki_tuotteet arraystä $skus
     $poistettavat_tuotteet = array_diff($skus, $kaikki_tuotteet);
 
+    $count = 0;
+    $total_count = count($poistettavat_tuotteet);
+
     // Nämä kaikki tuotteet pitää poistaa Magentosta
     foreach ($poistettavat_tuotteet as $tuote) {
-      $this->log("Poistetaan tuote $tuote");
-
       try {
         // Tässä kutsu, jos tuote oikeasti halutaan poistaa
         $this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
+
         $count++;
+        $this->log("[{$count}/{$total_count}] Poistetaan tuote '$tuote'");
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Tuotteen poisto epäonnistui!", $e);
+        $this->log("[{$count}/{$total_count}] Virhe! Tuotteen '{$tuote}' poisto epäonnistui!", $e);
       }
     }
 
@@ -1139,7 +1143,7 @@ class MagentoClient {
           $data
         );
 
-        $this->log("Lisätty kuva {$kuva['name']}");
+        $this->log("Lisätty kuva '{$kuva['name']}'");
         $this->debug($return);
       }
       catch (Exception $e) {

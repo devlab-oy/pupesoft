@@ -404,8 +404,8 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Tuotteen lisäys epäonnistui");
-          $this->debug($tuote_data, $e);
+          $this->log("Virhe! Tuotteen lisäys epäonnistui", $e);
+          $this->debug($tuote_data);
         }
       }
       // Tuote on jo olemassa, päivitetään
@@ -450,8 +450,8 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui");
-          $this->debug($tuote_data, $e);
+          $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
+          $this->debug($tuote_data);
         }
       }
 
@@ -491,8 +491,8 @@ class MagentoClient {
           $this->debug($kieliversio_data);
         }
         catch (Exception $e) {
-          $this->log("Virhe! Kieliversioiden päivitys epäonnistui");
-          $this->debug($kieliversio_data, $e);
+          $this->log("Virhe! Kieliversioiden päivitys epäonnistui", $e);
+          $this->debug($kieliversio_data);
           $this->_error_count++;
         }
       }
@@ -533,8 +533,8 @@ class MagentoClient {
           }
         }
         catch (Exception $e) {
-          $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
-          $this->debug($tuotteen_kauppakohtainen_data, $e);
+          $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
+          $this->debug($tuotteen_kauppakohtainen_data);
           $this->_error_count++;
         }
       }
@@ -840,8 +840,8 @@ class MagentoClient {
           }
           catch (Exception $e) {
             $this->_error_count++;
-            $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
-            $this->debug($tuotteen_kauppakohtainen_data, $e);
+            $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
+            $this->debug($tuotteen_kauppakohtainen_data);
           }
         }
 
@@ -853,8 +853,8 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui");
-        $this->debug($configurable, $e);
+        $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
+        $this->debug($configurable);
       }
     }
 
@@ -938,8 +938,7 @@ class MagentoClient {
       $tilaukset = $this->hae_tilaukset($status);
     }
     catch (Exception $e) {
-      $message = "Tilausten haku epäonnistui";
-      $this->log($message, $e, "order");
+      $this->log("Tilausten haku epäonnistui", $e, "order");
       exit;
     }
 
@@ -1156,8 +1155,8 @@ class MagentoClient {
         // Nollataan base-encoodattu kuva, että logi ei tuu isoks
         $data[1]["file"]["content"] = '...content poistettu logista...';
 
-        $this->log("Virhe! Kuvan lisäys epäonnistui");
-        $this->debug($data, $e);
+        $this->log("Virhe! Kuvan lisäys epäonnistui", $e);
+        $this->debug($data);
         $this->_error_count++;
       }
     }
@@ -1354,8 +1353,8 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' lisäys epäonnistui");
-          $this->debug($asiakas_data, $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' lisäys epäonnistui", $e);
+          $this->debug($asiakas_data);
         }
       }
       // Asiakas on jo olemassa, päivitetään
@@ -1395,8 +1394,8 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' päivitys epäonnistui");
-          $this->debug($asiakas_data, $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' päivitys epäonnistui", $e);
+          $this->debug($asiakas_data);
         }
       }
 
@@ -1419,7 +1418,7 @@ class MagentoClient {
 
       }
       catch (Exception $e) {
-        $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui, Magento tunnus {$asiakas['magento_tunnus']}");
+        $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui, Magento tunnus {$asiakas['magento_tunnus']}", $e);
         $this->_error_count++;
       }
 
@@ -1436,8 +1435,8 @@ class MagentoClient {
           );
         }
         catch (Exception $e) {
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui");
-          $this->debug($laskutus_osoite_data, $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui", $e);
+          $this->debug($laskutus_osoite_data);
           $this->_error_count++;
         }
       }
@@ -1455,8 +1454,8 @@ class MagentoClient {
           );
         }
         catch (Exception $e) {
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui");
-          $this->debug($tomitus_osoite_data, $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui", $e);
+          $this->debug($tomitus_osoite_data);
           $this->_error_count++;
         }
       }

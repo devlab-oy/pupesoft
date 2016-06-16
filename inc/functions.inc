@@ -7562,22 +7562,23 @@ if (!function_exists("enable_ajax")) {
     var t = document.getElementById(tilikentta_id);
 
     $.post( <?php echo "'{$_SERVER['SCRIPT_NAME']}', " ?>
-      {   ajax_toiminto: 'tilin_oletusalv',
+      {
+        ajax_toiminto: 'tilin_oletusalv',
         tilino: t.value,
         no_head: 'yes',
-        ohje: 'off' },
+        ohje: 'off'
+      },
       function(return_value) {
-        var data = $.parseJSON(return_value);
+        var data = JSON && JSON.parse(return_value) || $.parseJSON(return_value);
 
-        if (data.vero.length > 0) {
+        if (typeof data == 'object' && data.vero && data.vero.length > 0) {
           t = document.getElementsByName(alvkentta);
           if (t.length == 1) {
              t[0].value = data.vero;
           }
         }
-
       }
-      );
+    );
   }
 </script>
 

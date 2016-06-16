@@ -17,7 +17,7 @@ class Edi {
     if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej‰ puuttuu\n");
 
     // Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
-    $giftcards = json_decode($order['webtex_giftcard']);
+    $giftcards = empty($order['webtex_giftcard']) ? null : json_decode($order['webtex_giftcard']);
 
     if (!empty($giftcards)) {
       $giftcard_sum = 0;
@@ -272,9 +272,10 @@ class Edi {
 
     $name_prefix = "magento-order-{$order['increment_id']}-".date("Ymd")."-";
     $file_dir    = $magento_api_ht_edi;
-    $filename    = tempnam($file_dir, $name_prefix) . ".txt";
+    $filename    = tempnam($file_dir, $name_prefix);
+    unlink($filename);
 
-    file_put_contents($filename, $edi_order);
+    file_put_contents("{$filename}.txt", $edi_order);
 
     return true;
   }

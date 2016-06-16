@@ -622,9 +622,12 @@ function tuote_export_hae_asiakkaat($params) {
     // Yhteyshenkilön nimestä otetaan etunimi ja sukunimi
     if (!empty($row["yhenk_nimi"])) {
       // Viimeinen osa nimestä on sukunimi
-      $yhenk_sukunimi = end(explode(' ', $row['yhenk_nimi']));
+      $_last = explode(' ', $row['yhenk_nimi']);
+      $yhenk_sukunimi = end($_last);
+
       // Ensimmäiset osat etunimiä
       $yhenk_etunimi = explode(' ', $row['yhenk_nimi']);
+
       array_pop($yhenk_etunimi);
       $yhenk_etunimi = implode(' ', $yhenk_etunimi);
     }

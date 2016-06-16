@@ -491,11 +491,14 @@ class MagentoClient {
         try {
           foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
             foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+              $tuotteen_kauppakohtainen_data = array();
+
               foreach ($kauppatunnukset as $kauppatunnus) {
                 // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
                 // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
                 // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
                 if (empty($tuote[$tuotekentta])) continue;
+
                 $tuotteen_kauppakohtainen_data = array(
                   'price' => $tuote[$tuotekentta]
                 );
@@ -512,6 +515,7 @@ class MagentoClient {
                     )
                 );
               }
+
               $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
             }
           }

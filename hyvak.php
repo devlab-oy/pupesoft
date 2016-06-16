@@ -1553,7 +1553,7 @@ if (strlen($tunnus) != 0) {
   echo "</tr></table>";
 
   if ($iframe == 'yes' and $iframe_id != '') {
-    echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='600px' align='bottom' scrolling='auto'></iframe>";
+    echo "<iframe src='$iframe_id' name='alaikkuna' width='800px' height='100%' align='bottom' scrolling='auto'></iframe>";
   }
 
   echo "</td></tr></table>";

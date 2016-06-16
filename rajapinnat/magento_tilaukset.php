@@ -17,7 +17,6 @@ date_default_timezone_set('Europe/Helsinki');
 require "inc/connect.inc";
 require "inc/functions.inc";
 require "rajapinnat/magento_client.php";
-require "rajapinnat/edi.php";
 
 // Logitetaan ajo
 cron_log();

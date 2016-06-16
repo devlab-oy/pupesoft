@@ -110,9 +110,9 @@ class MagentoClient {
   // Lisätäänkö lapsituotteiden nimeen kaikki variaatioiden arvot
   private $magento_nimitykseen_parametrien_arvot = false;
 
-  function __construct($url, $user, $pass) {
+  function __construct($url, $user, $pass, $client_options = array()) {
     try {
-      $this->_proxy = new SoapClient($url);
+      $this->_proxy = new SoapClient($url, $client_options);
       $this->_session = $this->_proxy->login($user, $pass);
       $this->log("Magento päivitysskripti aloitettu");
     }

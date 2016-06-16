@@ -2106,11 +2106,11 @@ if (!function_exists('loppu')) {
       }
 
       //Haetaan factoringsopimuksen tiedot
-      if ($masrow["factoring"] != '') {
+      if (isset($masrow["factoring_id"])) {
         $query = "SELECT *
                   FROM factoring
                   WHERE yhtio = '$kukarow[yhtio]'
-                  and factoringyhtio = '$masrow[factoring]'
+                  and tunnus = '$masrow[factoring_id]'
                   and valkoodi = '$laskurow[valkoodi]'";
         $fres = pupe_query($query);
         $frow = mysql_fetch_assoc($fres);
@@ -2122,7 +2122,7 @@ if (!function_exists('loppu')) {
       $pankkitiedot = array();
 
       //Laitetaan pankkiyhteystiedot kuntoon
-      if ($masrow["factoring"] != "") {
+      if (isset($masrow["factoring_id"])) {
         $pankkitiedot["pankkinimi1"] = $frow["pankkinimi1"];
         $pankkitiedot["pankkitili1"] = $frow["pankkitili1"];
         $pankkitiedot["pankkiiban1"] = $frow["pankkiiban1"];

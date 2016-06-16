@@ -465,7 +465,7 @@ if ($ytunnus != '' and $tee == "") {
               and yhtio = '$kukarow[yhtio]'";
   }
   else {
-    $query = "SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring
+    $query = "SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring_id
               FROM asiakas
               LEFT JOIN maksuehto ON maksuehto.tunnus = asiakas.maksuehto
               WHERE asiakas.tunnus = '$asiakasid'
@@ -552,7 +552,7 @@ if ($ytunnus != '' and $tee == "") {
   $sel1='';
   $sel2='';
 
-  if ($asiakas['factoring'] != '') $sel2='checked';
+  if (isset($asiakas['factoring_id'])) $sel2='checked';
   if ($sel2=='') $sel1='checked';
 
   echo "<tr><th>".t("Kohdistus")."</th><td>";

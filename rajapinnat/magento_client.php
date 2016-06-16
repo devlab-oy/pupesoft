@@ -220,6 +220,7 @@ class MagentoClient {
 
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
+      $count++;
       $this->log("[{$count}/{$total_count}] Käsitelläään tuote '{$tuote['tuoteno']}' (simple)");
 
       $tuote_clean = $tuote['tuoteno'];
@@ -543,9 +544,6 @@ class MagentoClient {
       if ($this->_asiakaskohtaiset_tuotehinnat) {
         $this->lisaaAsiakaskohtaisetTuotehinnat($tuote_clean, $tuote['tuoteno']);
       }
-
-      // Lisätään tuote countteria
-      $count++;
     }
 
     $this->log("$count tuotetta päivitetty (simple)");
@@ -582,6 +580,7 @@ class MagentoClient {
 
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+      $count++;
       $this->log("[{$count}/{$total_count}] Käsittellään tuote {$nimitys} (configurable)");
 
       $category_ids = array();
@@ -841,9 +840,6 @@ class MagentoClient {
 
         // Lisätään kuvat Magentoon
         $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-
-        // Lisätään countteria
-        $count++;
       }
       catch (Exception $e) {
         $this->_error_count++;

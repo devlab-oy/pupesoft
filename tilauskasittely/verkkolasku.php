@@ -2548,10 +2548,8 @@ else {
 
               // Otetaan yhteensäkommentti pois jos summataan rivejä
               if ($rivigrouppaus) {
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+                // Trimmataan ja otetaan "yhteensäkommentti" pois
+                $tilrow["kommentti"] = trim(poista_rivin_yhteensakommentti($tilrow["kommentti"]));
               }
 
               // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä

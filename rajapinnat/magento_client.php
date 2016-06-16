@@ -954,6 +954,9 @@ class MagentoClient {
       $product_sku = $tuote['tuoteno'];
       $qty         = $tuote['myytavissa'];
 
+      $count++;
+      $this->log("[{$count}/{$total_count}] Päivitetään tuotteen {$product_sku} saldo {$qty}");
+
       // Out of stock jos määrä on tuotteella ei ole myytavissa saldoa
       $is_in_stock = ($qty > 0) ? 1 : 0;
 
@@ -973,15 +976,11 @@ class MagentoClient {
             $stock_data
           )
         );
-
-        $this->log("[{$count}/{$total_count}] Päivitetty tuotteen {$product_sku} saldo {$qty}.");
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Saldopäivitys epäonnistui. Tuote {$product_sku} saldo {$qty}.". $e);
+        $this->log("Virhe! Saldopäivitys epäonnistui!". $e);
       }
-
-      $count++;
     }
 
     $this->log("$count saldoa päivitetty");

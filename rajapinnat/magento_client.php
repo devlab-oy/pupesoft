@@ -1050,27 +1050,29 @@ class MagentoClient {
     // Poistetaan tuottee jotka löytyvät arraysta $kaikki_tuotteet arraystä $skus
     $poistettavat_tuotteet = array_diff($skus, $kaikki_tuotteet);
 
+    $poistettu = 0;
     $count = 0;
     $total_count = count($poistettavat_tuotteet);
 
     // Nämä kaikki tuotteet pitää poistaa Magentosta
     foreach ($poistettavat_tuotteet as $tuote) {
+      $count++;
+      $this->log("[{$count}/{$total_count}] Poistetaan tuote '$tuote'");
+
       try {
         // Tässä kutsu, jos tuote oikeasti halutaan poistaa
         $this->_proxy->call($this->_session, 'catalog_product.delete', $tuote, 'SKU');
-
-        $count++;
-        $this->log("[{$count}/{$total_count}] Poistetaan tuote '$tuote'");
+        $poistettu++;
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("[{$count}/{$total_count}] Virhe! Tuotteen '{$tuote}' poisto epäonnistui!", $e);
+        $this->log("Virhe! Poisto epäonnistui!", $e);
       }
     }
 
-    $this->log("$count tuotetta poistettu");
+    $this->log("$poistettu tuotetta poistettu");
 
-    return $count;
+    return $poistettu;
   }
 
   // Poistaa magentosta kategorioita

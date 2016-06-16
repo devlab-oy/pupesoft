@@ -1,32 +1,29 @@
 <?php
 
 // Kutsutaanko CLI:stä
-$php_cli = FALSE;
-
-if (php_sapi_name() == 'cli') {
-  $php_cli = TRUE;
-}
-
-date_default_timezone_set('Europe/Helsinki');
-
-// Kutsutaanko CLI:stä
-if (!$php_cli) {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+if (php_sapi_name() != 'cli') {
+  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-require "{$pupe_root_polku}/inc/connect.inc";
-require "{$pupe_root_polku}/inc/functions.inc";
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku);
+ini_set("display_errors", 1);
+ini_set("max_execution_time", 0); // unlimited execution time
+ini_set("memory_limit", "2G");
+error_reporting(E_ALL);
+date_default_timezone_set('Europe/Helsinki');
+
+require "inc/connect.inc";
+require "inc/functions.inc";
+require "rajapinnat/magento_client.php";
+require "rajapinnat/edi.php";
 
 // Logitetaan ajo
 cron_log();
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
-
-require "{$pupe_root_polku}/rajapinnat/magento_client.php";
-require "{$pupe_root_polku}/rajapinnat/edi.php";
 
 if (empty($magento_api_ht_edi)
   or empty($magento_api_ht_url)

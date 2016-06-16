@@ -15,8 +15,6 @@ class MagentoClient {
 
   // Kutsujen määrä multicall kutsulla
   const MULTICALL_BATCH_SIZE = 100;
-  const LOGGING = true;
-  const DEBUG = false;
 
   // Product visibility
   const NOT_VISIBLE_INDIVIDUALLY = 1;
@@ -33,6 +31,9 @@ class MagentoClient {
 
   // Soap clientin sessio
   private $_session;
+
+  // Lokitetaanko debug infoa
+  private $debug_logging = false;
 
   // Magenton oletus attributeSet
   private $_attributeSet;
@@ -110,10 +111,11 @@ class MagentoClient {
   // Lisätäänkö lapsituotteiden nimeen kaikki variaatioiden arvot
   private $magento_nimitykseen_parametrien_arvot = false;
 
-  function __construct($url, $user, $pass, $client_options = array()) {
+  function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
       $this->_session = $this->_proxy->login($user, $pass);
+      $this->debug_logging = $debug;
       $this->log("Magento päivitysskripti aloitettu");
     }
     catch (Exception $e) {
@@ -1095,10 +1097,6 @@ class MagentoClient {
 
   // Tapahtumaloki
   public function log($message, $exception = '', $type = 'product') {
-    if (self::LOGGING === false) {
-      return;
-    }
-
     if ($exception != '') {
       $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
     }
@@ -2082,7 +2080,7 @@ class MagentoClient {
 
   // debug level logging
   private function debug($string, $exception = "") {
-    if (self::DEBUG === false) {
+    if ($this->debug_logging === false) {
       return;
     }
 

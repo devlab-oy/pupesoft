@@ -80,6 +80,11 @@ if ($verkkokauppatyyppi == "magento") {
     );
   }
 
+  // Lokitetaanko debug -tietoa lokitiedostoon
+  if (empty($magento_debug)) {
+    $magento_debug = false;
+  }
+
   // Verkkokaupan "tax_class_id" tunnus
   if (empty($magento_tax_class_id)) {
     $magento_tax_class_id = 1;
@@ -387,7 +392,14 @@ tuote_export_echo("Aloitetaan päivitys verkkokauppaan.");
 if ($verkkokauppatyyppi == "magento") {
   $time_start = microtime(true);
 
-  $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas, $magento_client_options);
+  $magento_client = new MagentoClient(
+    $magento_api_te_url,
+    $magento_api_te_usr,
+    $magento_api_te_pas,
+    $magento_client_options,
+    $magento_debug
+  );
+
   $magento_client->set_magento_fetch_order_status($magento_tilaushaku);
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
   $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);

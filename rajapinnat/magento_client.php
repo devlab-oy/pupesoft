@@ -466,8 +466,9 @@ class MagentoClient {
           $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
 
           foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
+            if (empty($kieliversio_data[$kieli])) continue;
+
             $kaannokset = $kieliversio_data[$kieli];
-            if (empty($kaannokset)) continue;
 
             // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
             foreach ($kauppatunnukset as $kauppatunnus) {

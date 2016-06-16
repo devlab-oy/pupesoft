@@ -795,6 +795,8 @@ class MagentoClient {
           try {
             foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
               foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
+                $tuotteen_kauppakohtainen_data = array();
+
                 foreach ($kauppatunnukset as $kauppatunnus) {
                   // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
                   // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi

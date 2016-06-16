@@ -1139,7 +1139,7 @@ class MagentoClient {
           $data
         );
 
-        $this->log("Lisätty kuva");
+        $this->log("Lisätty kuva {$kuva['name']}");
         $this->debug($return);
       }
       catch (Exception $e) {
@@ -1166,7 +1166,7 @@ class MagentoClient {
         $product_id);
     }
     catch (Exception $e) {
-      $this->log("Virhe! Kuvalistauksen haku '{$product_id}' epäonnistui", $e);
+      $this->log("Virhe! Kuvalistauksen epäonnistui", $e);
       $this->_error_count++;
     }
 
@@ -1197,10 +1197,10 @@ class MagentoClient {
         )
       );
 
-      $this->log("Poistetaan tuotteen '{$product_id}' kuva '{$filename}'");
+      $this->log("Poistetaan '{$filename}'");
     }
     catch (Exception $e) {
-      $this->log("Virhe! Kuvan poisto epäonnistui '{$product_id}' kuva '{$filename}'", $e);
+      $this->log("Virhe! Kuvan poisto epäonnistui '{$filename}'", $e);
       $this->_error_count++;
 
       return false;
@@ -1237,7 +1237,7 @@ class MagentoClient {
 
       while ($liite = mysql_fetch_assoc($result)) {
         $file = array(
-          'content'   => base64_encode($liite['data']),
+          'content' => base64_encode($liite['data']),
           'mime'    => $liite['filetype'],
           'name'    => $liite['filename']
         );

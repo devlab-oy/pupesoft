@@ -3913,6 +3913,18 @@ if (!function_exists("alehinta")) {
     $aleperuste    = FALSE;
     $vanha_yhtio  = "";
     $vanha_liitostunnus = 0;
+    $kampanjahinnoittelu = false;
+    $kampanjahinnoittelu_osui = false;
+    $hintaan_osunut_kampanja = 0;
+    $_rajausperuste = '';
+
+    // Onko kyseessŠ kampanja
+    if ($laskurow['kampanja'] > 0) {
+      $kampanjahinnoittelu = true;
+    }
+    else {
+      $_rajausperuste = " and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')) ";
+    }
 
     // Tässä katotaan onko epäkuranttiutta
     if ($trow["epakurantti100pvm"] != "0000-00-00") {
@@ -4052,7 +4064,7 @@ if (!function_exists("alehinta")) {
       // 2A. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, kampanja
                    FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and asiakas   = '$laskurow[liitostunnus]'
@@ -4061,9 +4073,9 @@ if (!function_exists("alehinta")) {
                    and tuoteno  != ''
                    and valkoodi  = '$laskurow[valkoodi]'
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    UNION
-                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, kampanja
                    FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and ytunnus   = '$laskurow[ytunnus]'
@@ -4072,7 +4084,7 @@ if (!function_exists("alehinta")) {
                    and tuoteno  != ''
                    and valkoodi  = '$laskurow[valkoodi]'
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -4117,6 +4129,11 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta         = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
+          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            $hperuste .= " Kampanjahinnoittelu. ";
+            $kampanjahinnoittelu_osui = true;
+            $hintaan_osunut_kampanja = $hrow['kampanja'];
+          }
           $hperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
           $alehinta_val  = $laskurow["valkoodi"];
           $hintaperuste = 2;
@@ -4126,7 +4143,7 @@ if (!function_exists("alehinta")) {
       // 2B. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa
       if ($hinta == 0) {
 
-        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus, kampanja
                    FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_tuoteno)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and asiakas   = '$laskurow[liitostunnus]'
@@ -4135,9 +4152,9 @@ if (!function_exists("alehinta")) {
                    and tuoteno  != ''
                    and valkoodi  in ('$yhtiorow[valkoodi]','')
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    UNION
-                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus, kampanja
                    FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_tuoteno)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and ytunnus   = '$laskurow[ytunnus]'
@@ -4146,7 +4163,7 @@ if (!function_exists("alehinta")) {
                    and tuoteno  != ''
                    and valkoodi  in ('$yhtiorow[valkoodi]','')
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -4191,6 +4208,11 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta     = $hrow["hinta"];
+          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            $hperuste .= " Kampanjahinnoittelu. ";
+            $kampanjahinnoittelu_osui = true;
+            $hintaan_osunut_kampanja = $hrow['kampanja'];
+          }
           $hperuste  .= "Asiakkaan tuotteen nettohinta.".$hrow['laji'];
           $hintaperuste = 2;
         }
@@ -4199,7 +4221,7 @@ if (!function_exists("alehinta")) {
       // 3A. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, kampanja
                    FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and asiakas   = '$laskurow[liitostunnus]'
@@ -4208,9 +4230,9 @@ if (!function_exists("alehinta")) {
                    and ryhma    != ''
                    and valkoodi  = '$laskurow[valkoodi]'
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    UNION
-                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
+                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, kampanja
                    FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and ytunnus   = '$laskurow[ytunnus]'
@@ -4219,7 +4241,7 @@ if (!function_exists("alehinta")) {
                    and ryhma    != ''
                    and valkoodi  = '$laskurow[valkoodi]'
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    ORDER BY prio, minkpl desc, aika, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -4264,6 +4286,11 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
+          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            $hperuste .= " Kampanjahinnoittelu. ";
+            $kampanjahinnoittelu_osui = true;
+            $hintaan_osunut_kampanja = $hrow['kampanja'];
+          } 
           $hperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
           $alehinta_val = $laskurow["valkoodi"];
           $hintaperuste = 3;
@@ -4273,7 +4300,7 @@ if (!function_exists("alehinta")) {
       // 3B. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa
       if ($hinta == 0) {
 
-        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+        $query = "(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus, kampanja
                    FROM asiakashinta ashin1 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and asiakas   = '$laskurow[liitostunnus]'
@@ -4282,9 +4309,9 @@ if (!function_exists("alehinta")) {
                    and ryhma    != ''
                    and valkoodi  in ('$yhtiorow[valkoodi]','')
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    UNION
-                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
+                   (SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus, kampanja
                    FROM asiakashinta ashin2 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio   = '$kukarow[yhtio]'
                    and ytunnus   = '$laskurow[ytunnus]'
@@ -4293,7 +4320,7 @@ if (!function_exists("alehinta")) {
                    and ryhma    != ''
                    and valkoodi  in ('$yhtiorow[valkoodi]','')
                    and (minkpl <= $kpl or minkpl = 0)
-                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
+                   $_rajausperuste)
                    ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
                    LIMIT 1";
         $hresult = pupe_query($query);
@@ -4338,6 +4365,11 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta    = $hrow["hinta"];
+          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            $hperuste .= " Kampanjahinnoittelu. ";
+            $kampanjahinnoittelu_osui = true;
+            $hintaan_osunut_kampanja = $hrow['kampanja'];
+          }             
           $hperuste  .= "Asiakkaan tuotealeryhmän nettohinta. ";
           $hintaperuste = 3;
         }
@@ -5934,6 +5966,9 @@ if (!function_exists("alehinta")) {
     if (!isset($GLOBALS['ale_peruste']) or $GLOBALS['ale_peruste'] == "" or $g_ale_peruste_update) {
       $GLOBALS['ale_peruste']  = $g_ale_peruste;
       $GLOBALS['ale_peruste'] .= " XXXHINTAPERUSTE:$hintaperuste ";
+      if ($kampanjahinnoittelu_osui) {
+        $GLOBALS['kampanjahinnoitteluntunnus'] = $hintaan_osunut_kampanja;
+      }
 
       if (is_array($aleperuste)) {
         foreach ($aleperuste as $aile) {

@@ -556,6 +556,7 @@ function tuote_export_hae_asiakkaat($params) {
 
   $ajetaanko_kaikki     = $params['ajetaanko_kaikki'];
   $datetime_checkpoint  = $params['datetime_checkpoint'];
+  $magento_website_id   = $params['magento_website_id'];
   $verkkokauppatyyppi   = $params['verkkokauppatyyppi'];
 
   $dnsasiakas = array();

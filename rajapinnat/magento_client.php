@@ -493,6 +493,7 @@ class MagentoClient {
         catch (Exception $e) {
           $this->log("Virhe! Kieliversioiden päivitys epäonnistui");
           $this->debug($kieliversio_data, $e);
+          $this->_error_count++;
         }
       }
 
@@ -534,6 +535,7 @@ class MagentoClient {
         catch (Exception $e) {
           $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
           $this->debug($tuotteen_kauppakohtainen_data, $e);
+          $this->_error_count++;
         }
       }
 
@@ -583,6 +585,8 @@ class MagentoClient {
 
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+      if (is_numeric($nimitys)) $nimitys = "SKU_{$nimitys}";
+
       $count++;
       $this->log("[{$count}/{$total_count}] Käsittellään tuote {$nimitys} (configurable)");
 
@@ -835,6 +839,7 @@ class MagentoClient {
             }
           }
           catch (Exception $e) {
+            $this->_error_count++;
             $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
             $this->debug($tuotteen_kauppakohtainen_data, $e);
           }
@@ -1415,6 +1420,7 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui, Magento tunnus {$asiakas['magento_tunnus']}");
+        $this->_error_count++;
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
@@ -1432,6 +1438,7 @@ class MagentoClient {
         catch (Exception $e) {
           $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui");
           $this->debug($laskutus_osoite_data, $e);
+          $this->_error_count++;
         }
       }
 
@@ -1450,6 +1457,7 @@ class MagentoClient {
         catch (Exception $e) {
           $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui");
           $this->debug($tomitus_osoite_data, $e);
+          $this->_error_count++;
         }
       }
 

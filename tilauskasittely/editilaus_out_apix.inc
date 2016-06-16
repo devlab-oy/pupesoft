@@ -18,6 +18,13 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $yhteyshenkilores = pupe_query($query);
   $yhteyshenkilorow = mysql_fetch_assoc($yhteyshenkilores);
 
+  $query  = "SELECT *
+             FROM maksuehto
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             and tunnus  = '{$laskurow['maksuehto']}'";
+  $maksuehtores = pupe_query($query);
+  $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
   $lask_yritys  = trim($laskurow['nimi'].' '.$laskurow['nimitark']);
   $lask_osoite  = $laskurow['osoite'];
   $lask_postitp = $laskurow['postitp'];
@@ -43,8 +50,8 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $edi_order .= "OSTOTIL.OT_MYYNTI_POSTINRO:{$yhtiorow['postino']}\n";
   $edi_order .= "OSTOTIL.OT_MYYNTI_MAAKOODI:{$yhtiorow['maa']}\n";
   $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILO:\n";
-  $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:\n";
-  $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:\n";
+  $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:{$yhtiorow['puhelin']}\n";
+  $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:{$yhtiorow['fax']}\n";
 
   $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:1\n";
   $edi_order .= "OSTOTIL.OT_TILAUSAIKA:{$laskurow['h1time']}\n";
@@ -53,9 +60,9 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$laskurow['toimitustapa']}\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:{$laskurow['toimitusehto']}\n";
-  $edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$laskurow['maksuehto']}\n";
+  $edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$maksuehtorow['teksti']}\n";
   $edi_order .= "OSTOTIL.OT_VIITTEEMME:{$laskurow['viesti']}\n";
-  $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$laskurow['ohjausmerkki']}\n";
+  $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$laskurow['asiakkaan_tilausnumero']}\n";
   $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:{$laskurow['valkoodi']}\n";
   $edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
   $edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
@@ -122,6 +129,14 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
         }
         else {
           $sscc_array[] = $rahtikirjarow['sscc_ulkoinen'];
+        }
+      }
+      elseif (stripos($rahtikirjarow['rahtikirjanro'], "JJFI") !== false) {
+        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rahtikirjarow['rahtikirjanro'], $match);
+
+        foreach ($match[0] as $nro) {
+          $nro = str_replace(" ", "", $nro);
+          $sscc_array[] = $nro;
         }
       }
       elseif ($expansioncode != "") {

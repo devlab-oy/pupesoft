@@ -1270,12 +1270,16 @@ class MagentoClient {
     $this->log("Lisätään asiakkaita");
     // Asiakas countteri
     $count = 0;
+    $total_count = count($dnsasiakas);
 
     // Asiakkaiden erikoisparametrit
     $asiakkaat_erikoisparametrit = $this->_asiakkaat_erikoisparametrit;
 
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
+      $count++;
+      $this->log("[{$count}/{$total_count}] Asiakas '{$asiakas['nimi']}'");
+
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
       $asiakas_data = array(
@@ -1339,7 +1343,7 @@ class MagentoClient {
             )
           );
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$result} lisätty");
+          $this->log("Asiakas lisätty ({$result})");
           $this->debug($asiakas_data);
           $asiakas['magento_tunnus'] = $result;
 
@@ -1355,7 +1359,7 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' lisäys epäonnistui", $e);
+          $this->log("Virhe! Asiakkaan lisäys epäonnistui", $e);
           $this->debug($asiakas_data);
         }
       }
@@ -1380,7 +1384,7 @@ class MagentoClient {
             )
           );
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$asiakas['magento_tunnus']} päivitetty");
+          $this->log("Asiakas päivitetty ({$asiakas['magento_tunnus']})");
           $this->debug($asiakas_data);
 
           // Lähetetään aktivointiviesti Magentoon jos ominaisuus on päällä sekä yhteyshenkilölle
@@ -1396,7 +1400,7 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' päivitys epäonnistui", $e);
+          $this->log("Virhe! Asiakkaan päivitys epäonnistui", $e);
           $this->debug($asiakas_data);
         }
       }
@@ -1437,7 +1441,7 @@ class MagentoClient {
           );
         }
         catch (Exception $e) {
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' laskutusosoitteen päivitys epäonnistui", $e);
+          $this->log("Virhe! Asiakkaan laskutusosoitteen päivitys epäonnistui", $e);
           $this->debug($laskutus_osoite_data);
           $this->_error_count++;
         }
@@ -1456,14 +1460,11 @@ class MagentoClient {
           );
         }
         catch (Exception $e) {
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' toimitusosoitteen päivitys epäonnistui", $e);
-          $this->debug($tomitus_osoite_data);
+          $this->log("Virhe! Asiakkaan toimitusosoitteen päivitys epäonnistui", $e);
+          $this->debug($toimitus_osoite_data);
           $this->_error_count++;
         }
       }
-
-      // Lisätään asiakas countteria
-      $count++;
     }
 
     $this->log("$count asiakasta päivitetty");

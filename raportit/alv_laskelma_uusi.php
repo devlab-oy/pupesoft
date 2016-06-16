@@ -792,6 +792,7 @@ function laskeveroja($taso, $tulos) {
                   and lasku.tapvm   >= '$startmonth'
                   and lasku.tapvm   <= '$endmonth'
                   and lasku.vienti  = 'E'
+                  and lasku.tilaustyyppi != '9'
                   {$kolmikantakauppa}
                   GROUP BY 1,2";
       }

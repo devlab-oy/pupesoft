@@ -370,6 +370,7 @@ class MagentoClient {
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
             $tuote_data['status'] = self::DISABLED;
+            $this->log("Asetetaan tuote Disabled -tilaan");
           }
 
           $product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
@@ -598,6 +599,8 @@ class MagentoClient {
       // Yliajetaan tuoteryhm‰n nimi jos muuttuja on asetettu
       if (!empty($tuoteryhmayliajo)) {
         $tuoteryhmanimi = $tuoteryhmayliajo;
+
+        $this->log("Asetetaan tuote vakiokategoriaan '{$tuoteryhmayliajo}'");
       }
 
       // Etsit‰‰n kategoria_id tuoteryhm‰ll‰

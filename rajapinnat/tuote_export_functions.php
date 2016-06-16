@@ -852,7 +852,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
       }
       else {
         $myyntihinta = $alirow["myyntihinta"];
-        $myyntihinta_veroton = hintapyoristys($row["myyntihinta"] / (1+($alirow["alv"]/100)));
+        $myyntihinta_veroton = hintapyoristys($alirow["myyntihinta"] / (1+($alirow["alv"]/100)));
       }
 
       $myymalahinta = $alirow["myymalahinta"];

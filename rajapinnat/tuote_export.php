@@ -90,6 +90,11 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_parent_id = 1;
   }
 
+  // Magento websiten ID, joka laitetaan asiakashaussa mukaan resulttiin
+  if (empty($magento_website_id)) {
+    $magento_website_id = null;
+  }
+
   // Verkkokaupan hinta -kenttä, joko "myyntihinta" tai "myymalahinta"
   if (empty($magento_hintakentta)) {
     $magento_hintakentta = "myyntihinta";
@@ -346,6 +351,7 @@ if (in_array('asiakkaat', $magento_ajolista)) {
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
     "datetime_checkpoint" => $datetime_checkpoint,
+    "magento_website_id"  => $magento_website_id,
     "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
 

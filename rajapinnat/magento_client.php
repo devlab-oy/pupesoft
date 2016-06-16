@@ -220,6 +220,8 @@ class MagentoClient {
 
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
+      $this->log("[{$count}/{$total_count}] Käsitelläään tuote '{$tuote['tuoteno']}' (simple)");
+
       $tuote_clean = $tuote['tuoteno'];
 
       $category_ids = array();
@@ -378,7 +380,7 @@ class MagentoClient {
             )
           );
 
-          $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' lisätty (simple)");
+          $this->log("Tuote lisätty");
           $this->debug($tuote_data);
 
           // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
@@ -398,7 +400,7 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' lisäys epäonnistui (simple)");
+          $this->log("Virhe! Tuotteen lisäys epäonnistui");
           $this->debug($tuote_data, $e);
         }
       }
@@ -434,7 +436,7 @@ class MagentoClient {
               $tuote_data)
           );
 
-          $this->log("[{$count}/{$total_count}] Tuote '{$tuote['tuoteno']}' päivitetty (simple)");
+          $this->log("Tuotetiedot päivitetty");
           $this->debug($tuote_data);
 
           // Update tier prices
@@ -444,7 +446,7 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' päivitys epäonnistui (simple)");
+          $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui");
           $this->debug($tuote_data, $e);
         }
       }
@@ -481,11 +483,11 @@ class MagentoClient {
             }
           }
 
-          $this->log("Tuotteen '{$tuote['tuoteno']}' kieliversiot päivitetty (simple)");
+          $this->log("Kieliversiot päivitetty");
           $this->debug($kieliversio_data);
         }
         catch (Exception $e) {
-          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kieliversioiden päivitys epäonnistui (simple)");
+          $this->log("Virhe! Kieliversioiden päivitys epäonnistui");
           $this->debug($kieliversio_data, $e);
         }
       }
@@ -520,13 +522,13 @@ class MagentoClient {
                 );
               }
 
-              $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple)");
+              $this->log("Kauppakohtainen hinta päivitetty");
               $this->debug($tuotteen_kauppakohtainen_data);
             }
           }
         }
         catch (Exception $e) {
-          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kauppakohtaisen hinnan päivitys epäonnistui (simple)");
+          $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
           $this->debug($tuotteen_kauppakohtainen_data, $e);
         }
       }
@@ -557,6 +559,7 @@ class MagentoClient {
     $this->log("Lisätään tuotteet (configurable)");
 
     $count = 0;
+    $total_count = count($dnslajitelma);
 
     // Populoidaan attributeSet
     $this->_attributeSet = $this->getAttributeSet();
@@ -579,6 +582,8 @@ class MagentoClient {
 
     // Lisätään tuotteet
     foreach ($dnslajitelma as $nimitys => $tuotteet) {
+      $this->log("[{$count}/{$total_count}] Käsittellään tuote {$nimitys} (configurable)");
+
       $category_ids = array();
 
       // Jos lyhytkuvaus on tyhjä, käytetään kuvausta?
@@ -721,7 +726,7 @@ class MagentoClient {
             array($tuote['tuoteno'], $simple_tuote_data)
           );
 
-          $this->log("Päivitetään '{$nimitys}' tuotteen lapsituote '{$tuote['tuoteno']}'");
+          $this->log("Päivitetään lapsituote '{$tuote['tuoteno']}'");
           $this->debug($simple_tuote_data);
         }
 
@@ -743,7 +748,7 @@ class MagentoClient {
             )
           );
 
-          $this->log("Tuote '{$nimitys}' lisätty (configurable)");
+          $this->log("Tuote lisätty");
           $this->debug($configurable);
         }
         // Päivitetään olemassa olevaa configurablea
@@ -771,7 +776,7 @@ class MagentoClient {
             )
           );
 
-          $this->log("Tuote '{$nimitys}' päivitetty (configurable)");
+          $this->log("Tuotetiedot päivitetty");
           $this->debug($configurable);
         }
 
@@ -820,13 +825,13 @@ class MagentoClient {
                   );
                 }
 
-                $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable)");
+                $this->log("Kauppakohtainen hinta päivitetty");
                 $this->debug($tuotteen_kauppakohtainen_data);
               }
             }
           }
           catch (Exception $e) {
-            $this->log("Virhe! Tuotteen '{$nimitys}' kauppakohtaisen hinnan päivitys epäonnistui (configurable)");
+            $this->log("Virhe! Kauppakohtaisen hinnan päivitys epäonnistui");
             $this->debug($tuotteen_kauppakohtainen_data, $e);
           }
         }
@@ -842,7 +847,7 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Configurable tuotteen '{$nimitys}' lisäys/päivitys epäonnistui (configurable)");
+        $this->log("Virhe! Tuotteen lisäys/päivitys epäonnistui");
         $this->debug($configurable, $e);
       }
     }

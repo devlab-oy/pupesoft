@@ -291,6 +291,6 @@ class Edi {
 
     file_put_contents("{$filename}.txt", $edi_order);
 
-    return true;
+    return "{$filename}.txt";
   }
 }

@@ -278,16 +278,14 @@ if ($tee == '') {
               FROM kalenteri
               JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
               JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) 
-              AND avainsana.kieli  = '{$kukarow[kieli]}')
-              JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ({$kale_querylisa}) 
-              AND as_fi.kieli  = 'fi')
+              AND avainsana.kieli  = 'fi')
               {$asiakasjoini}
               WHERE kalenteri.yhtio = '{$yhtio}'
               AND kalenteri.kuka    IN ({$vertaa})
               AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
               AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
               AND kalenteri.tyyppi  IN ('kalenteri','memo')
-              AND kalenteri.tapa    = as_fi.selitetark
+              AND kalenteri.tapa    = avainsana.selitetark
               {$lisa}
               GROUP BY 1,2,3
               HAVING count(*) > 0

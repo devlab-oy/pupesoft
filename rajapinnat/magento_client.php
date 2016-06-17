@@ -1083,7 +1083,7 @@ class MagentoClient {
   }
 
   // Tapahtumaloki
-  public function log($message, $exception = '', $type = 'product') {
+  private function log($message, $exception = '', $type = 'product') {
     if ($exception != '') {
       $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
     }
@@ -1094,7 +1094,7 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
-  public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+  private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
     if (count($tuotekuvat) == 0 or empty($product_id)) {
       return;
     }
@@ -1146,7 +1146,7 @@ class MagentoClient {
   }
 
   // Hakee tuotteen tuotekuvat Magentosta
-  public function listaa_tuotekuvat($product_id) {
+  private function listaa_tuotekuvat($product_id) {
     $pictures = array();
     $return = array();
 
@@ -1170,7 +1170,7 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen tuotekuvan Magentosta
-  public function poista_tuotekuva($product_id, $filename) {
+  private function poista_tuotekuva($product_id, $filename) {
     // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
     if ($this->magento_lisaa_tuotekuvat === false) {
       return;
@@ -1202,7 +1202,7 @@ class MagentoClient {
   }
 
   // Hakee tuotteen tuotekuvat Pupesoftista
-  public function hae_tuotekuvat($tunnus) {
+  private function hae_tuotekuvat($tunnus) {
     global $kukarow;
 
     // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
@@ -1455,7 +1455,7 @@ class MagentoClient {
   }
 
   // Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
-  public function hae_kieliversiot($tuotenumero) {
+  private function hae_kieliversiot($tuotenumero) {
     global $kukarow;
 
     $kieliversiot_data = array();
@@ -1625,7 +1625,7 @@ class MagentoClient {
 
   // Kuittaa asiakkaan aktivoiduksi Magentossa
   // HUOM! Vaatii räätälöidyn Magenton
-  public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
+  private function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
     $reply = false;
 
     // Haetaan yhteyshenkilön tiedot
@@ -1671,7 +1671,7 @@ class MagentoClient {
 
   // Hakee ja siirtää tuotteen asiakaskohtaiset hinnat Magentoon
   // HUOM! Vaatii räätälöidyn Magenton
-  public function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
+  private function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
     global $kukarow;
 
     $reply = false;

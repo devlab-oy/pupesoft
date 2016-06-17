@@ -45,6 +45,16 @@ if (empty($pupesoft_tilaustyyppi)) {
   $pupesoft_tilaustyyppi = '';
 }
 
+// Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
+if (empty($verkkokauppa_erikoiskasittely)) {
+  $verkkokauppa_erikoiskasittely = array();
+}
+
+// Korvaavia Maksuehtoja Magenton maksuehdoille
+if (empty($magento_maksuehto_ohjaus)) {
+  $magento_maksuehto_ohjaus = array();
+}
+
 // Soap Clientin extra optiot
 if (empty($magento_client_options)) {
   $magento_client_options = array(

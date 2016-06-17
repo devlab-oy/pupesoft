@@ -1038,42 +1038,8 @@ class MagentoClient {
     return $count;
   }
 
-  // Päivittää tuotteiden hinnat
-  public function paivita_hinnat(array $dnshinnasto) {
-    $count = 0;
-    $batch_count = 0;
-
-    // Päivitetään tuotteen hinnastot
-    foreach ($dnshinnasto as $tuote) {
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
-
-      // Batch calls
-      $calls[] = array('catalog_product.update', array($tuote['tuoteno'], array('price' => $tuote['hinta'])));
-
-      $batch_count++;
-
-      if ($batch_count > self::MULTICALL_BATCH_SIZE) {
-        try {
-          $result = $this->_proxy->multicall($this->_session, $calls);
-          var_dump($result);
-        }
-        catch (Exception $e) {
-          $this->_error_count++;
-          $this->log("Virhe! Hintojen päivitys epäonnistui {$tuote['tuoteno']}", $e);
-        }
-
-        $batch_count = 0;
-        $calls = array();
-      }
-    }
-
-    // Päivitettyjen tuotteiden määrä
-    return $count;
-  }
-
   // Poistaa magentosta tuotteita
   // HUOM, tähän passataan aina **KAIKKI** verkkokauppatuotteet.
-  // Methodi katsoo, että kaikki nämä on kaupassa, ja muut paitsi gifcard-tuotteet dellataan!
   public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
     if ($this->_magento_poista_tuotteita !== true) {
       $this->log("Tuoteiden poisto kytketty pois päältä.");
@@ -1114,32 +1080,6 @@ class MagentoClient {
     $this->log("$poistettu tuotetta poistettu");
 
     return $poistettu;
-  }
-
-  // Poistaa magentosta kategorioita
-  // HUOM, tähän passataan aina **KAIKKI** verkkokauppakategoriat.
-  public function poista_kategorioita(array $kaikki_kategoriat) {
-    // Work in progress, don't use :)
-    return;
-
-    // Magento kategorian tunnus, jonka alle kaikki tuoteryhmät lisätään
-    $parent_id = $this->_parent_id;
-    $count = 0;
-
-    // Haetaan kaikki kategoriat, joiden parent_id on parent id
-    $magento_kategoriat = $this->_proxy->call($this->_session, 'catalog_category.level',
-      array(
-        null, // website
-        null, // storeview
-        $parent_id,
-      )
-    );
-
-    var_dump($magento_kategoriat);
-
-    $this->log("$count kategoriaa poistettu");
-
-    return $count;
   }
 
   // Tapahtumaloki
@@ -1771,60 +1711,6 @@ class MagentoClient {
     return $reply;
   }
 
-  // Hakee ja siirtää tuotteiden kuvat Magentoon
-  public function lisaa_tuotteiden_kuvat(array $tuotteet) {
-    global $kukarow, $yhtiorow;
-
-    foreach ($tuotteet as $tuote) {
-      // numeerisesta sku_+N
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
-
-      // Haetaan tuotteen tunnus Magentosta
-      $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
-      $product_id = $result['product_id'];
-
-      // Haetaan tuotteen kuvat Pupesta
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
-      // Lisataan tuotteen kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-    }
-  }
-
-  // Hakee verkkokauppatuotteet Pupesta
-  public function hae_kaikki_tuotteet() {
-    global $kukarow, $yhtiorow;
-
-    $individual_tuotteet = array();
-    $kaikki_tuotteet = array();
-
-    // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pitää olla Magentossa
-    $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
-              FROM tuote
-              LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno             = tuotteen_avainsanat.tuoteno
-              AND tuotteen_avainsanat.laji  = 'parametri_variaatio'
-              AND trim(tuotteen_avainsanat.selite) != '')
-              WHERE tuote.yhtio             = '{$kukarow["yhtio"]}'
-              AND tuote.status             != 'P'
-              AND tuote.tuotetyyppi         NOT in ('A','B')
-              AND tuote.tuoteno            != ''
-              AND tuote.nakyvyys           != ''";
-    $res = pupe_query($query);
-
-    // Kaikki tuotenumerot arrayseen
-    while ($row = mysql_fetch_array($res)) {
-      $kaikki_tuotteet[] = $row['tuoteno'];
-
-      if ($row['configurable_tuoteno'] == "") $individual_tuotteet[$row['tuoteno']] = $row['tuoteno'];
-      if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
-    }
-
-    $kaikki_tuotteet = array_unique($kaikki_tuotteet);
-
-    return array($kaikki_tuotteet, $individual_tuotteet);
-  }
-
   private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
     $asiakkaat_per_yhteyshenkilo = array();
 
@@ -2108,32 +1994,6 @@ class MagentoClient {
       $this->_error_count++;
       $this->log("Virhe! Tuotelistan hakemisessa", $e);
       return null;
-    }
-  }
-
-  // Hakee storen tiedot
-  private function getStoreInfo($store_id = 1) {
-    try {
-      $result = $this->_proxy->call($this->_session, 'store.info', $store_id);
-      return $result;
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Storetietojen hakemisessa", $e);
-      $this->log(__METHOD__, $e);
-    }
-  }
-
-  // Verkkokaupan lista luoduista storeista
-  private function getStoreList() {
-    try {
-      $result = $this->_proxy->call($this->_session, 'store.list');
-      return $result;
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Storelistan hakemisessa", $e);
-      $this->log(__METHOD__, $e);
     }
   }
 

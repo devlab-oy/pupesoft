@@ -982,7 +982,10 @@ class MagentoClient {
 
     // Tallennetaan EDI-tilauksina
     foreach ($tilaukset as $tilaus) {
-      Edi::create($tilaus, $options);
+      $filename = Edi::create($tilaus, $options);
+
+      $this->log("Tallennettiin tilaus '{$filename}'")
+      $this->debug($tilaus);
     }
   }
 

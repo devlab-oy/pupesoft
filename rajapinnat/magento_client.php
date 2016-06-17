@@ -1660,6 +1660,10 @@ class MagentoClient {
   }
 
   public function set_edi_polku($value) {
+    if (!is_writable($value)) {
+      throw new Exception("EDI -hakemistoon ei voida kirjoittaa");
+    }
+
     $this->edi_polku = $value;
   }
 

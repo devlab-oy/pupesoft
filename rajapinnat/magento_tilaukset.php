@@ -45,31 +45,48 @@ if (empty($pupesoft_tilaustyyppi)) {
   $pupesoft_tilaustyyppi = '';
 }
 
-// Magenton soap client
-$magento = new MagentoClient($magento_api_ht_url, $magento_api_ht_usr, $magento_api_ht_pas);
-
-// Halutaanko est‰‰ tilausten tuplasis‰‰nluku, eli jos tilaushistoriasta lˆytyy k‰sittely
-// 'processing_pupesoft'-tilassa niin tilausta ei lueta sis‰‰n jos sis‰‰nluvun esto on p‰‰ll‰
-// Default on: YES
-if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
-  $magento->setSisaanluvunEsto($magento_sisaanluvun_esto);
+// Soap Clientin extra optiot
+if (empty($magento_client_options)) {
+  $magento_client_options = array(
+    // 'login'    => 'http_basic_user',
+    // 'password' => 'http_basic_pass',
+  );
 }
+
+// Lokitetaanko debug -tietoa lokitiedostoon
+if (empty($magento_debug)) {
+  $magento_debug = false;
+}
+
+// Magenton soap client
+$magento = new MagentoClient(
+  $magento_api_ht_url,
+  $magento_api_ht_usr,
+  $magento_api_ht_pas,
+  $magento_client_options,
+  $magento_debug
+);
+
+$magento->set_edi_polku($magento_api_ht_edi);
+$magento->set_magento_erikoiskasittely($verkkokauppa_erikoiskasittely);
+$magento->set_magento_fetch_order_status($magento_tilaushaku);
+$magento->set_magento_maksuehto_ohjaus($magento_maksuehto_ohjaus);
+$magento->set_ovt_tunnus($ovt_tunnus);
+$magento->set_pupesoft_tilaustyyppi($pupesoft_tilaustyyppi);
+$magento->set_rahtikulu_nimitys($rahtikulu_nimitys);
+$magento->set_rahtikulu_tuoteno($rahtikulu_tuoteno);
+$magento->set_verkkokauppa_asiakasnro($verkkokauppa_asiakasnro);
+$magento->setSisaanluvunEsto($magento_sisaanluvun_esto);
 
 if ($magento->getErrorCount() > 0) {
   exit;
 }
 
 try {
-  // Haetaan tilaukset magentosta
-  $tilaukset = $magento->hae_tilaukset($magento_tilaushaku);
+  // Haetaan tilaukset magentosta ja tallennetaan EDI-tilauksiksi
+  $tilaukset = $magento->tallenna_tilaukset();
 }
 catch (Exception $e) {
   $message = "Tilausten haku ep‰onnistui";
   $magento->log($message, $e, "order");
-  exit;
-}
-
-// Tehd‰‰n EDI-tilaukset
-foreach ($tilaukset as $tilaus) {
-  $filename = Edi::create($tilaus);
 }

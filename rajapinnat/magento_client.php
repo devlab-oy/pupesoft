@@ -984,8 +984,8 @@ class MagentoClient {
     foreach ($tilaukset as $tilaus) {
       $filename = Edi::create($tilaus, $options);
 
-      $this->log("Tallennettiin tilaus '{$filename}'");
-      $this->debug($tilaus);
+      $this->log("Tallennettiin tilaus '{$filename}'", null, "order");
+      $this->debug($tilaus, null, "order");
     }
   }
 
@@ -2166,14 +2166,14 @@ class MagentoClient {
   }
 
   // debug level logging
-  private function debug($string, $exception = "") {
+  private function debug($string, $exception = "", $type = 'product') {
     if ($this->debug_logging === false) {
       return;
     }
 
     $string = print_r($string, true);
 
-    $this->log($string, $exception);
+    $this->log($string, $exception, $type);
   }
 
   // Palauttaa syvimmän kategoria id:n annetusta tuotteen koko tuotepolusta

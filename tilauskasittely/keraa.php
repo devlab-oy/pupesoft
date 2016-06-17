@@ -583,7 +583,7 @@ if ($tee == 'P') {
       }
     }
   }
-echo "586 toim $toim vertaus_hylly ",var_dump($vertaus_hylly),"<br><br> reklahyllyalue & nro ",var_dump($reklahyllyalue)," - ",var_dump($reklahyllynro)," <br><br>";
+
   // Tarkistetaan syötetyt varastopaikat
   if ($toim == 'VASTAANOTA_REKLAMAATIO') {
     for ($a=0; $a < count($kerivi); $a++) {

@@ -981,10 +981,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and tilausrivi.kampanja > 0 ,tilausrivi.rivihinta,0)) kampanja2,
                 sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and tilausrivi.kampanja > 0 ,tilausrivi.rivihinta,0)) kampanja3,
                 sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and tilausrivi.kampanja > 0 ,tilausrivi.rivihinta,0)) kampanja4,
-                sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.rivihinta,0)) sample1,
-                sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.rivihinta,0)) sample2,
-                sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.rivihinta,0)) sample3,
-                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.rivihinta,0)) sample4,
+                sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample1,
+                sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample2,
+                sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample3,
+                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample4,
                 max(tilausrivi.laskutettuaika) myyntipvm
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                 JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus 

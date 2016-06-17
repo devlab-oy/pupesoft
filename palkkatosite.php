@@ -122,6 +122,40 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
       $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
     }
+    // T‰m‰ on Palkka.fi CSV siirtomuoto
+    elseif ($tiedostomuoto == "PALKKAFI") {
+      /*
+        Aineisto sarkaineroteltu tekstitiedosto
+        0 tyyppi
+        1 tili
+        2 tilin nimi
+        3 summa
+        4
+        5
+        6
+        7
+      */
+
+      $kentat = explode(";", $rivi);
+
+      //  Trimmataan kaikki
+      foreach ($kentat as &$k) {
+        $k = pupesoft_cleanstring(trim($k));
+        $k = pupesoft_csvstring($k);
+      }
+
+      // Ekalla rivill‰ on otsikkotiedot
+      if ($maara == 1) {
+        // Otetaan p‰iv‰m‰‰r‰v‰lin loppu p‰iv‰m‰‰r‰ksi
+        list($tpp, $tpk, $tpv) = explode(".", $kentat[6]);
+      }
+      else {
+        $itili[$maara]   = $kentat[1];
+        $isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
+        $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+        $selite = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+      }
+    }
     elseif ($tiedostomuoto == "AMMATTILAINEN") {
 
       /*
@@ -147,7 +181,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
       // Tili
       $itili[$maara] = $kentat[0];
 
-      //  Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
+      // Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
       $ikustp[$maara]   = "";
       $iprojekti[$maara]  = "";
 
@@ -275,7 +309,8 @@ echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     <tr><th>".t("Valitse tiedostomuoto")."</th><td>
     <select name = 'tiedostomuoto'>
     <option value ='PRETAX'>Pretax palkkatosite</option>
-    <option value ='AMMATTILAINEN'>Ammattilainen/Aboa palkanlaskenta</option>
+    <option value ='AMMATTILAINEN'>Ammattilainen/Aboa/Heeros palkanlaskenta</option>
+    <option value ='PALKKAFI'>Palkka.fi</option>
     <option value ='M2MATKALASKU'>M2 Matkalasku</option>
     </select>
     </td></tr>

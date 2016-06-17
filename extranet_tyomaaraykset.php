@@ -322,8 +322,8 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   $valmistajatieto = !empty($tyomaarays['valmistaja']) ? $tyomaarays['valmistaja'] : $tyomaarays['merkki'];
   echo "<td>{$valmistajatieto}</td>";
-  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['mallivari']}</td>";
+  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['tyostatus']}</td>";
   echo "<td>{$tyomaarays['komm1']}</td>";
   echo "<td>{$tyomaarays['komm2']}</td>";

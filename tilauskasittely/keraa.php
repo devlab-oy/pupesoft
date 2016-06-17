@@ -583,7 +583,7 @@ if ($tee == 'P') {
       }
     }
   }
-
+echo "586 toim $toim vertaus_hylly ",var_dump($vertaus_hylly),"<br><br> reklahyllyalue & nro ",var_dump($reklahyllyalue)," - ",var_dump($reklahyllynro)," <br><br>";
   // Tarkistetaan syötetyt varastopaikat
   if ($toim == 'VASTAANOTA_REKLAMAATIO') {
     for ($a=0; $a < count($kerivi); $a++) {
@@ -3104,7 +3104,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
     $query = "SELECT
               tilausrivi.tyyppi,
-              concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
+              tilausrivi.tuoteno,
+              tilausrivi.nimitys,
               tilausrivi.tuoteno puhdas_tuoteno,
               tilausrivi.hyllyalue hyllyalue,
               tilausrivi.hyllynro hyllynro,
@@ -3257,6 +3258,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           <tr>
           <th>".t("Varastopaikka")."</th>
           <th>".t("Tuoteno")."</th>
+          <th>".t("Tuotenimitys")."</th>
           <th>".t("Määrä")."</th>
           <th>".t("Poikkeava määrä")."</th>";
 
@@ -3343,6 +3345,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "  <tr class='aktiivi'>
               <td>*</td>
               <td>$row[tuoteno]</td>
+              <td>$row[nimitys]</td>
               <td>$row[varattu]</td>
               <td>".t("Saldoton tuote")."</td>";
 
@@ -3466,6 +3469,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<input type='hidden' name='vertaus_hylly[$row[tunnus]]' value='$row[varastopaikka_rekla]'>";
           echo "</td>";
           echo "<td>$row[tuoteno] <input type='hidden' name='rivin_tuoteno[$row[tunnus]]' value='$row[tuoteno]'> <input type='hidden' name='rivin_puhdas_tuoteno[$row[tunnus]]' value='$row[puhdas_tuoteno]'></td>";
+          echo "<td>$row[nimitys] <input type='hidden' name='rivin_nimitys[$row[tunnus]]' value='$row[nimitys]'> <input type='hidden' name='rivin_puhdas_nimitys[$row[tunnus]]' value='$row[puhdas_nimitys]'></td>";
           echo "<td id='{$row['tunnus']}_varattu'>$row[varattu] <input type='hidden' name='rivin_varattu[$row[tunnus]]' value='$row[varattu]'> </td>";
           echo "<td>";
 

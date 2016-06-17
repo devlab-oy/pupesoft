@@ -111,6 +111,30 @@ class MagentoClient {
   // Lisätäänkö lapsituotteiden nimeen kaikki variaatioiden arvot
   private $magento_nimitykseen_parametrien_arvot = false;
 
+  // Ovt tunnus, kenelle EDI-tilaukset tehdään (yhtio.ovttunnus)
+  private $ovt_tunnus = null;
+
+  // Mikä on EDI-tilauksen tilaustyyppi
+  private $pupesoft_tilaustyyppi = '';
+
+  // Mikä on EDI-tilauksella rahtikulutuotteen nimitys
+  private $rahtikulu_nimitys = 'Lähetyskulut';
+
+  // Mikä on EDI-tilauksella rahtikulutuotteen tuotenumero (yhtio.rahti_tuotenumero)
+  private $rahtikulu_tuoteno = null;
+
+  // Mikä on EDI-tilauksella asiakasnumero, jolle tilaus tehdään
+  private $verkkokauppa_asiakasnro = null;
+
+  // Minne hakemistoon EDI-tilaus tallennetaan
+  private $edi_polku = '/tmp';
+
+  // Korvaavia Maksuehtoja Magenton maksuehdoille
+  private $magento_maksuehto_ohjaus = array();
+
+  // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
+  private $magento_erikoiskasittely = array();
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -867,7 +891,7 @@ class MagentoClient {
 
   // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
   // Palauttaa arrayn tilauksista
-  public function hae_tilaukset($status = 'processing') {
+  private function hae_tilaukset($status = 'processing') {
     $this->log("Haetaan tilauksia", '', $type = 'order');
 
     $orders = array();
@@ -932,7 +956,20 @@ class MagentoClient {
 
   // Hakee kaikki tilaukset Magentosta ja tallentaa ne edi_tilauksiksi
   public function tallenna_tilaukset() {
+    // status, mitä tilauksia haetaan
     $status = $this->magento_fetch_order_status;
+
+    // EDI-tilauksen luontiin tarvittavat parametrit
+    $options = array(
+      'edi_polku'          => $this->edi_polku,
+      'ovt_tunnus'         => $this->ovt_tunnus,
+      'rahtikulu_nimitys'  => $this->rahtikulu_nimitys,
+      'rahtikulu_tuoteno'  => $this->rahtikulu_tuoteno,
+      'tilaustyyppi'       => $this->pupesoft_tilaustyyppi,
+      'asiakasnro'         => $this->verkkokauppa_asiakasnro,
+      'maksuehto_ohjaus'   => $this->magento_maksuehto_ohjaus,
+      'erikoiskasittely'   => $this->magento_erikoiskasittely,
+    );
 
     // Haetaan tilaukset magentosta
     try {
@@ -945,7 +982,7 @@ class MagentoClient {
 
     // Tallennetaan EDI-tilauksina
     foreach ($tilaukset as $tilaus) {
-      Edi::create($tilaus);
+      Edi::create($tilaus, $options);
     }
   }
 
@@ -1600,6 +1637,38 @@ class MagentoClient {
 
   public function set_magento_simple_tuote_nimityskentta($value) {
     $this->magento_simple_tuote_nimityskentta = $value;
+  }
+
+  public function set_ovt_tunnus($value) {
+    $this->ovt_tunnus = $value;
+  }
+
+  public function set_pupesoft_tilaustyyppi($value) {
+    $this->pupesoft_tilaustyyppi = $value;
+  }
+
+  public function set_rahtikulu_nimitys($value) {
+    $this->rahtikulu_nimitys = $value;
+  }
+
+  public function set_rahtikulu_tuoteno($value) {
+    $this->rahtikulu_tuoteno = $value;
+  }
+
+  public function set_verkkokauppa_asiakasnro($value) {
+    $this->verkkokauppa_asiakasnro = $value;
+  }
+
+  public function set_edi_polku($value) {
+    $this->edi_polku = $value;
+  }
+
+  public function set_magento_maksuehto_ohjaus($value) {
+    $this->magento_maksuehto_ohjaus = $value;
+  }
+
+  public function set_magento_erikoiskasittely($value) {
+    $this->magento_erikoiskasittely = $value;
   }
 
   // Hakee error_countin:n

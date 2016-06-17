@@ -62,6 +62,14 @@ elseif (empty($magento_ajolista)) {
 // neljäs parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
 $ajetaanko_kaikki = empty($argv[4]) ? false : true;
 
+// Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
+if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
+  $lockfile = 'tuote_export-tilaukset-flock.lock';
+}
+else {
+  $lockfile = 'tuote_export-flock.lock';
+}
+
 // Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
 if (empty($verkkokauppa_saldo_varasto)) {
   $verkkokauppa_saldo_varasto = array(0);
@@ -293,7 +301,8 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 $tuote_export_error_count = 0;
 
 $lock_params = array(
-  "locktime" => 5400
+  "lockfile" => $lockfile,
+  "locktime" => 5400,
 );
 
 // alustetaan arrayt

@@ -60,7 +60,7 @@ elseif (empty($magento_ajolista)) {
 }
 
 // neljäs parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
-$ajetaanko_kaikki = empty($argv[4]) ? "NO" : "YES";
+$ajetaanko_kaikki = empty($argv[4]) ? false : true;
 
 // Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
 if (empty($verkkokauppa_saldo_varasto)) {

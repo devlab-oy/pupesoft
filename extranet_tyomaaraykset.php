@@ -1,10 +1,13 @@
 <?php
 
+$pupe_DataTables = "tyomaaraystable";
+
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
 enable_ajax();
+pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -183,15 +186,23 @@ elseif ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
 }
 
 function piirra_kayttajan_tyomaaraykset() {
+  global $pupe_DataTables;
+
   echo "<font class='head'>".t("Huoltopyynnöt")."</font><hr>";
   piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
     echo "</tr>";
+
+    echo "<tr>";
+    piirra_hakuboksit();
+    echo "</tr>";
+    echo "</thead>";
 
     foreach ($naytettavat_tyomaaraykset as $tyomaarays) {
       piirra_tyomaaraysrivi($tyomaarays);
@@ -201,7 +212,7 @@ function piirra_kayttajan_tyomaaraykset() {
     echo "</form>";
   }
   else {
-    echo "<br><font class='error'>".t('Työmääräyksiä ei löydy järjestelmästä')."!</font><br/>";
+    echo "<br><font class='message'>".t('Ei avoimia huoltopyyntöjä')."!</font><br/>";
   }
 
   piirra_luo_tyomaarays();
@@ -302,8 +313,27 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
 
   foreach ($headers as $header => $rajataan) {
     if ($rajattu and $rajataan) continue;
+
     echo "<th>$header</th>";
   }
+}
+
+function piirra_hakuboksit() {
+  $headers = array(
+    'tunnus',
+    'luontiaika',
+    'valmistaja',
+    'mallivari',
+    'valmnro',
+    'tyostatus',
+    'komm1',
+    'komm2'
+   );
+  foreach ($headers as $header) {
+    echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
+  }
+  // Huoltpyyntökopi hidden search
+  echo "<td style ='display:none'><input type='hidden' class='search_field' name='search_hidden'/></td>";
 }
 
 function piirra_tyomaaraysrivi($tyomaarays) {
@@ -334,7 +364,7 @@ function piirra_tyomaaraysrivi($tyomaarays) {
 }
 
 function piirra_luo_tyomaarays() {
-  echo "<br>";
+  echo "<br><br>";
   echo "<form name='uusi_tyomaarays_button'>";
   echo "<input type='hidden' name='tyom_toiminto' value='UUSI'>";
   echo "<input type='submit' value='".t('Uusi huoltopyyntö')."'>";

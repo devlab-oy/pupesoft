@@ -2,12 +2,16 @@
 
 $pupe_DataTables = "tyomaaraystable";
 
+if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') {
+  $nayta_pdf = 1; //Generoidaan .pdf-file
+  $ohje = 'off';
+}
+
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
 enable_ajax();
-pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -45,6 +49,10 @@ $request = array(
   'tyom_parametrit' => $tyom_parametrit,
   'osoite_parametrit' => $osoite_parametrit
 );
+
+if ($request['tyom_toiminto'] == '' and $_REQUEST["tee"] != 'NAYTATILAUS') {
+  pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
+}
 
 if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
 
@@ -186,14 +194,14 @@ elseif ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
 }
 
 function piirra_kayttajan_tyomaaraykset() {
-  global $pupe_DataTables;
+  global $pupe_DataTables, $request;
 
   echo "<font class='head'>".t("Huoltopyynnöt")."</font><hr>";
   piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";  
     echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
@@ -422,6 +430,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<input type='hidden' id='viesti1' name='viesti1' value='{$virhe1}'>";
   echo "<input type='hidden' id='viesti2' name='viesti2' value='{$virhe2}'>";
   echo "<input type='hidden' id='tarkistusmuuttuja' name='tarkistusmuuttuja' value=''>";
+  echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
   echo "<div style='display: none;'>";
   echo "<input type='submit'>";
   echo "</div>";
@@ -613,9 +622,16 @@ function email_tyomaarayskopio($request) {
 
   require_once "huoltopyynto_pdf.inc";
 
+  if ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
+    $mihin_maili_lahetetaan = $kukarow['eposti'];
+  }
+  else {
+    $mihin_maili_lahetetaan = $yhtiorow['uusi_huoltopyynto_email'];
+  }
+
   // Sähköpostin lähetykseen parametrit
   $parametrit = array(
-    "to"       => $kukarow['eposti'],
+    "to"       => $mihin_maili_lahetetaan,
     "cc"       => "",
     "subject"    => t('Huoltopyyntö')." {$tyom_tunnus}",
     "ctype"      => "text",

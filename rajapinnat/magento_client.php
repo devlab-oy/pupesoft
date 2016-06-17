@@ -984,7 +984,7 @@ class MagentoClient {
     foreach ($tilaukset as $tilaus) {
       $filename = Edi::create($tilaus, $options);
 
-      $this->log("Tallennettiin tilaus '{$filename}'")
+      $this->log("Tallennettiin tilaus '{$filename}'");
       $this->debug($tilaus);
     }
   }

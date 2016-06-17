@@ -113,6 +113,22 @@ class Edi {
       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
     }
 
+    $tilausviite = '';
+    $tilausnumero = '';
+    $kohde = '';
+
+    if (!empty($order['reference_number'])) {
+      $tilausviite = str_replace("\n", " ", $order['reference_number']);
+    }
+
+    if (!empty($order['order_number'])) {
+      $tilausnumero = str_replace("\n", " ", $order['order_number']);
+    }
+
+    if (!empty($order['target'])) {
+      $kohde = str_replace("\n", " ", $order['target']);
+    }
+
     // tilauksen otsikko
     $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:".$order['increment_id']." version:AFP-1.0 *MS\n";
     $edi_order .= "*MS ".$order['increment_id']."\n";
@@ -122,9 +138,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:".str_replace("\n", " ", $order['reference_number'])."\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:".str_replace("\n", " ", $order['order_number'])."\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:".str_replace("\n", " ", $order['target'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$tilausviite}\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:{$tilausnumero}\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:{$kohde}\n";
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";

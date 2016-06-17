@@ -18,8 +18,17 @@ class Edi {
     $rahtikulu_nimitys             = $options['rahtikulu_nimitys'];
     $verkkokauppa_erikoiskasittely = $options['erikoiskasittely'];
 
-    if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej‰ puuttuu\n");
-    if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej‰ puuttuu\n");
+    if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
+      die("Parametrej‰ puuttuu\n");
+    }
+
+    if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) {
+      die("Parametrej‰ puuttuu\n");
+    }
+
+    if (!is_writable($magento_api_ht_edi)) {
+      die("EDI -hakemistoon ei voida kirjoittaa\n");
+    }
 
     // Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
     $giftcards = empty($order['webtex_giftcard']) ? null : json_decode($order['webtex_giftcard']);

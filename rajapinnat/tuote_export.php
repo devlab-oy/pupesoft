@@ -37,16 +37,16 @@ if (empty($kukarow)) {
   die("Admin -käyttäjä ei löydy.");
 }
 
+// toinen parametri verkkokauppa tyyppi
 $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
 if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
   die("Et antanut verkkokaupan tyyppiä.\n");
 }
 
-$ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
-
-if (!empty($argv[4])) {
-  $magento_ajolista = explode(',', $argv[4]);
+// kolmas parametri ajettavat exportit
+if (!empty($argv[3])) {
+  $magento_ajolista = explode(',', $argv[3]);
 }
 elseif (empty($magento_ajolista)) {
   $magento_ajolista = array(
@@ -58,6 +58,9 @@ elseif (empty($magento_ajolista)) {
     'saldot'
   );
 }
+
+// neljäs parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
+$ajetaanko_kaikki = empty($argv[4]) ? "NO" : "YES";
 
 // Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
 if (empty($verkkokauppa_saldo_varasto)) {

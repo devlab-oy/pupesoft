@@ -154,6 +154,10 @@ if ($tee == '') {
   echo "<th>".t("Valitse listattavat kalenteritapahtuman lajit")."<br><br><input type='checkbox' class='check_all' value='kaletapa'>".t("Valitse kaikki")."</th>";
   echo "<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
       <table width='100%'>";
+  
+  if ($kukarow['kieli'] == '') {
+      $kukarow['kieli'] = $yhtiorow['kieli'];
+  }
 
   $query = "SELECT tunnus,selitetark, perhe
             FROM avainsana
@@ -275,13 +279,15 @@ if ($tee == '') {
               JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
               JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) 
               AND avainsana.kieli  = '{$kukarow[kieli]}')
+              JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ({$kale_querylisa}) 
+              AND as_fi.kieli  = 'fi')
               {$asiakasjoini}
               WHERE kalenteri.yhtio = '{$yhtio}'
               AND kalenteri.kuka    IN ({$vertaa})
               AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
               AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
               AND kalenteri.tyyppi  IN ('kalenteri','memo')
-              AND kalenteri.tapa    = avainsana.selitetark
+              AND kalenteri.tapa    = as_fi.selitetark
               {$lisa}
               GROUP BY 1,2,3
               HAVING count(*) > 0
@@ -346,13 +352,15 @@ if ($tee == '') {
                     JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
                     JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['tunnus']}') 
                     AND avainsana.kieli  = '{$kukarow[kieli]}')
+                    JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ('{$rivi['tunnus']}') 
+                    AND as_fi.kieli  = 'fi')
                     LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
                     WHERE kalenteri.yhtio = '{$yhtio}'
                     AND kalenteri.kuka    IN ('{$rivi['kuka']}')
                     AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                     AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
                     AND kalenteri.tyyppi  IN ('kalenteri','memo')
-                    AND kalenteri.tapa    = avainsana.selitetark
+                    AND kalenteri.tapa    = as_fi.selitetark
                     {$lisa}
                     ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
           $ressu = pupe_query($query);
@@ -466,13 +474,15 @@ if ($tee == '') {
                 JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
                 JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) 
                 AND avainsana.kieli  = '{$kukarow[kieli]}')
+                JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ({$kale_querylisa}) 
+                AND as_fi.kieli  = 'fi')
                 LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
                 WHERE kalenteri.yhtio = '{$yhtio}'
                 AND kalenteri.kuka    IN ($vertaa)
                 AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                 AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
                 AND kalenteri.tyyppi  IN ('kalenteri','memo')
-                AND kalenteri.tapa    = avainsana.selitetark
+                AND kalenteri.tapa    = as_fi.selitetark
                 {$lisa}
                 ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
       $ressu = pupe_query($query);

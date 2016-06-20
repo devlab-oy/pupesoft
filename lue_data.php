@@ -2654,7 +2654,7 @@ if (!$cli and !isset($api_kentat)) {
 
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu_query);
 
-  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
+  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":<br>".t("(Näitä tietoja ei voi muuttaa)")."</td>";
   echo "<td><ul><li>".strtolower(implode("</li><li>", $pakolliset))."</li></ul></td></tr>";
 
   if (!empty($wherelliset)) {

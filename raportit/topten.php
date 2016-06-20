@@ -31,7 +31,7 @@ echo "<form method='post' action='topten.php'>";
 echo "<table>";
 echo "<tr><th>".t('Valitse päivämäärärajaus tai syötä käsin')."</th>";
 
-echo "<td>";
+echo "<td colspan='3'>";
 echo "<select name='pvmvalinta' value='' onchange='submit();'>";
 
 $tvv_sel = $pvmvalinta == 'tvv' ? 'selected' : '';
@@ -65,13 +65,16 @@ echo "<table>";
 echo "<tr><th>".t('Näytä kaikki')."</th>";
 echo "<td>";
 echo t("Tuotteet");
-echo "<input type='checkbox' name='limitit[]' value = 'tuote' $tuo_sel>";
+echo ": <input type='checkbox' name='limitit[]' value = 'tuote' $tuo_sel>";
+echo "</td><td>";
 echo t("Asiakkaat");
-echo "<input type='checkbox' name='limitit[]' value = 'asiakas' $as_sel>";
+echo ": <input type='checkbox' name='limitit[]' value = 'asiakas' $as_sel>";
+echo "</td><td>";
 echo t("Myyjät");
-echo "<input type='checkbox' name='limitit[]' value = 'asiakasmyyja' $asmy_sel>";
+echo ": <input type='checkbox' name='limitit[]' value = 'asiakasmyyja' $asmy_sel>";
+echo "</td><td>";
 echo t("Asiakasryhmät");
-echo "<input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
+echo ": <input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
 echo "</td>";
 echo "</tr>";
 echo "</table><br>";
@@ -82,7 +85,7 @@ $monivalintalaatikot_normaali = array();
 require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "<input type='submit' name='aja_raportti' value='", t("Näytä"), "'>";
-echo "</form>";
+echo "</form><br>";
 
 if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and !empty($vvl) and !empty($kkl) and !empty($ppl)) {
   $alkupvm = "$vva-$kka-$ppa";
@@ -94,19 +97,19 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
   );
 
   echo "<table>";
-  echo "<tr><td>";
+  echo "<tr><td class='ptop back'>";
   piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset));
   echo "</td>";
 
-  echo "<td>";
+  echo "<td class='ptop back'>";
   piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset));
   echo "</td>";
 
-  echo "<tr><td>";
+  echo "<tr><td class='ptop back'>";
   piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset));
   echo "</td>";
 
-  echo "<td>";
+  echo "<td class='ptop back'>";
   piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset));
   echo "</td></tr></table>";
 }
@@ -158,20 +161,20 @@ function piirra_taulukko($data) {
 
   $jarjestys = 1;
 
-  echo "<table>";
+  echo "<table style='width: 100%;'>";
   echo "<tr><th>#</th><th>".t($data['otsikko'])."</th><th>".t('Laskutus')."</th></tr>";
 
   foreach ($data['rivit'] as $row) {
     echo "<tr>";
     echo "<td>{$jarjestys}</td>";
     echo "<td>{$row['nimi']}</td>";
-    echo "<td>".hintapyoristys($row['myyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
+    echo "<td align='right'>".hintapyoristys($row['myyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
     echo "</tr>";
 
     $jarjestys++;
   }
 
-  echo "<tr><th colspan ='2'>".t('Yhteensä')."</th><th>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</th></tr>";
+  echo "<tr><td class='tumma' colspan='2'>".t('Yhteensä')."</td><td class='tumma' align='right'>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</td></tr>";
   echo "</table>";
 }
 

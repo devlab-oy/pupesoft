@@ -2,6 +2,20 @@
 
 $pupe_DataTables = 'keikka';
 
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_erikoisale_ui", $_REQUEST["saap_erikoisale_ui"]);
+}
+elseif (!empty($_COOKIE["saap_erikoisale_ui"])) {
+  $saap_erikoisale_ui = $_COOKIE["saap_erikoisale_ui"];
+}
+
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_rivihinta_ui", $_REQUEST["saap_rivihinta_ui"]);
+}
+elseif (!empty($_COOKIE["saap_rivihinta_ui"])) {
+  $saap_rivihinta_ui = $_COOKIE["saap_rivihinta_ui"];
+}
+
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
   $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 }

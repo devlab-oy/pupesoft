@@ -111,6 +111,30 @@ class MagentoClient {
   // Lis‰t‰‰nkˆ lapsituotteiden nimeen kaikki variaatioiden arvot
   private $magento_nimitykseen_parametrien_arvot = false;
 
+  // Ovt tunnus, kenelle EDI-tilaukset tehd‰‰n (yhtio.ovttunnus)
+  private $ovt_tunnus = null;
+
+  // Mik‰ on EDI-tilauksen tilaustyyppi
+  private $pupesoft_tilaustyyppi = '';
+
+  // Mik‰ on EDI-tilauksella rahtikulutuotteen nimitys
+  private $rahtikulu_nimitys = 'L‰hetyskulut';
+
+  // Mik‰ on EDI-tilauksella rahtikulutuotteen tuotenumero (yhtio.rahti_tuotenumero)
+  private $rahtikulu_tuoteno = null;
+
+  // Mik‰ on EDI-tilauksella asiakasnumero, jolle tilaus tehd‰‰n
+  private $verkkokauppa_asiakasnro = null;
+
+  // Minne hakemistoon EDI-tilaus tallennetaan
+  private $edi_polku = '/tmp';
+
+  // Korvaavia Maksuehtoja Magenton maksuehdoille
+  private $magento_maksuehto_ohjaus = array();
+
+  // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
+  private $magento_erikoiskasittely = array();
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -865,74 +889,22 @@ class MagentoClient {
     return $count;
   }
 
-  // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
-  // Palauttaa arrayn tilauksista
-  public function hae_tilaukset($status = 'processing') {
-    $this->log("Haetaan tilauksia", '', $type = 'order');
-
-    $orders = array();
-
-    // Toimii ordersilla
-    $filter = array(array('status' => array('eq' => $status)));
-
-    // Uusia voi hakea? state => 'new'
-    //$filter = array(array('state' => array('eq' => 'new')));
-
-    // N‰in voi hakea yhden tilauksen tiedot
-    //return array($this->_proxy->call($this->_session, 'sales_order.info', '100019914'));
-
-    // Haetaan tilaukset (orders.status = 'processing')
-    $fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
-
-    // HUOM: invoicella on state ja orderilla on status
-    // Invoicen statet 'pending' => 1, 'paid' => 2, 'canceled' => 3
-    // Invoicella on state
-    // $filter = array(array('state' => array('eq' => 'paid')));
-    // Haetaan laskut (invoices.state = 'paid')
-
-    foreach ($fetched_orders as $order) {
-      $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
-
-      // Haetaan tilauksen tiedot (orders)
-      $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
-
-      // Looptaan tilauksen statukset
-      foreach ($temp_order['status_history'] as $historia) {
-        // Jos tilaus on ollut kerran jo processing_pupesoft, ei haeta sit‰ en‰‰
-        $_status = $historia['status'];
-
-        if ($_status == "processing_pupesoft" and $this->_sisaanluvun_esto == "YES") {
-          $this->log("Tilausta on k‰sitelty {$_status} tilassa, ohitetaan sis‰‰nluku", '', $type = 'order');
-          // Skipataan t‰m‰ $order
-          continue 2;
-        }
-      }
-
-      $orders[] = $temp_order;
-
-      // P‰ivitet‰‰n tilauksen tila ett‰ se on noudettu pupesoftiin
-      $_data = array(
-        'orderIncrementId' => $order['increment_id'],
-        'status' => 'processing_pupesoft',
-        'Tilaus noudettu Pupesoftiin',
-      );
-
-      $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
-    }
-
-    // Kirjataan kumpaankin logiin
-    $_count = count($orders);
-
-    $this->log("{$_count} tilausta haettu", '', $type = 'order');
-    $this->log("{$_count} tilausta haettu");
-
-    // Palautetaan lˆydetyt tilaukset
-    return $orders;
-  }
-
   // Hakee kaikki tilaukset Magentosta ja tallentaa ne edi_tilauksiksi
   public function tallenna_tilaukset() {
+    // status, mit‰ tilauksia haetaan
     $status = $this->magento_fetch_order_status;
+
+    // EDI-tilauksen luontiin tarvittavat parametrit
+    $options = array(
+      'edi_polku'          => $this->edi_polku,
+      'ovt_tunnus'         => $this->ovt_tunnus,
+      'rahtikulu_nimitys'  => $this->rahtikulu_nimitys,
+      'rahtikulu_tuoteno'  => $this->rahtikulu_tuoteno,
+      'tilaustyyppi'       => $this->pupesoft_tilaustyyppi,
+      'asiakasnro'         => $this->verkkokauppa_asiakasnro,
+      'maksuehto_ohjaus'   => $this->magento_maksuehto_ohjaus,
+      'erikoiskasittely'   => $this->magento_erikoiskasittely,
+    );
 
     // Haetaan tilaukset magentosta
     try {
@@ -945,7 +917,10 @@ class MagentoClient {
 
     // Tallennetaan EDI-tilauksina
     foreach ($tilaukset as $tilaus) {
-      Edi::create($tilaus);
+      $filename = Edi::create($tilaus, $options);
+
+      $this->log("Tallennettiin tilaus '{$filename}'", null, "order");
+      $this->debug($tilaus, null, "order");
     }
   }
 
@@ -998,42 +973,8 @@ class MagentoClient {
     return $count;
   }
 
-  // P‰ivitt‰‰ tuotteiden hinnat
-  public function paivita_hinnat(array $dnshinnasto) {
-    $count = 0;
-    $batch_count = 0;
-
-    // P‰ivitet‰‰n tuotteen hinnastot
-    foreach ($dnshinnasto as $tuote) {
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
-
-      // Batch calls
-      $calls[] = array('catalog_product.update', array($tuote['tuoteno'], array('price' => $tuote['hinta'])));
-
-      $batch_count++;
-
-      if ($batch_count > self::MULTICALL_BATCH_SIZE) {
-        try {
-          $result = $this->_proxy->multicall($this->_session, $calls);
-          var_dump($result);
-        }
-        catch (Exception $e) {
-          $this->_error_count++;
-          $this->log("Virhe! Hintojen p‰ivitys ep‰onnistui {$tuote['tuoteno']}", $e);
-        }
-
-        $batch_count = 0;
-        $calls = array();
-      }
-    }
-
-    // P‰ivitettyjen tuotteiden m‰‰r‰
-    return $count;
-  }
-
   // Poistaa magentosta tuotteita
   // HUOM, t‰h‰n passataan aina **KAIKKI** verkkokauppatuotteet.
-  // Methodi katsoo, ett‰ kaikki n‰m‰ on kaupassa, ja muut paitsi gifcard-tuotteet dellataan!
   public function poista_poistetut(array $kaikki_tuotteet, $exclude_giftcards = false) {
     if ($this->_magento_poista_tuotteita !== true) {
       $this->log("Tuoteiden poisto kytketty pois p‰‰lt‰.");
@@ -1074,196 +1015,6 @@ class MagentoClient {
     $this->log("$poistettu tuotetta poistettu");
 
     return $poistettu;
-  }
-
-  // Poistaa magentosta kategorioita
-  // HUOM, t‰h‰n passataan aina **KAIKKI** verkkokauppakategoriat.
-  public function poista_kategorioita(array $kaikki_kategoriat) {
-    // Work in progress, don't use :)
-    return;
-
-    // Magento kategorian tunnus, jonka alle kaikki tuoteryhm‰t lis‰t‰‰n
-    $parent_id = $this->_parent_id;
-    $count = 0;
-
-    // Haetaan kaikki kategoriat, joiden parent_id on parent id
-    $magento_kategoriat = $this->_proxy->call($this->_session, 'catalog_category.level',
-      array(
-        null, // website
-        null, // storeview
-        $parent_id,
-      )
-    );
-
-    var_dump($magento_kategoriat);
-
-    $this->log("$count kategoriaa poistettu");
-
-    return $count;
-  }
-
-  // Tapahtumaloki
-  public function log($message, $exception = '', $type = 'product') {
-    if ($exception != '') {
-      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-    }
-
-    $log_name = $type == 'product' ? 'magento_export' : 'magento_orders';
-
-    pupesoft_log($log_name, $message);
-  }
-
-  // Poistaa tuotteen kaikki kuvat ja lis‰‰ ne takaisin
-  public function lisaa_tuotekuvat($product_id, $tuotekuvat) {
-    if (count($tuotekuvat) == 0 or empty($product_id)) {
-      return;
-    }
-
-    $types = array('image', 'small_image', 'thumbnail');
-
-    // Pit‰‰ ensin poistaa kaikki tuotteen kuvat Magentosta
-    $magento_pictures = $this->listaa_tuotekuvat($product_id);
-
-    // Poistetaan kuvat
-    foreach ($magento_pictures as $file) {
-      $this->poista_tuotekuva($product_id, $file);
-    }
-
-    // Loopataan tuotteen kaikki kuvat
-    foreach ($tuotekuvat as $kuva) {
-
-      // Lis‰t‰‰n tuotekuva kerrallaan
-      try {
-        $data = array(
-          $product_id,
-          array(
-            'file'     => $kuva,
-            'label'    => '',
-            'position' => 0,
-            'types'    => $types,
-            'exclude'  => 0
-          ),
-        );
-
-        $return = $this->_proxy->call(
-          $this->_session,
-          'catalog_product_attribute_media.create',
-          $data
-        );
-
-        $this->log("Lis‰tty kuva '{$kuva['name']}'");
-        $this->debug($return);
-      }
-      catch (Exception $e) {
-        // Nollataan base-encoodattu kuva, ett‰ logi ei tuu isoks
-        $data[1]["file"]["content"] = '...content poistettu logista...';
-
-        $this->log("Virhe! Kuvan lis‰ys ep‰onnistui", $e);
-        $this->debug($data);
-        $this->_error_count++;
-      }
-    }
-  }
-
-  // Hakee tuotteen tuotekuvat Magentosta
-  public function listaa_tuotekuvat($product_id) {
-    $pictures = array();
-    $return = array();
-
-    // Haetaan tuotteen kuvat
-    try {
-      $pictures = $this->_proxy->call(
-        $this->_session,
-        'catalog_product_attribute_media.list',
-        $product_id);
-    }
-    catch (Exception $e) {
-      $this->log("Virhe! Kuvalistauksen ep‰onnistui", $e);
-      $this->_error_count++;
-    }
-
-    foreach ($pictures as $picture) {
-      $return[] = $picture['file'];
-    }
-
-    return $return;
-  }
-
-  // Poistaa tuotteen tuotekuvan Magentosta
-  public function poista_tuotekuva($product_id, $filename) {
-    // Jos ei haluta k‰sitell‰ tuotekuvia, ei poisteta niit‰ magentosta
-    if ($this->magento_lisaa_tuotekuvat === false) {
-      return;
-    }
-
-    $return = false;
-
-    // Poistetaan tuotteen kuva
-    try {
-      $return = $this->_proxy->call(
-        $this->_session,
-        'catalog_product_attribute_media.remove',
-        array(
-          'product' => $product_id,
-          'file'    => $filename
-        )
-      );
-
-      $this->log("Poistetaan '{$filename}'");
-    }
-    catch (Exception $e) {
-      $this->log("Virhe! Kuvan poisto ep‰onnistui '{$filename}'", $e);
-      $this->_error_count++;
-
-      return false;
-    }
-
-    return $return;
-  }
-
-  // Hakee tuotteen tuotekuvat Pupesoftista
-  public function hae_tuotekuvat($tunnus) {
-    global $kukarow;
-
-    // Jos ei haluta k‰sitell‰ tuotekuvia, palautetaan tyhj‰ array
-    if ($this->magento_lisaa_tuotekuvat === false) {
-      return array();
-    }
-
-    // Populoidaan tuotekuvat array
-    $tuotekuvat = array();
-
-    try {
-      $query = "SELECT
-                liitetiedostot.data,
-                liitetiedostot.filetype,
-                liitetiedostot.filename
-                FROM liitetiedostot
-                WHERE liitetiedostot.yhtio         = '{$kukarow['yhtio']}'
-                AND liitetiedostot.liitostunnus    = '{$tunnus}'
-                AND liitetiedostot.liitos          = 'tuote'
-                AND liitetiedostot.kayttotarkoitus = 'TK'
-                ORDER BY liitetiedostot.jarjestys DESC,
-                liitetiedostot.tunnus DESC";
-      $result = pupe_query($query);
-
-      while ($liite = mysql_fetch_assoc($result)) {
-        $file = array(
-          'content' => base64_encode($liite['data']),
-          'mime'    => $liite['filetype'],
-          'name'    => $liite['filename']
-        );
-
-        $tuotekuvat[] = $file;
-      }
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
-    }
-
-    // Palautetaan tuotekuvat
-    return $tuotekuvat;
   }
 
   // Lis‰‰ asiakkaita Magento-verkkokauppaan.
@@ -1474,40 +1225,6 @@ class MagentoClient {
     return $count;
   }
 
-  // Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
-  public function hae_kieliversiot($tuotenumero) {
-    global $kukarow;
-
-    $kieliversiot_data = array();
-
-    try {
-      $query = "SELECT
-                kieli, laji, selite
-                FROM
-                tuotteen_avainsanat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
-      $result = pupe_query($query);
-
-      while ($avainsana = mysql_fetch_assoc($result)) {
-        $kieli  = $avainsana['kieli'];
-        $laji   = utf8_encode($avainsana['laji']);
-        $selite = utf8_encode($avainsana['selite']);
-
-        // J‰sennell‰‰n tuotteen avainsanat kieliversioittain
-        $kieliversiot_data[$kieli][$laji] = $selite;
-      }
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
-    }
-
-    // Palautetaan kieliversiot
-    return $kieliversiot_data;
-  }
-
   public function setTaxClassID($tax_class_id) {
     $this->_tax_class_id = $tax_class_id;
   }
@@ -1602,6 +1319,42 @@ class MagentoClient {
     $this->magento_simple_tuote_nimityskentta = $value;
   }
 
+  public function set_ovt_tunnus($value) {
+    $this->ovt_tunnus = $value;
+  }
+
+  public function set_pupesoft_tilaustyyppi($value) {
+    $this->pupesoft_tilaustyyppi = $value;
+  }
+
+  public function set_rahtikulu_nimitys($value) {
+    $this->rahtikulu_nimitys = $value;
+  }
+
+  public function set_rahtikulu_tuoteno($value) {
+    $this->rahtikulu_tuoteno = $value;
+  }
+
+  public function set_verkkokauppa_asiakasnro($value) {
+    $this->verkkokauppa_asiakasnro = $value;
+  }
+
+  public function set_edi_polku($value) {
+    if (!is_writable($value)) {
+      throw new Exception("EDI -hakemistoon ei voida kirjoittaa");
+    }
+
+    $this->edi_polku = $value;
+  }
+
+  public function set_magento_maksuehto_ohjaus($value) {
+    $this->magento_maksuehto_ohjaus = $value;
+  }
+
+  public function set_magento_erikoiskasittely($value) {
+    $this->magento_erikoiskasittely = $value;
+  }
+
   // Hakee error_countin:n
   public function getErrorCount() {
     return $this->_error_count;
@@ -1609,7 +1362,7 @@ class MagentoClient {
 
   // Kuittaa asiakkaan aktivoiduksi Magentossa
   // HUOM! Vaatii r‰‰t‰lˆidyn Magenton
-  public function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
+  private function asiakkaanAktivointi($yhtio, $yhteyshenkilon_tunnus) {
     $reply = false;
 
     // Haetaan yhteyshenkilˆn tiedot
@@ -1655,7 +1408,7 @@ class MagentoClient {
 
   // Hakee ja siirt‰‰ tuotteen asiakaskohtaiset hinnat Magentoon
   // HUOM! Vaatii r‰‰t‰lˆidyn Magenton
-  public function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
+  private function lisaaAsiakaskohtaisetTuotehinnat($tuotenumero, $magento_tuotenumero) {
     global $kukarow;
 
     $reply = false;
@@ -1693,60 +1446,6 @@ class MagentoClient {
     }
 
     return $reply;
-  }
-
-  // Hakee ja siirt‰‰ tuotteiden kuvat Magentoon
-  public function lisaa_tuotteiden_kuvat(array $tuotteet) {
-    global $kukarow, $yhtiorow;
-
-    foreach ($tuotteet as $tuote) {
-      // numeerisesta sku_+N
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
-
-      // Haetaan tuotteen tunnus Magentosta
-      $result = $this->_proxy->call($this->_session, 'catalog_product.info', $tuote['tuoteno']);
-      $product_id = $result['product_id'];
-
-      // Haetaan tuotteen kuvat Pupesta
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
-      // Lisataan tuotteen kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-    }
-  }
-
-  // Hakee verkkokauppatuotteet Pupesta
-  public function hae_kaikki_tuotteet() {
-    global $kukarow, $yhtiorow;
-
-    $individual_tuotteet = array();
-    $kaikki_tuotteet = array();
-
-    // Haetaan pupesta kaikki tuotteet (ja configurable-tuotteet), jotka pit‰‰ olla Magentossa
-    $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
-              FROM tuote
-              LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno             = tuotteen_avainsanat.tuoteno
-              AND tuotteen_avainsanat.laji  = 'parametri_variaatio'
-              AND trim(tuotteen_avainsanat.selite) != '')
-              WHERE tuote.yhtio             = '{$kukarow["yhtio"]}'
-              AND tuote.status             != 'P'
-              AND tuote.tuotetyyppi         NOT in ('A','B')
-              AND tuote.tuoteno            != ''
-              AND tuote.nakyvyys           != ''";
-    $res = pupe_query($query);
-
-    // Kaikki tuotenumerot arrayseen
-    while ($row = mysql_fetch_array($res)) {
-      $kaikki_tuotteet[] = $row['tuoteno'];
-
-      if ($row['configurable_tuoteno'] == "") $individual_tuotteet[$row['tuoteno']] = $row['tuoteno'];
-      if ($row['configurable_tuoteno'] != "") $kaikki_tuotteet[] = $row['configurable_tuoteno'];
-    }
-
-    $kaikki_tuotteet = array_unique($kaikki_tuotteet);
-
-    return array($kaikki_tuotteet, $individual_tuotteet);
   }
 
   private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
@@ -2035,32 +1734,6 @@ class MagentoClient {
     }
   }
 
-  // Hakee storen tiedot
-  private function getStoreInfo($store_id = 1) {
-    try {
-      $result = $this->_proxy->call($this->_session, 'store.info', $store_id);
-      return $result;
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Storetietojen hakemisessa", $e);
-      $this->log(__METHOD__, $e);
-    }
-  }
-
-  // Verkkokaupan lista luoduista storeista
-  private function getStoreList() {
-    try {
-      $result = $this->_proxy->call($this->_session, 'store.list');
-      return $result;
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! Storelistan hakemisessa", $e);
-      $this->log(__METHOD__, $e);
-    }
-  }
-
   // Rakentaa url_key:n tuotteelle
   private function getUrlKeyForProduct($tuotedata) {
     $halutut_array = $this->_magento_url_key_attributes;
@@ -2090,14 +1763,14 @@ class MagentoClient {
   }
 
   // debug level logging
-  private function debug($string, $exception = "") {
+  private function debug($string, $exception = "", $type = 'product') {
     if ($this->debug_logging === false) {
       return;
     }
 
     $string = print_r($string, true);
 
-    $this->log($string, $exception);
+    $this->log($string, $exception, $type);
   }
 
   // Palauttaa syvimm‰n kategoria id:n annetusta tuotteen koko tuotepolusta
@@ -2332,5 +2005,268 @@ class MagentoClient {
 
     // Mit‰‰n ei lˆytyny
     return 0;
+  }
+
+  // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
+  // Palauttaa arrayn tilauksista
+  private function hae_tilaukset($status = 'processing') {
+    $this->log("Haetaan tilauksia", '', $type = 'order');
+
+    $orders = array();
+
+    // Toimii ordersilla
+    $filter = array(array('status' => array('eq' => $status)));
+
+    // Uusia voi hakea? state => 'new'
+    //$filter = array(array('state' => array('eq' => 'new')));
+
+    // N‰in voi hakea yhden tilauksen tiedot
+    //return array($this->_proxy->call($this->_session, 'sales_order.info', '100019914'));
+
+    // Haetaan tilaukset (orders.status = 'processing')
+    $fetched_orders = $this->_proxy->call($this->_session, 'sales_order.list', $filter);
+
+    // HUOM: invoicella on state ja orderilla on status
+    // Invoicen statet 'pending' => 1, 'paid' => 2, 'canceled' => 3
+    // Invoicella on state
+    // $filter = array(array('state' => array('eq' => 'paid')));
+    // Haetaan laskut (invoices.state = 'paid')
+
+    foreach ($fetched_orders as $order) {
+      $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
+
+      // Haetaan tilauksen tiedot (orders)
+      $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
+
+      // Looptaan tilauksen statukset
+      foreach ($temp_order['status_history'] as $historia) {
+        // Jos tilaus on ollut kerran jo processing_pupesoft, ei haeta sit‰ en‰‰
+        $_status = $historia['status'];
+
+        if ($_status == "processing_pupesoft" and $this->_sisaanluvun_esto == "YES") {
+          $this->log("Tilausta on k‰sitelty {$_status} tilassa, ohitetaan sis‰‰nluku", '', $type = 'order');
+          // Skipataan t‰m‰ $order
+          continue 2;
+        }
+      }
+
+      $orders[] = $temp_order;
+
+      // P‰ivitet‰‰n tilauksen tila ett‰ se on noudettu pupesoftiin
+      $_data = array(
+        'orderIncrementId' => $order['increment_id'],
+        'status' => 'processing_pupesoft',
+        'Tilaus noudettu Pupesoftiin',
+      );
+
+      $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
+    }
+
+    // Kirjataan kumpaankin logiin
+    $_count = count($orders);
+
+    $this->log("{$_count} tilausta haettu", '', $type = 'order');
+    $this->log("{$_count} tilausta haettu");
+
+    // Palautetaan lˆydetyt tilaukset
+    return $orders;
+  }
+
+  // Tapahtumaloki
+  private function log($message, $exception = '', $type = 'product') {
+    if ($exception != '') {
+      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+    }
+
+    $log_name = $type == 'product' ? 'magento_export' : 'magento_orders';
+
+    pupesoft_log($log_name, $message);
+  }
+
+  // Poistaa tuotteen kaikki kuvat ja lis‰‰ ne takaisin
+  private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
+    if (count($tuotekuvat) == 0 or empty($product_id)) {
+      return;
+    }
+
+    $types = array('image', 'small_image', 'thumbnail');
+
+    // Pit‰‰ ensin poistaa kaikki tuotteen kuvat Magentosta
+    $magento_pictures = $this->listaa_tuotekuvat($product_id);
+
+    // Poistetaan kuvat
+    foreach ($magento_pictures as $file) {
+      $this->poista_tuotekuva($product_id, $file);
+    }
+
+    // Loopataan tuotteen kaikki kuvat
+    foreach ($tuotekuvat as $kuva) {
+
+      // Lis‰t‰‰n tuotekuva kerrallaan
+      try {
+        $data = array(
+          $product_id,
+          array(
+            'file'     => $kuva,
+            'label'    => '',
+            'position' => 0,
+            'types'    => $types,
+            'exclude'  => 0
+          ),
+        );
+
+        $return = $this->_proxy->call(
+          $this->_session,
+          'catalog_product_attribute_media.create',
+          $data
+        );
+
+        $this->log("Lis‰tty kuva '{$kuva['name']}'");
+        $this->debug($return);
+      }
+      catch (Exception $e) {
+        // Nollataan base-encoodattu kuva, ett‰ logi ei tuu isoks
+        $data[1]["file"]["content"] = '...content poistettu logista...';
+
+        $this->log("Virhe! Kuvan lis‰ys ep‰onnistui", $e);
+        $this->debug($data);
+        $this->_error_count++;
+      }
+    }
+  }
+
+  // Hakee tuotteen tuotekuvat Magentosta
+  private function listaa_tuotekuvat($product_id) {
+    $pictures = array();
+    $return = array();
+
+    // Haetaan tuotteen kuvat
+    try {
+      $pictures = $this->_proxy->call(
+        $this->_session,
+        'catalog_product_attribute_media.list',
+        $product_id);
+    }
+    catch (Exception $e) {
+      $this->log("Virhe! Kuvalistauksen ep‰onnistui", $e);
+      $this->_error_count++;
+    }
+
+    foreach ($pictures as $picture) {
+      $return[] = $picture['file'];
+    }
+
+    return $return;
+  }
+
+  // Poistaa tuotteen tuotekuvan Magentosta
+  private function poista_tuotekuva($product_id, $filename) {
+    // Jos ei haluta k‰sitell‰ tuotekuvia, ei poisteta niit‰ magentosta
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      return;
+    }
+
+    $return = false;
+
+    // Poistetaan tuotteen kuva
+    try {
+      $return = $this->_proxy->call(
+        $this->_session,
+        'catalog_product_attribute_media.remove',
+        array(
+          'product' => $product_id,
+          'file'    => $filename
+        )
+      );
+
+      $this->log("Poistetaan '{$filename}'");
+    }
+    catch (Exception $e) {
+      $this->log("Virhe! Kuvan poisto ep‰onnistui '{$filename}'", $e);
+      $this->_error_count++;
+
+      return false;
+    }
+
+    return $return;
+  }
+
+  // Hakee tuotteen tuotekuvat Pupesoftista
+  private function hae_tuotekuvat($tunnus) {
+    global $kukarow;
+
+    // Jos ei haluta k‰sitell‰ tuotekuvia, palautetaan tyhj‰ array
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      return array();
+    }
+
+    // Populoidaan tuotekuvat array
+    $tuotekuvat = array();
+
+    try {
+      $query = "SELECT
+                liitetiedostot.data,
+                liitetiedostot.filetype,
+                liitetiedostot.filename
+                FROM liitetiedostot
+                WHERE liitetiedostot.yhtio         = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitostunnus    = '{$tunnus}'
+                AND liitetiedostot.liitos          = 'tuote'
+                AND liitetiedostot.kayttotarkoitus = 'TK'
+                ORDER BY liitetiedostot.jarjestys DESC,
+                liitetiedostot.tunnus DESC";
+      $result = pupe_query($query);
+
+      while ($liite = mysql_fetch_assoc($result)) {
+        $file = array(
+          'content' => base64_encode($liite['data']),
+          'mime'    => $liite['filetype'],
+          'name'    => $liite['filename']
+        );
+
+        $tuotekuvat[] = $file;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
+    }
+
+    // Palautetaan tuotekuvat
+    return $tuotekuvat;
+  }
+
+  // Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
+  private function hae_kieliversiot($tuotenumero) {
+    global $kukarow;
+
+    $kieliversiot_data = array();
+
+    try {
+      $query = "SELECT
+                kieli, laji, selite
+                FROM
+                tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuotenumero}'
+                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
+      $result = pupe_query($query);
+
+      while ($avainsana = mysql_fetch_assoc($result)) {
+        $kieli  = $avainsana['kieli'];
+        $laji   = utf8_encode($avainsana['laji']);
+        $selite = utf8_encode($avainsana['selite']);
+
+        // J‰sennell‰‰n tuotteen avainsanat kieliversioittain
+        $kieliversiot_data[$kieli][$laji] = $selite;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
+    }
+
+    // Palautetaan kieliversiot
+    return $kieliversiot_data;
   }
 }

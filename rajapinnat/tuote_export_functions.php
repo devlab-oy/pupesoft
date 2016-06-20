@@ -122,7 +122,7 @@ function tuote_export_hae_tuotetiedot($params) {
 
   $dnstuote = array();
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muuttuneet_tuotenumerot = $muuttuneet_tuoteryhmat = '';
 
     if ($magento_asiakaskohtaiset_tuotehinnat !== false) {
@@ -394,7 +394,7 @@ function tuote_export_hae_saldot($params) {
 
   $dnstock = array();
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
     $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
     $muutoslisa3 = "AND tuote.muutospvm     >= '{$datetime_checkpoint}'";
@@ -469,7 +469,7 @@ function tuote_export_hae_tuoteryhmat($params) {
   $dnsryhma = array();
   $dnstuoteryhma = array();
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muutoslisa = "AND (try_fi.muutospvm    >= '{$datetime_checkpoint}'
                      OR try_se.muutospvm    >= '{$datetime_checkpoint}'
                      OR try_en.muutospvm    >= '{$datetime_checkpoint}'
@@ -562,7 +562,7 @@ function tuote_export_hae_asiakkaat($params) {
 
   $dnsasiakas = array();
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
   }
   else {
@@ -677,7 +677,7 @@ function tuote_export_hae_hinnastot($params) {
 
   $dnshinnasto = array();
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muutoslisa = "AND hinnasto.muutospvm >= '{$datetime_checkpoint}'";
   }
   else {
@@ -764,7 +764,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
             AND trim(tuotteen_avainsanat.selite) != ''";
   $resselite = pupe_query($query);
 
-  if ($ajetaanko_kaikki == "NO") {
+  if ($ajetaanko_kaikki === false) {
     $muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
               OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
               OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'

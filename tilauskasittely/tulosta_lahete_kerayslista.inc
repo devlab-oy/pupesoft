@@ -718,10 +718,10 @@ if (!function_exists('rivi_kerayslista')) {
       if ($row["var"] == "" or  $row["var"] == "H") {
         $thispage->write($kala, 4, $row["tilkpl"]);
       }
-      
+
       if ($kerayslistatyyppi == 'EXCEL3') {
         if ($row["var"] == "" or  $row["var"] == "H") {
-          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2)); 
+          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2));
         }
       }
 
@@ -1145,14 +1145,8 @@ if (!function_exists('rivi_kerayslista')) {
           $row['kommentti'] .= "\n".t("Myyjä", $kieli).": {$myyrow['nimi']}";
         }
 
-        // Otetaan yhteensäkommentti pois keröyslistalta (tämä tieto löytyy riviltä jos tilaus on laskutettu, mutta lähetteellä sitä ei voi näyttää)
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-
-        // Trimmataan uudestaan
-        $row["kommentti"] = trim($row["kommentti"]);
+        // Trimmataan ja otetaan "yhteensäkommentti" pois
+        $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
 
         if ((
             ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0)

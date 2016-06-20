@@ -12,15 +12,14 @@ if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
 
 require "../inc/parametrit.inc";
 
-if (!isset($tee)) $tee = '';
+if (!isset($tee))    $tee = '';
 if (!isset($summa1)) $summa1 = '';
 if (!isset($summa2)) $summa2 = '';
-if (!isset($pvm)) $pvm = '';
-if (!isset($index)) $index  = '';
+if (!isset($pvm))    $pvm = '';
 
 if (!function_exists("mlh_nimi")) {
   function mlh_nimi($keta_haetaan) {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
     $query = "SELECT kuka.nimi
               FROM kuka
@@ -51,7 +50,7 @@ if (!function_exists("mlh_maksuteksti")) {
       $maksuviesti = t("Osasuoritettu");
 
       if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-        $maksuviesti .= " / ".t("Erääntynyt");
+        $maksuviesti .= " / ".t("Er‰‰ntynyt");
       }
     }
     elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
@@ -108,7 +107,9 @@ if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
   exit;
 }
 
-$lopetus = "${palvelin2}myyntires/myyntilaskuhaku.php////tee={$tee}//summa1={$summa1}//summa2={$summa2}";
+echo "<font class='head'>", t("Myyntilaskuhaku"), "</font><hr>";
+
+$index = "";
 
 $lopelisa = "${palvelin2}myyntires/myyntilaskuhaku.php////tee=$tee//laskuntyyppi=$laskuntyyppi//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//pvm=$pvm";
 if (isset($lopetus) and $lopetus != "") $lopelisa = "$lopetus/SPLIT/$lopelisa";
@@ -417,7 +418,7 @@ if ($tee == 'S') {
 // N = Etsitään nimeä laskulta
 if ($tee == 'N') {
   $index = " use index (asiakasnimi) ";
-  $ehto = "tila = 'U' and match (nimi) against ('$summa1*' IN BOOLEAN MODE)";
+  $ehto = "tila = 'U' and nimi like '%".$summa1."%'";
   $jarj = "nimi, tapvm desc";
 }
 
@@ -498,11 +499,17 @@ if (!empty($tee)) {
             {$rajaus}";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
+  if (mysql_num_rows($result) == 0) {
+    echo "<b>", t("Haulla ei löytynyt yhtään laskua"), "</b>";
+    $tee = '';
+  }
+  else {
 
-  echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+    pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
 
-  echo "<thead>
+    echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
+
+    echo "<thead>
         <tr>
         <th>", t("Pvm"), "</th>
         <th>", t("Eräpäivä"), "</th>
@@ -525,15 +532,17 @@ if (!empty($tee)) {
         <td><input type='text' class='search_field' name='search_tila'></td>
         <td><input type='text' class='search_field' name='search_laatija'></td>
         </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td colspan='9' class='dataTables_empty'>".t("Ladataan")."...</td>
-        </tr>
-      </tbody>
-      </table><br /><br />";
+      </thead>";
 
-  $toim = "";
+    echo "<tbody>
+          <tr>
+           <td colspan='9' class='dataTables_empty'>".t("Ladataan")."...</td>
+          </tr>
+          </tbody>
+          </table><br /><br />";
+
+    $toim = "";
+  }
 }
 
 require "inc/footer.inc";

@@ -387,7 +387,13 @@ foreach ($tulostimet as $tulostin) {
 
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-    echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+
+    if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and in_array($tulostin, array('Työmääräys', 'Huoltosaate', 'Reklamaatio', 'Takuu', 'Tarjous'))) {
+      echo "<option value='-88'>".t('PDF Ruudulle')."</option>";
+    }
+    else {
+      echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+    }
   }
 
   if ($tulostimet[0] == "Inventointi") {
@@ -396,6 +402,10 @@ foreach ($tulostimet as $tulostin) {
 
   if (!empty($editoimrow['email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
     echo "<option value='toimittajaemail{$editoimrow['email']}'>".t("Toimittajan sähköpostiin").": {$editoimrow['email']}</option>";
+  }
+
+  if (!empty($yhtiorow['ostotilaus_email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
+    echo "<option value='toimittajaemail{$yhtiorow['ostotilaus_email']}'>".t("Ostotilaus sähköpostiin").": {$yhtiorow['ostotilaus_email']}</option>";
   }
 
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
@@ -408,6 +418,7 @@ foreach ($tulostimet as $tulostin) {
 
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

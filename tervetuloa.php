@@ -49,7 +49,7 @@ if (!isset($tee) or $tee == '') {
 
     $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
               FROM lasku
-              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' 
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]'
               and alatila!='H' and alatila!='M' and tila!='D'
               ORDER BY erpcm";
     $result = pupe_query($query);
@@ -203,7 +203,7 @@ if (!isset($tee) or $tee == '') {
     echo "</table><br>";
   }
 
-  // Näytetään käyttäjäkohtaiset työmääräykset ja työmääräykset joissa käyttäjä on vastuuhenkilönä
+  // Näytetään käyttäjäkohtaiset työmääräykset
   $tyojonosql = "SELECT lasku.tunnus,
                  lasku.nimi,
                  lasku.toimaika,
@@ -211,7 +211,7 @@ if (!isset($tee) or $tee == '') {
                  a2.selitetark_2 tyostatusvari,
                  a5.selitetark tyom_prioriteetti
                  FROM lasku
-                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND (tyomaarays.suorittaja = '{$kukarow["kuka"]}' OR tyomaarays.vastuuhenkilo = '{$kukarow["kuka"]}'))
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
                  LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
                  LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
                  WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
@@ -260,7 +260,65 @@ if (!isset($tee) or $tee == '') {
     echo "</table><br>";
   }
 
-  if (tarkista_oikeus("alv_laskelma_uusi.php")) {
+
+  // Näytetään työmääräykset joissa käyttäjä on vastuuhenkilönä
+  $tyojono2sql = "SELECT lasku.tunnus,
+                 lasku.nimi,
+                 lasku.toimaika,
+                 a2.selitetark tyostatus,
+                 a2.selitetark_2 tyostatusvari,
+                 a5.selitetark tyom_prioriteetti
+                 FROM lasku
+                 JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.vastuuhenkilo = '{$kukarow["kuka"]}')
+                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                 WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
+                 AND lasku.tila     in ('A','L','N','S','C')
+                 AND lasku.alatila != 'X'
+                 ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
+  $tyoresult2 = pupe_query($tyojono2sql);
+
+  if (mysql_num_rows($tyoresult2) > 0) {
+
+    pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
+
+    $padding_muuttuja = " style='padding-right:15px;'";
+
+    echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+    echo "<thead>";
+
+    echo "<tr>";
+    echo "<td colspan='5' class='back'><font class='head'>".t("Omat Vastuudet")."</font><hr></td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th $padding_muuttuja>".t("Työnumero")."</th>";
+    echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
+    echo "<th $padding_muuttuja>".t("Status")."</th>";
+    echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
+    echo "<th $padding_muuttuja>".t("Päivämäärä")."</th>";
+    echo "</tr>";
+
+    echo "</thead>";
+    echo "<tbody>";
+
+    while ($tyorow = mysql_fetch_array($tyoresult2)) {
+      // Laitetetaan taustaväri jos sellainen on syötetty
+      $varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
+
+      echo "<tr $varilisa>";
+      echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
+      echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
+      echo "<td>{$tyorow["tyostatus"]}</td>";
+      echo "<td>{$tyorow["nimi"]}</td>";
+      echo "<td>{$tyorow["toimaika"]}</td>";
+      echo "</tr>";
+    }
+    echo "</tbody>";
+    echo "</table><br>";
+  }
+
+  if (tarkista_oikeus("alv_laskelma_uusi.php") and tarkista_oikeus("muutosite.php")) {
 
     $ulos = '';
 

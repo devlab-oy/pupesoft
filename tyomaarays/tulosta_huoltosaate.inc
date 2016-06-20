@@ -37,83 +37,88 @@ if (!function_exists('huoltosaate_alku')) {
     $page[$sivu] = $thispage;
 
     $merkkiavainsanares = t_avainsana('TUOTEMERKKI', '', "and selite = '{$laskurow['merkki']}'");
-    $merkkiavainsanarow = mysql_fetch_assoc($merkkiavainsanares);
 
-    $query = "SELECT *
-              FROM liitetiedostot
-              WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND liitostunnus = '{$merkkiavainsanarow['tunnus']}'
-              and liitos       = 'avainsana'";
-    $liiteres = pupe_query($query);
-    $liite = mysql_fetch_assoc($liiteres);
+    if ($merkkiavainsanarow = mysql_fetch_assoc($merkkiavainsanares)) {
 
-    $data = $liite["data"];
-    $isizelogo[0] = $liite["image_width"];
-    $isizelogo[1] = $liite["image_height"];
-    unset($liite);
+      $query = "SELECT *
+                FROM liitetiedostot
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND liitostunnus = '{$merkkiavainsanarow['tunnus']}'
+                and liitos       = 'avainsana'";
+      $liiteres = pupe_query($query);
+      $liite = mysql_fetch_assoc($liiteres);
 
-    if (isset($data) and $data) {
-      $image = $pdf->jfif_embed($data);
+      $data = $liite["data"];
+      $isizelogo[0] = $liite["image_width"];
+      $isizelogo[1] = $liite["image_height"];
+      unset($liite);
 
-      $logoparam = array();
+      if (isset($data) and $data) {
+        $image = $pdf->jfif_embed($data);
 
-      if ($lasku_logo_koko_y == 0 and $lasku_logo_koko_x == 0) {
-        $lasku_logo_koko_y = 50;
-        $lasku_logo_koko_x = 240;
+        $logoparam = array();
 
-        if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
-          $lasku_logo_koko_y = (int) $yhtiorow["lasku_logo_koko"];
+        if ($lasku_logo_koko_y == 0 and $lasku_logo_koko_x == 0) {
+          $lasku_logo_koko_y = 50;
+          $lasku_logo_koko_x = 240;
+
+          if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+            $lasku_logo_koko_y = (int) $yhtiorow["lasku_logo_koko"];
+          }
+        }
+
+        if ($lasku_logo_positio_y == 0 and $lasku_logo_positio_x == 0) {
+          $lasku_logo_positio_y = 830;
+          $lasku_logo_positio_x = 20;
+
+          if ($yhtiorow["lasku_logo_positio"] != "") {
+            if (strpos($yhtiorow["lasku_logo_positio"], "x") !== FALSE) {
+              list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
+            }
+            else {
+              $llp_y = trim($yhtiorow["lasku_logo_positio"]);
+              $llp_x = 0;
+            }
+
+            if ((int) $llp_y > 0) $lasku_logo_positio_y = (int) $llp_y;
+            if ((int) $llp_x > 0) $lasku_logo_positio_x = (int) $llp_x;
+          }
+        }
+
+        if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * ($lasku_logo_koko_x / $isizelogo[0]) <= $lasku_logo_koko_y) {
+          $logoparam['scale'] = $lasku_logo_koko_x / $isizelogo[0];
+        }
+        else {
+          $logoparam['scale'] = $lasku_logo_koko_y / $isizelogo[1];
+        }
+
+        $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
+      }
+      else {
+        if (!empty($merkkiavainsanarow['selitetark'])) {
+          $pdf->draw_text(50, 815, $merkkiavainsanarow['selitetark'], $thispage, $_hsiso);
+        }
+        else {
+          $pdf->draw_text(50, 815, $merkkiavainsanarow['selite'], $thispage, $_hsiso);
         }
       }
 
-      if ($lasku_logo_positio_y == 0 and $lasku_logo_positio_x == 0) {
-        $lasku_logo_positio_y = 830;
-        $lasku_logo_positio_x = 20;
+      if (!empty($merkkiavainsanarow['selitetark_2'])) {
 
-        if ($yhtiorow["lasku_logo_positio"] != "") {
-          if (strpos($yhtiorow["lasku_logo_positio"], "x") !== FALSE) {
-            list($llp_y, $llp_x) = explode("x", trim($yhtiorow["lasku_logo_positio"]));
-          }
-          else {
-            $llp_y = trim($yhtiorow["lasku_logo_positio"]);
-            $llp_x = 0;
-          }
+        $_oikea_yla_x = 815;
 
-          if ((int) $llp_y > 0) $lasku_logo_positio_y = (int) $llp_y;
-          if ((int) $llp_x > 0) $lasku_logo_positio_x = (int) $llp_x;
+        foreach (explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
+          $oikpos = $pdf->strlen($oikea_yla_teksti, $_hsnorm);
+          $pdf->draw_text(540-$oikpos, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $_hsnorm);
+          $_oikea_yla_x -= 12;
         }
       }
-
-      if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * ($lasku_logo_koko_x / $isizelogo[0]) <= $lasku_logo_koko_y) {
-        $logoparam['scale'] = $lasku_logo_koko_x / $isizelogo[0];
-      }
       else {
-        $logoparam['scale'] = $lasku_logo_koko_y / $isizelogo[1];
-      }
-
-      $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
-    }
-    else {
-      if (!empty($merkkiavainsanarow['selitetark'])) {
-        $pdf->draw_text(50, 815, $merkkiavainsanarow['selitetark'], $thispage, $_hsiso);
-      }
-      else {
-        $pdf->draw_text(50, 815, $merkkiavainsanarow['selite'], $thispage, $_hsiso);
-      }
-    }
-
-    if (!empty($merkkiavainsanarow['selitetark_2'])) {
-
-      $_oikea_yla_x = 815;
-
-      foreach (explode("\n", trim($merkkiavainsanarow['selitetark_2'])) as $oikea_yla_teksti) {
-        $oikpos = $pdf->strlen($oikea_yla_teksti, $_hsnorm);
-        $pdf->draw_text(540-$oikpos, $_oikea_yla_x, $oikea_yla_teksti, $thispage, $_hsnorm);
-        $_oikea_yla_x -= 12;
+        $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $_hsnorm);
       }
     }
     else {
-      $pdf->draw_text(410, 815, $yhtiorow['nimi'], $thispage, $_hsnorm);
+      tulosta_logo_pdf($pdf, $thispage, $laskurow);
     }
 
     $otsikko_len = $pdf->strlen(t("Huoltosaate", $kieli), $_hsiso);

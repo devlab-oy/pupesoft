@@ -20,6 +20,7 @@ if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($mobiili))        $mobiili = "";
 if (!isset($laadittuaika))   $laadittuaika = "";
 if (!isset($enarifocus))     $enarifocus = "";
+if (!isset($toim))           $toim = "";
 
 if (!isset($jarjestys)) {
   $jarjestys = $laaja_inventointilista ? "rivinro" : "";
@@ -48,6 +49,13 @@ if (stripos($toim, "paivamaara") !== FALSE) {
 }
 else {
   $paivamaaran_kasisyotto = "";
+}
+
+// Kevyt tuloutusprosessi
+if (substr($toim, 0, 4) == "OSTO") {
+  $paivamaaran_kasisyotto = "";
+  $laaja_inventointilista = FALSE;
+  $lista = "";
 }
 
 if ($livesearch_tee == "TUOTEHAKU") {
@@ -91,10 +99,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
           });
         </script>";
   }
-
 }
 
-if ($mobiili != "YES") {
+if (substr($toim, 0, 4) == "OSTO") {
+  echo "<font class='head'>".t("Tavaran tuloutus")."</font><hr>";
+}
+elseif ($mobiili != "YES") {
   echo "<font class='head'>".t("Inventointi")."</font><hr>";
 }
 
@@ -457,8 +467,9 @@ if ($tee == 'VALMIS') {
               tilausrivi WRITE,
               tili READ,
               tiliointi WRITE,
-              tuote READ,
+              tuote WRITE,
               tuotepaikat WRITE,
+              tuotteen_toimittajat READ,
               varastopaikat READ,
               varaston_hyllypaikat READ,
               yhtion_toimipaikat READ";
@@ -482,6 +493,14 @@ if ($tee == 'VALMIS') {
       if ($fileesta == "ON") {
         $inven_laji = $lajis[$i];
         $lisaselite = $selis[$i];
+      }
+
+      if (substr($toim, 0, 4) == "OSTO") {
+        $kpl = (float) preg_replace("/[^0-9\.]/", "", $kpl);
+
+        if (!empty($kpl)) {
+          $kpl = "+$kpl";
+        }
       }
 
       if ($kpl != '' and is_numeric($kpl)) {
@@ -896,7 +915,7 @@ if ($tee == 'VALMIS') {
             $erotus = $kpl - $row['saldo'];
             $cursaldo = $nykyinensaldo + $erotus;
 
-            //triggerˆid‰‰n eroh‰lytys
+            // triggerˆid‰‰n eroh‰lytys
             if (abs($erotus) > 10 and $lista != '') {
               $virhe = 2;
             }
@@ -1058,23 +1077,61 @@ if ($tee == 'VALMIS') {
               $lisaselite .=  t("Inv.lista")." {$lista}";
             }
 
-            if ($erotus > 0) {
-              $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lis‰ttiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
-            }
-            elseif ($erotus < 0) {
-              $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("v‰hennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
+            if (substr($toim, 0, 4) == "OSTO") {
+
+              $query = "SELECT *, if (jarjestys = 0, 9999, jarjestys) sorttaus
+                        FROM tuotteen_toimittajat
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        and tuoteno = '$row[tuoteno]'
+                        ORDER BY sorttaus
+                        LIMIT 1";
+              $otres = pupe_query($query);
+              $otrow = mysql_fetch_assoc($otres);
+
+              $query = "SELECT sum(saldo) kokonaissaldo
+                        FROM tuotepaikat
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        and tuoteno = '$row[tuoteno]'";
+              $ksres = pupe_query($query);
+              $ksrow = mysql_fetch_assoc($ksres);
+
+              // kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
+              $kehahin = round(($ksrow['saldo'] * $row['kehahin'] + $otrow['ostohinta'] * $erotus) / ($salrow['saldo'] + $erotus), 6);
+
+              $query = "UPDATE tuote set
+                        kehahin     = $kehahin,
+                        vihahin     = round('$otrow[ostohinta]','$yhtiorow[hintapyoristys]'),
+                        vihapvm     = now()
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        and tuoteno = '$row[tuoteno]'";
+              pupe_query($query);
+
+              $laji = "tulo";
+              $selite = "Tuloutus: $erotus kappaletta. Ostohinta: $otrow[ostohinta] Varastopaikka: $hyllyalue $hyllynro $hyllyvali $hyllytaso";
+              $laadittuaikalisa = "now()";
             }
             else {
-              $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si").".<br>$lisaselite<br>$inven_laji";
-            }
 
-            $laadittuaikalisa = $laadittuaika != "now()" ? "'{$laadittuaika}'" : $laadittuaika;
+              $laji = "Inventointi";
+
+              if ($erotus > 0) {
+                $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lis‰ttiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
+              }
+              elseif ($erotus < 0) {
+                $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("v‰hennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
+              }
+              else {
+                $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si").".<br>$lisaselite<br>$inven_laji";
+              }
+
+              $laadittuaikalisa = $laadittuaika != "now()" ? "'{$laadittuaika}'" : $laadittuaika;
+            }
 
             ///* Tehd‰‰n tapahtuma *///
             $query = "INSERT into tapahtuma set
                       yhtio     = '$kukarow[yhtio]',
                       tuoteno   = '$tuoteno',
-                      laji      = 'Inventointi',
+                      laji      = '$laji',
                       kpl       = '$erotus',
                       kplhinta  = '$row[kehahin]',
                       hinta     = '$row[kehahin]',
@@ -1863,7 +1920,10 @@ if ($tee == 'INVENTOI') {
   echo "<input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
 
   echo "<table>";
-  echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
+
+  if (substr($toim, 0, 4) != "OSTO") {
+    echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
+  }
 
   echo "<tr>";
 
@@ -1871,7 +1931,14 @@ if ($tee == 'INVENTOI') {
     echo "<th>#</th>";
   }
 
-  echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
+  echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th>";
+
+  if (substr($toim, 0, 4) == "OSTO") {
+    echo "<th>".t("Tuloutettava m‰‰r‰")."</th>";
+  }
+  else {
+    echo "<th>".t("Laskettu hyllyss‰")."</th>";
+  }
 
   if ($laaja_inventointilista) {
     echo "<th>#</th>";
@@ -1885,7 +1952,7 @@ if ($tee == 'INVENTOI') {
 
     if ($oletusvarasto_chk > 0 and kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
-    //Haetaan ker‰tty m‰‰r‰
+    // Haetaan ker‰tty m‰‰r‰
     $query = "SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,  ifnull(sum(tilausrivi.varattu),0) ennpois
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
               WHERE yhtio    = '$kukarow[yhtio]'
@@ -2206,7 +2273,6 @@ if ($tee == 'INVENTOI') {
   }
 
   echo "</table><br>";
-
   echo "<table>";
 
   $lisaselite = !isset($lisaselite) ? '' : $lisaselite;
@@ -2237,8 +2303,11 @@ if ($tee == 'INVENTOI') {
     echo "</select></td></tr>";
   }
 
-  echo "<tr><th>".t("Syˆt‰ inventointiselite:")."</th>";
-  echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
+  if (substr($toim, 0, 4) != "OSTO") {
+    echo "<tr><th>".t("Syˆt‰ inventointiselite:")."</th>";
+    echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
+  }
+
   if ($paivamaaran_kasisyotto == "JOO") {
     echo "<tr><th>".t("Syˆt‰ inventointip‰iv‰m‰‰r‰ (pp-kk-vvvv)").":</th>";
     echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
@@ -2259,6 +2328,9 @@ if ($tee == 'INVENTOI') {
   else {
     if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
       echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
+    }
+    elseif (substr($toim, 0, 4) == "OSTO") {
+      echo "<input type='submit' name='valmis' value='".t("Tulouta")."'>";
     }
     else {
       echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
@@ -2386,11 +2458,25 @@ if ($tee == '') {
 
   echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' id='ean_koodi' name='ean_koodi'></td></tr>";
 
-  echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='submit' value='".t("Inventoi")."'></td></tr>";
+  if (substr($toim, 0, 4) != "OSTO") {
+    echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td>";
+    echo "<td class='back'><input type='submit' value='".t("Inventoi")."'></td>";
+  }
+  else {
+    echo "<tr><td class='back'><input type='submit' value='".t("Tulouta")."'></td>";
+  }
 
-  echo "</form>";
+  echo "</tr>";
   echo "</table>";
+  echo "</form>";
   echo "<br><br>";
+
+  if (substr($toim, 0, 4) == "OSTO") {
+    echo "<br><br><font class='head'>".t("Tulouta tiedostosta")."</font><hr>";
+  }
+  else {
+    echo "<br><br><font class='head'>".t("Inventoi tiedostosta")."</font><hr>";
+  }
 
   echo "<form method='post' enctype='multipart/form-data'>
       <input type='hidden' name='toim' value='$toim'>
@@ -2400,8 +2486,6 @@ if ($tee == '') {
       <input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
       <input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
       <input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
-      <br><br>
-      <font class='head'>".t("Inventoi tiedostosta")."</font><hr>
       <table>
       <tr><th colspan='4'>".t("Tiedostomuoto").".</th></tr>
       <tr>";

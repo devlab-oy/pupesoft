@@ -148,6 +148,7 @@ if (!isset($mul_toimipaikka))   $mul_toimipaikka = array();
 if (!isset($mul_kustp))         $mul_kustp = array();
 if (!isset($mul_kohde))         $mul_kohde = array();
 if (!isset($mul_projekti))      $mul_projekti = array();
+if (!isset($mul_maa))           $mul_maa = array();
 
 if (!isset($poislisa_mulsel))   $poislisa_mulsel = "";
 
@@ -804,7 +805,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
@@ -900,7 +901,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
@@ -1013,7 +1014,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $sresult = pupe_query($query);
     }
 
-    if (mysql_num_rows($sresult) > 1) {
+    if (mysql_num_rows($sresult) >= 1) {
 
       $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 

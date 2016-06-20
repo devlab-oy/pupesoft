@@ -259,6 +259,88 @@ if ($tee == "pankin_sertifikaatti") {
   echo "</form>";
 }
 
+// Haetaan uusi sertifikaatti, oikeellisuustarkastus
+if ($tee == "uusi_sertifikaatti_hae") {
+  if (empty($salasana)) {
+    virhe("Salasana t‰ytyy antaa!");
+    $virheet_count++;
+  }
+  else {
+    $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+    if ($pankkiyhteys === false) {
+      virhe("Antamasi salasana on v‰‰r‰!");
+      $virheet_count++;
+    }
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "uusi_sertifikaatti";
+  }
+}
+
+// Haetaan uusi sertifikaatti, kysyt‰‰n salasana
+if ($tee == "uusi_sertifikaatti") {
+  echo "<h2>" . t('Sertifikaatin uusiminen') . "</h2>";
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='uusi_sertifikaatti_hae'/>";
+  echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'/>";
+
+  echo "<table>";
+
+  echo "<tr>";
+  echo "<th><label for='salasana'>";
+  echo t("Salasana");
+  echo "</label></th>";
+  echo "<td><input type='password' name='salasana'></td>";
+  echo "</tr>";
+
+  echo "</table>";
+  echo "<br>";
+
+  echo "<input type='submit' value='" . t("Jatka") . "'/>";
+  echo "</form>";
+}
+
+// Haetaan ja tallennetaan uusi sertifikaatti
+if ($tee == "uusi_sertifikaatti_hae") {
+  $params = array(
+    "pankkiyhteys_tunnus" => $pankkiyhteys_tunnus,
+    "salasana"            => $salasana,
+    "bank"                => $pankkiyhteys['bank'],
+  );
+
+  $uudet_tunnukset = sepa_renew_certificate($params);
+
+  if (!$uudet_tunnukset) {
+    virhe("Sertifikaatin uusiminen ep‰onnistui!");
+  }
+  else {
+    // Salataan sertifikaatit
+    $oss = salaa($uudet_tunnukset["own_signing_certificate"], $salasana);
+    $sk  = salaa($uudet_tunnukset["signing_private_key"],     $salasana);
+
+    // Haetaan sertifikaatin expire date
+    $_temp    = parse_sertificate($uudet_tunnukset["own_signing_certificate"]);
+    $oss_time = $_temp['valid_to'];
+
+    $query = "UPDATE pankkiyhteys
+              SET signing_certificate          = '{$oss}',
+                  signing_private_key          = '{$sk}',
+                  signing_certificate_valid_to = '{$oss_time}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = {$pankkiyhteys_tunnus}";
+    $result = pupe_query($query);
+
+    ok("Sertifikaatti p‰ivitetty!");
+    echo "<br>";
+  }
+
+  $tee = "";
+}
+
 // Uuden pankkiyhteyden oikeellisuustarkistus
 if ($tee == "luo") {
   $virheet_count = 0;
@@ -609,6 +691,16 @@ if ($tee == "") {
         echo "<input type='hidden' name='tee' value='pankin_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
         echo "<input type='submit' value='" . t("P‰ivit‰ pankin sertifikaatit") . "'/>";
+        echo "</form>";
+        echo "</td>";
+      }
+
+      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH'))) {
+        echo "<td class='back'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tee' value='uusi_sertifikaatti'/>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "'/>";
         echo "</form>";
         echo "</td>";
       }

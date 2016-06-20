@@ -37,16 +37,16 @@ if (empty($kukarow)) {
   die("Admin -käyttäjä ei löydy.");
 }
 
+// toinen parametri verkkokauppa tyyppi
 $verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
 if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
   die("Et antanut verkkokaupan tyyppiä.\n");
 }
 
-$ajetaanko_kaikki = empty($argv[3]) ? "NO" : "YES";
-
-if (!empty($argv[4])) {
-  $magento_ajolista = explode(',', $argv[4]);
+// kolmas parametri ajettavat exportit
+if (!empty($argv[3])) {
+  $magento_ajolista = explode(',', $argv[3]);
 }
 elseif (empty($magento_ajolista)) {
   $magento_ajolista = array(
@@ -57,6 +57,17 @@ elseif (empty($magento_ajolista)) {
     'hinnastot',
     'saldot'
   );
+}
+
+// neljäs parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
+$ajetaanko_kaikki = empty($argv[4]) ? false : true;
+
+// Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
+if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
+  $lockfile = 'tuote_export-tilaukset-flock.lock';
+}
+else {
+  $lockfile = 'tuote_export-flock.lock';
 }
 
 // Pupesoftin varastojen tunnukset, joista lasketaan saldot. Nolla on kaikki varastot.
@@ -226,6 +237,16 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_api_ht_edi = '/tmp';
   }
 
+  // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
+  if (empty($verkkokauppa_erikoiskasittely)) {
+    $verkkokauppa_erikoiskasittely = array();
+  }
+
+  // Korvaavia Maksuehtoja Magenton maksuehdoille
+  if (empty($magento_maksuehto_ohjaus)) {
+    $magento_maksuehto_ohjaus = array();
+  }
+
   // Mille yritykselle tilaukset luetaan Pupesoftissa sisään
   if (empty($ovt_tunnus)) {
     $ovt_tunnus = $yhtiorow['ovttunnus'];
@@ -280,7 +301,8 @@ $datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
 $tuote_export_error_count = 0;
 
 $lock_params = array(
-  "locktime" => 5400
+  "lockfile" => $lockfile,
+  "locktime" => 5400,
 );
 
 // alustetaan arrayt
@@ -400,7 +422,6 @@ if ($verkkokauppatyyppi == "magento") {
     $magento_debug
   );
 
-  $magento_client->set_magento_fetch_order_status($magento_tilaushaku);
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
   $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
   $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
@@ -416,7 +437,6 @@ if ($verkkokauppatyyppi == "magento") {
   $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
   $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
   $magento_client->setRemoveProducts($magento_salli_tuotepoistot);
-  $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
   $magento_client->setTaxClassID($magento_tax_class_id);
   $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
@@ -471,7 +491,28 @@ if ($verkkokauppatyyppi == "magento") {
 
   if (in_array('tilaukset', $magento_ajolista)) {
     tuote_export_echo("Haetaan tilaukset");
-    $magento_client->tallenna_tilaukset();
+
+    $magento_tilaus_client = new MagentoClient(
+      $magento_api_ht_url,
+      $magento_api_ht_usr,
+      $magento_api_ht_pas,
+      $magento_client_options,
+      $magento_debug
+    );
+
+    // editilauksen tallentamiseen tarvittavat parametrit
+    $magento_tilaus_client->set_edi_polku($magento_api_ht_edi);
+    $magento_tilaus_client->set_magento_erikoiskasittely($verkkokauppa_erikoiskasittely);
+    $magento_tilaus_client->set_magento_fetch_order_status($magento_tilaushaku);
+    $magento_tilaus_client->set_magento_maksuehto_ohjaus($magento_maksuehto_ohjaus);
+    $magento_tilaus_client->set_ovt_tunnus($ovt_tunnus);
+    $magento_tilaus_client->set_pupesoft_tilaustyyppi($pupesoft_tilaustyyppi);
+    $magento_tilaus_client->set_rahtikulu_nimitys($rahtikulu_nimitys);
+    $magento_tilaus_client->set_rahtikulu_tuoteno($rahtikulu_tuoteno);
+    $magento_tilaus_client->set_verkkokauppa_asiakasnro($verkkokauppa_asiakasnro);
+    $magento_tilaus_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+
+    $magento_tilaus_client->tallenna_tilaukset();
   }
 
   $tuote_export_error_count = $magento_client->getErrorCount();

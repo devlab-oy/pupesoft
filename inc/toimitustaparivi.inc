@@ -690,29 +690,6 @@ if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "sallitut_alustat") {
-  $ulos = "<td>";
-
-  $sel = explode(",", $trow[$i]);
-
-  $query = "SELECT *
-            FROM pakkaus
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $pakkaus_result = pupe_query($query);
-
-  $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
-
-  while ($pakkaus_row = mysql_fetch_assoc($pakkaus_result)) {
-
-    $chk = in_array($pakkaus_row['tunnus'], $sel) ? 'checked' : '';
-
-    $ulos .= "<input type='checkbox' name='{$nimi}[]' value='{$pakkaus_row['tunnus']}' {$chk}/> ".t_tunnus_avainsanat($pakkaus_row, "pakkaus", "PAKKAUSKV")." ".t_tunnus_avainsanat($pakkaus_row, "pakkauskuvaus", "PAKKAUSKV")."<br />";
-  }
-
-  $ulos .= "</td>";
-  $jatko = 0;
-}
-
 if (mysql_field_name($result, $i) == "jvkulu" or
   mysql_field_name($result, $i) == "kuluprosentti" or
   mysql_field_name($result, $i) == "ulkomaanlisa" or

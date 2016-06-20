@@ -1,32 +1,36 @@
 <?php
 
+$kaunisnimi = isset($_POST["kaunisnimi"]) ? $_POST["kaunisnimi"] : null;
+$tee        = isset($_REQUEST["tee"]) ? $_REQUEST["tee"] : null;
+$toim       = isset($_REQUEST["toim"]) ? $_REQUEST["toim"] : null;
+$toim_tee   = isset($_REQUEST["toim_tee"]) ? $_REQUEST["toim_tee"] : null;
 
-if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+if (isset($tee)) {
+  if ($tee == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($kaunisnimi != '') $kaunisnimi = str_replace("/", "", $kaunisnimi);
 }
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
 // Näissä keisseissä ei slavea
-if (($_REQUEST["toim"] == 'hyvaksynta' and $_REQUEST["tee"] == 'T') or $_REQUEST["toim"] == 'maksuvalmius' or $_REQUEST["toim_tee"] == 'kululasku') {
+if (($toim == 'hyvaksynta' and $tee == 'T') or $toim == 'maksuvalmius' or $toim_tee == 'kululasku') {
   $useslave = 0;
 }
 
-if ($_REQUEST["toim"] == 'avoimet') {
+if ($toim == 'avoimet') {
   // DataTables päälle
   $pupe_DataTables = array("avoimet0", "avoimet1");
 }
 
-if ($_REQUEST["toim"] == 'hyvaksynta') {
+if ($toim == 'hyvaksynta') {
   // DataTables päälle
   $pupe_DataTables = array("hyvaksynta");
 }
 
-if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'myyrespaakirja') {
+if ($toim == 'toimittajahaku' or $toim == 'laskuhaku' or $toim == 'myyrespaakirja') {
   // DataTables päälle
-  $pupe_DataTables = $_REQUEST["toim"];
+  $pupe_DataTables = $toim;
 }
 
 require "inc/parametrit.inc";

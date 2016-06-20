@@ -121,7 +121,7 @@ if ($luokka != "") {
   }
 
   if (strlen($order) > 0) {
-    if ($order == "try" or $order == "osasto" or $order == "nimitys") {
+    if ($order == "try" or $order == "osasto" or $order == "nimitys" or $order == "luokka") {
       $jarjestys = "abc_aputaulu.".$order." ".$sort;
     }
     else {

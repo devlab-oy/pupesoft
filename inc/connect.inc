@@ -83,6 +83,11 @@ mysql_query("set group_concat_max_len=1000000", $link);
 if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and $GLOBALS["pupe_query_debug"] < 1) {
   mysql_query("set session sql_mode = 'STRICT_ALL_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE'", $link); // NO_ZERO_DATE ois myös kova!
 }
+else {
+  // sql_mode oli blank aina mysql versioon 5.6.5 asti. pupen sql vaatii blank.
+  // http://dev.mysql.com/doc/refman/en/sql-mode.html
+  mysql_query("set session sql_mode = ''");
+}
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
 

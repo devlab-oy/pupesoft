@@ -385,7 +385,10 @@ if ($tee == '') {
   $valmistukset = Valmistus::all();
 
   //Listataan parkissa olevat valmistukset
+  $kokonaiskesto = 0;
   foreach ($valmistukset as $valmistus) {
+    $kesto = $valmistus->kesto() - $valmistus->kaytetty();
+    $kokonaiskesto += $kesto;
 
     echo "<tr>";
     echo "<td>" . $valmistus->tunnus() . "</td>";
@@ -407,7 +410,7 @@ if ($tee == '') {
     echo "</td>";
 
     echo "<td>{$kpl}</td>";
-    echo "<td>" . ($valmistus->kesto() - $valmistus->kaytetty()) . "</td>";
+    echo "<td>{$kesto}</td>";
 
     echo "<td>";
 
@@ -433,6 +436,19 @@ if ($tee == '') {
     echo "</td>";
     echo "</tr>";
   }
+
+  echo "<tfoot>";
+  echo "<tr>";
+  echo "<th colspan='7'>" . t('Yhteensä') . "</th>";
+  echo "</tr>";
+  echo "<tr>";
+  for ($i=0; $i < 5; $i++) {
+    echo "<td></td>";
+  }
+  echo "<td>{$kokonaiskesto}</td>";
+  echo "<td></td>";
+  echo "</tr>";
+  echo "</tfoot>";
 
   echo "</table>";
 

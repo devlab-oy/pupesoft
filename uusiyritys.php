@@ -1,4 +1,5 @@
 <?php
+
 require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uuden yrityksen ohjattu perustaminen").":</font><hr>";
@@ -441,17 +442,32 @@ if ($tila == 'maksuehto') {
     $kukar = pupe_query($query);
 
     while ($row = mysql_fetch_array($kukar)) {
+
+      if (is_null($row['abs_pvm'])) {
+        $abs_pvm = "abs_pvm = null,";
+      }
+      else {
+        $abs_pvm = "abs_pvm = '{$row['abs_pvm']}',";
+      }
+
+      if (is_null($row['kassa_abspvm'])) {
+        $kassa_abspvm = "kassa_abspvm = null,";
+      }
+      else {
+        $kassa_abspvm = "kassa_abspvm = '{$row['kassa_abspvm']}',";
+      }
+
       $query = "INSERT INTO maksuehto SET
                 yhtio              = '$yhtio',
                 teksti             = '$row[teksti]',
                 rel_pvm            = '$row[rel_pvm]',
-                abs_pvm            = '$row[abs_pvm]',
+                {$abs_pvm}
                 kassa_relpvm       = '$row[kassa_relpvm]',
-                kassa_abspvm       = '$row[kassa_abspvm]',
+                {$kassa_abspvm}
                 kassa_alepros      = '$row[kassa_alepros]',
                 jv                 = '$row[jv]',
                 kateinen           = '$row[kateinen]',
-                factoring          = '$row[factoring]',
+                factoring_id       = '$row[factoring_id]',
                 pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
                 itsetulostus       = '$row[itsetulostus]',
                 jaksotettu         = '$row[jaksotettu]',
@@ -508,7 +524,6 @@ if ($tila == 'toimitustapa') {
                 poistumistoimipaikka_koodi       = '$row[poistumistoimipaikka_koodi]',
                 ulkomaanlisa                     = '$row[ulkomaanlisa]',
                 sallitut_maat                    = '$row[sallitut_maat]',
-                sallitut_alustat                 = '$row[sallitut_alustat]',
                 virallinen_selite                = '$row[virallinen_selite]',
                 jarjestys                        = '$row[jarjestys]',
                 laatija                          = '$kukarow[kuka]',

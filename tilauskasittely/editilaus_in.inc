@@ -27,13 +27,16 @@ if ($php_cli) {
   // ja parametri komentorivilt‰
   $filename = $argv[1];
 
-  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order'
-      or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
-    $argv[2] = 'magento';
-  }
-
   // ja toinen parametri komentorivilt‰
-  $edi_tyyppi  = $argv[2];
+  $edi_tyyppi  = trim($argv[2]);
+
+  $verkkokauppa_filename = strtolower(basename($filename));
+  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
+
+  // tunnistetaan magento -tyyppinen k‰sittely tiedostonimest‰
+  if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'magento';
+  }
 
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
@@ -188,6 +191,7 @@ $editilaus_rahtivapaa         = "";
 $editilaus_sisainen           = "";
 $editilaus_tila               = "N"; // laskun tila
 $editilaus_tilaustyyppi       = "";
+$editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $edi_kommentti                = "";
@@ -233,6 +237,7 @@ $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
 $ovt_tunnus                   = "";
 $ovt_tunnuswhere              = "";
+$noutopisteen_tunnus          = "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta lˆydy
@@ -455,6 +460,16 @@ while ($tietue = fgets($fd)) {
     $editilaus_tilaustyyppi = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_VALUUTTAKOODI' :
+    // Tilauksen valuutta
+    $editilaus_valuuttakoodi = $tieto;
+
+    if (!empty($tieto)) {
+      $edi_ulos .= t("Valuuttakoodi")." $tieto\n";
+    }
+
+    break;
+
   case 'OSTOTIL.VERKKOKAUPPA' :
     // Verkkokaupan nimi
     $verkkokauppa = $tieto;
@@ -624,6 +639,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
     $viite .= $tieto. ' ';
+    break;
+
+  case 'OSTOTIL.OT_TILAUSVIESTI' :
+    //Asiakkaan tilausviesti
+    $edi_kommentti .= $tieto." \n";
     break;
 
   case 'ICHG_SNDR' :
@@ -1006,13 +1026,19 @@ while ($tietue = fgets($fd)) {
     $yhteyshenkilon_puhelin = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_TOIMITUS_NOUTOPISTE_TUNNUS' :
+    // noutopisteen tunnus unifaunia varten
+    $noutopisteen_tunnus = trim($tieto);
+    break;
+
   case 'OSTOTIL.OT_MAKSETTU' :
     // Jos Magenton tilaus ja osutaan erikoiskauppak‰sittelyyn
     if ($edi_tyyppi == 'magento' and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa);
-      if (count($result) > 0) {
+
+      if (!empty($result[6])) {
         // Tyhj‰t‰‰n t‰m‰ ja haetaan maksuehto myˆhemmin asiakkaan takaa
         $tieto = '';
         break;
@@ -1549,6 +1575,27 @@ while ($tietue = fgets($fd)) {
         $tpuh = $arow['toim_puh'];
       }
 
+      // Katsotaan verkkokauppatapauksessa tilauksen valuutta
+      if ($edi_tyyppi == 'magento'
+          and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
+          and !empty($editilaus_valuuttakoodi)) {
+        // escapetaan
+        $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
+
+        $query = "SELECT tunnus
+                  FROM valuu
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND nimi = '{$valkoodi}'";
+        $valuu_result = pupe_query($query);
+
+        if (mysql_num_rows($valuu_result) != 1) {
+          $valkoodi = $yhtiorow['valkoodi'];
+        }
+      }
+      else {
+        $valkoodi = $yhtiorow['valkoodi'];
+      }
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1621,7 +1668,7 @@ while ($tietue = fgets($fd)) {
                 toim_postitp            = '$arow[toim_postitp]',
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
-                valkoodi                = '$yhtiorow[valkoodi]',
+                valkoodi                = '{$valkoodi}',
                 varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
@@ -1649,6 +1696,7 @@ while ($tietue = fgets($fd)) {
                 laskutus_postitp  = '$arow[laskutus_postitp]',
                 laskutus_postino  = '$arow[laskutus_postino]',
                 laskutus_maa      = '$arow[laskutus_maa]',
+                noutopisteen_tunnus = '{$noutopisteen_tunnus}',
                 laatija           = '$edi_laatija',
                 luontiaika        = now(),
                 yhtio             = '$kukarow[yhtio]',
@@ -2359,15 +2407,40 @@ while ($tietue = fgets($fd)) {
         $silent = "SILENT";
         $tilausvalmiskutsuja = "EDITILAUS";
 
-        // Vientitilauksille saa kutsua tilaus-valmis.inci‰ vaan kerran
-        // Kotimaan tilauksilel kutsutaan tilaus-valmis.inci‰ kahdesti,
-        // koska ekalla kerralla niille luodaan pupeen lasku
-        if ($laskurow["vienti"] == "") {
+        if (!empty($ltoim_email)) {
+          $saate_query = "SELECT tunnus
+                    FROM avainsana
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND laji    = 'LASKUTUS_SAATE'
+                    AND selite  = 'Verkkokauppa'";
+          $saate_res = pupe_query($saate_query);
+
+          if ($saaterow = mysql_fetch_assoc($saate_res)) {
+            $saatekirje = $saaterow["tunnus"];
+            $valittu_kopio_tulostin = "asiakasemail$ltoim_email";
+          }
+        }
+
+        // magentotilaus on laskutettu, jos meill‰ on kassalipas
+        $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
+
+        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
+        // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
+        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+
+        // Laitetaan tilaus valmiiksi
+        if ($paivita_takaisin_keraysjonoon and $laskurow["vienti"] != "") {
+          // Paitsi jos meill‰ on vientitilaus, joka tulee laittaa takaisin ker‰ysjonoon
+        }
+        else {
           require "tilaus-valmis.inc";
         }
 
-        // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-        if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+        $valittu_kopio_tulostin = "";
+        $saatekirje = 0;
+
+        // P‰ivitet‰‰n tilaus takaisin ker‰ysjonoon
+        if ($paivita_takaisin_keraysjonoon) {
           // Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
           $varasto_query = "SELECT tunnus
                             from varastopaikat
@@ -2481,6 +2554,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_sisainen           = "";
     $editilaus_tila               = "N"; // laskun tila
     $editilaus_tilaustyyppi       = "";
+    $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $edi_kommentti                = "";
@@ -2526,6 +2600,7 @@ while ($tietue = fgets($fd)) {
     $yhteyshenkilon_puhelin       = "";
     $ovt_tunnus                   = "";
     $ovt_tunnuswhere              = "";
+    $noutopisteen_tunnus          = "";
     break;
   }
 }

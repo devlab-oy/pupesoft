@@ -291,7 +291,8 @@ if (!empty($variaatio)) {
             tuote.osasto,
             tuote.myyntihinta,
             tuote.myymalahinta,
-            tuote.yhtio
+            tuote.yhtio,
+            tuote.alv
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
               AND tuotteen_avainsanat.kieli  = '{$yhtiorow['kieli']}'
@@ -960,6 +961,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
             tuote.status
@@ -1499,7 +1501,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if (count($tuotteen_lisatiedot) > 0) {
         $row["nimitys"] .= "<ul>";
         foreach ($tuotteen_lisatiedot as $tuotteen_lisatiedot_arvo) {
-          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; $tuotteen_lisatiedot_arvo[selite]</li>";
+          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; ".url_or_text($tuotteen_lisatiedot_arvo['selite'])."</li>";
         }
         $row["nimitys"] .= "</ul>";
       }
@@ -1820,7 +1822,8 @@ function piirra_extranet_saldo($row, $oleasrow) {
 function hae_oletusasiakas($laskurow) {
   global $kukarow;
 
-  $query = "SELECT *
+  $query = "SELECT *,
+                   toimipaikka AS yhtio_toimipaikka
             FROM asiakas
             WHERE yhtio='$kukarow[yhtio]'
             AND tunnus='$kukarow[oletus_asiakas]'";
@@ -1852,16 +1855,22 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
 
   if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
-      echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'>";
-      echo "<input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'>";
-      echo "</a>";
+      echo "<table>";
+      echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
+      echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
+      echo "</td></tr>";
+
+      if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
+        echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+      }
+
+      echo "</table>";
       echo "</td>";
       $yht_i++;
     }
@@ -1923,7 +1932,7 @@ function piirra_formin_aloitus() {
  */
 function tarkista_tilausrivi() {
   global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
-  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
+  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
 
   pupemaster_start();
 
@@ -2024,6 +2033,10 @@ function tarkista_tilausrivi() {
             ${'ale' . $alepostfix} = "";
           }
 
+          // Jos ale1 annettu
+          if (!empty($_REQUEST['ale1'][$yht_i]) and empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
+            $ale1 = $_REQUEST['ale1'][$yht_i];
+          }
           $alv = "";
           $var = "";
           $varasto = $laskurow["varasto"];
@@ -2453,6 +2466,12 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         $ale_kaikki,
         $alehinta_alv,
         $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+
+      // alvillinen -> alviton
+      // alv pois
+      if ($yhtiorow['alv_kasittely'] == '' and $oleasrow['alv'] == 0 and $row['alv'] != 0) {
+        $hinta = $hinta / (1 + $row['alv'] / 100);
+      }
 
       $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
       $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";

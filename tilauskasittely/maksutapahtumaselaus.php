@@ -140,9 +140,22 @@ function hae_tilaukset($rajaus) {
 }
 
 function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
-  global $yhtiorow, $palvelin2;
+  global $yhtiorow, $kukarow, $palvelin2;
 
-  pupe_DataTables(array(array($pupe_DataTables, 9, 12)));
+
+  $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
+      $kukarow["maksupaate_kassamyynti"] == "") or
+    $kukarow["maksupaate_kassamyynti"] == "K");
+
+
+  if ($maksupaate_kassamyynti) {
+    $totcol =  13;
+  }
+  else {
+    $totcol =  12;
+  }
+
+  pupe_DataTables(array(array($pupe_DataTables, 9, $totcol)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";
@@ -160,6 +173,11 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   echo "<th class='back'></th>";
   echo "<th class='back'></th>";
   echo "<th class='back'></th>";
+
+  if ($maksupaate_kassamyynti) {
+    echo "<th class='back'></th>";
+  }
+
   echo "</tr>";
 
   echo "<tr>";
@@ -172,9 +190,14 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
   echo "<td><input type='text' class='search_field' name='search_summa'></td>";
   echo "<td><input type='text' class='search_field' name='search_astilno'></td>";
   echo "<td><input type='text' class='search_field' name='search_tilausviite'></td>";
-  echo "<td class='back'>";
-  echo "<td class='back'>";
-  echo "<td class='back'>";
+  echo "<td class='back'></td>";
+  echo "<td class='back'></td>";
+  echo "<td class='back'></td>";
+
+  if ($maksupaate_kassamyynti) {
+    echo "<td class='back'></td>";
+  }
+
   echo "</tr>";
 
   echo "</thead>";
@@ -202,20 +225,22 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<td class='text-right'>{$tilaus["asiakkaan_tilausnumero"]}</td>";
     echo "<td class='text-right'>{$tilaus["viite"]}</td>";
 
-    echo "<td class='back'>";
-    echo "<form>";
-    echo "<input type='hidden' name='rajaus[alku][vuosi]' value='{$rajaus["alku"]["vuosi"]}'>";
-    echo "<input type='hidden' name='rajaus[alku][kuukausi]' value='{$rajaus["alku"]["kuukausi"]}'>";
-    echo "<input type='hidden' name='rajaus[alku][paiva]' value='{$rajaus["alku"]["paiva"]}'>";
-    echo "<input type='hidden' name='rajaus[loppu][vuosi]' value='{$rajaus["loppu"]["vuosi"]}'>";
-    echo "<input type='hidden' name='rajaus[loppu][kuukausi]' value='{$rajaus["loppu"]["kuukausi"]}'>";
-    echo "<input type='hidden' name='rajaus[loppu][paiva]' value='{$rajaus["loppu"]["paiva"]}'>";
-    echo "<input type='hidden' name='rajaus[limit]' value='{$rajaus["limit"]}'>";
-    echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
-    echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
-    echo "<input type='submit' value='" . t("Kuittikopio") . "'>";
-    echo "</form>";
-    echo "</td>";
+    if ($maksupaate_kassamyynti) {
+      echo "<td class='back'>";
+      echo "<form>";
+      echo "<input type='hidden' name='rajaus[alku][vuosi]' value='{$rajaus["alku"]["vuosi"]}'>";
+      echo "<input type='hidden' name='rajaus[alku][kuukausi]' value='{$rajaus["alku"]["kuukausi"]}'>";
+      echo "<input type='hidden' name='rajaus[alku][paiva]' value='{$rajaus["alku"]["paiva"]}'>";
+      echo "<input type='hidden' name='rajaus[loppu][vuosi]' value='{$rajaus["loppu"]["vuosi"]}'>";
+      echo "<input type='hidden' name='rajaus[loppu][kuukausi]' value='{$rajaus["loppu"]["kuukausi"]}'>";
+      echo "<input type='hidden' name='rajaus[loppu][paiva]' value='{$rajaus["loppu"]["paiva"]}'>";
+      echo "<input type='hidden' name='rajaus[limit]' value='{$rajaus["limit"]}'>";
+      echo "<input type='hidden' name='tilaus[laskunro]' value='{$tilaus["laskunro"]}'>";
+      echo "<input type='hidden' name='tilaus[toiminto]' value='kuittikopio'>";
+      echo "<input type='submit' value='" . t("Kuittikopio") . "'>";
+      echo "</form>";
+      echo "</td>";
+    }
 
     echo "<td class='back'>";
     echo "<form action='../raportit/asiakkaantilaukset.php'>";
@@ -244,6 +269,17 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
     echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
     echo "<input type='submit' value='" . t("Korjaa kuitti") . "'>";
+    echo "</form>";
+    echo "</td>";
+
+    echo "<td class='back'>";
+    echo "<form action='../monistalasku.php'>";
+    echo "<input type='hidden' name='tee' value='MONISTA'>";
+    echo "<input type='hidden' name='kklkm' value='1'>";
+    echo "<input type='hidden' name='monistettavat[{$tilaus["myyntilaskun_tunnus"]}]' value='MONISTA'>";
+    echo "<input type='hidden' name='mistatultiin' value='maksutapahtumaselaus'>";
+    echo "<input type='hidden' name='lopetus' value='{$lopetus}'>";
+    echo "<input type='submit' value='" . t("Monista kuitti") . "'>";
     echo "</form>";
     echo "</td>";
 

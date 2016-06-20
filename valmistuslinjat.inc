@@ -206,7 +206,7 @@ function valmistuksen_kesto($valmistus) {
 function hae_valmistuslinjat() {
   global $kukarow;
 
-  $result = t_avainsana("VALMISTUSLINJA");
+  $result = t_avainsana("VALMISTUSLINJA", '', 'ORDER BY selite + 0');
 
   $valmistuslinjat = array();
 
@@ -324,7 +324,7 @@ function rebuild_valmistuslinjat($from = 'now') {
             FROM avainsana
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND laji    = 'VALMISTUSLINJA'
-            ORDER BY selite";
+            ORDER BY selite + 0";
   $valmistuslinjat_result = pupe_query($query);
 
   // J‰rjestell‰‰n linja kerrallaan

@@ -1942,27 +1942,31 @@ else {
           }
 
           // Tutkitaan onko ketju factorinkia
-          $query  = "SELECT factoring.sopimusnumero, maksuehto.factoring, factoring.viitetyyppi
-                     FROM lasku
-                     JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring!=''
-                     JOIN factoring ON maksuehto.yhtio=factoring.yhtio and maksuehto.factoring=factoring.factoringyhtio and lasku.valkoodi=factoring.valkoodi
-                     WHERE lasku.yhtio = '$kukarow[yhtio]'
-                     and lasku.tunnus  in ($tunnukset)
-                     GROUP BY factoring.sopimusnumero, maksuehto.factoring";
+          // Ketju on groupattu maksuehdon mukaan, joten meillä ei ole kun yhden maksuehdon laskuja
+          $query = "SELECT DISTINCT factoring.sopimusnumero, factoring.factoringyhtio, factoring.viitetyyppi
+                    FROM lasku
+                    JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+                      and maksuehto.tunnus = lasku.maksuehto
+                      and maksuehto.factoring_id is not null)
+                    JOIN factoring ON (factoring.yhtio = maksuehto.yhtio
+                      and factoring.tunnus = maksuehto.factoring_id
+                      and factoring.valkoodi = lasku.valkoodi)
+                    WHERE lasku.yhtio = '$kukarow[yhtio]'
+                    and lasku.tunnus in ($tunnukset)";
           $fres = pupe_query($query);
           $frow = mysql_fetch_assoc($fres);
 
           // Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
-          if ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'NORDEA' and $frow["viitetyyppi"] == '') {
+          if ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'NORDEA' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'COLLECTOR' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'COLLECTOR' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'OKO' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'OKO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."001".sprintf('%09d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."1".sprintf('%09d', $lasno);
           }
           else {
@@ -2114,11 +2118,11 @@ else {
           }
 
           //Haetaan factoringsopimuksen tiedot
-          if ($masrow["factoring"] != '') {
+          if (isset($masrow["factoring_id"])) {
             $query = "SELECT *
                       FROM factoring
                       WHERE yhtio        = '$kukarow[yhtio]'
-                      and factoringyhtio = '$masrow[factoring]'
+                      and tunnus         = '$masrow[factoring_id]'
                       and valkoodi       = '$lasrow[valkoodi]'";
             $fres = pupe_query($query);
             $frow = mysql_fetch_assoc($fres);
@@ -2130,7 +2134,7 @@ else {
           $pankkitiedot = array();
 
           //Laitetaan pankkiyhteystiedot kuntoon
-          if ($masrow["factoring"] != "") {
+          if (isset($masrow["factoring_id"])) {
             $pankkitiedot["pankkinimi1"]  = $frow["pankkinimi1"];
             $pankkitiedot["pankkitili1"]  = $frow["pankkitili1"];
             $pankkitiedot["pankkiiban1"]  = $frow["pankkiiban1"];
@@ -2544,10 +2548,8 @@ else {
 
               // Otetaan yhteensäkommentti pois jos summataan rivejä
               if ($rivigrouppaus) {
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+                // Trimmataan ja otetaan "yhteensäkommentti" pois
+                $tilrow["kommentti"] = trim(poista_rivin_yhteensakommentti($tilrow["kommentti"]));
               }
 
               // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä
@@ -2635,7 +2637,14 @@ else {
 
               // Yksikköhinta on laskulla aina veroton
               if ($yhtiorow["alv_kasittely"] == '') {
+                // Tuotteiden myyntihinnat sisältävät arvonlisäveron
                 $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
+                $tilrow["hinta_verollinen"] = $tilrow["hinta"];
+              }
+              else {
+                // Tuotteiden myyntihinnat ovat arvonlisäverottomia
+                $tilrow["hinta"] = $tilrow["hinta"];
+                $tilrow["hinta_verollinen"] = $tilrow["hinta"] * (1 + $tilrow["alv"] / 100);
               }
 
               // Veron määrä
@@ -3407,7 +3416,7 @@ else {
                       (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
                       (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
                       (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))), 1, 0)) paiva,
-              sum(if (maksuehto.factoring != '', 1, 0)) factoroitavat,
+              sum(if (maksuehto.factoring_id is not null, 1, 0)) factoroitavat,
               count(lasku.tunnus) kaikki
               from lasku
               LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus

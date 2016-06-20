@@ -421,11 +421,11 @@ if (!function_exists("loppu")) {
     $pankkitiedot = array();
 
     //Laitetaan pankkiyhteystiedot kuntoon
-    if ($maksuehtotiedot["factoring"] != "") {
+    if (isset($maksuehtotiedot["factoring_id"])) {
       $query = "SELECT *
                 FROM factoring
-                WHERE yhtio        = '$kukarow[yhtio]'
-                AND factoringyhtio = '$maksuehtotiedot[factoring]'";
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus = '$maksuehtotiedot[factoring_id]'";
       $fac_result = pupe_query($query);
       $factoringrow = mysql_fetch_assoc($fac_result);
 

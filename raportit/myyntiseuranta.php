@@ -2773,8 +2773,8 @@ else {
 
                 while ($dyprow = mysql_fetch_assoc($budj_r)) {
 
-                  if ($dyprow["kausi"] == $_kumulalk and (int) $ppa != 1) {
-                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$ppa)/$_kumul_alkukuun_paivat);
+                  if ($dyprow["kausi"] == $_kumulalk and (int) $kumulatiivinen_pp != 1) {
+                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$kumulatiivinen_pp)/$_kumul_alkukuun_paivat);
                   }
 
                   if ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {

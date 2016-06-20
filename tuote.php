@@ -1242,8 +1242,8 @@ if (isset($ajax)) {
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
               and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
               and tilausrivi.tuoteno         = '$tuoteno'
-              and tilausrivi.laskutettuaika  = '0000-00-00'
-              and (tilausrivi.var != 'P' or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila != 'X'))
+              and tilausrivi.laskutettuaika = '0000-00-00'
+              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila != 'X'))
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 
@@ -2119,7 +2119,7 @@ if ($tee == 'Z') {
     }
 
     // Varastoon
-    if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P') {
+    if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P' or $tuoterow["ei_saldoa"] == 'o') {
       $tuoterow['ei_varastoida'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {

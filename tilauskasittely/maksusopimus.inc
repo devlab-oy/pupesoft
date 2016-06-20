@@ -170,6 +170,10 @@ function maksusopimus_tallenna($laskurow, $maksupositio, $summa, $osuus, $mehto,
   $summa = str_replace(",", ".", $summa);
   $osuus = str_replace(",", ".", $osuus);
 
+  if (!empty($summa)) {
+    $summa = $summa * $laskurow['vienti_kurssi'];
+  }
+
   $query = "SELECT *
             FROM tuote
             WHERE yhtio = '$kukarow[yhtio]'
@@ -236,7 +240,7 @@ function maksusopimus_tallenna($laskurow, $maksupositio, $summa, $osuus, $mehto,
             WHERE yhtio = '$kukarow[yhtio]'
             and otunnus = '$laskurow[jaksotettu]'
             and tunnus  = '$maksupositio'";
-  $result = pupe_query($query);
+  pupe_query($query);
 
   $erpcmpp = "";
   $erpcmkk = "";
@@ -358,10 +362,10 @@ if (empty($maksusoppari_silent)) {
     // Haetaan laskun summat
     $query = "SELECT
               group_concat(distinct lasku.tunnus) tilaukset,
-              sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
-              sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli,
-              round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_veroton,
-              round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_verolli
+              sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / lasku.vienti_kurssi / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_veroton,
+              sum(if (tilausrivi.jaksotettu='$laskurow[jaksotettu]', round(tilausrivi.hinta / lasku.vienti_kurssi * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa},2), 0)) jaksotettavaa_verolli,
+              round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / lasku.vienti_kurssi / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_veroton,
+              round(sum(if (tilausrivi.jaksotettu=0 , tilausrivi.hinta / lasku.vienti_kurssi * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, 0)),2) loput_verolli
               FROM lasku
               JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
               WHERE lasku.yhtio    = '$kukarow[yhtio]'
@@ -372,11 +376,11 @@ if (empty($maksusoppari_silent)) {
     $result = pupe_query($query);
     $rivrow = mysql_fetch_array($result);
 
-    $jaksotettavaa_verolli   = $rivrow["jaksotettavaa_verolli"];
-    $loput_verolli       = $rivrow["loput_verolli"];
+    $jaksotettavaa_verolli = $rivrow["jaksotettavaa_verolli"];
+    $loput_verolli = $rivrow["loput_verolli"];
 
-    $jaksotettavaa_veroton   = $rivrow["jaksotettavaa_veroton"];
-    $loput_veroton       = $rivrow["loput_veroton"];
+    $jaksotettavaa_veroton = $rivrow["jaksotettavaa_veroton"];
+    $loput_veroton = $rivrow["loput_veroton"];
 
     if ($yhtiorow["alv_kasittely"] == '') {
       $jaksotettavaa = $rivrow["jaksotettavaa_verolli"];
@@ -421,9 +425,11 @@ if (empty($maksusoppari_silent)) {
       $osuus  = 0;
       $i    = 0;
 
-      while ($row = mysql_fetch_array($result)) {
+      while ($row = mysql_fetch_assoc($result)) {
 
         $i++;
+
+        $row["summa"] = round($row["summa"] / $laskurow['vienti_kurssi'], 2);
 
         $todellinen_osuus = round($row["summa"] / $jaksotettavaa * 100, 4);
 
@@ -479,8 +485,6 @@ if (empty($maksusoppari_silent)) {
                     and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
           $tuoteresult = pupe_query($query);
           $tuoterow = mysql_fetch_array($tuoteresult);
-
-          $row["summa"] = round($row["summa"], 2);
 
           echo "<td align ='right'><input style='text-align:right' type='text' size='10'  name='summa' value='".sprintf('%.2f', $row["summa"])."'></td>";
           echo "</tr>";
@@ -571,7 +575,7 @@ if (empty($maksusoppari_silent)) {
         $summavippaus   = round($jaksotettavaa-$tot, 2);
 
         echo "<br>";
-        echo "<font class='error'>".t("Positiot eiv‰t t‰sm‰‰, muuta jotain positiota")." $osuusvippaus% $summavippaus $yhtiorow[valkoodi]</font>";
+        echo "<font class='error'>".t("Positiot eiv‰t t‰sm‰‰, muuta jotain positiota")." $osuusvippaus% $summavippaus $laskurow[valkoodi]</font>";
         echo "<br>";
       }
 
@@ -606,19 +610,19 @@ if (empty($maksusoppari_silent)) {
       echo "<tr>";
       echo "<th>".t("Jaksotettavaa yhteens‰")."</th>";
       echo "<td align='right'>".sprintf('%.2f', $jaksotettavaa_veroton)."</td>";
-      echo "<td align='right'>".sprintf('%.2f', $jaksotettavaa_verolli)."</td>";
+      echo "<td align='right'>".sprintf('%.2f', $jaksotettavaa_verolli)."</td><td>{$laskurow['valkoodi']}</td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>".t("Ei jaksotettavaa yhteens‰")."</th>";
       echo "<td align='right'>".sprintf('%.2f', $loput_veroton)."</td>";
-      echo "<td align='right'>".sprintf('%.2f', $loput_verolli)."</td>";
+      echo "<td align='right'>".sprintf('%.2f', $loput_verolli)."</td><td>{$laskurow['valkoodi']}</td>";
       echo "</tr>";
 
       echo "<tr>";
       echo "<th>".t("Tilaus yhteens‰")."</th>";
       echo "<td align='right'>".sprintf('%.2f', $ihakaikki_veroton)."</td>";
-      echo "<td align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td>";
+      echo "<td align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td><td>{$laskurow['valkoodi']}</td>";
       echo "</tr>";
 
       echo "</table>";

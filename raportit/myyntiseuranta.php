@@ -1080,6 +1080,7 @@ else {
       $laskugroups   = 0;
       $muutgroups    = 0;
       $myyjagroups   = 0;
+      $asiakasmyyjittain = 0;
 
       // K‰yd‰‰n l‰pi k‰ytt‰j‰n syˆtt‰m‰t grouppaukset
       foreach ($apu as $i => $mukaan) {
@@ -1130,6 +1131,7 @@ else {
           $gluku++;
           $asiakasgroups++;
           $myyjagroups++;
+          $asiakasmyyjittain++;
         }
 
         if ($mukaan == "ytunnus") {
@@ -1806,6 +1808,22 @@ else {
 
         if (preg_match("/AND ?(tilausrivin_lisatiedot\.|kantaasiakas\.|lasklisa\.|varastopaikat\.|tilausrivi\.|asiakas\.|toimitustapa\.)/i", $myse_asiakasrajaus.$lisa)) {
           echo "<font class='error'>".t("VIRHE: Muita kuin tuotteisiin liittyvi‰ rajauksia ei voida valita kun n‰ytet‰‰n tuotetavoitteet")."!</font><br>";
+          $tee = '';
+        }
+      }
+
+      if ($vertailubu == "asmy") {
+        // N‰ytet‰‰n asikasmyyj‰tavoitteet:
+
+        //siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        if ($asiakasmyyjittain == 0) {
+          echo "<font class='error'>".t("VIRHE: Asiakasmyyjiin liittyv‰ ryhmittely on valittava, kun n‰ytet‰‰n asiakasmyyj‰tavoitteet")."!</font><br>";
+          $tee = '';
+        }
+
+        // siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        if ($myyjagroups > 1) {
+          echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
           $tee = '';
         }
       }
@@ -2722,8 +2740,8 @@ else {
 
                 while ($dyprow = mysql_fetch_assoc($budj_r)) {
 
-                  if ($dyprow["kausi"] == $_kumulalk and (int) $ppa != 1) {
-                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$ppa)/$_kumul_alkukuun_paivat);
+                  if ($dyprow["kausi"] == $_kumulalk and (int) $kumulatiivinen_pp != 1) {
+                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$kumulatiivinen_pp)/$_kumul_alkukuun_paivat);
                   }
 
                   if ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {

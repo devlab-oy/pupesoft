@@ -406,6 +406,9 @@ function presta_hae_tuotteet() {
     presta_echo("Haetaan kaikki tuotteet.");
   }
 
+  // tuotteen "tilaustuote" -termi kaikilla kielillä
+  $tilaustuote_kaannokset = presta_hae_tilaustuote();
+
   // Haetaan pupesta tuotteen tiedot
   $query = "SELECT distinct tuote.*
             FROM tuote
@@ -459,6 +462,11 @@ function presta_hae_tuotteet() {
         "kentta" => $tr_row['laji'],
         "teksti" => $tr_row['selite']
       );
+    }
+
+    // jos tämä on tilaustuote, liitetään käännökset
+    if ($row['status'] == 'T') {
+      $tuotteen_kaannokset = array_merge($tuotteen_kaannokset, $tilaustuote_kaannokset);
     }
 
     // Haetaan tuotteen lapsituotteet, jos tämä on isätuote
@@ -718,4 +726,32 @@ function presta_poista_ylimaaraiset_kuvat($sku, Array $all_ids) {
   $count = mysql_affected_rows();
 
   return $count;
+}
+
+function presta_hae_tilaustuote() {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tilaustuotteen käännökset
+  $query = "SELECT kieli, selite, selitetark
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'S'
+            AND selite = 'T'";
+  $tr_result = pupe_query($query);
+  $tuotteen_statukset = array();
+
+  while ($tr_row = mysql_fetch_assoc($tr_result)) {
+    $tuotteen_statukset[] = array(
+      "kieli"  => $tr_row['kieli'],
+      "kentta" => 'tilaustuote',
+      "teksti" => $tr_row['selitetark']
+    );
+  }
+
+  return $tuotteen_statukset;
 }

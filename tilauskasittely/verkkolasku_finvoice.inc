@@ -818,7 +818,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 
       fputs($tootfinvoice, "<EpiBeneficiaryPartyDetails>\r\n");
 
-      if ($masrow["factoring"] != "") {
+      if (isset($masrow["factoring_id"])) {
         xml_add("EpiNameAddressDetails", $pankkitiedot["pankkinimi1"], $tootfinvoice, 35, 2);
       }
       else {

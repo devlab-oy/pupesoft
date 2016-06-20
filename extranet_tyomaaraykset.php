@@ -622,11 +622,13 @@ function email_tyomaarayskopio($request) {
 
   require_once "huoltopyynto_pdf.inc";
 
+  $huolto_email = t_avainsana("HUOLTOP_EMAIL", '', '', '', '', "selite");
+
   if ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
     $mihin_maili_lahetetaan = $kukarow['eposti'];
   }
   else {
-    $mihin_maili_lahetetaan = $yhtiorow['uusi_huoltopyynto_email'];
+    $mihin_maili_lahetetaan = $huolto_email;
   }
 
   // Sähköpostin lähetykseen parametrit

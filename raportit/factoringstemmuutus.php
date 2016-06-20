@@ -15,7 +15,7 @@ if (!$vva) {
 echo "<table>";
 echo "<form name='stemmuutus' method='post' autocomplete='off'>";
 
-$query = "SELECT factoringyhtio
+$query = "SELECT *
           FROM factoring
           WHERE yhtio = '$kukarow[yhtio]'";
 $vresult = pupe_query($query);
@@ -24,10 +24,10 @@ echo "<tr><th>".t("Factoringsopimus")."</th><td><select name = 'sopimus'>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
   $sel="";
-  if ($sopimus == $vrow["factoringyhtio"]) {
+  if ($sopimus == $vrow["tunnus"]) {
     $sel = "selected";
   }
-  echo "<option value = '$vrow[factoringyhtio]' $sel>$vrow[factoringyhtio]</option>";
+  echo "<option value = '$vrow[tunnus]' $sel>$vrow[factoringyhtio] - $vrow[nimitys]</option>";
 }
 
 echo "</select></td></tr>";
@@ -49,7 +49,7 @@ if (isset($submit)) {
   $query = "SELECT group_concat(tunnus) joukko
             FROM maksuehto
             WHERE yhtio='$kukarow[yhtio]'
-            AND factoring='$sopimus'";
+            AND factoring_id='$sopimus'";
   $maksuehtores = pupe_query($query);
   $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
@@ -115,7 +115,7 @@ if (isset($submit)) {
   $query = "SELECT *
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
-            AND factoringyhtio = '$sopimus'";
+            AND tunnus         = '$sopimus'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 1) {

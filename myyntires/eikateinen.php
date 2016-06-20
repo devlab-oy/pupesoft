@@ -235,7 +235,7 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
     }
   }
 
-  if ($params['mehtorow']["factoring"] != "") {
+  if (isset($params['mehtorow']["factoring_id"])) {
     $myysaatili = $yhtiorow['factoringsaamiset'];
   }
   elseif ($params['konsrow']["konserniyhtio"] != "") {

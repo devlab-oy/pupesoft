@@ -1268,7 +1268,12 @@ if (!function_exists("vapauta_sarjanumerot")) {
   function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
     global $kukarow, $yhtiorow;
 
-    $query = "SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
+    $query = "SELECT tilausrivi.tyyppi,
+              tilausrivi.tunnus,
+              (tilausrivi.varattu+tilausrivi.jt) varattu,
+              tilausrivi.tuoteno,
+              tuote.sarjanumeroseuranta,
+              tilausrivin_lisatiedot.tilausrivilinkki
               FROM tilausrivi use index (yhtio_otunnus)
               JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
               LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -1296,21 +1301,32 @@ if (!function_exists("vapauta_sarjanumerot")) {
         }
       }
       else {
-        // merkataan myyntirivitunnus nollaks
-        if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
+        if ($srow["tyyppi"] == "W") {
+          // Poistetaan valmistusrivin sarjanumero poiston yhteydess‰
           $query = "DELETE FROM sarjanumeroseuranta
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$srow[tuoteno]'
-                    and myyntirivitunnus = '$srow[tunnus]'";
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    AND tuoteno        = '$srow[tuoteno]'
+                    AND ostorivitunnus = '$srow[tunnus]'
+                    AND myyntirivitunnus = 0";
           pupe_query($query);
         }
         else {
-          $query = "UPDATE sarjanumeroseuranta
-                    SET myyntirivitunnus = 0
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$srow[tuoteno]'
-                    and myyntirivitunnus = '$srow[tunnus]'";
-          pupe_query($query);
+          // merkataan myyntirivitunnus nollaks
+          if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
+            $query = "DELETE FROM sarjanumeroseuranta
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and tuoteno          = '$srow[tuoteno]'
+                      and myyntirivitunnus = '$srow[tunnus]'";
+            pupe_query($query);
+          }
+          else {
+            $query = "UPDATE sarjanumeroseuranta
+                      SET myyntirivitunnus = 0
+                      WHERE yhtio          = '$kukarow[yhtio]'
+                      and tuoteno          = '$srow[tuoteno]'
+                      and myyntirivitunnus = '$srow[tunnus]'";
+            pupe_query($query);
+          }
         }
       }
     }
@@ -2780,7 +2796,7 @@ if (!function_exists("synkronoi")) {
                       where yhtio       = '$kohderow[yhtio]'
                       and abs_pvm       = '$aburow[abs_pvm]'
                       and erapvmkasin   = '$aburow[erapvmkasin]'
-                      and factoring     = '$aburow[factoring]'
+                      and factoring_id  = '$aburow[factoring_id]'
                       and jaksotettu    = '$aburow[jaksotettu]'
                       and jv            = '$aburow[jv]'
                       and kassa_abspvm  = '$aburow[kassa_abspvm]'
@@ -7228,7 +7244,7 @@ if (!function_exists("tulosta_ytunnus")) {
         $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
       }
     }
-    elseif (strtoupper($maa) == 'SE') {
+    elseif (strtoupper($maa) == 'SE' and is_numeric(substr(trim(strtoupper($ytunnus)), 0, 2))) {
       if (substr(trim(strtoupper($ytunnus)), 0, 2) != strtoupper($maa) and trim(strtoupper($maa)) != trim(strtoupper($yhtiorow["maa"])) and trim(strtoupper($maa)) != "") {
         $ytunnus = strtoupper($maa)."-".$ytunnus;
       }
@@ -25121,7 +25137,7 @@ if (!function_exists('paivita_poikkeavat_tulliprosentit')) {
 }
 
 if (!function_exists('hae_tuotteen_saapumisaika')) {
-  function hae_tuotteen_saapumisaika($tuoteno, $tuote_status, $myytavissa, $loytyko=FALSE, $loytyko_normivarastosta=FALSE) {
+  function hae_tuotteen_saapumisaika($tuoteno, $tuote_status, $myytavissa, $loytyko = FALSE, $loytyko_normivarastosta = FALSE, $kieli = "") {
     global $kukarow, $yhtiorow, $verkkokauppa;
 
     $tulossalisa = array();
@@ -25141,8 +25157,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
         $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
         if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-          $tulossalisa[] = "<hr>".t("TULOSSA")."!°!";
-          $tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
+          $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!°!";
+          $tulossalisa[] = t("Arvioitu saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
         }
         else {
           $tulossa_query = "SELECT DATE_ADD(curdate(), INTERVAL (if(tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika)+if(tuotteen_toimittajat.tilausvali > 0, tuotteen_toimittajat.tilausvali, toimi.oletus_tilausvali)) DAY) paivamaara,
@@ -25159,8 +25175,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-            $tulossalisa[] = "<hr>".t("TULOSSA")."!°!";
-            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!°!";
+            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }
@@ -25177,8 +25193,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
         $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
         if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
-          $tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE")."</font>!°!";
-          $tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰");
+          $tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE", $kieli)."</font>!°!";
+          $tulossalisa[] = t("Arvioitu toimitusaika", $kieli)."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰", $kieli);
         }
       }
       elseif ($verkkokauppa != "") {
@@ -25192,7 +25208,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
         $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
         if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-          $tulossalisa[] = t("Saapuu")."!°!".tv1dateconv($tulossa_row['paivamaara']);
+          $tulossalisa[] = t("Saapuu", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
         }
         elseif ((float) $myytavissa <= 0) {
           $query = "SELECT toimitusaika
@@ -25205,7 +25221,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if ($tulossa_row["toimitusaika"] > 0) {
-            $tulossalisa[] = t("Toimaika: %s pv.", "", $tulossa_row["toimitusaika"]);
+            $tulossalisa[] = t("Toimaika: %s pv.", $kieli, $tulossa_row["toimitusaika"]);
           }
         }
       }
@@ -25261,14 +25277,14 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
 
             if (isset($tulossa_row["nimi"]) and $tulossa_row["nimi"] != '') {
               if ($tulossa_row["suoraan_laskutukseen"] != "") {
-                $tulind = t("Suoratoimitus asiakkaalle").":<br>$tulossa_row[nimi]";
+                $tulind = t("Suoratoimitus asiakkaalle", $kieli).":<br>$tulossa_row[nimi]";
               }
               else {
-                $tulind = t("Tilattu asiakkaalle").":<br>$tulossa_row[nimi]";
+                $tulind = t("Tilattu asiakkaalle", $kieli).":<br>$tulossa_row[nimi]";
               }
             }
             else {
-              $tulind = t("TULOSSA");
+              $tulind = t("TULOSSA", $kieli);
             }
 
             $tulossalisa[] = "<hr>$tulind!°!<hr>$tulossa_row[tilattu]".t_avainsana("Y", "", " and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite");
@@ -25276,7 +25292,7 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
             if ($tulossa_row["jaksotettu"] == '1') $tarkkuus = "Vahvistettu";
             else $tarkkuus = "Arvioitu";
 
-            $tulossalisa[] = t("$tarkkuus saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = t("$tarkkuus saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
 
@@ -25295,8 +25311,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0) {
-            $tulossalisa[] = "<hr>".t("TULOSSA")."!°!"."<hr>";
-            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰")."!°!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!°!"."<hr>";
+            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }
@@ -25314,8 +25330,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
         $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
         if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["toimaika"] > 0) {
-          $tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE")."</font>!°!<hr>";
-          $tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰");
+          $tulossalisa[] = "<hr><font color='orange'>".t("TILAUSTUOTE", $kieli)."</font>!°!<hr>";
+          $tulossalisa[] = t("Arvioitu toimitusaika", $kieli)."!°!{$tulossa_row["toimaika"]} ".t("p‰iv‰‰", $kieli);
         }
       }
     }
@@ -25336,8 +25352,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
       $tehdassaldo_res = pupe_query($query);
 
       while ($tehdassaldo_row = mysql_fetch_assoc($tehdassaldo_res)) {
-        $tulossalisa[] = "<hr>".t("Tehtaalla")."!°!<hr>".sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])." ".t_avainsana("Y", "", " and avainsana.selite='$tehdassaldo_row[yksikko]'", "", "", "selite");
-        $tulossalisa[] = t("Arvioitu toimitusaika")."!°!{$tehdassaldo_row['toimaika']} ".t("p‰iv‰‰");
+        $tulossalisa[] = "<hr>".t("Tehtaalla", $kieli)."!°!<hr>".sprintf("%.2f", $tehdassaldo_row['tehdas_saldo'])." ".t_avainsana("Y", "", " and avainsana.selite='$tehdassaldo_row[yksikko]'", "", "", "selite");
+        $tulossalisa[] = t("Arvioitu toimitusaika", $kieli)."!°!{$tehdassaldo_row['toimaika']} ".t("p‰iv‰‰", $kieli);
       }
     }
 
@@ -31429,7 +31445,7 @@ if (!function_exists("mb_str_split")) {
 }
 
 if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
-  function jt_saapumisaika_tilausvahvistus($tilausrivi, $status) {
+  function jt_saapumisaika_tilausvahvistus($tilausrivi, $status, $kieli = "") {
     global $yhtiorow;
 
     if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
@@ -31438,7 +31454,7 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
       $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
       $myytavissa = $myytavissa[2];
       $saapumisaika = hae_tuotteen_saapumisaika($tilausrivi["tuoteno"],
-        $status, $myytavissa);
+        $status, $myytavissa, false, false, $kieli);
       if (count($saapumisaika > 0)) {
         $saapumisaika = $saapumisaika[1];
 
@@ -33005,6 +33021,28 @@ if (!function_exists('ulkoinen_jarjestelma_varastot')) {
     return array($logmaster_varasto, $normivarastoja);
   }
 }
+
+if (!function_exists('poista_rivin_yhteensakommentti')) {
+  function poista_rivin_yhteensakommentti($kommentti) {
+
+    $sanakirja_kielet = array("fi" => "Suomi",
+      "en" => "Englanti",
+      "se" => "Ruotsi",
+      "ee" => "Viro",
+      "de" => "Saksa",
+      "dk" => "Tanska",
+      "no" => "Norja",
+      "ru" => "Ven‰j‰");
+
+    // Otetaan "yhteens‰kommentti" pois rivin kommentista
+    foreach ($sanakirja_kielet as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+      $kommentti = preg_replace("/".t("yhteens‰", $sanakirja_kieli).": [0-9\.]* [A-Z]{3}\./", "", $kommentti);
+    }
+
+    return $kommentti;
+  }
+}
+
 
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {

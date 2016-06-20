@@ -45,14 +45,15 @@ else {
     $wherelisa = "";
   }
 
-  $query = "SELECT tuote.*, ta.selite AS synkronointi
+  $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
             FROM tuote
-            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi' AND ta.selite != '')
+            LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
             WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
-            AND tuote.status    != 'P'
             AND tuote.ei_saldoa  = ''
             {$wherelisa}
-            AND ta.selite IS NULL";
+            HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
+                    # jos avainsanaa ei ole olemassa ja status P niin ei haluta n‰it‰ tuotteita jatkossakaan
+                   (ta.tunnus IS NULL AND tuote.status != 'P')";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -115,7 +116,14 @@ else {
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
 
-        $line->addChild('Type', 'U');
+        if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
+          $type = 'M';
+        }
+        else {
+          $type = 'U';
+        }
+
+        $line->addChild('Type', $type);
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
 
@@ -134,50 +142,63 @@ else {
 
         $line->addChild('ItemName', utf8_encode($nimitys));
         $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', 0);
-        $line->addChild('SalesPrice', 0);
+        $line->addChild('ProdGroup2', '');
+        $line->addChild('SalesPrice', '');
         $line->addChild('Unit1', utf8_encode($yksikko));
-        $line->addChild('Unit2', 0);
-        $line->addChild('Relation', 0);
+        $line->addChild('Unit2', '');
+        $line->addChild('Relation', '');
         $line->addChild('Weight', round($row['tuotemassa'], 3));
-        $line->addChild('NetWeight', 0);
-        $line->addChild('Volume', 0);
-        $line->addChild('Height', 0);
-        $line->addChild('Width', 0);
-        $line->addChild('Length', 0);
-        $line->addChild('PackageSize', 0);
-        $line->addChild('PalletSize', 0);
-        $line->addChild('Status', 0);
-        $line->addChild('WholesalePackageSize', 0);
+        $line->addChild('NetWeight', '');
+        $line->addChild('Volume', '');
+        $line->addChild('Height', '');
+        $line->addChild('Width', '');
+        $line->addChild('Length', '');
+        $line->addChild('PackageSize', '');
+        $line->addChild('PalletSize', '');
+
+        switch ($row['status']) {
+        case 'A':
+          $status = 1;
+          break;
+        case 'P':
+          $status = 9;
+          break;
+        default:
+          $status = 0;
+          break;
+        }
+
+        $line->addChild('Status', $status);
+        $line->addChild('WholesalePackageSize', '');
         $line->addChild('EANCode', utf8_encode($eankoodi));
-        $line->addChild('EANCode2', 0);
-        $line->addChild('CustomsTariffNum', 0);
-        $line->addChild('AlarmLimit', 0);
-        $line->addChild('QualPeriod1', 0);
-        $line->addChild('QualPeriod2', 0);
-        $line->addChild('QualPeriod3', 0);
-        $line->addChild('FactoryNum', 0);
-        $line->addChild('UNCode', 0);
-        $line->addChild('BBDateCollect', 0);
-        $line->addChild('SerialNumbers', 0);
-        $line->addChild('SerialNumInArrival', 0);
-        $line->addChild('TaxCode', 0);
-        $line->addChild('CountryofOrigin', 0);
-        $line->addChild('PlatformQuantity', 0);
-        $line->addChild('PlatformType', 0);
-        $line->addChild('PurchasePrice', 0);
-        $line->addChild('ConsumerPrice', 0);
-        $line->addChild('OperRecommendation', 0);
+        $line->addChild('EANCode2', '');
+        $line->addChild('CustomsTariffNum', '');
+        $line->addChild('AlarmLimit', '');
+        $line->addChild('QualPeriod1', '');
+        $line->addChild('QualPeriod2', '');
+        $line->addChild('QualPeriod3', '');
+        $line->addChild('FactoryNum', '');
+        $line->addChild('UNCode', '');
+        $line->addChild('BBDateCollect', '');
+        $line->addChild('SerialNumbers', '');
+        $line->addChild('SerialNumInArrival', '');
+        $line->addChild('TaxCode', '');
+        $line->addChild('CountryofOrigin', '');
+        $line->addChild('PlatformQuantity', '');
+        $line->addChild('PlatformType', '');
+        $line->addChild('PurchasePrice', '');
+        $line->addChild('ConsumerPrice', '');
+        $line->addChild('OperRecommendation', '');
         $line->addChild('FreeText', utf8_encode($tuoteno));
-        $line->addChild('PurchaseUnit', 0);
-        $line->addChild('ManufactItemNum', 0);
-        $line->addChild('InternationalItemNum', 0);
-        $line->addChild('Flashpoint', 0);
-        $line->addChild('SalesCurrency', 0);
-        $line->addChild('PurchaseCurrency', 0);
-        $line->addChild('Model', 0);
-        $line->addChild('ModelOrder', 0);
-        $line->addChild('TransportTemperature', 0);
+        $line->addChild('PurchaseUnit', '');
+        $line->addChild('ManufactItemNum', '');
+        $line->addChild('InternationalItemNum', '');
+        $line->addChild('Flashpoint', '');
+        $line->addChild('SalesCurrency', '');
+        $line->addChild('PurchaseCurrency', '');
+        $line->addChild('Model', '');
+        $line->addChild('ModelOrder', '');
+        $line->addChild('TransportTemperature', '');
 
         if (is_null($row['synkronointi'])) {
 
@@ -201,7 +222,7 @@ else {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tuoteno = '{$row['tuoteno']}'
                     AND laji    = 'synkronointi'";
-          pupe_query($query_dump());
+          pupe_query($query);
         }
 
         $i++;
@@ -246,12 +267,8 @@ else {
           break;
         }
 
-        if (!PUPE_UNICODE) {
-          exec("recode -f UTF-8..ISO-8859-15 '{$filename}'");
-        }
-        else {
-          $ftputf8 = TRUE;
-        }
+        # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+        $ftputf8 = PUPE_UNICODE;
 
         require "inc/ftp-send.inc";
       }

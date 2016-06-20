@@ -50,6 +50,14 @@ if (!function_exists("kopioi_tilaus")) {
 
     $monistarow = mysql_fetch_array($monistares);
 
+    // haetaan maksuehdon tiedot tarkastuksia varten
+    $apuqu = "SELECT erapvmkasin
+              from maksuehto
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$monistarow[maksuehto]'";
+    $meapu = pupe_query($apuqu);
+    $meapurow = mysql_fetch_assoc($meapu);
+
     $fields = mysql_field_name($monistares, 0);
     $values = "'".$monistarow[0]."'";
 
@@ -67,6 +75,28 @@ if (!function_exists("kopioi_tilaus")) {
 
       if ($field == "kate_korjattu") {
         $values .= ", NULL";
+      }
+      elseif ($field == "erpcm" and $meapurow["erapvmkasin"] != '') {
+        $pp = (int) substr($monistarow[$i], 8, 2);
+        $kk = (int) substr($monistarow[$i], 5, 2);
+        $vv = (int) substr($monistarow[$i], 0, 4);
+
+        // Jos on syˆtetty er‰p‰iv‰m‰‰r‰st‰ vain p‰iv‰, taiotaan siit‰ kokonainen p‰iv‰m‰‰r‰
+        if ($pp > 0 and $kk == 0 and $vv == 0) {
+          // Jos syˆtetty p‰iv‰ on kuluvalla kuukaudella viel‰ tulevaisuudessa, tehd‰‰n p‰iv‰m‰‰r‰ samalle kuukaudelle
+          if ($pp > date("d")) {
+            $uusi_erapaivamaara = date("Y-m-{$pp}");
+          }
+          else {
+            // Muutoin p‰iv‰m‰‰r‰ tehd‰‰n seuraavalle kuukaudelle
+            $uusi_erapaivamaara = date("Y-m-{$pp}", strtotime('+1 month'));
+          }
+
+          $values .= ", '$uusi_erapaivamaara'";
+        }
+        else {
+          $values .= ", '$monistarow[$i]'";
+        }
       }
       else {
         $values .= ", '$monistarow[$i]'";

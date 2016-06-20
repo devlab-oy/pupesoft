@@ -10,12 +10,25 @@ if (mysql_field_name($result, $i) == "tunnus" or
 }
 
 if (mysql_field_name($result, $i) == "pakkaus") {
-  if ($lukitse_avaimeen != "") {
-    $tyyppi = 4;
+  $ulos = "<td><select name='$nimi'>";
 
-    $ulos = "<input type='hidden' name='{$nimi}' value='{$lukitse_avaimeen}'>";
-    $jatko = 0;
+  $query = "SELECT *
+            FROM pakkaus
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            ORDER BY jarjestys, pakkaus";
+  $pakkaus_res = pupe_query($query);
+
+  while ($pakkaus_row = mysql_fetch_assoc($pakkaus_res)) {
+
+    $sel = '';
+    if ($trow[$i] == $pakkaus_row['tunnus']) $sel = 'SELECTED';
+
+    $ulos .= "<option value='{$pakkaus_row['tunnus']}' $sel>{$pakkaus_row['pakkaus']} - {$pakkaus_row['pakkauskuvaus']}</option>";
   }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+  
 }
 
 if (mysql_field_name($result, $i) == "rahdinkuljettaja") {

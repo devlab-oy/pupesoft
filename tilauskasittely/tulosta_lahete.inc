@@ -504,13 +504,15 @@ if (!function_exists('alku_lahete')) {
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
           or $base_lahetetyyppi == "tulosta_lahete_eialehintoja.inc"
-          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])
           and $GLOBALS['eta_yhtio'] != ''
           and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
 
-        if ($yhtiorow['alv_kasittely'] == '' or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+        if (($laskurow['alv'] > 0 and $yhtiorow['alv_kasittely'] == '') or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
           $pdf->draw_text(310, 640, t("Hinnat sis‰lt‰v‰t arvonlis‰veron", $kieli).".", $thispage, $boldi);
         }
         else {
@@ -1355,16 +1357,10 @@ if (!function_exists('rivi_lahete')) {
     //K‰‰nnet‰‰n nimitys
     $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
-    // Trimmataan
-    $row["kommentti"] = trim($row["kommentti"]);
+    // Trimmataan ja otetaan "yhteens‰kommentti" pois
+    $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
 
-    // Otetaan yhteens‰kommentti pois l‰hetteelt‰ (t‰m‰ tieto lˆytyy rivilt‰ jos tilaus on laskutettu, mutta l‰hetteell‰ sit‰ ei voi n‰ytt‰‰)
-    $row["kommentti"] = preg_replace("/".t("Tilaus", $kieli)." ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-    $row["kommentti"] = preg_replace("/".t("Tilaus", $asrow["kieli"])." ".t("yhteens‰", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-    $row["kommentti"] = preg_replace("/".t("Tilaus")." ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-    $row["kommentti"] = preg_replace("/Tilaus [0-9]* "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-
-    //Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
+    // Kommentissa voi olla jotain sanoja jotka pit‰‰ k‰‰‰nt‰‰:
     if ($kieli != $yhtiorow["kieli"]) {
       $row["kommentti"] = str_replace("Ennakkotilaus:", t("Ennakkotilaus", $kieli).":", $row["kommentti"]);
       $row["kommentti"] = str_replace("Tilaus:", t("Tilaus", $kieli).":", $row["kommentti"]);
@@ -1701,7 +1697,7 @@ if (!function_exists('rivi_lahete')) {
     }
 
     // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
-    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"]);
+    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"], $kieli);
 
     if (!empty($row["kommentti"]) and !empty($saapumisaika)) {
       $row["kommentti"] .= "\n{$saapumisaika}";

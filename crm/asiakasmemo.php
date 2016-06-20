@@ -17,6 +17,37 @@ if (!isset($nayta_kaikki_merkinnat)) {
   }
 }
 
+if (!isset($haas_call_type))        $haas_call_type = '';
+if (!isset($haas_call_type_ed))    $haas_call_type_ed = '';
+if (!isset($haas_opportunity))      $haas_opportunity = '';
+if (!isset($haas_qty))              $haas_qty = '';
+if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = '';
+if (!isset($haas_opp_proj_date_mm)) $haas_opp_proj_date_mm = '';
+if (!isset($haas_opp_proj_date_yy)) $haas_opp_proj_date_yy = '';
+if (!isset($haas_end_reason))       $haas_end_reason = '';
+
+$crm_haas_res = t_avainsana("CRM_HAAS");
+$crm_haas_row = mysql_fetch_assoc($crm_haas_res);
+$crm_haas_check = (mysql_num_rows($crm_haas_res) > 0 and $crm_haas_row['selite'] == 'K');
+
+$crm_haas_lisa = "";
+
+if ($crm_haas_check) {
+  if (!empty($haas_call_type))   $crm_haas_lisa .= "kentta02 = '{$haas_call_type}',";
+  if (!empty($haas_opportunity)) $crm_haas_lisa .= "kentta03 = '{$haas_opportunity}',";
+  if (!empty($haas_qty))         $crm_haas_lisa .= "kentta04 = '{$haas_qty}',";
+
+  $_dd = (int) $haas_opp_proj_date_dd;
+  $_mm = (int) $haas_opp_proj_date_mm;
+  $_yy = (int) $haas_opp_proj_date_yy;
+
+  if (!empty($_dd) and !empty($_mm) and !empty($_yy) and checkdate($_mm, $_dd, $_yy)) {
+    $crm_haas_lisa .= "kentta05 = '".date('Y-m-d', mktime(0, 0, 0, $_mm, $_dd, $_yy))."',";
+  }
+
+  if (!empty($haas_end_reason))  $crm_haas_lisa .= "kentta06 = '{$haas_end_reason}',";
+}
+
 echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
@@ -99,6 +130,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                  tyyppi       = 'Memo',
                  pvmalku      = now(),
                  kentta01     = '$eviesti',
+                 {$crm_haas_lisa}
                  perheid      = '$row[tunnus]',
                  laatija      = '$kukarow[kuka]',
                  luontiaika   = now()";
@@ -116,6 +148,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                    tyyppi          = '$row[tyyppi]',
                    pvmalku         = '$row[pvmalku]',
                    kentta01        = '$row[kentta01]',
+                   {$crm_haas_lisa}
                    kuittaus        = '$row[kuittaus]',
                    laatija         = '$kukarow[kuka]',
                    luontiaika      = now()";
@@ -164,6 +197,63 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $muistutusko   = "";
   }
 
+  if ($tee == "UUSIMEMO" and $crm_haas_check) {
+
+    $_dd = $haas_opp_proj_date_dd;
+    $_mm = $haas_opp_proj_date_mm;
+    $_yy = $haas_opp_proj_date_yy;
+
+    if ($haas_call_type != $haas_call_type_ed) {
+      $tee = '';
+    }
+
+    if (!empty($haas_call_type) and $haas_call_type != 'Prospecting Call') {
+      if (empty($haas_opportunity)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPPORTUNITY'),"</font><br>";
+        $tee = '';
+      }
+
+      if (empty($haas_qty)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'QTY'),"</font><br>";
+        $tee = '';
+      }
+
+      if (empty($_dd) or empty($_mm) or empty($_yy)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPP_PROJ_DATE'),"</font><br>";
+        $tee = '';
+      }
+
+      if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call')) and empty($haas_end_reason)) {
+        echo "<font class='error'>",t("%s on pakollinen.", '', 'END_REASON'),"</font><br>";
+        $tee = '';
+      }
+
+      if (!empty($haas_qty)) {
+
+        if (!is_numeric($haas_qty)) {
+          echo "<font class='error'>",t("Kappalem‰‰r‰n t‰ytyy olla numero."),"</font><br>";
+          $tee = '';
+        }
+
+        if (strlen($haas_qty) > 2) {
+          echo "<font class='error'>",t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."),"</font><br>";
+          $tee = '';
+        }
+      }
+
+      if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
+        if (!checkdate($_mm, $_dd, $_yy)) {
+          echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
+          $tee = '';
+        }
+        if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
+          echo "<font class='error'>",t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."),"</font><br>";
+          $tee = '';
+        }
+      }
+    }
+  }
+
   if ($tee == "UUSIMEMO") {
 
     if (checkdate($mkka, $mppa, $mvva)) {
@@ -183,6 +273,21 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
     if ($korjaus == '') {
       if ($viesti != '') {
+
+        if ($kukarow["kieli"] != 'fi') {
+          $query = "SELECT selite from avainsana
+              where yhtio = '$kukarow[yhtio]'
+              and laji       = 'KALETAPA'
+              and selitetark = '$tapa'
+              and kieli      = '$kukarow[kieli]'";
+          $tapa_res = pupe_query($query);
+          $tapa_row = mysql_fetch_assoc($tapa_res);
+
+          $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
+          $tapa_row = mysql_fetch_assoc($tapa_res);
+
+          if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
+        }
         $kysely = "INSERT INTO kalenteri
                    SET tapa        = '$tapa',
                    asiakas         = '$ytunnus',
@@ -194,6 +299,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                    tyyppi          = '$tyyppi',
                    pvmalku         = $pvmalku,
                    kentta01        = '$viesti',
+                   {$crm_haas_lisa}
                    kuittaus        = '$kuittaus',
                    laatija         = '$kukarow[kuka]',
                    luontiaika      = now()";
@@ -257,6 +363,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                  tyyppi          = '$tyyppi',
                  pvmalku         = $pvmalku,
                  kentta01        = '$viesti',
+                 {$crm_haas_lisa}
                  kuittaus        = '$kuittaus',
                  muuttaja        = '$kukarow[kuka]',
                  muutospvm       = now()
@@ -279,6 +386,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     }
 
     $tee = "";
+
+    if ($crm_haas_check and ($korjaus != '' or $viesti != '')) {
+      $haas_call_type = '';
+      $haas_opportunity = '';
+      $haas_qty = '';
+      $haas_opp_proj_date_dd = '';
+      $haas_opp_proj_date_mm = '';
+      $haas_opp_proj_date_yy = '';
+      $haas_end_reason = '';
+    }
   }
 
   // tallenetaan uutena ominaisuutena liitetiedostoja memolle.
@@ -371,6 +488,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $kuka        = $korjrow["kuka"];
     $kuittaus       = $korjrow["kuittaus"];
     $myyntipaallikko   = $korjrow["myyntipaallikko"];
+
+    if ($crm_haas_check) {
+      $haas_call_type = $korjrow['kentta02'];
+      $haas_opportunity = $korjrow['kentta03'];
+      $haas_qty = $korjrow['kentta04'];
+      $haas_opp_proj_date_dd = substr($korjrow['kentta05'], 8);
+      $haas_opp_proj_date_mm = substr($korjrow['kentta05'], 5, 2);
+      $haas_opp_proj_date_yy = substr($korjrow['kentta05'], 0, 4);
+      $haas_end_reason = $korjrow['kentta06'];
+    }
 
     if ($tyyppi == "Muistutus") {
       $muistutusko   = 'Muistutus';
@@ -484,13 +611,13 @@ if ($ytunnus != '' and $tee == '') {
       $asiakasrow['toim_postitp']  = $asiakasrow['postitp'];
     }
 
-    $asylloik = tarkista_oikeus("yllapito.php", "asiakas", "X");
+    $asylloik = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
 
     echo "<tr>";
     echo "<td>$asiakasrow[nimi]";
 
     if ($asylloik) {
-      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta asiakkaan tietoja"), "' /></a>";
+      echo "&nbsp;&nbsp;<a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta asiakkaan tietoja"), "' /></a>";
     }
 
     echo "</td>";
@@ -590,7 +717,7 @@ if ($ytunnus != '' and $tee == '') {
     echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
 
     if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
-      echo "<tr><td colspan='2'>".t("Valittu yhteyshenkilˆ").": $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
+      echo "<tr><td colspan='2'><b>".t("Valittu yhteyshenkilˆ").": $ytitteli $ynimi</b></td><td colspan='2'>$yfakta</td></tr>";
     }
 
     echo "</table><br>";
@@ -615,13 +742,6 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "<tr><th>".t("Lis‰‰")."</th>";
 
-    if ($yhtunnus > 0) {
-      echo "<th>".t("Yhteyshenkilˆ").": $ynimi</th>";
-    }
-    else {
-      echo "<td></td>";
-    }
-
     $sel = array();
     $sel[$tyyppi] = "SELECTED";
 
@@ -635,22 +755,140 @@ if ($ytunnus != '' and $tee == '') {
       echo "<option value='Kuittaus' $sel[Kuittaus]>".t("Kuittaus")."</option>";
     }
 
-    echo "</select></td>";
+    echo "</select></td></tr>";
+
+    if ($crm_haas_check and ($tyyppi == 'Memo' or $tyyppi == '')) {
+
+      $call_types = array(
+        'Prospecting Call' => '',
+        'Qualifying Call'  => '',
+        'Quoting Call'     => '',
+        'Closing Call'     => '',
+        'Won Call'         => '',
+        'Lost Call'        => '',
+        'Dead Call'        => '',
+      );
+
+      $call_type_sel = array($haas_call_type => 'selected') + $call_types;
+
+      echo "<tr>";
+      echo "<th>CALL_TYPE</th>";
+      echo "<td>";
+      echo "<select name='haas_call_type' onchange='submit();'>";
+      echo "<option value=''>",t("Valitse"),"</option>";
+
+      foreach ($call_types as $key => $value) {
+        echo "<option value='{$key}' {$call_type_sel[$key]}>{$key}</th>";
+      }
+
+      echo "</select>";
+      echo "<input type='hidden' name='haas_call_type_ed' value='{$haas_call_type}' />";
+      echo "</td>";
+      echo "</tr>";
+
+      if ($haas_call_type != 'Prospecting Call') {
+        $opportunities = array(
+          'OMs'           => '',
+          'TMs'           => '',
+          'MMs'           => '',
+          'VF-1/2s'        => '',
+          'VF-3/4/5'        => '',
+          'VF-6+'          => '',
+          'GRs'           => '',
+          'DT/DMs'        => '',
+          'UMCs'          => '',
+          'EC400/500'     => '',
+          'EC1600'        => '',
+          'OL'            => '',
+          'TLs'           => '',
+          'ST10/15'       => '',
+          'ST20/25'       => '',
+          'ST30/35'       => '',
+          'ST40/45/50/55' => '',
+          'DSs'           => '',
+          'ROTARY'        => '',
+          'BARFEEDER'     => '',
+        );
+
+        $opportunity_sel = array($haas_opportunity => 'selected') + $opportunities;
+
+        echo "<tr>";
+        echo "<th>OPPORTUNITY</th>";
+        echo "<td>";
+        echo "<select name='haas_opportunity'>";
+        echo "<option value=''>",t("Valitse"),"</option>";
+
+        foreach ($opportunities as $key => $value) {
+          echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
+        }
+
+        echo "</select>";
+        echo "</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>QTY</th>";
+        echo "<td>";
+        echo "<input type='text' name='haas_qty' value='{$haas_qty}' size='8' maxlength='7' />";
+        echo "</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>OPP_PROJ_DATE</th>";
+        echo "<td>";
+        echo "<input type='text' name='haas_opp_proj_date_dd' value='{$haas_opp_proj_date_dd}' size='3' maxlength='2' />";
+        echo "<input type='text' name='haas_opp_proj_date_mm' value='{$haas_opp_proj_date_mm}' size='3' maxlength='2' />";
+        echo "<input type='text' name='haas_opp_proj_date_yy' value='{$haas_opp_proj_date_yy}' size='5' maxlength='4' />";
+        echo "</td>";
+        echo "</tr>";
+
+        if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call'))) {
+          $end_reasons = array(
+            'Price Win'               => '',
+            'Specification Win'       => '',
+            'Delivery Win'            => '',
+            'Builder/Distributor Win' => '',
+            'Price Loss'              => '',
+            'Specification Loss'      => '',
+            'Delivery Loss'           => '',
+            'Distributor Loss'        => '',
+            'Competitor Loss'         => '',
+            'Dead'                    => '',
+          );
+
+          $end_reason_sel = array($haas_end_reason => 'selected') + $end_reasons;
+
+          echo "<tr>";
+          echo "<th>END_REASON</th>";
+          echo "<td>";
+          echo "<select name='haas_end_reason'>";
+          echo "<option value=''>",t("Valitse"),"</option>";
+
+          foreach ($end_reasons as $key => $value) {
+            echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";
+          }
+
+          echo "</select>";
+          echo "</td>";
+          echo "</tr>";
+        }
+      }
+    }
 
     echo "  <tr><th>".t("Tallenna tiedosto liitteeksi")."</th>";
-    echo "  <td colspan='2'><input type = 'file' name = 'userfile' />";
+    echo "  <td><input type = 'file' name = 'userfile' />";
     echo "  <input type='hidden' name='teeliite'  value='tallenna_pdf'>";
     echo "  <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
         <input type='hidden' name='ytunnus'   value='$ytunnus'>
         <input type='hidden' name='asiakasid'   value='$asiakasid'>";
     echo "  </td></tr>";
 
-    echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
+    echo "<tr><td colspan='2'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
 
     if ($tyyppi == "Muistutus") {
       echo "  <tr>
           <th>".t("Yhteydenottaja").":</th>
-          <td colspan='2'><select name='kuka'>
+          <td><select name='kuka'>
           <option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
@@ -686,7 +924,7 @@ if ($ytunnus != '' and $tee == '') {
         $mmm = "00";
 
       echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
-          <td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
+          <td><input type='text' name='mppa' value='$mppa' size='3'>-
           <input type='text' name='mkka' value='$mkka' size='3'>-
           <input type='text' name='mvva' value='$mvva' size='5'>
           &nbsp;&nbsp;
@@ -709,7 +947,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "  <tr>
           <th>".t("Leadia valvoo").":</th>
-          <td colspan='2'><select name='myyntipaallikko'>";
+          <td><select name='myyntipaallikko'>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
                 FROM kuka
@@ -735,7 +973,7 @@ if ($ytunnus != '' and $tee == '') {
 
       echo "  <tr>
           <th>".t("Leadia hoitaa").":</th>
-          <td colspan='2'><select name='kuka'>
+          <td><select name='kuka'>
           <option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
@@ -766,7 +1004,7 @@ if ($ytunnus != '' and $tee == '') {
       if (!isset($lmm))  $lmm = "00";
 
       echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
-          <td colspan='2'><input type='text' name='mppa' value='$lppa' size='3'>-
+          <td><input type='text' name='mppa' value='$lppa' size='3'>-
           <input type='text' name='mkka' value='$lkka' size='3'>-
           <input type='text' name='mvva' value='$lvva' size='5'>
           &nbsp;&nbsp;
@@ -778,7 +1016,7 @@ if ($ytunnus != '' and $tee == '') {
 
     $vresult = t_avainsana("KALETAPA");
 
-    echo "<td colspan='2'><select name='tapa'>";
+    echo "<td><select name='tapa'>";
 
     while ($vrow = mysql_fetch_array($vresult)) {
       $sel="";
@@ -792,12 +1030,12 @@ if ($ytunnus != '' and $tee == '') {
     echo "</select></td></tr>";
 
     echo "  <tr>
-        <td colspan='3' align='right' class='back'>
+        <td colspan='2' align='right' class='back'>
         <input type='submit' value='".t("Tallenna")."'>
         </form>
         </td></tr>";
 
-    echo "  <td colspan='3' align='right' class='back'>
+    echo "  <td colspan='2' align='right' class='back'>
         <form method='POST'>
         <input type='hidden' name='tee'     value='KORJAAMEMO'>
         <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
@@ -916,6 +1154,40 @@ if ($ytunnus != '' and $tee == '') {
         echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
       }
 
+      $crm_haas_column_check = !empty($memorow['kentta02']);
+      $crm_haas_column_check = (!empty($memorow['kentta03']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta04']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta05']) or $crm_haas_column_check);
+      $crm_haas_column_check = (!empty($memorow['kentta06']) or $crm_haas_column_check);
+
+      if ($crm_haas_check and $crm_haas_column_check) {
+        echo "<tr>";
+        echo "<th colspan='2'>CALL_TYPE</th>";
+        echo "<td colspan='4'>{$memorow['kentta02']}</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th colspan='2'>OPPORTUNITY</th>";
+        echo "<td colspan='4'>{$memorow['kentta03']}</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th colspan='2'>QTY</th>";
+        echo "<td colspan='4'>{$memorow['kentta04']}</td>";
+        echo "</tr>";
+
+
+        echo "<tr>";
+        echo "<th colspan='2'>OPP_PROJ_DATE</th>";
+        echo "<td colspan='4'>".tv1dateconv($memorow['kentta05'])."</td>";
+        echo "</tr>";
+
+        echo "<tr>";
+        echo "<th colspan='2'>END_REASON</th>";
+        echo "<td colspan='4'>{$memorow['kentta06']}</td>";
+        echo "</tr>";
+      }
+
       if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
         echo "<tr><td colspan='3' align='right'>".t("L‰het‰ k‰ytt‰j‰lle").":</td><td colspan='3'>";
         echo "<form method='POST'>";
@@ -945,6 +1217,8 @@ if ($ytunnus != '' and $tee == '') {
         echo "<input type='submit' value='".t("L‰het‰ viesti")."'>";
         echo "</form>";
         echo "</td></tr>";
+
+        echo "<tr><td colspan='6' class='back'>&nbsp;</td></tr>";
       }
     }
 

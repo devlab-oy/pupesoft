@@ -51,7 +51,7 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
   $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
-  $ulos .= "<option value = '' ></option>";
+  $ulos .= "<option value=''>".t("Toimittajan alkuperämaa")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -66,19 +66,20 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
 }
 
 if (mysql_field_name($result, $i) == "valuutta") {
-  $query = "SELECT nimi, tunnus
+
+  $ulos = "<td><select name='{$nimi}'>";
+
+  $query = "SELECT nimi
             FROM valuu
-            WHERE yhtio = '$kukarow[yhtio]'
+            WHERE yhtio = '{$kukarow['yhtio']}'
             ORDER BY jarjestys";
   $vresult = pupe_query($query);
-  $ulos = "<td><select name='$nimi'>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    $ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
+  $ulos .= "<option value=''>".t("Toimittajan valuutta")."</option>";
+
+  while ($vrow = mysql_fetch_assoc($vresult)) {
+    $sel = $trow[$i] == $vrow['nimi'] ? 'selected' : '';
+    $ulos .= "<option value = '{$vrow['nimi']}' {$sel}>{$vrow['nimi']}</option>";
   }
 
   $ulos .= "</select></td>";

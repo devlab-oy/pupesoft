@@ -457,6 +457,17 @@ if ($monta == 1) {
 if ($monta > 1 and $monta <= $limit) {
 
   if ($kutsuja != "yllapito.php") {
+    $piiri_result = t_avainsana('PIIRI');
+    $on_piireja   = mysql_num_rows($piiri_result) !== 0;
+
+    if ($on_piireja) {
+      $piirit = array();
+
+      while ($piiri = mysql_fetch_assoc($piiri_result)) {
+        $piirit[$piiri["selite"]] = $piiri["selitetark"];
+      }
+    }
+
     //tämä vain otsik.php:tä varten
     echo $lause;
 
@@ -471,6 +482,10 @@ if ($monta > 1 and $monta <= $limit) {
     echo "<th>", t("asnro"), "</th>";
     echo "<th>", t("lasknimi/toimnimi"), "</th>";
     echo "<th colspan='3'>", t("laskosoite/toimosoite"), "</th>";
+
+    if ($on_piireja) {
+      echo "<th>" . t("piiri") . "</th>";
+    }
 
     if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
@@ -588,7 +603,7 @@ if ($monta > 1 and $monta <= $limit) {
         $brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
       }
 
-      echo "<td>{$asiakas['ytunnus']}</td>";
+      echo "<td>",tarkistahetu($asiakas['ytunnus']),"</td>";
       echo "<td>{$asiakas['asiakasnro']}</td>";
       echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
       echo "<td>{$asiakas['osoite']} {$bros}</td>";
@@ -615,6 +630,15 @@ if ($monta > 1 and $monta <= $limit) {
 
 
         echo "</td>";
+      }
+
+      if ($on_piireja) {
+        if ($asiakas['piiri'] != 0) {
+          echo "<td>{$asiakas['piiri']} - {$piirit[$asiakas['piiri']]}</td>";
+        }
+        else {
+          echo "<td></td>";
+        }
       }
 
       $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';

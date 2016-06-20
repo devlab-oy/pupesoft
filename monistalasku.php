@@ -542,7 +542,7 @@ if ($tee == "ETSILASKU") {
       echo "</{$ero}>";
 
       echo "<{$ero}>{$row['asiakas']}</{$ero}>";
-      echo "<{$ero}>{$row['ytunnus']}</{$ero}>";
+      echo "<{$ero}>",tarkistahetu($row['ytunnus']),"</{$ero}>";
       echo "<{$ero}>{$row['summa']}</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["tapvm"])."</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["luontiaika"])."</{$ero}>";
@@ -618,6 +618,10 @@ if ($tee == "ETSILASKU") {
         echo "<input type='checkbox'
                      name='sailyta_rivikommentit[{$row['tilaus']}]'
                      value='on'>" . t('S‰ilyt‰ rivikommentit') . "<br>";
+
+        echo "<input type='checkbox'
+                     name='verkkotunnus_laskulta[{$row['tilaus']}]'
+                     value='on'>" . t('S‰ilyt‰ laskun verkkolaskutustunnus') . "<br>";
 
         if ($toim == '') {
 
@@ -1071,7 +1075,6 @@ if ($tee == 'MONISTA') {
         case 'yhtio_ovttunnus':
         case 'yhtio_kotipaikka':
         case 'yhtio_toimipaikka':
-        case 'verkkotunnus':
         case 'myyja':
         case 'kassalipas':
         case 'ovttunnus':
@@ -1083,6 +1086,16 @@ if ($tee == 'MONISTA') {
           }
           else {
             $values .= ", '".$monistarow[$fieldname]."'";
+          }
+          break;
+        case 'verkkotunnus':
+          if (empty($verkkotunnus_laskulta[$lasku]) and !empty($asiakrow["verkkotunnus"])) {
+            // halutaan k‰ytt‰‰ asiakkaan nykyist‰ verkkolaskutunnusta
+            $values .= ", '{$asiakrow['verkkotunnus']}'";
+          }
+          else {
+            // halutaan k‰ytt‰‰ verkkolaskutunnusta vanhalta laskulta
+            $values .= ", '{$monistarow['verkkotunnus']}'";
           }
           break;
         case 'maksuehto':
@@ -1718,7 +1731,7 @@ if ($tee == 'MONISTA') {
           switch ($fieldname) {
 
           case 'toimaika':
-            if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') {
+            if (($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') or $toim == 'SOPIMUS') {
               $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             else {

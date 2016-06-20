@@ -1,12 +1,30 @@
 <?php
+
 require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Lähetä factoringaineisto").":</font><hr>";
 
+// Otetaan ensimmäinen SEB -sopimus. Tämä softa ei tue useaa SEB-rahoitussopimusta.
+$query = "SELECT tunnus
+          FROM factoring
+          WHERE yhtio = '$kukarow[yhtio]'
+          and factoringyhtio = 'SEB'";
+$res = pupe_query($query);
+
+if (mysql_num_rows($res) != 1) {
+  echo t("%s factoring-sopimusta ei ole perustettu!", null, 'SEB');
+  exit;
+}
+else {
+  $seb_row = mysql_fetch_assoc($res);
+  $factoring_id = $seb_row['tunnus'];
+}
 
 $query = "SELECT lasku.*
           FROM lasku
-          JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='SEB'
+          JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
+            and lasku.maksuehto = maksuehto.tunnus
+            and maksuehto.factoring_id = '$factoring_id')
           WHERE lasku.yhtio               = '$kukarow[yhtio]'
           and lasku.tila                  = 'U'
           and lasku.alatila               = 'X'
@@ -43,7 +61,7 @@ while ($laskurow = mysql_fetch_array($res)) {
   $query = "SELECT *
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
-            and factoringyhtio = 'SEB'
+            and tunnus         = '$factoring_id'
             and valkoodi       = '$laskurow[valkoodi]'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_array($fres);

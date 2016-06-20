@@ -569,7 +569,7 @@ if ($tee == "VALITSE") {
 
       // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
       // niin tehdään nollalasku
-      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
+      if ($row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
         $row['summa'] = 0.00;
       }
 

@@ -257,11 +257,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     }
 
     //Haetaan factoringsopimuksen tiedot
-    if ($masrow["factoring"] != '') {
+    if (isset($masrow["factoring_id"])) {
       $query = "SELECT *
                 FROM factoring
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and factoringyhtio = '$masrow[factoring]'
+                and tunnus         = '$masrow[factoring_id]'
                 and valkoodi       = '$lasrow[valkoodi]'";
       $fres = pupe_query($query);
       $frow = mysql_fetch_assoc($fres);
@@ -273,7 +273,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     $pankkitiedot = array();
 
     //Laitetaan pankkiyhteystiedot kuntoon
-    if ($masrow["factoring"] != "") {
+    if (isset($masrow["factoring_id"])) {
       $pankkitiedot["pankkinimi1"]  =  $frow["pankkinimi1"];
       $pankkitiedot["pankkitili1"]  =  $frow["pankkitili1"];
       $pankkitiedot["pankkiiban1"]  =  $frow["pankkiiban1"];

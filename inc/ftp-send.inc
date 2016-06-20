@@ -37,10 +37,11 @@ $ncftplisa       = "";
 $renameftpfile   = isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
 $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi        = basename($ftpfile);
-$ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
+$ftptmpr         = isset($ftptmpr) ? $ftptmpr : true;
+$ftputf8         = isset($ftputf8) ? $ftputf8 : false;
 
 // Lähetetään oletuksena ISO-8859-15 merkistömuodossa
-if (PUPE_UNICODE and (!isset($ftputf8) or !$ftputf8)) {
+if (PUPE_UNICODE and $ftputf8 === false) {
   $encoding = exec("file -b --mime-encoding '$ftpfile'");
 
   if (strtoupper($encoding) == 'UTF-8') {
@@ -245,6 +246,8 @@ else {
     $rivi .= "\n";
     $rivi .= "$syy\n";
 
+    pupesoft_log('ftp_send', "Tiedoston '{$ftpfile}' lähetys palvelimelle '{$ftphost}' epäonnistui: {$syy}");
+
     $boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
     if ($boob === FALSE) {
@@ -268,6 +271,10 @@ else {
     $rivi .= "\n";
 
     $silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+  }
+
+  if ($palautus == 0) {
+    pupesoft_log('ftp_send', "Lähetettiin tiedosto '{$ftpfile}' palvelimelle '{$ftphost}'");
   }
 }
 

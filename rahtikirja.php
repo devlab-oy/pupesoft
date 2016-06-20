@@ -166,7 +166,7 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
       }
     }
 
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl=$dgdkpl&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=rahtikirja-tulostus.php?tee=tulosta&tultiin=koonti_eratulostus_pakkaustiedot&toimitustapa_varasto=$toimitustapa_varasto&jv=$jv&komento=$komento&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl=$dgdkpl&valittu_rakiroslapp_tulostin=$valittu_rakiroslapp_tulostin&pakkaustieto_rahtikirjanro=$rahtikirjanro$ltun_linkklisa&excel_koontilahete={$excel_koontilahete}'>";
     exit;
   }
   else {
@@ -1139,9 +1139,6 @@ if ($tee == 'add') {
 
         if ($toimitustaparow['osoitelappu'] == 'intrade') {
           require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
-        }
-        elseif ($toimitustaparow['osoitelappu'] == 'hornbach') {
-          require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
         }
         else {
           require "tilauskasittely/osoitelappu_pdf.inc";
@@ -2333,6 +2330,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     echo "<input type='hidden' name='komento' value='$komento'>";
     echo "<input type='hidden' name='merahti' value='$merahti'>";
     echo "<input type='hidden' name='valittu_rakiroslapp_tulostin' value='$valittu_rakiroslapp_tulostin'>";
+    echo "<input type='hidden' name='excel_koontilahete' value='{$excel_koontilahete}'>";
   }
   else {
     echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
@@ -2351,8 +2349,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
     echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
 
-    echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp]</td>";
-    echo "<th align='left'>".t("Toimitusosoite")."</th><td>$otsik[toim_nimi] $otsik[toim_nimitark]<br>$otsik[toim_osoite]<br>$otsik[toim_postino] $otsik[toim_postitp]</td></tr>";
+    $_maa = maa($otsik["maa"], $kukarow["kieli"]);
+    $_toim_maa = maa($otsik["toim_maa"], $kukarow["kieli"]);
+
+    echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp] <br> $_maa </td>";
+    echo "<th align='left'>".t("Toimitusosoite")."</th><td>$otsik[toim_nimi] $otsik[toim_nimitark]<br>$otsik[toim_osoite]<br>$otsik[toim_postino] $otsik[toim_postitp] <br> $_toim_maa </td></tr>";
 
     echo "<tr><th align='left'>".t("Kerätty")."</th><td>$otsik[kerayspvm]</td>";
     echo "<th align='left'>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($marow, "teksti", "MAKSUEHTOKV", $kieli)."</td></tr>";

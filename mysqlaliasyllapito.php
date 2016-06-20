@@ -126,7 +126,8 @@ echo "<tr><th>".t("Muokkaa aliasryhmää").":</th><td>";
 echo "<select name = 'taulu'>";
 
 while ($tables = mysql_fetch_array($tabresult)) {
-  if (file_exists("inc/".$tables[0].".inc")) {
+
+  if (!empty($pupenext_yllapitonakymat[$tables[0]]) or file_exists("inc/".$tables[0].".inc")) {
 
     $query = "SELECT distinct selitetark_2
               FROM avainsana
@@ -159,7 +160,7 @@ if ($taulu == "") {
   mysql_data_seek($tabresult, 0);
 
   while ($tables = mysql_fetch_array($tabresult)) {
-    if (file_exists("inc/".$tables[0].".inc")) {
+    if (!empty($pupenext_yllapitonakymat[$tables[0]]) or file_exists("inc/".$tables[0].".inc")) {
 
       $query = "SELECT distinct selitetark_2
                 FROM avainsana
@@ -240,7 +241,19 @@ if ($taulu != "") {
 
     $maxsize = mysql_field_len($result, $i); // Jotta tätä voidaan muuttaa
 
-    require "inc/$taulu"."rivi.inc";
+    if (empty($pupenext_yllapitonakymat[$taulu])) {
+      require "inc/$taulu"."rivi.inc";
+    }
+    else {
+      $jatko = 1; // oletetaan normaali käsittely
+      $tyyppi = 1;
+      $ulos = "";
+    }
+
+    // Yhtiöta ei näytetä
+    if (mysql_field_name($result, $i) == "yhtio") {
+      $tyyppi = 0;
+    }
 
     // Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
     if (mysql_field_name($result, $i) == "laatija" or

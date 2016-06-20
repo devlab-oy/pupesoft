@@ -665,7 +665,12 @@ if (mysql_num_rows($result) > 0 ) {
     echo "<td>$vienti</td>";
     echo "</tr>";
 
-    $yhteesa += ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]);
+    if ($yhtiorow['ostolaskun_kulutilit_kayttaytyminen'] == 'E') {
+      $yhteesa += ($trow["summaeur"]-$trow["summa3"]+$trow["summa1"]);
+    }
+    else {
+      $yhteesa += ($trow["summaeur"]-$trow["summa3"]-$trow["osto_rahti"]-$trow["osto_kulu"]-$trow["osto_rivi_kulu"]+$trow["summa1"]);
+    }
   }
 
   echo "<tr>";

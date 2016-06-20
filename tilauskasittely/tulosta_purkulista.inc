@@ -377,17 +377,21 @@ if (!empty($tee_excel)) {
         'header' => t('Toimittajan tuoteno'),
         'order' => 60
       ),
+      'varattu' => array(
+        'header' => t('Varattu'),
+        'order' => 70
+      ),
       'hinta' => array(
         'header' => t('Ostohinta'),
-        'order' => 70
+        'order' => 80
       ),
       'valuutta' => array(
         'header' => t('Valuutta'),
-        'order' => 80
+        'order' => 90
       ),
       'alkuperamaa' => array(
         'header' => t('Alkuperämaa'),
-        'order' => 90
+        'order' => 100
       ),
     );
     $force_to_string = array(

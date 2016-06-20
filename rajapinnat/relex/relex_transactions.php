@@ -32,6 +32,7 @@ $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 $weekly_ajo = FALSE;
 $kuukausi_ajo = FALSE;
+$extra_laskutiedot = false;
 $ftppath = "/data/input";
 
 if (isset($argv[2]) and $argv[2] != '') {
@@ -64,6 +65,10 @@ if (isset($argv[4]) and trim($argv[4]) != '') {
   $ftppath = trim($argv[4]);
 }
 
+if (isset($argv[5]) and trim($argv[5]) == 'extra') {
+  $extra_laskutiedot = true;
+}
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 
@@ -88,7 +93,12 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "date;location;product;clean_product;type;quantity;value;sales_purchase_price;reference;order_row;order_type;partner_code\n";
+$header  = "date;location;product;clean_product;type;quantity;value;sales_purchase_price;reference;order_row;order_type;partner_code";
+
+if ($extra_laskutiedot) $header .= ";profit;invoicenumber;rownumber;shipped;ordernumber";
+
+$header .= "\n";
+
 fwrite($fp, $header);
 
 /*
@@ -162,7 +172,12 @@ $query = "(SELECT
            tapahtuma.tunnus as sorttaustunnus,
            if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
            if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti,
-           if (tapahtuma.laji = 'siirto' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
+           if (tapahtuma.laji = 'siirto' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto,
+           tilausrivi.kate,
+           lasku.laskunro,
+           tilausrivi.tunnus AS rivinro,
+           if (tilausrivi.tyyppi = 'O', tilausrivi.laskutettuaika, tilausrivi.toimitettuaika) AS toimitettuaika,
+           tilausrivi.otunnus
            FROM tapahtuma
            JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
              AND tuote.tuoteno     = tapahtuma.tuoteno
@@ -176,7 +191,7 @@ $query = "(SELECT
            {$tapahtumarajaus}
            HAVING keratty_siirto = 0 AND keratty_myynti = 0 AND sisainen_tai_kir_siirto = 0)
 
-           UNION
+           UNION ALL
 
            (SELECT
            yhtio.maa,
@@ -194,7 +209,12 @@ $query = "(SELECT
            tilausrivi.tunnus as sorttaustunnus,
            '' keratty_siirto,
            '' keratty_myynti,
-           if (tilausrivi.tyyppi = 'G' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
+           if (tilausrivi.tyyppi = 'G' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto,
+           tilausrivi.kate,
+           lasku.laskunro,
+           tilausrivi.tunnus AS rivinro,
+           tilausrivi.toimitettuaika,
+           tilausrivi.otunnus
            FROM tilausrivi
            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
              AND tuote.tuoteno     = tilausrivi.tuoteno
@@ -338,6 +358,15 @@ foreach ($relex_transactions as $row) {
   $rivi .= ";";                                                      // Sales or purchase order row number
   $rivi .= ";";                                                      // Additional subtype for sales and delivery transactions
   $rivi .= "{$partner}";                                             // Customer for sales transactions, Supplier for incoming deliveries, Sending/receiving warehouse for stock transfers
+
+  if ($extra_laskutiedot) {
+    $rivi .= ";{$row['kate']}";
+    $rivi .= ";{$row['laskunro']}";
+    $rivi .= ";{$row['rivinro']}";
+    $rivi .= ";{$row['toimitettuaika']}";
+    $rivi .= ";{$row['otunnus']}";
+  }
+
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

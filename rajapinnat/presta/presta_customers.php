@@ -5,15 +5,16 @@ require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
   private $default_groups = array();
+  private $presta_addresses = null;
 
-  const RESOURCE = 'customers';
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+    $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'customers';
   }
 
   /**
@@ -35,14 +36,14 @@ class PrestaCustomers extends PrestaClient {
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = $_nimi;
-    $xml->customer->email = $_email;
+    $xml->customer->lastname = $this->xml_value($_nimi);
+    $xml->customer->email = $this->xml_value($_email);
 
     if (!empty($customer['verkkokauppa_salasana'])) {
-      $xml->customer->passwd = $customer['verkkokauppa_salasana'];
+      $xml->customer->passwd = $this->xml_value($customer['verkkokauppa_salasana']);
       $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
     }
 
@@ -85,8 +86,7 @@ class PrestaCustomers extends PrestaClient {
     $this->logger->log('---------Start customer sync---------');
 
     try {
-      $existing_customers = $this->all(array('id'));
-      $existing_customers = array_column($existing_customers, 'id');
+      $existing_customers = $this->fetch_all_ids();
 
       $total = count($customers);
       $current = 0;
@@ -95,22 +95,34 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
+        if (empty($customer['presta_customergroup_id'])) {
+          $this->logger->log("Asiakas ei kuulu mihinkään asiakasryhmään, ei voida lisätä!");
+          continue;
+        }
+
         try {
-          $presta_address = new PrestaAddresses($this->url(), $this->api_key());
+          // customers are not shared between stores, so only one store per customer
           $id = $customer['ulkoinen_asiakasnumero'];
+          $shop = empty($customer['verkkokauppa_nakyvyys']) ? null : array($customer['verkkokauppa_nakyvyys']);
+
+          // use set_shop_ids, so we'll do validation
+          // set id_shop as the first shop, since customers can only have one
+          $this->set_shop_ids($shop);
+          $shop_ids = $this->shop_ids();
+          $id_shop = is_array($shop_ids) ? $shop_ids[0] : null;
 
           if (in_array($id, $existing_customers)) {
-            $this->update($id, $customer);
+            $this->update($id, $customer, $id_shop);
 
             $customer['presta_customer_id'] = $id;
-            $presta_address->update_with_customer_id($customer);
+            $this->presta_addresses->update_with_customer_id($customer, $id_shop);
           }
           else {
-            $response = $this->create($customer);
+            $response = $this->create($customer, $id_shop);
             $id = (string) $response['customer']['id'];
 
             $customer['presta_customer_id'] = $id;
-            $presta_address->create($customer);
+            $this->presta_addresses->create($customer, $id_shop);
           }
 
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);
@@ -119,6 +131,8 @@ class PrestaCustomers extends PrestaClient {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
         }
+
+        $this->logger->log("Asiakas {$customer['nimi']} käsitelty\n");
       }
     }
     catch (Exception $e) {
@@ -162,13 +176,16 @@ class PrestaCustomers extends PrestaClient {
     return true;
   }
 
-  /**
-   * Overrides parents get
-   *
-   * @param int     $id
-   */
-  public function get($id) {
-    return parent::get($id);
+  // fetch all ids from all shops
+  private function fetch_all_ids() {
+    $display = array('id');
+    $filter = array();
+    $id_group_shop = $this->shop_group_id();
+
+    // fetch customer ids from all shops
+    $existing_customers = $this->all($display, $filter, null, $id_group_shop);
+
+    return array_column($existing_customers, 'id');
   }
 
   public function set_default_groups($value) {

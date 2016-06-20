@@ -1,4 +1,5 @@
 <?php
+
 require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uuden yrityksen ohjattu perustaminen").":</font><hr>";
@@ -466,7 +467,7 @@ if ($tila == 'maksuehto') {
                 kassa_alepros      = '$row[kassa_alepros]',
                 jv                 = '$row[jv]',
                 kateinen           = '$row[kateinen]',
-                factoring          = '$row[factoring]',
+                factoring_id       = '$row[factoring_id]',
                 pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
                 itsetulostus       = '$row[itsetulostus]',
                 jaksotettu         = '$row[jaksotettu]',

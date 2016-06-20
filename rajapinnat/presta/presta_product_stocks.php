@@ -8,10 +8,10 @@ class PrestaProductStocks extends PrestaClient {
   private $presta_products = null;
   private $pupesoft_all_products = array();
 
-  public function __construct($url, $api_key) {
-    $this->presta_products = new PrestaProducts($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_products = new PrestaProducts($url, $api_key, $log_file);
 
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -55,7 +55,7 @@ class PrestaProductStocks extends PrestaClient {
       $saldo = is_numeric($product_row['saldo']) ? floor((float) $product_row['saldo']) : 0;
       $status = $product_row['status'];
 
-      $product_id = array_search($sku, $this->presta_products->all_skus());
+      $product_id = $this->presta_products->product_id_by_sku($sku);
 
       $current++;
       $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
@@ -113,15 +113,12 @@ class PrestaProductStocks extends PrestaClient {
 
   private function stock_id_by_product_id($product_id, $id_shop) {
     if (is_null($this->all_stocks)) {
-      $all_stocks = array();
       $display = array('id', 'id_product', 'id_shop');
       $filter = array();
+      $id_group_shop = $this->shop_group_id();
 
-      // loop all shops
-      foreach ($this->all_shop_ids() as $shop) {
-        $stock = $this->all($display, $filter, $shop);
-        $all_stocks = array_merge($all_stocks, $stock);
-      }
+      // fetch from all shops
+      $all_stocks = $this->all($display, $filter, null, $id_group_shop);
 
       $this->all_stocks = $all_stocks;
     }

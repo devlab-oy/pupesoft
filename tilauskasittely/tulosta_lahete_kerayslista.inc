@@ -55,7 +55,7 @@ if (!function_exists('alku_kerayslista')) {
 
       $kala = 9;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
 
       include 'inc/pupeExcel.inc';
 
@@ -639,12 +639,16 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $thispage->writeString($kala, 0, "Items", $boldi);
       $thispage->writeString($kala, 1, "Code", $boldi);
       $thispage->writeString($kala, 2, "Description", $boldi);
       $thispage->writeString($kala, 3, "EAN code", $boldi);
       $thispage->writeString($kala, 4, "Pcs", $boldi);
+
+      if ($kerayslistatyyppi == 'EXCEL3') {
+        $thispage->writeString($kala, 5, "Price", $boldi);
+      }
 
       $kala++;
     }
@@ -705,7 +709,7 @@ if (!function_exists('rivi_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $thispage->writeString($kala, 0, "");
       $thispage->writeString($kala, 1, $row["tuoteno"]);
       $thispage->writeString($kala, 2, $row["nimitys"]);
@@ -713,6 +717,12 @@ if (!function_exists('rivi_kerayslista')) {
 
       if ($row["var"] == "" or  $row["var"] == "H") {
         $thispage->write($kala, 4, $row["tilkpl"]);
+      }
+
+      if ($kerayslistatyyppi == 'EXCEL3') {
+        if ($row["var"] == "" or  $row["var"] == "H") {
+          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2));
+        }
       }
 
       $kala++;
@@ -1135,14 +1145,8 @@ if (!function_exists('rivi_kerayslista')) {
           $row['kommentti'] .= "\n".t("Myyj‰", $kieli).": {$myyrow['nimi']}";
         }
 
-        // Otetaan yhteens‰kommentti pois kerˆyslistalta (t‰m‰ tieto lˆytyy rivilt‰ jos tilaus on laskutettu, mutta l‰hetteell‰ sit‰ ei voi n‰ytt‰‰)
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰", $asrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-
-        // Trimmataan uudestaan
-        $row["kommentti"] = trim($row["kommentti"]);
+        // Trimmataan ja otetaan "yhteens‰kommentti" pois
+        $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
 
         if ((
             ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0)
@@ -1216,7 +1220,7 @@ if (!function_exists('loppu_kerayslista')) {
     // Luodaan muuttujat
     extract($params);
 
-    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       // T‰ss‰ p‰rj‰t‰‰n ilman footteria....
     }
     else {
@@ -1366,7 +1370,7 @@ if (!function_exists('print_pdf_kerayslista')) {
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='submit' value='".t("Ker‰yslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
     }
-    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $excelnimi = $thispage->close();
 
       $liite['excel'] = "/tmp/".$excelnimi;

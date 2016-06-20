@@ -7,10 +7,10 @@ class PrestaCustomers extends PrestaClient {
   private $default_groups = array();
   private $presta_addresses = null;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
 
-    $this->presta_addresses = new PrestaAddresses($url, $api_key);
+    $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
@@ -36,14 +36,14 @@ class PrestaCustomers extends PrestaClient {
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = $_nimi;
-    $xml->customer->email = $_email;
+    $xml->customer->lastname = $this->xml_value($_nimi);
+    $xml->customer->email = $this->xml_value($_email);
 
     if (!empty($customer['verkkokauppa_salasana'])) {
-      $xml->customer->passwd = $customer['verkkokauppa_salasana'];
+      $xml->customer->passwd = $this->xml_value($customer['verkkokauppa_salasana']);
       $this->confirm_password_reset($customer['tunnus'], $customer['yhtio']);
     }
 
@@ -95,6 +95,11 @@ class PrestaCustomers extends PrestaClient {
         $current++;
         $this->logger->log("[{$current}/{$total}] Asiakas {$customer['nimi']}");
 
+        if (empty($customer['presta_customergroup_id'])) {
+          $this->logger->log("Asiakas ei kuulu mihinkään asiakasryhmään, ei voida lisätä!");
+          continue;
+        }
+
         try {
           // customers are not shared between stores, so only one store per customer
           $id = $customer['ulkoinen_asiakasnumero'];
@@ -126,6 +131,8 @@ class PrestaCustomers extends PrestaClient {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
         }
+
+        $this->logger->log("Asiakas {$customer['nimi']} käsitelty\n");
       }
     }
     catch (Exception $e) {
@@ -172,14 +179,11 @@ class PrestaCustomers extends PrestaClient {
   // fetch all ids from all shops
   private function fetch_all_ids() {
     $display = array('id');
-    $existing_customers = array();
     $filter = array();
+    $id_group_shop = $this->shop_group_id();
 
     // fetch customer ids from all shops
-    foreach ($this->all_shop_ids() as $id_shop) {
-      $customers = $this->all($display, $filter, $id_shop);
-      $existing_customers = array_merge($existing_customers, $customers);
-    }
+    $existing_customers = $this->all($display, $filter, null, $id_group_shop);
 
     return array_column($existing_customers, 'id');
   }

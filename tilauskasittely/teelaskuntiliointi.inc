@@ -479,7 +479,7 @@ else {
       $apusumma_valuutassa  = $loppusumma_valuutassa - $lasku['kasumma_valuutassa'];
     }
   }
-  elseif ($mehtorow["factoring"] != "") {
+  elseif (isset($mehtorow["factoring_id"])) {
     $myysaatili  = $yhtiorow['factoringsaamiset'];
   }
   elseif ($konsrow["konserniyhtio"] != "") {

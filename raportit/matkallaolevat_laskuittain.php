@@ -5,7 +5,9 @@ $useslave = 1;
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  if (!empty($_POST["kaunisnimi"])) {
+    $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  }
 }
 
 require "../inc/parametrit.inc";
@@ -138,6 +140,15 @@ echo "<input type='radio' name='vo_laskurajaus' value='muut' {$chk['muut']}> ".t
 echo "</td>";
 echo "</tr>";
 
+$chk = empty($rajaa_myos_lasku_tapvm) ? '' : 'CHECKED';
+
+echo "<tr>";
+echo "<th>".t("Rajaa myös laskun tapahtumapäivällä")."</th>";
+echo "<td>";
+echo "<input type='checkbox' name='rajaa_myos_lasku_tapvm' value='YES' $chk>";
+echo "</td>";
+echo "</tr>";
+
 $chk = "";
 if (isset($excel) and $excel != "") {
   $chk = "CHECKED";
@@ -168,6 +179,14 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
       $vo_laskurajaus_lisa = '';
   }
 
+  if ($rajaa_myos_lasku_tapvm == 'YES') {
+    $tapvm_laskurajaus_lisa = " AND lasku.tapvm >= '{$alisa}' AND lasku.tapvm <= '{$llisa}'
+      AND (lasku.tila in ('H', 'Y', 'M', 'P', 'Q') or (lasku.tila = 'X' and lasku.alatila != 'A'))";
+  }
+  else {
+    $tapvm_laskurajaus_lisa = "";
+  }
+
   $query = "SELECT lasku.alatila,
             lasku.nimi,
             lasku.summa,
@@ -184,6 +203,7 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
             AND tiliointi.tapvm <= '{$llisa}'
             AND tiliointi.korjattu = ''
             {$vo_laskurajaus_lisa}
+            {$tapvm_laskurajaus_lisa}
             GROUP BY lasku.alatila,
             lasku.nimi,
             lasku.summa,

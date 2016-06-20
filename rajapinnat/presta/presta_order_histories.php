@@ -3,8 +3,8 @@
 require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaOrderHistories extends PrestaClient {
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {

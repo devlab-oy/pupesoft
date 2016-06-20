@@ -314,7 +314,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi != 8) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 
@@ -431,7 +431,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi == 8) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 
@@ -2106,11 +2106,11 @@ if (!function_exists('loppu')) {
       }
 
       //Haetaan factoringsopimuksen tiedot
-      if ($masrow["factoring"] != '') {
+      if (isset($masrow["factoring_id"])) {
         $query = "SELECT *
                   FROM factoring
                   WHERE yhtio = '$kukarow[yhtio]'
-                  and factoringyhtio = '$masrow[factoring]'
+                  and tunnus = '$masrow[factoring_id]'
                   and valkoodi = '$laskurow[valkoodi]'";
         $fres = pupe_query($query);
         $frow = mysql_fetch_assoc($fres);
@@ -2122,7 +2122,7 @@ if (!function_exists('loppu')) {
       $pankkitiedot = array();
 
       //Laitetaan pankkiyhteystiedot kuntoon
-      if ($masrow["factoring"] != "") {
+      if (isset($masrow["factoring_id"])) {
         $pankkitiedot["pankkinimi1"] = $frow["pankkinimi1"];
         $pankkitiedot["pankkitili1"] = $frow["pankkitili1"];
         $pankkitiedot["pankkiiban1"] = $frow["pankkiiban1"];
@@ -3224,10 +3224,8 @@ if (!function_exists("tulosta_lasku")) {
 
       // Otetaan yhteensäkommentti pois jos summataan rivejä
       if ($rivigrouppaus) {
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakasrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        // Trimmataan ja otetaan "yhteensäkommentti" pois
+        $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
       }
       else {
         // Jos laskutyyppi on 18 (Normaali laskupohja (nimitykset rivitettynä))

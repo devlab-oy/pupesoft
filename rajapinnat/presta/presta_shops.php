@@ -5,23 +5,16 @@ require_once 'rajapinnat/presta/presta_client.php';
 class PrestaShops extends PrestaClient {
   private $all_shops = null;
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+  public function __construct($url, $api_key, $log_file) {
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
     return 'shops';
   }
 
-  /**
-   *
-   * @param array   $shop
-   * @param SimpleXMLElement $existing_shop
-   * @return \SimpleXMLElement
-   */
-
-  protected function generate_xml($shop, SimpleXMLElement $existing_shop = null) {
-    throw new Exception('You shouldnt be here! Shop does not have CRUD yet');
+  protected function generate_xml($record, SimpleXMLElement $existing_record = null) {
+    throw new Exception('You shouldnt be here, CRUD is not implemented!');
   }
 
   public function shop_by_id($value) {
@@ -34,12 +27,6 @@ class PrestaShops extends PrestaClient {
     return null;
   }
 
-  /**
-   * Fetches the first shop in presta
-   *
-   * @return array
-   * @throws Exception
-   */
   public function first_shop() {
     $shops = $this->fetch_all();
     $shop = $shops[0];

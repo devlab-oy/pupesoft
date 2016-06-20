@@ -210,8 +210,8 @@ function loppu($firstpage, $summat, $astunnus) {
   $pdf->draw_rectangle(90, 20, 20, 580,  $firstpage, $rectparam);
 
   $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),  $firstpage, $pieni);
-  
-  $query = "SELECT maksuehto.factoring
+
+  $query = "SELECT maksuehto.factoring_id
             FROM asiakas
             JOIN maksuehto on (asiakas.yhtio = maksuehto.yhtio
             AND asiakas.maksuehto = maksuehto.tunnus)
@@ -219,17 +219,17 @@ function loppu($firstpage, $summat, $astunnus) {
             and asiakas.tunnus = $astunnus";
   $result = pupe_query($query);
   $fcheck_row = mysql_fetch_assoc($result);
-  
-  if ($fcheck_row["factoring"] != "") {
+
+  if (isset($fcheck_row["factoring_id"])) {
 
     $query = "SELECT *
               FROM factoring
               WHERE yhtio        = '$kukarow[yhtio]'
-              and factoringyhtio = '$fcheck_row[factoring]'
+              and tunnus         = '$fcheck_row[factoring_id]'
               and valkoodi       = '$valuutta'";
     $result = pupe_query($query);
     $factoring_row = mysql_fetch_assoc($result);
-    
+
     $pdf->draw_text(30, 72,  $factoring_row["pankkiiban1"]."      ".$factoring_row["pankkiswift1"],  $firstpage, $norm);
     $pdf->draw_text(217, 72, $factoring_row["pankkiiban2"]."      ".$factoring_row["pankkiswift2"],  $firstpage, $norm);
   }

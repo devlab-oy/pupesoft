@@ -1,7 +1,15 @@
 <?php
 
-$_laa_src = "{$palvelin2}pics/facelift/nuolet_alas.png";
-$_sup_src = "{$palvelin2}pics/facelift/nuolet_ylos.png";
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  $_laa_src = "{$palvelin2}pics/facelift/nuolet_alas.png";
+  $_sup_src = "{$palvelin2}pics/facelift/nuolet_ylos.png";
+  $_kuv_sty = "height:20px;";
+}
+else {
+  $_laa_src = "{$palvelin2}pics/lullacons/arrow-single-down-green.png";
+  $_sup_src = "{$palvelin2}pics/lullacons/arrow-single-up-green.png";
+  $_kuv_sty = "height:15px;";
+}
 
 $hiddenlisa = "";
 $hiddenimg = $_sup_src;
@@ -94,7 +102,7 @@ if ($variaaritorivi === FALSE) {
       <tr>
       <th>".t("Tuoteno");
 
-  echo "<div style='float:right;'><img id='syota_osto_laajat' style='height:20px;' src='{$hiddenimg}'></div>";
+  echo "<div style='float:right;'><img id='syota_osto_laajat' style='{$_kuv_sty}' src='{$hiddenimg}'></div>";
 
   echo "</th>
       <th>".t("M‰‰r‰")."</th>

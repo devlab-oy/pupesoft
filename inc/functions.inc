@@ -33028,6 +33028,28 @@ if (!function_exists('ulkoinen_jarjestelma_varastot')) {
   }
 }
 
+if (!function_exists('poista_rivin_yhteensakommentti')) {
+  function poista_rivin_yhteensakommentti($kommentti) {
+
+    $sanakirja_kielet = array("fi" => "Suomi",
+      "en" => "Englanti",
+      "se" => "Ruotsi",
+      "ee" => "Viro",
+      "de" => "Saksa",
+      "dk" => "Tanska",
+      "no" => "Norja",
+      "ru" => "Venäjä");
+
+    // Otetaan "yhteensäkommentti" pois rivin kommentista
+    foreach ($sanakirja_kielet as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+      $kommentti = preg_replace("/".t("yhteensä", $sanakirja_kieli).": [0-9\.]* [A-Z]{3}\./", "", $kommentti);
+    }
+
+    return $kommentti;
+  }
+}
+
+
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {
     global $yhtiorow, $kukarow;

@@ -432,9 +432,32 @@ if ($tee == "") {
     echo "<tr><th>".t("Tilaus").": {$painorow['otunnus']}</th><td colspan='3'><input type='text' name='tilauksen_erikoisale[{$painorow['otunnus']}]' size='5' value='{$painorow['erikoisale']}'></td></tr>";
   }
 
+  echo "<tr><td class='back'><br>".t("Käyttöliittymä").":</td></tr>";
+
+  $chk = "";
+
+  if (!empty($saap_erikoisale_ui)) {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr><th>".t("Piilota rivikohtainen erikoisale").":</th><td colspan='3'><input type='checkbox' name='saap_erikoisale_ui' $chk></td></tr>";
+
+  $chk = "";
+
+  if (!empty($saap_rivihinta_ui)) {
+    $chk = "SELECTED";
+  }
+
+  echo "<tr><th>".t("Rivihinta").":</th><td colspan='3'>
+  <select name='saap_rivihinta_ui'>
+  <option value=''>".t("Näytetään veroton bruttohinta ja verollinen nettohinta")."</option>
+  <option value='verobveron' $chk>".t("Näytetään veroton bruttohinta ja veroton nettohinta")."</option>
+  </select>
+  </td></tr>";
+
   echo "</table>";
 
-  echo "<br><input type='submit' id='paivita' value='".t("Päivitä tiedot")."'>";
+  echo "<br><input type='submit' id='paivita' name='lisatiedot_submit' value='".t("Päivitä tiedot")."'>";
   echo "</form>";
 
   echo "

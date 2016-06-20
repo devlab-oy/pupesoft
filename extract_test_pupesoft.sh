@@ -183,6 +183,7 @@ UPDATE yhtio set
 nimi = concat('Testi ', nimi),
 ytunnus = '123',
 ovttunnus = '123',
+email = 'development@devlab.fi',
 kotitullauslupa = '',
 tullin_asiaknro = '',
 tullin_lupanro = '',
@@ -206,11 +207,15 @@ maventa_ohjelmisto_api_avain = '',
 admin_email = 'development@devlab.fi',
 alert_email = 'development@devlab.fi',
 talhal_email = 'development@devlab.fi',
-sahkopostilasku_cc_email = 'development@devlab.fi',
-edi_email = 'development@devlab.fi',
+sahkopostilasku_cc_email = '',
 varauskalenteri_email = '',
 tuotekopio_email = '',
 jt_email = '',
+edi_email = '',
+extranet_kerayspoikkeama_email = '',
+siirtolista_email = '',
+changelog_email = ' ',
+postittaja_email = 'development@devlab.fi',
 kuvapankki_polku = '',
 verkkolasku_lah = '';
 
@@ -252,6 +257,8 @@ WHERE tyyppi = 'uutinen';
 UPDATE kalenteri set
 kentta01 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 WHERE asiakas != '';
+
+DELETE FROM mail_servers;
 
 EOF
 

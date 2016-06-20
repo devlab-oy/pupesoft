@@ -13,7 +13,7 @@ $query = "SELECT selite as id, selitetark as name
           FROM avainsana
           WHERE yhtio='{$kukarow['yhtio']}'
           AND laji='VALMISTUSLINJA'
-          ORDER BY selite";
+          ORDER BY selite + 0";
 $result = pupe_query($query);
 
 $valmistuslinjat = array();

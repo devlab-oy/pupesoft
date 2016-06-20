@@ -2,7 +2,7 @@
 
 require "inc/parametrit.inc";
 
-echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
+if (empty($nayta_pdf)) echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
@@ -60,14 +60,14 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
     }
   }
 
-  // korjataan ensimmäinen rivi jossa on väärä otsikkonro sekä rahtikirjanro
-  $query = sprintf(
-    "UPDATE rahtikirjat set otsikkonro = '%s', rahtikirjanro = '%s' where tunnus = '%s'",
-    (int) $otsikkonro * -1,
-    (int) $otsikkonro * -1,
-    (int) $otsikkonro
-  );
+  $otsikkonro = (int) $otsikkonro;
+  $rahtikirjanro = $otsikkonro * -1;
 
+  // korjataan ensimmäinen rivi jossa on väärä otsikkonro sekä rahtikirjanro
+  $query = "UPDATE rahtikirjat SET
+            otsikkonro = '{$rahtikirjanro}',
+            rahtikirjanro = '{$rahtikirjanro}'
+            WHERE tunnus = '{$otsikkonro}'";
   pupe_query($query);
 
   $tulosta = "JOO";
@@ -301,22 +301,41 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   $result = pupe_query($query);
   $toitarow = mysql_fetch_assoc($result);
 
-  if ((int) $tulostin > 0 and $kollityht > 0) {
-    $query = "SELECT komento
-              from kirjoittimet
-              where tunnus = '$tulostin'
-              AND yhtio    = '$kukarow[yhtio]'";
-    $res = pupe_query($query);
-    $k = mysql_fetch_assoc($res);
+  if (((int) $tulostin > 0 and $kollityht > 0) or ($tulostin == '-88' or $kirjoitin == 'PDF_RUUDULLE')) {
 
-    $kirjoitin   = $k['komento'];
-    $tulostuskpl = $kollityht;
+    if ($tulostin != '-88' and $kirjoitin != 'PDF_RUUDULLE') {
+      $query = "SELECT komento
+                from kirjoittimet
+                where tunnus = '$tulostin'
+                AND yhtio    = '$kukarow[yhtio]'";
+      $res = pupe_query($query);
+      $k = mysql_fetch_assoc($res);
+
+      $kirjoitin   = $k['komento'];
+      $tulostuskpl = $kollityht;
+    }
 
     $kuljetusohjeet = $osoitelappurow["viesti"];
 
-    include "tilauskasittely/$toitarow[rahtikirja]";
+    if ($tulostin == "-88") {
+      js_openFormInNewWindow();
 
-    echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
+      echo "<br><form id='customform_rahtikirja_{$osoitelappurow['tunnus']}' name='customform_rahtikirja_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
+            <input type='hidden' name='tulostakopio' value='JOO'>
+            <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
+            <input type='hidden' name='kirjoitin' value='PDF_RUUDULLE'>
+            <input type='hidden' name='tee' value='tulosta'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='hidden' name='tulostuskpl' value='{$kollityht}' />
+            <input type='submit' value='".t("Rahtikirja").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_rahtikirja_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
+    }
+    else {
+
+      include "tilauskasittely/$toitarow[rahtikirja]";
+
+      if (empty($nayta_pdf)) echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
+      else exit;
+    }
   }
 
   // Tallennetaan customrahtikirjan tiedot järjestelmään
@@ -331,28 +350,45 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $kirres = pupe_query($query);
   }
 
-  if ((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) {
+  if (((int) $valittu_oslapp_tulostin > 0 and $oslappkpl > 0) or ($valittu_oslapp_tulostin == '-88' or $tee == 'NAYTATILAUS')) {
 
-    //haetaan osoitelapun tulostuskomento
-    $query  = "SELECT *
-               from kirjoittimet
-               where yhtio = '$kukarow[yhtio]'
-               and tunnus  = '$valittu_oslapp_tulostin'";
-    $kirres = pupe_query($query);
-    $kirrow = mysql_fetch_assoc($kirres);
-    $oslapp = $kirrow['komento'];
-
-    if ($toitarow['osoitelappu'] == 'intrade') {
-      require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+    if ($valittu_oslapp_tulostin != '-88' and $tee != 'NAYTATILAUS') {
+      //haetaan osoitelapun tulostuskomento
+      $query  = "SELECT *
+                 from kirjoittimet
+                 where yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$valittu_oslapp_tulostin'";
+      $kirres = pupe_query($query);
+      $kirrow = mysql_fetch_assoc($kirres);
+      $oslapp = $kirrow['komento'];
     }
-    elseif ($toitarow['osoitelappu'] == 'hornbach') {
-      require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+
+    if ($valittu_oslapp_tulostin == "-88") {
+      js_openFormInNewWindow();
+
+      echo "<br><form id='customform_osoitelappu_{$osoitelappurow['tunnus']}' name='customform_osoitelappu_{$osoitelappurow['tunnus']}' method='post' action='{$palvelin2}rahtikirja_custom.php' autocomplete='off'>
+            <input type='hidden' name='tulostakopio' value='JOO'>
+            <input type='hidden' name='otsikkonro' value='{$otsikkonro}'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='hidden' name='oslappkpl' value='{$kollityht}' />
+            <input type='submit' value='".t("Osoitelappu").": {$osoitelappurow['tunnus']}' onClick=\"js_openFormInNewWindow('customform_osoitelappu_{$osoitelappurow['tunnus']}', ''); return false;\"></form><br>";
     }
     else {
-      require "tilauskasittely/osoitelappu_pdf.inc";
+
+      if ($toitarow['osoitelappu'] == 'intrade') {
+        require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+      }
+      elseif ($toitarow['osoitelappu'] == 'hornbach') {
+        require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
+      }
+      else {
+        require "tilauskasittely/osoitelappu_pdf.inc";
+      }
     }
 
-    echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
+    if (empty($nayta_pdf)) echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
+    else exit;
   }
 
   unset($asiakasid);
@@ -388,7 +424,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
              FROM rahtikirjat
              where yhtio    = '$kukarow[yhtio]'
              and otsikkonro < 0
-             and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
+             #and tulostettu >= date_sub(now(), INTERVAL 180 DAY)
              GROUP BY rahtikirjanro, otsikkonro
              ORDER BY tulostettu desc";
   $kirres = pupe_query($query);
@@ -434,6 +470,8 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
             <select name='kopiotulostin'>";
 
         mysql_data_seek($kirre, 0);
+
+        echo "<option value='-88'>",t("PDF ruudulle"),"</option>";
 
         while ($kirow = mysql_fetch_assoc($kirre)) {
           echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
@@ -531,7 +569,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
     echo "<input type=hidden name='kumpiosoite_ed' value='$kumpiosoite'>";
     echo "<select name='kumpiosoite' onchange='submit();'>";
-    echo "<option value='toimitus' $sel[toimitus]>".t("Toimitusosite")."</option>";
+    echo "<option value='toimitus' $sel[toimitus]>".t("Toimitusosoite")."</option>";
     echo "<option value='virallinen' $sel[virallinen]>".t("Virallinen osoite")."</option>";
     echo "<option value='laskutus' $sel[laskutus]>".t("Laskutusosoite")."</option>";
     echo "</select>";
@@ -717,33 +755,38 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 
   // Hetaan varaston tulostimet
-  if ($varasto > 0) {
-    $query = "SELECT *
-              from varastopaikat
-              where yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$varasto'
-              order by alkuhyllyalue, alkuhyllynro";
-  }
+  $query = "SELECT *
+            from varastopaikat
+            where yhtio = '{$kukarow['yhtio']}'
+            and tunnus  = '{$varasto}'
+            order by alkuhyllyalue, alkuhyllynro";
   $kirre = pupe_query($query);
 
   if (mysql_num_rows($kirre) > 0) {
     $prirow = mysql_fetch_assoc($kirre);
 
     $sel_lahete[$prirow['printteri1']] = "SELECTED";
+    $sel_osoitelappu[$prirow['printteri3']] = "SELECTED";
   }
   else {
     $sel_lahete[$tulostin] = "SELECTED";
+    $sel_osoitelappu[$valittu_oslapp_tulostin] = "SELECTED";
   }
 
   $query = "SELECT *
             from kirjoittimet
-            where yhtio  = '$kukarow[yhtio]'
+            where yhtio  = '{$kukarow['yhtio']}'
             AND komento != 'EDI'
             ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
+  $sel = !empty($sel_lahete["-88"]) ? "selected" : "";
+
+  echo "<option value='-88' {$sel}>".t("PDF ruudulle")."</option>";
+
   while ($kirow = mysql_fetch_assoc($kires)) {
-    echo "<option value='$kirow[tunnus]' ".$sel_lahete[$kirow["tunnus"]].">$kirow[kirjoitin]</option>\n";
+    $sel = !empty($sel_lahete[$kirow["tunnus"]]) ? "selected" : "";
+    echo "<option value='{$kirow['tunnus']}' {$sel}>{$kirow['kirjoitin']}</option>\n";
   }
 
   echo "</select></td></tr>";
@@ -751,13 +794,17 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   echo "<tr><th>".t("Osoitelappu")."</th>";
   echo "<td>";
 
+  $sel = !empty($sel_osoitelappu["-88"]) ? "selected" : "";
+
   echo "<select name='valittu_oslapp_tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
+  echo "<option value='-88' {$sel}>".t("PDF ruudulle")."</option>";
 
   mysql_data_seek($kires, 0);
 
   while ($kirow = mysql_fetch_assoc($kires)) {
-    echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+    $sel = !empty($sel_osoitelappu[$kirow["tunnus"]]) ? "selected" : "";
+    echo "<option value='{$kirow['tunnus']}' {$sel}>{$kirow['kirjoitin']}</option>";
   }
 
   echo "</select></td></tr>";
@@ -840,11 +887,9 @@ function pupe_rahtikirja_insert($data) {
     $val = mysql_real_escape_string($val, $GLOBALS['link']);
   }
 
-  $query = sprintf(
-    "INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti, tulostuspaikka)
-    values('%s')",
-    implode("','", array_values($data))
-  );
+  $query = "INSERT INTO rahtikirjat
+            (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark, viesti, tulostuspaikka)
+            values('".implode("','", array_values($data))."')";
   pupe_query($query);
 
   return mysql_insert_id($GLOBALS["masterlink"]);

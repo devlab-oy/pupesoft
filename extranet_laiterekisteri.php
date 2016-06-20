@@ -57,8 +57,15 @@ function hae_kayttajan_laitteet() {
 
   $laitteet = array();
 
-  if ($kukarow['oletus_asiakas'] == '') {
+  $toimipistetunnukset = hae_kayttajan_toimipistetunnukset();
+
+  if ($kukarow['oletus_asiakas'] == '' and empty($toimipistetunnukset)) {
     return $laitteet;
+  }
+
+  $toimipistelisa = '';
+  if (!empty($toimipistetunnukset)) {
+    $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
   }
 
   $query = "SELECT
@@ -76,9 +83,10 @@ function hae_kayttajan_laitteet() {
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
+            {$toimipistelisa}
             GROUP BY laite.sarjanro,laite.tuoteno";
   $result = pupe_query($query);
+
   while ($row = mysql_fetch_assoc($result)) {
     $laitteet[] = $row;
   }
@@ -88,8 +96,8 @@ function hae_kayttajan_laitteet() {
 function piirra_headerit() {
   $headerit = array(
     t("Valmistaja"),
-    t("Sarjanumero"),
     t("Malli"),
+    t("Sarjanumero"),
     t("Valmistajan sopimuksen numero"),
     t("Valmistajan sopimuksen päättymispäivä")
   );
@@ -101,8 +109,8 @@ function piirra_headerit() {
 function piirra_hakuboksit() {
   $headerit = array(
     'valmistaja',
-    'sarjanumero',
     'tuotenumero',
+    'sarjanumero',
     'valmistajan_sopimusnumero',
     'valmistajan_sopimus_paattymispaiva'
   );
@@ -118,8 +126,8 @@ function piirra_laiterivi($laite) {
 
   echo "<tr>";
   echo "<td>{$laite['valmistaja']}</td>";
-  echo "<td>{$laite['sarjanro']}</td>";
   echo "<td>{$laite['tuoteno']}</td>";
+  echo "<td>{$laite['sarjanro']}</td>";
   echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
   echo "<td class='back' nowrap><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";

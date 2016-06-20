@@ -1,42 +1,46 @@
 <?php
 
+require_once 'rajapinnat/presta/presta_categories.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_manufacturers.php';
 require_once 'rajapinnat/presta/presta_product_feature_values.php';
 require_once 'rajapinnat/presta/presta_product_features.php';
-require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
   private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
-  private $languages_table = null;
+  private $image_fetch = false;
   private $presta_all_products = null;
   private $presta_categories = null;
   private $presta_home_category_id = null;
   private $presta_manufacturers = null;
   private $presta_product_feature_values = null;
   private $presta_product_features = null;
-  private $presta_stock = null;
   private $pupesoft_all_products = null;
   private $tax_rates_table = null;
   private $visibility_type = null;
 
-  public function __construct($url, $api_key, $presta_home_category_id) {
-    $this->presta_categories = new PrestaCategories($url, $api_key, $presta_home_category_id);
-    $this->presta_home_category_id = $presta_home_category_id;
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_categories = new PrestaCategories($url, $api_key, $log_file);
+    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key, $log_file);
+    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key, $log_file);
+    $this->presta_product_features = new PrestaProductFeatures($url, $api_key, $log_file);
 
-    $this->presta_manufacturers = new PrestaManufacturers($url, $api_key);
-    $this->presta_product_feature_values = new PrestaProductFeatureValues($url, $api_key);
-    $this->presta_product_features = new PrestaProductFeatures($url, $api_key);
-    $this->presta_stock = new PrestaProductStocks($url, $api_key);
-
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
     return 'products';
+  }
+
+  protected function remove_read_only_fields(SimpleXMLElement $xml) {
+    unset($xml->product->manufacturer_name);
+    unset($xml->product->quantity);
+    unset($xml->product->position_in_category);
+
+    return $xml;
   }
 
   /**
@@ -51,17 +55,21 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       $xml = $existing_product;
-
-      unset($xml->product->position_in_category);
-      unset($xml->product->manufacturer_name);
-      unset($xml->product->quantity);
     }
 
-    unset($xml->product->position_in_category);
+    $xml->product->reference = $this->xml_value($product['tuoteno']);
+    $xml->product->supplier_reference = $this->xml_value($product['tuoteno']);
 
-    $xml->product->reference = utf8_encode($product['tuoteno']);
-    $xml->product->supplier_reference = utf8_encode($product['tuoteno']);
-    $xml->product->ean13 = is_numeric($product['ean']) ? $product['ean'] : '';
+    $_ean = '';
+
+    if (is_numeric($product['ean']) and strlen($product['ean']) < 14) {
+      $_ean = $product['ean'];
+    }
+    elseif (!empty($product['ean'])) {
+      $this->logger->log("Virheellinen EAN koodi '{$product['ean']}'");
+    }
+
+    $xml->product->ean13 = $_ean;
 
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
@@ -111,19 +119,20 @@ class PrestaProducts extends PrestaClient {
     $xml->product->available_for_order = 1;
     $xml->product->show_price = 1;
 
-    // Out of stock message
-    $out_of_stock = $product['status'] == 'T' ? "Tilaustuote" : "";
-
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
+    $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
+
+    // remove forbidden characters
+    $_nimi = preg_replace("/[&]+/", "", $_nimi);
 
     // we must set these for all languages
     for ($i=0; $i < $languages; $i++) {
-      $xml->product->name->language[$i]              = empty($product['nimi']) ? '-' : utf8_encode($product['nimi']);
-      $xml->product->description->language[$i]       = utf8_encode($product['kuvaus']);
-      $xml->product->description_short->language[$i] = utf8_encode($product['lyhytkuvaus']);
+      $xml->product->name->language[$i]              = $this->xml_value($_nimi);
+      $xml->product->description->language[$i]       = nl2br($this->xml_value($product['kuvaus']));
+      $xml->product->description_short->language[$i] = nl2br($this->xml_value($product['lyhytkuvaus']));
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
-      $xml->product->available_later                 = $out_of_stock;
+      $xml->product->available_later->language[$i]   = '';
     }
 
     // loop all translations and overwrite defaults
@@ -136,10 +145,12 @@ class PrestaProducts extends PrestaClient {
         continue;
       }
 
-      $value = utf8_encode($translation['teksti']);
+      $value = $this->xml_value($translation['teksti']);
 
       // set translation to correct field
-      switch ($translation['kentta']) {
+      $field = strtolower($translation['kentta']);
+
+      switch ($field) {
         case 'nimitys':
           $xml->product->name->language[$tr_id] = $value;
           $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
@@ -149,6 +160,9 @@ class PrestaProducts extends PrestaClient {
           break;
         case 'lyhytkuvaus':
           $xml->product->description_short->language[$tr_id] = $value;
+          break;
+        case 'tilaustuote':
+          $xml->product->available_later->language[$tr_id] = $value;
           break;
       }
 
@@ -190,7 +204,7 @@ class PrestaProducts extends PrestaClient {
       foreach ($product_parameters as $parameter) {
         $_key = $parameter['arvo'];
         $_attribute = $parameter['nimi'];
-        $_value = utf8_encode($product[$_key]);
+        $_value = $this->xml_value($product[$_key]);
 
         $this->logger->log("Poikkeava arvo product.{$_attribute} -kenttään. Asetetaan {$_key} kentän arvo {$_value}");
 
@@ -217,17 +231,23 @@ class PrestaProducts extends PrestaClient {
     $dom_node->parentNode->removeChild($dom_node);
 
     // Then add element back
-    $xml->product->associations->addChild('product_bundle');
+    if (count($product['tuotteen_lapsituotteet']) > 0) {
+      $xml->product->associations->addChild('product_bundle');
 
-    // Add child products for product bundle
-    foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
-      $child_id = $this->add_child_product($xml, $child_product);
+      // Add child products for product bundle
+      foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
+        $child_id = $this->add_child_product($xml, $child_product);
 
-      // added the child successfully
-      if ($child_id !== false) {
-        // set parent product to pack
-        $product_type = 'pack';
+        // added the child successfully
+        if ($child_id !== false) {
+          // set parent product to pack
+          $product_type = 'pack';
+        }
       }
+    }
+
+    if ($product_type == "virtual") {
+      $xml->product->is_virtual = 1;
     }
 
     // set product type
@@ -243,60 +263,25 @@ class PrestaProducts extends PrestaClient {
 
     // Add product features
     foreach ($this->features_table as $field_name => $feature_id) {
-      $value = trim($product[$field_name]);
+      $value = $this->xml_value($product[$field_name]);
+      $value_id = $this->presta_product_feature_values->add_by_value($feature_id, $value);
 
-      // if we don't have a value, don't add anything.
-      if (empty($value)) {
-        continue;
+      if ($value_id != 0) {
+        $feature = $xml->product->associations->product_features->addChild('product_features');
+        $feature->id = $feature_id;
+        $feature->id_feature_value = $value_id;
+
+        $this->logger->log("Liitettiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
       }
-
-      $value_id = $this->presta_product_feature_values->value_id_by_value($value);
-
-      if (empty($value_id)) {
-        $feature_value = array(
-          "id_feature" => $feature_id,
-          "value" => $value,
-        );
-
-        // Create feature value
-        $response = $this->presta_product_feature_values->create($feature_value);
-        $value_id = $response['product_feature_value']['id'];
-
-        // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
-        $this->presta_product_feature_values->reset_all_values();
-        $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
-      }
-
-      $feature = $xml->product->associations->product_features->addChild('product_features');
-      $feature->id = $feature_id;
-      $feature->id_feature_value = $value_id;
-
-      $this->logger->log("Lisättiin ominaisuuteen {$feature_id} arvoksi {$value} ({$value_id})");
     }
 
     $manufacturer_name = $product['tuotemerkki'];
+    $manufacturer_id = $this->presta_manufacturers->add_manufacturer_by_name($manufacturer_name);
 
-    $xml->product->id_manufacturer = 0;
+    $xml->product->id_manufacturer = $manufacturer_id;
 
-    // add manufacturer
-    if (!empty($manufacturer_name)) {
-      $manufacturer_id = $this->presta_manufacturers->manufacturer_id_by_name($manufacturer_name);
-
-      if (empty($manufacturer_id)) {
-        $manufacturer = array(
-          "name" => $manufacturer_name,
-        );
-
-        // Create manufacturer
-        $response = $this->presta_manufacturers->create($manufacturer);
-        $manufacturer_id = $response['manufacturer']['id'];
-
-        // nollataan array, haetaan uusiksi prestasta, että ei perusteta samaa monta kertaa
-        $this->presta_manufacturers->reset_all_records();
-        $this->logger->log("Perustettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
-      }
-
-      $xml->product->id_manufacturer = $manufacturer_id;
+    if ($manufacturer_id != 0) {
+      $this->logger->log("Liitettiin valmistaja '{$manufacturer_name}' ({$manufacturer_id})");
     }
 
     return $xml;
@@ -316,7 +301,7 @@ class PrestaProducts extends PrestaClient {
       return null;
     }
 
-    $category_id = $response->category->id;
+    $category_id = $response['id'];
     $category = $xml->product->associations->categories->addChild('category');
     $category->addChild('id');
     $category->id = $category_id;
@@ -327,11 +312,9 @@ class PrestaProducts extends PrestaClient {
   }
 
   private function add_child_product(SimpleXMLElement &$xml, $product) {
-    $discount   = $product['alekerroin'];
-    $price      = $product['hintakerroin'];
     $qty        = $product['kerroin'];
     $sku        = $product['tuoteno'];
-    $product_id = array_search($sku, $this->all_skus());
+    $product_id = $this->product_id_by_sku($sku);
 
     if ($product_id === false) {
       $this->logger->log("VIRHE! Lapsituotetta {$sku} ei löytynyt!");
@@ -361,41 +344,105 @@ class PrestaProducts extends PrestaClient {
     $row_counter = 0;
     $total_counter = count($products);
 
-    try {
-      $existing_products = $this->all_skus();
+    // fetch the first shop group id, we will add all products to this shop group (for now)
+    $shop_group_id = $this->shop_group_id();
 
-      foreach ($products as $product) {
-        $row_counter++;
-        $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
+    foreach ($products as $product) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['tuoteno']}");
 
-        try {
-          if (in_array($product['tuoteno'], $existing_products)) {
-            $id = array_search($product['tuoteno'], $existing_products);
-            $this->update($id, $product);
-          }
-          else {
-            $this->create($product);
-          }
+      try {
+        // check do we have this product in this store
+        $id = $this->product_id_by_sku($product['tuoteno']);
+
+        if ($id !== false) {
+          $this->update($id, $product, null, $shop_group_id);
         }
-        catch (Exception $e) {
+        else {
+          $this->create($product, null, $shop_group_id);
+        }
+      }
+      catch (Exception $e) {
           //Do nothing here. If create / update throws exception loggin happens inside those functions
           //Exception is not thrown because we still want to continue syncing for other products
-        }
-
-        $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
       }
-    }
-    catch (Exception $e) {
-      //Exception logging happens in create / update.
 
-      return false;
+      $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
     }
 
     $this->delete_all_unnecessary_products();
-    $this->update_stock();
 
     $this->logger->log('---------Tuotteiden siirto valmis---------');
     return true;
+  }
+
+  public function fetch_and_save_images() {
+    if ($this->image_fetch !== true) {
+      return;
+    }
+
+    $this->logger->log('---------Aloitetaan tuotekuvien siirto---------');
+    $this->logger->log('Haetaan kaikkien tuotteiden kuvatiedot');
+
+    $all_product_images = $this->all_product_images();
+
+    $this->logger->log('Haetaan kuvatiedostot Prestasta');
+
+    $row_counter = 0;
+    $total_counter = count($all_product_images);
+    $all_presta_images = array();
+
+    // loop all products
+    foreach ($all_product_images as $product) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$product['sku']}");
+
+      // loop all product images
+      foreach ($product['images'] as $image) {
+
+        // collect all presta image ids to an array
+        $all_presta_images[] = $image['id'];
+
+        // do we have this image already
+        if (presta_image_exists($product['sku'], $image['id'])) {
+          $this->logger->log("Kuva {$image['id']} löytyy Pupesoftista");
+        }
+        else {
+          $this->logger->log("Haetaan ja tallennetaan kuva {$image['href']}");
+
+          // this requires changing PrestaShopWebservice executeRequest -method to public
+          // otherwise we don't have any way to get a binary response from presta
+          // without rewriting the whole curl call
+          $url = "{$this->url}api/images/products/{$product['product_id']}/{$image['id']}";
+          $response = $this->ws->executeRequest($url);
+
+          // save file to tmp dir
+          $temp_file = tempnam('/tmp', 'presta');
+          file_put_contents($temp_file, $response['response']);
+
+          // save image to pupesoft liitetiedostot
+          $params = array(
+            "filename" => $temp_file,
+            "id"       => $image['id'],
+            "sku"      => $product['sku'],
+          );
+
+          presta_tallenna_liite($params);
+
+          // delete temp file
+          unlink($temp_file);
+        }
+      }
+
+      // remove all images, that are not in Presta
+      $removed = presta_poista_ylimaaraiset_kuvat($product['sku'], $all_presta_images);
+
+      $this->logger->log("Poistettiin {$removed} tuotekuvaa Pupesoftista.");
+
+      $this->logger->log("Tuote {$product['sku']} käsitelty");
+    }
+
+    $this->logger->log('---------Tuotekuvien siirto valmis---------');
   }
 
   public function all_skus() {
@@ -405,7 +452,11 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('Haetaan kaikki tuotteet Prestashopista');
 
-    $existing_products = $this->all(array('id', 'reference'));
+    $display = array('id', 'reference');
+    $filter = array();
+    $shop_group_id = $this->shop_group_id();
+
+    $existing_products = $this->all($display, $filter, null, $shop_group_id);
     $existing_products = array_column($existing_products, 'reference', 'id');
 
     $this->presta_all_products = $existing_products;
@@ -421,18 +472,6 @@ class PrestaProducts extends PrestaClient {
     }
     else {
       return $value;
-    }
-  }
-
-  private function get_language_id($code) {
-    $value = $this->languages_table[$code];
-
-    if (empty($value)) {
-      return null;
-    }
-    else {
-      // substract one, since API key starts from zero
-      return ($value - 1);
     }
   }
 
@@ -452,7 +491,7 @@ class PrestaProducts extends PrestaClient {
       $product = $product_row['tuoteno'];
 
       // do we have this product in presta
-      $presta_id = array_search($product, $presta_products);
+      $presta_id = $this->product_id_by_sku($product);
 
       // if we found product from presta, add presta id to array
       if ($presta_id !== false) {
@@ -468,52 +507,20 @@ class PrestaProducts extends PrestaClient {
     // return the values that are not present keep_presta_ids
     $delete_presta_ids = array_diff($all_presta_ids, $keep_presta_ids);
 
+    $total = count($delete_presta_ids);
+    $current = 0;
+
     // delete products from presta
     foreach ($delete_presta_ids as $presta_id) {
+      $current++;
+      $this->logger->log("[{$current}/{$total}] Poistetaan tuote {$presta_id}");
+
       try {
         $this->delete($presta_id);
       }
       catch (Exception $e) {
       }
     }
-  }
-
-  private function update_stock() {
-    $this->logger->log('---------Aloitetaan saldojen päivitys---------');
-
-    // set all products null, so we'll fetch all_skus again from presta
-    $this->presta_all_products = null;
-    $pupesoft_products = $this->pupesoft_all_products;
-
-    $current = 0;
-    $total = count($pupesoft_products);
-
-    foreach ($pupesoft_products as $product_row) {
-      $sku = $product_row['tuoteno'];
-      $saldo = $product_row['saldo'];
-      $status = $product_row['status'];
-
-      $product_id = array_search($sku, $this->all_skus());
-
-      $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$sku} ({$product_id}) saldo {$saldo} status {$status}");
-
-      // could not find product or
-      // this is a virtual product, no stock management
-      if ($product_id === false or $saldo === null) {
-        continue;
-      }
-
-      $stock = array(
-        'product_id' => $product_id,
-        'saldo'      => $saldo,
-        'status'     => $status,
-      );
-
-      $this->presta_stock->create_or_update($stock);
-    }
-
-    $this->logger->log('---------Saldojen päivitys valmis---------');
   }
 
   private function find_product_from_all_products($sku) {
@@ -524,6 +531,66 @@ class PrestaProducts extends PrestaClient {
     }
 
     return false;
+  }
+
+  private function all_product_images() {
+    $all_product_images = array();
+    $all_skus = $this->all_skus();
+
+    $row_counter = 0;
+    $total_counter = count($all_skus);
+
+    // loop all products
+    foreach ($all_skus as $sku) {
+      $row_counter++;
+      $this->logger->log("[{$row_counter}/{$total_counter}] Tuote {$sku}");
+
+      // fetch product as xml, because we need to preserve the attributes
+      $product_id = $this->product_id_by_sku($sku);
+      $product = $this->get_as_xml($product_id);
+
+      // product images are under associations, sometimes singular, sometimes plural
+      $xml_images = $product->product->associations->images;
+      if (isset($xml_images->image)) {
+        $images = $xml_images->image;
+      }
+      elseif (isset($xml_images->images)) {
+        $images = $xml_images->images;
+      }
+      else {
+        $images = array();
+      }
+
+      $product_images = array();
+
+      // loop images
+      foreach ($images as $image) {
+        $image_id = (int) $image->id;
+        $attributes = $image->attributes("http://www.w3.org/1999/xlink");
+        $image_href = (string) $attributes['href'];
+
+        // collect products images urls
+        $product_images[] = array(
+          "href" => $image_href,
+          "id" => $image_id,
+        );
+      }
+
+      // add products images to an array
+      $all_product_images[] = array(
+        "images" => $product_images,
+        "product_id" => $product_id,
+        "sku" => $sku,
+      );
+    }
+
+    return $all_product_images;
+  }
+
+  public function product_id_by_sku($sku) {
+    $product_id = array_search($sku, $this->all_skus());
+
+    return $product_id;
   }
 
   public function set_removable_fields($fields) {
@@ -552,12 +619,6 @@ class PrestaProducts extends PrestaClient {
     }
   }
 
-  public function set_languages_table($value) {
-    if (is_array($value)) {
-      $this->languages_table = $value;
-    }
-  }
-
   public function set_visibility_type($value) {
     $this->visibility_type = $value;
   }
@@ -566,5 +627,13 @@ class PrestaProducts extends PrestaClient {
     if (is_array($value)) {
       $this->features_table = $value;
     }
+  }
+
+  public function set_home_category_id($value) {
+    $this->presta_home_category_id = $value;
+  }
+
+  public function set_image_fetch($value) {
+    $this->image_fetch = $value;
   }
 }

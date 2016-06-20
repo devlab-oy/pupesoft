@@ -404,6 +404,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='toimittajaemail{$editoimrow['email']}'>".t("Toimittajan sähköpostiin").": {$editoimrow['email']}</option>";
   }
 
+  if (!empty($yhtiorow['ostotilaus_email']) and ($toim == "OSTO" or $tulostimet[0] == 'Ostotilaus')) {
+    echo "<option value='toimittajaemail{$yhtiorow['ostotilaus_email']}'>".t("Ostotilaus sähköpostiin").": {$yhtiorow['ostotilaus_email']}</option>";
+  }
+
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
   }
@@ -414,6 +418,7 @@ foreach ($tulostimet as $tulostin) {
 
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

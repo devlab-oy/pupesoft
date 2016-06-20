@@ -18,6 +18,24 @@ $(document).ready(function() {
 
   if ($('#tilausrivin_esisyotto_parametri').val() == 'K') {
 
+    var toim = $('#toim').val();
+
+    $("input[name='tuoteno']").on('keyup', function() {
+      $("input[name='kpl']").val('');
+      $("input[name='hinta']").val('');
+      $("input[name='ale1']").val('');
+      $("input[name='ale2']").val('');
+      $("input[name='ale3']").val('');
+      $('#kate_rivi_laskenta').html('');
+
+      if (toim == 'PIKATILAUS') {
+        $("input[name='netto']").val('');
+      }
+      else {
+        $("select[name='netto']").val('');
+      }
+    });
+
     $("input[name='ale1']").on('keyup', function() {
       $("input[name='hinta']").trigger('keyup');
     });
@@ -35,8 +53,6 @@ $(document).ready(function() {
       var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
 
       if ($(this).val() != '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
-
-        var toim = $('#toim').val();
 
         if (toim == 'PIKATILAUS') {
           var netto = $("input[name='netto']").val();
@@ -56,6 +72,7 @@ $(document).ready(function() {
             ale2: $("input[name='ale2']").val(),
             ale3: $("input[name='ale3']").val(),
             netto: netto,
+            toim: toim,
             tilausnumero: $("input[name='tilausnumero']").val(),
             ajax_toiminto: 'esisyotto_kate',
             no_head: 'yes',
@@ -75,8 +92,6 @@ $(document).ready(function() {
     });
 
     $("input[name='kpl']").on('keyup', function() {
-
-      var toim = $('#toim').val();
 
       var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
 
@@ -105,6 +120,7 @@ $(document).ready(function() {
               tuoteno: $("input[name='tuoteno']").val(),
               kpl: $("input[name='kpl']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
+              toim: toim,
               ajax_toiminto: 'esisyotto',
               no_head: 'yes',
               ohje: 'off'

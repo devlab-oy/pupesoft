@@ -3500,6 +3500,20 @@ if ($tila == "" and !isset($jatka)) {
     if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
       echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
     }
+
+    $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
+
+    if (mysql_num_rows($mainostxt_res) > 0) {
+      if (isset($mainosteksti)) $srow['mainosteksti'] = $mainosteksti;
+
+      if (!isset($mainosteksti) and empty($tilausnumero) and empty($srow['mainosteksti'])) {
+        $mainostxt_row = mysql_fetch_assoc($mainostxt_res);
+        $srow['mainosteksti'] = trim($mainostxt_row['selite']."\n".$mainostxt_row['selitetark']);
+      }
+
+      echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td>".t("lasku")."</td></tr>";
+    }
+
     echo "</table><br>";
 
     echo "<table>";
@@ -3843,6 +3857,13 @@ if (isset($jatka)) {
     $ylatila = "";
   }
   else {
+    // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
+    if ($naytetaanko_tarjouksella != 'on' and ($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
+      $toimvv = "0000";
+      $toimkk = "00";
+      $toimpp = "00";
+    }
+
     // Pidetään huolta tilausrivien toimituspäivistä ja kerayspaivasta
     $query = "UPDATE tilausrivi
               SET kerayspvm = '{$kervv}-{$kerkk}-{$kerpp}'
@@ -4195,6 +4216,7 @@ if (isset($jatka)) {
         laskutusvkopv           = '$laskutusvkopv',
         liitostunnus            = '$liitostunnus',
         maa                     = '$maa',
+        mainosteksti            = '{$mainosteksti}',
         maksuehto               = '$maksuehto',
         maksuteksti             = '$maksuteksti',
         myyja                   = '$myyja',

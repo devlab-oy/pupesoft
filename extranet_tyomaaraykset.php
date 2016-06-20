@@ -4,6 +4,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
+enable_ajax();
+
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
   'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '',
@@ -48,7 +50,81 @@ if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
   exit;
 }
 
+?>
+<style>
+  .tr_border_top {
+    border-top: 1px solid;
+  }
+  .text_align_right {
+    text-align: right;
+  }
+</style>
+<script>
+
+$(function() {
+  
+  function confirmation(question) {
+      var defer = $.Deferred();
+      $('<div></div>')
+          .html(question)
+          .dialog({
+              autoOpen: true,
+              modal: true,
+              title: '<?php echo t("Vahvistus"); ?>',
+              buttons: {
+                  "<?php echo t("Avaa"); ?>": function () {
+                      defer.resolve(true);
+            $(this).dialog("close");
+                  },
+                  "<?php echo t("Peruuta"); ?>": function () {
+                      defer.resolve(false);
+                      $(this).dialog("close");
+                  }
+              }
+          });
+      return defer.promise();
+  };
+
+  $('#avaa_tyomaarays_nappi').on('click', function() {
+    var onkoviesti1 = $('#viesti1').val();
+    var onkoviesti2 = $('#viesti2').val();
+    $('#tarkistusmuuttuja').val('JOO');
+    if (onkoviesti1.length > 0) {
+        var question = "<?php 
+          echo t("Laitetta ei löydy laiterekisteristä");
+          echo "<br>";
+          echo t("Haluatko silti avata huoltopyynnön?");
+        ?>";
+        confirmation(question).then(function (answer) {
+            if(answer){
+              $('#tyomaarays_form').submit();
+            }
+        });
+    }
+    else if (onkoviesti2.length > 0) {
+      var question = "<?php 
+        echo t("Laitetta ei löydy sopimukselta");
+        echo "<br>";
+        echo t("Haluatko silti avata huoltopyynnön?");
+      ?>";
+      confirmation(question).then(function (answer) {
+          if(answer){
+            $('#tyomaarays_form').submit();
+          }
+      });
+    }
+    else {
+      $('#tyomaarays_form').submit();
+    }
+  });
+});
+
+</script>
+<?php
+
 $avataanko_tyomaarays = false;
+$virheviesti1 = '';
+$virheviesti2 = '';
 
 if (isset($valmnro) and !empty($valmnro)) {
   // Jos on valittu sarjanumero niin yritetään täyttää muut laitekentät
@@ -59,7 +135,7 @@ if (isset($valmnro) and !empty($valmnro)) {
             LIMIT 1";
   $result = pupe_query($query);
 
-  if (mysql_affected_rows() == 1) {
+  if (mysql_num_rows($result) == 1) {
     $laiterow = mysql_fetch_assoc($result);
     $laitetiedot = hae_laitteen_parametrit($laiterow['tunnus']);
 
@@ -69,18 +145,25 @@ if (isset($valmnro) and !empty($valmnro)) {
   $avataanko_tyomaarays = true;
 }
 
-enable_ajax();
-
-if (isset($avaa_tyomaarays_nappi) and !empty($request['tyom_parametrit']['tuotenro']) 
+if (!empty($tarkistusmuuttuja) and (!empty($request['tyom_parametrit']['tuotenro']) or !empty($request['tyom_parametrit']['valmnro']))
   and !empty($request['tyom_parametrit']['komm1']) and !empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) {
   // Tallennetaan työmääräys järjestelmään jos kaikki järkevät tiedot syötetty
   tallenna_tyomaarays($request);
   $tyom_toiminto = '';
+  $request['tyom_toiminto'] = '';
   unset($request['tyom_parametrit']);
 }
-elseif (isset($avaa_tyomaarays_nappi)) {
+elseif (!empty($tarkistusmuuttuja)) {
+  if ((!empty($request['tyom_parametrit']['valmnro']) or !empty($request['tyom_parametrit']['tuotenro'])) and puuttuuko_laite_jarjestelmasta($request['tyom_parametrit']['valmnro'], $request['tyom_parametrit']['tuotenro'])) {
+    $virheviesti1 = t("HUOM: Laitetta ei löydy laiterekisteristä");
+    echo "<font class='error'>{$virheviesti1}</font><br>";
+  }
+  elseif ((!empty($request['tyom_parametrit']['valmnro']) or !empty($request['tyom_parametrit']['tuotenro'])) and puuttuuko_laitteelta_sopimus($request['tyom_parametrit']['valmnro'], $request['tyom_parametrit']['tuotenro'])) {
+    $virheviesti2 = t("HUOM: Laite löytyy, mutta sillä ei ole sopimusta");
+    echo "<font class='error'>${virheviesti2}</font><br>";
+  }
+  if (empty($request['tyom_parametrit']['valmnro']) and empty($request['tyom_parametrit']['tuotenro'])) echo "<font class='error'>".t("VIRHE: Sarjanumero tai malli on pakollinen tieto")."</font><br>";
   if (empty($request['tyom_parametrit']['komm1'])) echo "<font class='error'>".t("VIRHE: Viankuvaus on pakollinen tieto")."</font><br>";
-  if (empty($request['tyom_parametrit']['tuotenro'])) echo "<font class='error'>".t("VIRHE: Malli on pakollinen tieto")."</font><br>";
   if (empty($request['osoite_parametrit']['tilausyhteyshenkilo'])) echo "<font class='error'>".t("VIRHE: Yhteyshenkilö on pakollinen tieto")."</font><br>";
 
   $request['tyom_toiminto'] = 'UUSI';
@@ -210,8 +293,8 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
     t('Huoltopyyntö') => true,
     t('Luontiaika') => true,
     t('Valmistaja') => false,
-    t('Sarjanumero') => false,
     t('Malli') => false,
+    t('Sarjanumero') => false,
     t('Työstatus') => true,
     t('Viankuvaus') => false,
     t('Työn toimenpiteet') => true
@@ -276,7 +359,7 @@ function piirra_nayta_aktiiviset_poistetut() {
 
 function uusi_tyomaarays_formi($laite_tunnus) {
   global $request;
- 
+
   echo "<font class='head'>".t("Uusi huoltopyyntö")."</font><hr>";
   // Jos ollaan tultu laiterekisteristä ja halutaan tehdä työmääräys tietylle laitteelle
   if (!empty($laite_tunnus)) {
@@ -284,7 +367,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   }
 
   $asiakasdata = hae_asiakasdata();
-  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form'>";
+  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form' method='post' action=''>";
   echo "<table>";
   echo "<tr>";
   piirra_tyomaaraysheaderit(true);
@@ -296,8 +379,23 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<br>";
   piirra_yhteyshenkilontiedot_taulu();
   piirra_toimitusosoite_taulu($asiakasdata);
-
-  echo "<input type='submit' name='avaa_tyomaarays_nappi' value='".t('Avaa huoltopyyntö')."'>";
+  $virhe1 = '';
+  $virhe2 = '';
+  if (!empty($request['tyom_parametrit']['tuotenro']) or !empty($request['tyom_parametrit']['valmnro'])) {
+    if (puuttuuko_laite_jarjestelmasta($request['tyom_parametrit']['valmnro'], $request['tyom_parametrit']['tuotenro'])) {
+      $virhe1 = 'JOO';
+    }
+    elseif (puuttuuko_laitteelta_sopimus($request['tyom_parametrit']['valmnro'], $request['tyom_parametrit']['tuotenro'])) {
+      $virhe2 = 'JOO';
+    }
+  }
+  echo "<input type='hidden' id='viesti1' name='viesti1' value='{$virhe1}'>";
+  echo "<input type='hidden' id='viesti2' name='viesti2' value='{$virhe2}'>";
+  echo "<input type='hidden' id='tarkistusmuuttuja' name='tarkistusmuuttuja' value=''>";
+  echo "<div style='display: none;'>";
+  echo "<input type='submit'>";
+  echo "</div>";
+  echo "<input type='button' id='avaa_tyomaarays_nappi' name='avaa_tyomaarays_nappi' value='".t('Avaa huoltopyyntö')."'/>";
   echo "</form>";
 }
 
@@ -305,12 +403,12 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   if (!$piilota) echo "<td></td>";
   if (!$piilota) echo "<td></td>";
   echo "<td><input type='text' name='valmistaja' value='{$request['tyom_parametrit']['valmistaja']}'></td>";
+  echo "<td><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuotenro']}'></td>";
 
   echo "<td>";
   echo livesearch_kentta("tyomaarays_form", "LAITEHAKU", "valmnro", 140, $request['tyom_parametrit']['valmnro'], '', '', '', 'ei_break_all');
   echo "</td>";
-
-  echo "<td><input type='text' name='tuotenro' value='{$request['tyom_parametrit']['tuotenro']}'></td>";
+  
   if (!$piilota) echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   if (!$piilota) echo "<td></td>";
@@ -512,4 +610,38 @@ function email_tyomaarayskopio($request) {
           <input type='hidden' name='tee' value='NAYTATILAUS'>
           <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
   }
+}
+
+function puuttuuko_laite_jarjestelmasta($sarjanumero, $tuotenumero) {
+  global $kukarow;
+
+  $puuttuu = true;
+  $query = "SELECT *
+            FROM laite
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuotenumero}'
+            AND sarjanro = '{$sarjanumero}'";
+  $result = pupe_query($query);
+  if (mysql_num_rows($result) != 0) {
+    $puuttuu = false;
+  }
+  return $puuttuu;
+}
+
+function puuttuuko_laitteelta_sopimus($sarjanumero, $tuotenumero) {
+  global $kukarow;
+
+  $puuttuu = true;
+  $query = "SELECT laite.tunnus
+            FROM laite
+            JOIN laitteen_sopimukset ON laite.yhtio = laitteen_sopimukset.yhtio
+              AND laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.tuoteno = '{$tuotenumero}'
+            AND laite.sarjanro = '{$sarjanumero}'";
+  $result = pupe_query($query);
+  if (mysql_num_rows($result) != 0) {
+    $puuttuu = false;
+  }
+  return $puuttuu;
 }

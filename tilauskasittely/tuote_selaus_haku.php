@@ -291,7 +291,8 @@ if (!empty($variaatio)) {
             tuote.osasto,
             tuote.myyntihinta,
             tuote.myymalahinta,
-            tuote.yhtio
+            tuote.yhtio,
+            tuote.alv
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
               AND tuotteen_avainsanat.kieli  = '{$yhtiorow['kieli']}'
@@ -960,6 +961,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
             tuote.status
@@ -1499,7 +1501,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if (count($tuotteen_lisatiedot) > 0) {
         $row["nimitys"] .= "<ul>";
         foreach ($tuotteen_lisatiedot as $tuotteen_lisatiedot_arvo) {
-          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; $tuotteen_lisatiedot_arvo[selite]</li>";
+          $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; ".url_or_text($tuotteen_lisatiedot_arvo['selite'])."</li>";
         }
         $row["nimitys"] .= "</ul>";
       }
@@ -2464,6 +2466,12 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         $ale_kaikki,
         $alehinta_alv,
         $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+
+      // alvillinen -> alviton
+      // alv pois
+      if ($yhtiorow['alv_kasittely'] == '' and $oleasrow['alv'] == 0 and $row['alv'] != 0) {
+        $hinta = $hinta / (1 + $row['alv'] / 100);
+      }
 
       $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
       $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";

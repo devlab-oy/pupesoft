@@ -410,13 +410,27 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $kal++;
   }
 
-  $query = "SELECT GROUP_CONCAT(viesti) tilausviitteet
+  // Yhdistettäessä tilauksia samalle keräyslistalle haetaan kaikkien tilausten kommentit yms. tiedot mukaan
+  $query = "SELECT GROUP_CONCAT(if(tilausyhteyshenkilo != '', tilausyhteyshenkilo, NULL) SEPARATOR ', ') tilaajat,
+            GROUP_CONCAT(if(asiakkaan_tilausnumero != '', asiakkaan_tilausnumero, NULL) SEPARATOR ', ') asiakkaan_tilausnumerot,
+            GROUP_CONCAT(if(kohde != '', kohde, NULL) SEPARATOR ', ') kohteet,
+            GROUP_CONCAT(if(viesti != '', viesti, NULL) SEPARATOR ', ') tilausviitteet,
+            GROUP_CONCAT(if(ohjausmerkki != '', ohjausmerkki, NULL) SEPARATOR ', ') ohjausmerkit,
+            GROUP_CONCAT(if(comments != '', comments, NULL) SEPARATOR ', ') kommentti1,
+            GROUP_CONCAT(if(sisviesti2 != '', sisviesti2, NULL) SEPARATOR ', ') kommentti2
             FROM lasku
             WHERE tunnus IN ({$tilausnumeroita})
-            and yhtio    = '{$kukarow['yhtio']}'";
+            AND yhtio    = '{$kukarow['yhtio']}'";
   $tilausviiteres = pupe_query($query);
   $tilausviiterow = mysql_fetch_assoc($tilausviiteres);
+
+  $laskurow["tilausyhteyshenkilo"] = $tilausviiterow["tilaajat"];
+  $laskurow["asiakkaan_tilausnumero"] = $tilausviiterow["asiakkaan_tilausnumerot"];
+  $laskurow["kohde"] = $tilausviiterow["kohteet"];
   $laskurow['viesti'] = $tilausviiterow['tilausviitteet'];
+  $laskurow["ohjausmerkki"] = $tilausviiterow["ohjausmerkit"];
+  $laskurow["comments"] = $tilausviiterow["kommentti1"];
+  $laskurow["sisviesti2"] = $tilausviiterow["kommentti2"];
 
   if (mysql_num_rows($riresult) > 0) {
     mysql_data_seek($riresult, 0);

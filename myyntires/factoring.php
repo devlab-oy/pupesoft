@@ -11,14 +11,14 @@ if (isset($maksuehto) and isset($tunnus)) {
             from maksuehto
             where yhtio    = '$kukarow[yhtio]'
             and tunnus     = '$maksuehto'
-            and factoring != ''";
+            and factoring_id is not null";
 
   if ($laji == 'pois') {
     $query = "SELECT *
               FROM maksuehto
               WHERE yhtio   = '$kukarow[yhtio]'
               and tunnus    = '$maksuehto'
-              and factoring = ''";
+              and factoring_id is null";
   }
 
   $result = pupe_query($query);
@@ -99,7 +99,7 @@ if (isset($maksuehto) and isset($tunnus)) {
     echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";
   }
 
-  if ($mehtorow["factoring"] != "") {
+  if (isset($mehtorow["factoring_id"])) {
     $myysaatili  = $yhtiorow['factoringsaamiset'];
   }
   elseif ($konsrow["konserniyhtio"] != "") {
@@ -152,7 +152,9 @@ if (isset($laskuno)) {
   // haetaan lasku. pit‰‰ factoroimaton
   $query = "SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
             from lasku
-            JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring=''
+            JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.factoring_id is null)
             where lasku.yhtio  = '$kukarow[yhtio]'
             and lasku.laskunro = '$laskuno'
             and lasku.tila     = 'U'
@@ -162,7 +164,9 @@ if (isset($laskuno)) {
   if ($laji == 'pois') {
     $query = "SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
               from lasku
-              JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring!=''
+              JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
+                and lasku.maksuehto = maksuehto.tunnus
+                and maksuehto.factoring_id is not null)
               where lasku.yhtio  = '$kukarow[yhtio]'
               and lasku.laskunro = '$laskuno'
               and lasku.tila     = 'U'
@@ -198,13 +202,13 @@ if (isset($laskuno)) {
     // haetaan kaikki factoringmaksuehdot
     $query = "SELECT *
               FROM maksuehto
-              WHERE yhtio = '$kukarow[yhtio]' and factoring!=''
+              WHERE yhtio = '$kukarow[yhtio]' and factoring_id is not null
               ORDER BY jarjestys, teksti";
 
     if ($laji == 'pois') {
       $query = "SELECT *
                 FROM maksuehto
-                WHERE yhtio = '$kukarow[yhtio]' and factoring=''
+                WHERE yhtio = '$kukarow[yhtio]' and factoring_id is null
                 ORDER BY jarjestys, teksti";
     }
 

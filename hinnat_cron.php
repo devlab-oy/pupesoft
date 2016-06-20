@@ -99,6 +99,7 @@ $laskurow = array(
   'valkoodi' => $asiakasrow['valkoodi'],
   'maa' => $asiakasrow['maa'],
   'ytunnus' => $asiakasrow['ytunnus'],
+  'yhtio_toimipaikka' => $asiakasrow['toimipaikka']
 );
 
 $tuotteet = $ryhmat = array();

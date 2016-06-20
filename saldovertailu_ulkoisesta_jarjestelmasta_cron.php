@@ -157,6 +157,8 @@ if ($handle = opendir($path)) {
 
           // siirret‰‰n tiedosto done-kansioon
           rename($path.$file, $path.'done/'.$file);
+
+          pupesoft_log('stock_report', "Saldovertailu k‰sitelty");
         }
       }
     }

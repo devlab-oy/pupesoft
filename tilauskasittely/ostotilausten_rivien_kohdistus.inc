@@ -1070,6 +1070,23 @@ if ($tila == 'tee_kohdistus') {
   }
 }
 
+$query = "SELECT DISTINCT varasto
+          FROM tilausrivi
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND uusiotunnus = '{$otunnus}'";
+$varastocheckres = pupe_query($query);
+
+$onkologmaster_varasto = true;
+
+while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+  $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+  if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
+    $onkologmaster_varasto = false;
+    break;
+  }
+}
+
 //näytetään rivilista ja ruksataan kohdistettavia rivejä
 if ($tila == '') {
 
@@ -1221,7 +1238,19 @@ if ($tila == '') {
   foreach ($kenhak_array as $i => $kentta) {
     // tarkastetaan onko hakukentässä jotakin
     if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
-      $lisa1 .= " $kentta like '%$haku[$i]%' and";
+      if ($kentta == "toimaika" and strpos($haku[$i], ".") !== false) {
+        $_aika = explode(".", $haku[$i]);
+
+        if (count($_aika) == 2) {
+          $lisa1 .= " $kentta like '%{$_aika["1"]}-{$_aika["0"]}%' and";
+        }
+        elseif (count($_aika) == 3) {
+          $lisa1 .= " $kentta like '%{$_aika["2"]}-{$_aika["1"]}-{$_aika["0"]}%' and";
+        }
+      }
+      else {
+        $lisa1 .= " $kentta like '%$haku[$i]%' and";
+      }
 
       //pidetään muistissa linkkejä varten
       $ulisa .= "&haku[$i]=$haku[$i]";
@@ -1542,7 +1571,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster) {
+    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -2308,7 +2337,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster) {
+    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

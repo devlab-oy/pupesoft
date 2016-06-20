@@ -55,7 +55,7 @@ if (!function_exists('alku_kerayslista')) {
 
       $kala = 9;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
 
       include 'inc/pupeExcel.inc';
 
@@ -152,14 +152,14 @@ if (!function_exists('alku_kerayslista')) {
       //maksuehto tekstin‰
       $maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
-      $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
+      $pdf->draw_text(550, 815, $laskurow["hyvaksynnanmuutos"],   $thispage, $iso);
       $prioriteetin_kuvaus = ($laskurow["hyvaksynnanmuutos"] != "") ? t_avainsana("ASIAKASLUOKKA", $kieli, "and avainsana.selite = '{$laskurow["hyvaksynnanmuutos"]}'", "", "", "selitetark") : "X";
 
       if ($tyyppi == "SIIRTOLISTA") {
         $pdf->draw_text(310, 815, t("Siirtolista", $kieli),     $thispage, $iso);
       }
       elseif ($tyyppi == "REKLAMAATIO") {
-        $pdf->draw_text(240, 815, t("Reklamaatio/Purkulista", $kieli),     $thispage, $iso);
+        $pdf->draw_text(310, 815, t("Reklamaatio/Purkulista", $kieli), $thispage, $iso);
       }
       elseif ($tyyppi == "TAKUU") {
         $pdf->draw_text(310, 815, t("Takuu", $kieli),     $thispage, $iso);
@@ -362,6 +362,10 @@ if (!function_exists('alku_kerayslista')) {
         $komm .= "\n$prioriteetin_kuvaus";
       }
 
+      if ($laskurow['ohjelma_moduli'] == "MAGENTO" and !empty($laskurow['toim_puh'])) {
+        $laskurow['sisviesti2'] .= "\n".t("Asiakkaan puh", $kieli).": $laskurow[toim_puh]";
+      }
+
       if (trim($laskurow['tilausyhteyshenkilo']) != '') {
         $komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
       }
@@ -523,7 +527,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 
     tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-    $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
+    $pdf->draw_text(550, 815, $laskurow["hyvaksynnanmuutos"],       $thispage, $iso);
 
     if ($tyyppi == "SIIRTOLISTA") {
       $pdf->draw_text(310, 815, t("Siirtolista", $kieli),         $thispage, $iso);
@@ -551,8 +555,9 @@ if (!function_exists('uusi_sivu_kerayslista')) {
       $pdf->draw_text(310, 782, $kerayseran_numero,        $thispage, $boldi);
     }
     else {
-      $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),   $thispage, $pieni);
-      $pdf->draw_text(310, 782, $tilausnumeroita,          $thispage, $boldi);
+      list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
+      $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),     $thispage, $pieni);
+      $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
     }
 
     $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
@@ -634,12 +639,16 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $thispage->writeString($kala, 0, "Items", $boldi);
       $thispage->writeString($kala, 1, "Code", $boldi);
       $thispage->writeString($kala, 2, "Description", $boldi);
       $thispage->writeString($kala, 3, "EAN code", $boldi);
       $thispage->writeString($kala, 4, "Pcs", $boldi);
+
+      if ($kerayslistatyyppi == 'EXCEL3') {
+        $thispage->writeString($kala, 5, "Price", $boldi);
+      }
 
       $kala++;
     }
@@ -700,7 +709,7 @@ if (!function_exists('rivi_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $thispage->writeString($kala, 0, "");
       $thispage->writeString($kala, 1, $row["tuoteno"]);
       $thispage->writeString($kala, 2, $row["nimitys"]);
@@ -708,6 +717,12 @@ if (!function_exists('rivi_kerayslista')) {
 
       if ($row["var"] == "" or  $row["var"] == "H") {
         $thispage->write($kala, 4, $row["tilkpl"]);
+      }
+      
+      if ($kerayslistatyyppi == 'EXCEL3') {
+        if ($row["var"] == "" or  $row["var"] == "H") {
+          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2)); 
+        }
       }
 
       $kala++;
@@ -1018,7 +1033,6 @@ if (!function_exists('rivi_kerayslista')) {
 
         $kala = $kala - $rivinkorkeus + 5;
 
-
         list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
         $pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 
@@ -1166,6 +1180,22 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         if ($row["kommentti"] != '') {
+          if ($kala-$norm["height"]-5 < 95) {
+
+            $sivu++;
+
+            // Luodaan palautettavat
+            $return = compact(array_keys($params));
+
+            $params = loppu_kerayslista($return);
+            $params = uusi_sivu_kerayslista($params);
+
+            // Luodaan muuttujat
+            extract($params);
+
+            $page[$sivu] = $thispage;
+          }
+
           $pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 125, 60, 470, $row["kommentti"],  $thispage, $norm);
           $kala = $pohja - $rivinkorkeus;
         }
@@ -1196,7 +1226,7 @@ if (!function_exists('loppu_kerayslista')) {
     // Luodaan muuttujat
     extract($params);
 
-    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       // T‰ss‰ p‰rj‰t‰‰n ilman footteria....
     }
     else {
@@ -1346,7 +1376,7 @@ if (!function_exists('print_pdf_kerayslista')) {
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='submit' value='".t("Ker‰yslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
     }
-    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
+    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
       $excelnimi = $thispage->close();
 
       $liite['excel'] = "/tmp/".$excelnimi;

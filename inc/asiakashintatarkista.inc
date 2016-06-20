@@ -163,7 +163,7 @@ if (!function_exists("asiakashintatarkista")) {
       }
     }
 
-    if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
+    if ((($chryhma == '' and $chtuoteno == '') or ($chryhma != '' and $chtuoteno != '')) and mysql_field_name($result, $i) == 'ryhma') {
       $virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
     }
 

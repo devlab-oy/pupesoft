@@ -414,7 +414,14 @@ if ($profiili != '') {
       echo "<td colspan='2'>";
     }
 
-    echo "  ".t("$orow[nimitys]")."</td>
+    echo "  ".t("$orow[nimitys]");
+
+    if ($orow["nimi"] == 'yllapito.php' and strpos($orow["alanimi"], "!!!") !== FALSE) {
+      list( , $aliassetti, ) = explode("!!!", $orow["alanimi"]);
+      echo "  ($aliassetti)";
+    }
+
+    echo "</td>
         <td align='center'><input type='checkbox' class='A".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $checked   value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[$lask]'></td>
         <td align='center'><input type='checkbox' class='B".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $paivit    value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[$lask]'></td>
         </tr>";

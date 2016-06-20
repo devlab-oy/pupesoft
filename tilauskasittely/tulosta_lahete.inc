@@ -504,13 +504,15 @@ if (!function_exists('alku_lahete')) {
           or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
           or $base_lahetetyyppi == "tulosta_lahete_eialehintoja.inc"
-          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc")
         or
         (   isset($GLOBALS['eta_yhtio'])
           and $GLOBALS['eta_yhtio'] != ''
           and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
 
-        if ($yhtiorow['alv_kasittely'] == '' or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
+        if (($laskurow['alv'] > 0 and $yhtiorow['alv_kasittely'] == '') or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
           $pdf->draw_text(310, 640, t("Hinnat sis‰lt‰v‰t arvonlis‰veron", $kieli).".", $thispage, $boldi);
         }
         else {
@@ -1701,7 +1703,7 @@ if (!function_exists('rivi_lahete')) {
     }
 
     // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
-    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"]);
+    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"], $kieli);
 
     if (!empty($row["kommentti"]) and !empty($saapumisaika)) {
       $row["kommentti"] .= "\n{$saapumisaika}";

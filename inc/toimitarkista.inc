@@ -139,10 +139,10 @@ if (!function_exists("toimitarkista")) {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu
-          require "tarkistahetu.inc";
+          $hetu = tarkistahetu($hetu);
 
           // ei ollu oikee hetukaan
-          if ($hetuok == 1) {
+          if (strpos($hetu, "XXXX") === false) {
             $virhe[$i] = t("Virheellinen henkilötunnus!");
           }
         }

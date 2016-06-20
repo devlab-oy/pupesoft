@@ -12,6 +12,14 @@ if (!function_exists('alku_dgd')) {
       ${$key} = $val;
     }
 
+    // haetaan toimitustavan tiedot
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND selite  = '{$laskurow['toimitustapa']}'";
+    $toitares = pupe_query($query);
+    $toitarow = mysql_fetch_assoc($toitares);
+
     //PDF parametrit
     if ($pdf === NULL) {
       $pdf = Zend_Pdf::load($GLOBALS["pupe_root_polku"]."/tilauskasittely/DGDpohja.pdf");
@@ -47,11 +55,19 @@ if (!function_exists('alku_dgd')) {
     }
 
     $pdf->pages[$sivu]->drawText($laskurow["rahtikirjanro"], mm_pt(110), mm_pt(263), 'LATIN1');
-
-    $pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
-    $pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
-    $pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
+    // jos tulostustapa on koonti ja toimitustavan takana on annettu osoitetiedot, käytetään niitä
+    if (in_array($toitarow['tulostustapa'], array('K', 'L')) and !empty($toitarow['toim_nimi']) and !empty($toitarow['toim_postitp'])) {
+      $pdf->pages[$sivu]->drawText($toitarow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($toitarow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($toitarow["toim_postino"]." ".$toitarow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
+      $pdf->pages[$sivu]->drawText(maa($toitarow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
+    }
+    else {
+      $pdf->pages[$sivu]->drawText($laskurow["toim_nimi"], mm_pt(15), mm_pt(242), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($laskurow["toim_osoite"], mm_pt(15), mm_pt(238), 'LATIN1');
+      $pdf->pages[$sivu]->drawText($laskurow["toim_postino"]." ".$laskurow["toim_postitp"], mm_pt(15), mm_pt(234), 'LATIN1');
+      $pdf->pages[$sivu]->drawText(maa($laskurow["toim_maa"], $kieli), mm_pt(15), mm_pt(230), 'LATIN1');
+    }
 
     // Ruksit
     $pdf->pages[$sivu]->drawLine(mm_pt(15), mm_pt(202), mm_pt(55), mm_pt(197));

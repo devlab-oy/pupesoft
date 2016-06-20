@@ -336,6 +336,15 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       }
     }
 
+    if ($toim == "PIKATILAUS") {
+      $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
+
+      if (mysql_num_rows($mainostxt_res) > 0) {
+        $mainostxt_row = mysql_fetch_assoc($mainostxt_res);
+        $mainosteksti = trim($mainostxt_row['selite']."\n".$mainostxt_row['selitetark']);
+      }
+    }
+
     if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS"))) {
       $osatoimitus = "o";
     }

@@ -4,15 +4,16 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 
 class PrestaAddresses extends PrestaClient {
+  private $presta_countries = null;
 
-  const RESOURCE = 'addresses';
+  public function __construct($url, $api_key, $log_file) {
+    $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
 
-  public function __construct($url, $api_key) {
-    parent::__construct($url, $api_key);
+    parent::__construct($url, $api_key, $log_file);
   }
 
   protected function resource_name() {
-    return self::RESOURCE;
+    return 'addresses';
   }
 
   /**
@@ -21,8 +22,6 @@ class PrestaAddresses extends PrestaClient {
    * @param SimpleXMLElement $existing_address
    * @return \SimpleXMLElement
    */
-
-
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
     if (is_null($existing_address)) {
       $xml = $this->empty_xml();
@@ -31,48 +30,62 @@ class PrestaAddresses extends PrestaClient {
       $xml = $existing_address;
     }
 
-    $presta_country = new PrestaCountries($this->url(), $this->api_key());
-    $finland = $presta_country->find_findland();
+    // find customer country
+    if (!empty($address['maa'])) {
+      $country = $this->presta_countries->find_country_by_code($address['maa']);
+    }
+
+    // default to finland
+    if (empty($country)) {
+      $country = $this->presta_countries->find_country_by_code('FI');
+    }
+
+    // default to first country
+    if (empty($country)) {
+      $country = $this->presta_countries->first_country();
+    }
 
     // Mandatory fields
-    $_osoite = empty($address['osoite']) ? "-" : utf8_encode($address['osoite']);
-    $_postitp = empty($address['postitp']) ? "-" : utf8_encode($address['postitp']);
+    $_osoite = empty($address['osoite']) ? "-" : $address['osoite'];
+    $_postitp = empty($address['postitp']) ? "-" : $address['postitp'];
     $_puh = empty($address['puh']) ? "-" : $address['puh'];
 
     // max 32, numbers and special characters not allowed
     $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : utf8_encode($_nimi);
+    $_nimi = empty($_nimi) ? '-' : $_nimi;
 
-    $xml->address->id_country = $finland['id'];
+    $xml->address->id_country = $country;
     $xml->address->id_customer = $address['presta_customer_id'];
     $xml->address->alias = 'Home';
-    $xml->address->lastname = $_nimi;
+    $xml->address->lastname = $this->xml_value($_nimi);
     $xml->address->firstname = '-';
-    $xml->address->address1 = $_osoite;
-    $xml->address->postcode = $address['postino'];
-    $xml->address->city = $_postitp;
-    $xml->address->phone = $_puh;
-    $xml->address->phone_mobile = $address['gsm'];
+    $xml->address->address1 = $this->xml_value($_osoite);
+    $xml->address->postcode = $this->xml_value($address['postino']);
+    $xml->address->city = $this->xml_value($_postitp);
+    $xml->address->phone = $this->xml_value($_puh);
+    $xml->address->phone_mobile = $this->xml_value($address['gsm']);
 
     return $xml;
   }
 
-  public function create(array $address) {
-    parent::create($address);
+  public function update_with_customer_id(array $customer, $id_shop = null) {
+    $presta_address = $this->find_address_by_customer_id($customer['presta_customer_id'], $id_shop);
+
+    if (is_null($presta_address)) {
+      parent::create($customer, $id_shop);
+    }
+    else {
+      parent::update($presta_address['id'], $customer, $id_shop);
+    }
   }
 
-  public function update_with_customer_id(array $address) {
-    $presta_address = $this->find_address_by_customer_id($address['presta_customer_id']);
-    parent::update($presta_address['id'], $address);
-  }
-
-  private function find_address_by_customer_id($customer_id) {
+  private function find_address_by_customer_id($customer_id, $id_shop = null) {
     $display = $filter = array();
     $filter['id_customer'] = $customer_id;
 
-    $addresses = $this->all($display, $filter);
+    $addresses = $this->all($display, $filter, $id_shop);
 
-    $address = $addresses[0];
+    $address = isset($addresses[0]) ? $addresses[0] : null;
 
     return $address;
   }

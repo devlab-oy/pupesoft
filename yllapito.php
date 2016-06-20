@@ -20,27 +20,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   echo "<script src='yllapito.js'></script>";
 }
 
-// Pupenext yll‰pitonakym‰t aakkosj‰rjestyksess‰
-$psx_ohjelmat = array(
-  "kassalipas"         => "{$palvelin2}pupenext/cash_registers",
-  "kirjoittimet"       => "{$palvelin2}pupenext/printers",
-  "kustannuspaikka"    => "{$palvelin2}pupenext/qualifiers",
-  "maksuehto"          => "{$palvelin2}pupenext/terms_of_payments",
-  "pakkaamo"           => "{$palvelin2}pupenext/packing_areas",
-  "pakkaus"            => "{$palvelin2}pupenext/packages",
-  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details",
-  "rahdinkuljettajat"  => "{$palvelin2}pupenext/carriers",
-  "taso"               => "{$palvelin2}pupenext/sum_levels",
-  "tili"               => "{$palvelin2}pupenext/accounts",
-  "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
-  "toimitustapa"       => "{$palvelin2}pupenext/delivery_methods",
-  "valuu"              => "{$palvelin2}pupenext/currencies",
-  "yriti"              => "{$palvelin2}pupenext/bank_accounts",
-);
+// Rails infraan siirretyt yll‰piton‰kym‰t, eli $pupenext_yllapitonakymat, m‰‰ritell‰‰n parametrit.inc:tiedostossa.
+if (array_key_exists($toim, $pupenext_yllapitonakymat)) {
 
-if (array_key_exists($toim, $psx_ohjelmat)) {
-
-  $psx_url = $psx_ohjelmat[$toim];
+  $psx_url = $pupenext_yllapitonakymat[$toim];
 
   echo "<font class='head'>", t("Virhe"), "</font><hr>";
 
@@ -1259,6 +1242,15 @@ for ($i=0; $i<=$count; $i++) {
     elseif ($toim == 'puun_alkio' and $i == 6) {
       $lisa .= " AND (SELECT nimi FROM dynaaminen_puu WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = puun_alkio.puun_tunnus AND laji = '{$laji}' AND nimi {$hakuehto}) {$hakuehto} ";
     }
+    elseif ($toim == 'pakkauskoodit' and ($i == 2 or $i == 1)) {
+
+      if ($i == 2) {
+        $lisa .= "AND rahdinkuljettaja {$hakuehto}";
+      }
+      else {
+        $lisa .= "AND pakkaus {$hakuehto}";
+      }
+    }
     elseif ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
       if ($i == 2 and $haku[$i] != '') {
         $lisa .= " AND varaston_hyllypaikat.reservipaikka {$hakuehto} ";
@@ -1560,6 +1552,21 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
           echo "</select>";
         }
+        elseif ($toim == "toimi" and mysql_field_name($result, $i) == "toimittajaryhma") {
+          echo "<br />";
+          echo "<select name='haku[{$i}]'>";
+          echo "<option value=''></option>";
+
+          $_ryhmares = t_avainsana('TOIMITTAJARYHMA');
+
+          while ($toimittajaryhmarow = mysql_fetch_assoc($_ryhmares)) {
+            $sel = (isset($haku[$i]) and $haku[$i] == "@".$toimittajaryhmarow['selite']) ? ' selected' : '';
+            $_teksti = $toimittajaryhmarow['selitetark'] != '' ? "{$toimittajaryhmarow['selite']} {$toimittajaryhmarow['selitetark']}" : $toimittajaryhmarow['selite'];
+            echo "<option value='@{$toimittajaryhmarow['selite']}'{$sel}>{$_teksti}</option>";
+          }
+
+          echo "</select>";
+        }
         elseif ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L' and mysql_field_name($result, $i) == "toimipaikka") {
 
           echo "<br />";
@@ -1589,6 +1596,47 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           }
 
           echo "</select>";
+        }
+        elseif ($toim == "pakkauskoodit") {
+          if (strtolower(mysql_field_name($result, $i)) == 'koodi') {
+            echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
+          }
+          elseif (strtolower(mysql_field_name($result, $i)) == 'rahdinkuljettaja') {
+            $query = "SELECT nimi, koodi
+                      FROM rahdinkuljettajat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      ORDER BY nimi";
+            $rahdinkuljettaja_chk_res = pupe_query($query);
+
+            echo "<br><select name='haku[{$i}]'>";
+            echo "<option value=''>", t("Kaikki rahdinkuljettajat"), "</option>";
+
+            while ($rahkulj_chk_row = mysql_fetch_assoc($rahdinkuljettaja_chk_res)) {
+              $sel = (isset($haku[$i]) and $haku[$i] == "@".$rahkulj_chk_row['koodi']) ? ' selected' : '';
+
+              echo "<option value='@{$rahkulj_chk_row['koodi']}'{$sel}>{$rahkulj_chk_row['nimi']}</option>";
+            }
+
+            echo "</select>";
+          }
+          elseif (strtolower(mysql_field_name($result, $i)) == 'pakkaus') {
+            $query = "SELECT pakkaus, pakkauskuvaus, tunnus
+                      FROM pakkaus
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      ORDER BY pakkaus, pakkauskuvaus";
+            $pakkaus_chk_res = pupe_query($query);
+
+            echo "<br><select name='haku[{$i}]'>";
+            echo "<option value=''>", t("Kaikki pakkaukset"), "</option>";
+
+            while ($pakkaus_chk_row = mysql_fetch_assoc($pakkaus_chk_res)) {
+              $sel = (isset($haku[$i]) and $haku[$i] == "@".$pakkaus_chk_row['tunnus']) ? ' selected' : '';
+
+              echo "<option value='@{$pakkaus_chk_row['tunnus']}'{$sel}>{$pakkaus_chk_row['pakkaus']} - {$pakkaus_chk_row['pakkauskuvaus']}</option>";
+            }
+
+            echo "</select>";
+          }
         }
         elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
           // jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
@@ -1888,6 +1936,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     //Haetaan tietokantasarakkeen nimialias
     $al_nimi   = mysql_field_name($result, $i);
+    $al_row    = array();
 
     $query = "SELECT *
               FROM avainsana
@@ -1993,7 +2042,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $infolinkki = "";
 
       // Jos rivilt‰ lˆytyy selitetark_5 niin piirret‰‰n otsikon per‰‰n tooltip-kysymysmerkki
-      if ($al_row['selitetark_5'] != '') {
+      if (!empty($al_row) and $al_row['selitetark_5'] != '') {
         $siistiselite = str_replace('.', '_', $al_row['selite']);
         $infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 

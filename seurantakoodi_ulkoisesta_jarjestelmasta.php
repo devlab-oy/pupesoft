@@ -103,6 +103,8 @@ if ($handle = opendir($path)) {
 
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
 
+        pupesoft_log('outbound_delivery', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
         // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan

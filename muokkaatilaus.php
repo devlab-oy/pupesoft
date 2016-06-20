@@ -927,12 +927,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $laitelisa = '';
 
     if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-      $laitelisa = " or laite.sarjanro like '%{$etsi}%' ";
+      $laitelisa = " or laite.sarjanro like '%{$etsi}%'
+                     or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
+                     or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'";
     }
 
-    $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
-               or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'
-               or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
+    $haku .= " or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
                $laitelisa) ";
   }
 
@@ -1704,7 +1704,7 @@ elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
   $miinus = 4;
 }
 elseif ($toim == "TARJOUS") {
-  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
+  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde lasku.viesti tilausviite, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
             if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">".t("Voimassa")."</font>', '<font class=\"red\">".t("Er‰‰ntynyt")."</font>') voimassa,
             DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
             if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1738,7 +1738,7 @@ elseif ($toim == "TARJOUS") {
   $miinus = 6;
 }
 elseif ($toim == "TARJOUSSUPER") {
-  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
+  $query = "SELECT DISTINCT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $asiakasstring asiakas, $seuranta $kohde lasku.viesti tilausviite, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
             if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">".t("Voimassa")."</font>', '<font class=\"red\">".t("Er‰‰ntynyt")."</font>') voimassa,
             DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
             if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
@@ -1925,9 +1925,14 @@ elseif ($toim == 'PROJEKTI') {
 }
 elseif ($toim == 'YLLAPITO') {
   $laitejoini = '';
+  $laiteselecti = '';
 
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-    $laitejoini = " LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
+    $laiteselecti = " group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sarjanumero,
+                      group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') vasteaika, ";
+
+    $laitejoini = " JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                    LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
                     LEFT JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus ";
   }
 
@@ -1937,8 +1942,7 @@ elseif ($toim == 'YLLAPITO') {
             lasku.luontiaika,
             if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
             concat_ws('###', sopimus_alkupvm, sopimus_loppupvm) sopimuspvm,
-            group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto1 separator '<br>') sarjanumero,
-            group_concat(distinct tilausrivin_lisatiedot.sopimuksen_lisatieto2 separator '<br>') vasteaika,
+            {$laiteselecti}
             lasku.alatila,
             lasku.tila,
             lasku.tunnus,
@@ -1949,7 +1953,6 @@ elseif ($toim == 'YLLAPITO') {
             laskun_lisatiedot.sopimus_numero
             FROM lasku use index (tila_index)
             JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-            JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio = lasku.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
             LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
             LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
@@ -1976,7 +1979,7 @@ elseif ($toim == 'YLLAPITO') {
     $sumrow = mysql_fetch_assoc($sumresult);
   }
 
-  $miinus = 7;
+  $miinus = 8;
 }
 elseif ($toim == 'KESKEN') {
   $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
@@ -2618,6 +2621,10 @@ if (mysql_num_rows($result) != 0) {
           $sarjanumerotrivi = mysql_fetch_assoc($res);
 
           echo "<td class='$class' valign='top'>{$sarjanumerotrivi['sarjanumerot']}</td>";
+        }
+        elseif ($whiletoim == "YLLAPITO" and $fieldname == "asiakas") {
+          list($_ytunnus, $_nimi) = explode('<br>', $row["asiakas"]);
+          echo "<td class='$class' valign='top'>",tarkistahetu($_ytunnus),"<br>{$_nimi}","</td>";
         }
         else {
           echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";

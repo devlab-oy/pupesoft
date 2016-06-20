@@ -289,6 +289,7 @@ function hae_asiakasalet($request) {
       $laskurow["maa"] = $request['asiakas']["maa"];
       $laskurow['toim_ovttunnus'] = $request['asiakas']["toim_ovttunnus"];
       $laskurow['liitostunnus'] = $request['valittu_asiakas'];
+      $laskurow['yhtio_toimipaikka'] = $request['asiakas']['toimipaikka'];
 
       $alehinnat = alehinta($laskurow, $tuote, 1, '', '', '', $palautettavat_kentat, '', '');
     }

@@ -260,6 +260,19 @@ if ($tee == 'S') {
   $tilioterivilaskuri = 1;
   $tilioterivimaara  = mysql_num_rows($tiliotedataresult);
 
+  $tiliotekuitti_maksupvm = '';
+  $tiliotekuitti_arvopvm = '';
+  $tiliotekuitti_saajan_nimi = '';
+  $tiliotekuitti_saajan_tilinumero = '';
+  $tiliotekuitti_viite = '';
+  $tiliotekuitti_arkistointitunnus = '';
+  $tiliotekuitti_kirjausselite = '';
+  $tiliotekuitti_sisainen_viite = '';
+  $tiliotekuitti_rahamaara = '';
+  $tiliotekuitti_maksajan_tilinumero = '';
+
+  $tiliotekuitti_oikeu = tarkista_oikeus('tilauskasittely/tulosta_tiliotekuitti.php');
+
   if ($tilioterivimaara == 0) {
     echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
     $tee = '';

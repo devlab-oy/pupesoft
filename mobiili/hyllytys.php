@@ -57,7 +57,8 @@ $query = "SELECT
               AND toimi.tunnus                            = tuotteen_toimittajat.liitostunnus)
           LEFT JOIN tilausrivin_lisatiedot
             ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio
-              AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+              AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
           JOIN tuotepaikat
             ON (tuotepaikat.yhtio = lasku.yhtio
               AND tuotepaikat.tuoteno                     = tilausrivi.tuoteno

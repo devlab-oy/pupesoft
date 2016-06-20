@@ -9,20 +9,19 @@
 
 if (!function_exists("log_message")) {
   function log_message($message) {
-    $now = date('d.m.y H:i:s');
-    $message = utf8_encode($message);
-
-    error_log("{$now}: {$message}\n", 3, '/tmp/magento_order_log.txt');
+    pupesoft_log('magento_orders', $message);
   }
 }
 
-if (!isset($magento_api_toimituskuittaus_viestit) or count($magento_api_toimituskuittaus_viestit) == 0) {
+if (empty($magento_api_toimituskuittaus_viestit)) {
   $magento_api_toimituskuittaus_viestit = array();
 }
 
 $default_kuittaukset = array(
   "nouto"     => "Tilauksesi on noudettavissa.",
-  "toimitus"  => "Your order is shipped!");
+  "toimitus"  => "Your order is shipped!"
+);
+
 $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
 
 $magento_api_ord   = (int) $magento_api_ord;

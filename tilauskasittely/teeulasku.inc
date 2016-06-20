@@ -192,11 +192,11 @@ $lisa_comments   = "";
 $lisa_viestit  = "";
 
 // Jos kyseessä on factoring niin laitetaan laskun kommenttiin talteen factoring siirtoteksti
-if (strtoupper($mehtorow["factoring"]) != "") {
+if (isset($mehtorow["factoring_id"])) {
   $query = "SELECT *
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
-            and factoringyhtio = '$mehtorow[factoring]'
+            and tunnus         = '$mehtorow[factoring_id]'
             and valkoodi       = '$lasrow[valkoodi]'";
   $fres = pupe_query($query);
 

@@ -574,6 +574,7 @@ if (!function_exists('finvoice_rivi')) {
       xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['kpl'], 2), $tootfinvoice);
       xml_add("OrderedQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['tilkpl'], 2), $tootfinvoice);
       xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
+      xml_add("UnitPriceVatIncludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta_verollinen'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
 
       if ($tilrow['tilaajanrivinro'] != 0) {
         xml_add("RowIdentifier", $tilrow['tilaajanrivinro'], $tootfinvoice, 35);
@@ -700,7 +701,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 
       fputs($tootfinvoice, "<EpiBeneficiaryPartyDetails>\r\n");
 
-      if ($masrow["factoring"] != "") {
+      if (isset($masrow["factoring_id"])) {
         xml_add("EpiNameAddressDetails", $pankkitiedot["pankkinimi1"], $tootfinvoice, 35, 2);
       }
       else {

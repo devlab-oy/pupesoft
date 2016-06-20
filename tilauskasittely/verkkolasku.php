@@ -24,8 +24,110 @@
 // Tämä vaatii paljon muistia
 ini_set("memory_limit", "5G");
 
-// Kutsutaanko CLI:stä
-$php_cli = (php_sapi_name() == 'cli' or isset($editil_cli));
+// Kutsutaanko CLI:stä, jos setataan force_web saadaan aina "ei cli" -versio
+$force_web = (isset($force_web) and $force_web === true);
+$php_cli = ((php_sapi_name() == 'cli' or isset($editil_cli)) and $force_web === false);
+
+if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
+  // Ottaa sisään arrayn jossa keynä 'jaksotettu' ja valuena array laskutunnuksia
+  // Tarkistaa löytyykö tarvittava määrä laskutunnuksia
+  // palauttaa arrayn jossa kaikki ok tunnukset[0] ja virheelliset tunnukset[1]
+  function tarkista_jaksotetut_laskutunnukset($jaksotetut_array) {
+    global $kukarow;
+
+    $hyvat = "";
+    $vialliset = "";
+
+    foreach ($jaksotetut_array as $key => $value) {
+
+      $query = "SELECT count(*) yhteensa
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila != 'D'
+                AND jaksotettu != 0
+                AND jaksotettu = '{$key}'";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+      $tarkastettu_maara = $row['yhteensa'];
+
+      if (count($value) != $tarkastettu_maara) {
+        $vialliset .= implode(',', $value).",";
+      }
+      else {
+        $hyvat .= implode(',', $value).",";
+      }
+    }
+
+    if (!empty($vialliset)) $vialliset = substr($vialliset, 0, -1);
+
+    return array($hyvat, $vialliset);
+  }
+}
+
+if (!function_exists("vlas_dateconv")) {
+  function vlas_dateconv($date) {
+    //kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+    return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
+  }
+}
+
+if (!function_exists("spyconv")) {
+  //tehdään viitteestä SPY standardia eli 20 merkkiä etunollilla
+  function spyconv($spy) {
+    return $spy = sprintf("%020.020s", $spy);
+  }
+}
+
+if (!function_exists("laskunkieli")) {
+  function laskunkieli($liitostunnus, $kieli) {
+    global $kukarow, $yhtiorow;
+
+    $asiakas_apu_query = "SELECT *
+                          FROM asiakas
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND tunnus  = '$liitostunnus'";
+    $asiakas_apu_res = pupe_query($asiakas_apu_query);
+    $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
+
+    if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
+      $laskun_kieli = "SE";
+    }
+    elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
+      $laskun_kieli = "EE";
+    }
+    elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
+      $laskun_kieli = "FI";
+    }
+    else {
+      $laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
+    }
+
+    if ($kieli != "") {
+      $laskun_kieli = trim(strtoupper($kieli));
+    }
+
+    return $laskun_kieli;
+  }
+}
+
+if (!function_exists("pp")) {
+  //pilkut pisteiksi
+  function pp($muuttuja, $round="", $rmax="", $rmin="") {
+    if (strlen($round)>0) {
+      if (strlen($rmax)>0 and $rmax<$round) {
+        $round = $rmax;
+      }
+      if (strlen($rmin)>0 and $rmin>$round) {
+        $round = $rmin;
+      }
+
+      return $muuttuja = number_format($muuttuja, $round, ",", "");
+    }
+    else {
+      return $muuttuja = str_replace(".", ",", $muuttuja);
+    }
+  }
+}
 
 if ($php_cli) {
 
@@ -128,7 +230,6 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 else {
-
   //Nollataan muuttujat
   $tulostettavat       = array();
   $tulostettavat_email = array();
@@ -186,7 +287,7 @@ else {
         }
         else {
 
-          if ($syotetty > $tanaan) {
+          if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] != 'S') {
             //tulevaisuudessa ei voida laskuttaa
             $tulos_ulos .= "<br>\n".t("VIRHE: Syötetty päivämäärä on tulevaisuudessa, ei voida laskuttaa!")."<br>\n<br>\n";
             $tee = "";
@@ -216,73 +317,6 @@ else {
   }
 
   if ($tee == "LASKUTA") {
-
-    if (!function_exists("vlas_dateconv")) {
-      function vlas_dateconv($date) {
-        //kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-        return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
-      }
-    }
-
-    //tehdään viitteestä SPY standardia eli 20 merkkiä etunollilla
-    if (!function_exists("spyconv")) {
-      function spyconv($spy) {
-        return $spy = sprintf("%020.020s", $spy);
-      }
-    }
-
-    if (!function_exists("laskunkieli")) {
-      function laskunkieli($liitostunnus, $kieli) {
-        global $kukarow, $yhtiorow;
-
-        $asiakas_apu_query = "SELECT *
-                              FROM asiakas
-                              WHERE yhtio = '$kukarow[yhtio]'
-                              AND tunnus  = '$liitostunnus'";
-        $asiakas_apu_res = pupe_query($asiakas_apu_query);
-        $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
-
-        if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
-          $laskun_kieli = "SE";
-        }
-        elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
-          $laskun_kieli = "EE";
-        }
-        elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
-          $laskun_kieli = "FI";
-        }
-        else {
-          $laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
-        }
-
-        if ($kieli != "") {
-          $laskun_kieli = trim(strtoupper($kieli));
-        }
-
-        return $laskun_kieli;
-      }
-    }
-
-    //pilkut pisteiksi
-    if (!function_exists("pp")) {
-      function pp($muuttuja, $round="", $rmax="", $rmin="") {
-
-        if (strlen($round)>0) {
-          if (strlen($rmax)>0 and $rmax<$round) {
-            $round = $rmax;
-          }
-          if (strlen($rmin)>0 and $rmin>$round) {
-            $round = $rmin;
-          }
-
-          return $muuttuja = number_format($muuttuja, $round, ",", "");
-        }
-        else {
-          return $muuttuja = str_replace(".", ",", $muuttuja);
-        }
-      }
-    }
-
     //Tiedostojen polut ja nimet
     //keksitään uudelle failille joku varmasti uniikki nimi:
     $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
@@ -446,7 +480,6 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-
     if (isset($laskutettavat) and $laskutettavat != "") {
       // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
@@ -466,7 +499,9 @@ else {
 
     // saldovirhe_esto_laskutus-parametri 'H', jolla voidaan estää tilauksen laskutus, jos tilauksen yhdeltäkin tuotteelta saldo menee miinukselle
     // kehahinvirhe_esto_laskutus-parametri 'N', Estetaan laskutus mikali keskihankintahinta on 0.00 tai tuotteen kate on negatiivinen
-    if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N') {
+    // Eutukäteeen lmaksettu verkkokauppatilaus ($editil_cli) laskutetaan vaikka saldo ei ihan riittäisikään
+    // Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+    if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'H' or $yhtiorow['kehahinvirhe_esto_laskutus'] == 'N' or $yhtiorow['laskutus_tulevaisuuteen'] == 'S')) {
 
       $query = "SELECT
                 tilausrivi.tuoteno,
@@ -488,6 +523,13 @@ else {
       $lasku_chk_res = pupe_query($query);
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
+
+        # Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+        if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
+          $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
+          $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";
+        }
+
         // Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta
         if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
@@ -968,10 +1010,34 @@ else {
     if (mysql_num_rows($res) > 0) {
 
       $tunnukset = "";
+      $jaksotetut_tunnukset = "";
+      $jaksotetut_by_jaksotettu = array();
 
       // otetaan tunnukset talteen
       while ($row = mysql_fetch_assoc($res)) {
-        $tunnukset .= "'$row[tunnus]',";
+        if ($row['jaksotettu'] > 0) {
+          $jaksotetut_tunnukset .= "'$row[tunnus]',";
+          $jaksotetut_by_jaksotettu[$row['jaksotettu']][] = $row['tunnus'];
+        }
+        else {
+          $tunnukset .= "'$row[tunnus]',";
+        }
+      }
+
+      // tarkistetaan jaksotetut tunnukset
+      if (!empty($jaksotetut_tunnukset)) {
+        list($ok_tunnukset, $puuttuvat_tunnukset) = tarkista_jaksotetut_laskutunnukset($jaksotetut_by_jaksotettu);
+
+        // ohitetaan virheellisen jaksotettujen laskujen käsittely
+        if (!empty($puuttuvat_tunnukset)) {
+          $tulos_ulos .= "<br>\n".t("HUOM: Laskuta kaikki maksusopimustilauksen toimitukset kerralla. Valituista laskuista ei käsitelty seuraavia").": {$puuttuvat_tunnukset}<br>\n";
+          $lasklisa .= " and lasku.tunnus NOT IN ({$puuttuvat_tunnukset}) ";
+        }
+
+        // lisätään oikeelliset jaksotetut laskut tunnuksiin
+        if (!empty($ok_tunnukset)) {
+          $tunnukset .= $ok_tunnukset;
+        }
       }
 
       // vika pilkku pois
@@ -1753,6 +1819,18 @@ else {
         }
       }
 
+      //haetaan kaikki laskutettavat tilaukset uudestaan
+      $query = "SELECT lasku.*
+                FROM lasku
+                {$lasklisa_eikateiset}
+                WHERE lasku.yhtio  = '$kukarow[yhtio]'
+                and lasku.tila     = 'L'
+                and lasku.alatila  = 'D'
+                and lasku.viite    = ''
+                and lasku.chn     != '999'
+                $lasklisa";
+      $res = pupe_query($query);
+
       // laskutetaan kaikki tilaukset (siis tehään kaikki tarvittava matikka)
       // rullataan eka query alkuun
       if (mysql_num_rows($res) != 0) {
@@ -1864,27 +1942,31 @@ else {
           }
 
           // Tutkitaan onko ketju factorinkia
-          $query  = "SELECT factoring.sopimusnumero, maksuehto.factoring, factoring.viitetyyppi
-                     FROM lasku
-                     JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring!=''
-                     JOIN factoring ON maksuehto.yhtio=factoring.yhtio and maksuehto.factoring=factoring.factoringyhtio and lasku.valkoodi=factoring.valkoodi
-                     WHERE lasku.yhtio = '$kukarow[yhtio]'
-                     and lasku.tunnus  in ($tunnukset)
-                     GROUP BY factoring.sopimusnumero, maksuehto.factoring";
+          // Ketju on groupattu maksuehdon mukaan, joten meillä ei ole kun yhden maksuehdon laskuja
+          $query = "SELECT DISTINCT factoring.sopimusnumero, factoring.factoringyhtio, factoring.viitetyyppi
+                    FROM lasku
+                    JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+                      and maksuehto.tunnus = lasku.maksuehto
+                      and maksuehto.factoring_id is not null)
+                    JOIN factoring ON (factoring.yhtio = maksuehto.yhtio
+                      and factoring.tunnus = maksuehto.factoring_id
+                      and factoring.valkoodi = lasku.valkoodi)
+                    WHERE lasku.yhtio = '$kukarow[yhtio]'
+                    and lasku.tunnus in ($tunnukset)";
           $fres = pupe_query($query);
           $frow = mysql_fetch_assoc($fres);
 
           // Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
-          if ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'NORDEA' and $frow["viitetyyppi"] == '') {
+          if ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'NORDEA' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'COLLECTOR' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'COLLECTOR' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'OKO' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'OKO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."001".sprintf('%09d', $lasno);
           }
-          elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."1".sprintf('%09d', $lasno);
           }
           else {
@@ -2036,11 +2118,11 @@ else {
           }
 
           //Haetaan factoringsopimuksen tiedot
-          if ($masrow["factoring"] != '') {
+          if (isset($masrow["factoring_id"])) {
             $query = "SELECT *
                       FROM factoring
                       WHERE yhtio        = '$kukarow[yhtio]'
-                      and factoringyhtio = '$masrow[factoring]'
+                      and tunnus         = '$masrow[factoring_id]'
                       and valkoodi       = '$lasrow[valkoodi]'";
             $fres = pupe_query($query);
             $frow = mysql_fetch_assoc($fres);
@@ -2052,7 +2134,7 @@ else {
           $pankkitiedot = array();
 
           //Laitetaan pankkiyhteystiedot kuntoon
-          if ($masrow["factoring"] != "") {
+          if (isset($masrow["factoring_id"])) {
             $pankkitiedot["pankkinimi1"]  = $frow["pankkinimi1"];
             $pankkitiedot["pankkitili1"]  = $frow["pankkitili1"];
             $pankkitiedot["pankkiiban1"]  = $frow["pankkiiban1"];
@@ -2466,10 +2548,8 @@ else {
 
               // Otetaan yhteensäkommentti pois jos summataan rivejä
               if ($rivigrouppaus) {
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-                $tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+                // Trimmataan ja otetaan "yhteensäkommentti" pois
+                $tilrow["kommentti"] = trim(poista_rivin_yhteensakommentti($tilrow["kommentti"]));
               }
 
               // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä
@@ -2557,7 +2637,14 @@ else {
 
               // Yksikköhinta on laskulla aina veroton
               if ($yhtiorow["alv_kasittely"] == '') {
+                // Tuotteiden myyntihinnat sisältävät arvonlisäveron
                 $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
+                $tilrow["hinta_verollinen"] = $tilrow["hinta"];
+              }
+              else {
+                // Tuotteiden myyntihinnat ovat arvonlisäverottomia
+                $tilrow["hinta"] = $tilrow["hinta"];
+                $tilrow["hinta_verollinen"] = $tilrow["hinta"] * (1 + $tilrow["alv"] / 100);
               }
 
               // Veron määrä
@@ -2673,7 +2760,7 @@ else {
           }
           elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
             if ($silent == "" or $silent == "VIENTI") {
-              if ($lasrow["chn"] == "666") {
+              if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0) {
                 $tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
               }
               elseif ($lasrow["chn"] == "667") {
@@ -2684,8 +2771,8 @@ else {
               }
             }
 
-            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
-            if ($lasrow["chn"] == "666") {
+            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+            if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0) {
               $tulostettavat_email[] = $lasrow["tunnus"];
             }
 
@@ -3019,7 +3106,7 @@ else {
 
       if ($yhtiorow['lasku_tulostin'] == -88 or (isset($valittu_tulostin) and $valittu_tulostin == "-88")) {
         // Tämä näytetään vain kun laskutetaan käsin.
-        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
+        if (strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") !== FALSE) {
           js_openFormInNewWindow();
 
           foreach ($tulostettavat as $lasku) {
@@ -3296,7 +3383,7 @@ else {
                 return false;
               }
             }
-            if (ero < 0) {
+            if (ero < 0 && '{$yhtiorow['laskutus_tulevaisuuteen']}' != 'S') {
               var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
               alert(msg);
 
@@ -3329,7 +3416,7 @@ else {
                       (lasku.laskutusvkopv = -3 and curdate() = '$keski_pv') or
                       (lasku.laskutusvkopv = -4 and curdate() in ('$keski_pv','$vika_pv')) or
                       (lasku.laskutusvkopv = -5 and curdate() in ('$eka_pv','$keski_pv'))), 1, 0)) paiva,
-              sum(if (maksuehto.factoring != '', 1, 0)) factoroitavat,
+              sum(if (maksuehto.factoring_id is not null, 1, 0)) factoroitavat,
               count(lasku.tunnus) kaikki
               from lasku
               LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus

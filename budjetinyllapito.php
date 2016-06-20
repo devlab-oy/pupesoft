@@ -289,8 +289,14 @@ else {
     // millä tasolla ollaan (1,2,3,4,5,6)
     $tasoluku = strlen($tasorow["taso"]);
 
-    // tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
-    $apusort = str_pad($tasorow["taso"], 20, "Z");
+    // tasonimi talteen (rightpäddätään Z:lla tai Ö:llä, niin saadaan oikeaan järjestykseen)
+    if (PUPE_UNICODE) {
+      $apusort = str_pad($tasorow["taso"], 20, "Z");
+    }
+    else {
+      $apusort = str_pad($tasorow["taso"], 20, "Ö");
+    }
+
     $tasonimi[$apusort] = $tasorow["nimi"];
 
     // pilkotaan taso osiin
@@ -424,7 +430,13 @@ else {
     // loopataan tasot läpi
     foreach ($tasonimi as $key_c => $value) {
 
-      $key = str_replace("Z", "", $key_c); // Ö-kirjaimet pois
+      // Päddäykset pois
+      if (PUPE_UNICODE) {
+        $key = str_replace("Z", "", $key_c); // Z-kirjaimet pois
+      }
+      else {
+        $key = str_replace("Ö", "", $key_c); // Ö-kirjaimet pois
+      }
 
       // tulostaan rivi vain jos se kuuluu rajaukseen
       if (strlen($key) <= $rtaso or $rtaso == "TILI") {

@@ -72,7 +72,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
       }
     }
 
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&merahti=$toitarow[merahti]&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl={$dgdkpl}{$linkkilisa}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}rahtikirja.php?toim=lisaa&id=dummy&jv=$jv&komento=$komento&merahti=$toitarow[merahti]&mista=rahtikirja-tulostus.php&toimitustapa_varasto=$toimitustapa_varasto&valittu_rakiroslapp_tulostin={$valittu_rakiroslapp_tulostin}&rakirsyotto_dgd_tulostin={$rakirsyotto_dgd_tulostin}&dgdkpl={$dgdkpl}{$linkkilisa}&excel_koontilahete={$excel_koontilahete}'>";
     exit;
   }
 
@@ -676,6 +676,9 @@ if ($tee == 'tulosta') {
         $lavatyht   += $pak["lavametri"];
       }
 
+      // $kolliyht yliajetaan jossain requiressa, joten otetaan tässä kohtaa arvo talteen ainakin osoitelappujen tulostusta varten
+      $_kolliyht = $kollityht;
+
       // Kuljetusohjeet
       $query = "SELECT trim(group_concat(DISTINCT viesti SEPARATOR ' ')) viesti
                 FROM rahtikirjat
@@ -1030,6 +1033,12 @@ if ($tee == 'tulosta') {
         print_pdf_dgd($params_dgd);
       }
 
+      // Palautetaan $kolliyht-muuttujalle arvo, jota ei ole yliajettu requireissa, jotta saadaan tulostettua osoitelaput.
+      $kollityht = $_kolliyht;
+
+      // Kun ollaan koontierätulostuksessa ja unifaun on käytössä, ei tulosteta osoitelappuja.
+      if ($_onko_unifaun && $toitarow['tulostustapa'] == 'L') $kollityht = 0;
+
       // Tulostetaan osoitelappu
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
         if ($valittu_rakiroslapp_tulostin != "" and $oslapp != '' and $kollityht > 0) {
@@ -1054,7 +1063,8 @@ if ($tee == 'tulosta') {
           if ($toitarow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
-          elseif ($toitarow['osoitelappu'] == 'hornbach') {
+          // Hornbach-tyyppisiä osoitelappuja ei tulosteta, kun ollaan tulostamassa koontirahtikirjaa.
+          elseif ($toitarow['osoitelappu'] == 'hornbach' && !in_array($toitarow['tulostustapa'], array('K', 'L'))) {
             require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
           }
           elseif ($toimitustaparow['osoitelappu'] == 'oslap_mg' and $yhtiorow['kerayserat'] == 'K') {
@@ -1105,6 +1115,20 @@ if ($tee == 'tulosta') {
       }
 
       if (!isset($nayta_pdf) and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) echo "<br>";
+    }
+
+    if (!empty($excel_koontilahete) && !empty($otunnukset)) {
+      $_otunnukset = explode(',', $otunnukset);
+
+      switch ($excel_koontilahete) {
+      case 'Y':
+        laheta_excel_koontilahete($_otunnukset, $toitarow);
+        break;
+      case 'E':
+        foreach ($_otunnukset as $_otunnus) {
+          laheta_excel_koontilahete(array($_otunnus), $toitarow);
+        }
+      }
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
@@ -1407,6 +1431,17 @@ if ($tee == '') {
     echo "<option value='-88'>".t("PDF Ruudulle")."</option>";
     echo "</select>&nbsp;", t("Kpl"), ": <input type='text' size='4' name='dgdkpl' value='{$dgdkpl}'></td></tr>";
 
+    // Excel koontilähetteen valinta
+    echo "<tr><th><label for='excel_koontilahete'>";
+    echo t('Excel-lähete');
+    echo "</label></th><td><select id='excel_koontilahete' name='excel_koontilahete'><option value=''>";
+    echo t('Ei lähetetä');
+    echo "</option><option value='Y'>";
+    echo t('Sähköpostiin');
+    echo "</option><option value='E'>";
+    echo t("Sähköpostiin tilauksittain");
+    echo "</option></select></td></tr>";
+
     echo "</table>";
     echo "</td>";
 
@@ -1491,4 +1526,133 @@ if ($tee == '') {
   }
 
   require "inc/footer.inc";
+}
+
+function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
+  $otunnukset = (array) $otunnukset;
+
+  if (empty($otunnukset)) return false;
+
+  require_once 'inc/pupeExcel.inc';
+
+  global $kukarow;
+
+  $_otunnukset = implode(',', $otunnukset);
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+                   lasku.nimi,
+                   lasku.toim_nimi,
+                   asiakaskommentti.kommentti,
+                   tilausrivi.tuoteno,
+                   tilausrivi.tilkpl,
+                   tuote.eankoodi,
+                   tuote.myynti_era,
+                   IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.keratty <> ''
+            JOIN tuote
+              ON tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno = tilausrivi.tuoteno
+            JOIN asiakas
+              ON asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus = lasku.liitostunnus
+            LEFT JOIN asiakaskommentti
+              ON asiakaskommentti.yhtio = tilausrivi.yhtio
+              AND asiakaskommentti.ytunnus = lasku.ytunnus
+              AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+            LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
+              ON avainsana_nimitys.yhtio = tuote.yhtio
+              AND avainsana_nimitys.kieli = asiakas.kieli
+              AND avainsana_nimitys.laji = 'nimitys'
+              AND avainsana_nimitys.tuoteno = tuote.tuoteno
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tila = 'L'
+              AND lasku.alatila = 'B'
+              AND lasku.tunnus IN ($_otunnukset)";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) return false;
+
+  $laskurow = mysql_fetch_assoc($result);
+
+  $worksheet   = new pupeExcel();
+  $format_bold = array("bold" => true);
+  $excelrivi   = 0;
+  $excelsarake = 0;
+
+  if (count($otunnukset) > 1) {
+    $header_nimi = $toimitustaparow["toim_postitp"];
+    $subject     = t("Excel-koontilähete");
+    $filename    = "Koontilahete.xlsx";
+  }
+  else {
+    $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
+    $subject     = t("Excel-lähete");
+    $filename    = "Lahete.xlsx";
+  }
+
+  if (!empty($header_nimi)) {
+    $worksheet->writeString($excelrivi,
+                            $excelsarake,
+                            "Deliveries to {$header_nimi}",
+                            $format_bold);
+
+    for ($i=0; $i < 3; $i++) $excelrivi++;
+  }
+
+  $headerit = array(
+    'Customer order number',
+    'Company Product number',
+    'Customer Product number',
+    'EAN Code',
+    'Product Description',
+    'Pack',
+    'QTY'
+  );
+
+  foreach ($headerit as $header) {
+    $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
+    $excelsarake++;
+  }
+
+  mysql_data_seek($result, 0);
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $excelsarake = 0;
+    $fields = array(
+      $row['asiakkaan_tilausnumero'],
+      $row['tuoteno'],
+      $row['kommentti'],
+      $row['eankoodi'],
+      $row['nimitys'],
+      $row['myynti_era'],
+      $row['tilkpl']
+    );
+
+    $excelrivi++;
+
+    foreach ($fields as $field) {
+      $worksheet->writeString($excelrivi, $excelsarake, $field);
+      $excelsarake++;
+    }
+  }
+
+  $excelnimi = $worksheet->close();
+
+  $email_params = array(
+    "to"      => $kukarow['eposti'],
+    "subject" => $subject,
+    "attachements" => array(
+      0 => array(
+        "filename"    => "/tmp/{$excelnimi}",
+        "newfilename" => $filename,
+        "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      )
+    )
+  );
+
+  return pupesoft_sahkoposti($email_params);
 }

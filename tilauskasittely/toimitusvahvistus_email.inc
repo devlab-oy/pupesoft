@@ -15,14 +15,51 @@ if (!empty($laskurow['asiakas_email'])) {
 
   $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", "", " and avainsana.selite = '{$laskurow['toimitusvahvistus']}'", "", "", "selitetark_2");
 
-  if ($_toimvahvistus == "eihintaa") {
+if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_row['asiakas_email'] == '' or $tunnukset == '' or $otunnukset == '') {
+  $toimitusvahvistus_email_lahetys = false;
+}
+
+if ($toimitusvahvistus_email_lahetys) {
+  $_toimvahvistus = mysql_fetch_assoc(t_avainsana("TOIMVAHVISTUS", $kieli, " and selite = 'toimitusvahvistus_email.inc' "));
+
+  if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
     $_hinta = "";
   }
   else {
     $_hinta = " ".t("Hinta", $kieli);
   }
 
-  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n";
+  $kenelle_emailataan = array();
+
+  if (!empty($_toimvahvistus['selitetark_3'])) {
+    // Haetaan myyjän sähköpostiosoite
+    $myyjaquery = "SELECT DISTINCT(kuka.eposti) myyjan_email
+                   FROM lasku
+                   JOIN kuka ON (lasku.yhtio = kuka.yhtio AND lasku.myyja = kuka.tunnus)
+                   WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                   AND lasku.tunnus IN ({$otunnukset})
+                   AND lasku.myyja != ''
+                   AND kuka.eposti != ''
+                   LIMIT 1";
+    $myyjaresult = pupe_query($myyjaquery);
+    $myyjarow = mysql_fetch_assoc($myyjaresult);
+
+    if ($_toimvahvistus['selitetark_3'] == 'M') {
+      // Email lähtee vain myyjälle
+      $kenelle_emailataan[] = $myyjarow['myyjan_email'];
+    }
+    elseif ($_toimvahvistus['selitetark_3'] == 'K') {
+      // Email lähtee myyjälle ja asiakkaalle
+      $kenelle_emailataan[] = $myyjarow['myyjan_email'];
+      $kenelle_emailataan[] = $rakir_row['asiakas_email'];
+    }
+  }
+  else {
+    // Email lähtee vain asiakkaalle
+    $kenelle_emailataan[] = $rakir_row['asiakas_email'];
+  }
+
+  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
 
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -46,7 +83,7 @@ if (!empty($laskurow['asiakas_email'])) {
       $_hinta = "{$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}";
     }
 
-    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n";
+    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n\n";
   }
 
   $body .= "\n";
@@ -57,10 +94,10 @@ if (!empty($laskurow['asiakas_email'])) {
             AND yhtio = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
-  $body .= t("Seurantakoodit", $kieli).":\n";
+  $body .= t("Seurantakoodit", $kieli).":\n\n";
 
   while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n";
+    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
   }
 
   $body .= "\n";
@@ -74,16 +111,18 @@ if (!empty($laskurow['asiakas_email'])) {
   $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
 
-  // Sähköpostin lähetykseen parametrit
-  $parametri = array(
-    "to" => $laskurow['asiakas_email'],
-    "cc" => "",
-    "subject" => t("Toimitusvahvistus", $kieli),
-    "ctype" => "text",
-    "body" => $body
-  );
+  foreach ($kenelle_emailataan as $key => $email_kuka) {
+    // Sähköpostin lähetykseen parametrit
+    $parametri = array(
+      "to"      => $email_kuka,
+      "cc"      => "",
+      "subject" => t("Toimitusvahvistus", $kieli),
+      "ctype"   => "text",
+      "body"    => $body,
+    );
 
-  if (pupesoft_sahkoposti($parametri)) {
-    echo t("Sähköpostin lähetys onnistui").": {$laskurow['asiakas_email']}<br />";
+    if (pupesoft_sahkoposti($parametri)) {
+      echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+    }    
   }
 }

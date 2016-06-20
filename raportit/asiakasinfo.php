@@ -235,15 +235,15 @@ if ($asiakasid > 0) {
   }
 
   echo "<table><tr>";
-  echo "<th valign='top'>".t("Ytunnus")."</th>";
-  echo "<th valign='top'>".t("Asiakasnumero")."</th>";
-  echo "<th valign='top'>".t("Nimi")."<br>".t("Osoite")."</th>";
-  echo "<th valign='top'>".t("Toimitusasiakas")."<br>".t("Toimitusosoite")."</th>";
+  echo "<th class='ptop'>".t("Ytunnus")."</th>";
+  echo "<th class='ptop'>".t("Asiakasnumero")."</th>";
+  echo "<th class='ptop'>".t("Nimi")."<br>".t("Osoite")."</th>";
+  echo "<th class='ptop'>".t("Toimitusasiakas")."<br>".t("Toimitusosoite")."</th>";
   echo "</tr><tr>";
-  echo "<td valign='top'>$asiakasrow[ytunnus]</td>";
-  echo "<td valign='top'>$asiakasrow[asiakasnro]</td>";
-  echo "<td valign='top'>$asiakasrow[nimi]<br>$asiakasrow[osoite]<br>$asiakasrow[postino] $asiakasrow[postitp]</td>";
-  echo "<td valign='top'>$asiakasrow[toim_nimi]<br>$asiakasrow[toim_osoite]<br>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td>";
+  echo "<td class='ptop'>$asiakasrow[ytunnus]</td>";
+  echo "<td class='ptop'>$asiakasrow[asiakasnro]</td>";
+  echo "<td class='ptop'>$asiakasrow[nimi]<br>$asiakasrow[osoite]<br>$asiakasrow[postino] $asiakasrow[postitp]</td>";
+  echo "<td class='ptop'>$asiakasrow[toim_nimi]<br>$asiakasrow[toim_osoite]<br>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td>";
   echo "</tr></table><br><br>";
 
   $maxcol  = 12; // montako columnia n‰yttˆ on
@@ -1051,13 +1051,13 @@ if ($asiakasid > 0) {
 
     // piirret‰‰n ryhmist‰ ja hinnoista taulukko..
     echo "<table><tr>
-        <td valign='top' class='back'>$asale</td>
+        <td class='ptop back'>$asale</td>
         <td class='back'></td>
-        <td valign='top' class='back'>$aletaulu</td>
+        <td class='ptop back'>$aletaulu</td>
         <td class='back'></td>
-        <td valign='top' class='back'>$ashin</td>
+        <td class='ptop back'>$ashin</td>
         <td class='back'></td>
-        <td valign='top' class='back'>$yhdistetty</td>
+        <td class='ptop back'>$yhdistetty</td>
       </tr></table><br>";
 
     if (isset($worksheet) and $excelrivi > 1) {

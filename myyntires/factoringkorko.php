@@ -50,7 +50,7 @@ if (isset($tapa) and $tapa == 'paalle') {
               FROM suoritus
               JOIN yriti ON (suoritus.yhtio = yriti.yhtio
                 AND suoritus.tilino  = yriti.tilino
-                AND yriti.factoring != '')
+                AND yriti.factoring_id is not null)
               WHERE suoritus.yhtio   = '$kukarow[yhtio]'
               AND suoritus.kohdpvm   = '0000-00-00'
               AND suoritus.ltunnus   > 0
@@ -151,7 +151,7 @@ if (isset($tapa) and $tapa == 'pois') {
               and suoritus.viite    like '$viite%'
               and suoritus.yhtio    = yriti.yhtio
               and suoritus.tilino   = yriti.tilino
-              and yriti.factoring  != ''
+              and yriti.factoring_id is not null
               and tiliointi.yhtio   = suoritus.yhtio
               and tiliointi.selite  = '".t("Kohdistettiin korkoihin")."'
               and tiliointi.tunnus  = suoritus.ltunnus";

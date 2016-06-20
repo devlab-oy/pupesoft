@@ -370,7 +370,18 @@ elseif ($tee != "") {
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$otun'
                 and tila    = 'L'
+                and jaksotettu = 0
                 and alatila NOT IN ('X', 'J')";
+      $result = pupe_query($query);
+
+      //päivitetään alatila vain jos tilauksella on maksupositioita
+      $query = "UPDATE lasku SET
+                alatila = 'J'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                and tunnus  = '{$otun}'
+                and tila    = 'L'
+                and jaksotettu > 0
+                and alatila NOT IN ('X', 'J', 'D')";
       $result = pupe_query($query);
     }
 
@@ -849,7 +860,7 @@ elseif ($tee == '') {
     $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}'))";
   }
   else {
-    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E')";
+    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E','J')";
   }
 
   if ($toim == "TYOMAARAYS") {
@@ -876,6 +887,7 @@ elseif ($tee == '') {
             lasku.maksuehto,
             lasku.lisattava_era,
             lasku.vahennettava_era,
+            lasku.jaksotettu,
             lasku.ketjutus,
             {$selectlisa}
             lasku.sisamaan_kuljetus,
@@ -889,7 +901,7 @@ elseif ($tee == '') {
             {$tilaehto}
             AND lasku.vienti  in ('K','E')
             {$haku}
-            ORDER by 5,6,7,8,9,10,11,12,13,14";
+            ORDER by 5,6,7,8,9,10,11,12,13,14,15";
   $tilre = pupe_query($query);
 
   echo "<br><br>";
@@ -917,6 +929,7 @@ elseif ($tee == '') {
     $maksuehto      = '';
     $lisattava_era    = '';
     $vahennettava_era  = '';
+    $jaksotettu = '';
 
     while ($tilrow = mysql_fetch_assoc($tilre)) {
       $query = "SELECT sum(if(varattu>0,1,0))  veloitus, sum(if(varattu<0,1,0)) hyvitys
@@ -926,7 +939,7 @@ elseif ($tee == '') {
       $hyvre = pupe_query($query);
       $hyvrow = mysql_fetch_assoc($hyvre);
 
-      if ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"]) {
+      if (($tilrow['jaksotettu'] != 0 and $jaksotettu == $tilrow['jaksotettu']) or ($tilrow['jaksotettu'] == 0 and $ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"])) {
         $tunnukset .= $tilrow["tilaus"].",";
         $lask++;
         echo "</tr>\n";
@@ -955,7 +968,15 @@ elseif ($tee == '') {
       for ($i=0; $i < mysql_num_fields($tilre)-18; $i++) {
         $fieldname = mysql_field_name($tilre, $i);
 
-        echo "<td>$tilrow[$fieldname]</td>";
+        echo "<td>";
+
+        if ($fieldname == 'laadittu') {
+          echo tv1dateconv($tilrow[$fieldname], "PITKA");
+        }
+        else {
+          echo $tilrow[$fieldname];
+        }
+        echo "</td>";
       }
 
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
@@ -969,7 +990,7 @@ elseif ($tee == '') {
       }
       echo "<td>$teksti</td>";
 
-      if ($tilrow['alatila'] == 'E'
+      if ((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0))
         and $tilrow['vienti'] == 'K'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -979,7 +1000,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif (($tilrow['alatila'] == 'E' or $toim == "TYOMAARAYS")
+      elseif (((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0)) or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -1013,6 +1034,7 @@ elseif ($tee == '') {
       $maksuehto      = $tilrow["maksuehto"];
       $lisattava_era    = $tilrow["lisattava_era"];
       $vahennettava_era  = $tilrow["vahennettava_era"];
+      $jaksotettu = $tilrow['jaksotettu'];
     }
 
     if ($tunnukset != '' and $lask >= 1) {

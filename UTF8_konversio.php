@@ -34,6 +34,8 @@ $files = listdir($pupe_root_polku);
 $finfo1 = finfo_open(FILEINFO_MIME_TYPE);
 $finfo2 = finfo_open(FILEINFO_MIME_ENCODING);
 
+echo "Konvertoidaan Pupesoft UTF8 merkistöön";
+
 foreach ($files as $file) {
 
   if (strpos($file, "UTF8_konversio.php") !== FALSE) {
@@ -49,7 +51,8 @@ foreach ($files as $file) {
 
   if (substr($mime, 0, 4) == "text" and $encd != "utf-8" and $encd != "us-ascii") {
     $mitenmeni = system("recode ISO_8859-1..UTF8 $file");
-    echo "$file, $encd\n";
+    // echo "$file, $encd\n";
+    echo ".";
   }
 
   if ($vain_recode) {
@@ -164,3 +167,5 @@ foreach ($files as $file) {
 
 finfo_close($finfo1);
 finfo_close($finfo2);
+
+echo ". Valmis!\n";

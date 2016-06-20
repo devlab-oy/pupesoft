@@ -1,13 +1,19 @@
 <?php
 
 function presta_hae_asiakkaat() {
-  global $kukarow, $yhtiorow, $ajetaanko_kaikki, $datetime_checkpoint;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
 
   if ($ajetaanko_kaikki == "NO") {
+    presta_echo("Haetaan asiakkaat, joita muutettu {$datetime_checkpoint} j‰lkeen.");
+
     $muutoslisa = " AND (yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'
       OR asiakas.muutospvm >= '{$datetime_checkpoint}') ";
   }
   else {
+    presta_echo("Haetaan kaikki asiakkaat.");
+
     $muutoslisa = "";
   }
 
@@ -61,6 +67,8 @@ function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasn
 function presta_hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
+  presta_echo("Haetaan kaikki asiakasryhm‰t.");
+
   // HUOM. pakko hakea aina kaikki, koska muuten ei osata deletoida poistettuja
   $query = "SELECT avainsana.*,
             avainsana.selitetark_5 AS presta_customergroup_id
@@ -77,8 +85,10 @@ function presta_hae_asiakasryhmat() {
   return $ryhmat;
 }
 
-function presta_specific_prices() {
+function presta_specific_prices(Array $ajolista) {
   global $kukarow, $yhtiorow;
+
+  presta_echo("Haetaan tuotteiden ".implode(', ', $ajolista).".");
 
   // Laitetaan hinnat ja alennukset samaan arrayseen, koska Prestassa niit‰ k‰sitell‰‰n samalla tavalla
   $specific_prices = array();
@@ -104,102 +114,109 @@ function presta_specific_prices() {
     $tuotehintoja = 0;
 
     // Asiakashinnat
-    $query = "SELECT
-              asiakashinta.tuoteno,
-              asiakashinta.alkupvm,
-              asiakashinta.loppupvm,
-              asiakashinta.minkpl,
-              asiakashinta.hinta,
-              asiakashinta.valkoodi,
-              avainsana.selitetark_5 AS presta_customergroup_id,
-              yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
-              'asiakashinta' AS tyyppi
-              FROM asiakashinta
-              LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
-                AND avainsana.selite = asiakashinta.asiakas_ryhma
-                AND avainsana.laji = 'ASIAKASRYHMA')
-              LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
-                AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
-              WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
-              AND asiakashinta.tuoteno = '{$tuote['tuoteno']}'
-              AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
-              AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
-              AND asiakashinta.hinta > 0";
-    $asiakashintaresult = pupe_query($query);
+    if (array_search('asiakashinnat', $ajolista) !== false) {
+      $query = "SELECT
+                asiakashinta.tuoteno,
+                asiakashinta.alkupvm,
+                asiakashinta.loppupvm,
+                asiakashinta.minkpl,
+                asiakashinta.hinta,
+                asiakashinta.valkoodi,
+                avainsana.selitetark_5 AS presta_customergroup_id,
+                yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+                'asiakashinta' AS tyyppi
+                FROM asiakashinta
+                LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
+                  AND avainsana.selite = asiakashinta.asiakas_ryhma
+                  AND avainsana.laji = 'ASIAKASRYHMA')
+                LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
+                  AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
+                WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'
+                AND asiakashinta.tuoteno = '{$tuote['tuoteno']}'
+                AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
+                AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
+                AND asiakashinta.hinta > 0";
+      $asiakashintaresult = pupe_query($query);
 
-    while ($asiakashinta = mysql_fetch_assoc($asiakashintaresult)) {
-      $specific_prices[] = $asiakashinta;
-      $tuotehintoja += 1;
+      while ($asiakashinta = mysql_fetch_assoc($asiakashintaresult)) {
+        $specific_prices[] = $asiakashinta;
+        $tuotehintoja += 1;
+      }
     }
 
     // Asiakasalennukset
-    $query = "SELECT
-              asiakasalennus.tuoteno,
-              asiakasalennus.alkupvm,
-              asiakasalennus.loppupvm,
-              asiakasalennus.minkpl,
-              asiakasalennus.alennus,
-              avainsana.selitetark_5 AS presta_customergroup_id,
-              yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
-              'asiakasalennus' AS tyyppi
-              FROM asiakasalennus
-              LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
-                AND avainsana.selite = asiakasalennus.asiakas_ryhma
-                AND avainsana.laji = 'ASIAKASRYHMA')
-              LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
-                AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
-              WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
-              AND asiakasalennus.tuoteno = '{$tuote['tuoteno']}'
-              AND if(asiakasalennus.alkupvm  = '0000-00-00', '0001-01-01', asiakasalennus.alkupvm)  <= current_date
-              AND if(asiakasalennus.loppupvm = '0000-00-00', '9999-12-31', asiakasalennus.loppupvm) >= current_date
-              AND asiakasalennus.alennus > 0";
-    $asiakasalennusresult = pupe_query($query);
+    if (array_search('asiakasalennukset', $ajolista) !== false) {
+      $query = "SELECT
+                asiakasalennus.tuoteno,
+                asiakasalennus.alkupvm,
+                asiakasalennus.loppupvm,
+                asiakasalennus.minkpl,
+                asiakasalennus.alennus,
+                avainsana.selitetark_5 AS presta_customergroup_id,
+                yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
+                'asiakasalennus' AS tyyppi
+                FROM asiakasalennus
+                LEFT JOIN avainsana ON (avainsana.yhtio = asiakasalennus.yhtio
+                  AND avainsana.selite = asiakasalennus.asiakas_ryhma
+                  AND avainsana.laji = 'ASIAKASRYHMA')
+                LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakasalennus.yhtio
+                  AND yhteyshenkilo.liitostunnus = asiakasalennus.asiakas)
+                WHERE asiakasalennus.yhtio = '{$kukarow['yhtio']}'
+                AND asiakasalennus.tuoteno = '{$tuote['tuoteno']}'
+                AND if(asiakasalennus.alkupvm  = '0000-00-00', '0001-01-01', asiakasalennus.alkupvm)  <= current_date
+                AND if(asiakasalennus.loppupvm = '0000-00-00', '9999-12-31', asiakasalennus.loppupvm) >= current_date
+                AND asiakasalennus.alennus > 0";
+      $asiakasalennusresult = pupe_query($query);
 
-    while ($asiakasalennus = mysql_fetch_assoc($asiakasalennusresult)) {
-      $specific_prices[] = $asiakasalennus;
-      $tuotehintoja += 1;
+      while ($asiakasalennus = mysql_fetch_assoc($asiakasalennusresult)) {
+        $specific_prices[] = $asiakasalennus;
+        $tuotehintoja += 1;
+      }
     }
 
-    // Hinnastohinnat, haetaan aluksi kaikki mahdolliset tuoteno/valuutta/maa kombot
-    // Lajit:
-    // '' Bruttohinta Myyntihinta
-    // 'N' N-Nettohinta Myyntihinta
-    // 'E' E-Nettohinta Myyntihinta
-    $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
-              FROM hinnasto
-              WHERE hinnasto.yhtio = '{$kukarow['yhtio']}'
-              AND hinnasto.tuoteno = '{$tuote['tuoteno']}'
-              AND hinnasto.laji in ('', 'N', 'E')
-              AND hinnasto.hinta > 0";
-    $hintavalresult = pupe_query($query);
-
-    while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
-      // katotaan onko tuotteelle voimassa hinnastohintoja
-      $query = "SELECT hinnasto.tuoteno,
-                hinnasto.alkupvm,
-                hinnasto.loppupvm,
-                hinnasto.minkpl,
-                hinnasto.hinta,
-                hinnasto.valkoodi,
-                hinnasto.maa,
-                'hinnastohinta' AS tyyppi
+    // Hinnastohinnat
+    if (array_search('hinnastohinnat', $ajolista) !== false) {
+      // Haetaan aluksi kaikki mahdolliset tuoteno/valuutta/maa kombot
+      // Lajit:
+      // '' Bruttohinta Myyntihinta
+      // 'N' N-Nettohinta Myyntihinta
+      // 'E' E-Nettohinta Myyntihinta
+      $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
                 FROM hinnasto
-                WHERE hinnasto.yhtio = '$kukarow[yhtio]'
-                AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
-                AND hinnasto.tuoteno = '{$hintavalrow['tuoteno']}'
-                AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
-                AND hinnasto.maa = '$hintavalrow[maa]'
+                WHERE hinnasto.yhtio = '{$kukarow['yhtio']}'
+                AND hinnasto.tuoteno = '{$tuote['tuoteno']}'
                 AND hinnasto.laji in ('', 'N', 'E')
-                AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
-                AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
-                AND hinnasto.hinta > 0
-                ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999), tunnus DESC
-                LIMIT 1";
-      $hinnastoresult = pupe_query($query);
+                AND hinnasto.hinta > 0";
+      $hintavalresult = pupe_query($query);
 
-      while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
-        $specific_prices[] = $hinnasto;
-        $tuotehintoja += 1;
+      while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
+        // katotaan onko tuotteelle voimassa hinnastohintoja
+        $query = "SELECT hinnasto.tuoteno,
+                  hinnasto.alkupvm,
+                  hinnasto.loppupvm,
+                  hinnasto.minkpl,
+                  hinnasto.hinta,
+                  hinnasto.valkoodi,
+                  hinnasto.maa,
+                  'hinnastohinta' AS tyyppi
+                  FROM hinnasto
+                  WHERE hinnasto.yhtio = '$kukarow[yhtio]'
+                  AND hinnasto.tuoteno = '$hintavalrow[tuoteno]'
+                  AND hinnasto.tuoteno = '{$hintavalrow['tuoteno']}'
+                  AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
+                  AND hinnasto.maa = '$hintavalrow[maa]'
+                  AND hinnasto.laji in ('', 'N', 'E')
+                  AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
+                  AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
+                  AND hinnasto.hinta > 0
+                  ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999), tunnus DESC
+                  LIMIT 1";
+        $hinnastoresult = pupe_query($query);
+
+        while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {
+          $specific_prices[] = $hinnasto;
+          $tuotehintoja += 1;
+        }
       }
     }
   }
@@ -256,6 +273,8 @@ function presta_specific_prices() {
 function presta_hae_kategoriat() {
   global $kukarow, $yhtiorow;
 
+  presta_echo("Haetaan kaikki tuotekategoriat.");
+
   // haetaan kaikki kategoriat ja niiden parent_id
   // HUOM! pakko hakea aina kaikki, ett‰ osataan poistaa poistetut/siirretyt
   $query = "SELECT node.nimi,
@@ -310,6 +329,8 @@ function presta_hae_kategoriat() {
 function presta_hae_kaikki_tuotteet() {
   global $kukarow, $yhtiorow, $presta_varastot;
 
+  presta_echo("Haetaan kaikki tuotteet ja varastosaldot.");
+
   $tuoterajaus = presta_tuoterajaus();
 
   if (!is_array($presta_varastot)) {
@@ -329,33 +350,31 @@ function presta_hae_kaikki_tuotteet() {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    if ($row['ei_saldoa'] != '') {
+    // Katsotaan onko t‰m‰ is‰tuote
+    $query = "SELECT tunnus
+              FROM tuoteperhe
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND isatuoteno = '{$tuoteno}'
+              AND tyyppi = 'P'
+              LIMIT 1";
+    $tr_result = pupe_query($query);
+
+    if (mysql_num_rows($tr_result) == 1) {
+      // is‰tuote
+      $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
+      $myytavissa = 0;
+
+      foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
+        $myytavissa += $isa_saldo;
+      }
+    }
+    elseif ($row['ei_saldoa'] != '') {
       // saldottomille tuoteteilla null, jotta presta tiet‰‰ olla lis‰‰m‰tt‰ t‰t‰ saldoa
       $myytavissa = null;
     }
     else {
-      // Katsotaan onko t‰m‰ is‰tuote
-      $query = "SELECT tunnus
-                FROM tuoteperhe
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND isatuoteno = '{$tuoteno}'
-                AND tyyppi = 'P'
-                LIMIT 1";
-      $tr_result = pupe_query($query);
-
-      if (mysql_num_rows($tr_result) == 1) {
-        // is‰tuote
-        $isa_saldot = tuoteperhe_myytavissa($tuoteno, 'KAIKKI', '', $presta_varastot);
-        $myytavissa = 0;
-
-        foreach ($isa_saldot as $isa_varasto => $isa_saldo) {
-          $myytavissa += $isa_saldo;
-        }
-      }
-      else {
-        // normituote
-        list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
-      }
+      // normituote
+      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $presta_varastot);
     }
 
     // lis‰t‰‰n saldon p‰ivitt‰miseen tarvittavat tiedot
@@ -370,17 +389,35 @@ function presta_hae_kaikki_tuotteet() {
 }
 
 function presta_hae_tuotteet() {
-  global $kukarow, $yhtiorow, $datetime_checkpoint, $ajetaanko_kaikki;
+  global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $datetime_checkpoint = presta_export_checkpoint('PSTS_TUOTE');
 
   $tuoterajaus = presta_tuoterajaus();
 
   if ($ajetaanko_kaikki == "NO") {
-    $tuoterajaus .= " AND tuote.muutospvm >= '{$datetime_checkpoint}' ";
+    presta_echo("Haetaan tuotteet, joita on muokattu {$datetime_checkpoint} j‰lkeen.");
+
+    $tuoterajaus .= " AND (tuote.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR puun_alkio.muutospvm >= '{$datetime_checkpoint}'";
+    $tuoterajaus .= " OR tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}') ";
+  }
+  else {
+    presta_echo("Haetaan kaikki tuotteet.");
   }
 
+  // tuotteen "tilaustuote" -termi kaikilla kielill‰
+  $tilaustuote_kaannokset = presta_hae_tilaustuote();
+
   // Haetaan pupesta tuotteen tiedot
-  $query = "SELECT tuote.*
+  $query = "SELECT distinct tuote.*
             FROM tuote
+            LEFT JOIN puun_alkio ON (puun_alkio.yhtio = tuote.yhtio
+              AND puun_alkio.laji = 'tuote'
+              AND puun_alkio.liitos = tuote.tuoteno)
+            LEFT JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+              AND tuotteen_avainsanat.laji IN ('nimitys', 'kuvaus', 'lyhytkuvaus'))
             WHERE tuote.yhtio = '{$kukarow['yhtio']}'
             {$tuoterajaus}";
   $res = pupe_query($query);
@@ -427,6 +464,11 @@ function presta_hae_tuotteet() {
       );
     }
 
+    // jos t‰m‰ on tilaustuote, liitet‰‰n k‰‰nnˆkset
+    if ($row['status'] == 'T') {
+      $tuotteen_kaannokset = array_merge($tuotteen_kaannokset, $tilaustuote_kaannokset);
+    }
+
     // Haetaan tuotteen lapsituotteet, jos t‰m‰ on is‰tuote
     $query = "SELECT tuoteno, kerroin
               FROM tuoteperhe
@@ -462,6 +504,7 @@ function presta_hae_tuotteet() {
       'alv'                       => $row["alv"],
       'ean'                       => $row["eankoodi"],
       'ei_saldoa'                 => $row["ei_saldoa"],
+      'keraysvyohyke'             => $row["keraysvyohyke"],
       'kuluprosentti'             => $row['kuluprosentti'],
       'kuvaus'                    => $row["kuvaus"],
       'lyhytkuvaus'               => $row["lyhytkuvaus"],
@@ -520,4 +563,195 @@ function presta_tuoterajaus() {
   }
 
   return $tuoterajaus;
+}
+
+function presta_ajetaanko_sykronointi($ajo, $ajolista) {
+  // jos ajo ei ole ajolistalla, ei ajeta
+  if (array_search(strtolower(trim($ajo)), $ajolista) === false) {
+    return false;
+  }
+
+  // Sallitaan vain yksi instanssi t‰st‰ ajosta kerrallaan
+  $lock_params = array(
+    "lockfile" => "presta-{$ajo}-flock.lock",
+    "locktime" => 5400,
+    "return"   => true,
+  );
+
+  $status = pupesoft_flock($lock_params);
+
+  if ($status === false) {
+    presta_echo("{$ajo} -ajo on jo k‰ynniss‰, ei ajeta uudestaan.");
+  }
+
+  return $status;
+}
+
+function presta_export_checkpoint($checkpoint) {
+  global $kukarow, $yhtiorow;
+
+  // Haetaan timestamp avainsanoista
+  $checkpoint_res = t_avainsana($checkpoint, 'fi');
+
+  // otetaan viimeisen ajon timestamppi talteen ja p‰ivitet‰‰n t‰m‰ hetki
+  if (mysql_num_rows($checkpoint_res) != 0) {
+    $row = mysql_fetch_assoc($checkpoint_res);
+    $selite = $row['selite'];
+
+    // P‰ivitet‰‰n timestamppi t‰h‰n hetkeen
+    $query = "UPDATE avainsana SET
+              selite = now()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = '{$checkpoint}'";
+    pupe_query($query);
+  }
+  else {
+    // timestamppia ei lˆydy, eli t‰m‰ on ensimm‰inen ajo
+    $selite = date('Y-m-d H:i:s', mktime(0, 0, 0, 1, 1, 1970));
+
+    // P‰ivitet‰‰n timestamppi talteen
+    $query = "INSERT INTO avainsana SET
+              kieli      = 'fi',
+              laatija    = '{$kukarow['kuka']}',
+              laji       = '{$checkpoint}',
+              luontiaika = now(),
+              muutospvm  = now(),
+              muuttaja   = '{$kukarow['kuka']}',
+              selite     = now(),
+              yhtio      = '{$kukarow['yhtio']}'";
+    pupe_query($query);
+  }
+
+  return $selite;
+}
+
+function presta_echo($string) {
+  echo date("d.m.Y @ G:i:s")." - {$string}\n";
+}
+
+function presta_image_exists($sku, $id) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // katsotaan onko meill‰ jo t‰m‰ tuotekuva tallessa
+  $query = "SELECT tunnus
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND liitos = 'tuote'
+            AND liitostunnus = {$liitostunnus}
+            AND kayttotarkoitus = 'TK'
+            AND selite = '{$id}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+
+  return true;
+}
+
+function presta_tallenna_liite($params) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  $filename = $params['filename'];
+  $image_id = $params['id'];
+  $sku      = $params['sku'];
+
+  if (empty($sku) or empty($filename) or empty($image_id) or empty($kukarow) or empty($yhtiorow)) {
+    return false;
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // params: filename, liitos, liitostunnus, selite, k‰yttˆtarkoitus
+  tallenna_liite($filename, 'tuote', $liitostunnus, $image_id, 'TK');
+}
+
+function presta_poista_ylimaaraiset_kuvat($sku, Array $all_ids) {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tuote
+  $tuote = hae_tuote($sku);
+
+  if (empty($tuote['tunnus'])) {
+    return false;
+  }
+
+  $liitostunnus = $tuote['tunnus'];
+
+  // meill‰ ei ole yht‰‰n kuvaan prestassa, dellataan kaikki
+  if (count($all_ids) == 0) {
+    $selite_query = "AND selite != ''";
+  }
+  else {
+    $presta_product_ids = implode(',', $all_ids);
+    $selite_query = "AND selite not in ({$presta_product_ids})";
+  }
+
+  // dellataan kuvat
+  $query = "DELETE
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND liitos = 'tuote'
+            AND liitostunnus = {$liitostunnus}
+            AND kayttotarkoitus = 'TK'
+            {$selite_query}";
+  $result = pupe_query($query);
+  $count = mysql_affected_rows();
+
+  return $count;
+}
+
+function presta_hae_tilaustuote() {
+  $kukarow  = $GLOBALS["kukarow"];
+  $yhtiorow = $GLOBALS["yhtiorow"];
+
+  if (empty($kukarow) or empty($yhtiorow)) {
+    die("ERROR!");
+  }
+
+  // Haetaan tilaustuotteen k‰‰nnˆkset
+  $query = "SELECT kieli, selite, selitetark
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'S'
+            AND selite = 'T'";
+  $tr_result = pupe_query($query);
+  $tuotteen_statukset = array();
+
+  while ($tr_row = mysql_fetch_assoc($tr_result)) {
+    $tuotteen_statukset[] = array(
+      "kieli"  => $tr_row['kieli'],
+      "kentta" => 'tilaustuote',
+      "teksti" => $tr_row['selitetark']
+    );
+  }
+
+  return $tuotteen_statukset;
 }

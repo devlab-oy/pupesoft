@@ -132,6 +132,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
         }
       }
       elseif (stripos($rahtikirjarow['rahtikirjanro'], "JJFI") !== false) {
+        $rahtikirjarow['kollit'] = 0; # Ei loopata tuplasti koska sscc_ulkoinen-kentässä on kaikkien kollien SSCC:t
         preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rahtikirjarow['rahtikirjanro'], $match);
 
         foreach ($match[0] as $nro) {

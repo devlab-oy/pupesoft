@@ -447,6 +447,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+      $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);

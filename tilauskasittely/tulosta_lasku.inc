@@ -3224,10 +3224,8 @@ if (!function_exists("tulosta_lasku")) {
 
       // Otetaan yhteensäkommentti pois jos summataan rivejä
       if ($rivigrouppaus) {
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakasrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        // Trimmataan ja otetaan "yhteensäkommentti" pois
+        $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
       }
       else {
         // Jos laskutyyppi on 18 (Normaali laskupohja (nimitykset rivitettynä))

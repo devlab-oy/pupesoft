@@ -781,7 +781,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
         // Yksikköhinta on laskulla aina veroton
         if ($yhtiorow["alv_kasittely"] == '') {
+          // Tuotteiden myyntihinnat sisältävät arvonlisäveron
           $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
+          $tilrow["hinta_verollinen"] = $tilrow["hinta"];
+        }
+        else {
+          // Tuotteiden myyntihinnat ovat arvonlisäverottomia
+          $tilrow["hinta"] = $tilrow["hinta"];
+          $tilrow["hinta_verollinen"] = $tilrow["hinta"] * (1 + $tilrow["alv"] / 100);
         }
 
         // Veron määrä

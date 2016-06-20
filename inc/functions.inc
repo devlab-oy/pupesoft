@@ -7244,7 +7244,7 @@ if (!function_exists("tulosta_ytunnus")) {
         $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
       }
     }
-    elseif (strtoupper($maa) == 'SE') {
+    elseif (strtoupper($maa) == 'SE' and is_numeric(substr(trim(strtoupper($ytunnus)), 0, 2))) {
       if (substr(trim(strtoupper($ytunnus)), 0, 2) != strtoupper($maa) and trim(strtoupper($maa)) != trim(strtoupper($yhtiorow["maa"])) and trim(strtoupper($maa)) != "") {
         $ytunnus = strtoupper($maa)."-".$ytunnus;
       }
@@ -33021,6 +33021,28 @@ if (!function_exists('ulkoinen_jarjestelma_varastot')) {
     return array($logmaster_varasto, $normivarastoja);
   }
 }
+
+if (!function_exists('poista_rivin_yhteensakommentti')) {
+  function poista_rivin_yhteensakommentti($kommentti) {
+
+    $sanakirja_kielet = array("fi" => "Suomi",
+      "en" => "Englanti",
+      "se" => "Ruotsi",
+      "ee" => "Viro",
+      "de" => "Saksa",
+      "dk" => "Tanska",
+      "no" => "Norja",
+      "ru" => "Venäjä");
+
+    // Otetaan "yhteensäkommentti" pois rivin kommentista
+    foreach ($sanakirja_kielet as $sanakirja_kieli => $sanakirja_kieli_nimi) {
+      $kommentti = preg_replace("/".t("yhteensä", $sanakirja_kieli).": [0-9\.]* [A-Z]{3}\./", "", $kommentti);
+    }
+
+    return $kommentti;
+  }
+}
+
 
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {

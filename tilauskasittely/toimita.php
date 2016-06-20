@@ -343,7 +343,18 @@ if ($id == '0') {
         echo "<form method='post'><td class='back'>
             <input type='hidden' name='id' value='$row[tilaus]'>
             <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
-            <input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
+            <input type='submit' name='tila' value='".t("Toimita")."'></td></form>";
+
+
+        echo "<form method='post' action='tilaus_myynti.php'>";
+        echo "<td class='back'>";
+        echo "<input type='hidden' name='tilausnumero' value='{$row['tilaus']}'>";
+        echo "<input type='hidden' name='toim' value='PIKATILAUS'>";
+        echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+        echo "<input type='hidden' name='lopetus' value='{$palvelin2}tilauskasittely/toimita.php////id=0//etsi={$etsi}'>";
+        echo "<input type='submit' value='".t("Muokkaa")."'>";
+        echo "</td>";
+        echo "</tr></form>";
       }
     }
   }

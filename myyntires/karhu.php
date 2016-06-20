@@ -107,7 +107,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
       $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
                 FROM maksuehto
                 WHERE yhtio   = '$kukarow[yhtio]'
-                AND factoring = '$factoringrow[factoringyhtio]'";
+                AND factoring_id = '$factoringrow[tunnus]'";
       $result = pupe_query($query);
 
       $maksuehdotrow = mysql_fetch_assoc($result);
@@ -128,7 +128,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
   else {
     $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
               FROM maksuehto
-              WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
+              WHERE yhtio = '$kukarow[yhtio]' and factoring_id is null";
     $result = pupe_query($query);
 
     $maksuehdotrow = mysql_fetch_assoc($result);

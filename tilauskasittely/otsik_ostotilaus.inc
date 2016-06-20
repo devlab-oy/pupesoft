@@ -66,10 +66,10 @@ if (isset($jatka) and !checkdate($toimkk, $toimpp, $toimvv)) {
 
 if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
   if ($toim == "HAAMU") {
-    echo "<font class='head'>".t("Työ/tarvikeoston otsikko").":</font><hr><br>";
+    echo "<font class='head'>".t("Työ/tarvikeoston otsikko").":</font><hr>";
   }
   else {
-    echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr><br>";
+    echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr>";
   }
 
   if (($tunnus != "") or ($kukarow["kesken"] != 0)) {
@@ -177,7 +177,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
   $maaresult = pupe_query($query);
 
   echo "</td></tr>";
-  echo "<tr><td valign='top'>".t("Maa").": </td><td><select name='maa'>";
+  echo "<tr><td valign='top'>".t("Maa").": </td><td><select name='maa' ".js_alasvetoMaxWidth($nimi, 250).">";
 
   echo "<option value = ''></option>";
 
@@ -193,9 +193,10 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
   echo "</select></td></tr></table></td>";
 
   if ($toimittajaid == 0 or $tila == "vaihdaasiakas") {
-    echo "  </tr><tr>
-        <td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>
-        </tr></table></form>";
+    echo "</tr></table><br>
+          <input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'>
+          <input type='submit' class='hae_btn' value='".t("Hae")."'>
+          </form>";
 
     $formi  = "paaformi";
     $kentta = "nimi";
@@ -228,6 +229,9 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "</select></td></tr>";
     echo "</table>";
     echo "</td></tr>";
+
+    echo "<tr><td colspan='4' class='back'><br></td></tr>";
+    echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
 
     if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
       $toimpp = $kerpp = date("j");
@@ -442,6 +446,9 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     }
 
     echo "</select></td></tr>";
+
+    echo "<tr><td colspan='4' class='back'><br></td></tr>";
+    echo "<tr><th colspan='4'>".t("Tilauksen kommentit").":</th></tr>";
 
     echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 

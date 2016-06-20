@@ -4,6 +4,24 @@ if (strpos($_SERVER['SCRIPT_NAME'], "kopioi_laitteita.php") !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+echo "<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+  <!--
+
+  function toggleAll(toggleBox) {
+
+    var currForm = toggleBox.form;
+    var isChecked = toggleBox.checked;
+    var nimi = toggleBox.name;
+    for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+      if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,20) == nimi) {
+        currForm.elements[elementIdx].checked = isChecked;
+      }
+    }
+  }
+
+  //-->
+</script>";
+
 if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));
 
 $request = array(
@@ -50,6 +68,7 @@ function echo_piirra_kopiointi_formi($request = array()) {
 
 function echo_piirra_laiterivit($kopioitavat_laitteet) {
   echo "<table>";
+  echo "<tr><td>".t("Ruksaa kaikki")." <input type='checkbox' name='kopioitavat_laitteet' onclick='toggleAll(this);'></td></tr>";
   foreach ($kopioitavat_laitteet as $laite) {
     echo "<tr><td style='border: 1px solid black;'>";
     echo "<input type='checkbox' name='kopioitavat_laitteet[]'  value='{$laite['tunnus']}'/>";

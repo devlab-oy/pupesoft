@@ -4,23 +4,29 @@ if (!function_exists("generoi_laskun_saate")) {
   function generoi_laskun_saate($lasrow, $saatekirje = '', $kieli = '', $toim = '') {
     global $kukarow, $yhtiorow;
 
-    $content_body     = "";
-    $content_subject   = "";
-    $email_to       = "";
-    $saatekirje     = mysql_real_escape_string($saatekirje);
-    $kieli         = mysql_real_escape_string($kieli);
+    $content_body = "";
+    $content_subject = "";
+    $email_to = "";
+    $saatekirje = mysql_real_escape_string($saatekirje);
+    $kieli = mysql_real_escape_string($kieli);
 
-    $query_lasku_email = "SELECT lasku_email, kieli
-                          FROM asiakas
-                          WHERE yhtio      = '$kukarow[yhtio]'
-                          AND tunnus       = '$lasrow[liitostunnus]'
-                          AND lasku_email != ''";
-    $result_lasku_email = pupe_query($query_lasku_email);
+    if (empty($GLOBALS["valittu_kopio_tulostin"])) {
+      $query_lasku_email = "SELECT lasku_email, kieli
+                            FROM asiakas
+                            WHERE yhtio      = '$kukarow[yhtio]'
+                            AND tunnus       = '$lasrow[liitostunnus]'
+                            AND lasku_email != ''";
+      $result_lasku_email = pupe_query($query_lasku_email);
 
-    if ($row_lasku_email = mysql_fetch_array($result_lasku_email)) {
-      $email_to = "asiakasemail".$row_lasku_email["lasku_email"];
+      if ($row_lasku_email = mysql_fetch_array($result_lasku_email)) {
+        $email_to = "asiakasemail".$row_lasku_email["lasku_email"];
+      }
     }
     else {
+      $email_to = mysql_real_escape_string($GLOBALS["valittu_kopio_tulostin"]);
+    }
+
+    if (empty($email_to)) {
       return array("", "", "");
     }
 

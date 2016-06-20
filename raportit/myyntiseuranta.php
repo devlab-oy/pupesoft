@@ -291,6 +291,7 @@ else {
     if ($naytaennakko != '')    $naytaennakkochk     = "CHECKED";
     if ($vertailubu != '')      ${"sel_".$vertailubu}  = "SELECTED";
     if ($naytakaikkiasiakkaat != '') $naytakaikkiasiakkaatchk = "CHECKED";
+    if ($alanaytapoistettujaasiakkaita != '') $alanaytapoistettujaasiakkaitachk = "CHECKED";
     if ($naytakaikkituotteet != '') $naytakaikkituotteetchk  = "CHECKED";
     if ($laskutuspaiva != '')    $laskutuspaivachk    = "CHECKED";
     if ($ytunnus_mistatiedot != '')  $ytun_mistatiedot_sel  = "SELECTED";
@@ -589,6 +590,11 @@ else {
       <td class='back'>", t("(N‰ytt‰‰ myˆs asiakkaat joita ei huomioida myynninseurannassa)"), "</td>
       </tr>
       <tr>
+      <th>", t("N‰yt‰ vain aktiiviset asiakkaat"), "</th>
+      <td colspan='3'><input type='checkbox' name='alanaytapoistettujaasiakkaita' {$alanaytapoistettujaasiakkaitachk}></td>
+      <td class='back'>", t("(Ei n‰ytet‰ poistettuja asiakkaita)"), "</td>
+      </tr>
+      <tr>
       <th>", t("N‰yt‰ kaikki tuotteet"), "</th>
       <td colspan='3'><input type='checkbox' name='naytakaikkituotteet' {$naytakaikkituotteetchk}></td>
       <td class='back'>", t("(N‰ytt‰‰ tuotteet joita ei huomioida myynninseurannassa)"), "</td>
@@ -646,7 +652,7 @@ else {
         break;
       case 'asmy':
         $sel_asmy = 'selected';
-        break;  
+        break;
       case 'asbuos':
         $sel_asbuos = 'selected';
         break;
@@ -1074,6 +1080,7 @@ else {
       $laskugroups   = 0;
       $muutgroups    = 0;
       $myyjagroups   = 0;
+      $asiakasmyyjittain = 0;
 
       // K‰yd‰‰n l‰pi k‰ytt‰j‰n syˆtt‰m‰t grouppaukset
       foreach ($apu as $i => $mukaan) {
@@ -1124,6 +1131,7 @@ else {
           $gluku++;
           $asiakasgroups++;
           $myyjagroups++;
+          $asiakasmyyjittain++;
         }
 
         if ($mukaan == "ytunnus") {
@@ -1804,6 +1812,22 @@ else {
         }
       }
 
+      if ($vertailubu == "asmy") {
+        // N‰ytet‰‰n asikasmyyj‰tavoitteet:
+
+        //siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        if ($asiakasmyyjittain == 0) {
+          echo "<font class='error'>".t("VIRHE: Asiakasmyyjiin liittyv‰ ryhmittely on valittava, kun n‰ytet‰‰n asiakasmyyj‰tavoitteet")."!</font><br>";
+          $tee = '';
+        }
+
+        // siin‰ tapauksessa ei voi groupata muiden kuin myyjien mukaan
+        if ($myyjagroups > 1) {
+          echo "<font class='error'>".t("VIRHE: Valitse korjeintaan yksi myyjiin liittyv‰ ryhmittely")."!</font><br>";
+          $tee = '';
+        }
+      }
+
       if ($vertailubu == "mybu" or $vertailubu == "mybury" or $vertailubu == "mybuos") {
         // N‰ytet‰‰n myyj‰tavoitteet:
 
@@ -1848,6 +1872,10 @@ else {
 
       if ($naytakaikkiasiakkaat == "") {
         $asiakaslisa = " and asiakas.myynninseuranta = '' ";
+      }
+
+      if ($alanaytapoistettujaasiakkaita != '') {
+        $asiakaslisa .= " and asiakas.laji != 'P' ";
       }
 
       if ($naytaennakko == "") {
@@ -2690,6 +2718,37 @@ else {
                 }
                 else {
                   $bulisa .= " and try = '' and osasto = '' ";
+                }
+              }
+
+              if (!empty($kumulatiivinen_valittu)) {
+                $_kumulalk_parts = explode("-",$kumulatiivinen_alkupaiva);
+                $_kumulalk = $_kumulalk_parts[0].sprintf('%02d', $_kumulalk_parts[1]);
+                $_kumul_alkukuun_paivat = date('t', mktime(0, 0, 0, $_kumulalk_parts[1], 1, $_kumulalk_parts[0]));
+
+                // Kumulatiivinen tavoite:
+                $budj_q = "SELECT kausi, sum(summa) summa
+                           FROM {$budj_taulu}
+                           WHERE yhtio = '{$kukarow['yhtio']}'
+                           and kausi   >= '{$_kumulalk}'
+                           and kausi   <= '{$lopu_kausi}'
+                           {$bulisa}
+                           GROUP BY kausi";
+                $budj_r = pupe_query($budj_q);
+
+                $row["tavoitekumul"] = 0;
+
+                while ($dyprow = mysql_fetch_assoc($budj_r)) {
+
+                  if ($dyprow["kausi"] == $_kumulalk and (int) $kumulatiivinen_pp != 1) {
+                    $dyprow["summa"] = $dyprow["summa"] * (($_kumul_alkukuun_paivat+1-$kumulatiivinen_pp)/$_kumul_alkukuun_paivat);
+                  }
+
+                  if ($dyprow["kausi"] == $lopu_kausi and (int) $ppl != $lopukuun_paivat) {
+                    $dyprow["summa"] = $dyprow["summa"] * ($ppl/$lopukuun_paivat);
+                  }
+
+                  $row["tavoitekumul"] += $dyprow["summa"];
                 }
               }
 

@@ -40,10 +40,19 @@ echo "<table>
     <input type='text' name='loppukk' value='$loppukk' size='4'>
     <input type='text' name='loppuvv' value='$loppuvv' size='8'> pp kk vvvv
     </td>
+  </tr>";
+
+  $scheck = (!empty($saapumisittain)) ? "CHECKED": "";
+
+  echo "<tr>
+    <th>".t("Listaa saapumiset")."</th>
+    <td>
+    <input type='checkbox' name='saapumisittain' $scheck>
+    </td>
   </tr>
 </table>";
 echo "<br/><input type='submit' class='hae_btn' value='".t("Hae")."'>";
-echo "</form><br/>";
+echo "</form><br /><br />";
 
 // Toimittajan haku
 if ($ytunnus != '' and $toimittajaid == 0) {
@@ -79,6 +88,12 @@ else {
 if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
   $query_lisa = "";
+  $yhteensa['vols'] = 0;
+  $yhteensa['sks'] = 0;
+  $yhteensa['kulut'] = 0;
+  $yhteensa_kaikki['vols'] = 0;
+  $yhteensa_kaikki['sks'] = 0;
+  $yhteensa_kaikki['kulut'] = 0;
 
   if (isset($toimittaja['tunnus']) and !empty($toimittaja['tunnus'])) {
     $query_lisa .= "AND liitostunnus = {$toimittaja['tunnus']}";
@@ -99,14 +114,32 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
 
   echo "<table>";
 
+  if (empty($saapumisittain)) {
+    echo "
+      <th>".t("Toimittaja")."</th>
+      <th style='text-align: right;'>".t("Vaihto-omaisuuslaskut")."</th>
+      <th style='text-align: right;'>".t("Saapuminen")."</th>
+      <th style='text-align: right;'>".t("Kuluja")."</th>
+      <th style='text-align: right;'>%</th>
+    </tr>";
+  }
+
   // Loopataan saapumiset
   while ($tama_rivi = mysql_fetch_assoc($saapumiset_result)) {
     // Jos toimittaja vaihtuu..
     if ($tama_rivi['nimi'] != $edellinen_rivi['nimi']) {
       if (isset($edellinen_rivi)) {
-        echo "<tr class='spec'>
-          <td>".t("Yhteensä")."</td>
-          <td style='text-align: right;'>{$yhteensa['vols']}</td>
+
+        if (!empty($saapumisittain)) {
+          echo "<tr class='spec'>";
+          echo "<td>".t("Yhteensä")."</td>";
+        }
+        else {
+          echo "<tr>";
+          echo "<td>{$edellinen_rivi['nimi']}</td>";
+        }
+
+        echo "<td style='text-align: right;'>{$yhteensa['vols']}</td>
           <td style='text-align: right;'>{$yhteensa['sks']}</td>
           <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
           <td style='text-align: right;'>".round(((($yhteensa['sks'] / $yhteensa['vols'])-1) * 100), 2)."</tr>";
@@ -114,19 +147,24 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
         $yhteensa_kaikki['vols'] += $yhteensa['vols'];
         $yhteensa_kaikki['sks'] += $yhteensa['sks'];
         $yhteensa_kaikki['kulut'] += $yhteensa['kulut'];
-        $yhteensa = NULL; // Nollataan yhteensä arvot
+
+        $yhteensa['vols'] = 0;
+        $yhteensa['sks'] = 0;
+        $yhteensa['kulut'] = 0;
       }
 
-      // Toimittaja
-      echo "<tr><td class='back' colspan='5'><br/><font class='head'>{$tama_rivi['nimi']}</font></td></tr>";
-      // Otsikkorivi
-      echo "
-        <th>".t("Saapuminen")."</th>
-        <th style='text-align: right;'>".t("Vaihto-omaisuuslaskut")."</th>
-        <th style='text-align: right;'>".t("Saapuminen")."</th>
-        <th style='text-align: right;'>".t("Kuluja")."</th>
-        <th style='text-align: right;'>%</th>
-      </tr>";
+      if (!empty($saapumisittain)) {
+        // Toimittaja
+        echo "<tr><td class='back' colspan='5'><br/><font class='head'>{$tama_rivi['nimi']}</font></td></tr>";
+        // Otsikkorivi
+        echo "<tr>
+          <th>".t("Saapuminen")."</th>
+          <th style='text-align: right;'>".t("Vaihto-omaisuuslaskut")."</th>
+          <th style='text-align: right;'>".t("Saapuminen")."</th>
+          <th style='text-align: right;'>".t("Kuluja")."</th>
+          <th style='text-align: right;'>%</th>
+        </tr>";
+      }
     }
 
     $query = "SELECT group_concat(vanhatunnus) as vanhatunnus
@@ -157,26 +195,37 @@ if ($tee == "raportoi" and $alkupvm != "" and $loppupvm != "") {
                     AND yhtio         = '{$kukarow['yhtio']}'";
       $sks = mysql_fetch_assoc(pupe_query($sks_query));
 
-      echo "<tr class='aktiivi'>";
-      echo "<td>".$tama_rivi["laskunro"]."</td>";
-      echo "<td style='text-align: right;'>".$vols["summa"]."</td>";
-      echo "<td style='text-align: right;'>".$sks["saapumisen_summa"]."</td>";
-      echo "<td style='text-align: right;'>".round($sks["saapumisen_summa"] - $vols["summa"], 2)."</td>";
-      echo "<td style='text-align: right;'>".round(((($sks["saapumisen_summa"] / $vols["summa"])-1)*100), 2)."</td>";
-      echo "</tr>";
+      if (!empty($saapumisittain)) {
+        echo "<tr class='aktiivi'>";
+        echo "<td>".$tama_rivi["laskunro"]."</td>";
+        echo "<td style='text-align: right;'>".$vols["summa"]."</td>";
+        echo "<td style='text-align: right;'>".$sks["saapumisen_summa"]."</td>";
+        echo "<td style='text-align: right;'>".round($sks["saapumisen_summa"] - $vols["summa"], 2)."</td>";
+        echo "<td style='text-align: right;'>".round(((($sks["saapumisen_summa"] / $vols["summa"])-1)*100), 2)."</td>";
+        echo "</tr>";
+      }
 
       $yhteensa['vols'] += $vols["summa"];
       $yhteensa['sks'] += $sks["saapumisen_summa"];
       $yhteensa['kulut'] += ($sks["saapumisen_summa"] - $vols["summa"]);
     }
+
     $edellinen_rivi = $tama_rivi;
   }
 
   // VIELÄ viimeisen rivin yhteensä tulos
   if (mysql_num_rows($saapumiset_result) > 0) {
-    echo "<tr class='spec'>
-      <td>".t("Yhteensä")."</td>
-      <td style='text-align: right;'>{$yhteensa['vols']}</td>
+
+    if (!empty($saapumisittain)) {
+      echo "<tr class='spec'>";
+      echo "<td>".t("Yhteensä")."</td>";
+    }
+    else {
+      echo "<tr>";
+      echo "<td>{$edellinen_rivi['nimi']}</td>";
+    }
+
+    echo "<td style='text-align: right;'>{$yhteensa['vols']}</td>
       <td style='text-align: right;'>{$yhteensa['sks']}</td>
       <td style='text-align: right;'>".round($yhteensa['kulut'], 2)."</td>
       <td style='text-align: right;'>".round((($yhteensa['sks'] / $yhteensa['vols']-1) * 100), 2)."</tr>";

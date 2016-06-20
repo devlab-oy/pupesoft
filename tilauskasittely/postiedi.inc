@@ -8,6 +8,10 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   // avataan faili
   if (!$handle = fopen($file, "w")) die("Filen '$file' luonti ep‰onnistui!");
 
+  if (empty($postirow["ytunnus"])) {
+    $postirow["ytunnus"] = '999999';
+  }
+  
   // tehd‰‰n EDI-aineisto
   $ulos  = "";
   $ulos .= "ICHGSTART:$postirow[tunnus]\n";                    // tilauksen numero

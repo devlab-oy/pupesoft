@@ -257,11 +257,11 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     }
 
     //Haetaan factoringsopimuksen tiedot
-    if ($masrow["factoring"] != '') {
+    if (isset($masrow["factoring_id"])) {
       $query = "SELECT *
                 FROM factoring
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and factoringyhtio = '$masrow[factoring]'
+                and tunnus         = '$masrow[factoring_id]'
                 and valkoodi       = '$lasrow[valkoodi]'";
       $fres = pupe_query($query);
       $frow = mysql_fetch_assoc($fres);
@@ -273,7 +273,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     $pankkitiedot = array();
 
     //Laitetaan pankkiyhteystiedot kuntoon
-    if ($masrow["factoring"] != "") {
+    if (isset($masrow["factoring_id"])) {
       $pankkitiedot["pankkinimi1"]  =  $frow["pankkinimi1"];
       $pankkitiedot["pankkitili1"]  =  $frow["pankkitili1"];
       $pankkitiedot["pankkiiban1"]  =  $frow["pankkiiban1"];
@@ -692,10 +692,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
         // Otetaan yhteensäkommentti pois jos summataan rivejä
         if ($rivigrouppaus) {
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakas_apu_row["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
-          $tilrow["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $tilrow["kommentti"]);
+          // Trimmataan ja otetaan "yhteensäkommentti" pois
+          $tilrow["kommentti"] = trim(poista_rivin_yhteensakommentti($tilrow["kommentti"]));
         }
 
         // Laitetaan alennukset kommenttiin, koska laskulla on vain yksi alekenttä
@@ -783,7 +781,14 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
         // Yksikköhinta on laskulla aina veroton
         if ($yhtiorow["alv_kasittely"] == '') {
+          // Tuotteiden myyntihinnat sisältävät arvonlisäveron
           $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
+          $tilrow["hinta_verollinen"] = $tilrow["hinta"];
+        }
+        else {
+          // Tuotteiden myyntihinnat ovat arvonlisäverottomia
+          $tilrow["hinta"] = $tilrow["hinta"];
+          $tilrow["hinta_verollinen"] = $tilrow["hinta"] * (1 + $tilrow["alv"] / 100);
         }
 
         // Veron määrä

@@ -1500,7 +1500,7 @@ if (strlen($tunnus) != 0) {
   }
 
   # Laskun kuva oikealle puolelle
-  echo "</td><td class='back'>";
+  echo "</td><td class='back ptop'>";
 
   echo "<table><tr>";
 

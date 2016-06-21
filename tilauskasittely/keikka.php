@@ -2,6 +2,20 @@
 
 $pupe_DataTables = 'keikka';
 
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_erikoisale_ui", $_REQUEST["saap_erikoisale_ui"]);
+}
+elseif (!empty($_COOKIE["saap_erikoisale_ui"])) {
+  $saap_erikoisale_ui = $_COOKIE["saap_erikoisale_ui"];
+}
+
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_rivihinta_ui", $_REQUEST["saap_rivihinta_ui"]);
+}
+elseif (!empty($_COOKIE["saap_rivihinta_ui"])) {
+  $saap_rivihinta_ui = $_COOKIE["saap_rivihinta_ui"];
+}
+
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
   $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 }
@@ -60,6 +74,7 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
+$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 

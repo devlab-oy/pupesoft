@@ -1,16 +1,66 @@
 <?php
+
 require 'inc/parametrit.inc';
 
 echo "<font class='head'>Danskebank Factoring</font><hr><br>";
 
-if ($tee == "") {
+$factoring_tarkista_lisa = "";
 
+if ($tee == 'TARKISTA') {
+  // lis‰t‰‰n t‰m‰ queryyn alle, niin ei ikin‰ p‰‰st‰ eteenp‰in, jos factoring_id on virheellinen
+  $factoring_tarkista_lisa = " and tunnus = '$factoring_id' ";
+
+  // siirryt‰‰n tulostukseen
+  $tee = 'TULOSTA';
+}
+
+$query = "SELECT *
+          FROM factoring
+          WHERE yhtio = '{$kukarow["yhtio"]}'
+          and factoringyhtio = 'SAMPO'
+          {$factoring_tarkista_lisa}";
+$factoring_result = pupe_query($query);
+
+if (mysql_num_rows($factoring_result) == 0) {
+  echo t("%s factoring-sopimusta ei ole perustettu!", null, 'SAMPO');
+
+  $tee = "ohita";
+}
+elseif (mysql_num_rows($factoring_result) == 1) {
+  // meill‰ on vaan yksi, ei tarvitse valita
+  $vrow = mysql_fetch_assoc($factoring_result);
+  $factoring_id = $vrow['tunnus'];
+  $tee = isset($tee) ? $tee : 'TOIMINNOT';
+}
+
+if ($tee == "") {
+  //K‰yttˆliittym‰
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='TOIMINNOT'>";
+
+  echo t("Valitse factoring-sopimus");
+  echo " <select name='factoring_id' onchange='submit();'>";
+  echo "<option value=''></option>";
+
+  while ($vrow = mysql_fetch_assoc($factoring_result)) {
+    $sel = ($vrow['tunnus'] == $factoring_id) ? "selected" : "";
+    echo "<option value='{$vrow["tunnus"]}' $sel>{$vrow["nimitys"]}</option>";
+  }
+
+  echo "</select>";
+  echo "</form>";
+  echo "<br><br>";
+}
+
+if ($tee == "TOIMINNOT") {
   echo "<font class='message'>Luodaan Danskebank Factoring siirtolista kaikista l‰hett‰m‰ttˆmist‰ factoring laskuista.</font><br><br>";
 
   // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
   $query = "SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
             FROM lasku USE INDEX (factoring)
-            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
+            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+              and maksuehto.tunnus = lasku.maksuehto
+              and maksuehto.factoring_id = '$factoring_id')
             WHERE lasku.yhtio            = '$kukarow[yhtio]' and
             lasku.tila                   = 'U' and
             lasku.alatila                = 'X' and
@@ -44,7 +94,8 @@ if ($tee == "") {
   echo "</table><br>";
 
   echo "<form method='post'>";
-  echo "<input type='hidden' name='tee' value='TULOSTA'>";
+  echo "<input type='hidden' name='tee' value='TARKISTA'>";
+  echo "<input type='hidden' name='factoring_id' value='$factoring_id'>";
 
   echo "<table>";
   echo "<tr>";
@@ -78,17 +129,17 @@ if ($tee == "") {
 
   echo "<input type='submit' value='Luo aineisto'>";
   echo "</form>";
-
 }
 
 if ($tee == 'TULOSTA') {
-
   $numero = (int) $numero;
 
   // haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
   $query = "SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
             FROM lasku USE INDEX (factoring)
-            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
+            JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+              and maksuehto.tunnus = lasku.maksuehto
+              and maksuehto.factoring_id = '$factoring_id')
             WHERE lasku.yhtio            = '$kukarow[yhtio]' and
             lasku.tila                   = 'U' and
             lasku.alatila                = 'X' and
@@ -198,6 +249,7 @@ if ($tee == 'TULOSTA') {
                from factoring
                where yhtio        = '$kukarow[yhtio]'
                and factoringyhtio = 'SAMPO'
+               and tunnus         = '$factoring_id'
                and valkoodi       = '$yhtiorow[valkoodi]'";
     $result = pupe_query($query);
     $soprow = mysql_fetch_array($result);

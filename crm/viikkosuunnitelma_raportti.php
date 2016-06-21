@@ -333,19 +333,6 @@ if ($tee == '') {
           $worksheet->write($excelrivi, $excelsarake++, $rivi["montakotapahtumaa"]);
 
           $excelrivi++;
-          
-          if ($kukarow['kieli'] != 'fi') {
-            $avainsanajoini = "JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['tunnus']}') 
-                    AND avainsana.kieli  = '{$kukarow[kieli]}')
-                    JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ('{$rivi['tunnus']}') 
-                    AND as_fi.kieli  = 'fi')";
-            $tapahaku = "AND kalenteri.tapa    = as_fi.selitetark";
-          }
-          else {
-            $avainsanajoini = "JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['tunnus']}') 
-                    AND avainsana.kieli  = 'fi')";
-            $tapahaku = "AND kalenteri.tapa    = avainsana.selitetark";
-          }    
 
           echo "<tr class='{$js_safe_muuttuja}_{$rivi['tunnus']}' style='display:none;'>";
           echo "<td colspan='4' >";
@@ -361,14 +348,14 @@ if ($tee == '') {
                     IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
                     FROM kalenteri
                     JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-                    {$avainsanajoini}    
+                    JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['tunnus']}') AND avainsana.kieli  = 'fi')    
                     LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
                     WHERE kalenteri.yhtio = '{$yhtio}'
                     AND kalenteri.kuka    IN ('{$rivi['kuka']}')
                     AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                     AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
                     AND kalenteri.tyyppi  IN ('kalenteri','memo')
-                    {$tapahaku}
+                    AND kalenteri.tapa    = avainsana.selitetark
                     {$lisa}
                     ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
           $ressu = pupe_query($query);
@@ -468,22 +455,9 @@ if ($tee == '') {
         echo "<th>".t("Kommentit")."</th>";
         echo "</tr>";
       }
-
-      if ($kukarow['kieli'] != 'fi') {
-        $avainsanajoini = "JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa})
-                AND avainsana.kieli  = '{$kukarow[kieli]}')
-                JOIN avainsana as_fi ON (as_fi.yhtio = kalenteri.yhtio AND as_fi.perhe IN ({$kale_querylisa}) 
-                AND as_fi.kieli  = 'fi')";
-        $tapahaku = "AND kalenteri.tapa    = as_fi.selitetark";
-      }
-      else {
-        $avainsanajoini = "JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) 
-                AND avainsana.kieli  = 'fi')";
-        $tapahaku = "AND kalenteri.tapa    = avainsana.selitetark";
-      }  
       
       $query = "SELECT kuka.nimi kukanimi,
-                avainsana.selitetark aselitetark,
+                avainsana.selitetark aselitetark, avainsana.perhe,
                 IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,
                 IF(asiakas.toim_postino!='' AND asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino,
                 kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio,
@@ -493,19 +467,33 @@ if ($tee == '') {
                 IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
                 FROM kalenteri
                 JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-                {$avainsanajoini}
+                JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) AND avainsana.kieli  = 'fi')
                 LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
                 WHERE kalenteri.yhtio = '{$yhtio}'
                 AND kalenteri.kuka    IN ($vertaa)
                 AND kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                 AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
                 AND kalenteri.tyyppi  IN ('kalenteri','memo')
-                {$tapahaku}
+                AND kalenteri.tapa    = avainsana.selitetark
                 {$lisa}
                 ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
       $ressu = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($ressu)) {
+        
+        $asquery = "SELECT tunnus,selitetark, perhe
+                  FROM avainsana
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND perhe   = '{$row['perhe']}'
+                  AND kieli   = '{$kukarow['kieli']}'
+                  LIMIT 1";
+        $asresult = pupe_query($asquery);
+
+        if (mysql_num_rows($asresult) > 0) {
+          $asrow = mysql_fetch_assoc($asresult);
+          $row["aselitetark"] = $asrow["selitetark"];
+        }
+        
         $excelsarake = 0;
 
         $worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);

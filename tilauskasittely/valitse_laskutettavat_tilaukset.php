@@ -569,7 +569,7 @@ if ($tee == "VALITSE") {
 
       // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
       // niin tehdään nollalasku
-      if ($yhtiorow["alv_kasittely"] != '' and $row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
+      if ($row['arvo'] == 0 and abs($row['summa']) <= 0.05 and $row['hinta'] == 0) {
         $row['summa'] = 0.00;
       }
 
@@ -677,7 +677,7 @@ if ($tee == "VALITSE") {
       }
 
       echo "<td>$row[toimitustapa] $rahti_hinta</td>";
-      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
+      echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$row[tunnus]&kaytiin_otsikolla=NOJOO!&lopetus={$palvelin2}tilauskasittely/valitse_laskutettavat_tilaukset.php////tee=$tee//toim=$toim//tunnukset=$tunnukset'>".t("Muokkaa")."</a></td>";
 
       //Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupositiot kerralla
       if ($jaksotettuja) {
@@ -1128,13 +1128,17 @@ if ($tee == "") {
   echo "</form><br>";
 
   $haku='';
+
   if (is_string($etsi)) {
     $haku = "AND (lasku.nimi LIKE '%{$etsi}%'
                   OR lasku.toim_nimi LIKE '%{$etsi}%'
                   OR lasku.nimitark LIKE '%{$etsi}%'
                   OR lasku.toim_nimitark LIKE '%{$etsi}%')";
   }
-  if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
+
+  if (is_numeric($etsi)) {
+    $haku="and lasku.tunnus='$etsi'";
+  }
 
   if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {
     $ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
@@ -1315,8 +1319,8 @@ if ($tee == "") {
 
     if ($arvoyhteensa != 0) {
       echo "<br><table>";
-      echo "<tr><th>".t("Tilausten arvo yhteensä")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
-      echo "<tr><th>".t("Tilausten summa yhteensä").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten arvo yhteensä")." ($tilauksiayhteensa ".t("kpl")."): </th><td align='right'>".sprintf('%.2f', $arvoyhteensa)." $yhtiorow[valkoodi]</td></tr>";
+      echo "<tr><th>".t("Tilausten summa yhteensä").": </th><td align='right'>".sprintf('%.2f', $summayhteensa)." $yhtiorow[valkoodi]</td></tr>";
       echo "</table>";
     }
   }

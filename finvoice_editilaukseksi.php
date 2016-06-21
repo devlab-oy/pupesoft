@@ -69,14 +69,22 @@ foreach ($files as $file) {
       "grand_total"         => $laskun_summa_eur,
       "order_currency_code" => $laskuttajan_valkoodi,
       "items"               => $items,
-      "laskuttajan_ovt"     => $ostaja_asiakkaantiedot["toim_ovttunnus"],
-      "asiakasnumero"       => $toim_asiakkaantiedot["asiakasnumero"],
       "laskun_numero"       => $laskun_numero,
       "tilausyhteyshenkilo" => $tilausyhteyshenkilo,
       "target"              => $kohde,
       "customer_email"      => $laskuttajan_email
     );
 
-    Edi::create($order, "finvoice");
+    // EDI-tilauksen luontiin tarvittavat parametrit
+    $options = array(
+      'edi_polku'          => $magento_api_ht_edi,
+      'ovt_tunnus'         => $ostaja_asiakkaantiedot["toim_ovttunnus"],
+      'tilaustyyppi'       => " ",
+      'asiakasnro'         => $toim_asiakkaantiedot["asiakasnumero"],
+      'maksuehto_ohjaus'   => "",
+      'erikoiskasittely'   => "",
+    );
+
+    Edi::create($order, $options);
   }
 }

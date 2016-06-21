@@ -24,8 +24,6 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_assoc($result);
-
-  $varastorow = hae_varasto($laskurow['varasto']);
 }
 else {
   echo "<font style='error'>".t("VIRHE: Saapumista ei enää löydy")."!</font>";
@@ -1072,6 +1070,23 @@ if ($tila == 'tee_kohdistus') {
   }
 }
 
+$query = "SELECT DISTINCT varasto
+          FROM tilausrivi
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND uusiotunnus = '{$otunnus}'";
+$varastocheckres = pupe_query($query);
+
+$onkologmaster_varasto = true;
+
+while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
+  $varastorow = hae_varasto($varastocheckrow['varasto']);
+
+  if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
+    $onkologmaster_varasto = false;
+    break;
+  }
+}
+
 //näytetään rivilista ja ruksataan kohdistettavia rivejä
 if ($tila == '') {
 
@@ -1120,14 +1135,26 @@ if ($tila == '') {
   $query_ale_lisa = generoi_alekentta('O');
 
   $kentat_array[] = "$alvti alv";
-  $kentat_array[] = "tilausrivi.erikoisale";
+
+  if (empty($saap_erikoisale_ui)) {
+    $kentat_array[] = "tilausrivi.erikoisale";
+  }
+
   $kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta";
+
+  if (!empty($saap_rivihinta_ui) and $saap_rivihinta_ui == "verobveron") {
+    $alerivihinta_alvit = 0;
+  }
+  else {
+    $alerivihinta_alvit = $alvit;
+  }
+
   $kentat_array[] = "round((tilausrivi.varattu+tilausrivi.kpl) * if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
               (1+(if ((SELECT max(kaytetty) kaytetty
                   FROM sarjanumeroseuranta
                   WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
                   and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
-                  and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,'$yhtiorow[hintapyoristys]') alerivihinta";
+                  and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alerivihinta_alvit)/100)) ,'$yhtiorow[hintapyoristys]') alerivihinta";
 
   if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
     $kentat_array[] = "tuote.myyntihinta myyntihinta";
@@ -1152,9 +1179,20 @@ if ($tila == '') {
   }
 
   $kennim_array[] = t('Alv');
-  $kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
+
+  if (empty($saap_erikoisale_ui)) {
+    $kennim_array[] = t('Tilauksen')."<br>".t('Erikoisale');
+  }
+
   $kennim_array[] = t('Rivihinta');
-  $kennim_array[] = t('+Alv -Ale');
+
+  if (!empty($saap_rivihinta_ui) and $saap_rivihinta_ui == "verobveron") {
+    $kennim_array[] = t('-Ale');
+  }
+  else {
+    $kennim_array[] = t('+Alv -Ale');
+  }
+
 
   if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
     $kennim_array[] = t('Myyntihinta');
@@ -1179,7 +1217,11 @@ if ($tila == '') {
   }
 
   $kenhak_array[] = 'alv';
-  $kenhak_array[] = 'erikoisale';
+
+  if (empty($saap_erikoisale_ui)) {
+    $kenhak_array[] = 'erikoisale';
+  }
+
   $kenhak_array[] = 'rivihinta';
   $kenhak_array[] = 'alerivihinta';
 
@@ -1208,7 +1250,11 @@ if ($tila == '') {
 
   $kenkok_array[] = 4;
   $kenkok_array[] = 6;
-  $kenkok_array[] = 8;
+
+  if (empty($saap_erikoisale_ui)) {
+    $kenkok_array[] = 8;
+  }
+
   $kenkok_array[] = 8;
 
   if ($yhtiorow['myyntihinta_paivitys_saapuminen'] == 'K') {
@@ -1522,7 +1568,9 @@ if ($tila == '') {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th></th><td></td>";
+
+  echo "<th>KALA</th><td>KALA</td>";
+
   echo "<th>".t("Jäljellä").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
   echo "<th>".t("Kappaleita").":</th><td style='text-align:right'><span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span></td>";
   echo "</tr>";
@@ -1556,7 +1604,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster and $varastorow['ulkoinen_jarjestelma'] == 'L' and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -1685,8 +1733,10 @@ if ($tila == '') {
     echo "</th>";
   }
 
-  echo "<th nowrap class='ptop'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
-  $pointteri++;
+  if (empty($saap_erikoisale_ui)) {
+    echo "<th nowrap class='ptop'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a></th>";
+    $pointteri++;
+  }
 
   echo "<th nowrap class='ptop'><a href='$href=".($pointteri).$ulisa."'>$kennim_array[$pointteri]</a><br>";
   $pointteri++;
@@ -1738,8 +1788,10 @@ if ($tila == '') {
     echo "</td>";
   }
 
-  echo "<td nowrap class='ptop'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
-  $pointteri++;
+  if (empty($saap_erikoisale_ui)) {
+    echo "<td nowrap class='ptop'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'></td>";
+    $pointteri++;
+  }
 
   echo "<td nowrap class='ptop'><input type='text' size='$kenkok_array[$pointteri]' name='haku[$pointteri]' value='$haku[$pointteri]'><br>";
   $pointteri++;
@@ -2116,7 +2168,9 @@ if ($tila == '') {
 
     }
 
-    echo "<$td $class align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' class='ale-kentta-{$rivirow["rivitunnus"]}' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
+    if (empty($saap_erikoisale_ui)) {
+      echo "<$td $class align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' class='ale-kentta-{$rivirow["rivitunnus"]}' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
+    }
 
     echo "<$td $class align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 
@@ -2322,7 +2376,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster and $varastorow['ulkoinen_jarjestelma'] == 'L' and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

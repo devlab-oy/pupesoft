@@ -173,7 +173,6 @@ if (count($tuotetiedot) > 0) {
     $tuote_elementit = array(
       xml_string($tuotetieto->ArticleIdentifier),
       xml_string($tuotetieto->ArticleName),
-      xml_string($tuotetieto->SubInvoiceRow->SubArticleName),
     );
 
     // Otetaan eka arvo, joka ei ole FALSE (null ja empty string on false)
@@ -194,14 +193,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
       $rtuoteno[$i]["riviinfo"] = preg_replace("/ {2,}/", " " , xml_string($tuotetieto->ArticleName));
 
-      // Lista elementeistä prioriteettijärjestyksessä, josta veroton rivihinta voi riviltä löytyä
-      $rivihinta_elementit = array(
-        round(xml_float($tuotetieto->RowVatExcludedAmount), 2),
-        round(xml_float($tuotetieto->SubInvoiceRow->SubRowAmount), 2),
-      );
-
-      // Otetaan eka arvo, joka ei ole FALSE (0, null ja empty string on false)
-      $rtuoteno[$i]["rivihinta"] = current(array_filter($rivihinta_elementit));
+      $rtuoteno[$i]["rivihinta"] = round(xml_float($tuotetieto->RowVatExcludedAmount), 2);
       $rtuoteno[$i]["rivihinta_verolli"] = round(xml_float($tuotetieto->RowAmount), 2);
 
       $rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];

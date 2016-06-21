@@ -2119,11 +2119,11 @@ if (!function_exists('loppu')) {
       }
 
       //Haetaan factoringsopimuksen tiedot
-      if ($masrow["factoring"] != '') {
+      if (isset($masrow["factoring_id"])) {
         $query = "SELECT *
                   FROM factoring
                   WHERE yhtio = '$kukarow[yhtio]'
-                  and factoringyhtio = '$masrow[factoring]'
+                  and tunnus = '$masrow[factoring_id]'
                   and valkoodi = '$laskurow[valkoodi]'";
         $fres = pupe_query($query);
         $frow = mysql_fetch_assoc($fres);
@@ -2135,7 +2135,7 @@ if (!function_exists('loppu')) {
       $pankkitiedot = array();
 
       //Laitetaan pankkiyhteystiedot kuntoon
-      if ($masrow["factoring"] != "") {
+      if (isset($masrow["factoring_id"])) {
         $pankkitiedot["pankkinimi1"] = $frow["pankkinimi1"];
         $pankkitiedot["pankkitili1"] = $frow["pankkitili1"];
         $pankkitiedot["pankkiiban1"] = $frow["pankkiiban1"];
@@ -3237,10 +3237,8 @@ if (!function_exists("tulosta_lasku")) {
 
       // Otetaan yhteensäkommentti pois jos summataan rivejä
       if ($rivigrouppaus) {
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $kieli).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä", $asiakasrow["kieli"]).": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ ".t("yhteensä").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
-        $row["kommentti"] = preg_replace("/ "."yhteensä".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
+        // Trimmataan ja otetaan "yhteensäkommentti" pois
+        $row["kommentti"] = trim(poista_rivin_yhteensakommentti($row["kommentti"]));
       }
       else {
         // Jos laskutyyppi on 18 (Normaali laskupohja (nimitykset rivitettynä))

@@ -14,14 +14,15 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
   exit;
 }
 
-// jos tilauksen varasto on setattu ja on laaja toimipaikkakäsittely,
-// tutkitaan eroaako varaston toimipaikka tilauksen toimipaikasta. Jos, haetaan $yhtiorow uusiksi.
-if ($laskurow['varasto'] != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
+// käytetään laskun varastoa jos se on, muuten varasto alkuperäiseltä tilaukselta
+$vanha_varasto = empty($alkuperainen_varasto) ? 0 : $alkuperainen_varasto;
+$_varasto      = empty($laskurow['varasto']) ? $vanha_varasto : $laskurow['varasto'];
 
+if ($_varasto != 0 and $yhtiorow['toimipaikkakasittely'] == 'L') {
   $query = "SELECT toimipaikka
             FROM varastopaikat
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$laskurow['varasto']}";
+            AND tunnus  = {$_varasto}";
   $_tp_res = pupe_query($query);
   $_tp_row = mysql_fetch_assoc($_tp_res);
 
@@ -214,6 +215,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
   and $laskurow['tila'] == 'N'
   and ($laskurow['alatila'] == '' or $laskurow['alatila'] == 'B')
+  and vapauta_maksusopimus_kysely($laskurow['jaksotettu']) == 0
   and ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == 'X' or ($tilausvalmis_asiakas_row['maksusopimus_toimitus'] == '' and $yhtiorow['maksusopimus_toimitus'] == 'X'))) {
 
   if ($laskurow['alatila'] == '') {
@@ -2080,7 +2082,7 @@ else {
       }
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
-        if ($laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L','P'))) {
+        if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('','K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L','P'))) {
           posten_outbounddelivery($_otunnus, $_ulkoinen_jarjestelma);
         }
       }

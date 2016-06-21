@@ -119,9 +119,6 @@ class PrestaProducts extends PrestaClient {
     $xml->product->available_for_order = 1;
     $xml->product->show_price = 1;
 
-    // Out of stock message
-    $out_of_stock = $product['status'] == 'T' ? "Tilaustuote" : "";
-
     // Set default value from Pupesoft to all languages
     $languages = count($xml->product->name->language);
     $_nimi = empty($product['nimi']) ? '-' : $product['nimi'];
@@ -135,7 +132,7 @@ class PrestaProducts extends PrestaClient {
       $xml->product->description->language[$i]       = nl2br($this->xml_value($product['kuvaus']));
       $xml->product->description_short->language[$i] = nl2br($this->xml_value($product['lyhytkuvaus']));
       $xml->product->link_rewrite->language[$i]      = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$product['nimi']}");
-      $xml->product->available_later                 = $out_of_stock;
+      $xml->product->available_later->language[$i]   = '';
     }
 
     // loop all translations and overwrite defaults
@@ -151,7 +148,9 @@ class PrestaProducts extends PrestaClient {
       $value = $this->xml_value($translation['teksti']);
 
       // set translation to correct field
-      switch ($translation['kentta']) {
+      $field = strtolower($translation['kentta']);
+
+      switch ($field) {
         case 'nimitys':
           $xml->product->name->language[$tr_id] = $value;
           $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
@@ -161,6 +160,9 @@ class PrestaProducts extends PrestaClient {
           break;
         case 'lyhytkuvaus':
           $xml->product->description_short->language[$tr_id] = $value;
+          break;
+        case 'tilaustuote':
+          $xml->product->available_later->language[$tr_id] = $value;
           break;
       }
 

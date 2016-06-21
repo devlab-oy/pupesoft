@@ -30,7 +30,7 @@ class PrestaProductFeatureValues extends PrestaClient {
         $value_id = $response['product_feature_value']['id'];
 
         // nollataan all values array, jotta se haetaan uusiksi prestasta, niin ei perusteta samaa arvoa monta kertaa
-        $this->presta_product_feature_values->reset_all_values();
+        $this->reset_all_values();
         $this->logger->log("Perustettiin ominaisuuden arvo '{$value}' ({$value_id})");
       }
       catch (Exception $e) {

@@ -2,6 +2,20 @@
 
 $pupe_DataTables = 'keikka';
 
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_erikoisale_ui", $_REQUEST["saap_erikoisale_ui"]);
+}
+elseif (!empty($_COOKIE["saap_erikoisale_ui"])) {
+  $saap_erikoisale_ui = $_COOKIE["saap_erikoisale_ui"];
+}
+
+if (!empty($_REQUEST["lisatiedot_submit"])) {
+  setcookie("saap_rivihinta_ui", $_REQUEST["saap_rivihinta_ui"]);
+}
+elseif (!empty($_COOKIE["saap_rivihinta_ui"])) {
+  $saap_rivihinta_ui = $_COOKIE["saap_rivihinta_ui"];
+}
+
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
   $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 }
@@ -60,6 +74,7 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
+$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -806,7 +821,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             max(lasku.nimitark) nimitark,
             max(lasku.osoite)   osoite,
             max(lasku.postitp)  postitp,
-            group_concat(distinct if(lasku.comments!='',lasku.comments,NULL) SEPARATOR '<br><br>') comments,
+            group_concat(distinct if(lasku.comments!='',CONCAT(lasku.laskunro, ': ', lasku.comments),NULL) SEPARATOR '<br><br>') comments,
             count(distinct lasku.tunnus) kpl,
             group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
             round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta, 0)),2) varastossaarvo,
@@ -1130,8 +1145,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             lasku.rahti_etu,
             lasku.kohdistettu,
             lasku.sisviesti3,
-            lasku.yhtio_toimipaikka,
-            lasku.varasto
+            lasku.yhtio_toimipaikka
             {$selectlisa}
             FROM lasku
             {$joinlisa}
@@ -1396,9 +1410,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
-        $varastorow = hae_varasto($row['varasto']);
+        $onkologmaster_varasto = $normivarastoja = 0;
 
-        $logmaster_chk = (!$onkologmaster or $varastorow['ulkoinen_jarjestelma'] != 'L' or ($onkologmaster and $row['sisviesti3'] == 'ok_vie_varastoon'));
+        if ($onkologmaster) {
+          list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($row['tunnus']);
+        }
+
+        $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $row['sisviesti3'] == 'ok_vie_varastoon'));
 
         // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
         if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S' and $logmaster_chk) {
@@ -1591,9 +1609,13 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
-  $varastorow = hae_varasto($tsekkirow['varasto']);
+  $onkologmaster_varasto = $normivarastoja = 0;
 
-  $logmaster_chk = (!$onkologmaster or $varastorow['ulkoinen_jarjestelma'] != 'L' or ($onkologmaster and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
+  if ($onkologmaster) {
+    list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($otunnus);
+  }
+
+  $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
 
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
   if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $logmaster_chk) {

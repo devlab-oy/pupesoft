@@ -1111,7 +1111,7 @@ else {
 
   // jos veroton summa on nolla ja verollinen summa on myös hyvin lähellä nollaa
   // niin tehdään nollalasku
-  if ($yhtiorow["alv_kasittely"] != '' and $arvosumma == 0 and abs($loppusumma) <= 0.05 and $pyorerotus == 0) {
+  if ($arvosumma == 0 and abs($loppusumma) <= 0.05 and $pyorerotus == 0) {
     $arvosumma = 0;
     $arvosumma_valuutassa = 0;
     $loppusumma = 0;

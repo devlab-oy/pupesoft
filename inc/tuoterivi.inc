@@ -186,12 +186,13 @@ if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["kehahinarvio_ennen
   $tyyppi = 1;
 }
 
-if (mysql_field_name($result, $i) == "try"
+if ($laji != "V" and
+  (mysql_field_name($result, $i) == "try"
   or mysql_field_name($result, $i) == "osasto"
   or mysql_field_name($result, $i) == "tuotemerkki"
   or mysql_field_name($result, $i) == "malli"
   or mysql_field_name($result, $i) == "mallitarkenne"
-  or mysql_field_name($result, $i) == "valmistuslinja") {
+  or mysql_field_name($result, $i) == "valmistuslinja")) {
 
   $sresult = t_avainsana(mysql_field_name($result, $i));
   $sarnimi = mysql_field_name($result, $i);

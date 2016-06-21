@@ -85,6 +85,11 @@ if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and
   mysql_query("set session sql_mode = ''", $link); //Mahdollistetaan devaus
   mysql_query("set global sql_mode = ''", $link); //Mahdollistetaan devaus
 }
+else {
+  // sql_mode oli blank aina mysql versioon 5.6.5 asti. pupen sql vaatii blank.
+  // http://dev.mysql.com/doc/refman/en/sql-mode.html
+  mysql_query("set session sql_mode = ''");
+}
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
 

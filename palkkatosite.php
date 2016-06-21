@@ -12,11 +12,40 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
     die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
   }
 
-  $file  = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+  if ($tiedostomuoto == "EMCE") {
+    $path_parts = pathinfo($_FILES['userfile']['name']);
+    $ext = strtoupper($path_parts['extension']);
+
+    $filerivit = pupeFileReader($_FILES['userfile']['tmp_name'], $ext);
+
+    // Otetaan p‰iv‰m‰‰r‰ kakkosrivilt‰
+    preg_match("/\- ([0-9]{2,2}\.[0-9]{2,2}\.[0-9]{4,4})/", $filerivit[1][3], $match);
+
+    list($tpp, $tpk, $tpv) = explode(".", $match[1]);
+
+    // Kolme ekaa rivi veks
+    unset($filerivit[0]);
+    unset($filerivit[1]);
+    unset($filerivit[2]);
+  }
+  else {
+    $file  = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+
+    $filerivit = array();
+
+    while ($rivi = fgets($file)) {
+      $filerivit[] = $rivi;
+    }
+
+    fclose($file);
+    unset($_FILES['userfile']['tmp_name']);
+    unset($_FILES['userfile']['error']);
+  }
+
   $maara = 1;
   $flip  = 0;
 
-  while ($rivi = fgets($file)) {
+  foreach ($filerivit as $rivi) {
 
     //  M2 matkalaskuohjelma
     if ($tiedostomuoto == "M2MATKALASKU") {
@@ -122,6 +151,131 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
       $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
     }
+    // T‰m‰ on Palkka.fi CSV siirtomuoto
+    elseif ($tiedostomuoto == "PALKKAFI") {
+      /*
+        Aineisto sarkaineroteltu tekstitiedosto
+        0 tyyppi
+        1 tili
+        2 tilin nimi
+        3 summa
+        4
+        5
+        6
+        7
+      */
+
+      $kentat = explode(";", $rivi);
+
+      //  Trimmataan kaikki
+      foreach ($kentat as &$k) {
+        $k = pupesoft_cleanstring(trim($k));
+        $k = pupesoft_csvstring($k);
+      }
+
+      // Ekalla rivill‰ on otsikkotiedot
+      if (empty($palkkafiekarivi)) {
+        // Otetaan p‰iv‰m‰‰r‰v‰lin loppu p‰iv‰m‰‰r‰ksi
+        list($tpp, $tpk, $tpv) = explode(".", $kentat[6]);
+        $palkkafiekarivi = TRUE;
+        continue;
+      }
+      else {
+        $itili[$maara]   = $kentat[1];
+        $isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
+        $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+        $selite = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+      }
+    }
+    // T‰m‰ on EMCE KIrjanpitoyhteenveto xls-tiedosto
+    elseif ($tiedostomuoto == "EMCE") {
+
+      $kentat = $rivi;
+
+      //  Trimmataan kaikki
+      foreach ($kentat as &$k) {
+        $k = pupesoft_cleanstring(trim($k));
+        $k = pupesoft_csvstring($k);
+      }
+
+      if (!empty($kentat[0]) and (!empty($kentat[2]) or !empty($kentat[3]))) {
+        // T‰ss‰ tulee p‰‰rivi. Eli koko summa, ksutannuspaikat yhteens‰
+        if (!empty($kentat[2])) {
+          $isumma[$maara] = sprintf('%.2f', round($kentat[2], 2));
+        }
+        else {
+          $isumma[$maara] = sprintf('%.2f', round($kentat[3] * -1, 2));
+        }
+
+        $itili[$maara] = $kentat[0];
+        $ikustp[$maara] = 0;
+        $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+        $selite = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+
+        $edmaara = $maara;
+      }
+      elseif (!empty($edmaara) and !empty($kentat[6]) and is_numeric($kentat[6]) and !empty($kentat[7]) and !empty($kentat[8])) {
+        // T‰ss‰ tulee ksutannuspaikkarivi
+        $ikustp_tsk = $kentat[6];
+        $ikustp[$maara] = 0;
+
+        if ($ikustp_tsk != "") {
+          $query = "SELECT tunnus
+                    FROM kustannuspaikka
+                    WHERE yhtio   = '$kukarow[yhtio]'
+                    and tyyppi    = 'K'
+                    and kaytossa != 'E'
+                    and nimi      = '$ikustp_tsk'";
+          $ikustpres = pupe_query($query);
+
+          if (mysql_num_rows($ikustpres) == 1) {
+            $ikustprow = mysql_fetch_assoc($ikustpres);
+            $ikustp[$maara] = $ikustprow["tunnus"];
+          }
+        }
+
+        if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
+          $query = "SELECT tunnus
+                    FROM kustannuspaikka
+                    WHERE yhtio   = '$kukarow[yhtio]'
+                    and tyyppi    = 'K'
+                    and kaytossa != 'E'
+                    and koodi     = '$ikustp_tsk'";
+          $ikustpres = pupe_query($query);
+
+          if (mysql_num_rows($ikustpres) == 1) {
+            $ikustprow = mysql_fetch_assoc($ikustpres);
+            $ikustp[$maara] = $ikustprow["tunnus"];
+          }
+        }
+
+        if ($kentat[8] == "D") {
+          $isumma[$maara] = sprintf('%.2f', round($kentat[7], 2));
+        }
+        else {
+          $isumma[$maara] = sprintf('%.2f', round($kentat[7] * -1, 2));
+        }
+
+        $itili[$maara] = $itili[$edmaara];
+        $iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;
+
+        // V‰hennet‰‰n kustannuspaikalle tiliˆit‰v‰ summa p‰‰rivilt‰
+        $isumma[$edmaara] = sprintf('%.2f', round($isumma[$edmaara] - $isumma[$maara], 2));
+
+        // P‰‰riville ei j‰‰nyt mit‰‰n, koko summa oli kustannuspaikoilla
+        // Unsetataan siis p‰‰rivi
+        if ($isumma[$edmaara] == 0) {
+          unset($isumma[$edmaara]);
+          unset($itili[$edmaara]);
+          unset($iselite[$edmaara]);
+          unset($ikustp[$edmaara]);
+          unset($edmaara);
+        }
+      }
+      else {
+        continue;
+      }
+    }
     elseif ($tiedostomuoto == "AMMATTILAINEN") {
 
       /*
@@ -147,7 +301,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
       // Tili
       $itili[$maara] = $kentat[0];
 
-      //  Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
+      // Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
       $ikustp[$maara]   = "";
       $iprojekti[$maara]  = "";
 
@@ -256,16 +410,24 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
     $maara++;
   }
 
-  fclose($file);
+  // Poistetaan tyhj‰t p‰‰rivit v‰list‰.
+  if ($tiedostomuoto == "EMCE") {
+    $isumma = array_values($isumma);
+    $itili = array_values($itili);
+    $iselite = array_values($iselite);
+    $ikustp = array_values($ikustp);
 
-  unset($_FILES['userfile']['tmp_name']);
-  unset($_FILES['userfile']['error']);
+    // Nollaindexi‰ ei k‰sitell‰, joten laitetaan sinne skeidaa
+    array_unshift($isumma, "");
+    array_unshift($itili, "");
+    array_unshift($iselite, "");
+    array_unshift($ikustp, "");
+  }
 
   $gokfrom = "palkkatosite"; // Pakotetaan virhe
   $tee = 'I';
 
   require 'tosite.php';
-
   exit;
 }
 
@@ -275,7 +437,9 @@ echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     <tr><th>".t("Valitse tiedostomuoto")."</th><td>
     <select name = 'tiedostomuoto'>
     <option value ='PRETAX'>Pretax palkkatosite</option>
-    <option value ='AMMATTILAINEN'>Ammattilainen/Aboa palkanlaskenta</option>
+    <option value ='AMMATTILAINEN'>Ammattilainen/Aboa/Heeros palkanlaskenta</option>
+    <option value ='PALKKAFI'>Palkka.fi (Kirjanpidon tosite CSV)</option>
+    <option value ='EMCE'>EmCe Palkkahallinto</option>
     <option value ='M2MATKALASKU'>M2 Matkalasku</option>
     </select>
     </td></tr>

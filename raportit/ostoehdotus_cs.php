@@ -41,6 +41,8 @@ if ($tee == "PAIVITA_AJAX") {
   exit;
 }
 
+if (!isset($ei_vuosikulutusta)) $ei_vuosikulutusta = '';
+
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 
 $useampi_yhtio = 0;
@@ -655,6 +657,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
   // loopataan tuotteet läpi
   while ($row = mysql_fetch_assoc($res)) {
 
+    // Paljonko ehdotetaan ostettavaksi
+    $ostoehdotus = 0;
+
     $toimilisa = "";
     if ($toimittajaid != '') $toimilisa = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 
@@ -727,9 +732,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
           $ostoehdotus = floor($ostoehdotus / $osto_era) * $osto_era;
         }
       }
-      else {
-        $ostoehdotus = 0;
-      }
     }
     elseif ($toim == "BIO") {
       // Vähennetään myynneistä vapaa saldo ja ostot
@@ -752,7 +754,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         if ($row["status"] != "T" or $lisa != 0) {
 
           $ostoehdotus     = $row["halytysraja"] - $vapaasaldo;
-          $ostoehdotus_lisa   = (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
+          $vku_laskenta    = !empty($ei_vuosikulutusta) ? 0 : $vku;
+
+          $ostoehdotus_lisa = (2 * (($vku_laskenta / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
 
           if ($ostoehdotus_lisa > 0) {
             $ostoehdotus += $ostoehdotus_lisa;
@@ -760,9 +764,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
           $ostoehdotus = round($ostoehdotus, 2);
         }
-      }
-      else {
-        $ostoehdotus = 0;
       }
     }
 
@@ -1125,6 +1126,12 @@ echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input ty
 $chk = "";
 if ($erikoisvarastot != "") $chk = "checked";
 echo "<tr><th>".t("Älä huomioi erikoisvarastoja")."</th><td colspan='3'><input type='checkbox' name='erikoisvarastot' $chk></td></tr>";
+
+if ($toim == "") {
+  $chk = "";
+  if ($ei_vuosikulutusta != "") $chk = "checked";
+  echo "<tr><th>".t("Älä huomioi vuosikulutusta")."</th><td colspan='3'><input type='checkbox' name='ei_vuosikulutusta' {$chk}></td></tr>";
+}
 
 $chk = "";
 if ($poistetut != "") $chk = "checked";

@@ -341,6 +341,23 @@ $sanakirja_kielet = array("fi" => "Suomi",
   "no" => "Norja",
   "ru" => "Venäjä");
 
+// Pupenext ylläpitonakymät aakkosjärjestyksessä
+$pupenext_yllapitonakymat = array(
+  "kassalipas"         => "{$palvelin2}pupenext/cash_registers",
+  "kirjoittimet"       => "{$palvelin2}pupenext/printers",
+  "kustannuspaikka"    => "{$palvelin2}pupenext/qualifiers",
+  "maksuehto"          => "{$palvelin2}pupenext/terms_of_payments",
+  "pakkaamo"           => "{$palvelin2}pupenext/packing_areas",
+  "pakkaus"            => "{$palvelin2}pupenext/packages",
+  "pankkiyhteystiedot" => "{$palvelin2}pupenext/bank_details",
+  "rahdinkuljettajat"  => "{$palvelin2}pupenext/carriers",
+  "taso"               => "{$palvelin2}pupenext/sum_levels",
+  "tili"               => "{$palvelin2}pupenext/accounts",
+  "tilikaudet"         => "{$palvelin2}pupenext/fiscal_years",
+  "valuu"              => "{$palvelin2}pupenext/currencies",
+  "yriti"              => "{$palvelin2}pupenext/bank_accounts",
+);
+
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
 if (!isset($extranet)) $extranet = "";

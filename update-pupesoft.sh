@@ -243,7 +243,9 @@ fi
 ####################################################################################################
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
+if [[ -n "${PUPESOFT_BRANCH}" ]]; then
+  pupebranch=${PUPESOFT_BRANCH}
+elif [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
   pupebranch=$(cat ${branchfile} | tr -d '\n')
 else
   pupebranch="master"
@@ -304,7 +306,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
     eval ${nrfile}
   fi
 elif [[ "${jatketaanko}" = "skip" ]]; then
-  echo "${green}Pupesoft ajantasalla, ei pävitettävää!${normal}"
+  echo "${green}Pupesoft ajantasalla, ei päivitettävää!${normal}"
 else
   echo "${red}Pupesoftia ei päivitetty!${normal}"
 fi
@@ -319,7 +321,9 @@ echo
 export RAILS_ENV=${environment}
 
 # Onko spessubranchi käytössä?
-if [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
+if [[ -n "${PUPENEXT_BRANCH}" ]]; then
+  pupenextbranch=${PUPENEXT_BRANCH}
+elif [[ -f "${branchfilepupenext}" && -s "${branchfilepupenext}" ]]; then
   pupenextbranch=$(cat ${branchfilepupenext} | tr -d '\n')
 else
   pupenextbranch="master"
@@ -333,8 +337,14 @@ if [[ $? -eq 0 ]]; then
   jatketaanko="skip"
 elif [[ "${jatketaan}" = "auto" || "${jatketaan}" = "autopupe" ]]; then
   jatketaanko="k"
-else
+elif [[ -n ${jatketaan} ]]; then
+  # Jos ollaan kysytty jo ylempänä, otetaan siitä vastaus
   jatketaanko=$jatketaan
+else
+  echo "${green}Uudempi Pupenext versio saatavilla!${normal}"
+  echo
+  echo -n "${white}Päivitetäänkö Pupenext (k/e)? ${normal}"
+  read jatketaanko
 fi
 
 if [[ "${jatketaanko}" = "k" ]]; then
@@ -373,12 +383,11 @@ if [[ ${bundle} = true ]]; then
   # Päivitetään bundler oikeaan versioon
   if [[ -n "${bundled_with}" && "${bundler_version}" != "${bundled_with}" ]]; then
     gem install bundler -v ${bundled_with}
-    gem cleanup
   fi
 
   # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
   cd "${pupenextdir}" &&
-  bundle --quiet &&
+  (bundle check || bundle install) &&
   bundle clean &&
   bundle exec rake css:write &&
   bundle exec rake assets:precompile &&
@@ -386,6 +395,13 @@ if [[ ${bundle} = true ]]; then
   # Restart rails App
   touch "${pupenextdir}/tmp/restart.txt" &&
   chmod 777 "${pupenextdir}/tmp/restart.txt" &&
+
+  # Write cron file (Skip this if we are updating a demo Pupesoft)
+  DEMO=$(echo ${pupenextdir} | grep asiakasdemot)
+
+  if [ -z $DEMO ]; then
+    bundle exec whenever --update-crontab
+  fi
 
   # Restart Resque workers
   bundle exec rake resque:stop_workers &&
@@ -439,7 +455,7 @@ else
   fi
 
   if [[ "$jatketaanko" = "k" ]]; then
-    bundle --quiet &&
+    (bundle check || bundle install) &&
     bundle exec rake db:migrate
 
     if [[ $? -eq 0 ]]; then

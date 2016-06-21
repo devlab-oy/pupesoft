@@ -158,7 +158,7 @@ if ($tee == '') {
       <th></th>
       </tr>";
 
-    // Haetaan linjan 4 uusinta kalenterimerkinnät
+    // Haetaan linjan 8 uusinta kalenterimerkinnät
     $tyojono_query = "SELECT kalenteri.kuka, kalenteri.henkilo, nimitys, varattu, yksikko, pvmalku, pvmloppu, kalenteri.tunnus, lasku.valmistuksen_tila, lasku.viesti, lasku.tunnus as valmistusnumero, kalenteri.otunnus
                       FROM kalenteri
                       JOIN tilausrivi on (tilausrivi.yhtio=kalenteri.yhtio and tilausrivi.otunnus=kalenteri.otunnus)
@@ -168,7 +168,7 @@ if ($tee == '') {
                       AND tilausrivi.tyyppi='W'
                       AND lasku.valmistuksen_tila != ('TA')
                       ORDER BY pvmalku
-                      LIMIT 4";
+                      LIMIT 8";
     $tyojono_result = pupe_query($tyojono_query);
 
     // Jos työjono on tyhjä

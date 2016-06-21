@@ -123,7 +123,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
+      if (($tem_laji == 'VAKIOVIESTI' or $tem_laji == 'MAINOSTXT_LASKU' or $tem_laji == 'VAKIOVIESTI_TIL') and trim($tem_selite) == '') {
         $virhe[$i] = t("Selite on pakollinen");
       }
 
@@ -215,7 +215,15 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'SAMMUTIN_KOKO' and $tem_laji != 'SAMMUTIN_TYYPPI') {
+      if ($seliteerrori == 1 and trim($t[$i]) == ''
+        and $tem_laji != 'HINNAT_CRON'
+        and $tem_laji != 'MAINOSTXT_LASKU'
+        and $tem_laji != 'SAMMUTIN_KOKO'
+        and $tem_laji != 'SAMMUTIN_TYYPPI'
+        and $tem_laji != 'TUOTE_EXP_CRON'
+        and $tem_laji != 'TUOTE_EXP_CRON'
+        and $tem_laji != 'VAKIOVIESTI'
+        and $tem_laji != 'VAKIOVIESTI_TIL') {
         $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
       }
 
@@ -289,6 +297,14 @@ if (!function_exists("avainsanatarkista")) {
 
       if (mysql_num_rows($results) > 0) {
         $virhe[$seliteind] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+      }
+
+      if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite'] and $trow['selite'] != '') {
+        $query = "UPDATE tuote SET
+                  vienti = '{$tem_selite}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND vienti = '{$trow['selite']}'";
+        $updres = pupe_query($query);
       }
     }
 

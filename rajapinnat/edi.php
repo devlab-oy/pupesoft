@@ -22,21 +22,17 @@ class Edi {
     // Oletuksena "magento"
     $tyyppi = empty($options['tyyppi']) ? "magento" : $options['tyyppi'];
 
-    if (empty($pupesoft_tilaustyyppi)) {
-      die("Parametrejä puuttuu\n");
-    }
-
-    if (!is_writable($magento_api_ht_edi)) {
-      die("EDI -hakemistoon ei voida kirjoittaa\n");
-    }
-
     if ($tyyppi == "magento") {
-      if (empty($magento_api_ht_edi) or empty($ovt_tunnus)) {
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
         die("Parametrejä puuttuu\n");
       }
 
       if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) {
         die("Parametrejä puuttuu\n");
+      }
+
+      if (!is_writable($magento_api_ht_edi)) {
+        die("EDI -hakemistoon ei voida kirjoittaa\n");
       }
 
       $viitteenne    = $storenimi;

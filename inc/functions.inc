@@ -6706,6 +6706,12 @@ if (!function_exists("kalenteritapahtuma")) {
   }
 }
 
+if (!function_exists('js_openUrlNewWindow')) {
+  function js_openUrlNewWindow($url, $name, $params = "") {
+    return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=700,height=1000'); return false;\">$name</a>";
+  }
+}
+
 if (!function_exists('ebid')) {
   function ebid($lasku_tunnus, $url_only = false) {
     global $kukarow, $yhtiorow, $palvelin2;
@@ -6732,7 +6738,7 @@ if (!function_exists('ebid')) {
         return array($url);
       }
 
-      $out = "<a href='$url' target='Attachment'>". t('Näytä lasku')."</a> ";
+      $out = js_openUrlNewWindow($url, t('Näytä lasku'))." ";
 
       // Ei näytetä INVOIC.D.96A xml-linkkiä
       $query = "SELECT tunnus
@@ -6744,7 +6750,7 @@ if (!function_exists('ebid')) {
       $res = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($res)) {
-        $out .= " <a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
+        $out .= " ".js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Näytä liite'))." ";
       }
 
       return $out;
@@ -6770,7 +6776,7 @@ if (!function_exists('ebid')) {
       $res = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($res)) {
-        $out .= " <a href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä liite') ."</a> ";
+        $out .= " ".js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Näytä liite'))." ";
       }
 
       return $out;
@@ -6797,12 +6803,12 @@ if (!function_exists('ebid')) {
         }
         else {
           if ($laskurow['tila'] == 'X') {
-            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
-                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Liite') .": $row[filename]</a>&nbsp;&nbsp;";
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>";
+            $out .= js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Liite').": $row[filename]", "class='tooltip' id='$row[tunnus]'")."&nbsp;&nbsp;";
           }
           else {
-            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>
-                     <a class='tooltip' id='$row[tunnus]' href='".$palvelin2."view.php?id=$row[tunnus]' target='Attachment'>". t('Näytä lasku') ."</a>&nbsp;&nbsp;";
+            $out .= "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>";
+            $out .= js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Näytä lasku'), "class='tooltip' id='$row[tunnus]'")."&nbsp;&nbsp;";
           }
         }
       }

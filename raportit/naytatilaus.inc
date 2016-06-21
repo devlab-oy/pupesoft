@@ -393,7 +393,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-            and tilausrivi.var     NOT IN ('O', 'P', 'J')
+            and tilausrivi.var not in ('P','J','O','S')
             AND tilausrivi.tyyppi  != 'D'
             HAVING kerattyaika != '0000-00-00 00:00:00'";
   $kerattyaikares = pupe_query($query);
@@ -418,7 +418,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
               FROM tilausrivi
               WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
               AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-              and tilausrivi.var     NOT IN ('O', 'P', 'J')
+              and tilausrivi.var not in ('P','J','O','S')
               AND tilausrivi.tyyppi  != 'D'
               HAVING toimitettuaika != '0000-00-00 00:00:00'";
     $toimitettuaikares = pupe_query($query);

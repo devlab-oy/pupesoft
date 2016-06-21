@@ -455,7 +455,7 @@ if ($tee == '') {
         echo "<th>".t("Kommentit")."</th>";
         echo "</tr>";
       }
-      
+
       $query = "SELECT kuka.nimi kukanimi,
                 avainsana.selitetark aselitetark, avainsana.perhe,
                 IF(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp,

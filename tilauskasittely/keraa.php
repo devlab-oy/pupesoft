@@ -590,13 +590,13 @@ if ($tee == 'P') {
       // varastorekla on dropdown ja vertaushylly on kannasta
       if ((trim($varastorekla[$kerivi[$a]]) == trim($vertaus_hylly[$kerivi[$a]])) and $reklahyllyalue[$kerivi[$a]] != '' and $reklahyllynro[$kerivi[$a]] != '') {
         if (kuuluukovarastoon($reklahyllyalue[$kerivi[$a]], $reklahyllynro[$kerivi[$a]], '') == 0) {
-          echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_tuoteno[$kerivi[$a]]." ".t("annettu paikka")." ".$reklahyllyalue[$kerivi[$a]]."-".$reklahyllynro[$kerivi[$a]]."-".$reklahyllyvali[$kerivi[$a]]."-".$reklahyllytaso[$kerivi[$a]]." ".t("ei kuulu mihink‰‰n varastoon")."!</font><br>";
+          echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_puhdas_tuoteno[$kerivi[$a]]." ".t("annettu paikka")." ".$reklahyllyalue[$kerivi[$a]]."-".$reklahyllynro[$kerivi[$a]]."-".$reklahyllyvali[$kerivi[$a]]."-".$reklahyllytaso[$kerivi[$a]]." ".t("ei kuulu mihink‰‰n varastoon")."!</font><br>";
           $virherivi++;
         }
       }
 
       if ((trim($varastorekla[$kerivi[$a]]) != trim($vertaus_hylly[$kerivi[$a]])) and $reklahyllyalue[$kerivi[$a]] != '') {
-        echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_tuoteno[$kerivi[$a]]." ".t("voi antaa vain yhden paikan per rivi")."</font><br>";
+        echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." ".$rivin_puhdas_tuoteno[$kerivi[$a]]." ".t("voi antaa vain yhden paikan per rivi")."</font><br>";
         $virherivi++;
       }
     }
@@ -3256,9 +3256,9 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "<table id='maintable'>
           <tr>
-          <th>".t("Varastopaikka")."</th>
+          <th>".t("Paikka")."</th>
           <th>".t("Tuoteno")."</th>
-          <th>".t("Tuotenimitys")."</th>
+          <th>".t("Nimitys")."</th>
           <th>".t("M‰‰r‰")."</th>
           <th>".t("Poikkeava m‰‰r‰")."</th>";
 
@@ -3468,9 +3468,9 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           echo "<input type='hidden' name='vertaus_hylly[$row[tunnus]]' value='$row[varastopaikka_rekla]'>";
           echo "</td>";
-          echo "<td>$row[tuoteno] <input type='hidden' name='rivin_tuoteno[$row[tunnus]]' value='$row[tuoteno]'> <input type='hidden' name='rivin_puhdas_tuoteno[$row[tunnus]]' value='$row[puhdas_tuoteno]'></td>";
-          echo "<td>$row[nimitys] <input type='hidden' name='rivin_nimitys[$row[tunnus]]' value='$row[nimitys]'> <input type='hidden' name='rivin_puhdas_nimitys[$row[tunnus]]' value='$row[puhdas_nimitys]'></td>";
-          echo "<td id='{$row['tunnus']}_varattu'>$row[varattu] <input type='hidden' name='rivin_varattu[$row[tunnus]]' value='$row[varattu]'> </td>";
+          echo "<td>$row[tuoteno]<input type='hidden' name='rivin_puhdas_tuoteno[$row[tunnus]]' value='$row[puhdas_tuoteno]'></td>";
+          echo "<td>$row[nimitys]</td>";
+          echo "<td class='text-right' id='{$row['tunnus']}_varattu'>".(float) $row[varattu]."<input type='hidden' name='rivin_varattu[$row[tunnus]]' value='$row[varattu]'></td>";
           echo "<td>";
 
           //  kaikki gruupatut tunnukset mukaan!

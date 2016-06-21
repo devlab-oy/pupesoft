@@ -1243,7 +1243,7 @@ if (isset($ajax)) {
               and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
               and tilausrivi.tuoteno         = '$tuoteno'
               and tilausrivi.laskutettuaika = '0000-00-00'
-              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila != 'X'))
+              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila NOT IN ('X', 'V')))
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 

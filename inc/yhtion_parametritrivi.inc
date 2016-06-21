@@ -3657,6 +3657,19 @@ if ($fieldname == "pakollinen_varasto") {
   $jatko = 0;
 }
 
+if ($fieldname == "ulkoinen_jarjestelma") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array($trow[$i] => 'selected') + array('K' => '', 'S' => '');
+
+  $ulos .= "<option value = ''>".t("Varaston ulkoisen järjestelmän toimintaa ei rajoiteta")."</option>";
+  $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen järjestelmä toimii vain keräyksen yhteydessä")."</option>";
+  $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen järjestelmä toimii vain saapumisen yhteydessä")."</option>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "suuntalavat") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

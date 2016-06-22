@@ -423,6 +423,7 @@ if ($verkkokauppatyyppi == "magento") {
   );
 
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
+  $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
   $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
   $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);

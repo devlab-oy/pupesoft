@@ -4806,7 +4806,11 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= "</option>";
 
   $ulos .= "<option value = 'K' {$sel}>";
-  $ulos .= t("Sallitaan tilausrivien korvamerkintä");
+  $ulos .= t("Sallitaan tilausrivien korvamerkintä vapaalla tekstillä");
+  $ulos .= "</option>";
+  
+  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= t("Sallitaan tilausrivien korvamerkintä avainsanoilla");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

@@ -8521,6 +8521,46 @@ if ($tee == '') {
                   ";
 
           }
+          elseif($yhtiorow['tilausrivin_korvamerkinta'] == 'A') {
+
+            echo "<br>
+                  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='korvamerkitse'>
+                  <input type='hidden' name='toim'       value = '$toim'>
+                  <input type='hidden' name='lopetus'     value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'   value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
+                  <input type='hidden' name='mista'       value = '$mista'>
+                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
+                  <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
+                  <input type='hidden' name='rivilaadittu'   value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='tila'       value = 'KORVAMERKITSE'>
+                  <input type='hidden' name='orig_tila'     value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                  <span class='korvaspan' id='korvaspan_{$row['tunnus']}' style='display:none'>";
+
+            $kresult = t_avainsana("KORVAMERKKI");
+            echo "<select name='korvamerkinta' onchange='submit();'>";
+            echo "<option value = ''>".t('Ei korvamerkint‰‰')."</option>";
+
+            while ($krow = mysql_fetch_assoc($kresult)) {
+              $sel = $row['korvamerkinta'] == $krow['selite'] ? 'SELECTED' : '';
+              echo "<option value='$krow[selite]' $sel>$krow[selitetark]</option>";
+            }
+            echo "</select>";
+            echo "</span>
+                  </form>
+                  <input type='Submit' class='korvabutton' style='margin:5px 0' id='korvabutton_{$row['tunnus']}' value='".t("Korvamerkitse")."'>
+                  <script type='text/javascript' language='javascript'>
+                  $('#korvabutton_{$row['tunnus']}').click(function() {
+                    $('.korvabutton').show();
+                    $(this).hide();
+                    $('.korvaspan').hide();
+                    $('#korvaspan_{$row['tunnus']}').show();
+                  });
+                  </script>";
+          }
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
             $napinnimi = t("J‰lkitoim, heti");

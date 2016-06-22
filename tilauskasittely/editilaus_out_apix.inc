@@ -191,7 +191,8 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
             AND tilausrivi.var     not in ('P','J','O','S')
-            AND tilausrivi.tyyppi = 'L'";
+            AND tilausrivi.tyyppi = 'L'
+            ORDER BY tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
 
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
@@ -207,9 +208,16 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     $tuotenumero = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tilausrivi_row['tuoteno']);
     $tuotteen_nimitys = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", " ", $tilausrivi_row['nimitys']);
 
+    if ($tilausrivi_row['tilaajanrivinro'] != 0) {
+      $_rivinro = $tilausrivi_row['tilaajanrivinro'];
+    }
+    else {
+      $_rivinro = $i;
+    }
+
     $edi_order .= "*RS OSTOTILRIV {$i}\n";
     $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
-    $edi_order .= "OSTOTILRIV.OTR_RIVINRO:{$tilausrivi_row['tunnus']}\n";
+    $edi_order .= "OSTOTILRIV.OTR_RIVINRO:{$_rivinro}\n";
     $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
     $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tuotenumero}\n";
     $edi_order .= "OSTOTILRIV.OTR_EANKOODI:{$tilausrivi_row['eankoodi']}\n";

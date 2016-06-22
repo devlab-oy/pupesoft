@@ -190,7 +190,8 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-            AND tilausrivi.var     not in ('U','J','P')";
+            AND tilausrivi.var     not in ('P','J','O','S')
+            AND tilausrivi.tyyppi = 'L'";
   $tilausrivi_res = pupe_query($query);
 
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {

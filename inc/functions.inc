@@ -1233,7 +1233,7 @@ if (!function_exists("apix_edi_put_file")) {
     //$url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_avain'];
     $transferid      = $yhtiorow['apix_tunnus'];
-    $software        = "PupesoftEdi";
+    $software        = "PupesoftEDI";
     $version         = "1.0";
 
     $timestamp       = gmdate("YmdHis");

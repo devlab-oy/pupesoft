@@ -101,7 +101,7 @@ while ($rivit = mysql_fetch_assoc($result)) {
 
   if (strpos($rivit["asiakas"], '!¡!') !== false) {
     list($_ytunnus, $_nimi) = explode('!¡!', $rivit["asiakas"]);
-    echo tarkistahetu($_ytunnus),"<br>{$_nimi}";
+    echo tarkistahetu($_ytunnus), "<br>{$_nimi}";
   }
   else {
     echo $rivit["asiakas"];

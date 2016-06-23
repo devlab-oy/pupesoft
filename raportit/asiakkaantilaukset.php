@@ -712,7 +712,7 @@ if ($ytunnus != '') {
           echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
         }
         elseif (mysql_field_name($result, $i) == 'ytunnus') {
-          echo "<td valign='top' {$class}>",tarkistahetu($row[$i]),"</td>";
+          echo "<td valign='top' {$class}>", tarkistahetu($row[$i]), "</td>";
         }
         else {
           echo "<td valign='top' $class>$row[$i]</td>";

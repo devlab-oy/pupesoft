@@ -115,8 +115,8 @@ if ($handle = opendir($path)) {
 
       $tilausrivit = array();
 
-      # Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
-      # koska aineistossa on OIKEAT saapuneet ostotilauksen rivit
+      // Poistetaan ostotilauksen kaikki kohdistukset saapumiselta
+      // koska aineistossa on OIKEAT saapuneet ostotilauksen rivit
       $query = "UPDATE tilausrivi SET
                 uusiotunnus     = 0
                 WHERE yhtio     = '{$yhtio}'
@@ -125,8 +125,8 @@ if ($handle = opendir($path)) {
                 AND uusiotunnus = '{$saapumistunnus}'";
       $updres = pupe_query($query);
 
-      # Loopataan rivit tilausrivit-arrayseen
-      # koska Pupesoftin tilausrivi voi tulla monella aineiston rivill‰
+      // Loopataan rivit tilausrivit-arrayseen
+      // koska Pupesoftin tilausrivi voi tulla monella aineiston rivill‰
       foreach ($xml->Lines->Line as $key => $line) {
 
         $rivitunnus = (int) $line->TransId;
@@ -149,9 +149,9 @@ if ($handle = opendir($path)) {
         $tuoteno = $data['tuoteno'];
         $kpl     = $data['kpl'];
 
-        # Jos sanomassa on kappaleita ja tiedet‰‰n saapuminen
-        # Kohdistetaan t‰m‰ rivi saapumiseen
-        # Aiemmin ollaan poistettu kaikki t‰m‰n saapumisen kohdistukset
+        // Jos sanomassa on kappaleita ja tiedet‰‰n saapuminen
+        // Kohdistetaan t‰m‰ rivi saapumiseen
+        // Aiemmin ollaan poistettu kaikki t‰m‰n saapumisen kohdistukset
         if ($kpl != 0 and $saapumistunnus != 0) {
           $uusiotunnuslisa = ", uusiotunnus = '{$saapumistunnus}' ";
         }
@@ -159,7 +159,7 @@ if ($handle = opendir($path)) {
           $uusiotunnuslisa = "";
         }
 
-        # P‰ivitet‰‰n varattu ja kohdistetaan rivi
+        // P‰ivitet‰‰n varattu ja kohdistetaan rivi
         $query = "UPDATE tilausrivi SET
                   varattu     = '{$kpl}'
                   {$uusiotunnuslisa}

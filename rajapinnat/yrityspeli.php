@@ -202,7 +202,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
       return;
     }
 
-    $kpl = rand(1,3);
+    $kpl = rand(1, 3);
     $hintacounter += ($trow['myyntihinta'] * $kpl);
 
     $params = array(

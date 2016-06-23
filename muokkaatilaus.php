@@ -2624,7 +2624,7 @@ if (mysql_num_rows($result) != 0) {
         }
         elseif ($whiletoim == "YLLAPITO" and $fieldname == "asiakas") {
           list($_ytunnus, $_nimi) = explode('<br>', $row["asiakas"]);
-          echo "<td class='$class' valign='top'>",tarkistahetu($_ytunnus),"<br>{$_nimi}","</td>";
+          echo "<td class='$class' valign='top'>", tarkistahetu($_ytunnus), "<br>{$_nimi}", "</td>";
         }
         else {
           echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";
@@ -2994,7 +2994,7 @@ if (mysql_num_rows($result) != 0) {
       echo "</form></td>";
 
       if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
-        or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
+          or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
 
         echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
         echo "<input type='hidden' name='toim' value='$whiletoim'>";

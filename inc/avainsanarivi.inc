@@ -330,8 +330,8 @@ if (mysql_field_name($result, $i) == "laji") {
 
 if (mysql_field_name($result, $i) == "nakyvyys") {
   if (in_array("SELECTED", array($avain_sel["TRY"],
-                                 $avain_sel["OSASTO"],
-                                 $avain_sel["PS_ALA_TRY"]))) {
+        $avain_sel["OSASTO"],
+        $avain_sel["PS_ALA_TRY"]))) {
     $sel = array();
     $sel[$trow[$i]] = "SELECTED";
 

@@ -167,16 +167,16 @@ $create_excel = (isset($excel) and $excel != "");
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
   switch ($vo_laskurajaus) {
-    case 'vain':
-      // halutaan listata vain vaihto-omaisuuslaskuja
-      $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
-      break;
-    case 'muut':
-      // ei haluta listata vaihto-omaisuuslaskuja
-      $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
-      break;
-    default:
-      $vo_laskurajaus_lisa = '';
+  case 'vain':
+    // halutaan listata vain vaihto-omaisuuslaskuja
+    $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
+    break;
+  case 'muut':
+    // ei haluta listata vaihto-omaisuuslaskuja
+    $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
+    break;
+  default:
+    $vo_laskurajaus_lisa = '';
   }
 
   if ($rajaa_myos_lasku_tapvm == 'YES') {

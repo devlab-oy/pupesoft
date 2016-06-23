@@ -103,7 +103,7 @@ if ($tee == 'aja') {
   $worksheet->write($excelrivi, 7, t("Asiakasnro"), $format_bold);
   $worksheet->write($excelrivi, 8, t("Hyvitys"), $format_bold);
   $worksheet->write($excelrivi, 9, t("Sisäinen viesti"), $format_bold);
-  $worksheet->write($excelrivi,10, t("Tila"), $format_bold);
+  $worksheet->write($excelrivi, 10, t("Tila"), $format_bold);
   $excelrivi++;
 
   $summat = 0;
@@ -144,7 +144,7 @@ if ($tee == 'aja') {
     $worksheet->writeString($excelrivi, 7, $row['asiakasnro']);
     $worksheet->writeString($excelrivi, 8, $row['viesti']);
     $worksheet->writeString($excelrivi, 9, $row['sisviesti3']);
-    $worksheet->writeString($excelrivi,10, t("$laskutyyppi")." ".t("$alatila"));
+    $worksheet->writeString($excelrivi, 10, t("$laskutyyppi")." ".t("$alatila"));
     $excelrivi++;
 
     $summat += $row['rivihinta_verolli'];

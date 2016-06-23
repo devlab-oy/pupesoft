@@ -1084,7 +1084,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th valign='top'>";
 
-    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
       echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
     }
 
@@ -1130,7 +1130,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
         echo $row['tunnus'];
       }
 
@@ -1141,7 +1141,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>", tarkistahetu($row['ytunnus']), "<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 

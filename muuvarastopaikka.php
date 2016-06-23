@@ -1151,7 +1151,7 @@ if ($tee == 'M') {
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
       if ($saldorow["saldo"] == 0 and $hyllyssa == 0 and $myytavissa == 0) {
-        #Tarkistetaan varaako reklamaatio tuotepaikkaa
+        //Tarkistetaan varaako reklamaatio tuotepaikkaa
         $query = "SELECT *
                   FROM lasku
                   JOIN tilausrivi ON (

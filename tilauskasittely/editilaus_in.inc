@@ -1577,8 +1577,8 @@ while ($tietue = fgets($fd)) {
 
       // Katsotaan verkkokauppatapauksessa tilauksen valuutta
       if ($edi_tyyppi == 'magento'
-          and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
-          and !empty($editilaus_valuuttakoodi)) {
+        and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
+        and !empty($editilaus_valuuttakoodi)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
 

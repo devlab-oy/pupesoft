@@ -5,10 +5,12 @@ class Edi {
   /**
    * Luo edi tilauksen
    *
-   * @param  array   $order   Tilauksen tiedot ja tilauserivit
-   * @param  array   $options Tarvittavat parametrit
+   * @param array   $order   Tilauksen tiedot ja tilauserivit
+   * @param array   $options Tarvittavat parametrit
    * @return string           Luodun tiedoston polku
    */
+
+
   static function create($order, $options) {
     $magento_api_ht_edi            = $options['edi_polku'];
     $ovt_tunnus                    = $options['ovt_tunnus'];

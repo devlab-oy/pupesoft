@@ -199,7 +199,7 @@ if ($xml_chk and $ftp_chk) {
 
   if (file_put_contents($filename, $xml->asXML())) {
 
-    # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+    // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
     $ftputf8 = PUPE_UNICODE;
 
     if ($_cli) {

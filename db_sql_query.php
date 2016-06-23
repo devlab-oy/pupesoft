@@ -73,7 +73,7 @@ else {
   $oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in', 'like' => 'like', 'gt' => '>', 'lt' => '<', 'gte' => '>=', 'lte' => '<=');
 
   function db_piirra_otsikot($dbtaulu) {
-    GLOBAL $table;
+    global $table;
 
     echo "<tr><th>".t("Kenttä")."</th><th>".t("Valitse")."</th><th>".t("Operaattori")."</th><th>".t("Rajaus")."</th>";
 
@@ -85,7 +85,7 @@ else {
   }
 
   function db_piirra_rivi($fields) {
-    GLOBAL $kukarow, $kentat, $ruksaa, $operaattori, $rajaus, $jarjestys, $table, $sanakirja_kielet;
+    global $kukarow, $kentat, $ruksaa, $operaattori, $rajaus, $jarjestys, $table, $sanakirja_kielet;
     $kala = array();
 
     foreach ($fields as $row) {
@@ -166,7 +166,7 @@ else {
         $avainsanatyypit["varastopalautus"] = t("Palautus sallittuihin varastoihin");
         $avainsanatyypit["hinnastoryhmittely"] = t("hinnastoryhmittely");
 
-        foreach($avainsanatyypit as $laji => $nimitys) {
+        foreach ($avainsanatyypit as $laji => $nimitys) {
           $chk = !empty($rajaus[$row[0]][$laji]) ? "CHECKED" : "";
 
           $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$laji]' value='$laji' $chk>$nimitys<br>";
@@ -492,7 +492,7 @@ else {
                 $order";
     $result = pupe_query($sqlhaku);
 
-    echo "<font class='message'>",query_dump($sqlhaku)."<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
+    echo "<font class='message'>", query_dump($sqlhaku)."<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
 
     if (mysql_num_rows($result) > 0) {
       if (include 'inc/pupeExcel.inc') {

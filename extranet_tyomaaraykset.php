@@ -91,10 +91,10 @@ $(function() {
     $('#tarkistusmuuttuja').val('JOO');
     if (onkoviesti1.length > 0) {
         var question = "<?php
-          echo t("Laitetta ei löydy laiterekisteristä");
-          echo "<br>";
-          echo t("Haluatko silti avata huoltopyynnön?");
-        ?>";
+echo t("Laitetta ei löydy laiterekisteristä");
+echo "<br>";
+echo t("Haluatko silti avata huoltopyynnön?");
+?>";
         confirmation(question).then(function (answer) {
             if(answer){
               $('#tyomaarays_form').submit();
@@ -103,10 +103,10 @@ $(function() {
     }
     else if (onkoviesti2.length > 0) {
       var question = "<?php
-        echo t("Laitetta ei löydy sopimukselta");
-        echo "<br>";
-        echo t("Haluatko silti avata huoltopyynnön?");
-      ?>";
+echo t("Laitetta ei löydy sopimukselta");
+echo "<br>";
+echo t("Haluatko silti avata huoltopyynnön?");
+?>";
       confirmation(question).then(function (answer) {
           if(answer){
             $('#tyomaarays_form').submit();

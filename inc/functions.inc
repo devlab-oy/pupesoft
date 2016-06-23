@@ -3582,7 +3582,7 @@ if (!function_exists("alv")) {
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) {
         // Otsikolla on valittu verollinen kotimaan myynti
         if ($trow["alv"] >= 600) {
-         $alv = $trow["alv"];
+          $alv = $trow["alv"];
         }
         else {
           $alv = $trow["alv"]+600;
@@ -7618,7 +7618,7 @@ if (!function_exists("js_openFormInNewWindow")) {
   function js_openFormInNewWindow() {
     static $js_openFormInNewWindowCalled = FALSE;
 
-    # Ekotetaan vain kerran.
+    // Ekotetaan vain kerran.
     if (!$js_openFormInNewWindowCalled) {
       $js_openFormInNewWindowCalled = TRUE;
 ?>
@@ -25508,7 +25508,7 @@ if (!function_exists("saako_myyda_private_label")) {
     //$tarkistakaikkituotteet muuttujalla voidaan funktio pakottaa tutkimaan onko asiakashintoja/alennuksia olemassa, vaikka tuote olisikin normaali hinnasto-tuote (eli tarkistetaan kaikki tuotteet)
     global $kukarow, $yhtiorow;
 
-    # Jos param on "vain extranet" ja jos ei ole extranet niin saa myydä
+    // Jos param on "vain extranet" ja jos ei ole extranet niin saa myydä
     if ($yhtiorow['extranet_private_label'] == 'E' and $kukarow['extranet'] == '') return true;
 
     //haetaan ensin tutkittavan tuotteen tiedot
@@ -27723,7 +27723,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-      # Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
+      // Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
       $ftputf8 = PUPE_UNICODE;
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
@@ -32639,14 +32639,14 @@ if (!function_exists("loppulaskuta")) {
     $stresult = pupe_query($query);
 
     if (mysql_num_rows($stresult) == 0) {
-      echo "<font class='error'>",t("Otsikkoa '%d' ei löytynyt, tai se on väärässä tilassa.", "", $tunnus),"</font><br><br>";
+      echo "<font class='error'>", t("Otsikkoa '%d' ei löytynyt, tai se on väärässä tilassa.", "", $tunnus), "</font><br><br>";
       return 0;
     }
     else {
       $row = mysql_fetch_assoc($stresult);
 
       if ($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
-        echo "<font class='error'>",t("Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta."),"</font><br><br>";
+        echo "<font class='error'>", t("Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta."), "</font><br><br>";
         return 0;
       }
     }
@@ -32772,8 +32772,8 @@ if (!function_exists("loppulaskuta")) {
       $rivikommentti .= "\n ".$posrow["lisatiedot"];
     }
 
-    # Tarkistetaan että ennakkolaskun hyvitysrivi menee kunnolliselle otsikolle
-    # (Voi olla case jossa ennakon kaikki rivit ovat olleet JT-rivejä ja otsikko on mitätöitynyt)
+    // Tarkistetaan että ennakkolaskun hyvitysrivi menee kunnolliselle otsikolle
+    // (Voi olla case jossa ennakon kaikki rivit ovat olleet JT-rivejä ja otsikko on mitätöitynyt)
     $query = "SELECT tunnus, if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) vienti_kurssi
               FROM lasku
               WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -32991,7 +32991,7 @@ if (!function_exists('url_or_text')) {
   function url_or_text($str) {
     $array = array("http://", "https://");
 
-    foreach($array as $a) {
+    foreach ($array as $a) {
       if (stripos($str, $a) !== false) {
         return "<a href='{$str}' target='_blank'>".t("Linkki")."</a>";
       }
@@ -33064,7 +33064,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       return;
     }
 
-    foreach($isatunnukset as $isa => $perhe) {
+    foreach ($isatunnukset as $isa => $perhe) {
 
       $tunnukset = implode(", ", $perhe);
 

@@ -267,7 +267,7 @@ else {
           break;
         }
 
-        # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+        // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
         $ftputf8 = PUPE_UNICODE;
 
         require "inc/ftp-send.inc";

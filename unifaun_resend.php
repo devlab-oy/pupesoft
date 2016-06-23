@@ -38,7 +38,7 @@ if ($php_cli) {
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
 pupesoft_flock();
 
-# L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+// L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
 $ftputf8 = PUPE_UNICODE;
 
 // PrintServer

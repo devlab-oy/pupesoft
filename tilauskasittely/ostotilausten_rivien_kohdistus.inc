@@ -1072,7 +1072,7 @@ if ($tila == 'tee_kohdistus') {
 
 $query = "SELECT DISTINCT varasto
           FROM tilausrivi
-          WHERE yhtio = '{$kukarow['yhtio']}'
+          WHERE yhtio     = '{$kukarow['yhtio']}'
           AND uusiotunnus = '{$otunnus}'";
 $varastocheckres = pupe_query($query);
 

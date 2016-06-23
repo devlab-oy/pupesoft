@@ -201,6 +201,9 @@ if ($keikalla == "on") {
 
 if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
 
+# Halutaan n‰hd‰ laskun kuva oikealla puolella joten tehd‰‰n table
+echo "<table><tr><td class='back'>";
+
 $onko_eka_hyvaksyja = FALSE;
 
 if ((int) $tunnus != 0) {
@@ -1036,9 +1039,6 @@ if (strlen($tunnus) != 0) {
     }
   }
 
-  # Halutaan n‰hd‰ laskun kuva oikealla puolella joten tehd‰‰n table
-  echo "<table><tr><td class='back'>";
-
   echo "<table>";
 
   echo "<tr>";
@@ -1553,7 +1553,7 @@ if (strlen($tunnus) != 0) {
   echo "</tr></table>";
 
   if ($iframe == 'yes' and $iframe_id != '') {
-    echo "<iframe src='$iframe_id' name='alaikkuna' width='800px' height='100%' align='bottom' scrolling='auto'></iframe>";
+    echo "<iframe src='$iframe_id' name='alaikkuna' width='800px' height='1200px' align='bottom' scrolling='auto'></iframe>";
   }
 
   echo "</td></tr></table>";

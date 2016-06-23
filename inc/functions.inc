@@ -3662,7 +3662,7 @@ if (!function_exists("jatka_ale")) {
 // Funkkari jolla setataan löydetyt alennukset
 if (!function_exists("settaa_ale")) {
   function settaa_ale($ale, $aleperuste, $aperuste, $hresult, $aleperuste_nro, $aleperuste_teksti) {
-    global $yhtiorow, $GLOBALS;
+    global $yhtiorow;
 
     if (mysql_num_rows($hresult) > 0) {
       while ($hrow = mysql_fetch_assoc($hresult)) {

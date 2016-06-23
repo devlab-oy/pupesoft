@@ -558,7 +558,7 @@ if (!function_exists("tee_jt_tilaus")) {
               $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
               if ($maksuehtorow['jv'] != '') {
-                 $_maksuehto = $maksuehtorow["tunnus"];
+                $_maksuehto = $maksuehtorow["tunnus"];
               }
             }
 

@@ -638,7 +638,7 @@ if ($tee == "") {
       echo "<input type='hidden' name='tee' value='paivita_hae_factoring'>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
       $checked = $pankkiyhteys['hae_factoring'] == 1 ? ' checked' : '';
-      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH','NDEAFIHH')) ? ' disabled' : '';
+      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH', 'NDEAFIHH')) ? ' disabled' : '';
       echo "<input type='checkbox' name='hae_factoring' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
       echo "</form>";
       echo "</td>";

@@ -524,7 +524,7 @@ else {
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
 
-        # Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
+        // Mikäli halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet täytyy olla saldottomia
         if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
           $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
           $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eivät olleet saldottomia")."!<br>\n";

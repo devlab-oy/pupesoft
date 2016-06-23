@@ -205,8 +205,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   while ($row = mysql_fetch_assoc($res)) {
     fwrite($toot, substr($row['myyja'], 0, 10).";");
 
-    # Halutaan regexpillä numerot ja raput ensimmäiseksi
-    # Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
+    // Halutaan regexpillä numerot ja raput ensimmäiseksi
+    // Esim. Pursimiehenkatu 26 C -> 26 C Pursimiehenkatu
     preg_match('/\d.*/', $row['osoite'], $matches);
     $address1 = $matches[0];
 
@@ -227,8 +227,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
     fwrite($toot, substr($row['postitp'], 0, 25).";");
     fwrite($toot, substr($address, 0, 60).";");
     fwrite($toot, substr($row['postino'], 0, 10).";");
-    fwrite($toot, ";"); # region
-    fwrite($toot, "{$row['maa']};"); # country
+    fwrite($toot, ";"); // region
+    fwrite($toot, "{$row['maa']};"); // country
     fwrite($toot, substr($row['puhelin'], 0, 30).";");
     fwrite($toot, substr($row['email'], 0, 241).";");
     fwrite($toot, substr($row['luontiaika'], 0, 10));
@@ -608,7 +608,7 @@ if ($crm_haas_check) {
   echo "</font></td></tr>";
 
   echo "<tr>";
-  echo "<th>",t("Valitse CRM Haas -kentät"),"</th>";
+  echo "<th>", t("Valitse CRM Haas -kentät"), "</th>";
   echo "<td>";
   echo "<input type='checkbox' name='crm_haas[call_type]' checked /> CALL_TYPE<br>";
   echo "<input type='checkbox' name='crm_haas[opportunity]' /> OPPORTUNITY<br>";
@@ -618,18 +618,18 @@ if ($crm_haas_check) {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Aikarajaus"),"</th>";
+  echo "<th>", t("Aikarajaus"), "</th>";
   echo "<td>";
-  echo "<input type='text' name='crm_haas_date_alku[]' value='",date('d', mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='3' maxlength='2' /> ";
-  echo "<input type='text' name='crm_haas_date_alku[]' value='",date("m", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='3' maxlength='2' /> ";
-  echo "<input type='text' name='crm_haas_date_alku[]' value='",date("Y", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)),"' size='5' maxlength='4' /> ";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='", date('d', mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)), "' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='", date("m", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)), "' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_alku[]' value='", date("Y", mktime(0, 0, 0, date('m'), date('d'), date('Y')-1)), "' size='5' maxlength='4' /> ";
   echo " - ";
-  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("d"),"' size='3' maxlength='2' /> ";
-  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("m"),"' size='3' maxlength='2' /> ";
-  echo "<input type='text' name='crm_haas_date_loppu[]' value='",date("Y"),"' size='5' maxlength='4' /> ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='", date("d"), "' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='", date("m"), "' size='3' maxlength='2' /> ";
+  echo "<input type='text' name='crm_haas_date_loppu[]' value='", date("Y"), "' size='5' maxlength='4' /> ";
   echo "</td>";
   echo "</tr>";
-  echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Tallenna CSV"),"' /></td></tr>";
+  echo "<tr><td colspan='2' class='back'><input type='submit' value='", t("Tallenna CSV"), "' /></td></tr>";
   echo "</td>";
   echo "</tr>";
   echo "</table>";

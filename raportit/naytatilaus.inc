@@ -112,7 +112,7 @@ if ($laskurow["tila"] == "O") {
 echo "</tr>";
 
 echo "<tr>
-    <td>",tarkistahetu($laskurow['ytunnus']),"</td>
+    <td>", tarkistahetu($laskurow['ytunnus']), "</td>
     <td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
 
 if ($verkkokauppa != "" and $muokkaa != "") {
@@ -359,7 +359,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
     elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
-      foreach(explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
+      foreach (explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
         $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
       }
     }

@@ -264,7 +264,7 @@ if (!function_exists("ennakkolaskuta")) {
     $result = pupe_query($query);
     $sumrow = mysql_fetch_assoc($result);
 
-    if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K'))) {
+    if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E', 'K'))) {
 
       $alet = generoi_alekentta_select('erikseen', 'M');
 
@@ -339,13 +339,13 @@ if (!function_exists("ennakkolaskuta")) {
           }
         }
 
-        $varattu = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? $row['varattu'] : 1;
-        $tilkpl = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? $row['tilkpl'] : 1;
+        $varattu = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E', 'K')) ? $row['varattu'] : 1;
+        $tilkpl = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E', 'K')) ? $row['tilkpl'] : 1;
 
         $ale_kentat = "";
         $ale_arvot = "";
 
-        if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K'))) {
+        if (in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E', 'K'))) {
           for ($i = 1; $i <= $yhtiorow['myynnin_alekentat']; $i++) {
             $ale_kentat .=  ",ale{$i}";
             $ale_arvot .= ", '".$row["ale{$i}"]."'";
@@ -354,7 +354,7 @@ if (!function_exists("ennakkolaskuta")) {
 
         $summa = round($summa, 6);
 
-        $laitetaanko_netto = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E','K')) ? "" : "N";
+        $laitetaanko_netto = in_array($yhtiorow['ennakkolaskun_tyyppi'], array('E', 'K')) ? "" : "N";
 
         $query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu {$ale_kentat}) values
                    ('$summa', '{$laitetaanko_netto}', '{$varattu}', '{$tilkpl}', '$id', '{$yhtiorow['ennakkomaksu_tuotenumero']}', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now() {$ale_arvot})";

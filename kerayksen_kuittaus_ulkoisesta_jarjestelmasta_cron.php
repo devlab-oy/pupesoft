@@ -100,13 +100,13 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (isset($xml->CustPackingSlip->DeliveryDate)) {
-    #<DeliveryDate>20-04-2016</DeliveryDate>
+    //<DeliveryDate>20-04-2016</DeliveryDate>
     $delivery_date = $xml->CustPackingSlip->DeliveryDate;
     $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
   }
   elseif (isset($xml->CustPackingSlip->Deliverydate)) {
-    #HHV-case
-    #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
+    //HHV-case
+    //<Deliverydate>2016-04-20T12:34:56</Deliverydate>
     $delivery_date = $xml->CustPackingSlip->Deliverydate;
     $toimaika = date("Y-m-d H:i:s", strtotime($delivery_date));
   }
@@ -232,7 +232,7 @@ while (false !== ($file = readdir($handle))) {
       $tuotteiden_paino += $painorow['paino'];
     }
 
-    # Päivitetään saldottomat tuotteet myös toimitetuksi
+    // Päivitetään saldottomat tuotteet myös toimitetuksi
     $query = "UPDATE tilausrivi
               JOIN tuote ON (
                 tuote.yhtio              = tilausrivi.yhtio AND

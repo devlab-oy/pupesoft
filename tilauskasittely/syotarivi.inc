@@ -302,7 +302,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
     echo "<th align='left'>", t("Kate"), "</th>";
   }
 
@@ -451,7 +451,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "</select></td>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
     echo "<td><span id='kate_rivi_laskenta'></span></td>";
   }
 
@@ -501,7 +501,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     $nrospanni++;
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO','TARJOUS'))) {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
     $nrospanni++;
   }
 

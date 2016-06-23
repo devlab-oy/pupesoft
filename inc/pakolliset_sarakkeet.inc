@@ -332,11 +332,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "asiakkaan_avainsanat" :
       if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset  = array("LAJI", "AVAINSANA");
-        $wherelliset = array("LAJI", "AVAINSANA","KIELI");
+        $wherelliset = array("LAJI", "AVAINSANA", "KIELI");
       }
       else {
         $pakolliset  = array("LIITOSTUNNUS", "LAJI", "AVAINSANA");
-        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA","KIELI");
+        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA", "KIELI");
       }
 
       $joinattavat  = array("LIITOSTUNNUS" => "asiakas");

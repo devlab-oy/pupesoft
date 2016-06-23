@@ -18,7 +18,7 @@ if (empty($aja_raportti)) {
   // Haetaan alku ja loppup‰iv‰m‰‰r‰t valinnan mukaan
   $pvmrajaus = hae_rajauksen_paivamaarat($pvmvalinta);
 
-  foreach($pvmrajaus as $key => $value) {
+  foreach ($pvmrajaus as $key => $value) {
     $$key = $value;
   }
 }
@@ -129,18 +129,18 @@ function hae_rajauksen_paivamaarat($pvmvalinta) {
   );
 
   switch ($pvmvalinta) {
-    case "tvv":
-      $alku = date('d-m-Y', strtotime('last monday'));
-      $loppu = date('d-m-Y', strtotime('next sunday'));
-      break;
-    case "tkk":
-      $alku = date('d-m-Y', strtotime('first day of this month'));
-      $loppu = date('d-m-Y', strtotime('last day of this month'));
-      break;
-    case "tvvv":
-      $alku = date('d-m-Y', strtotime('Jan 1'));
-      $loppu = date('d-m-Y', strtotime('Dec 31'));
-      break;
+  case "tvv":
+    $alku = date('d-m-Y', strtotime('last monday'));
+    $loppu = date('d-m-Y', strtotime('next sunday'));
+    break;
+  case "tkk":
+    $alku = date('d-m-Y', strtotime('first day of this month'));
+    $loppu = date('d-m-Y', strtotime('last day of this month'));
+    break;
+  case "tvvv":
+    $alku = date('d-m-Y', strtotime('Jan 1'));
+    $loppu = date('d-m-Y', strtotime('Dec 31'));
+    break;
   }
 
   $alku = explode('-', $alku);
@@ -222,28 +222,28 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
   }
 
   switch ($tyyppi) {
-    case "tuotteet":
-      $haettu_data['otsikko'] = t('Tuotteet');
-      $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakkaat":
-      $haettu_data['otsikko'] = t('Asiakkaat');
-      $nimikentta = " asiakas.nimi ";
-      $grouppauskentta = " asiakas.tunnus ";
-      $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakasryhmat":
-      $haettu_data['otsikko'] = t('Asiakasryhm‰t');
-      $nimikentta = " ifnull(avainsana.selitetark,'".t("Ei asiakasryhm‰‰")."') ";
-      $grouppauskentta = " asiakas.ryhma ";
-      $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakasmyyjat":
-      $haettu_data['otsikko'] = t('Asiakasmyyj‰t');
-      $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyj‰‰")."') ";
-      $grouppauskentta = " asiakas.myyjanro ";
-      $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
-      break;
+  case "tuotteet":
+    $haettu_data['otsikko'] = t('Tuotteet');
+    $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakkaat":
+    $haettu_data['otsikko'] = t('Asiakkaat');
+    $nimikentta = " asiakas.nimi ";
+    $grouppauskentta = " asiakas.tunnus ";
+    $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasryhmat":
+    $haettu_data['otsikko'] = t('Asiakasryhm‰t');
+    $nimikentta = " ifnull(avainsana.selitetark,'".t("Ei asiakasryhm‰‰")."') ";
+    $grouppauskentta = " asiakas.ryhma ";
+    $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasmyyjat":
+    $haettu_data['otsikko'] = t('Asiakasmyyj‰t');
+    $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyj‰‰")."') ";
+    $grouppauskentta = " asiakas.myyjanro ";
+    $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
+    break;
   }
 
   $query = "SELECT {$nimikentta} nimi,

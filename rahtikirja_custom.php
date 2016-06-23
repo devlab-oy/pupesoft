@@ -471,7 +471,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
         mysql_data_seek($kirre, 0);
 
-        echo "<option value='-88'>",t("PDF ruudulle"),"</option>";
+        echo "<option value='-88'>", t("PDF ruudulle"), "</option>";
 
         while ($kirow = mysql_fetch_assoc($kirre)) {
           echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";

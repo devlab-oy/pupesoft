@@ -1628,9 +1628,9 @@ function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
 
   if (!empty($header_nimi)) {
     $worksheet->writeString($excelrivi,
-                            $excelsarake,
-                            "Deliveries to {$header_nimi}",
-                            $format_bold);
+      $excelsarake,
+      "Deliveries to {$header_nimi}",
+      $format_bold);
 
     for ($i=0; $i < 3; $i++) $excelrivi++;
   }

@@ -85,7 +85,7 @@ function presta_hae_asiakasryhmat() {
   return $ryhmat;
 }
 
-function presta_specific_prices(Array $ajolista) {
+function presta_specific_prices(array $ajolista) {
   global $kukarow, $yhtiorow;
 
   presta_echo("Haetaan tuotteiden ".implode(', ', $ajolista).".");
@@ -688,7 +688,7 @@ function presta_tallenna_liite($params) {
   tallenna_liite($filename, 'tuote', $liitostunnus, $image_id, 'TK');
 }
 
-function presta_poista_ylimaaraiset_kuvat($sku, Array $all_ids) {
+function presta_poista_ylimaaraiset_kuvat($sku, array $all_ids) {
   $kukarow  = $GLOBALS["kukarow"];
   $yhtiorow = $GLOBALS["yhtiorow"];
 

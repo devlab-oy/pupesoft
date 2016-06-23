@@ -2,16 +2,27 @@
 
 $pupe_DataTables = "tyomaaraystable";
 
-if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') {
-  $nayta_pdf = 1; //Generoidaan .pdf-file
-  $ohje = 'off';
+if ($_REQUEST["tee"] == 'pdf_autosubmit') {
+  $nayta_pdf = 1;
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
+if ($nayta_pdf == 1 and !empty($_REQUEST['pdffilenimi'])) {
+  readfile($_REQUEST['pdffilenimi']);
+  exit;
+}
+
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+
 enable_ajax();
+
+if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
+  livesearch_laitehaku();
+  exit;
+}
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -49,17 +60,6 @@ $request = array(
   'tyom_parametrit' => $tyom_parametrit,
   'osoite_parametrit' => $osoite_parametrit
 );
-
-if ($request['tyom_toiminto'] == '' and $_REQUEST["tee"] != 'NAYTATILAUS') {
-  pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
-}
-
-if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
-
-if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
-  livesearch_laitehaku();
-  exit;
-}
 
 ?>
 <style>
@@ -132,6 +132,10 @@ $(function() {
 
 </script>
 <?php
+
+if ($request['tyom_toiminto'] == '' and $_REQUEST["tee"] != 'NAYTATILAUS') {
+  pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
+}
 
 $avataanko_tyomaarays = false;
 $virheviesti1 = '';
@@ -646,17 +650,9 @@ function email_tyomaarayskopio($request) {
 
   pupesoft_sahkoposti($parametrit);
 
-  // Näytä pdf nappi
+  // Avataan pdf ruudulle
   if ($request['pdf_ruudulle']) {
-    js_openFormInNewWindow();
-
-    echo "<br><form id='tulostakopioform_{$tyom_tunnus}' name='tulostakopioform_{$tyom_tunnus}' method='post' action='{$palvelin2}tulostakopio.php' autocomplete='off'>
-          <input type='hidden' name='otunnus' value='{$tyom_tunnus}'>
-          <input type='hidden' name='tyom_tunnus' value='{$tyom_tunnus}'>
-          <input type='hidden' name='pdffilenimi' value='{$pdffilenimi}'>
-          <input type='hidden' name='toim' value='HUOLTOPYYNTOKOPIO'>
-          <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}extranet_tyomaaraykset.php?tee=pdf_autosubmit&pdffilenimi=$pdffilenimi&mista=extranet_tyomaaraykset.php'>";
   }
 }
 

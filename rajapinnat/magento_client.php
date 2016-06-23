@@ -2007,7 +2007,7 @@ class MagentoClient {
   // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
   // Palauttaa arrayn tilauksista
   private function hae_tilaukset($status = 'processing') {
-    $this->log("Haetaan tilauksia", '', $type = 'order');
+    $this->log("Haetaan tilauksia", '', 'order');
 
     $orders = array();
 
@@ -2041,7 +2041,7 @@ class MagentoClient {
         $_status = $historia['status'];
 
         if ($_status == "processing_pupesoft" and $this->_sisaanluvun_esto == "YES") {
-          $this->log("Tilausta on k‰sitelty {$_status} tilassa, ohitetaan sis‰‰nluku", '', $type = 'order');
+          $this->log("Tilausta on k‰sitelty {$_status} tilassa, ohitetaan sis‰‰nluku", '', 'order');
           // Skipataan t‰m‰ $order
           continue 2;
         }

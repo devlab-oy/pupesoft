@@ -1555,8 +1555,6 @@ if (strlen($tunnus) != 0) {
   if ($iframe == 'yes' and $iframe_id != '') {
     echo "<iframe src='$iframe_id' name='alaikkuna' width='800px' height='1200px' align='bottom' scrolling='auto'></iframe>";
   }
-
-  echo "</td></tr></table>";
 }
 elseif ($kutsuja == "") {
 
@@ -1810,6 +1808,9 @@ elseif ($kutsuja == "") {
       }
       </SCRIPT>";
 }
+
+# Laskun kuva taulu loppuu
+echo "</td></tr></table>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
   require "inc/footer.inc";

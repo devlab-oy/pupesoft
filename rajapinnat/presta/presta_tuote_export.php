@@ -186,6 +186,10 @@ if (!isset($presta_asiakasryhmien_hinnat)) {
   // 0 = Verolliset hinnat, 1 = Verottomat hinnat
   $presta_asiakasryhmien_hinnat = 0;
 }
+if (!isset($presta_hinnaston_asiakasryhma)) {
+  // Prestashop customer group id, joka lisätään kaikki Pupesoftin hinnastohintoihin
+  $presta_hinnaston_asiakasryhma = null;
+}
 if (!isset($presta_varastot)) {
   // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
   $presta_varastot = array(0);
@@ -285,6 +289,7 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');
 
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
+  $presta_prices->set_presta_static_customer_group($presta_hinnaston_asiakasryhma);
   $presta_prices->sync_prices($hinnat);
 }
 

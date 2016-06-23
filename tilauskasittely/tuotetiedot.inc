@@ -77,11 +77,11 @@ function tilattu($tuoteno, $tyyppi) {
 
   $query = "SELECT sum(tilausrivi.varattu + tilausrivi.jt) AS tilattu
             FROM tilausrivi
-            WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-            AND tilausrivi.tyyppi = '{$tyyppi}'
-            AND tilausrivi.tuoteno = '{$tuoteno}'
-            AND tilausrivi.laskutettuaika = '0000-00-00'
-            AND tilausrivi.var != 'P'";
+            WHERE tilausrivi.yhtio         = '{$kukarow["yhtio"]}'
+            AND tilausrivi.tyyppi          = '{$tyyppi}'
+            AND tilausrivi.tuoteno         = '{$tuoteno}'
+            AND tilausrivi.laskutettuaika  = '0000-00-00'
+            AND tilausrivi.var            != 'P'";
   $result = pupe_query($query);
   $tilausrivirow = mysql_fetch_assoc($result);
 
@@ -97,10 +97,10 @@ function hae_halytysraja($tuoteno, $paikka) {
 
   $query = "SELECT halytysraja
             FROM tuotepaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuoteno}'
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tuoteno   = '{$tuoteno}'
             AND hyllyalue = '{$_hyllyalue}'
-            AND hyllynro = '{$_hyllynro}'
+            AND hyllynro  = '{$_hyllynro}'
             AND hyllyvali = '{$_hyllyvali}'
             AND hyllytaso = '{$_hyllytaso}'";
   $result = pupe_query($query);

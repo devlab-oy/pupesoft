@@ -967,9 +967,9 @@ function tuote_export_paivita_avainsana($timestamp) {
 
   // P‰ivitet‰‰n timestamp avainsanaan
   $query = "UPDATE avainsana SET
-            selite = '{$timestamp}'
+            selite      = '{$timestamp}'
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji = 'TUOTE_EXP_CRON'";
+            AND laji    = 'TUOTE_EXP_CRON'";
   pupe_query($query);
 
   if (mysql_affected_rows() != 1) {

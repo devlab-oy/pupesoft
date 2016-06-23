@@ -12,9 +12,9 @@ function piirra_multiasiakkuusdropdown() {
   global $kukarow;
 
   // Haetaan käyttäjän asiakkuudet
-  $query = "SELECT asiakas.tunnus, asiakas.nimi 
-            FROM customers_users 
-            JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus) 
+  $query = "SELECT asiakas.tunnus, asiakas.nimi
+            FROM customers_users
+            JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
             WHERE user_id = '{$kukarow['tunnus']}'";
   $multiresult = pupe_query($query);
 
@@ -25,9 +25,9 @@ function piirra_multiasiakkuusdropdown() {
 
   // Haetaan oletusasiakkuus
   $query = "SELECT asiakas.*
-            FROM asiakas 
+            FROM asiakas
             WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+            AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
   echo "<form>";
@@ -57,7 +57,7 @@ function paivita_kayttajan_oletusasiakkuus($asiakasvalinta) {
   $query = "UPDATE kuka
             SET oletus_asiakas = '$asiakasvalinta'
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$kukarow['tunnus']}'";
+            AND tunnus  = '{$kukarow['tunnus']}'";
   pupe_query($query);
   $kukarow['oletus_asiakas'] = $asiakasvalinta;
 

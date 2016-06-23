@@ -9,6 +9,7 @@
  * Hakee tilauksia pupesoftiin.
  */
 
+
 require_once "rajapinnat/edi.php";
 
 class MagentoClient {
@@ -548,7 +549,7 @@ class MagentoClient {
                     $tuote['tuoteno'],
                     $tuotteen_kauppakohtainen_data,
                     $kauppatunnus
-                    )
+                  )
                 );
               }
 
@@ -729,6 +730,7 @@ class MagentoClient {
       }
 
       try {
+
         /**
          * Loopataan tuotteen (configurable) lapsituotteet (simple) l‰pi
          * ja p‰ivitet‰‰n niiden attribuutit kuten koko ja v‰ri.
@@ -854,7 +856,7 @@ class MagentoClient {
                       $nimitys,
                       $tuotteen_kauppakohtainen_data,
                       $kauppatunnus
-                      )
+                    )
                   );
                 }
 

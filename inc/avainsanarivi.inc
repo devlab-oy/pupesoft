@@ -330,8 +330,8 @@ if (mysql_field_name($result, $i) == "laji") {
 
 if (mysql_field_name($result, $i) == "nakyvyys") {
   if (in_array("SELECTED", array($avain_sel["TRY"],
-                                 $avain_sel["OSASTO"],
-                                 $avain_sel["PS_ALA_TRY"]))) {
+        $avain_sel["OSASTO"],
+        $avain_sel["PS_ALA_TRY"]))) {
     $sel = array();
     $sel[$trow[$i]] = "SELECTED";
 
@@ -1140,9 +1140,9 @@ if ($avain_sel['TYOM_TYOJONO'] == "SELECTED" and $_selitetark_4) {
   $ulos .= "<option value=''>".t('Ei oletusvastuuhenkilöä')."</option>";
   $query = "SELECT *
             FROM kuka
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio    = '{$kukarow['yhtio']}'
             AND aktiivinen = 1
-            AND extranet = ''
+            AND extranet   = ''
             ORDER BY nimi";
   $vastuuresult = pupe_query($query);
 

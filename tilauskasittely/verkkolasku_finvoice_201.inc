@@ -55,7 +55,7 @@ if (!function_exists('finvoice_otsik')) {
     }
     // Trustkapitalilla pit‰ olla TULOSTUSPALVELU
     if ($senderintermediator == '003723327487' and $yhtiorow['verkkolasku_lah'] == 'trustpoint') {
-        $tulostuspalvelu  = "TULOSTUSPALVELU";
+      $tulostuspalvelu  = "TULOSTUSPALVELU";
     }
     //  Aloitellaan aineiston luontia. Kaikki tiedot pit‰‰ olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
     if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {

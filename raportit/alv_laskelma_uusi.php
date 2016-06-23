@@ -787,11 +787,11 @@ function laskeveroja($taso, $tulos) {
                   FROM lasku USE INDEX (yhtio_tila_tapvm)
                   JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
                   JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' $tuotetyyppilisa)
-                  WHERE lasku.yhtio = '$kukarow[yhtio]'
-                  and lasku.tila    = 'U'
-                  and lasku.tapvm   >= '$startmonth'
-                  and lasku.tapvm   <= '$endmonth'
-                  and lasku.vienti  = 'E'
+                  WHERE lasku.yhtio       = '$kukarow[yhtio]'
+                  and lasku.tila          = 'U'
+                  and lasku.tapvm         >= '$startmonth'
+                  and lasku.tapvm         <= '$endmonth'
+                  and lasku.vienti        = 'E'
                   and lasku.tilaustyyppi != '9'
                   {$kolmikantakauppa}
                   GROUP BY 1,2";

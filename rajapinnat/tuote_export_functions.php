@@ -388,11 +388,13 @@ function tuote_export_hae_saldot($params) {
   $datetime_checkpoint        = $params['datetime_checkpoint'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
-  if (!is_array($verkkokauppa_saldo_varasto)) {
-    die("verkkokauppa_saldo_varasto pitää olla array!");
-  }
-
   $dnstock = array();
+
+  if (!is_array($verkkokauppa_saldo_varasto)) {
+     echo "Virhe! verkkokauppa_saldo_varasto pitää olla array!";
+
+     return $dnstock;
+  }
 
   if ($ajetaanko_kaikki === false) {
     $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";

@@ -961,7 +961,7 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log("Virhe! Saldopäivitys epäonnistui!". $e);
+        $this->log("Virhe! Saldopäivitys epäonnistui!", $e);
       }
     }
 
@@ -1760,7 +1760,7 @@ class MagentoClient {
   }
 
   // debug level logging
-  private function debug($string, $exception = "", $type = 'product') {
+  private function debug($string, $exception = null, $type = 'product') {
     if ($this->debug_logging === false) {
       return;
     }
@@ -2069,9 +2069,10 @@ class MagentoClient {
   }
 
   // Tapahtumaloki
-  private function log($message, $exception = '', $type = 'product') {
-    if ($exception != '') {
-      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+  private function log($message, $exception = null, $type = 'product') {
+    if (!empty($exception)) {
+      $message .= "\nfaultcode: " . $exception->faultcode;
+      $message .= "\nmessage:   " . $exception->getMessage();
     }
 
     $log_name = $type == 'product' ? 'magento_export' : 'magento_orders';

@@ -4405,4 +4405,3 @@ if (!function_exists('skippa_lahete_pdf')) {
     }
   }
 }
-

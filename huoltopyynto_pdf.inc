@@ -97,7 +97,7 @@ $pdf->draw_text(50, 120, $tulostettavat_tiedot['lasku']['toim_nimi'],    $firstp
 $pdf->draw_text(50, 109, $tulostettavat_tiedot['lasku']['toim_osoite'],  $firstpage, $pieni);
 $pdf->draw_text(50, 98, $tulostettavat_tiedot['lasku']['toim_postino']."  ".$tulostettavat_tiedot['lasku']['toim_postitp'],  $firstpage, $pieni);
 $pdf->draw_text(50, 87, $tulostettavat_tiedot['lasku']['toim_maa'],    $firstpage, $pieni);
-                                                                                                   
+
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
@@ -118,7 +118,7 @@ function hae_tiedot($tyomaaraystunnus) {
 
   // Haetaan asiakastiedot
   $asiakasquery = "SELECT asiakas.*
-                   FROM asiakas 
+                   FROM asiakas
                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                    AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
   $asiakasresult = pupe_query($asiakasquery);
@@ -137,8 +137,8 @@ function hae_tiedot($tyomaaraystunnus) {
   // Haetaan lasku ja laskun lis‰tiedot
   $laskuquery = "SELECT lasku.*
                  FROM lasku
-                 JOIN laskun_lisatiedot ON (lasku.yhtio = laskun_lisatiedot.yhtio 
-                   AND lasku.tunnus = laskun_lisatiedot.otunnus) 
+                 JOIN laskun_lisatiedot ON (lasku.yhtio = laskun_lisatiedot.yhtio
+                   AND lasku.tunnus = laskun_lisatiedot.otunnus)
                  WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                  AND lasku.tunnus = '{$tyomaaraystunnus}'";
   $laskuresult = pupe_query($laskuquery);
@@ -146,7 +146,7 @@ function hae_tiedot($tyomaaraystunnus) {
   $tiedot['lasku'] = $laskurivi;
 
   // Haetaan laitetiedot
-  $laitequery = "SELECT * 
+  $laitequery = "SELECT *
                  FROM laite
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND sarjanro = '{$tyomaaraysrivi['valmnro']}'

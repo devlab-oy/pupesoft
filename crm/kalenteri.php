@@ -226,10 +226,10 @@ if ($tee == 'LISAA') {
 
       $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
       $tapa_row = mysql_fetch_assoc($tapa_res);
-    
+
       if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
     }
-    
+
     $query = "INSERT INTO kalenteri
               SET
               yhtio        = '$kyhtio',

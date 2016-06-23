@@ -512,7 +512,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      
+
       if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii]) {
         $siirretaan_varattua = true;
       }

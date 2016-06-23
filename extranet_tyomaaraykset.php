@@ -62,7 +62,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
 <script>
 
 $(function() {
-  
+
   function confirmation(question) {
       var defer = $.Deferred();
       $('<div></div>')
@@ -90,7 +90,7 @@ $(function() {
     var onkoviesti2 = $('#viesti2').val();
     $('#tarkistusmuuttuja').val('JOO');
     if (onkoviesti1.length > 0) {
-        var question = "<?php 
+        var question = "<?php
           echo t("Laitetta ei löydy laiterekisteristä");
           echo "<br>";
           echo t("Haluatko silti avata huoltopyynnön?");
@@ -102,7 +102,7 @@ $(function() {
         });
     }
     else if (onkoviesti2.length > 0) {
-      var question = "<?php 
+      var question = "<?php
         echo t("Laitetta ei löydy sopimukselta");
         echo "<br>";
         echo t("Haluatko silti avata huoltopyynnön?");
@@ -408,7 +408,7 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   echo "<td>";
   echo livesearch_kentta("tyomaarays_form", "LAITEHAKU", "valmnro", 140, $request['tyom_parametrit']['valmnro'], '', '', '', 'ei_break_all');
   echo "</td>";
-  
+
   if (!$piilota) echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   if (!$piilota) echo "<td></td>";
@@ -536,7 +536,7 @@ function hae_laitteen_parametrit($laite_tunnus) {
             AND avainsana.laji = 'TRY'
             AND avainsana.selite = tuote.try)
             LEFT JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
-            LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'

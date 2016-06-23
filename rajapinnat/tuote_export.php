@@ -331,7 +331,6 @@ if (in_array('tuotteet', $magento_ajolista)) {
     "ajetaanko_kaikki"                     => $ajetaanko_kaikki,
     "magento_asiakaskohtaiset_tuotehinnat" => $magento_asiakaskohtaiset_tuotehinnat,
     "tuotteiden_asiakashinnat_magentoon"   => $tuotteiden_asiakashinnat_magentoon,
-    "verkkokauppatyyppi"                   => $verkkokauppatyyppi,
   );
 
   $dnstuote = tuote_export_hae_tuotetiedot($params);
@@ -385,7 +384,6 @@ if (in_array('asiakkaat', $magento_ajolista)) {
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
     "magento_website_id"  => $magento_website_id,
-    "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
 
   $dnsasiakas = tuote_export_hae_asiakkaat($params);
@@ -398,8 +396,7 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
   tuote_export_echo("Haetaan tuotteiden variaatiot.");
 
   $params = array(
-    "ajetaanko_kaikki"    => $ajetaanko_kaikki,
-    "verkkokauppatyyppi"  => $verkkokauppatyyppi,
+    "ajetaanko_kaikki" => $ajetaanko_kaikki,
   );
 
   $dnslajitelma = tuote_export_hae_lajitelmatuotteet($params);

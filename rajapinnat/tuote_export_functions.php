@@ -118,7 +118,6 @@ function tuote_export_hae_tuotetiedot($params) {
   $datetime_checkpoint                  = tuote_export_checkpoint('TEX_TUOTTEET');
   $magento_asiakaskohtaiset_tuotehinnat = $params['magento_asiakaskohtaiset_tuotehinnat'];
   $tuotteiden_asiakashinnat_magentoon   = $params['tuotteiden_asiakashinnat_magentoon'];
-  $verkkokauppatyyppi                   = $params['verkkokauppatyyppi'];
 
   $dnstuote = array();
 
@@ -176,13 +175,7 @@ function tuote_export_hae_tuotetiedot($params) {
   while ($row = mysql_fetch_array($res)) {
     // Jos yhtiön hinnat eivät sisällä alv:tä
     if ($yhtiorow["alv_kasittely"] != "") {
-      // Anviassa myyntihintaan verot päälle
-      if ($verkkokauppatyyppi == 'anvia') {
-        $myyntihinta = hintapyoristys($row["myyntihinta"] * (1+($row["alv"]/100)));
-      }
-      else {
-        $myyntihinta = $row["myyntihinta"];
-      }
+      $myyntihinta = $row["myyntihinta"];
       $myyntihinta_veroton = $row["myyntihinta"];
     }
     else {
@@ -560,50 +553,40 @@ function tuote_export_hae_asiakkaat($params) {
   $ajetaanko_kaikki     = $params['ajetaanko_kaikki'];
   $datetime_checkpoint  = tuote_export_checkpoint('TEX_ASIAKKAAT');
   $magento_website_id   = $params['magento_website_id'];
-  $verkkokauppatyyppi   = $params['verkkokauppatyyppi'];
 
   $dnsasiakas = array();
 
   if ($ajetaanko_kaikki === false) {
-    $muutoslisa = "AND asiakas.muutospvm >= '{$datetime_checkpoint}'";
+    $muutoslisa  = "AND (asiakas.muutospvm >= '{$datetime_checkpoint}'";
+    $muutoslisa .= "OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}')";
   }
   else {
     $muutoslisa = "";
-  }
-
-  $asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
-
-  if ($verkkokauppatyyppi == "magento") {
-    $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
-                           yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
-                           yhteyshenkilo.tunnus yhenk_tunnus,
-                           yhteyshenkilo.nimi yhenk_nimi,
-                           yhteyshenkilo.email yhenk_email,
-                           yhteyshenkilo.puh yhenk_puh,";
-
-    $asiakasjoinilisa = " JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
-                          LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')";
-
-    $asiakaswherelisa = " AND yhteyshenkilo.rooli  = 'magento'
-                          AND yhteyshenkilo.email != ''";
-
-    if (!empty($muutoslisa)) {
-      $muutoslisa .= " OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
-    }
   }
 
   // Haetaan kaikki asiakkaat
   // Asiakassiirtoa varten poimitaan myös lisäkenttiä yhteyshenkilo-tauluista
   $query = "SELECT
             asiakas.*,
-            $asiakasselectlisa
+            avainsana.selitetark as asiakasryhma,
+            yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
+            yhteyshenkilo.tunnus yhenk_tunnus,
+            yhteyshenkilo.nimi yhenk_nimi,
+            yhteyshenkilo.email yhenk_email,
+            yhteyshenkilo.puh yhenk_puh,
             asiakas.yhtio ayhtio
             FROM asiakas
-            $asiakasjoinilisa
+            JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio
+              AND yhteyshenkilo.liitostunnus = asiakas.tunnus
+              AND yhteyshenkilo.rooli = 'magento')
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
+              AND avainsana.selite = asiakas.ryhma
+              AND avainsana.laji = 'asiakasryhma')
             WHERE asiakas.yhtio  = '{$kukarow["yhtio"]}'
-            AND asiakas.laji    != 'P'
-            $asiakaswherelisa
-            $muutoslisa";
+            AND asiakas.laji != 'P'
+            AND yhteyshenkilo.rooli = 'magento'
+            AND yhteyshenkilo.email != ''
+            {$muutoslisa}";
   $res = pupe_query($query);
 
   // pyöräytetään asiakkaat läpi
@@ -615,6 +598,7 @@ function tuote_export_hae_asiakkaat($params) {
       $row["laskutus_postino"] = $row['postino'];
       $row["laskutus_postitp"] = $row['postitp'];
     }
+
     // Osoite toimitusosoitteeksi jos tyhjä
     if (empty($row['toim_nimi'])) {
       $row['toim_nimi']    = $row['nimi'];
@@ -622,6 +606,7 @@ function tuote_export_hae_asiakkaat($params) {
       $row["toim_postino"] = $row['postino'];
       $row["toim_postitp"] = $row['postitp'];
     }
+
     // Yhteyshenkilön nimestä otetaan etunimi ja sukunimi
     if (!empty($row["yhenk_nimi"])) {
       // Viimeinen osa nimestä on sukunimi
@@ -675,24 +660,20 @@ function tuote_export_hae_lajitelmatuotteet($params) {
 
   $ajetaanko_kaikki    = $params['ajetaanko_kaikki'];
   $datetime_checkpoint = tuote_export_checkpoint('TEX_LAJITELMAT');
-  $verkkokauppatyyppi  = $params['verkkokauppatyyppi'];
 
   $dnslajitelma = array();
-
-  // Magentoon vain tuotteet joiden näkyvyys != ''
-  $nakyvyys_lisa = ($verkkokauppatyyppi == 'magento') ? "AND tuote.nakyvyys != ''" : "";
 
   // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
   $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
             FROM tuotteen_avainsanat
             JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-            AND tuote.tuoteno                = tuotteen_avainsanat.tuoteno
-            AND tuote.status                != 'P'
-            AND tuote.tuotetyyppi            NOT IN ('A','B')
-            AND tuote.tuoteno               != ''
-            $nakyvyys_lisa)
-            WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
-            AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
+              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+              AND tuote.status != 'P'
+              AND tuote.tuotetyyppi NOT IN ('A','B')
+              AND tuote.tuoteno != ''
+              AND tuote.nakyvyys != '')
+            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
             AND trim(tuotteen_avainsanat.selite) != ''";
   $resselite = pupe_query($query);
 
@@ -776,15 +757,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
 
       // Jos yhtiön hinnat eivät sisällä alv:tä
       if ($yhtiorow["alv_kasittely"] != "") {
-
-        // Anviassa myyntihintaan verot päälle
-        if ($verkkokauppatyyppi == 'anvia') {
-          $myyntihinta = hintapyoristys($alirow["myyntihinta"] * (1+($alirow["alv"]/100)));
-        }
-        else {
-          $myyntihinta = $alirow["myyntihinta"];
-        }
-
+        $myyntihinta = $alirow["myyntihinta"];
         $myyntihinta_veroton = $alirow["myyntihinta"];
       }
       else {

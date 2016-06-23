@@ -49,7 +49,7 @@ function piirra_kayttajan_laitteet() {
   }
   else {
     echo "<br><font class='error'>".t('Laiterekisteristä ei löydy yhtään laitetta tai niillä ei ole sopimuksia')."!</font><br/>";
-  } 
+  }
 }
 
 function hae_kayttajan_laitteet() {
@@ -79,7 +79,7 @@ function hae_kayttajan_laitteet() {
             AND avainsana.laji = 'TRY'
             AND avainsana.selite = tuote.try)
             JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
-            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
             WHERE laite.yhtio = '{$kukarow['yhtio']}'

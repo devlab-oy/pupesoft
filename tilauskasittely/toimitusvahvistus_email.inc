@@ -125,6 +125,6 @@ if ($toimitusvahvistus_email_lahetys) {
 
     if (pupesoft_sahkoposti($parametri)) {
       echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
-    }    
+    }
   }
 }

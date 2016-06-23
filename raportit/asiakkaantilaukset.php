@@ -337,11 +337,11 @@ elseif ($astilnro != '' or $tilausviite != '') {
   else {
     $otunnus = $row["tunnus"];
   }
-  
+
   if ($row["jaksotettu"] <> 0) {
     $sopimus = abs($row["jaksotettu"]);
   }
-  
+
   $ytunnus   = $row["ytunnus"];
 
   if ($cleantoim == 'OSTO') {
@@ -450,7 +450,7 @@ if ($ytunnus != '') {
   $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
 
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
-    
+
     if ($sopimus > 0) {
       $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
                  FROM lasku

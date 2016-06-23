@@ -1183,7 +1183,7 @@ if ($tee == "") {
     }
     elseif ($toim == "TOIMITTAJA") {
       $toim_selite = t("Toimittajan");
-    } 
+    }
     elseif ($toim == "ASIAKASMYYJA") {
       $toim_selite = t("Asiakasmyyjän");
     }

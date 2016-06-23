@@ -141,16 +141,11 @@ class MagentoClient {
       $this->_proxy = new SoapClient($url, $client_options);
       $this->_session = $this->_proxy->login($user, $pass);
       $this->debug_logging = $debug;
-      $this->log("Magento päivitysskripti aloitettu");
     }
     catch (Exception $e) {
       $this->_error_count++;
       $this->log("Virhe! Magento-class init failed", $e);
     }
-  }
-
-  function __destruct() {
-    $this->log("Päivitysskripti päättyi\n");
   }
 
   // Lisää kaikki tai puuttuvat kategoriat Magento-verkkokauppaan.
@@ -2035,7 +2030,7 @@ class MagentoClient {
     // Haetaan laskut (invoices.state = 'paid')
 
     foreach ($fetched_orders as $order) {
-      $this->log("Haetaan tilaus {$order['increment_id']}", '', $type = 'order');
+      $this->log("Haetaan tilaus {$order['increment_id']}", '', 'order');
 
       // Haetaan tilauksen tiedot (orders)
       $temp_order = $this->_proxy->call($this->_session, 'sales_order.info', $order['increment_id']);
@@ -2067,8 +2062,7 @@ class MagentoClient {
     // Kirjataan kumpaankin logiin
     $_count = count($orders);
 
-    $this->log("{$_count} tilausta haettu", '', $type = 'order');
-    $this->log("{$_count} tilausta haettu");
+    $this->log("{$_count} tilausta haettu", '', 'order');
 
     // Palautetaan löydetyt tilaukset
     return $orders;

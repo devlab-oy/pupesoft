@@ -61,16 +61,16 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       $query = "UPDATE tyomaarays SET
-                tullikoodi                       = '$tullikoodi',
-                tulliarvo                        = '$tulliarvo',
-                maa_maara                        = '$maa_maara',
-                maa_lahetys                      = '$maa_lahetys',
-                maa_alkupera                     = '$maa_alkupera',
-                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-                kuljetusmuoto                    = '$kuljetusmuoto',
-                bruttopaino                      = '$bruttopaino'
-                WHERE otunnus                    in ($otunnus)
-                and yhtio                        = '$kukarow[yhtio]'";
+                tullikoodi              = '$tullikoodi',
+                tulliarvo               = '$tulliarvo',
+                maa_maara               = '$maa_maara',
+                maa_lahetys             = '$maa_lahetys',
+                maa_alkupera            = '$maa_alkupera',
+                kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
+                kuljetusmuoto           = '$kuljetusmuoto',
+                bruttopaino             = '$bruttopaino'
+                WHERE otunnus           in ($otunnus)
+                and yhtio               = '$kukarow[yhtio]'";
       $result = pupe_query($query);
     }
     else {
@@ -367,21 +367,21 @@ elseif ($tee != "") {
       //päivitetään alatila vain jos tilaus ei vielä ole laskutettu
       $query = "UPDATE lasku
                 SET alatila = 'E'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$otun'
-                and tila    = 'L'
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tunnus     = '$otun'
+                and tila       = 'L'
                 and jaksotettu = 0
-                and alatila NOT IN ('X', 'J')";
+                and alatila    NOT IN ('X', 'J')";
       $result = pupe_query($query);
 
       //päivitetään alatila vain jos tilauksella on maksupositioita
       $query = "UPDATE lasku SET
-                alatila = 'J'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus  = '{$otun}'
-                and tila    = 'L'
+                alatila        = 'J'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                and tunnus     = '{$otun}'
+                and tila       = 'L'
                 and jaksotettu > 0
-                and alatila NOT IN ('X', 'J', 'D')";
+                and alatila    NOT IN ('X', 'J', 'D')";
       $result = pupe_query($query);
     }
 

@@ -37,9 +37,9 @@ if ($tee == 'paivita_hae_factoring') {
   $hae_factoring = isset($hae_factoring) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET
-            hae_factoring   = {$hae_factoring}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
+            hae_factoring = {$hae_factoring}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
   pupe_query($query);
 
   $tee = "";
@@ -330,8 +330,8 @@ if ($tee == "uusi_sertifikaatti_hae") {
               SET signing_certificate          = '{$oss}',
                   signing_private_key          = '{$sk}',
                   signing_certificate_valid_to = '{$oss_time}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = {$pankkiyhteys_tunnus}";
+              WHERE yhtio                      = '{$kukarow['yhtio']}'
+                AND tunnus                     = {$pankkiyhteys_tunnus}";
     $result = pupe_query($query);
 
     ok("Sertifikaatti päivitetty!");

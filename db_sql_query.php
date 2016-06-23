@@ -533,12 +533,12 @@ else {
         }
 
         if ($table == "tuote" and in_array("tuote.vienti", $kentat)) {
-          $maaryhmaquery = " SELECT *
-                             FROM avainsana
-                             WHERE yhtio = '{$kukarow['yhtio']}'
-                             and laji    = 'maaryhma'
-                             and selite != ''
-                             ORDER BY jarjestys";
+          $maaryhmaquery = "SELECT *
+                            FROM avainsana
+                            WHERE yhtio  = '{$kukarow['yhtio']}'
+                            and laji     = 'maaryhma'
+                            and selite  != ''
+                            ORDER BY jarjestys";
           $maaryhmares = pupe_query($maaryhmaquery);
           $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
 

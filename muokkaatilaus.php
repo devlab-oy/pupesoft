@@ -118,7 +118,7 @@ if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
               SET tyyppi = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
               {$tilausrivityyppilisa}
-              AND otunnus  = $tilausnumero";
+              AND otunnus = $tilausnumero";
     pupe_query($query);
 
     //Nollataan sarjanumerolinkit

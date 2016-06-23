@@ -215,8 +215,8 @@ function loppu($firstpage, $summat, $astunnus) {
             FROM asiakas
             JOIN maksuehto on (asiakas.yhtio = maksuehto.yhtio
             AND asiakas.maksuehto = maksuehto.tunnus)
-            WHERE asiakas.yhtio = '$kukarow[yhtio]'
-            and asiakas.tunnus = $astunnus";
+            WHERE asiakas.yhtio   = '$kukarow[yhtio]'
+            and asiakas.tunnus    = $astunnus";
   $result = pupe_query($query);
   $fcheck_row = mysql_fetch_assoc($result);
 
@@ -224,9 +224,9 @@ function loppu($firstpage, $summat, $astunnus) {
 
     $query = "SELECT *
               FROM factoring
-              WHERE yhtio        = '$kukarow[yhtio]'
-              and tunnus         = '$fcheck_row[factoring_id]'
-              and valkoodi       = '$valuutta'";
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tunnus   = '$fcheck_row[factoring_id]'
+              and valkoodi = '$valuutta'";
     $result = pupe_query($query);
     $factoring_row = mysql_fetch_assoc($result);
 

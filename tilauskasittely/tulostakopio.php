@@ -2206,9 +2206,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         //haetaan kaikki tälle klöntille kuuluvat otsikot
         $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
                   FROM lasku
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tila         = '{$laskurow['tila']}'
-                  AND kerayslista  = '{$laskurow['kerayslista']}'
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tila        = '{$laskurow['tila']}'
+                  AND kerayslista = '{$laskurow['kerayslista']}'
                   HAVING tunnukset IS NOT NULL";
         $toimresult = pupe_query($query);
 
@@ -2228,7 +2228,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 kieli
                 FROM asiakas
                 WHERE tunnus = '$laskurow[liitostunnus]'
-                and yhtio = '$kukarow[yhtio]'";
+                and yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 

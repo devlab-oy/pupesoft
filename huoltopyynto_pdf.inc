@@ -120,7 +120,7 @@ function hae_tiedot($tyomaaraystunnus) {
   $asiakasquery = "SELECT asiakas.*
                    FROM asiakas
                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                   AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+                   AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $asiakasresult = pupe_query($asiakasquery);
   $asiakasrivi = mysql_fetch_assoc($asiakasresult);
   $tiedot['asiakas'] = $asiakasrivi;
@@ -139,8 +139,8 @@ function hae_tiedot($tyomaaraystunnus) {
                  FROM lasku
                  JOIN laskun_lisatiedot ON (lasku.yhtio = laskun_lisatiedot.yhtio
                    AND lasku.tunnus = laskun_lisatiedot.otunnus)
-                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                 AND lasku.tunnus = '{$tyomaaraystunnus}'";
+                 WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+                 AND lasku.tunnus   = '{$tyomaaraystunnus}'";
   $laskuresult = pupe_query($laskuquery);
   $laskurivi = mysql_fetch_assoc($laskuresult);
   $tiedot['lasku'] = $laskurivi;
@@ -148,9 +148,9 @@ function hae_tiedot($tyomaaraystunnus) {
   // Haetaan laitetiedot
   $laitequery = "SELECT *
                  FROM laite
-                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 WHERE yhtio  = '{$kukarow['yhtio']}'
                  AND sarjanro = '{$tyomaaraysrivi['valmnro']}'
-                 AND tuoteno = '{$tyomaaraysrivi['mallivari']}'";
+                 AND tuoteno  = '{$tyomaaraysrivi['mallivari']}'";
   $laiteresult = pupe_query($laitequery);
   $laiterivi = mysql_fetch_assoc($laiteresult);
   $tiedot['laite'] = $laiterivi;

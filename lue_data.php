@@ -442,7 +442,7 @@ if ($kasitellaan_tiedosto) {
         $query = "SELECT tt.tunnus
                   FROM tuotteen_toimittajat AS tt
                   JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
-                  WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                  WHERE tt.yhtio      = '{$kukarow['yhtio']}'
                   AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'
                   AND tt.liitostunnus = toimi.tunnus";
         $chk_tunnus_res = pupe_query($query);
@@ -527,7 +527,7 @@ if ($kasitellaan_tiedosto) {
         $query = "SELECT tt.tunnus
                   FROM tuotteen_toimittajat AS tt
                   JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
-                  WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                  WHERE tt.yhtio      = '{$kukarow['yhtio']}'
                   AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'
                   AND tt.liitostunnus = toimi.tunnus";
         $chk_tunnus_res = pupe_query($query);
@@ -587,11 +587,11 @@ if ($kasitellaan_tiedosto) {
   // Tarkistetaan k‰ytet‰‰nkˆ maaryhmi‰
   if (in_array("tuote", $taulut)) {
     $maaryhmaquery = "SELECT *
-                       FROM avainsana
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                       and laji = 'maaryhma'
-                       and selite != ''
-                       ORDER BY jarjestys";
+                      FROM avainsana
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and laji     = 'maaryhma'
+                      and selite  != ''
+                      ORDER BY jarjestys";
     $maaryhmares = pupe_query($maaryhmaquery);
 
     $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
@@ -1021,9 +1021,9 @@ if ($kasitellaan_tiedosto) {
         elseif ($table_mysql == 'extranet_kayttajan_lisatiedot' and strtoupper($taulunotsikot[$taulu][$j]) == "LIITOSTUNNUS" and $liitostunnusvalinta == 2) {
           $query = "SELECT tunnus
                     FROM kuka
-                    WHERE yhtio = '$kukarow[yhtio]'
+                    WHERE yhtio   = '$kukarow[yhtio]'
                     and extranet != ''
-                    and kuka = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+                    and kuka      = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
           $apures = pupe_query($query);
 
           if (mysql_num_rows($apures) == 1) {
@@ -1078,7 +1078,7 @@ if ($kasitellaan_tiedosto) {
           $apusql = "SELECT tunnus
                      FROM {$yhteensopivuus_taulun_nimi}
                      WHERE yhtio = '$kukarow[yhtio]'
-                     and tyyppi = '{$_tyyppi}'
+                     and tyyppi  = '{$_tyyppi}'
                      and atunnus = '{$_atunnus}'
                      and tuoteno = '{$_tuoteno}'
                      {$_wherelisa}";
@@ -1107,8 +1107,8 @@ if ($kasitellaan_tiedosto) {
               $query_x = "SELECT tunnus
                           FROM dynaaminen_puu
                           WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND laji = '{$table_tarkenne}'
-                          AND koodi = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
+                          AND laji    = '{$table_tarkenne}'
+                          AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
               $koodi_tunnus_res = pupe_query($query_x);
 
               // jos tunnusta ei lˆydy, ohitetaan kyseinen rivi
@@ -1129,7 +1129,7 @@ if ($kasitellaan_tiedosto) {
 
               $query = "SELECT tunnus
                         FROM asiakas
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        WHERE yhtio  = '{$kukarow['yhtio']}'
                         AND laji    != 'P'
                         AND $dynaamisen_taulun_liitos = '{$taulunrivit[$taulu][$eriviindex][$j]}'";
               $asiakkaan_haku_res = pupe_query($query);
@@ -1251,8 +1251,8 @@ if ($kasitellaan_tiedosto) {
           if (isset($toimittajavalinta) and $toimittajavalinta == 3) {
             $tpque = "SELECT tunnus
                       FROM toimi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND toimittajanro = '{$taulunrivit[$taulu][$eriviindex][$j]}'
+                      WHERE yhtio        = '{$kukarow['yhtio']}'
+                      AND toimittajanro  = '{$taulunrivit[$taulu][$eriviindex][$j]}'
                       AND toimittajanro != ''
                       AND tyyppi        != 'P'";
             $tpres = pupe_query($tpque);
@@ -1260,8 +1260,8 @@ if ($kasitellaan_tiedosto) {
           elseif (isset($toimittajavalinta) and $toimittajavalinta == 2) {
             $tpque = "SELECT tunnus
                       FROM toimi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND ytunnus = '{$taulunrivit[$taulu][$eriviindex][$j]}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND ytunnus  = '{$taulunrivit[$taulu][$eriviindex][$j]}'
                       AND ytunnus != ''
                       AND tyyppi  != 'P'";
             $tpres = pupe_query($tpque);
@@ -1269,8 +1269,8 @@ if ($kasitellaan_tiedosto) {
           else {
             $tpque = "SELECT tunnus
                       FROM toimi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$taulunrivit[$taulu][$eriviindex][$j]}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND tunnus   = '{$taulunrivit[$taulu][$eriviindex][$j]}'
                       AND tyyppi  != 'P'";
             $tpres = pupe_query($tpque);
           }
@@ -1324,8 +1324,8 @@ if ($kasitellaan_tiedosto) {
             if ($taulunrivit[$taulu][$eriviindex][array_search("TYYPPI", $taulunotsikot[$taulu])] == "T" and $table_mysql == "yhteyshenkilo") {
               $tpque = "SELECT tunnus
                         from toimi
-                        where yhtio = '$kukarow[yhtio]'
-                        and ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'
+                        where yhtio  = '$kukarow[yhtio]'
+                        and ytunnus  = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'
                         and tyyppi  != 'P'";
               $tpres = pupe_query($tpque);
             }
@@ -1419,8 +1419,8 @@ if ($kasitellaan_tiedosto) {
           if ($taulunrivit[$taulu][$eriviindex][array_search("TYYPPI", $taulunotsikot[$taulu])] == "T" and $table_mysql == "yhteyshenkilo") {
             $tpque = "SELECT tunnus
                       from toimi
-                      where yhtio = '$kukarow[yhtio]'
-                      and tunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'
+                      where yhtio  = '$kukarow[yhtio]'
+                      and tunnus   = '".$taulunrivit[$taulu][$eriviindex][array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'
                       and tyyppi  != 'P'";
             $tpres = pupe_query($tpque);
           }
@@ -1428,7 +1428,7 @@ if ($kasitellaan_tiedosto) {
             $tpque = "SELECT tunnus
                       from asiakas
                       where yhtio = '$kukarow[yhtio]'
-                      and tunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'";
+                      and tunnus  = '".$taulunrivit[$taulu][$eriviindex][array_search("LIITOSTUNNUS", $taulunotsikot[$taulu])]."'";
             $tpres = pupe_query($tpque);
           }
 
@@ -1634,12 +1634,12 @@ if ($kasitellaan_tiedosto) {
               $_selitetark = mysql_real_escape_string($taulunrivit[$taulu][$eriviindex][$r]);
 
               $maaryhmaquery = "SELECT *
-                                 FROM avainsana
-                                 WHERE yhtio = '{$kukarow['yhtio']}'
-                                 and laji = 'maaryhma'
-                                 and selite != ''
-                                 and selitetark = '{$_selitetark}'
-                                 ORDER BY jarjestys";
+                                FROM avainsana
+                                WHERE yhtio     = '{$kukarow['yhtio']}'
+                                and laji        = 'maaryhma'
+                                and selite     != ''
+                                and selitetark  = '{$_selitetark}'
+                                ORDER BY jarjestys";
               $maaryhmares = pupe_query($maaryhmaquery);
 
               if (mysql_num_rows($maaryhmares) > 0) {
@@ -1699,10 +1699,10 @@ if ($kasitellaan_tiedosto) {
               if ($ikustp_tsk != "") {
                 $ikustpq = "SELECT tunnus
                             FROM kustannuspaikka
-                            WHERE yhtio = '$kukarow[yhtio]'
-                            and tyyppi = '$kptyyppi'
+                            WHERE yhtio   = '$kukarow[yhtio]'
+                            and tyyppi    = '$kptyyppi'
                             and kaytossa != 'E'
-                            and nimi = '$ikustp_tsk'";
+                            and nimi      = '$ikustp_tsk'";
                 $ikustpres = pupe_query($ikustpq);
 
                 if (mysql_num_rows($ikustpres) == 1) {
@@ -1714,10 +1714,10 @@ if ($kasitellaan_tiedosto) {
               if ($ikustp_tsk != "" and $ikustp_ok == 0) {
                 $ikustpq = "SELECT tunnus
                             FROM kustannuspaikka
-                            WHERE yhtio = '$kukarow[yhtio]'
-                            and tyyppi = '$kptyyppi'
+                            WHERE yhtio   = '$kukarow[yhtio]'
+                            and tyyppi    = '$kptyyppi'
                             and kaytossa != 'E'
-                            and koodi = '$ikustp_tsk'";
+                            and koodi     = '$ikustp_tsk'";
                 $ikustpres = pupe_query($ikustpq);
 
                 if (mysql_num_rows($ikustpres) == 1) {
@@ -1732,10 +1732,10 @@ if ($kasitellaan_tiedosto) {
 
                 $ikustpq = "SELECT tunnus
                             FROM kustannuspaikka
-                            WHERE yhtio = '$kukarow[yhtio]'
-                            and tyyppi = '$kptyyppi'
+                            WHERE yhtio   = '$kukarow[yhtio]'
+                            and tyyppi    = '$kptyyppi'
                             and kaytossa != 'E'
-                            and tunnus = '$ikustp_tsk'";
+                            and tunnus    = '$ikustp_tsk'";
                 $ikustpres = pupe_query($ikustpq);
 
                 if (mysql_num_rows($ikustpres) == 1) {
@@ -1769,11 +1769,11 @@ if ($kasitellaan_tiedosto) {
               elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 2 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
                 $etsitunnus = "SELECT tunnus
                                FROM asiakas USE INDEX (toim_ovttunnus_index)
-                               WHERE yhtio = '$kukarow[yhtio]'
-                               AND toim_ovttunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'
+                               WHERE yhtio         = '$kukarow[yhtio]'
+                               AND toim_ovttunnus  = '{$taulunrivit[$taulu][$eriviindex][$r]}'
                                AND toim_ovttunnus != ''
                                AND ytunnus        != ''
-                               AND ytunnus = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
+                               AND ytunnus         = '".$taulunrivit[$taulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$taulu])]."'";
                 $etsiresult = pupe_query($etsitunnus);
 
                 if (mysql_num_rows($etsiresult) == 1) {
@@ -1793,8 +1793,8 @@ if ($kasitellaan_tiedosto) {
               elseif ($otsikko == 'ASIAKAS' and $asiakkaanvalinta == 3 and $taulunrivit[$taulu][$eriviindex][$r] != "") {
                 $etsitunnus = "SELECT tunnus
                                FROM asiakas USE INDEX (asno_index)
-                               WHERE yhtio = '$kukarow[yhtio]'
-                               AND asiakasnro = '{$taulunrivit[$taulu][$eriviindex][$r]}'
+                               WHERE yhtio     = '$kukarow[yhtio]'
+                               AND asiakasnro  = '{$taulunrivit[$taulu][$eriviindex][$r]}'
                                AND asiakasnro != ''";
                 $etsiresult = pupe_query($etsitunnus);
 
@@ -1841,8 +1841,8 @@ if ($kasitellaan_tiedosto) {
                 $etsitunnus = "SELECT tunnus
                                FROM dynaaminen_puu
                                WHERE yhtio = '$kukarow[yhtio]'
-                               AND laji = 'asiakas'
-                               AND koodi = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
+                               AND laji    = 'asiakas'
+                               AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
                 $etsiresult = pupe_query($etsitunnus);
                 $etsirow = mysql_fetch_assoc($etsiresult);
 
@@ -1885,7 +1885,7 @@ if ($kasitellaan_tiedosto) {
                 $xquery = "SELECT tunnus
                            FROM asiakas
                            WHERE yhtio = '$kukarow[yhtio]'
-                           and tunnus = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
+                           and tunnus  = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
                 $xresult = pupe_query($xquery);
 
                 if (mysql_num_rows($xresult) == 0) {
@@ -1899,7 +1899,7 @@ if ($kasitellaan_tiedosto) {
                 if (mysql_num_rows($xresult) == 0) {
                   $xquery = "SELECT tunnus
                              FROM asiakas
-                             WHERE yhtio = '$kukarow[yhtio]'
+                             WHERE yhtio    = '$kukarow[yhtio]'
                              and asiakasnro = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
                   $xresult = pupe_query($xquery);
                 }
@@ -1944,8 +1944,8 @@ if ($kasitellaan_tiedosto) {
                 //  Selvitet‰‰n vanha oletuspaikka
                 $vanha_oletus_query = "SELECT *
                                        FROM tuotepaikat
-                                       WHERE tuoteno = '$tuoteno'
-                                       and yhtio = '$kukarow[yhtio]'
+                                       WHERE tuoteno  = '$tuoteno'
+                                       and yhtio      = '$kukarow[yhtio]'
                                        and oletus    != ''";
                 $oletusresult = pupe_query($vanha_oletus_query);
                 $oletusrow = mysql_fetch_assoc($oletusresult);
@@ -1960,18 +1960,18 @@ if ($kasitellaan_tiedosto) {
                 if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
                   $uusi_oletus_query = "UPDATE tilausrivi
                                         SET hyllyalue = '$hylly[hyllyalue]',
-                                        hyllynro = '$hylly[hyllynro]',
-                                        hyllytaso = '$hylly[hyllytaso]',
-                                        hyllyvali = '$hylly[hyllyvali]'
-                                        WHERE yhtio = '$kukarow[yhtio]'
-                                        AND tuoteno = '$tuoteno'
-                                        AND hyllyalue = '$oletusrow[hyllyalue]'
-                                        AND hyllynro = '$oletusrow[hyllynro]'
-                                        AND hyllytaso = '$oletusrow[hyllytaso]'
-                                        AND hyllyvali = '$oletusrow[hyllyvali]'
-                                        AND tyyppi = 'O'
-                                        AND uusiotunnus = '0'
-                                        AND kpl = '0'
+                                        hyllynro         = '$hylly[hyllynro]',
+                                        hyllytaso        = '$hylly[hyllytaso]',
+                                        hyllyvali        = '$hylly[hyllyvali]'
+                                        WHERE yhtio      = '$kukarow[yhtio]'
+                                        AND tuoteno      = '$tuoteno'
+                                        AND hyllyalue    = '$oletusrow[hyllyalue]'
+                                        AND hyllynro     = '$oletusrow[hyllynro]'
+                                        AND hyllytaso    = '$oletusrow[hyllytaso]'
+                                        AND hyllyvali    = '$oletusrow[hyllyvali]'
+                                        AND tyyppi       = 'O'
+                                        AND uusiotunnus  = '0'
+                                        AND kpl          = '0'
                                         AND varattu     != '0'";
                   $paivitysresult = pupe_query($uusi_oletus_query);
 
@@ -2010,8 +2010,8 @@ if ($kasitellaan_tiedosto) {
                 //  Selvitet‰‰n vanha oletuspaikka
                 $vanha_oletus_query = "SELECT *
                                        FROM tuotepaikat
-                                       WHERE tuoteno = '$tuoteno'
-                                       and yhtio = '$kukarow[yhtio]'
+                                       WHERE tuoteno  = '$tuoteno'
+                                       and yhtio      = '$kukarow[yhtio]'
                                        and oletus    != ''";
                 $oletusresult = pupe_query($vanha_oletus_query);
                 $oletusrow = mysql_fetch_assoc($oletusresult);
@@ -2026,18 +2026,18 @@ if ($kasitellaan_tiedosto) {
                 if (mysql_num_rows($oletusresult) == 1 and kuuluukovarastoon($oletusrow['hyllyalue'], $oletusrow['hyllynro']) == kuuluukovarastoon($hylly['hyllyalue'], $hylly['hyllynro'])) {
                   $uusi_oletus_query = "UPDATE tilausrivi
                                         SET hyllyalue = '$hylly[hyllyalue]',
-                                        hyllynro = '$hylly[hyllynro]',
-                                        hyllytaso = '$hylly[hyllytaso]',
-                                        hyllyvali = '$hylly[hyllyvali]'
-                                        WHERE yhtio = '$kukarow[yhtio]'
-                                        AND tuoteno = '$tuoteno'
-                                        AND hyllyalue = '$oletusrow[hyllyalue]'
-                                        AND hyllynro = '$oletusrow[hyllynro]'
-                                        AND hyllytaso = '$oletusrow[hyllytaso]'
-                                        AND hyllyvali = '$oletusrow[hyllyvali]'
-                                        AND tyyppi = 'O'
-                                        AND uusiotunnus = '0'
-                                        AND kpl = '0'
+                                        hyllynro         = '$hylly[hyllynro]',
+                                        hyllytaso        = '$hylly[hyllytaso]',
+                                        hyllyvali        = '$hylly[hyllyvali]'
+                                        WHERE yhtio      = '$kukarow[yhtio]'
+                                        AND tuoteno      = '$tuoteno'
+                                        AND hyllyalue    = '$oletusrow[hyllyalue]'
+                                        AND hyllynro     = '$oletusrow[hyllynro]'
+                                        AND hyllytaso    = '$oletusrow[hyllytaso]'
+                                        AND hyllyvali    = '$oletusrow[hyllyvali]'
+                                        AND tyyppi       = 'O'
+                                        AND uusiotunnus  = '0'
+                                        AND kpl          = '0'
                                         AND varattu     != '0'";
                   $paivitysresult = pupe_query($uusi_oletus_query);
 
@@ -2056,8 +2056,8 @@ if ($kasitellaan_tiedosto) {
                     $query_x = "SELECT tunnus
                                 FROM dynaaminen_puu
                                 WHERE yhtio = '{$kukarow['yhtio']}'
-                                AND laji = '{$table_tarkenne}'
-                                AND koodi = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
+                                AND laji    = '{$table_tarkenne}'
+                                AND koodi   = '{$taulunrivit[$taulu][$eriviindex][$r]}'";
                     $koodi_tunnus_res = pupe_query($query_x);
                     $koodi_tunnus_row = mysql_fetch_assoc($koodi_tunnus_res);
 
@@ -2466,19 +2466,19 @@ if ($kasitellaan_tiedosto) {
 
               //Tehd‰‰n tapahtuma
               $querytapahtuma = "INSERT into tapahtuma set
-                                 yhtio = '$kukarow[yhtio]',
-                                 tuoteno = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("TUOTENO", $taulunotsikot["tuotepaikat"])]}',
-                                 kpl = '0',
-                                 kplhinta = '0',
-                                 hinta = '0',
+                                 yhtio     = '$kukarow[yhtio]',
+                                 tuoteno   = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("TUOTENO", $taulunotsikot["tuotepaikat"])]}',
+                                 kpl       = '0',
+                                 kplhinta  = '0',
+                                 hinta     = '0',
                                  hyllyalue = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYALUE", $taulunotsikot["tuotepaikat"])]}',
-                                 hyllynro = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
+                                 hyllynro  = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYNRO", $taulunotsikot["tuotepaikat"])]}',
                                  hyllytaso = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYTASO", $taulunotsikot["tuotepaikat"])]}',
                                  hyllyvali = '{$taulunrivit["tuotepaikat"][$eriviindex][array_search("HYLLYVALI", $taulunotsikot["tuotepaikat"])]}',
-                                 laji = '$tapahtumalaji',
-                                 selite = '$tapahtumaselite',
-                                 laatija = '$kukarow[kuka]',
-                                 laadittu = now()";
+                                 laji      = '$tapahtumalaji',
+                                 selite    = '$tapahtumaselite',
+                                 laatija   = '$kukarow[kuka]',
+                                 laadittu  = now()";
               $resulttapahtuma = pupe_query($querytapahtuma);
             }
 

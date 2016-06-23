@@ -252,29 +252,29 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
             JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.uusiotunnus = lasku.tunnus
-              AND tilausrivi.tyyppi = 'L'
-              AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
+              AND tilausrivi.uusiotunnus   = lasku.tunnus
+              AND tilausrivi.tyyppi        = 'L'
+              AND tilausrivi.tuoteno      != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno = tilausrivi.tuoteno
-              AND tuote.myynninseuranta = ''
+              AND tuote.tuoteno            = tilausrivi.tuoteno
+              AND tuote.myynninseuranta    = ''
               {$tuoterajaus})
             JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus
-              AND asiakas.myynninseuranta = ''
+              AND asiakas.tunnus           = lasku.liitostunnus
+              AND asiakas.myynninseuranta  = ''
               {$myyjarajaus}
               {$ryhmarajaus})
             LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio
-              AND kuka.myyja = asiakas.myyjanro
-              AND kuka.myyja > 0)
+              AND kuka.myyja               = asiakas.myyjanro
+              AND kuka.myyja               > 0)
             LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio
-              AND avainsana.laji = 'ASIAKASRYHMA'
-              AND avainsana.selite = asiakas.ryhma)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila = 'U'
-            AND lasku.alatila = 'X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
+              AND avainsana.laji           = 'ASIAKASRYHMA'
+              AND avainsana.selite         = asiakas.ryhma)
+            WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+            AND lasku.tila                 = 'U'
+            AND lasku.alatila              = 'X'
+            AND lasku.tapvm                >= '{$alkupvm}'
+            AND lasku.tapvm                <= '{$loppupvm}'
             GROUP BY {$grouppauskentta}
             ORDER BY myyntinyt DESC
             {$limitti}";

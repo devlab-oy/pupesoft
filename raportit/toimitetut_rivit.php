@@ -58,9 +58,9 @@ if ($tee == 'aja') {
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
             LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.tyyppi = 'L'
-            AND tilausrivi.var not in ('P','J','O','S')
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi         = 'L'
+            AND tilausrivi.var            not in ('P','J','O','S')
             AND tilausrivi.varattu+tilausrivi.kpl != 0
             AND tilausrivi.toimitettuaika > '0000-00-00 00:00:00'
             AND tilausrivi.toimitettuaika <= '$vva-$kka-$ppa 23:59:59'

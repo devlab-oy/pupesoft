@@ -793,7 +793,7 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
                      toimaika
                      FROM lasku
                      WHERE yhtio = '$kukarow[yhtio]'
-                     AND tunnus = $valitsetoimitus_vaihdarivi";
+                     AND tunnus  = $valitsetoimitus_vaihdarivi";
       $ajat = mysql_fetch_assoc(pupe_query($ajat_query));
 
       $aikalisa = ", kerayspvm = '{$ajat["kerayspvm"]}', toimaika = '{$ajat["toimaika"]}'";
@@ -803,7 +803,7 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
       // Vaihdetaan rivin otunnus
       $query = "UPDATE tilausrivi
                 SET
-                otunnus = '$valitsetoimitus_vaihdarivi'
+                otunnus            = '$valitsetoimitus_vaihdarivi'
                 $aikalisa
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and otunnus        = '$edtilausnumero'

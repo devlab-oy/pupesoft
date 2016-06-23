@@ -573,13 +573,13 @@ if ($tee == 'N') {
       if ($siirretaan_varattua) {
         $query = "UPDATE tilausrivi
                   SET hyllyalue = '$minnerow[hyllyalue]',
-                    hyllynro    = '$minnerow[hyllynro]',
-                    hyllyvali   = '$minnerow[hyllyvali]',
-                    hyllytaso   = '$minnerow[hyllytaso]'
+                    hyllynro      = '$minnerow[hyllynro]',
+                    hyllyvali     = '$minnerow[hyllyvali]',
+                    hyllytaso     = '$minnerow[hyllytaso]'
                   WHERE tuoteno   = '$tuotteet[$iii]'
                     AND yhtio     = '$kukarow[yhtio]'
-                    AND tyyppi IN ('L','G','V')
-                    AND varattu <> 0
+                    AND tyyppi    IN ('L','G','V')
+                    AND varattu   <> 0
                     AND hyllyalue = '$mistarow[hyllyalue]'
                     AND hyllynro  = '$mistarow[hyllynro]'
                     AND hyllyvali = '$mistarow[hyllyvali]'
@@ -1155,17 +1155,17 @@ if ($tee == 'M') {
         $query = "SELECT *
                   FROM lasku
                   JOIN tilausrivi ON (
-                    tilausrivi.yhtio = lasku.yhtio AND
-                    tilausrivi.otunnus = lasku.tunnus
+                    tilausrivi.yhtio       = lasku.yhtio AND
+                    tilausrivi.otunnus     = lasku.tunnus
                   )
-                  WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                  AND lasku.tila = 'C'
-                  AND lasku.alatila IN ('', 'A', 'B', 'C')
+                  WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+                  AND lasku.tila           = 'C'
+                  AND lasku.alatila        IN ('', 'A', 'B', 'C')
                   AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
-                  AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
+                  AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
                   AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
                   AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
-                  AND tilausrivi.tuoteno = '{$saldorow["tuoteno"]}'";
+                  AND tilausrivi.tuoteno   = '{$saldorow["tuoteno"]}'";
         $reklares = pupe_query($query);
 
         $reklacheck = (mysql_num_rows($reklares) > 0);

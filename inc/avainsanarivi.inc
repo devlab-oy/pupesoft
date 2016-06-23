@@ -1140,9 +1140,9 @@ if ($avain_sel['TYOM_TYOJONO'] == "SELECTED" and $_selitetark_4) {
   $ulos .= "<option value=''>".t('Ei oletusvastuuhenkilöä')."</option>";
   $query = "SELECT *
             FROM kuka
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio    = '{$kukarow['yhtio']}'
             AND aktiivinen = 1
-            AND extranet = ''
+            AND extranet   = ''
             ORDER BY nimi";
   $vastuuresult = pupe_query($query);
 

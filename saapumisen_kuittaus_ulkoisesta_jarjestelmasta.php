@@ -91,11 +91,11 @@ if ($handle = opendir($path)) {
 
       $query = "SELECT tunnus
                 FROM lasku
-                WHERE yhtio  = '{$yhtio}'
-                AND tila     = 'K'
+                WHERE yhtio     = '{$yhtio}'
+                AND tila        = 'K'
                 AND vanhatunnus = 0
-                AND laskunro = '{$saapumisnro}'
-                AND sisviesti3 = 'ei_vie_varastoon'";
+                AND laskunro    = '{$saapumisnro}'
+                AND sisviesti3  = 'ei_vie_varastoon'";
       $selectres = pupe_query($query);
       $selectrow = mysql_fetch_assoc($selectres);
 
@@ -161,23 +161,23 @@ if ($handle = opendir($path)) {
 
         # Päivitetään varattu ja kohdistetaan rivi
         $query = "UPDATE tilausrivi SET
-                  varattu         = '{$kpl}'
+                  varattu     = '{$kpl}'
                   {$uusiotunnuslisa}
-                  WHERE yhtio     = '{$yhtio}'
-                  AND tyyppi      = 'O'
-                  AND kpl         = 0
-                  AND otunnus     = '{$ostotilaus}'
-                  AND tuoteno     = '{$tuoteno}'
-                  AND tunnus      = '{$rivitunnus}'";
+                  WHERE yhtio = '{$yhtio}'
+                  AND tyyppi  = 'O'
+                  AND kpl     = 0
+                  AND otunnus = '{$ostotilaus}'
+                  AND tuoteno = '{$tuoteno}'
+                  AND tunnus  = '{$rivitunnus}'";
         $updres = pupe_query($query);
       }
 
       if (count($tilausrivit) > 0) {
         $query = "UPDATE lasku SET
-                  sisviesti3   = 'ok_vie_varastoon'
-                  WHERE yhtio  = '{$yhtio}'
-                  AND tila     = 'K'
-                  AND tunnus = '{$saapumistunnus}'";
+                  sisviesti3  = 'ok_vie_varastoon'
+                  WHERE yhtio = '{$yhtio}'
+                  AND tila    = 'K'
+                  AND tunnus  = '{$saapumistunnus}'";
         $updres = pupe_query($query);
 
         if (!empty($email)) {

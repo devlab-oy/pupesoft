@@ -107,8 +107,8 @@ class Unifaun {
     // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
                  FROM laskun_lisatiedot
-                 WHERE yhtio  = '{$this->kukarow['yhtio']}'
-                 AND otunnus   = '{$this->postirow['tunnus']}'
+                 WHERE yhtio              = '{$this->kukarow['yhtio']}'
+                 AND otunnus              = '{$this->postirow['tunnus']}'
                  AND noutopisteen_tunnus != ''";
     $ll_res = pupe_query($ll_query);
 

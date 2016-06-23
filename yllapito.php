@@ -633,10 +633,10 @@ if ($upd == 1) {
 
           if ($paivita_myos_kanavointitieto != "") {
             $query = "UPDATE lasku SET
-                      chn            = '{$otsikrow['chn']}',
-                      verkkotunnus   = '{$otsikrow['verkkotunnus']}'
-                      WHERE yhtio    = '{$kukarow['yhtio']}'
-                      and tunnus     = '{$laskuorow['tunnus']}'";
+                      chn          = '{$otsikrow['chn']}',
+                      verkkotunnus = '{$otsikrow['verkkotunnus']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
             $updaresult = pupe_query($query);
           }
           else {

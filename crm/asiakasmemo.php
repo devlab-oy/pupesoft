@@ -276,10 +276,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
         if ($kukarow["kieli"] != 'fi') {
           $query = "SELECT selite from avainsana
-              where yhtio = '$kukarow[yhtio]'
-              and laji       = 'KALETAPA'
-              and selitetark = '$tapa'
-              and kieli      = '$kukarow[kieli]'";
+                    where yhtio    = '$kukarow[yhtio]'
+                    and laji       = 'KALETAPA'
+                    and selitetark = '$tapa'
+                    and kieli      = '$kukarow[kieli]'";
           $tapa_res = pupe_query($query);
           $tapa_row = mysql_fetch_assoc($tapa_res);
 

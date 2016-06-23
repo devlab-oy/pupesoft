@@ -250,7 +250,7 @@ else {
   if ($rtee == "AJA" and isset($ruks_pakolliset)) {
     require "inc/pakolliset_sarakkeet.inc";
 
-    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
+    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($table);
 
     if (!is_array($wherelliset)) {
       $ruksaa = $pakolliset;

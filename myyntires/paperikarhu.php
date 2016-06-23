@@ -425,7 +425,7 @@ if (!function_exists("loppu")) {
       $query = "SELECT *
                 FROM factoring
                 WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$maksuehtotiedot[factoring_id]'";
+                AND tunnus  = '$maksuehtotiedot[factoring_id]'";
       $fac_result = pupe_query($query);
       $factoringrow = mysql_fetch_assoc($fac_result);
 

@@ -423,11 +423,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       $query = "SELECT *
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'
-                AND tyyppi = 'O'
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND otunnus   = '{$laskurow['tunnus']}'
+                AND tyyppi    = 'O'
                 AND hyllyalue = ''
-                AND hyllynro = ''
+                AND hyllynro  = ''
                 AND hyllyvali = ''
                 AND hyllytaso = ''";
       $result = pupe_query($query);

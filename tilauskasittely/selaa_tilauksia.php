@@ -518,9 +518,9 @@ if (mysql_num_rows($result) > 0) {
     else {
       $i = 2;
     }
-    
+
     $summa = sprintf('%.02f', $summa);
-    
+
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $osuus_pyoristyseroista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "" or $saapumisenkulut_yhteensa != "") {
       $i = 6;
       $summa = "";

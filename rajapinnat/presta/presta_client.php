@@ -19,6 +19,8 @@ abstract class PrestaClient {
    *
    * @var PrestaShopWebservice REST-client
    */
+
+
   protected $ws = null;
 
   /**
@@ -383,7 +385,7 @@ abstract class PrestaClient {
 
   protected function delete_all() {
     $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
-    # TODO, this only fetches records from the default shop
+    // TODO, this only fetches records from the default shop
     $existing_resources = $this->all(array('id'));
     $existing_resources = array_column($existing_resources, 'id');
 
@@ -507,7 +509,7 @@ abstract class PrestaClient {
     }
     else {
       // substract one, since API key starts from zero
-      return ($this->languages_table[$code] - 1);
+      return $this->languages_table[$code] - 1;
     }
   }
 

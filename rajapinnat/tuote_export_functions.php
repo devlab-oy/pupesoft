@@ -115,7 +115,7 @@ function tuote_export_hae_tuotetiedot($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki                     = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint                  = $params['datetime_checkpoint'];
+  $datetime_checkpoint                  = tuote_export_checkpoint('TEX_TUOTTEET');
   $magento_asiakaskohtaiset_tuotehinnat = $params['magento_asiakaskohtaiset_tuotehinnat'];
   $tuotteiden_asiakashinnat_magentoon   = $params['tuotteiden_asiakashinnat_magentoon'];
   $verkkokauppatyyppi                   = $params['verkkokauppatyyppi'];
@@ -385,7 +385,7 @@ function tuote_export_hae_saldot($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki           = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint        = $params['datetime_checkpoint'];
+  $datetime_checkpoint        = tuote_export_checkpoint('TEX_SALDOT');
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
   $dnstock = array();
@@ -466,7 +466,7 @@ function tuote_export_hae_tuoteryhmat($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki           = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint        = $params['datetime_checkpoint'];
+  $datetime_checkpoint        = tuote_export_checkpoint('TEX_TRYHMAT');
 
   $dnsryhma = array();
   $dnstuoteryhma = array();
@@ -558,7 +558,7 @@ function tuote_export_hae_asiakkaat($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki     = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint  = $params['datetime_checkpoint'];
+  $datetime_checkpoint  = tuote_export_checkpoint('TEX_ASIAKKAAT');
   $magento_website_id   = $params['magento_website_id'];
   $verkkokauppatyyppi   = $params['verkkokauppatyyppi'];
 
@@ -674,7 +674,7 @@ function tuote_export_hae_hinnastot($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki    = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint = $params['datetime_checkpoint'];
+  $datetime_checkpoint = tuote_export_checkpoint('TEX_HINNASTOT');
   $verkkokauppatyyppi  = $params['verkkokauppatyyppi'];
 
   $dnshinnasto = array();
@@ -744,7 +744,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki    = $params['ajetaanko_kaikki'];
-  $datetime_checkpoint = $params['datetime_checkpoint'];
+  $datetime_checkpoint = tuote_export_checkpoint('TEX_LAJITELMAT');
   $verkkokauppatyyppi  = $params['verkkokauppatyyppi'];
 
   $dnslajitelma = array();
@@ -961,22 +961,42 @@ function tuote_export_hae_lajitelmatuotteet($params) {
   return $dnslajitelma;
 }
 
-function tuote_export_paivita_avainsana($timestamp) {
+function tuote_export_checkpoint($checkpoint) {
   global $kukarow, $yhtiorow;
 
-  // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
-  require 'inc/connect.inc';
+  // Haetaan timestamp avainsanoista
+  $checkpoint_res = t_avainsana($checkpoint, 'fi');
 
-  // P‰ivitet‰‰n timestamp avainsanaan
-  $query = "UPDATE avainsana SET
-            selite      = '{$timestamp}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji    = 'TUOTE_EXP_CRON'";
-  pupe_query($query);
+  // otetaan viimeisen ajon timestamppi talteen ja p‰ivitet‰‰n t‰m‰ hetki
+  if (mysql_num_rows($checkpoint_res) != 0) {
+    $row = mysql_fetch_assoc($checkpoint_res);
+    $selite = $row['selite'];
 
-  if (mysql_affected_rows() != 1) {
-    echo "Timestamp p‰ivitys ep‰onnistui!\n";
+    // P‰ivitet‰‰n timestamppi t‰h‰n hetkeen
+    $query = "UPDATE avainsana SET
+              selite      = now()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = '{$checkpoint}'";
+    pupe_query($query);
   }
+  else {
+    // timestamppia ei lˆydy, eli t‰m‰ on ensimm‰inen ajo
+    $selite = date('Y-m-d H:i:s', mktime(0, 0, 0, 1, 1, 1970));
+
+    // P‰ivitet‰‰n timestamppi talteen
+    $query = "INSERT INTO avainsana SET
+              kieli      = 'fi',
+              laatija    = '{$kukarow['kuka']}',
+              laji       = '{$checkpoint}',
+              luontiaika = now(),
+              muutospvm  = now(),
+              muuttaja   = '{$kukarow['kuka']}',
+              selite     = now(),
+              yhtio      = '{$kukarow['yhtio']}'";
+    pupe_query($query);
+  }
+
+  return $selite;
 }
 
 function tuote_export_echo($string) {

@@ -447,7 +447,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
       $query = "UPDATE lasku SET
                 alatila     = ''
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
+                AND tunnus  = '{$laskurow['tunnus']}'";
       $upd_res = pupe_query($query);
 
       if (mysql_affected_rows() != 0) $laskurow['alatila'] = '';
@@ -599,10 +599,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 
       $query = "SELECT tunnus
                 FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila    = 'N'
-                AND alatila = 'B'
-                AND jaksotettu  = '{$row['jaksotettu']}'";
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND tila       = 'N'
+                AND alatila    = 'B'
+                AND jaksotettu = '{$row['jaksotettu']}'";
       $tila_chk_res = pupe_query($query);
 
       // loppulaskutetaan maksusopimus

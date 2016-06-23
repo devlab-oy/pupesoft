@@ -130,7 +130,7 @@ if (isset($valmnro) and !empty($valmnro)) {
   // Jos on valittu sarjanumero niin yritet‰‰n t‰ytt‰‰ muut laitekent‰t
   $query = "SELECT *
             FROM laite
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
             AND sarjanro = '{$valmnro}'
             LIMIT 1";
   $result = pupe_query($query);
@@ -266,8 +266,8 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio and tuote.tuoteno = laite.tuoteno)
             LEFT JOIN avainsana a6 ON (a6.yhtio = tuote.yhtio and a6.laji = 'TRY' and a6.selite = tuote.try)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila     in ('A','L','N','S','C')
+            WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
+            AND lasku.tila         in ('A','L','N','S','C')
             {$alatila}
             AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
@@ -277,7 +277,7 @@ function hae_kayttajan_tyomaaraykset() {
   while ($row = mysql_fetch_assoc($result)) {
     $historiaquery = "SELECT count(*) tapahtumahistoria_count
                       FROM tyomaarayksen_tapahtumat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      WHERE yhtio           = '{$kukarow['yhtio']}'
                       AND tyomaarays_tunnus = '{$row['tunnus']}'";
     $historiaresult = pupe_query($historiaquery);
     $historiarow = mysql_fetch_assoc($historiaresult);
@@ -464,24 +464,24 @@ function tallenna_tyomaarays($request) {
   // Luodaan uusi lasku
   $query  = "INSERT INTO lasku
              SET yhtio = '{$kukarow['yhtio']}',
-             luontiaika = now(),
-             laatija = '{$kukarow['kuka']}',
-             nimi = '{$asiakastiedot['nimi']}',
-             nimitark = '{$asiakastiedot['nimitark']}',
-             osoite = '{$asiakastiedot['osoite']}',
-             postino = '{$asiakastiedot['postino']}',
-             postitp = '{$asiakastiedot['postitp']}',
-             maa = '{$asiakastiedot['maa']}',
-             toim_nimi     = '{$request['osoite_parametrit']['toim_nimi']}',
-             toim_nimitark = '{$request['osoite_parametrit']['toim_nimitark']}',
-             toim_osoite   = '{$request['osoite_parametrit']['toim_osoite']}',
-             toim_postino  = '{$request['osoite_parametrit']['toim_postino']}',
-             toim_postitp  = '{$request['osoite_parametrit']['toim_postitp']}',
-             toim_maa      = '{$request['osoite_parametrit']['toim_maa']}',
-             ytunnus = '{$asiakastiedot['ytunnus']}',
-             liitostunnus = '{$kukarow['oletus_asiakas']}',
-             tilaustyyppi = 'A',
-             tila = 'A',
+             luontiaika          = now(),
+             laatija             = '{$kukarow['kuka']}',
+             nimi                = '{$asiakastiedot['nimi']}',
+             nimitark            = '{$asiakastiedot['nimitark']}',
+             osoite              = '{$asiakastiedot['osoite']}',
+             postino             = '{$asiakastiedot['postino']}',
+             postitp             = '{$asiakastiedot['postitp']}',
+             maa                 = '{$asiakastiedot['maa']}',
+             toim_nimi           = '{$request['osoite_parametrit']['toim_nimi']}',
+             toim_nimitark       = '{$request['osoite_parametrit']['toim_nimitark']}',
+             toim_osoite         = '{$request['osoite_parametrit']['toim_osoite']}',
+             toim_postino        = '{$request['osoite_parametrit']['toim_postino']}',
+             toim_postitp        = '{$request['osoite_parametrit']['toim_postitp']}',
+             toim_maa            = '{$request['osoite_parametrit']['toim_maa']}',
+             ytunnus             = '{$asiakastiedot['ytunnus']}',
+             liitostunnus        = '{$kukarow['oletus_asiakas']}',
+             tilaustyyppi        = 'A',
+             tila                = 'A',
              tilausyhteyshenkilo = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}'";
   $result = pupe_query($query);
   $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
@@ -502,18 +502,18 @@ function tallenna_tyomaarays($request) {
   // Luodaan uusi tyˆm‰‰r‰ys
   $query  = "INSERT INTO tyomaarays
              SET yhtio = '{$kukarow['yhtio']}',
-             luontiaika = now(),
-             otunnus = '{$utunnus}',
-             laatija = '{$kukarow['kuka']}',
-             tyojono = '1',
-             tyostatus = 'O',
+             luontiaika   = now(),
+             otunnus      = '{$utunnus}',
+             laatija      = '{$kukarow['kuka']}',
+             tyojono      = '1',
+             tyostatus    = 'O',
              prioriteetti = '3',
-             hyvaksy = 'Kyll‰',
-             komm1 = '{$request['tyom_parametrit']['komm1']}',
-             sla = '{$request['tyom_parametrit']['sla']}',
-             mallivari = '{$request['tyom_parametrit']['tuotenro']}',
-             valmnro = '{$request['tyom_parametrit']['valmnro']}',
-             merkki = '{$request['tyom_parametrit']['valmistaja']}'";
+             hyvaksy      = 'Kyll‰',
+             komm1        = '{$request['tyom_parametrit']['komm1']}',
+             sla          = '{$request['tyom_parametrit']['sla']}',
+             mallivari    = '{$request['tyom_parametrit']['tuotenro']}',
+             valmnro      = '{$request['tyom_parametrit']['valmnro']}',
+             merkki       = '{$request['tyom_parametrit']['valmistaja']}'";
   $result  = pupe_query($query);
 
   $request['tyom_tunnus'] = $utunnus;
@@ -531,16 +531,16 @@ function hae_laitteen_parametrit($laite_tunnus) {
             tuote.tuotemerkki malli
             FROM laite
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio
-            AND tuote.tuoteno = laite.tuoteno)
+            AND tuote.tuoteno                           = laite.tuoteno)
             LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
-            AND avainsana.laji = 'TRY'
-            AND avainsana.selite = tuote.try)
+            AND avainsana.laji                          = 'TRY'
+            AND avainsana.selite                        = tuote.try)
             LEFT JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
             LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND laite.tunnus = '{$laite_tunnus}'";
+            WHERE laite.yhtio                           = '{$kukarow['yhtio']}'
+            AND laite.tunnus                            = '{$laite_tunnus}'";
 
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -571,7 +571,7 @@ function hae_asiakasdata() {
             IF(toim_maa = '', maa, toim_maa) toim_maa
             FROM asiakas
             WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+            AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
   $asiakasdata = mysql_fetch_assoc($result);
   return $asiakasdata;
@@ -618,8 +618,8 @@ function puuttuuko_laite_jarjestelmasta($sarjanumero, $tuotenumero) {
   $puuttuu = true;
   $query = "SELECT *
             FROM laite
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuotenumero}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND tuoteno  = '{$tuotenumero}'
             AND sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
   if (mysql_num_rows($result) != 0) {
@@ -636,8 +636,8 @@ function puuttuuko_laitteelta_sopimus($sarjanumero, $tuotenumero) {
             FROM laite
             JOIN laitteen_sopimukset ON laite.yhtio = laitteen_sopimukset.yhtio
               AND laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND laite.tuoteno = '{$tuotenumero}'
+            WHERE laite.yhtio  = '{$kukarow['yhtio']}'
+            AND laite.tuoteno  = '{$tuotenumero}'
             AND laite.sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
   if (mysql_num_rows($result) != 0) {

@@ -474,9 +474,9 @@ if (!function_exists("tuotetarkista")) {
            $tem_try        != $tem_try_vanha)) {
 
         $query = "UPDATE tuotteen_avainsanat SET
-                  selite = ''
+                  selite      = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji = 'synkronointi'
+                  AND laji    = 'synkronointi'
                   AND tuoteno = '{$tem_tuoteno}'";
         $updres = pupe_query($query);
       }

@@ -7,7 +7,7 @@ if ($kieli == '') {
   $querykiel = "SELECT kieli
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus = '$laskurow[liitostunnus]'";
+                and tunnus  = '$laskurow[liitostunnus]'";
   $kielresult = pupe_query($querykiel);
   $kielrow = mysql_fetch_assoc($kielresult);
 

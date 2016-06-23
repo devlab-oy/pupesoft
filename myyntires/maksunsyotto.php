@@ -300,10 +300,10 @@ if ($tee == "SYOTTO") {
 if (!empty($viite_haku) and $tee == "ETSI") {
   $query = "SELECT liitostunnus, valkoodi
             FROM lasku
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and tila     = 'U'
-            and alatila  = 'X'
-            and viite = '$viite_haku'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    = 'U'
+            and alatila = 'X'
+            and viite   = '$viite_haku'";
   $result  = pupe_query($query);
 
   if ($asiakas = mysql_fetch_assoc($result)) {

@@ -112,11 +112,11 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                     sum(tilausrivi.varattu * tilausrivi.hinta) as summa
                     FROM yhtio
                     LEFT JOIN lasku ON (lasku.yhtio = yhtio.yhtio
-                      AND lasku.tila IN ('N','L')
+                      AND lasku.tila         IN ('N','L')
                       AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')
                     LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
                       AND tilausrivi.otunnus = lasku.tunnus)
-                    WHERE yhtio.yhtio = '{$row['yhtio']}'
+                    WHERE yhtio.yhtio        = '{$row['yhtio']}'
                     GROUP BY yhtio.yhtio";
     $tilausresult = pupe_query($tilausquery);
     $tilausrow = mysql_fetch_assoc($tilausresult);
@@ -155,7 +155,7 @@ function generoi_myyntitilauksia($yhtiot, $kokonaiskustannus, $tilausmaara, $kau
 function hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra) {
   $query = "SELECT *
             FROM asiakas
-            WHERE yhtio = '{$yhtio}'
+            WHERE yhtio   = '{$yhtio}'
             AND ovttunnus = '{$kauppakeskus_myyra}'
             LIMIT 1";
   $result = pupe_query($query);
@@ -229,10 +229,10 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
 function tuotearvonta($yhtio) {
   $query = "SELECT *
             FROM tuote
-            WHERE yhtio = '{$yhtio}'
-            AND status != 'P'
-            AND myyntihinta > 0
-            AND tuotetyyppi NOT in ('A','B')
+            WHERE yhtio      = '{$yhtio}'
+            AND status      != 'P'
+            AND myyntihinta  > 0
+            AND tuotetyyppi  NOT in ('A','B')
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
 

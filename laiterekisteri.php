@@ -240,7 +240,7 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
             LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio
-              AND laite.toimipiste = asiakas.tunnus
+              AND laite.toimipiste                        = asiakas.tunnus
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
               AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
             WHERE laite.yhtio                             = '{$kukarow['yhtio']}'
@@ -382,13 +382,13 @@ if ($toiminto == 'NAYTALAITTEET') {
             group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
-              AND tuote.tuoteno    = laite.tuoteno
+              AND tuote.tuoteno = laite.tuoteno
             {$valmistajajoini}
             {$asiakasjoinilisa}
             {$sopimusjoinilisa} JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
             {$sopimusasiakasjoini}
             {$sarjanumeroseurantajoini}
-            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            WHERE laite.yhtio   = '{$kukarow['yhtio']}'
             {$mallihakulisa}
             {$sarjanumerohakulisa}
             {$laiterajaus}
@@ -410,7 +410,7 @@ if ($toiminto == 'MUOKKAA' and !empty($laiterajaus)) {
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno    = laite.tuoteno
             LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji = 'TRY'
+              AND avainsana.laji   = 'TRY'
               AND avainsana.selite = tuote.try
             LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio
               AND laite.toimipiste = asiakas.tunnus

@@ -48,8 +48,8 @@ else {
   $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
-            WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
-            AND tuote.ei_saldoa  = ''
+            WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
+            AND tuote.ei_saldoa = ''
             {$wherelisa}
             HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                     # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan

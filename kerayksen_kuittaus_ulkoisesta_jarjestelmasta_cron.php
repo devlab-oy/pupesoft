@@ -168,12 +168,12 @@ while (false !== ($file = readdir($handle))) {
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'
-                AND tilausrivi.tunnus != 0
-                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-                AND tilausrivi.keratty = ''
-                AND tilausrivi.toimitettu = ''";
+                WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus      = '{$tilausrivin_tunnus}'
+                AND tilausrivi.tunnus     != 0
+                AND tilausrivi.otunnus     = '{$laskurow['tunnus']}'
+                AND tilausrivi.keratty     = ''
+                AND tilausrivi.toimitettu  = ''";
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
@@ -235,16 +235,16 @@ while (false !== ($file = readdir($handle))) {
     # Päivitetään saldottomat tuotteet myös toimitetuksi
     $query = "UPDATE tilausrivi
               JOIN tuote ON (
-                tuote.yhtio = tilausrivi.yhtio AND
-                tuote.tuoteno = tilausrivi.tuoteno AND
-                tuote.ei_saldoa != ''
+                tuote.yhtio              = tilausrivi.yhtio AND
+                tuote.tuoteno            = tilausrivi.tuoteno AND
+                tuote.ei_saldoa         != ''
               )
               SET tilausrivi.keratty = '{$kukarow['kuka']}',
-              tilausrivi.kerattyaika = '{$toimaika}',
-              tilausrivi.toimitettu = '{$kukarow['kuka']}',
-              tilausrivi.toimitettuaika = '{$toimaika}'
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus  = '{$otunnus}'";
+              tilausrivi.kerattyaika     = '{$toimaika}',
+              tilausrivi.toimitettu      = '{$kukarow['kuka']}',
+              tilausrivi.toimitettuaika  = '{$toimaika}'
+              WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus     = '{$otunnus}'";
     pupe_query($query);
 
     $query  = "INSERT INTO rahtikirjat SET

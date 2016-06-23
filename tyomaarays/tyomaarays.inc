@@ -503,8 +503,8 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
               FROM lasku
               JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
               LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-              WHERE lasku.tunnus  = '$kukarow[kesken]'
-              AND lasku.yhtio     = '$kukarow[yhtio]'";
+              WHERE lasku.tunnus = '$kukarow[kesken]'
+              AND lasku.yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 

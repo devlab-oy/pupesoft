@@ -179,18 +179,18 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             kuka.myyja
             FROM kalenteri
             JOIN asiakas ON (
-              asiakas.yhtio = kalenteri.yhtio AND
-              asiakas.laji != 'P'
+              asiakas.yhtio               = kalenteri.yhtio AND
+              asiakas.laji               != 'P'
               {$asiakaslisa}
             )
             LEFT JOIN yhteyshenkilo ON (
-              kalenteri.yhtio = yhteyshenkilo.yhtio AND
-              kalenteri.henkilo = yhteyshenkilo.tunnus
+              kalenteri.yhtio             = yhteyshenkilo.yhtio AND
+              kalenteri.henkilo           = yhteyshenkilo.tunnus
               {$yhteyshenkilo_rooli_lisa}
             )
             JOIN kuka ON (
-              kuka.yhtio = kalenteri.yhtio AND
-              kuka.kuka = kalenteri.kuka
+              kuka.yhtio                  = kalenteri.yhtio AND
+              kuka.kuka                   = kalenteri.kuka
             )
             WHERE kalenteri.liitostunnus  = asiakas.tunnus
             AND kalenteri.tyyppi          IN ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')

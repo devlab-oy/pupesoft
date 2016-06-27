@@ -104,7 +104,9 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     }
   }
 
+  $jjfi = false;
   $uniq_merkki = 1;
+  $counter = 1;
 
   $query = "SELECT *
             FROM rahtikirjat
@@ -116,12 +118,14 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     $sscc_array = array();
 
-    for (;$rahtikirjarow['kollit'] > 0; $rahtikirjarow['kollit']--) {
+    $kollit = $rahtikirjarow['kollit'];
+
+    for (;$kollit > 0; $kollit--) {
 
       if (!empty($rahtikirjarow['sscc_ulkoinen'])) {
         if (strpos($rahtikirjarow['sscc_ulkoinen'], "\n") !== false) {
           # Oletetaan ett‰ sscc_ulkoinen-kent‰ss‰ on niin monta SSCC-numeroa kuin on kolleja
-          $rahtikirjarow['kollit'] = 0; # Ei loopata tuplasti koska sscc_ulkoinen-kent‰ss‰ on kaikkien kollien SSCC:t
+          $kollit = 0; # Ei loopata tuplasti koska sscc_ulkoinen-kent‰ss‰ on kaikkien kollien SSCC:t
           $sscc_array = explode("\n", $rahtikirjarow['sscc_ulkoinen']);
         }
         else {
@@ -129,13 +133,26 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
         }
       }
       elseif (stripos($rahtikirjarow['rahtikirjanro'], "JJFI") !== false) {
-        $rahtikirjarow['kollit'] = 0; # Ei loopata tuplasti koska sscc_ulkoinen-kent‰ss‰ on kaikkien kollien SSCC:t
+        $kollit = 0; # Ei loopata tuplasti koska rahtikirjanro-kent‰ss‰ on kaikkien kollien JJFI:t
+        $jjfi = true;
         preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rahtikirjarow['rahtikirjanro'], $match);
 
         foreach ($match[0] as $nro) {
           $nro = str_replace(" ", "", $nro);
           $sscc_array[] = $nro;
         }
+
+        # JJFI-casessa tiedot ovat joka tietokantarivill‰, joten halutaan vain kerran JJFI-tiedot
+        # Summataan kappalem‰‰r‰t ja otetaan ensimm‰iselt‰ rivilt‰ JJFI-tiedot
+        $query = "SELECT SUM(kilot) AS kilot, SUM(kuutiot) AS kuutiot
+                  FROM rahtikirjat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otsikkonro = '{$laskurow['tunnus']}'";
+        $rahtikirjares_sum = pupe_query($query);
+        $rahtikirjarow_sum = mysql_fetch_assoc($rahtikirjares_sum);
+
+        $rahtikirjarow['kollit'] = $rahtikirjarow_sum['kollit'] / count($sscc_array);
+        $rahtikirjarow['kuutiot'] = $rahtikirjarow_sum['kuutiot'] / count($sscc_array);
       }
       elseif ($expansioncode != "") {
         $sscc_array[] = gs1_sscc($expansioncode, $laskurow['tunnus'], $uniq_merkki);
@@ -161,8 +178,6 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       $uniq_merkki++;
     }
 
-    $counter = 1;
-
     foreach ($sscc_array as $sscc) {
       $edi_order .= "*RS OSTOTILPAK {$counter}\n";
       $edi_order .= "OSTOTILPAK.OTP_SSCC:{$sscc}\n";
@@ -173,6 +188,8 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
       $counter++;
     }
+
+    if ($jjfi) break;
   }
 
   # Koontirahtikirjan pakkaus

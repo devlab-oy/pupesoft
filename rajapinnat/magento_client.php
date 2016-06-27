@@ -2259,12 +2259,8 @@ class MagentoClient {
           'price' => $tuote[$tuotekentta]
         );
 
-        $log_message = "Poikkeava hinta {$tuote[$tuotekentta]} kauppaan {$kauppatunnus}";
-
         if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
           $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
-
-          $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
         }
 
         // Key on store id, arvo on Magentoon passattava data
@@ -2273,7 +2269,13 @@ class MagentoClient {
     }
 
     // Lokitetaan tieto
-    if (!empty($return_array)) {
+    foreach ($return_array as $log_key => $log_value) {
+      $log_message = "Poikkeava hinta {$log_value['price']} kauppaan {$log_key}";
+
+      if (!empty($log_value['tax_class_id'])) {
+        $log_message .= ", poikkeava veroluokka {$log_value['tax_class_id']}";
+      }
+
       $this->log('magento_tuotteet', $log_message);
       $this->debug('magento_tuotteet', $return_array);
     }

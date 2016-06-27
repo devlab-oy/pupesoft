@@ -1236,12 +1236,12 @@ if (isset($ajax)) {
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
               JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.tunnus     = lasku.varasto)
+                AND varastopaikat.tunnus    = lasku.varasto)
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
-              WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
-              and tilausrivi.tuoteno         = '$tuoteno'
+              WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi         in ('L','E','G','V','W','M','O')
+              and tilausrivi.tuoteno        = '$tuoteno'
               and tilausrivi.laskutettuaika = '0000-00-00'
               and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila NOT IN ('X', 'V')))
               ORDER BY pvm, tunnus";

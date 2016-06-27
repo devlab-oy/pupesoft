@@ -603,7 +603,7 @@ if ($monta > 1 and $monta <= $limit) {
         $brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
       }
 
-      echo "<td>",tarkistahetu($asiakas['ytunnus']),"</td>";
+      echo "<td>", tarkistahetu($asiakas['ytunnus']), "</td>";
       echo "<td>{$asiakas['asiakasnro']}</td>";
       echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
       echo "<td>{$asiakas['osoite']} {$bros}</td>";

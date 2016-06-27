@@ -32647,6 +32647,106 @@ if (!function_exists("hae_tuoteperhe")) {
   }
 }
 
+if (!function_exists('pupesoft_toimitusvahvistus')) {
+  // Tarvitaan $otunnukset jossa on tilauksien tunnukset
+  // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
+
+  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset=0) {
+    global $kukarow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
+
+    if (empty($otunnukset)) {
+      return;
+    }
+
+    // Haetaan tarvittavat tiedot
+    $query = "SELECT lasku.*, laskun_lisatiedot.*,
+              lasku.tunnus laskutunnus,
+              lasku.toim_ovttunnus asiakastoim_ovttunnus,
+              lasku.toim_nimi asiakastoim_nimi,
+              lasku.toim_nimitark asiakastoim_nimitark,
+              lasku.toim_osoite asiakastoim_osoite,
+              lasku.toim_postitp asiakastoim_postitp,
+              lasku.toim_postino asiakastoim_postino,
+              lasku.toim_maa asiakastoim_maa,
+              asiakas.nimi asiakasnimi,
+              asiakas.nimitark asiakasnimitark,
+              asiakas.osoite asiakasosoite,
+              asiakas.postitp asiakaspostitp,
+              asiakas.postino asiakaspostino,
+              asiakas.maa asiakasmaa,
+              asiakas.ovttunnus asiakasovttunnus,
+              rahtikirjat.merahti,
+              rahtikirjat.rahtisopimus,
+              if(maksuehto.jv is null,'',maksuehto.jv) jv,
+              rahtisopimukset.muumaksaja,
+              asiakas.toimitusvahvistus,
+              asiakas.kieli,
+              IF(lasku.toim_email != '', lasku.toim_email, IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email,
+              IF(lasku.toim_puh != '', lasku.toim_puh, IF(asiakas.gsm != '', asiakas.gsm, IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin, IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
+              FROM lasku
+              LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
+              LEFT JOIN rahtikirjat ON (lasku.tunnus = rahtikirjat.otsikkonro and lasku.yhtio = rahtikirjat.yhtio)
+              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+              LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+              LEFT JOIN rahtisopimukset ON (lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tunnus in ({$otunnukset})";
+    $toimv_laskures = pupe_query($query);
+
+    if (mysql_num_rows($toimv_laskures) == 0) {
+      return;
+    }
+
+    $laskurow = mysql_fetch_assoc($toimv_laskures);
+
+    if (empty($laskurow['toimitusvahvistus'])) {
+      return;
+    }
+
+    // haetaan toimitustavan tiedot
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND selite  = '{$laskurow['toimitustapa']}'";
+    $toitares = pupe_query($query);
+    $toitarow = mysql_fetch_assoc($toitares);
+
+    if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+      $desadv_version = "una";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+      $desadv_version = "fi0089";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    else {
+      $desadv_version = "";
+    }
+
+    if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+      $myynti_vai_osto = 'M';
+    }
+
+    if ($laskurow['toimitusvahvistus'] == 'toimitusvahvistus_lahete') {
+      $params = array(
+        'laskurow'                 => $laskurow,
+        'sellahetetyyppi'          => "",
+        'extranet_tilausvahvistus' => "",
+        'naytetaanko_rivihinta'    => "",
+        'tee'                      => "",
+        'toim'                     => "",
+        'komento'                  => "asiakasemail".$laskurow['asiakas_email'],
+        'lahetekpl'                => "",
+        'kieli'                    => ""
+      );
+      pupesoft_tulosta_lahete($params);
+    }
+    else {
+      @include "tilauskasittely/$laskurow[toimitusvahvistus]";
+    }
+  }
+}
+
 if (!function_exists('generoi_hinnastot')) {
 
 

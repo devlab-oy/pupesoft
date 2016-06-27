@@ -1,21 +1,19 @@
 <?php
 
-if ($kieli == '') {
-  $querykiel = "SELECT kieli
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$laskurow[liitostunnus]'";
-  $kielresult = pupe_query($querykiel);
-  $kielrow = mysql_fetch_assoc($kielresult);
+if (!empty($laskurow['asiakas_email'])) {
 
-  $kieli = strtolower($kielrow['kieli']);
-}
+  if ($kieli == '') {
+    $querykiel = "SELECT kieli
+                  FROM asiakas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus = '$laskurow[liitostunnus]'";
+    $kielresult = pupe_query($querykiel);
+    $kielrow = mysql_fetch_assoc($kielresult);
 
-$toimitusvahvistus_email_lahetys = true;
+    $kieli = strtolower($kielrow['kieli']);
+  }
 
-if (!isset($rakir_row) or !isset($rakir_row['toimitusvahvistus']) or !isset($rakir_row['asiakas_email']) or !isset($tunnukset) or !isset($otunnukset)) {
-  $toimitusvahvistus_email_lahetys = false;
-}
+  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", "", " and avainsana.selite = '{$laskurow['toimitusvahvistus']}'", "", "", "selitetark_2");
 
 if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_row['asiakas_email'] == '' or $tunnukset == '' or $otunnukset == '') {
   $toimitusvahvistus_email_lahetys = false;
@@ -93,7 +91,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
             FROM rahtikirjat
             WHERE tunnus IN ({$tunnukset})
-            AND yhtio    = '{$kukarow['yhtio']}'";
+            AND yhtio = '{$kukarow['yhtio']}'";
   $seurantakoodit_res = pupe_query($query);
 
   $body .= t("Seurantakoodit", $kieli).":\n\n";
@@ -106,12 +104,12 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= t("Tilauksen toimitusosoite", $kieli).":\n\n";
 
-  $maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
+  $maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
 
-  $body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n\n";
-  $body .= "{$rakir_row['toim_osoite']}\n\n";
-  $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n\n";
-  $body .= "{$maan_tiedot['nimi']}\n\n";
+  $body .= "{$laskurow['toim_nimi']} {$laskurow['toim_nimitark']}\n";
+  $body .= "{$laskurow['toim_osoite']}\n";
+  $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
+  $body .= "{$maan_tiedot['nimi']}\n";
 
   foreach ($kenelle_emailataan as $key => $email_kuka) {
     // Sähköpostin lähetykseen parametrit

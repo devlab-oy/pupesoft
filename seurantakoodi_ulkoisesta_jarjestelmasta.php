@@ -107,8 +107,18 @@ if ($handle = opendir($path)) {
 
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
+        $query = "SELECT asiakkaan_tilausnumero
+                  FROM lasku
+                  WHERE yhtio                 = '{$kukarow['yhtio']}'
+                  AND tunnus                  = '{$tilausnumero}'
+                  AND laatija                 = 'Magento'
+                  AND asiakkaan_tilausnumero != ''";
+        $mageres = pupe_query($query);
+
         // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-        if ($_magento_kaytossa) {
+        if ($_magento_kaytossa and mysql_num_rows($mageres)) {
+          $magerow = mysql_fetch_assoc($mageres);
+
           $query = "SELECT toimitustapa
                     FROM rahtikirjat
                     WHERE yhtio    = '{$kukarow['yhtio']}'
@@ -116,7 +126,6 @@ if ($handle = opendir($path)) {
           $chk_res = pupe_query($query);
 
           if (mysql_num_rows($chk_res) > 0) {
-
             $chk_row = mysql_fetch_assoc($chk_res);
 
             $query = "SELECT *
@@ -126,21 +135,11 @@ if ($handle = opendir($path)) {
             $toitares = pupe_query($query);
             $toitarow = mysql_fetch_assoc($toitares);
 
-            $query = "SELECT asiakkaan_tilausnumero
-                      FROM lasku
-                      WHERE yhtio                 = '{$kukarow['yhtio']}'
-                      AND tunnus                  = '{$tilausnumero}'
-                      AND laatija                 = 'Magento'
-                      AND asiakkaan_tilausnumero != ''";
-            $mageres = pupe_query($query);
+            $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+            $magento_api_rak = $seurantakoodi;
+            $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
 
-            while ($magerow = mysql_fetch_assoc($mageres)) {
-              $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
-              $magento_api_rak = $seurantakoodi;
-              $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
-
-              require "magento_toimita_tilaus.php";
-            }
+            require "magento_toimita_tilaus.php";
           }
         }
       }

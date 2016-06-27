@@ -137,9 +137,9 @@ while ($rivi = fgets($fd)) {
       // Jos ei haluta tilausvahvistusta
       if (!empty($tilaus_novahvistus)) {
         $query = "UPDATE lasku
-            SET tilausvahvistus = ''
-            WHERE tunnus = '$id'
-            AND yhtio    = '$kukarow[yhtio]'";
+                  SET tilausvahvistus = ''
+                  WHERE tunnus = '$id'
+                  AND yhtio    = '$kukarow[yhtio]'";
         pupe_query($query);
       }
 

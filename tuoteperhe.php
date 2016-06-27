@@ -546,10 +546,10 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
     $query = "SELECT tuoteperhe.tunnus
               FROM tuoteperhe
               join tuote using(yhtio, tuoteno)
-              WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-              and tuoteperhe.tyyppi = '$hakutyyppi'
+              WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+              and tuoteperhe.tyyppi     = '$hakutyyppi'
               and tuoteperhe.isatuoteno = '$isatuoteno'
-              AND tuote.kehahin = 0";
+              AND tuote.kehahin         = 0";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -788,9 +788,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "PERHE") {
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio     = '$kukarow[yhtio]'
-                  AND tyyppi      = '$hakutyyppi'
-                  AND isatuoteno  = '$isatuoteno'
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  AND tyyppi     = '$hakutyyppi'
+                  AND isatuoteno = '$isatuoteno'
                   ORDER BY isatuoteno, tuoteno
                   LIMIT 1";
         $ressu = pupe_query($query);

@@ -42,9 +42,9 @@ echo "<table>
     </td>
   </tr>";
 
-  $scheck = (!empty($saapumisittain)) ? "CHECKED": "";
+$scheck = (!empty($saapumisittain)) ? "CHECKED": "";
 
-  echo "<tr>
+echo "<tr>
     <th>".t("Listaa saapumiset")."</th>
     <td>
     <input type='checkbox' name='saapumisittain' $scheck>

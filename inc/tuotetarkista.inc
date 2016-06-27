@@ -78,10 +78,10 @@ if (!function_exists("tuotetarkista")) {
 
     if ($laji != "V" and
       ($fieldname == "osasto"
-      or $fieldname == "try"
-      or $fieldname == "tuotemerkki"
-      or $fieldname == "malli"
-      or $fieldname == "mallitarkenne")) {
+        or $fieldname == "try"
+        or $fieldname == "tuotemerkki"
+        or $fieldname == "malli"
+        or $fieldname == "mallitarkenne")) {
 
       // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
       if (empty($t[$i])) {
@@ -465,18 +465,18 @@ if (!function_exists("tuotetarkista")) {
       }
 
       if (count($virhe) == 0 and
-          ($onkologmaster or $onkoposten) and
-          ($tem_status     != $trow['status']     or
-           $tem_eankoodi   != $trow['eankoodi']   or
-           $tem_yksikko    != $trow['yksikko']    or
-           $tem_nimitys    != $trow['nimitys']    or
-           $tem_tuotemassa != $trow['tuotemassa'] or
-           $tem_try        != $tem_try_vanha)) {
+        ($onkologmaster or $onkoposten) and
+        ($tem_status     != $trow['status']     or
+          $tem_eankoodi   != $trow['eankoodi']   or
+          $tem_yksikko    != $trow['yksikko']    or
+          $tem_nimitys    != $trow['nimitys']    or
+          $tem_tuotemassa != $trow['tuotemassa'] or
+          $tem_try        != $tem_try_vanha)) {
 
         $query = "UPDATE tuotteen_avainsanat SET
-                  selite = ''
+                  selite      = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji = 'synkronointi'
+                  AND laji    = 'synkronointi'
                   AND tuoteno = '{$tem_tuoteno}'";
         $updres = pupe_query($query);
       }

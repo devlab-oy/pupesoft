@@ -380,6 +380,8 @@ class MagentoClient {
       // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
       // tai jos ne halutaan korvata additional_attributesin mukana
       foreach ($poista_defaultit as $poistettava_key) {
+        $this->log('magento_tuotteet', "Ei päivitetä kenttää {$poistettava_key}");
+
         unset($tuote_data[$poistettava_key]);
       }
 
@@ -692,6 +694,8 @@ class MagentoClient {
       // Voidaan yliajaa Magenton defaultparameja jos niitä ei haluta
       // tai jos ne halutaan korvata additional_attributesin mukana
       foreach ($poista_defaultit as $poistettava_key) {
+        $this->log('magento_tuotteet', "Ei päivitetä kenttää {$poistettava_key}");
+
         unset($configurable[$poistettava_key]);
       }
 

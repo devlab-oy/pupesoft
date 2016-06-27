@@ -514,48 +514,56 @@ class MagentoClient {
         }
       }
 
+      // Esimerkiksi:
+      // $kauppakohtaiset_hinnat = array(
+      //   'myyntihinta'   => array('7','8'),
+      //   'hinnastohinta' => array('7','8')
+      // );
+      //
+      // $kauppakohtaiset_verokannat = array(
+      //   # magento_store_id => magento_tax_class_id
+      //   '7' => 6,
+      //   '8' => 6
+      // )
+
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
-      foreach ($kauppakohtaiset_hinnat as $kauppakohtainen_hinta) {
-        foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
-          $tuotteen_kauppakohtainen_data = array();
+      foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+        foreach ($kauppatunnukset as $kauppatunnus) {
+          // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
+          // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+          // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+          if (empty($tuote[$tuotekentta])) {
+            continue;
+          }
 
-          foreach ($kauppatunnukset as $kauppatunnus) {
-            // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
-            // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
-            // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-            if (empty($tuote[$tuotekentta])) {
-              continue;
-            }
+          $tuotteen_kauppakohtainen_data = array(
+            'price' => $tuote[$tuotekentta]
+          );
 
-            $tuotteen_kauppakohtainen_data = array(
-              'price' => $tuote[$tuotekentta]
+          $log_message = "Poikkeava hinta {$tuote[$tuotekentta]} kauppaan {$kauppatunnus}";
+
+          if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+            $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+
+            $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
+          }
+
+          $this->log('magento_tuotteet', $log_message);
+          $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+
+          try {
+            $this->_proxy->call($this->_session, 'catalog_product.update',
+              array(
+                $tuote['tuoteno'],
+                $tuotteen_kauppakohtainen_data,
+                $kauppatunnus
+              )
             );
-
-            $log_message = "Poikkeava hinta {$tuote[$tuotekentta]} kauppaan {$kauppatunnus}";
-
-            if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-              $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
-
-              $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
-            }
-
-            $this->log('magento_tuotteet', $log_message);
+          }
+          catch (Exception $e) {
+            $this->_error_count++;
+            $this->log('magento_tuotteet', "Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
             $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-
-            try {
-              $this->_proxy->call($this->_session, 'catalog_product.update',
-                array(
-                  $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data,
-                  $kauppatunnus
-                )
-              );
-            }
-            catch (Exception $e) {
-              $this->_error_count++;
-              $this->log('magento_tuotteet', "Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
-              $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-            }
           }
         }
       }
@@ -827,48 +835,56 @@ class MagentoClient {
           )
         );
 
+        // Esimerkiksi:
+        // $kauppakohtaiset_hinnat = array(
+        //   'myyntihinta'   => array('7','8'),
+        //   'hinnastohinta' => array('7','8')
+        // );
+        //
+        // $kauppakohtaiset_verokannat = array(
+        //   # magento_store_id => magento_tax_class_id
+        //   '7' => 6,
+        //   '8' => 6
+        // )
+
         // Päivitetään configurable-tuotteen kauppanäkymäkohtaiset hinnat
-        foreach ($kauppakohtaiset_hinnat as $kauppakohtainen_hinta) {
-          foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
-            $tuotteen_kauppakohtainen_data = array();
+        foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+          foreach ($kauppatunnukset as $kauppatunnus) {
+            // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
+            // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+            // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+            if (empty($tuotteet[0][$tuotekentta])) {
+              continue;
+            }
 
-            foreach ($kauppatunnukset as $kauppatunnus) {
-              // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
-              // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
-              // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-              if (empty($tuotteet[0][$tuotekentta])) {
-                continue;
-              }
+            $tuotteen_kauppakohtainen_data = array(
+              'price' => $tuotteet[0][$tuotekentta]
+            );
 
-              $tuotteen_kauppakohtainen_data = array(
-                'price' => $tuotteet[0][$tuotekentta]
+            $log_message = "Poikkeava hinta {$tuotteet[0][$tuotekentta]} kauppaan {$kauppatunnus}";
+
+            if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+              $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+
+              $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
+            }
+
+            $this->log('magento_tuotteet', $log_message);
+            $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+
+            try {
+              $this->_proxy->call($this->_session, 'catalog_product.update',
+                array(
+                  $nimitys,
+                  $tuotteen_kauppakohtainen_data,
+                  $kauppatunnus
+                )
               );
-
-              $log_message = "Poikkeava hinta {$tuotteet[0][$tuotekentta]} kauppaan {$kauppatunnus}";
-
-              if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
-
-                $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
-              }
-
-              $this->log('magento_tuotteet', $log_message);
+            }
+            catch (Exception $e) {
+              $this->_error_count++;
+              $this->log('magento_tuotteet', "Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
               $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-
-              try {
-                $this->_proxy->call($this->_session, 'catalog_product.update',
-                  array(
-                    $nimitys,
-                    $tuotteen_kauppakohtainen_data,
-                    $kauppatunnus
-                  )
-                );
-              }
-              catch (Exception $e) {
-                $this->_error_count++;
-                $this->log('magento_tuotteet', "Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
-                $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-              }
             }
           }
         }
@@ -878,11 +894,6 @@ class MagentoClient {
 
         // Lisätään kuvat Magentoon
         $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
-      }
-      catch (Exception $e) {
-        $this->_error_count++;
-        $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
-        $this->debug('magento_tuotteet', $configurable);
       }
     }
 

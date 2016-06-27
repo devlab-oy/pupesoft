@@ -244,6 +244,7 @@ class MagentoClient {
     foreach ($dnstuote as $tuote) {
       $count++;
       $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsitelläään tuote '{$tuote['tuoteno']}' (simple)");
+      $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$tuote[$hintakentta]}");
 
       $tuote_clean = $tuote['tuoteno'];
 
@@ -580,7 +581,8 @@ class MagentoClient {
       if (is_numeric($nimitys)) $nimitys = "SKU_{$nimitys}";
 
       $count++;
-      $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsittellään tuote {$nimitys} (configurable)");
+      $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsitellään tuote {$nimitys} (configurable)");
+      $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$tuotteet[0][$hintakentta]}");
 
       $category_ids = array();
 

@@ -142,8 +142,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $msg = "Haetaan {$resource} id {$id} {$kauppa}";
@@ -151,7 +151,7 @@ abstract class PrestaClient {
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Haku {$resource} id {$id} {$kauppa} epäonnistui!";
+      $msg = "Haku {$resource} id {$id} {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -174,8 +174,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->generate_xml($resource);
@@ -184,10 +184,10 @@ abstract class PrestaClient {
 
       $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin {$kauppa} uusi " . $this->resource_name());
+      $this->logger->log("Luotiin {$kauppa}uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa} epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa}epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -247,8 +247,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->remove_read_only_fields($xml);
@@ -300,8 +300,8 @@ abstract class PrestaClient {
     }
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_xml = $this->ws->get($opt);
@@ -309,7 +309,7 @@ abstract class PrestaClient {
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku {$kauppa} epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -366,8 +366,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_bool = $this->ws->delete($opt);

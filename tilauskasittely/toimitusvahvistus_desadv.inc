@@ -8,7 +8,6 @@
  *
  */
 
-
 // Tarvitaan $otunnukset jossa on tilauksien tunnukset
 // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 // Tarvitaan $rahtikirjanro jossa on rahtikirjan numero
@@ -100,8 +99,7 @@ if (!function_exists('desadv_header')) {
 
       // DTM - despatch and/or delivery date/time
       // 171 = tilauspäivä
-      list($date, $time) = explode(" ", $desadv_laskurow['toimaika']);
-      list($year, $month, $day) = explode("-", $date);
+      list($year, $month, $day) = explode("-", $desadv_laskurow['toimaika']);
       $desadv_message .= "DTM+69:{$year}{$month}{$day}:102'";
       $x++;
 
@@ -529,40 +527,14 @@ if (!function_exists('desadv_row')) {
   }
 }
 
-$toimitusvahvistus_desadv_lahetys = FALSE;
-
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 
-  //  Haetaan otsikkotiedot pohjalle
-  $query = "SELECT lasku.*, laskun_lisatiedot.*,
-            lasku.tunnus laskutunnus,
-            asiakas.nimi asiakasnimi,
-            asiakas.nimitark asiakasnimitark,
-            asiakas.osoite asiakasosoite,
-            asiakas.postitp asiakaspostitp,
-            asiakas.postino asiakaspostino,
-            asiakas.maa asiakasmaa,
-            asiakas.ovttunnus asiakasovttunnus,
-            lasku.toim_ovttunnus asiakastoim_ovttunnus,
-            lasku.toim_nimi asiakastoim_nimi,
-            lasku.toim_nimitark asiakastoim_nimitark,
-            lasku.toim_osoite asiakastoim_osoite,
-            lasku.toim_postitp asiakastoim_postitp,
-            lasku.toim_postino asiakastoim_postino,
-            lasku.toim_maa asiakastoim_maa
-            FROM lasku
-            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-            LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-            AND lasku.tila    != 'D'
-            AND lasku.tunnus   in ({$otunnukset})
-            ORDER BY lasku.tunnus";
-  $desadv_laskures = pupe_query($query);
+  mysql_data_seek($toimv_laskures, 0);
 
   $rajaus = 1;
 
-  while ($desadv_laskurow = mysql_fetch_assoc($desadv_laskures)) {
+  while ($desadv_laskurow = mysql_fetch_assoc($toimv_laskures)) {
 
     $lahtunniste = "";
 
@@ -624,8 +596,8 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
     }
 
     $desadv_message = '';
-    $error       = '';
-    $x         = 0; // yhteensä rivejä koko filessä
+    $error = '';
+    $x = 0; // yhteensä rivejä koko filessä
 
     $params = array(
       'desadv_laskurow'   => $desadv_laskurow,
@@ -686,7 +658,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       require "inc/ftp-send.inc";
 
       if ($palautus == 0) {
-        $toimitusvahvistus_desadv_lahetys = TRUE;
+        echo "<font class='message'>", t("Tilauksesta %s lähetettiin toimitusvahvistus.", "", $desadv_laskurow["tunnus"])."</font><br><br>\n";
       }
     }
     else {

@@ -27543,8 +27543,14 @@ if (!function_exists('posten_outbounddelivery')) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
+    $posten_itemnumberfield = '';
+
     if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
       return false;
+    }
+
+    if ($ulkoinen_jarjestelma == 'P') {
+      $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " avainsana.selite = 'eankoodi' ", '', '', "selitetark");
     }
 
     $query = "SELECT lasku.*,
@@ -27687,6 +27693,9 @@ if (!function_exists('posten_outbounddelivery')) {
       if ($ulkoinen_jarjestelma == 'L') {
         $_tuoteno = substr($looprow['tuoteno'], 0, 20);
         $line->addChild('ItemNumber', utf8_encode($_tuoteno));
+      }
+      elseif ($ulkoinen_jarjestelma == 'P' and !empty($posten_itemnumberfield)) {
+        $line->addChild('ItemNumber', substr($looprow[$posten_itemnumberfield], 0, 20));
       }
       else {
         $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));

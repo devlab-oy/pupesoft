@@ -4,9 +4,9 @@ function tuote_export_tee_querylisa_resultista($tyyppi, array $tulokset) {
   $poimitut = '';
 
   // $tulokset = array(
-  //   [0] => array ("muuttuneet_tuotenumerot" => "'3','4'"),
-  //   [1] => array ("muuttuneet_tuotenumerot" => "'12','24'"´),
-  //   [2] => array ("muuttuneet_tuotenumerot" => "'5'" )
+  //   [0] => array("muuttuneet_tuotenumerot" => "'3','4'"),
+  //   [1] => array("muuttuneet_tuotenumerot" => "'12','24'"´),
+  //   [2] => array("muuttuneet_tuotenumerot" => "'5'" )
   // );
   // -> 3','4','12','24','5'
 
@@ -260,10 +260,10 @@ function tuote_export_hae_tuotetiedot($params) {
               ORDER BY t0.lft";
     $result_tp = pupe_query($query);
 
-    $tuotepuun_nodet = array ();
+    $tuotepuun_nodet = array();
 
     while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
-      $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n", $tuotepuurow['ancestors']);
+      $breadcrumbs = empty($tuotepuurow['ancestors']) ? array() : explode("\n", $tuotepuurow['ancestors']);
       $breadcrumbs[] = $tuotepuurow['node'];
       if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
       $tuotepuun_nodet[] = $breadcrumbs;
@@ -800,7 +800,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
       $tuotepuun_nodet = array();
 
       while ($tuotepuurow = mysql_fetch_assoc($result_tp)) {
-        $breadcrumbs = empty($tuotepuurow['ancestors']) ? array () : explode("\n", $tuotepuurow['ancestors']);
+        $breadcrumbs = empty($tuotepuurow['ancestors']) ? array() : explode("\n", $tuotepuurow['ancestors']);
         $breadcrumbs[] = $tuotepuurow['node'];
 
         if (count($breadcrumbs) > 1) {

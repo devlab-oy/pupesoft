@@ -335,7 +335,8 @@ class MagentoClient {
           $tuetut_kieliversiot = $erikoisparametri['arvo'];
           continue;
         }
-        elseif ($key == 'kauppakohtaiset_hinnat') {
+
+        if ($key == 'kauppakohtaiset_hinnat') {
           $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
           continue;
         }
@@ -524,14 +525,20 @@ class MagentoClient {
                 // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
                 // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
                 // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-                if (empty($tuote[$tuotekentta])) continue;
+                if (empty($tuote[$tuotekentta])) {
+                  continue;
+                }
 
                 $tuotteen_kauppakohtainen_data = array(
                   'price' => $tuote[$tuotekentta]
                 );
 
+                $log_message = "Poikkeava hinta {$tuote[$tuotekentta]} kauppaan {$kauppatunnus}";
+
                 if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
                   $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+
+                  $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
                 }
 
                 $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -541,10 +548,10 @@ class MagentoClient {
                     $kauppatunnus
                   )
                 );
-              }
 
-              $this->log('magento_tuotteet', "Kauppakohtainen hinta päivitetty");
-              $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+                $this->log('magento_tuotteet', $log_message);
+                $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+              }
             }
           }
         }
@@ -666,7 +673,9 @@ class MagentoClient {
       foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
         $key = $erikoisparametri['nimi'];
 
-        if ($key == 'kieliversiot') continue;
+        if ($key == 'kieliversiot') {
+          continue;
+        }
 
         if ($key == 'kauppakohtaiset_hinnat') {
           $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
@@ -831,14 +840,20 @@ class MagentoClient {
                   // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
                   // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
                   // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-                  if (empty($tuotteet[0][$tuotekentta])) continue;
+                  if (empty($tuotteet[0][$tuotekentta])) {
+                    continue;
+                  }
 
                   $tuotteen_kauppakohtainen_data = array(
                     'price' => $tuotteet[0][$tuotekentta]
                   );
 
+                  $log_message = "Poikkeava hinta {$tuotteet[0][$tuotekentta]} kauppaan {$kauppatunnus}";
+
                   if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
                     $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+
+                    $log_message .= ", poikkeava veroluokka $kauppakohtaiset_verokannat[$kauppatunnus]";
                   }
 
                   $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -848,10 +863,10 @@ class MagentoClient {
                       $kauppatunnus
                     )
                   );
-                }
 
-                $this->log('magento_tuotteet', "Kauppakohtainen hinta päivitetty");
-                $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+                  $this->log('magento_tuotteet', $log_message);
+                  $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
+                }
               }
             }
           }

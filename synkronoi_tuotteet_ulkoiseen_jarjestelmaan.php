@@ -50,6 +50,7 @@ else {
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
             WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
             AND tuote.ei_saldoa = ''
+            AND tuote.tuotetyyppi NOT IN ('A', 'B')
             {$wherelisa}
             HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                     # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan

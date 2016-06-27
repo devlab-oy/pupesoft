@@ -49,6 +49,8 @@ class PrestaProducts extends PrestaClient {
    * @param SimpleXMLElement $existing_product
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($product, SimpleXMLElement $existing_product = null) {
     if (is_null($existing_product)) {
       $xml = $this->empty_xml();
@@ -151,19 +153,19 @@ class PrestaProducts extends PrestaClient {
       $field = strtolower($translation['kentta']);
 
       switch ($field) {
-        case 'nimitys':
-          $xml->product->name->language[$tr_id] = $value;
-          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
-          break;
-        case 'kuvaus':
-          $xml->product->description->language[$tr_id] = $value;
-          break;
-        case 'lyhytkuvaus':
-          $xml->product->description_short->language[$tr_id] = $value;
-          break;
-        case 'tilaustuote':
-          $xml->product->available_later->language[$tr_id] = $value;
-          break;
+      case 'nimitys':
+        $xml->product->name->language[$tr_id] = $value;
+        $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
+        break;
+      case 'kuvaus':
+        $xml->product->description->language[$tr_id] = $value;
+        break;
+      case 'lyhytkuvaus':
+        $xml->product->description_short->language[$tr_id] = $value;
+        break;
+      case 'tilaustuote':
+        $xml->product->available_later->language[$tr_id] = $value;
+        break;
       }
 
       $this->logger->log("Käännös {$translation['kieli']}, {$translation['kentta']}: $value");
@@ -363,8 +365,8 @@ class PrestaProducts extends PrestaClient {
         }
       }
       catch (Exception $e) {
-          //Do nothing here. If create / update throws exception loggin happens inside those functions
-          //Exception is not thrown because we still want to continue syncing for other products
+        //Do nothing here. If create / update throws exception loggin happens inside those functions
+        //Exception is not thrown because we still want to continue syncing for other products
       }
 
       $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");

@@ -133,6 +133,8 @@ class PrestaSalesOrders extends PrestaClient {
    *
    * @return array
    */
+
+
   public function fetch_sales_orders() {
     $this->logger->log('Fetching sales orders');
 
@@ -266,7 +268,7 @@ class PrestaSalesOrders extends PrestaClient {
     if (isset($order_rows['order_rows'])) {
       $rows = $order_rows['order_rows'];
     }
-    elseif(isset($order_rows['order_row'])) {
+    elseif (isset($order_rows['order_row'])) {
       $rows = $order_rows['order_row'];
     }
     else {

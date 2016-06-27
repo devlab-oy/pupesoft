@@ -1036,7 +1036,7 @@ if (strlen($tunnus) != 0) {
     }
   }
 
-  # Halutaan n‰hd‰ laskun kuva oikealla puolella joten tehd‰‰n table
+  // Halutaan n‰hd‰ laskun kuva oikealla puolella joten tehd‰‰n table
   echo "<table><tr><td class='back'>";
 
   echo "<table>";
@@ -1499,7 +1499,7 @@ if (strlen($tunnus) != 0) {
     echo "</tr></table><br>";
   }
 
-  # Laskun kuva oikealle puolelle
+  // Laskun kuva oikealle puolelle
   echo "</td><td class='back ptop'>";
 
   echo "<table><tr>";

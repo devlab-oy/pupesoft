@@ -288,18 +288,6 @@ if ($verkkokauppatyyppi == "anvia") {
   }
 }
 
-// Haetaan timestamp
-$datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
-
-if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-  die("VIRHE: Timestamp ei lˆydy avainsanoista!\n");
-}
-
-$datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
-$datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mik‰ tilanne on jo k‰sitelty
-$datetime_checkpoint_uusi = date('Y-m-d H:i:s'); // Timestamp nyt
-$tuote_export_error_count = 0;
-
 $lock_params = array(
   "lockfile" => $lockfile,
   "locktime" => 5400,
@@ -329,7 +317,6 @@ if (in_array('tuotteet', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"                     => $ajetaanko_kaikki,
-    "datetime_checkpoint"                  => $datetime_checkpoint,
     "magento_asiakaskohtaiset_tuotehinnat" => $magento_asiakaskohtaiset_tuotehinnat,
     "tuotteiden_asiakashinnat_magentoon"   => $tuotteiden_asiakashinnat_magentoon,
     "verkkokauppatyyppi"                   => $verkkokauppatyyppi,
@@ -352,7 +339,6 @@ if (in_array('saldot', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
-    "datetime_checkpoint"        => $datetime_checkpoint,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
   );
 
@@ -364,7 +350,6 @@ if (in_array('tuoteryhmat', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
-    "datetime_checkpoint" => $datetime_checkpoint,
   );
 
   $response = tuote_export_hae_tuoteryhmat($params);
@@ -377,7 +362,6 @@ if (in_array('asiakkaat', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
-    "datetime_checkpoint" => $datetime_checkpoint,
     "magento_website_id"  => $magento_website_id,
     "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
@@ -390,7 +374,6 @@ if (in_array('hinnastot', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
-    "datetime_checkpoint" => $datetime_checkpoint,
     "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
 
@@ -402,7 +385,6 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki"    => $ajetaanko_kaikki,
-    "datetime_checkpoint" => $datetime_checkpoint,
     "verkkokauppatyyppi"  => $verkkokauppatyyppi,
   );
 
@@ -423,6 +405,7 @@ if ($verkkokauppatyyppi == "magento") {
   );
 
   $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
+  $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
   $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
   $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
   $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
@@ -557,6 +540,3 @@ elseif ($verkkokauppatyyppi == "anvia") {
     require "rajapinnat/lajitelmaxml.inc";
   }
 }
-
-// Kun kaikki onnistui, p‰ivitet‰‰n lopuksi timestamppi talteen
-tuote_export_paivita_avainsana($datetime_checkpoint_uusi);

@@ -144,17 +144,17 @@ if (isset($tapa) and $tapa == 'pois') {
   if (isset($viite)) {
     $query = "SELECT suoritus.*, tiliointi.summa
               from suoritus, yriti, tiliointi
-              where suoritus.yhtio  = '$kukarow[yhtio]'
-              and suoritus.kohdpvm  > '0000-00-00'
-              and suoritus.ltunnus  > 0
-              and suoritus.summa    = 0
-              and suoritus.viite    like '$viite%'
-              and suoritus.yhtio    = yriti.yhtio
-              and suoritus.tilino   = yriti.tilino
+              where suoritus.yhtio = '$kukarow[yhtio]'
+              and suoritus.kohdpvm > '0000-00-00'
+              and suoritus.ltunnus > 0
+              and suoritus.summa   = 0
+              and suoritus.viite   like '$viite%'
+              and suoritus.yhtio   = yriti.yhtio
+              and suoritus.tilino  = yriti.tilino
               and yriti.factoring_id is not null
-              and tiliointi.yhtio   = suoritus.yhtio
-              and tiliointi.selite  = '".t("Kohdistettiin korkoihin")."'
-              and tiliointi.tunnus  = suoritus.ltunnus";
+              and tiliointi.yhtio  = suoritus.yhtio
+              and tiliointi.selite = '".t("Kohdistettiin korkoihin")."'
+              and tiliointi.tunnus = suoritus.ltunnus";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {

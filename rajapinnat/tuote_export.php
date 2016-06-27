@@ -37,9 +37,12 @@ if (empty($kukarow)) {
   die("Admin -käyttäjä ei löydy.");
 }
 
-// toinen parametri ajettavat exportit
-if (!empty($argv[2])) {
-  $magento_ajolista = explode(',', $argv[2]);
+// toinen parametri verkkokauppa tyyppi (tätä ei käytetä, jätetty taaksepäin yhteensopivuuden vuoksi)
+$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
+
+// kolmas parametri ajettavat exportit
+if (!empty($argv[3])) {
+  $magento_ajolista = explode(',', $argv[3]);
 }
 elseif (empty($magento_ajolista)) {
   $magento_ajolista = array(
@@ -51,7 +54,7 @@ elseif (empty($magento_ajolista)) {
   );
 }
 
-// kolmas parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
+// neljäs parametri haetaanko kaikki, vai vain muutokset viimeisestä ajosta
 $ajetaanko_kaikki = empty($argv[4]) ? false : true;
 
 // Tässä kaikki magentorajapinnan configurointimuuttujat

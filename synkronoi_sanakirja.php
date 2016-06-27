@@ -30,7 +30,7 @@ $kieliarray = array("se", "en", "de", "no", "dk", "ee");
 if ($tee == "TEE" or $tee == "UPDATE") {
 
   function sanakirja_echo($ekotus) {
-    GLOBAL $ei_ruudulle;
+    global $ei_ruudulle;
 
     if (empty($ei_ruudulle)) {
       echo "$ekotus";

@@ -291,19 +291,10 @@ $magento_client = new MagentoClient(
   $magento_debug
 );
 
-$magento_client->set_edi_polku($magento_api_ht_edi);
-$magento_client->set_magento_erikoiskasittely($verkkokauppa_erikoiskasittely);
-$magento_client->set_magento_fetch_order_status($magento_tilaushaku);
 $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
-$magento_client->set_magento_maksuehto_ohjaus($magento_maksuehto_ohjaus);
 $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
 $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
 $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
-$magento_client->set_ovt_tunnus($ovt_tunnus);
-$magento_client->set_pupesoft_tilaustyyppi($pupesoft_tilaustyyppi);
-$magento_client->set_rahtikulu_nimitys($rahtikulu_nimitys);
-$magento_client->set_rahtikulu_tuoteno($rahtikulu_tuoteno);
-$magento_client->set_verkkokauppa_asiakasnro($verkkokauppa_asiakasnro);
 $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
 $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
 $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
@@ -316,7 +307,6 @@ $magento_client->setParentID($magento_parent_id);
 $magento_client->setPoistaDefaultAsiakasparametrit($magento_poista_asiakasdefaultit);
 $magento_client->setPoistaDefaultTuoteparametrit($magento_poista_defaultit);
 $magento_client->setRemoveProducts($magento_salli_tuotepoistot);
-$magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
 $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
 $magento_client->setTaxClassID($magento_tax_class_id);
 $magento_client->setUniversalTuoteryhma($magento_universal_tuoteryhma);
@@ -412,7 +402,27 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 if (in_array('tilaukset', $magento_ajolista)) {
   tuote_export_echo("Haetaan tilaukset");
 
-  $magento_client->tallenna_tilaukset();
+  $magento_tilaus_client = new MagentoClient(
+    $magento_api_ht_url,
+    $magento_api_ht_usr,
+    $magento_api_ht_pas,
+    $magento_client_options,
+    $magento_debug
+  );
+
+  // editilauksen tallentamiseen tarvittavat parametrit
+  $magento_tilaus_client->set_edi_polku($magento_api_ht_edi);
+  $magento_tilaus_client->set_magento_erikoiskasittely($verkkokauppa_erikoiskasittely);
+  $magento_tilaus_client->set_magento_fetch_order_status($magento_tilaushaku);
+  $magento_tilaus_client->set_magento_maksuehto_ohjaus($magento_maksuehto_ohjaus);
+  $magento_tilaus_client->set_ovt_tunnus($ovt_tunnus);
+  $magento_tilaus_client->set_pupesoft_tilaustyyppi($pupesoft_tilaustyyppi);
+  $magento_tilaus_client->set_rahtikulu_nimitys($rahtikulu_nimitys);
+  $magento_tilaus_client->set_rahtikulu_tuoteno($rahtikulu_tuoteno);
+  $magento_tilaus_client->set_verkkokauppa_asiakasnro($verkkokauppa_asiakasnro);
+  $magento_tilaus_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+
+  $magento_tilaus_client->tallenna_tilaukset();
 }
 
 tuote_export_echo("Magento-siirto valmis.");

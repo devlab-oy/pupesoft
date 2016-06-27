@@ -129,7 +129,13 @@ else {
         $eankoodi = substr($row['eankoodi'], 0, 20);
 
         if ($ulkoinen_jarjestelma == "P") {
-          $line->addChild('ItemNumber', utf8_encode($eankoodi));
+          $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " avainsana.selite = 'eankoodi' ", '', '', "selitetark");
+          if (!empty($posten_itemnumberfield)) {
+            $line->addChild('ItemNumber', utf8_encode(substr($row[$poste], 0, 20))); 
+          }
+          else {
+            $line->addChild('ItemNumber', utf8_encode($eankoodi)); 
+          }
         }
         else {
           $tuoteno = substr($row['tuoteno'], 0, 20);

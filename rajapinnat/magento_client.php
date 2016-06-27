@@ -309,8 +309,6 @@ class MagentoClient {
 
       $multi_data = array();
       $tuetut_kieliversiot = array();
-      $kauppakohtaiset_hinnat = array();
-      $kauppakohtaiset_verokannat = array();
 
       $_key = $this->magento_simple_tuote_nimityskentta;
       $tuotteen_nimitys = $tuote[$_key];
@@ -329,19 +327,19 @@ class MagentoClient {
       foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
         $key = $erikoisparametri['nimi'];
 
-        // Kieliversiot ja kauppakohtaiset_hinnat sekä kauppakohtaiset_verokannat
+        // Kieliversiot
         // poimitaan talteen koska niitä käytetään toisaalla
         if ($key == 'kieliversiot') {
           $tuetut_kieliversiot = $erikoisparametri['arvo'];
           continue;
         }
-        elseif ($key == 'kauppakohtaiset_hinnat') {
-          $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
+
+        // ohitetaan kauppakohtaiset hinnat ja verokannat
+        if ($key == 'kauppakohtaiset_hinnat') {
           continue;
         }
 
         if ($key == 'kauppakohtaiset_verokannat') {
-          $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
           continue;
         }
 
@@ -465,7 +463,7 @@ class MagentoClient {
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
+          $this->log('magento_tuotteet', "Virhe! Tuotteen päivitys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuote_data);
         }
       }
@@ -514,44 +512,22 @@ class MagentoClient {
       }
 
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
-      if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
+      $tuotteen_kauppakohtaiset_hinnat = $this->kauppakohtaiset_hinnat($tuote);
+
+      foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kauppakohtainen_data) {
         try {
-          foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
-            foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
-              $tuotteen_kauppakohtainen_data = array();
-
-              foreach ($kauppatunnukset as $kauppatunnus) {
-                // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
-                // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
-                // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-                if (empty($tuote[$tuotekentta])) continue;
-
-                $tuotteen_kauppakohtainen_data = array(
-                  'price' => $tuote[$tuotekentta]
-                );
-
-                if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                  $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
-                }
-
-                $this->_proxy->call($this->_session, 'catalog_product.update',
-                  array(
-                    $tuote['tuoteno'],
-                    $tuotteen_kauppakohtainen_data,
-                    $kauppatunnus
-                  )
-                );
-              }
-
-              $this->log('magento_tuotteet', "Kauppakohtainen hinta päivitetty");
-              $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-            }
-          }
+          $this->_proxy->call($this->_session, 'catalog_product.update',
+            array(
+              $tuote['tuoteno'],
+              $tuotteen_kauppakohtainen_data,
+              $kauppatunnus
+            )
+          );
         }
         catch (Exception $e) {
+          $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe! Kauppakohtaisen hinnan päivitys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-          $this->_error_count++;
         }
       }
 
@@ -659,22 +635,20 @@ class MagentoClient {
         $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
-      $kauppakohtaiset_hinnat = array();
-      $kauppakohtaiset_verokannat = array();
-
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
       foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
         $key = $erikoisparametri['nimi'];
 
-        if ($key == 'kieliversiot') continue;
+        if ($key == 'kieliversiot') {
+          continue;
+        }
 
+        // ohitetaan kauppakohtaiset hinnat ja verokannat
         if ($key == 'kauppakohtaiset_hinnat') {
-          $kauppakohtaiset_hinnat[] = $erikoisparametri['arvo'];
           continue;
         }
 
         if ($key == 'kauppakohtaiset_verokannat') {
-          $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
           continue;
         }
 
@@ -820,40 +794,18 @@ class MagentoClient {
           )
         );
 
-        // Päivitetään configurable-tuotteen kauppanäkymäkohtaiset hinnat
-        if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
+        // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
+        $tuotteen_kauppakohtaiset_hinnat = $this->kauppakohtaiset_hinnat($tuotteet[0]);
+
+        foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kauppakohtainen_data) {
           try {
-            foreach ($kauppakohtaiset_hinnat as $key => $kauppakohtainen_hinta) {
-              foreach ($kauppakohtainen_hinta as $tuotekentta => $kauppatunnukset) {
-                $tuotteen_kauppakohtainen_data = array();
-
-                foreach ($kauppatunnukset as $kauppatunnus) {
-                  // Jos asetettu hintakenttä on 0, 0.0 tai '' niin skipataan, tämä
-                  // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
-                  // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
-                  if (empty($tuotteet[0][$tuotekentta])) continue;
-
-                  $tuotteen_kauppakohtainen_data = array(
-                    'price' => $tuotteet[0][$tuotekentta]
-                  );
-
-                  if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
-                    $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
-                  }
-
-                  $this->_proxy->call($this->_session, 'catalog_product.update',
-                    array(
-                      $nimitys,
-                      $tuotteen_kauppakohtainen_data,
-                      $kauppatunnus
-                    )
-                  );
-                }
-
-                $this->log('magento_tuotteet', "Kauppakohtainen hinta päivitetty");
-                $this->debug('magento_tuotteet', $tuotteen_kauppakohtainen_data);
-              }
-            }
+            $this->_proxy->call($this->_session, 'catalog_product.update',
+              array(
+                $nimitys,
+                $tuotteen_kauppakohtainen_data,
+                $kauppatunnus
+              )
+            );
           }
           catch (Exception $e) {
             $this->_error_count++;
@@ -2258,5 +2210,81 @@ class MagentoClient {
 
     // Palautetaan kieliversiot
     return $kieliversiot_data;
+  }
+
+  private function kauppakohtaiset_hinnat(Array $tuote) {
+    $kauppakohtaiset_hinnat = array();
+    $kauppakohtaiset_verokannat = array();
+    $return_array = array();
+
+    // Kauppakohtaiset hinnat tulee erikoisparametreistä
+    foreach ($this->_verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+      $key = $erikoisparametri['nimi'];
+
+      if ($key == 'kauppakohtaiset_hinnat') {
+        $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+        continue;
+      }
+
+      if ($key == 'kauppakohtaiset_verokannat') {
+        $kauppakohtaiset_verokannat = $erikoisparametri['arvo'];
+        continue;
+      }
+    }
+
+    // Esimerkiksi:
+    //
+    // $kauppakohtaiset_hinnat = array(
+    //   'myyntihinta'   => array('7','8'),
+    //   'hinnastohinta' => array('7','8')
+    // );
+    //
+    // $kauppakohtaiset_verokannat = array(
+    //   # magento_store_id => magento_tax_class_id
+    //   '7' => 6,
+    //   '8' => 6
+    // );
+
+    // Valitaan tuotteen kauppanäkymäkohtainen hinta
+    foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+      foreach ($kauppatunnukset as $kauppatunnus) {
+        // Jos asetettu hintakenttä on 0 tai '' niin skipataan, tämä
+        // sitävarten että voidaan antaa "default"-arvoja(myyntihinta) jotka yliajetaan esimerkiksi
+        // hinnastohinnalla, mutta vain jos sellainen löytyy ja on voimassa
+        if (empty($tuote[$tuotekentta])) {
+          continue;
+        }
+
+        $tuotteen_kauppakohtainen_data = array(
+          'price' => $tuote[$tuotekentta]
+        );
+
+        if (!empty($kauppakohtaiset_verokannat[$kauppatunnus])) {
+          $tuotteen_kauppakohtainen_data['tax_class_id'] = $kauppakohtaiset_verokannat[$kauppatunnus];
+        }
+
+        // Key on store id, arvo on Magentoon passattava data
+        $return_array[$kauppatunnus] = $tuotteen_kauppakohtainen_data;
+      }
+    }
+
+    // Lokitetaan tieto
+    foreach ($return_array as $log_key => $log_value) {
+      $log_message = "Poikkeava hinta {$log_value['price']} kauppaan {$log_key}";
+
+      if (!empty($log_value['tax_class_id'])) {
+        $log_message .= ", poikkeava veroluokka {$log_value['tax_class_id']}";
+      }
+
+      $this->log('magento_tuotteet', $log_message);
+      $this->debug('magento_tuotteet', $return_array);
+    }
+
+    // Esimerkiksi:
+    // $return_array = array(
+    //   7 => array('price' => 10.0, 'tax_class_id' => 6),
+    //   8 => array('price' => 17.50),
+    // );
+    return $return_array;
   }
 }

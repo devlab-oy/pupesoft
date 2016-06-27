@@ -448,7 +448,7 @@ abstract class PrestaClient {
     // if we want to reset
     if (empty($value)) {
       $this->shop_ids = null;
-      return;
+      return null;
     }
 
     if (is_null($this->presta_shops)) {
@@ -478,6 +478,8 @@ abstract class PrestaClient {
     }
 
     $this->shop_ids = $value;
+
+    return $value;
   }
 
   protected function all_shop_ids() {

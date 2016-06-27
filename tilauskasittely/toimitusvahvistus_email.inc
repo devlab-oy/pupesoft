@@ -36,10 +36,10 @@ if ($toimitusvahvistus_email_lahetys) {
     $myyjaquery = "SELECT DISTINCT(kuka.eposti) myyjan_email
                    FROM lasku
                    JOIN kuka ON (lasku.yhtio = kuka.yhtio AND lasku.myyja = kuka.tunnus)
-                   WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                   AND lasku.tunnus IN ({$otunnukset})
-                   AND lasku.myyja != ''
-                   AND kuka.eposti != ''
+                   WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+                   AND lasku.tunnus   IN ({$otunnukset})
+                   AND lasku.myyja   != ''
+                   AND kuka.eposti   != ''
                    LIMIT 1";
     $myyjaresult = pupe_query($myyjaquery);
     $myyjarow = mysql_fetch_assoc($myyjaresult);
@@ -123,6 +123,6 @@ if ($toimitusvahvistus_email_lahetys) {
 
     if (pupesoft_sahkoposti($parametri)) {
       echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
-    }    
+    }
   }
 }

@@ -1577,15 +1577,15 @@ while ($tietue = fgets($fd)) {
 
       // Katsotaan verkkokauppatapauksessa tilauksen valuutta
       if ($edi_tyyppi == 'magento'
-          and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
-          and !empty($editilaus_valuuttakoodi)) {
+        and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
+        and !empty($editilaus_valuuttakoodi)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
 
         $query = "SELECT tunnus
                   FROM valuu
                   WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND nimi = '{$valkoodi}'";
+                  AND nimi    = '{$valkoodi}'";
         $valuu_result = pupe_query($query);
 
         if (mysql_num_rows($valuu_result) != 1) {
@@ -1690,17 +1690,17 @@ while ($tietue = fgets($fd)) {
       $id = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "INSERT INTO laskun_lisatiedot SET
-                laskutus_nimi     = '$arow[laskutus_nimi]',
-                laskutus_nimitark = '$arow[laskutus_nimitark]',
-                laskutus_osoite   = '$arow[laskutus_osoite]',
-                laskutus_postitp  = '$arow[laskutus_postitp]',
-                laskutus_postino  = '$arow[laskutus_postino]',
-                laskutus_maa      = '$arow[laskutus_maa]',
+                laskutus_nimi       = '$arow[laskutus_nimi]',
+                laskutus_nimitark   = '$arow[laskutus_nimitark]',
+                laskutus_osoite     = '$arow[laskutus_osoite]',
+                laskutus_postitp    = '$arow[laskutus_postitp]',
+                laskutus_postino    = '$arow[laskutus_postino]',
+                laskutus_maa        = '$arow[laskutus_maa]',
                 noutopisteen_tunnus = '{$noutopisteen_tunnus}',
-                laatija           = '$edi_laatija',
-                luontiaika        = now(),
-                yhtio             = '$kukarow[yhtio]',
-                otunnus           = '$id'";
+                laatija             = '$edi_laatija',
+                luontiaika          = now(),
+                yhtio               = '$kukarow[yhtio]',
+                otunnus             = '$id'";
       $lisatiedot_result = pupe_query($query);
 
       if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
@@ -2409,10 +2409,10 @@ while ($tietue = fgets($fd)) {
 
         if (!empty($ltoim_email)) {
           $saate_query = "SELECT tunnus
-                    FROM avainsana
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND laji    = 'LASKUTUS_SAATE'
-                    AND selite  = 'Verkkokauppa'";
+                          FROM avainsana
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND laji    = 'LASKUTUS_SAATE'
+                          AND selite  = 'Verkkokauppa'";
           $saate_res = pupe_query($saate_query);
 
           if ($saaterow = mysql_fetch_assoc($saate_res)) {

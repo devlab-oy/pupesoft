@@ -131,12 +131,12 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi  = "{$row['maa']}-{$row['tunnus']};";
   $rivi .= pupesoft_csvstring($row['nimi']).";";
   $rivi .= pupesoft_csvstring($row['ryhma']);
-  
+
   if ($extra_asiakastiedot) {
     $rivi .= ";".pupesoft_csvstring($row['asiakasnro']);
     $rivi .= ";".pupesoft_csvstring($row['myyjanro']);
-  } 
-  
+  }
+
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

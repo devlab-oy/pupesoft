@@ -252,12 +252,6 @@ class MagentoClient {
 
       if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
-      // Lyhytkuvaus ei saa olla magentossa tyhj‰.
-      // K‰ytet‰‰n kuvaus kent‰n tietoja jos lyhytkuvaus on tyhj‰.
-      if ($tuote['lyhytkuvaus'] == '') {
-        $tuote['lyhytkuvaus'] = '&nbsp;';
-      }
-
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;
       $tuoteryhmanimi   = $tuote['try_nimi'];
@@ -587,11 +581,6 @@ class MagentoClient {
       $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$tuotteet[0][$hintakentta]}");
 
       $category_ids = array();
-
-      // Jos lyhytkuvaus on tyhj‰, k‰ytet‰‰n kuvausta?
-      if ($tuotteet[0]['lyhytkuvaus'] == '') {
-        $tuotteet[0]['lyhytkuvaus'] = '&nbsp';
-      }
 
       // Erikoishinta
       $tuotteet[0]['kuluprosentti'] = ($tuotteet[0]['kuluprosentti'] == 0) ? '' : $tuotteet[0]['kuluprosentti'];

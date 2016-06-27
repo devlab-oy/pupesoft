@@ -176,12 +176,12 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   }
 
   # Koontirahtikirjan pakkaus
-  $edi_order .= "*RS OSTOTILPAK {$uniq_merkki}\n";
+  $edi_order .= "*RS OSTOTILPAK {$counter}\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_SSCC:\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_BRUTTOPAINO:\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_TILAVUUS:\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_TILAVUUSYKS:\n";
-  $edi_order .= "*RE OSTOTILPAK {$uniq_merkki}\n";
+  $edi_order .= "*RE OSTOTILPAK {$counter}\n";
 
   $i = 1;
 

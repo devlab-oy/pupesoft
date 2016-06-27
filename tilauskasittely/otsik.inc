@@ -2467,7 +2467,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
     }
 
-    if ($toim != "MYYNTITILI" AND $toim != "ENNAKKO") {
+    if ($toim != "MYYNTITILI" and $toim != "ENNAKKO") {
       $oikea_sarake[$oikea] = "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
       $oikea++;
     }
@@ -3023,9 +3023,9 @@ if ($tila == "" and !isset($jatka)) {
           // Tarkistetaan, onko valitulle työjonolle asetettu oletusvastuuhenkilö,
           // jos ei ole vielä valittu vastuuhenkilöä
           if (empty($srow[$kentta]) and isset($srow['tyojono'])) {
-             $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
-             $oletus_row = mysql_fetch_assoc($oletus_result);
-             $oletus_kuka = $oletus_row['selitetark_4'];
+            $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
+            $oletus_row = mysql_fetch_assoc($oletus_result);
+            $oletus_kuka = $oletus_row['selitetark_4'];
           }
 
           $query = "SELECT *

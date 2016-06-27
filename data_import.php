@@ -406,7 +406,10 @@ if (empty($_taulu)) {
   $_taulu = array_shift($taulut);
 }
 
-list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu);
+list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($_taulu);
+
+$pakolliset = array_merge($pakolliset, $eisaaollatyhja);
+$pakolliset = array_unique($pakolliset);
 
 echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
 echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";

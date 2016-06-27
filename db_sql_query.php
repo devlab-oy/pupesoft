@@ -73,7 +73,7 @@ else {
   $oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in', 'like' => 'like', 'gt' => '>', 'lt' => '<', 'gte' => '>=', 'lte' => '<=');
 
   function db_piirra_otsikot($dbtaulu) {
-    GLOBAL $table;
+    global $table;
 
     echo "<tr><th>".t("Kenttä")."</th><th>".t("Valitse")."</th><th>".t("Operaattori")."</th><th>".t("Rajaus")."</th>";
 
@@ -85,7 +85,7 @@ else {
   }
 
   function db_piirra_rivi($fields) {
-    GLOBAL $kukarow, $kentat, $ruksaa, $operaattori, $rajaus, $jarjestys, $table, $sanakirja_kielet;
+    global $kukarow, $kentat, $ruksaa, $operaattori, $rajaus, $jarjestys, $table, $sanakirja_kielet;
     $kala = array();
 
     foreach ($fields as $row) {
@@ -166,7 +166,7 @@ else {
         $avainsanatyypit["varastopalautus"] = t("Palautus sallittuihin varastoihin");
         $avainsanatyypit["hinnastoryhmittely"] = t("hinnastoryhmittely");
 
-        foreach($avainsanatyypit as $laji => $nimitys) {
+        foreach ($avainsanatyypit as $laji => $nimitys) {
           $chk = !empty($rajaus[$row[0]][$laji]) ? "CHECKED" : "";
 
           $rivi .= "<input type='checkbox' class='$class' name='rajaus[$row[0]][$laji]' value='$laji' $chk>$nimitys<br>";
@@ -250,7 +250,7 @@ else {
   if ($rtee == "AJA" and isset($ruks_pakolliset)) {
     require "inc/pakolliset_sarakkeet.inc";
 
-    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
+    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($table);
 
     if (!is_array($wherelliset)) {
       $ruksaa = $pakolliset;
@@ -492,7 +492,7 @@ else {
                 $order";
     $result = pupe_query($sqlhaku);
 
-    echo "<font class='message'>",query_dump($sqlhaku)."<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
+    echo "<font class='message'>", query_dump($sqlhaku)."<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
 
     if (mysql_num_rows($result) > 0) {
       if (include 'inc/pupeExcel.inc') {
@@ -533,12 +533,12 @@ else {
         }
 
         if ($table == "tuote" and in_array("tuote.vienti", $kentat)) {
-          $maaryhmaquery = " SELECT *
-                             FROM avainsana
-                             WHERE yhtio = '{$kukarow['yhtio']}'
-                             and laji    = 'maaryhma'
-                             and selite != ''
-                             ORDER BY jarjestys";
+          $maaryhmaquery = "SELECT *
+                            FROM avainsana
+                            WHERE yhtio  = '{$kukarow['yhtio']}'
+                            and laji     = 'maaryhma'
+                            and selite  != ''
+                            ORDER BY jarjestys";
           $maaryhmares = pupe_query($maaryhmaquery);
           $maaryhma_kaytossa = mysql_num_rows($maaryhmares) > 0 ? true : false;
 

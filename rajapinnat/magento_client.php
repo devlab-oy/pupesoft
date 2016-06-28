@@ -239,15 +239,14 @@ class MagentoClient {
 
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
+      $tuote_clean = $tuote['tuoteno'];
+      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
+
       $count++;
       $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsitelläään tuote '{$tuote['tuoteno']}' (simple)");
       $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$tuote[$hintakentta]}");
 
-      $tuote_clean = $tuote['tuoteno'];
-
       $category_ids = array();
-
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;

@@ -3933,14 +3933,11 @@ if (!function_exists("alehinta")) {
     $aleperuste    = FALSE;
     $vanha_yhtio  = "";
     $vanha_liitostunnus = 0;
-    $kampanjahinnoittelu = false;
-    $kampanjahinnoittelu_osui = false;
     $hintaan_osunut_kampanja = 0;
     $kampanjarajaus = '';
 
     // Onko kyseessŠ kampanja, jos on niin kampanjamatch yliajaa pŠivŠmŠŠrŠrajauksen
     if ($laskurow['kampanja'] > 0) {
-      $kampanjahinnoittelu = true;
       $kampanjarajaus = " or kampanja = {$laskurow['kampanja']} ";
     }
 
@@ -4147,9 +4144,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta         = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
@@ -4226,9 +4222,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta     = $hrow["hinta"];
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste  .= "Asiakkaan tuotteen nettohinta.".$hrow['laji'];
@@ -4304,9 +4299,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           } 
           $hperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
@@ -4383,9 +4377,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta    = $hrow["hinta"];
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }             
           $hperuste  .= "Asiakkaan tuotealeryhmän nettohinta. ";
@@ -4452,9 +4445,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste    .= "Asiakassegmentin tuotteen nettohinta laskun valuutassa. ";
@@ -4522,9 +4514,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta        = $hrow["hinta"];
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste    .= "Asiakassegmentin tuotteen nettohinta. ";
@@ -4591,9 +4582,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
@@ -4660,9 +4650,8 @@ if (!function_exists("alehinta")) {
           }
 
           $hinta    = $hrow["hinta"];
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
           $hperuste  .= "Asiakasaleryhmän tuotteen nettohinta. ";
@@ -4728,9 +4717,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -4799,9 +4787,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -4869,9 +4856,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -4940,9 +4926,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5010,9 +4995,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5081,9 +5065,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5216,9 +5199,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5292,9 +5274,9 @@ if (!function_exists("alehinta")) {
               $hinta = $hinta * (1 + ($trow['alv'] / 100));
             }
 
-            if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            if ($hrow['kampanja'] > 0) {
               $hperuste .= " Kampanjahinnoittelu. ";
-              $kampanjahinnoittelu_osui = true;
+
               $hintaan_osunut_kampanja = $hrow['kampanja'];
             }
 
@@ -5363,9 +5345,9 @@ if (!function_exists("alehinta")) {
               $hinta = $hinta * (1 + ($trow['alv'] / 100));
             }
 
-            if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            if ($hrow['kampanja'] > 0) {
               $hperuste .= " Kampanjahinnoittelu. ";
-              $kampanjahinnoittelu_osui = true;
+
               $hintaan_osunut_kampanja = $hrow['kampanja'];
             }
 
@@ -5435,9 +5417,9 @@ if (!function_exists("alehinta")) {
               $hinta = $hinta * (1 + ($trow['alv'] / 100));
             }
 
-            if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            if ($hrow['kampanja'] > 0) {
               $hperuste .= " Kampanjahinnoittelu. ";
-              $kampanjahinnoittelu_osui = true;
+
               $hintaan_osunut_kampanja = $hrow['kampanja'];
             }
 
@@ -5507,9 +5489,9 @@ if (!function_exists("alehinta")) {
               $hinta = $hinta * (1 + ($trow['alv'] / 100));
             }
 
-            if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+            if ($hrow['kampanja'] > 0) {
               $hperuste .= " Kampanjahinnoittelu. ";
-              $kampanjahinnoittelu_osui = true;
+
               $hintaan_osunut_kampanja = $hrow['kampanja'];
             }
 
@@ -5575,9 +5557,8 @@ if (!function_exists("alehinta")) {
             }
           }
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5617,9 +5598,8 @@ if (!function_exists("alehinta")) {
         if (mysql_num_rows($hresult) > 0) {
           $hrow         = mysql_fetch_assoc($hresult);
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5657,9 +5637,8 @@ if (!function_exists("alehinta")) {
         if (mysql_num_rows($hresult) > 0) {
           $hrow         = mysql_fetch_assoc($hresult);
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5708,9 +5687,8 @@ if (!function_exists("alehinta")) {
         if (mysql_num_rows($hresult) > 0) {
           $hrow      = mysql_fetch_assoc($hresult);
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -5748,9 +5726,8 @@ if (!function_exists("alehinta")) {
         if (mysql_num_rows($hresult) > 0) {
           $hrow      = mysql_fetch_assoc($hresult);
 
-          if ($kampanjahinnoittelu and $hrow['kampanja'] > 0) {
+          if ($hrow['kampanja'] > 0) {
             $hperuste .= " Kampanjahinnoittelu. ";
-            $kampanjahinnoittelu_osui = true;
             $hintaan_osunut_kampanja = $hrow['kampanja'];
           }
 
@@ -6102,7 +6079,7 @@ if (!function_exists("alehinta")) {
       }
     }
 
-    if ($kampanjahinnoittelu_osui and $hintaan_osunut_kampanja > 0) {
+    if ($hintaan_osunut_kampanja > 0) {
       $GLOBALS['kampanjahinnoitteluntunnus'] = $hintaan_osunut_kampanja;
     }
 

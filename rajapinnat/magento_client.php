@@ -228,9 +228,6 @@ class MagentoClient {
       // Tarvitaan kategoriat
       $category_tree = $this->getCategories();
 
-      // Populoidaan attributeSet
-      $this->_attributeSet = $this->getAttributeSet();
-
       // Haetaan storessa olevat tuotenumerot
       $skus_in_store = $this->getProductList(true);
     }
@@ -242,15 +239,14 @@ class MagentoClient {
 
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
+      $tuote_clean = $tuote['tuoteno'];
+      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
+
       $count++;
       $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsitelläään tuote '{$tuote['tuoteno']}' (simple)");
       $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$tuote[$hintakentta]}");
 
-      $tuote_clean = $tuote['tuoteno'];
-
       $category_ids = array();
-
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
 
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;
@@ -393,7 +389,7 @@ class MagentoClient {
           $product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
             array(
               'simple',
-              $this->_attributeSet['set_id'],
+              $this->get_attribute_set_id($tuote),
               $tuote['tuoteno'], // sku
               $tuote_data,
             )
@@ -552,9 +548,6 @@ class MagentoClient {
 
     $count = 0;
     $total_count = count($dnslajitelma);
-
-    // Populoidaan attributeSet
-    $this->_attributeSet = $this->getAttributeSet();
 
     // Haetaan storessa olevat tuotenumerot
     $skus_in_store = $this->getProductList(true);
@@ -736,7 +729,7 @@ class MagentoClient {
             'catalog_product.create',
             array(
               'configurable',
-              $this->_attributeSet['set_id'],
+              $this->get_attribute_set_id($tuotteet[0]),
               $nimitys, // sku
               $configurable
             )
@@ -1771,6 +1764,36 @@ class MagentoClient {
     }
 
     return $this->_attributeSet;
+  }
+
+  // Hakee tuotteelle attribute set id:n
+  private function get_attribute_set_id(Array $tuote) {
+    $pupesoft_attr_id = $this->get_tuotteen_avainsana($tuote, 'magento_attribute_set_id');
+
+    if (is_null($pupesoft_attr_id)) {
+      $magento_attr_set = $this->getAttributeSet();
+
+      $set_id = $magento_attr_set['set_id'];
+    }
+    else {
+      $set_id = $pupesoft_attr_id['selite'];
+    }
+
+    $this->log('magento_tuotteet', "Attribute set {$set_id}");
+
+    return $set_id;
+  }
+
+  // Hakee tuotteen avainsanan arvon
+  private function get_tuotteen_avainsana(Array $tuote, $laji, $kieli = 'fi') {
+    // loopataan läpi tuotteen avainsanat ja palautetaan kysytty avainsana jos löytyy
+    foreach ($tuote['tuotteen_avainsanat'] as $avainsana) {
+      if ($avainsana['laji'] == $laji and $avainsana['kieli'] == $kieli) {
+        return $avainsana;
+      }
+    }
+
+    return null;
   }
 
   // Hakee kaikki attribuutit magentosta

@@ -32,7 +32,7 @@
 // $olpaikalta      --> pakotetaan myymään oletuspaikalta
 // $tuotenimitys    --> tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 // $tuotenimitys_force  --> tuotteen nimitys muutetaan systemitasolla
-
+echo "35 kpl $kpl <br><br>";
 // Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 // Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 
@@ -279,7 +279,7 @@ if (!function_exists("tuoteperhe_reku2")) {
         foreach ($tmp_kerroin_array as $ke_ind => $ke_kerr) {
           list($ker_isa, $ke_ker) = explode("#!¡!#", $ke_kerr);
 
-          if ($ke_ker <= 0) {
+          if ($ke_ker == 0) {
             $ke_ker = 1;
           }
 

@@ -32,7 +32,7 @@
 // $olpaikalta      --> pakotetaan myym‰‰n oletuspaikalta
 // $tuotenimitys    --> tuotteen nimitys jos nimityksen syˆtˆ on yhtiˆll‰ sallittu
 // $tuotenimitys_force  --> tuotteen nimitys muutetaan systemitasolla
-echo "35 kpl $kpl <br><br>";
+
 // Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 // Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 

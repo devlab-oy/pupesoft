@@ -181,11 +181,12 @@ function presta_specific_prices(array $ajolista) {
       // '' Bruttohinta Myyntihinta
       // 'N' N-Nettohinta Myyntihinta
       // 'E' E-Nettohinta Myyntihinta
+      // 'K' Informatiivinen hinta
       $query = "SELECT distinct hinnasto.tuoteno, hinnasto.valkoodi, hinnasto.maa
                 FROM hinnasto
                 WHERE hinnasto.yhtio = '{$kukarow['yhtio']}'
                 AND hinnasto.tuoteno = '{$tuote['tuoteno']}'
-                AND hinnasto.laji    in ('', 'N', 'E')
+                AND hinnasto.laji    in ('', 'N', 'E', 'K')
                 AND hinnasto.hinta   > 0";
       $hintavalresult = pupe_query($query);
 
@@ -198,14 +199,14 @@ function presta_specific_prices(array $ajolista) {
                   hinnasto.hinta,
                   hinnasto.valkoodi,
                   hinnasto.maa,
-                  'hinnastohinta' AS tyyppi
+                  if(hinnasto.laji = 'K', 'informatiivinen_hinta', 'hinnastohinta') AS tyyppi
                   FROM hinnasto
                   WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
                   AND hinnasto.tuoteno  = '$hintavalrow[tuoteno]'
                   AND hinnasto.tuoteno  = '{$hintavalrow['tuoteno']}'
                   AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
                   AND hinnasto.maa      = '$hintavalrow[maa]'
-                  AND hinnasto.laji     in ('', 'N', 'E')
+                  AND hinnasto.laji     in ('', 'N', 'E', 'K')
                   AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
                   AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
                   AND hinnasto.hinta    > 0

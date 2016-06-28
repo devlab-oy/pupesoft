@@ -27550,7 +27550,7 @@ if (!function_exists('posten_outbounddelivery')) {
     }
 
     if ($ulkoinen_jarjestelma == 'P') {
-      $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " avainsana.selite = 'eankoodi' ", '', '', "selitetark");
+      $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'eankoodi' ", '', '', "selitetark");
     }
 
     $query = "SELECT lasku.*,

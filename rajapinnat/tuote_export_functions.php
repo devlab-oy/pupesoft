@@ -328,6 +328,7 @@ function tuote_export_hae_tuotetiedot($params) {
       'tuotemerkki'          => $row["tuotemerkki"],
       'tuoteno'              => $row["tuoteno"],
       'tuotepuun_nodet'      => $tuotepuun_nodet,
+      'tuotteen_avainsanat'  => tuote_export_hae_tuotteen_avainsanat($row['tuoteno']),
       'tuotteen_parametrit'  => $tuotteen_parametrit,
       'yksikko'              => $row["yksikko"],
     );
@@ -857,6 +858,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
         'tuotemerkki'           => $alirow['tuotemerkki'],
         'tuoteno'               => $alirow["tuoteno"],
         'tuotepuun_nodet'       => $tuotepuun_nodet,
+        'tuotteen_avainsanat'   => tuote_export_hae_tuotteen_avainsanat($alirow['tuoteno']),
       );
     }
   }
@@ -904,4 +906,32 @@ function tuote_export_checkpoint($checkpoint) {
 
 function tuote_export_echo($string) {
   echo date("d.m.Y @ G:i:s")." - {$string}\n";
+}
+
+function tuote_export_hae_tuotteen_avainsanat($tuoteno) {
+  global $kukarow, $yhtiorow;
+
+  $tuotteen_avainsanat = array();
+
+  // Haetaan tuotteen avainsanat (ei parametrejä)
+  $query = "SELECT tuotteen_avainsanat.kieli,
+            tuotteen_avainsanat.laji,
+            tuotteen_avainsanat.selite,
+            tuotteen_avainsanat.selitetark
+            FROM tuotteen_avainsanat
+            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.tuoteno = '{$tuoteno}'
+            AND tuotteen_avainsanat.laji not like 'parametri_%'";
+  $avainsana_result = pupe_query($query);
+
+  while ($avainsana_row = mysql_fetch_assoc($avainsana_result)) {
+    $tuotteen_avainsanat[] = array(
+      "kieli"      => $avainsana_row["kieli"],
+      "laji"       => $avainsana_row["laji"],
+      "selite"     => $avainsana_row["selite"],
+      "selitetark" => $avainsana_row["selitetark"],
+    );
+  }
+
+  return $tuotteen_avainsanat;
 }

@@ -4184,14 +4184,16 @@ if (isset($jatka)) {
 
   $maksettulisa = '';
   $verkkokauppa_avainsanatunnus = t_avainsana("LABEL", "", " and avainsana.selite='Verkkokauppatilaus'", "", "", "tunnus");
-  // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
-  if (!empty($verkkokauppa_avainsanatunnus) and $vienti == '' and (!isset($otsikon_laskurow['mapvm']) or $otsikon_laskurow['mapvm'] = '0000-00-00') and 
-     ($otsikon_laskurow['label'] == "{$verkkokauppa_avainsanatunnus}" or $label == $verkkokauppa_avainsanatunnus)) {
 
-    $kassalipasquery = "SELECT tunnus
+  // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
+  if (!empty($verkkokauppa_avainsanatunnus) and $vienti == '' and !empty($maksuehto) and (!isset($otsikon_laskurow['mapvm']) or $otsikon_laskurow['mapvm'] = '0000-00-00') and 
+     $label == $verkkokauppa_avainsanatunnus) {
+
+    $kassalipasquery = "SELECT kassalipas.tunnus
                         FROM kassalipas
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND nimi = 'Verkkokauppa'";
+                        JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.tunnus = '{$maksuehto}' and maksuehto.kateinen = '')
+                        WHERE kassalipas.yhtio = '$kukarow[yhtio]'
+                        AND kassalipas.nimi    = 'Verkkokauppa'";
     $kassalipas_res = pupe_query($kassalipasquery);
     if (mysql_num_rows($kassalipas_res) == 1) {
       $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
@@ -4199,9 +4201,10 @@ if (isset($jatka)) {
       $maksettulisa = " mapvm = now(), ";
       // Laskutuskielto
       $chn = 999;
+      echo "<font class='message'>".t("Manuaalinen verkkokauppatilaus merkattu maksetuksi").".</font><br>";
     }
     else {
-      echo "<font class='error'>", t("HUOM: Verkkokauppa-kassalipasta ei löytynyt vaikka otsikolla on valittu luokitukseksi Verkkokauppatilaus"), "!</font><br><br>";
+      echo "<font class='error'>", t("HUOM: Verkkokauppa-kassalipasta ei löytynyt tai tilaukselle on valittu käteismaksuehto."), "!</font><br><br>";
     }
   }
 

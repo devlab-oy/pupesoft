@@ -1530,7 +1530,7 @@ else {
 }
 
 if (function_exists("js_popup")) {
-  echo js_popup(-100);
+  echo js_popup();
 }
 
 // Enaboidaan ajax kikkare
@@ -1651,7 +1651,7 @@ echo "     $('#tuotteen_tilaukset_container').html('<img src=\"'+_src+'\" /><br 
               },
               success: function(data) {
                 $('#tuotteen_tilaukset_container').html(data);
-                $('.tooltip').tooltip('yes', 'popup');
+                bind_tooltip();
               }
             });
           });
@@ -1743,7 +1743,7 @@ echo"       if (tilalehinta) {
               },
               success: function(data) {
                 $('#tapahtumat_container').html(data);
-                $('.tooltip').tooltip('yes', 'popup');
+                bind_tooltip();
               }
             });
           });

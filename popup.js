@@ -1,4 +1,4 @@
-$(function(){
+function bind_tooltip() {
   $('.tooltip').tooltip({
     items: 'a, img, td',
     content: function() {
@@ -29,4 +29,8 @@ $(function(){
       }
     }
   });
+}
+
+$(function(){
+  bind_tooltip();
 });

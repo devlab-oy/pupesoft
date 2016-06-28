@@ -2296,6 +2296,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
+
+    if (($toikrow = tarkista_oikeus("yllapito.php", "hinnasto%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='hinnasto_iframe' name='hinnasto_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "auto_vari") {

@@ -286,7 +286,7 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   $hinnat = presta_specific_prices($presta_siirrettavat_hinnat);
 
   presta_echo("Siirretään specific prices.");
-  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');
+  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_hinnoittelu');
 
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
   $presta_prices->set_presta_static_customer_group($presta_hinnaston_asiakasryhma);

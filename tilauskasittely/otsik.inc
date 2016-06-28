@@ -4187,6 +4187,7 @@ if (isset($jatka)) {
   // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
   if (!empty($verkkokauppa_avainsanatunnus) and $vienti == '' and (!isset($otsikon_laskurow['mapvm']) or $otsikon_laskurow['mapvm'] = '0000-00-00') and 
      ($otsikon_laskurow['label'] == "{$verkkokauppa_avainsanatunnus}" or $label == $verkkokauppa_avainsanatunnus)) {
+
     $kassalipasquery = "SELECT tunnus
                         FROM kassalipas
                         WHERE yhtio = '$kukarow[yhtio]'
@@ -4198,6 +4199,9 @@ if (isset($jatka)) {
       $maksettulisa = " mapvm = now(), ";
       // Laskutuskielto
       $chn = 999;
+    }
+    else {
+      echo "<font class='error'>", t("HUOM: Verkkokauppa-kassalipasta ei löytynyt vaikka otsikolla on valittu luokitukseksi Verkkokauppatilaus"), "!</font><br><br>";
     }
   }
 

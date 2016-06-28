@@ -179,6 +179,19 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
+    if ($tem_laji == 'POSTEN_TKOODI' and trim($t[$i]) != "") {
+       $query = "SELECT *
+                 FROM avainsana
+                 WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                 AND avainsana.selite  = '{$tem_selite}'
+                 AND avainsana.laji    = '{$tem_laji}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi avainsana jolla on tämä laji");
+        }
+    }
+
     if (mysql_field_name($result, $i) == "selitetark") {
       $tem_selitetark = trim($t[$i]);
 

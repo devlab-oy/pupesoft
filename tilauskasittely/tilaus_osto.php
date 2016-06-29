@@ -409,6 +409,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         echo "<font class='head'>".t("Ostotilaus").":</font><hr>";
       }
 
+      echo "<br>".t("Ostotilaus %s valmis", "", $kukarow["kesken"])."!<br>";
+
       // p‰ivitet‰‰n t‰ss‰ tilaus valmiiksi
       $query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='$kukarow[kesken]'";
       $result = pupe_query($query);
@@ -516,7 +518,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           $saapres = pupe_query($query);
           $saaprow = mysql_fetch_assoc($saapres);
 
-          echo "<table>";
+          echo "<br><table>";
           echo "<tr>";
           echo "<th>".t("Luotiin saapuminen").":</th>";
           echo "<td>";
@@ -534,7 +536,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           echo "</form>";
           echo "</td>";
           echo "</tr>";
-          echo "</table><br><br>";
+          echo "</table><br>";
 
           // Kohdistetaan rivit valmiiksi
           $kohdistus_q = "UPDATE tilausrivi SET
@@ -558,6 +560,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         }
       }
 
+      echo "<br><br>".t("Tulosta ostotilaus").":<br>";
       $tulostimet[0] = "Ostotilaus";
       require "../inc/valitse_tulostin.inc";
     }

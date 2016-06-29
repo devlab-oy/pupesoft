@@ -16,7 +16,7 @@ if ($tee == 'TARKISTA') {
 
 $query = "SELECT *
           FROM factoring
-          WHERE yhtio = '{$kukarow["yhtio"]}'
+          WHERE yhtio        = '{$kukarow["yhtio"]}'
           and factoringyhtio = 'SAMPO'
           {$factoring_tarkista_lisa}";
 $factoring_result = pupe_query($query);
@@ -59,14 +59,14 @@ if ($tee == "TOIMINNOT") {
   $query = "SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              and maksuehto.tunnus = lasku.maksuehto
-              and maksuehto.factoring_id = '$factoring_id')
-            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
-            lasku.tila                   = 'U' and
-            lasku.alatila                = 'X' and
-            lasku.summa                 != 0 and
-            lasku.factoringsiirtonumero  = '' and
-            lasku.valkoodi               = '$yhtiorow[valkoodi]'";
+              and maksuehto.tunnus        = lasku.maksuehto
+              and maksuehto.factoring_id  = '$factoring_id')
+            WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+            lasku.tila                    = 'U' and
+            lasku.alatila                 = 'X' and
+            lasku.summa                  != 0 and
+            lasku.factoringsiirtonumero   = '' and
+            lasku.valkoodi                = '$yhtiorow[valkoodi]'";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -138,14 +138,14 @@ if ($tee == 'TULOSTA') {
   $query = "SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              and maksuehto.tunnus = lasku.maksuehto
-              and maksuehto.factoring_id = '$factoring_id')
-            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
-            lasku.tila                   = 'U' and
-            lasku.alatila                = 'X' and
-            lasku.summa                 != 0 and
-            lasku.factoringsiirtonumero  = '$numero' and
-            lasku.valkoodi               = '$yhtiorow[valkoodi]'
+              and maksuehto.tunnus        = lasku.maksuehto
+              and maksuehto.factoring_id  = '$factoring_id')
+            WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+            lasku.tila                    = 'U' and
+            lasku.alatila                 = 'X' and
+            lasku.summa                  != 0 and
+            lasku.factoringsiirtonumero   = '$numero' and
+            lasku.valkoodi                = '$yhtiorow[valkoodi]'
             order by laskunro";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);

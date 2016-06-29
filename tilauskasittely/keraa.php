@@ -2257,7 +2257,7 @@ if ($tee == 'P') {
               pupesoft_tulosta_lahete($params);
 
               if ($lahete_tulostus_paperille > 0) echo "<br>".t("Tulostettiin %s paperilähetettä", "", $lahete_tulostus_paperille).".";
-              #if ($lahete_tulostus_ruudulle > 0) echo "<br>".t("Tulostettiin %s lähetettä ruudulle", "", $lahete_tulostus_ruudulle).".";
+              //if ($lahete_tulostus_ruudulle > 0) echo "<br>".t("Tulostettiin %s lähetettä ruudulle", "", $lahete_tulostus_ruudulle).".";
               if ($lahete_tulostus_emailiin > 0) echo "<br>".t("Lähetettiin %s sähköistä lähetettä", "", $lahete_tulostus_emailiin).".";
               if ($lahete_tulostus_emailiin == 0 and $lahete_tulostus_paperille == 0 and $lahete_tulostus_ruudulle == 0) echo "<br>".t("Lähetteitä ei tulostettu").".";
             }

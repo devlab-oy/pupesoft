@@ -90,11 +90,11 @@ if ($handle = opendir($path)) {
 
       $query = "SELECT tunnus
                 FROM lasku
-                WHERE yhtio  = '{$yhtio}'
-                AND tila     = 'K'
+                WHERE yhtio     = '{$yhtio}'
+                AND tila        = 'K'
                 AND vanhatunnus = 0
-                AND laskunro = '{$saapumisnro}'
-                AND sisviesti3 = 'ei_vie_varastoon'";
+                AND laskunro    = '{$saapumisnro}'
+                AND sisviesti3  = 'ei_vie_varastoon'";
       $selectres = pupe_query($query);
       $selectrow = mysql_fetch_assoc($selectres);
 
@@ -125,8 +125,8 @@ if ($handle = opendir($path)) {
                 AND uusiotunnus = '{$saapumistunnus}'";
       $updres = pupe_query($query);
 
-      # Loopataan rivit tilausrivit-arrayseen
-      # koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
+      // Loopataan rivit tilausrivit-arrayseen
+      // koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
       foreach ($xml->Lines->Line as $key => $line) {
 
         $rivitunnus = (int) $line->TransId;
@@ -181,10 +181,10 @@ if ($handle = opendir($path)) {
         require "tilauskasittely/varastoon.inc";
 
         $query = "UPDATE lasku SET
-                  sisviesti3   = 'ok_vie_varastoon'
-                  WHERE yhtio  = '{$yhtio}'
-                  AND tila     = 'K'
-                  AND tunnus = '{$saapumistunnus}'";
+                  sisviesti3  = 'ok_vie_varastoon'
+                  WHERE yhtio = '{$yhtio}'
+                  AND tila    = 'K'
+                  AND tunnus  = '{$saapumistunnus}'";
         $updres = pupe_query($query);
 
         if (!empty($email)) {

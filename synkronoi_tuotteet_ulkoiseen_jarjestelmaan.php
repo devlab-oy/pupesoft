@@ -127,26 +127,19 @@ else {
         $line->addChild('Type', $type);
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
-
-        if ($ulkoinen_jarjestelma == "P") {
-          $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'eankoodi' ", '', '', "selitetark");
-          if (!empty($posten_itemnumberfield)) {
-            $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20))); 
-          }
-          else {
-            $line->addChild('ItemNumber', utf8_encode($eankoodi)); 
-          }
-        }
-        else {
-          $tuoteno = substr($row['tuoteno'], 0, 20);
-          $line->addChild('ItemNumber', utf8_encode($tuoteno));
-        }
-
         $nimitys = substr($row['nimitys'], 0, 50);
         $try = substr($row['try'], 0, 6);
         $yksikko = substr($row['yksikko'], 0, 10);
         $tuoteno = substr($row['tuoteno'], 0, 100);
 
+        $posten_itemnumberfield = "tuoteno";
+        $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+
+        if (!empty($alt_posten_itemnumberfield) and isset($row[$alt_posten_itemnumberfield])) {
+          $posten_itemnumberfield = $alt_posten_itemnumberfield;
+        }
+
+        $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
         $line->addChild('ItemName', utf8_encode($nimitys));
         $line->addChild('ProdGroup1', utf8_encode($try));
         $line->addChild('ProdGroup2', '');

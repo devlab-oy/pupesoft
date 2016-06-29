@@ -39,6 +39,9 @@ class MagentoClient {
   // Magenton oletus attributeSet
   private $_attributeSet;
 
+  // Magenton attribuurit
+  private $magento_attribute_list = array();
+
   // Tuotekategoriat
   private $_category_tree;
 
@@ -251,6 +254,7 @@ class MagentoClient {
       $tuote['kuluprosentti'] = ($tuote['kuluprosentti'] == 0) ? '' : $tuote['kuluprosentti'];
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;
       $tuoteryhmanimi   = $tuote['try_nimi'];
+      $attribute_set_id = $this->get_attribute_set_id($tuote);
 
       // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
       if (!empty($tuoteryhmayliajo)) {
@@ -307,7 +311,9 @@ class MagentoClient {
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
         // Lisätään lapsituotteen nimeen variaatioiden arvot
         if ($this->magento_nimitykseen_parametrien_arvot === true) {
@@ -335,7 +341,7 @@ class MagentoClient {
         }
 
         if (isset($tuote[$erikoisparametri['arvo']])) {
-          $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
+          $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
         }
       }
 
@@ -389,7 +395,7 @@ class MagentoClient {
           $product_id = $this->_proxy->call($this->_session, 'catalog_product.create',
             array(
               'simple',
-              $this->get_attribute_set_id($tuote),
+              $attribute_set_id,
               $tuote['tuoteno'], // sku
               $tuote_data,
             )
@@ -580,6 +586,9 @@ class MagentoClient {
       $tuoteryhmayliajo = $this->_universal_tuoteryhma;
       $tuoteryhmanimi = $tuotteet[0]['try_nimi'];
 
+      // attribute setin id
+      $attribute_set_id = $this->get_attribute_set_id($tuotteet[0]);
+
       // Yliajetaan tuoteryhmän nimi jos muuttuja on asetettu
       if (!empty($tuoteryhmayliajo)) {
         $tuoteryhmanimi = $tuoteryhmayliajo;
@@ -618,7 +627,7 @@ class MagentoClient {
 
       foreach ($tuotteet[0]['parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+        $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
       }
 
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
@@ -639,7 +648,7 @@ class MagentoClient {
         }
 
         if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
-          $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
+          $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']], $attribute_set_id);
         }
       }
 
@@ -695,7 +704,7 @@ class MagentoClient {
           // Simple tuotteiden parametrit kuten koko ja väri
           foreach ($tuote['parametrit'] as $parametri) {
             $key = $parametri['option_name'];
-            $multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
+            $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
           }
 
           $simple_tuote_data = array(
@@ -729,7 +738,7 @@ class MagentoClient {
             'catalog_product.create',
             array(
               'configurable',
-              $this->get_attribute_set_id($tuotteet[0]),
+              $attribute_set_id,
               $nimitys, // sku
               $configurable
             )
@@ -1797,16 +1806,19 @@ class MagentoClient {
   }
 
   // Hakee kaikki attribuutit magentosta
-  private function getAttributeList() {
-    if (empty($this->_attribute_list)) {
-      $this->_attribute_list = $this->_proxy->call(
+  private function getAttributeList($attribute_set_id) {
+    // array jo haetuista attribuuteista
+    $attr_list = $this->magento_attribute_list;
+
+    if (empty($attr_list[$attribute_set_id])) {
+      $this->magento_attribute_list[$attribute_set_id] = $this->_proxy->call(
         $this->_session,
         "product_attribute.list",
-        array($this->_attributeSet['set_id'])
+        array($attribute_set_id)
       );
     }
 
-    return $this->_attribute_list;
+    return $this->magento_attribute_list[$attribute_set_id];
   }
 
   // Hakee kaikki kategoriat
@@ -1876,10 +1888,10 @@ class MagentoClient {
   }
 
   // Palauttaa attribuutin option id:n annetulle atribuutille ja arvolle
-  private function get_option_id($name, $value) {
+  private function get_option_id($name, $value, $attribute_set_id) {
     $name = utf8_encode($name);
     $value = utf8_encode($value);
-    $attribute_list = $this->getAttributeList();
+    $attribute_list = $this->getAttributeList($attribute_set_id);
     $attribute_id = '';
 
     // Etsitään halutun attribuutin id

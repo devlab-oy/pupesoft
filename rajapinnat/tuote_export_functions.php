@@ -146,22 +146,12 @@ function tuote_export_hae_tuotetiedot($params) {
             tuote.mallitarkenne campaign_code,
             tuote.malli target,
             tuote.leimahduspiste onsale,
-            ta_nimitys_se.selite nimi_swe,
-            ta_nimitys_en.selite nimi_eng,
             try_fi.selitetark try_nimi
             FROM tuote
             LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
               and try_fi.selite        = tuote.try
               and try_fi.laji          = 'try'
               and try_fi.kieli         = 'fi')
-            LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
-              and tuote.tuoteno        = ta_nimitys_se.tuoteno
-              and ta_nimitys_se.laji   = 'nimitys'
-              and ta_nimitys_se.kieli  = 'se'
-            LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
-              and tuote.tuoteno        = ta_nimitys_en.tuoteno
-              and ta_nimitys_en.laji   = 'nimitys'
-              and ta_nimitys_en.kieli  = 'en'
             WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
               AND tuote.status        != 'P'
               AND tuote.tuotetyyppi    NOT in ('A','B')
@@ -314,8 +304,6 @@ function tuote_export_hae_tuotetiedot($params) {
       'myyntihinta_veroton'  => $myyntihinta_veroton,
       'nakyvyys'             => strtolower($row["nakyvyys"]),
       'nimi'                 => $row["nimitys"],
-      'nimi_eng'             => $row["nimi_eng"],
-      'nimi_swe'             => $row["nimi_swe"],
       'nimitys'              => $row["nimitys"],
       'onsale'               => $row["onsale"],
       'osasto'               => $row["osasto"],
@@ -349,7 +337,7 @@ function tuote_export_hae_poistettavat_tuotteet() {
             LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
             AND tuote.tuoteno             = tuotteen_avainsanat.tuoteno
             AND tuotteen_avainsanat.laji  = 'parametri_variaatio'
-            AND trim(tuotteen_avainsanat.selite) != '')
+              AND trim(tuotteen_avainsanat.selite) != '')
             WHERE tuote.yhtio             = '{$kukarow["yhtio"]}'
             AND tuote.status             != 'P'
             AND tuote.tuotetyyppi         NOT in ('A','B')
@@ -696,8 +684,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                   tuote.*,
                   tuotteen_avainsanat.tuoteno,
                   tuotteen_avainsanat.jarjestys,
-                  ta_nimitys_se.selite nimi_swe,
-                  ta_nimitys_en.selite nimi_eng,
                   tuote.mallitarkenne campaign_code,
                   tuote.malli target,
                   tuote.leimahduspiste onsale,
@@ -713,14 +699,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                     and try_fi.selite              = tuote.try
                     and try_fi.laji                = 'try'
                     and try_fi.kieli               = 'fi')
-                  LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on (tuote.yhtio = ta_nimitys_se.yhtio
-                    and tuote.tuoteno              = ta_nimitys_se.tuoteno
-                    and ta_nimitys_se.laji         = 'nimitys'
-                    and ta_nimitys_se.kieli        = 'se')
-                  LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on (tuote.yhtio = ta_nimitys_en.yhtio
-                    and tuote.tuoteno              = ta_nimitys_en.tuoteno
-                    and ta_nimitys_en.laji         = 'nimitys'
-                    and ta_nimitys_en.kieli        = 'en')
                   WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
                   AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
                   AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
@@ -845,8 +823,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
         'myyntihinta_veroton'   => $myyntihinta_veroton,
         'nakyvyys'              => strtolower($alirow["nakyvyys"]),
         'nimi'                  => $alirow["nimitys"],
-        'nimi_eng'              => $alirow["nimi_eng"],
-        'nimi_swe'              => $alirow["nimi_swe"],
         'nimitys'               => $alirow["nimitys"],
         'onsale'                => $alirow["onsale"],
         'paino'                 => $alirow["tuotemassa"],

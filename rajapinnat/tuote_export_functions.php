@@ -129,12 +129,11 @@ function tuote_export_hae_tuotetiedot($params) {
       $muuttuneet_tuoteryhmat = tuote_export_hae_hintamuutoksia_sisaltavat_tuoteryhmat($datetime_checkpoint);
     }
 
-    $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
-              OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
-              OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-              {$muuttuneet_tuotenumerot}
-              {$muuttuneet_tuoteryhmat}
-              )";
+    $muutoslisa = " AND (
+      tuote.muutospvm >= '{$datetime_checkpoint}'
+      {$muuttuneet_tuotenumerot}
+      {$muuttuneet_tuoteryhmat}
+    ) ";
   }
   else {
     $muutoslisa = "";
@@ -619,11 +618,11 @@ function tuote_export_hae_lajitelmatuotteet($params) {
   $resselite = pupe_query($query);
 
   if ($ajetaanko_kaikki === false) {
-    $muutoslisa = " AND (tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
-              OR try_fi.muutospvm  >= '{$datetime_checkpoint}'
-              OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
-              OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-              OR tuote.muutospvm  >= '{$datetime_checkpoint}')";
+    $muutoslisa = " AND (
+      tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
+      OR try_fi.muutospvm >= '{$datetime_checkpoint}'
+      OR tuote.muutospvm >= '{$datetime_checkpoint}'
+    ) ";
   }
   else {
     $muutoslisa = "";

@@ -135,7 +135,7 @@ else {
         $posten_itemnumberfield = "tuoteno";
         $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
 
-        if (!empty($alt_posten_itemnumberfield) and isset($row[$alt_posten_itemnumberfield])) {
+        if (!empty($alt_posten_itemnumberfield)) {
           $posten_itemnumberfield = $alt_posten_itemnumberfield;
         }
 

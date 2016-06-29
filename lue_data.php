@@ -2696,10 +2696,10 @@ if (!$cli and !isset($api_kentat)) {
 
   list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($_taulu_query);
 
-  $pakolliset = array_merge($pakolliset, $eisaaollatyhja);
-  $pakolliset = array_unique($pakolliset);
+  $wherelliset = array_merge($wherelliset, $eisaaollatyhja);
+  $wherelliset = array_unique($wherelliset);
 
-  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
+  echo "<tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":<br>".t("(Näitä tietoja ei voi muuttaa)")."</td>";
   echo "<td><ul><li>".strtolower(implode("</li><li>", $pakolliset))."</li></ul></td></tr>";
 
   if (!empty($wherelliset)) {

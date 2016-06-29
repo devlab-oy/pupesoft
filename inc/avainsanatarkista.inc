@@ -275,9 +275,9 @@ if (!function_exists("avainsanatarkista")) {
 
       if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite'] and $trow['selite'] != '') {
         $query = "UPDATE tuote SET
-                  vienti = '{$tem_selite}'
+                  vienti      = '{$tem_selite}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND vienti = '{$trow['selite']}'";
+                  AND vienti  = '{$trow['selite']}'";
         $updres = pupe_query($query);
       }
     }

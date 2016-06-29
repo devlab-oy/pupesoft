@@ -11,7 +11,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   if (empty($postirow["ytunnus"])) {
     $postirow["ytunnus"] = '999999';
   }
-  
+
   // tehd‰‰n EDI-aineisto
   $ulos  = "";
   $ulos .= "ICHGSTART:$postirow[tunnus]\n";                    // tilauksen numero

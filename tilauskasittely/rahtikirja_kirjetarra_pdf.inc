@@ -106,7 +106,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(243, 370, $toitarow['sopimusnro'], $firstpage, $iso);
   $pdf->draw_text(241, 360, 'Posti Oy', $firstpage, $iso);
 
-  # Jaetaan kirje osiin vaakaviivoilla
+  // Jaetaan kirje osiin vaakaviivoilla
   $pdf->draw_rectangle(280, 8, 280, 290, $firstpage, $rectparam);
   $pdf->draw_rectangle(100, 8, 100, 290, $firstpage, $rectparam);
 

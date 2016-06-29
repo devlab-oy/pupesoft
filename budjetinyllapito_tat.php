@@ -1183,7 +1183,7 @@ if ($tee == "") {
     }
     elseif ($toim == "TOIMITTAJA") {
       $toim_selite = t("Toimittajan");
-    } 
+    }
     elseif ($toim == "ASIAKASMYYJA") {
       $toim_selite = t("Asiakasmyyjän");
     }
@@ -1519,9 +1519,9 @@ if ($tee == "AJA_RAPORTTI") {
               kuka.myyja
               FROM kuka
               JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.myyjanro = kuka.myyja)
-              WHERE kuka.yhtio = '{$kukarow['yhtio']}'
-              AND kuka.extranet = ''
-              AND kuka.myyja > 0
+              WHERE kuka.yhtio     = '{$kukarow['yhtio']}'
+              AND kuka.extranet    = ''
+              AND kuka.myyja       > 0
               AND asiakas.myyjanro > 0
               {$lisa}";
   }

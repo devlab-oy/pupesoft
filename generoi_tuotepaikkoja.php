@@ -28,7 +28,7 @@ require "inc/functions.inc";
 // Generoidaan jokaiselle yhtiön tuotteelle tuotepaikka jokaiseen yhtiön varastoon
 $query = "SELECT *
           FROM varastopaikat
-          WHERE yhtio = '$yhtio'
+          WHERE yhtio        = '$yhtio'
           AND alkuhyllyalue != '!!M'";
 $varastoresult = pupe_query($query);
 

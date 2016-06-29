@@ -214,26 +214,26 @@ else {
   // jos siirto epäonnistuu
   if ($palautus != 0) {
     switch ($palautus) {
-      case  1:
-        $syy = "Could not connect to remote host. ($ftphost)";
-        break;
-      case  2:
-        $syy = "Could not login to remote host ($ftpuser, $ftppass)";
-        break;
-      case  3:
-        $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
-        break;
-      case  4:
-        $syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
-        break;
-      case  5:
-        $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
-        break;
-      case  6:
-        $syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
-        break;
-      default:
-        $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+    case  1:
+      $syy = "Could not connect to remote host. ($ftphost)";
+      break;
+    case  2:
+      $syy = "Could not login to remote host ($ftpuser, $ftppass)";
+      break;
+    case  3:
+      $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
+      break;
+    case  4:
+      $syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
+      break;
+    case  5:
+      $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+      break;
+    case  6:
+      $syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
+      break;
+    default:
+      $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
 
     pupesoft_log('ftp_send', "Tiedoston '{$ftpfile}' lähetys palvelimelle '{$ftphost}' epäonnistui: {$syy}");

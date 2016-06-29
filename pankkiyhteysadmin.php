@@ -37,9 +37,9 @@ if ($tee == 'paivita_hae_factoring') {
   $hae_factoring = isset($hae_factoring) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET
-            hae_factoring   = {$hae_factoring}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
+            hae_factoring = {$hae_factoring}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
   pupe_query($query);
 
   $tee = "";
@@ -330,8 +330,8 @@ if ($tee == "uusi_sertifikaatti_hae") {
               SET signing_certificate          = '{$oss}',
                   signing_private_key          = '{$sk}',
                   signing_certificate_valid_to = '{$oss_time}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = {$pankkiyhteys_tunnus}";
+              WHERE yhtio                      = '{$kukarow['yhtio']}'
+                AND tunnus                     = {$pankkiyhteys_tunnus}";
     $result = pupe_query($query);
 
     ok("Sertifikaatti päivitetty!");
@@ -638,7 +638,7 @@ if ($tee == "") {
       echo "<input type='hidden' name='tee' value='paivita_hae_factoring'>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
       $checked = $pankkiyhteys['hae_factoring'] == 1 ? ' checked' : '';
-      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH','NDEAFIHH')) ? ' disabled' : '';
+      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH', 'NDEAFIHH')) ? ' disabled' : '';
       echo "<input type='checkbox' name='hae_factoring' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
       echo "</form>";
       echo "</td>";

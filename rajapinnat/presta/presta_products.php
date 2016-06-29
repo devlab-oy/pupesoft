@@ -49,6 +49,8 @@ class PrestaProducts extends PrestaClient {
    * @param SimpleXMLElement $existing_product
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($product, SimpleXMLElement $existing_product = null) {
     if (is_null($existing_product)) {
       $xml = $this->empty_xml();
@@ -151,19 +153,19 @@ class PrestaProducts extends PrestaClient {
       $field = strtolower($translation['kentta']);
 
       switch ($field) {
-        case 'nimitys':
-          $xml->product->name->language[$tr_id] = $value;
-          $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
-          break;
-        case 'kuvaus':
-          $xml->product->description->language[$tr_id] = $value;
-          break;
-        case 'lyhytkuvaus':
-          $xml->product->description_short->language[$tr_id] = $value;
-          break;
-        case 'tilaustuote':
-          $xml->product->available_later->language[$tr_id] = $value;
-          break;
+      case 'nimitys':
+        $xml->product->name->language[$tr_id] = $value;
+        $xml->product->link_rewrite->language[$tr_id] = $this->saniteze_link_rewrite("{$product['tuoteno']}_{$value}");
+        break;
+      case 'kuvaus':
+        $xml->product->description->language[$tr_id] = $value;
+        break;
+      case 'lyhytkuvaus':
+        $xml->product->description_short->language[$tr_id] = $value;
+        break;
+      case 'tilaustuote':
+        $xml->product->available_later->language[$tr_id] = $value;
+        break;
       }
 
       $this->logger->log("Käännös {$translation['kieli']}, {$translation['kentta']}: $value");
@@ -359,13 +361,17 @@ class PrestaProducts extends PrestaClient {
           $this->update($id, $product, null, $shop_group_id);
         }
         else {
-          $this->create($product, null, $shop_group_id);
+          $response = $this->create($product, null, $shop_group_id);
+          $id = (string) $response['product']['id'];
         }
       }
       catch (Exception $e) {
-          //Do nothing here. If create / update throws exception loggin happens inside those functions
-          //Exception is not thrown because we still want to continue syncing for other products
+        //Do nothing here. If create / update throws exception loggin happens inside those functions
+        //Exception is not thrown because we still want to continue syncing for other products
       }
+
+      // Set product activity per store
+      $this->set_active_by_shop($id, $product['nakyvyys']);
 
       $this->logger->log("Tuote {$product['tuoteno']} käsitelty.\n");
     }
@@ -461,6 +467,37 @@ class PrestaProducts extends PrestaClient {
 
     $this->presta_all_products = $existing_products;
     return $existing_products;
+  }
+
+  private function set_active_by_shop($product_id, $active_shop_ids_string) {
+    // Set store ids.
+    $verkkokauppa_nakyvyys = explode(" ", $active_shop_ids_string);
+    $active_shop_ids = $this->set_shop_ids($verkkokauppa_nakyvyys);
+
+    // If we get null, nakyvyys was invalid. Don't change visibility
+    if (is_null($active_shop_ids)) {
+      return;
+    }
+
+    // all shop ids
+    $all_shop_ids = $this->all_shop_ids();
+
+    foreach ($all_shop_ids as $id) {
+      // if id is in active_shop_ids, we want it active
+      // activity values: 0 off, 1 on
+      $activity = in_array($id, $active_shop_ids) ? 1 : 0;
+
+      $this->logger->log("Active {$activity} kauppaan {$id}");
+
+      try {
+        // fetch product, change activity and update
+        $xml = $this->get_as_xml($product_id, $id);
+        $xml->product->active = $activity;
+        $this->update_xml($product_id, $xml, $id);
+      }
+      catch (Exception $e) {
+      }
+    }
   }
 
   private function get_tax_group_id($vat) {

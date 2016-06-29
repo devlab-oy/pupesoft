@@ -71,21 +71,21 @@ while ($row = mysql_fetch_assoc($result)) {
             count(*) toimituksia
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.otunnus     = lasku.tunnus
               AND tilausrivi.jaksotettu=lasku.jaksotettu
-              AND tilausrivi.tyyppi != 'D' 
-              AND tilausrivi.var != 'P' 
+              AND tilausrivi.tyyppi     != 'D'
+              AND tilausrivi.var        != 'P'
               AND tilausrivi.toimitettu != '')
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.jaksotettu = '{$row['jaksotettu']}' 
-            AND lasku.tila = 'L'
-            AND lasku.alatila IN ('J', 'X')
+            WHERE lasku.yhtio            = '{$kukarow['yhtio']}'
+            AND lasku.jaksotettu         = '{$row['jaksotettu']}'
+            AND lasku.tila               = 'L'
+            AND lasku.alatila            IN ('J', 'X')
             GROUP BY lasku.jaksotettu
             HAVING tilaok = toimituksia
-            AND toimittamatta = 0";
+            AND toimittamatta            = 0";
   $toimitettu = pupe_query($query);
   if (mysql_affected_rows() > 0) {
     echo "\nLoppulaskutetaan maksusopimus: {$row['jaksotettu']}\n";
     loppulaskuta($row['jaksotettu']);
-  }  
+  }
 }

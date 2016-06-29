@@ -1719,7 +1719,7 @@ if ($tee == "JATKA") {
 
                 $_nimitark = "";
                 if (!empty($jtrow["nimitark"])) {
-                 $_nimitark = "<br>".$jtrow["nimitark"];
+                  $_nimitark = "<br>".$jtrow["nimitark"];
                 }
 
                 if ($kukarow["extranet"] == "") {
@@ -1731,7 +1731,7 @@ if ($tee == "JATKA") {
 
                 $_toim_nimitark = "";
                 if (!empty($jtrow["toim_nimitark"])) {
-                 $_toim_nimitark = "<br>".$jtrow["toim_nimitark"];
+                  $_toim_nimitark = "<br>".$jtrow["toim_nimitark"];
                 }
 
                 echo "$jtrow[toim_nimi]$_toim_nimitark";

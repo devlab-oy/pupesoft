@@ -364,8 +364,7 @@ if (in_array('tuoteryhmat', $magento_ajolista)) {
     "ajetaanko_kaikki" => $ajetaanko_kaikki,
   );
 
-  $response = tuote_export_hae_tuoteryhmat($params);
-  $dnstuoteryhma = $response['dnstuoteryhma'];
+  $dnstuoteryhma = tuote_export_hae_tuoteryhmat($params);
 
   tuote_export_echo("Päivitetään tuotekategoriat");
   $magento_client->lisaa_kategoriat($dnstuoteryhma);

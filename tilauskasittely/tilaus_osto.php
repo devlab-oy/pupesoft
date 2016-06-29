@@ -2043,7 +2043,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             </form>
             </td>";
 
-        if (mysql_num_rows($saapumisriveja_res) == 0) {
+        if (mysql_num_rows($saapumisriveja_res) == 0 and tarkista_oikeus("keikka.php")) {
          echo "  <td class='back'>
               <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
               <input type='hidden' name='toim'          value = '$toim'>

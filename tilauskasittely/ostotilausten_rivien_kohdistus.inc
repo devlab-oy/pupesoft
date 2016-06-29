@@ -1072,7 +1072,7 @@ if ($tila == 'tee_kohdistus') {
 
 $query = "SELECT DISTINCT varasto
           FROM tilausrivi
-          WHERE yhtio = '{$kukarow['yhtio']}'
+          WHERE yhtio     = '{$kukarow['yhtio']}'
           AND uusiotunnus = '{$otunnus}'";
 $varastocheckres = pupe_query($query);
 
@@ -1569,7 +1569,7 @@ if ($tila == '') {
 
   echo "<tr>";
 
-  echo "<th>KALA</th><td>KALA</td>";
+  echo "<th></th><td></td>";
 
   echo "<th>".t("Jäljellä").":</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
   echo "<th>".t("Kappaleita").":</th><td style='text-align:right'><span id='kohdistettu_kpl'>".(float) $kappaleetrow['kappaleet']."</span></td>";

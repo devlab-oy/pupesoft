@@ -111,6 +111,10 @@ if ($Xtunnukset2 != "") {
     function erittely_alku() {
       global $Xpdf, $laskurow, $yhtiorow, $kukarow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
 
+      if (!is_object($Xpdf)) {
+        return;
+      }
+
       $Xfirstpage = $Xpdf->new_page("a4");
       $Xpdf->enable('template');
       $Xtid = $Xpdf->template->create();
@@ -195,6 +199,10 @@ if ($Xtunnukset2 != "") {
     function erittely_rivi($Xfirstpage) {
       global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
 
+      if (!is_object($Xpdf)) {
+        return;
+      }
+
       if ($Xlask == 36) {
         $Xsivu++;
         erittely_loppu($Xfirstpage);
@@ -248,6 +256,10 @@ if ($Xtunnukset2 != "") {
   if (!function_exists('erittely_loppu')) {
     function erittely_loppu($Xfirstpage) {
       global $Xpdf, $yhtiorow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli;
+
+      if (!is_object($Xpdf)) {
+        return;
+      }
 
       //Alimmat kolme laatikkoa, yhtiötietoja
       $Xpdf->draw_rectangle(55, 20, 20, 580,              $Xfirstpage, $Xrectparam);

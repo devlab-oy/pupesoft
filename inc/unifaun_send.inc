@@ -107,8 +107,8 @@ class Unifaun {
     // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
                  FROM laskun_lisatiedot
-                 WHERE yhtio  = '{$this->kukarow['yhtio']}'
-                 AND otunnus   = '{$this->postirow['tunnus']}'
+                 WHERE yhtio              = '{$this->kukarow['yhtio']}'
+                 AND otunnus              = '{$this->postirow['tunnus']}'
                  AND noutopisteen_tunnus != ''";
     $ll_res = pupe_query($ll_query);
 
@@ -156,7 +156,7 @@ class Unifaun {
 
       $ftpfile = realpath($filenimi);
 
-      # Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
+      // Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
       $ftputf8 = PUPE_UNICODE;
 
       require "inc/ftp-send.inc";
@@ -579,7 +579,7 @@ class Unifaun {
 
     if (!empty($this->postirow["noutopisteen_tunnus"])) {
       //<val n="agentto">1234</val> # definaa noutopisteen tunnuksen
-      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); // Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
       $agentto_noutopiste->addAttribute('n', "agentto");
     }
 

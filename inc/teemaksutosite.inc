@@ -202,20 +202,20 @@ if ($teemaksutosite) {
 
   // Rahatili
   $query = "INSERT into tiliointi set
-            yhtio    = '$yritirow[yhtio]',
-            ltunnus  = '$trow[tunnus]',
-            tilino   = '$yritirow[oletus_rahatili]',
-            kustp    = '{$kustp_ins}',
-            kohde    = '{$kohde_ins}',
-            projekti = '{$projekti_ins}',
-            tapvm    = '$tpv-$tpk-$tpp',
-            summa    = '$maara',
+            yhtio            = '$yritirow[yhtio]',
+            ltunnus          = '$trow[tunnus]',
+            tilino           = '$yritirow[oletus_rahatili]',
+            kustp            = '{$kustp_ins}',
+            kohde            = '{$kohde_ins}',
+            projekti         = '{$projekti_ins}',
+            tapvm            = '$tpv-$tpk-$tpp',
+            summa            = '$maara',
             summa_valuutassa = '{$summavaluutassa}',
-            valkoodi = '{$summavaluuttakoodi}',
-            vero     = 0,
-            lukko    = '',
-            laatija  = 'tiliote',
-            laadittu = now()";
+            valkoodi         = '{$summavaluuttakoodi}',
+            vero             = 0,
+            lukko            = '',
+            laatija          = 'tiliote',
+            laadittu         = now()";
   $result = pupe_query($query);
 
   // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
@@ -223,20 +223,20 @@ if ($teemaksutosite) {
 
   // Ostovelat, tarkenteet kopsataan alkuperäisesltä tiliöinniltä
   $query = "INSERT into tiliointi set
-            yhtio    = '$yritirow[yhtio]',
-            ltunnus  = '$trow[tunnus]',
-            tilino   = '$ostovelkarow[tilino]',
-            kustp    = '{$kustp_ins}',
-            kohde    = '{$kohde_ins}',
-            projekti = '{$projekti_ins}',
-            tapvm    = '$tpv-$tpk-$tpp',
-            summa    = '$trow[vietysumma]',
+            yhtio            = '$yritirow[yhtio]',
+            ltunnus          = '$trow[tunnus]',
+            tilino           = '$ostovelkarow[tilino]',
+            kustp            = '{$kustp_ins}',
+            kohde            = '{$kohde_ins}',
+            projekti         = '{$projekti_ins}',
+            tapvm            = '$tpv-$tpk-$tpp',
+            summa            = '$trow[vietysumma]',
             summa_valuutassa = '{$summavaluutassa}',
-            valkoodi = '{$summavaluuttakoodi}',
-            vero     = 0,
-            lukko    = '',
-            laatija  = 'tiliote',
-            laadittu = now()";
+            valkoodi         = '{$summavaluuttakoodi}',
+            vero             = 0,
+            lukko            = '',
+            laatija          = 'tiliote',
+            laadittu         = now()";
   $result = pupe_query($query);
   $_tiliointi_id = mysql_insert_id($GLOBALS["masterlink"]);
 

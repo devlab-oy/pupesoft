@@ -342,6 +342,8 @@ class MagentoClient {
 
         if (isset($tuote[$erikoisparametri['arvo']])) {
           $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
+
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
         }
       }
 
@@ -628,6 +630,8 @@ class MagentoClient {
       foreach ($tuotteet[0]['parametrit'] as $parametri) {
         $key = $parametri['option_name'];
         $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
       }
 
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
@@ -649,6 +653,8 @@ class MagentoClient {
 
         if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
           $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']], $attribute_set_id);
+
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuotteet[0][$erikoisparametri['arvo']]}");
         }
       }
 
@@ -705,6 +711,8 @@ class MagentoClient {
           foreach ($tuote['parametrit'] as $parametri) {
             $key = $parametri['option_name'];
             $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+            $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
           }
 
           $simple_tuote_data = array(
@@ -1904,7 +1912,11 @@ class MagentoClient {
     }
 
     // Jos attribuuttia ei löytynyt niin turha ettiä option valuea
-    if (empty($attribute_id)) return 0;
+    if (empty($attribute_id)) {
+      $this->log('magento_tuotteet', "Atribuuttia '{$name}' ei löydetty setistä {$attribute_set_id}");
+
+      return 0;
+    }
 
     // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
     if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
@@ -1965,6 +1977,8 @@ class MagentoClient {
         }
       }
     }
+
+    $this->log('magento_tuotteet', "Attribuutin '{$name}' arvon '{$value}' haku setistä {$attribute_set_id} ei onnistunut.");
 
     // Mitään ei löytyny
     return 0;

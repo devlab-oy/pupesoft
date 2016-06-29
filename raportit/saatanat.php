@@ -527,7 +527,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             echo "$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//sappl=$sappl//sakkl=$sakkl//savvl=$savvl//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako///$row[latunnari]";
           }
 
-          echo "'>",tarkistahetu($row['ytunnus']),"</a>";
+          echo "'>", tarkistahetu($row['ytunnus']), "</a>";
           echo "</td>";
 
           if (substr_count($row['nimi'], '<br>') > 5) {

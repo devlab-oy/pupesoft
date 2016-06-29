@@ -2432,15 +2432,13 @@ if ($fieldname == "rahti_ja_kasittelykulut_kasin") {
 
 if ($fieldname == "myyntitilaus_osatoimitus") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $sel = array($trow[$i] => 'selected') + array('K' => '', 'T' => '', 'E' => '');
 
-  $sel = array();
-  $apu = $trow[$i];
-  $sel[$apu] = "SELECTED";
-
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi tehdä osatoimitusta käsin")."</option>";
-  $ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin")."</option>";
-  $ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei osatoimiteta")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin")."</option>";
+  $ulos .= "<option value = 'T' {$sel['T']}>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin, jos tilaus odottaa toimittamista")."</option>";
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("Tilauksia ei osatoimiteta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3144,6 +3142,9 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'G' {$sel['G']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'H' {$sel['H']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'I' {$sel['I']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'J' {$sel['J']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+  
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -1807,12 +1807,7 @@ class MagentoClient {
 
   // Hakee kaikki attribuutit magentosta
   private function getAttributeList($attribute_set_id) {
-    // jos ei passata, haetaan default
-    if (is_null($attribute_set_id)) {
-      $attribute_set_id = $this->getAttributeSet();
-    }
-
-    // array haetuista attribuuteista
+    // array jo haetuista attribuuteista
     $attr_list = $this->magento_attribute_list;
 
     if (empty($attr_list[$attribute_set_id])) {

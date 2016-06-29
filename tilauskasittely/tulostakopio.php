@@ -1084,7 +1084,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th valign='top'>";
 
-    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
       echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
     }
 
@@ -1130,7 +1130,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
         echo $row['tunnus'];
       }
 
@@ -1141,7 +1141,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>", tarkistahetu($row['ytunnus']), "<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 
@@ -2206,9 +2206,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         //haetaan kaikki tälle klöntille kuuluvat otsikot
         $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
                   FROM lasku
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tila         = '{$laskurow['tila']}'
-                  AND kerayslista  = '{$laskurow['kerayslista']}'
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tila        = '{$laskurow['tila']}'
+                  AND kerayslista = '{$laskurow['kerayslista']}'
                   HAVING tunnukset IS NOT NULL";
         $toimresult = pupe_query($query);
 
@@ -2228,7 +2228,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 kieli
                 FROM asiakas
                 WHERE tunnus = '$laskurow[liitostunnus]'
-                and yhtio = '$kukarow[yhtio]'";
+                and yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 

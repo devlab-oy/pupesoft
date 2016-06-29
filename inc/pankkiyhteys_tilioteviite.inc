@@ -8,9 +8,9 @@ if ($tee == "hae_aineistot") {
   $factoring_viite_references = isset($factoring_viite_references) ? $factoring_viite_references : array();
 
   if (count($tiliote_references) +
-      count($viite_references) +
-      count($factoring_tiliote_references) +
-      count($factoring_viite_references) == 0) {
+    count($viite_references) +
+    count($factoring_tiliote_references) +
+    count($factoring_viite_references) == 0) {
     virhe("Et valinnut yht‰‰n aineistoa");
     $tee = "valitse";
   }

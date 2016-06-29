@@ -114,8 +114,8 @@ if (isset($submit)) {
 
   $query = "SELECT *
             FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            AND tunnus         = '$sopimus'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$sopimus'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 1) {

@@ -209,45 +209,45 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
     if (!empty($haas_call_type) and $haas_call_type != 'Prospecting Call') {
       if (empty($haas_opportunity)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPPORTUNITY'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'OPPORTUNITY'), "</font><br>";
         $tee = '';
       }
 
       if (empty($haas_qty)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'QTY'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'QTY'), "</font><br>";
         $tee = '';
       }
 
       if (empty($_dd) or empty($_mm) or empty($_yy)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPP_PROJ_DATE'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'OPP_PROJ_DATE'), "</font><br>";
         $tee = '';
       }
 
       if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call')) and empty($haas_end_reason)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'END_REASON'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'END_REASON'), "</font><br>";
         $tee = '';
       }
 
       if (!empty($haas_qty)) {
 
         if (!is_numeric($haas_qty)) {
-          echo "<font class='error'>",t("Kappalem‰‰r‰n t‰ytyy olla numero."),"</font><br>";
+          echo "<font class='error'>", t("Kappalem‰‰r‰n t‰ytyy olla numero."), "</font><br>";
           $tee = '';
         }
 
         if (strlen($haas_qty) > 2) {
-          echo "<font class='error'>",t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."),"</font><br>";
+          echo "<font class='error'>", t("Liian suuri kappalem‰‰r‰. M‰‰r‰n maksimipituus on 2."), "</font><br>";
           $tee = '';
         }
       }
 
       if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
         if (!checkdate($_mm, $_dd, $_yy)) {
-          echo "<font class='error'>",t("Virheellinen p‰iv‰m‰‰r‰."),"</font><br>";
+          echo "<font class='error'>", t("Virheellinen p‰iv‰m‰‰r‰."), "</font><br>";
           $tee = '';
         }
         if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
-          echo "<font class='error'>",t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."),"</font><br>";
+          echo "<font class='error'>", t("P‰iv‰m‰‰r‰ ei saa olla menneisyydess‰."), "</font><br>";
           $tee = '';
         }
       }
@@ -276,14 +276,14 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
         if ($kukarow["kieli"] != 'fi') {
           $query = "SELECT selite from avainsana
-              where yhtio = '$kukarow[yhtio]'
-              and laji       = 'KALETAPA'
-              and selitetark = '$tapa'
-              and kieli      = '$kukarow[kieli]'";
+                    where yhtio    = '$kukarow[yhtio]'
+                    and laji       = 'KALETAPA'
+                    and selitetark = '$tapa'
+                    and kieli      = '$kukarow[kieli]'";
           $tapa_res = pupe_query($query);
           $tapa_row = mysql_fetch_assoc($tapa_res);
 
-          $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
+          $tapa_res = t_avainsana("KALETAPA", "fi", "and avainsana.selite = '{$tapa_row['selite']}'");
           $tapa_row = mysql_fetch_assoc($tapa_res);
 
           if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
@@ -775,7 +775,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<th>CALL_TYPE</th>";
       echo "<td>";
       echo "<select name='haas_call_type' onchange='submit();'>";
-      echo "<option value=''>",t("Valitse"),"</option>";
+      echo "<option value=''>", t("Valitse"), "</option>";
 
       foreach ($call_types as $key => $value) {
         echo "<option value='{$key}' {$call_type_sel[$key]}>{$key}</th>";
@@ -816,7 +816,7 @@ if ($ytunnus != '' and $tee == '') {
         echo "<th>OPPORTUNITY</th>";
         echo "<td>";
         echo "<select name='haas_opportunity'>";
-        echo "<option value=''>",t("Valitse"),"</option>";
+        echo "<option value=''>", t("Valitse"), "</option>";
 
         foreach ($opportunities as $key => $value) {
           echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
@@ -862,7 +862,7 @@ if ($ytunnus != '' and $tee == '') {
           echo "<th>END_REASON</th>";
           echo "<td>";
           echo "<select name='haas_end_reason'>";
-          echo "<option value=''>",t("Valitse"),"</option>";
+          echo "<option value=''>", t("Valitse"), "</option>";
 
           foreach ($end_reasons as $key => $value) {
             echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";

@@ -619,7 +619,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       // Otetaan laskun alkuperäinen valuutta kuitenkin talteen ja plautetaan se lisaarivi.inc jälkeen.
       $valkoodi_lasku = $laskurow["valkoodi"];
       if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-       $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
+        $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
       }
 
       require 'lisaarivi.inc';

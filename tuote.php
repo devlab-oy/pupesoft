@@ -1431,9 +1431,7 @@ if (isset($ajax)) {
 
             if (mysql_num_rows($label_result) == 1) {
               $label_row = mysql_fetch_assoc($label_result);
-              if (substr($label_row['selite'], 0, 1) == '#') {
-                $label_color = " class='aktiivi' style = 'background-color: {$label_row['selite']};'";
-              }
+              $label_color = " class='aktiivi' style = 'background-color: {$label_row['selite']};'";
             }
           }
 

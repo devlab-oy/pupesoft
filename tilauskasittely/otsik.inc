@@ -641,6 +641,17 @@ if ($kukarow["kesken"] != 0) {
   $rakre_chkres = pupe_query($query);
 }
 
+// Onko verkkokauppakassalipasta?
+// Jos on niin voidaan luoda käsin verkkokauppatilauksia
+$kassalipasquery = "SELECT kassalipas.tunnus kassalipas, maksuehto.tunnus maksuehto
+                    FROM kassalipas
+                    JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.kateinen != '')
+                    WHERE kassalipas.yhtio = '$kukarow[yhtio]'
+                    AND kassalipas.nimi = 'Verkkokauppa'
+                    ORDER BY maksuehto.tunnus
+                    LIMIT 1";
+$vk_kassalipas_res = pupe_query($kassalipasquery);
+
 // ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 if ($tila == "" and !isset($jatka)) {
 
@@ -990,6 +1001,10 @@ if ($tila == "" and !isset($jatka)) {
       'T' => t("Tarjoustilaus"),
       'U' => t("Takuutilaus"),
     );
+
+    if (mysql_num_rows($vk_kassalipas_res)) {
+      $tilaustyypit['W'] = t("Verkkokauppatilaus");
+    }
   }
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
@@ -3962,6 +3977,7 @@ if (isset($jatka)) {
 
       $toimitustapa = $apuro['selite'];
     }
+
     $kassalipas = $kukarow["kassamyyja"];
   }
 
@@ -4182,34 +4198,17 @@ if (isset($jatka)) {
     $tilaustyyppi = 'H';
   }
 
-  $maksettulisa = '';
-  $verkkokauppa_avainsanatunnus = t_avainsana("LABEL", "", " and avainsana.selite='Verkkokauppatilaus'", "", "", "tunnus");
-
   // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
-  if (!empty($verkkokauppa_avainsanatunnus) and $vienti == '' and !empty($maksuehto) and (!isset($otsikon_laskurow['mapvm']) or $otsikon_laskurow['mapvm'] = '0000-00-00') and 
-     $label == $verkkokauppa_avainsanatunnus) {
+  // Tilaus laskutetaan heti ja laitetaan sitten sen jälkeen takaisin keräsyjonoon
+  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res)) {
+    $kassalipas_row = mysql_fetch_assoc($vk_kassalipas_res);
 
-    $kassalipasquery = "SELECT kassalipas.tunnus
-                        FROM kassalipas
-                        JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.tunnus = '{$maksuehto}' and maksuehto.kateinen = '')
-                        WHERE kassalipas.yhtio = '$kukarow[yhtio]'
-                        AND kassalipas.nimi    = 'Verkkokauppa'";
-    $kassalipas_res = pupe_query($kassalipasquery);
-    if (mysql_num_rows($kassalipas_res) == 1) {
-      $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
-      $kassalipas = $kassalipas_row['tunnus'];
-      $maksettulisa = " mapvm = now(), ";
-      // Laskutuskielto
-      $chn = 999;
-      echo "<font class='message'>".t("Manuaalinen verkkokauppatilaus merkattu maksetuksi").".</font><br>";
-    }
-    else {
-      echo "<font class='error'>", t("HUOM: Verkkokauppa-kassalipasta ei löytynyt tai tilaukselle on valittu käteismaksuehto."), "!</font><br><br>";
-    }
+    $kassalipas = $kassalipas_row['kassalipas'];
+    $maksuehto  = $kassalipas_row['maksuehto'];
+    $sisainen   = "o";
   }
 
   $query .= "  lasku SET
-        {$maksettulisa}
         aktiivinen_kuljetus     = '',
         alatila                 = '$alatila',
         alv                     = '$alv',

@@ -57,7 +57,7 @@
 			$pdf_myyntisopimus->draw_text(mm_pt(75),   mm_pt(275), t("Pvm", $kieli).": $luotoaik",						$pdf_myyntisopimus_sivu[0], $kasi_helvetica);
 			$pdf_myyntisopimus->draw_text(mm_pt(160),  mm_pt(284), t("Numero", $kieli),									$pdf_myyntisopimus_sivu[0], $kasi_helvetica);
 			$pdf_myyntisopimus->draw_text(mm_pt(170),  mm_pt(280), $laskurow["tunnus"],									$pdf_myyntisopimus_sivu[0]);
-			if ($laskurow["yhtio"] != "vator") $pdf_myyntisopimus->draw_text(mm_pt(110),  mm_pt(275), t("Tämän sopimuksen ehdot on annettu ostajalle erillisenä liitteenä", $kieli),	$pdf_myyntisopimus_sivu[0], $seiska);
+			$pdf_myyntisopimus->draw_text(mm_pt(110),  mm_pt(275), t("Tämän sopimuksen ehdot on annettu ostajalle erillisenä liitteenä", $kieli),	$pdf_myyntisopimus_sivu[0], $seiska);
 
 
 			$pdf_myyntisopimus->draw_text(mm_pt(10),   mm_pt(275), t("MYYJÄ", $kieli),									$pdf_myyntisopimus_sivu[0], $kymppi_helvetica);
@@ -972,7 +972,7 @@
 			loppu_myyntisopimus($pdf_myyntisopimus, $laskurow, $kieli, $page_myyntisopimus[$sivu], 1, $total_uudet, $total_vanhat);
 
 			// Sopimusehdot
-			if ($laskurow["yhtio"] != "vator") ehdot_myyntisopimus($pdf_myyntisopimus, $laskurow, $kieli);
+			ehdot_myyntisopimus($pdf_myyntisopimus, $laskurow, $kieli);
 
 			// Tulostetaan sivu
 			print_pdf_myyntisopimus($pdf_myyntisopimus, $laskurow, $komento, $tee);

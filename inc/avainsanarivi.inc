@@ -318,7 +318,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka lähetetään asiakkalle, kun työmääräys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille lähtevä TransportAccount")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhmä")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Vaihtoehtoinen OutboundDelivery ja MaterialMaster sanomien ItemNumber")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1458,15 +1458,4 @@ if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
   $ulos  = "<th>" . t("Nimitys") . "</th>
             <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
-}
-
-if ($avain_sel['POSTEN_TKOODI'] == 'SELECTED') {
-  if ($_selite) {
-    $ulos .= "<td>";
-    $ulos .= "eankoodi";
-    $ulos .= "<input type='hidden' name='{$nimi}' value='eankoodi' />";
-    $ulos .= "</td>";
-
-    $jatko = 0;
-  }
 }

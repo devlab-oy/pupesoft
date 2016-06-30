@@ -950,20 +950,20 @@ if (!function_exists('tulosta_myyntisopimus')) {
     //Myyntisopimuksen pohja
     $page_myyntisopimus[$sivu] = alku_myyntisopimus($laskurow, $asiakasrow, $sivu, $kieli, $pdf_myyntisopimus);
 
-    // Uusi vene
-    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vene'", "Veneen merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    // Uusi laite
+    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio not like '%vaihto%'", "Ajoneuvon merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
     // Uusi moottori
-    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Moottori'", "Moottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    #list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Moottori'", "Moottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
     // Uudet tarvikkeet
-    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'", "", $total, $hinnat);
+    #list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "myyntirivitunnus",   "HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'", "", $total, $hinnat);
 
     // Siirryt‰‰n vaihtolaitteiden kimppuun
     $total_uudet = $total;
     $kala = 109.5;
     $lask--;
 
-    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "ostorivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vaihtovene'", "Vaihtoveneen merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
-    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "ostorivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vaihtomoottori'", "Vaihtomoottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "ostorivitunnus",   "HAVING tilausrivin_lisatiedot.positio like '%vaihto%'", "Vaihtokohteen merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    #list ($page_myyntisopimus[$sivu], $lask, $kala, $total) = printtaa_rivit_myyntisopimus($pdf_myyntisopimus, $laskurow, $kala, $lask, $kieli, $sivu, $page_myyntisopimus[$sivu], "ostorivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vaihtomoottori'", "Vaihtomoottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
 
     // Lasketaan v‰h‰n hintoja yhteen
     $total_vanhat = $total - $total_uudet;

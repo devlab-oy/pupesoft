@@ -67,7 +67,7 @@ if ((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and empty($
 }
 
 if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
-  @include 'sarjanumeron_lisatiedot_popup.inc';
+  @include 'ajoneuvomyynti/sarjanumeron_lisatiedot_popup.inc';
 
   if ($kukarow["extranet"] != "" or empty($verkkokauppa)) {
     $hinnat = 'MY';
@@ -622,7 +622,7 @@ if (trim($alkuperaisnumero) != '') {
 }
 
 if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {
-  require "sarjanumeron_lisatiedot_popup.inc";
+  require "ajoneuvomyynti/sarjanumeron_lisatiedot_popup.inc";
 }
 
 $orginaaalit = FALSE;

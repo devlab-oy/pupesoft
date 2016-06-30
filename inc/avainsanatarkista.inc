@@ -75,7 +75,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($tem_laji == 'LABEL' and $tem_selite != 'Verkkokauppatilaus') {
+      if ($tem_laji == 'LABEL') {
         if (trim($tem_selite) == '') {
           $virhe[$i] = t("Selite on pakollinen ja se pit‰‰ olla muodossa #123 tai #112233");
         }

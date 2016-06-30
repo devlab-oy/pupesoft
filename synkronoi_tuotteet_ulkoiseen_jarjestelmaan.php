@@ -139,10 +139,17 @@ else {
           $posten_itemnumberfield = $alt_posten_itemnumberfield;
         }
 
+        $posten_prodgroup2field = "";
+        $alt_posten_prodgroup2field = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ProdGroup2' ", '', '', "selitetark");
+
+        if (!empty($alt_posten_prodgroup2field)) {
+          $posten_prodgroup2field = utf8_encode($row[$alt_posten_prodgroup2field]);
+        }
+
         $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
         $line->addChild('ItemName', utf8_encode($nimitys));
         $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', '');
+        $line->addChild('ProdGroup2', $posten_prodgroup2field);
         $line->addChild('SalesPrice', '');
         $line->addChild('Unit1', utf8_encode($yksikko));
         $line->addChild('Unit2', '');

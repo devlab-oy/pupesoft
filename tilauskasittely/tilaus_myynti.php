@@ -1524,8 +1524,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
 
   if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
     $mahdolliset_liitokset = array(
-      "liitostunnus" => "Asiakkaan tunnuksella",
-      "ytunnus"      => "Y-tunnuksella"
+      "liitostunnus" => "Asiakkaalle",
+      "ytunnus"      => "Y-tunnukselle"
     );
 
     if (!empty($asiakasrow["ryhma"])) {
@@ -1536,7 +1536,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
       $mahdolliset_liitokset["piiri"] = "Piirille";
     }
 
-    echo t("Liitos").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+    echo t("Lis‰‰ alennus").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
 
     foreach ($mahdolliset_liitokset as $liitos => $teksti) {
       echo "<option value='{$liitos}'>" . t($teksti) . "</option>";

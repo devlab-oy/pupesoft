@@ -1784,7 +1784,7 @@ class MagentoClient {
   }
 
   // Hakee tuotteelle attribute set id:n
-  private function get_attribute_set_id(Array $tuote) {
+  private function get_attribute_set_id(array $tuote) {
     $pupesoft_attr_id = $this->get_tuotteen_avainsana($tuote, 'magento_attribute_set_id');
 
     if (is_null($pupesoft_attr_id)) {
@@ -1802,7 +1802,7 @@ class MagentoClient {
   }
 
   // Hakee tuotteen avainsanan arvon
-  private function get_tuotteen_avainsana(Array $tuote, $laji, $kieli = 'fi') {
+  private function get_tuotteen_avainsana(array $tuote, $laji, $kieli = 'fi') {
     // loopataan läpi tuotteen avainsanat ja palautetaan kysytty avainsana jos löytyy
     foreach ($tuote['tuotteen_avainsanat'] as $avainsana) {
       if ($avainsana['laji'] == $laji and $avainsana['kieli'] == $kieli) {
@@ -2256,7 +2256,7 @@ class MagentoClient {
     return $kieliversiot_data;
   }
 
-  private function kauppakohtaiset_hinnat(Array $tuote) {
+  private function kauppakohtaiset_hinnat(array $tuote) {
     $kauppakohtaiset_hinnat = array();
     $kauppakohtaiset_verokannat = array();
     $return_array = array();

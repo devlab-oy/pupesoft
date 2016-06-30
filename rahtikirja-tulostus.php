@@ -1627,11 +1627,11 @@ if (!function_exists("laheta_excel_koontilahete")) {
       $filename    = "Lahete.xlsx";
     }
 
-  if (!empty($header_nimi)) {
-    $worksheet->writeString($excelrivi,
-      $excelsarake,
-      "Deliveries to {$header_nimi}",
-      $format_bold);
+    if (!empty($header_nimi)) {
+      $worksheet->writeString($excelrivi,
+        $excelsarake,
+        "Deliveries to {$header_nimi}",
+        $format_bold);
 
       for ($i=0; $i < 3; $i++) $excelrivi++;
     }

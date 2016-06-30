@@ -376,9 +376,9 @@ function tuote_export_hae_saldot($params) {
   $dnstock = array();
 
   if (!is_array($verkkokauppa_saldo_varasto)) {
-     echo "Virhe! verkkokauppa_saldo_varasto pit‰‰ olla array!";
+    echo "Virhe! verkkokauppa_saldo_varasto pit‰‰ olla array!";
 
-     return $dnstock;
+    return $dnstock;
   }
 
   if ($ajetaanko_kaikki === false) {

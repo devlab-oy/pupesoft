@@ -1,46 +1,46 @@
 <?php
-  $otsikko = 'Sarjanumeron lisätiedot';
-  $otsikko_nappi = 'sarjanumeron lisätieto';
+$otsikko = 'Sarjanumeron lisätiedot';
+$otsikko_nappi = 'sarjanumeron lisätieto';
 
-  $kentat = 'tunnus, Merkki, Malli';
-  $jarjestys = 'Merkki, Malli';
+$kentat = 'tunnus, Merkki, Malli';
+$jarjestys = 'Merkki, Malli';
 
 
-  if ($specialtee == "tiedottuotteelta") {
+if ($specialtee == "tiedottuotteelta") {
 
-    if ($liitostunnus > 0) {
-      $hakliitos = $liitostunnus;
-    }
-    else {
-      $query = "SELECT liitostunnus
+  if ($liitostunnus > 0) {
+    $hakliitos = $liitostunnus;
+  }
+  else {
+    $query = "SELECT liitostunnus
                 FROM sarjanumeron_lisatiedot
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$tunnus'";
-      $tuoteres = mysql_query($query) or pupe_error($query);
-      $sarjarow = mysql_fetch_array($tuoteres);
-
-      $hakliitos = $sarjarow["liitostunnus"];
-    }
-
-    $query = "SELECT tuoteno
-              FROM sarjanumeroseuranta
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$hakliitos'";
     $tuoteres = mysql_query($query) or pupe_error($query);
     $sarjarow = mysql_fetch_array($tuoteres);
 
-    $query = "SELECT *
+    $hakliitos = $sarjarow["liitostunnus"];
+  }
+
+  $query = "SELECT tuoteno
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$hakliitos'";
+  $tuoteres = mysql_query($query) or pupe_error($query);
+  $sarjarow = mysql_fetch_array($tuoteres);
+
+  $query = "SELECT *
               FROM tuote
               WHERE yhtio = '$kukarow[yhtio]'
               and tuoteno = '$sarjarow[tuoteno]'";
-    $tuoteres = mysql_query($query) or pupe_error($query);
-    $tuoterow = mysql_fetch_array($tuoteres);
+  $tuoteres = mysql_query($query) or pupe_error($query);
+  $tuoterow = mysql_fetch_array($tuoteres);
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MERKKI' and selitetark_2 = '$tuoterow[tuotemerkki]'");
-    $vrow = mysql_fetch_array($vresult);
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MERKKI' and selitetark_2 = '$tuoterow[tuotemerkki]'");
+  $vrow = mysql_fetch_array($vresult);
 
-    if ($liitostunnus > 0) {
-      $query = "INSERT INTO sarjanumeron_lisatiedot
+  if ($liitostunnus > 0) {
+    $query = "INSERT INTO sarjanumeron_lisatiedot
                 SET yhtio      = '$kukarow[yhtio]',
                 liitostunnus       = '$liitostunnus',
                 laatija            = '$kukarow[kuka]',
@@ -58,14 +58,14 @@
                 Teho_kw            = '$tuoterow[teho_kw]',
                 Malli              = '$tuoterow[nimitys]',
                 Merkki             = '$vrow[selitetark]'";
-      $lisatietores_apu = mysql_query($query) or pupe_error($query);
+    $lisatietores_apu = mysql_query($query) or pupe_error($query);
 
-      $tunnus     = mysql_insert_id();
-      $uusi       = "";
-      $liitostunnus   = "";
-    }
-    else {
-      $query = "UPDATE sarjanumeron_lisatiedot
+    $tunnus     = mysql_insert_id();
+    $uusi       = "";
+    $liitostunnus   = "";
+  }
+  else {
+    $query = "UPDATE sarjanumeron_lisatiedot
                 SET yhtio      = '$kukarow[yhtio]',
                 muuttaja           = '$kukarow[kuka]',
                 muutospvm          = now(),
@@ -84,6 +84,6 @@
                 Merkki             = '$vrow[selitetark]'
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and tunnus         = '$tunnus'";
-      $lisatietores_apu = mysql_query($query) or pupe_error($query);
-    }
+    $lisatietores_apu = mysql_query($query) or pupe_error($query);
   }
+}

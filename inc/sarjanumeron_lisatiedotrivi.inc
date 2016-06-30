@@ -1,577 +1,577 @@
 <?php
 
-  $ulos   = "";
-  $jatko   = 1; // oletetaan normaali k‰sittely
-  $tyyppi = 1; // oletetaan rivin n‰kyvyys
+$ulos   = "";
+$jatko   = 1; // oletetaan normaali k‰sittely
+$tyyppi = 1; // oletetaan rivin n‰kyvyys
 
-  if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
-    $tyyppi = 0;
+if ($i == 0) { //yhtiˆt‰ ei n‰ytet‰
+  $tyyppi = 0;
+}
+
+if (mysql_field_name($result, $i) == "liitostunnus") {
+  if ($liitostunnus != '') {
+    $trow[$i] = $liitostunnus;
+  }
+  $tyyppi = 4;
+}
+
+if (mysql_field_name($result, $i) == "julkaisu") {
+
+  $sela = $selb = '';
+  if ($trow[$i] != '') {
+    $selb = "SELECTED";
+  }
+  else {
+    $sela = "SELECTED";
   }
 
-  if (mysql_field_name($result, $i) == "liitostunnus") {
-    if ($liitostunnus != ''){
-      $trow[$i] = $liitostunnus;
+  $ulos  = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' $sela>".t("Ei julkaista")."</option>";
+  $ulos .= "<option value = 'o' $selb>".t("Julkaistaan")."</option>";
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "Ensirekisterointipvm" or
+  mysql_field_name($result, $i) == "Katsastuspvm" or
+  mysql_field_name($result, $i) == "Arviointipvm") {
+  $tyyppi = 1.5;
+}
+
+if (mysql_field_name($result, $i) == "Tyyppi") {
+
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TYYPPI'");
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-    $tyyppi = 4;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "julkaisu") {
+  $ulos .= "</select></td><td><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$tunnus&liitostunnus=$liitostunnus&uusi=$uusi&limit=$limit&laji=$laji&lopetus=$lopetus&specialtee=tiedottuotteelta'>Hae tiedot tuotteelta</a></td>";
+  $jatko = 0;
+}
 
-    $sela = $selb = '';
-    if ($trow[$i] != '') {
-      $selb = "SELECTED";
+if (mysql_field_name($result, $i) == "Runkotyyppi") {
+
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'RUNKOTYYPPI'");
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-    else {
-      $sela = "SELECTED";
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "Kilpi") {
+
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KILPI'");
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse kilpi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos  = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' $sela>".t("Ei julkaista")."</option>";
-    $ulos .= "<option value = 'o' $selb>".t("Julkaistaan")."</option>";
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Ensirekisterointipvm" or
-    mysql_field_name($result, $i) == "Katsastuspvm" or
-    mysql_field_name($result, $i) == "Arviointipvm") {
-    $tyyppi = 1.5;
-  }
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-  if (mysql_field_name($result, $i) == "Tyyppi") {
+if (mysql_field_name($result, $i) == "Merkki") {
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TYYPPI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MERKKI' ORDER BY avainsana.selitetark_2");
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse merkki")."</option>";
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td><td><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$tunnus&liitostunnus=$liitostunnus&uusi=$uusi&limit=$limit&laji=$laji&lopetus=$lopetus&specialtee=tiedottuotteelta'>Hae tiedot tuotteelta</a></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Runkotyyppi") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'RUNKOTYYPPI'");
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
+if (mysql_field_name($result, $i) == "Lisatiedot") {
+  $ulos = "<td><textarea cols='40' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
+  $jatko = 0;
+}
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+if (mysql_field_name($result, $i) == "Toimituskulut") {
+
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TOIMITUSKULUT'");
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse toimituskulu")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Kilpi") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KILPI'");
+if (mysql_field_name($result, $i) == "Sijainti") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse kilpi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'SIJAINTI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse sijainti")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Merkki") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MERKKI' ORDER BY avainsana.selitetark_2");
+if (mysql_field_name($result, $i) == "Myyja") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse merkki")."</option>";
+  $query = "select distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
+  $vresult = mysql_query($query) or pupe_error($query);
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['myyja']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
   }
 
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-  if (mysql_field_name($result, $i) == "Lisatiedot") {
-    $ulos = "<td><textarea cols='40' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
-    $jatko = 0;
-  }
+if (mysql_field_name($result, $i) == "Kuvatyyppi") {
 
-  if (mysql_field_name($result, $i) == "Toimituskulut") {
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KUVATYYPPI'");
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TOIMITUSKULUT'");
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse kuvien tyyppi")."</option>";
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse toimituskulu")."</option>";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Sijainti") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'SIJAINTI'");
+if (mysql_field_name($result, $i) == "Moottorin_ohjausjarjestelma") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse sijainti")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MOOTTORINOHJAUS'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse moottorin ohjausj‰rjestelm‰")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Myyja") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $query = "select distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-    $vresult = mysql_query($query) or pupe_error($query);
+if (mysql_field_name($result, $i) == "Koneen_merkki") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MOOTTORINMERKKI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['myyja']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse koneen merkki")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Kuvatyyppi") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KUVATYYPPI'");
+if (mysql_field_name($result, $i) == "Materiaali") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse kuvien tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MATERIAALI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse veneen materiaali")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Moottorin_ohjausjarjestelma") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MOOTTORINOHJAUS'");
+if (mysql_field_name($result, $i) == "Laatuluokitus") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse moottorin ohjausj‰rjestelm‰")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'LAATU'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse veneen laatuluokitus")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Koneen_merkki") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MOOTTORINMERKKI'");
+if (mysql_field_name($result, $i) == "WC_ja_suihku") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse koneen merkki")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VESSA'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse WC:n / Suihkun tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Materiaali") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'MATERIAALI'");
+if (mysql_field_name($result, $i) == "Koneistus") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse veneen materiaali")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KONEISTUS'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse veneen koneistus")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Laatuluokitus") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'LAATU'");
+if (mysql_field_name($result, $i) == "Liesin_Ceran_pinnalla" or
+  mysql_field_name($result, $i) == "Nopeusmittari" or
+  mysql_field_name($result, $i) == "Kompassi" or
+  mysql_field_name($result, $i) == "Defroster" or
+  mysql_field_name($result, $i) == "Mikroaaltouuni" or
+  mysql_field_name($result, $i) == "Pakastin" or
+  mysql_field_name($result, $i) == "TV_antenni" or
+  mysql_field_name($result, $i) == "GPS" or
+  mysql_field_name($result, $i) == "Satamapeite" or
+  mysql_field_name($result, $i) == "Ajokuomu" or
+  mysql_field_name($result, $i) == "Maasahko" or
+  mysql_field_name($result, $i) == "Generaattori" or
+  mysql_field_name($result, $i) == "Ankkuri" or
+  mysql_field_name($result, $i) == "Keulapotkuri" or
+  mysql_field_name($result, $i) == "Lamminvesijarjestelma" or
+  mysql_field_name($result, $i) == "Trimmitasot" or
+  mysql_field_name($result, $i) == "Makeavesijarjestelma" or
+  mysql_field_name($result, $i) == "Suihku_WCssa" or
+  mysql_field_name($result, $i) == "Suihku_uimatasolla" or
+  mysql_field_name($result, $i) == "Sailytyspukki" or
+  mysql_field_name($result, $i) == "Raitatiikkilattia" or
+  mysql_field_name($result, $i) == "Myrkkymaalaus" or
+  mysql_field_name($result, $i) == "Runkovalonheittimet" or
+  mysql_field_name($result, $i) == "Vesi_WC" or
+  mysql_field_name($result, $i) == "Septitankki_tyyppi" or
+  mysql_field_name($result, $i) == "Runkoikkunat" or
+  mysql_field_name($result, $i) == "Avotilan_poyta" or
+  mysql_field_name($result, $i) == "Kaksoisakkujarjestelma" or
+  mysql_field_name($result, $i) == "Sumutorvi" or
+  mysql_field_name($result, $i) == "Keulaluukku" or
+  mysql_field_name($result, $i) == "Avotilan_penkki" or
+  mysql_field_name($result, $i) == "Liesituuletin" or
+  mysql_field_name($result, $i) == "Tuulilasin_peite" or
+  mysql_field_name($result, $i) == "Aurinkokatos" or
+  mysql_field_name($result, $i) == "Avotilan_kuomu" or
+  mysql_field_name($result, $i) == "Jaapalakone") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse veneen laatuluokitus")."</option>";
+  $esel = '';
+  $ksel = '';
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
-    }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+  if ($trow[$i] != "") {
+    $ksel = "SELECTED";
+  }
+  else {
+    $esel = "SELECTED";
   }
 
-  if (mysql_field_name($result, $i) == "WC_ja_suihku") {
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' $esel>".t("Ei")."</option>";
+  $ulos .= "<option value = 'o' $ksel>".t("Kyll‰")."</option>";
+  $ulos .= "</td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VESSA'");
+if (mysql_field_name($result, $i) == "Jaakaappi") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse WC:n / Suihkun tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'JAAKAAPPI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse j‰‰kaapin tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Koneistus") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'KONEISTUS'");
+if (mysql_field_name($result, $i) == "Valonheitin") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse veneen koneistus")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VALONHEITIN'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse valonheittimen tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Liesin_Ceran_pinnalla" or
-    mysql_field_name($result, $i) == "Nopeusmittari" or
-    mysql_field_name($result, $i) == "Kompassi" or
-    mysql_field_name($result, $i) == "Defroster" or
-    mysql_field_name($result, $i) == "Mikroaaltouuni" or
-    mysql_field_name($result, $i) == "Pakastin" or
-    mysql_field_name($result, $i) == "TV_antenni" or
-    mysql_field_name($result, $i) == "GPS" or
-    mysql_field_name($result, $i) == "Satamapeite" or
-    mysql_field_name($result, $i) == "Ajokuomu" or
-    mysql_field_name($result, $i) == "Maasahko" or
-    mysql_field_name($result, $i) == "Generaattori" or
-    mysql_field_name($result, $i) == "Ankkuri" or
-    mysql_field_name($result, $i) == "Keulapotkuri" or
-    mysql_field_name($result, $i) == "Lamminvesijarjestelma" or
-    mysql_field_name($result, $i) == "Trimmitasot" or
-    mysql_field_name($result, $i) == "Makeavesijarjestelma" or
-    mysql_field_name($result, $i) == "Suihku_WCssa" or
-    mysql_field_name($result, $i) == "Suihku_uimatasolla" or
-    mysql_field_name($result, $i) == "Sailytyspukki" or
-    mysql_field_name($result, $i) == "Raitatiikkilattia" or
-    mysql_field_name($result, $i) == "Myrkkymaalaus" or
-    mysql_field_name($result, $i) == "Runkovalonheittimet" or
-    mysql_field_name($result, $i) == "Vesi_WC" or
-    mysql_field_name($result, $i) == "Septitankki_tyyppi" or
-    mysql_field_name($result, $i) == "Runkoikkunat" or
-    mysql_field_name($result, $i) == "Avotilan_poyta" or
-    mysql_field_name($result, $i) == "Kaksoisakkujarjestelma" or
-    mysql_field_name($result, $i) == "Sumutorvi" or
-    mysql_field_name($result, $i) == "Keulaluukku" or
-    mysql_field_name($result, $i) == "Avotilan_penkki" or
-    mysql_field_name($result, $i) == "Liesituuletin" or
-    mysql_field_name($result, $i) == "Tuulilasin_peite" or
-    mysql_field_name($result, $i) == "Aurinkokatos" or
-    mysql_field_name($result, $i) == "Avotilan_kuomu" or
-    mysql_field_name($result, $i) == "Jaapalakone") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $esel = '';
-    $ksel = '';
+if (mysql_field_name($result, $i) == "Ankkurivinssi") {
 
-    if ($trow[$i] != "") {
-      $ksel = "SELECTED";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'ANKKURIVINSSI'");
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse ankkurivinssin tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-    else {
-      $esel = "SELECTED";
-    }
-
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' $esel>".t("Ei")."</option>";
-    $ulos .= "<option value = 'o' $ksel>".t("Kyll‰")."</option>";
-    $ulos .= "</td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Jaakaappi") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'JAAKAAPPI'");
+if (mysql_field_name($result, $i) == "Uuni") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse j‰‰kaapin tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'UUNI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse uunin tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Valonheitin") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VALONHEITIN'");
+if (mysql_field_name($result, $i) == "Tyynysarja") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse valonheittimen tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TYYNYSARJA'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse tyynysarjan tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Ankkurivinssi") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'ANKKURIVINSSI'");
+if (mysql_field_name($result, $i) == "Tiikkisarja") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse ankkurivinssin tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TIIKKISARJA'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse tiikkisarjan tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Uuni") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'UUNI'");
+if (mysql_field_name($result, $i) == "Varirunko") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse uunin tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VARIRUNKO'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse rungon v‰ri")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Tyynysarja") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TYYNYSARJA'");
+if (mysql_field_name($result, $i) == "Pilssipumppu") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse tyynysarjan tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'PILSSIPUMPPU'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse pilssipumpun tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Tiikkisarja") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'TIIKKISARJA'");
+if (mysql_field_name($result, $i) == "Sprinkleri") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse tiikkisarjan tyyppi")."</option>";
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'SPRINKLERI'");
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
+
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['selitetark']) {
+      $sel = "selected";
     }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
+    $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  if (mysql_field_name($result, $i) == "Varirunko") {
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
 
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'VARIRUNKO'");
+if (mysql_field_name($result, $i) == "Teho_hv") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse rungon v‰ri")."</option>";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
-    }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
-  }
-
-  if (mysql_field_name($result, $i) == "Pilssipumppu") {
-
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'PILSSIPUMPPU'");
-
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse pilssipumpun tyyppi")."</option>";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
-    }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
-  }
-
-  if (mysql_field_name($result, $i) == "Sprinkleri") {
-
-    $vresult = t_avainsana("SARJANUMERON_LI", "", "and selite = 'SPRINKLERI'");
-
-    $ulos = "<td><select name='$nimi'>";
-    $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if ($trow[$i] == $vrow['selitetark']) {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
-    }
-
-    $ulos .= "</select></td>";
-    $jatko = 0;
-  }
-
-  if (mysql_field_name($result, $i) == "Teho_hv") {
-
-    echo "  <script language='javascript'>
+  echo "  <script language='javascript'>
         function hv_to_kw() {
           var kw = Math.round(document.mainform.Teho_hv.value/1.36*100)/100;
           document.mainform.Teho_kw.value=kw;
         }
       </script> ";
 
-    $ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'  id='Teho_hv' onKeyUp='hv_to_kw();'></td>";
-    $jatko = 0;
+  $ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'  id='Teho_hv' onKeyUp='hv_to_kw();'></td>";
+  $jatko = 0;
+}
+if (mysql_field_name($result, $i) == "Teho_kw") {
+
+  $ulos = "<td><input type='text' name='$nimi' value='$trow[$i]' id='Teho_kw'></td>";
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "Polttoaine") {
+
+  $ulos = "<td><select name='$nimi'>";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == "Bensiini") {
+    $sel1 = "selected";
   }
-  if (mysql_field_name($result, $i) == "Teho_kw") {
-
-    $ulos = "<td><input type='text' name='$nimi' value='$trow[$i]' id='Teho_kw'></td>";
-    $jatko = 0;
+  elseif ($trow[$i] == "Diesel") {
+    $sel2 = "selected";
   }
 
-  if (mysql_field_name($result, $i) == "Polttoaine") {
 
-    $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value = 'Bensiini'  $sel1>".t("Bensiini")."</option>";
+  $ulos .= "<option value = 'Diesel' $sel2>".t("Diesel")."</option>";
+  $ulos .= "</select></td>";
 
-    $sel1 = "";
-    $sel2 = "";
-
-    if ($trow[$i] == "Bensiini") {
-      $sel1 = "selected";
-    }
-    elseif ($trow[$i] == "Diesel") {
-      $sel2 = "selected";
-    }
-
-
-    $ulos .= "<option value = 'Bensiini'  $sel1>".t("Bensiini")."</option>";
-    $ulos .= "<option value = 'Diesel' $sel2>".t("Diesel")."</option>";
-    $ulos .= "</select></td>";
-
-    $jatko = 0;
-  }
+  $jatko = 0;
+}

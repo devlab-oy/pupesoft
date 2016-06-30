@@ -3774,7 +3774,7 @@ if ($tee == '') {
 
       echo "</optgroup></select>";
     }
-    elseif (($yhtiorow["myyntitilaus_osatoimitus"] == "K" or ($yhtiorow["myyntitilaus_osatoimitus"] == "T" and $laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('C','B')))) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
+    elseif (($yhtiorow["myyntitilaus_osatoimitus"] == "K" or ($yhtiorow["myyntitilaus_osatoimitus"] == "T" and $laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('C', 'B')))) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA")) {
       echo "<td><select name='luotunnusnippu' onchange='submit();'>";
       echo "<option value =''>$kukarow[kesken]</option>";
       echo "<option value ='$kukarow[kesken]'>".t("Tee osatoimitus")."</option>";

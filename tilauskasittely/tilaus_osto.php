@@ -548,7 +548,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           pupe_query($kohdistus_q);
 
           $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
 
           if ($onkologmaster) {
             // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
@@ -2044,7 +2044,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             </td>";
 
         if (mysql_num_rows($saapumisriveja_res) == 0 and tarkista_oikeus("keikka.php")) {
-         echo "  <td class='back'>
+          echo "  <td class='back'>
               <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
               <input type='hidden' name='toim'          value = '$toim'>
               <input type='hidden' name='lopetus'        value = '$lopetus'>

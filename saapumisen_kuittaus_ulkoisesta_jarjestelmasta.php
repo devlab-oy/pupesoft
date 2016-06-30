@@ -114,8 +114,8 @@ if ($handle = opendir($path)) {
 
       $tilausrivit = array();
 
-      # Ei haluta vied‰ varastoon niit‰ rivej‰, mitk‰ ei ollu t‰ss‰ aineistossa mukana
-      # Joten laitetaan varastoon = 0
+      // Ei haluta vied‰ varastoon niit‰ rivej‰, mitk‰ ei ollu t‰ss‰ aineistossa mukana
+      // Joten laitetaan varastoon = 0
       $query = "UPDATE tilausrivi SET
                 varastoon        = 0
                 WHERE yhtio      = '{$yhtio}'
@@ -149,7 +149,7 @@ if ($handle = opendir($path)) {
         $tuoteno = $data['tuoteno'];
         $kpl     = $data['kpl'];
 
-        # P‰ivitet‰‰n varattu ja kohdistetaan rivi
+        // P‰ivitet‰‰n varattu ja kohdistetaan rivi
         $query = "UPDATE tilausrivi SET
                   varattu     = '{$kpl}',
                   varastoon   = 1
@@ -173,7 +173,7 @@ if ($handle = opendir($path)) {
         $laskures = pupe_query($query);
         $laskurow = mysql_fetch_assoc($laskures);
 
-        # Setataan parametrit varastoon.incille
+        // Setataan parametrit varastoon.incille
         $tullaan_automaattikohdistuksesta = true;
         $toiminto = "kalkyyli";
         $tee = "varastoon";

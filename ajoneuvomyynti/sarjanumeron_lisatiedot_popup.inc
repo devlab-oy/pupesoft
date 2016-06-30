@@ -1,56 +1,56 @@
 <?php
 
-  function sarjanumeronlisatiedot_popup ($sarjatunnus, $yhtio = '', $class = '', $hinnat = '', $leveys= '', $eilisatietoja = '') {
-    global $kukarow, $yhtiorow;
+function sarjanumeronlisatiedot_popup($sarjatunnus, $yhtio = '', $class = '', $hinnat = '', $leveys= '', $eilisatietoja = '') {
+  global $kukarow, $yhtiorow;
 
-    // parametri $sarjatunnus jossa on sarjanumero-olion tunnus
+  // parametri $sarjatunnus jossa on sarjanumero-olion tunnus
 
-    //Jos yhtiˆ tulee parametrin‰ niin katsotaa, ettei se ole ihan mit‰ sattuu
-    if ($yhtio != "") {
-      $query  = "SELECT GROUP_CONCAT(distinct yhtio) yhtiot
+  //Jos yhtiˆ tulee parametrin‰ niin katsotaa, ettei se ole ihan mit‰ sattuu
+  if ($yhtio != "") {
+    $query  = "SELECT GROUP_CONCAT(distinct yhtio) yhtiot
                  from yhtio
                  where yhtio = '$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-      $pres = pupe_query($query);
-      $prow = mysql_fetch_array($pres);
+    $pres = pupe_query($query);
+    $prow = mysql_fetch_array($pres);
 
-      $yhtiot = explode(",", $prow["yhtiot"]);
+    $yhtiot = explode(",", $prow["yhtiot"]);
 
-      if (in_array($yhtio, $yhtiot)) {
-        $yhtiolisa = $yhtio;
-      }
-      else {
-        $yhtiolisa = $kukarow["yhtio"];
-      }
+    if (in_array($yhtio, $yhtiot)) {
+      $yhtiolisa = $yhtio;
     }
     else {
       $yhtiolisa = $kukarow["yhtio"];
     }
+  }
+  else {
+    $yhtiolisa = $kukarow["yhtio"];
+  }
 
-    $query = "SELECT *
+  $query = "SELECT *
               FROM sarjanumeroseuranta use index (PRIMARY)
               WHERE sarjanumeroseuranta.yhtio = '$yhtiolisa'
               AND sarjanumeroseuranta.tunnus  = '$sarjatunnus'";
-    $sarjares = pupe_query($query);
-    $sarjarow = mysql_fetch_array($sarjares);
+  $sarjares = pupe_query($query);
+  $sarjarow = mysql_fetch_array($sarjares);
 
-    $sisviestit  = "<table width='100%'>";
-    $text_output = "";
+  $sisviestit  = "<table width='100%'>";
+  $text_output = "";
 
-    if ($sarjarow["lisatieto"] != '' and $kukarow["extranet"] == "" and substr($hinnat,0,2) != "ME") {
-      $sisviestit  .= "<tr><th class='ptop'>Sis‰inen viesti:</th><td colspan='2'>".str_replace("\n","<br>",$sarjarow["lisatieto"])."</td></tr>";
-      $text_output .= "Sis‰inen viesti:";
+  if ($sarjarow["lisatieto"] != '' and $kukarow["extranet"] == "" and substr($hinnat, 0, 2) != "ME") {
+    $sisviestit  .= "<tr><th class='ptop'>Sis‰inen viesti:</th><td colspan='2'>".str_replace("\n", "<br>", $sarjarow["lisatieto"])."</td></tr>";
+    $text_output .= "Sis‰inen viesti:";
 
-      $kommentit = explode("\n", trim($sarjarow["lisatieto"]));
+    $kommentit = explode("\n", trim($sarjarow["lisatieto"]));
 
-      foreach($kommentit as $kommentti) {
-        $text_output .= "###".$kommentti."\n";
-      }
+    foreach ($kommentit as $kommentti) {
+      $text_output .= "###".$kommentti."\n";
     }
+  }
 
-    //Haetaan myˆs ns. lis‰varusteperheet.
-    if ($sarjarow["ostorivitunnus"] != 0) {
+  //Haetaan myˆs ns. lis‰varusteperheet.
+  if ($sarjarow["ostorivitunnus"] != 0) {
 
-      $query = "SELECT tilausrivi.tunnus, tilausrivi.uusiotunnus, tilausrivi.perheid2,
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.uusiotunnus, tilausrivi.perheid2,
                 round(tilausrivi.rivihinta/tilausrivi.kpl, '$yhtiorow[hintapyoristys]') rivihinta,
                 tilausrivi.kpl,
                 tilausrivi.tilkpl,
@@ -63,25 +63,25 @@
                 WHERE tilausrivi.yhtio  = '$sarjarow[yhtio]'
                 and tilausrivi.tunnus   = '$sarjarow[ostorivitunnus]'
                 and tilausrivi.tyyppi  != 'D'";
-      $tilrivires = pupe_query($query);
+    $tilrivires = pupe_query($query);
 
-      if (mysql_num_rows($tilrivires) > 0) {
-        $tilrivirow = mysql_fetch_array($tilrivires);
+    if (mysql_num_rows($tilrivires) > 0) {
+      $tilrivirow = mysql_fetch_array($tilrivires);
 
-        // TArvitaan varastop‰ivien laskennassa
-        $ostonpvm = $tilrivirow["osto_laskaika"];
-        $osvarpvm = $tilrivirow["varpvm"];
+      // TArvitaan varastop‰ivien laskennassa
+      $ostonpvm = $tilrivirow["osto_laskaika"];
+      $osvarpvm = $tilrivirow["varpvm"];
 
-        // Haetaan keikan tiedot jolla laite on ostettu sis‰‰n
-        $query    = "SELECT *
+      // Haetaan keikan tiedot jolla laite on ostettu sis‰‰n
+      $query    = "SELECT *
                      FROM lasku
                      WHERE tunnus = '$tilrivirow[uusiotunnus]'
                      AND yhtio    = '$sarjarow[yhtio]'";
-        $result   = pupe_query($query);
-        $keikkarow = mysql_fetch_array($result);
+      $result   = pupe_query($query);
+      $keikkarow = mysql_fetch_array($result);
 
-        // Katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
-        $query = "SELECT sum(summa) summa, valkoodi, vienti
+      // Katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
+      $query = "SELECT sum(summa) summa, valkoodi, vienti
                   FROM lasku
                   WHERE yhtio  = '$sarjarow[yhtio]'
                   and tila     = 'K'
@@ -89,52 +89,52 @@
                   and vanhatunnus<>0
                   and vienti   in ('C','F','I','J','K','L')
                   GROUP BY valkoodi, vienti";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        // jos on, haetaan liitettyjen laskujen
-        if (mysql_num_rows($result) == 1) {
-          $kulurow = mysql_fetch_array($result);
+      // jos on, haetaan liitettyjen laskujen
+      if (mysql_num_rows($result) == 1) {
+        $kulurow = mysql_fetch_array($result);
+      }
+      else {
+        $kulurow = array(); // muuten tyhj‰‰
+      }
+
+      // Jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
+      if ($kulurow["vienti"] != "") $keikkarow["vienti"] = $kulurow["vienti"];
+
+      if ($kukarow["extranet"] == "") {
+        $sisviestit .= "<tr><th>Ostohinta:</th><td align='right' colspan='2'>$tilrivirow[rivihinta] $yhtiorow[valkoodi]</td></tr>";
+
+        if ($hinnat == "") {
+          $text_output   .= "Ostohinta:### ### ###$tilrivirow[rivihinta] $yhtiorow[valkoodi]\n";
         }
-        else {
-          $kulurow = array(); // muuten tyhj‰‰
-        }
+      }
 
-        // Jos ollaan liitetty jo vaihto-omaisuuslasku, k‰ytet‰‰n sen vientikentt‰‰
-        if ($kulurow["vienti"] != "") $keikkarow["vienti"] = $kulurow["vienti"];
+      $ostohinta = $tilrivirow["rivihinta"];
+      $yhtion_oletus_alv = 1 + (((float) alv_oletus()) / 100);
 
-        if ($kukarow["extranet"] == "") {
-          $sisviestit .= "<tr><th>Ostohinta:</th><td align='right' colspan='2'>$tilrivirow[rivihinta] $yhtiorow[valkoodi]</td></tr>";
+      if ($sarjarow["kaytetty"] == '') $ostohinta_alv = $tilrivirow["rivihinta"] * $yhtion_oletus_alv; // HUOM Aina plus 24% alvia!!!!!
+      else $ostohinta_alv = $tilrivirow["rivihinta"];
 
-          if ($hinnat == "") {
-            $text_output   .= "Ostohinta:### ### ###$tilrivirow[rivihinta] $yhtiorow[valkoodi]\n";
-          }
-        }
-
-        $ostohinta = $tilrivirow["rivihinta"];
-        $yhtion_oletus_alv = 1 + (((float) alv_oletus()) / 100);
-
-        if ($sarjarow["kaytetty"] == '') $ostohinta_alv = $tilrivirow["rivihinta"] * $yhtion_oletus_alv; // HUOM Aina plus 24% alvia!!!!!
-        else $ostohinta_alv = $tilrivirow["rivihinta"];
-
-        // Katsotaan onko sarjanumerolle liitetty kulukeikka
-        $query  = "SELECT *
+      // Katsotaan onko sarjanumerolle liitetty kulukeikka
+      $query  = "SELECT *
                    from lasku
                    where yhtio      = '$kukarow[yhtio]'
                    and tila         = 'K'
                    and alatila      = 'S'
                    and liitostunnus = '$sarjarow[tunnus]'
                    and ytunnus      = '$sarjarow[tunnus]'";
-        $keikkares = pupe_query($query);
+      $keikkares = pupe_query($query);
 
-        $kuluohinta      = 0;
-        $kuluohinta_alv = 0;
+      $kuluohinta      = 0;
+      $kuluohinta_alv = 0;
 
-        if (mysql_num_rows($keikkares) > 0) {
+      if (mysql_num_rows($keikkares) > 0) {
 
-          while ($kulukeikkarow = mysql_fetch_array($keikkares)) {
+        while ($kulukeikkarow = mysql_fetch_array($keikkares)) {
 
-            // Haetaan kaikki keikkaan liitettyjen laskujen summa
-            $query = "SELECT tila, vanhatunnus, nimi,
+          // Haetaan kaikki keikkaan liitettyjen laskujen summa
+          $query = "SELECT tila, vanhatunnus, nimi,
                       round(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi),2) summa,
                       round(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi),2) arvo
                       FROM lasku
@@ -143,37 +143,37 @@
                       and laskunro    = '$kulukeikkarow[laskunro]'
                       and vanhatunnus <> 0
                       and vienti      in ('B','E','H')";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            while($kulukulurow = mysql_fetch_array($result)) {
-              if ($kulukulurow["summa"] != 0) {
-                $kuluohinta    += $kulukulurow["arvo"];
-                $kuluohinta_alv += $kulukulurow["summa"];
+          while ($kulukulurow = mysql_fetch_array($result)) {
+            if ($kulukulurow["summa"] != 0) {
+              $kuluohinta    += $kulukulurow["arvo"];
+              $kuluohinta_alv += $kulukulurow["summa"];
 
-                if ($kukarow["extranet"] == "") {
+              if ($kukarow["extranet"] == "") {
 
-                  if ($kulukulurow["tila"] == "K") {
-                    $sisviestit .= "<tr><th>Kululasku:</th><td align='right' colspan='2'>$kulukulurow[arvo] $yhtiorow[valkoodi] " . ebid($kulukulurow['vanhatunnus']) . "</td></tr>";
+                if ($kulukulurow["tila"] == "K") {
+                  $sisviestit .= "<tr><th>Kululasku:</th><td align='right' colspan='2'>$kulukulurow[arvo] $yhtiorow[valkoodi] " . ebid($kulukulurow['vanhatunnus']) . "</td></tr>";
 
-                    if ($hinnat == "") {
-                      $text_output   .= "Kululasku:### ### ###$kulukulurow[arvo] $yhtiorow[valkoodi]\n";
-                    }
+                  if ($hinnat == "") {
+                    $text_output   .= "Kululasku:### ### ###$kulukulurow[arvo] $yhtiorow[valkoodi]\n";
                   }
-                  else {
-                    $sisviestit .= "<tr><th>Sis‰inen kulu:</th><td align='right' colspan='2'>$kulukulurow[arvo] $yhtiorow[valkoodi] $kulukeikkarow[nimi]</td></tr>";
+                }
+                else {
+                  $sisviestit .= "<tr><th>Sis‰inen kulu:</th><td align='right' colspan='2'>$kulukulurow[arvo] $yhtiorow[valkoodi] $kulukeikkarow[nimi]</td></tr>";
 
-                    if ($hinnat == "") {
-                      $text_output   .= "Sis‰inen kulu:### ### ###$kulukulurow[arvo] $yhtiorow[valkoodi]\n";
-                    }
+                  if ($hinnat == "") {
+                    $text_output   .= "Sis‰inen kulu:### ### ###$kulukulurow[arvo] $yhtiorow[valkoodi]\n";
                   }
                 }
               }
             }
           }
         }
+      }
 
-        if ($tilrivirow["perheid2"] == $tilrivirow["tunnus"]) {
-          $query = "SELECT round(tilausrivi.rivihinta/$tilrivirow[kpl], '$yhtiorow[hintapyoristys]') rivihinta,
+      if ($tilrivirow["perheid2"] == $tilrivirow["tunnus"]) {
+        $query = "SELECT round(tilausrivi.rivihinta/$tilrivirow[kpl], '$yhtiorow[hintapyoristys]') rivihinta,
                     tilausrivi.nimitys,
                     tilausrivi.tuoteno,
                     tuote.alv,
@@ -191,137 +191,137 @@
                     and tilausrivi.perheid2  = '$tilrivirow[perheid2]'
                     and tilausrivi.tunnus   != tilausrivi.perheid2
                     order by tilausrivi.tunnus";
-          $tilrivires = pupe_query($query);
+        $tilrivires = pupe_query($query);
 
-          if (mysql_num_rows($tilrivires) > 0) {
+        if (mysql_num_rows($tilrivires) > 0) {
 
-            $tehdasvaruste  = "<table width='100%'><tr><th colspan='3'>".t("Tehdaslis‰varusteet").":</th></tr>";
-            $text_output1   = t("Tehdaslis‰varusteet").":\n";
+          $tehdasvaruste  = "<table width='100%'><tr><th colspan='3'>".t("Tehdaslis‰varusteet").":</th></tr>";
+          $text_output1   = t("Tehdaslis‰varusteet").":\n";
 
-            $lisaostohinta     = 0;
-            $lisaostohinta_alv   = 0;
-            $lisamyyntihinta  = 0;
+          $lisaostohinta     = 0;
+          $lisaostohinta_alv   = 0;
+          $lisamyyntihinta  = 0;
 
-            while ($tilrivirow2 = mysql_fetch_array($tilrivires)) {
-              // jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
-              if ($keikkarow['vienti']=='C' or $keikkarow['vienti']=='J') {
-                $alvit = $tilrivirow2["alv"];
-              }
-              else {
-                $alvit = 0;
-              }
+          while ($tilrivirow2 = mysql_fetch_array($tilrivires)) {
+            // jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+            if ($keikkarow['vienti']=='C' or $keikkarow['vienti']=='J') {
+              $alvit = $tilrivirow2["alv"];
+            }
+            else {
+              $alvit = 0;
+            }
 
-              if ($tilrivirow2['sarjanumeroseuranta'] == 'S' and $tilrivirow2['tyyppi'] == 'G' and $tilrivirow2["sistyomaarays_sarjatunnus"] > 0) {
-                $query = "SELECT group_concat(sarjanumero) sarjanumero, round(sum(tilausrivi_osto.rivihinta / tilausrivi_osto.kpl) * $tilrivirow2[kpl], '$yhtiorow[hintapyoristys]') rivihinta
+            if ($tilrivirow2['sarjanumeroseuranta'] == 'S' and $tilrivirow2['tyyppi'] == 'G' and $tilrivirow2["sistyomaarays_sarjatunnus"] > 0) {
+              $query = "SELECT group_concat(sarjanumero) sarjanumero, round(sum(tilausrivi_osto.rivihinta / tilausrivi_osto.kpl) * $tilrivirow2[kpl], '$yhtiorow[hintapyoristys]') rivihinta
                           FROM sarjanumeroseuranta use index (PRIMARY)
                           LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio
                             AND tilausrivi_osto.tunnus    = sarjanumeroseuranta.ostorivitunnus)
                           WHERE sarjanumeroseuranta.yhtio = '$sarjarow[yhtio]'
                           and sarjanumeroseuranta.tuoteno = '$tilrivirow2[tuoteno]'
                           and sarjanumeroseuranta.tunnus  in ($tilrivirow2[sistyomaarays_sarjatunnus])";
-                $lisavarsarjares = pupe_query($query);
-                $lisavarsarjarow = mysql_fetch_array($lisavarsarjares);
+              $lisavarsarjares = pupe_query($query);
+              $lisavarsarjarow = mysql_fetch_array($lisavarsarjares);
 
-                $tilrivirow2["rivihinta"] = $lisavarsarjarow['rivihinta'];
-                $lisavarsarjalisa = "(".$lisavarsarjarow["sarjanumero"].")";
-              }
-              elseif ($tilrivirow2['sarjanumeroseuranta'] == 'S' and $tilrivirow2['tyyppi'] == 'O') {
-                $query = "SELECT group_concat(sarjanumero) sarjanumero
+              $tilrivirow2["rivihinta"] = $lisavarsarjarow['rivihinta'];
+              $lisavarsarjalisa = "(".$lisavarsarjarow["sarjanumero"].")";
+            }
+            elseif ($tilrivirow2['sarjanumeroseuranta'] == 'S' and $tilrivirow2['tyyppi'] == 'O') {
+              $query = "SELECT group_concat(sarjanumero) sarjanumero
                           FROM sarjanumeroseuranta use index (PRIMARY)
                           WHERE sarjanumeroseuranta.yhtio        = '$sarjarow[yhtio]'
                           and sarjanumeroseuranta.tuoteno        = '$tilrivirow2[tuoteno]'
                           and sarjanumeroseuranta.ostorivitunnus = '$tilrivirow2[tunnus]'";
-                $lisavarsarjares = pupe_query($query);
-                $lisavarsarjarow = mysql_fetch_array($lisavarsarjares);
+              $lisavarsarjares = pupe_query($query);
+              $lisavarsarjarow = mysql_fetch_array($lisavarsarjares);
 
-                $lisavarsarjalisa = "(".$lisavarsarjarow["sarjanumero"].")";
-              }
-              else {
-                $lisavarsarjalisa = "";
-              }
-
-              $lisaostohinta     += $tilrivirow2["rivihinta"];
-              $yhtion_oletus_alv = 1 + (((float) alv_oletus()) / 100);
-              $lisaostohinta_alv   += $tilrivirow2["rivihinta"] * $yhtion_oletus_alv; // HUOM Aina plus 24% alvia!!!!!
-              $lisamyyntihinta   += $tilrivirow2["myyntihinta"];
-
-              if ($hinnat == "" and $kukarow["extranet"] == "") {
-                $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL###".hintapyoristys($tilrivirow2["rivihinta"])." $yhtiorow[valkoodi]\n";
-                $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["rivihinta"])." $yhtiorow[valkoodi]</td></tr>";
-              }
-              elseif($hinnat == "MY") {
-                if ($sarjarow["kaytetty"] != "") {
-                  $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL\n";
-                  $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
-                }
-                else {
-                  $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL###".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]\n";
-                  $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
-                }
-              }
-              elseif(substr($hinnat,0,2) == "ME") {
-                $text_output1   .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL\n";
-                $tehdasvaruste  .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'></td></tr>";
-              }
+              $lisavarsarjalisa = "(".$lisavarsarjarow["sarjanumero"].")";
+            }
+            else {
+              $lisavarsarjalisa = "";
             }
 
-            $tehdasvaruste .= "</table>";
+            $lisaostohinta     += $tilrivirow2["rivihinta"];
+            $yhtion_oletus_alv = 1 + (((float) alv_oletus()) / 100);
+            $lisaostohinta_alv   += $tilrivirow2["rivihinta"] * $yhtion_oletus_alv; // HUOM Aina plus 24% alvia!!!!!
+            $lisamyyntihinta   += $tilrivirow2["myyntihinta"];
+
+            if ($hinnat == "" and $kukarow["extranet"] == "") {
+              $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL###".hintapyoristys($tilrivirow2["rivihinta"])." $yhtiorow[valkoodi]\n";
+              $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["rivihinta"])." $yhtiorow[valkoodi]</td></tr>";
+            }
+            elseif ($hinnat == "MY") {
+              if ($sarjarow["kaytetty"] != "") {
+                $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL\n";
+                $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
+              }
+              else {
+                $text_output1  .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL###".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]\n";
+                $tehdasvaruste .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'>".hintapyoristys($tilrivirow2["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
+              }
+            }
+            elseif (substr($hinnat, 0, 2) == "ME") {
+              $text_output1   .= "$tilrivirow2[nimitys] $lisavarsarjalisa### ###$tilrivirow2[kpl] KPL\n";
+              $tehdasvaruste  .= "<tr><td>$tilrivirow2[nimitys] $lisavarsarjalisa</td><td align='right'>$tilrivirow2[kpl] KPL</td><td align='right'></td></tr>";
+            }
           }
+
+          $tehdasvaruste .= "</table>";
         }
-
-        if ($hinnat == "" and $kukarow["extranet"] == "") {
-          $sisviestit .= "<tr><th>Lis‰varusteet:</th><td align='right' colspan='2'>".hintapyoristys($lisaostohinta)." $yhtiorow[valkoodi]</td></tr>";
-          $sisviestit .= "<tr><th>Ostohinta yht:</th><td align='right' colspan='2'>".hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta)." $yhtiorow[valkoodi]</td></tr>";
-          $sisviestit .= "<tr><th>Ostohinta alv:</th><td align='right' colspan='2'>".hintapyoristys($ostohinta_alv+$lisaostohinta_alv+$kuluohinta_alv)." $yhtiorow[valkoodi]</td></tr>";
-
-          $text_output .= "Lis‰varusteet:### ### ###".hintapyoristys($lisaostohinta)." $yhtiorow[valkoodi]\n";
-          $text_output .= "Ostohinta yht:### ### ###".hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta)." $yhtiorow[valkoodi]\n";
-          $text_output .= "Ostohinta alv:### ### ###".hintapyoristys($ostohinta_alv+$lisaostohinta_alv+$kuluohinta_alv)." $yhtiorow[valkoodi]\n";
-        }
-        elseif($hinnat == "MY") {
-          if ($sarjarow["kaytetty"] == "") {
-            $sisviestit .= "<tr><td class='back'></td></tr>";
-            $sisviestit .= "<tr><th>Myyntihinta:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
-            $sisviestit .= "<tr><th>Lis‰varusteet:</th><td align='right' colspan='2'>".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
-            $sisviestit .= "<tr><th>Myyntihinta yht:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
-
-            $text_output .= "Venehinta:### ### ###$tilrivirow[myyntihinta] $yhtiorow[valkoodi]\n";
-            $text_output .= "Lis‰varusteet:### ### ###".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]\n";
-            $text_output .= "Myyntihinta yht:### ### ###".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]\n";
-            $text_output .= "\n";
-          }
-          else {
-            //Hmm?
-          }
-        }
-
-        $hankintahinta = hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta);
-        $tuotemyyntihinta = hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta);
-
-        $text_output .= "\n".$text_output1;
-
       }
+
+      if ($hinnat == "" and $kukarow["extranet"] == "") {
+        $sisviestit .= "<tr><th>Lis‰varusteet:</th><td align='right' colspan='2'>".hintapyoristys($lisaostohinta)." $yhtiorow[valkoodi]</td></tr>";
+        $sisviestit .= "<tr><th>Ostohinta yht:</th><td align='right' colspan='2'>".hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta)." $yhtiorow[valkoodi]</td></tr>";
+        $sisviestit .= "<tr><th>Ostohinta alv:</th><td align='right' colspan='2'>".hintapyoristys($ostohinta_alv+$lisaostohinta_alv+$kuluohinta_alv)." $yhtiorow[valkoodi]</td></tr>";
+
+        $text_output .= "Lis‰varusteet:### ### ###".hintapyoristys($lisaostohinta)." $yhtiorow[valkoodi]\n";
+        $text_output .= "Ostohinta yht:### ### ###".hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta)." $yhtiorow[valkoodi]\n";
+        $text_output .= "Ostohinta alv:### ### ###".hintapyoristys($ostohinta_alv+$lisaostohinta_alv+$kuluohinta_alv)." $yhtiorow[valkoodi]\n";
+      }
+      elseif ($hinnat == "MY") {
+        if ($sarjarow["kaytetty"] == "") {
+          $sisviestit .= "<tr><td class='back'></td></tr>";
+          $sisviestit .= "<tr><th>Myyntihinta:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["myyntihinta"])." $yhtiorow[valkoodi]</td></tr>";
+          $sisviestit .= "<tr><th>Lis‰varusteet:</th><td align='right' colspan='2'>".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
+          $sisviestit .= "<tr><th>Myyntihinta yht:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
+
+          $text_output .= "Venehinta:### ### ###$tilrivirow[myyntihinta] $yhtiorow[valkoodi]\n";
+          $text_output .= "Lis‰varusteet:### ### ###".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]\n";
+          $text_output .= "Myyntihinta yht:### ### ###".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]\n";
+          $text_output .= "\n";
+        }
+        else {
+          //Hmm?
+        }
+      }
+
+      $hankintahinta = hintapyoristys($ostohinta+$lisaostohinta+$kuluohinta);
+      $tuotemyyntihinta = hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta);
+
+      $text_output .= "\n".$text_output1;
+
     }
+  }
 
-    if ($sarjarow["myyntirivitunnus"] > 0 and $hinnat == "" and $kukarow["extranet"] == "") {
+  if ($sarjarow["myyntirivitunnus"] > 0 and $hinnat == "" and $kukarow["extranet"] == "") {
 
-      $query = "SELECT group_concat(tunnus) tunnukset
+    $query = "SELECT group_concat(tunnus) tunnukset
                 FROM tilausrivi
                 WHERE tilausrivi.yhtio         = '$sarjarow[yhtio]'
                 and tilausrivi.perheid2        = '$sarjarow[myyntirivitunnus]'
                 and tilausrivi.laskutettuaika != '0000:00:00'
                 and tilausrivi.kpl            != 0";
-      $tilrivires = pupe_query($query);
-      $tilrivirow = mysql_fetch_array($tilrivires);
+    $tilrivires = pupe_query($query);
+    $tilrivirow = mysql_fetch_array($tilrivires);
 
-      if ($tilrivirow["tunnukset"] != '') {
-        $myty = $tilrivirow["tunnukset"];
-      }
-      else {
-        $myty = $sarjarow["myyntirivitunnus"];
-      }
+    if ($tilrivirow["tunnukset"] != '') {
+      $myty = $tilrivirow["tunnukset"];
+    }
+    else {
+      $myty = $sarjarow["myyntirivitunnus"];
+    }
 
-      $query = "SELECT
+    $query = "SELECT
                 round(sum(if(tilausrivi.alv<500, tilausrivi.rivihinta*(1+(tilausrivi.alv/100)), tilausrivi.rivihinta)/tilausrivi.kpl), 2) hinta,
                 round((sum(tilausrivi.kate)/sum(tilausrivi.rivihinta)) * 100, 2) kate
                 FROM tilausrivi use index (PRIMARY)
@@ -329,25 +329,25 @@
                 and tilausrivi.tunnus          in ($myty)
                 and tilausrivi.laskutettuaika != '0000:00:00'
                 and tilausrivi.kpl            != 0";
-      $tilrivires = pupe_query($query);
+    $tilrivires = pupe_query($query);
 
-      if (mysql_num_rows($tilrivires) > 0) {
-        $tilrivirow = mysql_fetch_array($tilrivires);
+    if (mysql_num_rows($tilrivires) > 0) {
+      $tilrivirow = mysql_fetch_array($tilrivires);
 
-        // Halutaan tiet‰‰ varastop‰ivien laskennassa
-        $myyty = "KYLLƒ";
+      // Halutaan tiet‰‰ varastop‰ivien laskennassa
+      $myyty = "KYLLƒ";
 
-        $sisviestit .= "<tr><td class='back'></td></tr>";
-        $sisviestit .= "<tr><th>Myyntihinta:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["hinta"])." $yhtiorow[valkoodi]</td></tr>";
-        $sisviestit .= "<tr><th>Kate:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["kate"])." %</td></tr>";
-      }
+      $sisviestit .= "<tr><td class='back'></td></tr>";
+      $sisviestit .= "<tr><th>Myyntihinta:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["hinta"])." $yhtiorow[valkoodi]</td></tr>";
+      $sisviestit .= "<tr><th>Kate:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["kate"])." %</td></tr>";
     }
+  }
 
-    $sisviestit .= "</table>";
+  $sisviestit .= "</table>";
 
-    if ($eilisatietoja != 'on') {
-      //Haetaan sarjanumeron lis‰tiedot:
-      $query = "SELECT
+  if ($eilisatietoja != 'on') {
+    //Haetaan sarjanumeron lis‰tiedot:
+    $query = "SELECT
                 sarjanumeron_lisatiedot.tunnus,
                 a7.selitetark_2 Merkki,
                 sarjanumeron_lisatiedot.Malli,
@@ -457,94 +457,94 @@
                 LEFT JOIN avainsana a22 use index (yhtio_laji_selitetark) ON a22.yhtio=sarjanumeron_lisatiedot.yhtio and a22.laji='sarjanumeron_li' and a22.selitetark=sarjanumeron_lisatiedot.Sprinkleri and a22.selite='SPRINKLERI'
                 WHERE sarjanumeron_lisatiedot.yhtio      = '$yhtiolisa'
                 and sarjanumeron_lisatiedot.liitostunnus = '$sarjarow[tunnus]'";
-      $lisatietores = pupe_query($query);
-      $lisatietorow = mysql_fetch_assoc($lisatietores);
+    $lisatietores = pupe_query($query);
+    $lisatietorow = mysql_fetch_assoc($lisatietores);
 
-      if (mysql_num_rows($lisatietores) > 0 or ($kukarow["extranet"] == "" and $myyty == "")) {
-        $lisatiedotlisa  = "<table width='100%'>";
-        $lisatiedotlisa .= "<tr><th colspan='2'>".t("Lis‰tiedot").":</th></tr>";
-        $text_output .= "\n";
+    if (mysql_num_rows($lisatietores) > 0 or ($kukarow["extranet"] == "" and $myyty == "")) {
+      $lisatiedotlisa  = "<table width='100%'>";
+      $lisatiedotlisa .= "<tr><th colspan='2'>".t("Lis‰tiedot").":</th></tr>";
+      $text_output .= "\n";
 
-        if ($kukarow["extranet"] == "" and $myyty == "" and $hinnat != "MY") {
-          $lisatiedotlisa .= "<tr><td>".t("Varastointiaika")."</td><td>$osvarpvm ".t("pva").". (".tv1dateconv($ostonpvm).")</td></tr>";
-          $text_output .= t("Varastointiaika")."###$osvarpvm ".t("pva").". (".tv1dateconv($ostonpvm).")\n";
-        }
+      if ($kukarow["extranet"] == "" and $myyty == "" and $hinnat != "MY") {
+        $lisatiedotlisa .= "<tr><td>".t("Varastointiaika")."</td><td>$osvarpvm ".t("pva").". (".tv1dateconv($ostonpvm).")</td></tr>";
+        $text_output .= t("Varastointiaika")."###$osvarpvm ".t("pva").". (".tv1dateconv($ostonpvm).")\n";
       }
+    }
 
-      if (mysql_num_rows($lisatietores) > 0) {
-        foreach ($lisatietorow as $ind => $val) {
-          if(((!is_numeric($val) and $val != '') or (is_numeric($val) and $val != 0)) and $val != "0.00 L" and $val != '0000-00-00' and $ind != 'tunnus') {
-            if ($val == "o") {
-              $lisatiedotlisa .= "<tr><td>$ind</td><td>&nbsp;<img width='10px' heigth='10px' src='../pics/vihrea.png'></td></tr>";
-              $text_output .= $ind."###On\n";
-            }
-            else {
-              $lisatiedotlisa .= "<tr><td>$ind</td><td>$val</td></tr>";
-              $text_output .= $ind."###".$val."\n";
-            }
+    if (mysql_num_rows($lisatietores) > 0) {
+      foreach ($lisatietorow as $ind => $val) {
+        if (((!is_numeric($val) and $val != '') or (is_numeric($val) and $val != 0)) and $val != "0.00 L" and $val != '0000-00-00' and $ind != 'tunnus') {
+          if ($val == "o") {
+            $lisatiedotlisa .= "<tr><td>$ind</td><td>&nbsp;<img width='10px' heigth='10px' src='../pics/vihrea.png'></td></tr>";
+            $text_output .= $ind."###On\n";
+          }
+          else {
+            $lisatiedotlisa .= "<tr><td>$ind</td><td>$val</td></tr>";
+            $text_output .= $ind."###".$val."\n";
           }
         }
       }
+    }
 
-      if (mysql_num_rows($lisatietores) > 0 or ($kukarow["extranet"] == "" and $myyty == "")) {
-        $lisatiedotlisa .= "</table>";
-      }
+    if (mysql_num_rows($lisatietores) > 0 or ($kukarow["extranet"] == "" and $myyty == "")) {
+      $lisatiedotlisa .= "</table>";
+    }
 
-      $query  = "SELECT *
+    $query  = "SELECT *
                  from liitetiedostot
                  where yhtio      = '$yhtiolisa'
                  and liitos       = 'sarjanumeroseuranta'
                  and liitostunnus = '$sarjatunnus'
                  order by jarjestys, tunnus";
-      $lisatietores = pupe_query($query);
+    $lisatietores = pupe_query($query);
 
-      $kuvalisa = "";
-      $kuvalisa_bin = array();
+    $kuvalisa = "";
+    $kuvalisa_bin = array();
 
-      if (mysql_num_rows($lisatietores) > 0) {
-        while($lisatietorow = mysql_fetch_array($lisatietores)) {
+    if (mysql_num_rows($lisatietores) > 0) {
+      while ($lisatietorow = mysql_fetch_array($lisatietores)) {
 
-          $kuvalisa .= "<img width='200px' src='../view.php?id=$lisatietorow[tunnus]'>";
+        $kuvalisa .= "<img width='200px' src='../view.php?id=$lisatietorow[tunnus]'>";
 
-          $query = "SELECT * from liitetiedostot where tunnus='$lisatietorow[tunnus]'";
-          $liiteres = pupe_query($query);
+        $query = "SELECT * from liitetiedostot where tunnus='$lisatietorow[tunnus]'";
+        $liiteres = pupe_query($query);
 
-          if (mysql_num_rows($liiteres) > 0) {
-            $liiterow = mysql_fetch_array($liiteres);
-            $kuvalisa_bin[] = array($liiterow["data"], $liiterow["image_width"], $liiterow["image_height"]);
-          }
+        if (mysql_num_rows($liiteres) > 0) {
+          $liiterow = mysql_fetch_array($liiteres);
+          $kuvalisa_bin[] = array($liiterow["data"], $liiterow["image_width"], $liiterow["image_height"]);
         }
       }
     }
-
-
-    if ($leveys != '') {
-      $leveys = " width='$leveys' ";
-    }
-
-    $divit  = "<div id='$sarjarow[tunnus]' class='$class'>";
-    $divit .= "<table $leveys>";
-
-    $divit .= "<tr><td class='back ptop' align='center' width='50%'>";
-    $divit .= $sisviestit;
-    $divit .= "</td>";
-    $divit .= "<td class='back ptop' align='center' width='50%'>";
-    $divit .= $kuvalisa;
-    $divit .= "</td></tr>";
-
-    $divit .= "<tr><td class='back ptop' align='center' width='50%'>";
-    $divit .= $tehdasvaruste;
-    $divit .= "</td>";
-    $divit .= "<td class='back ptop' align='center' width='50%'>";
-    $divit .= $lisatiedotlisa;
-    $divit .= "</td></tr>";
-
-    if ($class != "") {
-      $divit .= "<tr><td colspan='2' class='back' align='center'><a href='#' onclick=\"popUp(event,'$sarjarow[tunnus]')\">Sulje</a></td></tr>";
-    }
-
-    $divit .= "</table>";
-    $divit .= "</div>";
-
-    return(array($divit, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta));
   }
+
+
+  if ($leveys != '') {
+    $leveys = " width='$leveys' ";
+  }
+
+  $divit  = "<div id='$sarjarow[tunnus]' class='$class'>";
+  $divit .= "<table $leveys>";
+
+  $divit .= "<tr><td class='back ptop' align='center' width='50%'>";
+  $divit .= $sisviestit;
+  $divit .= "</td>";
+  $divit .= "<td class='back ptop' align='center' width='50%'>";
+  $divit .= $kuvalisa;
+  $divit .= "</td></tr>";
+
+  $divit .= "<tr><td class='back ptop' align='center' width='50%'>";
+  $divit .= $tehdasvaruste;
+  $divit .= "</td>";
+  $divit .= "<td class='back ptop' align='center' width='50%'>";
+  $divit .= $lisatiedotlisa;
+  $divit .= "</td></tr>";
+
+  if ($class != "") {
+    $divit .= "<tr><td colspan='2' class='back' align='center'><a href='#' onclick=\"popUp(event,'$sarjarow[tunnus]')\">Sulje</a></td></tr>";
+  }
+
+  $divit .= "</table>";
+  $divit .= "</div>";
+
+  return array($divit, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta);
+}

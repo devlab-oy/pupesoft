@@ -2036,8 +2036,36 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
       $tilausvalmiskutsuja = "TILAUSMYYNTI";
 
+      // Otetaan laskurow talteen
+      $tm_laskurow_talteen = $laskurow;
+
       // tulostetaan lähetteet ja tilausvahvistukset tai sisäinen lasku..
       require "tilaus-valmis.inc";
+
+      // Käsinsyötetty verkkokauppatilaus laskutettiin ja nyt se laitetaan takaisin keräysjonoon
+      if ($tm_laskurow_talteen["tilaustyyppi"] == "W") {
+        // Jos se on laskutettu, niin laitetaan se
+        $query = "SELECT tunnus
+                  from lasku
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus = '$tm_laskurow_talteen[tunnus]'
+                  and tila ='L'
+                  and alatila = 'X'";
+        $result = pupe_query($query);
+
+        if ($laskurow = mysql_fetch_assoc($result)) {
+
+          $query  = "UPDATE lasku set
+                     sisainen = ''
+                     where yhtio = '$kukarow[yhtio]'
+                     and tunnus = '$laskurow[tunnus]'";
+          pupe_query($query);
+
+          $kukarow['kesken'] = $laskurow['tunnus'];
+
+          laskutettu_myyntitilaus_tulostusjonoon($laskurow["tunnus"]);
+        }
+      }
     }
   }
 

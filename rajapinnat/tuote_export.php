@@ -225,7 +225,18 @@ if (empty($magento_api_ht_edi)) {
 
 // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
 if (empty($verkkokauppa_erikoiskasittely)) {
-  $verkkokauppa_erikoiskasittely = array();
+  // Avaimet
+  // 0 = Verkkokaupan nimi
+  // 1 = Editilaus_tilaustyyppi
+  // 2 = Tilaustyyppilisa
+  // 3 = Myyjanumero
+  // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kentt‰‰n EDI tiedostossa
+  // 5 = Rahtivapaus, jos 'E', niin k‰ytet‰‰n asiakkaan 'rahtivapaa' -oletusta
+  // 6 = Tyhjennet‰‰nkˆ OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhj‰ ei, kaikki muut arvot kyll‰)
+  $verkkokauppa_erikoiskasittely = array(
+    // array('Suomi',  'K', '2', '100', '',      'E', ''     ),
+    // array('Ruotsi', 'E', 'E', '',    'SE123', '',  'kylla'),
+  );
 }
 
 // Korvaavia Maksuehtoja Magenton maksuehdoille

@@ -76,6 +76,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->price = $product['myyntihinta'];
     $xml->product->wholesale_price = $product['myyntihinta'];
     $xml->product->unity = $product['yksikko'];
+    $xml->product->on_sale = 0; // 0 = no, 1 = yes
 
     // TODO: unit_price_ratio does nothing. Presta just ignores this field and we cannot set unit price.
     // find another way to se unit price? or do wait for presta to fix?
@@ -189,13 +190,11 @@ class PrestaProducts extends PrestaClient {
 
       $xml->product->id_category_default = $category_id;
 
-      // tähtituote means "upsell", so we need to add this product also to the home category
+      // tähtituote means "on sale", so we need to enable it
       if (!empty($product['tahtituote'])) {
-        $this->logger->log("Tähtituote, liitettiin myös kategoriaan {$this->presta_home_category_id}");
+        $this->logger->log("Tähtituote, asetetaan 'on sale'");
 
-        $category = $xml->product->associations->categories->addChild('category');
-        $category->addChild('id');
-        $category->id = $this->presta_home_category_id;
+        $xml->product->on_sale = 1; // 0 = no, 1 = yes
       }
     }
 

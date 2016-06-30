@@ -3159,6 +3159,7 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+
   $ulos .= "</select></td>";
 
   $jatko = 0;

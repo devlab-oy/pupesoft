@@ -194,8 +194,8 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if (mysql_field_name($result, $i) == "selitetark" and trim($t[$i]) == '') {
-        $virhe[$i] = t("Selitetark on pakollinen");
+      if ((mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
       }
     }
 

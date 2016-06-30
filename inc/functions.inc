@@ -27682,21 +27682,20 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_line_i = 1;
 
+    $posten_itemnumberfield = "tuoteno";
+    $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+
+    if (!empty($alt_posten_itemnumberfield)) {
+      $posten_itemnumberfield = $alt_posten_itemnumberfield;
+    }
+
     while ($looprow = mysql_fetch_assoc($loopres)) {
 
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-
-      if ($ulkoinen_jarjestelma == 'L') {
-        $_tuoteno = substr($looprow['tuoteno'], 0, 20);
-        $line->addChild('ItemNumber', utf8_encode($_tuoteno));
-      }
-      else {
-        $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
-      }
-
+      $line->addChild('ItemNumber', utf8_encode(substr($looprow[$posten_itemnumberfield], 0, 20)));
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);

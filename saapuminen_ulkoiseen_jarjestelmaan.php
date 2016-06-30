@@ -85,11 +85,11 @@ $xml = new SimpleXMLElement($xmlstr);
 
 $query = "SELECT *
           FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tila    = 'K'
-          AND alatila = ''
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tila        = 'K'
+          AND alatila     = ''
           AND vanhatunnus = 0
-          AND tunnus  = '{$saapumisnro}'";
+          AND tunnus      = '{$saapumisnro}'";
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 

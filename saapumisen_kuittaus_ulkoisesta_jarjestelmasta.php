@@ -117,12 +117,12 @@ if ($handle = opendir($path)) {
       # Ei haluta vied‰ varastoon niit‰ rivej‰, mitk‰ ei ollu t‰ss‰ aineistossa mukana
       # Joten laitetaan varastoon = 0
       $query = "UPDATE tilausrivi SET
-                varastoon       = 0
-                WHERE yhtio     = '{$yhtio}'
-                AND tyyppi      = 'O'
-                AND kpl         = 0
-                AND varattu    != 0
-                AND uusiotunnus = '{$saapumistunnus}'";
+                varastoon        = 0
+                WHERE yhtio      = '{$yhtio}'
+                AND tyyppi       = 'O'
+                AND kpl          = 0
+                AND varattu     != 0
+                AND uusiotunnus  = '{$saapumistunnus}'";
       $updres = pupe_query($query);
 
       // Loopataan rivit tilausrivit-arrayseen
@@ -151,13 +151,13 @@ if ($handle = opendir($path)) {
 
         # P‰ivitet‰‰n varattu ja kohdistetaan rivi
         $query = "UPDATE tilausrivi SET
-                  varattu         = '{$kpl}',
-                  varastoon       = 1
-                  WHERE yhtio     = '{$yhtio}'
-                  AND tyyppi      = 'O'
-                  AND kpl         = 0
-                  AND tuoteno     = '{$tuoteno}'
-                  AND tunnus      = '{$rivitunnus}'";
+                  varattu     = '{$kpl}',
+                  varastoon   = 1
+                  WHERE yhtio = '{$yhtio}'
+                  AND tyyppi  = 'O'
+                  AND kpl     = 0
+                  AND tuoteno = '{$tuoteno}'
+                  AND tunnus  = '{$rivitunnus}'";
         $updres = pupe_query($query);
       }
 
@@ -168,7 +168,7 @@ if ($handle = opendir($path)) {
         $query = "SELECT *
                   FROM lasku
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tila = 'K'
+                  AND tila    = 'K'
                   AND tunnus  = '{$saapumistunnus}'";
         $laskures = pupe_query($query);
         $laskurow = mysql_fetch_assoc($laskures);

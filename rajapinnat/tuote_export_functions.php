@@ -148,14 +148,14 @@ function tuote_export_hae_tuotetiedot($params) {
             try_fi.selitetark as try_nimi
             FROM tuote
             LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-              and try_fi.selite = tuote.try
-              and try_fi.laji = 'try'
-              and try_fi.kieli = 'fi')
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-            AND tuote.status != 'P'
-            AND tuote.tuotetyyppi NOT in ('A','B')
-            AND tuote.tuoteno != ''
-            AND tuote.nakyvyys != ''
+              and try_fi.selite    = tuote.try
+              and try_fi.laji      = 'try'
+              and try_fi.kieli     = 'fi')
+            WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''
             $muutoslisa
             ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
@@ -184,11 +184,11 @@ function tuote_export_hae_tuotetiedot($params) {
                 asiakashinta.hinta
                 FROM asiakas
                 JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-                  AND avainsana.selite = asiakas.ryhma
-                  AND avainsana.laji = 'asiakasryhma')
+                  AND avainsana.selite           = asiakas.ryhma
+                  AND avainsana.laji             = 'asiakasryhma')
                 JOIN asiakashinta ON (asiakashinta.yhtio = asiakas.yhtio
                   AND asiakashinta.asiakas_ryhma = asiakas.ryhma)
-                WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                WHERE asiakas.yhtio              = '{$kukarow['yhtio']}'
                 AND asiakashinta.tuoteno ='{$row['tuoteno']}'";
       $asiakashintares = pupe_query($query);
 
@@ -208,14 +208,14 @@ function tuote_export_hae_tuotetiedot($params) {
                         avainsana.selite as option_name
                         FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                         JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                          AND avainsana.laji = 'PARAMETRI'
-                          AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                        WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-                        AND tuotteen_avainsanat.laji != 'parametri_variaatio'
-                        AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
-                        AND tuotteen_avainsanat.laji like 'parametri_%'
-                        AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
-                        AND tuotteen_avainsanat.kieli = 'fi'
+                          AND avainsana.laji             = 'PARAMETRI'
+                          AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                        WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                        AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                        AND tuotteen_avainsanat.laji     like 'parametri_%'
+                        AND tuotteen_avainsanat.tuoteno  = '{$row['tuoteno']}'
+                        AND tuotteen_avainsanat.kieli    = 'fi'
                         ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();
@@ -275,8 +275,8 @@ function tuote_export_hae_tuotetiedot($params) {
               FROM hinnasto
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tuoteno = '{$row['tuoteno']}'
-              AND maa = '{$yhtiorow['maa']}'
-              AND laji = ''
+              AND maa     = '{$yhtiorow['maa']}'
+              AND laji    = ''
               AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
               ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
               LIMIT 1";
@@ -338,14 +338,14 @@ function tuote_export_hae_poistettavat_tuotteet() {
   $query = "SELECT DISTINCT tuote.tuoteno, tuotteen_avainsanat.selite configurable_tuoteno
             FROM tuote
             LEFT JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+              AND tuote.tuoteno             = tuotteen_avainsanat.tuoteno
+              AND tuotteen_avainsanat.laji  = 'parametri_variaatio'
               AND trim(tuotteen_avainsanat.selite) != '')
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-            AND tuote.status != 'P'
-            AND tuote.tuotetyyppi NOT in ('A','B')
-            AND tuote.tuoteno != ''
-            AND tuote.nakyvyys != ''";
+            WHERE tuote.yhtio               = '{$kukarow["yhtio"]}'
+            AND tuote.status               != 'P'
+            AND tuote.tuotetyyppi           NOT in ('A','B')
+            AND tuote.tuoteno              != ''
+            AND tuote.nakyvyys             != ''";
   $res = pupe_query($query);
 
   // Kaikki tuotenumerot arrayseen
@@ -465,14 +465,14 @@ function tuote_export_hae_tuoteryhmat($params) {
             try_fi.selitetark as try_fi_nimi
             FROM tuote
             LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-              AND try_fi.selite = tuote.try
-              AND try_fi.laji = 'try'
-              AND try_fi.kieli = 'fi')
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-            AND tuote.status != 'P'
-            AND tuote.tuotetyyppi NOT in ('A','B')
-            AND tuote.tuoteno != ''
-            AND tuote.nakyvyys != ''
+              AND try_fi.selite    = tuote.try
+              AND try_fi.laji      = 'try'
+              AND try_fi.kieli     = 'fi')
+            WHERE tuote.yhtio      = '{$kukarow["yhtio"]}'
+            AND tuote.status      != 'P'
+            AND tuote.tuotetyyppi  NOT in ('A','B')
+            AND tuote.tuoteno     != ''
+            AND tuote.nakyvyys    != ''
             $muutoslisa";
   $try_result = pupe_query($query);
 
@@ -517,15 +517,15 @@ function tuote_export_hae_asiakkaat($params) {
             asiakas.yhtio ayhtio
             FROM asiakas
             JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio
-              AND yhteyshenkilo.liitostunnus = asiakas.tunnus
-              AND yhteyshenkilo.rooli = 'magento')
+              AND yhteyshenkilo.liitostunnus  = asiakas.tunnus
+              AND yhteyshenkilo.rooli         = 'magento')
             LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
-              AND avainsana.selite = asiakas.ryhma
-              AND avainsana.laji = 'asiakasryhma')
-            WHERE asiakas.yhtio  = '{$kukarow["yhtio"]}'
-            AND asiakas.laji != 'P'
-            AND yhteyshenkilo.rooli = 'magento'
-            AND yhteyshenkilo.email != ''
+              AND avainsana.selite            = asiakas.ryhma
+              AND avainsana.laji              = 'asiakasryhma')
+            WHERE asiakas.yhtio               = '{$kukarow["yhtio"]}'
+            AND asiakas.laji                 != 'P'
+            AND yhteyshenkilo.rooli           = 'magento'
+            AND yhteyshenkilo.email          != ''
             {$muutoslisa}";
   $res = pupe_query($query);
 
@@ -607,13 +607,13 @@ function tuote_export_hae_lajitelmatuotteet($params) {
   $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
             FROM tuotteen_avainsanat
             JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuote.status != 'P'
-              AND tuote.tuotetyyppi NOT IN ('A','B')
-              AND tuote.tuoteno != ''
-              AND tuote.nakyvyys != '')
-            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+              AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
+              AND tuote.status              != 'P'
+              AND tuote.tuotetyyppi          NOT IN ('A','B')
+              AND tuote.tuoteno             != ''
+              AND tuote.nakyvyys            != '')
+            WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
             AND trim(tuotteen_avainsanat.selite) != ''";
   $resselite = pupe_query($query);
 
@@ -641,18 +641,18 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                   try_fi.selitetark try_nimi
                   FROM tuotteen_avainsanat
                   JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
-                    AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-                    AND tuote.status != 'P'
-                    AND tuote.tuotetyyppi NOT in ('A','B')
-                    AND tuote.tuoteno != ''
-                    AND tuote.nakyvyys != '')
+                    AND tuote.tuoteno              = tuotteen_avainsanat.tuoteno
+                    AND tuote.status              != 'P'
+                    AND tuote.tuotetyyppi          NOT in ('A','B')
+                    AND tuote.tuoteno             != ''
+                    AND tuote.nakyvyys            != '')
                   LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-                    and try_fi.selite = tuote.try
-                    and try_fi.laji = 'try'
-                    and try_fi.kieli = 'fi')
-                  WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-                  AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
+                    and try_fi.selite              = tuote.try
+                    and try_fi.laji                = 'try'
+                    and try_fi.kieli               = 'fi')
+                  WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+                  AND tuotteen_avainsanat.laji     = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.selite   = '{$rowselite['selite']}'
                   {$muutoslisa}
                   ORDER BY tuote.tuoteno";
     $alires = pupe_query($aliselect);
@@ -665,14 +665,14 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                      avainsana.selite option_name
                      FROM tuotteen_avainsanat USE INDEX (yhtio_tuoteno)
                      JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
-                       AND avainsana.laji = 'PARAMETRI'
-                       AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                     WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-                     AND tuotteen_avainsanat.laji != 'parametri_variaatio'
-                     AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
-                     AND tuotteen_avainsanat.laji like 'parametri_%'
-                     AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
-                     AND tuotteen_avainsanat.kieli = 'fi'
+                       AND avainsana.laji             = 'PARAMETRI'
+                       AND avainsana.selite           = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                     WHERE tuotteen_avainsanat.yhtio  = '{$kukarow['yhtio']}'
+                     AND tuotteen_avainsanat.laji    != 'parametri_variaatio'
+                     AND tuotteen_avainsanat.laji    != 'parametri_variaatio_jako'
+                     AND tuotteen_avainsanat.laji     like 'parametri_%'
+                     AND tuotteen_avainsanat.tuoteno  = '{$alirow['tuoteno']}'
+                     AND tuotteen_avainsanat.kieli    = 'fi'
                      ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
       $alinres = pupe_query($alinselect);
       $properties = array();
@@ -848,7 +848,7 @@ function tuote_export_hae_tuotteen_avainsanat($tuoteno) {
             FROM tuotteen_avainsanat
             WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
             AND tuotteen_avainsanat.tuoteno = '{$tuoteno}'
-            AND tuotteen_avainsanat.laji not like 'parametri_%'";
+            AND tuotteen_avainsanat.laji    not like 'parametri_%'";
   $avainsana_result = pupe_query($query);
 
   while ($avainsana_row = mysql_fetch_assoc($avainsana_result)) {

@@ -64,10 +64,10 @@ echo "<td class='ylapalkki'><a class='puhdas' target='_top' href='{$palvelin2}'>
 
 $query = "SELECT *
           FROM extranet_kayttajan_lisatiedot
-          WHERE yhtio      = '{$kukarow['yhtio']}'
-          AND laji         = 'PIKAVALINTA'
-          AND liitostunnus = '{$kukarow['tunnus']}'
-          AND selitetark  != ''
+          WHERE yhtio       = '{$kukarow['yhtio']}'
+          AND laji          = 'PIKAVALINTA'
+          AND liitostunnus  = '{$kukarow['tunnus']}'
+          AND selitetark   != ''
           ORDER BY selite+0";
 $result = pupe_query($query);
 

@@ -1524,8 +1524,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
 
   if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
     $mahdolliset_liitokset = array(
-      "liitostunnus" => "Asiakkaan tunnuksella",
-      "ytunnus"      => "Y-tunnuksella"
+      "liitostunnus" => "Asiakkaalle",
+      "ytunnus"      => "Y-tunnukselle"
     );
 
     if (!empty($asiakasrow["ryhma"])) {
@@ -1536,7 +1536,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
       $mahdolliset_liitokset["piiri"] = "Piirille";
     }
 
-    echo t("Liitos").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+    echo t("Lis‰‰ alennus").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
 
     foreach ($mahdolliset_liitokset as $liitos => $teksti) {
       echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
@@ -2537,7 +2537,13 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
   while ($tilausrivi = mysql_fetch_assoc($result)) {
 
-    $hintapyoristys_echo = $tilausrivi["hinta"] * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
+    $hinta = $tilausrivi["hinta"];
+
+    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+      $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+    }
+
+    $hintapyoristys_echo = $hinta * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
     $asiakas_hinta_liitos = isset($asiakas_hinta_liitos) ? $asiakas_hinta_liitos : "";
 

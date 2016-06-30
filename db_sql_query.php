@@ -148,23 +148,24 @@ else {
         $rivi .= "<td colspan='2'>";
 
         $avainsanatyypit = array();
-        $avainsanatyypit["nimitys"] = t("Tuotteen nimitys");
-        $avainsanatyypit["lyhytkuvaus"] = t("Tuotteen lyhytkuvaus");
-        $avainsanatyypit["kuvaus"] = t("Tuotteen kuvaus");
-        $avainsanatyypit["mainosteksti"] = t("Tuotteen mainosteksti");
-        $avainsanatyypit["tarratyyppi"] = t("Tuotteen tarratyyppi");
-        $avainsanatyypit["sistoimittaja"] = t("Tuotteen sisäinen toimittaja");
-        $avainsanatyypit["oletusvalinta"] = t("Tuotteen tilauksen oletusvalinta");
-        $avainsanatyypit["osasto"] = t("Tuotteen osasto");
-        $avainsanatyypit["try"] = t("Tuotteen tuoteryhmä");
-        $avainsanatyypit["ps_ala_try"] = t("PupeShop alaryhmä");
-        $avainsanatyypit["ei_edi_ostotilaukseen"] = t("Tuotetta ei lisätä EDI-ostotilaukselle");
-        $avainsanatyypit["hammastus"] = t("Tuotteen hammastus");
-        $avainsanatyypit["laatuluokka"] = t("Tuotteen laatuluokka");
-        $avainsanatyypit["synkronointi"] = t("Tuotteen synkronointi");
-        $avainsanatyypit["toimpalautus"] = t("Palautus toimittajalle");
-        $avainsanatyypit["varastopalautus"] = t("Palautus sallittuihin varastoihin");
-        $avainsanatyypit["hinnastoryhmittely"] = t("hinnastoryhmittely");
+        $avainsanatyypit["nimitys"]                  = t("Tuotteen nimitys");
+        $avainsanatyypit["lyhytkuvaus"]              = t("Tuotteen lyhytkuvaus");
+        $avainsanatyypit["kuvaus"]                   = t("Tuotteen kuvaus");
+        $avainsanatyypit["mainosteksti"]             = t("Tuotteen mainosteksti");
+        $avainsanatyypit["tarratyyppi"]              = t("Tuotteen tarratyyppi");
+        $avainsanatyypit["sistoimittaja"]            = t("Tuotteen sisäinen toimittaja");
+        $avainsanatyypit["oletusvalinta"]            = t("Tuotteen tilauksen oletusvalinta");
+        $avainsanatyypit["osasto"]                   = t("Tuotteen osasto");
+        $avainsanatyypit["try"]                      = t("Tuotteen tuoteryhmä");
+        $avainsanatyypit["ps_ala_try"]               = t("PupeShop alaryhmä");
+        $avainsanatyypit["ei_edi_ostotilaukseen"]    = t("Tuotetta ei lisätä EDI-ostotilaukselle");
+        $avainsanatyypit["hammastus"]                = t("Tuotteen hammastus");
+        $avainsanatyypit["laatuluokka"]              = t("Tuotteen laatuluokka");
+        $avainsanatyypit["synkronointi"]             = t("Tuotteen synkronointi");
+        $avainsanatyypit["toimpalautus"]             = t("Palautus toimittajalle");
+        $avainsanatyypit["varastopalautus"]          = t("Palautus sallittuihin varastoihin");
+        $avainsanatyypit["hinnastoryhmittely"]       = t("hinnastoryhmittely");
+        $avainsanatyypit["magento_attribute_set_id"] = t("Magento attribute set ID");
 
         foreach ($avainsanatyypit as $laji => $nimitys) {
           $chk = !empty($rajaus[$row[0]][$laji]) ? "CHECKED" : "";

@@ -1724,7 +1724,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $otunnus = $laskurow["tunnus"];
       list ($toimalku, $hinnat) = explode("!!!", $toim);
 
-      require_once "tulosta_myyntisopimus.inc";
+      require_once "ajoneuvomyynti/tulosta_myyntisopimus.inc";
 
       tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee, $hinnat);
 

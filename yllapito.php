@@ -2260,7 +2260,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
+  if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
     if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }

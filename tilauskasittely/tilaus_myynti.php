@@ -9667,7 +9667,7 @@ if ($tee == '') {
               echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
             }
 
-            if (file_exists("tulosta_myyntisopimus.inc")) {
+            if (file_exists("../ajoneuvomyynti/tulosta_myyntisopimus.inc")) {
               echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
 
               if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!VL')) {

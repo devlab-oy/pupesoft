@@ -2037,7 +2037,7 @@ if ($tila == '') {
     echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
     echo "</ul>";
     echo "</div>";
-    echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
+    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "class='tooltip' id='$rivirow[rivitunnus]'", 1000, 1000);
     echo "<br>$rivirow[toim_tuoteno]";
 
     echo "&nbsp;";

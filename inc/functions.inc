@@ -6707,8 +6707,11 @@ if (!function_exists("kalenteritapahtuma")) {
 }
 
 if (!function_exists('js_openUrlNewWindow')) {
-  function js_openUrlNewWindow($url, $name, $params = "") {
-    return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=700,height=1000'); return false;\">$name</a>";
+  function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
+    $width = (!empty($width)) ? $width : 700;
+    $height = (!empty($height)) ? $height : 100;
+
+    return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=$width,height=$height'); return false;\">$name</a>";
   }
 }
 

@@ -832,7 +832,7 @@ function tuote_export_checkpoint($checkpoint) {
 }
 
 function tuote_export_echo($string) {
-  echo date("d.m.Y @ G:i:s")." - {$string}\n";
+  pupesoft_log('tuote_export', $string);
 }
 
 function tuote_export_hae_tuotteen_avainsanat($tuoteno) {

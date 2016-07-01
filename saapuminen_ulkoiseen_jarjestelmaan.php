@@ -120,8 +120,8 @@ $query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
 $tilasnumero_res = pupe_query($query);
 $tilasnumero_row = mysql_fetch_assoc($tilasnumero_res);
 
-$body->addChild('PurchId', $tilasnumero_row['otunnus']);
-$body->addChild('ReceiptsListId', $row['laskunro']);
+$body->addChild('PurchId', $row['laskunro']);
+$body->addChild('ReceiptsListId', $tilasnumero_row['otunnus']);
 
 // U = new
 // M = change

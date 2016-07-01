@@ -19,6 +19,8 @@ abstract class PrestaClient {
    *
    * @var PrestaShopWebservice REST-client
    */
+
+
   protected $ws = null;
 
   /**
@@ -140,8 +142,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $msg = "Haetaan {$resource} id {$id} {$kauppa}";
@@ -149,7 +151,7 @@ abstract class PrestaClient {
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Haku {$resource} id {$id} {$kauppa} epäonnistui!";
+      $msg = "Haku {$resource} id {$id} {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -172,8 +174,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->generate_xml($resource);
@@ -182,10 +184,10 @@ abstract class PrestaClient {
 
       $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin {$kauppa} uusi " . $this->resource_name());
+      $this->logger->log("Luotiin {$kauppa}uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa} epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa}epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -245,8 +247,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->remove_read_only_fields($xml);
@@ -298,8 +300,8 @@ abstract class PrestaClient {
     }
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_xml = $this->ws->get($opt);
@@ -307,7 +309,7 @@ abstract class PrestaClient {
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku {$kauppa} epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -364,8 +366,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_bool = $this->ws->delete($opt);
@@ -383,7 +385,7 @@ abstract class PrestaClient {
 
   protected function delete_all() {
     $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
-    # TODO, this only fetches records from the default shop
+    // TODO, this only fetches records from the default shop
     $existing_resources = $this->all(array('id'));
     $existing_resources = array_column($existing_resources, 'id');
 
@@ -446,7 +448,7 @@ abstract class PrestaClient {
     // if we want to reset
     if (empty($value)) {
       $this->shop_ids = null;
-      return;
+      return null;
     }
 
     if (is_null($this->presta_shops)) {
@@ -476,6 +478,8 @@ abstract class PrestaClient {
     }
 
     $this->shop_ids = $value;
+
+    return $value;
   }
 
   protected function all_shop_ids() {
@@ -507,7 +511,7 @@ abstract class PrestaClient {
     }
     else {
       // substract one, since API key starts from zero
-      return ($this->languages_table[$code] - 1);
+      return $this->languages_table[$code] - 1;
     }
   }
 

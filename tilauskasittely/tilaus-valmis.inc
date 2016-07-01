@@ -2096,7 +2096,7 @@ else {
       }
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
-        if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('','K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L','P'))) {
+        if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L', 'P'))) {
           posten_outbounddelivery($_otunnus, $_ulkoinen_jarjestelma);
         }
       }
@@ -2258,11 +2258,11 @@ else {
 
               $tulossa_query = "SELECT sum(varattu) tulossa_kpl
                                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                                WHERE yhtio  = '{$kukarow['yhtio']}'
-                                AND tuoteno  = '{$jt_chk_row['tuoteno']}'
-                                AND tyyppi   = 'O'
+                                WHERE yhtio        = '{$kukarow['yhtio']}'
+                                AND tuoteno        = '{$jt_chk_row['tuoteno']}'
+                                AND tyyppi         = 'O'
                                 AND laskutettuaika = '0000-00-00'
-                                AND varasto = '{$jt_chk_row['varasto']}'";
+                                AND varasto        = '{$jt_chk_row['varasto']}'";
               $tulossa_result = pupe_query($tulossa_query);
               $tulossa_row = mysql_fetch_assoc($tulossa_result);
 

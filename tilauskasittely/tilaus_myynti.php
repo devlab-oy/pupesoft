@@ -1336,7 +1336,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
-  $query = "UPDATE tilausrivi 
+  $query = "UPDATE tilausrivi
             LEFT JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
             SET tyyppi='D', muutospvm=now()
             where tilausrivi.yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
@@ -2216,37 +2216,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
         $kuittiurl = tulosta_asiakkaan_kuitti($laskurow["laskunro"], "", $kuitti_params);
 
-        echo "<script type=\"text/javascript\">
-                function printIframePdf(){
-                  window.frames[\"printf\"].focus();
-                  try {
-                    window.frames[\"printf\"].print();
-                  }
-                  catch(e){
-                    window.print();
-                    console.log(e);
-                  }
-                }
-
-                function printObjectPdf() {
-                  try{
-                    document.getElementById('idPdf').print();
-                  }
-                  catch(e){
-                    printIframePdf();
-                    console.log(e);
-                  }
-                }
-        </script>
-
-        <form><input type='button' onClick='printIframePdf()' class='btn' value='".t("Tulosta kuitti")."'/></form><br><br>
-
-        <iframe id='printf' name='printf' src='$kuittiurl' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
-
-        <object id='idPdf'
-            width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf'
-            data='{$palvelin2}{$filenimi}'>
-        </object>";
+        // Tulostusdialogi
+        echo js_openPrintDialog($kuittiurl, "Tulosta kuitti");
 
         $formi  = "laskuri";
         $kentta = "kateisraha";

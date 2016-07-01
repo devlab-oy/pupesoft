@@ -631,49 +631,59 @@ if ($upd == 1) {
             $paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
           }
 
-          $query = "UPDATE lasku
-                    SET ytunnus      = '$otsikrow[ytunnus]',
-                    ovttunnus      = '$otsikrow[ovttunnus]',
-                    nimi           = '$otsikrow[nimi]',
-                    nimitark       = '$otsikrow[nimitark]',
-                    osoite         = '$otsikrow[osoite]',
-                    postino        = '$otsikrow[postino]',
-                    postitp        = '$otsikrow[postitp]',
-                    maa            = '$otsikrow[maa]',
-                    chn            = '$otsikrow[chn]',
-                    verkkotunnus   = '$otsikrow[verkkotunnus]',
-                    vienti         = '$otsikrow[vienti]',
-                    toim_ovttunnus = '$otsikrow[toim_ovttunnus]',
-                    toim_nimi      = '$otsikrow[toim_nimi]',
-                    toim_nimitark  = '$otsikrow[toim_nimitark]',
-                    toim_osoite    = '$otsikrow[toim_osoite]',
-                    toim_postino   = '$otsikrow[toim_postino]',
-                    toim_postitp   = '$otsikrow[toim_postitp]',
-                    toim_maa       = '$otsikrow[toim_maa]',
-                    laskutusvkopv  = '$otsikrow[laskutusvkopv]'
-                    $paivita_myos_lisa
-                    $paivita_sisviesti1
-                    WHERE yhtio    = '$kukarow[yhtio]'
-                    and tunnus     = '$laskuorow[tunnus]'";
-          $updaresult = pupe_query($query);
+          if ($paivita_myos_kanavointitieto != "") {
+            $query = "UPDATE lasku SET
+                      chn          = '{$otsikrow['chn']}',
+                      verkkotunnus = '{$otsikrow['verkkotunnus']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
+            $updaresult = pupe_query($query);
+          }
+          else {
+            $query = "UPDATE lasku
+                      SET ytunnus      = '$otsikrow[ytunnus]',
+                      ovttunnus      = '$otsikrow[ovttunnus]',
+                      nimi           = '$otsikrow[nimi]',
+                      nimitark       = '$otsikrow[nimitark]',
+                      osoite         = '$otsikrow[osoite]',
+                      postino        = '$otsikrow[postino]',
+                      postitp        = '$otsikrow[postitp]',
+                      maa            = '$otsikrow[maa]',
+                      chn            = '$otsikrow[chn]',
+                      verkkotunnus   = '$otsikrow[verkkotunnus]',
+                      vienti         = '$otsikrow[vienti]',
+                      toim_ovttunnus = '$otsikrow[toim_ovttunnus]',
+                      toim_nimi      = '$otsikrow[toim_nimi]',
+                      toim_nimitark  = '$otsikrow[toim_nimitark]',
+                      toim_osoite    = '$otsikrow[toim_osoite]',
+                      toim_postino   = '$otsikrow[toim_postino]',
+                      toim_postitp   = '$otsikrow[toim_postitp]',
+                      toim_maa       = '$otsikrow[toim_maa]',
+                      laskutusvkopv  = '$otsikrow[laskutusvkopv]'
+                      $paivita_myos_lisa
+                      $paivita_sisviesti1
+                      WHERE yhtio    = '$kukarow[yhtio]'
+                      and tunnus     = '$laskuorow[tunnus]'";
+            $updaresult = pupe_query($query);
 
-          $query = "UPDATE laskun_lisatiedot
-                    SET kolm_ovttunnus  = '$otsikrow[kolm_ovttunnus]',
-                    kolm_nimi         = '$otsikrow[kolm_nimi]',
-                    kolm_nimitark     = '$otsikrow[kolm_nimitark]',
-                    kolm_osoite       = '$otsikrow[kolm_osoite]',
-                    kolm_postino      = '$otsikrow[kolm_postino]',
-                    kolm_postitp      = '$otsikrow[kolm_postitp]',
-                    kolm_maa          = '$otsikrow[kolm_maa]',
-                    laskutus_nimi     = '$otsikrow[laskutus_nimi]',
-                    laskutus_nimitark = '$otsikrow[laskutus_nimitark]',
-                    laskutus_osoite   = '$otsikrow[laskutus_osoite]',
-                    laskutus_postino  = '$otsikrow[laskutus_postino]',
-                    laskutus_postitp  = '$otsikrow[laskutus_postitp]',
-                    laskutus_maa      = '$otsikrow[laskutus_maa]'
-                    WHERE yhtio       = '$kukarow[yhtio]'
-                    and otunnus       = '$laskuorow[tunnus]'";
-          $updaresult = pupe_query($query);
+            $query = "UPDATE laskun_lisatiedot
+                      SET kolm_ovttunnus  = '$otsikrow[kolm_ovttunnus]',
+                      kolm_nimi         = '$otsikrow[kolm_nimi]',
+                      kolm_nimitark     = '$otsikrow[kolm_nimitark]',
+                      kolm_osoite       = '$otsikrow[kolm_osoite]',
+                      kolm_postino      = '$otsikrow[kolm_postino]',
+                      kolm_postitp      = '$otsikrow[kolm_postitp]',
+                      kolm_maa          = '$otsikrow[kolm_maa]',
+                      laskutus_nimi     = '$otsikrow[laskutus_nimi]',
+                      laskutus_nimitark = '$otsikrow[laskutus_nimitark]',
+                      laskutus_osoite   = '$otsikrow[laskutus_osoite]',
+                      laskutus_postino  = '$otsikrow[laskutus_postino]',
+                      laskutus_postitp  = '$otsikrow[laskutus_postitp]',
+                      laskutus_maa      = '$otsikrow[laskutus_maa]'
+                      WHERE yhtio       = '$kukarow[yhtio]'
+                      and otunnus       = '$laskuorow[tunnus]'";
+            $updaresult = pupe_query($query);
+          }
         }
       }
     }
@@ -2120,6 +2130,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     if ($toim == "asiakas") {
       echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
       echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> ".t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
     }
   }
   if ($toim == "toimi" and $uusi != 1) {
@@ -2284,6 +2295,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
+
+    if (($toikrow = tarkista_oikeus("yllapito.php", "hinnasto%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='hinnasto_iframe' name='hinnasto_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

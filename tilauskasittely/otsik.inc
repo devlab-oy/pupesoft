@@ -641,6 +641,17 @@ if ($kukarow["kesken"] != 0) {
   $rakre_chkres = pupe_query($query);
 }
 
+// Onko verkkokauppakassalipasta?
+// Jos on niin voidaan luoda käsin verkkokauppatilauksia
+$kassalipasquery = "SELECT kassalipas.tunnus kassalipas, maksuehto.tunnus maksuehto
+                    FROM kassalipas
+                    JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.kateinen != '')
+                    WHERE kassalipas.yhtio = '$kukarow[yhtio]'
+                    AND kassalipas.nimi = 'Verkkokauppa'
+                    ORDER BY maksuehto.tunnus
+                    LIMIT 1";
+$vk_kassalipas_res = pupe_query($kassalipasquery);
+
 // ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 if ($tila == "" and !isset($jatka)) {
 
@@ -990,6 +1001,10 @@ if ($tila == "" and !isset($jatka)) {
       'T' => t("Tarjoustilaus"),
       'U' => t("Takuutilaus"),
     );
+
+    if (mysql_num_rows($vk_kassalipas_res)) {
+      $tilaustyypit['W'] = t("Verkkokauppatilaus");
+    }
   }
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
@@ -2467,7 +2482,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
     }
 
-    if ($toim != "MYYNTITILI" AND $toim != "ENNAKKO") {
+    if ($toim != "MYYNTITILI" and $toim != "ENNAKKO") {
       $oikea_sarake[$oikea] = "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
       $oikea++;
     }
@@ -3023,9 +3038,9 @@ if ($tila == "" and !isset($jatka)) {
           // Tarkistetaan, onko valitulle työjonolle asetettu oletusvastuuhenkilö,
           // jos ei ole vielä valittu vastuuhenkilöä
           if (empty($srow[$kentta]) and isset($srow['tyojono'])) {
-             $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
-             $oletus_row = mysql_fetch_assoc($oletus_result);
-             $oletus_kuka = $oletus_row['selitetark_4'];
+            $oletus_result = t_avainsana("tyom_tyojono", "", "and avainsana.selite='{$srow['tyojono']}'");
+            $oletus_row = mysql_fetch_assoc($oletus_result);
+            $oletus_kuka = $oletus_row['selitetark_4'];
           }
 
           $query = "SELECT *
@@ -3962,6 +3977,7 @@ if (isset($jatka)) {
 
       $toimitustapa = $apuro['selite'];
     }
+
     $kassalipas = $kukarow["kassamyyja"];
   }
 
@@ -4180,6 +4196,16 @@ if (isset($jatka)) {
       $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and $toim == "EXTRANET"
   ) {
     $tilaustyyppi = 'H';
+  }
+
+  // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
+  // Tilaus laskutetaan heti ja laitetaan sitten sen jälkeen takaisin keräsyjonoon
+  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res)) {
+    $kassalipas_row = mysql_fetch_assoc($vk_kassalipas_res);
+
+    $kassalipas = $kassalipas_row['kassalipas'];
+    $maksuehto  = $kassalipas_row['maksuehto'];
+    $sisainen   = "o";
   }
 
   $query .= "  lasku SET

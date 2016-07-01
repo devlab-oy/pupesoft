@@ -23,6 +23,7 @@ function lisaa_hintaan_kate($keskihankintahinta, $kateprosentti) {
   return $keskihankintahinta / ( 1 - ( $kateprosentti / 100 ) );
 }
 
+
 /**
  * Funktio tarkistaa, että kateprosentti on sallitulla välillä.
  *

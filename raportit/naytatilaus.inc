@@ -117,7 +117,7 @@ echo "<tr>
 
 if ($verkkokauppa != "" and $muokkaa != "") {
   echo "<td colspan='2'>
-3      <input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
+      <input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
       <input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
       <input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
       <input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'><br>

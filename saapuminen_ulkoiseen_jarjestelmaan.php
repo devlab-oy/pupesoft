@@ -95,7 +95,6 @@ $row = mysql_fetch_assoc($res);
 
 if ($row['sisviesti3'] == 'ok_vie_varastoon') {
   pupesoft_log('inbound_delivery', "Saapuminen {$saapumisnro} on jo kuitattu");
-
   exit;
 }
 
@@ -106,8 +105,23 @@ $header->addChild('Sender', utf8_encode($yhtiorow['nimi']));
 $header->addChild('Receiver', 'LogMaster');
 
 $body = $xml->addChild('VendReceiptsList');
-$body->addChild('PurchId', $row['laskunro']);
-$body->addChild('ReceiptsListId', '');
+
+// Tämän saapumisen "pää"-ostotilaus.
+$query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
+          FROM tilausrivi
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tyyppi      = 'O'
+          AND kpl         = 0
+          AND varattu     > 0
+          AND uusiotunnus = '{$saapumisnro}'
+          GROUP BY otunnus
+          ORDER BY maara DESC
+          LIMIT 1";
+$tilasnumero_res = pupe_query($query);
+$tilasnumero_row = mysql_fetch_assoc($tilasnumero_res);
+
+$body->addChild('PurchId', $tilasnumero_row['otunnus']);
+$body->addChild('ReceiptsListId', $row['laskunro']);
 
 // U = new
 // M = change
@@ -115,7 +129,7 @@ $body->addChild('ReceiptsListId', '');
 $body->addChild('OrderCode', $ordercode);
 $body->addChild('OrderType', 'PO');
 $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
-$body->addChild('DeliveryDate', $row['toimaika']);
+$body->addChild('DeliveryDate', tv1dateconv($tilasnumero_row['toimaika']));
 $body->addChild('Warehouse', '');
 
 $query = "SELECT *

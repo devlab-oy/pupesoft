@@ -6706,6 +6706,39 @@ if (!function_exists("kalenteritapahtuma")) {
   }
 }
 
+if (!function_exists('js_openPrintDialog')) {
+  function js_openPrintDialog($fileurl, $nappiteksti = "Tulosta") {
+    return "<script type=\"text/javascript\">
+            function printIframePdf(){
+              window.frames[\"printf\"].focus();
+              try {
+                window.frames[\"printf\"].print();
+              }
+              catch(e){
+                window.print();
+                console.log(e);
+              }
+            }
+
+            function printObjectPdf() {
+              try{
+                document.getElementById('idPdf').print();
+              }
+              catch(e){
+                printIframePdf();
+                console.log(e);
+              }
+            }
+    </script>
+    <form>
+    <input type='button' onClick='printIframePdf()' class='btn' value='".t($nappiteksti)."'/>
+    </form><br><br>
+    <iframe id='printf' name='printf' src='{$fileurl}' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
+    <object id='idPdf' width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf' data='{$fileurl}'>
+    </object>";
+  }
+}
+
 if (!function_exists('js_openUrlNewWindow')) {
   function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
     $width = (!empty($width)) ? $width : 700;

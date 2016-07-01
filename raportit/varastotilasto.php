@@ -24,7 +24,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 $vvl = date("Y");
 if (!isset($nayta_vapaa_saldo)) $nayta_vapaa_saldo = "";
 
-echo "<font class=head>".t("Varastotilasto")." $vvl</font><hr>";
+echo "<font class='head'>".t("Varastotilasto")." $vvl</font><hr>";
 
 if ($ytunnus != '') {
 

@@ -326,12 +326,14 @@ echo "<script type='text/javascript' language='JavaScript'>
     -->
 </script>";
 
+if (!isset($toim)) $toim = "";
+
 // Jos tullaan takaisin muutosite.phpn lopeta:sta
 if (is_string($kassavalinnat)) {
   $kassakone = unserialize(base64_decode($kassavalinnat));
 }
 
-$lisakenttialinkkiin = "&lopetus=$PHP_SELF////myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=$tee//kassavalinnat=".base64_encode(serialize($kassakone));
+$lisakenttialinkkiin = "&lopetus=$PHP_SELF////toim=$toim//myyjanro=$myyjanro//myyja=$myyja//tilityskpl=$tilityskpl//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//koti=$koti//printteri=$printteri//tee=$tee//kassavalinnat=".base64_encode(serialize($kassakone));
 
 // Lockdown-funktio, joka tarkistaa onko kyseinen kassalipas jo täsmätty.
 function lockdown($vv, $kk, $pp, $tasmayskassa) {
@@ -1174,6 +1176,7 @@ elseif ($tee != '') {
       echo "<table><tr><td>";
       echo "<font class='head'>".t("Täsmäys").":</font><br>";
       echo "<form method='post' id='tasmaytysform' onSubmit='return verify();'>";
+      echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tee' value='tiliointi'>";
       echo "<table width='100%'>";
       echo "<tr>";
@@ -2240,6 +2243,7 @@ elseif ($tee != '') {
     }
 
     echo "</table>";
+
     echo "<table width='100%'>";
     echo "<input type='hidden' id='myynti_yhteensa_hidden' name='myynti_yhteensa' value='$yhteensa'>";
     echo "<tr><td align='left' colspan='3'><font class='head'>";
@@ -2350,6 +2354,8 @@ elseif ($tee != '') {
 // Käyttöliittymä
 echo "<br>";
 echo "<form method='post'>";
+echo "<input type='hidden' name='toim' value='$toim'>";
+
 echo "<table>";
 
 if (!isset($kka)) $kka = date("m");
@@ -2398,7 +2404,7 @@ else {
   $dis2 = "disabled";
 }
 
-if ($oikeurow['paivitys'] == 1) {
+if ($toim == "" and $oikeurow['paivitys'] == 1) {
 
   if (isset($tasmays) and $tasmays != '') {
     $sel = 'CHECKED';
@@ -2476,30 +2482,36 @@ echo "<td><input type='text' name='kkl' id='kkl' value='$kkl' size='3' $dis2></t
 echo "<td><input type='text' name='vvl' id='vvl' value='$vvl' size='5' $dis2></td>";
 echo "</tr>";
 
-$chk1 = '';
-$chk2 = '';
+if ($toim == "") {
+  $chk1 = '';
+  $chk2 = '';
 
-if ($koti == 'KOTI') {
-  $chk1 = "CHECKED";
+  if ($koti == 'KOTI') {
+    $chk1 = "CHECKED";
+  }
+
+  if ($ulko == 'ULKO') {
+    $chk2 = "CHECKED";
+  }
+
+  if ($chk1 == '' and $chk2 == '') {
+    $chk1 = 'CHECKED';
+  }
+
+  echo "<tr>";
+  echo "<th>".t("Kotimaan myynti")."</th>";
+  echo "<td colspan='3'><input type='checkbox' name='koti' value='KOTI' $chk1></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>".t("Vienti")."</th>";
+  echo "<td colspan='3'><input type='checkbox' name='ulko' value='ULKO' $chk2></td>";
+  echo "</tr>";
 }
-
-if ($ulko == 'ULKO') {
-  $chk2 = "CHECKED";
+else {
+  echo "<input type='hidden' name='koti' value='KOTI'>";
+  echo "<input type='hidden' name='ulko' value='ULKO'>";
 }
-
-if ($chk1 == '' and $chk2 == '') {
-  $chk1 = 'CHECKED';
-}
-
-echo "<tr>";
-echo "<th>".t("Kotimaan myynti")."</th>";
-echo "<td colspan='3'><input type='checkbox' name='koti' value='KOTI' $chk1></td>";
-echo "</tr>";
-
-echo "<tr>";
-echo "<th>".t("Vienti")."</th>";
-echo "<td colspan='3'><input type='checkbox' name='ulko' value='ULKO' $chk2></td>";
-echo "</tr>";
 
 $query = "SELECT *
           FROM kirjoittimet

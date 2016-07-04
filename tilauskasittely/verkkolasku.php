@@ -870,7 +870,7 @@ else {
               $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
               if ($silent == "" or $silent == "VIENTI") {
-                $tulos_ulos_sarjanumerot .= t("Olet myymässä käytettyä venettä, jota ei ole vielä ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+                $tulos_ulos_sarjanumerot .= t("Olet myymässä käytettyä tuotetta, jota ei ole vielä ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
               }
             }
           }

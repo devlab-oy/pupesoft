@@ -1735,7 +1735,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
               $ext = $path_parts['extension'];
 
               if (file_exists("pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
-                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='80px'><br>".t("Muokkaa liitettä");
+                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='40px'><br>".t("Muokkaa liitettä");
               }
               elseif (file_exists("pics/tiedostotyyppiikonit/".strtoupper($ext).".ico")) {
                 echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($ext).".ico' height='80px'><br>".t("Muokkaa liitettä");

@@ -313,15 +313,14 @@ if ($toiminto == 'MUOKKAA') {
           <input type='hidden' name='myyntitilaus_haku'  value='$myyntitilaus_haku'>
           <input type='hidden' name='lisatieto_haku'     value='$lisatieto_haku'>";
 
-      echo "<table>";
-
       if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
-        echo "<tr><th colspan='2'>".t("Muuta eränumerotietoja").":</th></tr>";
+        echo "<font class='message'>".t("Muuta eränumerotietoja").":</font>";
       }
       else {
-        echo "<tr><th colspan='2'>".t("Muuta sarjanumerotietoja").":</th></tr>";
+        echo "<font class='message'>".t("Muuta sarjanumerotietoja").":</font>";
       }
 
+      echo "<table>";
       echo "<tr><th>".t("Tuotenumero")."</th><td>$muutarow[tuoteno] $muutarow[nimitys]</td></tr>";
 
       if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
@@ -438,10 +437,10 @@ if ($toiminto == 'MUOKKAA') {
         $nimires = pupe_query($query);
         $nimirow = mysql_fetch_assoc($nimires);
 
-        echo "<tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys_nimitys' value='$nimirow[nimitys]' size='15'></td>";
+        echo "<tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys_nimitys' value='$nimirow[nimitys]' size='45'></td>";
       }
 
-      echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
+      echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='44' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
 
       if ($muutarow["sarjanumeroseuranta"] == "S") {
 
@@ -488,7 +487,7 @@ if ($toiminto == 'MUOKKAA') {
         "&lukitse_avaimeen={$muutarow["tunnus"]}" .
         "&lukitse_laji=sarjanumeroseuranta&ohje=off'></iFrame>";
 
-      echo "</td></tr></table>";
+      echo "</td></tr></table><br><br>";
     }
     else {
       echo t("Muutettava sarjanumero on kadonnut")."!!!!<br>";
@@ -1519,7 +1518,7 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
 
     while ($lisarow = mysql_fetch_assoc($lisares)) {
       echo "<br>";
-      echo js_openUrlNewWindow("{$palvelin2}view.php?id={$lisarow[tunnus]}", t("Liite")." ".$liilask);
+      echo js_openUrlNewWindow("{$palvelin2}view.php?id={$lisarow[tunnus]}", t("Liite")." ".$liilask, "", 800, 600);
       $liilask++;
     }
 

@@ -1336,7 +1336,10 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
-  $query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
+  $query = "UPDATE tilausrivi 
+            LEFT JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+            SET tyyppi='D', muutospvm=now()
+            where tilausrivi.yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
   $result = pupe_query($query);
 
   if ($sahkoinen_lahete) {
@@ -1524,8 +1527,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
 
   if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
     $mahdolliset_liitokset = array(
-      "liitostunnus" => "Asiakkaan tunnuksella",
-      "ytunnus"      => "Y-tunnuksella"
+      "liitostunnus" => "Asiakkaalle",
+      "ytunnus"      => "Y-tunnukselle"
     );
 
     if (!empty($asiakasrow["ryhma"])) {
@@ -1536,7 +1539,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
       $mahdolliset_liitokset["piiri"] = "Piirille";
     }
 
-    echo t("Liitos").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+    echo t("Lisää alennus").":</th><td><select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
 
     foreach ($mahdolliset_liitokset as $liitos => $teksti) {
       echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
@@ -2033,8 +2036,36 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
       $tilausvalmiskutsuja = "TILAUSMYYNTI";
 
+      // Otetaan laskurow talteen
+      $tm_laskurow_talteen = $laskurow;
+
       // tulostetaan lähetteet ja tilausvahvistukset tai sisäinen lasku..
       require "tilaus-valmis.inc";
+
+      // Käsinsyötetty verkkokauppatilaus laskutettiin ja nyt se laitetaan takaisin keräysjonoon
+      if ($tm_laskurow_talteen["tilaustyyppi"] == "W") {
+        // Jos se on laskutettu, niin laitetaan se
+        $query = "SELECT tunnus
+                  from lasku
+                  where yhtio = '$kukarow[yhtio]'
+                  and tunnus = '$tm_laskurow_talteen[tunnus]'
+                  and tila ='L'
+                  and alatila = 'X'";
+        $result = pupe_query($query);
+
+        if ($laskurow = mysql_fetch_assoc($result)) {
+
+          $query  = "UPDATE lasku set
+                     sisainen = ''
+                     where yhtio = '$kukarow[yhtio]'
+                     and tunnus = '$laskurow[tunnus]'";
+          pupe_query($query);
+
+          $kukarow['kesken'] = $laskurow['tunnus'];
+
+          laskutettu_myyntitilaus_tulostusjonoon($laskurow["tunnus"]);
+        }
+      }
     }
   }
 
@@ -2537,7 +2568,13 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
   while ($tilausrivi = mysql_fetch_assoc($result)) {
 
-    $hintapyoristys_echo = $tilausrivi["hinta"] * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
+    $hinta = $tilausrivi["hinta"];
+
+    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+      $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+    }
+
+    $hintapyoristys_echo = $hinta * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
     $asiakas_hinta_liitos = isset($asiakas_hinta_liitos) ? $asiakas_hinta_liitos : "";
 

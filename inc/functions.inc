@@ -6707,8 +6707,11 @@ if (!function_exists("kalenteritapahtuma")) {
 }
 
 if (!function_exists('js_openUrlNewWindow')) {
-  function js_openUrlNewWindow($url, $name, $params = "") {
-    return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=700,height=1000'); return false;\">$name</a>";
+  function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
+    $width = (!empty($width)) ? $width : 700;
+    $height = (!empty($height)) ? $height : 100;
+
+    return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=$width,height=$height'); return false;\">$name</a>";
   }
 }
 
@@ -27682,21 +27685,20 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_line_i = 1;
 
+    $posten_itemnumberfield = "tuoteno";
+    $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+
+    if (!empty($alt_posten_itemnumberfield)) {
+      $posten_itemnumberfield = $alt_posten_itemnumberfield;
+    }
+
     while ($looprow = mysql_fetch_assoc($loopres)) {
 
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-
-      if ($ulkoinen_jarjestelma == 'L') {
-        $_tuoteno = substr($looprow['tuoteno'], 0, 20);
-        $line->addChild('ItemNumber', utf8_encode($_tuoteno));
-      }
-      else {
-        $line->addChild('ItemNumber', substr($looprow['eankoodi'], 0, 20));
-      }
-
+      $line->addChild('ItemNumber', utf8_encode(substr($looprow[$posten_itemnumberfield], 0, 20)));
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);
@@ -33055,6 +33057,83 @@ if (!function_exists('poista_rivin_yhteensakommentti')) {
   }
 }
 
+if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
+  function laskutettu_myyntitilaus_tulostusjonoon($tilausnumero) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
+    $varasto_query = "SELECT tunnus
+                      from varastopaikat
+                      where yhtio = '$kukarow[yhtio]'
+                      and tyyppi  = ''
+                      order by alkuhyllyalue
+                      limit 1";
+    $varasto_res = pupe_query($varasto_query);
+    $varasto_row = mysql_fetch_assoc($varasto_res);
+
+    $query = "SELECT hyllyalue, hyllynro
+              FROM tilausrivi
+              WHERE yhtio    = '$kukarow[yhtio]'
+              AND hyllyalue != ''
+              AND hyllynro  != ''
+              AND otunnus    = '$tilausnumero'";
+    $edi_varastopaikka_res = pupe_query($query);
+    $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
+
+    $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+
+    $vielisa = "";
+    if ($til_vienti == "") $vielisa = "chn = '999', ";
+
+    // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
+    $query = "UPDATE lasku SET
+              mapvm        = now(),
+              tila         = 'N',
+              alatila      = 'A',
+              $vielisa
+              varasto      = '$varasto_row[tunnus]',
+              sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+              tulostusalue = '$tulostusalue'
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND tunnus   = '$tilausnumero'";
+    $magento_maksettu_res = pupe_query($query);
+
+    // haetaan tilauksen tiedot
+    $query    = "SELECT *
+                 FROM lasku
+                 WHERE tunnus = '$tilausnumero'
+                 AND yhtio = '$kukarow[yhtio]'";
+    $result   = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+
+    // pit‰‰ nollata toimitettuaika riveille
+    $query = "UPDATE tilausrivi SET
+              toimitettu     = '',
+              toimitettuaika = ''
+              WHERE yhtio    = '$kukarow[yhtio]'
+              AND otunnus    = '$tilausnumero'";
+    $result = pupe_query($query);
+
+    // pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
+    $query = "UPDATE tilausrivi SET
+              keratty      = '',
+              kerattyaika  = ''
+              WHERE yhtio  = '$kukarow[yhtio]'
+              AND otunnus  = '$tilausnumero'
+              AND keratty != 'saldoton'";
+    $result = pupe_query($query);
+
+    // ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
+    $kukarow["kassamyyja"] = "";
+    $editilaus_kassalipas = "";
+
+    // kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
+    $silent = "SILENT";
+    $tilausvalmiskutsuja = "EDITILAUS";
+
+    require "tilaus-valmis.inc";
+  }
+}
 
 if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
   function tuoteperheiden_hintojen_paivitys($params) {

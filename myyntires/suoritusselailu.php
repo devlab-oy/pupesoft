@@ -75,9 +75,9 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     // Haetaan suorituksen pankkitili
     $query = "SELECT oletus_rahatili
               FROM yriti
-              WHERE yhtio   = '$kukarow[yhtio]'
-              AND kaytossa != 'E'
-              and tilino    = '$suoritus_row[tilino]'
+              WHERE yhtio          = '$kukarow[yhtio]'
+              AND kaytossa        != 'E'
+              and tilino           = '$suoritus_row[tilino]'
               and oletus_rahatili != ''";
     $yriti_res = pupe_query($query);
 
@@ -103,9 +103,9 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
       // katsotaan onko tiliöinti poistettu, ja etsitään tosite poistetun tiliöinnin kautta
       $query = "SELECT *
                 FROM tiliointi
-                WHERE yhtio  = '{$kukarow['yhtio']}'
-                AND tunnus   = '{$suoritus_row['ltunnus']}'
-                AND ltunnus  > 0";
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$suoritus_row['ltunnus']}'
+                AND ltunnus > 0";
       $tiliointi1_res = pupe_query($query);
 
       if (mysql_num_rows($tiliointi1_res) !== 1) {
@@ -138,12 +138,12 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
     // Haetaan suorituksen pankkitili-tiliöinti
     $query = "SELECT tilino
               FROM tiliointi
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and ltunnus  = '$tiliointi1_row[ltunnus]'
-              and tilino   = '$yriti_row[oletus_rahatili]'
-              and tilino  != ''
-              and summa    =  $tiliointi1_row[summa] * -1
-              and korjattu = ''
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and ltunnus   = '$tiliointi1_row[ltunnus]'
+              and tilino    = '$yriti_row[oletus_rahatili]'
+              and tilino   != ''
+              and summa     =  $tiliointi1_row[summa] * -1
+              and korjattu  = ''
               LIMIT 1";
     $tiliointi2_res = pupe_query($query);
 
@@ -248,12 +248,12 @@ if ($tila == 'uudelleenkohdista_viitemaksut') {
               AND lasku.valkoodi         = suoritus.valkoodi
               AND (lasku.summa - lasku.saldo_maksettu) = suoritus.summa)
             JOIN tiliointi AS suorinT ON (suorinT.yhtio = suoritus.yhtio
-              AND suorinT.tunnus = suoritus.ltunnus
-              AND suorinT.korjattu = '')
+              AND suorinT.tunnus         = suoritus.ltunnus
+              AND suorinT.korjattu       = '')
             JOIN tiliointi AS laskunT ON (laskunT.yhtio = lasku.yhtio
-              AND laskunT.ltunnus = lasku.tunnus
-              AND laskunT.tilino = suorinT.tilino
-              AND laskunT.korjattu = '')
+              AND laskunT.ltunnus        = lasku.tunnus
+              AND laskunT.tilino         = suorinT.tilino
+              AND laskunT.korjattu       = '')
             WHERE suoritus.yhtio         = '$kukarow[yhtio]'
             AND suoritus.kohdpvm         = '0000-00-00'
             AND suoritus.asiakas_tunnus != 0";

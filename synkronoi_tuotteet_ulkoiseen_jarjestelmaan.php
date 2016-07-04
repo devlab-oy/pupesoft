@@ -48,8 +48,9 @@ else {
   $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
             FROM tuote
             LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
-            WHERE tuote.yhtio    = '{$kukarow['yhtio']}'
-            AND tuote.ei_saldoa  = ''
+            WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
+            AND tuote.ei_saldoa = ''
+            AND tuote.tuotetyyppi NOT IN ('A', 'B')
             {$wherelisa}
             HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                     # jos avainsanaa ei ole olemassa ja status P niin ei haluta n‰it‰ tuotteita jatkossakaan
@@ -126,23 +127,29 @@ else {
         $line->addChild('Type', $type);
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
-
-        if ($ulkoinen_jarjestelma == "P") {
-          $line->addChild('ItemNumber', utf8_encode($eankoodi));
-        }
-        else {
-          $tuoteno = substr($row['tuoteno'], 0, 20);
-          $line->addChild('ItemNumber', utf8_encode($tuoteno));
-        }
-
         $nimitys = substr($row['nimitys'], 0, 50);
         $try = substr($row['try'], 0, 6);
         $yksikko = substr($row['yksikko'], 0, 10);
         $tuoteno = substr($row['tuoteno'], 0, 100);
 
+        $posten_itemnumberfield = "tuoteno";
+        $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+
+        if (!empty($alt_posten_itemnumberfield)) {
+          $posten_itemnumberfield = $alt_posten_itemnumberfield;
+        }
+
+        $posten_prodgroup2field = "";
+        $alt_posten_prodgroup2field = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ProdGroup2' ", '', '', "selitetark");
+
+        if (!empty($alt_posten_prodgroup2field)) {
+          $posten_prodgroup2field = utf8_encode($row[$alt_posten_prodgroup2field]);
+        }
+
+        $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
         $line->addChild('ItemName', utf8_encode($nimitys));
         $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', '');
+        $line->addChild('ProdGroup2', $posten_prodgroup2field);
         $line->addChild('SalesPrice', '');
         $line->addChild('Unit1', utf8_encode($yksikko));
         $line->addChild('Unit2', '');
@@ -267,7 +274,7 @@ else {
           break;
         }
 
-        # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+        // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
         $ftputf8 = PUPE_UNICODE;
 
         require "inc/ftp-send.inc";

@@ -318,6 +318,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka lähetetään asiakkalle, kun työmääräys on valmis")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIM_TAPA_TA")   $ulos .= "<option value='TOIM_TAPA_TA' {$avain_sel['TOIM_TAPA_TA']}>".t("Toimitustavan PostNordille lähtevä TransportAccount")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMITTAJARYHMA")   $ulos .= "<option value='TOIMITTAJARYHMA' {$avain_sel['TOIMITTAJARYHMA']}>".t("Toimittajaryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -330,8 +331,8 @@ if (mysql_field_name($result, $i) == "laji") {
 
 if (mysql_field_name($result, $i) == "nakyvyys") {
   if (in_array("SELECTED", array($avain_sel["TRY"],
-                                 $avain_sel["OSASTO"],
-                                 $avain_sel["PS_ALA_TRY"]))) {
+        $avain_sel["OSASTO"],
+        $avain_sel["PS_ALA_TRY"]))) {
     $sel = array();
     $sel[$trow[$i]] = "SELECTED";
 
@@ -1140,9 +1141,9 @@ if ($avain_sel['TYOM_TYOJONO'] == "SELECTED" and $_selitetark_4) {
   $ulos .= "<option value=''>".t('Ei oletusvastuuhenkilöä')."</option>";
   $query = "SELECT *
             FROM kuka
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio    = '{$kukarow['yhtio']}'
             AND aktiivinen = 1
-            AND extranet = ''
+            AND extranet   = ''
             ORDER BY nimi";
   $vastuuresult = pupe_query($query);
 

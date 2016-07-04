@@ -9,6 +9,13 @@ if ($i == 0) {
   $tyyppi = 0;
 }
 
+if (mysql_field_name($result, $i) == "tuoteno") {
+  if ($lukitse_avaimeen != "") {
+    $ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
+    $jatko = 0;
+  }
+}
+
 if (mysql_field_name($result, $i) == "valkoodi") {
   $query = "SELECT nimi, tunnus
             FROM valuu

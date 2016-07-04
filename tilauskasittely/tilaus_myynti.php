@@ -6867,39 +6867,20 @@ if ($tee == '') {
       }
 
       if ($kukarow["extranet"] == "") {
-        $query = "SELECT tunnus, alanimi
+        $query = "SELECT nimi, alanimi
                   from oikeu
                   where yhtio = '$kukarow[yhtio]'
                   and kuka    = '$kukarow[kuka]'
-                  and nimi    = 'tuote.php'
-                  ORDER BY alanimi
+                  and nimi in ('tuote.php','tuvar.php')
+                  ORDER BY nimi, alanimi
                   LIMIT 1";
         $tarkres = pupe_query($query);
 
-        if (mysql_num_rows($tarkres) > 0) {
-
-          $tuotekyslinkki = "tuote.php";
-
-          $tarkrow = mysql_fetch_assoc($tarkres);
+        if ($tarkrow = mysql_fetch_assoc($tarkres)) {
+          $tuotekyslinkki = $tarkrow["nimi"];
 
           if ($tarkrow["alanimi"] != "") {
             $tuotekyslinkkilisa = "toim=$tarkrow[alanimi]&";
-          }
-        }
-        else {
-          $query = "SELECT tunnus
-                    from oikeu
-                    where yhtio = '$kukarow[yhtio]'
-                    and kuka    = '$kukarow[kuka]'
-                    and nimi    = 'tuvar.php'
-                    LIMIT 1";
-          $tarkres = pupe_query($query);
-
-          if (mysql_num_rows($tarkres) > 0) {
-            $tuotekyslinkki = "tuvar.php";
-          }
-          else {
-            $tuotekyslinkki = "";
           }
         }
       }

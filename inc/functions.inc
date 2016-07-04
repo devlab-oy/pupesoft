@@ -616,7 +616,7 @@ if (!function_exists("tv1dateconv")) {
     }
     else {
       if ($lyhyt == "LYHYT") return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 2, 2).$jatko;
-      else return substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
+      else return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
     }
   }
 }

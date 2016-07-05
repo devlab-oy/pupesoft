@@ -1995,7 +1995,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $trivtyrow = array("selite" => "");
 
-              @include "trivityyppivalinta.inc";
+              @include "ajoneuvomyynti/trivityyppivalinta.inc";
 
               //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
               //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)
@@ -3341,7 +3341,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     $trivtyrow = array("selite" => "");
-    @include "trivityyppivalinta.inc";
+    @include "ajoneuvomyynti/trivityyppivalinta.inc";
 
     //special case: Kun yhtiöparametri Valmistuksien_kasittely on asennossa, "valmistuksella voi olla vain yksi valmiste...",
     //excelistä sisäänluettavissa valmistusriveissä voi antaa valmistuslinjan ja toivotut päivämäärät (mikrotilaus.inc)

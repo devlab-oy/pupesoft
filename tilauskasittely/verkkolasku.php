@@ -855,18 +855,16 @@ else {
 
           // ollaan tekemässä myyntiä
           if ($tunken == "myyntirivitunnus") {
-            $query = "SELECT sum(if (ifnull(tilausrivi.rivihinta, 0) = 0, 1, 0)) ei_ostohintaa
+            $query = "SELECT sarjanumeroseuranta.tunnus
                       FROM sarjanumeroseuranta
-                      LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
-                      LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus)
+                      JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus and tilausrivi.laskutettuaika > 0)
                       WHERE sarjanumeroseuranta.yhtio  = '$kukarow[yhtio]'
                       and sarjanumeroseuranta.tuoteno  = '$srow1[tuoteno]'
                       and sarjanumeroseuranta.$tunken  = '$srow1[tunnus]'
                       and sarjanumeroseuranta.kaytetty = 'K'";
             $sarres = pupe_query($query);
-            $srow2 = mysql_fetch_assoc($sarres);
 
-            if (mysql_num_rows($sarres) > 0 and $srow2["ei_ostohintaa"] > 0) {
+            if (mysql_num_rows($sarres) == 0) {
               $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
               if ($silent == "" or $silent == "VIENTI") {

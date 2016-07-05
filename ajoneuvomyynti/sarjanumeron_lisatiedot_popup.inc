@@ -285,7 +285,7 @@ function sarjanumeronlisatiedot_popup($sarjatunnus, $yhtio = '', $class = '', $h
           $sisviestit .= "<tr><th>Lisävarusteet:</th><td align='right' colspan='2'>".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
           $sisviestit .= "<tr><th>Myyntihinta yht:</th><td align='right' colspan='2'>".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]</td></tr>";
 
-          $text_output .= "Venehinta:### ### ###$tilrivirow[myyntihinta] $yhtiorow[valkoodi]\n";
+          $text_output .= "Laitehinta:### ### ###$tilrivirow[myyntihinta] $yhtiorow[valkoodi]\n";
           $text_output .= "Lisävarusteet:### ### ###".hintapyoristys($lisamyyntihinta)." $yhtiorow[valkoodi]\n";
           $text_output .= "Myyntihinta yht:### ### ###".hintapyoristys($tilrivirow["myyntihinta"]+$lisamyyntihinta)." $yhtiorow[valkoodi]\n";
           $text_output .= "\n";

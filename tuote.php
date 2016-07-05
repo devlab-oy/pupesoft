@@ -2967,7 +2967,7 @@ if ($tee == 'Z') {
 
             if ($siirow["tyyppi"] == "O") {
               // pultattu kiinni johonkin
-              $fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+              $fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."&lopetus=$tkysy_lopetus'>$siirow[sarjanumero]</a>)</font>";
             }
             elseif ($siirow["tyyppi"] == "G") {
               // jos tämä on jollain siirtolistalla
@@ -2977,7 +2977,7 @@ if ($tee == 'Z') {
 
           echo "<tr>
               <td>$sarjarow[nimitys]</td>
-              <td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
+              <td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$tkysy_lopetus'>$sarjarow[sarjanumero]</a></td>
               <td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td>
               <td align='right'>";
           if ($tuoterow['sarjanumeroseuranta'] == 'V' or $tuoterow['sarjanumeroseuranta'] == 'T') {
@@ -3035,7 +3035,7 @@ if ($tee == 'Z') {
 
         while ($sarjarow = mysql_fetch_assoc($sarjares)) {
           echo "<tr>
-              <td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>";
+              <td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."&lopetus=$tkysy_lopetus'>$sarjarow[sarjanumero]</a></td>";
 
           if ($tuoterow["sarjanumeroseuranta"] == "F") {
             echo "<td>".tv1dateconv($sarjarow["parasta_ennen"])."</td>";

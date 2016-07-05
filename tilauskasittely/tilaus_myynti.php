@@ -1336,7 +1336,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
-  $query = "UPDATE tilausrivi 
+  $query = "UPDATE tilausrivi
             LEFT JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
             SET tyyppi='D', muutospvm=now()
             where tilausrivi.yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
@@ -5473,7 +5473,11 @@ if ($tee == '') {
 
   $numres_saatavt  = 0;
 
-  if ((int) $kukarow["kesken"] > 0) {
+  $_kukaextranet = ($kukarow['extranet'] == '');
+
+  $_saako_nahda = (($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $kukarow['saatavat'] != '2');
+
+  if ($_saako_nahda and (int) $kukarow["kesken"] > 0) {
     //N‰ytet‰‰nko asiakkaan saatavat!
     $query  = "SELECT yhtio
                FROM tilausrivi
@@ -5484,9 +5488,6 @@ if ($tee == '') {
     $numres_saatavt = mysql_num_rows($numres);
   }
 
-  $_kukaextranet = ($kukarow['extranet'] == '');
-
-  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
   $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
   $_saako = ($_saako_nahda and $_saako_nayttaa);
 

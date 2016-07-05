@@ -1560,131 +1560,133 @@ if ($tee == '') {
   require "inc/footer.inc";
 }
 
-function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
-  $otunnukset = (array) $otunnukset;
+if (!function_exists("laheta_excel_koontilahete")) {
+  function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
+    $otunnukset = (array) $otunnukset;
 
-  if (empty($otunnukset)) return false;
+    if (empty($otunnukset)) return false;
 
-  require_once 'inc/pupeExcel.inc';
+    require_once 'inc/pupeExcel.inc';
 
-  global $kukarow;
+    global $kukarow;
 
-  $_otunnukset = implode(',', $otunnukset);
+    $_otunnukset = implode(',', $otunnukset);
 
-  $query = "SELECT lasku.asiakkaan_tilausnumero,
-                   lasku.nimi,
-                   lasku.toim_nimi,
-                   asiakaskommentti.kommentti,
-                   tilausrivi.tuoteno,
-                   tilausrivi.tilkpl,
-                   tuote.eankoodi,
-                   tuote.myynti_era,
-                   IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
-            FROM lasku
-            JOIN tilausrivi
-              ON tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.keratty <> ''
-            JOIN tuote
-              ON tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno = tilausrivi.tuoteno
-            JOIN asiakas
-              ON asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus
-            LEFT JOIN asiakaskommentti
-              ON asiakaskommentti.yhtio = tilausrivi.yhtio
-              AND asiakaskommentti.ytunnus = lasku.ytunnus
-              AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
-            LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
-              ON avainsana_nimitys.yhtio = tuote.yhtio
-              AND avainsana_nimitys.kieli = asiakas.kieli
-              AND avainsana_nimitys.laji = 'nimitys'
-              AND avainsana_nimitys.tuoteno = tuote.tuoteno
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tila = 'L'
-              AND lasku.alatila = 'B'
-              AND lasku.tunnus IN ($_otunnukset)";
-  $result = pupe_query($query);
+    $query = "SELECT lasku.asiakkaan_tilausnumero,
+                     lasku.nimi,
+                     lasku.toim_nimi,
+                     asiakaskommentti.kommentti,
+                     tilausrivi.tuoteno,
+                     tilausrivi.tilkpl,
+                     tuote.eankoodi,
+                     tuote.myynti_era,
+                     IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
+              FROM lasku
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.keratty <> ''
+              JOIN tuote
+                ON tuote.yhtio = tilausrivi.yhtio
+                AND tuote.tuoteno = tilausrivi.tuoteno
+              JOIN asiakas
+                ON asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus = lasku.liitostunnus
+              LEFT JOIN asiakaskommentti
+                ON asiakaskommentti.yhtio = tilausrivi.yhtio
+                AND asiakaskommentti.ytunnus = lasku.ytunnus
+                AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+              LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
+                ON avainsana_nimitys.yhtio = tuote.yhtio
+                AND avainsana_nimitys.kieli = asiakas.kieli
+                AND avainsana_nimitys.laji = 'nimitys'
+                AND avainsana_nimitys.tuoteno = tuote.tuoteno
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tila = 'L'
+                AND lasku.alatila = 'B'
+                AND lasku.tunnus IN ($_otunnukset)";
+    $result = pupe_query($query);
 
-  if (mysql_num_rows($result) == 0) return false;
+    if (mysql_num_rows($result) == 0) return false;
 
-  $laskurow = mysql_fetch_assoc($result);
+    $laskurow = mysql_fetch_assoc($result);
 
-  $worksheet   = new pupeExcel();
-  $format_bold = array("bold" => true);
-  $excelrivi   = 0;
-  $excelsarake = 0;
+    $worksheet   = new pupeExcel();
+    $format_bold = array("bold" => true);
+    $excelrivi   = 0;
+    $excelsarake = 0;
 
-  if (count($otunnukset) > 1) {
-    $header_nimi = $toimitustaparow["toim_postitp"];
-    $subject     = t("Excel-koontilähete");
-    $filename    = "Koontilahete.xlsx";
-  }
-  else {
-    $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
-    $subject     = t("Excel-lähete");
-    $filename    = "Lahete.xlsx";
-  }
+    if (count($otunnukset) > 1) {
+      $header_nimi = $toimitustaparow["toim_postitp"];
+      $subject     = t("Excel-koontilähete");
+      $filename    = "Koontilahete.xlsx";
+    }
+    else {
+      $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
+      $subject     = t("Excel-lähete");
+      $filename    = "Lahete.xlsx";
+    }
 
   if (!empty($header_nimi)) {
     $worksheet->writeString($excelrivi,
-                            $excelsarake,
-                            "Deliveries to {$header_nimi}",
-                            $format_bold);
+      $excelsarake,
+      "Deliveries to {$header_nimi}",
+      $format_bold);
 
-    for ($i=0; $i < 3; $i++) $excelrivi++;
-  }
+      for ($i=0; $i < 3; $i++) $excelrivi++;
+    }
 
-  $headerit = array(
-    'Customer order number',
-    'Company Product number',
-    'Customer Product number',
-    'EAN Code',
-    'Product Description',
-    'Pack',
-    'QTY'
-  );
-
-  foreach ($headerit as $header) {
-    $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
-    $excelsarake++;
-  }
-
-  mysql_data_seek($result, 0);
-
-  while ($row = mysql_fetch_assoc($result)) {
-    $excelsarake = 0;
-    $fields = array(
-      $row['asiakkaan_tilausnumero'],
-      $row['tuoteno'],
-      $row['kommentti'],
-      $row['eankoodi'],
-      $row['nimitys'],
-      $row['myynti_era'],
-      $row['tilkpl']
+    $headerit = array(
+      'Customer order number',
+      'Company Product number',
+      'Customer Product number',
+      'EAN Code',
+      'Product Description',
+      'Pack',
+      'QTY'
     );
 
-    $excelrivi++;
-
-    foreach ($fields as $field) {
-      $worksheet->writeString($excelrivi, $excelsarake, $field);
+    foreach ($headerit as $header) {
+      $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
       $excelsarake++;
     }
-  }
 
-  $excelnimi = $worksheet->close();
+    mysql_data_seek($result, 0);
 
-  $email_params = array(
-    "to"      => $kukarow['eposti'],
-    "subject" => $subject,
-    "attachements" => array(
-      0 => array(
-        "filename"    => "/tmp/{$excelnimi}",
-        "newfilename" => $filename,
-        "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    while ($row = mysql_fetch_assoc($result)) {
+      $excelsarake = 0;
+      $fields = array(
+        $row['asiakkaan_tilausnumero'],
+        $row['tuoteno'],
+        $row['kommentti'],
+        $row['eankoodi'],
+        $row['nimitys'],
+        $row['myynti_era'],
+        $row['tilkpl']
+      );
+
+      $excelrivi++;
+
+      foreach ($fields as $field) {
+        $worksheet->writeString($excelrivi, $excelsarake, $field);
+        $excelsarake++;
+      }
+    }
+
+    $excelnimi = $worksheet->close();
+
+    $email_params = array(
+      "to"      => $kukarow['eposti'],
+      "subject" => $subject,
+      "attachements" => array(
+        0 => array(
+          "filename"    => "/tmp/{$excelnimi}",
+          "newfilename" => $filename,
+          "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
       )
-    )
-  );
+    );
 
-  return pupesoft_sahkoposti($email_params);
+    return pupesoft_sahkoposti($email_params);
+  }
 }

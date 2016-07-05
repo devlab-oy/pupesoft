@@ -112,7 +112,7 @@ if ($laskurow["tila"] == "O") {
 echo "</tr>";
 
 echo "<tr>
-    <td>",tarkistahetu($laskurow['ytunnus']),"</td>
+    <td>", tarkistahetu($laskurow['ytunnus']), "</td>
     <td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
 
 if ($verkkokauppa != "" and $muokkaa != "") {
@@ -256,9 +256,9 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   if ($laskurow["tila"] == "U") {
     $query = "SELECT group_concat(lasku.tunnus) tunnukset
               FROM lasku
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and tila        = 'L'
-              and laskunro    = '$laskurow[laskunro]'";
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tila     = 'L'
+              and laskunro = '$laskurow[laskunro]'";
     $otres = pupe_query($query);
     $otrow = mysql_fetch_assoc($otres);
 
@@ -359,7 +359,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
     elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
-      foreach(explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
+      foreach (explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
         $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
       }
     }
@@ -393,7 +393,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-            and tilausrivi.var     != 'O'
+            and tilausrivi.var      not in ('P','J','O','S')
             AND tilausrivi.tyyppi  != 'D'
             HAVING kerattyaika != '0000-00-00 00:00:00'";
   $kerattyaikares = pupe_query($query);
@@ -418,7 +418,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
               FROM tilausrivi
               WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
               AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-              and tilausrivi.var     != 'O'
+              and tilausrivi.var      not in ('P','J','O','S')
               AND tilausrivi.tyyppi  != 'D'
               HAVING toimitettuaika != '0000-00-00 00:00:00'";
     $toimitettuaikares = pupe_query($query);

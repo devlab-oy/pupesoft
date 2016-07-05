@@ -200,7 +200,7 @@ if ($tee == "raportti") {
       echo "<th>".t("Valuutta")."</th>";
       echo "<th>".t("Vienti")."</th>";
 
-      $query = "SELECT selite
+      $query = "SELECT cast(selite AS DECIMAL(4,2)) selite
                 FROM avainsana
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND laji    = 'ALV'
@@ -208,7 +208,7 @@ if ($tee == "raportti") {
       $alv_result = pupe_query($query);
 
       while ($alv_row = mysql_fetch_assoc($alv_result)) {
-        echo "<th>".t("Alv")." $alv_row[selite]%</th>";
+        echo "<th>".t("Alv")." ".(float) $alv_row["selite"]."%</th>";
       }
 
       echo "</tr>";
@@ -243,7 +243,7 @@ if ($tee == "raportti") {
           $query = "SELECT ";
 
           while ($alv_row = mysql_fetch_assoc($alv_result)) {
-            $query .= " sum(if(tilausrivi.alv=$alv_row[selite], rivihinta*(tilausrivi.alv/100), 0)) alv$alv_row[selite], ";
+            $query .= " sum(if(tilausrivi.alv=$alv_row[selite], rivihinta*(tilausrivi.alv/100), 0)) 'alv$alv_row[selite]', ";
           }
 
           //  Tehdään lista vielä alv erottelusta
@@ -259,7 +259,7 @@ if ($tee == "raportti") {
           $query = "SELECT ";
 
           while ($alv_row = mysql_fetch_assoc($alv_result)) {
-            $query .= " sum(if(t1.vero=$alv_row[selite], t2.summa, 0)) alv$alv_row[selite], ";
+            $query .= " sum(if(t1.vero=$alv_row[selite], t2.summa, 0)) 'alv$alv_row[selite]', ";
           }
 
           // Haetaan  kaikki verotiliöinnit

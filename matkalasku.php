@@ -3013,9 +3013,9 @@ function hae_matkustajan_kilometrit($tuoteno, $kuka) {
   $query = "SELECT sum(tilausrivi.kpl) yhteensa
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND lasku.tila in ('H','Y','M','P','Q'))
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tyyppi = 'M'
-              AND tilausrivi.tuoteno = 'km-16'
+            WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+              AND tilausrivi.tyyppi    = 'M'
+              AND tilausrivi.tuoteno   = 'km-16'
               AND lasku.toim_ovttunnus = '{$kuka}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);

@@ -279,7 +279,7 @@ if (!function_exists("tuoteperhe_reku2")) {
         foreach ($tmp_kerroin_array as $ke_ind => $ke_kerr) {
           list($ker_isa, $ke_ker) = explode("#!¡!#", $ke_kerr);
 
-          if ($ke_ker <= 0) {
+          if ($ke_ker == 0) {
             $ke_ker = 1;
           }
 

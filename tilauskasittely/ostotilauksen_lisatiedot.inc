@@ -415,7 +415,7 @@ if ($tee == "") {
       <td>".t("kk")." <input type='text' name='kk' value='$kk' size='3'></td>
       <td>".t("vvvv")." <input type='text' name='vv' value='$vv' size='5'></td></tr>";
 
-  echo "<tr><th>".t("Kommentti").":</th><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
+  echo "<tr><th>".t("Kommentti").":</th><td colspan='3'><textarea name='kommentti' rows='6' cols='60'>{$laskurow['comments']}</textarea></td></tr>";
 
   echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 

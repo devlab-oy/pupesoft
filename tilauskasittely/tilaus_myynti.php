@@ -265,9 +265,6 @@ else {
   liite_popup("JS");
 }
 
-if (function_exists("js_popup")) {
-  echo js_popup(-100);
-}
 for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
   if (!isset(${'ale'.$alepostfix})) { ${'ale'.$alepostfix} = "";}
   if (!isset(${'ale_array'.$alepostfix})) { ${'ale_array'.$alepostfix} = "";}
@@ -5505,8 +5502,6 @@ if ($tee == '') {
   $_keratty_ja_ylitetty = FALSE;
 
   if ($_kukaextranet and $_kat_jv and $_asiakas and $_saako and $_mika_toim) {
-
-    js_popup();
 
     // Parametrejä saatanat.php:lle
     $sytunnus          = $laskurow['ytunnus'];

@@ -939,6 +939,8 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
 }
 
 function pankkiyhteyden_paivamaarat($pankkiyhteys) {
+  global $palvelin2;
+
   // Loopataan certifikaattien expire datet
   $certit = array(
     "signing_certificate_valid_to" => "Allekirjoitus-sertifikaatti",
@@ -967,7 +969,15 @@ function pankkiyhteyden_paivamaarat($pankkiyhteys) {
     $_nimi = t($nimi);
     $_time = tv1dateconv($_time);
 
-    echo "<font class='error'>{$_nimi} on vanhentunut!</font><br><br>";
+    echo "<font class='error'>{$_nimi} on vanhentunut!";
+
+    if (tarkista_oikeus('pankkiyhteysadmin.php', '', true)) {
+      echo " Sertifikaatin voi uusia ";
+      echo "<a href='{$palvelin2}/pankkiyhteysadmin.php'>" . t('t‰‰lt‰') . "</a>.";
+    }
+
+    echo "</font><br><br>";
+
 
     $_certit_ok = false;
   }

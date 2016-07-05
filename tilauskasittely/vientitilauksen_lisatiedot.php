@@ -61,16 +61,16 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       $query = "UPDATE tyomaarays SET
-                tullikoodi                       = '$tullikoodi',
-                tulliarvo                        = '$tulliarvo',
-                maa_maara                        = '$maa_maara',
-                maa_lahetys                      = '$maa_lahetys',
-                maa_alkupera                     = '$maa_alkupera',
-                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-                kuljetusmuoto                    = '$kuljetusmuoto',
-                bruttopaino                      = '$bruttopaino'
-                WHERE otunnus                    in ($otunnus)
-                and yhtio                        = '$kukarow[yhtio]'";
+                tullikoodi              = '$tullikoodi',
+                tulliarvo               = '$tulliarvo',
+                maa_maara               = '$maa_maara',
+                maa_lahetys             = '$maa_lahetys',
+                maa_alkupera            = '$maa_alkupera',
+                kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
+                kuljetusmuoto           = '$kuljetusmuoto',
+                bruttopaino             = '$bruttopaino'
+                WHERE otunnus           in ($otunnus)
+                and yhtio               = '$kukarow[yhtio]'";
       $result = pupe_query($query);
     }
     else {
@@ -148,7 +148,7 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       echo "<tr>";
-      echo "<th>",t("Tullinimike"),"</th>";
+      echo "<th>", t("Tullinimike"), "</th>";
       echo "<td>";
       echo "<br>";
       echo livesearch_kentta("paaformi", 'TULLINIMIKEHAKU', 'tullikoodi', 140, $laskurow['tullikoodi'], 'EISUBMIT', '', '', 'ei_break_all');
@@ -156,7 +156,7 @@ if ($tapa == "tuonti" and $tee != "") {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>",t("Tulliarvo"),"</th>";
+      echo "<th>", t("Tulliarvo"), "</th>";
       echo "<td>";
       echo "<br>";
       echo "<input type='text' name='tulliarvo' value='{$laskurow['tulliarvo']}' />";
@@ -367,21 +367,21 @@ elseif ($tee != "") {
       //päivitetään alatila vain jos tilaus ei vielä ole laskutettu
       $query = "UPDATE lasku
                 SET alatila = 'E'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$otun'
-                and tila    = 'L'
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tunnus     = '$otun'
+                and tila       = 'L'
                 and jaksotettu = 0
-                and alatila NOT IN ('X', 'J')";
+                and alatila    NOT IN ('X', 'J')";
       $result = pupe_query($query);
 
       //päivitetään alatila vain jos tilauksella on maksupositioita
       $query = "UPDATE lasku SET
-                alatila = 'J'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus  = '{$otun}'
-                and tila    = 'L'
+                alatila        = 'J'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                and tunnus     = '{$otun}'
+                and tila       = 'L'
                 and jaksotettu > 0
-                and alatila NOT IN ('X', 'J', 'D')";
+                and alatila    NOT IN ('X', 'J', 'D')";
       $result = pupe_query($query);
     }
 
@@ -990,7 +990,7 @@ elseif ($tee == '') {
       }
       echo "<td>$teksti</td>";
 
-      if ((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0))
+      if ((in_array($tilrow['alatila'], array('E', 'J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0))
         and $tilrow['vienti'] == 'K'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
@@ -1000,7 +1000,7 @@ elseif ($tee == '') {
         and $tilrow['poistumistoimipaikka_koodi'] != '') {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
-      elseif (((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0)) or $toim == "TYOMAARAYS")
+      elseif (((in_array($tilrow['alatila'], array('E', 'J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0)) or $toim == "TYOMAARAYS")
         and $tilrow['vienti'] == 'E'
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0

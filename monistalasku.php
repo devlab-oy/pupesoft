@@ -542,7 +542,7 @@ if ($tee == "ETSILASKU") {
       echo "</{$ero}>";
 
       echo "<{$ero}>{$row['asiakas']}</{$ero}>";
-      echo "<{$ero}>",tarkistahetu($row['ytunnus']),"</{$ero}>";
+      echo "<{$ero}>", tarkistahetu($row['ytunnus']), "</{$ero}>";
       echo "<{$ero}>{$row['summa']}</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["tapvm"])."</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["luontiaika"])."</{$ero}>";

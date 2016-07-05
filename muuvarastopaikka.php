@@ -94,7 +94,7 @@ if ($tee == 'S' or $tee == 'E') {
 }
 
 // Itse varastopaikkoja muutellaan
-if ($tee == 'MUUTA') {
+if ($tee == 'MUUTA' and $toim != "VAINSIIRTO") {
   $query = "SELECT *
             FROM tuotepaikat
             WHERE tuoteno  = '$tuoteno'
@@ -622,6 +622,10 @@ if ($tee == 'N') {
     );
 
     hyllysiirto($params);
+
+    if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
+      echo "<br><font class='message'>".t("Tuotesiirto onnistui. Paikalle %s siirrettiin %s tuotetta", "", "$minnerow[hyllyalue]-$minnerow[hyllynro]-$minnerow[hyllyvali]-$minnerow[hyllytaso]", $kappaleet[$iii])."!</font><br><br>";
+    }
   }
 
   //P‰ivitet‰‰n sarjanumerot
@@ -740,13 +744,13 @@ if ($tee == 'N') {
   $ahyllyvali = '';
   $ahyllytaso = '';
   $asaldo     = '';
-  $tee     = $uusitee;
+  $tee        = $uusitee;
 
   if ($kutsuja == "varastopaikka_aineistolla.php") $tee = 'MEGALOMAANINEN_ONNISTUMINEN';
 }
 
 // Uusi varstopaikka
-if ($tee == 'UUSIPAIKKA') {
+if ($tee == 'UUSIPAIKKA' and $toim != "VAINSIIRTO") {
 
   $ahyllyalue = trim($ahyllyalue);
   $ahyllynro  = trim($ahyllynro);
@@ -1106,165 +1110,166 @@ if ($tee == 'M') {
   echo "<td class='back'><input type = 'submit' value = '".t("Siirr‰")."'></td>
       </tr></table></form><br>";
 
-  // Tehd‰‰n k‰yttˆliittym‰ paikkojen muutoksille (otetus tai pois)
-  echo "  <form name = 'valinta' method='post'>
-      <input type = 'hidden' name = 'tee' value ='MUUTA'>
-      <input type = 'hidden' name = 'toim' value = '{$toim}' />
-      <input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
+  if ($toim != "VAINSIIRTO") {
+    // Tehd‰‰n k‰yttˆliittym‰ paikkojen muutoksille (otetus tai pois)
+    echo "  <form name = 'valinta' method='post'>
+        <input type = 'hidden' name = 'tee' value ='MUUTA'>
+        <input type = 'hidden' name = 'toim' value = '{$toim}' />
+        <input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>", t("Varasto"), "</th>";
-  echo "<th>", t("Varastopaikka"), "</th>";
-  echo "<th>", t("Saldo"), "</th>";
-  echo "<th>", t("Hyllyss‰"), "</th>";
-  echo "<th>", t("Myyt‰viss‰"), "</th>";
-  echo "<th>", t("Oletuspaikka"), "</th>";
-  echo "<th>", t("H‰lyraja"), "</th>";
-  echo "<th>", t("Tilausm‰‰r‰"), "</th>";
-  echo "<th>", t("Prio"), "</th>";
-  echo "<th>", t("Poista"), "</th>";
-  echo "</tr>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>", t("Varasto"), "</th>";
+    echo "<th>", t("Varastopaikka"), "</th>";
+    echo "<th>", t("Saldo"), "</th>";
+    echo "<th>", t("Hyllyss‰"), "</th>";
+    echo "<th>", t("Myyt‰viss‰"), "</th>";
+    echo "<th>", t("Oletuspaikka"), "</th>";
+    echo "<th>", t("H‰lyraja"), "</th>";
+    echo "<th>", t("Tilausm‰‰r‰"), "</th>";
+    echo "<th>", t("Prio"), "</th>";
+    echo "<th>", t("Poista"), "</th>";
+    echo "</tr>";
 
-  if (mysql_num_rows($paikatresult1) > 0) {
-    $query = "SELECT *
-              FROM tuotepaikat
-              WHERE tuoteno  = '$tuoteno'
-              and yhtio      = '$kukarow[yhtio]'
-              and oletus    != ''";
-    $result = pupe_query($query);
-    $oletusrow = mysql_fetch_array($result);
+    if (mysql_num_rows($paikatresult1) > 0) {
+      $query = "SELECT *
+                FROM tuotepaikat
+                WHERE tuoteno  = '$tuoteno'
+                and yhtio      = '$kukarow[yhtio]'
+                and oletus    != ''";
+      $result = pupe_query($query);
+      $oletusrow = mysql_fetch_array($result);
 
-    mysql_data_seek($paikatresult1, 0);
+      mysql_data_seek($paikatresult1, 0);
 
-    while ($saldorow = mysql_fetch_array($paikatresult1)) {
+      while ($saldorow = mysql_fetch_array($paikatresult1)) {
 
-      if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
+        if ($oletusvarasto_chk != '' and kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"], $oletusvarasto_chk) == 0) continue;
 
-      if ($saldorow["tunnus"] == $oletusrow["tunnus"]) {
-        $checked = "CHECKED";
-      }
-      else {
-        $checked = "";
-      }
+        if ($saldorow["tunnus"] == $oletusrow["tunnus"]) {
+          $checked = "CHECKED";
+        }
+        else {
+          $checked = "";
+        }
 
-      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-      if ($saldorow["saldo"] == 0 and $hyllyssa == 0 and $myytavissa == 0) {
-        //Tarkistetaan varaako reklamaatio tuotepaikkaa
-        $query = "SELECT *
-                  FROM lasku
-                  JOIN tilausrivi ON (
-                    tilausrivi.yhtio       = lasku.yhtio AND
-                    tilausrivi.otunnus     = lasku.tunnus
-                  )
-                  WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
-                  AND lasku.tila           = 'C'
-                  AND lasku.alatila        IN ('', 'A', 'B', 'C')
-                  AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
-                  AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
-                  AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
-                  AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
-                  AND tilausrivi.tuoteno   = '{$saldorow["tuoteno"]}'";
-        $reklares = pupe_query($query);
+        if ($saldorow["saldo"] == 0 and $hyllyssa == 0 and $myytavissa == 0) {
+          //Tarkistetaan varaako reklamaatio tuotepaikkaa
+          $query = "SELECT *
+                    FROM lasku
+                    JOIN tilausrivi ON (
+                      tilausrivi.yhtio       = lasku.yhtio AND
+                      tilausrivi.otunnus     = lasku.tunnus
+                    )
+                    WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+                    AND lasku.tila           = 'C'
+                    AND lasku.alatila        IN ('', 'A', 'B', 'C')
+                    AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
+                    AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
+                    AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
+                    AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
+                    AND tilausrivi.tuoteno   = '{$saldorow["tuoteno"]}'";
+          $reklares = pupe_query($query);
 
-        $reklacheck = (mysql_num_rows($reklares) > 0);
-      }
-      else {
-        $reklacheck = false;
-      }
+          $reklacheck = (mysql_num_rows($reklares) > 0);
+        }
+        else {
+          $reklacheck = false;
+        }
 
-      echo "<tr>";
-      echo "<td>$saldorow[nimitys]</td>";
-      echo "<td>";
-
-      if (tarkista_oikeus('inventoi.php', '', 1)) {
-        echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
-      }
-      elseif (tarkista_oikeus('inventoi.php', 'OLETUSVARASTO', 1)) {
-        echo "<a href='{$palvelin2}inventoi.php?toim=OLETUSVARASTO&tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////toim=OLETUSVARASTO//tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
-      }
-      else {
-        echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";
-      }
-
-      echo "</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
-
-      if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
-
+        echo "<tr>";
+        echo "<td>$saldorow[nimitys]</td>";
         echo "<td>";
 
-        if ($oletusvarasto_chk == '' or ($oletusvarasto_chk != '' and kuuluukovarastoon($oletusrow["hyllyalue"], $oletusrow["hyllynro"], $oletusvarasto_chk) != 0)) {
-          echo "<input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked>";
+        if (tarkista_oikeus('inventoi.php', '', 1)) {
+          echo "<a href='{$palvelin2}inventoi.php?tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+        }
+        elseif (tarkista_oikeus('inventoi.php', 'OLETUSVARASTO', 1)) {
+          echo "<a href='{$palvelin2}inventoi.php?toim=OLETUSVARASTO&tee=INVENTOI&tuoteno=".urlencode($saldorow["tuoteno"])."&lopetus=$lopetus/SPLIT/muuvarastopaikka.php////toim=OLETUSVARASTO//tee=M//tuoteno=".urlencode($saldorow["tuoteno"])."'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</a>";
+        }
+        else {
+          echo "$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]";
         }
 
-        echo "</td>";
-        echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'  value='$saldorow[halytysraja]'></td>
-          <td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
-          <td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]'    value='{$saldorow['prio']}'></td>";
-      }
-      else {
-        echo "<td></td><td></td><td></td><td></td>";
-      }
+        echo "</td><td align='right'>$saldorow[saldo]</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 
-      $chk = $poistoteksti = "";
+        if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {
 
-      if ($saldorow["poistettava"] != "") {
-        $chk = "CHECKED";
-        $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myyt‰viss‰ nolla, eik‰ tuotepaikalle ole avoimia rivej‰").")";
-      }
+          echo "<td>";
 
-      // Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
-      if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
-        echo "<td></td>";
-      }
-      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
+          if ($oletusvarasto_chk == '' or ($oletusvarasto_chk != '' and kuuluukovarastoon($oletusrow["hyllyalue"], $oletusrow["hyllynro"], $oletusvarasto_chk) != 0)) {
+            echo "<input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked>";
+          }
 
-        if ($reklacheck) {
-          $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
+          echo "</td>";
+          echo "<td><input type='text' size='6' name='halyraja2[$saldorow[tunnus]]'  value='$saldorow[halytysraja]'></td>
+            <td><input type='text' size='6' name='tilausmaara2[$saldorow[tunnus]]' value='$saldorow[tilausmaara]'></td>
+            <td><input type='text' size='6' name='prio2[{$saldorow['tunnus']}]'    value='{$saldorow['prio']}'></td>";
+        }
+        else {
+          echo "<td></td><td></td><td></td><td></td>";
         }
 
-        echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
-            <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
-      }
-      else {
+        $chk = $poistoteksti = "";
 
         if ($saldorow["poistettava"] != "") {
-          $poistoteksti .= "<br>(".t("Voit myˆs poistaa tuotepaikan t‰st‰ heti").")";
+          $chk = "CHECKED";
+          $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myyt‰viss‰ nolla, eik‰ tuotepaikalle ole avoimia rivej‰").")";
         }
 
-        echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'> {$poistoteksti}</td>";
+        // Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
+        if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
+          echo "<td></td>";
+        }
+        elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
+
+          if ($reklacheck) {
+            $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
+          }
+
+          echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
+              <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
+        }
+        else {
+
+          if ($saldorow["poistettava"] != "") {
+            $poistoteksti .= "<br>(".t("Voit myˆs poistaa tuotepaikan t‰st‰ heti").")";
+          }
+
+          echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'> {$poistoteksti}</td>";
+        }
+
+        echo "</tr>";
       }
-
-      echo "</tr>";
     }
+    echo "<tr><td colspan='10'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
+
+    $ahyllyalue  = '';
+    $ahyllynro  = '';
+    $ahyllyvali  = '';
+    $ahyllytaso  = '';
+
+    echo "<table><form name = 'valinta' method='post'>
+        <input type='hidden' name='tee' value='UUSIPAIKKA'>
+        <input type = 'hidden' name = 'toim' value = '{$toim}' />
+        <input type='hidden' name='tuoteno' value='$tuoteno'>
+        <tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
+        <tr><td>
+        ".t("Alue")." ", hyllyalue('ahyllyalue', $ahyllyalue), "
+        ".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
+        ".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
+        ".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";
+
+    echo "  </td></tr>
+        <tr><td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr>
+        </table></form>";
   }
-  echo "<tr><td colspan='10'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
-
-  $ahyllyalue  = '';
-  $ahyllynro  = '';
-  $ahyllyvali  = '';
-  $ahyllytaso  = '';
-
-  echo "<table><form name = 'valinta' method='post'>
-      <input type='hidden' name='tee' value='UUSIPAIKKA'>
-      <input type = 'hidden' name = 'toim' value = '{$toim}' />
-      <input type='hidden' name='tuoteno' value='$tuoteno'>
-      <tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
-      <tr><td>
-      ".t("Alue")." ", hyllyalue('ahyllyalue', $ahyllyalue), "
-      ".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
-      ".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
-      ".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>";
-
-  echo "  </td></tr>
-      <tr><td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr>
-      </table></form>";
-
   echo "<br><hr><form name = 'valinta' method='post'>
-      <input type='hidden' name='tee' value=''>
-      <input type = 'hidden' name = 'toim' value = '{$toim}' />
-      <input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
+        <input type='hidden' name='tee' value=''>
+        <input type = 'hidden' name = 'toim' value = '{$toim}' />
+        <input type = 'submit' value = '".t("Palaa tuotteen valintaan")."'>";
 }
 
 if ($tee == '') {

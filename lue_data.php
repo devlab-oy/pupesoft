@@ -993,6 +993,9 @@ if ($kasitellaan_tiedosto) {
       $avkmuuttuja = FALSE;
 
       foreach ($indeksi as $j) {
+        $otsikko = $taulunotsikot[$taulu][$j];
+        $column_value = $taulunrivit[$taulu][$eriviindex][$j];
+
         if ($taulunotsikot[$taulu][$j] == "TUOTENO") {
 
           $tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
@@ -1295,6 +1298,9 @@ if ($kasitellaan_tiedosto) {
           $muutetut_sopimusrivitunnukset[$taulunrivit[$taulu][$eriviindex][$j]] = $taulunrivit[$taulu][$eriviindex][$j];
           $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
         }
+        elseif ($table_mysql == 'avainsana' and in_array($otsikko, array('SELITETARK', 'SELITETARK_2', 'SELITETARK_3', 'SELITETARK_4', 'SELITETARK_5')) and empty($column_value)) {
+          $valinta .= " and $otsikko IS NULL ";
+        }
         else {
           $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
         }
@@ -1550,6 +1556,8 @@ if ($kasitellaan_tiedosto) {
           if (is_array($apu_sarakkeet) and in_array($otsikko, $apu_sarakkeet)) {
             continue;
           }
+
+          $column_value = $taulunrivit[$taulu][$eriviindex][$r];
 
           if ($r != $postoiminto) {
 
@@ -1938,6 +1946,9 @@ if ($kasitellaan_tiedosto) {
                   lue_data_echo(t("Virhe rivillä").": $rivilaskuri ".t("Selite ei saa olla tyhjä!")."<br>");
                 }
               }
+              elseif ($table_mysql == 'avainsana' and in_array($otsikko, array('SELITETARK', 'SELITETARK_2', 'SELITETARK_3', 'SELITETARK_4', 'SELITETARK_5')) and empty($column_value)) {
+                $query .= ", $otsikko = NULL ";
+              }
               elseif ($table_mysql=='tuotepaikat' and $otsikko == 'OLETUS' and $taulunrivit[$taulu][$eriviindex][$r] == 'XVAIHDA') {
                 //vaihdetaan tämä oletukseksi
                 $taulunrivit[$taulu][$eriviindex][$r] = "X"; // pakotetaan oletus
@@ -2078,6 +2089,9 @@ if ($kasitellaan_tiedosto) {
                 $query .= " $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
               }
               elseif ($table_mysql == 'maksuehto' and in_array($otsikko, array('ABS_PVM', 'KASSA_ABSPVM', 'FACTORING_ID')) and (empty($taulunrivit[$taulu][$eriviindex][$r]) or in_array($taulunrivit[$taulu][$eriviindex][$r], array('0000-00-00', 'NULL')))) {
+                $query .= ", $otsikko = NULL ";
+              }
+              elseif ($table_mysql == 'avainsana' and in_array($otsikko, array('SELITETARK', 'SELITETARK_2', 'SELITETARK_3', 'SELITETARK_4', 'SELITETARK_5')) and empty($column_value)) {
                 $query .= ", $otsikko = NULL ";
               }
               elseif ($eilisataeikamuuteta == "") {

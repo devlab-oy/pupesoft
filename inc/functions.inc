@@ -9263,16 +9263,34 @@ if (!function_exists("livesearch_tuotehaku")) {
         $naytetaanko_poistetut = "and tuote.status != 'P'";
       }
 
-      $query = "(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                 if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+      $query_select = "tuote.tunnus,
+        tuote.tuoteno,
+        tuote.nimitys,
+        tuote.kuvaus,
+        tuote.osasto,
+        tuote.try,
+        tuote.epakurantti25pvm,
+        tuote.epakurantti50pvm,
+        tuote.epakurantti75pvm,
+        tuote.epakurantti100pvm,
+        if(tuote.tuoteno  = '{$haku}', 1,
+        if(tuote.nimitys  = '{$haku}', 2,
+        if(tuote.muuta    = '{$haku}', 3,
+        if(tuote.eankoodi = '{$haku}', 4,
+        if(left(tuote.tuoteno,  length('{$haku}')) = '{$haku}', 5,
+        if(left(tuote.nimitys,  length('{$haku}')) = '{$haku}', 6,
+        if(left(tuote.muuta,    length('{$haku}')) = '{$haku}', 7,
+        if(left(tuote.eankoodi, length('{$haku}')) = '{$haku}', 8,
+        9)))))))) as jarjestys";
+
+      $query = "(SELECT {$query_select}
                  FROM tuote {$tuoteindex}
                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                  {$naytetaanko_poistetut}
                  {$kieltolisa}
                  {$tuoteno_haku_query})
                  UNION
-                 (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                 if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                 (SELECT {$query_select}
                  FROM tuote {$nimitindex}
                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                  {$naytetaanko_poistetut}
@@ -9281,8 +9299,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
       if (!empty($muuta_haku_query)) {
         $query .= "UNION
-                  (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                  if (tuote.muuta = '{$haku}', 1, if(left(tuote.muuta, length('{$haku}')) = '{$haku}', 2, if(tuote.tuoteno = '{$haku}', 3, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                  (SELECT {$query_select}
                   FROM tuote
                   WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                   {$naytetaanko_poistetut}
@@ -9292,8 +9309,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 
       if (!empty($ean_haku_query)) {
         $query .= "UNION
-                  (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                  if (tuote.muuta = '{$haku}', 1, if(left(tuote.muuta, length('{$haku}')) = '{$haku}', 2, if(tuote.tuoteno = '{$haku}', 3, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                  (SELECT {$query_select}
                   FROM tuote
                   WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                   {$naytetaanko_poistetut}

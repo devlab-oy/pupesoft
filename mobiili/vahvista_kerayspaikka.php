@@ -79,6 +79,14 @@ $alkuperainen_saapuminen = $saapuminen;
 
 // Tullaan nappulasta
 if (isset($submit_button) and trim($submit_button) != '') {
+  // Vaan yks varastoonvienti kerrallaan voi olla käynnissä per firma
+  $lock_params = array(
+  "locktime"    => 600,
+  "lockfile"    => "$kukarow[yhtio]-keikka.lock",
+  "filecontent" => "$otunnus;{$kukarow['kuka']};".date("Y-m-d H:i:s")
+  );
+
+  pupesoft_flock($lock_params);
 
   // Virheet
   $errors = array();

@@ -19,6 +19,10 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kuka
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
+if (!$onkolaajattoimipaikat) {
+  $toimipaikka = 0;
+}
+
 require "korvaavat.class.php";
 require "vastaavat.class.php";
 

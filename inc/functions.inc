@@ -6742,7 +6742,7 @@ if (!function_exists('js_openPrintDialog')) {
 if (!function_exists('js_openUrlNewWindow')) {
   function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
     $width = (!empty($width)) ? $width : 700;
-    $height = (!empty($height)) ? $height : 100;
+    $height = (!empty($height)) ? $height : 1000;
 
     return "<a href='#' {$params} onclick=\"window.open('$url', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=$width,height=$height'); return false;\">$name</a>";
   }

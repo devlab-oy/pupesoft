@@ -469,6 +469,10 @@ else {
   $rivityyppi = 'L'; // Myyntitilausrivi
 }
 
+$sallitaanko_rivikommentti_osto   = ($rivityyppi == 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'O')));
+$sallitaanko_rivikommentti_myynti = ($rivityyppi == 'L' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
+$sallitaanko_rivikommentti = ($sallitaanko_rivikommentti_osto or $sallitaanko_rivikommentti_myynti);
+
 // Onko päässätty varasto josta myydään
 if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
   $varasto = $varasto;
@@ -1916,7 +1920,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Onko tuotteella staattinen tilausrivikommentti
-              if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
+              if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0 and $sallitaanko_rivikommentti) {
                 // Tilausrivin systeemikommentti
                 if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
                   if (trim($kommentti) != "")  $kommentti = "\n".$kommentti;
@@ -3114,7 +3118,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     // Onko tuotteella staattinen tilausrivikommentti
-    if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0) {
+    if ($trow["tilausrivi_kommentti"] != "" and $rivitunnus == 0 and $sallitaanko_rivikommentti) {
       // Tilausrivin systeemikommentti
       if (stripos($kommentti, $trow["tilausrivi_kommentti"]) === FALSE) {
         if (trim($kommentti) != "")  $kommentti = "\n".$kommentti;

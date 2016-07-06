@@ -383,8 +383,7 @@ else {
   $sel = array();
   $sel[$vavv] = "SELECTED";
 
-  for ($i = date("Y"); $i >= (float) substr($ekakausirow['alkukausi'], 0, 4); $i--) {
-
+  for ($i = date("Y"); $i >= date("Y") - 5; $i--) {
     if (!isset($sel[$i])) {
       $sel[$i] = "";
     }
@@ -437,7 +436,7 @@ else {
   $sel = array();
   $sel[$vlvv] = "SELECTED";
 
-  for ($i = date("Y")+1; $i >= (float) substr($ekakausirow['loppukausi'], 0, 4); $i--) {
+  for ($i = date("Y"); $i >= date("Y") - 5; $i--) {
     echo "<option value='$i' $sel[$i]>$i</option>";
   }
 

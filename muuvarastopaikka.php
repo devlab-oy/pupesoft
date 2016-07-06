@@ -131,7 +131,7 @@ if ($tee == 'MUUTA') {
   //Haetaan edellisen tuote statuksen oletuspaikat
   if ($kutsuja == 'tuotetarkista.inc') {
     $kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
-echo "134 ",var_dump($poista),"<br><br>";
+
     foreach ($poista as $poistettava) {
       //Jos poistettavaa paikkaa ei löydy kaikista_oletuspaikoista,
       //tarkoittaa se, että kyseessä on manuaalisesti lisätty tuotepaikka.

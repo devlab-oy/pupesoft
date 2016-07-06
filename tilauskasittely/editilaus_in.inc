@@ -177,6 +177,7 @@ unset($arow_toimitus);
 unset($arow_terminaali);
 unset($yhtiorow);
 unset($crossdock911);
+unset($laskpp, $laskkk, $laskvv);
 
 $asiakkaan_tilausnumero       = "";
 $editilaus_alatila            = "";
@@ -195,6 +196,8 @@ $editilaus_tilaustyyppi       = "";
 $editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+$editilaus_ytunnus            = "";
+$editilaus_tilausaika         = "";
 $edi_kommentti                = "";
 $id                           = "";
 $ketjutus                     = "";
@@ -280,6 +283,11 @@ $mailfile = $filename;
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sis‰‰ntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
+}
+elseif ($edi_tyyppi == "ahkio") {
+  $edi_subj = "Sis‰‰ntuleva Ahkio -tilaus";
+  $edi_laatija = "Ahkio";
+  $edi_tyyppi = "magento"; // Ahkio toimii t‰‰ll‰ samaan tapaan kuin magento
 }
 elseif ($edi_tyyppi == "magento") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
@@ -868,6 +876,15 @@ while ($tietue = fgets($fd)) {
     $lnimitark = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_ASIAKASOVT':
+    $editilaus_ytunnus = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_TILAUSAIKA':
+    $editilaus_tilausaika = $tieto;
+    $toimpvm = $tieto;
+    break;
+
   case 'OSTOTIL.OT_KATUOSOITE':
     $losoite = trim($tieto);
     break;
@@ -1059,6 +1076,7 @@ while ($tietue = fgets($fd)) {
                 FROM maksuehto
                 WHERE yhtio  = '$kukarow[yhtio]'
                 AND kateinen = 'o'
+                AND kaytossa != 'E'
                 LIMIT 1";
       $editilaus_kateinen_res = pupe_query($query);
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
@@ -1208,6 +1226,12 @@ while ($tietue = fgets($fd)) {
         $arow["toim_puh"]   = $ltoim_puh;
         $arow["toim_email"] = $ltoim_email;
         $arow["vienti"]     = "";
+
+        if (!empty($editilaus_ytunnus)) {
+          // jos t‰‰ll‰ tuli ovt/ytunnus, k‰ytet‰‰n sit‰
+          $arow["ytunnus"] = $editilaus_ytunnus;
+          $arow["ovttunnus"] = $editilaus_ytunnus;
+        }
 
         $arow['laskutus_nimi']     = $lnimi;
         $arow['laskutus_nimitark'] = $lnimitark;
@@ -2440,6 +2464,16 @@ while ($tietue = fgets($fd)) {
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
 
+        // jos magento -casessa on annettu toimitusaika, asetetaan se laskun tapahtumap‰iv‰ksi
+        // mik‰li tilaus on maksettu
+        if ($laskutettu_magento_tilaus and !empty($editilaus_tilausaika)) {
+          $_temp_date = strtotime($editilaus_tilausaika);
+
+          $laskpp = date("d", $_temp_date);
+          $laskkk = date("m", $_temp_date);
+          $laskvv = date("Y", $_temp_date);
+        }
+
         // Laitetaan tilaus valmiiksi
         if ($paivita_takaisin_keraysjonoon and $laskurow["vienti"] != "") {
           // Paitsi jos meill‰ on vientitilaus, joka tulee laittaa takaisin ker‰ysjonoon
@@ -2486,6 +2520,7 @@ while ($tietue = fgets($fd)) {
     unset($arow_toimitus);
     unset($arow_terminaali);
     unset($crossdock911);
+    unset($laskpp, $laskkk, $laskvv);
 
     $asiakkaan_tilausnumero       = "";
     $editilaus_alatila            = "";
@@ -2503,6 +2538,8 @@ while ($tietue = fgets($fd)) {
     $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+    $editilaus_ytunnus            = "";
+    $editilaus_tilausaika         = "";
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

@@ -181,7 +181,7 @@ $maksaja    = "''";
 
 if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
   $maksaja    = "$kukarow[kuka]";
-  $maksupaiva = "now()";
+  $maksupaiva = "'{$lasrow['tapvm']}'";
 }
 
 ///* Lasketaan Kassa-alennus *///

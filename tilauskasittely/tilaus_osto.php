@@ -830,6 +830,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
   if ($tee == 'POISTA_RIVI') {
     tarkista_myynti_osto_liitos_ja_poista($rivitunnus, true);
 
+    $rivitunnus = 0;
+
     $automatiikka = "ON";
     $tee = "Y";
   }

@@ -2901,7 +2901,7 @@ else {
       elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
 
         // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
-        $apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents($nimifinvoice));
+        $apix_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
         $apix_laskumaara = count($apix_laskuarray);
 
         if ($apix_laskumaara > 0) {
@@ -2910,7 +2910,7 @@ else {
           for ($a = 1; $a < $apix_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-            $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
+            $apix_finvoice = "<SOAP-ENV:Envelope".$apix_laskuarray[$a];
 
             // Laitetaan lasku l‰hetysjonoon
             $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);

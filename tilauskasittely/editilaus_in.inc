@@ -180,6 +180,7 @@ unset($crossdock911);
 
 $asiakkaan_tilausnumero       = "";
 $editilaus_alatila            = "";
+$editilaus_hyvaksyttava       = "";
 $editilaus_eilahetetta        = "";
 $editilaus_kassalipas         = "";
 $editilaus_loppuhinta         = "";
@@ -883,6 +884,10 @@ while ($tietue = fgets($fd)) {
     $lnimi = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_HYVAKSYTTAVA':
+    $editilaus_hyvaksyttava = trim($tieto);
+    break;
+
   case 'ONADPL_PC' :
     // Asiakkaan joku toimitus ovttunnus tms... tää ylikirjottaa kaiken...
     if ($tieto != "") {
@@ -1555,6 +1560,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
+      if ($editilaus_hyvaksyttava != "") {
+        $editilaus_alatila = 'F';
+      }
 
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
@@ -2341,6 +2349,10 @@ while ($tietue = fgets($fd)) {
   case 'UNT':
 
     if ($editilaus_otsikko_ok == "KYLLA" and $edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+      $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+    }
+
+    if ($editilaus_hyvaksyttava != "") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 

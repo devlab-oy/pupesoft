@@ -2432,8 +2432,6 @@ while ($tietue = fgets($fd)) {
             $valittu_kopio_tulostin = "asiakasemail$ltoim_email";
           }
         }
-        // Otetaan laskurow talteen
-        $tm_laskurow_talteen = $laskurow;
 
         // magentotilaus on laskutettu, jos meillä on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
@@ -2455,32 +2453,18 @@ while ($tietue = fgets($fd)) {
 
         // Päivitetään tilaus takaisin keräysjonoon
         if ($paivita_takaisin_keraysjonoon) {
-          // Käsinsyötetty verkkokauppatilaus laskutettiin ja nyt se laitetaan takaisin keräysjonoon
-          if ($tm_laskurow_talteen["tilaustyyppi"] == "W") {
-            // Jos se on laskutettu, niin laitetaan se
+            // Varmistetaan, että tilaus on laskutettu
             $query = "SELECT tunnus
                       FROM lasku
                       WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus = '$tm_laskurow_talteen[tunnus]'
+                      AND tunnus = '$editilaus_lasku_tunnus'
                       AND tila ='L'
                       AND alatila = 'X'";
             $result = pupe_query($query);
 
             if ($laskurow = mysql_fetch_assoc($result)) {
-
-              $query  = "UPDATE lasku set
-                         sisainen = ''
-                         where yhtio = '$kukarow[yhtio]'
-                         and tunnus = '$laskurow[tunnus]'";
-              pupe_query($query);
-
-              $kukarow['kesken'] = $laskurow['tunnus'];
-
-              laskutettu_myyntitilaus_tulostusjonoon($laskurow["tunnus"]);
+              laskutettu_myyntitilaus_tulostusjonoon($editilaus_lasku_tunnus);
             }
-          }
-          else {
-            require "tilaus-valmis.inc";
           }
         }
 

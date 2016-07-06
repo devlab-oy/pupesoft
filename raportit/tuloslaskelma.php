@@ -920,6 +920,27 @@ else {
       $tilijoini = "  JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
     }
 
+    // Vapaavalintainen vertailup‰iv‰
+    if (!empty($vertailupvm)) {
+      $vertailu_alku  = date("Y-m-d", mktime(0, 0, 0, $vakk, $vapp, $vavv));
+      $vertailu_loppu = date("Y-m-d", mktime(0, 0, 0, $vlkk, $vlpp, $vlvv));
+
+      // HUOM, t‰ss‰ ylikirjotetaan totalalku/totalloppu, jota k‰ytet‰‰n yll‰ kyselyss‰,
+      // jotta saadaan p‰‰queryn whereen kaikki kaikki tapahtumat
+      if ($vertailu_alku < $totalalku) {
+        $totalalku = $vertailu_alku;
+      }
+
+      if ($vertailu_loppu > $totalloppu) {
+        $totalloppu = $vertailu_loppu;
+      }
+
+      $alkuquery1 .= ", sum(if (tiliointi.tapvm >= '{$vertailu_alku}' and tiliointi.tapvm <= '{$vertailu_loppu}', tiliointi.summa, 0)) AS '{$vertailu_alku} - {$vertailu_loppu}' \n";
+      $alkuquery2 .= ", sum(if (tiliointi.tapvm >= '{$vertailu_alku}' and tiliointi.tapvm <= '{$vertailu_loppu}', tiliointi.summa, 0)) AS '{$vertailu_alku} - {$vertailu_loppu}' \n";
+
+      $kaudet[] = "{$vertailu_alku} - {$vertailu_loppu}";
+    }
+
     // Rajataan AINA k‰ytt‰j‰n osaston kustannuspaikalla
     $vainomakustp_lisa = "";
 

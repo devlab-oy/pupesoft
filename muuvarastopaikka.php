@@ -131,7 +131,7 @@ if ($tee == 'MUUTA') {
   //Haetaan edellisen tuote statuksen oletuspaikat
   if ($kutsuja == 'tuotetarkista.inc') {
     $kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try_vanha, $tem_status_vanha);
-
+echo "134 ",var_dump($poista),"<br><br>";
     foreach ($poista as $poistettava) {
       //Jos poistettavaa paikkaa ei löydy kaikista_oletuspaikoista,
       //tarkoittaa se, että kyseessä on manuaalisesti lisätty tuotepaikka.
@@ -1169,9 +1169,30 @@ if ($tee == 'M') {
         $reklares = pupe_query($query);
 
         $reklacheck = (mysql_num_rows($reklares) > 0);
+
+        // Tarkistetaan onko paikalla tilausrivejä
+        $query = "SELECT lasku.tunnus
+                  FROM lasku
+                  JOIN tilausrivi ON (
+                    tilausrivi.yhtio       = lasku.yhtio AND
+                    tilausrivi.otunnus     = lasku.tunnus
+                  )
+                  WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+                  AND lasku.tila           IN ('L', 'N')
+                  AND lasku.alatila        IN ('', 'A', 'B', 'BD', 'C', 'D', 'E', 'F', 'G', 'J', 'K', 'KA', 'T', 'U', 'V')
+                  AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
+                  AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
+                  AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
+                  AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
+                  AND tilausrivi.tuoteno   = '{$saldorow["tuoteno"]}'";
+        $rivires = pupe_query($query);
+
+        $rivicheck = (mysql_num_rows($rivires) > 0);
+
       }
       else {
         $reklacheck = false;
+        $rivicheck = false;
       }
 
       echo "<tr>";
@@ -1218,10 +1239,18 @@ if ($tee == 'M') {
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
-      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
+      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck or !empty($saldorow["inventointilistatunnus"]) or $rivicheck) {
 
         if ($reklacheck) {
           $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
+        }
+
+        if (!empty($saldorow["inventointilistatunnus"])) {
+          $poistoteksti .= "<br>(".t("Tuotepaikka käsittelemättömänä inventointilistalla").")";
+        }
+
+        if ($rivicheck) {
+          $poistoteksti .= "<br>(".t("Tuotepaikalla avoimia tilausrivejä").")";
         }
 
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}

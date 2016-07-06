@@ -11,7 +11,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
 }
 
 if ($nayta_pdf == 1 and !empty($_REQUEST['pdffilenimi'])) {
-  readfile($_REQUEST['pdffilenimi']);
+  readfile("/tmp/".basename($_REQUEST['pdffilenimi']));
   exit;
 }
 

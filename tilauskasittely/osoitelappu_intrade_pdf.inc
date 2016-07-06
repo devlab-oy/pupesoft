@@ -313,7 +313,7 @@ else {
     $query = "SELECT *
               FROM toimitustapa
               WHERE yhtio = '$kukarow[yhtio]'
-              and selite = '$laskurow[toimitustapa]'";
+              and selite  = '$laskurow[toimitustapa]'";
     $toitares = pupe_query($query);
     $toitarow = mysql_fetch_assoc($toitares);
 

@@ -1823,7 +1823,7 @@ function hae_oletusasiakas($laskurow) {
   global $kukarow;
 
   $query = "SELECT *,
-                   toimipaikka AS yhtio_toimipaikka
+            toimipaikka AS yhtio_toimipaikka
             FROM asiakas
             WHERE yhtio='$kukarow[yhtio]'
             AND tunnus='$kukarow[oletus_asiakas]'";

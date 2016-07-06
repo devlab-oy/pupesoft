@@ -542,8 +542,8 @@ if (!function_exists("tee_jt_tilaus")) {
             // Tätä ei tehdä jos tilauksen maksuehto on "jaksotettu"
             $maksuehto_query = "SELECT tunnus
                                 FROM maksuehto
-                                where yhtio = '$kukarow[yhtio]'
-                                and tunnus  = '$otsikkorivi[maksuehto]'
+                                where yhtio     = '$kukarow[yhtio]'
+                                and tunnus      = '$otsikkorivi[maksuehto]'
                                 and jaksotettu != ''";
             $maksuehto_result = pupe_query($maksuehto_query);
 
@@ -558,7 +558,7 @@ if (!function_exists("tee_jt_tilaus")) {
               $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
               if ($maksuehtorow['jv'] != '') {
-                 $_maksuehto = $maksuehtorow["tunnus"];
+                $_maksuehto = $maksuehtorow["tunnus"];
               }
             }
 

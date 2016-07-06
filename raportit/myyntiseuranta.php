@@ -2722,7 +2722,7 @@ else {
               }
 
               if (!empty($kumulatiivinen_valittu)) {
-                $_kumulalk_parts = explode("-",$kumulatiivinen_alkupaiva);
+                $_kumulalk_parts = explode("-", $kumulatiivinen_alkupaiva);
                 $_kumulalk = $_kumulalk_parts[0].sprintf('%02d', $_kumulalk_parts[1]);
                 $_kumul_alkukuun_paivat = date('t', mktime(0, 0, 0, $_kumulalk_parts[1], 1, $_kumulalk_parts[0]));
 

@@ -179,6 +179,26 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
+    if ($tem_laji == 'POSTEN_TKOODI') {
+      if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) != '') {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                  AND avainsana.selite  = '{$tem_selite}'
+                  AND avainsana.laji    = '{$tem_laji}'
+                  AND tunnus           != '{$tunnus}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana per selite");
+        }
+      }
+
+      if ((mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
+      }
+    }
+
     if (mysql_field_name($result, $i) == "selitetark") {
       $tem_selitetark = trim($t[$i]);
 
@@ -275,9 +295,9 @@ if (!function_exists("avainsanatarkista")) {
 
       if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite'] and $trow['selite'] != '') {
         $query = "UPDATE tuote SET
-                  vienti = '{$tem_selite}'
+                  vienti      = '{$tem_selite}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND vienti = '{$trow['selite']}'";
+                  AND vienti  = '{$trow['selite']}'";
         $updres = pupe_query($query);
       }
     }

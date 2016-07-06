@@ -2374,7 +2374,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     // haetaan kaikki toimitustavat
     $query  = "SELECT *
                FROM toimitustapa
-               WHERE yhtio       = '$kukarow[yhtio]'
+               WHERE yhtio = '$kukarow[yhtio]'
                and (tulostustapa != 'X' OR selite = '{$otsik["toimitustapa"]}')
                {$toimtapalisa}
                order by jarjestys, selite";

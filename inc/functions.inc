@@ -33116,15 +33116,12 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
 
     $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
 
-    $vielisa = "";
-    if ($til_vienti == "") $vielisa = "chn = '999', ";
-
     // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
     $query = "UPDATE lasku SET
               mapvm        = now(),
               tila         = 'N',
               alatila      = 'A',
-              $vielisa
+              chn          = '999',
               varasto      = '$varasto_row[tunnus]',
               sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
               tulostusalue = '$tulostusalue'

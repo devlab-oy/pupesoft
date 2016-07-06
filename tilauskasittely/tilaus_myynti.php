@@ -1334,9 +1334,9 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
 
   // poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
   $query = "UPDATE tilausrivi 
-            LEFT JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-            SET tyyppi='D', muutospvm=now()
-            where tilausrivi.yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
+            SET tilausrivi.tyyppi = 'D', tilausrivi.laadittu = now(), tilausrivi.laatija = '$kukarow[kuka]'
+            where tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$kukarow[kesken]'
+            and tilausrivi.var <> 'P'";
   $result = pupe_query($query);
 
   if ($sahkoinen_lahete) {

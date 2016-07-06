@@ -195,9 +195,9 @@ $lisa_viestit  = "";
 if (isset($mehtorow["factoring_id"])) {
   $query = "SELECT *
             FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and tunnus         = '$mehtorow[factoring_id]'
-            and valkoodi       = '$lasrow[valkoodi]'";
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tunnus   = '$mehtorow[factoring_id]'
+            and valkoodi = '$lasrow[valkoodi]'";
   $fres = pupe_query($query);
 
   if (mysql_num_rows($fres) > 0) {

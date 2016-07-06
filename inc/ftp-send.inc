@@ -211,10 +211,8 @@ else {
     rename($ftpfile, $ftpfail."/".$filenimi);
   }
 
-  // jos siirto epäonnistuu ja faildirri ei oo setattu nin lähetetään maili
-  // jos faildirri ON setattu niin ei ekoteta eikä meilata mittään
-  if ($palautus != 0 and (!isset($ftpfail) or $ftpfail == "")) {
-    // ncftpput:in exit valuet
+  // jos siirto epäonnistuu
+  if ($palautus != 0) {
     switch ($palautus) {
     case  1:
       $syy = "Could not connect to remote host. ($ftphost)";
@@ -238,43 +236,46 @@ else {
       $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
 
-    $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
-    $rivi .= "\n";
-    $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
-    $rivi .= "\n";
-    $rivi .= "$cmd\n";
-    $rivi .= "\n";
-    $rivi .= "$syy\n";
-
     pupesoft_log('ftp_send', "Tiedoston '{$ftpfile}' lähetys palvelimelle '{$ftphost}' epäonnistui: {$syy}");
 
-    $boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    // jos faildirri ON setattu niin ei ekoteta eikä meilata mitään
+    if (!empty($ftpfail)) {
+      $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
+      $rivi .= "\n";
+      $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
+      $rivi .= "\n";
+      $rivi .= "$cmd\n";
+      $rivi .= "\n";
+      $rivi .= "$syy\n";
 
-    if ($boob === FALSE) {
-      $tulos_ulos_ftp .= "<font class='error'>\n";
-      $tulos_ulos_ftp .= t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
-      $tulos_ulos_ftp .= "</font><br>\n";
+      $boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-      $tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
-    }
-    else {
-      $tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
+      if ($boob === FALSE) {
+        $tulos_ulos_ftp .= "<font class='error'>\n";
+        $tulos_ulos_ftp .= t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
+        $tulos_ulos_ftp .= "</font><br>\n";
+
+        $tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
+      }
+      else {
+        $tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
+      }
     }
   }
-  elseif ($palautus_pyynto != "") {
-    $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
-    $rivi .= "\n";
-    $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
-    $rivi .= "\n";
-    $rivi .= "$ftpuser @ $ftphost : $ftppath\n";
-    $rivi .= "\n";
-    $rivi .= "\n";
-
-    $silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-  }
-
-  if ($palautus == 0) {
+  else {
     pupesoft_log('ftp_send', "Lähetettiin tiedosto '{$ftpfile}' palvelimelle '{$ftphost}'");
+
+    if ($palautus_pyynto != "") {
+      $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
+      $rivi .= "\n";
+      $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
+      $rivi .= "\n";
+      $rivi .= "$ftpuser @ $ftphost : $ftppath\n";
+      $rivi .= "\n";
+      $rivi .= "\n";
+
+      $silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    }
   }
 }
 

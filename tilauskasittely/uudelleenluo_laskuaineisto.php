@@ -127,11 +127,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
 
   if ($tee == "NAYTATILAUS" and empty($nayta_ja_tallenna)) {
     $nosoap   = "NOSOAP";
-    $nosoapapix = "NOSOAP";
   }
   else {
     $nosoap   = "";
-    $nosoapapix = "NOSOAPAPIX";
   }
 
   if (!function_exists("vlas_dateconv")) {
@@ -260,9 +258,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
     if (isset($masrow["factoring_id"])) {
       $query = "SELECT *
                 FROM factoring
-                WHERE yhtio        = '$kukarow[yhtio]'
-                and tunnus         = '$masrow[factoring_id]'
-                and valkoodi       = '$lasrow[valkoodi]'";
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and tunnus   = '$masrow[factoring_id]'
+                and valkoodi = '$lasrow[valkoodi]'";
       $fres = pupe_query($query);
       $frow = mysql_fetch_assoc($fres);
     }
@@ -465,7 +463,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-        finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoapapix);
+        finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
       }
       else {
         pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);

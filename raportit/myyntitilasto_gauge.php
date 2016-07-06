@@ -811,7 +811,7 @@ if ($tee == 'laske') {
       $vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : 0;
       $vals['tilatut_rivit'] = isset($vals['tilatut_rivit']) ? $vals['tilatut_rivit'] : 0;
 
-      $id = str_replace(" ", "", $pvm.'_'.$kustp);
+      $id = sanitoi_javascript_id($pvm.'_'.$kustp);
 
       echo "<tr class='{$pvm} spec kustp' style='display:none;'>";
       echo "<td align='right' class='toggleable' id='{$id}_osasto'><img style='float:left;' id='img_{$id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$kustp}</td>";
@@ -1170,7 +1170,7 @@ if ($tee == 'laske') {
     $_kustp = $kustp;
 
     if ($kustp == '') $_kustp = t("Ei kustannuspaikkaa");
-    $kustp_id = str_replace(" ", "", $kustp);
+    $kustp_id = sanitoi_javascript_id($kustp);
 
     echo "<tr class='yhteensa_kustp aktiivi' style='display:none;'>";
     echo "<th class='toggleable' id='yhteensa_{$kustp_id}_osasto'><img style='float:left;' id='img_yhteensa_{$kustp_id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), " {$_kustp}</th>";
@@ -1235,7 +1235,7 @@ if ($tee == 'laske') {
 
       $_osasto = $osasto == '' ? t("Ei osastoa") : $osasto;
 
-      $id = str_replace(" ", "", "{$kustp}_{$osasto}");
+      $id = sanitoi_javascript_id("{$kustp}_{$osasto}");
 
       echo "<tr class='yhteensa_{$kustp_id}_osasto aktiivi osasto' style='display:none;'>";
       echo "<td align='right'></td>";

@@ -52,7 +52,7 @@ if ($toim == "KASSA" and !isset($painoinnappia)) {
   $listaustyyppi = "eimyyntia";
 }
 
-$sel = array_fill_keys(array($listaustyyppi), " SELECTED") + array_fill_keys(array('kappaleet', 'hinnat', 'kappaleet2','eimyyntia'), '');
+$sel = array_fill_keys(array($listaustyyppi), " SELECTED") + array_fill_keys(array('kappaleet', 'hinnat', 'kappaleet2', 'eimyyntia'), '');
 
 echo "<tr>";
 echo "<th>".t("Listaustyyppi")."</th>";

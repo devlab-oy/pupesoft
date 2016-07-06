@@ -349,10 +349,11 @@ else {
       <option $sel[0] value='0'>0 ".t("desimaalia")."</option>
       </select></td></tr>";
 
-  $vchek = $bchek = $ychek = "";
-  if ($vertailued != "")   $vchek = "CHECKED";
-  if ($vertailubu != "")   $bchek = "CHECKED";
-  if ($ei_yhteensa != "")   $ychek = "CHECKED";
+  $vchek = $bchek = $ychek = $vpvmchek = "";
+  if ($vertailued != "")  $vchek = "CHECKED";
+  if ($vertailubu != "")  $bchek = "CHECKED";
+  if ($vertailupvm != "") $vpvmchek = "CHECKED";
+  if ($ei_yhteensa != "") $ychek = "CHECKED";
 
   $kausi = array("VY" => "", "KY" => "", "V" => "", "K" => "", "Y" => "");
   $kausi[$kaikkikaudet] = "SELECTED";
@@ -372,7 +373,111 @@ else {
   echo "<td>";
   echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
   echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
+  echo "<br>&nbsp;<input type='checkbox' name='vertailupvm' $vpvmchek> ".t("Vertailu vapaavalintaisen kauden kanssa");
   echo "</td></tr>";
+
+  echo "<tr>";
+  echo "<th valign='top'>" . t("Vertailukausi (alku)") . "</th>";
+  echo "<td><select name='vavv'>";
+
+  $sel = array();
+  $sel[$vavv] = "SELECTED";
+
+  for ($i = date("Y"); $i >= (float) substr($ekakausirow['alkukausi'], 0, 4); $i--) {
+
+    if (!isset($sel[$i])) {
+      $sel[$i] = "";
+    }
+
+    echo "<option value='$i' $sel[$i]>$i</option>";
+  }
+
+  echo "</select>";
+
+  $sel = array();
+  $sel[$vakk] = "SELECTED";
+
+  echo "<select name='vakk'>";
+
+  for ($opt = 1; $opt <= 12; $opt++) {
+    $opt = sprintf("%02d", $opt);
+
+    if (!isset($sel[$opt])) {
+      $sel[$opt] = "";
+    }
+
+    echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+  }
+
+  echo "</select>";
+
+  $sel = array();
+  $sel[$vapp] = "SELECTED";
+
+  echo "<select name='vapp'>";
+
+  for ($opt = 1; $opt <= 31; $opt++) {
+    $opt = sprintf("%02d", $opt);
+
+    if (!isset($sel[$opt])) {
+      $sel[$opt] = "";
+    }
+
+    echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th valign='top'>" . t("Vertailukausi (loppu)") . "</th>";
+  echo "<td><select name='vlvv'>";
+
+  $sel = array();
+  $sel[$vlvv] = "SELECTED";
+
+  for ($i = date("Y")+1; $i >= (float) substr($ekakausirow['loppukausi'], 0, 4); $i--) {
+    echo "<option value='$i' $sel[$i]>$i</option>";
+  }
+
+  echo "</select>";
+
+  $sel = array();
+  $sel[$vlkk] = "SELECTED";
+
+  echo "<select name='vlkk'>";
+
+  for ($opt = 1; $opt <= 12; $opt++) {
+    $opt = sprintf("%02d", $opt);
+
+    if (!isset($sel[$opt])) {
+      $sel[$opt] = "";
+    }
+
+    echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+  }
+
+  echo "</select>";
+
+  $sel = array();
+  $sel[$vlpp] = "SELECTED";
+
+  echo "<select name='vlpp'>";
+
+  for ($opt = 1; $opt <= 31; $opt++) {
+    $opt = sprintf("%02d", $opt);
+
+    if (!isset($sel[$opt])) {
+      $sel[$opt] = "";
+    }
+
+    echo "<option $sel[$opt] value = '$opt'>$opt</option>";
+  }
+
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
 
   echo "<tr><th valign='top'>".t("Konsernirajaus")."</th>";
 
@@ -692,7 +797,7 @@ else {
       $paakirjalink = FALSE;
     }
 
-    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&", "//", $ulisa);
+    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailupvm=$vertailupvm//vertailubu=$vertailubu".str_replace("&", "//", $ulisa);
 
     $startmonth  = date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
     $endmonth   = date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));

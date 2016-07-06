@@ -4,7 +4,7 @@ if (!function_exists("asiakashintatarkista")) {
   function asiakashintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chvalkoodi;;
+    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chvalkoodi;
 
     if (mysql_field_name($result, $i) == "hinta") {
       if (trim($t[$i]) == '') {

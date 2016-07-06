@@ -66,7 +66,7 @@ if (isset($tee) and $tee == "edi_siirto") {
 if (isset($tee) and $tee == "apix_siirto") {
 
   // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
-  $apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents("/tmp/".$filenimi));
+  $apix_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("/tmp/".$filenimi));
   $apix_laskumaara = count($apix_laskuarray);
 
   if ($apix_laskumaara > 0) {
@@ -75,7 +75,7 @@ if (isset($tee) and $tee == "apix_siirto") {
     for ($a = 1; $a < $apix_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-      $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
+      $apix_finvoice = "<SOAP-ENV:Envelope".$apix_laskuarray[$a];
 
       $tilausnumero = hae_tilausnumero($invoice_number[1]);
       $liitteet     = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);

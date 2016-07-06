@@ -1209,6 +1209,9 @@ else {
       if ($vertailued != "") $alkukausi -= 2;
       if ($vertailubu != "") $alkukausi -= 2;
 
+      if (!empty($vertailupvm)) {
+        $alkukausi -= 1;
+      }
     }
     elseif ($kaikkikaudet == "V") {
       // vika ei yht
@@ -1218,6 +1221,10 @@ else {
 
       if ($vertailued != "" and $vertailubu != "") $alkukausi -= 1;
       if ($vertailued == "" and $vertailubu == "") $alkukausi += 1;
+
+      if (!empty($vertailupvm)) {
+        $alkukausi -= 1;
+      }
     }
     elseif ($kaikkikaudet == "KY") {
       // kaikki + yht
@@ -1242,6 +1249,10 @@ else {
         $alkukausi -= 1;
       }
       elseif ($vertailued == "" and $vertailubu != "") {
+        $alkukausi -= 1;
+      }
+
+      if (!empty($vertailupvm)) {
         $alkukausi -= 1;
       }
     }

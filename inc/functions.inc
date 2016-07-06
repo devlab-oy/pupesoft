@@ -23947,6 +23947,8 @@ if  (!function_exists('hae_chn_teksti')) {
       return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
     case '999':
       return t("Laskutuskielto, laskutusta ei tehdä", $kieli);
+    case '888':
+      return t("Laskuta heti", $kieli)." (".t("sisäinen", $kieli).")";
     default:
       return FALSE;
     }

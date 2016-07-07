@@ -109,7 +109,7 @@ if (mysql_field_name($result, $i) == "yhtion_toimipaikka_id") {
   $tyyppi = 0;
 }
 
-if (mysql_field_name($result, $i) == "kampanja") {
+if (mysql_field_name($result, $i) == "campaign_id") {
 
   $query = "SELECT campaigns.*
             FROM campaigns
@@ -117,8 +117,8 @@ if (mysql_field_name($result, $i) == "kampanja") {
             WHERE campaigns.active = 1";
   $kresult = pupe_query($query);
 
-  $ulos = "<td><select id='kampanja' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value = ''>".t("Ei kampanjaa")."</option>";
+  $ulos = "<td><select id='campaign_id' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = 'NULL'>".t("Ei kampanjaa")."</option>";
   while ($krow = mysql_fetch_assoc($kresult)) {
     $sel = '';
     if (strtoupper($trow[$i]) == strtoupper($krow["id"])) {

@@ -16328,9 +16328,14 @@ if (!function_exists('tulosta_oslap_mg')) {
         $tempfile = tempnam("/tmp", "oslap");
         file_put_contents($tempfile, $sivu);
 
-        $line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
+        $params = array(
+          'filename' => $tempfile,
+        );
 
-        $line = exec("$komento $tempfile.ps");
+        // konveroidaan postscriptiksi
+        $filenimi_ps = pupesoft_a2ps($params);
+
+        $line = exec("$komento {$filenimi_ps}");
 
         echo t("Osoitelappu tulostuu")."...<br>";
       }

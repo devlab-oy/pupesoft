@@ -357,11 +357,19 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
 
   fclose($fh);
 
-  system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
+  $params = array(
+    'chars'    => $rivinleveys,
+    'filename' => $filenimi,
+    'margin'   => 0,
+    'mode'     => 'landscape',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi_ps = pupesoft_a2ps($params);
 
   if ($komento["Inventointierolista"] == 'email') {
 
-    system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+    system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
 
     $liite = $filenimi.".pdf";
     $kutsu = t("Inventointierolista")."_$lista";
@@ -370,14 +378,14 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
   }
   else {
     // itse print komento...
-    $line = exec("{$komento['Inventointierolista']} ".$filenimi.".ps");
+    $line = exec("{$komento['Inventointierolista']} {$filenimi_ps}");
   }
 
   echo "<font class='message'>", t("Inventointierolista tulostuu!"), "</font><br><br>";
 
   //poistetaan tmp file samantien kuleksimasta...
   unlink($filenimi);
-  unlink($filenimi.".ps");
+  unlink($filenimi_ps);
 
   $tee = "INVENTOI";
 }

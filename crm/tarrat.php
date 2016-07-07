@@ -309,7 +309,16 @@ if ($tee == "TULOSTA") {
     fputs($fh, $sisalto);
     fclose($fh);
 
-    $line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=$sarakkeet --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
+    $params = array(
+      'chars'    => $rivinpituus_ps,
+      'columns'  => $sarakkeet,
+      'filename' => $filenimi,
+      'major'    => 'columns',
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
 
     // itse print komento...
     if ($komento["Tarrat"] == 'email') {
@@ -317,18 +326,18 @@ if ($tee == "TULOSTA") {
       $kutsu = "Tarrat";
       $ctype = "pdf";
 
-      system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps $liite");
+      system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} $liite");
 
       require "inc/sahkoposti.inc";
     }
     else {
-      $cmd = $komento["Tarrat"]." ".$filenimi.".ps";
+      $cmd = $komento["Tarrat"]." {$filenimi_ps}";
       $line = exec($cmd);
     }
 
     //poistetaan tmp file samantien kuleksimasta...
     unlink($filenimi);
-    unlink($filenimi.".ps");
+    unlink($filenimi_ps);
 
     echo "<br>".t("Tarrat tulostuu")."!<br><br>";
   }

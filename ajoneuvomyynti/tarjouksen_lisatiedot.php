@@ -201,3 +201,7 @@ if ($tee == "ETSILASKU") {
 
 
     $query = "SELECT lasku.tunnus Tilaus, if (lasku.laskunro=0, '', laskunro) Laskunro,
+
+
+
+      

@@ -2545,12 +2545,12 @@ if ($tee == 'mikrotila_matriisi' or $tee == 'file_matriisi') {
 
 // Tehd‰‰n rahoituslaskuelma
 if ($tee == 'osamaksusoppari') {
-  require 'osamaksusoppari.inc';
+  require 'ajoneuvomyynti/osamaksusoppari.inc';
 }
 
 // Tehd‰‰n vakuutushakemus
 if ($tee == 'vakuutushakemus') {
-  require 'vakuutushakemus.inc';
+  require 'ajoneuvomyynti/vakuutushakemus.inc';
 }
 
 // siirret‰‰n tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
@@ -3242,13 +3242,13 @@ if ($tee == '') {
       echo "</form>";
     }
 
-    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {
+    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("${pupe_root_polku}/ajoneuvomyynti/osamaksusoppari.inc")) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='tee' value='osamaksusoppari'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value='$mista'>
           <input type='hidden' name='toim' value='$toim'>
-          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
@@ -3257,13 +3257,13 @@ if ($tee == '') {
           </form>";
     }
 
-    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("vakuutushakemus.inc")) {
+    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("${pupe_root_polku}/ajoneuvomyynti/vakuutushakemus.inc")) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='tee' value='vakuutushakemus'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value='$mista'>
           <input type='hidden' name='toim' value='$toim'>
-          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>

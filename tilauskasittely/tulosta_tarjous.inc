@@ -144,7 +144,7 @@
 			$tilausnumero = $laskurow["tunnus"];
 			$maksuerienlkm = 0;
 
-			#require ("ajoneuvomyynti/osamaksusoppari.inc");
+			require ("ajoneuvomyynti/osamaksusoppari.inc");
 
 			if ($maksuerienlkm > 0) {
 				$pdf_tarjous->draw_text(mm_pt(89), mm_pt(75), t("OSAMAKSUERIEN MAKSUSUUNNITELMA", $kieli),						$pdf_tarjous_sivu[0], $kymppi_helvetica);

@@ -552,7 +552,7 @@
 			while ($al_row = mysql_fetch_array($al_res)) {
 				$avain_oletukset[$al_row["selite"]] = $al_row["selitetark"];
 			}
-			
+
 			$sel = array();
 			$sel[$laskurow["rekisteilmo_omistaja"]] = "selected";
 
@@ -888,7 +888,7 @@
 			echo "<tr><td class='back'><br></td></tr>";
 			echo "<tr><th>".t("Näytä lomake").":</th>";
 
-			echo "<form name='valmis' action='tulostakopio.php' method='post'>
+			echo "<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_osamaksusoppari' id='tulostaform_osamaksusoppari' class='multisubmit'>
 					<input type='hidden' name='tee' value='NAYTATILAUS'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='otunnus' value='$tilausnumero'>";
@@ -902,7 +902,7 @@
 			echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
 			echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
 			echo "</select></td>";
-			echo "<td><input type='submit' value='".t("Näytä")."'></td>";
+			echo "<td><input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_osamaksusoppari', 'tulosta_osamaksusoppari'); return false;\"></td>";
 			echo "</form></tr>";
 			echo "</table>";
 

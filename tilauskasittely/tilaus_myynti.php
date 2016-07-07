@@ -2048,7 +2048,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         $query = "SELECT tunnus
                   from lasku
                   where yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$tm_laskurow_talteen[tunnus]'
+                  and tunnus  = '$tm_laskurow_talteen[tunnus]'
                   and tila ='L'
                   and alatila = 'X'";
         $result = pupe_query($query);
@@ -2056,9 +2056,9 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         if ($laskurow = mysql_fetch_assoc($result)) {
 
           $query  = "UPDATE lasku set
-                     sisainen = ''
+                     sisainen    = ''
                      where yhtio = '$kukarow[yhtio]'
-                     and tunnus = '$laskurow[tunnus]'";
+                     and tunnus  = '$laskurow[tunnus]'";
           pupe_query($query);
 
           $kukarow['kesken'] = $laskurow['tunnus'];

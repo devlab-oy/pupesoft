@@ -178,135 +178,135 @@
 
 		if ($otunnus > 0) {
 			//katotaan lˆytyykˆ lasku ja sen kaikki tilaukset
-			$query = "  SELECT laskunro
-						FROM lasku
-						WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
-			$laresult = mysql_query($query) or pupe_error($query);
-			$larow = mysql_fetch_array($laresult);
+			$query = "SELECT laskunro
+             
+             
+             
+             
 
-			if ($larow["laskunro"] > 0) {
-				$where2 = " and lasku.laskunro = '$larow[laskunro]' ";
-				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-				$use = " use index (lasno_index) ";
-			}
-			else {
-				$where1 = " lasku.tunnus = '$otunnus' ";
-				$where2 = "";
-				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-				$use = " use index (PRIMARY) ";
-			}
-		}
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
 
-		$query_ale_lisa = generoi_alekentta('M');
+             
 
-		// Etsit‰‰n muutettavaa tilausta
-		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
-					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
-					if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm, 
-					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
-					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
-					lasku.tila, lasku.alatila
-					FROM lasku $use
-					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-					WHERE $where1 $where2
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila != 'D'
-					ORDER BY $jarj";
-		$result = mysql_query($query) or pupe_error($query);
+             
+		$query = "SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
-		if (mysql_num_rows($result) > 0) {
+            
 
-			echo "<table border='0' cellpadding='2' cellspacing='1'>";
-			echo "<tr>";
+            
+            
 
-			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-				$jarj = $i+1;
-				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
-			}
-			echo "<th>".t("Tyyppi")."</th>";
+            
+            
+            
+            
+            
 
-			echo "</tr>";
+            
 
-			while ($row = mysql_fetch_array($result)) {
-				echo "<tr>";
-				$ero="td";
+            
+            
+            
 
-				if ($tunnus==$row['Tilaus']) $ero="th";
+            
 
-				echo "<tr>";
+            
 
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+            
 					
 					
-					echo "<$ero>$row[$i]</$ero>";
-				}
+            
+            
 
-				$laskutyyppi = $row["tila"];
-				$alatila     = $row["alatila"];
+            
+            
 
-				//tehd‰‰n selv‰kielinen tila/alatila
-				require "../inc/laskutyyppi.inc";
+            
+            
 
-				echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
+            
 
-				echo "	<td class='back'>
-						<form method='post'>
-						<input type='hidden' name='tee' value='NAYTAHTML'>
-						<input type='hidden' name='tunnus' value='$row[Tilaus]'>
-						<input type='hidden' name='ytunnus' value='$ytunnus'>
-						<input type='hidden' name='asiakasid' value='$asiakasid'>
-						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-						<input type='hidden' name='laskunro' value='$laskunro'>
-						<input type='hidden' name='ppa' value='$ppa'>
-						<input type='hidden' name='kka' value='$kka'>
-						<input type='hidden' name='vva' value='$vva'>
-						<input type='hidden' name='ppl' value='$ppl'>
-						<input type='hidden' name='kkl' value='$kkl'>
-						<input type='hidden' name='vvl' value='$vvl'>
-						<input type='submit' value='".t("N‰yt‰ ruudulla")."'></form><br>
-						<form method='post'>
-						<input type='hidden' name='tee' value='osamaksusoppari'>
-						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Rahoituslaskelma")."'>
-						</form><br>
-						<form method='post'>
-						<input type='hidden' name='tee' value='vakuutushakemus'>
-						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'>
-						</form><br>
-						<form method='post'>
-						<input type='hidden' name='tee' value='TULOSTA'>
-						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Tulosta Lomakkeita")."'>
-						</form><br>
-						</td>";
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
-				echo "</tr>";
-			}
-			echo "</table>";
-		}
-		else {
-			echo t("Ei tilauksia")."...<br><br>";
-		}
-	}
+            
+            
+            
+            
+            
+            
+            
+            
 
-	if ($tee == '') {
-		//syˆtet‰‰n tilausnumero
-		echo "<br><table>";
-		echo "<form method = 'post' name='hakuformi'>";
+            
+            
+            
+            
 
 		
-		echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
-		echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
-		echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
-		echo "</table>";
+            
+            
+            
+            
 
-		echo "<br><input type='submit' value='".t("Jatka")."'>";
-		echo "</form>";
+            
+            
 		
-		$formi  = 'hakuformi';
-		$kentta = 'ytunnus';
-	}
+            
+            
+            
 
-	require ('../inc/footer.inc');
-?>
+            
+            

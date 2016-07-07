@@ -33102,7 +33102,7 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
     $query    = "SELECT *
                  FROM lasku
                  WHERE tunnus = '$tilausnumero'
-                 AND yhtio = '$kukarow[yhtio]'";
+                 AND yhtio    = '$kukarow[yhtio]'";
     $result   = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 

@@ -647,7 +647,7 @@ $kassalipasquery = "SELECT kassalipas.tunnus kassalipas, maksuehto.tunnus maksue
                     FROM kassalipas
                     JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.kateinen != '')
                     WHERE kassalipas.yhtio = '$kukarow[yhtio]'
-                    AND kassalipas.nimi = 'Verkkokauppa'
+                    AND kassalipas.nimi    = 'Verkkokauppa'
                     ORDER BY maksuehto.tunnus
                     LIMIT 1";
 $vk_kassalipas_res = pupe_query($kassalipasquery);

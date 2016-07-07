@@ -844,7 +844,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$toimipaikkalisa}
             {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY nimi, nimitark, ytunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

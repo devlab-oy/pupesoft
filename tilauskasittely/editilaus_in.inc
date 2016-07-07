@@ -2453,19 +2453,7 @@ while ($tietue = fgets($fd)) {
 
         // P‰ivitet‰‰n tilaus takaisin ker‰ysjonoon
         if ($paivita_takaisin_keraysjonoon) {
-            // Varmistetaan, ett‰ tilaus on laskutettu
-            $query = "SELECT tunnus
-                      FROM lasku
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus = '$editilaus_lasku_tunnus'
-                      AND tila ='L'
-                      AND alatila = 'X'";
-            $result = pupe_query($query);
-
-            if ($laskurow = mysql_fetch_assoc($result)) {
-              laskutettu_myyntitilaus_tulostusjonoon($editilaus_lasku_tunnus);
-            }
-          }
+          laskutettu_myyntitilaus_tulostusjonoon($editilaus_lasku_tunnus);
         }
 
         $edi_ulos .= "$tilaus_valmis_ulos\n";

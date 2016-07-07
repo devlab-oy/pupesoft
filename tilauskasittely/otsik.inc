@@ -738,7 +738,7 @@ if ($tila == "" and !isset($jatka)) {
                 maksuehto           = '$assrow[maksuehto]',
                 tilausvahvistus     = '$assrow[tilausvahvistus]',
                 piiri               = '$assrow[piiri]',
-                kampanja            = '$assrow[kampanja]',
+                campaign_id         =  $assrow[campaign_id],
                 rahtivapaa          = '$assrow[rahtivapaa]',
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',
@@ -2611,11 +2611,11 @@ if ($tila == "" and !isset($jatka)) {
       if (mysql_num_rows($cresult) > 0) {
 
         $vasen_sarake[$vasen] = "<td>".t("Kampanja").":</td>";
-        $vasen_sarake[$vasen] .= "<td><select id='kampanja' name='kampanja' ".js_alasvetoMaxWidth('kampanja', 300).">";
-        $vasen_sarake[$vasen] .= "<option value = ''>".t("Ei kampanjaa")."</option>";
+        $vasen_sarake[$vasen] .= "<td><select id='campaign_id' name='campaign_id' ".js_alasvetoMaxWidth('campaign_id', 300).">";
+        $vasen_sarake[$vasen] .= "<option value = null>".t("Ei kampanjaa")."</option>";
         while ($krow = mysql_fetch_assoc($cresult)) {
           $sel = '';
-          if (strtoupper($srow['kampanja']) == strtoupper($krow["id"])) {
+          if (strtoupper($srow['campaign_id']) == strtoupper($krow["id"])) {
             $sel = "selected";
           }
           $vasen_sarake[$vasen] .= "<option value='{$krow['id']}' $sel>{$krow['name']}</option>";
@@ -4255,7 +4255,7 @@ if (isset($jatka)) {
         ostotilauksen_kasittely = '{$ostotilauksen_kasittely}',
         ovttunnus               = '$ovttunnus',
         piiri                   = '$piiri',
-        kampanja                = '$kampanja',
+        campaign_id             =  $campaign_id,
         postino                 = '$postino',
         postitp                 = '$postitp',
         rahtivapaa              = '$rahtivapaa',

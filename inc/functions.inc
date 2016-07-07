@@ -27647,7 +27647,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('CustOrderNumber', substr($looprow['asiakkaan_tilausnumero'], 0, 20)); // Magentosta?
-    // $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
+    $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
     $custpickinglist->addChild('OrderCode', 'U');
     $custpickinglist->addChild('OrderType', 'SO');
 

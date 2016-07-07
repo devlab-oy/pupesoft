@@ -105,10 +105,10 @@ if (!function_exists('rivi')) {
         $pdf->draw_text(485, $kalakorkeus, sprintf('%15s', sprintf('%.2f', $sarjarow["tuotemyyntihinta"])." ".$yhtiorow["valkoodi"]), $page, $pc);
       }
       else {
-        $query = "	SELECT Hinta
-							FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-							WHERE sarjanumeron_lisatiedot.yhtio		 = '$kukarow[yhtio]'
-							and sarjanumeron_lisatiedot.liitostunnus = '$sarjarow[tunnus]'";
+        $query = "  SELECT Hinta
+              FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+              WHERE sarjanumeron_lisatiedot.yhtio     = '$kukarow[yhtio]'
+              and sarjanumeron_lisatiedot.liitostunnus = '$sarjarow[tunnus]'";
         $lisatietores = mysql_query($query) or pupe_error($query);
         $lisatietorow = mysql_fetch_array($lisatietores);
 
@@ -148,17 +148,17 @@ if (!function_exists('rivi')) {
     if ($tarkkuus == "") {
       if (strlen($kuvalisa_bin) > 0) {
         /*
-				$image = $pdf->jfif_embed($kuvalisa_bin);
+        $image = $pdf->jfif_embed($kuvalisa_bin);
 
-				if(!$image) {
-					echo t("Logokuvavirhe").": ".$image.$kuvalisa_bin;
-				}
-				else {
-					$logoparam = array();
-					$logoparam['scale'] = 0.15;
-					$placement = $pdf->image_place($image, $kalakorkeus-100, 325, $page, $logoparam);
-				}
-				*/
+        if(!$image) {
+          echo t("Logokuvavirhe").": ".$image.$kuvalisa_bin;
+        }
+        else {
+          $logoparam = array();
+          $logoparam['scale'] = 0.15;
+          $placement = $pdf->image_place($image, $kalakorkeus-100, 325, $page, $logoparam);
+        }
+        */
         $kalakorkeus = $kalakorkeus - $rivinkorkeus;
       }
       else {
@@ -213,10 +213,10 @@ if (!function_exists('print_pdf')) {
     if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
     fclose($fh);
 
-    $query = "	SELECT *
-					from kirjoittimet
-					where yhtio='$kukarow[yhtio]'
-					and tunnus='$kirjoitin'";
+    $query = "  SELECT *
+          from kirjoittimet
+          where yhtio='$kukarow[yhtio]'
+          and tunnus='$kirjoitin'";
     $kirres= mysql_query($query) or pupe_error($query);
     $kirrow= mysql_fetch_array($kirres);
     $komento=$kirrow['komento'];

@@ -19,23 +19,23 @@ else {
 
   if ($toiminto != 'TULOSTA') {
     echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-				<!--
+        <!--
 
-				function toggleAll(toggleBox) {
+        function toggleAll(toggleBox) {
 
-					var currForm = toggleBox.form;
-					var isChecked = toggleBox.checked;
-					var nimi = toggleBox.name;
+          var currForm = toggleBox.form;
+          var isChecked = toggleBox.checked;
+          var nimi = toggleBox.name;
 
-					for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
-						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
-							currForm.elements[elementIdx].checked = isChecked;
-						}
-					}
-				}
+          for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+            if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
+              currForm.elements[elementIdx].checked = isChecked;
+            }
+          }
+        }
 
-				//-->
-				</script>";
+        //-->
+        </script>";
 
     // Piirrell‰‰n formi
     // Kursorinohjaus
@@ -88,30 +88,30 @@ else {
     }
 
     echo "<tr><th>".t("Varastostatus")."</th><td>
-					<select name='varasto_haku'>
-			 		<option value=''    $chk1>".t("Kaikki")."</option>
-					<option value='MYY' $chk5>".t("Vain myydyt tuotteet")."</option>
-					<option value='VAR' $chk2>".t("Vain varastossa olevat")."</option>
-					<option value='VVP' $chk3>".t("Vain vapaana varastossa olevat")."</option>
-					<option value='VVS' $chk4>".t("Vain varattuina varastossa olevat")."</option>
-					</select>
-				</td></tr>";
+          <select name='varasto_haku'>
+           <option value=''    $chk1>".t("Kaikki")."</option>
+          <option value='MYY' $chk5>".t("Vain myydyt tuotteet")."</option>
+          <option value='VAR' $chk2>".t("Vain varastossa olevat")."</option>
+          <option value='VVP' $chk3>".t("Vain vapaana varastossa olevat")."</option>
+          <option value='VVS' $chk4>".t("Vain varattuina varastossa olevat")."</option>
+          </select>
+        </td></tr>";
 
     echo "<tr><th>".t("Lis‰tiedot/Varusteet")."</th><td>
-					<select name='lisatiedot'>
-			 		<option value=''    $chk6>".t("N‰ytet‰‰n kaikki tiedot")."</option>
-					<option value='on' $chk7>".t("Ei n‰ytet‰ lis‰tietoja")."</option>
-					<option value='EIVAR' $chk8>".t("Ei n‰ytet‰ lis‰tietoja eik‰ varusteita")."</option>
-					</select>
-				</td></tr>";
+          <select name='lisatiedot'>
+           <option value=''    $chk6>".t("N‰ytet‰‰n kaikki tiedot")."</option>
+          <option value='on' $chk7>".t("Ei n‰ytet‰ lis‰tietoja")."</option>
+          <option value='EIVAR' $chk8>".t("Ei n‰ytet‰ lis‰tietoja eik‰ varusteita")."</option>
+          </select>
+        </td></tr>";
 
 
     echo "<tr><th>".t("Tee Excel listaus")."</th><td>
-					<select name='exceliin'>
-			 		<option value=''   $chk9>".t("Ei")."</option>
-					<option value='kylla' $chk10>".t("Kyll‰")."</option>
-					</select>
-				</td></tr>";
+          <select name='exceliin'>
+           <option value=''   $chk9>".t("Ei")."</option>
+          <option value='kylla' $chk10>".t("Kyll‰")."</option>
+          </select>
+        </td></tr>";
 
     echo "<tr><td class='back'><br></td></tr>";
 
@@ -127,14 +127,14 @@ else {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<td><input type='text' size='10' name='sarjanumero_haku' 		value='$sarjanumero_haku'></td>";
-    echo "<td><input type='text' size='10' name='tuoteno_haku' 			value='$tuoteno_haku'></td>";
-    echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
-    echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
-    echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
+    echo "<td><input type='text' size='10' name='sarjanumero_haku'     value='$sarjanumero_haku'></td>";
+    echo "<td><input type='text' size='10' name='tuoteno_haku'       value='$tuoteno_haku'></td>";
+    echo "<td><input type='text' size='10' name='nimitys_haku'       value='$nimitys_haku'></td>";
+    echo "<td><input type='text' size='10' name='ostotilaus_haku'     value='$ostotilaus_haku'></td>";
+    echo "<td><input type='text' size='10' name='myyntitilaus_haku'    value='$myyntitilaus_haku'></td>";
     echo "<td></td>";
 
-    echo "<td><input type='text' size='10' name='varastonimi_haku'		value='$varastonimi_haku'></td>";
+    echo "<td><input type='text' size='10' name='varastonimi_haku'    value='$varastonimi_haku'></td>";
 
     $chk1 = $chk2 = $chk3 = "";
 
@@ -149,12 +149,12 @@ else {
     }
 
     echo "<td>
-					<select name='kaytetty_haku'>
-			 		<option value=''  $chk1>".t("Kaikki")."</option>
-					<option value='U' $chk2>".t("Uudet")."</option>
-					<option value='K' $chk3>".t("K‰ytetyt")."</option>
-					</select>
-				</td>";
+          <select name='kaytetty_haku'>
+           <option value=''  $chk1>".t("Kaikki")."</option>
+          <option value='U' $chk2>".t("Uudet")."</option>
+          <option value='K' $chk3>".t("K‰ytetyt")."</option>
+          </select>
+        </td>";
 
     echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
     echo "</tr>";
@@ -241,20 +241,20 @@ else {
       }
 
       if ($varasto_haku == 'MYY') {
-        $lisa1 .= "	and tilausrivi_myynti.laskutettuaika != '0000-00-00'
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+        $lisa1 .= "  and tilausrivi_myynti.laskutettuaika != '0000-00-00'
+                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
       }
       elseif ($varasto_haku == 'VAR') {
-        $lisa1 .= "	and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+        $lisa1 .= "  and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
       }
       elseif ($varasto_haku == 'VVP') {
-        $lisa1 .= "	and (tilausrivi_myynti.tunnus is null or lasku_myynti.tila = 'T')
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+        $lisa1 .= "  and (tilausrivi_myynti.tunnus is null or lasku_myynti.tila = 'T')
+                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
       }
       elseif ($varasto_haku == 'VVS') {
-        $lisa1 .= "	and (tilausrivi_myynti.tunnus is not null and tilausrivi_myynti.laskutettuaika = '0000-00-00')
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+        $lisa1 .= "  and (tilausrivi_myynti.tunnus is not null and tilausrivi_myynti.laskutettuaika = '0000-00-00')
+                and tilausrivi_osto.laskutettuaika != '0000-00-00'";
       }
 
       if ($nimitys_haku != '') {
@@ -263,37 +263,37 @@ else {
     }
 
     // N‰ytet‰‰n kaikki
-    $query = "	SELECT sarjanumeroseuranta.*,
-						if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
-						tuote.myyntihinta 									tuotemyyntihinta,
-						tuote.nimitys 										tuotenimitys,
-						tuote.tuotemerkki 									tuotetuotemerkki,
-						lasku_osto.tunnus									osto_tunnus,
-						lasku_osto.nimi										osto_nimi,
-						lasku_myynti.tunnus									myynti_tunnus,
-						lasku_myynti.nimi									myynti_nimi,
-						lasku_myynti.tila									myynti_tila,
-						(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
-						tilausrivi_osto.perheid2							osto_perheid2,
-						(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
-						varastopaikat.nimitys								varastonimi,
-						tilausrivi_osto.tunnus 								osto_rivitunnus,
-						sarjanumeroseuranta.lisatieto						lisatieto,
-						concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
-						FROM sarjanumeroseuranta
-						LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
-						LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-						LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-						LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
-						LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
-						LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
-						and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
-						and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
-						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-						and sarjanumeroseuranta.myyntirivitunnus != -1
-						$lisa
-						$lisa1
-						ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
+    $query = "  SELECT sarjanumeroseuranta.*,
+            if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
+            tuote.myyntihinta                   tuotemyyntihinta,
+            tuote.nimitys                     tuotenimitys,
+            tuote.tuotemerkki                   tuotetuotemerkki,
+            lasku_osto.tunnus                  osto_tunnus,
+            lasku_osto.nimi                    osto_nimi,
+            lasku_myynti.tunnus                  myynti_tunnus,
+            lasku_myynti.nimi                  myynti_nimi,
+            lasku_myynti.tila                  myynti_tila,
+            (tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)    ostohinta,
+            tilausrivi_osto.perheid2              osto_perheid2,
+            (tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)  myyntihinta,
+            varastopaikat.nimitys                varastonimi,
+            tilausrivi_osto.tunnus                 osto_rivitunnus,
+            sarjanumeroseuranta.lisatieto            lisatieto,
+            concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+            FROM sarjanumeroseuranta
+            LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
+            LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+            LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+            LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+            LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+            LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+            and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+            and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+            WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+            and sarjanumeroseuranta.myyntirivitunnus != -1
+            $lisa
+            $lisa1
+            ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
     $sarjares = mysql_query($query) or pupe_error($query);
 
     if (file_exists('../tilauskasittely/sarjanumeron_lisatiedot_popup.inc') and $lisatiedot != 'EIVAR') {
@@ -394,10 +394,10 @@ else {
       }
 
       if ($ztun > 0) {
-        $query = "	SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
-								FROM tilausrivi
-								LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-								WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+        $query = "  SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
+                FROM tilausrivi
+                LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
         $siires = mysql_query($query) or pupe_error($query);
         $siirow = mysql_fetch_array($siires);
 
@@ -496,10 +496,10 @@ else {
 
         preg_match("/Tehdaslis‰varusteet:(.*?)<\/table>/", $kommpreg, $xls_komm1);
 
-        $query = "	SELECT lisatiedot, Hinta
-								FROM sarjanumeron_lisatiedot
-								WHERE yhtio		 = '$kukarow[yhtio]'
-								and liitostunnus = '$sarjarow[tunnus]'";
+        $query = "  SELECT lisatiedot, Hinta
+                FROM sarjanumeron_lisatiedot
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and liitostunnus = '$sarjarow[tunnus]'";
         $lttres = mysql_query($query) or pupe_error($query);
         $lttrow = mysql_fetch_assoc($lttres);
 
@@ -631,11 +631,11 @@ else {
     echo "<option value='MEY' $sel[MEY]>".t("Tulosta hintalappu")."</option>";
     echo "</select></td></tr>";
 
-    $query = "	SELECT *
-						FROM kirjoittimet
-						WHERE yhtio='$kukarow[yhtio]'
-						AND komento != 'EDI'
-						ORDER BY kirjoitin";
+    $query = "  SELECT *
+            FROM kirjoittimet
+            WHERE yhtio='$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
     echo "<tr><th>Tulostin:</th>";

@@ -466,10 +466,10 @@ if (!function_exists('print_pdf')) {
     if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
     fclose($fh);
 
-    $query = "	SELECT *
-					from kirjoittimet
-					where yhtio='$kukarow[yhtio]'
-					and tunnus='$kirjoitin'";
+    $query = "  SELECT *
+          from kirjoittimet
+          where yhtio='$kukarow[yhtio]'
+          and tunnus='$kirjoitin'";
     $kirres= mysql_query($query) or pupe_error($query);
     $kirrow= mysql_fetch_array($kirres);
     $komento=$kirrow['komento'];

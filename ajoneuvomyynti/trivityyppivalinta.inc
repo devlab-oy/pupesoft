@@ -17,4 +17,3 @@ else {
   $trivtyres = t_avainsana("TRIVITYYPPI", "", "and selite like '".substr($trivtyrow["selitetark"], 0, -2)."%'");
   $trivtyrow = mysql_fetch_array($trivtyres);
 }
-?>

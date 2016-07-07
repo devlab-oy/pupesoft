@@ -116,9 +116,9 @@ if ($tee == "" or $tee == 'ETSILASKU') {
 
 if ($tee == "ETSILASKU") {
   echo "<form method='post' autocomplete='off'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
-			<input type='hidden' name='asiakasid' value='$asiakasid'>
-			<input type='hidden' name='tee' value='ETSILASKU'>";
+      <input type='hidden' name='ytunnus' value='$ytunnus'>
+      <input type='hidden' name='asiakasid' value='$asiakasid'>
+      <input type='hidden' name='tee' value='ETSILASKU'>";
 
   echo "<table>";
 
@@ -137,13 +137,13 @@ if ($tee == "ETSILASKU") {
     $ppl = date("d");
 
   echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-				<td><input type='text' name='kka' value='$kka' size='3'></td>
-				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
+        <td><input type='text' name='ppa' value='$ppa' size='3'></td>
+        <td><input type='text' name='kka' value='$kka' size='3'></td>
+        <td><input type='text' name='vva' value='$vva' size='5'></td>
+        </tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+        <td><input type='text' name='ppl' value='$ppl' size='3'></td>
+        <td><input type='text' name='kkl' value='$kkl' size='3'></td>
+        <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
   echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table><br>";
 
   $where1 = "";
@@ -152,19 +152,19 @@ if ($tee == "ETSILASKU") {
   //myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
   $where1 = " lasku.tila in ('L','N') ";
 
-  if ($ytunnus{0} == '£') {
+  if (substr($ytunnus, 0, 1) == '£') {
     $where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-						and lasku.nimitark  = '$asiakasrow[nimitark]'
-						and lasku.osoite    = '$asiakasrow[osoite]'
-						and lasku.postino   = '$asiakasrow[postino]'
-						and lasku.postitp   = '$asiakasrow[postitp]' ";
+            and lasku.nimitark  = '$asiakasrow[nimitark]'
+            and lasku.osoite    = '$asiakasrow[osoite]'
+            and lasku.postino   = '$asiakasrow[postino]'
+            and lasku.postitp   = '$asiakasrow[postitp]' ";
   }
   else {
     $where2 = " and lasku.liitostunnus  = '$asiakasid'";
   }
 
   $where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-					 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+           and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
   if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 
@@ -200,116 +200,4 @@ if ($tee == "ETSILASKU") {
 
 
 
-		$query = "SELECT lasku.tunnus Tilaus, if (lasku.laskunro=0, '', laskunro) Laskunro,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+    $query = "SELECT lasku.tunnus Tilaus, if (lasku.laskunro=0, '', laskunro) Laskunro,

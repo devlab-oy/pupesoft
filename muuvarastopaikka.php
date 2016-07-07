@@ -1170,16 +1170,12 @@ if ($tee == 'M') {
 
         $reklacheck = (mysql_num_rows($reklares) > 0);
 
-        // Tarkistetaan onko paikalla tilausrivejä
-        $query = "SELECT lasku.tunnus
-                  FROM lasku
-                  JOIN tilausrivi ON (
-                    tilausrivi.yhtio       = lasku.yhtio AND
-                    tilausrivi.otunnus     = lasku.tunnus
-                  )
-                  WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
-                  AND lasku.tila           IN ('L', 'N')
-                  AND lasku.alatila        IN ('', 'A', 'B', 'BD', 'C', 'D', 'E', 'F', 'G', 'J', 'K', 'KA', 'T', 'U', 'V')
+        // Tarkistetaan onko paikalla avoimi JT-rivejä
+        $query = "SELECT tilausrivi.tunnus
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi    = 'L'
+                  AND tilausrivi.var       = 'J'
                   AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
                   AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
                   AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
@@ -1250,7 +1246,7 @@ if ($tee == 'M') {
         }
 
         if ($rivicheck) {
-          $poistoteksti .= "<br>(".t("Tuotepaikalla avoimia tilausrivejä").")";
+          $poistoteksti .= "<br>(".t("Tuotepaikalla avoimia jälkitoimitusrivejä").")";
         }
 
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}

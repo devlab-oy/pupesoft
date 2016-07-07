@@ -1698,20 +1698,20 @@ else {
       if (isset($kampanja_ja_samplerajaus) and !empty($kampanja_ja_samplerajaus)) {
         switch ($kampanja_ja_samplerajaus) {
           case "nayta_kamp" :
-            $lisa .= " and tilausrivi.kampanja > 0 ";
+            $lisa .= " and tilausrivi.campaign_id IS NOT NULL ";
             break;
           case "nayta_samp" :
             $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ";
             break;
           case "alanayta_kamp" :
-            $lisa .= " and tilausrivi.kampanja = 0 ";
+            $lisa .= " and tilausrivi.campaign_id IS NULL ";
             break;
           case "alanayta_samp" :
             $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta != 'Sample' ";
             break;
           case "alanayta_kamp_samp" :
             $lisatiedot_join = " JOIN tilausrivin_lisatiedot  use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta != 'Sample' ";
-            $lisa .= " and tilausrivi.kampanja = 0 ";
+            $lisa .= " and tilausrivi.campaign_id IS NULL ";
             break;
         }
       }

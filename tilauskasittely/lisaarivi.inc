@@ -2945,10 +2945,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       //Käyttäjän syöttämä paikka
       $paikat = explode('#!¡!#', $paikka);
 
-      $p_hyllyalue  = $paikat[0];
-      $p_hyllynro    = $paikat[1];
-      $p_hyllyvali  = $paikat[2];
-      $p_hyllytaso  = $paikat[3];
+      $p_hyllyalue = $paikat[0];
+      $p_hyllynro  = $paikat[1];
+      $p_hyllyvali = $paikat[2];
+      $p_hyllytaso = $paikat[3];
     }
     else {
       // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa

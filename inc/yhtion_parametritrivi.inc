@@ -488,13 +488,12 @@ if ($fieldname == "ostotilaukseen_toimittajan_toimaika") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $apu = (int)$trow[$i];
-  $sel = array();
-  $sel[$apu] = "selected";
+  $sel = array_fill_keys(array($trow[$i]), 'selected') + array_fill_keys(array('0', '1', '2', '3'), '');
 
   $ulos .= "<option value = '0' $sel[0]>".t("Ei k‰ytet‰");
   $ulos .= "<option value = '1' $sel[1]>".t("Ehdottaa toimitusaikaa");
-  $ulos .= "<option value = '2' $sel[2]>".t("Laittaa automaattisesti toimitusajan");
+  $ulos .= "<option value = '2' $sel[2]>".t("Toimittajan toimitusaika p‰ivitet‰‰n automaattisesti riville");
+  $ulos .= "<option value = '3' $sel[3]>".t("Tuotteen toimittajan toimitusaika ensisijaisesti ja toimittajan toimitusaika toissijaisesti p‰ivitet‰‰n automaattisesti riville");
 
   $ulos .= "</select></td>";
 

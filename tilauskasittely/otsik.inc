@@ -3965,7 +3965,7 @@ if (isset($jatka)) {
     $meapu2row = mysql_fetch_assoc($meapu2);
 
     // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-    if ($meapu2row["nouto"] == "" and $otsikon_laskurow['tilaustyyppi'] != "W") {
+    if ($meapu2row["nouto"] == "" and $tilaustyyppi != "W") {
       $apuqu = "SELECT *
                 FROM toimitustapa
                 WHERE yhtio  = '$kukarow[yhtio]'

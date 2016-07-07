@@ -594,7 +594,6 @@ if (!function_exists("pupesoft_rest")) {
 
 if (!function_exists("tv1dateconv")) {
   function tv1dateconv($date, $pitka = "", $lyhyt = "") {
-
     global $laskurow;
 
     //kääntää mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
@@ -7272,12 +7271,18 @@ if (!function_exists("enable_ajax")) {
   function enable_ajax() {
     global $palvelin2, $kukarow;
 
-    if ($kukarow["extranet"] != "") {
-      $imgUrl = $palvelin2."loading_blue_small.gif";
-    }
-    else {
-      $imgUrl = $palvelin2."pics/loading_blue_small.gif";
-    }
+    static $js_enable_ajaxCalled = FALSE;
+
+    // Ekotetaan vain kerran.
+    if (!$js_enable_ajaxCalled) {
+      $js_enable_ajaxCalled = TRUE;
+
+      if ($kukarow["extranet"] != "") {
+        $imgUrl = $palvelin2."loading_blue_small.gif";
+      }
+      else {
+        $imgUrl = $palvelin2."pics/loading_blue_small.gif";
+      }
 
 ?>
 
@@ -7592,6 +7597,7 @@ if (!function_exists("enable_ajax")) {
 </script>
 
 <?php
+    }
   }
 }
 

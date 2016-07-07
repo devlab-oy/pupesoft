@@ -20,6 +20,34 @@ if (isset($_REQUEST['ajax_popup'])) {
 
 require "../inc/parametrit.inc";
 
+if ($tee == "VAHV_TA_AJAX") {
+  $query = "UPDATE tilausrivi
+            SET jaksotettu = 1
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and otunnus     = '$kukarow[kesken]'
+            and tyyppi      = 'O'
+            and uusiotunnus = 0
+            and tunnus      = '{$rivitunnus}'";
+  pupe_query($query);
+
+  echo json_encode('ok');
+  exit;
+}
+
+if ($tee == "PAIVITA_TA_AJAX") {
+  $query = "UPDATE tilausrivi
+            SET toimaika = '$paiv_toimaika'
+            WHERE yhtio     = '$kukarow[yhtio]'
+            and otunnus     = '$kukarow[kesken]'
+            and tyyppi      = 'O'
+            and uusiotunnus = 0
+            and tunnus      = '{$rivitunnus}'";
+  pupe_query($query);
+
+  echo json_encode('ok');
+  exit;
+}
+
 if ($kukarow['extranet'] == '' && isset($ajax_popup)) {
   require "tuotetiedot.inc";
   exit;
@@ -560,7 +588,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }            
+             }
           }
           $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 
@@ -906,7 +934,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
     // K‰ytt‰j‰n syˆtt‰m‰ hinta ja ale ja netto, pit‰‰ s‰ilˆ‰ jotta tuotehaussakin voidaan syˆtt‰‰ n‰m‰
     $kayttajan_hinta  = $hinta;
-    $kayttajan_netto   = $netto;
+    $kayttajan_netto  = $netto;
     $kayttajan_var    = $var;
     $kayttajan_kpl    = $kpl;
     $kayttajan_alv    = $alv;
@@ -930,6 +958,23 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       else {
         //Tuotetta ei lˆydy, arvataan muutamia muuttujia
         $trow["alv"] = $laskurow["alv"];
+      }
+
+      if (empty($rivitunnus) and $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '3') {
+        $ttquery = "SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimaika
+                    FROM tuotteen_toimittajat
+                    JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                    AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+                    AND tuotteen_toimittajat.liitostunnus = {$laskurow['liitostunnus']}
+                    AND (tuotteen_toimittajat.toimitusaika > 0 or toimi.oletus_toimaika > 0)";
+        $ttres = pupe_query($ttquery);
+
+        if ($ttrow = mysql_fetch_assoc($ttres)) {
+          $toimittajan_toimaika = date('Y-m-d', time() + $ttrow["toimaika"] * 24 * 60 * 60);
+
+          list($toimvva, $toimkka, $toimppa) = explode('-', $toimittajan_toimaika);
+        }
       }
 
       if (checkdate($toimkka, $toimppa, $toimvva)) {
@@ -1219,7 +1264,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     echo "</tr>";
     echo "</table><br>";
 
-    echo "<font class='head'>".t("Lis‰‰ rivi")."</font>";
+    echo "<font class='message'>".t("Lis‰‰ rivi")."</font>";
 
     if (empty($toim_tuoteno)) {
       $toim_tuoteno = "toim_tuoteno_omat";
@@ -1262,7 +1307,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $huomio = '';
     }
 
-    echo "<font class='head'>".t("Tilausrivit")."</font>";
+    echo "<font class='message'>".t("Tilausrivit")."</font>";
 
     if (empty($toim_nimitykset)) {
       $toim_nimitykset = "ME";
@@ -1395,7 +1440,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.var2,
               tilausrivi.jaksotettu,
               tilausrivi.yksikko,
-              tuotteen_toimittajat.toim_yksikko,
+              if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tuote.yksikko) toim_yksikko,
               tuote.tuotemassa,
               (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
               tuote.kehahin keskihinta,
@@ -1432,12 +1477,83 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
     if ($rivienmaara > 0) {
 
+      enable_ajax();
+
+      echo "<script type=\"text/javascript\" charset=\"utf-8\">
+
+      $(function() {
+
+        var vahvistarivintoimaika = function() {
+          if ($(this).attr(\"disabled\") == undefined) {
+            var submitid    = $(this).attr(\"id\");
+            var osat        = submitid.split(\"_\");
+            var rivitunnus  = osat[1];
+
+            $.post('{$_SERVER['SCRIPT_NAME']}',
+              {
+                tee: 'VAHV_TA_AJAX',
+                async: false,
+                rivitunnus: rivitunnus,
+                no_head: 'yes',
+                ohje: 'off'
+              },
+              function(json) {
+                var message = JSON && JSON.parse(json) || $.parseJSON(json);
+
+                if (message == \"ok\") {
+                  $(\"#\"+submitid).html(' ".t("Vahvistettu")."!');
+                  $(\"#\"+submitid).attr('disabled', true);
+                  $(\"#\"+submitid+\"_wrap\").attr('class', 'ok');
+                }
+              }
+            );
+          }
+          return false;
+        }
+
+        var paivitarivintoimaika = function() {
+          if ($(this).attr(\"disabled\") == undefined) {
+            var submitid    = $(this).attr(\"id\");
+            var osat        = submitid.split(\"_\");
+            var rivitunnus  = osat[1];
+            var paiv_toimaika = $(\"#\"+submitid+\"_pvm\").text();
+            var paiv_toimaika_ui = $(\"#\"+submitid+\"_pvm_ui\").text();
+
+            $.post('{$_SERVER['SCRIPT_NAME']}',
+              {
+                tee: 'PAIVITA_TA_AJAX',
+                async: false,
+                rivitunnus: rivitunnus,
+                paiv_toimaika: paiv_toimaika,
+                no_head: 'yes',
+                ohje: 'off'
+              },
+              function(json) {
+                var message = JSON && JSON.parse(json) || $.parseJSON(json);
+
+                if (message == \"ok\") {
+                  $(\"#\"+submitid).html(' ".t("Toimitusiaka p‰ivitetty")."!');
+                  $(\"#\"+submitid).attr('disabled', true);
+                  $(\"#\"+submitid+\"_message\").html('');
+                  $(\".toimaika_\"+rivitunnus).html(paiv_toimaika_ui);
+                }
+              }
+            );
+          }
+          return false;
+        }
+
+        $('.vahvistarivintoimaika').live('click', vahvistarivintoimaika);
+        $('.paivitarivintoimaika').live('click', paivitarivintoimaika);
+      });
+      </script>";
+
       echo "<table><tr>";
       echo "<th>#</th>";
       echo "<th align='left'>".t("Nimitys")."</th>";
       echo "<th align='left'>".t("Paikka")."</th>";
-      echo "<th align='left'>".t("Tuote")."<br>".t("Toim Tuote")."</th>";
-      echo "<th align='left'>".t("M‰‰r‰")."<br>".t("M‰‰r‰/Ulk")."</th>";
+      echo "<th align='left'>".t("Tuote")."</th>";
+      echo "<th align='left'>".t("M‰‰r‰")."</th>";
       echo "<th align='left'>".t("Hinta")."</th>";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
@@ -1446,7 +1562,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       echo "<th align='left'>".t("Alv")."</th>";
       echo "<th align='left'>".t("Rivihinta")."</th>";
-      echo "<th align='left'>".t("Valuutta")."</th>";
       echo "</tr>";
 
       $yhteensa         = 0;
@@ -1601,17 +1716,16 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               echo "<td $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
-                         id='$prow[tunnus]'
+                         id='saldo_$prow[tunnus]'
                          data-content-url='{$parametrit}'>$prow[tuoteno]</a>";
             }
             else {
               echo "<td $class>
                       <a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&lopetus=$tilost_lopetus//from=LASKUTATILAUS'
                          class='tooltip'
-                         id='$prow[tunnus]'
+                         id='saldo_$prow[tunnus]'
                          data-content-url='{$parametrit}'>$prow[tuoteno]</a>";
             }
-
           }
           else {
             if ($toim != "HAAMU") {
@@ -1670,9 +1784,9 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           echo ($prow["tilattu"]*1)." ", strtolower($prow['yksikko']), "<br />".($prow["tilattu_ulk"]*1)." ", strtolower($prow['toim_yksikko']), "</td>";
           echo "<td $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
-          $alespan = 8;
-          $backspan1 = 0;
-          $backspan2 = 4;
+          $alespan = 7;
+          $backspan1 = -1;
+          $backspan2 = 3;
 
           for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
             echo "<td $class align='right'>".((float) $prow["ale{$alepostfix}"])."</td>";
@@ -1683,12 +1797,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           echo "<td $class align='right'>".((float) $prow["alv"])."</td>";
           echo "<td $class align='right'>".hintapyoristys($prow["rivihinta"])."</td>";
-
-          if ($prow["valuutta"] == "" and $toimittajarow["oletus_valkoodi"] != "") {
-            $prow["valuutta"] = $toimittajarow["oletus_valkoodi"];
-          }
-
-          echo "<td $classlisa align='right'>$prow[valuutta]</td>";
 
           if ($prow["uusiotunnus"] == 0) {
 
@@ -1743,22 +1851,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                   <input type='hidden' name='tee'         value = 'OOKOOAA'>
                   <input type='submit' value='".t("Hyv‰ksy")."'>
                   </form></td> ";
-            }
-
-            if ($prow['jaksotettu'] == 0) {
-              echo "  <td class='ptop back''>
-                  <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
-                  <input type='hidden' name='toim'          value = '$toim'>
-                  <input type='hidden' name='lopetus'        value = '$lopetus'>
-                  <input type='hidden' name='tilausnumero'      value = '$tilausnumero'>
-                  <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
-                  <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
-                  <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
-                  <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
-                  <input type='hidden' name='tee'          value = 'vahvista'>
-                  <input type='submit' value='".t("Vahvista rivin toimitus")."'>
-                  </form>
-                  </td>";
             }
 
             if ($varaosavirhe != '') {
@@ -1870,7 +1962,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
               $font_class = $comp_a != $comp_b ? 'error' : 'ok';
 
-              echo "<font class='{$font_class}'>", t("Vahvistettu toimitusaika"), ": ", tv1dateconv($prow["toimaika"]), "<br />";
+              echo "<font class='{$font_class}'>", t("Vahvistettu toimitusaika"), ": <span class='toimaika_$prow[tunnus]'>", tv1dateconv($prow["toimaika"]), "</span><br />";
               echo t("Vahvistettu m‰‰r‰"), ": {$prow['vahvistettu_maara']}";
 
               if ($prow['vahvistettu_kommentti'] != "") {
@@ -1880,20 +1972,40 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               echo "</font>";
             }
             else {
-              echo "<font class='ok'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font>";
+              echo "<font class='ok'>".t("Vahvistettu toimitusaika").": <span class='toimaika_$prow[tunnus]'>".tv1dateconv($prow["toimaika"])."</span></font>";
             }
           }
           else {
-            if (isset($paivitetty_ok) and $paivitetty_ok == "YES") {
-              echo t("Toimitusaika").": ".tv1dateconv($ehdotus_pvm);
-            }
-            else {
-              echo t("Toimitusaika").": ".tv1dateconv($prow["toimaika"]);
+
+            echo "<span id='vta_$prow[tunnus]_wrap'>";
+            echo t("Toimitusaika").": <span class='toimaika_$prow[tunnus]'>".tv1dateconv($prow["toimaika"])."</span>";
+            echo "</span>";
+
+            if ($prow['jaksotettu'] == 0) {
+              echo " <a href='#' class='vahvistarivintoimaika' id ='vta_$prow[tunnus]'>*".t("Vahvista toimitusaika")."*</a>";
             }
           }
 
           if (trim($prow["kommentti"]) != "") {
             echo " / ".t("Kommentti").": $prow[kommentti]";
+          }
+
+          //toimitusajan p‰ivitys toimittajan toimitusaikaan
+          if (!empty($trow["toimitusaika"]) or !empty($toimittajarow["oletus_toimaika"])) {
+
+            if (!empty($trow["toimitusaika"])) {
+              $ehdotus_pvm = date('Y-m-d', time() + $trow["toimitusaika"] * 24 * 60 * 60);
+            }
+            elseif (!empty($toimittajarow["oletus_toimaika"])) {
+              $ehdotus_pvm = date('Y-m-d', time() + $toimittajarow["oletus_toimaika"] * 24 * 60 * 60);
+            }
+
+            if ($ehdotus_pvm != $prow["toimaika"]) {
+              echo "<br><span id='pta_$prow[tunnus]_message' class='message'>".t("Haluatko muuttaa toimitusajan")." ".t("tuotteen toimittajan toimitusaikaan")." ".tv1dateconv($ehdotus_pvm)."?</span>";
+              echo "<div id='pta_$prow[tunnus]_pvm' style='display:none;'>$ehdotus_pvm</div>";
+              echo "<div id='pta_$prow[tunnus]_pvm_ui' style='display:none;'>".tv1dateconv($ehdotus_pvm)."</div>";
+              echo " <a href='#' class='paivitarivintoimaika' id ='pta_$prow[tunnus]'>*".t("P‰ivit‰")."*</a>";
+            }
           }
 
           if (!empty($prow['tilausrivilinkki'])) {
@@ -1996,11 +2108,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           </form>
           </td>";
 
-      echo "<td class='back' colspan='$backspan1'></td>
-          <td colspan='3' class='spec'>".t("Tilauksen tilavuus").":</td>
-          <td align='right' class='spec'>".sprintf("%.2f", $tilavuus_yhteensa)."</td>
-          <td class='spec'>m3</td>
-          </tr>";
+      if ($backspan1 > 0) {
+        echo "<td class='back' colspan='$backspan1'></td>";
+      }
+
+      echo "<td colspan='3' class='spec'>".t("Tilauksen tilavuus").":</td>
+            <td align='right' class='spec'>".sprintf("%.2f", $tilavuus_yhteensa)."</td>
+            <td class='spec'>m3</td>
+            </tr>";
 
       echo "</table>";
     }

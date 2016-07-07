@@ -1976,7 +1976,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         toimaika        = '$toimaika',
                         kommentti       = '$kommentti',
                         ale_peruste     = '{$GLOBALS['ale_peruste']}',
-                        kampanja        = '{$GLOBALS['kampanjahinnoitteluntunnus']}',
+                        campaign_id     = {$GLOBALS['kampanjahinnoitteluntunnus']},
                         var             = '',
                         var2            = '{$var2}',
                         try             = '$trow[try]',

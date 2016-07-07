@@ -59,23 +59,23 @@ else {
     }
 
     // tässä query
-    $query = "  SELECT tuote.tuoteno,
-            group_concat(if(tilausrivi_osto.nimitys is null or tilausrivi_osto.nimitys='', tuote.nimitys, tilausrivi_osto.nimitys) SEPARATOR '<br>') nimitys,
-            group_concat(sarjanumeroseuranta.sarjanumero SEPARATOR '<br>') sarjanumero,
-            group_concat(concat(\"'\", sarjanumeroseuranta.sarjanumero, \"'\")) sarjanumero_clean,
-            group_concat(distinct if(sarjanumeroseuranta.kaytetty = '', 'U', sarjanumeroseuranta.kaytetty) SEPARATOR ' ') kaytetty,
-            sum(if(tilausrivi_myynti.tunnus is null and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) vapaana,
-            sum(if((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00', tilausrivi_osto.rivihinta / tilausrivi_osto.kpl, 0)) vararvo,
-            sum(if((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) kaikki,
-            sum(if(tilausrivi_myynti.tunnus is not null and tilausrivi_myynti.laskutettuaika = '0000-00-00' and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) varattu
-            FROM tuote
-            LEFT JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tuote.yhtio and sarjanumeroseuranta.tuoteno = tuote.tuoteno and sarjanumeroseuranta.myyntirivitunnus != -1)
-            LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
-            LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.sarjanumeroseuranta = 'S'
-            $lisa
-            $group";
+    $query = "SELECT tuote.tuoteno,
+              group_concat(if(tilausrivi_osto.nimitys is null or tilausrivi_osto.nimitys='', tuote.nimitys, tilausrivi_osto.nimitys) SEPARATOR '<br>') nimitys,
+              group_concat(sarjanumeroseuranta.sarjanumero SEPARATOR '<br>') sarjanumero,
+              group_concat(concat(\"'\", sarjanumeroseuranta.sarjanumero, \"'\")) sarjanumero_clean,
+              group_concat(distinct if(sarjanumeroseuranta.kaytetty = '', 'U', sarjanumeroseuranta.kaytetty) SEPARATOR ' ') kaytetty,
+              sum(if(tilausrivi_myynti.tunnus is null and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) vapaana,
+              sum(if((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00', tilausrivi_osto.rivihinta / tilausrivi_osto.kpl, 0)) vararvo,
+              sum(if((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) kaikki,
+              sum(if(tilausrivi_myynti.tunnus is not null and tilausrivi_myynti.laskutettuaika = '0000-00-00' and tilausrivi_osto.laskutettuaika != '0000-00-00', 1, 0)) varattu
+              FROM tuote
+              LEFT JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tuote.yhtio and sarjanumeroseuranta.tuoteno = tuote.tuoteno and sarjanumeroseuranta.myyntirivitunnus != -1)
+              LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
+              LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
+              WHERE tuote.yhtio             = '$kukarow[yhtio]'
+              and tuote.sarjanumeroseuranta = 'S'
+              $lisa
+              $group";
     $result = mysql_query($query) or pupe_error($query);
 
     echo "<table>";
@@ -158,15 +158,15 @@ else {
       echo "<td valign='top' align='right'>".($saldo-$myytavissa)."</td>";
       echo "<td valign='top' align='right'>$saldo</td>";
 
-      $query = "  SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
-              FROM sarjanumeroseuranta
-              LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-              LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-              WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-              and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-              and sarjanumeroseuranta.myyntirivitunnus != -1
-              and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-              and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+      $query = "SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+                FROM sarjanumeroseuranta
+                LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+                LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+                WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+                and sarjanumeroseuranta.tuoteno           = '$row[tuoteno]'
+                and sarjanumeroseuranta.myyntirivitunnus != -1
+                and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+                and tilausrivi_osto.laskutettuaika       != '0000-00-00'";
       $sarjares = mysql_query($query) or pupe_error($query);
       $sarjarow = mysql_fetch_array($sarjares);
 

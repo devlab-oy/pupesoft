@@ -263,37 +263,37 @@ else {
     }
 
     // N‰ytet‰‰n kaikki
-    $query = "  SELECT sarjanumeroseuranta.*,
-            if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
-            tuote.myyntihinta                   tuotemyyntihinta,
-            tuote.nimitys                     tuotenimitys,
-            tuote.tuotemerkki                   tuotetuotemerkki,
-            lasku_osto.tunnus                  osto_tunnus,
-            lasku_osto.nimi                    osto_nimi,
-            lasku_myynti.tunnus                  myynti_tunnus,
-            lasku_myynti.nimi                  myynti_nimi,
-            lasku_myynti.tila                  myynti_tila,
-            (tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)    ostohinta,
-            tilausrivi_osto.perheid2              osto_perheid2,
-            (tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)  myyntihinta,
-            varastopaikat.nimitys                varastonimi,
-            tilausrivi_osto.tunnus                 osto_rivitunnus,
-            sarjanumeroseuranta.lisatieto            lisatieto,
-            concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
-            FROM sarjanumeroseuranta
-            LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
-            LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-            LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-            LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
-            LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
-            LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
-            and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
-            and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
-            WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-            and sarjanumeroseuranta.myyntirivitunnus != -1
-            $lisa
-            $lisa1
-            ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
+    $query = "SELECT sarjanumeroseuranta.*,
+              if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
+              tuote.myyntihinta                   tuotemyyntihinta,
+              tuote.nimitys                     tuotenimitys,
+              tuote.tuotemerkki                   tuotetuotemerkki,
+              lasku_osto.tunnus                  osto_tunnus,
+              lasku_osto.nimi                    osto_nimi,
+              lasku_myynti.tunnus                  myynti_tunnus,
+              lasku_myynti.nimi                  myynti_nimi,
+              lasku_myynti.tila                  myynti_tila,
+              (tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)    ostohinta,
+              tilausrivi_osto.perheid2              osto_perheid2,
+              (tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)  myyntihinta,
+              varastopaikat.nimitys                varastonimi,
+              tilausrivi_osto.tunnus                 osto_rivitunnus,
+              sarjanumeroseuranta.lisatieto            lisatieto,
+              concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+              FROM sarjanumeroseuranta
+              LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
+              LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+              LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+              LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+              LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+              LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+              and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+              and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+              WHERE sarjanumeroseuranta.yhtio           = '$kukarow[yhtio]'
+              and sarjanumeroseuranta.myyntirivitunnus != -1
+              $lisa
+              $lisa1
+              ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
     $sarjares = mysql_query($query) or pupe_error($query);
 
     if (file_exists('../tilauskasittely/sarjanumeron_lisatiedot_popup.inc') and $lisatiedot != 'EIVAR') {
@@ -394,10 +394,10 @@ else {
       }
 
       if ($ztun > 0) {
-        $query = "  SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
-                FROM tilausrivi
-                LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-                WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+        $query = "SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
+                  FROM tilausrivi
+                  LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                  WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
         $siires = mysql_query($query) or pupe_error($query);
         $siirow = mysql_fetch_array($siires);
 
@@ -496,10 +496,10 @@ else {
 
         preg_match("/Tehdaslis‰varusteet:(.*?)<\/table>/", $kommpreg, $xls_komm1);
 
-        $query = "  SELECT lisatiedot, Hinta
-                FROM sarjanumeron_lisatiedot
-                WHERE yhtio     = '$kukarow[yhtio]'
-                and liitostunnus = '$sarjarow[tunnus]'";
+        $query = "SELECT lisatiedot, Hinta
+                  FROM sarjanumeron_lisatiedot
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and liitostunnus = '$sarjarow[tunnus]'";
         $lttres = mysql_query($query) or pupe_error($query);
         $lttrow = mysql_fetch_assoc($lttres);
 
@@ -631,11 +631,11 @@ else {
     echo "<option value='MEY' $sel[MEY]>".t("Tulosta hintalappu")."</option>";
     echo "</select></td></tr>";
 
-    $query = "  SELECT *
-            FROM kirjoittimet
-            WHERE yhtio='$kukarow[yhtio]'
-            AND komento != 'EDI'
-            ORDER BY kirjoitin";
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio='$kukarow[yhtio]'
+              AND komento != 'EDI'
+              ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
     echo "<tr><th>Tulostin:</th>";

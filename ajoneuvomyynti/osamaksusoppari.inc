@@ -17,52 +17,52 @@ if ($tee == 'osamaksusoppari') {
 
 // Päivitetään tiedot tietokantaan
 if ($tee == 'osamaksusoppari' and $tilausnumero > 0 and isset($omaformi)) {
-  $query = "  SELECT tunnus
-          FROM laskun_lisatiedot
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and otunnus = '$tilausnumero'";
+  $query = "SELECT tunnus
+            FROM laskun_lisatiedot
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$tilausnumero'";
   $res = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($res) > 0) {
-    $query  = "  UPDATE laskun_lisatiedot
-            SET rahlaskelma_rahoitettava_positio     = '$rahlaskelma_rahoitettava_positio',
-            rahlaskelma_jaannosvelka_vaihtokohteesta  = '$jaannosvelka_vaihtokohteesta',
-            rahlaskelma_perustamiskustannus       = '$perustamiskustannus',
-            rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
-            rahlaskelma_sopajankorko           = '$sopajankorko',
-            rahlaskelma_maksuerienlkm           = '$maksuerienlkm',
-            rahlaskelma_luottoaikakk           = '$luottoaikakk',
-            rahlaskelma_ekaerpcm             = '$vva-$kka-$ppa',
-            rahlaskelma_erankasittelymaksu        = '$erankasittelymaksu',
-            rahlaskelma_tilinavausmaksu         = '$tilinavausmaksu',
-            rahlaskelma_viitekorko             = '$viitekorko',
-            rahlaskelma_marginaalikorko         = '$marginaalikorko',
-            rahlaskelma_lyhennystapa           = '$lyhennystapa',
-            rahlaskelma_poikkeava_era          = '$poikkeava_era',
-            rekisteilmo_omistaja            = '$rekisteilmo_omistaja'
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus  = '$tilausnumero' ";
+    $query  = "UPDATE laskun_lisatiedot
+               SET rahlaskelma_rahoitettava_positio     = '$rahlaskelma_rahoitettava_positio',
+               rahlaskelma_jaannosvelka_vaihtokohteesta = '$jaannosvelka_vaihtokohteesta',
+               rahlaskelma_perustamiskustannus          = '$perustamiskustannus',
+               rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
+               rahlaskelma_sopajankorko                 = '$sopajankorko',
+               rahlaskelma_maksuerienlkm                = '$maksuerienlkm',
+               rahlaskelma_luottoaikakk                 = '$luottoaikakk',
+               rahlaskelma_ekaerpcm                     = '$vva-$kka-$ppa',
+               rahlaskelma_erankasittelymaksu           = '$erankasittelymaksu',
+               rahlaskelma_tilinavausmaksu              = '$tilinavausmaksu',
+               rahlaskelma_viitekorko                   = '$viitekorko',
+               rahlaskelma_marginaalikorko              = '$marginaalikorko',
+               rahlaskelma_lyhennystapa                 = '$lyhennystapa',
+               rahlaskelma_poikkeava_era                = '$poikkeava_era',
+               rekisteilmo_omistaja                     = '$rekisteilmo_omistaja'
+               WHERE yhtio                              = '$kukarow[yhtio]'
+               and otunnus                              = '$tilausnumero' ";
     $res = mysql_query($query) or pupe_error($query);
   }
   else {
-    $query  = "  INSERT INTO laskun_lisatiedot
-            SET yhtio                   = '$kukarow[yhtio]',
-            otunnus                   = '$tilausnumero',
-            rahlaskelma_rahoitettava_positio       = '$rahlaskelma_rahoitettava_positio',
-            rahlaskelma_jaannosvelka_vaihtokohteesta  = '$jaannosvelka_vaihtokohteesta',
-            rahlaskelma_perustamiskustannus       = '$perustamiskustannus',
-            rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
-            rahlaskelma_sopajankorko           = '$sopajankorko',
-            rahlaskelma_maksuerienlkm           = '$maksuerienlkm',
-            rahlaskelma_luottoaikakk           = '$luottoaikakk',
-            rahlaskelma_ekaerpcm             = '$vva-$kka-$ppa',
-            rahlaskelma_erankasittelymaksu        = '$erankasittelymaksu',
-            rahlaskelma_tilinavausmaksu         = '$tilinavausmaksu',
-            rahlaskelma_viitekorko             = '$viitekorko',
-            rahlaskelma_marginaalikorko         = '$marginaalikorko',
-            rahlaskelma_lyhennystapa           = '$lyhennystapa',
-            rahlaskelma_poikkeava_era          = '$poikkeava_era',
-            rekisteilmo_omistaja            = '$rekisteilmo_omistaja'";
+    $query  = "INSERT INTO laskun_lisatiedot
+               SET yhtio                   = '$kukarow[yhtio]',
+               otunnus                                  = '$tilausnumero',
+               rahlaskelma_rahoitettava_positio         = '$rahlaskelma_rahoitettava_positio',
+               rahlaskelma_jaannosvelka_vaihtokohteesta = '$jaannosvelka_vaihtokohteesta',
+               rahlaskelma_perustamiskustannus          = '$perustamiskustannus',
+               rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
+               rahlaskelma_sopajankorko                 = '$sopajankorko',
+               rahlaskelma_maksuerienlkm                = '$maksuerienlkm',
+               rahlaskelma_luottoaikakk                 = '$luottoaikakk',
+               rahlaskelma_ekaerpcm                     = '$vva-$kka-$ppa',
+               rahlaskelma_erankasittelymaksu           = '$erankasittelymaksu',
+               rahlaskelma_tilinavausmaksu              = '$tilinavausmaksu',
+               rahlaskelma_viitekorko                   = '$viitekorko',
+               rahlaskelma_marginaalikorko              = '$marginaalikorko',
+               rahlaskelma_lyhennystapa                 = '$lyhennystapa',
+               rahlaskelma_poikkeava_era                = '$poikkeava_era',
+               rekisteilmo_omistaja                     = '$rekisteilmo_omistaja'";
     $res = mysql_query($query) or pupe_error($query);
   }
 
@@ -72,10 +72,10 @@ if ($tee == 'osamaksusoppari' and $tilausnumero > 0 and isset($omaformi)) {
 }
 
 if ($nrahdemo == 1 and $nrahtee == "POISTA") {
-  $query  = "  UPDATE laskun_lisatiedot
-          SET rahlaskelma_nfref = '0'
-          WHERE yhtio = '$kukarow[yhtio]'
-          and otunnus  = '$tilausnumero' ";
+  $query  = "UPDATE laskun_lisatiedot
+             SET rahlaskelma_nfref = '0'
+             WHERE yhtio = '$kukarow[yhtio]'
+             and otunnus = '$tilausnumero' ";
   $res = mysql_query($query) or pupe_error($query);
 
   $nrahtee = "";
@@ -84,19 +84,19 @@ if ($nrahdemo == 1 and $nrahtee == "POISTA") {
 if ($tee == 'osamaksusoppari') {
 
   // Laskun tiedot
-  $query  = "  SELECT laskun_lisatiedot.*, lasku.*
-          FROM lasku
-          LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-          WHERE lasku.tunnus  = '$tilausnumero'
-          and lasku.yhtio    = '$kukarow[yhtio]'";
+  $query  = "SELECT laskun_lisatiedot.*, lasku.*
+             FROM lasku
+             LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+             WHERE lasku.tunnus = '$tilausnumero'
+             and lasku.yhtio    = '$kukarow[yhtio]'";
   $result   = mysql_query($query) or pupe_error($query);
   $laskurow   = mysql_fetch_array($result);
 
   // Asiakkaan tiedot
-  $query  = "  SELECT *
-          FROM asiakas
-          WHERE tunnus  = '$laskurow[liitostunnus]'
-          and yhtio    = '$kukarow[yhtio]'";
+  $query  = "SELECT *
+             FROM asiakas
+             WHERE tunnus = '$laskurow[liitostunnus]'
+             and yhtio    = '$kukarow[yhtio]'";
   $result   = mysql_query($query) or pupe_error($query);
   $asiakasrow = mysql_fetch_array($result);
 
@@ -108,16 +108,16 @@ if ($tee == 'osamaksusoppari') {
 
       $query_ale_lisa = generoi_alekentta('M');
 
-      $query = "  SELECT tilausrivi.*,
-               round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, 2) rivihinta,
-              tuote.tuoteno, tilausrivin_lisatiedot.positio
-              FROM tilausrivi
-              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-              WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-              and tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi in  ('L','T','U')
-              $osasto";
+      $query = "SELECT tilausrivi.*,
+                round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, 2) rivihinta,
+                tuote.tuoteno, tilausrivin_lisatiedot.positio
+                FROM tilausrivi
+                JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+                and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    in  ('L','T','U')
+                $osasto";
       $riresult = mysql_query($query) or pupe_error($query);
 
       while ($row = mysql_fetch_array($riresult)) {
@@ -157,10 +157,10 @@ if ($tee == 'osamaksusoppari') {
   $muut_maksut_ennen_toimitusta = 0;
 
   if ($rahlaskelma_rahoitettava_positio > 0) {
-    $query = "  SELECT *
-            FROM maksupositio
-            WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[jaksotettu]' and tunnus != '$rahlaskelma_rahoitettava_positio'
-            order by summa desc";
+    $query = "SELECT *
+              FROM maksupositio
+              WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[jaksotettu]' and tunnus != '$rahlaskelma_rahoitettava_positio'
+              order by summa desc";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -428,13 +428,13 @@ if ($tee == 'osamaksusoppari') {
 
     echo "<table>";
 
-    $query = "  SELECT yhtio
-            FROM oikeu
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and kuka  = '$kukarow[kuka]'
-            and nimi  = 'yllapito.php'
-            and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
-            and paivitys != ''";
+    $query = "SELECT yhtio
+              FROM oikeu
+              WHERE yhtio   = '$kukarow[yhtio]'
+              and kuka      = '$kukarow[kuka]'
+              and nimi      = 'yllapito.php'
+              and alanimi   = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
+              and paivitys != ''";
     $oikeuresult1 = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($oikeuresult1) > 0) {
@@ -444,23 +444,23 @@ if ($tee == 'osamaksusoppari') {
     }
 
 
-    $query = "  SELECT sarjanumeroseuranta.tunnus
-            FROM tilausrivi
-            JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-            JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.otunnus = '$tilausnumero'
-            LIMIT 1";
+    $query = "SELECT sarjanumeroseuranta.tunnus
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.otunnus = '$tilausnumero'
+              LIMIT 1";
     $venvelisres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($venvelisres) > 0) {
 
       $lisrow = mysql_fetch_array($venvelisres);
 
-      $query = "  SELECT *
-              FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and liitostunnus = '$lisrow[tunnus]'";
+      $query = "SELECT *
+                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$lisrow[tunnus]'";
       $lisares = mysql_query($query) or pupe_error($query);
       $lisarow = mysql_fetch_array($lisares);
 
@@ -476,23 +476,23 @@ if ($tee == 'osamaksusoppari') {
             <td align='right'><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!RAHHAK!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Veneen lisätiedot")."</a></td><td></td></tr>";
     }
 
-    $query = "  SELECT sarjanumeroseuranta.tunnus
-            FROM tilausrivi
-            JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-            JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VAIHTOVENE'
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.otunnus = '$tilausnumero'
-            LIMIT 1";
+    $query = "SELECT sarjanumeroseuranta.tunnus
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VAIHTOVENE'
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.otunnus = '$tilausnumero'
+              LIMIT 1";
     $venvelisres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($venvelisres) > 0) {
 
       $lisrow = mysql_fetch_array($venvelisres);
 
-      $query = "  SELECT *
-              FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and liitostunnus = '$lisrow[tunnus]'";
+      $query = "SELECT *
+                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$lisrow[tunnus]'";
       $lisares = mysql_query($query) or pupe_error($query);
       $lisarow = mysql_fetch_array($lisares);
 
@@ -512,10 +512,10 @@ if ($tee == 'osamaksusoppari') {
           <th>".t("Rekisteröinti- ja vakuutustiedot")."</th>
           <td align='right'><a href='$PHP_SELF?toim=$toim&tee=vakuutushakemus&tilausnumero=$tilausnumero&from=LASKUTATILAUS&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Rekisteröinti- ja Vakuutustiedot")."</a></td><td></td></tr>";
 
-    $query = "  SELECT *
-            FROM maksupositio
-            WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[jaksotettu]'
-            order by summa desc";
+    $query = "SELECT *
+              FROM maksupositio
+              WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[jaksotettu]'
+              order by summa desc";
     $result = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -540,11 +540,11 @@ if ($tee == 'osamaksusoppari') {
     }
 
     // Hetaana mutamia oletuksia avainsanoista
-    $query = "  SELECT *
-            FROM avainsana
-            WHERE yhtio = '$kukarow[yhtio]'
-            and laji  ='MYSQLALIAS'
-            and selite  like 'osamaksusoppari.%'";
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              and laji  ='MYSQLALIAS'
+              and selite  like 'osamaksusoppari.%'";
     $al_res = mysql_query($query) or pupe_error($query);
 
     $avain_oletukset = array();

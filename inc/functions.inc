@@ -1,5 +1,8 @@
 <?php
 
+# for github syntax highlighting
+# -*- mode: php;-*-
+
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 
@@ -33262,5 +33265,42 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
         pupe_query($query);
       }
     }
+  }
+}
+
+if (!function_exists('pupesoft_a2ps')) {
+  function pupesoft_a2ps($params) {
+
+    $borders  = empty($params['borders'])  ? '0'        : $params['borders'];
+    $chars    = empty($params['chars'])    ? '80'       : $params['chars'];
+    $columns  = empty($params['columns'])  ? '1'        : $params['columns'];
+    $filename = empty($params['filename']) ? ''         : $params['filename'];
+    $major    = empty($params['major'])    ? 'rows'     : $params['major'];
+    $margin   = empty($params['margin'])   ? '1'        : $params['margin'];
+    $medium   = empty($params['medium'])   ? 'A4'       : $params['medium']; // a2ps --list=media
+    $mode     = empty($params['mode'])     ? 'portrait' : $params['mode'];   // landscape or portrait
+
+    if (empty($filename)) {
+      return false;
+    }
+
+    // Tehdään kopio tiedostosta, että ei yliajeta alkuperäistä
+    $temp_file = tempnam("/tmp", "postscript");
+    copy($filename, $temp_file);
+
+    // Varmistetaan, että tiedosto on ISO formaatissa, koska a2ps ei tue UTF8 encoodausta
+    if (PUPE_UNICODE) {
+      exec("recode -f UTF-8..ISO-8859-15 '$temp_file'");
+    }
+
+    // konertoidaan postscriptiksi
+    $out_file = tempnam("/tmp", "postscript") . ".ps";
+    exec("a2ps -o {$out_file} --{$mode} --no-header --major={$major} --medium={$medium} --chars-per-line={$chars} --columns={$columns} --margin={$margin} --borders={$borders} $temp_file");
+
+    // poistetaan sisäinen temp file
+    unlink($temp_file);
+
+    // palautetaan polku uuteen .ps tiedostoon
+    return $out_file;
   }
 }

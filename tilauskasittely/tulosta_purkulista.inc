@@ -35,6 +35,8 @@ if (!function_exists('alku_purku')) {
 
     tulosta_logo_pdf($pdf, $firstpage, $laskurow, $kala, 22, 25, 120);
 
+    $pdf->draw_rectangle($kala+15, 20,  $kala-25, 808, $firstpage,       $rectparam);
+
     if ($mista == 'vastaanota') {
       $pdf->draw_text(280, $kala, t("VASTAANOTETUT", $kieli),     $firstpage);
     }
@@ -44,102 +46,84 @@ if (!function_exists('alku_purku')) {
 
     $pdf->draw_text(440, $kala, $laskurow["nimi"],           $firstpage);
 
-    $kala -= 10;
-
-    $pdf->draw_text(155, $kala, t("Sivu", $kieli),           $firstpage, $pieni);
-    $pdf->draw_text(155, $kala-10, $sivu,                 $firstpage, $p);
+    $pdf->draw_text(155, $kala-10, t("Sivu", $kieli),           $firstpage, $pieni);
+    $pdf->draw_text(155, $kala-20, $sivu,                 $firstpage, $p);
 
     if ($mista == 'vastaanota') {
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] != 'K') {
-        $pdf->draw_text(280,  $kala, t("Tilaus", $kieli),        $firstpage, $pieni);
-        $pdf->draw_text(280,  $kala-10, $laskurow["tunnus"],        $firstpage, $p);
+        $pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),        $firstpage, $pieni);
+        $pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],        $firstpage, $p);
       }
     }
     else {
-      $pdf->draw_text(280,  $kala, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
-      $pdf->draw_text(280,  $kala-10, $laskurow["laskunro"],      $firstpage, $p);
+      $pdf->draw_text(280,  $kala-10, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
+      $pdf->draw_text(280,  $kala-20, $laskurow["laskunro"],      $firstpage, $p);
     }
 
-    $pdf->draw_text(440, $kala, t("Ajoaika", $kieli),         $firstpage, $pieni);
-    $pdf->draw_text(440, $kala-10, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
+    $pdf->draw_text(440, $kala-10, t("Ajoaika", $kieli),         $firstpage, $pieni);
+    $pdf->draw_text(440, $kala-20, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
 
     if ($mista != 'vastaanota') {
-      $pdf->draw_text(520, $kala, t("Kommentti", $kieli),       $firstpage, $pieni);
-
-      $laskurow["comments"] = wordwrap($laskurow["comments"], 65, "\n");
-
-      $kala_comment = $kala;
-
-      foreach (explode("\n", $laskurow["comments"]) as $komm) {
-        $pdf->draw_text(520, $kala_comment-10, $komm, $firstpage, $p);
-        $kala_comment = $kala_comment - 10;
-      }
+      $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli),       $firstpage, $pieni);
+      $pdf->draw_text(520, $kala-20, $laskurow["comments"],      $firstpage, $p);
     }
 
-    $kala_comment -= 5;
-
-    $pdf->draw_rectangle($kala+25, 20,  $kala_comment, 808, $firstpage,       $rectparam);
-
-    $kala = $kala_comment - 15;
-
-    $pdf->draw_rectangle($kala, 20,  $kala-35, 808, $firstpage, $rectparam);
+    $pdf->draw_rectangle($kala-25, 20,  $kala-45, 808, $firstpage, $rectparam);
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(30, $kala-10, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(30, $kala-35, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-        $pdf->draw_text(30, $kala-17, t("Tilaus", $kieli),      $firstpage, $pieni);
+        $pdf->draw_text(30, $kala-42, t("Tilaus", $kieli),      $firstpage, $pieni);
       }
     }
     else {
-      $pdf->draw_text(30,  $kala-10, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
-      $pdf->draw_text(30, $kala-17, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(30,  $kala-35, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
+      $pdf->draw_text(30, $kala-42, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
     }
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(155, $kala-10, t("Nimitys", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(155, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
     else {
-      $pdf->draw_text(280, $kala-10, t("Nimitys", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(280, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
 
     if ($yhtiorow['purkulistan_asettelu'] == 'A') {
       if ($mista == 'vastaanota') {
-        $pdf->draw_text(130, $kala-10, t("Paikasta", $kieli),    $firstpage, $pieni);
-        $pdf->draw_text(130, $kala-20, t("Paikalle", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(130, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(130, $kala-45, t("Paikalle", $kieli),    $firstpage, $pieni);
       }
       else {
-        $pdf->draw_text(170, $kala-10, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(170, $kala-35, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
       }
     }
     else {
       if ($mista == 'vastaanota') {
-        $pdf->draw_text(315, $kala-10, t("Paikasta", $kieli),    $firstpage, $pieni);
-        $pdf->draw_text(475, $kala-10, t("Paikalle", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(315, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(475, $kala-35, t("Paikalle", $kieli),    $firstpage, $pieni);
       }
       else {
-        $pdf->draw_text(440, $kala-10, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(440, $kala-35, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
       }
     }
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(725, $kala-10, t("Määrä", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(725, $kala-35, t("Määrä", $kieli),        $firstpage, $pieni);
 
     }
     else {
-      $pdf->draw_text(600, $kala-10, t("Määrä", $kieli),        $firstpage, $pieni);
-      $pdf->draw_text(650, $kala-10, t("Kerroin", $kieli),        $firstpage, $pieni);
-      $pdf->draw_text(705, $kala-10, t("Toim.Määrä", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(600, $kala-35, t("Määrä", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(650, $kala-35, t("Kerroin", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(705, $kala-35, t("Toim.Määrä", $kieli),      $firstpage, $pieni);
     }
 
-    $pdf->draw_text(770, $kala-10, t("Yksikkö", $kieli),        $firstpage, $pieni);
+    $pdf->draw_text(770, $kala-35, t("Yksikkö", $kieli),        $firstpage, $pieni);
 
-    $pdf->draw_rectangle($kala, 20, 20, 808, $firstpage, $rectparam);
+    $pdf->draw_rectangle($kala-25, 20, 20, 808, $firstpage, $rectparam);
 
-    $kala -= 60;
-
-    return array($firstpage, $kala);
+    return $firstpage;
   }
 }
 
@@ -445,6 +429,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
   $pdf->set_default('margin-right',   0);
   $rectparam["width"] = 0.3;
 
+  $kala     = 500;
   $total     = 0;
   $sivu     = 1;
   $sumarum  = 0;
@@ -529,7 +514,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       $laskurow = mysql_fetch_assoc($result_lasku);
     }
 
-    list($firstpage, $kala) = alku_purku();
+    $firstpage = alku_purku();
 
     if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavajoin) != '') {
 
@@ -562,7 +547,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
         if ($kala - 55 < 50) {
           $sivu++;
-          list($firstpage, $kala) = alku_purku();
+          $firstpage = alku_purku();
+          $kala = 500;
         }
       }
       elseif ($yhtiorow['suuntalavat'] == 'S' and $edellinen_sscc != $row['sscc']) {
@@ -570,7 +556,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
         $pdf->draw_text(185, 535, $edellinen_sscc,                 $firstpage, $p);
 
         $sivu++;
-        list($firstpage, $kala) = alku_purku();
+        $firstpage = alku_purku();
+        $kala = 500;
 
         $pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli),           $firstpage, $pieni);
         $pdf->draw_text(185, 535, $row['sscc'],                 $firstpage, $p);
@@ -583,7 +570,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
           }
 
           $sivu++;
-          list($firstpage, $kala) = alku_purku();
+          $firstpage = alku_purku();
+          $kala = 500;
 
           if ($yhtiorow['suuntalavat'] == 'S') {
             $pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli),           $firstpage, $pieni);
@@ -594,7 +582,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       else {
         if ($kala < 50) {
           $sivu++;
-          list($firstpage, $kala) = alku_purku();
+          $firstpage = alku_purku();
+          $kala = 500;
         }
       }
 
@@ -995,11 +984,14 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if ($kala < 50) {
         $sivu++;
-        list($firstpage, $kala) = alku_purku();
+        $firstpage = alku_purku();
+        $kala = 500;
       }
 
       $sumarum = sprintf('%.2f', $sumarum);
-      $pdf->draw_text(520,  $kala, t("Yhteensä", $kieli)." {$sumarum}",  $firstpage, $p);
+      $pdf->draw_text(520,  $kala, t("Yhteensä", $kieli),  $firstpage, $p);
+      $pdf->draw_text(570,  $kala, $sumarum,  $firstpage, $p);
+
 
       $pdf->draw_rectangle(40, 20,  20, 200, $firstpage, $rectparam);
       $pdf->draw_rectangle(40, 200, 20, 808, $firstpage, $rectparam);

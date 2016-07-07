@@ -123,15 +123,25 @@ if ($tee == "TULOSTA") {
         require "inc/sahkoposti.inc";
       }
       elseif ($komento["Tuotepaikkalistaus"] != '') {
-        exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=1 --medium=A4 --chars-per-line=80 --margin=0 --borders=0 $filenimi");
+        $params = array(
+          'chars'    => $rivinleveys,
+          'filename' => $filenimi,
+          'margin'   => 0,
+          'mode'     => 'portrait',
+        );
+
+        // konveroidaan postscriptiksi
+        $filenimi_ps = pupesoft_a2ps($params);
+
         // itse print komento...
-        $line = exec("$komento[Tuotepaikkalistaus] ".$filenimi.".ps", $output);
+        $line = exec("$komento[Tuotepaikkalistaus] {$filenimi_ps}", $output);
       }
 
       echo "<font class='message'>".t("Tuotepaikkalistaus tulostuu")."!</font><br><br>";
 
       //poistetaan tmp file samantien kuleksimasta...
-      unlink($filenimi.".ps");
+      unlink($filenimi);
+      unlink($filenimi_ps);
 
       $tee = "";
     }

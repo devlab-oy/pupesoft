@@ -1241,7 +1241,6 @@ if ($tee == 'M') {
         $reklares = pupe_query($query);
 
         $reklacheck = (mysql_num_rows($reklares) > 0);
-
       }
       else {
         $reklacheck = false;

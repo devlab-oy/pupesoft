@@ -27677,6 +27677,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
     $_osoite = substr($looprow['osoite'], 0, 50);
+   
     $_postitp = substr($looprow['postitp'], 0, 30);
     $_maa = substr($looprow['maa'], 0, 10);
     $_postino = substr($looprow['postino'], 0, 10);
@@ -27691,6 +27692,10 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50);
     $_osoite = substr($looprow['toim_osoite'], 0, 50);
+    $_osoite2 = substr($looprow['kohde'], 0, 50);
+    if (empty($_osoite2)) {
+      $_osoite2 = $_osoite;
+    }
     $_postitp = substr($looprow['toim_postitp'], 0, 30);
     $_maa = substr($looprow['toim_maa'], 0, 10);
     $_postino = substr($looprow['toim_postino'], 0, 10);
@@ -27700,7 +27705,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $receiver->addChild('RecCustAccount', 0);
     $receiver->addChild('RecCustName', utf8_encode($_nimi));
     $receiver->addChild('RecCustStreet', utf8_encode($_osoite));
-    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite));
+    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite2));
     $receiver->addChild('RecCustPostCode',  utf8_encode($_postino));
     $receiver->addChild('RecCustCity', utf8_encode($_postitp));
     $receiver->addChild('RecCustCountry', utf8_encode($_maa));

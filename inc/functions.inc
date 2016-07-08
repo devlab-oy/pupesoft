@@ -7226,8 +7226,10 @@ if (!function_exists("tulosta_ytunnus")) {
       $maa = $yhtiorow["maa"];
     }
 
-    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
-    if (strtoupper($maa) == 'FI') {
+    $ytunnus = trim($ytunnus);
+
+    //jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks (paitsi jos ytunnus on ulkolainen)
+    if (strtoupper($maa) == 'FI' and (is_numeric(substr($ytunnus, 0, 2)) or strtoupper(substr($ytunnus, 0, 2)) == "FI")) {
 
       $ytunnus = preg_replace("/[^0-9]/", "", $ytunnus); // poistetaan kaikki paitsi numerot
 

@@ -247,11 +247,11 @@ if ($tee == 'MUUTA') {
                       WHERE yhtio = '{$kukarow["yhtio"]}'
                       AND tunnus  = '{$jtrivi["tunnus"]}'";
             pupe_query($query);
-echo "241 $query <br><br>";
+
           }
 
         }
-echo "245 done! <br><br><br>";
+
         $query = "INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tuoteno',
@@ -267,7 +267,7 @@ echo "245 done! <br><br><br>";
                   laatija   = '$kukarow[kuka]',
                   laadittu  = now()";
         pupe_query($query);
-echo "$query <br><br>";
+
         $query = "DELETE FROM tuotepaikat
                   WHERE tuoteno = '$tuoteno'
                   and yhtio     = '$kukarow[yhtio]'

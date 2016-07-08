@@ -359,6 +359,23 @@ if (empty($maksusoppari_silent)) {
       $asiakasrow = mysql_fetch_array($result);
     }
 
+    $query = "SELECT tunnus
+              FROM maksupositio
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$laskurow[jaksotettu]'
+              ORDER BY tunnus";
+    $result = pupe_query($query);
+    $crrow = mysql_fetch_assoc($result);
+
+    if (mysql_num_rows($result) == 0) {
+      // Luodaan oletuspositiot
+      list($laskurow, $lisatty_maksupositio) = maksusopimus_uusi($laskurow);
+      maksusopimus_tallenna($laskurow, $lisatty_maksupositio, "", 10, "", "", "", "", "", "",  "");
+
+      list($laskurow, $lisatty_maksupositio) = maksusopimus_uusi($laskurow);
+      maksusopimus_tallenna($laskurow, $lisatty_maksupositio, "", 90, "", "", "", "", "", "",  "");
+    }
+
     // Haetaan laskun summat
     $query = "SELECT
               group_concat(distinct lasku.tunnus) tilaukset,

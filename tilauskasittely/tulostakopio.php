@@ -1735,7 +1735,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once "tulosta_osamaksusoppari.inc";
+      require_once "ajoneuvomyynti/tulosta_osamaksusoppari.inc";
 
       tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
 
@@ -1746,7 +1746,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once "tulosta_luovutustodistus.inc";
+      require_once "ajoneuvomyynti/tulosta_luovutustodistus.inc";
 
       tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
 
@@ -1757,7 +1757,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once "tulosta_vakuutushakemus.inc";
+      require_once "ajoneuvomyynti/tulosta_vakuutushakemus.inc";
 
       tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
 
@@ -1768,7 +1768,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $otunnus = $laskurow["tunnus"];
 
-      require_once "tulosta_rekisteriilmoitus.inc";
+      require_once "ajoneuvomyynti/tulosta_rekisteriilmoitus.inc";
 
       tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
 

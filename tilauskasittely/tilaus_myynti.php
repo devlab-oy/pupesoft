@@ -5713,7 +5713,7 @@ if ($tee == '') {
 
   //Syöttörivi
   if (($muokkauslukko == "" or (!empty($rivitunnus) and $_keratty_ja_ylitetty)) and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
-    echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi")."</font></td></tr></table>";
+    echo "<table><tr>$jarjlisa<td class='back'><font class='message'>".t("Lisää rivi")."</font></td></tr></table>";
 
     if ($toim == 'VALMISTAVARASTOON' and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
 
@@ -6640,11 +6640,11 @@ if ($tee == '') {
 
     if ($toim == "VALMISTAVARASTOON") {
       echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-      echo "<font class='head'>".t("Valmistusrivit")."</font>";
+      echo "<font class='message'>".t("Valmistusrivit")."</font>";
     }
     else {
       echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-      echo "<font class='head'>".t("Tilausrivit")."</font>";
+      echo "<font class='message'>".t("Tilausrivit")."</font>";
 
       $sele = array("K" => "", "E" => "");
 
@@ -7160,7 +7160,7 @@ if ($tee == '') {
             $tuotetyyppi = 1;
 
             echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>".t("Työt")."</font>:</td></tr>";
           }
         }
         elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
@@ -7168,7 +7168,7 @@ if ($tee == '') {
             $positio_varattu = 1;
 
             echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>", t("Umpeutuneet tilausrivit"), "</font>:</td></tr>";
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>", t("Umpeutuneet tilausrivit"), "</font>:</td></tr>";
             echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>", t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
 
             if ($ei_saldoa_varausaika != '') {
@@ -7561,7 +7561,7 @@ if ($tee == '') {
                         <input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
                         <input type='hidden' name='orig_tila' value='$orig_tila'>
                         <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-                        <select name='positio' onchange='submit();'>";
+                        <select name='positio' class='minpad_select' onchange='submit();'>";
 
               mysql_data_seek($trivityyppi_result, 0);
 
@@ -8097,7 +8097,7 @@ if ($tee == '') {
                 <input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS'>
                 <input type='hidden' name='orig_tila' value='$orig_tila'>
                 <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-                <select name='osto_vai_hyvitys' onchange='submit();'>
+                <select name='osto_vai_hyvitys' class='minpad_select' onchange='submit();'>
                 <option value=''  $sel1>$kpl_ruudulle ".("Hyvitys")."</option>
                 <option value='O' $sel2>$kpl_ruudulle ".("Osto")."</option>
                 </select>
@@ -9705,7 +9705,7 @@ if ($tee == '') {
               echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
             }
 
-            if (file_exists("../ajoneuvomyynti/tulosta_myyntisopimus.inc")) {
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_myyntisopimus.inc")) {
               echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
 
               if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!VL')) {
@@ -9716,20 +9716,20 @@ if ($tee == '') {
                 echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Myyntisopimus BR")."</option>";
               }
             }
-            if (file_exists("tulosta_osamaksusoppari.inc")) {
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_osamaksusoppari.inc")) {
               echo "<option value='OSAMAKSUSOPIMUS'>".t("Osamaksusopimus")."</option>";
             }
-            if (file_exists("tulosta_luovutustodistus.inc")) {
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_luovutustodistus.inc")) {
               echo "<option value='LUOVUTUSTODISTUS'>".t("Luovutustodistus")."</option>";
             }
-            if (file_exists("tulosta_vakuutushakemus.inc")) {
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_vakuutushakemus.inc")) {
               echo "<option value='VAKUUTUSHAKEMUS'>".t("Vakuutushakemus")."</option>";
+            }
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_rekisteriilmoitus.inc")) {
+              echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";
             }
             if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
               echo "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
-            }
-            if (file_exists("tulosta_rekisteriilmoitus.inc")) {
-              echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";
             }
             if ($toim == "PROJEKTI") {
               echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
@@ -10013,7 +10013,7 @@ if ($tee == '') {
 
         if (mysql_num_rows($vtresult) != 0 and count($varastosta) != 0) {
           if ($kukarow['extranet'] != '') {
-            echo "<font class='head'>", t("Sinun jälkitoimitusrivisi"), ":</font><br/>";
+            echo "<font class='message'>", t("Sinun jälkitoimitusrivisi"), ":</font><br/>";
           }
           require 'jtselaus.php';
         }

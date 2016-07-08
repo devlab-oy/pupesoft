@@ -1,9 +1,5 @@
 <?php
 
-if ($tee == 'osamaksusoppari' and $tulosta_osamakusoppari == "") {
-  echo "<font class='head'>".t("Rahoituslaskelma")."</font><hr>";
-}
-
 if ($tee == 'osamaksusoppari') {
   $jaannosvelka_vaihtokohteesta = str_replace(",", ".", $jaannosvelka_vaihtokohteesta);
   $perustamiskustannus   = str_replace(",", ".", $perustamiskustannus);
@@ -130,26 +126,26 @@ if ($tee == 'osamaksusoppari') {
   // A. Rahoitettava positio
   $rahlaskelma_rahoitettava_positio = $laskurow["rahlaskelma_rahoitettava_positio"];
 
-  // 1. Uusi vene
-  $uusivene = summarivit("HAVING tilausrivin_lisatiedot.positio='Vene' or tilausrivin_lisatiedot.positio='Moottori'", $laskurow);
+  // 1. Uusi ajoneuvo
+  $uusiajoneuvo = summarivit("HAVING tilausrivin_lisatiedot.positio not like '%vaihto%'", $laskurow);
 
   // 2. Uudet tarvikkeet
-  $uusitarvike = summarivit("HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tuote.tuoteno not in ('$yhtiorow[rahti_tuotenumero]', '$yhtiorow[ennakkomaksu_tuotenumero]')", $laskurow);
+  $uusitarvike = 0; #summarivit("HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tuote.tuoteno not in ('$yhtiorow[rahti_tuotenumero]', '$yhtiorow[ennakkomaksu_tuotenumero]')", $laskurow);
 
   // 3. Toimituskulut
   $toimkulu = summarivit("HAVING tuote.tuoteno = '$yhtiorow[rahti_tuotenumero]'", $laskurow);
 
   // 4 = 1+2+3
-  $kateishinta_kaupan_kohteesta = $uusivene+$uusitarvike+$toimkulu;
+  $kateishinta_kaupan_kohteesta = $uusiajoneuvo+$uusitarvike+$toimkulu;
 
-  // 5. Hyvitys vaihtoveneestä
-  $hyvitys_vaihtoveneesta = summarivit("HAVING (tilausrivin_lisatiedot.positio='Vaihtovene' or tilausrivin_lisatiedot.positio='Vaihtomoottori')", $laskurow) * -1;
+  // 5. Hyvitys vaihtoajoneuvosta
+  $hyvitys_vaihtoajoneuvosta = summarivit("HAVING tilausrivin_lisatiedot.positio like '%vaihto%'", $laskurow) * -1;
 
   // 6. Jäännösvelka vaihtokohteesta
   $jaannosvelka_vaihtokohteesta = $laskurow["rahlaskelma_jaannosvelka_vaihtokohteesta"];
 
   // 7 = 5+6
-  $hyvitysosuus_vaihtokohteesta = $hyvitys_vaihtoveneesta - $jaannosvelka_vaihtokohteesta;
+  $hyvitysosuus_vaihtokohteesta = $hyvitys_vaihtoajoneuvosta - $jaannosvelka_vaihtokohteesta;
 
   // 8. Ennakkomaksu
   // 9. Muut maskut ennen toimitusta
@@ -290,6 +286,9 @@ if ($tee == 'osamaksusoppari') {
     $m = ($maksuerienlkm_for/$luottoaikakk_for);
     $a = $luottoaikakk_for;
 
+    // https://kulutusluottovertailu.fi/todellinen-vuosikorko/
+    // http://www.finlex.fi/data/sdliite/liite/6176.pdf
+
     // Annuiteetin (Tasaerän) laskukaava
     if ($poikkeava_era != 0) {
       $A = sprintf('%.2f', ((($N-$poikkeava_era/(pow((($p/(12/$m))/100+1), ($a/$m))))*(pow((($p/(12/$m))/100+1), (($a/$m)-1)))*(($p/(12/$m))/100))/(((pow((($p/(12/$m))/100+1), (($a/$m)-1))))-1)));
@@ -416,8 +415,8 @@ if ($tee == 'osamaksusoppari') {
     $ksl_vuosikorko = 0;
   }
 
-
   if ($tulosta_osamakusoppari == "") {
+    echo "<font class='head'>".t("Rahoituslaskelma")."</font><hr>";
 
     echo "<form method='post' name='mainform'>
           <input type='hidden' name='toim' value='$toim'>
@@ -472,8 +471,8 @@ if ($tee == 'osamaksusoppari') {
       }
 
       echo "<tr>
-            <th>".t("Veneen tiedot")."</th>
-            <td align='right'><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!RAHHAK!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Veneen lisätiedot")."</a></td><td></td></tr>";
+            <th>".t("Ajoneuvon tiedot")."</th>
+            <td align='right'><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!RAHHAK!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Ajoneuvon lisätiedot")."</a></td><td></td></tr>";
     }
 
     $query = "SELECT sarjanumeroseuranta.tunnus
@@ -504,8 +503,8 @@ if ($tee == 'osamaksusoppari') {
       }
 
       echo "<tr>
-            <th>".t("Vaihtoveneen tiedot")."</th>
-            <td align='right'><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!RAHHAK!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Vaihtoveneen lisätiedot")."</a></td><td></td></tr>";
+            <th>".t("Vaihtoajoneuvon tiedot")."</th>
+            <td align='right'><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!RAHHAK!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Vaihtoajoneuvon lisätiedot")."</a></td><td></td></tr>";
     }
 
     echo "<tr>
@@ -573,7 +572,7 @@ if ($tee == 'osamaksusoppari') {
 
     echo "<tr>
           <th>".t("1. Käteishinta kaupan kohteesta vakiovarustein")."</th>
-          <td align='right'>".sprintf('%.2f', $uusivene)."</td><td>$laskurow[valkoodi]</td></tr>";
+          <td align='right'>".sprintf('%.2f', $uusiajoneuvo)."</td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr>
           <th>".t("2. Lisävarusteet yhteensä")."</th>
           <td align='right'>".sprintf('%.2f', $uusitarvike)."</td><td>$laskurow[valkoodi]</td></tr>";
@@ -585,7 +584,7 @@ if ($tee == 'osamaksusoppari') {
           <td align='right'>".sprintf('%.2f', $kateishinta_kaupan_kohteesta)."</td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr>
           <th>".t("5. Hyvityshinta vaihtokohteesta")."</th>
-          <td align='right'>".sprintf('%.2f', $hyvitys_vaihtoveneesta)."</td><td>$laskurow[valkoodi]</td></tr>";
+          <td align='right'>".sprintf('%.2f', $hyvitys_vaihtoajoneuvosta)."</td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr>
           <th valign='top'>".t("6. Jäännösvelka vaihtokohteesta")."</th>
           <td align='right' valign='top'><input type='text' name='jaannosvelka_vaihtokohteesta' size='15' style='text-align:right' value='$jaannosvelka_vaihtokohteesta'></td><td valign='top'>$laskurow[valkoodi]</td></tr>";

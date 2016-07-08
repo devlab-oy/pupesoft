@@ -793,20 +793,24 @@ if (!function_exists('tulosta_tarjous')) {
 
     $page_tarjous[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
 
-    // Uusi vene
-    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "myyntirivitunnus",  "HAVING tilausrivin_lisatiedot.positio like '%moottori%'", "Ajoneuvon merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    // Uusi ajoneuvo
+    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "myyntirivitunnus",  "HAVING tilausrivin_lisatiedot.positio = 'Ajoneuvo'", "Ajoneuvon merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+
     // Uusi moottori
     //list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "",      "HAVING tilausrivin_lisatiedot.positio='Moottori'", "Moottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+
     // Uudet tarvikkeet
-    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "",      "HAVING tilausrivin_lisatiedot.positio = '' and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'", "Tarvike", $total, $hinnat);
+    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "",      "HAVING tilausrivin_lisatiedot.positio = 'Lis‰varuste' and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'", "Tarvike", $total, $hinnat);
 
     // Siirryt‰‰n vaihtolaitteiden kimppuun
     $total_uudet = $total;
     $kala = 129;
     $lask--;
 
-    // Vaihtokamat
-    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "ostorivitunnus",  "HAVING tilausrivin_lisatiedot.positio like '%vaihto%'", "Vaihtokohteen merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+    // Vaihtoajoneuvo
+    list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "ostorivitunnus",  "HAVING tilausrivin_lisatiedot.positio = 'Vaihtoajoneuvo'", "Vaihtokohteen merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
+
+    // Vaihtomoottori
     //list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "ostorivitunnus",  "HAVING tilausrivin_lisatiedot.positio='Vaihtomoottori'", "Vaihtomoottorin merkki, malli (ja numero, jos tiedossa tarjoushetkell‰)", $total, $hinnat);
 
     // Lasketaan v‰h‰n hintoja yhteen

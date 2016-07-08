@@ -981,7 +981,7 @@ if (
   }
 
   if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
-    $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+    $paikat = "<select name='paikka' class='minpad_select' style='max-width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";

@@ -1950,7 +1950,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
 
-              $kampanjatunnus = NULL;
+              $kampanjatunnus = 'NULL';
               if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
                 $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
               }

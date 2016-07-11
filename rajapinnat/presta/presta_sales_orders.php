@@ -17,6 +17,7 @@ class PrestaSalesOrders extends PrestaClient {
   private $presta_countries = null;
   private $presta_currencies = null;
   private $presta_order_histories = null;
+  private $presta_changeable_invoice_address = true;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
@@ -62,6 +63,10 @@ class PrestaSalesOrders extends PrestaClient {
 
   public function set_fetched_status($value) {
     $this->fetched_status = $value;
+  }
+
+  public function set_changeable_invoice_address($value) {
+    $this->presta_changeable_invoice_address = $value;
   }
 
   public function transfer_orders_to_pupesoft() {
@@ -142,9 +147,7 @@ class PrestaSalesOrders extends PrestaClient {
    *
    * @return array
    */
-
-
-  public function fetch_sales_orders() {
+  private function fetch_sales_orders() {
     $this->logger->log('Fetching sales orders');
 
     try {

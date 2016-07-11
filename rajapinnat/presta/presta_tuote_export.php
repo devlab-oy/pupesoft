@@ -90,6 +90,11 @@ if (!isset($presta_verkkokauppa_asiakas)) {
   // verkkokauppa_asiakas on fallback, mikäli oikeaa asiakasta ei löydetä pupesoftista
   $presta_verkkokauppa_asiakas = null;
 }
+if (!isset($presta_laskutusosoitteen_muutos)) {
+  // voidaanko verkkokaupassa vaihtaa laskutusosoitetta
+  // jos false, otetaan aina pupesoftin asiakkaan laskutusosoite
+  $presta_laskutusosoitteen_muutos = true;
+}
 if (!isset($presta_haettavat_tilaus_statukset)) {
   // Missä tilassa olevia tilauksia haetaan Prestasta
   /* Tämä on Prestan default status list;
@@ -301,11 +306,12 @@ if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   presta_echo("Haetaan tilaukset.");
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key, 'presta_tilaukset');
 
+  $presta_orders->set_changeable_invoice_address($presta_laskutusosoitteen_muutos);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
-  $presta_orders->set_yhtiorow($yhtiorow);
-  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
   $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
   $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
+  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_yhtiorow($yhtiorow);
   $presta_orders->transfer_orders_to_pupesoft();
 }
 

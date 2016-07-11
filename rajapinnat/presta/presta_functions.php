@@ -627,6 +627,10 @@ function presta_export_checkpoint($checkpoint) {
 }
 
 function presta_echo($string) {
+  if ($GLOBALS['presta_debug'] !== true) {
+    return;
+  }
+
   echo date("d.m.Y @ G:i:s")." - {$string}\n";
 }
 

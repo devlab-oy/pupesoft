@@ -106,7 +106,17 @@ if ($handle = opendir($path)) {
         continue;
       }
 
-      if (!isset($xml->Lines) or !isset($xml->Lines->Line)) {
+      $sanoman_kaikki_rivit = '';
+      // Otetaan talteen Lines-elementti sieltä missä se on
+      if (isset($xml->Lines)) {
+        $sanoman_kaikki_rivit = $xml->Lines;
+      }
+
+      if (isset($node->Lines)) {
+        $sanoman_kaikki_rivit = $node->Lines;
+      }
+
+      if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
         pupesoft_log('inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
 
         continue;
@@ -127,7 +137,7 @@ if ($handle = opendir($path)) {
 
       // Loopataan rivit tilausrivit-arrayseen
       // koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
-      foreach ($xml->Lines->Line as $key => $line) {
+      foreach ($sanoman_kaikki_rivit->Line as $key => $line) {
 
         $rivitunnus = (int) $line->TransId;
         $tuoteno    = (string) $line->ItemNumber;

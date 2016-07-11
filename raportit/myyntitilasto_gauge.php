@@ -7,6 +7,63 @@ require "../inc/parametrit.inc";
 
 ini_set("memory_limit", "5G");
 
+if (!isset($toim))   $toim = "";
+if (!isset($naytetaan_tulos)) $naytetaan_tulos = '';
+
+if ($toim != "") {
+
+  if (!isset($naytetaan_luvut)) $naytetaan_luvut = 'eurolleen';
+
+  $query = "SELECT selitetark, selitetark_2, selitetark_3
+            FROM avainsana
+            WHERE yhtio = '$kukarow[yhtio]'
+            and laji = 'MYYNTITILASTO'
+            and selite = '$toim'";
+  $al_res = pupe_query($query);
+  $al_row = mysql_fetch_assoc($al_res);
+
+  $tilatut_eurot_params = $al_row['selitetark'];
+  $toimiteut_rivit_params = $al_row['selitetark_2'];
+  $tilatut_katepros = $al_row['selitetark_3'];
+}
+else {
+
+  if (!isset($naytetaan_luvut)) $naytetaan_luvut = '';
+
+  $tilatut_eurot_params = " min: 0,
+                            max: 400000,
+                            redFrom: 200000,
+                            redTo: 300000,
+                            yellowFrom: 300000,
+                            yellowTo: 350000,
+                            greenFrom: 350000,
+                            greenTo: 400000,
+                            minorTicks: 5,
+                            majorTicks: [0, 50, 100, 150, 200, 250, 300, 350, 400]";
+
+  $toimiteut_rivit_params = " min: 0,
+                              max: 8000,
+                              redFrom: 4000,
+                              redTo: 6000,
+                              yellowFrom: 6000,
+                              yellowTo: 7000,
+                              greenFrom: 7000,
+                              greenTo: 8000,
+                              minorTicks: 5,
+                              majorTicks: [0, 1, 2, 3, 4, 5, 6, 7, 8]";
+
+  $tilatut_katepros = " min: 0,
+                        max: 50,
+                        redFrom: 25,
+                        redTo: 30,
+                        yellowFrom: 30,
+                        yellowTo: 40,
+                        greenFrom: 40,
+                        greenTo: 50,
+                        minorTicks: 2,
+                        majorTicks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]";
+}
+
 gauge();
 
 echo "  <script type='text/javascript' charset='utf-8'>
@@ -56,22 +113,13 @@ echo "  <script type='text/javascript' charset='utf-8'>
 
           var gauge = new Gauge();
           var args = {
-            tilatut: ['k".$yhtiorow["valkoodi"]."', 0]
+            tilatut: ['".$yhtiorow["valkoodi"]."', 0]
           }
 
           var options = {  forceIFrame: false,
                   width: 800,
                   height: 220,
-                  min: 0,
-                  max: 400000,
-                  redFrom: 200000,
-                  redTo: 300000,
-                  greenFrom: 350000,
-                  greenTo: 400000,
-                  yellowFrom: 300000,
-                  yellowTo: 350000,
-                  minorTicks: 5,
-                  majorTicks: ['0', '50', '100', '150', '200', '250', '300', '350', '400'],
+                  $tilatut_eurot_params,
                   animation: {
                     easing: 'out',
                     duration: 4000
@@ -94,16 +142,7 @@ echo "  <script type='text/javascript' charset='utf-8'>
           var options = {  forceIFrame: false,
                   width: 800,
                   height: 220,
-                  min: 0,
-                  max: 8000,
-                  redFrom: 4000,
-                  redTo: 6000,
-                  yellowFrom: 6000,
-                  yellowTo: 7000,
-                  greenFrom: 7000,
-                  greenTo: 8000,
-                  minorTicks: 5,
-                  majorTicks: ['0', '1', '2', '3', '4', '5', '6', '7', '8'],
+                  $toimiteut_rivit_params,
                   animation: {
                     easing: 'out',
                     duration: 4000
@@ -126,16 +165,7 @@ echo "  <script type='text/javascript' charset='utf-8'>
           var options = {  forceIFrame: false,
                   width: 800,
                   height: 220,
-                  min: 0,
-                  max: 50,
-                  redFrom: 25,
-                  redTo: 30,
-                  greenFrom: 40,
-                  greenTo: 50,
-                  yellowFrom: 30,
-                  yellowTo: 40,
-                  minorTicks: 2,
-                  majorTicks: ['0', '5', '10', '15', '20', '25', '30', '35', '40', '45', '50'],
+                  $tilatut_katepros,
                   animation: {
                     easing: 'out',
                     duration: 4000
@@ -175,6 +205,7 @@ echo "  <script type='text/javascript' charset='utf-8'>
 echo "<font class='head'>", t("Myyntitilasto"), "</font><hr>";
 
 echo "<form method='post'>";
+echo "<input type='hidden' name='toim' value='$toim'>";
 echo "<table><tr>";
 echo "<td class='back'><div id='chart_div'></div></td>";
 echo "</tr><tr>";
@@ -274,8 +305,6 @@ else {
   $yhtiot = array($kukarow['yhtio']);
 }
 
-if (!isset($naytetaan_tulos)) $naytetaan_tulos = '';
-
 $sel = array_fill_keys(array($naytetaan_tulos), " selected") + array('daily' => '', 'weekly' => '', 'monthly' => '');
 
 echo "<tr><th>", t("N‰ytet‰‰n tulos"), "</th>";
@@ -284,8 +313,6 @@ echo "<option value='daily'{$sel['daily']}>", t("P‰ivitt‰in"), "</option>";
 echo "<option value='weekly'{$sel['weekly']}>", t("Viikottain"), "</option>";
 echo "<option value='monthly'{$sel['monthly']}>", t("Kuukausittain"), "</option>";
 echo "</select></td></tr>";
-
-if (!isset($naytetaan_luvut)) $naytetaan_luvut = '';
 
 $sel = array_fill_keys(array($naytetaan_luvut), " selected") + array('tuhansittain' => '', 'eurolleen' => '', 'sentilleen' => '');
 
@@ -811,7 +838,7 @@ if ($tee == 'laske') {
       $vals['laskutetut_rivit'] = isset($vals['laskutetut_rivit']) ? $vals['laskutetut_rivit'] : 0;
       $vals['tilatut_rivit'] = isset($vals['tilatut_rivit']) ? $vals['tilatut_rivit'] : 0;
 
-      $id = str_replace(" ", "", $pvm.'_'.$kustp);
+      $id = sanitoi_javascript_id($pvm.'_'.$kustp);
 
       echo "<tr class='{$pvm} spec kustp' style='display:none;'>";
       echo "<td align='right' class='toggleable' id='{$id}_osasto'><img style='float:left;' id='img_{$id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$kustp}</td>";
@@ -1170,7 +1197,7 @@ if ($tee == 'laske') {
     $_kustp = $kustp;
 
     if ($kustp == '') $_kustp = t("Ei kustannuspaikkaa");
-    $kustp_id = str_replace(" ", "", $kustp);
+    $kustp_id = sanitoi_javascript_id($kustp);
 
     echo "<tr class='yhteensa_kustp aktiivi' style='display:none;'>";
     echo "<th class='toggleable' id='yhteensa_{$kustp_id}_osasto'><img style='float:left;' id='img_yhteensa_{$kustp_id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteens‰"), " {$_kustp}</th>";
@@ -1235,7 +1262,7 @@ if ($tee == 'laske') {
 
       $_osasto = $osasto == '' ? t("Ei osastoa") : $osasto;
 
-      $id = str_replace(" ", "", "{$kustp}_{$osasto}");
+      $id = sanitoi_javascript_id("{$kustp}_{$osasto}");
 
       echo "<tr class='yhteensa_{$kustp_id}_osasto aktiivi osasto' style='display:none;'>";
       echo "<td align='right'></td>";

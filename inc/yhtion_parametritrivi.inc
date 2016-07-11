@@ -1274,6 +1274,19 @@ if ($fieldname == "jt_toimitus_varastorajaus") {
   $jatko = 0;
 }
 
+if ($fieldname == "tuotekommentti_tilausriville") {
+
+  $sel = array($trow[$i] => 'selected') + array('M' => '', 'O' => '');
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Tuotekommentti tilausriville toimii myynti- ja ostotilauksella")."</option>";
+  $ulos .= "<option value='M' {$sel['M']}>".t("Tuotekommentti tilausriville toimii vain myyntitilauksella")."</option>";
+  $ulos .= "<option value='O' {$sel['O']}>".t("Tuotekommentti tilausriville toimii vain ostotilauksella")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "naytetaan_katteet_tilauksella") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3144,6 +3157,8 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'I' {$sel['I']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'J' {$sel['J']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 

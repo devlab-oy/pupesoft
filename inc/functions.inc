@@ -616,7 +616,7 @@ if (!function_exists("tv1dateconv")) {
     }
     else {
       if ($lyhyt == "LYHYT") return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 2, 2).$jatko;
-      else return substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
+      else return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
     }
   }
 }
@@ -6706,6 +6706,39 @@ if (!function_exists("kalenteritapahtuma")) {
   }
 }
 
+if (!function_exists('js_openPrintDialog')) {
+  function js_openPrintDialog($fileurl, $nappiteksti = "Tulosta") {
+    return "<script type=\"text/javascript\">
+            function printIframePdf(){
+              window.frames[\"printf\"].focus();
+              try {
+                window.frames[\"printf\"].print();
+              }
+              catch(e){
+                window.print();
+                console.log(e);
+              }
+            }
+
+            function printObjectPdf() {
+              try{
+                document.getElementById('idPdf').print();
+              }
+              catch(e){
+                printIframePdf();
+                console.log(e);
+              }
+            }
+    </script>
+    <form>
+    <input type='button' onClick='printIframePdf()' class='btn' value='".t($nappiteksti)."'/>
+    </form><br><br>
+    <iframe id='printf' name='printf' src='{$fileurl}' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
+    <object id='idPdf' width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf' data='{$fileurl}'>
+    </object>";
+  }
+}
+
 if (!function_exists('js_openUrlNewWindow')) {
   function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
     $width = (!empty($width)) ? $width : 700;
@@ -7643,7 +7676,13 @@ if (!function_exists("js_openFormInNewWindow")) {
           thistee = formi.elements["tee"].value;
           formi.elements["tee"].value = "NAYTATILAUS";
 
-          window.open('', name, 'top=100,left=100,resizable=yes');
+          leveys = ''
+
+          if (arguments[2] > 0) {
+            leveys = ",width="+arguments[2]+",height=800"
+          }
+
+          window.open('', name, 'top=100,left=100,resizable=yes'+leveys);
 
           formi.target=name;
 
@@ -9170,6 +9209,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       $tuoteno_haku_query = "";
       $nimitys_haku_query = "";
       $muuta_haku_query = "";
+      $ean_haku_query = "";
       $tuoteindex = "";
       $nimitindex = "";
 
@@ -9189,7 +9229,13 @@ if (!function_exists("livesearch_tuotehaku")) {
         elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('J', 'K'))) {
           $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
           $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
-          $muuta_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+          $ean_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+        }
+        elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('L', 'M'))) {
+          $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+          $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
+          $ean_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+          $muuta_haku_query .= " and tuote.muuta like ('%{$haku}%') ";
         }
         elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
           $tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
@@ -9256,16 +9302,34 @@ if (!function_exists("livesearch_tuotehaku")) {
         $naytetaanko_poistetut = "and tuote.status != 'P'";
       }
 
-      $query = "(SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                 if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+      $query_select = "tuote.tunnus,
+        tuote.tuoteno,
+        tuote.nimitys,
+        tuote.kuvaus,
+        tuote.osasto,
+        tuote.try,
+        tuote.epakurantti25pvm,
+        tuote.epakurantti50pvm,
+        tuote.epakurantti75pvm,
+        tuote.epakurantti100pvm,
+        if(tuote.tuoteno  = '{$haku}', 1,
+        if(tuote.nimitys  = '{$haku}', 2,
+        if(tuote.muuta    = '{$haku}', 3,
+        if(tuote.eankoodi = '{$haku}', 4,
+        if(left(tuote.tuoteno,  length('{$haku}')) = '{$haku}', 5,
+        if(left(tuote.nimitys,  length('{$haku}')) = '{$haku}', 6,
+        if(left(tuote.muuta,    length('{$haku}')) = '{$haku}', 7,
+        if(left(tuote.eankoodi, length('{$haku}')) = '{$haku}', 8,
+        9)))))))) as jarjestys";
+
+      $query = "(SELECT {$query_select}
                  FROM tuote {$tuoteindex}
                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                  {$naytetaanko_poistetut}
                  {$kieltolisa}
                  {$tuoteno_haku_query})
                  UNION
-                 (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                 if (tuote.tuoteno = '{$haku}', 1, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 2, if(tuote.nimitys = '{$haku}', 3, if(left(tuote.nimitys, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                 (SELECT {$query_select}
                  FROM tuote {$nimitindex}
                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                  {$naytetaanko_poistetut}
@@ -9274,13 +9338,22 @@ if (!function_exists("livesearch_tuotehaku")) {
 
       if (!empty($muuta_haku_query)) {
         $query .= "UNION
-                  (SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try, tuote.epakurantti25pvm, tuote.epakurantti50pvm,tuote.epakurantti75pvm,tuote.epakurantti100pvm,
-                  if (tuote.muuta = '{$haku}', 1, if(left(tuote.muuta, length('{$haku}')) = '{$haku}', 2, if(tuote.tuoteno = '{$haku}', 3, if(left(tuote.tuoteno, length('{$haku}')) = '{$haku}', 4, 5)))) jarjestys
+                  (SELECT {$query_select}
                   FROM tuote
                   WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                   {$naytetaanko_poistetut}
                   {$kieltolisa}
                   {$muuta_haku_query})";
+      }
+
+      if (!empty($ean_haku_query)) {
+        $query .= "UNION
+                  (SELECT {$query_select}
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  {$naytetaanko_poistetut}
+                  {$kieltolisa}
+                  {$ean_haku_query})";
       }
 
       $query .= " ORDER BY jarjestys, tuoteno
@@ -9294,7 +9367,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M'))) {
 
           $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
 
@@ -9343,7 +9416,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 
@@ -23874,6 +23947,8 @@ if  (!function_exists('hae_chn_teksti')) {
       return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
     case '999':
       return t("Laskutuskielto, laskutusta ei tehdä", $kieli);
+    case '888':
+      return t("Laskuta heti", $kieli)." (".t("sisäinen", $kieli).")";
     default:
       return FALSE;
     }

@@ -158,7 +158,12 @@ while (false !== ($file = readdir($handle))) {
       $eankoodi = $data['eankoodi'];
       $keratty  = $data['keratty'];
 
-      if ($hhv) {
+      $posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+
+      if (!empty($posten_itemnumberfield)) {
+        $tuotelisa = "AND tuote.{$posten_itemnumberfield} = '{$eankoodi}'";
+      }
+      elseif ($hhv) {
         $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
       }
       else {

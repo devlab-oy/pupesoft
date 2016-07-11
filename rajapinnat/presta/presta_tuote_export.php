@@ -78,6 +78,10 @@ if (!isset($presta_edi_folderpath)) {
   // Mihin hakemistoon tehd‰‰n Prestan tilauksista EDI tiedosto
   die('Presta edi folder path puuttuu');
 }
+if (!isset($presta_debug)) {
+  // debug mode echottaa ruudulle ajon statusta
+  $presta_debug = false;
+}
 if (!isset($presta_home_category_id)) {
   // Prestan "home" kategorian tunnus, jonka alle kaikki Pupesoftin kategoriat siirret‰‰n
   $presta_home_category_id = 2;

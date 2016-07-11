@@ -204,6 +204,12 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
+    if (empty($pupesoft_customer)) {
+      $msg = "Oletusasiakasta {$id} ei löytynyt Pupesoftista!";
+
+      throw new Exception($msg);
+    }
+
     // choose pupesoft customer number
     if (!empty($pupesoft_customer['asiakasnro'])) {
       $pupesoft_customer_id = $pupesoft_customer['asiakasnro'];
@@ -216,6 +222,18 @@ class PrestaSalesOrders extends PrestaClient {
     }
     else {
       $pupesoft_customer_id = '';
+    }
+
+    // we don't allow users to change their invoice address, use pupesoft's address instead
+    if ($this->presta_changeable_invoice_address === false) {
+      $invoice_address = array(
+        'address1'  => $pupesoft_customer['osoite'],
+        'city'      => $pupesoft_customer['postitp'],
+        'firstname' => '',
+        'lastname'  => $pupesoft_customer['nimi'],
+        'phone'     => $pupesoft_customer['puhelin'],
+        'postcode'  => $pupesoft_customer['postino'],
+      );
     }
 
     // empty edi_order

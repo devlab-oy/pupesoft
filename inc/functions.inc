@@ -33324,14 +33324,22 @@ if (!function_exists('posten_field')) {
       }
 
       break;
-    case 'ProdGroup2':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+    case 'ProdGroup1':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
 
       if (empty($key)) {
-        $key = '';
+        $key = 'try';
       }
 
       break;
+      case 'ProdGroup2':
+        $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+
+        if (empty($key)) {
+          $key = '';
+        }
+
+        break;
     default:
       die(t('Annettu arvo ei ole käytössä'));
     }

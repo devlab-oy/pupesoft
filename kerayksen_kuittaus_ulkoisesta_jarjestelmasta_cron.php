@@ -142,8 +142,8 @@ while (false !== ($file = readdir($handle))) {
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
         $tilausrivit[$tilausrivin_tunnus] = array(
-          'eankoodi' => mysql_real_escape_string($line->ItemNumber),
-          'keratty'  => (float) $line->DeliveredQuantity
+          'item_number' => mysql_real_escape_string($line->ItemNumber),
+          'keratty'     => (float) $line->DeliveredQuantity
         );
       }
       else {
@@ -155,15 +155,11 @@ while (false !== ($file = readdir($handle))) {
 
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
-      $eankoodi = $data['eankoodi'];
-      $keratty  = $data['keratty'];
+      $item_number = $data['item_number'];
+      $keratty     = $data['keratty'];
 
-      if ($hhv) {
-        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
-      }
-      else {
-        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
-      }
+      $posten_itemnumberfield = posten_field('ItemNumber');
+      $tuotelisa = "AND tuote.{$posten_itemnumberfield} = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi

@@ -1293,15 +1293,16 @@ if (!function_exists("vapauta_sarjanumerot")) {
         pupe_query($query);
       }
       elseif ($srow["varattu"] < 0) {
-        // dellataan koko rivi jos sitä ei ole vielä myyty
-        $query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
-        pupe_query($query);
+        # TODO: Miksi näin?
+        #// dellataan koko rivi jos sitä ei ole vielä myyty
+        #$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+        #pupe_query($query);
 
-        if (mysql_affected_rows() == 0) {
+        #if (mysql_affected_rows() == 0) {
           // merkataan osorivitunnus nollaksi
           $query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
           pupe_query($query);
-        }
+        #}
       }
       else {
         if ($srow["tyyppi"] == "W") {

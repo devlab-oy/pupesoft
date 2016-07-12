@@ -9621,6 +9621,17 @@ if ($tee == '') {
 
             echo "<select name='toim'>";
 
+            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_myyntisopimus.inc")) {
+              echo "<option value='MYYNTISOPIMUS'>".t("Kauppasopimus")."</option>";
+
+              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!VL')) {
+                echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Kauppasopimus VL")."</option>";
+              }
+
+              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!BR')) {
+                echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Kauppasopimus BR")."</option>";
+              }
+            }
             if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
               echo "<option value='TARJOUS'>".t("Tarjous")."</option>";
 
@@ -9632,21 +9643,8 @@ if ($tee == '') {
                 echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
               }
             }
-
             if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
               echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
-            }
-
-            if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_myyntisopimus.inc")) {
-              echo "<option value='MYYNTISOPIMUS'>".t("Kauppasopimus")."</option>";
-
-              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!VL')) {
-                echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Kauppasopimus VL")."</option>";
-              }
-
-              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!BR')) {
-                echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Kauppasopimus BR")."</option>";
-              }
             }
             if (file_exists("$pupe_root_polku/ajoneuvomyynti/tulosta_osamaksusoppari.inc")) {
               echo "<option value='OSAMAKSUSOPIMUS'>".t("Osamaksusopimus")."</option>";

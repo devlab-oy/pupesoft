@@ -27718,7 +27718,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
     $_osoite = substr($looprow['osoite'], 0, 50);
-   
+
     $_postitp = substr($looprow['postitp'], 0, 30);
     $_maa = substr($looprow['maa'], 0, 10);
     $_postino = substr($looprow['postino'], 0, 10);
@@ -27775,12 +27775,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_line_i = 1;
 
-    $posten_itemnumberfield = "tuoteno";
-    $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
-
-    if (!empty($alt_posten_itemnumberfield)) {
-      $posten_itemnumberfield = $alt_posten_itemnumberfield;
-    }
+    $posten_itemnumberfield = posten_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
 
@@ -33355,5 +33350,33 @@ if (!function_exists('pupesoft_a2ps')) {
 
     // palautetaan polku uuteen .ps tiedostoon
     return $out_file;
+  }
+}
+
+if (!function_exists('posten_field')) {
+  function posten_field($column_name) {
+
+    switch ($column_name) {
+    case 'ItemNumber':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ItemNumber' ", '', '', 'selitetark');
+
+      if (empty($key)) {
+        $key = 'tuoteno';
+      }
+
+      break;
+    case 'ProdGroup2':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+
+      if (empty($key)) {
+        $key = '';
+      }
+
+      break;
+    default:
+      die(t('Annettu arvo ei ole käytössä'));
+    }
+
+    return mysql_real_escape_string($key);
   }
 }

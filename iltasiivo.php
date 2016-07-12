@@ -791,6 +791,18 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
     $avoimet_rivit[] = $avoinrivi['id'];
   }
 
+  // Haetaan inventointilistalla olevat käsittelemättömät rivit
+  $query = "SELECT LOWER(CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali)) AS id
+            FROM inventointilistarivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tila = 'A'
+            AND aika IS NULL";
+  $avoinrivi_result = pupe_query($query);
+
+  while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+    $avoimet_rivit[] = $avoinrivi['id'];
+  }
+
   // Haetaan avoimet tilausrivit arrayseen (siirtolistojen kohdepaikka)
   $query = "SELECT LOWER(CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali)) AS id
             FROM tilausrivi

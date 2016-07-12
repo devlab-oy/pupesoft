@@ -560,7 +560,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }            
+             }
           }
           $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 
@@ -1412,7 +1412,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
-              tilausrivi.hinta_alkuperainen
+              tilausrivi.hinta_alkuperainen,
+              tilausrivi.laadittu
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno                      = tuote.tuoteno
@@ -1705,6 +1706,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 <input type='hidden' name='toim_nimitykset'   value = '$toim_nimitykset'>
                 <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
                 <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
+                <input type='hidden' name='rivilaadittu' value = '$prow[laadittu]'>
                 <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                 <input type='hidden' name='tee'         value = 'PV'>";
 

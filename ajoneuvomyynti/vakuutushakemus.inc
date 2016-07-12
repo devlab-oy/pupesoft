@@ -1,29 +1,29 @@
 <?php
-  // Päivitetään tiedot tietokantaan
-  if ($tee == 'vakuutushakemus' and $tilausnumero > 0 and (isset($PAIVIT) or isset($VALMIS))) {
-    $query = "SELECT tunnus
+// Päivitetään tiedot tietokantaan
+if ($tee == 'vakuutushakemus' and $tilausnumero > 0 and (isset($PAIVIT) or isset($VALMIS))) {
+  $query = "SELECT tunnus
               FROM laskun_lisatiedot
               WHERE yhtio = '$kukarow[yhtio]'
               and otunnus = '$tilausnumero'";
-    $res = mysql_query($query) or pupe_error($query);
+  $res = mysql_query($query) or pupe_error($query);
 
-    if ($rekisteilmo_laminointi == "") {
-      $rekisteilmo_laminointi = "E";
-    }
-    if ($rekisteilmo_suoramarkkinointi == "") {
-      $rekisteilmo_suoramarkkinointi = "E";
-    }
+  if ($rekisteilmo_laminointi == "") {
+    $rekisteilmo_laminointi = "E";
+  }
+  if ($rekisteilmo_suoramarkkinointi == "") {
+    $rekisteilmo_suoramarkkinointi = "E";
+  }
 
-    if (mysql_num_rows($res) > 0) {
-      $query = " UPDATE laskun_lisatiedot ";
-      $postq = " WHERE yhtio  = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
-    }
-    else {
-      $query = "INSERT INTO laskun_lisatiedot ";
-      $postq = "";
-    }
+  if (mysql_num_rows($res) > 0) {
+    $query = " UPDATE laskun_lisatiedot ";
+    $postq = " WHERE yhtio  = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
+  }
+  else {
+    $query = "INSERT INTO laskun_lisatiedot ";
+    $postq = "";
+  }
 
-    $query  .= "  SET vakuutushak_vakuutusyhtio       = '$vakuutushak_vakuutusyhtio',
+  $query  .= "  SET vakuutushak_vakuutusyhtio       = '$vakuutushak_vakuutusyhtio',
             vakuutushak_alkamispaiva         = '$vva-$kka-$ppa',
             vakuutushak_kaskolaji           = '$vakuutushak_kaskolaji',
             vakuutushak_maksuerat           = '$vakuutushak_maksuerat',
@@ -58,50 +58,50 @@
             rahlaskelma_kuntotestitodistus      = '$rahlaskelma_kuntotestitodistus',
             rahlaskelma_kayttotarkoitus        = '$rahlaskelma_kayttotarkoitus'";
 
-    $res = mysql_query($query.$postq) or pupe_error($query.$postq);
+  $res = mysql_query($query.$postq) or pupe_error($query.$postq);
 
-    if (isset($VALMIS)) {
-      $tee = "";
+  if (isset($VALMIS)) {
+    $tee = "";
 
-      if ($lopetus != '') {
-        lopetus($lopetus, "META");
-      }
+    if ($lopetus != '') {
+      lopetus($lopetus, "META");
     }
   }
+}
 
-  if ($tee == 'vakuutushakemus') {
-    $query = "SELECT *
+if ($tee == 'vakuutushakemus') {
+  $query = "SELECT *
               FROM laskun_lisatiedot
               WHERE yhtio = '$kukarow[yhtio]'
               and otunnus = '$tilausnumero'";
-    $lisres = mysql_query($query) or pupe_error($query);
-    $lisrow = mysql_fetch_array($lisres);
+  $lisres = mysql_query($query) or pupe_error($query);
+  $lisrow = mysql_fetch_array($lisres);
 
-    if ($lisrow["vakuutushak_alkamispaiva"] != '0000-00-00') {
-      $kka = substr($lisrow["vakuutushak_alkamispaiva"],5,2);
-      $vva = substr($lisrow["vakuutushak_alkamispaiva"],0,4);
-      $ppa = substr($lisrow["vakuutushak_alkamispaiva"],8,2);
-    }
-    else {
-      $kka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $vva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      $ppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    }
+  if ($lisrow["vakuutushak_alkamispaiva"] != '0000-00-00') {
+    $kka = substr($lisrow["vakuutushak_alkamispaiva"], 5, 2);
+    $vva = substr($lisrow["vakuutushak_alkamispaiva"], 0, 4);
+    $ppa = substr($lisrow["vakuutushak_alkamispaiva"], 8, 2);
+  }
+  else {
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+  }
 
-    echo "<form method='post'>
+  echo "<form method='post'>
         <input type='hidden' name='toim' value='$toim'>
         <input type='hidden' name='lopetus' value='$lopetus'>
         <input type='hidden' name='tilausnumero' value='$tilausnumero'>
         <input type='hidden' name='tee' value='vakuutushakemus'>";
 
-    echo "<br><table>";
-    echo "<tr>
+  echo "<br><table>";
+  echo "<tr>
         <th>".t("1. Vakuutusyhtiö")."</th>";
 
-    $sel = array();
-    $sel[$lisrow["vakuutushak_vakuutusyhtio"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["vakuutushak_vakuutusyhtio"]] = "selected";
 
-    echo "<td>
+  echo "<td>
         <select name='vakuutushak_vakuutusyhtio'>
         <option value='41' $sel[41]>if / Sampo</option>
         <option value='03' $sel[03]>Lähivakuutus</option>
@@ -117,19 +117,19 @@
         <option value='66' $sel[66]>Ålandia</option>
         </select></td><td></td></tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("2. Alkamispäivä")."</th>
         <td><input type='text' name='ppa' size='3' value='$ppa'>
           <input type='text' name='kka' size='3' value='$kka'>
           <input type='text' name='vva' size='5' value='$vva'>
           </td><td></td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("3. Kaskolaji")."</th>";
 
-    $sel = array();
-    $sel[$lisrow["vakuutushak_kaskolaji"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["vakuutushak_kaskolaji"]] = "selected";
 
-    echo "<td>
+  echo "<td>
         <select name='vakuutushak_kaskolaji'>
         <option value='1' $sel[1]>Laajin</option>
         <option value='2' $sel[2]>Laaja</option>
@@ -138,13 +138,13 @@
         </select></td><td></td></tr>";
 
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("4. Maksetaan")."</th>";
 
-    $sel = array();
-    $sel[$lisrow["vakuutushak_maksuerat"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["vakuutushak_maksuerat"]] = "selected";
 
-    echo "<td>
+  echo "<td>
         <select name='vakuutushak_maksuerat'>
         <option value='1' $sel[1]>1</option>
         <option value='2' $sel[2]>2</option>
@@ -152,38 +152,38 @@
         <option value='4' $sel[4]>4</option>
         </select></td><td>".t("erässä")."</td></tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("5. Perusomavastuu")."</th>
         <td><input type='text' name='vakuutushak_perusomavastuu' size='14' value='$lisrow[vakuutushak_perusomavastuu]'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("6. Runko, takila, purjeet")."</th>
         <td><input type='text' name='vakuutushak_runko_takila_purjeet' size='14' value='$lisrow[vakuutushak_runko_takila_purjeet]'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("7. Moottori")."</th>
         <td><input type='text' name='vakuutushak_moottori' size='14' value='$lisrow[vakuutushak_moottori]'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("8. Varusteet")."</th>
         <td><input type='text' name='vakuutushak_varusteet' size='14' value='$lisrow[vakuutushak_varusteet]'></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("9. Yhteensä")."</th>
         <td><input type='text' name='vakuutushak_yhteensa' size='14' value='$lisrow[vakuutushak_yhteensa]'></td><td>$laskurow[valkoodi]</td></tr>";
 
 
-    echo "<tr><td class='back'><br><br></td></tr>";
+  echo "<tr><td class='back'><br><br></td></tr>";
 
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("1. Rekisterinumero")."</th>
         <td><input type='text' name='rekisteilmo_rekisterinumero' size='14' value='$lisrow[rekisteilmo_rekisterinumero]'></td><td></td></tr>";
-    echo "<tr>
+  echo "<tr>
         <th>".t("2. Pääasiallinen käyttökunta")."</th>
         <td><input type='text' name='rekisteilmo_paakayttokunta' size='14' value='$lisrow[rekisteilmo_paakayttokunta]'></td><td></td></tr>";
 
 
-    $sel = array();
-    $sel[$lisrow["rekisteilmo_kieli"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["rekisteilmo_kieli"]] = "selected";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("3. Todistuksen kieli")."</th>
         <td>
         <select name='rekisteilmo_kieli'>
@@ -192,10 +192,10 @@
         </select>
         </td><td></td></tr>";
 
-    $sel = array();
-    $sel[$lisrow["rekisteilmo_tyyppi"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["rekisteilmo_tyyppi"]] = "selected";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("4. Reksiteröinnin tyyppi")."</th>
         <td>
         <select name='rekisteilmo_tyyppi'>
@@ -208,49 +208,49 @@
         </select>
         </td><td></td></tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("5. Omistajien lukumäärä")."</th>
         <td><input type='text' name='rekisteilmo_omistajienlkm' size='14' value='$lisrow[rekisteilmo_omistajienlkm]'></td><td></td></tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("6. Omistajan kotikunta")."</th>
         <td><input type='text' name='rekisteilmo_omistajankotikunta' size='14' value='$lisrow[rekisteilmo_omistajankotikunta]'></td><td></td></tr>";
 
 
-    if ($lisrow["rekisteilmo_laminointi"] == "K" or $lisrow["rekisteilmo_laminointi"] == "") {
-      $sel = "CHECKED";
-    }
-    else {
-      $sel = "";
-    }
+  if ($lisrow["rekisteilmo_laminointi"] == "K" or $lisrow["rekisteilmo_laminointi"] == "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("7. Venetodistuksen laminointi")."</th>
         <td><input type='checkbox' name='rekisteilmo_laminointi' value='K' $sel></td><td></td></tr>";
 
 
-    if ($lisrow["rekisteilmo_suoramarkkinointi"] == "K") {
-      $sel = "CHECKED";
-    }
-    else {
-      $sel = "";
-    }
+  if ($lisrow["rekisteilmo_suoramarkkinointi"] == "K") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("8. Tiedot saa luovuttaa suoramarkkinointikäyttöön")."</th>
         <td><input type='checkbox' name='rekisteilmo_suoramarkkinointi' value='K' $sel></td><td></td></tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("9. Vesikulkuneuvolle annettu nimi")."</th>
         <td><input type='text' name='rekisteilmo_veneen_nimi' size='14' value='$lisrow[rekisteilmo_veneen_nimi]'></td><td></td></tr>";
 
 
-    echo "<tr><td class='back'><br><br></td></tr>";
+  echo "<tr><td class='back'><br><br></td></tr>";
 
-    $sel = array();
-    $sel[$lisrow["rekisteilmo_omistaja"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["rekisteilmo_omistaja"]] = "selected";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("Omistajan tiedot")."</th>
         <td>
         <select name='rekisteilmo_omistaja'>
@@ -261,19 +261,19 @@
         <option value='SAMPO'  $sel[SAMPO]>".t("Sampo Rahoitus")."</option>
         <option value='SANTAN' $sel[SANTAN]>".t("Santander")."</option>
         <option value='HANDEL' $sel[HANDEL]>".t("Handelsbanken Rahoitus")."</option>";
-    echo "  </select>
+  echo "  </select>
         </td><td></td></tr>";
 
-    echo "<tr><td class='back'><br><br></td></tr>";
+  echo "<tr><td class='back'><br><br></td></tr>";
 
-    //   Y = Yksityinen
-    //   L = Luvanvarainen
-    //   V = Vuokraus ilman kuljettajaa
-    //   M = Myyntivarasto
-    $sel = array();
-    $sel[$lisrow["rahlaskelma_kayttotarkoitus"]] = "selected";
+  //   Y = Yksityinen
+  //   L = Luvanvarainen
+  //   V = Vuokraus ilman kuljettajaa
+  //   M = Myyntivarasto
+  $sel = array();
+  $sel[$lisrow["rahlaskelma_kayttotarkoitus"]] = "selected";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("Käyttötarkoitus")."</th>
         <td>
         <select name='rahlaskelma_kayttotarkoitus'>
@@ -284,103 +284,103 @@
         </select>
         </td><td></td></tr>";
 
-    $query = "SELECT sarjanumeroseuranta.tunnus
+  $query = "SELECT sarjanumeroseuranta.tunnus
               FROM tilausrivi
               JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
               JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
               and tilausrivi.otunnus = '$tilausnumero'
               LIMIT 1";
-    $venvelisres = mysql_query($query) or pupe_error($query);
+  $venvelisres = mysql_query($query) or pupe_error($query);
 
-    $query = "SELECT sarjanumeroseuranta.tunnus
+  $query = "SELECT sarjanumeroseuranta.tunnus
               FROM tilausrivi
               JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
               JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
               and tilausrivi.otunnus = '$tilausnumero'
               LIMIT 1";
-    $mootlisres = mysql_query($query) or pupe_error($query);
+  $mootlisres = mysql_query($query) or pupe_error($query);
 
-    if (mysql_num_rows($venvelisres) > 0) {
+  if (mysql_num_rows($venvelisres) > 0) {
 
-      $lisrow = mysql_fetch_array($venvelisres);
+    $lisrow = mysql_fetch_array($venvelisres);
 
-      $query = "SELECT *
+    $query = "SELECT *
                 FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
                 WHERE yhtio      = '$kukarow[yhtio]'
                 and liitostunnus = '$lisrow[tunnus]'";
-      $lisares = mysql_query($query) or pupe_error($query);
-      $lisarow = mysql_fetch_array($lisares);
+    $lisares = mysql_query($query) or pupe_error($query);
+    $lisarow = mysql_fetch_array($lisares);
 
-      if ($lisarow["tunnus"] != 0) {
-        $ylisa = "&tunnus=$lisarow[tunnus]";
-      }
-      else {
-        $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
-      }
-
-      if (mysql_num_rows($mootlisres) > 0) {
-        $alanimi = "VAKHAKVENE";
-      }
-      else {
-        $alanimi = "VAKHAK";
-      }
-
-      echo "<tr>
-          <th>".t("Veneen tiedot")."</th>
-          <td><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!$alanimi!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Veneen lisätiedot")."</a></td><td>".t("Tallenna tämä sivu ennen kuin siirryt lisätietoihin")."</td></tr>";
+    if ($lisarow["tunnus"] != 0) {
+      $ylisa = "&tunnus=$lisarow[tunnus]";
+    }
+    else {
+      $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
     }
 
     if (mysql_num_rows($mootlisres) > 0) {
+      $alanimi = "VAKHAKVENE";
+    }
+    else {
+      $alanimi = "VAKHAK";
+    }
 
-      $lisrow = mysql_fetch_array($mootlisres);
+    echo "<tr>
+          <th>".t("Veneen tiedot")."</th>
+          <td><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!$alanimi!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Veneen lisätiedot")."</a></td><td>".t("Tallenna tämä sivu ennen kuin siirryt lisätietoihin")."</td></tr>";
+  }
 
-      $query = "SELECT *
+  if (mysql_num_rows($mootlisres) > 0) {
+
+    $lisrow = mysql_fetch_array($mootlisres);
+
+    $query = "SELECT *
                 FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
                 WHERE yhtio      = '$kukarow[yhtio]'
                 and liitostunnus = '$lisrow[tunnus]'";
-      $lisares = mysql_query($query) or pupe_error($query);
-      $lisarow = mysql_fetch_array($lisares);
+    $lisares = mysql_query($query) or pupe_error($query);
+    $lisarow = mysql_fetch_array($lisares);
 
-      if ($lisarow["tunnus"] != 0) {
-        $ylisa = "&tunnus=$lisarow[tunnus]";
-      }
-      else {
-        $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
-      }
+    if ($lisarow["tunnus"] != 0) {
+      $ylisa = "&tunnus=$lisarow[tunnus]";
+    }
+    else {
+      $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
+    }
 
-      echo "<tr>
+    echo "<tr>
           <th>".t("Moottorin tiedot")."</th>
           <td>
 
           <a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!VAKHAKMOO!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Moottorin lisätiedot")."</a>
 
           </td><td>".t("Tallenna tämä sivu ennen kuin siirryt lisätietoihin")."</td></tr>";
-    }
+  }
 
-    echo "<tr><td class='back'><br><br></td></tr>";
+  echo "<tr><td class='back'><br><br></td></tr>";
 
-    echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='PAIVIT' value='".t("Tallenna")."'></td><td></td></tr>";
-    echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='VALMIS' value='".t("Tallenna ja siirry takaisin tilaukselle")."'></td><td></td></tr>";
-    echo "</form>";
+  echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='PAIVIT' value='".t("Tallenna")."'></td><td></td></tr>";
+  echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='VALMIS' value='".t("Tallenna ja siirry takaisin tilaukselle")."'></td><td></td></tr>";
+  echo "</form>";
 
-    echo "<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_vakhak' id='tulostaform_vakhak' class='multisubmit'>
+  echo "<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_vakhak' id='tulostaform_vakhak' class='multisubmit'>
         <input type='hidden' name='tee' value='NAYTATILAUS'>
         <input type='hidden' name='otunnus' value='$tilausnumero'>";
 
 
-    echo "<tr><th>".t("Näytä lomake").":</th>";
+  echo "<tr><th>".t("Näytä lomake").":</th>";
 
-    echo "<td>";
-    echo "<select name='toim'>";
-    echo "<option value='TARJOUS'>Tarjous</value>";
-    echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
-    echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
-    echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
-    echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
-    echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
-    echo "</select></td>";
-    echo "<td><input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_vakhak', 'tulosta_vakhak'); return false;\"></td>";
-    echo "</form></table>";
-  }
+  echo "<td>";
+  echo "<select name='toim'>";
+  echo "<option value='TARJOUS'>Tarjous</value>";
+  echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
+  echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
+  echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
+  echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
+  echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
+  echo "</select></td>";
+  echo "<td><input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_vakhak', 'tulosta_vakhak'); return false;\"></td>";
+  echo "</form></table>";
+}

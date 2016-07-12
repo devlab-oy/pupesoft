@@ -548,7 +548,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           pupe_query($kohdistus_q);
 
           $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
           $ulkoinen_varasto = false;
           // Lähetetään sanoma vain, jos valitulla varastolla on ulkoinen jarjestelma
           if ($laskurow['varasto'] > 0) {
@@ -560,7 +560,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }
+            }
           }
           $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 

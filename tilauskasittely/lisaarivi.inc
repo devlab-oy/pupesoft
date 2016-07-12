@@ -1804,10 +1804,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
-              # Jos kokonaiskappalemäärä on suurempi kuin myytävissä
-              # Ja ollaan lisäämässä uutta riviä
-              # Niin tarkistetaan onko asiakkaalle määritelty huokeampi hinta isommalle kappalemäärälle
-              if ($alkupera_kpl > $myy_kpl[$indeksi] and $rivitunnus == 0 and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+              // Jos kokonaiskappalemäärä on suurempi kuin myytävissä
+              // Ja ollaan lisäämässä uutta riviä
+              // Niin tarkistetaan onko asiakkaalle määritelty huokeampi hinta isommalle kappalemäärälle
+              if ($alkupera_kpl > $myy_kpl[$indeksi] and $rivitunnus == 0 and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS'))) {
                 list($lis_hinta_chk, $lis_netto_chk, $lis_ale_kaikki_chk, $alehinta_alv_chk, $alehinta_val_chk) = alehinta($laskurow, $trow, $alkupera_kpl, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
                 if (!empty($lis_hinta_chk) and $lis_hinta > $lis_hinta_chk) {
@@ -2799,10 +2799,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($puu_tyyppi[$i] == 'LAPSITUOTE' ? 'X' : ''));
 
-      # Jos kokonaiskappalemäärä on suurempi kuin myytävissä
-      # Ja ollaan lisäämässä uutta riviä
-      # Niin tarkistetaan onko asiakkaalle määritelty huokeampi hinta isommalle kappalemäärälle
-      if ($alkupera_kpl > $alemaara and $rivitunnus == 0 and in_array($toim, array('RIVISYOTTO','PIKATILAUS'))) {
+      // Jos kokonaiskappalemäärä on suurempi kuin myytävissä
+      // Ja ollaan lisäämässä uutta riviä
+      // Niin tarkistetaan onko asiakkaalle määritelty huokeampi hinta isommalle kappalemäärälle
+      if ($alkupera_kpl > $alemaara and $rivitunnus == 0 and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS'))) {
         list($lis_hinta_chk, $lis_netto_chk, $lis_ale_kaikki_chk, $alehinta_alv_chk, $alehinta_val_chk) = alehinta($laskurow, $trow, $alkupera_kpl, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
         if (!empty($lis_hinta_chk) and $lis_hinta > $lis_hinta_chk) {

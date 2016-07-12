@@ -479,7 +479,7 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
 
   $prn  = "\n";
 
-  foreach(explode("<br>", $kommentti) as $kom) {
+  foreach (explode("<br>", $kommentti) as $kom) {
     $prn .= $kom."\n";
   }
 
@@ -1270,7 +1270,7 @@ elseif ($tee != '') {
 
       echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr></table>";
     }
-    elseif($toim == "") {
+    elseif ($toim == "") {
       echo "<table><tr><td>";
     }
 

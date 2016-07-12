@@ -19,6 +19,7 @@
  * @return bool
  */
 
+
 function draw_center_aligned($pdf, $firstpage, $text, $font, $y) {
   $lpos = (204-$pdf->strlen($text, $font)) / 2;
   $pdf->draw_text($lpos, $y, $text, $firstpage, $font);

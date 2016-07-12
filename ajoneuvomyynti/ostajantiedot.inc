@@ -67,14 +67,14 @@ if ($tee == 'ostajantiedot') {
   $lisrow = mysql_fetch_array($lisres);
 
   if ($lisrow["vakuutushak_alkamispaiva"] != '0000-00-00') {
-    $kka = substr($lisrow["vakuutushak_alkamispaiva"],5,2);
-    $vva = substr($lisrow["vakuutushak_alkamispaiva"],0,4);
-    $ppa = substr($lisrow["vakuutushak_alkamispaiva"],8,2);
+    $kka = substr($lisrow["vakuutushak_alkamispaiva"], 5, 2);
+    $vva = substr($lisrow["vakuutushak_alkamispaiva"], 0, 4);
+    $ppa = substr($lisrow["vakuutushak_alkamispaiva"], 8, 2);
   }
   else {
-    $kka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $vva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $ppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   }
 
   echo "<form method='post'>
@@ -112,46 +112,46 @@ if ($tee == 'ostajantiedot') {
       <td><input type='text' name='postino' size='10' value='$laskurow[postino]'> <input type='text' name='postitp' size='21' value='$laskurow[postitp]'></td>
     </tr>";
 
-$query = "SELECT distinct koodi, nimi
+  $query = "SELECT distinct koodi, nimi
           FROM maat
           WHERE nimi != ''
           ORDER BY koodi";
-$vresult = pupe_query($query);
+  $vresult = pupe_query($query);
 
-echo "<tr><th> ".t("Maa").": </th>
+  echo "<tr><th> ".t("Maa").": </th>
     <td><select name='maa' onChange='submit();' ".js_alasvetoMaxWidth("maa", 200).">";
 
-while ($vrow = mysql_fetch_assoc($vresult)) {
-  $sel="";
-  if (strtoupper($laskurow["maa"]) == strtoupper($vrow["koodi"])) {
-    $sel = "selected";
+  while ($vrow = mysql_fetch_assoc($vresult)) {
+    $sel="";
+    if (strtoupper($laskurow["maa"]) == strtoupper($vrow["koodi"])) {
+      $sel = "selected";
+    }
+    elseif ($laskurow["maa"] == "" and strtoupper($vrow["koodi"]) == strtoupper($yhtiorow["maa"])) {
+      $sel = "selected";
+    }
+    echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
   }
-  elseif ($laskurow["maa"] == "" and strtoupper($vrow["koodi"]) == strtoupper($yhtiorow["maa"])) {
-    $sel = "selected";
-  }
-  echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
-}
 
-echo "</select></td>
+  echo "</select></td>
       </tr>";
 
-echo "<tr>
+  echo "<tr>
     <th> ".t("Sähköposti").": </th>
     <td><input type='text' name='email' size='35' value='$srow[email]'></td></tr>";
 
-echo "<tr>
+  echo "<tr>
     <th>".t("Puhelin")."</th>
     <td><input type='text' name='puhelin' size='35' value='$srow[puhelin]'></td></tr>";
 
-//    A = Ajokortti
-//    H = Henkilökortti
-//    P = Passi
-//    (K = Kuvallinen pankkikortti)
-//    U = Kuvallinen Kela-kortti
-$sel = array();
-$sel[$lisrow["rahlaskelma_hetu_tarkistus"]] = "selected";
+  //    A = Ajokortti
+  //    H = Henkilökortti
+  //    P = Passi
+  //    (K = Kuvallinen pankkikortti)
+  //    U = Kuvallinen Kela-kortti
+  $sel = array();
+  $sel[$lisrow["rahlaskelma_hetu_tarkistus"]] = "selected";
 
-echo "<tr>
+  echo "<tr>
       <th>".t("Henkilötietojen tarkistus")."</th>
       <td>
       <select name='rahlaskelma_hetu_tarkistus'>
@@ -164,23 +164,23 @@ echo "<tr>
       </select>
       </td></tr>";
 
-echo"<tr>
+  echo"<tr>
   <th>".t("Henkilötietojen asiakirjan nro / pvm")."</th>
   <td><input type='text' name='rahlaskelma_hetu_asiakirjanro' size='35' value='$lisrow[rahlaskelma_hetu_asiakirjanro]'></td>
   </tr>";
 
-echo"<tr>
+  echo"<tr>
   <th>".t("Henkilötietojen asiakirjan myöntäja")."</th>
   <td><input type='text' name='rahlaskelma_hetu_asiakirjamyontaja' size='35' value='$lisrow[rahlaskelma_hetu_asiakirjamyontaja]'></td>
   </tr>";
 
-echo"<tr>
+  echo"<tr>
   <th>".t("Henkilötietojen tarkastaja / pvm")."</th>
   <td><input type='text' name='rahlaskelma_hetu_tarkastaja' size='35' value='$lisrow[rahlaskelma_hetu_tarkastaja]'></td>
   </tr>";
 
-$sel = array();
-$sel[$lisrow["rahlaskelma_pep"]] = "selected";
+  $sel = array();
+  $sel[$lisrow["rahlaskelma_pep"]] = "selected";
 
   echo "<tr>
         <th>PEP (Politically Exposed Person)</th>
@@ -260,46 +260,46 @@ $sel[$lisrow["rahlaskelma_pep"]] = "selected";
   $sel = array();
   $sel[$lisrow["rahlaskelma_pep"]] = "selected";
 
-    echo "<tr>
+  echo "<tr>
           <th>PEP (Politically Exposed Person)</th>
           <td><input type='checkbox' name='pep' value='X' $sel></td>
           </tr>";
-    echo "<tr><td class='back'><br><br></td></tr>";
+  echo "<tr><td class='back'><br><br></td></tr>";
 
-    // Haltijan / käyttäjän tiedot
-    echo "<tr><td class='back' colspan='2'><span class='message'>".t("Muu haltija/käyttäjä")."</span></td></tr>";
+  // Haltijan / käyttäjän tiedot
+  echo "<tr><td class='back' colspan='2'><span class='message'>".t("Muu haltija/käyttäjä")."</span></td></tr>";
 
-    echo "<tr>
+  echo "<tr>
           <th>", t("Henkilötunnus / Y-tunnus"), ":</th>
           <td><input type='text' name='kolm_ovttunnus' value='{$laskurow['']}' /></td>
           </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th> ".t("Nimi").": </th>
         <td><input type='text' name='kolm_nimi' size='35' value='{$laskurow['']}'></td>
         </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th></th>
         <td><input type='text' name='kolm_nimitark' size='35' value='{$laskurow['']}'></td>
         </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("Osoite").": </th>
         <td><input type='text' name='kolm_osoite' size='35' value='{$laskurow['']}'></td>
         </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th>".t("Postitp").": </th>
         <td><input type='text' name='kolm_postino' size='6' value='{$laskurow['']}'> <input type='text' name='kolm_postitp' size='21' value='{$laskurow['']}'></td>
         </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th valign='top'> ".t("Sähköposti").": </th>
         <td><input type='text' name='kolm_email' size='35' value='$srow[kolm_email]'></td>
         </tr>";
 
-    echo "<tr>
+  echo "<tr>
         <th valign='top'>".t("Puhelin")."</th>
         <td><input type='text' name='kolm_puhelin' size='35' value='$srow[kolm_puhelin]'></td>
         </tr>";

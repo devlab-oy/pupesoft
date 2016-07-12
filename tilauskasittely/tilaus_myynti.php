@@ -7821,14 +7821,14 @@ if ($tee == '') {
                   <a href='{$palvelin2}$tuotekyslinkki?".$tuotekyslinkkilisa."tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'
                      class='tooltip'
                      data-content-url='?toim={$toim}" .
-                       "&ajax_popup=true" .
-                       "&tuoteno={$row["tuoteno"]}" .
-                       "&yksikko={$row["yksikko"]}" .
-                       "&paikka={$row["paikka"]}" .
-                       "&keskihinta={$row["kehahin"]}" .
-                       "&valuutta={$laskurow["valkoodi"]}" .
-                       "&varasto={$laskurow["varasto"]}" .
-                       "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
+            "&ajax_popup=true" .
+            "&tuoteno={$row["tuoteno"]}" .
+            "&yksikko={$row["yksikko"]}" .
+            "&paikka={$row["paikka"]}" .
+            "&keskihinta={$row["kehahin"]}" .
+            "&valuutta={$laskurow["valkoodi"]}" .
+            "&varasto={$laskurow["varasto"]}" .
+            "&vanhatunnus={$laskurow["vanhatunnus"]}'>$row[tuoteno]</a>";
         }
         else {
           echo "<td $class>$row[tuoteno]";
@@ -8400,7 +8400,7 @@ if ($tee == '') {
                 </form>";
           }
           elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N"))
-            or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0))
+              or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0))
             and $kukarow['extranet'] == ''
           ) {
 

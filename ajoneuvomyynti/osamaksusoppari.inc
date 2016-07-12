@@ -130,7 +130,7 @@ if ($tee == 'osamaksusoppari') {
   $uusiajoneuvo = summarivit("HAVING tilausrivin_lisatiedot.positio not like '%vaihto%'", $laskurow);
 
   // 2. Uudet tarvikkeet
-  $uusitarvike = 0; #summarivit("HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tuote.tuoteno not in ('$yhtiorow[rahti_tuotenumero]', '$yhtiorow[ennakkomaksu_tuotenumero]')", $laskurow);
+  $uusitarvike = 0; //summarivit("HAVING (tilausrivin_lisatiedot.positio not like '%vene%' and tilausrivin_lisatiedot.positio not like '%moottori%') and tuote.tuoteno not in ('$yhtiorow[rahti_tuotenumero]', '$yhtiorow[ennakkomaksu_tuotenumero]')", $laskurow);
 
   // 3. Toimituskulut
   $toimkulu = summarivit("HAVING tuote.tuoteno = '$yhtiorow[rahti_tuotenumero]'", $laskurow);

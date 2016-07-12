@@ -59,16 +59,16 @@ if ($tee == 'toimitusehdot' and $tilausnumero > 0 and (isset($PAIVIT) or isset($
 }
 
 if ($tee == 'toimitusehdot') {
-echo "<form method='post'>
+  echo "<form method='post'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='lopetus' value='$lopetus'>
     <input type='hidden' name='tilausnumero' value='$tilausnumero'>
     <input type='hidden' name='tee' value='toimitusehdot'>";
 
-// Ostajan tiedot
-echo "<table>";
+  // Ostajan tiedot
+  echo "<table>";
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Toimitusaika")."</th>
   <td><input type='text' name='toimpp' value='$toimpp' size='3'>-
       <input type='text' name='toimkk' value='$toimkk' size='3'>-
@@ -78,118 +78,118 @@ echo "<tr>
   echo "<tr>
     <th>".t("Toimitustapa")."</th>";
 
- // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
- $query = "SELECT *
+  // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+  $query = "SELECT *
            FROM rahtikirjat
            WHERE yhtio     = '$kukarow[yhtio]'
            AND otsikkonro  = '$tilausnumero'
            AND tulostettu != '0000-00-00 00:00:00'
            LIMIT 1";
- $rakre_chkres = pupe_query($query);
+  $rakre_chkres = pupe_query($query);
 
- $state_chk = "";
+  $state_chk = "";
 
- if (mysql_num_rows($rakre_chkres) > 0) {
-   $state_chk = 'disabled';
- }
+  if (mysql_num_rows($rakre_chkres) > 0) {
+    $state_chk = 'disabled';
+  }
 
- $_varasto = hae_varasto($laskurow['varasto']);
+  $_varasto = hae_varasto($laskurow['varasto']);
 
- $params = array(
-   'asiakas_tunnus'      => $laskurow['liitostunnus'],
-   'lasku_toimipaikka'   => $laskurow['yhtio_toimipaikka'],
-   'varasto_toimipaikka' => $_varasto['toimipaikka'],
-   'kohdevarasto'        => $laskurow['clearing'],
-   'lahdevarasto'        => $laskurow['varasto'],
- );
+  $params = array(
+    'asiakas_tunnus'      => $laskurow['liitostunnus'],
+    'lasku_toimipaikka'   => $laskurow['yhtio_toimipaikka'],
+    'varasto_toimipaikka' => $_varasto['toimipaikka'],
+    'kohdevarasto'        => $laskurow['clearing'],
+    'lahdevarasto'        => $laskurow['varasto'],
+  );
 
- $toimitustavat = hae_toimitustavat($params);
+  $toimitustavat = hae_toimitustavat($params);
 
- echo "<td><select name='toimitustapa' {$state_chk}>";
+  echo "<td><select name='toimitustapa' {$state_chk}>";
 
- foreach ($toimitustavat as $toimitustapa) {
+  foreach ($toimitustavat as $toimitustapa) {
 
-   if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $laskurow['toim_maa'])) {
-     continue;
-   }
+    if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $laskurow['toim_maa'])) {
+      continue;
+    }
 
-   if (in_array($toimitustapa['extranet'], array('', 'M'))
-     or $toimitustapa['selite'] == $laskurow['toimitustapa']
-     or $toimitustapa['selite'] == $asiakasrow['toimitustapa']) {
+    if (in_array($toimitustapa['extranet'], array('', 'M'))
+      or $toimitustapa['selite'] == $laskurow['toimitustapa']
+      or $toimitustapa['selite'] == $asiakasrow['toimitustapa']) {
 
-     $sel = "";
-     if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
-       $sel = 'selected';
-       $tm_toimitustaparow   = $toimitustapa;
-       $toimitustavan_tunnus = $toimitustapa['tunnus'];
-     }
+      $sel = "";
+      if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
+        $sel = 'selected';
+        $tm_toimitustaparow   = $toimitustapa;
+        $toimitustavan_tunnus = $toimitustapa['tunnus'];
+      }
 
-     echo "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
-     echo t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
-     echo "</option>";
-   }
- }
+      echo "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
+      echo t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");
+      echo "</option>";
+    }
+  }
 
-echo "</select></td>";
-echo "</tr>";
+  echo "</select></td>";
+  echo "</tr>";
 
-if ($lisrow["rahlaskelma_takuukirja"] != "") {
-  $sel = "CHECKED";
-}
-else {
-  $sel = "";
-}
+  if ($lisrow["rahlaskelma_takuukirja"] != "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Ostajalle annettu takuukirja")."</th>
   <td><input type='checkbox' name='rahlaskelma_takuukirja' value='X' $sel></td>
   </tr>";
 
 
-if ($lisrow["rahlaskelma_huoltokirja"] != "") {
-  $sel = "CHECKED";
-}
-else {
-  $sel = "";
-}
+  if ($lisrow["rahlaskelma_huoltokirja"] != "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Ostajalle annettu huoltokirja")."</th>
   <td><input type='checkbox' name='rahlaskelma_huoltokirja' value='X' $sel></td>
   </tr>";
 
-if ($lisrow["rahlaskelma_kayttoohjeet"] != "") {
-  $sel = "CHECKED";
-}
-else {
-  $sel = "";
-}
+  if ($lisrow["rahlaskelma_kayttoohjeet"] != "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Ostajalle annettu käyttöohjeet")."</th>
   <td><input type='checkbox' name='rahlaskelma_kayttoohjeet' value='X' $sel></td>
   </tr>";
 
-if ($lisrow["rahlaskelma_opastus"] != "") {
-  $sel = "CHECKED";
-}
-else {
-  $sel = "";
-}
+  if ($lisrow["rahlaskelma_opastus"] != "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Ostajalle annettu suullinen opastus")."</th>
   <td><input type='checkbox' name='rahlaskelma_opastus' value='X' $sel></td>
   </tr>";
 
-if ($lisrow["rahlaskelma_kuntotestitodistus"] != "") {
-  $sel = "CHECKED";
-}
-else {
-  $sel = "";
-}
+  if ($lisrow["rahlaskelma_kuntotestitodistus"] != "") {
+    $sel = "CHECKED";
+  }
+  else {
+    $sel = "";
+  }
 
-echo "<tr>
+  echo "<tr>
   <th>".t("Ostajalle annettu kuntotestitodistus")."</th>
   <td><input type='checkbox' name='rahlaskelma_kuntotestitodistus' value='X' $sel></td></tr>";
 

@@ -340,7 +340,7 @@ function piirra_hakuboksit() {
     'tyostatus',
     'komm1',
     'komm2'
-   );
+  );
   foreach ($headers as $header) {
     echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
   }

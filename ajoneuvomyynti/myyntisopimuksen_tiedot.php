@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kauppasopimuksen tiedot")."</font><hr>";
 
@@ -119,4 +119,4 @@ if ($tee == "toimitusehdot") {
   require "ajoneuvomyynti/toimitusehdot.inc";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

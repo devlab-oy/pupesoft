@@ -1,7 +1,7 @@
 <?php
 
-# for github syntax highlighting
-# -*- mode: php;-*-
+// for github syntax highlighting
+// -*- mode: php;-*-
 
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {

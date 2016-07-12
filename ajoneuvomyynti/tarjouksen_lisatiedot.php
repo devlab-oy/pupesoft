@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
   echo "<font class='head'>".t("Lisätietojen korjaus").":</font><hr><br>";
@@ -8,11 +8,11 @@ if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
 
 if ($tee == 'osamaksusoppari') {
   // Tehdään rahoituslaskuelma
-  require('osamaksusoppari.inc');
+  require 'osamaksusoppari.inc';
 }
 elseif ($tee == 'vakuutushakemus') {
   // Tehdään vakuutushakemus
-  require('vakuutushakemus.inc');
+  require 'vakuutushakemus.inc';
 }
 
 if ($tee == "TULOSTA") {
@@ -47,38 +47,38 @@ if ($tee == "TULOSTA") {
   }
 
   if (count($komento) == 0 and $tee == 'TULOSTA') {
-    require("../inc/valitse_tulostin.inc");
+    require "../inc/valitse_tulostin.inc";
   }
 }
 
 if ($tee == "TULOSTA") {
   if ($komento["Tarjous"] != "") {
-    require_once ("tulosta_tarjous.inc");
+    require_once "tulosta_tarjous.inc";
     tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
   }
 
   if ($komento["Myyntisopimus"] != "") {
-    require_once ("tulosta_myyntisopimus.inc");
+    require_once "tulosta_myyntisopimus.inc";
     tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
   }
 
   if ($komento["Osamaksusopimus"] != "") {
-    require_once ("tulosta_osamaksusoppari.inc");
+    require_once "tulosta_osamaksusoppari.inc";
     tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
   }
 
   if ($komento["Luovutustodistus"] != "") {
-    require_once ("tulosta_luovutustodistus.inc");
+    require_once "tulosta_luovutustodistus.inc";
     tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
   }
 
   if ($komento["Vakuutushakemus"] != "") {
-    require_once ("tulosta_vakuutushakemus.inc");
+    require_once "tulosta_vakuutushakemus.inc";
     tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
   }
 
   if ($komento["Rekisteröinti_ilmoitus"] != "") {
-    require_once ("tulosta_rekisteriilmoitus.inc");
+    require_once "tulosta_rekisteriilmoitus.inc";
     tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
   }
   $otunnus  = "";
@@ -88,14 +88,14 @@ if ($tee == "TULOSTA") {
 
 if ($tee == 'NAYTAHTML' or $tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<br><br>";
   $tee = "ETSILASKU";
 }
 
-if ($tee == "" or $tee == 'ETSILASKU'){
+if ($tee == "" or $tee == 'ETSILASKU') {
   if ($ytunnus != '') {
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
   }
   if ($ytunnus != '') {
     $tee = "ETSILASKU";
@@ -122,11 +122,11 @@ if ($tee == "ETSILASKU") {
   echo "<table>";
 
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -220,7 +220,7 @@ if ($tee == "ETSILASKU") {
 
     for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
       $jarj = $i+1;
-      echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
+      echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result, $i))."</a></th>";
     }
     echo "<th>".t("Tyyppi")."</th>";
 
@@ -307,4 +307,4 @@ if ($tee == '') {
   $kentta = 'ytunnus';
 }
 
-require ('../inc/footer.inc');
+require '../inc/footer.inc';

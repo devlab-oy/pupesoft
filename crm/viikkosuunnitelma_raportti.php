@@ -156,7 +156,7 @@ if ($tee == '') {
       <table width='100%'>";
 
   if ($kukarow['kieli'] == '') {
-      $kukarow['kieli'] = $yhtiorow['kieli'];
+    $kukarow['kieli'] = $yhtiorow['kieli'];
   }
 
   $query = "SELECT tunnus,selitetark, perhe

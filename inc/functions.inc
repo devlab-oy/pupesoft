@@ -33314,19 +33314,18 @@ if (!function_exists('pupesoft_a2ps')) {
 
 if (!function_exists('posten_field')) {
   function posten_field($column_name) {
-    $key = '';
 
     switch ($column_name) {
-    case "ItemNumber":
-      $key = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
+    case 'ItemNumber':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ItemNumber' ", '', '', 'selitetark');
 
       if (empty($key)) {
         $key = 'tuoteno';
       }
 
       break;
-    case "ProdGroup2":
-      $key = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ProdGroup2' ", '', '', "selitetark");
+    case 'ProdGroup2':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
 
       if (empty($key)) {
         $key = '';
@@ -33334,7 +33333,7 @@ if (!function_exists('posten_field')) {
 
       break;
     default:
-      die(t("Annettu arvo ei ole käytössä"));
+      die(t('Annettu arvo ei ole käytössä'));
     }
 
     return $key;

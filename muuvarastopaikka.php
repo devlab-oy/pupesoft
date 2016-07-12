@@ -1295,26 +1295,24 @@ if ($tee == 'M') {
         if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
           echo "<td></td>";
         }
-        elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
+        elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck or !empty($saldorow["inventointilistatunnus"])) {
 
-      // Ei näytetä boxia, jos sitä ei saa käyttää
-      if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
-        echo "<td></td>";
-      }
-      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck or !empty($saldorow["inventointilistatunnus"])) {
+          if ($reklacheck) {
+            $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
+          }
+
+          if (!empty($saldorow["inventointilistatunnus"])) {
+            $poistoteksti .= "<br>(".t("Tuotepaikka käsittelemättömänä inventointilistalla").")";
+          }
 
           echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
               <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
         }
+        else {
 
-        if (!empty($saldorow["inventointilistatunnus"])) {
-          $poistoteksti .= "<br>(".t("Tuotepaikka käsittelemättömänä inventointilistalla").")";
-        }
-
-        echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}
-            <input type = 'hidden' name='flagaa_poistettavaksi_undo[$saldorow[tunnus]]' value='$saldorow[poistettava]'></td>";
-      }
-      else {
+          if ($saldorow["poistettava"] != "") {
+            $poistoteksti .= "<br>(".t("Voit myös poistaa tuotepaikan tästä heti").")";
+          }
 
           echo "<td><input type = 'checkbox' name='poista[$saldorow[tunnus]]' value='$saldorow[tunnus]'> {$poistoteksti}</td>";
         }

@@ -133,12 +133,13 @@ else {
         $tuoteno = substr($row['tuoteno'], 0, 100);
 
         $posten_itemnumberfield = posten_field('ItemNumber');
+        $posten_prodgroup1field = posten_field('ProdGroup1');
         $posten_prodgroup2field = posten_field('ProdGroup2');
 
         $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
         $line->addChild('ItemName', utf8_encode($nimitys));
-        $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', utf8_encode($row[$posten_prodgroup2field]));
+        $line->addChild('ProdGroup1', utf8_encode(substr($row[$posten_prodgroup1field], 0, 6)));
+        $line->addChild('ProdGroup2', utf8_encode(substr($row[$posten_prodgroup2field], 0, 6)));
         $line->addChild('SalesPrice', '');
         $line->addChild('Unit1', utf8_encode($yksikko));
         $line->addChild('Unit2', '');

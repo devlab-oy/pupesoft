@@ -33328,7 +33328,7 @@ if (!function_exists('posten_field')) {
       $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
 
       if (empty($key)) {
-        $key = '';
+        $key = 'try';
       }
 
       break;

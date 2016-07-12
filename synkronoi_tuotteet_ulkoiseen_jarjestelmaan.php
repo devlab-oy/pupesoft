@@ -128,7 +128,6 @@ else {
 
         $eankoodi = substr($row['eankoodi'], 0, 20);
         $nimitys = substr($row['nimitys'], 0, 50);
-        $try = substr($row['try'], 0, 6);
         $yksikko = substr($row['yksikko'], 0, 10);
         $tuoteno = substr($row['tuoteno'], 0, 100);
 

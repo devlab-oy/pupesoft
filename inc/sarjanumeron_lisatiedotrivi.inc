@@ -9,9 +9,12 @@ if ($i == 0) { //yhtiötä ei näytetä
 }
 
 if (mysql_field_name($result, $i) == "liitostunnus") {
-  if ($liitostunnus != '') {
+  if (!empty($liitostunnus)) {
     $trow[$i] = $liitostunnus;
   }
+
+  $liitostunnus = $trow[$i];
+
   $tyyppi = 4;
 }
 
@@ -53,7 +56,7 @@ if (mysql_field_name($result, $i) == "Tyyppi") {
     $ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
   }
 
-  $ulos .= "</select></td><td><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$tunnus&liitostunnus=$liitostunnus&uusi=$uusi&limit=$limit&laji=$laji&lopetus=$lopetus&specialtee=tiedottuotteelta'>Hae tiedot tuotteelta</a></td>";
+  $ulos .= "</select> <div style='float: right;'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$tunnus&liitostunnus=$liitostunnus&uusi=$uusi&limit=$limit&laji=$laji&lopetus=$lopetus&specialtee=tiedottuotteelta'>Hae tiedot tuotteelta</a></div></td>";
   $jatko = 0;
 }
 

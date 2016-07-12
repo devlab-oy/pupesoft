@@ -145,10 +145,12 @@ if ($otsikko_nappi == "") {
   $otsikko_nappi = $toim;
 }
 
-echo "<font class='head'>".t("$otsikko")."</font><hr>";
+if ($mista != 'ajoneuvon_tiedot') {
+  echo "<font class='head'>".t("$otsikko")."</font><hr>";
 
-if ($otsikko_lisatiedot != "") {
-  echo $otsikko_lisatiedot;
+  if ($otsikko_lisatiedot != "") {
+    echo $otsikko_lisatiedot;
+  }
 }
 
 // Kun tehdään päivityksiä omasta ikkunasta
@@ -969,7 +971,7 @@ if ($upd == 1) {
 
     $uusi = 0;
 
-    if ((isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset)) and $lukossa != "ON" or isset($paluunappi)) {
+    if (((isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset)) and $lukossa != "ON" or isset($paluunappi)) and $mista != 'ajoneuvon_tiedot') {
       $tmp_tuote_tunnus  = $tunnus;
       $tunnus  = 0;
     }
@@ -2263,6 +2265,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
     if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
+  }
+
+  if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and $toim == "sarjanumeron_lisatiedot") {
+    if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@sarjanumeroseuranta&haku[8]=@$liitostunnus&lukitse_avaimeen=$liitostunnus&lukitse_laji=sarjanumeroseuranta' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

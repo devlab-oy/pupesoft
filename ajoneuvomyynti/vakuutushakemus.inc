@@ -1,64 +1,38 @@
 <?php
 // Päivitetään tiedot tietokantaan
-if ($tee == 'vakuutushakemus' and $tilausnumero > 0 and (isset($PAIVIT) or isset($VALMIS))) {
-  $query = "SELECT tunnus
-              FROM laskun_lisatiedot
-              WHERE yhtio = '$kukarow[yhtio]'
-              and otunnus = '$tilausnumero'";
-  $res = mysql_query($query) or pupe_error($query);
+if ($tee == 'vakuutushakemus' and !empty($laskurow['laskun_lisatiedottunnus']) and (isset($PAIVIT) or isset($VALMIS))) {
 
-  if ($rekisteilmo_laminointi == "") {
+  if (empty($rekisteilmo_laminointi)) {
     $rekisteilmo_laminointi = "E";
   }
-  if ($rekisteilmo_suoramarkkinointi == "") {
+  if (empty($rekisteilmo_suoramarkkinointi)) {
     $rekisteilmo_suoramarkkinointi = "E";
   }
 
-  if (mysql_num_rows($res) > 0) {
-    $query = " UPDATE laskun_lisatiedot ";
-    $postq = " WHERE yhtio  = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
-  }
-  else {
-    $query = "INSERT INTO laskun_lisatiedot ";
-    $postq = "";
-  }
-
-  $query  .= "  SET vakuutushak_vakuutusyhtio       = '$vakuutushak_vakuutusyhtio',
+  $query = "UPDATE laskun_lisatiedot
+  					SET vakuutushak_vakuutusyhtio    = '$vakuutushak_vakuutusyhtio',
             vakuutushak_alkamispaiva         = '$vva-$kka-$ppa',
-            vakuutushak_kaskolaji           = '$vakuutushak_kaskolaji',
-            vakuutushak_maksuerat           = '$vakuutushak_maksuerat',
-            vakuutushak_perusomavastuu         = '$vakuutushak_perusomavastuu',
-            vakuutushak_runko_takila_purjeet     = '$vakuutushak_runko_takila_purjeet',
-            vakuutushak_moottori           = '$vakuutushak_moottori',
-            vakuutushak_varusteet           = '$vakuutushak_varusteet',
-            vakuutushak_yhteensa           = '$vakuutushak_yhteensa',
-            rekisteilmo_rekisterinumero       = '$rekisteilmo_rekisterinumero',
-            rekisteilmo_paakayttokunta         = '$rekisteilmo_paakayttokunta',
-            rekisteilmo_kieli             = '$rekisteilmo_kieli',
-            rekisteilmo_tyyppi             = '$rekisteilmo_tyyppi',
-            rekisteilmo_omistajienlkm         = '$rekisteilmo_omistajienlkm',
-            rekisteilmo_omistajankotikunta       = '$rekisteilmo_omistajankotikunta',
-            rekisteilmo_lisatietoja         = '$rekisteilmo_lisatietoja',
+            vakuutushak_kaskolaji            = '$vakuutushak_kaskolaji',
+            vakuutushak_maksuerat            = '$vakuutushak_maksuerat',
+            vakuutushak_perusomavastuu       = '$vakuutushak_perusomavastuu',
+            vakuutushak_runko_takila_purjeet = '$vakuutushak_runko_takila_purjeet',
+            vakuutushak_moottori             = '$vakuutushak_moottori',
+            vakuutushak_varusteet            = '$vakuutushak_varusteet',
+            vakuutushak_yhteensa             = '$vakuutushak_yhteensa',
+            rekisteilmo_rekisterinumero      = '$rekisteilmo_rekisterinumero',
+            rekisteilmo_paakayttokunta       = '$rekisteilmo_paakayttokunta',
+            rekisteilmo_kieli                = '$rekisteilmo_kieli',
+            rekisteilmo_tyyppi               = '$rekisteilmo_tyyppi',
+            rekisteilmo_omistajienlkm        = '$rekisteilmo_omistajienlkm',
+            rekisteilmo_omistajankotikunta   = '$rekisteilmo_omistajankotikunta',
             rekisteilmo_laminointi           = '$rekisteilmo_laminointi',
-            rekisteilmo_suoramarkkinointi       = '$rekisteilmo_suoramarkkinointi',
+            rekisteilmo_suoramarkkinointi    = '$rekisteilmo_suoramarkkinointi',
             rekisteilmo_veneen_nimi          = '$rekisteilmo_veneen_nimi',
-            rekisteilmo_omistaja          = '$rekisteilmo_omistaja',
-            rahlaskelma_hetu_tarkistus        = '$rahlaskelma_hetu_tarkistus',
-            rahlaskelma_hetu_tarkastaja        = '$rahlaskelma_hetu_tarkastaja',
-            rahlaskelma_hetu_asiakirjanro      = '$rahlaskelma_hetu_asiakirjanro',
-            rahlaskelma_hetu_asiakirjamyontaja    = '$rahlaskelma_hetu_asiakirjamyontaja',
-            rahlaskelma_hetu_kolm_tarkistus      = '$rahlaskelma_hetu_kolm_tarkistus',
-            rahlaskelma_hetu_kolm_asiakirjanro    = '$rahlaskelma_hetu_kolm_asiakirjanro',
-            rahlaskelma_hetu_kolm_asiakirjamyontaja  = '$rahlaskelma_hetu_kolm_asiakirjamyontaja',
-            rahlaskelma_hetu_kolm_tarkastaja    = '$rahlaskelma_hetu_kolm_tarkastaja',
-            rahlaskelma_takuukirja          = '$rahlaskelma_takuukirja',
-            rahlaskelma_huoltokirja          = '$rahlaskelma_huoltokirja',
-            rahlaskelma_kayttoohjeet        = '$rahlaskelma_kayttoohjeet',
-            rahlaskelma_opastus            = '$rahlaskelma_opastus',
-            rahlaskelma_kuntotestitodistus      = '$rahlaskelma_kuntotestitodistus',
-            rahlaskelma_kayttotarkoitus        = '$rahlaskelma_kayttotarkoitus'";
-
-  $res = mysql_query($query.$postq) or pupe_error($query.$postq);
+            rekisteilmo_omistaja             = '$rekisteilmo_omistaja',
+            rahlaskelma_kayttotarkoitus      = '$rahlaskelma_kayttotarkoitus'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus = '{$laskurow['laskun_lisatiedottunnus']}'";
+  pupe_query($query);
 
   if (isset($VALMIS)) {
     $tee = "";
@@ -284,103 +258,10 @@ if ($tee == 'vakuutushakemus') {
         </select>
         </td><td></td></tr>";
 
-  $query = "SELECT sarjanumeroseuranta.tunnus
-              FROM tilausrivi
-              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
-              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.otunnus = '$tilausnumero'
-              LIMIT 1";
-  $venvelisres = mysql_query($query) or pupe_error($query);
-
-  $query = "SELECT sarjanumeroseuranta.tunnus
-              FROM tilausrivi
-              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
-              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.otunnus = '$tilausnumero'
-              LIMIT 1";
-  $mootlisres = mysql_query($query) or pupe_error($query);
-
-  if (mysql_num_rows($venvelisres) > 0) {
-
-    $lisrow = mysql_fetch_array($venvelisres);
-
-    $query = "SELECT *
-                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-                WHERE yhtio      = '$kukarow[yhtio]'
-                and liitostunnus = '$lisrow[tunnus]'";
-    $lisares = mysql_query($query) or pupe_error($query);
-    $lisarow = mysql_fetch_array($lisares);
-
-    if ($lisarow["tunnus"] != 0) {
-      $ylisa = "&tunnus=$lisarow[tunnus]";
-    }
-    else {
-      $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
-    }
-
-    if (mysql_num_rows($mootlisres) > 0) {
-      $alanimi = "VAKHAKVENE";
-    }
-    else {
-      $alanimi = "VAKHAK";
-    }
-
-    echo "<tr>
-          <th>".t("Veneen tiedot")."</th>
-          <td><a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!$alanimi!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Veneen lisätiedot")."</a></td><td>".t("Tallenna tämä sivu ennen kuin siirryt lisätietoihin")."</td></tr>";
-  }
-
-  if (mysql_num_rows($mootlisres) > 0) {
-
-    $lisrow = mysql_fetch_array($mootlisres);
-
-    $query = "SELECT *
-                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-                WHERE yhtio      = '$kukarow[yhtio]'
-                and liitostunnus = '$lisrow[tunnus]'";
-    $lisares = mysql_query($query) or pupe_error($query);
-    $lisarow = mysql_fetch_array($lisares);
-
-    if ($lisarow["tunnus"] != 0) {
-      $ylisa = "&tunnus=$lisarow[tunnus]";
-    }
-    else {
-      $ylisa = "&liitostunnus=$lisrow[tunnus]&uusi=1";
-    }
-
-    echo "<tr>
-          <th>".t("Moottorin tiedot")."</th>
-          <td>
-
-          <a href='../yllapito.php?toim=sarjanumeron_lisatiedot!!!VAKHAKMOO!!!true$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>".t("Moottorin lisätiedot")."</a>
-
-          </td><td>".t("Tallenna tämä sivu ennen kuin siirryt lisätietoihin")."</td></tr>";
-  }
-
   echo "<tr><td class='back'><br><br></td></tr>";
 
   echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='PAIVIT' value='".t("Tallenna")."'></td><td></td></tr>";
   echo "<tr><th>".t("Tallenna").":</th><td><input type='submit' name='VALMIS' value='".t("Tallenna ja siirry takaisin tilaukselle")."'></td><td></td></tr>";
   echo "</form>";
-
-  echo "<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_vakhak' id='tulostaform_vakhak' class='multisubmit'>
-        <input type='hidden' name='tee' value='NAYTATILAUS'>
-        <input type='hidden' name='otunnus' value='$tilausnumero'>";
-
-
-  echo "<tr><th>".t("Näytä lomake").":</th>";
-
-  echo "<td>";
-  echo "<select name='toim'>";
-  echo "<option value='TARJOUS'>Tarjous</value>";
-  echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
-  echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
-  echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
-  echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
-  echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
-  echo "</select></td>";
-  echo "<td><input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_vakhak', 'tulosta_vakhak'); return false;\"></td>";
-  echo "</form></table>";
+	echo "</table>";
 }

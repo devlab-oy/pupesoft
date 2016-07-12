@@ -3032,6 +3032,7 @@ if ($tee == '') {
       echo "<form method='post' action='{$palvelin2}ajoneuvomyynti/myyntisopimuksen_tiedot.php'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>
+          <input type='hidden' name='tee' value='ostajantiedot'>
           <input type='submit' value='".t("Kauppasopimus")."'>
           </form>";
     }

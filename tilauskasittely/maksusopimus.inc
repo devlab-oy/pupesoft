@@ -1,6 +1,6 @@
 <?php
 
-if (empty($maksusoppari_silent)) {
+if (empty($maksusoppari_silent) and strpos($_SERVER['SCRIPT_NAME'], "myyntisopimuksen_tiedot.php") === FALSE) {
   echo "<font class='head'>".t("Tilauksen maksusopimus")."</font><hr><br>";
 }
 
@@ -325,6 +325,7 @@ if (empty($maksusoppari_silent)) {
 
     echo "<form method='post' name='maksupositiot'>
         <input type='hidden' name='toim' value='$toim'>
+        <input type='hidden' name='lopetus' value='$lopetus'>
         <input type='hidden' name='tilausnumero' value='$tilausnumero'>
         <input type='hidden' name='tee' value='$tee'>
         <input type='hidden' name='tila' value='uusi'>
@@ -334,6 +335,7 @@ if (empty($maksusoppari_silent)) {
     if ($laskurow["jaksotettu"] > 0) {
       echo "<form method='post' name='maksupositiot'>
           <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='tee' value='$tee'>
           <input type='hidden' name='tila' value='lisaa_kaikki_jaksotukseen'>
@@ -341,11 +343,15 @@ if (empty($maksusoppari_silent)) {
           </form>";
     }
 
-    echo "<form method='post'>
-        <input type='hidden' name='toim' value='$toim'>
-        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-        <input type='submit' value='".t("Takaisin tilaukselle")."'>
-        </form><br><br>";
+    if (strpos($_SERVER['SCRIPT_NAME'], "myyntisopimuksen_tiedot.php") === FALSE) {
+      echo "<form method='post'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='submit' value='".t("Takaisin tilaukselle")."'>
+          </form>";
+    }
+
+    echo "<br><br>";
 
     $tot = 0;
 
@@ -462,6 +468,7 @@ if (empty($maksusoppari_silent)) {
 
         if ($row["uusiotunnus"] == 0) {
           echo "<form method='post' name='maksupositiot'>";
+          echo "<input type='hidden' name='lopetus' value='$lopetus'>";
           echo "<tr>";
 
           echo "<td>$i</td>";
@@ -529,6 +536,7 @@ if (empty($maksusoppari_silent)) {
 
           echo "<form method='post' name='maksupositiot'>
               <input type='hidden' name='toim' value='$toim'>
+              <input type='hidden' name='lopetus' value='$lopetus'>
               <input type='hidden' name='tilausnumero' value='$tilausnumero'>
               <input type='hidden' name='tee' value='$tee'>
               <input type='hidden' name='tila' value='poista'>
@@ -605,6 +613,7 @@ if (empty($maksusoppari_silent)) {
         echo "<br>";
         echo "<form method='post' id='tulosta_maksusopimus' name='tulosta_maksusopimus'>";
         echo "<input type='hidden' name='toim' value='{$toim}'>";
+        echo "<input type='hidden' name='lopetus' value='$lopetus'>";
         echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
         echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
         echo "<input type='hidden' name='tulosta_maksusopimus' value='{$laskurow['jaksotettu']}'>";

@@ -1,80 +1,43 @@
 <?php
 
-if ($tee == 'osamaksusoppari') {
-  $jaannosvelka_vaihtokohteesta = str_replace(",", ".", $jaannosvelka_vaihtokohteesta);
-  $perustamiskustannus   = str_replace(",", ".", $perustamiskustannus);
-  $muutluottokustannukset   = str_replace(",", ".", $muutluottokustannukset);
-  $erankasittelymaksu    = str_replace(",", ".", $erankasittelymaksu);
-  $viitekorko      = str_replace(",", ".", $viitekorko);
-  $marginaalikorko    = str_replace(",", ".", $marginaalikorko);
-  $tilinavausmaksu    = str_replace(",", ".", $tilinavausmaksu);
-  $sopajankorko     = str_replace(",", ".", $sopajankorko);
-}
-
 // Päivitetään tiedot tietokantaan
-if ($tee == 'osamaksusoppari' and $tilausnumero > 0 and isset($omaformi)) {
-  $query = "SELECT tunnus
-            FROM laskun_lisatiedot
-            WHERE yhtio = '$kukarow[yhtio]'
-            and otunnus = '$tilausnumero'";
-  $res = mysql_query($query) or pupe_error($query);
+if ($tee == 'osamaksusoppari' and !empty($laskurow['laskun_lisatiedottunnus']) and isset($omaformi)) {
 
-  if (mysql_num_rows($res) > 0) {
-    $query  = "UPDATE laskun_lisatiedot
-               SET rahlaskelma_rahoitettava_positio     = '$rahlaskelma_rahoitettava_positio',
-               rahlaskelma_jaannosvelka_vaihtokohteesta = '$jaannosvelka_vaihtokohteesta',
-               rahlaskelma_perustamiskustannus          = '$perustamiskustannus',
-               rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
-               rahlaskelma_sopajankorko                 = '$sopajankorko',
-               rahlaskelma_maksuerienlkm                = '$maksuerienlkm',
-               rahlaskelma_luottoaikakk                 = '$luottoaikakk',
-               rahlaskelma_ekaerpcm                     = '$vva-$kka-$ppa',
-               rahlaskelma_erankasittelymaksu           = '$erankasittelymaksu',
-               rahlaskelma_tilinavausmaksu              = '$tilinavausmaksu',
-               rahlaskelma_viitekorko                   = '$viitekorko',
-               rahlaskelma_marginaalikorko              = '$marginaalikorko',
-               rahlaskelma_lyhennystapa                 = '$lyhennystapa',
-               rahlaskelma_poikkeava_era                = '$poikkeava_era',
-               rekisteilmo_omistaja                     = '$rekisteilmo_omistaja'
-               WHERE yhtio                              = '$kukarow[yhtio]'
-               and otunnus                              = '$tilausnumero' ";
-    $res = mysql_query($query) or pupe_error($query);
-  }
-  else {
-    $query  = "INSERT INTO laskun_lisatiedot
-               SET yhtio                   = '$kukarow[yhtio]',
-               otunnus                                  = '$tilausnumero',
-               rahlaskelma_rahoitettava_positio         = '$rahlaskelma_rahoitettava_positio',
-               rahlaskelma_jaannosvelka_vaihtokohteesta = '$jaannosvelka_vaihtokohteesta',
-               rahlaskelma_perustamiskustannus          = '$perustamiskustannus',
-               rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
-               rahlaskelma_sopajankorko                 = '$sopajankorko',
-               rahlaskelma_maksuerienlkm                = '$maksuerienlkm',
-               rahlaskelma_luottoaikakk                 = '$luottoaikakk',
-               rahlaskelma_ekaerpcm                     = '$vva-$kka-$ppa',
-               rahlaskelma_erankasittelymaksu           = '$erankasittelymaksu',
-               rahlaskelma_tilinavausmaksu              = '$tilinavausmaksu',
-               rahlaskelma_viitekorko                   = '$viitekorko',
-               rahlaskelma_marginaalikorko              = '$marginaalikorko',
-               rahlaskelma_lyhennystapa                 = '$lyhennystapa',
-               rahlaskelma_poikkeava_era                = '$poikkeava_era',
-               rekisteilmo_omistaja                     = '$rekisteilmo_omistaja'";
-    $res = mysql_query($query) or pupe_error($query);
-  }
+  $jaannosvelka_vaihtokohteesta = str_replace(",", ".", $jaannosvelka_vaihtokohteesta);
+  $perustamiskustannus = str_replace(",", ".", $perustamiskustannus);
+  $muutluottokustannukset = str_replace(",", ".", $muutluottokustannukset);
+  $erankasittelymaksu = str_replace(",", ".", $erankasittelymaksu);
+  $viitekorko = str_replace(",", ".", $viitekorko);
+  // $marginaalikorko = str_replace(",", ".", $marginaalikorko);
+  $tilinavausmaksu = str_replace(",", ".", $tilinavausmaksu);
+  $sopajankorko = str_replace(",", ".", $sopajankorko);
+
+  $query  = "UPDATE laskun_lisatiedot
+             SET rahlaskelma_rahoitettava_positio     = '$rahlaskelma_rahoitettava_positio',
+             rahlaskelma_jaannosvelka_vaihtokohteesta = '$jaannosvelka_vaihtokohteesta',
+             rahlaskelma_perustamiskustannus          = '$perustamiskustannus',
+             rahlaskelma_muutluottokustannukset       = '$muutluottokustannukset',
+             rahlaskelma_sopajankorko                 = '$sopajankorko',
+             rahlaskelma_maksuerienlkm                = '$maksuerienlkm',
+             rahlaskelma_luottoaikakk                 = '$luottoaikakk',
+             rahlaskelma_ekaerpcm                     = '$vva-$kka-$ppa',
+             rahlaskelma_erankasittelymaksu           = '$erankasittelymaksu',
+             rahlaskelma_tilinavausmaksu              = '$tilinavausmaksu',
+             rahlaskelma_viitekorko                   = '$viitekorko',
+             rahlaskelma_lyhennystapa                 = '$lyhennystapa',
+             rahlaskelma_poikkeava_era                = '$poikkeava_era',
+             rekisteilmo_omistaja                     = '$rekisteilmo_omistaja'
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus = '{$laskurow['laskun_lisatiedottunnus']}' ";
+  pupe_query($query);
 
   if (isset($VALMIS)) {
     $tee = "";
+
+    if ($lopetus != '') {
+      lopetus($lopetus, "META");
+    }
   }
-}
-
-if ($nrahdemo == 1 and $nrahtee == "POISTA") {
-  $query  = "UPDATE laskun_lisatiedot
-             SET rahlaskelma_nfref = '0'
-             WHERE yhtio = '$kukarow[yhtio]'
-             and otunnus = '$tilausnumero' ";
-  $res = mysql_query($query) or pupe_error($query);
-
-  $nrahtee = "";
 }
 
 if ($tee == 'osamaksusoppari') {
@@ -415,7 +378,7 @@ if ($tee == 'osamaksusoppari') {
     $ksl_vuosikorko = 0;
   }
 
-  if ($tulosta_osamakusoppari == "") {
+  if (empty($tulosta_osamakusoppari)) {
 
     echo "<form method='post' name='mainform'>
           <input type='hidden' name='toim' value='$toim'>
@@ -587,29 +550,6 @@ if ($tee == 'osamaksusoppari') {
     echo "<tr>
           <th valign='top'>".t("6. Jäännösvelka vaihtokohteesta")."</th>
           <td align='right' valign='top'><input type='text' name='jaannosvelka_vaihtokohteesta' size='15' style='text-align:right' value='$jaannosvelka_vaihtokohteesta'></td><td valign='top'>$laskurow[valkoodi]</td></tr>";
-
-    if ($nrahdemo == 1 and isset($old_debt) and checkdate($old_debtkk, $old_debtpp, $old_debtvv)) {
-      $nrahtee = "old_debt";
-
-      require "nordea_rahoitus_ulos.inc";
-
-      $nrahtee = "";
-    }
-
-    if ($nrahdemo == 1) {
-      if (!isset($old_debtkk)) $old_debtkk = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      if (!isset($old_debtvv)) $old_debtvv = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-      if (!isset($old_debtpp)) $old_debtpp = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-
-      echo "<tr>
-          <th>".t("Hae jäännösvelka vaihtokohteesta")."</th>
-          <td align='right'>
-          <input type='text' name='old_debtpp' size='3' style='text-align:right' value='$old_debtpp'>
-          <input type='text' name='old_debtkk' size='3' style='text-align:right' value='$old_debtkk'>
-          <input type='text' name='old_debtvv' size='5' style='text-align:right' value='$old_debtvv'></td><td><input type='submit' name='old_debt' value='".t("Hae")."'></td>";
-      echo "</tr>";
-    }
-
     echo "<tr>
           <th>".t("7. Hyvitysosuus vaihtokohteesta (5-6)")."</th>
           <td align='right'>".sprintf('%.2f', $hyvitysosuus_vaihtokohteesta)."</td><td>$laskurow[valkoodi]</td></tr>";
@@ -862,47 +802,6 @@ if ($tee == 'osamaksusoppari') {
     echo "</form>";
 
     echo "<tr><td class='back'><br></td></tr>";
-
-    if ($nrahdemo == 1 and $tee == 'osamaksusoppari' and $tilausnumero > 0 and isset($omaformi_2)) {
-      require "nordea_rahoitus_ulos.inc";
-    }
-
-    if ($nrahdemo == 1 and $rahoitettavaa_yhteensa > 0 and $viitekorko == 1 and $maksuerienlkm > 0 and $luottoaikakk > 0 and $laskurow["rahlaskelma_nfref"] == 0 and !isset($omaformi_2)) {
-      echo "<tr><th></th><td colspan='2'>";
-      echo "<form method='post'>
-            <input type='hidden' name='toim' value='$toim'>
-            <input type='hidden' name='lopetus' value='$lopetus'>
-            <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-            <input type='hidden' name='omaformi_2' value='1'>
-            <input type='hidden' name='tee' value='osamaksusoppari'>";
-      echo "<input type='submit' value='".t("Tee Nordea-Online hakemus")."'>";
-      echo "</form>";
-      echo "</td></tr>";
-    }
-    elseif ($nrahdemo == 1 and $rahoitettavaa_yhteensa > 0 and $laskurow["rahlaskelma_nfref"] > 0 and !isset($omaformi_2)) {
-      require "nordea_rahoitus_ulos.inc";
-    }
-
-    echo "<tr><td class='back'><br></td></tr>";
-    echo "<tr><th>".t("Näytä lomake").":</th>";
-
-    echo "<form name='valmis' action='tulostakopio.php' method='post' name='tulostaform_osamaksusoppari' id='tulostaform_osamaksusoppari' class='multisubmit'>
-          <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='hidden' name='lopetus' value='$lopetus'>
-          <input type='hidden' name='otunnus' value='$tilausnumero'>";
-
-    echo "<td>";
-    echo "<select name='toim'>";
-    echo "<option value='TARJOUS'>Tarjous</value>";
-    echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
-    echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
-    echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
-    echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
-    echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
-    echo "</select></td>";
-    echo "<td><input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_osamaksusoppari', 'tulosta_osamaksusoppari'); return false;\"></td>";
-    echo "</form></tr>";
     echo "</table>";
-
   }
 }

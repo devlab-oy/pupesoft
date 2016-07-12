@@ -104,6 +104,7 @@ if (!isset($alias_set))           $alias_set = "";
 if (!isset($rajattu_nakyma))      $rajattu_nakyma = "";
 if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
+if (!isset($mista))               $mista = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";

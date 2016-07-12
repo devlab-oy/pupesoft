@@ -1,10 +1,10 @@
 <?php
   // Päivitetään tiedot tietokantaan
   if ($tee == 'vakuutushakemus' and $tilausnumero > 0 and (isset($PAIVIT) or isset($VALMIS))) {
-    $query = "  SELECT tunnus
-          FROM laskun_lisatiedot
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and otunnus = '$tilausnumero'";
+    $query = "SELECT tunnus
+              FROM laskun_lisatiedot
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tilausnumero'";
     $res = mysql_query($query) or pupe_error($query);
 
     if ($rekisteilmo_laminointi == "") {
@@ -70,10 +70,10 @@
   }
 
   if ($tee == 'vakuutushakemus') {
-    $query = "  SELECT *
-          FROM laskun_lisatiedot
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and otunnus = '$tilausnumero'";
+    $query = "SELECT *
+              FROM laskun_lisatiedot
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tilausnumero'";
     $lisres = mysql_query($query) or pupe_error($query);
     $lisrow = mysql_fetch_array($lisres);
 
@@ -284,32 +284,32 @@
         </select>
         </td><td></td></tr>";
 
-    $query = "  SELECT sarjanumeroseuranta.tunnus
-          FROM tilausrivi
-          JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-          JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          and tilausrivi.otunnus = '$tilausnumero'
-          LIMIT 1";
+    $query = "SELECT sarjanumeroseuranta.tunnus
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.otunnus = '$tilausnumero'
+              LIMIT 1";
     $venvelisres = mysql_query($query) or pupe_error($query);
 
-    $query = "  SELECT sarjanumeroseuranta.tunnus
-          FROM tilausrivi
-          JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-          JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
-          WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-          and tilausrivi.otunnus = '$tilausnumero'
-          LIMIT 1";
+    $query = "SELECT sarjanumeroseuranta.tunnus
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.otunnus = '$tilausnumero'
+              LIMIT 1";
     $mootlisres = mysql_query($query) or pupe_error($query);
 
     if (mysql_num_rows($venvelisres) > 0) {
 
       $lisrow = mysql_fetch_array($venvelisres);
 
-      $query = "  SELECT *
-            FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-            WHERE yhtio     = '$kukarow[yhtio]'
-            and liitostunnus = '$lisrow[tunnus]'";
+      $query = "SELECT *
+                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$lisrow[tunnus]'";
       $lisares = mysql_query($query) or pupe_error($query);
       $lisarow = mysql_fetch_array($lisares);
 
@@ -336,10 +336,10 @@
 
       $lisrow = mysql_fetch_array($mootlisres);
 
-      $query = "  SELECT *
-            FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-            WHERE yhtio     = '$kukarow[yhtio]'
-            and liitostunnus = '$lisrow[tunnus]'";
+      $query = "SELECT *
+                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and liitostunnus = '$lisrow[tunnus]'";
       $lisares = mysql_query($query) or pupe_error($query);
       $lisarow = mysql_fetch_array($lisares);
 

@@ -865,17 +865,17 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
 
       #if (($rivirow["sarjanumeroseuranta"] == "S") and $tunnuskentta == "myyntirivitunnus") {
       #  $query = "SELECT nimitys
-      #            FROM tilausrivi
-      #            WHERE yhtio = '$kukarow[yhtio]'
-      #            and tunnus  = '$sarjarow[ostorivitunnus]'";
+                   #            FROM tilausrivi
+                   #            WHERE yhtio = '$kukarow[yhtio]'
+                   #            and tunnus  = '$sarjarow[ostorivitunnus]'";
       #  $nimires = pupe_query($query);
       #  $nimirow = mysql_fetch_assoc($nimires);
       #
       #  if ($nimirow["nimitys"] != "") {
       #    $query = "UPDATE tilausrivi
-      #              SET nimitys = '$nimirow[nimitys]'
-      #              WHERE yhtio = '$kukarow[yhtio]'
-      #              and tunnus  = '$sarjarow[rivitunnus]'";
+                     #              SET nimitys = '$nimirow[nimitys]'
+                     #              WHERE yhtio = '$kukarow[yhtio]'
+                     #              and tunnus  = '$sarjarow[rivitunnus]'";
       #    $nimires = pupe_query($query);
       #  }
       #}

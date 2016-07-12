@@ -189,38 +189,38 @@ function korjaa_erapaivat_ja_alet_ja_paivita_lasku($params) {
       $updlisa = "tapvm = '{$params['tapahtumapaiva']}',";
 
       $query = "UPDATE lasku set
-                tapvm = '{$params['tapahtumapaiva']}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila = 'L'
-                AND alatila = 'X'
+                tapvm        = '{$params['tapahtumapaiva']}'
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tila     = 'L'
+                AND alatila  = 'X'
                 AND laskunro = {$params['laskurow']['laskunro']}";
       pupe_query($query);
 
       $query = "UPDATE tiliointi set
-                tapvm = '{$params['tapahtumapaiva']}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
+                tapvm        = '{$params['tapahtumapaiva']}'
+                WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND korjattu = ''
-                AND tapvm = '{$params['laskurow']['tapvm']}'
+                AND tapvm    = '{$params['laskurow']['tapvm']}'
                 AND ltunnus  = '{$params['tunnus']}'";
       pupe_query($query);
 
       $query = "SELECT tunnus
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND uusiotunnus  = '{$params['tunnus']}'
+                WHERE yhtio        = '{$kukarow['yhtio']}'
+                AND uusiotunnus    = '{$params['tunnus']}'
                 AND laskutettuaika > 0";
       $rivires = pupe_query($query);
 
       while ($rivirow = mysql_fetch_assoc($rivires)) {
         $query = "UPDATE tilausrivi set
                   laskutettuaika = '{$params['tapahtumapaiva']}'
-                  WHERE tunnus = {$rivirow['tunnus']}";
+                  WHERE tunnus   = {$rivirow['tunnus']}";
         pupe_query($query);
 
         $query = "UPDATE tapahtuma set
-                  laadittu = '{$params['tapahtumapaiva']} 23:59:59'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji = 'laskutus'
+                  laadittu       = '{$params['tapahtumapaiva']} 23:59:59'
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND laji       = 'laskutus'
                   AND rivitunnus = {$rivirow['tunnus']}";
         pupe_query($query);
       }

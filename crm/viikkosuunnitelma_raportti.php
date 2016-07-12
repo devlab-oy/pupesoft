@@ -278,7 +278,7 @@ if ($tee == '') {
               FROM kalenteri
               JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
               JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa})
-              AND avainsana.kieli  = 'fi')
+              AND avainsana.kieli   = 'fi')
               {$asiakasjoini}
               WHERE kalenteri.yhtio = '{$yhtio}'
               AND kalenteri.kuka    IN ({$vertaa})
@@ -482,11 +482,11 @@ if ($tee == '') {
       while ($row = mysql_fetch_assoc($ressu)) {
 
         $asquery = "SELECT tunnus,selitetark, perhe
-                  FROM avainsana
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND perhe   = '{$row['perhe']}'
-                  AND kieli   = '{$kukarow['kieli']}'
-                  LIMIT 1";
+                    FROM avainsana
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND perhe   = '{$row['perhe']}'
+                    AND kieli   = '{$kukarow['kieli']}'
+                    LIMIT 1";
         $asresult = pupe_query($asquery);
 
         if (mysql_num_rows($asresult) > 0) {

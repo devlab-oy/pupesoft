@@ -11,42 +11,42 @@ if ($tee == 'ostajantiedot' and $tilausnumero > 0 and (isset($PAIVIT) or isset($
   }
 
   $query = "UPDATE laskun_lisatiedot
-          SET vakuutushak_vakuutusyhtio       = '$vakuutushak_vakuutusyhtio',
-          vakuutushak_alkamispaiva        = '$vva-$kka-$ppa',
-          vakuutushak_kaskolaji           = '$vakuutushak_kaskolaji',
-          vakuutushak_maksuerat           = '$vakuutushak_maksuerat',
-          vakuutushak_perusomavastuu        = '$vakuutushak_perusomavastuu',
-          vakuutushak_runko_takila_purjeet    = '$vakuutushak_runko_takila_purjeet',
-          vakuutushak_moottori          = '$vakuutushak_moottori',
-          vakuutushak_varusteet           = '$vakuutushak_varusteet',
-          vakuutushak_yhteensa          = '$vakuutushak_yhteensa',
-          rekisteilmo_rekisterinumero       = '$rekisteilmo_rekisterinumero',
-          rekisteilmo_paakayttokunta        = '$rekisteilmo_paakayttokunta',
-          rekisteilmo_kieli             = '$rekisteilmo_kieli',
-          rekisteilmo_tyyppi            = '$rekisteilmo_tyyppi',
-          rekisteilmo_omistajienlkm         = '$rekisteilmo_omistajienlkm',
-          rekisteilmo_omistajankotikunta      = '$rekisteilmo_omistajankotikunta',
-          rekisteilmo_lisatietoja         = '$rekisteilmo_lisatietoja',
-          rekisteilmo_laminointi          = '$rekisteilmo_laminointi',
-          rekisteilmo_suoramarkkinointi       = '$rekisteilmo_suoramarkkinointi',
-          rekisteilmo_veneen_nimi         = '$rekisteilmo_veneen_nimi',
-          rekisteilmo_omistaja          = '$rekisteilmo_omistaja',
-          rahlaskelma_hetu_tarkistus        = '$rahlaskelma_hetu_tarkistus',
-          rahlaskelma_hetu_tarkastaja       = '$rahlaskelma_hetu_tarkastaja',
-          rahlaskelma_hetu_asiakirjanro     = '$rahlaskelma_hetu_asiakirjanro',
-          rahlaskelma_hetu_asiakirjamyontaja    = '$rahlaskelma_hetu_asiakirjamyontaja',
-          rahlaskelma_hetu_kolm_tarkistus     = '$rahlaskelma_hetu_kolm_tarkistus',
-          rahlaskelma_hetu_kolm_asiakirjanro    = '$rahlaskelma_hetu_kolm_asiakirjanro',
-          rahlaskelma_hetu_kolm_asiakirjamyontaja = '$rahlaskelma_hetu_kolm_asiakirjamyontaja',
-          rahlaskelma_hetu_kolm_tarkastaja    = '$rahlaskelma_hetu_kolm_tarkastaja',
-          rahlaskelma_takuukirja          = '$rahlaskelma_takuukirja',
-          rahlaskelma_huoltokirja         = '$rahlaskelma_huoltokirja',
-          rahlaskelma_kayttoohjeet        = '$rahlaskelma_kayttoohjeet',
-          rahlaskelma_opastus           = '$rahlaskelma_opastus',
-          rahlaskelma_kuntotestitodistus      = '$rahlaskelma_kuntotestitodistus',
-          rahlaskelma_kayttotarkoitus       = '$rahlaskelma_kayttotarkoitus'
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and otunnus = '$tilausnumero'";
+            SET vakuutushak_vakuutusyhtio       = '$vakuutushak_vakuutusyhtio',
+            vakuutushak_alkamispaiva                = '$vva-$kka-$ppa',
+            vakuutushak_kaskolaji                   = '$vakuutushak_kaskolaji',
+            vakuutushak_maksuerat                   = '$vakuutushak_maksuerat',
+            vakuutushak_perusomavastuu              = '$vakuutushak_perusomavastuu',
+            vakuutushak_runko_takila_purjeet        = '$vakuutushak_runko_takila_purjeet',
+            vakuutushak_moottori                    = '$vakuutushak_moottori',
+            vakuutushak_varusteet                   = '$vakuutushak_varusteet',
+            vakuutushak_yhteensa                    = '$vakuutushak_yhteensa',
+            rekisteilmo_rekisterinumero             = '$rekisteilmo_rekisterinumero',
+            rekisteilmo_paakayttokunta              = '$rekisteilmo_paakayttokunta',
+            rekisteilmo_kieli                       = '$rekisteilmo_kieli',
+            rekisteilmo_tyyppi                      = '$rekisteilmo_tyyppi',
+            rekisteilmo_omistajienlkm               = '$rekisteilmo_omistajienlkm',
+            rekisteilmo_omistajankotikunta          = '$rekisteilmo_omistajankotikunta',
+            rekisteilmo_lisatietoja                 = '$rekisteilmo_lisatietoja',
+            rekisteilmo_laminointi                  = '$rekisteilmo_laminointi',
+            rekisteilmo_suoramarkkinointi           = '$rekisteilmo_suoramarkkinointi',
+            rekisteilmo_veneen_nimi                 = '$rekisteilmo_veneen_nimi',
+            rekisteilmo_omistaja                    = '$rekisteilmo_omistaja',
+            rahlaskelma_hetu_tarkistus              = '$rahlaskelma_hetu_tarkistus',
+            rahlaskelma_hetu_tarkastaja             = '$rahlaskelma_hetu_tarkastaja',
+            rahlaskelma_hetu_asiakirjanro           = '$rahlaskelma_hetu_asiakirjanro',
+            rahlaskelma_hetu_asiakirjamyontaja      = '$rahlaskelma_hetu_asiakirjamyontaja',
+            rahlaskelma_hetu_kolm_tarkistus         = '$rahlaskelma_hetu_kolm_tarkistus',
+            rahlaskelma_hetu_kolm_asiakirjanro      = '$rahlaskelma_hetu_kolm_asiakirjanro',
+            rahlaskelma_hetu_kolm_asiakirjamyontaja = '$rahlaskelma_hetu_kolm_asiakirjamyontaja',
+            rahlaskelma_hetu_kolm_tarkastaja        = '$rahlaskelma_hetu_kolm_tarkastaja',
+            rahlaskelma_takuukirja                  = '$rahlaskelma_takuukirja',
+            rahlaskelma_huoltokirja                 = '$rahlaskelma_huoltokirja',
+            rahlaskelma_kayttoohjeet                = '$rahlaskelma_kayttoohjeet',
+            rahlaskelma_opastus                     = '$rahlaskelma_opastus',
+            rahlaskelma_kuntotestitodistus          = '$rahlaskelma_kuntotestitodistus',
+            rahlaskelma_kayttotarkoitus             = '$rahlaskelma_kayttotarkoitus'
+            WHERE yhtio                             = '$kukarow[yhtio]'
+            and otunnus                             = '$tilausnumero'";
   $res = mysql_query($query) or pupe_error($query);
 
   if (isset($VALMIS)) {
@@ -59,10 +59,10 @@ if ($tee == 'ostajantiedot' and $tilausnumero > 0 and (isset($PAIVIT) or isset($
 }
 
 if ($tee == 'ostajantiedot') {
-  $query = "  SELECT *
-        FROM laskun_lisatiedot
-        WHERE yhtio = '$kukarow[yhtio]'
-        and otunnus = '$tilausnumero'";
+  $query = "SELECT *
+            FROM laskun_lisatiedot
+            WHERE yhtio = '$kukarow[yhtio]'
+            and otunnus = '$tilausnumero'";
   $lisres = mysql_query($query) or pupe_error($query);
   $lisrow = mysql_fetch_array($lisres);
 

@@ -632,26 +632,26 @@ Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.", 
 
       $firstpage = $pdf_osamaksusoppari->new_page("a4");
 
-      $query = "  SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
-            FROM tilausrivi
-            JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-            JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
-            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tilausrivi.otunnus = '$laskurow[tunnus]'
-            LIMIT 1";
+      $query = "SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
+                FROM tilausrivi
+                JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+                JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                and tilausrivi.otunnus = '$laskurow[tunnus]'
+                LIMIT 1";
       $venvelisres = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($venvelisres) > 0) {
         $lisrow = mysql_fetch_array($venvelisres);
       }
       else {
-        $query = "  SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
-              FROM tilausrivi
-              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
-              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.otunnus = '$laskurow[tunnus]'
-              LIMIT 1";
+        $query = "SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
+                  FROM tilausrivi
+                  JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+                  JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
+                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                  and tilausrivi.otunnus = '$laskurow[tunnus]'
+                  LIMIT 1";
         $mootlisres = mysql_query($query) or pupe_error($query);
 
         $lisrow = mysql_fetch_array($mootlisres);
@@ -709,11 +709,11 @@ Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.", 
       global $yhtiorow, $kukarow, $vkorko;
 
       // Haetaan laskun tiedot
-      $query = "  SELECT laskun_lisatiedot.*, lasku.*, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
-            FROM lasku
-            LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tunnus  = '$otunnus'";
+      $query = "SELECT laskun_lisatiedot.*, lasku.*, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
+                FROM lasku
+                LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and lasku.tunnus  = '$otunnus'";
       $result = mysql_query($query) or pupe_error($query);
       $laskurow = mysql_fetch_array($result);
 
@@ -734,9 +734,9 @@ Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.", 
       $laskurow["maksuehto"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 
-      $query  = "  SELECT *
-            FROM asiakas
-            WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $query  = "SELECT *
+                 FROM asiakas
+                 WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
       $result = mysql_query($query) or pupe_error($query);
       $asiakasrow = mysql_fetch_array($result);
 
@@ -761,18 +761,18 @@ Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.", 
 
         $query_ale_lisa = generoi_alekentta('M');
 
-        $query = "  SELECT tilausrivi.*,
-              round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-              tilausrivin_lisatiedot.positio
-              FROM tilausrivi
-              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-              WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-              and tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi in  ('L','T','U')
-              $ennakkolisa
-              $osasto
-              LIMIT 1";
+        $query = "SELECT tilausrivi.*,
+                  round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
+                  tilausrivin_lisatiedot.positio
+                  FROM tilausrivi
+                  JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                  LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                  WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+                  and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                  and tilausrivi.tyyppi    in  ('L','T','U')
+                  $ennakkolisa
+                  $osasto
+                  LIMIT 1";
         $riresult = mysql_query($query) or pupe_error($query);
 
         while ($row = mysql_fetch_array($riresult)) {

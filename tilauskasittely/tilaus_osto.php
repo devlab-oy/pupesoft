@@ -554,8 +554,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           if ($laskurow['varasto'] > 0) {
             $v_query = "SELECT *
                         FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$laskurow['varasto']}'
+                        WHERE yhtio               = '{$kukarow['yhtio']}'
+                        AND tunnus                = '{$laskurow['varasto']}'
                         AND ulkoinen_jarjestelma != ''";
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {

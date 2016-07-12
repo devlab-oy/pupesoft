@@ -49,9 +49,9 @@
 
       // varmistetaan, että kopiossakin tulee oikean toimipaikan logo
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-        $query = "  SELECT *
-              FROM yhtion_toimipaikat
-              WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+        $query = "SELECT *
+                  FROM yhtion_toimipaikat
+                  WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
         $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
         if (mysql_num_rows($result) == 1) {
@@ -60,9 +60,9 @@
          }
       }
       else {
-        $query = "  SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio = '$laskurow[yhtio]'";
+        $query = "SELECT *
+                  FROM yhtion_parametrit
+                  WHERE yhtio = '$laskurow[yhtio]'";
         $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
         if (mysql_num_rows($result) == 1) {
@@ -312,48 +312,48 @@
         $sarjalisa = "";
       }
 
-      $query = "  SELECT sarjanumeron_lisatiedot.*,
-            a1.selitetark_2 Ankkurivinssi,
-            a2.selitetark_2 Jaakaappi,
-            a3.selitetark_2 Koneistus,
-            a4.selitetark_2 Kuvatyyppi,
-            a5.selitetark_2 Laatuluokitus,
-            a6.selitetark_2 Materiaali,
-            a7.selitetark_2 Merkki,
-            a8.selitetark_2 Koneen_merkki,
-            a9.selitetark_2 Moottorin_ohjausjarjestelma,
-            a10.selitetark_2 Pilssipumppu,
-            a11.selitetark_2 Sijainti,
-            a12.selitetark_2 Tiikkisarja,
-            a13.selitetark_2 Toimituskulut,
-            a14.selitetark_2 Tyynysarja,
-            a15.selitetark_2 Tyyppi,
-            a16.selitetark_2 Uuni,
-            a17.selitetark_2 Valonheitin,
-            a18.selitetark_2 Varirunko,
-            a19.selitetark_2 WC_ja_suihku
-            FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-            LEFT JOIN avainsana a1 use index (yhtio_laji_selitetark) ON a1.yhtio=sarjanumeron_lisatiedot.yhtio and a1.laji='sarjanumeron_li' and a1.selitetark=sarjanumeron_lisatiedot.Ankkurivinssi and a1.selite='ANKKURIVINSSI'
-            LEFT JOIN avainsana a2 use index (yhtio_laji_selitetark) ON a2.yhtio=sarjanumeron_lisatiedot.yhtio and a2.laji='sarjanumeron_li' and a2.selitetark=sarjanumeron_lisatiedot.Jaakaappi and a2.selite='JAAKAAPPI'
-            LEFT JOIN avainsana a3 use index (yhtio_laji_selitetark) ON a3.yhtio=sarjanumeron_lisatiedot.yhtio and a3.laji='sarjanumeron_li' and a3.selitetark=sarjanumeron_lisatiedot.Koneistus and a3.selite='KONEISTUS'
-            LEFT JOIN avainsana a4 use index (yhtio_laji_selitetark) ON a4.yhtio=sarjanumeron_lisatiedot.yhtio and a4.laji='sarjanumeron_li' and a4.selitetark=sarjanumeron_lisatiedot.Kuvatyyppi and a4.selite='KUVATYYPPI'
-            LEFT JOIN avainsana a5 use index (yhtio_laji_selitetark) ON a5.yhtio=sarjanumeron_lisatiedot.yhtio and a5.laji='sarjanumeron_li' and a5.selitetark=sarjanumeron_lisatiedot.Laatuluokitus and a5.selite='LAATU'
-            LEFT JOIN avainsana a6 use index (yhtio_laji_selitetark) ON a6.yhtio=sarjanumeron_lisatiedot.yhtio and a6.laji='sarjanumeron_li' and a6.selitetark=sarjanumeron_lisatiedot.Materiaali and a6.selite='MATERIAALI'
-            LEFT JOIN avainsana a7 use index (yhtio_laji_selitetark) ON a7.yhtio=sarjanumeron_lisatiedot.yhtio and a7.laji='sarjanumeron_li' and a7.selitetark=sarjanumeron_lisatiedot.Merkki and a7.selite='MERKKI'
-            LEFT JOIN avainsana a8 use index (yhtio_laji_selitetark) ON a8.yhtio=sarjanumeron_lisatiedot.yhtio and a8.laji='sarjanumeron_li' and a8.selitetark=sarjanumeron_lisatiedot.Koneen_merkki and a8.selite='MOOTTORINMERKKI'
-            LEFT JOIN avainsana a9 use index (yhtio_laji_selitetark) ON a9.yhtio=sarjanumeron_lisatiedot.yhtio and a9.laji='sarjanumeron_li' and a9.selitetark=sarjanumeron_lisatiedot.Moottorin_ohjausjarjestelma and a9.selite='MOOTTORINOHJAUS'
-            LEFT JOIN avainsana a10 use index (yhtio_laji_selitetark) ON a10.yhtio=sarjanumeron_lisatiedot.yhtio and a10.laji='sarjanumeron_li' and a10.selitetark=sarjanumeron_lisatiedot.Pilssipumppu and a10.selite='PILSSIPUMPPU'
-            LEFT JOIN avainsana a11 use index (yhtio_laji_selitetark) ON a11.yhtio=sarjanumeron_lisatiedot.yhtio and a11.laji='sarjanumeron_li' and a11.selitetark=sarjanumeron_lisatiedot.Sijainti and a11.selite='SIJAINTI'
-            LEFT JOIN avainsana a12 use index (yhtio_laji_selitetark) ON a12.yhtio=sarjanumeron_lisatiedot.yhtio and a12.laji='sarjanumeron_li' and a12.selitetark=sarjanumeron_lisatiedot.Tiikkisarja and a12.selite='TIIKKISARJA'
-            LEFT JOIN avainsana a13 use index (yhtio_laji_selitetark) ON a13.yhtio=sarjanumeron_lisatiedot.yhtio and a13.laji='sarjanumeron_li' and a13.selitetark=sarjanumeron_lisatiedot.Toimituskulut and a13.selite='TOIMITUSKULUT'
-            LEFT JOIN avainsana a14 use index (yhtio_laji_selitetark) ON a14.yhtio=sarjanumeron_lisatiedot.yhtio and a14.laji='sarjanumeron_li' and a14.selitetark=sarjanumeron_lisatiedot.Tyynysarja and a14.selite='TYYNYSARJA'
-            LEFT JOIN avainsana a15 use index (yhtio_laji_selitetark) ON a15.yhtio=sarjanumeron_lisatiedot.yhtio and a15.laji='sarjanumeron_li' and a15.selitetark=sarjanumeron_lisatiedot.Tyyppi and a15.selite='TYYPPI'
-            LEFT JOIN avainsana a16 use index (yhtio_laji_selitetark) ON a16.yhtio=sarjanumeron_lisatiedot.yhtio and a16.laji='sarjanumeron_li' and a16.selitetark=sarjanumeron_lisatiedot.Uuni and a16.selite='UUNI'
-            LEFT JOIN avainsana a17 use index (yhtio_laji_selitetark) ON a17.yhtio=sarjanumeron_lisatiedot.yhtio and a17.laji='sarjanumeron_li' and a17.selitetark=sarjanumeron_lisatiedot.Valonheitin and a17.selite='VALONHEITIN'
-            LEFT JOIN avainsana a18 use index (yhtio_laji_selitetark) ON a18.yhtio=sarjanumeron_lisatiedot.yhtio and a18.laji='sarjanumeron_li' and a18.selitetark=sarjanumeron_lisatiedot.Varirunko and a18.selite='VARIRUNKO'
-            LEFT JOIN avainsana a19 use index (yhtio_laji_selitetark) ON a19.yhtio=sarjanumeron_lisatiedot.yhtio and a19.laji='sarjanumeron_li' and a19.selitetark=sarjanumeron_lisatiedot.WC_ja_suihku and a19.selite='VESSA'
-            WHERE sarjanumeron_lisatiedot.yhtio     = '$kukarow[yhtio]'
-            and sarjanumeron_lisatiedot.liitostunnus = '$sarjarow[tunnus]'";
+      $query = "SELECT sarjanumeron_lisatiedot.*,
+                a1.selitetark_2 Ankkurivinssi,
+                a2.selitetark_2 Jaakaappi,
+                a3.selitetark_2 Koneistus,
+                a4.selitetark_2 Kuvatyyppi,
+                a5.selitetark_2 Laatuluokitus,
+                a6.selitetark_2 Materiaali,
+                a7.selitetark_2 Merkki,
+                a8.selitetark_2 Koneen_merkki,
+                a9.selitetark_2 Moottorin_ohjausjarjestelma,
+                a10.selitetark_2 Pilssipumppu,
+                a11.selitetark_2 Sijainti,
+                a12.selitetark_2 Tiikkisarja,
+                a13.selitetark_2 Toimituskulut,
+                a14.selitetark_2 Tyynysarja,
+                a15.selitetark_2 Tyyppi,
+                a16.selitetark_2 Uuni,
+                a17.selitetark_2 Valonheitin,
+                a18.selitetark_2 Varirunko,
+                a19.selitetark_2 WC_ja_suihku
+                FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+                LEFT JOIN avainsana a1 use index (yhtio_laji_selitetark) ON a1.yhtio=sarjanumeron_lisatiedot.yhtio and a1.laji='sarjanumeron_li' and a1.selitetark=sarjanumeron_lisatiedot.Ankkurivinssi and a1.selite='ANKKURIVINSSI'
+                LEFT JOIN avainsana a2 use index (yhtio_laji_selitetark) ON a2.yhtio=sarjanumeron_lisatiedot.yhtio and a2.laji='sarjanumeron_li' and a2.selitetark=sarjanumeron_lisatiedot.Jaakaappi and a2.selite='JAAKAAPPI'
+                LEFT JOIN avainsana a3 use index (yhtio_laji_selitetark) ON a3.yhtio=sarjanumeron_lisatiedot.yhtio and a3.laji='sarjanumeron_li' and a3.selitetark=sarjanumeron_lisatiedot.Koneistus and a3.selite='KONEISTUS'
+                LEFT JOIN avainsana a4 use index (yhtio_laji_selitetark) ON a4.yhtio=sarjanumeron_lisatiedot.yhtio and a4.laji='sarjanumeron_li' and a4.selitetark=sarjanumeron_lisatiedot.Kuvatyyppi and a4.selite='KUVATYYPPI'
+                LEFT JOIN avainsana a5 use index (yhtio_laji_selitetark) ON a5.yhtio=sarjanumeron_lisatiedot.yhtio and a5.laji='sarjanumeron_li' and a5.selitetark=sarjanumeron_lisatiedot.Laatuluokitus and a5.selite='LAATU'
+                LEFT JOIN avainsana a6 use index (yhtio_laji_selitetark) ON a6.yhtio=sarjanumeron_lisatiedot.yhtio and a6.laji='sarjanumeron_li' and a6.selitetark=sarjanumeron_lisatiedot.Materiaali and a6.selite='MATERIAALI'
+                LEFT JOIN avainsana a7 use index (yhtio_laji_selitetark) ON a7.yhtio=sarjanumeron_lisatiedot.yhtio and a7.laji='sarjanumeron_li' and a7.selitetark=sarjanumeron_lisatiedot.Merkki and a7.selite='MERKKI'
+                LEFT JOIN avainsana a8 use index (yhtio_laji_selitetark) ON a8.yhtio=sarjanumeron_lisatiedot.yhtio and a8.laji='sarjanumeron_li' and a8.selitetark=sarjanumeron_lisatiedot.Koneen_merkki and a8.selite='MOOTTORINMERKKI'
+                LEFT JOIN avainsana a9 use index (yhtio_laji_selitetark) ON a9.yhtio=sarjanumeron_lisatiedot.yhtio and a9.laji='sarjanumeron_li' and a9.selitetark=sarjanumeron_lisatiedot.Moottorin_ohjausjarjestelma and a9.selite='MOOTTORINOHJAUS'
+                LEFT JOIN avainsana a10 use index (yhtio_laji_selitetark) ON a10.yhtio=sarjanumeron_lisatiedot.yhtio and a10.laji='sarjanumeron_li' and a10.selitetark=sarjanumeron_lisatiedot.Pilssipumppu and a10.selite='PILSSIPUMPPU'
+                LEFT JOIN avainsana a11 use index (yhtio_laji_selitetark) ON a11.yhtio=sarjanumeron_lisatiedot.yhtio and a11.laji='sarjanumeron_li' and a11.selitetark=sarjanumeron_lisatiedot.Sijainti and a11.selite='SIJAINTI'
+                LEFT JOIN avainsana a12 use index (yhtio_laji_selitetark) ON a12.yhtio=sarjanumeron_lisatiedot.yhtio and a12.laji='sarjanumeron_li' and a12.selitetark=sarjanumeron_lisatiedot.Tiikkisarja and a12.selite='TIIKKISARJA'
+                LEFT JOIN avainsana a13 use index (yhtio_laji_selitetark) ON a13.yhtio=sarjanumeron_lisatiedot.yhtio and a13.laji='sarjanumeron_li' and a13.selitetark=sarjanumeron_lisatiedot.Toimituskulut and a13.selite='TOIMITUSKULUT'
+                LEFT JOIN avainsana a14 use index (yhtio_laji_selitetark) ON a14.yhtio=sarjanumeron_lisatiedot.yhtio and a14.laji='sarjanumeron_li' and a14.selitetark=sarjanumeron_lisatiedot.Tyynysarja and a14.selite='TYYNYSARJA'
+                LEFT JOIN avainsana a15 use index (yhtio_laji_selitetark) ON a15.yhtio=sarjanumeron_lisatiedot.yhtio and a15.laji='sarjanumeron_li' and a15.selitetark=sarjanumeron_lisatiedot.Tyyppi and a15.selite='TYYPPI'
+                LEFT JOIN avainsana a16 use index (yhtio_laji_selitetark) ON a16.yhtio=sarjanumeron_lisatiedot.yhtio and a16.laji='sarjanumeron_li' and a16.selitetark=sarjanumeron_lisatiedot.Uuni and a16.selite='UUNI'
+                LEFT JOIN avainsana a17 use index (yhtio_laji_selitetark) ON a17.yhtio=sarjanumeron_lisatiedot.yhtio and a17.laji='sarjanumeron_li' and a17.selitetark=sarjanumeron_lisatiedot.Valonheitin and a17.selite='VALONHEITIN'
+                LEFT JOIN avainsana a18 use index (yhtio_laji_selitetark) ON a18.yhtio=sarjanumeron_lisatiedot.yhtio and a18.laji='sarjanumeron_li' and a18.selitetark=sarjanumeron_lisatiedot.Varirunko and a18.selite='VARIRUNKO'
+                LEFT JOIN avainsana a19 use index (yhtio_laji_selitetark) ON a19.yhtio=sarjanumeron_lisatiedot.yhtio and a19.laji='sarjanumeron_li' and a19.selitetark=sarjanumeron_lisatiedot.WC_ja_suihku and a19.selite='VESSA'
+                WHERE sarjanumeron_lisatiedot.yhtio      = '$kukarow[yhtio]'
+                and sarjanumeron_lisatiedot.liitostunnus = '$sarjarow[tunnus]'";
       $lisatietores = mysql_query($query) or pupe_error($query);
       $lisarow = mysql_fetch_array($lisatietores);
 
@@ -430,11 +430,11 @@
       global $yhtiorow, $kukarow;
 
       // Haetaan laskun tiedot
-      $query = "  SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
-            FROM lasku
-            LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tunnus  = '$otunnus'";
+      $query = "SELECT *, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
+                FROM lasku
+                LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and lasku.tunnus  = '$otunnus'";
       $result = mysql_query($query) or pupe_error($query);
       $laskurow = mysql_fetch_array($result);
 
@@ -454,17 +454,17 @@
       //maksuehto tekstinä
       $laskurow["maksuehto"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
-      $query  = "  SELECT *
-            FROM asiakas
-            WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $query  = "SELECT *
+                 FROM asiakas
+                 WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
       $result = mysql_query($query) or pupe_error($query);
       $asiakasrow = mysql_fetch_array($result);
 
       //korjataan yhtiön tietoja
-      $query  = "  SELECT *
-            from kuka
-            where tunnus = '$laskurow[myyja]'
-            and yhtio = '$kukarow[yhtio]'";
+      $query  = "SELECT *
+                 from kuka
+                 where tunnus = '$laskurow[myyja]'
+                 and yhtio    = '$kukarow[yhtio]'";
       $myyresult = mysql_query($query) or pupe_error($query);
 
       if (mysql_num_rows($myyresult) == 1) {
@@ -473,9 +473,9 @@
         $kukarow["toimipaikka"] = $myyrow["toimipaikka"];
       }
 
-      $query = "  SELECT *
-            FROM yhtion_toimipaikat
-            WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
+      $query = "SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
       $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
       if (mysql_num_rows($result) == 1) {
@@ -504,16 +504,16 @@
 
         $query_ale_lisa = generoi_alekentta('M');
 
-        $query = "  SELECT tilausrivi.*,
-               round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-              tuote.tuoteno, tilausrivin_lisatiedot.positio
-              FROM tilausrivi
-              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-              WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-              and tilausrivi.yhtio = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi in  ('L','T','U')
-              $osasto";
+        $query = "SELECT tilausrivi.*,
+                  round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
+                  tuote.tuoteno, tilausrivin_lisatiedot.positio
+                  FROM tilausrivi
+                  JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                  LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                  WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+                  and tilausrivi.yhtio     = '$kukarow[yhtio]'
+                  and tilausrivi.tyyppi    in  ('L','T','U')
+                  $osasto";
         $riresult = mysql_query($query) or pupe_error($query);
 
         $riveja = mysql_num_rows($riresult);

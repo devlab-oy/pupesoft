@@ -17,8 +17,8 @@ if ($toim != "") {
   $query = "SELECT selitetark, selitetark_2, selitetark_3
             FROM avainsana
             WHERE yhtio = '$kukarow[yhtio]'
-            and laji = 'MYYNTITILASTO'
-            and selite = '$toim'";
+            and laji    = 'MYYNTITILASTO'
+            and selite  = '$toim'";
   $al_res = pupe_query($query);
   $al_row = mysql_fetch_assoc($al_res);
 

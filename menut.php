@@ -339,12 +339,12 @@ if ($tee == "PAIVITA") {
   // Tarkistetaan ettei yritetä tehdä duplikaattia jo olemassaolevasta valikosta
   $t_query = "SELECT tunnus
               FROM oikeu
-              WHERE yhtio  = '$yht'
-              AND sovellus = '$sove'
-              AND nimi     = '$nimi'
-              AND alanimi  = '$alanimi'
-              AND kuka     = ''
-              AND tunnus  != '$tunnus'";
+              WHERE yhtio   = '$yht'
+              AND sovellus  = '$sove'
+              AND nimi      = '$nimi'
+              AND alanimi   = '$alanimi'
+              AND kuka      = ''
+              AND tunnus   != '$tunnus'";
   $tarkistus = pupe_query($t_query);
 
   if (mysql_num_rows($tarkistus) > 0) {

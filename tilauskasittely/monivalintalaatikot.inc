@@ -1221,7 +1221,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM avainsana
                     WHERE avainsana.yhtio = '$kukarow[yhtio]'
                     and avainsana.laji    = 'MALLI'
-                    and avainsana.kieli         in ('$yhtiorow[kieli]', '')
+                    and avainsana.kieli   in ('$yhtiorow[kieli]', '')
                     $avainlisa
                     ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);

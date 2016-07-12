@@ -2370,7 +2370,7 @@ elseif ($tee != '') {
       $query   = "SELECT *
                   from kirjoittimet
                   where yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$printteri'";
+                  and tunnus  = '$printteri'";
       $kirres  = pupe_query($query);
       $kirrow  = mysql_fetch_assoc($kirres);
       $komento = $kirrow['komento'];

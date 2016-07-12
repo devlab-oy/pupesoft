@@ -177,9 +177,9 @@ if ($tee == "ETSILASKU") {
 
   if ($otunnus > 0) {
     //katotaan löytyykö lasku ja sen kaikki tilaukset
-    $query = "  SELECT laskunro
-          FROM lasku
-          WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT laskunro
+              FROM lasku
+              WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
     $laresult = mysql_query($query) or pupe_error($query);
     $larow = mysql_fetch_array($laresult);
 
@@ -199,18 +199,18 @@ if ($tee == "ETSILASKU") {
   $query_ale_lisa = generoi_alekentta('M');
 
   // Etsitään muutettavaa tilausta
-  $query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
-        concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
-        if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm,
-        if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija,
-        if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa,
-        lasku.tila, lasku.alatila
-        FROM lasku $use
-        LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-        WHERE $where1 $where2
-        and lasku.yhtio = '$kukarow[yhtio]'
-        and lasku.tila != 'D'
-        ORDER BY $jarj";
+  $query = "SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
+            concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
+            if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm,
+            if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija,
+            if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa,
+            lasku.tila, lasku.alatila
+            FROM lasku $use
+            LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
+            WHERE $where1 $where2
+            and lasku.yhtio  = '$kukarow[yhtio]'
+            and lasku.tila  != 'D'
+            ORDER BY $jarj";
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {

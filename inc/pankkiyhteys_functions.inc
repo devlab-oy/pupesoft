@@ -655,21 +655,33 @@ function sepa_renew_certificate($params) {
   $old_cert_info = openssl_x509_parse(base64_decode($pankkiyhteys['signing_certificate']));
 
   $csr_params = array(
-    'pankki'       => $bank,
-    'customer_id'  => $old_cert_info['subject']['serialNumber'],
-    'company_name' => $old_cert_info['subject']['CN'],
+    'pankki' => $bank,
   );
 
-  $generoidut_tunnukset = generoi_private_key_ja_csr($csr_params);
+  switch ($bank) {
+  case 'nordea':
+    $customer_id = $old_cert_info['subject']['serialNumber'];
+
+    $csr_params['customer_id']  = $customer_id;
+    $csr_params['company_name'] = $old_cert_info['subject']['CN'];
+  case 'danske':
+    $customer_id = $pankkiyhteys['customer_id'];
+  }
+
+  $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
+  $generoidut_tunnukset2 = generoi_private_key_ja_csr($csr_params);
 
   $parameters = array(
     "method" => "POST",
     "data" => array(
-      "customer_id"             => $old_cert_info['subject']['serialNumber'],
-      "environment"             => SEPA_ENVIRONMENT,
-      "signing_csr"             => base64_encode($generoidut_tunnukset['csr']),
-      "own_signing_certificate" => $pankkiyhteys['signing_certificate'],
-      "signing_private_key"     => $pankkiyhteys['signing_private_key'],
+      "customer_id"                 => $customer_id,
+      "environment"                 => SEPA_ENVIRONMENT,
+      "signing_csr"                 => base64_encode($generoidut_tunnukset1['csr']),
+      "encryption_csr"              => base64_encode($generoidut_tunnukset2['csr']),
+      "own_signing_certificate"     => $pankkiyhteys['signing_certificate'],
+      "bank_encryption_certificate" => $pankkiyhteys['bank_encryption_certificate'],
+      "signing_private_key"         => $pankkiyhteys['signing_private_key'],
+      "encryption_private_key"      => $pankkiyhteys['encryption_private_key'],
     ),
     "url" => SEPA_ADDRESS . "/{$bank}/renew_certificate",
     "headers" => array(
@@ -683,8 +695,13 @@ function sepa_renew_certificate($params) {
   if (!vastaus_kunnossa($code)) return false;
 
   return array(
-    "own_signing_certificate" => base64_decode($response["ownSigningCertificate"]),
-    "signing_private_key"     => $generoidut_tunnukset['private_key'],
+    "own_signing_certificate"     => base64_decode($response["ownSigningCertificate"]),
+    "own_encryption_certificate"  => base64_decode($response["ownEncryptionCertificate"]),
+    "ca_certificate"              => base64_decode($response["caCertificate"]),
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"]),
+    "signing_private_key"         => $generoidut_tunnukset1['private_key'],
+    "encryption_private_key"      => $generoidut_tunnukset2['private_key'],
   );
 }
 

@@ -560,7 +560,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }            
+             }
           }
           $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 

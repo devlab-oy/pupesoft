@@ -1,485 +1,485 @@
 <?php
 
-	//Fontit
-	$mini["height"] 			= 5;
-	$mini["font"] 				= "Times-Roman";
+  //Fontit
+  $mini["height"]       = 5;
+  $mini["font"]         = "Times-Roman";
 
-	$seiska["height"] 			= 7;
-	$seiska["font"] 			= "Times-Roman";
+  $seiska["height"]       = 7;
+  $seiska["font"]       = "Times-Roman";
 
-	$kymppi["height"] 			= 10;
-	$kymppi["font"] 			= "Times-Roman";
-
-	$kymppi_courier["height"] 	= 10;
-	$kymppi_courier["font"] 	= "Courier";
+  $kymppi["height"]       = 10;
+  $kymppi["font"]       = "Times-Roman";
+
+  $kymppi_courier["height"]   = 10;
+  $kymppi_courier["font"]   = "Courier";
 
-	$kymppi_helvetica["height"] = 10;
-	$kymppi_helvetica["font"] 	= "Helvetica";
-
-	$kasi_helvetica["height"] 	= 8;
-	$kasi_helvetica["font"] 	= "Helvetica";
-
-	$rectparam["width"]			= 0.2;
-
-	//Haetaan pdflibrary
-	require_once('pdflib/phppdflib.class.php');
-
-	//muutamat funktiot...
-	if (!function_exists('alku_osamaksusoppari')) {
-		function alku_osamaksusoppari ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_osamaksusoppari) {
-			global $yhtiorow, $kukarow, $pupe_root_polku, $kasi_helvetica, $kymppi_helvetica, $seiska, $rectparam, $kymppi_courier, $vkorko;
-
-			// Haetaan pohja
-			ob_start();
-
-			$filename = "{$pupe_root_polku}/ajoneuvomyynti/osamaksusoppari.pdf";
-
-			$handle = fopen($filename, "r");
-			$d = fread($handle, filesize($filename));
-			fclose($handle);
-
-			$pdf_osamaksusoppari->import->append($d);
-			$pdf_osamaksusoppari_sivu = $pdf_osamaksusoppari->import->get_pages();
-
-			ob_end_clean();
-
-			tulosta_logo_pdf($pdf_osamaksusoppari, $pdf_osamaksusoppari_sivu[0], "", 0, 0, 30, 200);
-
-			$rectp = array();
-			$rectp['mode'] 					= "fill";
-			$rectp['fillcolor']['red'] 		= 1;
-			$rectp['fillcolor']['blue']		= 1;
-			$rectp['fillcolor']['green'] 	= 1;
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(283), t("OSAMAKSUSOPIMUS"),						$pdf_osamaksusoppari_sivu[0]);
-			$pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(278), t("Pvm").": ".tv1dateconv($laskurow["luontiaika"]), $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(287), t("Numero"),								$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			//top left bottom right
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(290), mm_pt(158),  mm_pt(281), mm_pt(197),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_text(mm_pt(170),  mm_pt(283), $laskurow["tunnus"],						$pdf_osamaksusoppari_sivu[0]);
-			$pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(278), t("Tämän sopimuksen ehdot on annettu ostajalle erillisenä liitteenä"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			// Ylipiirretään ruudukko
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(278), mm_pt(8),  mm_pt(185), mm_pt(200),					$pdf_osamaksusoppari_sivu[0], $rectp);
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(200),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(270.5), mm_pt(200),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(152),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(97),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(76),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(278), t("MYYJÄ"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(275), t("Nimi"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(275), t("Y-tunnus"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(98),   mm_pt(275), t("Puhelin"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(122),  mm_pt(275), t("Kotipaikka"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(153),  mm_pt(275), t("Pankkiyhteys"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(271.5), $yhtiorow["nimi"], 						$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(78),   mm_pt(271.5), $yhtiorow["ytunnus"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(99),   mm_pt(271.5), $yhtiorow["puhelin"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(123),  mm_pt(271.5), $yhtiorow["kotipaikka"], 				$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(154),  mm_pt(271.5), $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(268), t("Lähiosoite"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(268), t("Postinumero"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(98),  mm_pt(268), t("Postitoimipaikka"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(153),  mm_pt(268), t("Henkilön nimi"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(264.5), $yhtiorow["osoite"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(78),   mm_pt(264.5), $yhtiorow["postino"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(99),  mm_pt(264.5), $yhtiorow["postitp"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(154),  mm_pt(264.5), $kukarow["nimi"],						$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(252.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(245.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(238.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(231.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(224.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(159),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(105),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(64),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(260.5), t("OSTAJA"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(25),   mm_pt(260.5), t("(Rinnakkaisostajan tiedot merkitään vain jos yhteisvastuullinen)"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(257), t("Nimi"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(257), t("Henkilötunnus / Y-tunnus"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(253.5), $laskurow["nimi"]." ".$laskurow["nimitark"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(253.5), $laskurow["ovttunnus"],					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(257), t("Nimi"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(257), t("Henkilötunnus / Y-tunnus"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(253.5), $laskurow["kolm_nimi"]." ".$laskurow["kolm_nimitark"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(253.5), $laskurow["kolm_ovttunnus"],				$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			if ($asiakasrow["gsm"] != "") {
-				$puh = $asiakasrow["gsm"];
-			}
-			else {
-				$puh = $asiakasrow["puhelin"];
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(250), t("Lähiosoite"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(250), t("Puhelin"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(246.5), $laskurow["osoite"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(246.5), $puh, 									$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(250), t("Lähiosoite"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(250), t("Puhelin"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(246.5), $laskurow["kolm_osoite"], 				$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(246.5), "", 										$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(243), t("Postinumero"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(243), t("Postitoimipaikka"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(239.5), $laskurow["postino"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(239.5), $laskurow["postitp"], 					$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(243), t("Postinumero"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(243), t("Postitoimipaikka"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(239.5), $laskurow["kolm_postino"], 				$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(239.5), $laskurow["kolm_postitp"], 				$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(236), t("Henkilötiedot tarkistettu"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(236), t("(Ks. yleiset ehdot 15 §)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$ht = "";
-
-			if ($laskurow["rahlaskelma_hetu_tarkistus"] != "") {
-				if ($laskurow["rahlaskelma_hetu_tarkistus"] == "A") 	$ht = t("Ajokortti");
-				elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "H") $ht = t("Henkilökortti");
-				elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "P") $ht = t("Passi");
-				elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "K") $ht = t("Kuvallinen pankkikortti");
-				elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "U") $ht = t("Kuvallinen Kela-kortti");
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(232.5), $ht, 									$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(232.5), "PEP / Ei", 								$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(236), t("Henkilötiedot tarkistettu"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(236), t("(Ks. yleiset ehdot 15 §)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$ht = "";
-
-			if ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] != "") {
-				if ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "A") 	 $ht = t("Ajokortti");
-				elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "H") $ht = t("Henkilökortti");
-				elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "P") $ht = t("Passi");
-				elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "K") $ht = t("Kuvallinen pankkikortti");
-				elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "U") $ht = t("Kuvallinen Kela-kortti");
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(232.5), $ht, 									$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(232.5), "PEP / Ei",	 							$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(229), t("Asiakirjan nro / pvm"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(229), t("Asiakirjan myöntäja"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(225.5), $laskurow["rahlaskelma_hetu_asiakirjanro"], 		$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(225.5), $laskurow["rahlaskelma_hetu_asiakirjamyontaja"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(229), t("Asiakirjan nro / pvm"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(229), t("Asiakirjan myöntäja"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(225.5), $laskurow["rahlaskelma_hetu_kolm_asiakirjanro"], 		$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(225.5), $laskurow["rahlaskelma_hetu_kolm_asiakirjamyontaja"],	$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(222), t("Päivämäärä/tunnistajan nimi"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(222), t("Kansalaisuus"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(218.5), $laskurow["rahlaskelma_hetu_tarkastaja"],	$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(218.5), $asiakasrow["kansalaisuus"], 			$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(222), t("Päivämäärä/tunnistajan nimi"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(222), t("Kansalaisuus"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(218.5), $laskurow["rahlaskelma_hetu_kolm_tarkastaja"],	$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(218.5), $laskurow[""], 							$pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(214.5), t("KAUPAN KOHDE"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(213.5), mm_pt(10),  mm_pt(199.5), mm_pt(200),			$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(196.5), t("VAIHTOKOHDE"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(195.5), mm_pt(10),  mm_pt(188), mm_pt(200),				$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(185), mm_pt(8),  mm_pt(77), mm_pt(60),					$pdf_osamaksusoppari_sivu[0], $rectp);
-
-			$x[0] = $x[1] = mm_pt(60);
-			$y[0] = mm_pt(183.5);
-			$y[1] = mm_pt(80.20);
-			$pdf_osamaksusoppari->draw_line($x, $y, $pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(184.5), t("RAHOITETTAVA OSA"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(181.5), t("1. Käteishinta kaupan kohteesta vakiovarustein"),		$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(175.5), t("2. Lisävarusteet yhteensä"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(169.5), t("3. Toimituskulut"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(163.5), t("4. Käteishinta kaupan kohteesta (1+2+3)"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(157.5), t("5. Hyvityshinta vaihtokohteesta"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(151.5), t("6. Jäännösvelka vaihtokohteesta"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(145.5), t("7. Hyvitysosuus vaihtokohteesta (5+6)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(139.5), t("8. Etumaksu tilattaessa"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(133.5), t("9. Muut maksut ennen toimitusta"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(127.5), t("10. Käteismaksuosuus yhteensä (7+8+9)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(121.0), t("11. Velkaosuus käteishinnasta (4-10)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(115.0), t("12. Luottosuhteen perustamiskustannus"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(109.0), t("13. Muut luottokustannukset"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(102.5), t("14. Rahoitettava osuus yhteensä (11+12+13)"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(96.5),  t("15. Korko sopimusajalta eräpäiviä noudatettaessa"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(90.5),  t("16. Tilinavausmaksu"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(84.5),  t("17. Käsittelymaksu yhteensä"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$tee = 'osamaksusoppari';
-			$tulosta_osamakusoppari = "TRUE";
-			$tilausnumero = $laskurow["tunnus"];
-
-			//Otetaan laskurow talteen
-			$resquelaskurow = $laskurow;
-
-			require ("osamaksusoppari.inc");
-
-			$vkorko = $viitearray[$viitekorko];
-			$laskurow = $resquelaskurow;
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(178), sprintf('%10.2f', $uusivene),								$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(172), sprintf('%10.2f', $uusitarvike),								$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(166), sprintf('%10.2f', $toimkulu),								$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(160), sprintf('%10.2f', $kateishinta_kaupan_kohteesta),			$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(154), sprintf('%10.2f', $hyvitys_vaihtoveneesta),					$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(148), sprintf('%10.2f', $jaannosvelka_vaihtokohteesta),			$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(142), sprintf('%10.2f', $hyvitysosuus_vaihtokohteesta),			$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(136), sprintf('%10.2f', $ennakkomaksu),							$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(130), sprintf('%10.2f', $muut_maksut_ennen_toimitusta),			$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(124), sprintf('%10.2f', $kateismaksuosuus_yhteensa),				$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(118), sprintf('%10.2f', $velkaosuus_kateishinnasta),				$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(112), sprintf('%10.2f', $perustamiskustannus),						$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(106), sprintf('%10.2f', $muutluottokustannukset),					$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(99.5),sprintf('%10.2f', $rahoitettavaa_yhteensa),					$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-
-			if ($lyhennystapa == 1) {
-				$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(93.5),sprintf('%10.2f', $koron_osuus_tl),						$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			}
-			else {
-				$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(93.5),sprintf('%10.2f', $koron_osuus_te),						$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(87.5),sprintf('%10.2f', $tilinavausmaksu),							$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-			$pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(81),  sprintf('%10.2f', $kasittelymaksut_yhteensa),				$pdf_osamaksusoppari_sivu[0], $kymppi_courier);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(89), mm_pt(184.5), t("OSAMAKSUERIEN MAKSUSUUNNITELMA"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(183), mm_pt(145),  mm_pt(178), mm_pt(155),								$pdf_osamaksusoppari_sivu[0], $rectp);
-
-			if ($viitearray[$viitekorko] == "Kiinteä") {
-				$pdf_osamaksusoppari->draw_paragraph(mm_pt(184),mm_pt(90), mm_pt(150), mm_pt(190),  t("Lyhennys on annuiteettilyhennys. Maksuerä sisältää myös koron. Sopimusajan korko on kiinteä. Kauppahinnan maksamattomalle, rahoitettavalle osalle maksetaan vuotuista korkoa"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-
-				$pdf_osamaksusoppari->draw_text(mm_pt(185), mm_pt(175), $sopajankorko." %",										$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			}
-			else {
-				$pdf_osamaksusoppari->draw_paragraph(mm_pt(184),mm_pt(90), mm_pt(150), mm_pt(190),  t("Korko on vaihtuva, jolloin koron määrästä, muutosperusteista, muutosten voimaantulosta ja muista ehdoista laaditaan erillinen sopimus"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(168),  t("Osamaksuerien lkm"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(168),  t("Luottoaika kk"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(168),  t("Maksuväli kk"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(168),  t("Erän nro 1 maksupäivä"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(161),  t("Annuiteettierä"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(161),  t("Viim erä euro"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(161),  t("Käsittelymaksu per erä"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(161),  t("Viitekorko"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(153),  t("Viim.erän maksupäivä"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(153),  t("18. Luottokustannus yht (12+13+15+16+17)"),				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(146),  t("19. KSL 7.2 §:n mukainen luottohinta (4+18)"),			$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(146),  t("20. KSL 7:11 §:n mukainen todellinen vuosikorko"),		$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(139),  t("Erien viivästyessä ostaja maksaa eräpäivän jälkeiseltä osalta korkolain mukaista viivästyskorkoa."), $pdf_osamaksusoppari_sivu[0], $seiska);
-
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(163.5), $maksuerienlkm,										$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(163.5), $luottoaikakk,										$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(163.5), $maksuvali_kk,										$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(163.5), $ekaerpcm,											$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(156),   sprintf('%.2f', $A),									$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			if ($poikkeava_era != 0) {
-				$pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(156),   sprintf('%.2f', $poikkeava_era),					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			}
-			else {
-				$pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(156),   sprintf('%.2f', $A),								$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(156),   sprintf('%.2f', $erankasittelymaksu),					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(156),   $viitearray[$viitekorko],								$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(149.5), $vikaerpcm,											$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			if ($lyhennystapa == 1) {
-				$luottokustannus_yhteensa 	= $luottokustannus_yhteensa_tl;
-				$ksl_luottohinta 			= $ksl_luottohinta_tl;
-			}
-			else {
-				$luottokustannus_yhteensa 	= $luottokustannus_yhteensa_te;
-				$ksl_luottohinta 			= $ksl_luottohinta_te;
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(149.5), sprintf('%.2f', $luottokustannus_yhteensa),			$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(142),   sprintf('%.2f', $ksl_luottohinta),					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(142),   $ksl_vuosikorko."%",									$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(134),   t("VAKUUTUS"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(131.5), t("Vakuutusyhtiö"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(131.5), t("Laajuus"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(124.5), t("Alkamispäivä"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(124.5), t("Perusomavastuu"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$vakuutushak_vakuutusyhtio_array = array("03" => "Lähivakuutus",
-													 "04" => "A-vakuutus",
-													 "13" => "Pohjantähti",
-													 "15" => "Volvia",
-													 "20" => "Nordea Vahinkovakuutus",
-													 "22" => "Tapiola",
-													 "36" => "Pohjola",
-													 "41" => "if / Sampo",
-													 "50" => "Veritas",
-													 "56" => "Turva",
-													 "65" => "Y-Fennia",
-													 "66" => "Ålandia");
-
-			$vakuutushak_kaskolaji_array = array("1" => "Laajin",
-								 				 "2" => "Laaja",
-								 				 "3" => "Suppea",
-								 				 "4" => "Suppein");
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(127), $vakuutushak_vakuutusyhtio_array[$laskurow["vakuutushak_vakuutusyhtio"]], $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(143), mm_pt(127), $vakuutushak_kaskolaji_array[$laskurow["vakuutushak_kaskolaji"]], 					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(120), tv1dateconv($laskurow["vakuutushak_alkamispaiva"]), 	$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(143), mm_pt(120), $laskurow["vakuutushak_perusomavastuu"], 				$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(115), t("TOIMITUSEHDOT"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(112), t("Toimitusaika"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(110), mm_pt(112), t("Toimitustapa"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(107), tv1dateconv($laskurow["toimaika"]), 					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(111), mm_pt(107), t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),	$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(114), mm_pt(150),  mm_pt(103.5), mm_pt(190),							$pdf_osamaksusoppari_sivu[0], $rectp);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(150),  mm_pt(112.4), t("Ostajalle on annettu:"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(111.5),  mm_pt(150),  mm_pt(109.25), mm_pt(153),						$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(109.25), mm_pt(150),  mm_pt(106.75), mm_pt(153),						$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(106.75), mm_pt(150),  mm_pt(104.25),  mm_pt(153),					$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(109.25), mm_pt(176),  mm_pt(106.75), mm_pt(179),						$pdf_osamaksusoppari_sivu[0], $rectparam);
-			$pdf_osamaksusoppari->draw_rectangle(mm_pt(106.75), mm_pt(176),  mm_pt(104.25),  mm_pt(179),					$pdf_osamaksusoppari_sivu[0], $rectparam);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(109.35), t("Suullinen käytön opastus"),					$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(106.85), t("Huoltokirja"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(104.35), t("Takuukirja"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(179.5),  mm_pt(106.85), t("Kuntotestitodistus"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(179.5),  mm_pt(104.35), t("Käyttöohjeet"),								$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			if ($laskurow['rahlaskelma_opastus'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(109.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
-			if ($laskurow['rahlaskelma_huoltokirja'] != "")	$pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(106.85), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
-			if ($laskurow['rahlaskelma_takuukirja'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(104.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
-			if ($laskurow['rahlaskelma_kuntotestitodistus'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(177),  mm_pt(106.85), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
-			if ($laskurow['rahlaskelma_kayttoohjeet'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(177),  mm_pt(104.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(100.5),   t("LISÄTIEDOT JA -EHDOT"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(100),mm_pt(90), mm_pt(80), mm_pt(190), t("Ostaja on hyväksynyt kaupan kohteen tämän sopimuksen allekirjoituksella. Ostaja on tutustunut tähän sopimukseen sekä sopimukseen kuuluviin yleisehtoihin ja sopimuksen liitteisiin ennen sopimuksen allekirjoitusta. Tämä sopimus tulee voimaan, kun sekä ostaja että myyjä ovat sopimuksen allekirjoittaneet. Sopijapuolet sitoutuvat noudattamaan tätä sopimusta. Tätä sopimusta on tehty kaksi samansisältöistä kappaletta, toinen myyjälle ja toinen ostajalle. MYYJÄLLÄ ON OSAMAKSUEHTOJEN 3. KOHDAN NOJALLA OIKEUS SIIRTÄÄ TÄHÄN SOPIMUKSEEN PERUSTUVAT OIKEUDET KOLMANNELLE, JOLLA ON OIKEUS SIIRTÄÄ NE EDELLEEN."), $pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10),  mm_pt(76), t("ALLEKIRJOITUKSET"),									$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(75),mm_pt(11), mm_pt(67), mm_pt(80), t("Allekirjoituksellaan ostaja vahvistaa tutustuneensa sopimusehtoihin ja hyväksyvänsä sopimuksen täysin."), $pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(131), mm_pt(73), t("Myyjän nimi ja allekirjoitus"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(86),  mm_pt(73), t("Paikka ja aika"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(87),  mm_pt(69), $yhtiorow["postitp"]." ".date("d.m.Y"),					$pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(65.5), t("Ostajan allekirjoitus"),							$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(73),  mm_pt(65.5), t("Toisen ostajan allekirjoitus"),						$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(133), mm_pt(55), $kukarow["nimi"]."   ".$yhtiorow["nimi"],				$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(13),  mm_pt(55), $laskurow["nimi"],										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(75),  mm_pt(55), $laskurow["kolm_nimi"],									$pdf_osamaksusoppari_sivu[0], $seiska);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10),  mm_pt(50), t("SIIRROT"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(47), t("Tähän sopimukseen perustuvat oikeudet siirrämme"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(47), t("Tähän sopimukseen perustuvat oikeudet siirrämme"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(39), t("Paikka ja aika"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(39), t("Paikka ja aika"),										$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(32), t("Myyjäliikkeen allekirjoitus (myös painokirjaimin)"),	$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(32), t("Siirtäjän allekirjoitus (myös painokirjaimin)"),		$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(23), t("Todistavat"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(23), t("Todistavat"),											$pdf_osamaksusoppari_sivu[0], $seiska);
-
-
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(19),mm_pt(10), mm_pt(10), mm_pt(190), t("Omistusoikeus kaupan kohteeseen ei siirry ostajalle ennen kuin kauppahinta kokonaisuudessaan on maksettu ja muut tämän sopimuksen tarkoittamat, kaupan kohdetta koskevat ostajan maksuvelvoitteet on täysin täytetty."), $pdf_osamaksusoppari_sivu[0], $seiska);
-
-			//Palautetan luotu sivu
-			return $pdf_osamaksusoppari_sivu[0];
-		}
-	}
-
-	if (!function_exists('rivi_osamaksusoppari')) {
-		function rivi_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $kieli, $page_osamaksusoppari, $sarjanutunnus, $selite, $row) {
-			global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $seiska, $kymppi_courier;
-
-			$rivinkorkeus	= 7.1;
-
-			if ($sarjanutunnus != "") {
-				$query = "SELECT * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $sarjanutunnus='$row[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
-				$sarjarow = mysql_fetch_array($sarjares);
-
-				if ($sarjarow["sarjanumero"] != "") {
-					$sarjalisa = " (".$sarjarow["sarjanumero"].")";
-				}
-			}
-			else {
-				$sarjalisa = "";
-			}
-
-			if ($row["rivihinta"] < 0) {
-				$row["rivihinta"] = abs($row["rivihinta"]);
-			}
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(11), mm_pt($kala+4), $selite, 													$page_osamaksusoppari, $seiska);
-			$pdf_osamaksusoppari->draw_text(mm_pt(12), mm_pt($kala), $row["nimitys"]."  ".$sarjalisa, 								$page_osamaksusoppari, $kasi_helvetica);
-
-			$kala = $kala - $rivinkorkeus;
-
-			return array($page_osamaksusoppari, $kala);
-		}
-	}
-
-	if (!function_exists('ehdot_osamaksusoppari')) {
-		function ehdot_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $kieli) {
-			global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $mini;
-
-			$firstpage = $pdf_osamaksusoppari->new_page("a4");
-
-			tulosta_logo_pdf($pdf_osamaksusoppari, $firstpage, "", 0, 0, 30, 200);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(283), t("YLEISET SOPIMUSEHDOT"),	$firstpage);
-
-			$rahoitusyhtio = '';
-
-			if ($laskurow["rekisteilmo_omistaja"] == "NORDEA") {
-				$rahoitusyhtio = "Nordea Rahoitus Suomi Oy";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "GE") {
-				$rahoitusyhtio = "GE Money Oy";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "OKO") {
-				$rahoitusyhtio = "Pohjola Pankki Oyj";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "POHJOLA") {
-				$rahoitusyhtio = "Pohjola Pankki Oyj";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "SAMPO") {
-				$rahoitusyhtio = "Sampo Rahoitus / Sampo Pankki Oyj";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "SANTAN") {
-				$rahoitusyhtio = "Santander";
-			}
-			elseif($laskurow["rekisteilmo_omistaja"] == "HANDEL") {
-				$rahoitusyhtio = "Handelsbanken Rahoitus Oyj";
-			}
-
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(280),mm_pt(10), mm_pt(10), mm_pt(90), "
+  $kymppi_helvetica["height"] = 10;
+  $kymppi_helvetica["font"]   = "Helvetica";
+
+  $kasi_helvetica["height"]   = 8;
+  $kasi_helvetica["font"]   = "Helvetica";
+
+  $rectparam["width"]      = 0.2;
+
+  //Haetaan pdflibrary
+  require_once('pdflib/phppdflib.class.php');
+
+  //muutamat funktiot...
+  if (!function_exists('alku_osamaksusoppari')) {
+    function alku_osamaksusoppari ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_osamaksusoppari) {
+      global $yhtiorow, $kukarow, $pupe_root_polku, $kasi_helvetica, $kymppi_helvetica, $seiska, $rectparam, $kymppi_courier, $vkorko;
+
+      // Haetaan pohja
+      ob_start();
+
+      $filename = "{$pupe_root_polku}/ajoneuvomyynti/osamaksusoppari.pdf";
+
+      $handle = fopen($filename, "r");
+      $d = fread($handle, filesize($filename));
+      fclose($handle);
+
+      $pdf_osamaksusoppari->import->append($d);
+      $pdf_osamaksusoppari_sivu = $pdf_osamaksusoppari->import->get_pages();
+
+      ob_end_clean();
+
+      tulosta_logo_pdf($pdf_osamaksusoppari, $pdf_osamaksusoppari_sivu[0], "", 0, 0, 30, 200);
+
+      $rectp = array();
+      $rectp['mode']           = "fill";
+      $rectp['fillcolor']['red']     = 1;
+      $rectp['fillcolor']['blue']    = 1;
+      $rectp['fillcolor']['green']   = 1;
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(283), t("OSAMAKSUSOPIMUS"),            $pdf_osamaksusoppari_sivu[0]);
+      $pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(278), t("Pvm").": ".tv1dateconv($laskurow["luontiaika"]), $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(287), t("Numero"),                $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      //top left bottom right
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(290), mm_pt(158),  mm_pt(281), mm_pt(197),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_text(mm_pt(170),  mm_pt(283), $laskurow["tunnus"],            $pdf_osamaksusoppari_sivu[0]);
+      $pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(278), t("Tämän sopimuksen ehdot on annettu ostajalle erillisenä liitteenä"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      // Ylipiirretään ruudukko
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(278), mm_pt(8),  mm_pt(185), mm_pt(200),          $pdf_osamaksusoppari_sivu[0], $rectp);
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(200),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(270.5), mm_pt(200),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(152),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(97),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(277), mm_pt(10),  mm_pt(263.5), mm_pt(76),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(278), t("MYYJÄ"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(275), t("Nimi"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(275), t("Y-tunnus"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(98),   mm_pt(275), t("Puhelin"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(122),  mm_pt(275), t("Kotipaikka"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(153),  mm_pt(275), t("Pankkiyhteys"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(271.5), $yhtiorow["nimi"],             $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(78),   mm_pt(271.5), $yhtiorow["ytunnus"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(99),   mm_pt(271.5), $yhtiorow["puhelin"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(123),  mm_pt(271.5), $yhtiorow["kotipaikka"],         $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(154),  mm_pt(271.5), $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],  $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(268), t("Lähiosoite"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(77),   mm_pt(268), t("Postinumero"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(98),  mm_pt(268), t("Postitoimipaikka"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(153),  mm_pt(268), t("Henkilön nimi"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(264.5), $yhtiorow["osoite"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(78),   mm_pt(264.5), $yhtiorow["postino"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(99),  mm_pt(264.5), $yhtiorow["postitp"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(154),  mm_pt(264.5), $kukarow["nimi"],            $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(252.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(245.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(238.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(231.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(224.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(159),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(105),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(259.5), mm_pt(10),  mm_pt(217.5), mm_pt(64),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(260.5), t("OSTAJA"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(25),   mm_pt(260.5), t("(Rinnakkaisostajan tiedot merkitään vain jos yhteisvastuullinen)"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(257), t("Nimi"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(257), t("Henkilötunnus / Y-tunnus"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(253.5), $laskurow["nimi"]." ".$laskurow["nimitark"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(253.5), $laskurow["ovttunnus"],          $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(257), t("Nimi"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(257), t("Henkilötunnus / Y-tunnus"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(253.5), $laskurow["kolm_nimi"]." ".$laskurow["kolm_nimitark"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(253.5), $laskurow["kolm_ovttunnus"],        $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      if ($asiakasrow["gsm"] != "") {
+        $puh = $asiakasrow["gsm"];
+      }
+      else {
+        $puh = $asiakasrow["puhelin"];
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(250), t("Lähiosoite"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(250), t("Puhelin"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(246.5), $laskurow["osoite"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(246.5), $puh,                   $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(250), t("Lähiosoite"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(250), t("Puhelin"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(246.5), $laskurow["kolm_osoite"],         $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(246.5), "",                     $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(243), t("Postinumero"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(243), t("Postitoimipaikka"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(239.5), $laskurow["postino"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(239.5), $laskurow["postitp"],           $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(243), t("Postinumero"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(243), t("Postitoimipaikka"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(239.5), $laskurow["kolm_postino"],         $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(239.5), $laskurow["kolm_postitp"],         $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(236), t("Henkilötiedot tarkistettu"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(236), t("(Ks. yleiset ehdot 15 §)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $ht = "";
+
+      if ($laskurow["rahlaskelma_hetu_tarkistus"] != "") {
+        if ($laskurow["rahlaskelma_hetu_tarkistus"] == "A")   $ht = t("Ajokortti");
+        elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "H") $ht = t("Henkilökortti");
+        elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "P") $ht = t("Passi");
+        elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "K") $ht = t("Kuvallinen pankkikortti");
+        elseif ($laskurow["rahlaskelma_hetu_tarkistus"] == "U") $ht = t("Kuvallinen Kela-kortti");
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(232.5), $ht,                   $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(232.5), "PEP / Ei",                 $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(236), t("Henkilötiedot tarkistettu"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(236), t("(Ks. yleiset ehdot 15 §)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $ht = "";
+
+      if ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] != "") {
+        if ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "A")    $ht = t("Ajokortti");
+        elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "H") $ht = t("Henkilökortti");
+        elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "P") $ht = t("Passi");
+        elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "K") $ht = t("Kuvallinen pankkikortti");
+        elseif ($laskurow["rahlaskelma_hetu_kolm_tarkistus"] == "U") $ht = t("Kuvallinen Kela-kortti");
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(232.5), $ht,                   $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(232.5), "PEP / Ei",                 $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(229), t("Asiakirjan nro / pvm"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(229), t("Asiakirjan myöntäja"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(225.5), $laskurow["rahlaskelma_hetu_asiakirjanro"],     $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(225.5), $laskurow["rahlaskelma_hetu_asiakirjamyontaja"], $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(229), t("Asiakirjan nro / pvm"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(229), t("Asiakirjan myöntäja"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(225.5), $laskurow["rahlaskelma_hetu_kolm_asiakirjanro"],     $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(225.5), $laskurow["rahlaskelma_hetu_kolm_asiakirjamyontaja"],  $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),   mm_pt(222), t("Päivämäärä/tunnistajan nimi"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(65),   mm_pt(222), t("Kansalaisuus"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12),   mm_pt(218.5), $laskurow["rahlaskelma_hetu_tarkastaja"],  $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(66),   mm_pt(218.5), $asiakasrow["kansalaisuus"],       $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(106),  mm_pt(222), t("Päivämäärä/tunnistajan nimi"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(160),  mm_pt(222), t("Kansalaisuus"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(107),  mm_pt(218.5), $laskurow["rahlaskelma_hetu_kolm_tarkastaja"],  $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(161),  mm_pt(218.5), $laskurow[""],               $pdf_osamaksusoppari_sivu[0], $kasi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(214.5), t("KAUPAN KOHDE"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(213.5), mm_pt(10),  mm_pt(199.5), mm_pt(200),      $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(196.5), t("VAIHTOKOHDE"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(195.5), mm_pt(10),  mm_pt(188), mm_pt(200),        $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(185), mm_pt(8),  mm_pt(77), mm_pt(60),          $pdf_osamaksusoppari_sivu[0], $rectp);
+
+      $x[0] = $x[1] = mm_pt(60);
+      $y[0] = mm_pt(183.5);
+      $y[1] = mm_pt(80.20);
+      $pdf_osamaksusoppari->draw_line($x, $y, $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10),   mm_pt(184.5), t("RAHOITETTAVA OSA"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(181.5), t("1. Käteishinta kaupan kohteesta vakiovarustein"),    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(175.5), t("2. Lisävarusteet yhteensä"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(169.5), t("3. Toimituskulut"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(163.5), t("4. Käteishinta kaupan kohteesta (1+2+3)"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(157.5), t("5. Hyvityshinta vaihtokohteesta"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(151.5), t("6. Jäännösvelka vaihtokohteesta"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(145.5), t("7. Hyvitysosuus vaihtokohteesta (5+6)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(139.5), t("8. Etumaksu tilattaessa"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(133.5), t("9. Muut maksut ennen toimitusta"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(127.5), t("10. Käteismaksuosuus yhteensä (7+8+9)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(121.0), t("11. Velkaosuus käteishinnasta (4-10)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(115.0), t("12. Luottosuhteen perustamiskustannus"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(109.0), t("13. Muut luottokustannukset"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(102.5), t("14. Rahoitettava osuus yhteensä (11+12+13)"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(96.5),  t("15. Korko sopimusajalta eräpäiviä noudatettaessa"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(90.5),  t("16. Tilinavausmaksu"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10.5), mm_pt(84.5),  t("17. Käsittelymaksu yhteensä"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $tee = 'osamaksusoppari';
+      $tulosta_osamakusoppari = "TRUE";
+      $tilausnumero = $laskurow["tunnus"];
+
+      //Otetaan laskurow talteen
+      $resquelaskurow = $laskurow;
+
+      require ("osamaksusoppari.inc");
+
+      $vkorko = $viitearray[$viitekorko];
+      $laskurow = $resquelaskurow;
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(178), sprintf('%10.2f', $uusivene),                $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(172), sprintf('%10.2f', $uusitarvike),                $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(166), sprintf('%10.2f', $toimkulu),                $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(160), sprintf('%10.2f', $kateishinta_kaupan_kohteesta),      $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(154), sprintf('%10.2f', $hyvitys_vaihtoveneesta),          $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(148), sprintf('%10.2f', $jaannosvelka_vaihtokohteesta),      $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(142), sprintf('%10.2f', $hyvitysosuus_vaihtokohteesta),      $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(136), sprintf('%10.2f', $ennakkomaksu),              $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(130), sprintf('%10.2f', $muut_maksut_ennen_toimitusta),      $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(124), sprintf('%10.2f', $kateismaksuosuus_yhteensa),        $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(118), sprintf('%10.2f', $velkaosuus_kateishinnasta),        $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(112), sprintf('%10.2f', $perustamiskustannus),            $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(106), sprintf('%10.2f', $muutluottokustannukset),          $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(99.5),sprintf('%10.2f', $rahoitettavaa_yhteensa),          $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+
+      if ($lyhennystapa == 1) {
+        $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(93.5),sprintf('%10.2f', $koron_osuus_tl),            $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      }
+      else {
+        $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(93.5),sprintf('%10.2f', $koron_osuus_te),            $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(87.5),sprintf('%10.2f', $tilinavausmaksu),              $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+      $pdf_osamaksusoppari->draw_text(mm_pt(62), mm_pt(81),  sprintf('%10.2f', $kasittelymaksut_yhteensa),        $pdf_osamaksusoppari_sivu[0], $kymppi_courier);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(89), mm_pt(184.5), t("OSAMAKSUERIEN MAKSUSUUNNITELMA"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(183), mm_pt(145),  mm_pt(178), mm_pt(155),                $pdf_osamaksusoppari_sivu[0], $rectp);
+
+      if ($viitearray[$viitekorko] == "Kiinteä") {
+        $pdf_osamaksusoppari->draw_paragraph(mm_pt(184),mm_pt(90), mm_pt(150), mm_pt(190),  t("Lyhennys on annuiteettilyhennys. Maksuerä sisältää myös koron. Sopimusajan korko on kiinteä. Kauppahinnan maksamattomalle, rahoitettavalle osalle maksetaan vuotuista korkoa"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+
+        $pdf_osamaksusoppari->draw_text(mm_pt(185), mm_pt(175), $sopajankorko." %",                    $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      }
+      else {
+        $pdf_osamaksusoppari->draw_paragraph(mm_pt(184),mm_pt(90), mm_pt(150), mm_pt(190),  t("Korko on vaihtuva, jolloin koron määrästä, muutosperusteista, muutosten voimaantulosta ja muista ehdoista laaditaan erillinen sopimus"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(168),  t("Osamaksuerien lkm"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(168),  t("Luottoaika kk"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(168),  t("Maksuväli kk"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(168),  t("Erän nro 1 maksupäivä"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(161),  t("Annuiteettierä"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(161),  t("Viim erä euro"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(161),  t("Käsittelymaksu per erä"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(161),  t("Viitekorko"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(153),  t("Viim.erän maksupäivä"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(153),  t("18. Luottokustannus yht (12+13+15+16+17)"),        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(146),  t("19. KSL 7.2 §:n mukainen luottohinta (4+18)"),      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(146),  t("20. KSL 7:11 §:n mukainen todellinen vuosikorko"),    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(139),  t("Erien viivästyessä ostaja maksaa eräpäivän jälkeiseltä osalta korkolain mukaista viivästyskorkoa."), $pdf_osamaksusoppari_sivu[0], $seiska);
+
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(163.5), $maksuerienlkm,                    $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(163.5), $luottoaikakk,                    $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(163.5), $maksuvali_kk,                    $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(163.5), $ekaerpcm,                      $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(156),   sprintf('%.2f', $A),                  $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      if ($poikkeava_era != 0) {
+        $pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(156),   sprintf('%.2f', $poikkeava_era),          $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      }
+      else {
+        $pdf_osamaksusoppari->draw_text(mm_pt(120), mm_pt(156),   sprintf('%.2f', $A),                $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(156),   sprintf('%.2f', $erankasittelymaksu),          $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(170), mm_pt(156),   $viitearray[$viitekorko],                $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(149.5), $vikaerpcm,                      $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      if ($lyhennystapa == 1) {
+        $luottokustannus_yhteensa   = $luottokustannus_yhteensa_tl;
+        $ksl_luottohinta       = $ksl_luottohinta_tl;
+      }
+      else {
+        $luottokustannus_yhteensa   = $luottokustannus_yhteensa_te;
+        $ksl_luottohinta       = $ksl_luottohinta_te;
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(149.5), sprintf('%.2f', $luottokustannus_yhteensa),      $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(142),   sprintf('%.2f', $ksl_luottohinta),          $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(142),   $ksl_vuosikorko."%",                  $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(134),   t("VAKUUTUS"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(131.5), t("Vakuutusyhtiö"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(131.5), t("Laajuus"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(90),  mm_pt(124.5), t("Alkamispäivä"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(142), mm_pt(124.5), t("Perusomavastuu"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $vakuutushak_vakuutusyhtio_array = array("03" => "Lähivakuutus",
+                           "04" => "A-vakuutus",
+                           "13" => "Pohjantähti",
+                           "15" => "Volvia",
+                           "20" => "Nordea Vahinkovakuutus",
+                           "22" => "Tapiola",
+                           "36" => "Pohjola",
+                           "41" => "if / Sampo",
+                           "50" => "Veritas",
+                           "56" => "Turva",
+                           "65" => "Y-Fennia",
+                           "66" => "Ålandia");
+
+      $vakuutushak_kaskolaji_array = array("1" => "Laajin",
+                          "2" => "Laaja",
+                          "3" => "Suppea",
+                          "4" => "Suppein");
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(127), $vakuutushak_vakuutusyhtio_array[$laskurow["vakuutushak_vakuutusyhtio"]], $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(143), mm_pt(127), $vakuutushak_kaskolaji_array[$laskurow["vakuutushak_kaskolaji"]],           $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(120), tv1dateconv($laskurow["vakuutushak_alkamispaiva"]),   $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(143), mm_pt(120), $laskurow["vakuutushak_perusomavastuu"],         $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(115), t("TOIMITUSEHDOT"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(112), t("Toimitusaika"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(110), mm_pt(112), t("Toimitustapa"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(91),  mm_pt(107), tv1dateconv($laskurow["toimaika"]),           $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(111), mm_pt(107), t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),  $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(114), mm_pt(150),  mm_pt(103.5), mm_pt(190),              $pdf_osamaksusoppari_sivu[0], $rectp);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(150),  mm_pt(112.4), t("Ostajalle on annettu:"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(111.5),  mm_pt(150),  mm_pt(109.25), mm_pt(153),            $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(109.25), mm_pt(150),  mm_pt(106.75), mm_pt(153),            $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(106.75), mm_pt(150),  mm_pt(104.25),  mm_pt(153),          $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(109.25), mm_pt(176),  mm_pt(106.75), mm_pt(179),            $pdf_osamaksusoppari_sivu[0], $rectparam);
+      $pdf_osamaksusoppari->draw_rectangle(mm_pt(106.75), mm_pt(176),  mm_pt(104.25),  mm_pt(179),          $pdf_osamaksusoppari_sivu[0], $rectparam);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(109.35), t("Suullinen käytön opastus"),          $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(106.85), t("Huoltokirja"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(153.5),  mm_pt(104.35), t("Takuukirja"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(179.5),  mm_pt(106.85), t("Kuntotestitodistus"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(179.5),  mm_pt(104.35), t("Käyttöohjeet"),                $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      if ($laskurow['rahlaskelma_opastus'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(109.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
+      if ($laskurow['rahlaskelma_huoltokirja'] != "")  $pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(106.85), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
+      if ($laskurow['rahlaskelma_takuukirja'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(151),  mm_pt(104.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
+      if ($laskurow['rahlaskelma_kuntotestitodistus'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(177),  mm_pt(106.85), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
+      if ($laskurow['rahlaskelma_kayttoohjeet'] != "") $pdf_osamaksusoppari->draw_text(mm_pt(177),  mm_pt(104.35), "X", $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(89),  mm_pt(100.5),   t("LISÄTIEDOT JA -EHDOT"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(100),mm_pt(90), mm_pt(80), mm_pt(190), t("Ostaja on hyväksynyt kaupan kohteen tämän sopimuksen allekirjoituksella. Ostaja on tutustunut tähän sopimukseen sekä sopimukseen kuuluviin yleisehtoihin ja sopimuksen liitteisiin ennen sopimuksen allekirjoitusta. Tämä sopimus tulee voimaan, kun sekä ostaja että myyjä ovat sopimuksen allekirjoittaneet. Sopijapuolet sitoutuvat noudattamaan tätä sopimusta. Tätä sopimusta on tehty kaksi samansisältöistä kappaletta, toinen myyjälle ja toinen ostajalle. MYYJÄLLÄ ON OSAMAKSUEHTOJEN 3. KOHDAN NOJALLA OIKEUS SIIRTÄÄ TÄHÄN SOPIMUKSEEN PERUSTUVAT OIKEUDET KOLMANNELLE, JOLLA ON OIKEUS SIIRTÄÄ NE EDELLEEN."), $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10),  mm_pt(76), t("ALLEKIRJOITUKSET"),                  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(75),mm_pt(11), mm_pt(67), mm_pt(80), t("Allekirjoituksellaan ostaja vahvistaa tutustuneensa sopimusehtoihin ja hyväksyvänsä sopimuksen täysin."), $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(131), mm_pt(73), t("Myyjän nimi ja allekirjoitus"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(86),  mm_pt(73), t("Paikka ja aika"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(87),  mm_pt(69), $yhtiorow["postitp"]." ".date("d.m.Y"),          $pdf_osamaksusoppari_sivu[0], $kymppi_helvetica);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(65.5), t("Ostajan allekirjoitus"),              $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(73),  mm_pt(65.5), t("Toisen ostajan allekirjoitus"),            $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(133), mm_pt(55), $kukarow["nimi"]."   ".$yhtiorow["nimi"],        $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(13),  mm_pt(55), $laskurow["nimi"],                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(75),  mm_pt(55), $laskurow["kolm_nimi"],                  $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(10),  mm_pt(50), t("SIIRROT"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(47), t("Tähän sopimukseen perustuvat oikeudet siirrämme"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(47), t("Tähän sopimukseen perustuvat oikeudet siirrämme"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(39), t("Paikka ja aika"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(39), t("Paikka ja aika"),                    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(32), t("Myyjäliikkeen allekirjoitus (myös painokirjaimin)"),  $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(32), t("Siirtäjän allekirjoitus (myös painokirjaimin)"),    $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(11),  mm_pt(23), t("Todistavat"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(104), mm_pt(23), t("Todistavat"),                      $pdf_osamaksusoppari_sivu[0], $seiska);
+
+
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(19),mm_pt(10), mm_pt(10), mm_pt(190), t("Omistusoikeus kaupan kohteeseen ei siirry ostajalle ennen kuin kauppahinta kokonaisuudessaan on maksettu ja muut tämän sopimuksen tarkoittamat, kaupan kohdetta koskevat ostajan maksuvelvoitteet on täysin täytetty."), $pdf_osamaksusoppari_sivu[0], $seiska);
+
+      //Palautetan luotu sivu
+      return $pdf_osamaksusoppari_sivu[0];
+    }
+  }
+
+  if (!function_exists('rivi_osamaksusoppari')) {
+    function rivi_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $kieli, $page_osamaksusoppari, $sarjanutunnus, $selite, $row) {
+      global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $seiska, $kymppi_courier;
+
+      $rivinkorkeus  = 7.1;
+
+      if ($sarjanutunnus != "") {
+        $query = "SELECT * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $sarjanutunnus='$row[tunnus]'";
+        $sarjares = mysql_query($query) or pupe_error($query);
+        $sarjarow = mysql_fetch_array($sarjares);
+
+        if ($sarjarow["sarjanumero"] != "") {
+          $sarjalisa = " (".$sarjarow["sarjanumero"].")";
+        }
+      }
+      else {
+        $sarjalisa = "";
+      }
+
+      if ($row["rivihinta"] < 0) {
+        $row["rivihinta"] = abs($row["rivihinta"]);
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(11), mm_pt($kala+4), $selite,                           $page_osamaksusoppari, $seiska);
+      $pdf_osamaksusoppari->draw_text(mm_pt(12), mm_pt($kala), $row["nimitys"]."  ".$sarjalisa,                 $page_osamaksusoppari, $kasi_helvetica);
+
+      $kala = $kala - $rivinkorkeus;
+
+      return array($page_osamaksusoppari, $kala);
+    }
+  }
+
+  if (!function_exists('ehdot_osamaksusoppari')) {
+    function ehdot_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $kieli) {
+      global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $mini;
+
+      $firstpage = $pdf_osamaksusoppari->new_page("a4");
+
+      tulosta_logo_pdf($pdf_osamaksusoppari, $firstpage, "", 0, 0, 30, 200);
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(110),  mm_pt(283), t("YLEISET SOPIMUSEHDOT"),  $firstpage);
+
+      $rahoitusyhtio = '';
+
+      if ($laskurow["rekisteilmo_omistaja"] == "NORDEA") {
+        $rahoitusyhtio = "Nordea Rahoitus Suomi Oy";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "GE") {
+        $rahoitusyhtio = "GE Money Oy";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "OKO") {
+        $rahoitusyhtio = "Pohjola Pankki Oyj";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "POHJOLA") {
+        $rahoitusyhtio = "Pohjola Pankki Oyj";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "SAMPO") {
+        $rahoitusyhtio = "Sampo Rahoitus / Sampo Pankki Oyj";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "SANTAN") {
+        $rahoitusyhtio = "Santander";
+      }
+      elseif($laskurow["rekisteilmo_omistaja"] == "HANDEL") {
+        $rahoitusyhtio = "Handelsbanken Rahoitus Oyj";
+      }
+
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(280),mm_pt(10), mm_pt(10), mm_pt(90), "
 1 § Osapuolet\r\n\r\n
 Ostaja ja myyjä ovat sopineet tässä sopimuksessa mainitun kaupan tehdyksi erityisissä sopimusehdoissa mainituin sekä seuraavin ehdoin. Kaupan kohteesta käytetään jäljempänä nimitystä laite. Sopimus on euromääräinen.
 \r\n
@@ -527,7 +527,7 @@ Vakuutusyhtiöllä on oikeus ilmoittaa Rahoitusyhtiölle, mikäli ostaja on irtisano
 Vakuutustapahtuman sattuessa ostajan tulee tehdä vakuutusyhtiölle vakuutusehdoissa edellytetty vahinkoilmoitus ja ilmoittaa asiasta Rahoitusyhtiölle.
 Laitteen vahingoittuminen tai vaurioituminen ei vapauta ostajaa tämän sopimuksen mukaisista velvollisuuksista.
 Mikäli laite vahingoittuu, ei Rahoitusyhtiö ole velvollinen kunnostamaan, korjaamaan tai vaihtamaan laitetta. Ostaja on velvollinen toimittamaan laitteen korjattavaksi. Vahingoittuneiden osien sijaan tulleisiin korvaaviin osiin sovelletaan tätä sopimusta muuttumattomana.
-Mikäli laite tuhoutuu käyttökelvottomaksi eikä sitä kunnosteta, erääntyy maksamatta oleva osa osamaksuvelasta välittömästi ostajan maksettavaksi.",	$firstpage, $mini);
+Mikäli laite tuhoutuu käyttökelvottomaksi eikä sitä kunnosteta, erääntyy maksamatta oleva osa osamaksuvelasta välittömästi ostajan maksettavaksi.",  $firstpage, $mini);
 
 $pdf_osamaksusoppari->draw_paragraph(mm_pt(280),mm_pt(100), mm_pt(10), mm_pt(180), "
 10 § Rekisteröinti\r\n\r\n
@@ -570,264 +570,262 @@ Jos erimielisyyksiä ei voida ratkaista osapuolten välisillä neuvotteluilla, kulu
 Kuluttajansuojalain 7 luvun säännösten noudattamista valvovat kuluttaja-asiamies ja Kuluttajavirasto (www.kuluttajavirasto.fi) ja sen alaisina piirihallintoviranomaisina aluehallintoviranomaiset sekä myös Finanssivalvonta (www.finanssivalvonta.fi) silloin, kun luotonantajana on Finanssivalvonnan valvottava.
 \r\n
 19 § Sopimusmuutokset\r\n\r\n
-Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.",	$firstpage, $mini);
+Kaikki tähän sopimukseen tehtävät muutokset on tehtävä yhdessä kirjallisesti.",  $firstpage, $mini);
 
 
-		}
-	}
+    }
+  }
 
-	if (!function_exists('print_pdf_osamaksusoppari')) {
-		function print_pdf_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $komento, $tee = "") {
-			global $yhtiorow, $kukarow;
+  if (!function_exists('print_pdf_osamaksusoppari')) {
+    function print_pdf_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $komento, $tee = "") {
+      global $yhtiorow, $kukarow;
 
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$pdf_osamaksusopparifilenimi = "/tmp/Osamaksusopimus-".md5(uniqid(mt_rand(), true)).".pdf";
+      //keksitään uudelle failille joku varmasti uniikki nimi:
+      list($usec, $sec) = explode(' ', microtime());
+      mt_srand((float) $sec + ((float) $usec * 100000));
+      $pdf_osamaksusopparifilenimi = "/tmp/Osamaksusopimus-".md5(uniqid(mt_rand(), true)).".pdf";
 
-			//kirjoitetaan pdf faili levylle..
-			$fh = fopen($pdf_osamaksusopparifilenimi, "w");
-			if (fwrite($fh, $pdf_osamaksusoppari->generate()) === FALSE) die("PDF create error $pdf_osamaksusopparifilenimi");
-			fclose($fh);
+      //kirjoitetaan pdf faili levylle..
+      $fh = fopen($pdf_osamaksusopparifilenimi, "w");
+      if (fwrite($fh, $pdf_osamaksusoppari->generate()) === FALSE) die("PDF create error $pdf_osamaksusopparifilenimi");
+      fclose($fh);
 
-			// itse print komento...
-			if ($komento == 'RUUDULLE') {
-				return $pdf_osamaksusopparifilenimi;
-			}
-			elseif ($komento == 'email') {
-				$liite = $pdf_osamaksusopparifilenimi;
+      // itse print komento...
+      if ($komento == 'RUUDULLE') {
+        return $pdf_osamaksusopparifilenimi;
+      }
+      elseif ($komento == 'email') {
+        $liite = $pdf_osamaksusopparifilenimi;
 
-				$kutsu = t("Osamaksusopimus", $kieli);
+        $kutsu = t("Osamaksusopimus", $kieli);
 
-				if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-					$kutsu .= ", ".trim($laskurow["nimi"]);
-				}
+        if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+          $kutsu .= ", ".trim($laskurow["nimi"]);
+        }
 
-				echo t("Osamaksusopimus tulostuu")."...<br>";
+        echo t("Osamaksusopimus tulostuu")."...<br>";
 
-				if ($kukarow["extranet"] == '') {
-					require("../inc/sahkoposti.inc");
-				}
-				else {
-					require("sahkoposti.inc");
-				}
-			}
-			elseif ($tee == 'NAYTATILAUS') {
-				//Työnnetään tuo pdf vaan putkeen!
-				echo file_get_contents($pdf_osamaksusopparifilenimi);
-			}
-			elseif ($komento != '' and $komento != 'edi') {
-				echo t("Osamaksusopimus tulostuu")."...<br>";
-				$line = exec("$komento $pdf_osamaksusopparifilenimi", $output, $returnvalue);
-			}
+        if ($kukarow["extranet"] == '') {
+          require("../inc/sahkoposti.inc");
+        }
+        else {
+          require("sahkoposti.inc");
+        }
+      }
+      elseif ($tee == 'NAYTATILAUS') {
+        //Työnnetään tuo pdf vaan putkeen!
+        echo file_get_contents($pdf_osamaksusopparifilenimi);
+      }
+      elseif ($komento != '' and $komento != 'edi') {
+        echo t("Osamaksusopimus tulostuu")."...<br>";
+        $line = exec("$komento $pdf_osamaksusopparifilenimi", $output, $returnvalue);
+      }
 
-			//poistetaan tmp file samantien kuleksimasta...
-			system("rm -f $pdf_osamaksusopparifilenimi");
-		}
-	}
+      //poistetaan tmp file samantien kuleksimasta...
+      system("rm -f $pdf_osamaksusopparifilenimi");
+    }
+  }
 
-	if (!function_exists('liite_osamaksusoppari')) {
-		function liite_osamaksusoppari ($pdf_osamaksusoppari, $vkorko, $laskurow, $kieli) {
-			global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $seiska;
+  if (!function_exists('liite_osamaksusoppari')) {
+    function liite_osamaksusoppari ($pdf_osamaksusoppari, $vkorko, $laskurow, $kieli) {
+      global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $seiska;
 
-			$firstpage = $pdf_osamaksusoppari->new_page("a4");
+      $firstpage = $pdf_osamaksusoppari->new_page("a4");
 
-			$query = "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
-						FROM tilausrivi
-						JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-						JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.otunnus = '$laskurow[tunnus]'
-						LIMIT 1";
-			$venvelisres = mysql_query($query) or pupe_error($query);
+      $query = "  SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
+            FROM tilausrivi
+            JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+            JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='VENE'
+            WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+            and tilausrivi.otunnus = '$laskurow[tunnus]'
+            LIMIT 1";
+      $venvelisres = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($venvelisres) > 0) {
-				$lisrow = mysql_fetch_array($venvelisres);
-			}
-			else {
-				$query = "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
-							FROM tilausrivi
-							JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.otunnus = '$laskurow[tunnus]'
-							LIMIT 1";
-				$mootlisres = mysql_query($query) or pupe_error($query);
+      if (mysql_num_rows($venvelisres) > 0) {
+        $lisrow = mysql_fetch_array($venvelisres);
+      }
+      else {
+        $query = "  SELECT sarjanumeroseuranta.sarjanumero, tilausrivi.nimitys
+              FROM tilausrivi
+              JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
+              JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.positio='MOOTTORI'
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.otunnus = '$laskurow[tunnus]'
+              LIMIT 1";
+        $mootlisres = mysql_query($query) or pupe_error($query);
 
-				$lisrow = mysql_fetch_array($mootlisres);
-			}
-
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(150), mm_pt(290), "LIITE OSAMAKSUSOPIMUKSEEN", 					$firstpage, $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(285), "OSAMAKSUSOPIMUKSEN KORKOKANTA", 				$firstpage, $kymppi_helvetica);
-
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(270), "Ostaja:", 										$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(265), "Myyjä:", 										$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(260), "Kaupan kohde:", 								$firstpage, $kymppi_helvetica);
+        $lisrow = mysql_fetch_array($mootlisres);
+      }
 
 
-			$pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(270), $laskurow["nimi"], 								$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(265), $yhtiorow["nimi"], 								$firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(150), mm_pt(290), "LIITE OSAMAKSUSOPIMUKSEEN",           $firstpage, $kymppi_helvetica);
 
-			if (strpos($lisrow["sarjanumero"], t("PUUTTUU")) === FALSE and $lisrow["sarjanumero"] != "") {
-				$sarjalisa = " (".$lisrow["sarjanumero"].")";
-			}
-			else {
-				$sarjalisa = "";
-			}
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(285), "OSAMAKSUSOPIMUKSEN KORKOKANTA",         $firstpage, $kymppi_helvetica);
 
-			$pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(260), $lisrow["nimitys"]." $sarjalisa", 	$firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(270), "Ostaja:",                     $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(265), "Myyjä:",                     $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(260), "Kaupan kohde:",                 $firstpage, $kymppi_helvetica);
 
 
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(250), "Allekirjoituspäivä:", 							$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(245), "Rahoituspäivä:", 								$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(240), "Rahoituspäivän noteeraus viitekorolle:", 		$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(235), "Marginaali:", 									$firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(270), $laskurow["nimi"],                 $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(265), $yhtiorow["nimi"],                 $firstpage, $kymppi_helvetica);
 
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(223),mm_pt(10), mm_pt(210), mm_pt(195), "Myyjä on siirtänyt yllä yksilöidyn osamaksusopimuksen kaikkine siihen liittyvine myyjän oikeuksineen Nordea Rahoitus Suomi Oy:lle (rahoittaja).",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(210),mm_pt(10), mm_pt(190), mm_pt(195), "Ostaja sitoutuu maksamaan kulloinkin maksamatta olevalle pääomalle korkoa, joka on sidottu $vkorko -korkoon lisättynä sovitulla marginaalilla. Korkokanta kullakin korkokaudella muodostuu korkokannan vaihtuvasta osasta ($vkorko -korko) lisättynä korkokannan kiinteällä osalla eli marginaalilla. Korko lasketaan todellisten päivien mukaan käyttäen jakajana lukua 360.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(190),mm_pt(10), mm_pt(170), mm_pt(195), "Euriborkorkoon sidottu osamaksusopimuksen korkokanta ensimmäisellä korkokaudella määräytyy rahoituspäivänä noteeratun viitekoron mukaan. Rahoituspäivä on se päivä, jona rahoittaja maksaa sopimuksen mukaisen suorituksen myyjälle. Noteerauspäivällä tarkoitetaan päivää, jolloin euriborkoron arvo määrätään kulloinkin voimassa olevan kansainvälisen käytännön mukaan.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(170),mm_pt(10), mm_pt(150), mm_pt(195), "Rahoituspäivänä alkaa myös ensimmäinen koronmääräytymisjakso. Kukin uusi koronmääräytymisjakso alkaa edellisen koronmääräytymisjakson päättymispäivänä. Korkokanta kullekin ensimmäistä korkokautta seuraavalle korkokaudelle määräytyy kaksi noteerauspäivää ennen uuden koronmääräytymisjakson alkamista noteeratun viitekoron mukaan. Korkokausi on 3 kuukautta.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(150),mm_pt(10), mm_pt(125), mm_pt(195), "Mikäli $vkorko -koron noteeraus lakkaa tai se menettää merkityksensä markkinakorkona, ostaja ja rahoittaja sopivat erikseen käytössä olleen viitekoron korvaavasta uudesta viitekorosta, ellei uudesta viitekorosta ole annettu viranomaisohjetta. Edellä mainitun sopimuksen voimaantuloon saakka sovelletaan viitekoron viimeisintä noteerausta. Mikäli ostaja ja rahoittaja eivät 21 vrk:n kuluessa noteerauksen päättymisestä pääse sopimukseen käytettävästä viitekorosta, rahoittajalla on oikeus sitoa korkokannan vaihtuva osa käytettyä viitekorkoa vastaavaan julkisesti noteerattuun korkoon.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(122),mm_pt(10), mm_pt(105), mm_pt(195), "Rahoittajalla on oikeus muuttaa korkokannan kiinteää osaa, mikäli rahoittajalle määrätään lainsäädännössä tai viranomaismääräyksissä myös tätä rahoitusta koskeva vero tai muu maksu, joka nostaa rahoittajan jälleenrahoituskustannuksia.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(105),mm_pt(10), mm_pt(90),  mm_pt(195), "Osamaksusopimuksessa oleva todellinen vuosikorko on laskettu rahoitushetkellä noteerattuun viitekorkoon perustuvalla korkokannalla.",	$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_paragraph(mm_pt(90),mm_pt(10), mm_pt(80),   mm_pt(195), "Olen perehtynyt ylläolevaan ja hyväksyn sen kaikin puolin.",	$firstpage, $kymppi_helvetica);
+      if (strpos($lisrow["sarjanumero"], t("PUUTTUU")) === FALSE and $lisrow["sarjanumero"] != "") {
+        $sarjalisa = " (".$lisrow["sarjanumero"].")";
+      }
+      else {
+        $sarjalisa = "";
+      }
+
+      $pdf_osamaksusoppari->draw_text(mm_pt(40), mm_pt(260), $lisrow["nimitys"]." $sarjalisa",   $firstpage, $kymppi_helvetica);
 
 
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(70), "Paikka ja aika:", 								$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(60), "_______________ __/__ ____", 					$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(50), "_________________________", 						$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(40), "______________________", 						$firstpage, $kymppi_helvetica);
-			$pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(35), "nimen selvennys", 								$firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(250), "Allekirjoituspäivä:",               $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(245), "Rahoituspäivä:",                 $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(240), "Rahoituspäivän noteeraus viitekorolle:",     $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(235), "Marginaali:",                   $firstpage, $kymppi_helvetica);
 
-		}
-	}
-
-	if (!function_exists('tulosta_osamaksusoppari')) {
-		function tulosta_osamaksusoppari ($otunnus, $komento, $kieli = "", $tee = "") {
-			global $yhtiorow, $kukarow, $vkorko;
-
-			// Haetaan laskun tiedot
-			$query = "	SELECT laskun_lisatiedot.*, lasku.*, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
-						FROM lasku
-						LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tunnus  = '$otunnus'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array($result);
-
-			if ($kieli== '') {
-				$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-				$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
-				$kielnum = mysql_num_rows($kielresult);
-				$kielrow = mysql_fetch_array($kielresult);
-				$kieli = strtolower($kielrow['kieli']);
-			}
-
-			// haetaan maksuehdon tiedot
-			$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$masrow = mysql_fetch_array($result);
-
-			//maksuehto tekstinä
-			$laskurow["maksuehto"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(223),mm_pt(10), mm_pt(210), mm_pt(195), "Myyjä on siirtänyt yllä yksilöidyn osamaksusopimuksen kaikkine siihen liittyvine myyjän oikeuksineen Nordea Rahoitus Suomi Oy:lle (rahoittaja).",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(210),mm_pt(10), mm_pt(190), mm_pt(195), "Ostaja sitoutuu maksamaan kulloinkin maksamatta olevalle pääomalle korkoa, joka on sidottu $vkorko -korkoon lisättynä sovitulla marginaalilla. Korkokanta kullakin korkokaudella muodostuu korkokannan vaihtuvasta osasta ($vkorko -korko) lisättynä korkokannan kiinteällä osalla eli marginaalilla. Korko lasketaan todellisten päivien mukaan käyttäen jakajana lukua 360.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(190),mm_pt(10), mm_pt(170), mm_pt(195), "Euriborkorkoon sidottu osamaksusopimuksen korkokanta ensimmäisellä korkokaudella määräytyy rahoituspäivänä noteeratun viitekoron mukaan. Rahoituspäivä on se päivä, jona rahoittaja maksaa sopimuksen mukaisen suorituksen myyjälle. Noteerauspäivällä tarkoitetaan päivää, jolloin euriborkoron arvo määrätään kulloinkin voimassa olevan kansainvälisen käytännön mukaan.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(170),mm_pt(10), mm_pt(150), mm_pt(195), "Rahoituspäivänä alkaa myös ensimmäinen koronmääräytymisjakso. Kukin uusi koronmääräytymisjakso alkaa edellisen koronmääräytymisjakson päättymispäivänä. Korkokanta kullekin ensimmäistä korkokautta seuraavalle korkokaudelle määräytyy kaksi noteerauspäivää ennen uuden koronmääräytymisjakson alkamista noteeratun viitekoron mukaan. Korkokausi on 3 kuukautta.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(150),mm_pt(10), mm_pt(125), mm_pt(195), "Mikäli $vkorko -koron noteeraus lakkaa tai se menettää merkityksensä markkinakorkona, ostaja ja rahoittaja sopivat erikseen käytössä olleen viitekoron korvaavasta uudesta viitekorosta, ellei uudesta viitekorosta ole annettu viranomaisohjetta. Edellä mainitun sopimuksen voimaantuloon saakka sovelletaan viitekoron viimeisintä noteerausta. Mikäli ostaja ja rahoittaja eivät 21 vrk:n kuluessa noteerauksen päättymisestä pääse sopimukseen käytettävästä viitekorosta, rahoittajalla on oikeus sitoa korkokannan vaihtuva osa käytettyä viitekorkoa vastaavaan julkisesti noteerattuun korkoon.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(122),mm_pt(10), mm_pt(105), mm_pt(195), "Rahoittajalla on oikeus muuttaa korkokannan kiinteää osaa, mikäli rahoittajalle määrätään lainsäädännössä tai viranomaismääräyksissä myös tätä rahoitusta koskeva vero tai muu maksu, joka nostaa rahoittajan jälleenrahoituskustannuksia.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(105),mm_pt(10), mm_pt(90),  mm_pt(195), "Osamaksusopimuksessa oleva todellinen vuosikorko on laskettu rahoitushetkellä noteerattuun viitekorkoon perustuvalla korkokannalla.",  $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_paragraph(mm_pt(90),mm_pt(10), mm_pt(80),   mm_pt(195), "Olen perehtynyt ylläolevaan ja hyväksyn sen kaikin puolin.",  $firstpage, $kymppi_helvetica);
 
 
-			$query  = "	SELECT *
-						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$asiakasrow = mysql_fetch_array($result);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(70), "Paikka ja aika:",                 $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(60), "_______________ __/__ ____",           $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(50), "_________________________",             $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(40), "______________________",             $firstpage, $kymppi_helvetica);
+      $pdf_osamaksusoppari->draw_text(mm_pt(10), mm_pt(35), "nimen selvennys",                 $firstpage, $kymppi_helvetica);
+
+    }
+  }
+
+  if (!function_exists('tulosta_osamaksusoppari')) {
+    function tulosta_osamaksusoppari ($otunnus, $komento, $kieli = "", $tee = "") {
+      global $yhtiorow, $kukarow, $vkorko;
+
+      // Haetaan laskun tiedot
+      $query = "  SELECT laskun_lisatiedot.*, lasku.*, lasku.laatija laatija, lasku.luontiaika luontiaika, lasku.tunnus tunnus
+            FROM lasku
+            LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tunnus  = '$otunnus'";
+      $result = mysql_query($query) or pupe_error($query);
+      $laskurow = mysql_fetch_array($result);
+
+      if ($kieli== '') {
+        $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+        $kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+        $kielnum = mysql_num_rows($kielresult);
+        $kielrow = mysql_fetch_array($kielresult);
+        $kieli = strtolower($kielrow['kieli']);
+      }
+
+      // haetaan maksuehdon tiedot
+      $query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+      $result = mysql_query($query) or pupe_error($query);
+      $masrow = mysql_fetch_array($result);
+
+      //maksuehto tekstinä
+      $laskurow["maksuehto"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 
-			function printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari, $sarjanutunnus, $osasto, $selite) {
-				global $yhtiorow, $kukarow;
-
-				//Tehään tästä taas array tän funktion siäiseen käyttöön jotta saamme sivunvaihdot toimimaan
-				$page_osamaksusoppari2[$sivu] = $page_osamaksusoppari;
-
-				$ennakkolisa = "";
-				if($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
-					$ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
-				}
-
-				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-					$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
-				}
-				else {
-					$hinta_riv = "tilausrivi.hinta";
-				}
-
-				$query_ale_lisa = generoi_alekentta('M');
-
-				$query = "	SELECT tilausrivi.*,
-							round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
-							tilausrivin_lisatiedot.positio
-							FROM tilausrivi
-							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in  ('L','T','U')
-							$ennakkolisa
-							$osasto
-							LIMIT 1";
-				$riresult = mysql_query($query) or pupe_error($query);
-
-				while ($row = mysql_fetch_array($riresult)) {
-					list($page_osamaksusoppari2[$sivu], $kala) = rivi_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $kieli, $page_osamaksusoppari2[$sivu], $sarjanutunnus, $selite, $row);
-
-					$lask++;
-				}
-				return array($page_osamaksusoppari2[$sivu], $lask, $kala);
-			}
-
-			//Oletuksia
-			$sivu 			= 1;
-			$lask 			= 0;
-
-			$pdf_osamaksusoppari = new pdffile;
-
-			$pdf_osamaksusoppari->set_default('margin-top', 20);
-			$pdf_osamaksusoppari->set_default('margin-bottom', 0);
-			$pdf_osamaksusoppari->set_default('margin-left', 0);
-			$pdf_osamaksusoppari->set_default('margin-right', 0);
-
-			$pdf_osamaksusoppari->enable('import');
-
-			//Sopimuksen pohja
-			$page_osamaksusoppari[$sivu] = alku_osamaksusoppari ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_osamaksusoppari);
-
-			$kala = 207;
-
-			// Uusi vene
-			list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "myyntirivitunnus", 	"HAVING tilausrivin_lisatiedot.positio='Vene'", "Veneen merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
-
-			$kala = 200.5;
-
-			// Uusi moottori
-			list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "myyntirivitunnus", 	"HAVING tilausrivin_lisatiedot.positio='Moottori'", "Moottorin merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
+      $query  = "  SELECT *
+            FROM asiakas
+            WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $result = mysql_query($query) or pupe_error($query);
+      $asiakasrow = mysql_fetch_array($result);
 
 
-			$kala = 189;
+      function printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari, $sarjanutunnus, $osasto, $selite) {
+        global $yhtiorow, $kukarow;
 
-			//Vaihtovene
-			list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "ostorivitunnus", 	"HAVING tilausrivin_lisatiedot.positio='Vaihtovene'", "Vaihtoveneen merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
+        //Tehään tästä taas array tän funktion siäiseen käyttöön jotta saamme sivunvaihdot toimimaan
+        $page_osamaksusoppari2[$sivu] = $page_osamaksusoppari;
 
-			// Sopimusehdot
-			ehdot_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $kieli);
+        $ennakkolisa = "";
+        if($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
+          $ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
+        }
 
-			if ($vkorko != "Kiinteä") {
-				# Ei tarvita enää?
-				#liite_osamaksusoppari ($pdf_osamaksusoppari, $vkorko, $laskurow, $kieli);
-			}
+        if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+          $hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+        }
+        else {
+          $hinta_riv = "tilausrivi.hinta";
+        }
 
-			// Tulostetaan sivu
-			print_pdf_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $komento, $tee);
+        $query_ale_lisa = generoi_alekentta('M');
 
-			$tee = '';
-		}
-	}
+        $query = "  SELECT tilausrivi.*,
+              round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},2) rivihinta,
+              tilausrivin_lisatiedot.positio
+              FROM tilausrivi
+              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+              and tilausrivi.yhtio = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi in  ('L','T','U')
+              $ennakkolisa
+              $osasto
+              LIMIT 1";
+        $riresult = mysql_query($query) or pupe_error($query);
 
-?>
+        while ($row = mysql_fetch_array($riresult)) {
+          list($page_osamaksusoppari2[$sivu], $kala) = rivi_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $kieli, $page_osamaksusoppari2[$sivu], $sarjanutunnus, $selite, $row);
+
+          $lask++;
+        }
+        return array($page_osamaksusoppari2[$sivu], $lask, $kala);
+      }
+
+      //Oletuksia
+      $sivu       = 1;
+      $lask       = 0;
+
+      $pdf_osamaksusoppari = new pdffile;
+
+      $pdf_osamaksusoppari->set_default('margin-top', 20);
+      $pdf_osamaksusoppari->set_default('margin-bottom', 0);
+      $pdf_osamaksusoppari->set_default('margin-left', 0);
+      $pdf_osamaksusoppari->set_default('margin-right', 0);
+
+      $pdf_osamaksusoppari->enable('import');
+
+      //Sopimuksen pohja
+      $page_osamaksusoppari[$sivu] = alku_osamaksusoppari ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_osamaksusoppari);
+
+      $kala = 207;
+
+      // Uusi vene
+      list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vene'", "Veneen merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
+
+      $kala = 200.5;
+
+      // Uusi moottori
+      list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "myyntirivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Moottori'", "Moottorin merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
+
+
+      $kala = 189;
+
+      //Vaihtovene
+      list ($page_osamaksusoppari[$sivu], $lask, $kala) = printtaa_rivit_osamaksusoppari($pdf_osamaksusoppari, $laskurow, $kala, $lask, $kieli, $sivu, $page_osamaksusoppari[$sivu], "ostorivitunnus",   "HAVING tilausrivin_lisatiedot.positio='Vaihtovene'", "Vaihtoveneen merkki, malli (ja numero, jos tiedossa tarjoushetkellä)");
+
+      // Sopimusehdot
+      ehdot_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $kieli);
+
+      if ($vkorko != "Kiinteä") {
+        # Ei tarvita enää?
+        #liite_osamaksusoppari ($pdf_osamaksusoppari, $vkorko, $laskurow, $kieli);
+      }
+
+      // Tulostetaan sivu
+      print_pdf_osamaksusoppari ($pdf_osamaksusoppari, $laskurow, $komento, $tee);
+
+      $tee = '';
+    }
+  }

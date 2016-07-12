@@ -27718,7 +27718,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
     $_osoite = substr($looprow['osoite'], 0, 50);
-   
+
     $_postitp = substr($looprow['postitp'], 0, 30);
     $_maa = substr($looprow['maa'], 0, 10);
     $_postino = substr($looprow['postino'], 0, 10);

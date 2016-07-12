@@ -33336,6 +33336,6 @@ if (!function_exists('posten_field')) {
       die(t('Annettu arvo ei ole käytössä'));
     }
 
-    return $key;
+    return mysql_real_escape_string($key);
   }
 }

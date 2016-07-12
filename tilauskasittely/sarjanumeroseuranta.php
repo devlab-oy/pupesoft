@@ -1510,7 +1510,7 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
         $keikkalisa = "&luouusikeikka=OK&liitostunnus=$sarjarow[tunnus]";
       }
 
-      echo "<a href='$PHP_SELF?toiminto=kululaskut$keikkalisa&keikanalatila=S&lopetus=$sarjalopetus'>".t("Liitä kululasku")."</a>";
+      echo "<a href='$PHP_SELF?toiminto=kululaskut$keikkalisa&keikanalatila=S&lopetus=$sarjalopetus'>".t("Liitä kululasku")."</a><br>";
     }
 
     if ($sarjanumeronLisatiedot) {
@@ -1528,12 +1528,12 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
         $ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
       }
 
-      echo "<br><a href='{$palvelin2}yllapito.php?toim=sarjanumeron_lisatiedot!!!!!!TRUE$ylisa&lopetus=$sarjalopetus'>".t("Lisätiedot")."</a>";
-      echo "<br><a href='#' onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\">".t("Lisätietoikkuna")."</a>";
+      echo "<a href='{$palvelin2}yllapito.php?toim=sarjanumeron_lisatiedot!!!!!!TRUE$ylisa&lopetus=$sarjalopetus'>".t("Lisätiedot")."</a><br>";
+      echo "<a href='#' onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\">".t("Lisätietoikkuna")."</a><br>";
     }
 
     if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0 and $sarjarow["era_kpl"] >= 0) {
-      echo "<br><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat' onclick=\"return verify()\">".t("Poista")."</a>";
+      echo "<a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat' onclick=\"return verify()\">".t("Poista")."</a><br>";
     }
 
     $query = "SELECT tunnus
@@ -1546,8 +1546,8 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
     $liilask = 1;
 
     while ($lisarow = mysql_fetch_assoc($lisares)) {
-      echo "<br>";
       echo js_openUrlNewWindow("{$palvelin2}view.php?id={$lisarow[tunnus]}", t("Liite")." ".$liilask, "", 800, 600);
+      echo "<br>";
       $liilask++;
     }
 

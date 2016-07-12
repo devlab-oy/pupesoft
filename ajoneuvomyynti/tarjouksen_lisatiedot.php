@@ -15,7 +15,6 @@
     require('vakuutushakemus.inc');
   }
 
-
   if ($tee == "TULOSTA") {
     $tulostimet[0] = 'Tarjous';
     if ($kappaleet > 0 and $komento["Tarjous"] != '' and $komento["Tarjous"] != 'email') {

@@ -88,9 +88,6 @@
 			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
 		}
 
-
-		echo "<font class='head'>".t("Vakuutushakemus / Rekisteröinti-ilmoitus")."</font><hr>";
-
 		echo "<form method='post'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -269,130 +266,6 @@
 
 		echo "<tr><td class='back'><br><br></td></tr>";
 
-		// 	A = Ajokortti
-		// 	H = Henkilökortti
-		// 	P = Passi
-		// 	(K = Kuvallinen pankkikortti)
-		// 	U = Kuvallinen Kela-kortti
-		$sel = array();
-		$sel[$lisrow["rahlaskelma_hetu_tarkistus"]] = "selected";
-
-		echo "<tr>
-				<th>".t("Ostajan henkilötietojen tarkistus")."</th>
-				<td>
-				<select name='rahlaskelma_hetu_tarkistus'>
-				<option value=''>".t("Valitse")."</option>
-				<option value='A' $sel[A]>".t("Ajokortti")."</option>
-				<option value='H' $sel[H]>".t("Henkilökortti")."</option>
-				<option value='P' $sel[P]>".t("Passi")."</option>
-				<option value='K' $sel[K]>".t("Kuvallinen pankkikortti")."</option>
-				<option value='U' $sel[U]>".t("Kuvallinen Kela-kortti")."</option>
-				</select>
-				</td><td></td></tr>";
-
-		echo"<tr>
-			<th>".t("Ostajan henkilötietojen asiakirjan nro / pvm")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_asiakirjanro' size='14' value='$lisrow[rahlaskelma_hetu_asiakirjanro]'></td><td></td></tr>";
-
-		echo"<tr>
-			<th>".t("Ostajan henkilötietojen asiakirjan myöntäja")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_asiakirjamyontaja' size='14' value='$lisrow[rahlaskelma_hetu_asiakirjamyontaja]'></td><td></td></tr>";
-
-		echo"<tr>
-			<th>".t("Ostajan henkilötietojen tarkastaja / pvm")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_tarkastaja' size='14' value='$lisrow[rahlaskelma_hetu_tarkastaja]'></td><td></td></tr>";
-
-		echo "<tr><td class='back'><br><br></td></tr>";
-
-		$sel = array();
-		$sel[$lisrow["rahlaskelma_hetu_kolm_tarkistus"]] = "selected";
-
-		echo "<tr>
-				<th>".t("Rinnakkaisostajan henkilötietojen tarkistus")."</th>
-				<td>
-				<select name='rahlaskelma_hetu_kolm_tarkistus'>
-				<option value=''>".t("Valitse")."</option>
-				<option value='A' $sel[A]>".t("Ajokortti")."</option>
-				<option value='H' $sel[H]>".t("Henkilökortti")."</option>
-				<option value='P' $sel[P]>".t("Passi")."</option>
-				<option value='K' $sel[K]>".t("Kuvallinen pankkikortti")."</option>
-				<option value='U' $sel[U]>".t("Kuvallinen Kela-kortti")."</option>
-				</select>
-				</td><td></td></tr>";
-
-		echo"<tr>
-			<th>".t("Rinnakkaisostajan henkilötietojen asiakirjan nro / pvm")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_kolm_asiakirjanro' size='14' value='$lisrow[rahlaskelma_hetu_kolm_asiakirjanro]'></td><td></td></tr>";
-
-		echo"<tr>
-			<th>".t("Rinnakkaisostajan henkilötietojen asiakirjan myöntäja")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_kolm_asiakirjamyontaja' size='14' value='$lisrow[rahlaskelma_hetu_kolm_asiakirjamyontaja]'></td><td></td></tr>";
-
-
-		echo"<tr>
-			<th>".t("Rinnakkaisostajan henkilötietojen tarkastaja / pvm")."</th>
-			<td><input type='text' name='rahlaskelma_hetu_kolm_tarkastaja' size='14' value='$lisrow[rahlaskelma_hetu_kolm_tarkastaja]'></td><td></td></tr>";
-
-		echo "<tr><td class='back'><br><br></td></tr>";
-
-		if ($lisrow["rahlaskelma_takuukirja"] != "") {
-			$sel = "CHECKED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<tr>
-			<th>".t("Ostajalle annettu takuukirja")."</th>
-			<td><input type='checkbox' name='rahlaskelma_takuukirja' value='X' $sel></td><td></td></tr>";
-
-
-		if ($lisrow["rahlaskelma_huoltokirja"] != "") {
-			$sel = "CHECKED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<tr>
-			<th>".t("Ostajalle annettu huoltokirja")."</th>
-			<td><input type='checkbox' name='rahlaskelma_huoltokirja' value='X' $sel></td><td></td></tr>";
-
-		if ($lisrow["rahlaskelma_kayttoohjeet"] != "") {
-			$sel = "CHECKED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<tr>
-			<th>".t("Ostajalle annettu käyttöohjeet")."</th>
-			<td><input type='checkbox' name='rahlaskelma_kayttoohjeet' value='X' $sel></td><td></td></tr>";
-
-		if ($lisrow["rahlaskelma_opastus"] != "") {
-			$sel = "CHECKED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<tr>
-			<th>".t("Ostajalle annettu suullinen opastus")."</th>
-			<td><input type='checkbox' name='rahlaskelma_opastus' value='X' $sel></td><td></td></tr>";
-
-		if ($lisrow["rahlaskelma_kuntotestitodistus"] != "") {
-			$sel = "CHECKED";
-		}
-		else {
-			$sel = "";
-		}
-
-		echo "<tr>
-			<th>".t("Ostajalle annettu kuntotestitodistus")."</th>
-			<td><input type='checkbox' name='rahlaskelma_kuntotestitodistus' value='X' $sel></td><td></td></tr>";
-
-		echo "<tr><td class='back'><br><br></td></tr>";
-
 		// 	Y = Yksityinen
 		// 	L = Luvanvarainen
 		// 	V = Vuokraus ilman kuljettajaa
@@ -410,8 +283,6 @@
 				<option value='M' $sel[M]>".t("Myyntivarasto")."</option>
 				</select>
 				</td><td></td></tr>";
-
-		echo "<tr><td class='back'><br><br></td></tr>";
 
 		$query = "	SELECT sarjanumeroseuranta.tunnus
 					FROM tilausrivi

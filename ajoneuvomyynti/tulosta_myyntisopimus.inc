@@ -1,25 +1,25 @@
 <?php
 
 //Fontit
-$seiska["height"]       = 7;
-$seiska["font"]       = "Times-Roman";
+$seiska["height"] = 7;
+$seiska["font"] = "Times-Roman";
 
-$kymppi["height"]       = 10;
-$kymppi["font"]       = "Times-Roman";
+$kymppi["height"] = 10;
+$kymppi["font"] = "Times-Roman";
 
-$kymppi_courier["height"]   = 10;
-$kymppi_courier["font"]   = "Courier";
+$kymppi_courier["height"] = 10;
+$kymppi_courier["font"] = "Courier";
 
-$kasi_courier["height"]   = 8;
-$kasi_courier["font"]     = "Courier";
+$kasi_courier["height"] = 8;
+$kasi_courier["font"] = "Courier";
 
 $kymppi_helvetica["height"] = 10;
-$kymppi_helvetica["font"]   = "Helvetica";
+$kymppi_helvetica["font"] = "Helvetica";
 
-$kasi_helvetica["height"]   = 8;
-$kasi_helvetica["font"]   = "Helvetica";
+$kasi_helvetica["height"] = 8;
+$kasi_helvetica["font"] = "Helvetica";
 
-$rectparam["width"]      = 0.2;
+$rectparam["width"] = 0.2;
 
 //Haetaan pdflibrary
 require_once 'pdflib/phppdflib.class.php';

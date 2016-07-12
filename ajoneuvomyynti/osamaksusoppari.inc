@@ -416,7 +416,6 @@ if ($tee == 'osamaksusoppari') {
   }
 
   if ($tulosta_osamakusoppari == "") {
-    echo "<font class='head'>".t("Rahoituslaskelma")."</font><hr>";
 
     echo "<form method='post' name='mainform'>
           <input type='hidden' name='toim' value='$toim'>
@@ -521,7 +520,7 @@ if ($tee == 'osamaksusoppari') {
       echo "<tr>
             <th>".t("A. Valitse rahoitettava osuus")."</th>";
 
-      echo "<td><select name='rahlaskelma_rahoitettava_positio' onchange='submit();'>";
+      echo "<td align='right'><select name='rahlaskelma_rahoitettava_positio' onchange='submit();'>";
 
       while ($positiorow = mysql_fetch_array($result)) {
 

@@ -285,7 +285,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "  <th align='left'>".t("Rekisterinumero")."</th>";
   }
 
-  echo "  <th align='left'>".t("Tuoteno")."</th>
+  echo "  <th align='left'>".t("Tuotenumero")."</th>
       <th align='left'>".t("M‰‰r‰")."</th>
       <th align='left'>".t("Tila")."</th>";
 

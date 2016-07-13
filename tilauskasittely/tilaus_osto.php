@@ -960,23 +960,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $trow["alv"] = $laskurow["alv"];
       }
 
-      if (empty($rivitunnus) and $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '3') {
-        $ttquery = "SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimaika
-                    FROM tuotteen_toimittajat
-                    JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-                    WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-                    AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
-                    AND tuotteen_toimittajat.liitostunnus = {$laskurow['liitostunnus']}
-                    AND (tuotteen_toimittajat.toimitusaika > 0 or toimi.oletus_toimaika > 0)";
-        $ttres = pupe_query($ttquery);
-
-        if ($ttrow = mysql_fetch_assoc($ttres)) {
-          $toimittajan_toimaika = date('Y-m-d', time() + $ttrow["toimaika"] * 24 * 60 * 60);
-
-          list($toimvva, $toimkka, $toimppa) = explode('-', $toimittajan_toimaika);
-        }
-      }
-
       if (checkdate($toimkka, $toimppa, $toimvva)) {
         $toimaika = $toimvva."-".$toimkka."-".$toimppa;
       }

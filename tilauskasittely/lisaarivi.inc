@@ -312,6 +312,21 @@ if (isset($olpaikalta) and $olpaikalta != '') {
   $paikka  = $olparow["olpaikka"];
 }
 
+if (empty($rivitunnus) and $laskurow['tila'] == 'O' and $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '3') {
+  $ttquery = "SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimaika
+              FROM tuotteen_toimittajat
+              JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+              WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotteen_toimittajat.tuoteno = '{$trow[tuoteno]}'
+              AND tuotteen_toimittajat.liitostunnus = {$laskurow['liitostunnus']}
+              AND (tuotteen_toimittajat.toimitusaika > 0 or toimi.oletus_toimaika > 0)";
+  $ttres = pupe_query($ttquery);
+
+  if ($ttrow = mysql_fetch_assoc($ttres)) {
+    $toimaika = date('Y-m-d', time() + $ttrow["toimaika"] * 24 * 60 * 60);
+  }
+}
+
 // Päivämäärien oikeellisuustsekki
 list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
 
@@ -3239,10 +3254,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
       }
 
-      if (isset($hinta_alkuperainen) and trim($hinta_alkuperainen) != '' and $laskurow['tila'] == 'O' and ($laskurow['alatila'] != '' or ($laskurow['alatila'] == '' and $laskurow['laskunro'] != 0))) {
+      if (isset($hinta_alkuperainen) and trim($hinta_alkuperainen) != '' and (($laskurow['tila'] == 'O' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'K' and $laskurow['alatila'] == ''))) {
         $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$hinta_alkuperainen}',";
       }
-      elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '' and $laskurow['laskunro'] == 0)) {
+      elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '')) {
 
         $query = "SELECT tuotekerroin
                   FROM tuotteen_toimittajat

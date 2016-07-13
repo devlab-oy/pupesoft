@@ -1,5 +1,8 @@
 <?php
 
+# for github syntax highlighting
+# -*- mode: php;-*-
+
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 
@@ -7222,8 +7225,10 @@ if (!function_exists("tulosta_ytunnus")) {
       $maa = $yhtiorow["maa"];
     }
 
-    //jos on suomalainen yritys tehdään ytunnus nätiks
-    if (strtoupper($maa) == 'FI') {
+    $ytunnus = trim($ytunnus);
+
+    //jos on suomalainen yritys tehdään ytunnus nätiks (paitsi jos ytunnus on ulkolainen)
+    if (strtoupper($maa) == 'FI' and (is_numeric(substr($ytunnus, 0, 2)) or strtoupper(substr($ytunnus, 0, 2)) == "FI")) {
 
       $ytunnus = preg_replace("/[^0-9]/", "", $ytunnus); // poistetaan kaikki paitsi numerot
 
@@ -16331,9 +16336,14 @@ if (!function_exists('tulosta_oslap_mg')) {
         $tempfile = tempnam("/tmp", "oslap");
         file_put_contents($tempfile, $sivu);
 
-        $line = exec("a2ps -o $tempfile.ps -R --medium=A4 --chars-per-line=80 --columns=1 --margin=1 --borders=0 $tempfile");
+        $params = array(
+          'filename' => $tempfile,
+        );
 
-        $line = exec("$komento $tempfile.ps");
+        // konveroidaan postscriptiksi
+        $filenimi_ps = pupesoft_a2ps($params);
+
+        $line = exec("$komento {$filenimi_ps}");
 
         echo t("Osoitelappu tulostuu")."...<br>";
       }
@@ -27645,7 +27655,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('CustOrderNumber', substr($looprow['asiakkaan_tilausnumero'], 0, 20)); // Magentosta?
-    // $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
+    $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
     $custpickinglist->addChild('OrderCode', 'U');
     $custpickinglist->addChild('OrderType', 'SO');
 
@@ -27673,6 +27683,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['nimi'].' '.$looprow['nimitark']), 0, 50);
     $_osoite = substr($looprow['osoite'], 0, 50);
+
     $_postitp = substr($looprow['postitp'], 0, 30);
     $_maa = substr($looprow['maa'], 0, 10);
     $_postino = substr($looprow['postino'], 0, 10);
@@ -27687,6 +27698,10 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = substr(trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']), 0, 50);
     $_osoite = substr($looprow['toim_osoite'], 0, 50);
+    $_osoite2 = substr($looprow['kohde'], 0, 50);
+    if (empty($_osoite2)) {
+      $_osoite2 = $_osoite;
+    }
     $_postitp = substr($looprow['toim_postitp'], 0, 30);
     $_maa = substr($looprow['toim_maa'], 0, 10);
     $_postino = substr($looprow['toim_postino'], 0, 10);
@@ -27696,7 +27711,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $receiver->addChild('RecCustAccount', 0);
     $receiver->addChild('RecCustName', utf8_encode($_nimi));
     $receiver->addChild('RecCustStreet', utf8_encode($_osoite));
-    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite));
+    $receiver->addChild('RecCustStreet2', utf8_encode($_osoite2));
     $receiver->addChild('RecCustPostCode',  utf8_encode($_postino));
     $receiver->addChild('RecCustCity', utf8_encode($_postitp));
     $receiver->addChild('RecCustCountry', utf8_encode($_maa));
@@ -27725,12 +27740,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_line_i = 1;
 
-    $posten_itemnumberfield = "tuoteno";
-    $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
-
-    if (!empty($alt_posten_itemnumberfield)) {
-      $posten_itemnumberfield = $alt_posten_itemnumberfield;
-    }
+    $posten_itemnumberfield = posten_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
 
@@ -33268,5 +33278,78 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
         pupe_query($query);
       }
     }
+  }
+}
+
+if (!function_exists('pupesoft_a2ps')) {
+  function pupesoft_a2ps($params) {
+
+    $borders  = empty($params['borders'])  ? '0'        : $params['borders'];
+    $chars    = empty($params['chars'])    ? '80'       : $params['chars'];
+    $columns  = empty($params['columns'])  ? '1'        : $params['columns'];
+    $filename = empty($params['filename']) ? ''         : $params['filename'];
+    $major    = empty($params['major'])    ? 'rows'     : $params['major'];
+    $margin   = empty($params['margin'])   ? '1'        : $params['margin'];
+    $medium   = empty($params['medium'])   ? 'A4'       : $params['medium']; // a2ps --list=media
+    $mode     = empty($params['mode'])     ? 'portrait' : $params['mode'];   // landscape or portrait
+
+    if (empty($filename)) {
+      return false;
+    }
+
+    // Tehdään kopio tiedostosta, että ei yliajeta alkuperäistä
+    $temp_file = tempnam("/tmp", "postscript");
+    copy($filename, $temp_file);
+
+    // Varmistetaan, että tiedosto on ISO formaatissa, koska a2ps ei tue UTF8 encoodausta
+    if (PUPE_UNICODE) {
+      exec("recode -f UTF-8..ISO-8859-15 '$temp_file'");
+    }
+
+    // konertoidaan postscriptiksi
+    $out_file = tempnam("/tmp", "postscript") . ".ps";
+    exec("a2ps -o {$out_file} --{$mode} --no-header --major={$major} --medium={$medium} --chars-per-line={$chars} --columns={$columns} --margin={$margin} --borders={$borders} $temp_file");
+
+    // poistetaan sisäinen temp file
+    unlink($temp_file);
+
+    // palautetaan polku uuteen .ps tiedostoon
+    return $out_file;
+  }
+}
+
+if (!function_exists('posten_field')) {
+  function posten_field($column_name) {
+
+    switch ($column_name) {
+    case 'ItemNumber':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ItemNumber' ", '', '', 'selitetark');
+
+      if (empty($key)) {
+        $key = 'tuoteno';
+      }
+
+      break;
+    case 'ProdGroup1':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
+
+      if (empty($key)) {
+        $key = 'try';
+      }
+
+      break;
+      case 'ProdGroup2':
+        $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+
+        if (empty($key)) {
+          $key = '';
+        }
+
+        break;
+    default:
+      die(t('Annettu arvo ei ole käytössä'));
+    }
+
+    return mysql_real_escape_string($key);
   }
 }

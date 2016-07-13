@@ -75,18 +75,26 @@ if ($komento["Tuotetarrat"] == 'email') {
 }
 else {
   //paperilista pit‰‰ saada kauniiksi
-  $line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=1 --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
+  $params = array(
+    'chars'    => 75,
+    'filename' => $filenimi,
+    'margin'   => 0,
+    'mode'     => 'portrait',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi_ps = pupesoft_a2ps($params);
 
   if ($tee == 'NAYTATILAUS') {
     //Tyˆnnet‰‰n tuo pdf vaan putkeen!
-    echo file_get_contents($filenimi.".ps");
+    echo file_get_contents($filenimi_ps);
   }
   else {
     //itse print komento tulee valitse_tulosin.incilt‰...
-    $line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
+    $line = exec("$komento[Tuotetarrat] {$filenimi_ps}");
 
     //p‰‰dyt‰‰n taas selailemaan toimittajia
     echo t("Tuotetarrat tulostuu")."...<br>";
   }
-  system("rm -f ".$filenimi.".ps");
+  system("rm -f {$filenimi_ps}");
 }

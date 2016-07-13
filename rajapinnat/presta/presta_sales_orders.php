@@ -8,7 +8,7 @@ require_once 'rajapinnat/presta/presta_currencies.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {
-  private $edi_filepath_base = '';
+  private $edi_filepath_base = null;
   private $edi_order = '';
   private $fetch_statuses = array();
   private $fetched_status = null;
@@ -17,6 +17,7 @@ class PrestaSalesOrders extends PrestaClient {
   private $presta_countries = null;
   private $presta_currencies = null;
   private $presta_order_histories = null;
+  private $presta_changeable_invoice_address = true;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
@@ -39,7 +40,13 @@ class PrestaSalesOrders extends PrestaClient {
   }
 
   public function set_edi_filepath($filepath) {
-    $this->edi_filepath_base = rtrim($filepath, '/');
+    $filepath = rtrim($filepath, '/');
+
+    if (!is_writable($filepath)) {
+      throw new Exception("{$filepath} ei pysty kirjoittamaan");
+    }
+
+    $this->edi_filepath_base = $filepath;
   }
 
   public function set_yhtiorow($yhtiorow) {
@@ -58,10 +65,14 @@ class PrestaSalesOrders extends PrestaClient {
     $this->fetched_status = $value;
   }
 
+  public function set_changeable_invoice_address($value) {
+    $this->presta_changeable_invoice_address = $value;
+  }
+
   public function transfer_orders_to_pupesoft() {
     $this->logger->log('---------Start sales orders fetch---------');
 
-    if ($this->edi_filepath_base == '') {
+    if (empty($this->edi_filepath_base)) {
       throw new Exception('Edi tiedosto polku pitää olla määritelty');
     }
 
@@ -112,6 +123,9 @@ class PrestaSalesOrders extends PrestaClient {
 
         $this->convert_to_edi($params);
         $this->mark_as_fetched($sales_order);
+
+        // write order to disk
+        $this->write_to_file();
       }
       catch (Exception $e) {
         // Do nothing because we still want to try to create the other
@@ -133,9 +147,7 @@ class PrestaSalesOrders extends PrestaClient {
    *
    * @return array
    */
-
-
-  public function fetch_sales_orders() {
+  private function fetch_sales_orders() {
     $this->logger->log('Fetching sales orders');
 
     try {
@@ -192,6 +204,12 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
+    if (empty($pupesoft_customer)) {
+      $msg = "Oletusasiakasta {$id} ei löytynyt Pupesoftista!";
+
+      throw new Exception($msg);
+    }
+
     // choose pupesoft customer number
     if (!empty($pupesoft_customer['asiakasnro'])) {
       $pupesoft_customer_id = $pupesoft_customer['asiakasnro'];
@@ -204,6 +222,18 @@ class PrestaSalesOrders extends PrestaClient {
     }
     else {
       $pupesoft_customer_id = '';
+    }
+
+    // we don't allow users to change their invoice address, use pupesoft's address instead
+    if ($this->presta_changeable_invoice_address === false) {
+      $invoice_address = array(
+        'address1'  => $pupesoft_customer['osoite'],
+        'city'      => $pupesoft_customer['postitp'],
+        'firstname' => '',
+        'lastname'  => $pupesoft_customer['nimi'],
+        'phone'     => $pupesoft_customer['puhelin'],
+        'postcode'  => $pupesoft_customer['postino'],
+      );
     }
 
     // empty edi_order
@@ -325,9 +355,6 @@ class PrestaSalesOrders extends PrestaClient {
 
     $this->add_row("*ME");
     $this->add_row("*IE");
-
-    // write order to disk
-    $this->write_to_file();
   }
 
   private function mark_as_fetched($sales_order) {
@@ -369,15 +396,13 @@ class PrestaSalesOrders extends PrestaClient {
     $date = date("Ymd");
     $filepath = "{$this->edi_filepath_base}/presta-order-{$date}-{$rnd}.txt";
 
-    if (!is_writable(dirname($filepath))) {
-      throw new Exception("{$filepath} ei pysty kirjoittamaan");
-    }
-
     // write file
     file_put_contents($filepath, $this->edi_order);
 
     // empty variable
     $this->edi_order = '';
+
+    $this->logger->log("Tallennettiin tiedosto {$filepath}");
 
     return true;
   }

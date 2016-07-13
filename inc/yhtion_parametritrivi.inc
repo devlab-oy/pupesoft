@@ -758,6 +758,26 @@ if ($fieldname == "alv_kasittely_hintamuunnos") {
   $jatko = 0;
 }
 
+if ($fieldname == "alv_velvollinen") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  else {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value='' $sel1>".t("Normaali verokäsittely")."</option>";
+  $ulos .= "<option value='E' $sel2>".t("Verkkolaskut kirjataan aina verottomina")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "asiakashinta_netto") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

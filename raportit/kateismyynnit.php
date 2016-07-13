@@ -491,7 +491,13 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
     $kirrow  = mysql_fetch_assoc($kirres);
     $komento = $kirrow['komento'];
 
-    $line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --columns=1 --margin=1 --borders=0 $filenimi");
+    $params = array(
+      'filename' => $filenimi,
+      'chars'    => '94',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
 
     if ($komento == "email" and $kukarow["eposti"] != '') {
       // l‰hetet‰‰n meili
@@ -499,7 +505,7 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
 
       $kutsu = t("K‰teismyynnit", $kieli);
 
-      $liite           = "$filenimi.ps";
+      $liite           = $filenimi_ps;
       $sahkoposti_cc   = "";
       $content_subject = "";
       $content_body    = "";
@@ -508,7 +514,7 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
     }
     elseif ($komento != "" and $komento != "email") {
       // itse print komento...
-      $line = exec("$komento $filenimi.ps");
+      $line = exec("$komento $filenimi_ps");
     }
 
     //poistetaan tmp file samantien kuleksimasta...
@@ -2269,7 +2275,13 @@ elseif ($tee != '') {
     $kirrow  = mysql_fetch_assoc($kirres);
     $komento = $kirrow['komento'];
 
-    $line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+    $params = array(
+      'filename' => $filenimi,
+      'chars'    => '94',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
 
     if ($komento == "email" and $kukarow["eposti"] != '') {
       // l‰hetet‰‰n meili
@@ -2277,7 +2289,7 @@ elseif ($tee != '') {
 
       $kutsu = t("K‰teismyynnit", $kieli);
 
-      system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+      system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} {$filenimi}.pdf");
 
       $liite           = "$filenimi.pdf";
       $sahkoposti_cc   = "";
@@ -2288,12 +2300,12 @@ elseif ($tee != '') {
     }
     elseif ($komento != "" and $komento != "email") {
       // itse print komento...
-      $line = exec("$komento $filenimi.ps");
+      $line = exec("$komento $filenimi_ps");
     }
 
     //poistetaan tmp file samantien kuleksimasta...
     unlink($filenimi);
-    unlink($filenimi.".ps");
+    unlink($filenimi_ps);
   }
 
   echo "</table>";

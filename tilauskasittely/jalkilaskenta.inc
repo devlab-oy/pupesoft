@@ -215,7 +215,6 @@ if (!function_exists("korjaalaskut")) {
         if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
         $katekorjres = pupe_query($query);
 
-        return 0;
       }
 
       $muutos = 0;
@@ -446,8 +445,8 @@ if (!function_exists("korjaalaskut")) {
       }
     }
 
-    return 0;
   }
+  return 0;
 }
 
 if (!function_exists('korjaatapahtuma')) {

@@ -195,6 +195,7 @@ $editilaus_tilaustyyppi       = "";
 $editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+$editilaus_liitetiedosto      = "";
 $edi_kommentti                = "";
 $id                           = "";
 $ketjutus                     = "";
@@ -276,6 +277,9 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui"
 
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
+
+// EDI-tilausten käsittelyhakemisto
+$editilaus_hakemisto = dirname(realpath($filename));
 
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sisääntuleva Futursoft-tilaus";
@@ -500,6 +504,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VERKKOKAUPPA_KOHDE' :
     // Verkkokaupassa asiakkaan antama kohde
     $ot_verkkokauppa_kohde = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_LIITETIEDOSTO' :
+    // Tilaukseen liittyvä liitetiedosto
+    $editilaus_liitetiedosto = basename($tieto);
     break;
 
   case 'OBGMIACKR' :
@@ -1769,6 +1778,25 @@ while ($tietue = fgets($fd)) {
                 luontiaika      = now()";
       $Xresult = pupe_query($query);
 
+      // jos meillä on liitetiedosto tilauksella, tallennetaan se tilauksen liitetiedostoksi
+      if (!empty($editilaus_liitetiedosto)) {
+        // liitetiedostot tulee siirtää editilaus -hakemiston alle liitetiedostot -hakemistoon
+        $full_path = "{$editilaus_hakemisto}/liitetiedostot/{$editilaus_liitetiedosto}";
+
+        if (is_readable($full_path)) {
+          // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
+          tallenna_liite($full_path, 'lasku', $id, 'Asiakkaan lähettämä liite', 'MU');
+
+          // poistetaan liitetiedosto hakemistosta
+          unlink($full_path);
+
+          $edi_ulos .= t("Tallennettiin liite")." {$editilaus_liitetiedosto}\n";
+        }
+        else {
+          $edi_ulos .= t("Ilmoitettua liitetiedostoa ei löytynyt")." {$editilaus_liitetiedosto}\n";
+        }
+      }
+
       // HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
       if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
 
@@ -2503,6 +2531,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+    $editilaus_liitetiedosto      = "";
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

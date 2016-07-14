@@ -806,6 +806,13 @@ if ($tee == 'I') {
 
   // IBAN / BBAN
   if ($trow['ultilno'] != "") {
+    // Haetaan swift jos se puuttuu
+    if (empty($trow["swift"])) {
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($trow['ultilno'], '');
+      $trow["swift"] = $vastaus['swift'];
+    }
+
     // Vaaditaan isot kirjaimet
     $trow['ultilno'] = strtoupper($trow['ultilno']);
     $trow['swift']   = strtoupper($trow['swift']);

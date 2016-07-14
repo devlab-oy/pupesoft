@@ -207,6 +207,10 @@ if (!isset($presta_tuotekuvien_nouto)) {
   // Siirretäänkö Prestashopin tuotekuvat Pupesoftiin
   $presta_tuotekuvien_nouto = false;
 }
+if (!isset($presta_tilauksen_liitetiedostojen_nouto)) {
+  // Haetaan tilauksen liitetiedostot. HUOM! Vaatii custom muutoksia Prestaan.
+  $presta_tilauksen_liitetiedostojen_nouto = false;
+}
 if (!isset($presta_siirrettavat_hinnat)) {
   // Mitä hintoja siirretään Prestan Specific Prices hinnoiksi
   $presta_siirrettavat_hinnat = array(
@@ -308,6 +312,7 @@ if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
 
   $presta_orders->set_changeable_invoice_address($presta_laskutusosoitteen_muutos);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
+  $presta_orders->set_fetch_carrier_files($presta_tilauksen_liitetiedostojen_nouto);
   $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
   $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
   $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);

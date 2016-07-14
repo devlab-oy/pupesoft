@@ -73,6 +73,10 @@ class PrestaSalesOrders extends PrestaClient {
     $this->presta_changeable_invoice_address = $value;
   }
 
+  public function set_fetch_carrier_files($value) {
+    $this->fetch_carrier_files = $value;
+  }
+
   public function transfer_orders_to_pupesoft() {
     $this->logger->log('---------Start sales orders fetch---------');
 

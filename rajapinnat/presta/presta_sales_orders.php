@@ -2,6 +2,7 @@
 
 require_once 'rajapinnat/presta/presta_addresses.php';
 require_once 'rajapinnat/presta/presta_carriers.php';
+require_once 'rajapinnat/presta/presta_carrier_files.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_currencies.php';
@@ -10,19 +11,22 @@ require_once 'rajapinnat/presta/presta_order_histories.php';
 class PrestaSalesOrders extends PrestaClient {
   private $edi_filepath_base = null;
   private $edi_order = '';
+  private $fetch_carrier_files = false;
   private $fetch_statuses = array();
   private $fetched_status = null;
   private $presta_addresses = null;
+  private $presta_carrier_files = null;
   private $presta_carriers = null;
+  private $presta_changeable_invoice_address = true;
   private $presta_countries = null;
   private $presta_currencies = null;
   private $presta_order_histories = null;
-  private $presta_changeable_invoice_address = true;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
   public function __construct($url, $api_key, $log_file) {
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_carrier_files = new PrestaCarrierFiles($url, $api_key, $log_file);
     $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
     $this->presta_currencies = new PrestaCurrencies($url, $api_key, $log_file);

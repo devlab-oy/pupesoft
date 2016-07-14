@@ -8597,12 +8597,10 @@ if (!function_exists('tallenna_liite')) {
       $file = $_FILES[$userfile];
     }
     elseif (file_exists($userfile)) {
-      $a = getimagesize($userfile);
-
       $file["name"]     = basename($userfile);
-      $file["type"]     = $a["mime"];
-      $file["tmp_name"]   = $userfile;
-      $file["error"]     = 0;
+      $file["type"]     = mime_content_type($userfile);
+      $file["tmp_name"] = $userfile;
+      $file["error"]    = 0;
       $file["size"]     = filesize($userfile);
 
       $_FILES[$userfile] = $file;
@@ -33365,14 +33363,22 @@ if (!function_exists('posten_field')) {
       }
 
       break;
-    case 'ProdGroup2':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+    case 'ProdGroup1':
+      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
 
       if (empty($key)) {
-        $key = '';
+        $key = 'try';
       }
 
       break;
+      case 'ProdGroup2':
+        $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
+
+        if (empty($key)) {
+          $key = '';
+        }
+
+        break;
     default:
       die(t('Annettu arvo ei ole käytössä'));
     }

@@ -2,6 +2,7 @@
 
 require_once 'rajapinnat/presta/presta_addresses.php';
 require_once 'rajapinnat/presta/presta_carriers.php';
+require_once 'rajapinnat/presta/presta_carrier_files.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_currencies.php';
@@ -10,19 +11,22 @@ require_once 'rajapinnat/presta/presta_order_histories.php';
 class PrestaSalesOrders extends PrestaClient {
   private $edi_filepath_base = null;
   private $edi_order = '';
+  private $fetch_carrier_files = false;
   private $fetch_statuses = array();
   private $fetched_status = null;
   private $presta_addresses = null;
+  private $presta_carrier_files = null;
   private $presta_carriers = null;
+  private $presta_changeable_invoice_address = true;
   private $presta_countries = null;
   private $presta_currencies = null;
   private $presta_order_histories = null;
-  private $presta_changeable_invoice_address = true;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
 
   public function __construct($url, $api_key, $log_file) {
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_carrier_files = new PrestaCarrierFiles($url, $api_key, $log_file);
     $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
     $this->presta_currencies = new PrestaCurrencies($url, $api_key, $log_file);
@@ -69,6 +73,10 @@ class PrestaSalesOrders extends PrestaClient {
     $this->presta_changeable_invoice_address = $value;
   }
 
+  public function set_fetch_carrier_files($value) {
+    $this->fetch_carrier_files = $value;
+  }
+
   public function transfer_orders_to_pupesoft() {
     $this->logger->log('---------Start sales orders fetch---------');
 
@@ -111,8 +119,17 @@ class PrestaSalesOrders extends PrestaClient {
           );
         }
 
+        // fetch carrier files
+        $carrier_file = null;
+
+        if ($this->fetch_carrier_files === true) {
+          $file_directory = $this->carrier_file_directory();
+          $carrier_file   = $this->presta_carrier_files->save_file($sales_order['id'], $file_directory);
+        }
+
         $params = array(
           "carrier"          => $carrier,
+          "carrier_file"     => basename($carrier_file),
           "currency"         => $currency,
           "delivery_address" => $address_delivery,
           "delivery_country" => $delivery_country,
@@ -178,6 +195,7 @@ class PrestaSalesOrders extends PrestaClient {
    */
   private function convert_to_edi($params) {
     $carrier          = $params["carrier"];
+    $carrier_file     = $params["carrier_file"];
     $currency         = $params["currency"];
     $delivery_address = $params["delivery_address"];
     $delivery_country = $params["delivery_country"];
@@ -249,6 +267,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$order['invoice_number']}");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_KOHDE:");
+    $this->add_row("OSTOTIL.OT_LIITETIEDOSTO:{$carrier_file}");
     $this->add_row("OSTOTIL.OT_TILAUSAIKA:");
     $this->add_row("OSTOTIL.OT_KASITTELIJA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
@@ -331,7 +350,7 @@ class PrestaSalesOrders extends PrestaClient {
 
       // pack_rows on custom presta kenttä. Mikäli kyseessä on pack -tuote (tuoteperhe), niin
       // kentässä tulee lapsituotteiden tiedot muodossa "tuotekoodi1:hinta1;tuotekoodi1:hinta2..."
-      $pack_rows = isset($row['pack_rows']) ? $row['pack_rows'] : '';
+      $pack_rows = empty($row['pack_rows']) ? '' : $row['pack_rows'];
 
       $this->add_row("*RS OSTOTILRIV {$row_number}");
       $this->add_row("OSTOTILRIV.OTR_NRO:{$order['id']}");
@@ -405,5 +424,15 @@ class PrestaSalesOrders extends PrestaClient {
     $this->logger->log("Tallennettiin tiedosto {$filepath}");
 
     return true;
+  }
+
+  private function carrier_file_directory() {
+    $file_directory = "{$this->edi_filepath_base}/liitetiedostot";
+
+    if (!is_writable($file_directory)) {
+      throw new Exception("{$file_directory} ei pysty kirjoittamaan");
+    }
+
+    return "{$this->edi_filepath_base}/liitetiedostot";
   }
 }

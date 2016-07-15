@@ -1790,7 +1790,7 @@ while ($tietue = fgets($fd)) {
 
         if (is_readable($full_path)) {
           // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
-          tallenna_liite($full_path, 'lasku', $id, 'Asiakkaan lähettämä liite', 'MU');
+          tallenna_liite($full_path, 'lasku', $id, 'Asiakkaan lähettämä liite', 'VK');
 
           // poistetaan liitetiedosto hakemistosta
           unlink($full_path);

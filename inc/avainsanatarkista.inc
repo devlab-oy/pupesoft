@@ -187,10 +187,10 @@ if (!function_exists("avainsanatarkista")) {
       if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) != '') {
         $query = "SELECT *
                   FROM avainsana
-                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
-                  AND avainsana.selite  = '{$tem_selite}'
-                  AND avainsana.laji    = '{$tem_laji}'
-                  AND tunnus           != '{$tunnus}'";
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND avainsana.selite   = '{$tem_selite}'
+                  AND avainsana.laji     = '{$tem_laji}'
+                  AND tunnus            != '{$tunnus}'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {

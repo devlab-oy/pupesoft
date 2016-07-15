@@ -21,6 +21,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='kuvaus' $sel[kuvaus]>".t("Tuotteen kuvaus")."</option>";
   $ulos .= "<option value='mainosteksti' $sel[mainosteksti]>".t("Tuotteen mainosteksti")."</option>";
   $ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
+  $ulos .= "<option value='tilausrivin_tyyppi' $sel[tilausrivin_tyyppi]>".t("Tilausrivin tyyppi")."</option>";
   $ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
   $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
   $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
@@ -32,7 +33,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
   $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
-  $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("hinnastoryhmittely")."</option>";
+  $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("Hinnastoryhmittely")."</option>";
   $ulos .= "<option value='magento_attribute_set_id' {$sel['magento_attribute_set_id']}>".t("Magento attribute set ID")."</option>";
 
   // Tuotteiden avainsanojen laji
@@ -84,6 +85,24 @@ if (mysql_field_name($result, $i) == "selite") {
     if (mysql_num_rows($vresult) > 0) {
       $ulos = "<td><select name='{$nimi}'>";
       $ulos .= "<option value=''>".t("Ei elinkaarityyppiä")."</option>";
+
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        $sel = $trow[$i] == $vrow['selite'] ? "selected" : "";
+        $ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selitetark']}</option>";
+      }
+
+      $ulos .= "</select></td>";
+    }
+
+    $jatko = 0;
+  }
+  elseif (strtolower($tem_laji) == "tilausrivin_tyyppi") {
+
+    $vresult = t_avainsana("TRIVITYYPPI");
+
+    if (mysql_num_rows($vresult) > 0) {
+      $ulos = "<td><select name='{$nimi}'>";
+      $ulos .= "<option value=''>".t("Ei tilausrivityyppiä")."</option>";
 
       while ($vrow = mysql_fetch_assoc($vresult)) {
         $sel = $trow[$i] == $vrow['selite'] ? "selected" : "";

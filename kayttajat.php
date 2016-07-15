@@ -1288,7 +1288,7 @@ if ($tee == 'MUUTA') {
                 </td>
               </tr>";
 
-        $sel0 = $sel1 = "";
+        $sel0 = $sel1 = $sel2 = "";
 
         if ($krow["saatavat"] == "0") {
           $sel0 = "SELECTED";
@@ -1296,12 +1296,16 @@ if ($tee == 'MUUTA') {
         if ($krow["saatavat"] == "1") {
           $sel1 = "SELECTED";
         }
+        if ($krow["saatavat"] == "2") {
+          $sel2 = "SELECTED";
+        }
 
         echo "<tr><th align='left'>", t("Saatavat"), ":</th>";
 
         echo "<td><select name='saatavat'>";
         echo "<option value='0' {$sel0}>", t("Ei n‰ytet‰ saatavia kassak‰ytt‰j‰n‰"), "</option>";
         echo "<option value='1' {$sel1}>", t("N‰ytet‰‰n saatavat kassak‰ytt‰j‰n‰"), "</option>";
+        echo "<option value='2' {$sel2}>", t("Ei n‰ytet‰ saatavia"), "</option>";
         echo "</select></td></tr>";
       }
       else {

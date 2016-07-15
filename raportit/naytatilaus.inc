@@ -271,12 +271,12 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   if (!empty($otsikkonrot)) {
     // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
     $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen,
-             sum(rahtikirjat.kollit) kollit
-              FROM rahtikirjat
-              JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
-              WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
-             AND rahtikirjat.otsikkonro in ($otsikkonrot)
-              GROUP BY 1";
+              sum(rahtikirjat.kollit) kollit
+               FROM rahtikirjat
+               JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
+               WHERE rahtikirjat.yhtio   = '$kukarow[yhtio]'
+              AND rahtikirjat.otsikkonro in ($otsikkonrot)
+               GROUP BY 1";
     $rakre = pupe_query($query);
 
     while ($rakirrow = mysql_fetch_assoc($rakre)) {

@@ -1164,10 +1164,30 @@ else {
       $result = pupe_query($query);
 
       //tulostetaan k‰teislasku...
-      $laskutettavat  = $laskurow["tunnus"];
-      $tee       = "TARKISTA";
-      $laskutakaikki   = "KYLLA";
-      $silent       = "VIENTI";
+      $laskutettavat = $laskurow["tunnus"];
+      $tee = "TARKISTA";
+      $laskutakaikki = "KYLLA";
+      $silent = "VIENTI";
+
+      if ($kukarow['yhtio'] == "activ" and !empty($poikkeava_kpvm)) {
+        list($poikkeava_laskvv, $poikkeava_laskkk, $poikkeava_laskpp) = explode("-", $poikkeava_kpvm);
+
+        $poikkeava_laskkk = sprintf('%02d', $poikkeava_laskkk);
+        $poikkeava_laskpp = sprintf('%02d', $poikkeava_laskpp);
+
+        if (!checkdate($poikkeava_laskkk, $poikkeava_laskpp, $poikkeava_laskvv)) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")."!</font><br>";
+        }
+        elseif (strtotime($yhtiorow['tilikausi_alku']) > strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")
+          or strtotime($yhtiorow['tilikausi_loppu']) < strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")." ".t("Tilikausi on suljettu")."!</font><br>";
+        }
+        else {
+          $laskkk = $poikkeava_laskkk;
+          $laskpp = $poikkeava_laskpp;
+          $laskvv = $poikkeava_laskvv;
+        }
+      }
 
       if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
         $valittu_tulostin = $kukarow["kirjoitin"];

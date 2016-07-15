@@ -205,7 +205,7 @@ function piirra_kayttajan_tyomaaraykset() {
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table class='display dataTable' id='$pupe_DataTables'>";  
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
     echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
@@ -340,7 +340,7 @@ function piirra_hakuboksit() {
     'tyostatus',
     'komm1',
     'komm2'
-   );
+  );
   foreach ($headers as $header) {
     echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
   }

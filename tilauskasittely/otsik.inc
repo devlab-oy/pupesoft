@@ -647,7 +647,7 @@ $kassalipasquery = "SELECT kassalipas.tunnus kassalipas, maksuehto.tunnus maksue
                     FROM kassalipas
                     JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.kateinen != '')
                     WHERE kassalipas.yhtio = '$kukarow[yhtio]'
-                    AND kassalipas.nimi = 'Verkkokauppa'
+                    AND kassalipas.nimi    = 'Verkkokauppa'
                     ORDER BY maksuehto.tunnus
                     LIMIT 1";
 $vk_kassalipas_res = pupe_query($kassalipasquery);
@@ -2365,6 +2365,12 @@ if ($tila == "" and !isset($jatka)) {
         tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
         tarkista_oikeus("verkkolasku.php"))
     ) {
+
+      // Luodaan suoraan sisäinen lasku, jos asiakkaan taakse on näin valittu
+      if (!isset($laskurow["sisainen"]) and $srow['chn'] == "888") {
+        $sisah = 'CHECKED';
+      }
+
       $oikea_sarake[$oikea] = "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
       $oikea++;
     }
@@ -3154,6 +3160,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<option value='666' {$sel['666']}>" . hae_chn_teksti('666') . "</option>";
         echo "<option value='667' {$sel['667']}>" . hae_chn_teksti('667') . "</option>";
         echo "<option value='999' {$sel['999']}>" . hae_chn_teksti('999') . "</option>";
+        echo "<option value='888' {$sel['888']}>" . hae_chn_teksti('888') . "</option>";
         echo "</select></td>";
         echo "</tr>";
       }
@@ -3503,7 +3510,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
       echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
     }
 

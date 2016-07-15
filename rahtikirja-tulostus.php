@@ -1573,38 +1573,38 @@ if (!function_exists("laheta_excel_koontilahete")) {
     $_otunnukset = implode(',', $otunnukset);
 
     $query = "SELECT lasku.asiakkaan_tilausnumero,
-                     lasku.nimi,
-                     lasku.toim_nimi,
-                     asiakaskommentti.kommentti,
-                     tilausrivi.tuoteno,
-                     tilausrivi.tilkpl,
-                     tuote.eankoodi,
-                     tuote.myynti_era,
-                     IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
+              lasku.nimi,
+              lasku.toim_nimi,
+              asiakaskommentti.kommentti,
+              tilausrivi.tuoteno,
+              tilausrivi.tilkpl,
+              tuote.eankoodi,
+              tuote.myynti_era,
+              IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
               FROM lasku
               JOIN tilausrivi
-                ON tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-                AND tilausrivi.keratty <> ''
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus        = lasku.tunnus
+              AND tilausrivi.keratty        <> ''
               JOIN tuote
-                ON tuote.yhtio = tilausrivi.yhtio
-                AND tuote.tuoteno = tilausrivi.tuoteno
+              ON tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno             = tilausrivi.tuoteno
               JOIN asiakas
-                ON asiakas.yhtio = lasku.yhtio
-                AND asiakas.tunnus = lasku.liitostunnus
+              ON asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus            = lasku.liitostunnus
               LEFT JOIN asiakaskommentti
-                ON asiakaskommentti.yhtio = tilausrivi.yhtio
-                AND asiakaskommentti.ytunnus = lasku.ytunnus
-                AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+              ON asiakaskommentti.yhtio = tilausrivi.yhtio
+              AND asiakaskommentti.ytunnus  = lasku.ytunnus
+              AND asiakaskommentti.tuoteno  = tilausrivi.tuoteno
               LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
-                ON avainsana_nimitys.yhtio = tuote.yhtio
-                AND avainsana_nimitys.kieli = asiakas.kieli
-                AND avainsana_nimitys.laji = 'nimitys'
-                AND avainsana_nimitys.tuoteno = tuote.tuoteno
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.tila = 'L'
-                AND lasku.alatila = 'B'
-                AND lasku.tunnus IN ($_otunnukset)";
+              ON avainsana_nimitys.yhtio = tuote.yhtio
+              AND avainsana_nimitys.kieli   = asiakas.kieli
+              AND avainsana_nimitys.laji    = 'nimitys'
+              AND avainsana_nimitys.tuoteno = tuote.tuoteno
+              WHERE lasku.yhtio             = '{$kukarow['yhtio']}'
+              AND lasku.tila                = 'L'
+              AND lasku.alatila             = 'B'
+              AND lasku.tunnus              IN ($_otunnukset)";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) return false;
@@ -1627,11 +1627,11 @@ if (!function_exists("laheta_excel_koontilahete")) {
       $filename    = "Lahete.xlsx";
     }
 
-  if (!empty($header_nimi)) {
-    $worksheet->writeString($excelrivi,
-      $excelsarake,
-      "Deliveries to {$header_nimi}",
-      $format_bold);
+    if (!empty($header_nimi)) {
+      $worksheet->writeString($excelrivi,
+        $excelsarake,
+        "Deliveries to {$header_nimi}",
+        $format_bold);
 
       for ($i=0; $i < 3; $i++) $excelrivi++;
     }

@@ -164,6 +164,8 @@ class PrestaSalesOrders extends PrestaClient {
    *
    * @return array
    */
+
+
   private function fetch_sales_orders() {
     $this->logger->log('Fetching sales orders');
 

@@ -28,6 +28,8 @@ class PrestaSpecificPrices extends PrestaClient {
    * @param SimpleXMLElement $existing_specific_price
    * @return \SimpleXMLElement
    */
+
+
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
     if (is_null($existing_specific_price)) {
       $xml = $this->empty_xml();

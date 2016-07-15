@@ -421,11 +421,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
         $query = "SELECT *
                   FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$laskurow['tunnus']}'
-                  AND tyyppi = 'O'
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND otunnus   = '{$laskurow['tunnus']}'
+                  AND tyyppi    = 'O'
                   AND hyllyalue = ''
-                  AND hyllynro = ''
+                  AND hyllynro  = ''
                   AND hyllyvali = ''
                   AND hyllytaso = ''";
         $result = pupe_query($query);
@@ -501,9 +501,9 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         // Tarkistetaan löytyykö kohdistettuja rivejä
         $tarkistus_q = "SELECT DISTINCT uusiotunnus
                         FROM tilausrivi
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND otunnus = '{$laskurow['tunnus']}'
-                        AND tyyppi = 'O'
+                        WHERE yhtio      = '{$kukarow['yhtio']}'
+                        AND otunnus      = '{$laskurow['tunnus']}'
+                        AND tyyppi       = 'O'
                         AND uusiotunnus != 0";
         $tarkistus_r = pupe_query($tarkistus_q);
 
@@ -514,7 +514,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           $query = "SELECT nimi, laskunro, liitostunnus, ytunnus, tunnus
                     FROM lasku
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$saapumisnro}'";
+                    AND tunnus  = '{$saapumisnro}'";
           $saapres = pupe_query($query);
           $saaprow = mysql_fetch_assoc($saapres);
 
@@ -540,27 +540,27 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           // Kohdistetaan rivit valmiiksi
           $kohdistus_q = "UPDATE tilausrivi SET
-                          uusiotunnus = '{$saapumisnro}'
-                          WHERE yhtio = '{$kukarow['yhtio']}'
-                          AND otunnus = '{$laskurow['tunnus']}'
-                          AND tyyppi = 'O'
+                          uusiotunnus     = '{$saapumisnro}'
+                          WHERE yhtio     = '{$kukarow['yhtio']}'
+                          AND otunnus     = '{$laskurow['tunnus']}'
+                          AND tyyppi      = 'O'
                           AND uusiotunnus = 0";
           pupe_query($kohdistus_q);
 
           $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
           $ulkoinen_varasto = false;
           // Lähetetään sanoma vain, jos valitulla varastolla on ulkoinen jarjestelma
           if ($laskurow['varasto'] > 0) {
             $v_query = "SELECT *
                         FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$laskurow['varasto']}'
+                        WHERE yhtio               = '{$kukarow['yhtio']}'
+                        AND tunnus                = '{$laskurow['varasto']}'
                         AND ulkoinen_jarjestelma != ''";
             $v_result = pupe_query($v_query);
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }
+            }
           }
           $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 
@@ -1297,8 +1297,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       // katotaan onko joku rivi jo liitetty johonkin saapumiseen ja jos on niin annetaan mahdollisuus piilottaa lukitut rivit
       $query = "SELECT tunnus
                 from tilausrivi
-                where yhtio = '$kukarow[yhtio]'
-                and otunnus = '$laskurow[tunnus]'
+                where yhtio      = '$kukarow[yhtio]'
+                and otunnus      = '$laskurow[tunnus]'
                 and uusiotunnus != 0
                 LIMIT 1";
       $saapumisriveja_res = pupe_query($query);
@@ -2062,7 +2062,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             </td>";
 
         if (mysql_num_rows($saapumisriveja_res) == 0 and tarkista_oikeus("keikka.php")) {
-         echo "  <td class='back'>
+          echo "  <td class='back'>
               <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
               <input type='hidden' name='toim'          value = '$toim'>
               <input type='hidden' name='lopetus'        value = '$lopetus'>

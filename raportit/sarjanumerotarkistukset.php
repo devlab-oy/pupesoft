@@ -194,12 +194,11 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       }
 
       echo "<tr>
-          <td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a><br><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
-          <td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($vrow["tuoteno"])."'>$vrow[tuoteno]</a></td>
+          <td valign='top'><a name='$vrow[ostotunnus]'>".js_openUrlNewWindow("$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]", "$vrow[otunnus]", "", 1000, 800)."<br>
+          ".js_openUrlNewWindow("$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]", "$vrow[ostotilaus]", "", 1000, 800)."</td>
+          <td valign='top'>".js_openUrlNewWindow("../tuote.php?tee=Z&tuoteno=".urlencode($vrow["tuoteno"]), "$vrow[tuoteno]", "", 1000, 800)."</td>
           <td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
           <td valign='top' align='right'>$vrow[rivihinta]<br>".sprintf('%.2f', $ostohinta)."</td>";
-
-
 
       if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta, 2) - $vrow["kate"]) > 0.01) {
         echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$ostohinta)."</font><br>";
@@ -258,7 +257,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
       }
 
       if ($vrow["sarjatunnus"] != "" and $vrow["css"] == abs($vrow["kpl"])) {
-        echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($vrow["tuoteno"])."&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
+        echo "<td valign='top'>".js_openUrlNewWindow("../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($vrow["tuoteno"])."&sarjanumero_haku=$vrow[sarjanumero]", "$vrow[sarjanumero]", "", 1000, 800)."<br>$vrow[kaytetty]</td></tr>";
       }
       else {
         if ($vrow["kpl"] > 0 and $tyyppi == "myynti") {
@@ -267,7 +266,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
         else {
           $lisays = "ostorivitunnus=$vrow[ostotunnus]";
         }
-        echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($vrow["tuoteno"])."&$lisays&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6//jarjestys_7=$jarjestys_7'>Sarjanumero</a><br>&nbsp;</tr>";
+        echo "<td valign='top'>".js_openUrlNewWindow("../tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($vrow["tuoteno"])."&$lisays&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6//jarjestys_7=$jarjestys_7", "Sarjanumero", "", 1000, 800)."<br>&nbsp;</tr>";
       }
     }
 

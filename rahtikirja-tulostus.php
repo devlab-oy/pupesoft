@@ -47,6 +47,7 @@ if (!function_exists("laheta_excel_koontilahete")) {
                      lasku.toim_nimi,
                      asiakaskommentti.kommentti,
                      tilausrivi.tuoteno,
+                     tilausrivi.tilkpl,
                      tilausrivi.varattu,
                      tuote.eankoodi,
                      tuote.myynti_era,
@@ -113,7 +114,8 @@ if (!function_exists("laheta_excel_koontilahete")) {
       'EAN Code',
       'Product Description',
       'Pack',
-      'QTY'
+      'ordered QTY',
+      'delivered QTY'
     );
 
     foreach ($headerit as $header) {
@@ -132,6 +134,7 @@ if (!function_exists("laheta_excel_koontilahete")) {
         $row['eankoodi'],
         $row['nimitys'],
         $row['myynti_era'],
+        $row['tilkpl'],
         $row['varattu']
       );
 

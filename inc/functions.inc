@@ -8786,6 +8786,29 @@ if (!function_exists('hae_liite')) {
   }
 }
 
+if (!function_exists('tilauksen_liitetiedostot')) {
+  function tilauksen_liitetiedostot($liitostunnukset, $kayttotarkoitus = null) {
+    global $kukarow, $yhtiorow;
+
+    $tunnukset = array();
+    $kayttotarkoitus_lisa = isset($kayttotarkoitus) ? " and kayttotarkoitus = '{$kayttotarkoitus}' " : '';
+
+    $query = "SELECT tunnus
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitos = 'lasku'
+              AND liitostunnus in ({$liitostunnukset})
+              {$kayttotarkoitus_lisa}";
+    $result = pupe_query($query);
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $tunnukset[] = $row['tunnus'];
+    }
+
+    return $tunnukset;
+  }
+}
+
 if (!function_exists("tarvitaanko_intrastat")) {
   function tarvitaanko_intrastat($maa_lahetys, $maa_maara) {
     global $yhtiorow;

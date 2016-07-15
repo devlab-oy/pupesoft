@@ -256,6 +256,11 @@ $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
 
+// Mihin tilaan laitetaan verkkokauppatilauksen tuotteet, jos saldo on loppu Pupesta
+if (empty($verkkokauppa_oletus_loppuneet) or !in_array($verkkokauppa_oletus_loppuneet, array('H', 'J'))) {
+  $verkkokauppa_oletus_loppuneet = 'H';
+}
+
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
 
@@ -2227,7 +2232,7 @@ while ($tietue = fgets($fd)) {
 
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
-          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
+          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi tai jälkkäriksi
           if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
 
             list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
@@ -2279,7 +2284,7 @@ while ($tietue = fgets($fd)) {
                 $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
               }
               else {
-                $var = "H";
+                $var = $verkkokauppa_oletus_loppuneet;
               }
             }
           }

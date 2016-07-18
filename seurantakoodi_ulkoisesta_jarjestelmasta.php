@@ -73,6 +73,8 @@ while (false !== ($file = readdir($handle))) {
     }
 
     if (trim($seurantakoodi) == '') {
+      pupesoft_log('outbound_delivery', "Seurantakoodi puuttuu riviltä");
+
       continue;
     }
 
@@ -83,6 +85,8 @@ while (false !== ($file = readdir($handle))) {
     $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
     if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
+      pupesoft_log('outbound_delivery', "Tilausnumero puuttuu riviltä");
+
       continue;
     }
 
@@ -94,6 +98,8 @@ while (false !== ($file = readdir($handle))) {
     pupe_query($query);
 
     if (mysql_affected_rows() == 0) {
+      pupesoft_log('outbound_delivery', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
+
       $rahtikirja_hukassa = true;
       break;
     }
@@ -115,6 +121,8 @@ while (false !== ($file = readdir($handle))) {
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
+      pupesoft_log('outbound_delivery', "Päivitetään toimitetuksi Magentoon");
+
       $query = "SELECT toimitustapa
                 FROM rahtikirjat
                 WHERE yhtio    = '{$kukarow['yhtio']}'

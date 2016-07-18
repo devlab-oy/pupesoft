@@ -51,8 +51,6 @@ while (false !== ($file = readdir($handle))) {
   $message_type = posten_message_type($full_filepath);
 
   if ($message_type != 'InboundDeliveryConfirmation') {
-    pupesoft_log('inbound_delivery_confirmation', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
     continue;
   }
 

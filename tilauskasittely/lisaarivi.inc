@@ -1966,6 +1966,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
 
+              $kampanjatunnus = 'NULL';
+              if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+                $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+              }
+
               $query = "INSERT into tilausrivi set
                         hyllyalue       = '$myy_hyllyalue[$indeksi]',
                         hyllynro        = '$myy_hyllynro[$indeksi]',
@@ -1992,6 +1997,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         toimaika        = '$toimaika',
                         kommentti       = '$kommentti',
                         ale_peruste     = '{$GLOBALS['ale_peruste']}',
+                        campaign_id     = {$kampanjatunnus},
                         var             = '',
                         var2            = '{$var2}',
                         try             = '$trow[try]',
@@ -3291,6 +3297,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllyvali = $myy_hyllyvali_temp;
     }
 
+    $kampanjatunnus = 'NULL';
+    if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+      $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+    }
+
     // lisätään puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',
@@ -3320,6 +3331,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               toimaika        = '$toimaika',
               kommentti       = '$kommentti',
               ale_peruste     = '{$GLOBALS['ale_peruste']}',
+              campaign_id     = {$kampanjatunnus},
               var             = '$var',
               var2            = '{$var2}',
               try             = '$trow[try]',

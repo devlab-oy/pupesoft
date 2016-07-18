@@ -405,6 +405,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
           }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
+          }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
           }
@@ -482,6 +485,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
+          }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
           }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";

@@ -470,7 +470,7 @@ else {
 }
 
 $sallitaanko_rivikommentti_osto   = ($rivityyppi == 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'O')));
-$sallitaanko_rivikommentti_myynti = ($rivityyppi == 'L' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
+$sallitaanko_rivikommentti_myynti = ($rivityyppi != 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
 $sallitaanko_rivikommentti = ($sallitaanko_rivikommentti_osto or $sallitaanko_rivikommentti_myynti);
 
 // Onko p‰‰ss‰tty varasto josta myyd‰‰n

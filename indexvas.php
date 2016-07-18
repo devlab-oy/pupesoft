@@ -241,7 +241,7 @@ while ($orow = mysql_fetch_array($result)) {
 
     $goclass = "";
 
-    if (isset($go) and $go == $mrow["nimi"] or $go == "$mrow[nimi]?toim=$mrow[alanimi]") {
+    if (isset($go) and ($go == $mrow["nimi"] or $go == "$mrow[nimi]?toim=$mrow[alanimi]")) {
       $goclass = " menu_aktivoitu";
       unset($go);
     }

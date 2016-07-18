@@ -54,37 +54,16 @@ if ($handle === false) {
 }
 
 while (false !== ($file = readdir($handle))) {
-  if (is_dir($path.$file)) {
-    continue;
-  }
-
-  $path_parts = pathinfo($file);
-
-  if (empty($path_parts['extension']) or strtoupper($path_parts['extension']) != 'XML') {
-    continue;
-  }
-
-  $xml = simplexml_load_file($path.$file);
-
-  pupesoft_log('outbound_delivery', "Käsitellään sanoma {$file}");
-
-  if (!is_object($xml)) {
-    pupesoft_log('outbound_delivery', "Virheellinen XML sanoma {$file}");
-
-    continue;
-  }
-
-  $message_type = "";
-
-  if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-    $message_type = trim($xml->MessageHeader->MessageType);
-  }
+  $full_filepath = $path.$file;
+  $message_type = posten_message_type($full_filepath);
 
   if ($message_type != 'OutboundDeliveryConfirmation') {
-    pupesoft_log('outbound_delivery', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
     continue;
   }
+
+  $xml = simplexml_load_file($full_filepath);
+
+  pupesoft_log('outbound_delivery', "Käsitellään sanoma {$file}");
 
   $otunnus = (int) $xml->CustPackingSlip->SalesId;
 
@@ -100,13 +79,13 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (isset($xml->CustPackingSlip->DeliveryDate)) {
-    #<DeliveryDate>20-04-2016</DeliveryDate>
+    //<DeliveryDate>20-04-2016</DeliveryDate>
     $delivery_date = $xml->CustPackingSlip->DeliveryDate;
     $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
   }
   elseif (isset($xml->CustPackingSlip->Deliverydate)) {
-    #HHV-case
-    #<Deliverydate>2016-04-20T12:34:56</Deliverydate>
+    //HHV-case
+    //<Deliverydate>2016-04-20T12:34:56</Deliverydate>
     $delivery_date = $xml->CustPackingSlip->Deliverydate;
     $toimaika = date("Y-m-d H:i:s", strtotime($delivery_date));
   }
@@ -142,8 +121,8 @@ while (false !== ($file = readdir($handle))) {
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
         $tilausrivit[$tilausrivin_tunnus] = array(
-          'eankoodi' => mysql_real_escape_string($line->ItemNumber),
-          'keratty'  => (float) $line->DeliveredQuantity
+          'item_number' => mysql_real_escape_string($line->ItemNumber),
+          'keratty'     => (float) $line->DeliveredQuantity
         );
       }
       else {
@@ -155,25 +134,21 @@ while (false !== ($file = readdir($handle))) {
 
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
-      $eankoodi = $data['eankoodi'];
-      $keratty  = $data['keratty'];
+      $item_number = $data['item_number'];
+      $keratty     = $data['keratty'];
 
-      if ($hhv) {
-        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
-      }
-      else {
-        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
-      }
+      $posten_itemnumberfield = posten_field('ItemNumber');
+      $tuotelisa = "AND tuote.{$posten_itemnumberfield} = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'
-                AND tilausrivi.tunnus != 0
-                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-                AND tilausrivi.keratty = ''
-                AND tilausrivi.toimitettu = ''";
+                WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+                AND tilausrivi.tunnus      = '{$tilausrivin_tunnus}'
+                AND tilausrivi.tunnus     != 0
+                AND tilausrivi.otunnus     = '{$laskurow['tunnus']}'
+                AND tilausrivi.keratty     = ''
+                AND tilausrivi.toimitettu  = ''";
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
@@ -232,19 +207,19 @@ while (false !== ($file = readdir($handle))) {
       $tuotteiden_paino += $painorow['paino'];
     }
 
-    # Päivitetään saldottomat tuotteet myös toimitetuksi
+    // Päivitetään saldottomat tuotteet myös toimitetuksi
     $query = "UPDATE tilausrivi
               JOIN tuote ON (
-                tuote.yhtio = tilausrivi.yhtio AND
-                tuote.tuoteno = tilausrivi.tuoteno AND
-                tuote.ei_saldoa != ''
+                tuote.yhtio              = tilausrivi.yhtio AND
+                tuote.tuoteno            = tilausrivi.tuoteno AND
+                tuote.ei_saldoa         != ''
               )
               SET tilausrivi.keratty = '{$kukarow['kuka']}',
-              tilausrivi.kerattyaika = '{$toimaika}',
-              tilausrivi.toimitettu = '{$kukarow['kuka']}',
-              tilausrivi.toimitettuaika = '{$toimaika}'
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus  = '{$otunnus}'";
+              tilausrivi.kerattyaika     = '{$toimaika}',
+              tilausrivi.toimitettu      = '{$kukarow['kuka']}',
+              tilausrivi.toimitettuaika  = '{$toimaika}'
+              WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus     = '{$otunnus}'";
     pupe_query($query);
 
     $query  = "INSERT INTO rahtikirjat SET
@@ -366,7 +341,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // siirretään tiedosto done-kansioon
-  rename($path.$file, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

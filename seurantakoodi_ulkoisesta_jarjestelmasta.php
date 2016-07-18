@@ -28,126 +28,140 @@ cron_log();
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
-$yhtio = mysql_escape_string(trim($argv[1]));
+$yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow = hae_kukarow('admin', $yhtio);
 
-// Haetaan kukarow
-$query = "SELECT *
-          FROM kuka
-          WHERE yhtio = '{$yhtio}'
-          AND kuka    = 'admin'";
-$kukares = pupe_query($query);
-
-if (mysql_num_rows($kukares) != 1) {
+if (empty($kukarow)) {
   exit("VIRHE: Admin käyttäjä ei löydy!\n");
 }
 
-$kukarow = mysql_fetch_assoc($kukares);
-
 $path = trim($argv[2]);
-$path = substr($path, -1) != '/' ? $path.'/' : $path;
+$path = rtrim($path, '/').'/';
+$handle = opendir($path);
 
-if ($handle = opendir($path)) {
+if ($handle === false) {
+  exit;
+}
 
-  while (false !== ($file = readdir($handle))) {
+$_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-    if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
+while (false !== ($file = readdir($handle))) {
+  $full_filepath = $path.$file;
 
-    $path_parts = pathinfo($file);
-    $ext = strtoupper($path_parts['extension']);
+  $is_tc  = check_file_extension($full_filepath, 'TC');
+  $is_txt = check_file_extension($full_filepath, 'TXT');
 
-    if ($ext == 'TC' or $ext == 'TXT') {
+  if ($is_tc === false and $is_txt === false) {
+    continue;
+  }
 
-      $filehandle = fopen($path.$file, "r");
-      $rahtikirja_hukassa = false;
+  $filehandle = fopen($full_filepath, "r");
+  $rahtikirja_hukassa = false;
 
-      while ($tietue = fgets($filehandle)) {
+  while ($tietue = fgets($filehandle)) {
+    // Tyhjät rivit skipataan
+    if (trim($tietue) == "") {
+      continue;
+    }
 
-        // Tyhjät rivit skipataan
-        if (trim($tietue) == "") continue;
+    if ($is_tc) {
+      list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
+    }
+    else {
+      list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
+    }
 
-        if ($ext == 'TC') {
-          list($seurantakoodi, $posten_lahetenumero, $tilausnumero) = explode(';', $tietue);
-        }
-        else {
-          list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
-        }
+    if (trim($seurantakoodi) == '') {
+      pupesoft_log('outbound_delivery', "Seurantakoodi puuttuu riviltä");
 
-        if (trim($seurantakoodi) == '') continue;
-        // Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
-        list($tilausnumero) = explode(' ', $tilausnumero);
+      continue;
+    }
 
-        $tilausnumero = (int) $tilausnumero;
-        $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
+    // Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
+    list($tilausnumero) = explode(' ', $tilausnumero);
 
-        if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
+    $tilausnumero = (int) $tilausnumero;
+    $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
-        $query = "UPDATE rahtikirjat SET
-                  rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
-                  tulostettu     = now()
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND otsikkonro = '{$tilausnumero}'";
-        pupe_query($query);
+    if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
+      pupesoft_log('outbound_delivery', "Tilausnumero puuttuu riviltä");
 
-        if (mysql_affected_rows() == 0) {
-          $rahtikirja_hukassa = true;
-          break;
-        }
+      continue;
+    }
 
-        $query = "SELECT SUM(kilot) kilotyht
-                  FROM rahtikirjat
-                  WHERE yhtio    = '{$kukarow['yhtio']}'
-                  AND otsikkonro = '{$tilausnumero}'";
-        $kilotres = pupe_query($query);
-        $kilotrow = mysql_fetch_assoc($kilotres);
+    $query = "UPDATE rahtikirjat SET
+              rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
+              tulostettu     = now()
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND otsikkonro = '{$tilausnumero}'";
+    pupe_query($query);
 
-        paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
+    if (mysql_affected_rows() == 0) {
+      pupesoft_log('outbound_delivery', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
 
-        pupesoft_log('outbound_delivery', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+      $rahtikirja_hukassa = true;
+      break;
+    }
 
-        $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+    $query = "SELECT SUM(kilot) kilotyht
+              FROM rahtikirjat
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND otsikkonro = '{$tilausnumero}'";
+    $kilotres = pupe_query($query);
+    $kilotrow = mysql_fetch_assoc($kilotres);
 
-        // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-        if ($_magento_kaytossa) {
-          $query = "SELECT toimitustapa
-                    FROM rahtikirjat
-                    WHERE yhtio    = '{$kukarow['yhtio']}'
-                    AND otsikkonro = '{$tilausnumero}'";
-          $chk_res = pupe_query($query);
+    $params = array(
+      'otunnukset' => $tilausnumero,
+      'kilotyht' => $kilotrow['kilotyht']
+    );
+    paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
-          if (mysql_num_rows($chk_res) > 0) {
+    pupesoft_log('outbound_delivery', "Tilaus {$otunnus} toimituskuittaus käsitelty");
 
-            $chk_row = mysql_fetch_assoc($chk_res);
+    // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
+    if ($_magento_kaytossa) {
+      pupesoft_log('outbound_delivery', "Päivitetään toimitetuksi Magentoon");
 
-            $query = "SELECT *
-                      FROM toimitustapa
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND selite  = '{$chk_row['toimitustapa']}'";
-            $toitares = pupe_query($query);
-            $toitarow = mysql_fetch_assoc($toitares);
+      $query = "SELECT toimitustapa
+                FROM rahtikirjat
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                AND otsikkonro = '{$tilausnumero}'";
+      $chk_res = pupe_query($query);
 
-            $query = "SELECT asiakkaan_tilausnumero
-                      FROM lasku
-                      WHERE yhtio                 = '{$kukarow['yhtio']}'
-                      AND tunnus                  = '{$tilausnumero}'
-                      AND laatija                 = 'Magento'
-                      AND asiakkaan_tilausnumero != ''";
-            $mageres = pupe_query($query);
+      if (mysql_num_rows($chk_res) > 0) {
+        $chk_row = mysql_fetch_assoc($chk_res);
 
-            while ($magerow = mysql_fetch_assoc($mageres)) {
-              $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
-              $magento_api_rak = $seurantakoodi;
-              $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+        $query = "SELECT *
+                  FROM toimitustapa
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND selite  = '{$chk_row['toimitustapa']}'";
+        $toitares = pupe_query($query);
+        $toitarow = mysql_fetch_assoc($toitares);
 
-              require "magento_toimita_tilaus.php";
-            }
-          }
+        $query = "SELECT asiakkaan_tilausnumero
+                  FROM lasku
+                  WHERE yhtio                 = '{$kukarow['yhtio']}'
+                  AND tunnus                  = '{$tilausnumero}'
+                  AND laatija                 = 'Magento'
+                  AND asiakkaan_tilausnumero != ''";
+        $mageres = pupe_query($query);
+
+        while ($magerow = mysql_fetch_assoc($mageres)) {
+          $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+          $magento_api_rak = $seurantakoodi;
+          $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+
+          require "magento_toimita_tilaus.php";
         }
       }
-      // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
-      if (!$rahtikirja_hukassa) rename($path.$file, $path."done/".$file);
     }
   }
 
-  closedir($handle);
+  // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
+  if (!$rahtikirja_hukassa) {
+    rename($full_filepath, $path."done/".$file);
+  }
 }
+
+closedir($handle);

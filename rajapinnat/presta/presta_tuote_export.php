@@ -78,6 +78,10 @@ if (!isset($presta_edi_folderpath)) {
   // Mihin hakemistoon tehdään Prestan tilauksista EDI tiedosto
   die('Presta edi folder path puuttuu');
 }
+if (!isset($presta_debug)) {
+  // debug mode echottaa ruudulle ajon statusta
+  $presta_debug = false;
+}
 if (!isset($presta_home_category_id)) {
   // Prestan "home" kategorian tunnus, jonka alle kaikki Pupesoftin kategoriat siirretään
   $presta_home_category_id = 2;
@@ -85,6 +89,11 @@ if (!isset($presta_home_category_id)) {
 if (!isset($presta_verkkokauppa_asiakas)) {
   // verkkokauppa_asiakas on fallback, mikäli oikeaa asiakasta ei löydetä pupesoftista
   $presta_verkkokauppa_asiakas = null;
+}
+if (!isset($presta_laskutusosoitteen_muutos)) {
+  // voidaanko verkkokaupassa vaihtaa laskutusosoitetta
+  // jos false, otetaan aina pupesoftin asiakkaan laskutusosoite
+  $presta_laskutusosoitteen_muutos = true;
 }
 if (!isset($presta_haettavat_tilaus_statukset)) {
   // Missä tilassa olevia tilauksia haetaan Prestasta
@@ -186,6 +195,10 @@ if (!isset($presta_asiakasryhmien_hinnat)) {
   // 0 = Verolliset hinnat, 1 = Verottomat hinnat
   $presta_asiakasryhmien_hinnat = 0;
 }
+if (!isset($presta_hinnaston_asiakasryhma)) {
+  // Prestashop customer group id, joka lisätään kaikki Pupesoftin hinnastohintoihin
+  $presta_hinnaston_asiakasryhma = null;
+}
 if (!isset($presta_varastot)) {
   // Pupesoftin varastojen tunnukset, joista lasketaan Prestaan saldot. Nolla on kaikki varastot.
   $presta_varastot = array(0);
@@ -193,6 +206,10 @@ if (!isset($presta_varastot)) {
 if (!isset($presta_tuotekuvien_nouto)) {
   // Siirretäänkö Prestashopin tuotekuvat Pupesoftiin
   $presta_tuotekuvien_nouto = false;
+}
+if (!isset($presta_tilauksen_liitetiedostojen_nouto)) {
+  // Haetaan tilauksen liitetiedostot. HUOM! Vaatii custom muutoksia Prestaan.
+  $presta_tilauksen_liitetiedostojen_nouto = false;
 }
 if (!isset($presta_siirrettavat_hinnat)) {
   // Mitä hintoja siirretään Prestan Specific Prices hinnoiksi
@@ -282,9 +299,10 @@ if (presta_ajetaanko_sykronointi('asiakashinnat', $synkronoi)) {
   $hinnat = presta_specific_prices($presta_siirrettavat_hinnat);
 
   presta_echo("Siirretään specific prices.");
-  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_asiakashinnat');
+  $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key, 'presta_hinnoittelu');
 
   $presta_prices->set_currency_codes($presta_valuuttakoodit);
+  $presta_prices->set_presta_static_customer_group($presta_hinnaston_asiakasryhma);
   $presta_prices->sync_prices($hinnat);
 }
 
@@ -292,11 +310,13 @@ if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   presta_echo("Haetaan tilaukset.");
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key, 'presta_tilaukset');
 
+  $presta_orders->set_changeable_invoice_address($presta_laskutusosoitteen_muutos);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
-  $presta_orders->set_yhtiorow($yhtiorow);
-  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_fetch_carrier_files($presta_tilauksen_liitetiedostojen_nouto);
   $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
   $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
+  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_yhtiorow($yhtiorow);
   $presta_orders->transfer_orders_to_pupesoft();
 }
 

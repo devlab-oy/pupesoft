@@ -197,9 +197,9 @@ if ($valitut["KAUSI3"] != '') {
   $ehd_kausi_o3  = $lo;
 }
 
-$sarakkeet["SARAKE10"]  = t("Ostoehdotus")." $ehd_kausi_o1\t";
-$sarakkeet["SARAKE11"]  = t("Ostoehdotus")." $ehd_kausi_o2\t";
-$sarakkeet["SARAKE12"]  = t("Ostoehdotus")." $ehd_kausi_o3\t";
+$sarakkeet["SARAKE10"]  = t("Ostoehdotus A:")." $ehd_kausi_o1\t";
+$sarakkeet["SARAKE11"]  = t("Ostoehdotus B:")." $ehd_kausi_o2\t";
+$sarakkeet["SARAKE12"]  = t("Ostoehdotus C:")." $ehd_kausi_o3\t";
 
 $sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
 $sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";

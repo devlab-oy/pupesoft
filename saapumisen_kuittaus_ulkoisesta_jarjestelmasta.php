@@ -114,7 +114,6 @@ while (false !== ($file = readdir($handle))) {
   // Loopataan rivit tilausrivit-arrayseen
   // koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
   foreach ($sanoman_kaikki_rivit->Line as $key => $line) {
-
     $rivitunnus = (int) $line->TransId;
     $tuoteno    = (string) $line->ItemNumber;
     $kpl        = (float) $line->ArrivedQuantity;
@@ -131,7 +130,6 @@ while (false !== ($file = readdir($handle))) {
   }
 
   foreach ($tilausrivit as $rivitunnus => $data) {
-
     $tuoteno = $data['tuoteno'];
     $kpl     = $data['kpl'];
 
@@ -148,7 +146,6 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (count($tilausrivit) > 0) {
-
     pupesoft_log('inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
 
     $query = "SELECT *

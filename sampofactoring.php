@@ -16,7 +16,7 @@ if ($tee == 'TARKISTA') {
 
 $query = "SELECT *
           FROM factoring
-          WHERE yhtio = '{$kukarow["yhtio"]}'
+          WHERE yhtio        = '{$kukarow["yhtio"]}'
           and factoringyhtio = 'SAMPO'
           {$factoring_tarkista_lisa}";
 $factoring_result = pupe_query($query);
@@ -59,14 +59,14 @@ if ($tee == "TOIMINNOT") {
   $query = "SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              and maksuehto.tunnus = lasku.maksuehto
-              and maksuehto.factoring_id = '$factoring_id')
-            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
-            lasku.tila                   = 'U' and
-            lasku.alatila                = 'X' and
-            lasku.summa                 != 0 and
-            lasku.factoringsiirtonumero  = '' and
-            lasku.valkoodi               = '$yhtiorow[valkoodi]'";
+              and maksuehto.tunnus        = lasku.maksuehto
+              and maksuehto.factoring_id  = '$factoring_id')
+            WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+            lasku.tila                    = 'U' and
+            lasku.alatila                 = 'X' and
+            lasku.summa                  != 0 and
+            lasku.factoringsiirtonumero   = '' and
+            lasku.valkoodi                = '$yhtiorow[valkoodi]'";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
@@ -138,14 +138,14 @@ if ($tee == 'TULOSTA') {
   $query = "SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
             FROM lasku USE INDEX (factoring)
             JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              and maksuehto.tunnus = lasku.maksuehto
-              and maksuehto.factoring_id = '$factoring_id')
-            WHERE lasku.yhtio            = '$kukarow[yhtio]' and
-            lasku.tila                   = 'U' and
-            lasku.alatila                = 'X' and
-            lasku.summa                 != 0 and
-            lasku.factoringsiirtonumero  = '$numero' and
-            lasku.valkoodi               = '$yhtiorow[valkoodi]'
+              and maksuehto.tunnus        = lasku.maksuehto
+              and maksuehto.factoring_id  = '$factoring_id')
+            WHERE lasku.yhtio             = '$kukarow[yhtio]' and
+            lasku.tila                    = 'U' and
+            lasku.alatila                 = 'X' and
+            lasku.summa                  != 0 and
+            lasku.factoringsiirtonumero   = '$numero' and
+            lasku.valkoodi                = '$yhtiorow[valkoodi]'
             order by laskunro";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
@@ -322,7 +322,15 @@ if ($tee == 'TULOSTA') {
 
     $tempfile1 = tempnam("/tmp", "SAMPOFAC");
     $null = file_put_contents($tempfile1, $otsikkoulos);
-    $null = exec("a2ps -o ".$tempfile1.".ps --no-header -R --columns=1 --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile1");
+
+    $params = array(
+      'chars'    => 80,
+      'filename' => $tempfile1,
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
 
     if ($kirrow["komento"] == 'email') {
 
@@ -335,33 +343,41 @@ if ($tee == 'TULOSTA') {
       $kutsu[0] = "Danskebankfactoring-otsikko";
       $ctype[0] = "pdf";
 
-      system("ps2pdf -sPAPERSIZE=a4 $tempfile1.ps $liite[0]");
+      system("ps2pdf -sPAPERSIZE=a4 $filenimi_ps $liite[0]");
     }
     else {
-      $null = exec("$kirrow[komento] ".$tempfile1.".ps");
+      $null = exec("$kirrow[komento] {$filenimi_ps}");
     }
 
     $tempfile2 = tempnam("/tmp", "SAMPOFAC");
     $null = file_put_contents($tempfile2, $ulos);
-    $null = exec("a2ps -o ".$tempfile2.".ps --no-header -R --columns=1 --medium=a4 --chars-per-line=80 --margin=0 --borders=0 $tempfile2");
+
+    $params = array(
+      'chars'    => 80,
+      'filename' => $tempfile2,
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi2_ps = pupesoft_a2ps($params);
 
     if ($kirrow["komento"] == 'email') {
       $liite[1] = $tempfile2.".pdf";
       $kutsu[1] = "Danskebankfactoring-laskut";
       $ctype[1] = "pdf";
 
-      system("ps2pdf -sPAPERSIZE=a4 $tempfile2.ps $liite[1]");
+      system("ps2pdf -sPAPERSIZE=a4 {$filenimi2_ps} $liite[1]");
 
       require "inc/sahkoposti.inc";
     }
     else {
-      $null = exec("$kirrow[komento] ".$tempfile2.".ps");
+      $null = exec("$kirrow[komento] {$filenimi2_ps}");
     }
 
     unlink($tempfile1);
-    unlink($tempfile1.".ps");
+    unlink($filenimi_ps);
     unlink($tempfile2);
-    unlink($tempfile2.".ps");
+    unlink($filenimi2_ps);
   }
   else {
     echo "<font class='message'>Yhtään factoroitavaa laskua ei löytynyt.</font><br><br>";

@@ -2,6 +2,7 @@
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
+$compression = FALSE;
 
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
   $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
@@ -14,6 +15,15 @@ if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
+
+if ($tee == 'lataa_tiedosto') {
+  $filepath = "/tmp/".$tmpfilenimi;
+  if (file_exists($filepath)) {
+    readfile($filepath);
+    unlink($filepath);
+  }
+  exit;
+}
 
 if (!isset($logistiikka_yhtio)) $logistiikka_yhtio = "";
 if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
@@ -1084,7 +1094,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th valign='top'>";
 
-    if (!in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+    if (!in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
       echo "<a href='{$hreffi}&jarj=lasku.tunnus'>", t("Tilausnro"), "</a><br>";
     }
 
@@ -1130,7 +1140,7 @@ if ($tee == "ETSILASKU") {
 
       echo "<$ero valign='top'>";
 
-      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI","PURKU"))) {
+      if ($row['tila'] != "U" and !in_array($toim, array("VASTAANOTTORAPORTTI", "PURKU"))) {
         echo $row['tunnus'];
       }
 
@@ -1141,7 +1151,7 @@ if ($tee == "ETSILASKU") {
         echo "<br>$row[laskunro]";
       }
       echo "</$ero>";
-      echo "<$ero valign='top'>",tarkistahetu($row['ytunnus']),"<br>$row[nimi]<br>$row[nimitark]</$ero>";
+      echo "<$ero valign='top'>", tarkistahetu($row['ytunnus']), "<br>$row[nimi]<br>$row[nimitark]</$ero>";
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 
@@ -1637,8 +1647,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     $tilausvahvistus_onkin_kerayslista = '';
     $excel_lahete_hinnoilla = '';
-    $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
-    $pos2 = strpos($komento['Tilausvahvistus'], "excel_lahete_hinnoilla");
+    $komento_tilausvahvistus = empty($komento['Tilausvahvistus']) ? '' : $komento['Tilausvahvistus'];
+
+    $pos  = strpos($komento_tilausvahvistus, "excel_lahete_geodis_wilson");
+    $pos2 = strpos($komento_tilausvahvistus, "excel_lahete_hinnoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
@@ -2206,9 +2218,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         //haetaan kaikki tälle klöntille kuuluvat otsikot
         $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
                   FROM lasku
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tila         = '{$laskurow['tila']}'
-                  AND kerayslista  = '{$laskurow['kerayslista']}'
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tila        = '{$laskurow['tila']}'
+                  AND kerayslista = '{$laskurow['kerayslista']}'
                   HAVING tunnukset IS NOT NULL";
         $toimresult = pupe_query($query);
 
@@ -2228,7 +2240,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 kieli
                 FROM asiakas
                 WHERE tunnus = '$laskurow[liitostunnus]'
-                and yhtio = '$kukarow[yhtio]'";
+                and yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
       $asrow = mysql_fetch_assoc($result);
 

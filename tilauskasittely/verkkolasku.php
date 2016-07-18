@@ -42,10 +42,10 @@ if (!function_exists("tarkista_jaksotetut_laskutunnukset")) {
 
       $query = "SELECT count(*) yhteensa
                 FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila != 'D'
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                AND tila       != 'D'
                 AND jaksotettu != 0
-                AND jaksotettu = '{$key}'";
+                AND jaksotettu  = '{$key}'";
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
       $tarkastettu_maara = $row['yhteensa'];
@@ -524,7 +524,7 @@ else {
 
       while ($lasku_chk_row = mysql_fetch_assoc($lasku_chk_res)) {
 
-        # Mik‰li halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet t‰ytyy olla saldottomia
+        // Mik‰li halutaan laskuttaa tulevaisuuteen niin kaikki tilauksen tuotteet t‰ytyy olla saldottomia
         if ($syotetty > $tanaan and $yhtiorow['laskutus_tulevaisuuteen'] == 'S') {
           $lasklisa .= " and lasku.tunnus not in ({$lasku_chk_row['tunnukset']}) ";
           $tulos_ulos .= "<br>\n".t("Tuotevirheet").":<br>\n".t("Tilausta")." {$lasku_chk_row['tunnukset']} ".t("ei voida laskuttaa, koska tilauksien kaikki tuotteet eiv‰t olleet saldottomia")."!<br>\n";
@@ -1946,13 +1946,13 @@ else {
           $query = "SELECT DISTINCT factoring.sopimusnumero, factoring.factoringyhtio, factoring.viitetyyppi
                     FROM lasku
                     JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-                      and maksuehto.tunnus = lasku.maksuehto
+                      and maksuehto.tunnus   = lasku.maksuehto
                       and maksuehto.factoring_id is not null)
                     JOIN factoring ON (factoring.yhtio = maksuehto.yhtio
-                      and factoring.tunnus = maksuehto.factoring_id
+                      and factoring.tunnus   = maksuehto.factoring_id
                       and factoring.valkoodi = lasku.valkoodi)
-                    WHERE lasku.yhtio = '$kukarow[yhtio]'
-                    and lasku.tunnus in ($tunnukset)";
+                    WHERE lasku.yhtio        = '$kukarow[yhtio]'
+                    and lasku.tunnus         in ($tunnukset)";
           $fres = pupe_query($query);
           $frow = mysql_fetch_assoc($fres);
 
@@ -2121,9 +2121,9 @@ else {
           if (isset($masrow["factoring_id"])) {
             $query = "SELECT *
                       FROM factoring
-                      WHERE yhtio        = '$kukarow[yhtio]'
-                      and tunnus         = '$masrow[factoring_id]'
-                      and valkoodi       = '$lasrow[valkoodi]'";
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      and tunnus   = '$masrow[factoring_id]'
+                      and valkoodi = '$lasrow[valkoodi]'";
             $fres = pupe_query($query);
             $frow = mysql_fetch_assoc($fres);
           }
@@ -2313,7 +2313,7 @@ else {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
-              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAPAPIX");
+              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             else {
               pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -2901,7 +2901,7 @@ else {
       elseif ($yhtiorow["verkkolasku_lah"] == "apix" and file_exists(realpath($nimifinvoice))) {
 
         // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
-        $apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents($nimifinvoice));
+        $apix_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
         $apix_laskumaara = count($apix_laskuarray);
 
         if ($apix_laskumaara > 0) {
@@ -2910,7 +2910,7 @@ else {
           for ($a = 1; $a < $apix_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-            $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
+            $apix_finvoice = "<SOAP-ENV:Envelope".$apix_laskuarray[$a];
 
             // Laitetaan lasku l‰hetysjonoon
             $tulos_ulos .= apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);

@@ -180,6 +180,78 @@ if ($tee == 'MUUTA') {
           echo "<font class='message'>$poisto_texti</font>";
         }
 
+        // Tarkistetaan onko paikalla avoimia JT-rivejä
+        // ja päivitetään avoimet JT-rivit toiselle paikalle, mikäli niitä löytyy
+        $query = "SELECT tilausrivi.varasto,
+                  tilausrivi.tunnus
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio   = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi    = 'L'
+                  AND tilausrivi.var       = 'J'
+                  AND tilausrivi.hyllyalue = '{$hyllyalue[$poistetaan]}'
+                  AND tilausrivi.hyllynro  = '{$hyllynro[$poistetaan]}'
+                  AND tilausrivi.hyllyvali = '{$hyllyvali[$poistetaan]}'
+                  AND tilausrivi.hyllytaso = '{$hyllytaso[$poistetaan]}'
+                  AND tilausrivi.tuoteno   = '{$tuoteno}'";
+        $rivires = pupe_query($query);
+
+        while ($jtrivi = mysql_fetch_assoc($rivires)) {
+          // Haetaan ensin nykyisen paikan tunnus,
+          // jotta voidaan helposti varmistaa ettei olla laittamassa takaisin samalle paikalle
+          $query = "SELECT tunnus
+                    FROM tuotepaikat
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                    AND varasto   = '{$jtrivi['varasto']}'
+                    AND hyllyalue = '{$hyllyalue[$poistetaan]}'
+                    AND hyllynro  = '{$hyllynro[$poistetaan]}'
+                    AND hyllyvali = '{$hyllyvali[$poistetaan]}'
+                    AND hyllytaso = '{$hyllytaso[$poistetaan]}'";
+          $nykyvarasto_tunnus = mysql_fetch_assoc(pupe_query($query));
+
+          // Laitetaan ensisijaisesti avoin JT-rivi saman varaston vanhimmalle paikalle
+          $query = "SELECT varasto,
+                    hyllyalue,
+                    hyllynro,
+                    hyllyvali,
+                    hyllytaso
+                    FROM tuotepaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND varasto = '{$jtrivi["varasto"]}'
+                    AND tunnus != '{$nykyvarasto_tunnus["tunnus"]}'
+                    AND tuoteno   = '{$tuoteno}'
+                    ORDER BY tunnus";
+          $uusivarasto_res = pupe_query($query);
+
+          // Jos samasta varastosta ei paikkaa löydy, niin laitetaan JT-rivi oletuspaikalle
+          if (mysql_num_rows($uusivarasto_res) == 0) {
+            $query = "SELECT varasto,
+                      hyllyalue,
+                      hyllynro,
+                      hyllyvali,
+                      hyllytaso
+                      FROM tuotepaikat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND oletus != ''
+                      AND tuoteno = '{$tuoteno}'";
+            $uusivarasto_res = pupe_query($query);
+          }
+
+          // Päivitetään uusi paikka avoimelle JT-riville
+          if ($uusivarasto = mysql_fetch_assoc($uusivarasto_res)) {
+            $query = "UPDATE tilausrivi
+                      SET varasto = '{$uusivarasto["varasto"]}',
+                      hyllyalue   = '{$uusivarasto["hyllyalue"]}',
+                      hyllynro    = '{$uusivarasto["hyllynro"]}',
+                      hyllyvali   = '{$uusivarasto["hyllyvali"]}',
+                      hyllytaso   = '{$uusivarasto["hyllytaso"]}'
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      AND tunnus  = '{$jtrivi["tunnus"]}'";
+            pupe_query($query);
+
+          }
+
+        }
+
         $query = "INSERT into tapahtuma set
                   yhtio     = '$kukarow[yhtio]',
                   tuoteno   = '$tuoteno',
@@ -512,7 +584,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      
+
       if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii]) {
         $siirretaan_varattua = true;
       }
@@ -573,13 +645,13 @@ if ($tee == 'N') {
       if ($siirretaan_varattua) {
         $query = "UPDATE tilausrivi
                   SET hyllyalue = '$minnerow[hyllyalue]',
-                    hyllynro    = '$minnerow[hyllynro]',
-                    hyllyvali   = '$minnerow[hyllyvali]',
-                    hyllytaso   = '$minnerow[hyllytaso]'
+                    hyllynro      = '$minnerow[hyllynro]',
+                    hyllyvali     = '$minnerow[hyllyvali]',
+                    hyllytaso     = '$minnerow[hyllytaso]'
                   WHERE tuoteno   = '$tuotteet[$iii]'
                     AND yhtio     = '$kukarow[yhtio]'
-                    AND tyyppi IN ('L','G','V')
-                    AND varattu <> 0
+                    AND tyyppi    IN ('L','G','V')
+                    AND varattu   <> 0
                     AND hyllyalue = '$mistarow[hyllyalue]'
                     AND hyllynro  = '$mistarow[hyllynro]'
                     AND hyllyvali = '$mistarow[hyllyvali]'
@@ -1151,21 +1223,21 @@ if ($tee == 'M') {
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
       if ($saldorow["saldo"] == 0 and $hyllyssa == 0 and $myytavissa == 0) {
-        #Tarkistetaan varaako reklamaatio tuotepaikkaa
+        //Tarkistetaan varaako reklamaatio tuotepaikkaa
         $query = "SELECT *
                   FROM lasku
                   JOIN tilausrivi ON (
-                    tilausrivi.yhtio = lasku.yhtio AND
-                    tilausrivi.otunnus = lasku.tunnus
+                    tilausrivi.yhtio       = lasku.yhtio AND
+                    tilausrivi.otunnus     = lasku.tunnus
                   )
-                  WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                  AND lasku.tila = 'C'
-                  AND lasku.alatila IN ('', 'A', 'B', 'C')
+                  WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+                  AND lasku.tila           = 'C'
+                  AND lasku.alatila        IN ('', 'A', 'B', 'C')
                   AND tilausrivi.hyllyalue = '{$saldorow['hyllyalue']}'
-                  AND tilausrivi.hyllynro = '{$saldorow['hyllynro']}'
+                  AND tilausrivi.hyllynro  = '{$saldorow['hyllynro']}'
                   AND tilausrivi.hyllyvali = '{$saldorow['hyllyvali']}'
                   AND tilausrivi.hyllytaso = '{$saldorow['hyllytaso']}'
-                  AND tilausrivi.tuoteno = '{$saldorow["tuoteno"]}'";
+                  AND tilausrivi.tuoteno   = '{$saldorow["tuoteno"]}'";
         $reklares = pupe_query($query);
 
         $reklacheck = (mysql_num_rows($reklares) > 0);
@@ -1218,10 +1290,14 @@ if ($tee == 'M') {
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
-      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck) {
+      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0 or $reklacheck or !empty($saldorow["inventointilistatunnus"])) {
 
         if ($reklacheck) {
           $poistoteksti .= "<br>(".t("Reklamaatio varaa tuotepaikkaa").")";
+        }
+
+        if (!empty($saldorow["inventointilistatunnus"])) {
+          $poistoteksti .= "<br>(".t("Tuotepaikka käsittelemättömänä inventointilistalla").")";
         }
 
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}

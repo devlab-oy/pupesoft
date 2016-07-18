@@ -147,15 +147,15 @@ $query = "SELECT
           IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
           FROM lasku
           JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio
-            AND tilausrivi.tyyppi = 'O'
-            AND tilausrivi.varattu != 0
+            AND tilausrivi.tyyppi                        = 'O'
+            AND tilausrivi.varattu                      != 0
             {$join_lisa})
           {$lasku_join_lisa}
           LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-            AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
-            AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
+            AND tilausrivin_lisatiedot.tilausrivilinkki  = tilausrivi.tunnus
+            AND tilausrivin_lisatiedot.tilausrivilinkki  <> 0)
+          WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
+          AND lasku.vanhatunnus                          = '{$kukarow['toimipaikka']}'
           {$where_lisa}
           {$query_lisa}
           ORDER BY {$orderby} {$ascdesc}";
@@ -188,15 +188,15 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
             IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio=lasku.yhtio
-              AND tilausrivi.tyyppi = 'O'
-              AND tilausrivi.varattu != 0
+              AND tilausrivi.tyyppi                        = 'O'
+              AND tilausrivi.varattu                      != 0
               {$join_lisa})
             {$lasku_join_lisa}
             LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
-              AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.vanhatunnus = '{$kukarow['toimipaikka']}'
+              AND tilausrivin_lisatiedot.tilausrivilinkki  = tilausrivi.tunnus
+              AND tilausrivin_lisatiedot.tilausrivilinkki  <> 0)
+            WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
+            AND lasku.vanhatunnus                          = '{$kukarow['toimipaikka']}'
             {$where_lisa}
             {$query_lisa}
             ORDER BY {$orderby} {$ascdesc}";
@@ -332,8 +332,8 @@ while ($row = mysql_fetch_assoc($result)) {
   $query = "SELECT
             IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-            AND tuotteen_toimittajat.tuoteno = '{$row['tuoteno']}'
+            WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
+            AND tuotteen_toimittajat.tuoteno      = '{$row['tuoteno']}'
             AND tuotteen_toimittajat.liitostunnus = '{$row['liitostunnus']}'";
   $ttres = pupe_query($query);
   $ttrow = mysql_fetch_assoc($ttres);

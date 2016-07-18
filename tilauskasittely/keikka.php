@@ -74,7 +74,7 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -844,7 +844,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$toimipaikkalisa}
             {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY nimi, nimitark, ytunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

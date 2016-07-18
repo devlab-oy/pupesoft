@@ -716,3 +716,29 @@ if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
 
   $jatko = 0;
 }
+
+if (mysql_field_name($result, $i) == "toim_maa" or
+  mysql_field_name($result, $i) == "maa_maara") {
+
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
+  $vresult = pupe_query($query);
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = '' ></option>";
+
+  while ($vrow = mysql_fetch_array($vresult)) {
+    $sel = "";
+
+    if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
+      $sel = "selected";
+    }
+
+    $ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+  }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}

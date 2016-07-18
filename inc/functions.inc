@@ -27987,7 +27987,7 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addAttribute('No', $_line_i);
 
       $line->addChild('TransId', substr($looprow['tilausrivin_tunnus'], 0, 20));
-      $line->addChild('ItemNumber', utf8_encode(substr($looprow[$posten_itemnumberfield], 0, 20)));
+      $line->addChild('ItemNumber', utf8_encode(substr($looprow[$posten_itemnumberfield], 0, 22)));
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);

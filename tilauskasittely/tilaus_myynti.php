@@ -1333,7 +1333,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
-  $query = "UPDATE tilausrivi 
+  $query = "UPDATE tilausrivi
             SET tilausrivi.tyyppi = 'D', tilausrivi.laadittu = now(), tilausrivi.laatija = '$kukarow[kuka]'
             where tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$kukarow[kesken]'
             and tilausrivi.var <> 'P'";
@@ -2833,8 +2833,8 @@ if ($tee == '') {
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
-        // ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
-        if ($meapu2row["nouto"] == "") {
+        // ja toimitustapa ei ole nouto eik‰ kyseess‰ ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
+        if ($meapu2row["nouto"] == "" and $laskurow['tilaustyyppi'] != "W") {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'

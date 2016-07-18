@@ -343,7 +343,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // siirret‰‰n tiedosto done-kansioon
-  rename($path.$file, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

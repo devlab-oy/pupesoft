@@ -54,37 +54,16 @@ if ($handle === false) {
 }
 
 while (false !== ($file = readdir($handle))) {
-  if (is_dir($path.$file)) {
-    continue;
-  }
-
-  $path_parts = pathinfo($file);
-
-  if (empty($path_parts['extension']) or strtoupper($path_parts['extension']) != 'XML') {
-    continue;
-  }
-
-  $xml = simplexml_load_file($path.$file);
-
-  pupesoft_log('outbound_delivery', "K‰sitell‰‰n sanoma {$file}");
-
-  if (!is_object($xml)) {
-    pupesoft_log('outbound_delivery', "Virheellinen XML sanoma {$file}");
-
-    continue;
-  }
-
-  $message_type = "";
-
-  if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-    $message_type = trim($xml->MessageHeader->MessageType);
-  }
+  $full_filepath = $path.$file;
+  $message_type = posten_message_type($full_filepath);
 
   if ($message_type != 'OutboundDeliveryConfirmation') {
-    pupesoft_log('outbound_delivery', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
     continue;
   }
+
+  $xml = simplexml_load_file($full_filepath);
+
+  pupesoft_log('outbound_delivery', "K‰sitell‰‰n sanoma {$file}");
 
   $otunnus = (int) $xml->CustPackingSlip->SalesId;
 
@@ -362,7 +341,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // siirret‰‰n tiedosto done-kansioon
-  rename($path.$file, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

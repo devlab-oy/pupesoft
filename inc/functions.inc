@@ -33453,3 +33453,46 @@ if (!function_exists('posten_field')) {
     return mysql_real_escape_string($key);
   }
 }
+
+if (!function_exists('check_file_extension')) {
+  function check_file_extension($file_name, $extension) {
+
+    if (!is_file($file_name) or !is_readable($file_name)) {
+      return false;
+    }
+
+    $path_parts = pathinfo($file_name);
+
+    if (empty($path_parts['extension'])) {
+      return false;
+    }
+
+    if (strtoupper($path_parts['extension']) == strtoupper($extension)) {
+      return true;
+    }
+
+    return false;
+  }
+}
+
+if (!function_exists('posten_message_type')) {
+  function posten_message_type($file_name) {
+    $extension = check_file_extension($file_name, 'XML');
+
+    if ($extension === false) {
+      return false;
+    }
+
+    $xml = simplexml_load_file($file_name);
+
+    if (!is_object($xml)) {
+      return false;
+    }
+
+    if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
+      return trim($xml->MessageHeader->MessageType);
+    }
+
+    return false;
+  }
+}

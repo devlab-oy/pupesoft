@@ -40,8 +40,6 @@ if (empty($kukarow)) {
   exit("VIRHE: Admin käyttäjä ei löydy!\n");
 }
 
-$kukarow = mysql_fetch_assoc($kukares);
-
 $path = trim($argv[2]);
 $error_email = trim($argv[3]);
 

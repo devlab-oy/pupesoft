@@ -55,14 +55,12 @@ while (false !== ($file = readdir($handle))) {
   $message_type = posten_message_type($full_filepath);
 
   if ($message_type != 'StockReport') {
-    pupesoft_log('stock_report', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
     continue;
   }
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('stock_report', "K‰sitell‰‰n {$file}");
+  pupesoft_log('stock_report', "K‰sitell‰‰n sanoma {$file}");
 
   // tuki vain yhdelle Posten-varastolle
   $query = "SELECT *

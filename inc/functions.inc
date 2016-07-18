@@ -13565,8 +13565,10 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($q2);
 
     // Pävitetään kaikki nodet, jotka on uuden noden oikealla puolella kaksi pykälää oikealle (vasen puoli)
-    $qu = "UPDATE dynaaminen_puu
-           set lft = lft + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu set
+           lft = lft + 2,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            AND lft     > @myRight
@@ -13574,8 +13576,10 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($qu);
 
     // Pävitetään kaikki nodet joiden oikea laita on uuden noden oikealla puolella kaksi pykälää oikealle (oikea puoli)
-    $qu = "UPDATE dynaaminen_puu
-           set rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu set
+           rgt = rgt + 2,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            AND rgt     >= @myRight
@@ -13583,8 +13587,10 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($qu);
 
     // Päivitetään valitun tason leftit pykälää oikealle, jotta uusi taso mahtuu mukaan
-    $qu = "UPDATE dynaaminen_puu
-           set lft = lft + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu set
+           lft = lft + 1,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            AND lft     > @myLeft
@@ -13593,8 +13599,10 @@ if (!function_exists("LisaaTaso")) {
     $re = pupe_query($qu);
 
     // Päivitetään valitun tason rightit pykälää oikealle, jotta uusi taso mahtuu mukaan
-    $qu = "UPDATE dynaaminen_puu
-           set rgt = rgt + 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu set
+           rgt = rgt + 1,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            AND lft     > @myLeft
@@ -13602,7 +13610,28 @@ if (!function_exists("LisaaTaso")) {
            ORDER BY rgt desc";
     $re = pupe_query($qu);
 
-    $qu = "INSERT INTO dynaaminen_puu(yhtio,koodi,nimi, lft, rgt, laji,laatija,luontiaika) values ('$kukarow[yhtio]', '{$koodi}', '{$nimi}', @myLeft + 1 , @myRight + 1, '$laji', '$kukarow[kuka]', now())";
+    $qu = "INSERT INTO dynaaminen_puu
+    (
+      yhtio,
+      koodi,
+      nimi,
+      lft,
+      rgt,
+      laji,
+      laatija,
+      luontiaika
+    )
+    values
+    (
+      '$kukarow[yhtio]',
+      '{$koodi}',
+      '{$nimi}',
+      @myLeft + 1 ,
+      @myRight + 1,
+      '$laji',
+      '$kukarow[kuka]',
+      now()
+    )";
     $re = pupe_query($qu);
 
     $qu = "UNLOCK TABLES";
@@ -13615,7 +13644,26 @@ if (!function_exists("LisaaPaaKat")) {
   function LisaaPaaKat($laji, $nimi) {
     global $kukarow;
 
-    $qu = "INSERT INTO dynaaminen_puu(yhtio,nimi,lft,rgt, laji, laatija, luontiaika) VALUES('$kukarow[yhtio]', '$nimi', 1, 2, '$laji', '$kukarow[kuka]', now())";
+    $qu = "INSERT INTO dynaaminen_puu
+    (
+      yhtio,
+      nimi,
+      lft,
+      rgt,
+      laji,
+      laatija,
+      luontiaika
+    )
+    VALUES
+    (
+      '$kukarow[yhtio]',
+      '$nimi',
+      1,
+      2,
+      '$laji',
+      '$kukarow[kuka]',
+      now()
+    )";
     $re = pupe_query($qu);
   }
 }
@@ -13656,23 +13704,49 @@ if (!function_exists("LisaaLapsi")) {
            AND lft     = '$left'";
     $re = pupe_query($qu);
 
-    $qu = "UPDATE dynaaminen_puu
-           SET rgt = rgt + 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu SET
+           rgt = rgt + 2,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            $apu
            ORDER BY rgt desc";
     $re = pupe_query($qu);
 
-    $qu = "UPDATE dynaaminen_puu
-           SET lft = lft + 2,muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu SET
+           lft = lft + 2,
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '$laji'
            $apu4
            ORDER BY lft desc";
     $re = pupe_query($qu);
 
-    $qu = "INSERT INTO dynaaminen_puu (yhtio, nimi, koodi, lft, rgt, syvyys, laji, laatija, luontiaika) VALUES ('$kukarow[yhtio]', '$nimi', '$koodi', $apu2, $syvyys + 1, '$laji', '$kukarow[kuka]', now())";
+    $qu = "INSERT INTO dynaaminen_puu
+    (
+      yhtio,
+      nimi,
+      koodi,
+      lft,
+      rgt,
+      syvyys,
+      laji,
+      laatija,
+      luontiaika
+    )
+    VALUES
+    (
+      '$kukarow[yhtio]',
+      '$nimi',
+      '$koodi',
+      $apu2,
+      $syvyys + 1,
+      '$laji',
+      '$kukarow[kuka]',
+      now()
+    )";
     $re = pupe_query($qu);
 
     $qu = "UNLOCK TABLES";
@@ -13713,8 +13787,8 @@ if (!function_exists("PoistaLapset")) {
       $re = pupe_query($qu);
 
       // Päivitetään poistettavan noden lapset pykälää vasemmalle
-      $qu = "UPDATE dynaaminen_puu
-             SET rgt = rgt - 1
+      $qu = "UPDATE dynaaminen_puu SET
+             rgt = rgt - 1
              WHERE yhtio = '{$kukarow["yhtio"]}'
              AND laji    = '$laji'
              AND lft between @myLeft and @myRight
@@ -13722,8 +13796,10 @@ if (!function_exists("PoistaLapset")) {
       $re = pupe_query($qu);
 
       // Päivitetään poistettavan noden lapset pykälää vasemmalle
-      $qu = "UPDATE dynaaminen_puu
-             SET lft = lft - 1, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+      $qu = "UPDATE dynaaminen_puu SET
+             lft = lft - 1,
+             muutospvm = now(),
+             muuttaja = '$kukarow[kuka]'
              WHERE yhtio = '{$kukarow["yhtio"]}'
              AND laji    = '$laji'
              AND lft between @myLeft and @myRight
@@ -13731,8 +13807,10 @@ if (!function_exists("PoistaLapset")) {
       $re = pupe_query($qu);
 
       // Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
-      $qu = "UPDATE dynaaminen_puu
-             SET rgt = rgt - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+      $qu = "UPDATE dynaaminen_puu SET
+             rgt = rgt - 2,
+             muutospvm = now(),
+             muuttaja = '$kukarow[kuka]'
              WHERE yhtio = '{$kukarow["yhtio"]}'
              AND laji    = '$laji'
              AND rgt     > @myRight
@@ -13740,8 +13818,10 @@ if (!function_exists("PoistaLapset")) {
       $re = pupe_query($qu);
 
       // Päivitetään poistetun noden oikealta puolelta löytyvät nodet vasemalle
-      $qu = "UPDATE dynaaminen_puu
-             SET lft = lft - 2, muutospvm = now(), muuttaja = '$kukarow[kuka]'
+      $qu = "UPDATE dynaaminen_puu SET
+             lft = lft - 2,
+             muutospvm = now(),
+             muuttaja = '$kukarow[kuka]'
              WHERE yhtio = '{$kukarow["yhtio"]}'
              AND laji    = '$laji'
              AND lft     > @myRight
@@ -13789,8 +13869,11 @@ if (!function_exists("paivitakat")) {
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
 
-    $qu = "UPDATE dynaaminen_puu
-           set nimi='{$nimi}', koodi='{$koodi}', muutospvm = now(), muuttaja = '$kukarow[kuka]'
+    $qu = "UPDATE dynaaminen_puu set
+           nimi='{$nimi}',
+           koodi='{$koodi}',
+           muutospvm = now(),
+           muuttaja = '$kukarow[kuka]'
            where yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '{$laji}'
            AND tunnus  = '{$kategoriaid}'";
@@ -13806,14 +13889,14 @@ if (!function_exists("muutaOksienRL")) {
   function muutaOksienRL($laji, $kohdevas, $muutos) {
     global $kukarow;
 
-    $qu = "UPDATE dynaaminen_puu
-           SET lft = lft+{$muutos}
+    $qu = "UPDATE dynaaminen_puu SET
+           lft = lft+{$muutos}
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '{$laji}' and lft >= '{$kohdevas}'";
     $re = pupe_query($qu);
 
-    $qu = "UPDATE dynaaminen_puu
-           SET rgt = rgt+{$muutos}
+    $qu = "UPDATE dynaaminen_puu SET
+           rgt = rgt+{$muutos}
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '{$laji}'
            and rgt     >= '{$kohdevas}'";
@@ -13826,16 +13909,16 @@ if (!function_exists("muutaOksavalinRL")) {
   function muutaOksavalinRL($laji, $src, $muutos) {
     global $kukarow;
 
-    $qu = "UPDATE dynaaminen_puu
-           SET lft = lft+{$muutos}
+    $qu = "UPDATE dynaaminen_puu SET
+           lft = lft+{$muutos}
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '{$laji}'
            AND lft     >= {$src['lft']}
            AND lft     <= {$src['rgt']}";
     $re = pupe_query($qu);
 
-    $qu = "UPDATE dynaaminen_puu
-           SET rgt = rgt+{$muutos}
+    $qu = "UPDATE dynaaminen_puu SET
+           rgt = rgt+{$muutos}
            WHERE yhtio = '{$kukarow["yhtio"]}'
            AND laji    = '{$laji}'
            AND rgt     >= {$src['lft']}
@@ -13914,28 +13997,30 @@ if (!function_exists("paivitapuunsyvyys")) {
     $qu = "SELECT
            node.lft AS lft,
            node.rgt AS rgt,
-           node.tunnus AS node_tunnus,
-           node.syvyys as node_syvyys,
+           node.syvyys AS node_syvyys,
+           min(node.tunnus) AS node_tunnus,
            (COUNT(node.tunnus) - 1) AS syvyys
            FROM dynaaminen_puu AS node
-           JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+           JOIN dynaaminen_puu AS parent ON (node.yhtio = parent.yhtio
+            AND node.laji = parent.laji
+            AND node.lft BETWEEN parent.lft AND parent.rgt)
            WHERE node.yhtio = '{$kukarow["yhtio"]}'
-           AND node.laji    = '{$laji}'
-           GROUP BY node.lft
-           ORDER BY node.lft";
+           AND node.laji = '{$laji}'
+           GROUP BY lft, rgt, node_syvyys
+           ORDER BY lft";
     $re = pupe_query($qu);
 
     while ($row = mysql_fetch_assoc($re)) {
-
       if ($row["node_syvyys"] != $row["syvyys"]) {
-        $updqu = "UPDATE dynaaminen_puu
-                  SET syvyys = {$row["syvyys"]}
+        $updqu = "UPDATE dynaaminen_puu SET
+                  syvyys = {$row["syvyys"]}
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND laji    = '{$laji}'
                   AND tunnus  = {$row["node_tunnus"]}";
         $updateres = pupe_query($updqu);
       }
     }
+
     return;
   }
 }

@@ -135,7 +135,7 @@ if ($kukarow['taso'] != 1) {
 
     $kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t('Laskun maksutili muutettiin. Vanha oli %s.', '', $ultilno)."<br>" . $trow['comments'];
 
-    if ($ibanmaa == "FI") {
+    if ($ibanmaa == "FI" or substr($ultilno, 0, 2) == "FI") {
       // Haetaan uuden tilinumeron mukainen swift koodi
       include "inc/pankkitiedot.inc";
       $vastaus = pankkitiedot($ultilno, '');
@@ -208,6 +208,13 @@ if ($kukarow['taso'] != 1) {
     $trow = mysql_fetch_assoc($result);
 
     $kommentti = "($kukarow[nimi]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
+
+    if ($ibanmaa == "FI" or substr($ultilno, 0, 2) == "FI") {
+      // Haetaan uuden tilinumeron mukainen swift koodi
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($ultilno, '');
+      $swift = $vastaus['swift'];
+    }
 
     //P‰ivitet‰‰n lasku
     $query = "UPDATE lasku SET

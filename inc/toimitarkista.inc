@@ -122,7 +122,7 @@ if (!function_exists("toimitarkista")) {
       else $ibanmaa = $tmp_maakoodi;
 
       $swift_virhe = FALSE;
-      if (strtoupper($ibanmaa) == "FI") {
+      if (strtoupper($ibanmaa) == "FI" or substr($tmp_iban, 0, 2) == "FI") {
         // Haetaan swift tarkistusta varten
         include "inc/pankkitiedot.inc";
         $vastaus = pankkitiedot($tmp_iban, '');

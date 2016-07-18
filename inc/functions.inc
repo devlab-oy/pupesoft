@@ -27754,8 +27754,12 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId', substr($otunnus, 0, 20));
-    $custpickinglist->addChild('CustOrderNumber', substr($looprow['asiakkaan_tilausnumero'], 0, 20)); // Magentosta?
-    $custpickinglist->addChild('CustReference', substr($looprow['viesti'], 0, 50));
+
+    $_asiakkaan_tilausnumero = substr($looprow['asiakkaan_tilausnumero'], 0, 20);
+    $custpickinglist->addChild('CustOrderNumber', utf8_encode($_asiakkaan_tilausnumero)); // Magentosta?
+
+    $_viesti = substr($looprow['viesti'], 0, 50);
+    $custpickinglist->addChild('CustReference', utf8_encode($_viesti));
     $custpickinglist->addChild('OrderCode', 'U');
     $custpickinglist->addChild('OrderType', 'SO');
 

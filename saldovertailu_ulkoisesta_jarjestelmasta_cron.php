@@ -57,10 +57,14 @@ while (false !== ($file = readdir($handle))) {
   $message_type = posten_message_type($full_filepath);
 
   if ($message_type != 'StockReport') {
+    pupesoft_log('stock_report', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
+
     continue;
   }
 
   $xml = simplexml_load_file($full_filepath);
+
+  pupesoft_log('stock_report', "Käsitellään {$file}");
 
   // tuki vain yhdelle Posten-varastolle
   $query = "SELECT *
@@ -78,7 +82,6 @@ while (false !== ($file = readdir($handle))) {
   $saldoeroja = array();
 
   foreach ($xml->InvCounting->Line as $line) {
-
     $eankoodi = $line->ItemNumber;
     $kpl = (float) $line->Quantity;
 
@@ -122,15 +125,11 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (count($saldoeroja) > 0) {
-
-    $body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
-
+    $body  = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
     $body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
 
     foreach ($saldoeroja as $tuoteno => $_arr) {
-
       $body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
-
     }
 
     $params = array(
@@ -142,6 +141,8 @@ while (false !== ($file = readdir($handle))) {
     );
 
     pupesoft_sahkoposti($params);
+
+    pupesoft_log('stock_report', "Saldovertailussa eroja, lähetetään sähköposti {$error_email}");
   }
 
   // siirretään tiedosto done-kansioon

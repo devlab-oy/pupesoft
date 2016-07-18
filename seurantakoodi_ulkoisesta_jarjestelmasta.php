@@ -28,7 +28,7 @@ cron_log();
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
-$yhtio = mysql_escape_string(trim($argv[1]));
+$yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 

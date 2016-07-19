@@ -749,7 +749,6 @@ if ($tila == "" and !isset($jatka)) {
                 maksuehto           = '$assrow[maksuehto]',
                 tilausvahvistus     = '$assrow[tilausvahvistus]',
                 piiri               = '$assrow[piiri]',
-                campaign_id         =  $assrow[campaign_id],
                 rahtivapaa          = '$assrow[rahtivapaa]',
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',

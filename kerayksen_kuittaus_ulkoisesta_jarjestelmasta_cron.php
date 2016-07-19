@@ -109,14 +109,14 @@ while (false !== ($file = readdir($handle))) {
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($hhv) {
-      $lines = $xml->Lines->Line;
-    }
-    else {
-      $lines = $xml->CustPackingSlip->Lines;
-    }
+    $lines = $xml->CustPackingSlip->Lines;
 
     foreach ($lines as $line) {
+
+      if (!empty($line->Line)) {
+        $line = $line->Line;
+      }
+
       $tilausrivin_tunnus = (int) $line->TransId;
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {

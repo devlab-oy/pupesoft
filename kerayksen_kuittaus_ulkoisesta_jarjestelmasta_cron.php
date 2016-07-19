@@ -117,6 +117,11 @@ while (false !== ($file = readdir($handle))) {
     }
 
     foreach ($lines as $line) {
+
+      if (!empty($line->Line)) {
+        $line = $line->Line;
+      }
+
       $tilausrivin_tunnus = (int) $line->TransId;
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {

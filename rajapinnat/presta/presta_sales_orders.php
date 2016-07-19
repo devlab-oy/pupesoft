@@ -244,14 +244,26 @@ class PrestaSalesOrders extends PrestaClient {
 
     // we don't allow users to change their invoice address, use pupesoft's address instead
     if ($this->presta_changeable_invoice_address === false) {
-      $invoice_address = array(
-        'address1'  => $pupesoft_customer['osoite'],
-        'city'      => $pupesoft_customer['postitp'],
-        'firstname' => '',
-        'lastname'  => $pupesoft_customer['nimi'],
-        'phone'     => $pupesoft_customer['puhelin'],
-        'postcode'  => $pupesoft_customer['postino'],
-      );
+      if (!empty($pupesoft_customer['laskutus_nimi'])) {
+        $invoice_address = array(
+          'address1'  => $pupesoft_customer['laskutus_osoite'],
+          'city'      => $pupesoft_customer['laskutus_postitp'],
+          'firstname' => $pupesoft_customer['laskutus_nimitark'],
+          'lastname'  => $pupesoft_customer['laskutus_nimi'],
+          'phone'     => '',
+          'postcode'  => $pupesoft_customer['laskutus_postino'],
+        );
+      }
+      else {
+        $invoice_address = array(
+          'address1'  => $pupesoft_customer['osoite'],
+          'city'      => $pupesoft_customer['postitp'],
+          'firstname' => $pupesoft_customer['nimitark'],
+          'lastname'  => $pupesoft_customer['nimi'],
+          'phone'     => $pupesoft_customer['puhelin'],
+          'postcode'  => $pupesoft_customer['postino'],
+        );
+      }
     }
 
     // empty edi_order

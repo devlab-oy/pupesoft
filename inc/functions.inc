@@ -33371,8 +33371,17 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
 
     $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
 
+    // Vienneille ei laiteta laskutuskieltoa, koska ne laskutetaan k‰sin lopuksi
     $vielisa = "";
-    if ($til_vienti == "") $vielisa = "chn = '999', ";
+    $vienti_query = "SELECT vienti
+                     FROM lasku
+                     WHERE yhtio = '{$kukarow["yhtio"]}'
+                     AND tunnus  = '$tilausnumero'";
+    $vienti_row = mysql_fetch_assoc(pupe_query($vienti_query));
+
+    if ($vienti_row["vienti"] == "") {
+      $vielisa = "chn = '999', ";
+    }
 
     // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
     $query = "UPDATE lasku SET

@@ -101,7 +101,7 @@ if ($row['sisviesti3'] == 'ok_vie_varastoon') {
 $header = $xml->addChild('MessageHeader');
 
 $header->addChild('MessageType', 'inboundDelivery');
-$header->addChild('Sender', utf8_encode($yhtiorow['nimi']));
+simple_xml_add($header, 'Sender', $yhtiorow['nimi']);
 $header->addChild('Receiver', 'LogMaster');
 
 $body = $xml->addChild('VendReceiptsList');
@@ -141,20 +141,20 @@ $toimirow = mysql_fetch_assoc($toimires);
 
 $vendor = $body->addChild('Vendor');
 $vendor->addChild('VendAccount',  $toimirow['toimittajanro']);
-$vendor->addChild('VendName',     utf8_encode($row['nimi']));
-$vendor->addChild('VendStreet',   utf8_encode($row['osoite']));
+simple_xml_add($vendor, 'VendName', $row['nimi']);
+simple_xml_add($vendor, 'VendStreet', $row['osoite']);
 $vendor->addChild('VendPostCode', $row['postino']);
-$vendor->addChild('VendCity',     utf8_encode($row['postitp']));
-$vendor->addChild('VendCountry',  utf8_encode($row['maa']));
+simple_xml_add($vendor, 'VendCity', $row['postitp']);
+simple_xml_add($vendor, 'VendCountry', $row['maa']);
 $vendor->addChild('VendInfo', '');
 
 $purchaser = $body->addChild('Purchaser');
 $purchaser->addChild('PurcAccount',  $yhtiorow['ytunnus']);
-$purchaser->addChild('PurcName',     utf8_encode($yhtiorow['nimi']));
-$purchaser->addChild('PurcStreet',   utf8_encode($yhtiorow['osoite']));
+simple_xml_add($purchaser, 'PurcName', $yhtiorow['nimi']);
+simple_xml_add($purchaser, 'PurcStreet', $yhtiorow['osoite']);
 $purchaser->addChild('PurcPostCode', $yhtiorow['postino']);
-$purchaser->addChild('PurcCity',     utf8_encode($yhtiorow['postitp']));
-$purchaser->addChild('PurcCountry',  utf8_encode($yhtiorow['maa']));
+simple_xml_add($purchaser, 'PurcCity', $yhtiorow['postitp']);
+simple_xml_add($purchaser, 'PurcCountry', $yhtiorow['maa']);
 
 $query = "SELECT *
           FROM tilausrivi
@@ -178,12 +178,12 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
   $line->addAttribute('No', $i);
 
   $line->addChild('TransId',         $rivit_row['tunnus']);
-  $line->addChild('ItemNumber',      utf8_encode($rivit_row['tuoteno']));
+  simple_xml_add($line, 'ItemNumber', $rivit_row['tuoteno']);
   $line->addChild('OrderedQuantity', $rivit_row['varattu']);
-  $line->addChild('Unit',            utf8_encode($rivit_row['yksikko']));
+  simple_xml_add($line, 'Unit', $rivit_row['yksikko']);
   $line->addChild('Price',           $rivit_row['hinta']);
-  $line->addChild('CurrencyCode',    utf8_encode($row['valkoodi']));
-  $line->addChild('RowInfo',         utf8_encode($rivit_row['kommentti']));
+  simple_xml_add($line, 'CurrencyCode', $row['valkoodi']);
+  simple_xml_add($line, 'RowInfo', $rivit_row['kommentti']);
 
   $i++;
 }

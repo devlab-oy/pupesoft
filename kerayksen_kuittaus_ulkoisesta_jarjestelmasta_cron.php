@@ -109,7 +109,12 @@ while (false !== ($file = readdir($handle))) {
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
 
-    $lines = $xml->CustPackingSlip->Lines;
+    if ($hhv) {
+      $lines = $xml->Lines->Line;
+    }
+    else {
+      $lines = $xml->CustPackingSlip->Lines;
+    }
 
     foreach ($lines as $line) {
 

@@ -83,7 +83,7 @@ else {
 
       $messageheader = $xml->addChild('MessageHeader');
       $messageheader->addChild('MessageType', 'MaterialMaster');
-      $messageheader->addChild('Sender', utf8_encode($yhtiorow['nimi']));
+      simple_xml_add($messageheader, 'Sender', $yhtiorow['nimi']);
 
       if ($ulkoinen_jarjestelma == 'L') {
         $uj_nimi = "LogMaster";
@@ -126,21 +126,16 @@ else {
 
         $line->addChild('Type', $type);
 
-        $eankoodi = substr($row['eankoodi'], 0, 20);
-        $nimitys = substr($row['nimitys'], 0, 50);
-        $yksikko = substr($row['yksikko'], 0, 10);
-        $tuoteno = substr($row['tuoteno'], 0, 100);
-
         $posten_itemnumberfield = posten_field('ItemNumber');
         $posten_prodgroup1field = posten_field('ProdGroup1');
         $posten_prodgroup2field = posten_field('ProdGroup2');
 
-        $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
-        $line->addChild('ItemName', utf8_encode($nimitys));
-        $line->addChild('ProdGroup1', utf8_encode(substr($row[$posten_prodgroup1field], 0, 6)));
-        $line->addChild('ProdGroup2', utf8_encode(substr($row[$posten_prodgroup2field], 0, 6)));
+        simple_xml_add($line, 'ItemNumber', $row[$posten_itemnumberfield], 20);
+        simple_xml_add($line, 'ItemName', $row['nimitys'], 50);
+        simple_xml_add($line, 'ProdGroup1', $row[$posten_prodgroup1field], 6);
+        simple_xml_add($line, 'ProdGroup2', $row[$posten_prodgroup2field], 6);
         $line->addChild('SalesPrice', '');
-        $line->addChild('Unit1', utf8_encode($yksikko));
+        simple_xml_add($line, 'Unit1', $row['yksikko'], 10);
         $line->addChild('Unit2', '');
         $line->addChild('Relation', '');
         $line->addChild('Weight', round($row['tuotemassa'], 3));
@@ -166,7 +161,7 @@ else {
 
         $line->addChild('Status', $status);
         $line->addChild('WholesalePackageSize', '');
-        $line->addChild('EANCode', utf8_encode($eankoodi));
+        simple_xml_add($line, 'EANCode', $row['eankoodi'], 20);
         $line->addChild('EANCode2', '');
         $line->addChild('CustomsTariffNum', '');
         $line->addChild('AlarmLimit', '');
@@ -185,7 +180,7 @@ else {
         $line->addChild('PurchasePrice', '');
         $line->addChild('ConsumerPrice', '');
         $line->addChild('OperRecommendation', '');
-        $line->addChild('FreeText', utf8_encode($tuoteno));
+        simple_xml_add($line, 'FreeText', $row['tuoteno'], 100);
         $line->addChild('PurchaseUnit', '');
         $line->addChild('ManufactItemNum', '');
         $line->addChild('InternationalItemNum', '');

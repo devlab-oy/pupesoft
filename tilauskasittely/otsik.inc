@@ -749,7 +749,6 @@ if ($tila == "" and !isset($jatka)) {
                 maksuehto           = '$assrow[maksuehto]',
                 tilausvahvistus     = '$assrow[tilausvahvistus]',
                 piiri               = '$assrow[piiri]',
-                campaign_id         =  $assrow[campaign_id],
                 rahtivapaa          = '$assrow[rahtivapaa]',
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',
@@ -2627,7 +2626,7 @@ if ($tila == "" and !isset($jatka)) {
 
         $vasen_sarake[$vasen] = "<td>".t("Kampanja").":</td>";
         $vasen_sarake[$vasen] .= "<td><select id='campaign_id' name='campaign_id' ".js_alasvetoMaxWidth('campaign_id', 300).">";
-        $vasen_sarake[$vasen] .= "<option value = null>".t("Ei kampanjaa")."</option>";
+        $vasen_sarake[$vasen] .= "<option value = 'NULL'>".t("Ei kampanjaa")."</option>";
         while ($krow = mysql_fetch_assoc($cresult)) {
           $sel = '';
           if (strtoupper($srow['campaign_id']) == strtoupper($krow["id"])) {
@@ -4231,6 +4230,10 @@ if (isset($jatka)) {
     $kassalipas = $kassalipas_row['kassalipas'];
     $maksuehto  = $kassalipas_row['maksuehto'];
     $sisainen   = "o";
+  }
+
+  if (!isset($campaign_id)) {
+    $campaign_id = 'NULL';
   }
 
   $query .= "  lasku SET

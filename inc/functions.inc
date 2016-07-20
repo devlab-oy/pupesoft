@@ -27962,7 +27962,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $receiver->addChild('RecCustPostCode', xml_cleanstring($looprow['toim_postino'], 10));
     $receiver->addChild('RecCustCity', xml_cleanstring($looprow['toim_postitp'], 30));
     $receiver->addChild('RecCustCountry', xml_cleanstring($looprow['toim_maa'], 10));
-    $receiver->addChild('RecCustCity', xml_cleanstring($looprow['toim_puh'], 30));
+    $receiver->addChild('RecCustPhone', xml_cleanstring($looprow['toim_puh'], 30));
 
     $query = "SELECT tunnus
               FROM toimitustapa

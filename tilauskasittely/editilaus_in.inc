@@ -1107,6 +1107,7 @@ while ($tietue = fgets($fd)) {
         if (mysql_num_rows($kassalipas_res) == 1) {
           $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
           $kukarow["kassamyyja"] = $editilaus_kassalipas = $kassalipas_row["tunnus"];
+          $edi_ulos .= t("Tilaus on maksettu")."\n";
         }
         else {
           $editilaus_maksuehto = "";
@@ -1263,10 +1264,14 @@ while ($tietue = fgets($fd)) {
           $maa_eu_row = mysql_fetch_assoc($maa_eu_res);
 
           if ($maa_eu_row["eu"] == "") {
+            $edi_ulos .= t("Vientitilaus EU:n ulkopuolelle")."\n";
+
             $arow["vienti"] = "K";
             $arow["alv"] = 0;
           }
           else {
+            $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
+
             $arow["vienti"] = "E";
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
@@ -1274,6 +1279,8 @@ while ($tietue = fgets($fd)) {
           }
         }
       }
+
+      $til_vienti = $arow["vienti"];
 
       if (trim($arow['laskutus_nimi']) == '') {
         $arow['laskutus_nimi']     = $arow['nimi'];
@@ -1329,8 +1336,12 @@ while ($tietue = fgets($fd)) {
           if (mysql_num_rows($ressu) == 1) {
             $ftc = mysql_fetch_assoc($ressu);
             $editilaus_toimitustapa = $ftc['selite'];
+
+            $edi_ulos .= t("Valittu asiakkaan pyytämä toimitustapa")." {$editilaus_toimitustapa}\n";
           }
           else {
+            $edi_ulos .= t("Ei löydetty asiakkaan pyytämää toimitustapaa")." {$editilaus_toimitustapa}\n";
+
             $editilaus_toimitustapa = '';
           }
         }
@@ -1446,8 +1457,6 @@ while ($tietue = fgets($fd)) {
       else {
         $splittauskielto = "";
       }
-
-      $til_vienti = $arow["vienti"];
 
       if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
         $tilaustyyppilisa = $editilaus_tilaustyyppi;
@@ -2497,14 +2506,22 @@ while ($tietue = fgets($fd)) {
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
 
-        // jos magento -casessa on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
-        // mikäli tilaus on maksettu
-        if ($laskutettu_magento_tilaus and !empty($editilaus_tilausaika)) {
-          $_temp_date = strtotime($editilaus_tilausaika);
+        // jos meillä on maksettu magento tilaus
+        if ($laskutettu_magento_tilaus) {
+          // jos on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
+          if (!empty($editilaus_tilausaika)) {
+            $_temp_date = strtotime($editilaus_tilausaika);
 
-          $laskpp = date("d", $_temp_date);
-          $laskkk = date("m", $_temp_date);
-          $laskvv = date("Y", $_temp_date);
+            $laskpp = date("d", $_temp_date);
+            $laskkk = date("m", $_temp_date);
+            $laskvv = date("Y", $_temp_date);
+          }
+
+          // jos tilaus on vientiä, pitää pakottaa sisäinen täppä jotta saadaan tilaus laskutettua.
+          // ei setata kuitenkaan kantaan, jotta saadaan läpi myöhemmin varastoprosessi, jos niin halutaan
+          if ($laskurow["vienti"] != "") {
+            $laskurow['sisainen'] = 'o';
+          }
         }
 
         // Laitetaan tilaus valmiiksi

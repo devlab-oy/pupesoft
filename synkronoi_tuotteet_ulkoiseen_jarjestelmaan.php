@@ -83,7 +83,7 @@ else {
 
       $messageheader = $xml->addChild('MessageHeader');
       $messageheader->addChild('MessageType', 'MaterialMaster');
-      simple_xml_add($messageheader, 'Sender', $yhtiorow['nimi']);
+      $messageheader->addChild('Sender', xml_cleanstring($yhtiorow['nimi']));
 
       if ($ulkoinen_jarjestelma == 'L') {
         $uj_nimi = "LogMaster";
@@ -130,12 +130,12 @@ else {
         $posten_prodgroup1field = posten_field('ProdGroup1');
         $posten_prodgroup2field = posten_field('ProdGroup2');
 
-        simple_xml_add($line, 'ItemNumber', $row[$posten_itemnumberfield], 20);
-        simple_xml_add($line, 'ItemName', $row['nimitys'], 50);
-        simple_xml_add($line, 'ProdGroup1', $row[$posten_prodgroup1field], 6);
-        simple_xml_add($line, 'ProdGroup2', $row[$posten_prodgroup2field], 6);
+        $line->addChild('ItemNumber', xml_cleanstring($row[$posten_itemnumberfield], 20));
+        $line->addChild('ItemName',   xml_cleanstring($row['nimitys'], 50));
+        $line->addChild('ProdGroup1', xml_cleanstring($row[$posten_prodgroup1field], 6));
+        $line->addChild('ProdGroup2', xml_cleanstring($row[$posten_prodgroup2field], 6));
         $line->addChild('SalesPrice', '');
-        simple_xml_add($line, 'Unit1', $row['yksikko'], 10);
+        $line->addChild('Unit1', xml_cleanstring($row['yksikko'], 10));
         $line->addChild('Unit2', '');
         $line->addChild('Relation', '');
         $line->addChild('Weight', round($row['tuotemassa'], 3));
@@ -161,7 +161,7 @@ else {
 
         $line->addChild('Status', $status);
         $line->addChild('WholesalePackageSize', '');
-        simple_xml_add($line, 'EANCode', $row['eankoodi'], 20);
+        $line->addChild('EANCode', xml_cleanstring($row['eankoodi'], 20));
         $line->addChild('EANCode2', '');
         $line->addChild('CustomsTariffNum', '');
         $line->addChild('AlarmLimit', '');
@@ -180,7 +180,7 @@ else {
         $line->addChild('PurchasePrice', '');
         $line->addChild('ConsumerPrice', '');
         $line->addChild('OperRecommendation', '');
-        simple_xml_add($line, 'FreeText', $row['tuoteno'], 100);
+        $line->addChild('FreeText', xml_cleanstring($row['tuoteno'], 100));
         $line->addChild('PurchaseUnit', '');
         $line->addChild('ManufactItemNum', '');
         $line->addChild('InternationalItemNum', '');

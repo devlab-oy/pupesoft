@@ -8926,6 +8926,11 @@ if (!function_exists('tilauksen_liitetiedostot')) {
     global $kukarow, $yhtiorow;
 
     $tunnukset = array();
+
+    if (empty($liitostunnukset)) {
+      return $tunnukset;
+    }
+
     $kayttotarkoitus_lisa = isset($kayttotarkoitus) ? " and kayttotarkoitus = '{$kayttotarkoitus}' " : '';
 
     $query = "SELECT tunnus

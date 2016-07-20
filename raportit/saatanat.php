@@ -277,6 +277,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
   if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
     $summalisa  = " round(sum(tiliointi.summa_valuutassa),2) avoimia,\n";
+    $summalisa .= " round(sum(if(lasku.jaksotettu < 0, tiliointi.summa_valuutassa, 0)),2) avoimia_ennakkolaskuja,\n"; 
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$pvmraja}, tiliointi.summa_valuutassa, 0)) 'ylivito',\n";
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa_valuutassa, 0)) 'alle_$saatavat_array[0]',\n";
 
@@ -288,6 +289,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   }
   else {
     $summalisa  = " round(sum(tiliointi.summa),2) avoimia,\n";
+    $summalisa .= " round(sum(if(lasku.jaksotettu < 0, tiliointi.summa, 0)),2) avoimia_ennakkolaskuja,\n"; 
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$pvmraja}, tiliointi.summa, 0)) 'ylivito',\n";
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) <= $saatavat_array[0], tiliointi.summa, 0)) 'alle_$saatavat_array[0]',\n";
 
@@ -308,7 +310,6 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
              and lasku.tapvm   > '0000-00-00'
              and lasku.tila    = 'U'
              and lasku.alatila = 'X'
-             and lasku.jaksotettu >= 0
              {$generoitumuuttuja}
              {$salisa1}
              {$having})
@@ -323,7 +324,6 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
              and lasku.tapvm   > '0000-00-00'
              and lasku.tila    = 'U'
              and lasku.alatila = 'X'
-             and lasku.jaksotettu >= 0
              {$generoitumuuttuja}
              {$salisa1}
              {$having})";
@@ -477,6 +477,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         else {
           list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"]);
         }
+
+        // v‰hennet‰‰n ennakkolaskujen osuus avoimista tilauksista, ettei ennakkolaskujen osuus ole tuplasti
+        $avoimettilaukset = $avoimettilaukset - $row['avoimia_ennakkolaskuja'];
 
         // Lasketaan luottotilanne nyt
         $luottotilanne_nyt = round($luottoraja + $kaatotilisumma - $row["avoimia"] - $avoimettilaukset, 2);

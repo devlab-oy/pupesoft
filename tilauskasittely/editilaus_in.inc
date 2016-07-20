@@ -2474,12 +2474,7 @@ while ($tietue = fgets($fd)) {
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
 
         // Laitetaan tilaus valmiiksi
-        if ($paivita_takaisin_keraysjonoon and $laskurow["vienti"] != "") {
-          // Paitsi jos meillä on vientitilaus, joka tulee laittaa takaisin keräysjonoon
-        }
-        else {
-          require "tilaus-valmis.inc";
-        }
+        require "tilaus-valmis.inc";
 
         $valittu_kopio_tulostin = "";
         $saatekirje = 0;

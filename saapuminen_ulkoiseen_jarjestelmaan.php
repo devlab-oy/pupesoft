@@ -101,7 +101,7 @@ if ($row['sisviesti3'] == 'ok_vie_varastoon') {
 $header = $xml->addChild('MessageHeader');
 
 $header->addChild('MessageType', 'inboundDelivery');
-simple_xml_add($header, 'Sender', $yhtiorow['nimi']);
+$header->addChild('Sender', xml_cleanstring($yhtiorow['nimi']));
 $header->addChild('Receiver', 'LogMaster');
 
 $body = $xml->addChild('VendReceiptsList');
@@ -140,21 +140,21 @@ $toimires = pupe_query($query);
 $toimirow = mysql_fetch_assoc($toimires);
 
 $vendor = $body->addChild('Vendor');
-$vendor->addChild('VendAccount',  $toimirow['toimittajanro']);
-simple_xml_add($vendor, 'VendName', $row['nimi']);
-simple_xml_add($vendor, 'VendStreet', $row['osoite']);
-$vendor->addChild('VendPostCode', $row['postino']);
-simple_xml_add($vendor, 'VendCity', $row['postitp']);
-simple_xml_add($vendor, 'VendCountry', $row['maa']);
+$vendor->addChild('VendAccount',  xml_cleanstring($toimirow['toimittajanro']));
+$vendor->addChild('VendName',     xml_cleanstring($row['nimi']));
+$vendor->addChild('VendStreet',   xml_cleanstring($row['osoite']));
+$vendor->addChild('VendPostCode', xml_cleanstring($row['postino']));
+$vendor->addChild('VendCity',     xml_cleanstring($row['postitp']));
+$vendor->addChild('VendCountry',  xml_cleanstring($row['maa']));
 $vendor->addChild('VendInfo', '');
 
 $purchaser = $body->addChild('Purchaser');
-$purchaser->addChild('PurcAccount',  $yhtiorow['ytunnus']);
-simple_xml_add($purchaser, 'PurcName', $yhtiorow['nimi']);
-simple_xml_add($purchaser, 'PurcStreet', $yhtiorow['osoite']);
-$purchaser->addChild('PurcPostCode', $yhtiorow['postino']);
-simple_xml_add($purchaser, 'PurcCity', $yhtiorow['postitp']);
-simple_xml_add($purchaser, 'PurcCountry', $yhtiorow['maa']);
+$purchaser->addChild('PurcAccount',  xml_cleanstring($yhtiorow['ytunnus']));
+$purchaser->addChild('PurcName',     xml_cleanstring($yhtiorow['nimi']));
+$purchaser->addChild('PurcStreet',   xml_cleanstring($yhtiorow['osoite']));
+$purchaser->addChild('PurcPostCode', xml_cleanstring($yhtiorow['postino']));
+$purchaser->addChild('PurcCity',     xml_cleanstring($yhtiorow['postitp']));
+$purchaser->addChild('PurcCountry',  xml_cleanstring($yhtiorow['maa']));
 
 $query = "SELECT *
           FROM tilausrivi
@@ -177,13 +177,13 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
   $line = $lines->addChild('Line');
   $line->addAttribute('No', $i);
 
-  $line->addChild('TransId',         $rivit_row['tunnus']);
-  simple_xml_add($line, 'ItemNumber', $rivit_row['tuoteno']);
-  $line->addChild('OrderedQuantity', $rivit_row['varattu']);
-  simple_xml_add($line, 'Unit', $rivit_row['yksikko']);
-  $line->addChild('Price',           $rivit_row['hinta']);
-  simple_xml_add($line, 'CurrencyCode', $row['valkoodi']);
-  simple_xml_add($line, 'RowInfo', $rivit_row['kommentti']);
+  $line->addChild('TransId',         xml_cleanstring($rivit_row['tunnus']));
+  $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno']));
+  $line->addChild('OrderedQuantity', xml_cleanstring($rivit_row['varattu']));
+  $line->addChild('Unit',            xml_cleanstring($rivit_row['yksikko']));
+  $line->addChild('Price',           xml_cleanstring($rivit_row['hinta']));
+  $line->addChild('CurrencyCode',    xml_cleanstring($row['valkoodi']));
+  $line->addChild('RowInfo',         xml_cleanstring($rivit_row['kommentti']));
 
   $i++;
 }

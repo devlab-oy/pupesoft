@@ -27924,7 +27924,7 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist->addChild('UnloadingDate', 0);
     $custpickinglist->addChild('OrderDate', 0);
 
-    $custpickinglist->addChild('DlvTerm', xml_cleanstring($looprow['toimitusehto'], 30));
+    $custpickinglist->addChild('DlvTerm', xml_cleanstring($looprow['toimitusehto'], 3));
 
     $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
     $custpickinglist->addChild('SalesOffice', 0);

@@ -15600,19 +15600,18 @@ if (!function_exists("xml_add")) {
 }
 
 if (!function_exists("xml_cleanstring")) {
-  function xml_cleanstring($value = '', $maxlength = '') {
+  function xml_cleanstring($value = '', $maxlength = 0) {
 
-    if (!empty($value)) {
-      $value = xmlentities($value);
+    if (empty($value)) {
+      return '';
     }
 
-    if (!empty($maxlength) and $maxlength > 0) {
+    if ($maxlength > 0) {
       $value = substr($value, 0, $maxlength);
     }
 
-    if (mb_detect_encoding($value, 'UTF-8', true) !== true) {
-      $value = utf8_encode($value);
-    }
+    $value = xmlentities($value);
+    $value = utf8_encode($value);
 
     return $value;
   }

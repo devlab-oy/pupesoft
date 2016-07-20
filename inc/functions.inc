@@ -15599,13 +15599,8 @@ if (!function_exists("xml_add")) {
   }
 }
 
-if (!function_exists("simple_xml_add")) {
-  function simple_xml_add($base_element, $name, $value = '', $maxlength = '') {
-    global $$base_element;
-
-    if (empty($base_element) or empty($name)) {
-      return false;
-    }
+if (!function_exists("xml_cleanstring")) {
+  function xml_cleanstring($value = '', $maxlength = '') {
 
     if (!empty($value)) {
       $value = xmlentities($value);
@@ -15615,9 +15610,11 @@ if (!function_exists("simple_xml_add")) {
       $value = substr($value, 0, $maxlength);
     }
 
-    $base_element->addChild($name, utf8_encode($value));
+    if (mb_detect_encoding($value, 'UTF-8', true) !== true) {
+      $value = utf8_encode($value);
+    }
 
-    return true;
+    return $value;
   }
 }
 
@@ -27897,7 +27894,7 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $messageheader = $xml->addChild('MessageHeader');
     $messageheader->addChild('MessageType', 'OutboundDelivery');
-    simple_xml_add($messageheader, 'Sender', $yhtiorow['nimi']);
+    $messageheader->addChild('Sender', xml_cleanstring($yhtiorow['nimi']));
 
     if ($ulkoinen_jarjestelma == 'L') {
       $uj_nimi = "Helsingin Hyllyvarasto";
@@ -27912,9 +27909,9 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist->addChild('SalesId', substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId', substr($otunnus, 0, 20));
 
-    simple_xml_add($custpickinglist, 'CustOrderNumber', $looprow['asiakkaan_tilausnumero'], 20); // Magentosta?
+    $custpickinglist->addChild('CustOrderNumber', xml_cleanstring($looprow['asiakkaan_tilausnumero'], 20)); // Magentosta?
 
-    simple_xml_add($custpickinglist, 'CustReference', $looprow['viesti'], 50);
+    $custpickinglist->addChild('CustReference', xml_cleanstring($looprow['viesti'], 50));
     $custpickinglist->addChild('OrderCode', 'U');
     $custpickinglist->addChild('OrderType', 'SO');
 
@@ -27927,9 +27924,9 @@ if (!function_exists('posten_outbounddelivery')) {
     $custpickinglist->addChild('UnloadingDate', 0);
     $custpickinglist->addChild('OrderDate', 0);
 
-    simple_xml_add($custpickinglist, 'DlvTerm', $looprow['toimitusehto'], 30);
+    $custpickinglist->addChild('DlvTerm', xml_cleanstring($looprow['toimitusehto'], 30));
 
-    simple_xml_add($custpickinglist, 'PickingInstruction', $looprow['sisviesti2'], 128);
+    $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
     $custpickinglist->addChild('SalesOffice', 0);
     $custpickinglist->addChild('SalesContact', 0);
     $custpickinglist->addChild('Warehouse', 0);
@@ -27940,13 +27937,13 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $_nimi = trim($looprow['nimi'].' '.$looprow['nimitark']);
 
-    simple_xml_add($orderedby, 'CustName', $_nimi, 50);
-    simple_xml_add($orderedby, 'CustStreet', $looprow['osoite'], 50);
-    simple_xml_add($orderedby, 'CustStreet2', $looprow['osoite'], 50);
-    simple_xml_add($orderedby, 'CustPostCode', $looprow['postino'], 10);
-    simple_xml_add($orderedby, 'CustCity', $looprow['postitp'], 30);
-    simple_xml_add($orderedby, 'CustCountry', $looprow['maa'], 10);
-    simple_xml_add($orderedby, 'Email', $looprow['email']);
+    $orderedby->addChild('CustName', xml_cleanstring($_nimi, 50));
+    $orderedby->addChild('CustStreet', xml_cleanstring($looprow['osoite'], 50));
+    $orderedby->addChild('CustStreet2', xml_cleanstring($looprow['osoite'], 50));
+    $orderedby->addChild('CustPostCode', xml_cleanstring($looprow['postino'], 10));
+    $orderedby->addChild('CustCity', xml_cleanstring($looprow['postitp'], 30));
+    $orderedby->addChild('CustCountry', xml_cleanstring($looprow['maa'], 10));
+    $orderedby->addChild('Email', xml_cleanstring($looprow['email']));
 
     $_nimi = trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']);
     $_osoite = $looprow['toim_osoite'];
@@ -27959,13 +27956,13 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount', 0);
-    simple_xml_add($receiver, 'RecCustName', $_nimi, 50);
-    simple_xml_add($receiver, 'RecCustStreet', $_osoite, 50);
-    simple_xml_add($receiver, 'RecCustStreet2', $_osoite2, 50);
-    simple_xml_add($receiver, 'RecCustPostCode', $looprow['toim_postino'], 10);
-    simple_xml_add($receiver, 'RecCustCity', $looprow['toim_postitp'], 30);
-    simple_xml_add($receiver, 'RecCustCountry', $looprow['toim_maa'], 10);
-    simple_xml_add($receiver, 'RecCustCity', $looprow['toim_puh'], 30);
+    $receiver->addChild('RecCustName', xml_cleanstring($_nimi, 50));
+    $receiver->addChild('RecCustStreet', xml_cleanstring($_osoite, 50));
+    $receiver->addChild('RecCustStreet2', xml_cleanstring($_osoite2, 50));
+    $receiver->addChild('RecCustPostCode', xml_cleanstring($looprow['toim_postino'], 10));
+    $receiver->addChild('RecCustCity', xml_cleanstring($looprow['toim_postitp'], 30));
+    $receiver->addChild('RecCustCountry', xml_cleanstring($looprow['toim_maa'], 10));
+    $receiver->addChild('RecCustCity', xml_cleanstring($looprow['toim_puh'], 30));
 
     $query = "SELECT tunnus
               FROM toimitustapa
@@ -27997,8 +27994,8 @@ if (!function_exists('posten_outbounddelivery')) {
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
 
-      simple_xml_add($line, 'TransId', $looprow['tilausrivin_tunnus'], 20);
-      simple_xml_add($line, 'ItemNumber', $looprow[$posten_itemnumberfield], 22);
+      $line->addChild('TransId', xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
+      $line->addChild('ItemNumber', xml_cleanstring($looprow[$posten_itemnumberfield], 22));
       $line->addChild('CustItemNumber', 0);
       $line->addChild('ItemName', 0);
       $line->addChild('ItemText', 0);
@@ -28019,7 +28016,7 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('CurrencyCode', 0);
       $line->addChild('TaxCode', 0);
 
-      simple_xml_add($line, 'LineInfo', $looprow['kommentti'], 92);
+      $line->addChild('LineInfo', xml_cleanstring($looprow['kommentti'], 92));
 
       $_line_i++;
     }

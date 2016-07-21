@@ -330,7 +330,7 @@ while (false !== ($file = readdir($handle))) {
     $params = array(
       'to'      => $error_email,
       'cc'      => '',
-      'subject' => t("Posten keräyspoikkeama")." - {$otunnus}",
+      'subject' => t("PostNord keräyspoikkeama")." - {$otunnus}",
       'ctype'   => 'html',
       'body'    => $body,
     );

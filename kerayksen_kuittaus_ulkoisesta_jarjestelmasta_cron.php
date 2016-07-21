@@ -65,12 +65,7 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('outbound_delivery', "Käsitellään sanoma {$file}");
 
-  $otunnus = (int) $xml->CustPackingSlip->SalesId;
-
-  // Fallback to pickinglist id
-  if ($otunnus == 0) {
-    $otunnus = (int) $xml->CustPackingSlip->PickingListId;
-  }
+  $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
   if ($otunnus == 0) {
     pupesoft_log('outbound_delivery', "Tilausnumeroa ei löytynyt sanomasta {$file}");

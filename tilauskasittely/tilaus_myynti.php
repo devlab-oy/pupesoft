@@ -10511,6 +10511,9 @@ if ($tee == '') {
         if ($toim == 'REKLAMAATIO' and $laskurow['tilaustyyppi'] == 'U') {
           $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>";
         }
+        elseif ($laskurow['tilaustyyppi'] == 'W') {
+         $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = 'W'>";
+        }
 
         echo "<form name='kaikkyht' id='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
           <input type='hidden' name='toim' value='$toim'>

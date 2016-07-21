@@ -1022,6 +1022,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='projektilla' value='$projektilla'>";
+  echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
   echo "<input type='hidden' name='from' value='$from'>";
   echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
   echo "<input type='hidden' name='mista' value='$mista'>";

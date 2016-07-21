@@ -1329,9 +1329,11 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
         $lisat_res = pupe_query($query);
         $lisat_row = mysql_fetch_assoc($lisat_res);
 
-        // Lukitaan sarjanumero
-        $sarjarow["osto_laskaika"] = date("Y-m-d");
-        $sarjarow["myyntirivitunnus"] = $lisat_row["tunnus"];
+        if ($lisat_row != "") {
+          // Lukitaan sarjanumero
+          $sarjarow["osto_laskaika"] = date("Y-m-d");
+          $sarjarow["myyntirivitunnus"] = $lisat_row["tunnus"];
+        }
       }
 
       if ($sarjarow["era_kpl"] < 0) {

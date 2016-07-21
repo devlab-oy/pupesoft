@@ -13692,6 +13692,9 @@ if (!function_exists("LisaaTaso")) {
   function LisaaTaso($laji, $left, $koodi , $nimi) {
     global $kukarow;
 
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     // Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
@@ -13784,6 +13787,9 @@ if (!function_exists("LisaaPaaKat")) {
   function LisaaPaaKat($laji, $nimi) {
     global $kukarow;
 
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     $qu = "INSERT INTO dynaaminen_puu
     (
       yhtio,
@@ -13811,6 +13817,9 @@ if (!function_exists("LisaaPaaKat")) {
 if (!function_exists("LisaaLapsi")) {
   function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi) {
     global $kukarow;
+
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
 
     if ($left == 1) {
       // mik‰li is‰ on root, niin lis‰t‰‰n sille alakat

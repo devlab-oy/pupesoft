@@ -5483,7 +5483,7 @@ if ($tee == '') {
 
   $_kukaextranet = ($kukarow['extranet'] == '');
 
-  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
+  $_saako_nahda = ($kukarow['saatavat'] != '2' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1'));
   $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
   $_saako = ($_saako_nahda and $_saako_nayttaa);
 

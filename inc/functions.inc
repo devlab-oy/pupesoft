@@ -15600,7 +15600,7 @@ if (!function_exists("xml_add")) {
 }
 
 if (!function_exists("xml_cleanstring")) {
-  function xml_cleanstring($value = '', $maxlength = 0) {
+  function xml_cleanstring($value, $maxlength = 0) {
 
     if (empty($value)) {
       return '';

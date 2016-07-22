@@ -8926,6 +8926,11 @@ if (!function_exists('tilauksen_liitetiedostot')) {
     global $kukarow, $yhtiorow;
 
     $tunnukset = array();
+
+    if (empty($liitostunnukset)) {
+      return $tunnukset;
+    }
+
     $kayttotarkoitus_lisa = isset($kayttotarkoitus) ? " and kayttotarkoitus = '{$kayttotarkoitus}' " : '';
 
     $query = "SELECT tunnus
@@ -33360,17 +33365,20 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
     $edi_varastopaikka_res = pupe_query($query);
     $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
 
-    $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+    $tulostusalue = onkotulostusalueita(
+      $edi_varastopaikka_row["hyllyalue"],
+      $edi_varastopaikka_row["hyllynro"],
+      $varasto_row['tunnus'],
+      $kukarow['yhtio']
+    );
 
-    $vielisa = "";
-    if ($til_vienti == "") $vielisa = "chn = '999', ";
-
-    // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
+    // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan,
+    // lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
     $query = "UPDATE lasku SET
               mapvm        = now(),
               tila         = 'N',
               alatila      = 'A',
-              $vielisa
+              chn          = '999',
               varasto      = '$varasto_row[tunnus]',
               sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
               tulostusalue = '$tulostusalue'
@@ -33379,24 +33387,24 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
     $magento_maksettu_res = pupe_query($query);
 
     // haetaan tilauksen tiedot
-    $query    = "SELECT *
-                 FROM lasku
-                 WHERE tunnus = '$tilausnumero'
-                 AND yhtio = '$kukarow[yhtio]'";
-    $result   = pupe_query($query);
+    $query = "SELECT *
+              FROM lasku
+              WHERE tunnus = '$tilausnumero'
+              AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 
     // pit‰‰ nollata toimitettuaika riveille
     $query = "UPDATE tilausrivi SET
-              toimitettu     = '',
+              toimitettu = '',
               toimitettuaika = ''
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND otunnus    = '$tilausnumero'";
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus = '$tilausnumero'";
     $result = pupe_query($query);
 
     // pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
     $query = "UPDATE tilausrivi SET
-              keratty      = '',
+              keratty = '',
               kerattyaika  = ''
               WHERE yhtio  = '$kukarow[yhtio]'
               AND otunnus  = '$tilausnumero'

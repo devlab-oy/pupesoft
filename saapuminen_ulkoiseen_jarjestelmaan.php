@@ -38,19 +38,11 @@ else {
 
   $yhtio = mysql_escape_string(trim($argv[1]));
   $yhtiorow = hae_yhtion_parametrit($yhtio);
+  $kukarow = hae_kukarow('admin', $yhtio);
 
-  // Haetaan kukarow
-  $query = "SELECT *
-            FROM kuka
-            WHERE yhtio = '{$yhtio}'
-            AND kuka    = 'admin'";
-  $kukares = pupe_query($query);
-
-  if (mysql_num_rows($kukares) != 1) {
+  if (!isset($kukarow)) {
     exit("VIRHE: Admin käyttäjä ei löydy!\n");
   }
-
-  $kukarow = mysql_fetch_assoc($kukares);
 
   $pupe_root_polku = dirname(__FILE__);
 
@@ -75,12 +67,6 @@ if (!$ftp_chk) {
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-$xmlstr  = "<?xml version='1.0' encoding='UTF-8'?>";
-$xmlstr .= '<Message>';
-$xmlstr .= '</Message>';
-
-$xml = new SimpleXMLElement($xmlstr);
-
 $query = "SELECT *
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -96,14 +82,6 @@ if ($row['sisviesti3'] == 'ok_vie_varastoon') {
   exit;
 }
 
-$header = $xml->addChild('MessageHeader');
-
-$header->addChild('MessageType', 'inboundDelivery');
-$header->addChild('Sender', xml_cleanstring($yhtiorow['nimi']));
-$header->addChild('Receiver', 'LogMaster');
-
-$body = $xml->addChild('VendReceiptsList');
-
 // Tämän saapumisen "pää"-ostotilaus.
 $query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
           FROM tilausrivi
@@ -118,18 +96,7 @@ $query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
 $tilasnumero_res = pupe_query($query);
 $tilasnumero_row = mysql_fetch_assoc($tilasnumero_res);
 
-$body->addChild('PurchId', $row['laskunro']);
-$body->addChild('ReceiptsListId', $tilasnumero_row['otunnus']);
-
-// U = new
-// M = change
-// P = delete
-$body->addChild('OrderCode', $ordercode);
-$body->addChild('OrderType', 'PO');
-$body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
-$body->addChild('DeliveryDate', tv1dateconv($tilasnumero_row['toimaika']));
-$body->addChild('Warehouse', '');
-
+// haetaan toimittajan tiedot
 $query = "SELECT *
           FROM toimi
           WHERE yhtio = '{$kukarow['yhtio']}'
@@ -137,23 +104,7 @@ $query = "SELECT *
 $toimires = pupe_query($query);
 $toimirow = mysql_fetch_assoc($toimires);
 
-$vendor = $body->addChild('Vendor');
-$vendor->addChild('VendAccount',  xml_cleanstring($toimirow['toimittajanro']));
-$vendor->addChild('VendName',     xml_cleanstring($row['nimi']));
-$vendor->addChild('VendStreet',   xml_cleanstring($row['osoite']));
-$vendor->addChild('VendPostCode', xml_cleanstring($row['postino']));
-$vendor->addChild('VendCity',     xml_cleanstring($row['postitp']));
-$vendor->addChild('VendCountry',  xml_cleanstring($row['maa']));
-$vendor->addChild('VendInfo', '');
-
-$purchaser = $body->addChild('Purchaser');
-$purchaser->addChild('PurcAccount',  xml_cleanstring($yhtiorow['ytunnus']));
-$purchaser->addChild('PurcName',     xml_cleanstring($yhtiorow['nimi']));
-$purchaser->addChild('PurcStreet',   xml_cleanstring($yhtiorow['osoite']));
-$purchaser->addChild('PurcPostCode', xml_cleanstring($yhtiorow['postino']));
-$purchaser->addChild('PurcCity',     xml_cleanstring($yhtiorow['postitp']));
-$purchaser->addChild('PurcCountry',  xml_cleanstring($yhtiorow['maa']));
-
+// haetaan tilausrivit
 $query = "SELECT *
           FROM tilausrivi
           WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -163,18 +114,49 @@ $query = "SELECT *
           AND uusiotunnus = '{$saapumisnro}'";
 $rivit_res = pupe_query($query);
 
+# Rakennetaan XML
+$xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
+
+$header = $xml->addChild('MessageHeader');
+$header->addChild('MessageType', 'inboundDelivery');
+$header->addChild('Sender',      xml_cleanstring($yhtiorow['nimi']));
+$header->addChild('Receiver',    'LogMaster');
+
+$body = $xml->addChild('VendReceiptsList');
+$body->addChild('PurchId',          $row['laskunro']);
+$body->addChild('ReceiptsListId',   $tilasnumero_row['otunnus']);
+$body->addChild('OrderCode',        $ordercode);
+$body->addChild('OrderType',        'PO');
+$body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
+$body->addChild('DeliveryDate',     tv1dateconv($tilasnumero_row['toimaika']));
+$body->addChild('Warehouse',        '');
+
+$vendor = $body->addChild('Vendor');
+$vendor->addChild('VendAccount',  xml_cleanstring($toimirow['toimittajanro']));
+$vendor->addChild('VendName',     xml_cleanstring($row['nimi']));
+$vendor->addChild('VendStreet',   xml_cleanstring($row['osoite']));
+$vendor->addChild('VendPostCode', xml_cleanstring($row['postino']));
+$vendor->addChild('VendCity',     xml_cleanstring($row['postitp']));
+$vendor->addChild('VendCountry',  xml_cleanstring($row['maa']));
+$vendor->addChild('VendInfo',     '');
+
+$purchaser = $body->addChild('Purchaser');
+$purchaser->addChild('PurcAccount',  xml_cleanstring($yhtiorow['ytunnus']));
+$purchaser->addChild('PurcName',     xml_cleanstring($yhtiorow['nimi']));
+$purchaser->addChild('PurcStreet',   xml_cleanstring($yhtiorow['osoite']));
+$purchaser->addChild('PurcPostCode', xml_cleanstring($yhtiorow['postino']));
+$purchaser->addChild('PurcCity',     xml_cleanstring($yhtiorow['postitp']));
+$purchaser->addChild('PurcCountry',  xml_cleanstring($yhtiorow['maa']));
+
 $i = 1;
 $ostotilaukset = array();
 
 while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
-
   $ostotilaukset[] = $rivit_row['otunnus'];
 
   $lines = $body->addChild('Lines');
-
   $line = $lines->addChild('Line');
   $line->addAttribute('No', $i);
-
   $line->addChild('TransId',         xml_cleanstring($rivit_row['tunnus']));
   $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno']));
   $line->addChild('OrderedQuantity', xml_cleanstring($rivit_row['varattu']));
@@ -189,14 +171,12 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
 if ($xml_chk and $ftp_chk) {
-
   $ostotilaukset = array_unique($ostotilaukset);
 
   $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
-
     // Lähetetään aina UTF-8 muodossa
     $ftputf8 = true;
 

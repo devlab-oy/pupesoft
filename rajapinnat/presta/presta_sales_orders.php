@@ -2,18 +2,22 @@
 
 require_once 'rajapinnat/presta/presta_addresses.php';
 require_once 'rajapinnat/presta/presta_carriers.php';
+require_once 'rajapinnat/presta/presta_carrier_files.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_currencies.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {
-  private $edi_filepath_base = '';
+  private $edi_filepath_base = null;
   private $edi_order = '';
+  private $fetch_carrier_files = false;
   private $fetch_statuses = array();
   private $fetched_status = null;
   private $presta_addresses = null;
+  private $presta_carrier_files = null;
   private $presta_carriers = null;
+  private $presta_changeable_invoice_address = true;
   private $presta_countries = null;
   private $presta_currencies = null;
   private $presta_order_histories = null;
@@ -22,6 +26,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   public function __construct($url, $api_key, $log_file) {
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_carrier_files = new PrestaCarrierFiles($url, $api_key, $log_file);
     $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
     $this->presta_currencies = new PrestaCurrencies($url, $api_key, $log_file);
@@ -39,7 +44,13 @@ class PrestaSalesOrders extends PrestaClient {
   }
 
   public function set_edi_filepath($filepath) {
-    $this->edi_filepath_base = rtrim($filepath, '/');
+    $filepath = rtrim($filepath, '/');
+
+    if (!is_writable($filepath)) {
+      throw new Exception("{$filepath} ei pysty kirjoittamaan");
+    }
+
+    $this->edi_filepath_base = $filepath;
   }
 
   public function set_yhtiorow($yhtiorow) {
@@ -58,10 +69,18 @@ class PrestaSalesOrders extends PrestaClient {
     $this->fetched_status = $value;
   }
 
+  public function set_changeable_invoice_address($value) {
+    $this->presta_changeable_invoice_address = $value;
+  }
+
+  public function set_fetch_carrier_files($value) {
+    $this->fetch_carrier_files = $value;
+  }
+
   public function transfer_orders_to_pupesoft() {
     $this->logger->log('---------Start sales orders fetch---------');
 
-    if ($this->edi_filepath_base == '') {
+    if (empty($this->edi_filepath_base)) {
       throw new Exception('Edi tiedosto polku pitää olla määritelty');
     }
 
@@ -100,8 +119,17 @@ class PrestaSalesOrders extends PrestaClient {
           );
         }
 
+        // fetch carrier files
+        $carrier_file = null;
+
+        if ($this->fetch_carrier_files === true) {
+          $file_directory = $this->carrier_file_directory();
+          $carrier_file   = $this->presta_carrier_files->save_file($sales_order['id'], $file_directory);
+        }
+
         $params = array(
           "carrier"          => $carrier,
+          "carrier_file"     => basename($carrier_file),
           "currency"         => $currency,
           "delivery_address" => $address_delivery,
           "delivery_country" => $delivery_country,
@@ -112,6 +140,9 @@ class PrestaSalesOrders extends PrestaClient {
 
         $this->convert_to_edi($params);
         $this->mark_as_fetched($sales_order);
+
+        // write order to disk
+        $this->write_to_file();
       }
       catch (Exception $e) {
         // Do nothing because we still want to try to create the other
@@ -133,9 +164,7 @@ class PrestaSalesOrders extends PrestaClient {
    *
    * @return array
    */
-
-
-  public function fetch_sales_orders() {
+  private function fetch_sales_orders() {
     $this->logger->log('Fetching sales orders');
 
     try {
@@ -166,6 +195,7 @@ class PrestaSalesOrders extends PrestaClient {
    */
   private function convert_to_edi($params) {
     $carrier          = $params["carrier"];
+    $carrier_file     = $params["carrier_file"];
     $currency         = $params["currency"];
     $delivery_address = $params["delivery_address"];
     $delivery_country = $params["delivery_country"];
@@ -192,6 +222,12 @@ class PrestaSalesOrders extends PrestaClient {
       $pupesoft_customer = hae_asiakas($id);
     }
 
+    if (empty($pupesoft_customer)) {
+      $msg = "Oletusasiakasta {$id} ei löytynyt Pupesoftista!";
+
+      throw new Exception($msg);
+    }
+
     // choose pupesoft customer number
     if (!empty($pupesoft_customer['asiakasnro'])) {
       $pupesoft_customer_id = $pupesoft_customer['asiakasnro'];
@@ -204,6 +240,30 @@ class PrestaSalesOrders extends PrestaClient {
     }
     else {
       $pupesoft_customer_id = '';
+    }
+
+    // we don't allow users to change their invoice address, use pupesoft's address instead
+    if ($this->presta_changeable_invoice_address === false) {
+      if (!empty($pupesoft_customer['laskutus_nimi'])) {
+        $invoice_address = array(
+          'address1'  => $pupesoft_customer['laskutus_osoite'],
+          'city'      => $pupesoft_customer['laskutus_postitp'],
+          'firstname' => $pupesoft_customer['laskutus_nimitark'],
+          'lastname'  => $pupesoft_customer['laskutus_nimi'],
+          'phone'     => '',
+          'postcode'  => $pupesoft_customer['laskutus_postino'],
+        );
+      }
+      else {
+        $invoice_address = array(
+          'address1'  => $pupesoft_customer['osoite'],
+          'city'      => $pupesoft_customer['postitp'],
+          'firstname' => $pupesoft_customer['nimitark'],
+          'lastname'  => $pupesoft_customer['nimi'],
+          'phone'     => $pupesoft_customer['puhelin'],
+          'postcode'  => $pupesoft_customer['postino'],
+        );
+      }
     }
 
     // empty edi_order
@@ -219,6 +279,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$order['invoice_number']}");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_KOHDE:");
+    $this->add_row("OSTOTIL.OT_LIITETIEDOSTO:{$carrier_file}");
     $this->add_row("OSTOTIL.OT_TILAUSAIKA:");
     $this->add_row("OSTOTIL.OT_KASITTELIJA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
@@ -301,7 +362,7 @@ class PrestaSalesOrders extends PrestaClient {
 
       // pack_rows on custom presta kenttä. Mikäli kyseessä on pack -tuote (tuoteperhe), niin
       // kentässä tulee lapsituotteiden tiedot muodossa "tuotekoodi1:hinta1;tuotekoodi1:hinta2..."
-      $pack_rows = isset($row['pack_rows']) ? $row['pack_rows'] : '';
+      $pack_rows = empty($row['pack_rows']) ? '' : $row['pack_rows'];
 
       $this->add_row("*RS OSTOTILRIV {$row_number}");
       $this->add_row("OSTOTILRIV.OTR_NRO:{$order['id']}");
@@ -325,9 +386,6 @@ class PrestaSalesOrders extends PrestaClient {
 
     $this->add_row("*ME");
     $this->add_row("*IE");
-
-    // write order to disk
-    $this->write_to_file();
   }
 
   private function mark_as_fetched($sales_order) {
@@ -369,16 +427,24 @@ class PrestaSalesOrders extends PrestaClient {
     $date = date("Ymd");
     $filepath = "{$this->edi_filepath_base}/presta-order-{$date}-{$rnd}.txt";
 
-    if (!is_writable(dirname($filepath))) {
-      throw new Exception("{$filepath} ei pysty kirjoittamaan");
-    }
-
     // write file
     file_put_contents($filepath, $this->edi_order);
 
     // empty variable
     $this->edi_order = '';
 
+    $this->logger->log("Tallennettiin tiedosto {$filepath}");
+
     return true;
+  }
+
+  private function carrier_file_directory() {
+    $file_directory = "{$this->edi_filepath_base}/liitetiedostot";
+
+    if (!is_writable($file_directory)) {
+      throw new Exception("{$file_directory} ei pysty kirjoittamaan");
+    }
+
+    return "{$this->edi_filepath_base}/liitetiedostot";
   }
 }

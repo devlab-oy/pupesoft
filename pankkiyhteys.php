@@ -6,6 +6,9 @@ ob_start();
 require "inc/parametrit.inc";
 require "inc/pankkiyhteys_functions.inc";
 
+$formi  = 'pankkiyhteys';
+$kentta = 'salasana';
+
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
@@ -114,7 +117,7 @@ if ($tee == "") {
 
   if ($kaytossa_olevat_pankkiyhteydet) {
 
-    echo "<form method='post' action='pankkiyhteys.php'>";
+    echo "<form name='pankkiyhteys' method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='kirjaudu'/>";
     echo "<input type='hidden' name='toim' value='$toim'/>";
     echo "<table>";

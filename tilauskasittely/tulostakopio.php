@@ -2,6 +2,7 @@
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
+$compression = FALSE;
 
 if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
   $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
@@ -14,6 +15,15 @@ if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
+
+if ($tee == 'lataa_tiedosto') {
+  $filepath = "/tmp/".$tmpfilenimi;
+  if (file_exists($filepath)) {
+    readfile($filepath);
+    unlink($filepath);
+  }
+  exit;
+}
 
 if (!isset($logistiikka_yhtio)) $logistiikka_yhtio = "";
 if (!isset($logistiikka_yhtiolisa)) $logistiikka_yhtiolisa = "";
@@ -1637,8 +1647,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     $tilausvahvistus_onkin_kerayslista = '';
     $excel_lahete_hinnoilla = '';
-    $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
-    $pos2 = strpos($komento['Tilausvahvistus'], "excel_lahete_hinnoilla");
+    $komento_tilausvahvistus = empty($komento['Tilausvahvistus']) ? '' : $komento['Tilausvahvistus'];
+
+    $pos  = strpos($komento_tilausvahvistus, "excel_lahete_geodis_wilson");
+    $pos2 = strpos($komento_tilausvahvistus, "excel_lahete_hinnoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";

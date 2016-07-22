@@ -60,7 +60,6 @@ else {
   if (mysql_num_rows($res) > 0) {
 
     if ($tee == '') {
-
       echo "<font class='message'>", t("Tuotteet joita ei ole synkronoitu"), "</font><br />";
       echo "<font class='message'>", t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)), "</font><br /><br />";
 
@@ -76,15 +75,6 @@ else {
       echo "</tr>";
     }
     else {
-
-      $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
-
-      $xml = simplexml_load_string("<?xml version='1.0' encoding='{$encoding}'?><Message></Message>");
-
-      $messageheader = $xml->addChild('MessageHeader');
-      $messageheader->addChild('MessageType', 'MaterialMaster');
-      $messageheader->addChild('Sender', utf8_encode($yhtiorow['nimi']));
-
       if ($ulkoinen_jarjestelma == 'L') {
         $uj_nimi = "LogMaster";
       }
@@ -92,7 +82,12 @@ else {
         $uj_nimi = "Posten";
       }
 
-      $messageheader->addChild('Receiver', $uj_nimi);
+      $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
+
+      $messageheader = $xml->addChild('MessageHeader');
+      $messageheader->addChild('MessageType', 'MaterialMaster');
+      $messageheader->addChild('Sender',      xml_cleanstring($yhtiorow['nimi']));
+      $messageheader->addChild('Receiver',    $uj_nimi);
 
       $iteminformation = $xml->addChild('ItemInformation');
       $iteminformation->addChild('TransDate', date('d-m-Y'));
@@ -106,63 +101,13 @@ else {
     while ($row = mysql_fetch_assoc($res)) {
 
       if ($tee == '') {
-
         echo "<tr>";
         echo "<td>{$row['tuoteno']}</td>";
         echo "<td>{$row['nimitys']}</td>";
         echo "</tr>";
       }
       else {
-
-        $line = $items->addChild('Line');
-        $line->addAttribute('No', $i);
-
-        if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
-          $type = 'M';
-        }
-        else {
-          $type = 'U';
-        }
-
-        $line->addChild('Type', $type);
-
-        $eankoodi = substr($row['eankoodi'], 0, 20);
-        $nimitys = substr($row['nimitys'], 0, 50);
-        $try = substr($row['try'], 0, 6);
-        $yksikko = substr($row['yksikko'], 0, 10);
-        $tuoteno = substr($row['tuoteno'], 0, 100);
-
-        $posten_itemnumberfield = "tuoteno";
-        $alt_posten_itemnumberfield = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ItemNumber' ", '', '', "selitetark");
-
-        if (!empty($alt_posten_itemnumberfield)) {
-          $posten_itemnumberfield = $alt_posten_itemnumberfield;
-        }
-
-        $posten_prodgroup2field = "";
-        $alt_posten_prodgroup2field = t_avainsana("POSTEN_TKOODI", '', " and avainsana.selite = 'ProdGroup2' ", '', '', "selitetark");
-
-        if (!empty($alt_posten_prodgroup2field)) {
-          $posten_prodgroup2field = utf8_encode($row[$alt_posten_prodgroup2field]);
-        }
-
-        $line->addChild('ItemNumber', utf8_encode(substr($row[$posten_itemnumberfield], 0, 20)));
-        $line->addChild('ItemName', utf8_encode($nimitys));
-        $line->addChild('ProdGroup1', utf8_encode($try));
-        $line->addChild('ProdGroup2', $posten_prodgroup2field);
-        $line->addChild('SalesPrice', '');
-        $line->addChild('Unit1', utf8_encode($yksikko));
-        $line->addChild('Unit2', '');
-        $line->addChild('Relation', '');
-        $line->addChild('Weight', round($row['tuotemassa'], 3));
-        $line->addChild('NetWeight', '');
-        $line->addChild('Volume', '');
-        $line->addChild('Height', '');
-        $line->addChild('Width', '');
-        $line->addChild('Length', '');
-        $line->addChild('PackageSize', '');
-        $line->addChild('PalletSize', '');
-
+        // statuskoodi
         switch ($row['status']) {
         case 'A':
           $status = 1;
@@ -175,40 +120,70 @@ else {
           break;
         }
 
-        $line->addChild('Status', $status);
-        $line->addChild('WholesalePackageSize', '');
-        $line->addChild('EANCode', utf8_encode($eankoodi));
-        $line->addChild('EANCode2', '');
-        $line->addChild('CustomsTariffNum', '');
-        $line->addChild('AlarmLimit', '');
-        $line->addChild('QualPeriod1', '');
-        $line->addChild('QualPeriod2', '');
-        $line->addChild('QualPeriod3', '');
-        $line->addChild('FactoryNum', '');
-        $line->addChild('UNCode', '');
-        $line->addChild('BBDateCollect', '');
-        $line->addChild('SerialNumbers', '');
-        $line->addChild('SerialNumInArrival', '');
-        $line->addChild('TaxCode', '');
-        $line->addChild('CountryofOrigin', '');
-        $line->addChild('PlatformQuantity', '');
-        $line->addChild('PlatformType', '');
-        $line->addChild('PurchasePrice', '');
-        $line->addChild('ConsumerPrice', '');
-        $line->addChild('OperRecommendation', '');
-        $line->addChild('FreeText', utf8_encode($tuoteno));
-        $line->addChild('PurchaseUnit', '');
-        $line->addChild('ManufactItemNum', '');
-        $line->addChild('InternationalItemNum', '');
-        $line->addChild('Flashpoint', '');
-        $line->addChild('SalesCurrency', '');
-        $line->addChild('PurchaseCurrency', '');
-        $line->addChild('Model', '');
-        $line->addChild('ModelOrder', '');
-        $line->addChild('TransportTemperature', '');
+        // tyyppi
+        if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
+          $type = 'M';
+        }
+        else {
+          $type = 'U';
+        }
+
+        $posten_itemnumberfield = posten_field('ItemNumber');
+        $posten_prodgroup1field = posten_field('ProdGroup1');
+        $posten_prodgroup2field = posten_field('ProdGroup2');
+
+        $line = $items->addChild('Line');
+        $line->addAttribute('No', $i);
+        $line->addChild('Type',                  $type);
+        $line->addChild('ItemNumber',            xml_cleanstring($row[$posten_itemnumberfield], 20));
+        $line->addChild('ItemName',              xml_cleanstring($row['nimitys'], 50));
+        $line->addChild('ProdGroup1',            xml_cleanstring($row[$posten_prodgroup1field], 6));
+        $line->addChild('ProdGroup2',            xml_cleanstring($row[$posten_prodgroup2field], 6));
+        $line->addChild('SalesPrice',            '');
+        $line->addChild('Unit1',                 xml_cleanstring($row['yksikko'], 10));
+        $line->addChild('Unit2',                 '');
+        $line->addChild('Relation',              '');
+        $line->addChild('Weight',                round($row['tuotemassa'], 3));
+        $line->addChild('NetWeight',             '');
+        $line->addChild('Volume',                '');
+        $line->addChild('Height',                '');
+        $line->addChild('Width',                 '');
+        $line->addChild('Length',                '');
+        $line->addChild('PackageSize',           '');
+        $line->addChild('PalletSize',            '');
+        $line->addChild('Status',                $status);
+        $line->addChild('WholesalePackageSize',  '');
+        $line->addChild('EANCode',               xml_cleanstring($row['eankoodi'], 20));
+        $line->addChild('EANCode2',              '');
+        $line->addChild('CustomsTariffNum',      '');
+        $line->addChild('AlarmLimit',            '');
+        $line->addChild('QualPeriod1',           '');
+        $line->addChild('QualPeriod2',           '');
+        $line->addChild('QualPeriod3',           '');
+        $line->addChild('FactoryNum',            '');
+        $line->addChild('UNCode',                '');
+        $line->addChild('BBDateCollect',         '');
+        $line->addChild('SerialNumbers',         '');
+        $line->addChild('SerialNumInArrival',    '');
+        $line->addChild('TaxCode',               '');
+        $line->addChild('CountryofOrigin',       '');
+        $line->addChild('PlatformQuantity',      '');
+        $line->addChild('PlatformType',          '');
+        $line->addChild('PurchasePrice',         '');
+        $line->addChild('ConsumerPrice',         '');
+        $line->addChild('OperRecommendation',    '');
+        $line->addChild('FreeText',              xml_cleanstring($row['tuoteno'], 100));
+        $line->addChild('PurchaseUnit',          '');
+        $line->addChild('ManufactItemNum',       '');
+        $line->addChild('InternationalItemNum',  '');
+        $line->addChild('Flashpoint',            '');
+        $line->addChild('SalesCurrency',         '');
+        $line->addChild('PurchaseCurrency',      '');
+        $line->addChild('Model',                 '');
+        $line->addChild('ModelOrder',            '');
+        $line->addChild('TransportTemperature',  '');
 
         if (is_null($row['synkronointi'])) {
-
           $query = "INSERT INTO tuotteen_avainsanat SET
                     yhtio      = '{$kukarow['yhtio']}',
                     tuoteno    = '{$row['tuoteno']}',
@@ -220,10 +195,8 @@ else {
                     muutospvm  = now(),
                     muuttaja   = '{$kukarow['kuka']}'";
           pupe_query($query);
-
         }
         else {
-
           $query = "UPDATE tuotteen_avainsanat SET
                     selite      = 'x'
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -244,7 +217,6 @@ else {
       echo "</form>";
     }
     else {
-
       $_name = substr("tuote_".md5(uniqid()), 0, 25);
       $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
@@ -274,8 +246,8 @@ else {
           break;
         }
 
-        // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
-        $ftputf8 = PUPE_UNICODE;
+        // L‰hetet‰‰n aina UTF-8 muodossa
+        $ftputf8 = true;
 
         require "inc/ftp-send.inc";
       }

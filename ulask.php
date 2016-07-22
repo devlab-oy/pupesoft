@@ -806,12 +806,29 @@ if ($tee == 'I') {
 
   // IBAN / BBAN
   if ($trow['ultilno'] != "") {
+    $swift_ok = TRUE;
+
+    if (strtoupper($ibanmaa) == "FI") {
+      // Haetaan swift tarkistusta varten tai jos sitä ei ole syötetty ollenkaan
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($trow['ultilno'], '');
+
+      // Jos swift on tyhjä niin laitetaan haettu tilalle
+      if (empty($trow["swift"])) {
+        $trow["swift"] = $vastaus['swift'];
+      }
+
+      if ($trow["swift"] != $vastaus['swift']) {
+        $swift_ok = FALSE;
+      }
+    }
+
     // Vaaditaan isot kirjaimet
     $trow['ultilno'] = strtoupper($trow['ultilno']);
     $trow['swift']   = strtoupper($trow['swift']);
 
-    // Jos SEPA-maa, tarkistetaan IBAN
-    if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) == $trow['ultilno']) {
+    // Jos SEPA-maa, tarkistetaan IBAN ja SWIFT-koodi
+    if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) == $trow['ultilno'] and $swift_ok) {
       $pankkitiliok = TRUE;
     }
     elseif (!tarkista_sepa($ibanmaa) and tarkista_bban($trow['ultilno']) !== FALSE) {
@@ -821,6 +838,7 @@ if ($tee == 'I') {
 
   if (!$pankkitiliok) {
     $errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai on virheellinen")."!</font><br>";
+    $errormsg .= "<font class='error'>".t("Tarkista myös SWIFT-koodi")."!</font><br>";
     $tee = 'E';
   }
 }

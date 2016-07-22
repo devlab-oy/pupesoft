@@ -180,6 +180,7 @@ unset($crossdock911);
 
 $asiakkaan_tilausnumero       = "";
 $editilaus_alatila            = "";
+$editilaus_hyvaksyttava       = "";
 $editilaus_eilahetetta        = "";
 $editilaus_kassalipas         = "";
 $editilaus_loppuhinta         = "";
@@ -194,6 +195,7 @@ $editilaus_tilaustyyppi       = "";
 $editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+$editilaus_liitetiedosto      = "";
 $edi_kommentti                = "";
 $id                           = "";
 $ketjutus                     = "";
@@ -254,6 +256,11 @@ $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
 
+// Mihin tilaan laitetaan verkkokauppatilauksen tuotteet, jos saldo on loppu Pupesta
+if (empty($verkkokauppa_oletus_loppuneet) or !in_array($verkkokauppa_oletus_loppuneet, array('H', 'J'))) {
+  $verkkokauppa_oletus_loppuneet = 'H';
+}
+
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
 
@@ -275,6 +282,9 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui"
 
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
+
+// EDI-tilausten käsittelyhakemisto
+$editilaus_hakemisto = dirname(realpath($filename));
 
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sisääntuleva Futursoft-tilaus";
@@ -499,6 +509,11 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VERKKOKAUPPA_KOHDE' :
     // Verkkokaupassa asiakkaan antama kohde
     $ot_verkkokauppa_kohde = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_LIITETIEDOSTO' :
+    // Tilaukseen liittyvä liitetiedosto
+    $editilaus_liitetiedosto = basename($tieto);
     break;
 
   case 'OBGMIACKR' :
@@ -881,6 +896,10 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_YHTEYSHENKILO':
     $lnimi = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_HYVAKSYTTAVA':
+    $editilaus_hyvaksyttava = trim($tieto);
     break;
 
   case 'ONADPL_PC' :
@@ -1555,6 +1574,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
+      if ($editilaus_hyvaksyttava != "") {
+        $editilaus_alatila = 'F';
+      }
 
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
@@ -1760,6 +1782,25 @@ while ($tietue = fgets($fd)) {
                 laatija         = '$edi_laatija',
                 luontiaika      = now()";
       $Xresult = pupe_query($query);
+
+      // jos meillä on liitetiedosto tilauksella, tallennetaan se tilauksen liitetiedostoksi
+      if (!empty($editilaus_liitetiedosto)) {
+        // liitetiedostot tulee siirtää editilaus -hakemiston alle liitetiedostot -hakemistoon
+        $full_path = "{$editilaus_hakemisto}/liitetiedostot/{$editilaus_liitetiedosto}";
+
+        if (is_readable($full_path)) {
+          // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
+          tallenna_liite($full_path, 'lasku', $id, 'Asiakkaan lähettämä liite', 'VK');
+
+          // poistetaan liitetiedosto hakemistosta
+          unlink($full_path);
+
+          $edi_ulos .= t("Tallennettiin liite")." {$editilaus_liitetiedosto}\n";
+        }
+        else {
+          $edi_ulos .= t("Ilmoitettua liitetiedostoa ei löytynyt")." {$editilaus_liitetiedosto}\n";
+        }
+      }
 
       // HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
       if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
@@ -2191,7 +2232,7 @@ while ($tietue = fgets($fd)) {
 
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
-          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
+          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi tai jälkkäriksi
           if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
 
             list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
@@ -2243,7 +2284,7 @@ while ($tietue = fgets($fd)) {
                 $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
               }
               else {
-                $var = "H";
+                $var = $verkkokauppa_oletus_loppuneet;
               }
             }
           }
@@ -2341,6 +2382,10 @@ while ($tietue = fgets($fd)) {
   case 'UNT':
 
     if ($editilaus_otsikko_ok == "KYLLA" and $edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+      $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+    }
+
+    if ($editilaus_hyvaksyttava != "") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 
@@ -2491,6 +2536,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+    $editilaus_liitetiedosto      = "";
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

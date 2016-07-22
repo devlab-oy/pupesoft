@@ -759,6 +759,26 @@ if ($fieldname == "alv_kasittely_hintamuunnos") {
   $jatko = 0;
 }
 
+if ($fieldname == "alv_velvollinen") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  else {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value='' $sel1>".t("Normaali verokäsittely")."</option>";
+  $ulos .= "<option value='E' $sel2>".t("Verkkolaskut kirjataan aina verottomina")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "asiakashinta_netto") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1269,6 +1289,19 @@ if ($fieldname == "jt_toimitus_varastorajaus") {
 
   $ulos .= "<option value=''>".t("Jälkitoimituksia toimitetaan kaikista varastoista")."</option>";
   $ulos .= "<option value='K'{$sel['K']}>".t("Jälkitoimituksia toimitaan ainoastaan myyntitilauksen otsikolle valitusta varastosta")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tuotekommentti_tilausriville") {
+
+  $sel = array($trow[$i] => 'selected') + array('M' => '', 'O' => '');
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Tuotekommentti tilausriville toimii myynti- ja ostotilauksella")."</option>";
+  $ulos .= "<option value='M' {$sel['M']}>".t("Tuotekommentti tilausriville toimii vain myyntitilauksella")."</option>";
+  $ulos .= "<option value='O' {$sel['O']}>".t("Tuotekommentti tilausriville toimii vain ostotilauksella")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3144,7 +3177,9 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'I' {$sel['I']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'J' {$sel['J']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  
+  $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4807,7 +4842,11 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= "</option>";
 
   $ulos .= "<option value = 'K' {$sel}>";
-  $ulos .= t("Sallitaan tilausrivien korvamerkintä");
+  $ulos .= t("Sallitaan tilausrivien korvamerkintä vapaalla tekstillä");
+  $ulos .= "</option>";
+  
+  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= t("Sallitaan tilausrivien korvamerkintä avainsanoilla");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

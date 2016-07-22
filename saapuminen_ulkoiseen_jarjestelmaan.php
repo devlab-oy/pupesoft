@@ -75,9 +75,7 @@ if (!$ftp_chk) {
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-$encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
-
-$xmlstr  = "<?xml version='1.0' encoding='{$encoding}'?>";
+$xmlstr  = "<?xml version='1.0' encoding='UTF-8'?>";
 $xmlstr .= '<Message>';
 $xmlstr .= '</Message>';
 
@@ -199,8 +197,8 @@ if ($xml_chk and $ftp_chk) {
 
   if (file_put_contents($filename, $xml->asXML())) {
 
-    // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
-    $ftputf8 = PUPE_UNICODE;
+    // L‰hetet‰‰n aina UTF-8 muodossa
+    $ftputf8 = true;
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti onnistui"), "\n";

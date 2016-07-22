@@ -77,9 +77,7 @@ else {
     }
     else {
 
-      $encoding = PUPE_UNICODE ? 'UTF-8' : 'ISO-8859-1';
-
-      $xml = simplexml_load_string("<?xml version='1.0' encoding='{$encoding}'?><Message></Message>");
+      $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
 
       $messageheader = $xml->addChild('MessageHeader');
       $messageheader->addChild('MessageType', 'MaterialMaster');
@@ -258,8 +256,8 @@ else {
           break;
         }
 
-        // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
-        $ftputf8 = PUPE_UNICODE;
+        // L‰hetet‰‰n aina UTF-8 muodossa
+        $ftputf8 = true;
 
         require "inc/ftp-send.inc";
       }

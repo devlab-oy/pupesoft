@@ -3343,7 +3343,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               jaksotettu      = '$jaksotettu'";
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
-      $query .= ", kerattyaika = now()";
+      $query .= ", keratty = '$kukarow[kuka]', kerattyaika = now()";
     }
 
     $result = pupe_query($query);

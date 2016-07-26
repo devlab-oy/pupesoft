@@ -13692,6 +13692,9 @@ if (!function_exists("LisaaTaso")) {
   function LisaaTaso($laji, $left, $koodi , $nimi) {
     global $kukarow;
 
+    // laji pitää olla aina pienellä, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     // Funktio mahdollistaa lisäämään tason mihin tahansa väliin.
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
@@ -13784,6 +13787,9 @@ if (!function_exists("LisaaPaaKat")) {
   function LisaaPaaKat($laji, $nimi) {
     global $kukarow;
 
+    // laji pitää olla aina pienellä, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     $qu = "INSERT INTO dynaaminen_puu
     (
       yhtio,
@@ -13811,6 +13817,9 @@ if (!function_exists("LisaaPaaKat")) {
 if (!function_exists("LisaaLapsi")) {
   function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi) {
     global $kukarow;
+
+    // laji pitää olla aina pienellä, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
 
     if ($left == 1) {
       // mikäli isä on root, niin lisätään sille alakat
@@ -14159,9 +14168,59 @@ if (!function_exists("paivitapuunsyvyys")) {
                   AND tunnus  = {$row["node_tunnus"]}";
         $updateres = pupe_query($updqu);
       }
+
+      $params = array(
+        'laji'   => $laji,
+        'lft'    => $row['lft'],
+        'rgt'    => $row['rgt'],
+        'tunnus' => $row['node_tunnus'],
+      );
+
+      paivita_puun_parent($params);
     }
 
     return;
+  }
+}
+
+if (!function_exists("paivita_puun_parent")) {
+  function paivita_puun_parent($params) {
+    global $yhtiorow, $kukarow;
+
+    $node_laji   = $params['laji'];
+    $node_left   = $params['lft'];
+    $node_right  = $params['rgt'];
+    $node_tunnus = $params['tunnus'];
+
+    if (empty($node_laji) or empty($node_left) or empty($node_right) or empty($node_tunnus)) {
+      die("invalid params");
+    }
+
+    // haetaan noden parentin id
+    $query = "SELECT dynaaminen_puu.tunnus AS parent_id
+              FROM dynaaminen_puu
+              WHERE dynaaminen_puu.yhtio = '{$kukarow['yhtio']}'
+              AND dynaaminen_puu.laji = '{$node_laji}'
+              AND dynaaminen_puu.lft < {$node_left}
+              AND dynaaminen_puu.rgt > {$node_right}
+              AND dynaaminen_puu.tunnus != {$node_tunnus}
+              ORDER BY dynaaminen_puu.lft DESC
+              LIMIT 1";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 1) {
+      $row = mysql_fetch_assoc($result);
+      $parent_id = $row['parent_id'];
+    }
+    else {
+      $parent_id = 'NULL';
+    }
+
+    $query = "UPDATE dynaaminen_puu SET
+              parent_id = {$parent_id}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$node_tunnus}";
+    pupe_query($query);
   }
 }
 

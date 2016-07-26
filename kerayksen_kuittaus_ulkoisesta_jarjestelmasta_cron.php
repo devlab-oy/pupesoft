@@ -105,17 +105,13 @@ while (false !== ($file = readdir($handle))) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     if ($hhv) {
-      $lines = $xml->Lines->Line;
+      $lines = $xml->Lines;
     }
     else {
       $lines = $xml->CustPackingSlip->Lines;
     }
 
-    foreach ($lines as $line) {
-
-      if (!empty($line->Line)) {
-        $line = $line->Line;
-      }
+    foreach ($lines->Line as $line) {
 
       $tilausrivin_tunnus = (int) $line->TransId;
 

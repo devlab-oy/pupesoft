@@ -7,6 +7,11 @@ function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
   $alkuaika = date("Y-m-d", strtotime('monday this week'));
   $loppuaika = date("Y-m-d", strtotime('sunday this week'));
 
+  echo "<font class='head'>";
+  echo t("Generoi myyntitilauksia yrityksille");
+  echo "</font>";
+  echo "<hr>";
+
   echo "<font class='message'>Aikav‰li {$alkuaika} - {$loppuaika}</font><br><br>";
 
   $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot($alkuaika, $loppuaika);
@@ -102,6 +107,11 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
 }
 
 function generoi_myyntitilauksia($yhtiot, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra) {
+  if (empty($yhtiot)) {
+    echo "<font class='error'>Et valinnut yht‰‰n yrityst‰</font><br><br>";
+    return;
+  }
+
   foreach ($yhtiot as $yhtio) {
     $asiakas = hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra);
 

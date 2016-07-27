@@ -1,32 +1,20 @@
 <?php
 
-// T‰ll‰ ohjelmalla voidaan generoida myyntitilauksia kuluvalle viikolle yrityksille
+// T‰ll‰ ohjelmalla voidaan generoida myyntitilauksia annetulle ajanjaksolle
 
 require '../../inc/parametrit.inc';
-require 'tilauskasittely/luo_myyntitilausotsikko.inc';
 require 'rajapinnat/yrityspeli/yrityspeli_functions.php';
+require 'tilauskasittely/luo_myyntitilausotsikko.inc';
 
-if (!isset($tee)) $tee = '';
-if (!isset($kokonaiskustannus)) $kokonaiskustannus = 1000;
-if (!isset($tilausmaara)) $tilausmaara = 3;
-
-$kauppakeskus_myyra = '003732419754';
-
-echo "<font class='head'>", t("Generoi myyntitilauksia yrityksille"), "</font><hr>";
+if (empty($kauppakeskus_myyra)) $kauppakeskus_myyra = '003732419754';
+if (empty($kokonaiskustannus))  $kokonaiskustannus = 1000;
+if (empty($tee))                $tee = '';
+if (empty($tilausmaara))        $tilausmaara = 3;
 
 if ($tee == 'GENEROI') {
-  if (empty($valitut)) {
-    echo "<font class='error'>Et valinnut yht‰‰n yrityst‰</font><br><br>";
-  }
-  else {
-    $tilaukset = generoi_myyntitilauksia($valitut, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra);
-  }
-
-  $tee = '';
+  generoi_myyntitilauksia($valitut, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra);
 }
 
-if (empty($tee)) {
-  echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara);
-}
+echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara);
 
 require "inc/footer.inc";

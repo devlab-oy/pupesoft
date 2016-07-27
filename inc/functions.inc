@@ -24302,7 +24302,7 @@ if  (!function_exists('verkkolaskuputkeen')) {
     }
 
     // EU-viennit eivät mene verkkolaskuputkeen, paitsi jos CHN tai verkkolasku_vienti sallii verkkolaskutuksen
-    if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030") {
+    if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030" and $lasrow["chn"] != "111") {
       if ($info) {
         echo t("EU-vientiä");
       }

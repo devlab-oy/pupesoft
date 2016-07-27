@@ -1,7 +1,10 @@
 <?php
 
-function echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara) {
+function echo_yrityspeli_kayttoliittyma(Array $params) {
   global $yhtiorow, $kukarow;
+
+  $kokonaiskustannus = $params['kokonaiskustannus'];
+  $tilausmaara       = $params['tilausmaara'];
 
   // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
   $alkuaika = date("Y-m-d", strtotime('monday this week'));
@@ -106,7 +109,12 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   return $tilauksettomat_yhtiot;
 }
 
-function generoi_myyntitilauksia($yhtiot, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra) {
+function generoi_myyntitilauksia(Array $params) {
+  $kauppakeskus_myyra = $params['kauppakeskus_myyra'];
+  $kokonaiskustannus  = $params['kokonaiskustannus'];
+  $tilausmaara        = $params['tilausmaara'];
+  $yhtiot             = $params['yhtiot'];
+
   if (empty($yhtiot)) {
     echo "<font class='error'>Et valinnut yht‰‰n yrityst‰</font><br><br>";
     return;

@@ -12,9 +12,21 @@ if (empty($tee))                $tee = '';
 if (empty($tilausmaara))        $tilausmaara = 3;
 
 if ($tee == 'GENEROI') {
-  generoi_myyntitilauksia($valitut, $kokonaiskustannus, $tilausmaara, $kauppakeskus_myyra);
+  $params = array(
+    "kauppakeskus_myyra" => $kauppakeskus_myyra,
+    "kokonaiskustannus" => $kokonaiskustannus,
+    "tilausmaara" => $tilausmaara,
+    "valitut" => $valitut,
+  );
+
+  generoi_myyntitilauksia($params);
 }
 
-echo_yrityspeli_kayttoliittyma($kokonaiskustannus, $tilausmaara);
+$params = array(
+  "kokonaiskustannus" => $kokonaiskustannus,
+  "tilausmaara" => $tilausmaara,
+);
+
+echo_yrityspeli_kayttoliittyma($params);
 
 require "inc/footer.inc";

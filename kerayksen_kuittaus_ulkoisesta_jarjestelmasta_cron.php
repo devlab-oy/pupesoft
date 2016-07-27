@@ -95,7 +95,7 @@ while (false !== ($file = readdir($handle))) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
             AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila = 'A'";
+            AND alatila IN ('A', 'E')";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;

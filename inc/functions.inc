@@ -30921,6 +30921,34 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $virhe++;
             }
           }
+          // Sama kuin ylemmässä iffissä, mutta viiteaineistolle ja tuetaan vain yhtä aineistoa per tiedosto.
+          elseif ($xtyyppi == 3) {
+            $query = "SELECT group_concat(tieto SEPARATOR '') AS kanta_aineisto
+                      FROM tiliotedata
+                      WHERE tilino = '$tilino'
+                      AND alku     = '$alkupvm'
+                      AND loppu    = '$loppupvm'
+                      AND tyyppi   = '$xtyyppi'";
+            $tiliotedatares = pupe_query($query);
+            $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
+
+            $_aineisto      = trim(str_replace($serc, $repl, $kokoaineisto));
+            $kanta_aineisto = trim($tiliotedatarow["kanta_aineisto"]);
+
+            if ($kanta_aineisto != "" && $_aineisto != "" && strpos($kanta_aineisto, $_aineisto) !== false) {
+              echo "<font class='error'>";
+              echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+              echo "<br>";
+              echo "Tili: $tilino<br>";
+              echo "Ajalta: $alkupvm - $loppupvm<br>";
+              echo "Yritys: $yritirow[yhtio]";
+              echo "</font>";
+              echo "<br>";
+
+              $xtyyppi = 0;
+              $virhe++;
+            }
+          }
           else {
             if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
               echo "<font class='error'>";

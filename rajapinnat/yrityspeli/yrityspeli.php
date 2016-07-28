@@ -4,7 +4,6 @@
 
 require '../../inc/parametrit.inc';
 require 'rajapinnat/yrityspeli/yrityspeli_functions.php';
-require 'tilauskasittely/luo_myyntitilausotsikko.inc';
 
 if (empty($kauppakeskus_myyra)) $kauppakeskus_myyra = '003732419754';
 if (empty($kokonaiskustannus))  $kokonaiskustannus = 1000;
@@ -16,9 +15,9 @@ if (empty($loppuaika))          $loppuaika  = date("Y-m-d", strtotime('sunday th
 
 if ($tee == 'GENEROI') {
   $params = array(
+    "asiakkaat" => $valitut,
     "kokonaiskustannus" => $kokonaiskustannus,
     "tilausmaara" => $tilausmaara,
-    "valitut" => $valitut,
   );
 
   $response = generoi_ostotilauksia($params);

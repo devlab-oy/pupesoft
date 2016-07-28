@@ -212,6 +212,8 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
 
   $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
+  $response[] = yrityspeli_tulosta_ostotilaus($ostotilaus['tunnus'], $asiakas['email']);
+
   return $response;
 }
 
@@ -255,4 +257,17 @@ function yrityspeli_tuotearvonta($toimittaja) {
   }
 
   return mysql_fetch_assoc($result);
+}
+
+function yrityspeli_tulosta_ostotilaus($otunnus, $email) {
+  // komento pitää olla global, jotta tulosta_ostotilaus funkkarit saa siitä kiinni
+  global $kukarow, $yhtiorow, $komento;
+
+  $kieli = 'fi';
+  $komento = array('Ostotilaus' => "toimittajaemail{$email}");
+  $silent = 'kyllä';
+
+  require 'tilauskasittely/tulosta_ostotilaus.inc';
+
+  return "Lähetettiin ostotilaus {$tunnus} sähköpostilla {$email}";
 }

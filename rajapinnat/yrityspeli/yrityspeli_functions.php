@@ -167,11 +167,12 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   require_once 'inc/luo_ostotilausotsikko.inc';
 
   $asiakas = hae_asiakas($asiakas);
+  $toimittaja = yrityspeli_hae_toimittaja();
   $hintacounter = 0;
   $response = array();
 
   $params = array(
-    'liitostunnus' => yrityspeli_hae_toimittaja(),
+    'liitostunnus' => $toimittaja['tunnus'],
     'nimi'         => $asiakas['nimi'],
     'nimitark'     => $asiakas['nimitark'],
     'osoite'       => $asiakas['osoite'],
@@ -184,10 +185,10 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   $kukarow['kesken'] = $ostotilaus['tunnus'];
 
   while ($hintacounter < $kokonaiskustannus) {
-    $trow = yrityspeli_tuotearvonta();
+    $trow = yrityspeli_tuotearvonta($toimittaja['tunnus']);
 
     if ($trow === false) {
-      $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.";
+      $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, jota voi tilata toimittajalta {$toimittaja['nimi']}.";
 
       return $response;
     }
@@ -205,6 +206,10 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
     lisaa_rivi($params);
   }
 
+  // päivitetään tilaus valmiiksi
+  $query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='{$ostotilaus['tunnus']}'";
+  $result = pupe_query($query);
+
   $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
   return $response;
@@ -213,9 +218,10 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
 function yrityspeli_hae_toimittaja() {
   global $yhtiorow, $kukarow;
 
-  $query = "SELECT tunnus
+  $query = "SELECT *
             FROM toimi
             WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi in ('', 'L')
             LIMIT 1";
   $result = pupe_query($query);
 
@@ -225,18 +231,22 @@ function yrityspeli_hae_toimittaja() {
 
   $row = mysql_fetch_assoc($result);
 
-  return $row['tunnus'];
+  return $row;
 }
 
-function yrityspeli_tuotearvonta() {
+function yrityspeli_tuotearvonta($toimittaja) {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT *
+  // katsotaan mitä tuotteita tältä toimittajalta voi tilata, ja arvotaan yksi
+  $query = "SELECT tuote.*
             FROM tuote
-            WHERE yhtio      = '{$kukarow['yhtio']}'
-            AND status      != 'P'
-            AND myyntihinta  > 0
-            AND tuotetyyppi  NOT in ('A','B')
+            JOIN tuotteen_toimittajat on (tuotteen_toimittajat.yhtio = tuote.yhtio
+              AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
+              AND tuotteen_toimittajat.liitostunnus = $toimittaja)
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.status != 'P'
+            AND tuote.myyntihinta  > 0
+            AND tuote.tuotetyyppi NOT in ('A','B')
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
 

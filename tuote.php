@@ -521,28 +521,30 @@ if (isset($ajax)) {
     $yhteensa_maara = 0.0;
     $yhteensa_arvo  = 0.0;
 
-    while ($prow = mysql_fetch_assoc($qresult)) {
-      if ($prow["laji"] != $tapahtumalaji) continue;
+    if (!empty($tapahtumalaji)) {
+      while ($prow = mysql_fetch_assoc($qresult)) {
+        if ($prow["laji"] != $tapahtumalaji) continue;
 
-      $yhteensa_maara += $prow["kpl"];
-      $yhteensa_arvo  += $prow["arvo"];
+        $yhteensa_maara += $prow["kpl"];
+        $yhteensa_arvo  += $prow["arvo"];
+      }
+
+      $_return .= "<tr class='aktiivi'>";
+      $_return .= "<th>" . t("Yhteensä") . ":</th>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_maara) . "</td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_arvo) . "</td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "</tr>";
+
+      mysql_data_seek($qresult, 0);
     }
-
-    $_return .= "<tr class='aktiivi'>";
-    $_return .= "<th>" . t("Yhteensä") . ":</th>";
-    $_return .= "<td></td>";
-    $_return .= "<td></td>";
-    $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_maara) . "</td>";
-    $_return .= "<td></td>";
-    $_return .= "<td></td>";
-    $_return .= "<td></td>";
-    $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_arvo) . "</td>";
-    $_return .= "<td></td>";
-    $_return .= "<td></td>";
-    $_return .= "<td></td>";
-    $_return .= "</tr>";
-
-    mysql_data_seek($qresult, 0);
 
     // jos jsarjanumeroseuranta S ja inout varastonarvo
     if ($sarjanumeroseuranta == "S") {

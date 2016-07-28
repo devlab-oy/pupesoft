@@ -1,6 +1,6 @@
 <?php
 
-function echo_yrityspeli_kayttoliittyma(Array $params) {
+function yrityspeli_kayttoliittyma(Array $params) {
   global $yhtiorow, $kukarow;
 
   $alkuaika              = $params['alkuaika'];
@@ -86,7 +86,7 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
   echo "</form>";
 }
 
-function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
+function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   global $kukarow, $yhtiorow;
 
   $tilauksettomat_yhtiot = array();
@@ -139,7 +139,7 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   return $tilauksettomat_yhtiot;
 }
 
-function generoi_ostotilauksia(Array $params) {
+function yrityspeli_generoi_ostotilauksia(Array $params) {
   $asiakkaat          = $params['asiakkaat'];
   $kokonaiskustannus  = $params['kokonaiskustannus'];
   $tilausmaara        = $params['tilausmaara'];
@@ -154,14 +154,14 @@ function generoi_ostotilauksia(Array $params) {
 
   foreach ($asiakkaat as $asiakas) {
     for ($i = 0; $i < $tilausmaara; $i++) {
-      $response = generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $response = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
     }
   }
 
   return $response;
 }
 
-function generoi_ostotilaus($asiakas, $kokonaiskustannus) {
+function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   global $yhtiorow, $kukarow;
 
   require_once 'inc/luo_ostotilausotsikko.inc';
@@ -184,7 +184,7 @@ function generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   $kukarow['kesken'] = $ostotilaus['tunnus'];
 
   while ($hintacounter < $kokonaiskustannus) {
-    $trow = tuotearvonta();
+    $trow = yrityspeli_tuotearvonta();
 
     if ($trow === false) {
       $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.";
@@ -228,7 +228,7 @@ function yrityspeli_hae_toimittaja() {
   return $row['tunnus'];
 }
 
-function tuotearvonta() {
+function yrityspeli_tuotearvonta() {
   global $kukarow, $yhtiorow;
 
   $query = "SELECT *

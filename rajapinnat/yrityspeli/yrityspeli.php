@@ -20,7 +20,7 @@ if ($tee == 'GENEROI') {
     "tilausmaara" => $tilausmaara,
   );
 
-  $response = generoi_ostotilauksia($params);
+  $response = yrityspeli_generoi_ostotilauksia($params);
 }
 
 $params = array(
@@ -28,10 +28,10 @@ $params = array(
   "kokonaiskustannus" => $kokonaiskustannus,
   "loppuaika" => $loppuaika,
   "messages" => $response,
-  "tilauksettomat_yhtiot" => hae_tilauksettomat_yhtiot($alkuaika, $loppuaika),
+  "tilauksettomat_yhtiot" => yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika),
   "tilausmaara" => $tilausmaara,
 );
 
-echo_yrityspeli_kayttoliittyma($params);
+yrityspeli_kayttoliittyma($params);
 
 require "inc/footer.inc";

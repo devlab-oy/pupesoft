@@ -16,13 +16,12 @@ if (empty($loppuaika))          $loppuaika  = date("Y-m-d", strtotime('sunday th
 
 if ($tee == 'GENEROI') {
   $params = array(
-    "kauppakeskus_myyra" => $kauppakeskus_myyra,
     "kokonaiskustannus" => $kokonaiskustannus,
     "tilausmaara" => $tilausmaara,
     "valitut" => $valitut,
   );
 
-  $response = generoi_myyntitilauksia($params);
+  $response = generoi_ostotilauksia($params);
 }
 
 $params = array(

@@ -47,7 +47,10 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>nimi</td>";
+  echo "<th>yhtiö</td>";
+  echo "<th>asiakas</td>";
+  echo "<th>ytunnus</td>";
+  echo "<th>email</td>";
   echo "<th>tilauksia</td>";
   echo "<th>summa</td>";
   echo "<th></td>";
@@ -55,12 +58,21 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
 
   foreach ($tilauksettomat_yhtiot as $yhtio) {
     $checked = $yhtio['tilauksia'] == 0 ? 'checked' : '';
+    $disabled = '';
 
-    echo "<tr>";
-    echo "<td>{$yhtio['nimi']}</td>";
-    echo "<td>{$yhtio['tilauksia']}</td>";
-    echo "<td>{$yhtio['summa']}</td>";
-    echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['yhtio']}' $checked></td>";
+    if (empty($yhtio['asiakas_email'])) {
+      $checked = '';
+      $disabled = 'disabled';
+    }
+
+    echo "<tr class='aktiivi'>";
+    echo "<td>{$yhtio['yhtio']}</td>";
+    echo "<td>{$yhtio['asiakas_nimi']}</td>";
+    echo "<td>{$yhtio['asiakas_ytunnus']}</td>";
+    echo "<td>{$yhtio['asiakas_email']}</td>";
+    echo "<td class='text-right'>{$yhtio['tilauksia']}</td>";
+    echo "<td class='text-right'>{$yhtio['summa']}</td>";
+    echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['yhtio']}' {$checked} {$disabled}></td>";
     echo "</tr>";
   }
 
@@ -79,39 +91,49 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
 
   $tilauksettomat_yhtiot = array();
 
+  // Etsitään samasta tietokannasta kaikki muut yhtiöt
   $query = "SELECT *
             FROM yhtio
-            WHERE yhtio NOT IN ('{$kukarow['yhtio']}')";
+            WHERE yhtio != '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    $tilausquery = "SELECT yhtio.yhtio,
-                    yhtio.nimi as nimi,
+    // katsotaan löytyykö tämä yhtiö meiltä asiakkaana (ytunnuksen mukaan)
+    // lasketaan yhtiön avointen tilausten arvo (varattu * hinta)
+    $tilausquery = "SELECT yhtio.nimi as yhtio_nimi,
+                    asiakas.nimi as asiakas_nimi,
+                    asiakas.ytunnus as asiakas_ytunnus,
+                    asiakas.email as asiakas_email,
                     count(distinct lasku.tunnus) as tilauksia,
                     sum(tilausrivi.varattu * tilausrivi.hinta) as summa
                     FROM yhtio
+                    JOIN asiakas ON (asiakas.yhtio = '{$kukarow['yhtio']}'
+                      AND asiakas.ytunnus = yhtio.ytunnus)
                     LEFT JOIN lasku ON (lasku.yhtio = yhtio.yhtio
                       AND lasku.tila IN ('N','L')
                       AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')
                     LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
                       AND tilausrivi.otunnus = lasku.tunnus)
                     WHERE yhtio.yhtio = '{$row['yhtio']}'
-                    GROUP BY yhtio.yhtio, nimi";
+                    GROUP BY yhtio.nimi, asiakas.nimi, asiakas.ytunnus, asiakas.email";
     $tilausresult = pupe_query($tilausquery);
-    $tilausrow = mysql_fetch_assoc($tilausresult);
 
-    $tilauksettomat_yhtiot[] = array(
-      'nimi'      => $tilausrow['nimi'],
-      'summa'     => round($tilausrow['summa']),
-      'tilauksia' => (int) $tilausrow['tilauksia'],
-      'yhtio'     => $tilausrow['yhtio'],
-    );
+    while ($tilausrow = mysql_fetch_assoc($tilausresult)) {
+      $tilauksettomat_yhtiot[] = array(
+        'asiakas_nimi'    => $tilausrow['asiakas_nimi'],
+        'asiakas_ytunnus' => $tilausrow['asiakas_ytunnus'],
+        'asiakas_email'   => $tilausrow['asiakas_email'],
+        'summa'           => round($tilausrow['summa']),
+        'tilauksia'       => (int) $tilausrow['tilauksia'],
+        'yhtio'           => $tilausrow['yhtio_nimi'],
+      );
+    }
   }
 
   return $tilauksettomat_yhtiot;
 }
 
-function generoi_myyntitilauksia(Array $params) {
+function generoi_ostotilauksia(Array $params) {
   $kauppakeskus_myyra = $params['kauppakeskus_myyra'];
   $kokonaiskustannus  = $params['kokonaiskustannus'];
   $tilausmaara        = $params['tilausmaara'];

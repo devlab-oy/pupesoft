@@ -72,7 +72,7 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
     echo "<td>{$yhtio['asiakas_email']}</td>";
     echo "<td class='text-right'>{$yhtio['tilauksia']}</td>";
     echo "<td class='text-right'>{$yhtio['summa']}</td>";
-    echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['yhtio']}' {$checked} {$disabled}></td>";
+    echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['asiakas_tunnus']}' {$checked} {$disabled}></td>";
     echo "</tr>";
   }
 
@@ -104,6 +104,7 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                     asiakas.nimi as asiakas_nimi,
                     asiakas.ytunnus as asiakas_ytunnus,
                     asiakas.email as asiakas_email,
+                    asiakas.tunnus as asiakas_tunnus,
                     count(distinct lasku.tunnus) as tilauksia,
                     sum(tilausrivi.varattu * tilausrivi.hinta) as summa
                     FROM yhtio
@@ -115,13 +116,18 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                     LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
                       AND tilausrivi.otunnus = lasku.tunnus)
                     WHERE yhtio.yhtio = '{$row['yhtio']}'
-                    GROUP BY yhtio.nimi, asiakas.nimi, asiakas.ytunnus, asiakas.email";
+                    GROUP BY yhtio.nimi,
+                    asiakas.nimi,
+                    asiakas.ytunnus,
+                    asiakas.email,
+                    asiakas.tunnus";
     $tilausresult = pupe_query($tilausquery);
 
     while ($tilausrow = mysql_fetch_assoc($tilausresult)) {
       $tilauksettomat_yhtiot[] = array(
         'asiakas_nimi'    => $tilausrow['asiakas_nimi'],
         'asiakas_ytunnus' => $tilausrow['asiakas_ytunnus'],
+        'asiakas_tunnus'  => $tilausrow['asiakas_tunnus'],
         'asiakas_email'   => $tilausrow['asiakas_email'],
         'summa'           => round($tilausrow['summa']),
         'tilauksia'       => (int) $tilausrow['tilauksia'],
@@ -134,78 +140,51 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
 }
 
 function generoi_ostotilauksia(Array $params) {
-  $kauppakeskus_myyra = $params['kauppakeskus_myyra'];
+  $asiakkaat          = $params['asiakkaat'];
   $kokonaiskustannus  = $params['kokonaiskustannus'];
   $tilausmaara        = $params['tilausmaara'];
-  $yhtiot             = $params['yhtiot'];
 
   $response = array();
 
-  if (empty($yhtiot)) {
-    $response[] = "Et valinnut yht‰‰n yrityst‰";
+  if (empty($asiakkaat)) {
+    $response[] = "Et valinnut yht‰‰n asiakasta";
 
     return $response;
   }
 
-  foreach ($yhtiot as $yhtio) {
-    $asiakas = hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra);
-
-    if (empty($asiakas)) {
-      $response[] = "Yhtiˆll‰ '{$yhtio}' ei ole 'Kauppakeskus Myyr‰' perustettuna, ei voitu luoda tilauksia.";
-
-      continue;
-    }
-
-    for ($i=0; $i < $tilausmaara; $i++) {
-      luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus);
+  foreach ($asiakkaat as $asiakas) {
+    for ($i = 0; $i < $tilausmaara; $i++) {
+      $response = generoi_ostotilaus($asiakas, $kokonaiskustannus);
     }
   }
 
   return $response;
 }
 
-function hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra) {
-  $query = "SELECT *
-            FROM asiakas
-            WHERE yhtio   = '{$yhtio}'
-            AND ovttunnus = '{$kauppakeskus_myyra}'
-            LIMIT 1";
-  $result = pupe_query($query);
-
-  return mysql_fetch_assoc($result);
-}
-
-function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) {
+function generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   global $yhtiorow, $kukarow;
 
-  $alkuperainen_yhtio = $yhtiorow;
-  $alkuperainen_kuka  = $kukarow;
+  require_once 'inc/luo_ostotilausotsikko.inc';
 
-  $yhtiorow = hae_yhtion_parametrit($yhtio);
-  $kukarow['kesken'] = '';
-  $kukarow['yhtio'] = $yhtio;
+  $asiakas = hae_asiakas($asiakas);
+  $hintacounter = 0;
   $response = array();
 
-  // Luodaan uusi myyntitilausotsikko
-  $tilausnumero = luo_myyntitilausotsikko("RIVISYOTTO", $asiakas["tunnus"]);
+  $params = array(
+    'liitostunnus' => yrityspeli_hae_toimittaja(),
+    'nimi'         => $asiakas['nimi'],
+    'nimitark'     => $asiakas['nimitark'],
+    'osoite'       => $asiakas['osoite'],
+    'postino'      => $asiakas['postino'],
+    'postitp'      => $asiakas['postitp'],
+    'maa'          => $asiakas['maa'],
+  );
 
-  $kukarow["kesken"] = $tilausnumero;
-
-  // Haetaan avoimen tilauksen otsikko
-  $query    = "SELECT *
-               FROM lasku
-               WHERE yhtio='{$yhtio}'
-               AND tunnus='{$tilausnumero}'";
-  $laskures = pupe_query($query);
-  $laskurow = mysql_fetch_assoc($laskures);
-
-  // Lis‰t‰‰n tuotteet
-  $tuoteriveja = rand(1, 3);
-
-  $hintacounter = 0;
+  $ostotilaus = luo_ostotilausotsikko($params);
+  $kukarow['kesken'] = $ostotilaus['tunnus'];
 
   while ($hintacounter < $kokonaiskustannus) {
-    $trow = tuotearvonta($yhtio);
+    $trow = tuotearvonta();
 
     if ($trow === false) {
       $response[] = "Yrityksell‰ {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.";
@@ -217,32 +196,44 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
     $hintacounter += ($trow['myyntihinta'] * $kpl);
 
     $params = array(
-      'trow' => $trow,
-      'laskurow' => $laskurow,
-      'tuoteno' => $trow['tuoteno'],
-      'kpl' => $kpl
+      'kpl'      => $kpl,
+      'laskurow' => $ostotilaus,
+      'trow'     => $trow,
+      'tuoteno'  => $trow['tuoteno'],
     );
 
     lisaa_rivi($params);
   }
 
-  $response[] = "Perustettiin tilaus {$tilausnumero} yritykselle {$yhtiorow['nimi']}<br>";
-
-  // Tilaus valmiiksi
-  require "tilauskasittely/tilaus-valmis.inc";
-
-  $yhtiorow = $alkuperainen_yhtio;
-  $kukarow = $alkuperainen_kuka;
-
-  $kukarow['kesken'] = '';
+  $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
   return $response;
 }
 
-function tuotearvonta($yhtio) {
+function yrityspeli_hae_toimittaja() {
+  global $yhtiorow, $kukarow;
+
+  $query = "SELECT tunnus
+            FROM toimi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return 0;
+  }
+
+  $row = mysql_fetch_assoc($result);
+
+  return $row['tunnus'];
+}
+
+function tuotearvonta() {
+  global $kukarow, $yhtiorow;
+
   $query = "SELECT *
             FROM tuote
-            WHERE yhtio      = '{$yhtio}'
+            WHERE yhtio      = '{$kukarow['yhtio']}'
             AND status      != 'P'
             AND myyntihinta  > 0
             AND tuotetyyppi  NOT in ('A','B')

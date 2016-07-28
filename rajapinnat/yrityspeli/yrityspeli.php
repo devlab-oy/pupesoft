@@ -10,6 +10,7 @@ if (empty($kauppakeskus_myyra)) $kauppakeskus_myyra = '003732419754';
 if (empty($kokonaiskustannus))  $kokonaiskustannus = 1000;
 if (empty($tee))                $tee = '';
 if (empty($tilausmaara))        $tilausmaara = 3;
+if (empty($response))           $response = array();
 
 if ($tee == 'GENEROI') {
   $params = array(
@@ -19,11 +20,12 @@ if ($tee == 'GENEROI') {
     "valitut" => $valitut,
   );
 
-  generoi_myyntitilauksia($params);
+  $response = generoi_myyntitilauksia($params);
 }
 
 $params = array(
   "kokonaiskustannus" => $kokonaiskustannus,
+  "messages" => $response,
   "tilausmaara" => $tilausmaara,
 );
 

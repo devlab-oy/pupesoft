@@ -3,16 +3,15 @@
 function echo_yrityspeli_kayttoliittyma(Array $params) {
   global $yhtiorow, $kukarow;
 
-  $kokonaiskustannus = $params['kokonaiskustannus'];
-  $messages          = $params['messages'];
-  $tilausmaara       = $params['tilausmaara'];
-
-  // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
-  $alkuaika = date("Y-m-d", strtotime('monday this week'));
-  $loppuaika = date("Y-m-d", strtotime('sunday this week'));
+  $alkuaika              = $params['alkuaika'];
+  $kokonaiskustannus     = $params['kokonaiskustannus'];
+  $loppuaika             = $params['loppuaika'];
+  $messages              = $params['messages'];
+  $tilauksettomat_yhtiot = $params['tilauksettomat_yhtiot'];
+  $tilausmaara           = $params['tilausmaara'];
 
   echo "<font class='head'>";
-  echo t("Generoi myyntitilauksia yrityksille");
+  echo t("Lähetä ostotilauksia yrityksille");
   echo "</font>";
   echo "<hr>";
 
@@ -21,8 +20,6 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
   }
 
   echo "<font class='message'>Aikaväli {$alkuaika} - {$loppuaika}</font><br><br>";
-
-  $tilauksettomat_yhtiot = hae_tilauksettomat_yhtiot($alkuaika, $loppuaika);
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='GENEROI'>";
@@ -57,7 +54,7 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
   echo "</tr>";
 
   foreach ($tilauksettomat_yhtiot as $yhtio) {
-    $checked = (int) $yhtio['tilauksia'] == 0 ? 'checked' : '';
+    $checked = $yhtio['tilauksia'] == 0 ? 'checked' : '';
 
     echo "<tr>";
     echo "<td>{$yhtio['nimi']}</td>";
@@ -73,7 +70,7 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
 
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' value='".t('Luo myyntitilauksia valituille yrityksille')."'>";
+  echo "<input type='submit' value='".t('Lähetä ostotilaukset yrityksille')."'>";
   echo "</form>";
 }
 
@@ -89,25 +86,25 @@ function hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
 
   while ($row = mysql_fetch_assoc($result)) {
     $tilausquery = "SELECT yhtio.yhtio,
-                    min(yhtio.nimi) as nimi,
+                    yhtio.nimi as nimi,
                     count(distinct lasku.tunnus) as tilauksia,
                     sum(tilausrivi.varattu * tilausrivi.hinta) as summa
                     FROM yhtio
                     LEFT JOIN lasku ON (lasku.yhtio = yhtio.yhtio
-                      AND lasku.tila         IN ('N','L')
+                      AND lasku.tila IN ('N','L')
                       AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')
                     LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
                       AND tilausrivi.otunnus = lasku.tunnus)
-                    WHERE yhtio.yhtio        = '{$row['yhtio']}'
-                    GROUP BY yhtio.yhtio";
+                    WHERE yhtio.yhtio = '{$row['yhtio']}'
+                    GROUP BY yhtio.yhtio, nimi";
     $tilausresult = pupe_query($tilausquery);
     $tilausrow = mysql_fetch_assoc($tilausresult);
 
     $tilauksettomat_yhtiot[] = array(
-      'yhtio' => $tilausrow['yhtio'],
-      'nimi' => $tilausrow['nimi'],
-      'tilauksia' => $tilausrow['tilauksia'],
-      'summa' => round($tilausrow['summa']),
+      'nimi'      => $tilausrow['nimi'],
+      'summa'     => round($tilausrow['summa']),
+      'tilauksia' => (int) $tilausrow['tilauksia'],
+      'yhtio'     => $tilausrow['yhtio'],
     );
   }
 

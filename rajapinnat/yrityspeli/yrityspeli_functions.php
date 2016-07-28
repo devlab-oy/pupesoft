@@ -4,6 +4,7 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
   global $yhtiorow, $kukarow;
 
   $kokonaiskustannus = $params['kokonaiskustannus'];
+  $messages          = $params['messages'];
   $tilausmaara       = $params['tilausmaara'];
 
   // Tarkastellaan aina onko kuluvalle viikolle luotu tilauksia
@@ -14,6 +15,10 @@ function echo_yrityspeli_kayttoliittyma(Array $params) {
   echo t("Generoi myyntitilauksia yrityksille");
   echo "</font>";
   echo "<hr>";
+
+  foreach ($messages as $message) {
+    echo "<font class='error'>{$message}</font><br>";
+  }
 
   echo "<font class='message'>Aikaväli {$alkuaika} - {$loppuaika}</font><br><br>";
 
@@ -115,20 +120,19 @@ function generoi_myyntitilauksia(Array $params) {
   $tilausmaara        = $params['tilausmaara'];
   $yhtiot             = $params['yhtiot'];
 
+  $response = array();
+
   if (empty($yhtiot)) {
-    echo "<font class='error'>Et valinnut yhtään yritystä</font><br><br>";
-    return;
+    $response[] = "Et valinnut yhtään yritystä";
+
+    return $response;
   }
 
   foreach ($yhtiot as $yhtio) {
     $asiakas = hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra);
 
     if (empty($asiakas)) {
-      echo "<font class='error'>";
-      echo "Yhtiöllä '{$yhtio}' ei ole 'Kauppakeskus Myyrä' perustettuna, ei voitu luoda tilauksia.";
-      echo "</font>";
-
-      echo "<br><br>";
+      $response[] = "Yhtiöllä '{$yhtio}' ei ole 'Kauppakeskus Myyrä' perustettuna, ei voitu luoda tilauksia.";
 
       continue;
     }
@@ -137,6 +141,8 @@ function generoi_myyntitilauksia(Array $params) {
       luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus);
     }
   }
+
+  return $response;
 }
 
 function hae_oletusasiakkuus($yhtio, $kauppakeskus_myyra) {
@@ -159,6 +165,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
   $kukarow['kesken'] = '';
   $kukarow['yhtio'] = $yhtio;
+  $response = array();
 
   // Luodaan uusi myyntitilausotsikko
   $tilausnumero = luo_myyntitilausotsikko("RIVISYOTTO", $asiakas["tunnus"]);
@@ -182,11 +189,9 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
     $trow = tuotearvonta($yhtio);
 
     if ($trow === false) {
-      echo "<font class='error'>";
-      echo "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.<br>";
-      echo "</font>";
+      $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, ei voitu luoda tilauksia.";
 
-      return;
+      return $response;
     }
 
     $kpl = rand(1, 3);
@@ -202,7 +207,7 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
     lisaa_rivi($params);
   }
 
-  echo "Perustettiin tilaus {$tilausnumero} yritykselle {$yhtiorow['nimi']}<br>";
+  $response[] = "Perustettiin tilaus {$tilausnumero} yritykselle {$yhtiorow['nimi']}<br>";
 
   // Tilaus valmiiksi
   require "tilauskasittely/tilaus-valmis.inc";
@@ -211,6 +216,8 @@ function luo_tilausotsikot_ja_tilausrivit($yhtio, $asiakas, $kokonaiskustannus) 
   $kukarow = $alkuperainen_kuka;
 
   $kukarow['kesken'] = '';
+
+  return $response;
 }
 
 function tuotearvonta($yhtio) {

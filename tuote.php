@@ -518,6 +518,32 @@ if (isset($ajax)) {
               $maara";
     $qresult = pupe_query($query);
 
+    $yhteensa_maara = 0.0;
+    $yhteensa_arvo  = 0.0;
+
+    while ($prow = mysql_fetch_assoc($qresult)) {
+      if ($prow["laji"] != $tapahtumalaji) continue;
+
+      $yhteensa_maara += $prow["kpl"];
+      $yhteensa_arvo  += $prow["arvo"];
+    }
+
+    $_return .= "<tr class='aktiivi'>";
+    $_return .= "<th>" . t("Yhteensä") . ":</th>";
+    $_return .= "<td></td>";
+    $_return .= "<td></td>";
+    $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_maara) . "</td>";
+    $_return .= "<td></td>";
+    $_return .= "<td></td>";
+    $_return .= "<td></td>";
+    $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_arvo) . "</td>";
+    $_return .= "<td></td>";
+    $_return .= "<td></td>";
+    $_return .= "<td></td>";
+    $_return .= "</tr>";
+
+    mysql_data_seek($qresult, 0);
+
     // jos jsarjanumeroseuranta S ja inout varastonarvo
     if ($sarjanumeroseuranta == "S") {
       $kokonaissaldo_tapahtumalle = $sarjanumero_kpl;

@@ -50,9 +50,6 @@ if (mysql_field_name($result, $i) == "tuoteno") {
 
       if (!empty($kaatokoodi_tuotteen_tuotenumeron_alku)) {
         $autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
-
-        $autom_tuoteno_len = strlen($kaatokoodi_tuotteen_tuotenumeron_alku) + 1;
-        $autom_selectlisa = "CONCAT({$kaatokoodi_tuotteen_tuotenumeron_alku}, SUBSTRING(MAX(CAST(tuote.tuoteno AS UNSIGNED)), {$autom_tuoteno_len}))";
       }
 
       $query = "SELECT IF({$autom_selectlisa} = 18446744073709551615, 'error', {$autom_selectlisa} + 1) AS seuraava_tuoteno
@@ -65,15 +62,11 @@ if (mysql_field_name($result, $i) == "tuoteno") {
 
       if ($autom_tuoteno_row['seuraava_tuoteno'] == 'error') {
         $virheviesti  = "<br /><font class='error'>";
-        $virheviesti .= t("Seuraava automaattisesti generoitu tuotenumero on liian suuri (isompi kuin %s)", "", "18446744073709551615");
+        $virheviesti .= t("Seuraava tuotenumero on liian suuri (isompi kuin %s)", "", "18446744073709551615");
         $virheviesti .= "</font>";
       }
       else {
         $trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
-      }
-
-      if ($autom_tuoteno_row['seuraava_tuoteno'] == '' and $autom_wherelisa != "") {
-        $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
       }
     }
 

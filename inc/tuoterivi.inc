@@ -46,23 +46,32 @@ if (mysql_field_name($result, $i) == "tuoteno") {
     if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
 
       $autom_wherelisa = "";
+      $autom_selectlisa = "MAX(CAST(tuote.tuoteno AS UNSIGNED))";
 
       if (isset($kaatokoodi_tuotteen_tuotenumeron_alku) and trim($kaatokoodi_tuotteen_tuotenumeron_alku) != '') {
-        $autom_wherelisa = "AND t1.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+        $autom_wherelisa = "AND tuote.tuoteno LIKE '{$kaatokoodi_tuotteen_tuotenumeron_alku}%'";
+
+        $autom_tuoteno_len = strlen($kaatokoodi_tuotteen_tuotenumeron_alku) + 1;
+        $autom_selectlisa = "CONCAT({$kaatokoodi_tuotteen_tuotenumeron_alku}, SUBSTRING(MAX(CAST(tuote.tuoteno AS UNSIGNED)), {$autom_tuoteno_len}))";
       }
 
-      $query = "SELECT CAST(t1.tuoteno AS UNSIGNED) + 1 seuraava_tuoteno
-                FROM tuote t1
-                LEFT JOIN tuote t2 ON (t1.yhtio = t2.yhtio and CAST(t1.tuoteno AS UNSIGNED) + 1 = t2.tuoteno)
-                WHERE t1.yhtio = '{$kukarow['yhtio']}'
-                AND t1.tuoteno REGEXP '[^0-9]' = 0
-                {$autom_wherelisa}
-                AND t2.tuoteno IS NULL
-                LIMIT 1";
+      $etsitaan = true;
+
+      $query = "SELECT IF({$autom_selectlisa} = 18446744073709551615, 'error', {$autom_selectlisa} + 1) AS seuraava_tuoteno
+                FROM tuote
+                WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                AND tuote.tuoteno REGEXP '[^0-9]' = 0
+                {$autom_wherelisa}";
       $autom_tuoteno_res = pupe_query($query);
       $autom_tuoteno_row = mysql_fetch_assoc($autom_tuoteno_res);
 
-      $trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
+      if ($autom_tuoteno_row['seuraava_tuoteno'] == 'error') {
+        $virheviesti = "<br /><font class='error'>".t("Seuraava automaattisesti generoitu tuotenumero on liian suuri (isompi kuin %s)", "", "18446744073709551615")."</font>";
+      }
+      else {
+        $virheviesti = '';
+        $trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
+      }
 
       if ($autom_tuoteno_row['seuraava_tuoteno'] == '' and $autom_wherelisa != "") $trow[$i] = "{$kaatokoodi_tuotteen_tuotenumeron_alku}1";
     }

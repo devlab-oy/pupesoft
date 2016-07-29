@@ -621,12 +621,19 @@ if ($tee == 'add') {
       $k_kasitkulut = str_replace(',', '.', $k_kasitkulut);
 
       if ($k_rahtikulut > 0) {
+
+        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'"; 
+        $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+        if (!empty($vaihtoehtoinenrahti)) {
+          $rahtituotenumerot .= ", '{$vaihtoehtoinenrahti}'";
+        }
+
         $query = "UPDATE tilausrivi
                   SET tyyppi='D',
                   kommentti    = concat(kommentti, ' $kukarow[kuka] muutti rahtikuluja rahtikirjan syötössä.')
                   WHERE yhtio='$kukarow[yhtio]'
                   and otunnus  IN ({$tunnuslisa})
-                  and tuoteno='$yhtiorow[rahti_tuotenumero]'
+                  and tuoteno IN ({$rahtituotenumerot})
                   and uusiotunnus=0
                   and tyyppi  != 'D'";
         $result = pupe_query($query);
@@ -3014,6 +3021,11 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       if (mysql_num_rows($rhire) == 1 and $merahti!='') {
         $trow  = mysql_fetch_assoc($rhire);
 
+        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
+        $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+        if (!empty($vaihtoehtoinenrahti)) {
+          $rahtituotenumerot .= ", '{$vaihtoehtoinenrahti}'";
+        }
         $query = "SELECT
                   round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
                   round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
@@ -3021,7 +3033,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
                   JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
                   WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
                   and tilausrivi.otunnus  = '$otsik[tunnus]'
-                  and tilausrivi.tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+                  and tilausrivi.tuoteno  IN ({$rahtituotenumerot})
                   and tilausrivi.tyyppi  != 'D'";
         $rhire = pupe_query($query);
         $rrow  = mysql_fetch_assoc($rhire);

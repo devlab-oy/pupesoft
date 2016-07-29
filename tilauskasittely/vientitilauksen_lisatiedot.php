@@ -859,7 +859,13 @@ elseif ($tee == '') {
     $tilaehto = "";
   }
 
-  $laskutetut = "lasku.tila = 'L' and lasku.alatila = 'X' and lasku.tapvm >= '{$yhtiorow['tilikausi_alku']}'";
+  // ehto, millä valitaan mukaan laskutetut tilaukset
+  // vain avoin kausi. ei sisäisiä eikä KTL 999, koska niistä ei lähetetä intrastattia
+  $laskutetut = "lasku.tila = 'L'
+    AND lasku.alatila = 'X'
+    AND lasku.tapvm >= '{$yhtiorow['tilikausi_alku']}'
+    AND lasku.sisainen = ''
+    AND lasku.kauppatapahtuman_luonne != '999'";
 
   if (isset($toimittamattomat) and $toimittamattomat == 1) {
     $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}') OR ({$laskutetut}))";

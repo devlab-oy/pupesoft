@@ -158,6 +158,12 @@ else {
 
       $x = 1;
 
+      $rahtinro_tuoteno_lisa = "'{$yhtiorow['rahti_tuotenumero']}', ";
+      $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+      if (!empty($vaihtoehtoinenrahti)) {
+        $rahtinro_tuoteno_lisa .= "'{$vaihtoehtoinenrahti}', ";
+      }
+
       $query = "SELECT *
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -165,7 +171,7 @@ else {
                 AND tyyppi  = 'L'
                 AND kpl+varattu > 0
                 AND tuoteno NOT IN (
-                  '{$yhtiorow['rahti_tuotenumero']}',
+                  {$rahtinro_tuoteno_lisa},
                   '{$yhtiorow['jalkivaatimus_tuotenumero']}',
                   '{$yhtiorow['erilliskasiteltava_tuotenumero']}',
                   '{$yhtiorow['kasittelykulu_tuotenumero']}',

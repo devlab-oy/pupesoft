@@ -168,6 +168,19 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
+      if ($tem_laji == "VEHT_RAHTI") {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND laji               = '{$tem_laji}'
+                  AND tunnus            != '{$tunnus}'";
+        $result = pupe_query($query);
+        
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron pit‰‰ olla uniikki");
+        }
+      }
+
       if ($tem_laji == "ASIAKASHINNASTO") {
         $query = "SELECT *
                   FROM avainsana

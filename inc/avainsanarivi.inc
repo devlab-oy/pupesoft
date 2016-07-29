@@ -220,6 +220,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY")     $ulos .= "<option value='KVERITTELY' $avain_sel[KVERITTELY]>        ".t("Kulunvalvonnan erittely")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA")     $ulos .= "<option value='KONEENOSA' $avain_sel[KONEENOSA]>          ".t("Koneenosa")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SAHKTILTUN")     $ulos .= "<option value='SAHKTILTUN' {$avain_sel['SAHKTILTUN']}>      ".t("Sähköisen tilausliitännän tunnukset")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VEHT_RAHTI")     $ulos .= "<option value='VEHT_RAHTI' {$avain_sel['VEHT_RAHTI']}>".t("Vaihtoehtoinen rahtituotenumero")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";

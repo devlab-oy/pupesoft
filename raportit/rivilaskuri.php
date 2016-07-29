@@ -187,7 +187,11 @@ if ($tee != '') {
                     '{$yhtiorow['alennus_tuotenumero']}',
                     '{$yhtiorow['laskutuslisa_tuotenumero']}',
                     '{$yhtiorow['kuljetusvakuutus_tuotenumero']}'";
-
+    $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+    if (!empty($vaihtoehtoinenrahti)) {
+     $ei_laskutusajo_tuotteita .= ", '{$vaihtoehtoinenrahti}'";
+    }
+    
     if ($toimitustapa_row['kuljetusvakuutus_tuotenumerot'] != '') $ei_laskutusajo_tuotteita .= ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 
     $ei_laskutusajo_tuotteita .= ")";

@@ -25265,13 +25265,9 @@ if (!function_exists('onko_rahtituote_syotetty')) {
               AND selite  = '$laskurow[toimitustapa]'";
     $result = pupe_query($query);
     $torow = mysql_fetch_assoc($result);
-    
-    $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
 
-    $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-    if (!empty($vaihtoehtoinenrahti)) {
-      $rahtinro_tuoteno_lisa .= ", '{$vaihtoehtoinenrahti}'";
-    }
+    $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+    $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
     $hintalisa = $whateverhinta === FALSE ? " AND hinta != 0 " : "";
 
@@ -33696,5 +33692,15 @@ if (!function_exists('posten_message_type')) {
     }
 
     return false;
+  }
+}
+
+if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
+  function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
+    $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+    if (!empty($vaihtoehtoinenrahti)) {
+      $merkkijono .= ", '{$vaihtoehtoinenrahti}'";
+    }
+    return $merkkijono;
   }
 }

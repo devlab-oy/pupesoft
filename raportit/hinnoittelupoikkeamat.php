@@ -159,10 +159,7 @@ else {
       $x = 1;
 
       $rahtinro_tuoteno_lisa = "'{$yhtiorow['rahti_tuotenumero']}', ";
-      $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-      if (!empty($vaihtoehtoinenrahti)) {
-        $rahtinro_tuoteno_lisa .= "'{$vaihtoehtoinenrahti}', ";
-      }
+      $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       $query = "SELECT *
                 FROM tilausrivi

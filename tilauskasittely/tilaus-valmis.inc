@@ -934,10 +934,7 @@ else {
       $torow = mysql_fetch_assoc($result);
 
       $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
-      $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-      if (!empty($vaihtoehtoinenrahti)) {
-        $rahtinro_tuoteno_lisa .= ", '{$vaihtoehtoinenrahti}'";
-      }
+      $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       // jos kyseessä on JT-tilaus, katsotaan pitääkö lisätä rahtikulua usealle tilaukselle
       if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {

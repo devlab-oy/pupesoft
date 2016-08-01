@@ -4417,11 +4417,7 @@ if (isset($jatka)) {
   if ($laskurow["erikoisale"] != $erikoisale) {
     // p‰ivitet‰‰n erikoisale tilausriveille
     $poisrajattavat = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
-
-    $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-    if (!empty($vaihtoehtoinenrahti)) {
-      $poisrajattavat .= ", '{$vaihtoehtoinenrahti}'";
-    }
+    $poisrajattavat = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajattavat);
 
     $erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
     $query_erikoisale = "UPDATE tilausrivi

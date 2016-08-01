@@ -623,10 +623,7 @@ if ($tee == 'add') {
       if ($k_rahtikulut > 0) {
 
         $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'"; 
-        $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-        if (!empty($vaihtoehtoinenrahti)) {
-          $rahtituotenumerot .= ", '{$vaihtoehtoinenrahti}'";
-        }
+        $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
 
         $query = "UPDATE tilausrivi
                   SET tyyppi='D',
@@ -3022,10 +3019,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         $trow  = mysql_fetch_assoc($rhire);
 
         $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
-        $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
-        if (!empty($vaihtoehtoinenrahti)) {
-          $rahtituotenumerot .= ", '{$vaihtoehtoinenrahti}'";
-        }
+        $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
+        
         $query = "SELECT
                   round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
                   round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa

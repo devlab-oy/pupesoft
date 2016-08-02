@@ -9,6 +9,13 @@ if ($i == 0) {
   $tyyppi = 0;
 }
 
+if (mysql_field_name($result, $i) == "tuoteno") {
+  if ($lukitse_avaimeen != "") {
+    $ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
+    $jatko = 0;
+  }
+}
+
 if (mysql_field_name($result, $i) == "valkoodi") {
   $query = "SELECT nimi, tunnus
             FROM valuu
@@ -107,4 +114,26 @@ if (mysql_field_name($result, $i) == "yhtion_toimipaikka_id") {
   }
 
   $tyyppi = 0;
+}
+
+if (mysql_field_name($result, $i) == "campaign_id") {
+
+  $query = "SELECT campaigns.*
+            FROM campaigns
+            JOIN yhtio ON (campaigns.company_id = yhtio.tunnus and yhtio.yhtio = '{$kukarow['yhtio']}')
+            WHERE campaigns.active = 1";
+  $kresult = pupe_query($query);
+
+  $ulos = "<td><select id='campaign_id' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = 'NULL'>".t("Ei kampanjaa")."</option>";
+  while ($krow = mysql_fetch_assoc($kresult)) {
+    $sel = '';
+    if (strtoupper($trow[$i]) == strtoupper($krow["id"])) {
+      $sel = "selected";
+    }
+    $ulos .= "<option value='{$krow['id']}' $sel>{$krow['name']}</option>";
+  }
+
+  $ulos .= "</select></td>\n";
+  $jatko = 0;
 }

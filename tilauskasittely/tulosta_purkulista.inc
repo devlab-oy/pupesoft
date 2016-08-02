@@ -191,6 +191,8 @@ else {
   $sorttauskentta = generoi_sorttauskentta("10", $laskurow["liitostunnus"]);
 }
 
+$eanlisa = "";
+
 if ($mitkarivit == "viematta") {
   $mitkalisa = " and tilausrivi.varattu != 0 ";
 }
@@ -407,6 +409,7 @@ if (!empty($tee_excel)) {
     echo "<tr><th>".t("Tallenna tulos").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
     echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
     echo "<input type='hidden' name='kaunisnimi' value='".t('Tullinimikkeet').".xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$tiedosto}'>";
@@ -418,7 +421,7 @@ if (!empty($tee_excel)) {
   }
 }
 
-if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
+if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["Vastaanotetut"])) {
 
   list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
 

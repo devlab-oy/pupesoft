@@ -104,6 +104,7 @@ if (!isset($alias_set))           $alias_set = "";
 if (!isset($rajattu_nakyma))      $rajattu_nakyma = "";
 if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
+if (!isset($mista))               $mista = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
@@ -404,6 +405,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
           }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
+          }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
           }
@@ -481,6 +485,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
+          }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
           }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
@@ -2295,6 +2302,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
+
+    if (($toikrow = tarkista_oikeus("yllapito.php", "hinnasto%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='hinnasto_iframe' name='hinnasto_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

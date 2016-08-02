@@ -132,7 +132,7 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
-          if ($price['tyyppi'] !== 'hinnastohinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+          if ($price['tyyppi'] !== 'hinnastohinta' and $price['tyyppi'] !== 'informatiivinen_hinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
             $this->logger->log("Ohitettu {$price['tyyppi']} tuotteelle '{$price['tuoteno']}' koska sill‰ ei ole asiakastunnusta eik‰ asiakasryhm‰‰");
             continue;
           }

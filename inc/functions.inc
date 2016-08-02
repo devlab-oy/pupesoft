@@ -33003,7 +33003,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
   // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 
   function pupesoft_toimitusvahvistus($otunnukset, $tunnukset=0) {
-    global $kukarow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
+    global $kukarow, $yhtiorow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
 
     if (empty($otunnukset)) {
       return;

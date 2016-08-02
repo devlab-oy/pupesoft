@@ -1,7 +1,5 @@
 <?php
 
-$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
 # Tilauksien tunnukset tulevat $kaikki_lotsikot muuttujassa
 $query = "SELECT *
           FROM lasku

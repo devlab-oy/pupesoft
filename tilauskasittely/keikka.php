@@ -35,7 +35,8 @@ if (isset($_POST["tee"])) {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
-  if (isset($_REQUEST["toiminto"]) and ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok")) {
+  if (isset($_REQUEST["toiminto"]) and
+      ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok" or ($_REQUEST["toiminto"] == "tulosta" and !empty($_REQUEST["tee_excel"])))) {
     // Ei käytetä pakkausta
     $compression = FALSE;
   }

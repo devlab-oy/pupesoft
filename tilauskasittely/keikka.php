@@ -35,7 +35,8 @@ if (isset($_POST["tee"])) {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
-  if (isset($_REQUEST["toiminto"]) and ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok")) {
+  if (isset($_REQUEST["toiminto"]) and
+      ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok" or ($_REQUEST["toiminto"] == "tulosta" and !empty($_REQUEST["tee_excel"])))) {
     // Ei käytetä pakkausta
     $compression = FALSE;
   }
@@ -844,7 +845,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$toimipaikkalisa}
             {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY nimi, nimitark, ytunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

@@ -290,7 +290,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         7 henkilö
       */
 
+      // Haistellaan onko puolipisteerottelu tai tabierottelu
       $kentat = explode("\t", $rivi);
+
+      if (count($kentat) < 5) {
+        $kentat = explode(";", $rivi);
+      }
 
       //  Trimmataan kaikki
       foreach ($kentat as &$k) {
@@ -400,9 +405,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
       // Selite
       $iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
-
+      $selite = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
       // Liitetään tähän henkilönumero jos se haluttiin aineistoon
-      if ($kentat[7] != "") {
+      if (!empty($kentat[7])) {
         $iselite[$maara] .= " / #".$kentat[7];
       }
     }

@@ -60,11 +60,14 @@ class Edi {
       $edi_store = str_replace("\n", " ", $order['store_name']);
 
       foreach ($verkkokauppa_erikoiskasittely as $verkkokauppaparametrit) {
-        // $verkkokauppaparametrit[0] - Verkkokaupan nimi
-        // $verkkokauppaparametrit[1] - Editilaus_tilaustyyppi
-        // $verkkokauppaparametrit[2] - Tilaustyyppilisa
-        // $verkkokauppaparametrit[3] - Myyjanumero
-        // $verkkokauppaparametrit[4] - Vaihtoehtoinen ovttunnus
+        // Avaimet
+        // 0 = Verkkokaupan nimi
+        // 1 = Editilaus_tilaustyyppi
+        // 2 = Tilaustyyppilisa
+        // 3 = Myyjanumero
+        // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kentt‰‰n EDI tiedostossa
+        // 5 = Rahtivapaus, jos 'E', niin k‰ytet‰‰n asiakkaan 'rahtivapaa' -oletusta
+        // 6 = Tyhjennet‰‰nkˆ OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhj‰ ei, kaikki muut arvot kyll‰)
         if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }

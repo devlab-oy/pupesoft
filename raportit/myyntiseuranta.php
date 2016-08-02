@@ -542,7 +542,7 @@ else {
       <tr>
       <th>", t("Näytä vain myydyt sarjanumerot"), "</th>
       <td colspan='3'><input type='checkbox' name='eiOstSarjanumeroita' {$sarjachk2}></td>
-      <td class='back'></td>
+      <td class='back'>".t('(Toimii vain jos ei rajata kampanja tai sample-tuotteittain)')."</td>;
       </tr>
       <tr>
       <th>", t("Näytä varastonarvo"), "</th>
@@ -644,6 +644,20 @@ else {
       <td colspan='3'><input type='checkbox' name='naytamaksupvm' {$naytamaksupvmchk}></td>
       <td class='back'>", t("(Toimii vain jos listaat laskuittain)"), "</td>
       </tr>";
+
+    $ks_sel[$kampanja_ja_samplerajaus] = "SELECTED";
+    echo "<tr>";
+    echo "<th>".t('Kampanja ja sample-tuoterajaus')."</th>";
+    echo "<td colspan='3'>";
+    echo "<select name='kampanja_ja_samplerajaus'>";
+    echo "<option value=''>".t('Ei rajausta')."</option>";
+    echo "<option value='nayta_kamp' {$ks_sel["nayta_kamp"]}>", t("Näytä vain kampanja-tuotteita"), "</option>";
+    echo "<option value='nayta_samp' {$ks_sel["nayta_samp"]}>", t("Näytä vain sample-tuotteita"), "</option>";
+    echo "<option value='alanayta_kamp' {$ks_sel["alanayta_kamp"]}>", t("Älä näytä kampanja-tuotteita"), "</option>";
+    echo "<option value='alanayta_samp' {$ks_sel["alanayta_samp"]}>", t("Älä näytä sample-tuotteita"), "</option>";
+    echo "<option value='alanayta_kamp_samp' {$ks_sel["alanayta_kamp_samp"]}>", t("Älä näytä kampanja tai sample-tuotteita"), "</option>";
+    echo "</select>";
+    echo "</td>";
 
     if (isset($vertailubu)) {
       switch ($vertailubu) {
@@ -1680,6 +1694,28 @@ else {
       if (isset($verkkokaupat) and $verkkokaupat != '') {
         $lisa .= " and lasku.ohjelma_moduli = '$verkkokaupat' ";
       }
+      $lisatiedot_join = '';
+      if (isset($kampanja_ja_samplerajaus) and !empty($kampanja_ja_samplerajaus)) {
+        switch ($kampanja_ja_samplerajaus) {
+          case "nayta_kamp" :
+            $lisa .= " and tilausrivi.campaign_id IS NOT NULL ";
+            break;
+          case "nayta_samp" :
+            $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ";
+            break;
+          case "alanayta_kamp" :
+            $lisa .= " and tilausrivi.campaign_id IS NULL ";
+            break;
+          case "alanayta_samp" :
+            $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta != 'Sample' ";
+            break;
+          case "alanayta_kamp_samp" :
+            $lisatiedot_join = " JOIN tilausrivin_lisatiedot  use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta != 'Sample' ";
+            $lisa .= " and tilausrivi.campaign_id IS NULL ";
+            break;
+        }
+      }
+
       // Myyntied lukujen vuosi
       $vvaa = $vva - '1';
       $vvll = $vvl - '1';
@@ -1738,11 +1774,8 @@ else {
                        (kalenteri.pvmalku    <= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu >= '{$vvl}-{$kkl}-{$ppl} 23:59:59'))) asiakaskaynnit,";
       }
 
-      if ($eiOstSarjanumeroita != "") {
+      if ($eiOstSarjanumeroita != "" and empty($kampanja_ja_samplerajaus)) {
         $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'\n";
-      }
-      else {
-        $lisatiedot_join = "";
       }
 
       // Jos ei olla valittu mitään

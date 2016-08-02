@@ -641,6 +641,17 @@ if ($kukarow["kesken"] != 0) {
   $rakre_chkres = pupe_query($query);
 }
 
+// Onko verkkokauppakassalipasta?
+// Jos on niin voidaan luoda käsin verkkokauppatilauksia
+$kassalipasquery = "SELECT kassalipas.tunnus kassalipas, maksuehto.tunnus maksuehto
+                    FROM kassalipas
+                    JOIN maksuehto ON (maksuehto.yhtio = kassalipas.yhtio and maksuehto.kateinen != '')
+                    WHERE kassalipas.yhtio = '$kukarow[yhtio]'
+                    AND kassalipas.nimi = 'Verkkokauppa'
+                    ORDER BY maksuehto.tunnus
+                    LIMIT 1";
+$vk_kassalipas_res = pupe_query($kassalipasquery);
+
 // ** TÄSTÄ ALKAA KÄYTTÖLIITTYMÄ ** //
 if ($tila == "" and !isset($jatka)) {
 
@@ -990,6 +1001,10 @@ if ($tila == "" and !isset($jatka)) {
       'T' => t("Tarjoustilaus"),
       'U' => t("Takuutilaus"),
     );
+
+    if (mysql_num_rows($vk_kassalipas_res)) {
+      $tilaustyypit['W'] = t("Verkkokauppatilaus");
+    }
   }
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
@@ -1007,6 +1022,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='projektilla' value='$projektilla'>";
+  echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
   echo "<input type='hidden' name='from' value='$from'>";
   echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
   echo "<input type='hidden' name='mista' value='$mista'>";
@@ -2600,6 +2616,30 @@ if ($tila == "" and !isset($jatka)) {
         $vasen++;
       }
 
+      $cquery = "SELECT campaigns.*
+                 FROM campaigns
+                 JOIN yhtio ON (campaigns.company_id = yhtio.tunnus
+                   AND yhtio.yhtio = '{$kukarow['yhtio']}')
+                 WHERE campaigns.active = 1";
+      $cresult = pupe_query($cquery);
+
+      if (mysql_num_rows($cresult) > 0) {
+
+        $vasen_sarake[$vasen] = "<td>".t("Kampanja").":</td>";
+        $vasen_sarake[$vasen] .= "<td><select id='campaign_id' name='campaign_id' ".js_alasvetoMaxWidth('campaign_id', 300).">";
+        $vasen_sarake[$vasen] .= "<option value = 'NULL'>".t("Ei kampanjaa")."</option>";
+        while ($krow = mysql_fetch_assoc($cresult)) {
+          $sel = '';
+          if (strtoupper($srow['campaign_id']) == strtoupper($krow["id"])) {
+            $sel = "selected";
+          }
+          $vasen_sarake[$vasen] .= "<option value='{$krow['id']}' $sel>{$krow['name']}</option>";
+        }
+
+        $vasen_sarake[$vasen] .= "</select></td>\n";
+        $jatko = 0;
+      }
+
       // Katsotaan onko suoratoimitusrivejä
       // asiakkaalle tai varastoon
       if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'X', 'Y', 'A', 'B', 'C', 'V', 'W', 'I', 'J'))) {
@@ -3949,8 +3989,8 @@ if (isset($jatka)) {
     $meapu2 = pupe_query($apuqu2);
     $meapu2row = mysql_fetch_assoc($meapu2);
 
-    // ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-    if ($meapu2row["nouto"] == "") {
+    // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
+    if ($meapu2row["nouto"] == "" and $tilaustyyppi != "W") {
       $apuqu = "SELECT *
                 FROM toimitustapa
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -3962,6 +4002,7 @@ if (isset($jatka)) {
 
       $toimitustapa = $apuro['selite'];
     }
+
     $kassalipas = $kukarow["kassamyyja"];
   }
 
@@ -4182,6 +4223,20 @@ if (isset($jatka)) {
     $tilaustyyppi = 'H';
   }
 
+  // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
+  // Tilaus laskutetaan heti ja laitetaan sitten sen jälkeen takaisin keräsyjonoon
+  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res)) {
+    $kassalipas_row = mysql_fetch_assoc($vk_kassalipas_res);
+
+    $kassalipas = $kassalipas_row['kassalipas'];
+    $maksuehto  = $kassalipas_row['maksuehto'];
+    $sisainen   = "o";
+  }
+
+  if (!isset($campaign_id)) {
+    $campaign_id = 'NULL';
+  }
+
   $query .= "  lasku SET
         aktiivinen_kuljetus     = '',
         alatila                 = '$alatila',
@@ -4230,6 +4285,7 @@ if (isset($jatka)) {
         ostotilauksen_kasittely = '{$ostotilauksen_kasittely}',
         ovttunnus               = '$ovttunnus',
         piiri                   = '$piiri',
+        campaign_id             =  $campaign_id,
         postino                 = '$postino',
         postitp                 = '$postitp',
         rahtivapaa              = '$rahtivapaa',

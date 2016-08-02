@@ -14,8 +14,8 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
-if ($tee == "PDF_RUUDULLE") {
-  readfile("/tmp/".basename($filenimi));
+if ($tee == "NAYTATILAUS") {
+  readfile($filenimi);
   exit;
 }
 
@@ -1491,7 +1491,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         js_openFormInNewWindow();
 
         echo "<br><form id='inventointi_listat_{$listanro}' name='inventointi_listat_{$listanro}' method='post' action='{$palvelin2}inventointi_listat.php' autocomplete='off'>
-              <input type='hidden' name='tee' value='PDF_RUUDULLE'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
               <input type='hidden' name='nayta_pdf' value='1'>
               <input type='hidden' name='filenimi' value='{$filenimi}.pdf'>
               <input type='submit' value='".t("Inventointilista").": {$listanro}' onClick=\"js_openFormInNewWindow('inventointi_listat_{$listanro}', ''); return false;\"></form><br>";

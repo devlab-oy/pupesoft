@@ -156,7 +156,8 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
 
   foreach ($asiakkaat as $asiakas) {
     for ($i = 0; $i < $tilausmaara; $i++) {
-      $response = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $generate = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $response = array_merge($response, $generate);
     }
   }
 

@@ -106,7 +106,7 @@ function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                     asiakas.email as asiakas_email,
                     asiakas.tunnus as asiakas_tunnus,
                     count(distinct lasku.tunnus) as tilauksia,
-                    sum(tilausrivi.varattu * tilausrivi.hinta) as summa
+                    sum((tilausrivi.varattu + tilausrivi.jt) * tilausrivi.hinta) as summa
                     FROM yhtio
                     JOIN asiakas ON (asiakas.yhtio = '{$kukarow['yhtio']}'
                       AND asiakas.ytunnus = yhtio.ytunnus)
@@ -114,7 +114,9 @@ function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                       AND lasku.tila IN ('N','L')
                       AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')
                     LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
-                      AND tilausrivi.otunnus = lasku.tunnus)
+                      AND tilausrivi.otunnus = lasku.tunnus
+                      AND tilausrivi.tyyppi = 'L'
+                      AND tilausrivi.var != 'P')
                     WHERE yhtio.yhtio = '{$row['yhtio']}'
                     GROUP BY yhtio.nimi,
                     asiakas.nimi,
@@ -154,7 +156,8 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
 
   foreach ($asiakkaat as $asiakas) {
     for ($i = 0; $i < $tilausmaara; $i++) {
-      $response = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $generate = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $response = array_merge($response, $generate);
     }
   }
 
@@ -170,6 +173,12 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   $toimittaja = yrityspeli_hae_toimittaja();
   $hintacounter = 0;
   $response = array();
+
+  if ($toimittaja === false) {
+    $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole yhtään toimittajaa.";
+
+    return $response;
+  }
 
   $params = array(
     'liitostunnus' => $toimittaja['tunnus'],
@@ -228,7 +237,7 @@ function yrityspeli_hae_toimittaja() {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    return 0;
+    return false;
   }
 
   $row = mysql_fetch_assoc($result);

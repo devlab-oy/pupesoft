@@ -380,7 +380,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   $result = pupe_query($query);
 
   ///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
-  if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
+  if (in_array($yhtiorow["lahetteen_tulostustapa"], array("A","B","X"))) {
     $tilausnumeroita = $laskurow["tunnus"];
     require "tilaus-valmis-tulostus.inc";
 

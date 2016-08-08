@@ -2183,6 +2183,8 @@ class MagentoClient {
 
     // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
     if ($this->magento_lisaa_tuotekuvat === false) {
+      $this->log('magento_tuotteet', 'Tuotekuvia ei käsitellä.');
+
       return array();
     }
 

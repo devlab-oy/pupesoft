@@ -27979,10 +27979,10 @@ if (!function_exists('posten_outbounddelivery')) {
     $cust_name         = trim($looprow['nimi'].' '.$looprow['nimitark']);
     $rec_cust_name     = trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']);
     $rec_cust_street   = $looprow['toim_osoite'];
-    $rec_cust_street2  = $looprow['kohde'];
+    $rec_cust_street2  = '';
 
-    if (empty($rec_cust_street2)) {
-      $rec_cust_street2 = $rec_cust_street;
+    if (!empty($looprow['kohde'])) {
+      $rec_cust_street2 = $looprow['kohde'];
     }
 
     # Rakennetaan XML

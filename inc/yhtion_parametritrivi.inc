@@ -3699,7 +3699,7 @@ if ($fieldname == "ulkoinen_jarjestelma") {
 
   $sel = array($trow[$i] => 'selected') + array('K' => '', 'S' => '');
 
-  $ulos .= "<option value = ''>".t("Varaston ulkoisen järjestelmän toimintaa ei rajoiteta")."</option>";
+  $ulos .= "<option value = ''>".t("Varaston ulkoinen järjestelmä toimii keräyksen ja saapumisen yhteydessä")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen järjestelmä toimii vain keräyksen yhteydessä")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen järjestelmä toimii vain saapumisen yhteydessä")."</option>";
 
@@ -4844,7 +4844,7 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= "<option value = 'K' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkintä vapaalla tekstillä");
   $ulos .= "</option>";
-  
+
   $ulos .= "<option value = 'A' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkintä avainsanoilla");
   $ulos .= "</option>";

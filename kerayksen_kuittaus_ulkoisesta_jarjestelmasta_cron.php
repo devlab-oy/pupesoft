@@ -54,44 +54,18 @@ if ($handle === false) {
 }
 
 while (false !== ($file = readdir($handle))) {
-  if (is_dir($path.$file)) {
+  $full_filepath = $path.$file;
+  $message_type = posten_message_type($full_filepath);
+
+  if ($message_type != 'OutboundDeliveryConfirmation') {
     continue;
   }
 
-  $path_parts = pathinfo($file);
-
-  if (empty($path_parts['extension']) or strtoupper($path_parts['extension']) != 'XML') {
-    continue;
-  }
-
-  $xml = simplexml_load_file($path.$file);
+  $xml = simplexml_load_file($full_filepath);
 
   pupesoft_log('outbound_delivery', "K‰sitell‰‰n sanoma {$file}");
 
-  if (!is_object($xml)) {
-    pupesoft_log('outbound_delivery', "Virheellinen XML sanoma {$file}");
-
-    continue;
-  }
-
-  $message_type = "";
-
-  if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-    $message_type = trim($xml->MessageHeader->MessageType);
-  }
-
-  if ($message_type != 'OutboundDeliveryConfirmation') {
-    pupesoft_log('outbound_delivery', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
-    continue;
-  }
-
-  $otunnus = (int) $xml->CustPackingSlip->SalesId;
-
-  // Fallback to pickinglist id
-  if ($otunnus == 0) {
-    $otunnus = (int) $xml->CustPackingSlip->PickingListId;
-  }
+  $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
   if ($otunnus == 0) {
     pupesoft_log('outbound_delivery', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
@@ -121,7 +95,7 @@ while (false !== ($file = readdir($handle))) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
             AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila = 'A'";
+            AND alatila IN ('A', 'E')";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
@@ -131,13 +105,14 @@ while (false !== ($file = readdir($handle))) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     if ($hhv) {
-      $lines = $xml->Lines->Line;
+      $lines = $xml->Lines;
     }
     else {
       $lines = $xml->CustPackingSlip->Lines;
     }
 
-    foreach ($lines as $line) {
+    foreach ($lines->Line as $line) {
+
       $tilausrivin_tunnus = (int) $line->TransId;
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
@@ -351,7 +326,7 @@ while (false !== ($file = readdir($handle))) {
     $params = array(
       'to'      => $error_email,
       'cc'      => '',
-      'subject' => t("Posten ker‰yspoikkeama")." - {$otunnus}",
+      'subject' => t("PostNord ker‰yspoikkeama")." - {$otunnus}",
       'ctype'   => 'html',
       'body'    => $body,
     );
@@ -362,7 +337,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // siirret‰‰n tiedosto done-kansioon
-  rename($path.$file, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

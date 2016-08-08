@@ -34,135 +34,117 @@ pupesoft_flock();
 
 $yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow = hae_kukarow('admin', $yhtio);
 
-// Haetaan kukarow
-$query = "SELECT *
-          FROM kuka
-          WHERE yhtio = '{$yhtio}'
-          AND kuka    = 'admin'";
-$kukares = pupe_query($query);
-
-if (mysql_num_rows($kukares) != 1) {
+if (empty($kukarow)) {
   exit("VIRHE: Admin käyttäjä ei löydy!\n");
 }
 
-$kukarow = mysql_fetch_assoc($kukares);
-
 $path = trim($argv[2]);
-$path = substr($path, -1) != '/' ? $path.'/' : $path;
-
 $error_email = trim($argv[3]);
 
-if ($handle = opendir($path)) {
+$path = rtrim($path, '/').'/';
+$handle = opendir($path);
 
-  while (false !== ($file = readdir($handle))) {
+if ($handle === false) {
+  exit;
+}
 
-    if ($file == '.' or $file == '..' or $file == '.DS_Store' or is_dir($path.$file)) continue;
+while (false !== ($file = readdir($handle))) {
+  $full_filepath = $path.$file;
+  $message_type = posten_message_type($full_filepath);
 
-    $path_parts = pathinfo($file);
-    $ext = isset($path_parts['extension']) ? strtoupper($path_parts['extension']) : '';
+  if ($message_type != 'StockReport') {
+    continue;
+  }
 
-    if ($ext == 'XML') {
+  $xml = simplexml_load_file($full_filepath);
 
-      $filehandle = fopen($path.$file, "r");
-      $contents = fread($filehandle, filesize($path.$file));
+  pupesoft_log('stock_report', "Käsitellään sanoma {$file}");
 
-      $xml = simplexml_load_string($contents);
+  // tuki vain yhdelle Posten-varastolle
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio              = '{$kukarow['yhtio']}'
+            AND ulkoinen_jarjestelma = 'P'
+            LIMIT 1";
+  $varastores = pupe_query($query);
+  $varastorow = mysql_fetch_assoc($varastores);
 
-      if (is_object($xml)) {
+  $luontiaika = $xml->InvCounting->TransDate;
 
-        if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType) and trim($xml->MessageHeader->MessageType) == 'StockReport') {
+  unset($xml->InvCounting->TransDate);
 
-          // tuki vain yhdelle Posten-varastolle
-          $query = "SELECT *
-                    FROM varastopaikat
-                    WHERE yhtio              = '{$kukarow['yhtio']}'
-                    AND ulkoinen_jarjestelma = 'P'
-                    LIMIT 1";
-          $varastores = pupe_query($query);
-          $varastorow = mysql_fetch_assoc($varastores);
+  $saldoeroja = array();
 
-          $luontiaika = $xml->InvCounting->TransDate;
+  foreach ($xml->InvCounting->Line as $line) {
+    $eankoodi = $line->ItemNumber;
+    $kpl = (float) $line->Quantity;
 
-          unset($xml->InvCounting->TransDate);
+    $query = "SELECT tuoteno, nimitys
+              FROM tuote
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND eankoodi = '{$eankoodi}'";
+    $tuoteres = pupe_query($query);
+    $tuoterow = mysql_fetch_assoc($tuoteres);
 
-          $saldoeroja = array();
+    list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
 
-          foreach ($xml->InvCounting->Line as $line) {
+    // Etukäteen maksetut tilaukset, jotka ovat keräämättä mutta tilaus jo laskutettu
+    // Lasketaan ne mukaan Pupen hyllyssä määrään, koska saldo_myytavissa ei huomioi niitä
+    $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) AS keraamatta
+              FROM tilausrivi
+              INNER JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus          = tilausrivi.otunnus
+                AND lasku.mapvm          != '0000-00-00'
+                AND lasku.chn             = '999')
+              WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+              AND tilausrivi.tyyppi       = 'L'
+              AND tilausrivi.var         != 'P'
+              AND tilausrivi.keratty      = ''
+              AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'
+              AND tilausrivi.tuoteno      = '{$tuoterow['tuoteno']}'";
+    $ker_result = pupe_query($query);
+    $ker_rivi = mysql_fetch_assoc($ker_result);
 
-            $eankoodi = $line->ItemNumber;
-            $kpl = (float) $line->Quantity;
+    $hyllyssa += $ker_rivi['keraamatta'];
 
-            $query = "SELECT tuoteno, nimitys
-                      FROM tuote
-                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                      AND eankoodi = '{$eankoodi}'";
-            $tuoteres = pupe_query($query);
-            $tuoterow = mysql_fetch_assoc($tuoteres);
+    // Vertailukonversio
+    $a = (int) $kpl * 10000;
+    $b = (int) $hyllyssa * 10000;
 
-            list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
-
-            // Etukäteen maksetut tilaukset, jotka ovat keräämättä mutta tilaus jo laskutettu
-            // Lasketaan ne mukaan Pupen hyllyssä määrään, koska saldo_myytavissa ei huomioi niitä
-            $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) AS keraamatta
-                      FROM tilausrivi
-                      INNER JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
-                        AND lasku.tunnus          = tilausrivi.otunnus
-                        AND lasku.mapvm          != '0000-00-00'
-                        AND lasku.chn             = '999')
-                      WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tyyppi       = 'L'
-                      AND tilausrivi.var         != 'P'
-                      AND tilausrivi.keratty      = ''
-                      AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'
-                      AND tilausrivi.tuoteno      = '{$tuoterow['tuoteno']}'";
-            $ker_result = pupe_query($query);
-            $ker_rivi = mysql_fetch_assoc($ker_result);
-
-            $hyllyssa += $ker_rivi['keraamatta'];
-
-            // Vertailukonversio
-            $a = (int) $kpl * 10000;
-            $b = (int) $hyllyssa * 10000;
-
-            if ($a != $b) {
-              $saldoeroja[$tuoterow['tuoteno']]['posten'] = $kpl;
-              $saldoeroja[$tuoterow['tuoteno']]['pupe'] = $hyllyssa;
-              $saldoeroja[$tuoterow['tuoteno']]['nimitys'] = $tuoterow['nimitys'];
-            }
-          }
-
-          if (count($saldoeroja) > 0) {
-
-            $body = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
-
-            $body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
-
-            foreach ($saldoeroja as $tuoteno => $_arr) {
-
-              $body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
-
-            }
-
-            $params = array(
-              'to' => $error_email,
-              'cc' => '',
-              'subject' => t("Posten saldovertailu")." - {$luontiaika}",
-              'ctype' => 'html',
-              'body' => $body,
-            );
-
-            pupesoft_sahkoposti($params);
-          }
-
-          // siirretään tiedosto done-kansioon
-          rename($path.$file, $path.'done/'.$file);
-
-          pupesoft_log('stock_report', "Saldovertailu käsitelty");
-        }
-      }
+    if ($a != $b) {
+      $saldoeroja[$tuoterow['tuoteno']]['posten'] = $kpl;
+      $saldoeroja[$tuoterow['tuoteno']]['pupe'] = $hyllyssa;
+      $saldoeroja[$tuoterow['tuoteno']]['nimitys'] = $tuoterow['nimitys'];
     }
   }
 
-  closedir($handle);
+  if (count($saldoeroja) > 0) {
+    $body  = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
+    $body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
+
+    foreach ($saldoeroja as $tuoteno => $_arr) {
+      $body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
+    }
+
+    $params = array(
+      'to' => $error_email,
+      'cc' => '',
+      'subject' => t("Posten saldovertailu")." - {$luontiaika}",
+      'ctype' => 'html',
+      'body' => $body,
+    );
+
+    pupesoft_sahkoposti($params);
+
+    pupesoft_log('stock_report', "Saldovertailussa eroja, lähetetään sähköposti {$error_email}");
+  }
+
+  // siirretään tiedosto done-kansioon
+  rename($full_filepath, $path.'done/'.$file);
+
+  pupesoft_log('stock_report', "Saldovertailu käsitelty");
 }
+
+closedir($handle);

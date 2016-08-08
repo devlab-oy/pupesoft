@@ -470,7 +470,7 @@ else {
 }
 
 $sallitaanko_rivikommentti_osto   = ($rivityyppi == 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'O')));
-$sallitaanko_rivikommentti_myynti = ($rivityyppi == 'L' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
+$sallitaanko_rivikommentti_myynti = ($rivityyppi != 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
 $sallitaanko_rivikommentti = ($sallitaanko_rivikommentti_osto or $sallitaanko_rivikommentti_myynti);
 
 // Onko päässätty varasto josta myydään
@@ -1966,6 +1966,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
 
+              $kampanjatunnus = 'NULL';
+              if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+                $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+              }
+
               $query = "INSERT into tilausrivi set
                         hyllyalue       = '$myy_hyllyalue[$indeksi]',
                         hyllynro        = '$myy_hyllynro[$indeksi]',
@@ -1992,6 +1997,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         toimaika        = '$toimaika',
                         kommentti       = '$kommentti',
                         ale_peruste     = '{$GLOBALS['ale_peruste']}',
+                        campaign_id     = {$kampanjatunnus},
                         var             = '',
                         var2            = '{$var2}',
                         try             = '$trow[try]',
@@ -3291,6 +3297,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllyvali = $myy_hyllyvali_temp;
     }
 
+    $kampanjatunnus = 'NULL';
+    if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+      $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+    }
+
     // lisätään puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',
@@ -3320,6 +3331,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               toimaika        = '$toimaika',
               kommentti       = '$kommentti',
               ale_peruste     = '{$GLOBALS['ale_peruste']}',
+              campaign_id     = {$kampanjatunnus},
               var             = '$var',
               var2            = '{$var2}',
               try             = '$trow[try]',
@@ -3331,7 +3343,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               jaksotettu      = '$jaksotettu'";
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
-      $query .= ", kerattyaika = now()";
+      $query .= ", keratty = 'saldoton', kerattyaika = now()";
     }
 
     $result = pupe_query($query);

@@ -7682,12 +7682,12 @@ if (!function_exists("enable_ajax")) {
           document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
         }
         else {
-          document.haku_formi.submit();
+          document.forms[haku_formi].submit();
         }
         keyStrokeIndex=-1;
       }
       else {
-        document.haku_formi.submit();
+        document.forms[haku_formi].submit();
       }
 
       return false;

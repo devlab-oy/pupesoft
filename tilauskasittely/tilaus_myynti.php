@@ -1333,7 +1333,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   }
 
   // poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
-  $query = "UPDATE tilausrivi 
+  $query = "UPDATE tilausrivi
             SET tilausrivi.tyyppi = 'D', tilausrivi.laadittu = now(), tilausrivi.laatija = '$kukarow[kuka]'
             where tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$kukarow[kesken]'
             and tilausrivi.var <> 'P'";
@@ -2867,8 +2867,8 @@ if ($tee == '') {
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
-        // ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
-        if ($meapu2row["nouto"] == "") {
+        // ja toimitustapa ei ole nouto eik‰ kyseess‰ ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
+        if ($meapu2row["nouto"] == "" and $laskurow['tilaustyyppi'] != "W") {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'
@@ -5492,7 +5492,7 @@ if ($tee == '') {
 
   $_kukaextranet = ($kukarow['extranet'] == '');
 
-  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
+  $_saako_nahda = ($kukarow['saatavat'] != '2' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1'));
   $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
   $_saako = ($_saako_nahda and $_saako_nayttaa);
 
@@ -8534,6 +8534,46 @@ if ($tee == '') {
                   ";
 
           }
+          elseif($yhtiorow['tilausrivin_korvamerkinta'] == 'A') {
+
+            echo "<br>
+                  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='korvamerkitse'>
+                  <input type='hidden' name='toim'       value = '$toim'>
+                  <input type='hidden' name='lopetus'     value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'   value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
+                  <input type='hidden' name='mista'       value = '$mista'>
+                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
+                  <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
+                  <input type='hidden' name='rivilaadittu'   value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='tila'       value = 'KORVAMERKITSE'>
+                  <input type='hidden' name='orig_tila'     value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                  <span class='korvaspan' id='korvaspan_{$row['tunnus']}' style='display:none'>";
+
+            $kresult = t_avainsana("KORVAMERKKI");
+            echo "<select name='korvamerkinta' onchange='submit();'>";
+            echo "<option value = ''>".t('Ei korvamerkint‰‰')."</option>";
+
+            while ($krow = mysql_fetch_assoc($kresult)) {
+              $sel = $row['korvamerkinta'] == $krow['selite'] ? 'SELECTED' : '';
+              echo "<option value='$krow[selite]' $sel>$krow[selitetark]</option>";
+            }
+            echo "</select>";
+            echo "</span>
+                  </form>
+                  <input type='Submit' class='korvabutton' style='margin:5px 0' id='korvabutton_{$row['tunnus']}' value='".t("Korvamerkitse")."'>
+                  <script type='text/javascript' language='javascript'>
+                  $('#korvabutton_{$row['tunnus']}').click(function() {
+                    $('.korvabutton').show();
+                    $(this).hide();
+                    $('.korvaspan').hide();
+                    $('#korvaspan_{$row['tunnus']}').show();
+                  });
+                  </script>";
+          }
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
             $napinnimi = t("J‰lkitoim, heti");
@@ -10431,6 +10471,9 @@ if ($tee == '') {
         $_takuu_tilaustyyppi = "";
         if ($toim == 'REKLAMAATIO' and $laskurow['tilaustyyppi'] == 'U') {
           $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>";
+        }
+        elseif ($laskurow['tilaustyyppi'] == 'W') {
+         $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = 'W'>";
         }
 
         echo "<form name='kaikkyht' id='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>

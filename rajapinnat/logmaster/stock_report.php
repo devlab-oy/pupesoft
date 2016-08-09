@@ -61,7 +61,7 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('stock_report', "Käsitellään sanoma {$file}");
+  pupesoft_log('logmaster_stock_report', "Käsitellään sanoma {$file}");
 
   // tuki vain yhdelle Posten-varastolle
   $query = "SELECT *
@@ -137,15 +137,23 @@ while (false !== ($file = readdir($handle))) {
       'body' => $body,
     );
 
-    pupesoft_sahkoposti($params);
+    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja, lähetetään sähköposti {$error_email}");
 
-    pupesoft_log('stock_report', "Saldovertailussa eroja, lähetetään sähköposti {$error_email}");
+    if (pupesoft_sahkoposti($params)) {
+      pupesoft_log('logmaster_stock_report', "Sähköpostin lähetys onnistui osoitteeseen {$error_email}");
+    }
+    else {
+      pupesoft_log('logmaster_stock_report', "Sähköpostin lähetys epäonnistui osoitteeseen {$error_email}");
+    }
+  }
+  else {
+    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa ei ollut eroja.");
   }
 
   // siirretään tiedosto done-kansioon
   rename($full_filepath, $path.'done/'.$file);
 
-  pupesoft_log('stock_report', "Saldovertailu käsitelty");
+  pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailu käsitelty");
 }
 
 closedir($handle);

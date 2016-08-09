@@ -64,12 +64,12 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('outbound_delivery_confirmation', "K‰sitell‰‰n sanoma {$file}");
+  pupesoft_log('logmaster_outbound_delivery_confirmation', "K‰sitell‰‰n sanoma {$file}");
 
   $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
   if ($otunnus == 0) {
-    pupesoft_log('outbound_delivery_confirmation', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
 
     continue;
   }
@@ -100,7 +100,7 @@ while (false !== ($file = readdir($handle))) {
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
-  $kerayspoikkeama = $tilausrivit = array();
+  $kerayspoikkeama = $tilausrivit = $tilausrivit_error = array();
 
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
@@ -127,6 +127,8 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausrivi‰.");
+
     $paivitettiin_tilausrivi_onnistuneesti = false;
 
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
@@ -149,8 +151,9 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
-        pupesoft_log('outbound_delivery_confirmation', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
 
+        $tilausrivit_error[$tilausrivin_tunnus] = $data;
         continue;
       }
 
@@ -261,10 +264,14 @@ while (false !== ($file = readdir($handle))) {
 
       paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-      pupesoft_log('outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
     }
 
-    pupesoft_log('outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
+    if (count($tilausrivit_error) > 0) {
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} oli ".count($tilausrivit_error)." virheellist‰ tilausrivi‰.");
+    }
+
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
 
     $avainsanaresult = t_avainsana("ULKJARJLAHETE");
     $avainsanarow = mysql_fetch_assoc($avainsanaresult);
@@ -286,7 +293,7 @@ while (false !== ($file = readdir($handle))) {
 
       pupesoft_tulosta_lahete($params);
 
-      pupesoft_log('outbound_delivery_confirmation', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
     }
   }
   else {
@@ -304,7 +311,7 @@ while (false !== ($file = readdir($handle))) {
 
     $body = t("Pupessa jo ker‰tyksi merkitty tilaus %d yritettiin merkit‰ ker‰tyksi ker‰yssanomalla", "", $otunnus);
 
-    pupesoft_log('outbound_delivery_confirmation', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
 
     $params = array(
       "to"      => $error_email,
@@ -334,7 +341,7 @@ while (false !== ($file = readdir($handle))) {
 
     pupesoft_sahkoposti($params);
 
-    pupesoft_log('outbound_delivery_confirmation', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
   }
 
   // siirret‰‰n tiedosto done-kansioon

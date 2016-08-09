@@ -4,6 +4,7 @@
 $useslave = 1;
 
 require "inc/parametrit.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
 

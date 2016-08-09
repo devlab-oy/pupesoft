@@ -74,8 +74,7 @@ if (!isset($mobiili_keikka))   $mobiili_keikka = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
-$onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
+$onkologmaster = in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S'));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 

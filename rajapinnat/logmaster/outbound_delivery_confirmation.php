@@ -25,6 +25,7 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();
@@ -63,12 +64,12 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('outbound_delivery', "K‰sitell‰‰n sanoma {$file}");
+  pupesoft_log('outbound_delivery_confirmation', "K‰sitell‰‰n sanoma {$file}");
 
   $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
   if ($otunnus == 0) {
-    pupesoft_log('outbound_delivery', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
+    pupesoft_log('outbound_delivery_confirmation', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
 
     continue;
   }
@@ -148,7 +149,7 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
-        pupesoft_log('outbound_delivery', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
+        pupesoft_log('outbound_delivery_confirmation', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
 
         continue;
       }
@@ -260,10 +261,10 @@ while (false !== ($file = readdir($handle))) {
 
       paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-      pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
+      pupesoft_log('outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
     }
 
-    pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
+    pupesoft_log('outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
 
     $avainsanaresult = t_avainsana("ULKJARJLAHETE");
     $avainsanarow = mysql_fetch_assoc($avainsanaresult);
@@ -285,7 +286,7 @@ while (false !== ($file = readdir($handle))) {
 
       pupesoft_tulosta_lahete($params);
 
-      pupesoft_log('outbound_delivery', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+      pupesoft_log('outbound_delivery_confirmation', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
     }
   }
   else {
@@ -303,7 +304,7 @@ while (false !== ($file = readdir($handle))) {
 
     $body = t("Pupessa jo ker‰tyksi merkitty tilaus %d yritettiin merkit‰ ker‰tyksi ker‰yssanomalla", "", $otunnus);
 
-    pupesoft_log('outbound_delivery', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
+    pupesoft_log('outbound_delivery_confirmation', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
 
     $params = array(
       "to"      => $error_email,
@@ -333,7 +334,7 @@ while (false !== ($file = readdir($handle))) {
 
     pupesoft_sahkoposti($params);
 
-    pupesoft_log('outbound_delivery', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
+    pupesoft_log('outbound_delivery_confirmation', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
   }
 
   // siirret‰‰n tiedosto done-kansioon

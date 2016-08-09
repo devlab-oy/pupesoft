@@ -203,7 +203,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     mysql_data_seek($loopres, 0);
 
     $_line_i = 1;
-    $posten_itemnumberfield = logmaster_field('ItemNumber');
+    $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
       // Laitetaan kappalemäärät kuntoon
@@ -212,7 +212,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$posten_itemnumberfield], 22));
+      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
       $line->addChild('CustItemNumber',    0);
       $line->addChild('ItemName',          0);
       $line->addChild('ItemText',          0);

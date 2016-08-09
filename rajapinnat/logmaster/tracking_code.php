@@ -118,7 +118,7 @@ while (false !== ($file = readdir($handle))) {
     );
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
-    pupesoft_log('tracking_code', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+    pupesoft_log('tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {

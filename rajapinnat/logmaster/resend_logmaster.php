@@ -23,7 +23,7 @@ if ($tee == "laheta" and $tilaukset != "") {
   if (mysql_num_rows($result) > 0 and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
     while ($laskurow = mysql_fetch_assoc($res)) {
       echo t("Uudelleenl‰hetet‰‰n LogMaster-ker‰yssanoma").": $laskurow[tunnus]<br>";
-      posten_outbounddelivery($laskurow["tunnus"], $laskurow['ulkoinen_jarjestelma']);
+      logmaster_outbounddelivery($laskurow["tunnus"], $laskurow['ulkoinen_jarjestelma']);
     }
   }
   else {

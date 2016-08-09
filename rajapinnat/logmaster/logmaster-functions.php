@@ -1,7 +1,7 @@
 <?php
 
-if (!function_exists('posten_field')) {
-  function posten_field($column_name) {
+if (!function_exists('logmaster_field')) {
+  function logmaster_field($column_name) {
 
     switch ($column_name) {
     case 'ItemNumber':
@@ -57,8 +57,8 @@ if (!function_exists('check_file_extension')) {
   }
 }
 
-if (!function_exists('posten_message_type')) {
-  function posten_message_type($file_name) {
+if (!function_exists('logmaster_message_type')) {
+  function logmaster_message_type($file_name) {
     $extension = check_file_extension($file_name, 'XML');
 
     if ($extension === false) {
@@ -79,8 +79,8 @@ if (!function_exists('posten_message_type')) {
   }
 }
 
-if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
+if (!function_exists('logmaster_outbounddelivery')) {
+  function logmaster_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $logmaster;
 
@@ -203,7 +203,7 @@ if (!function_exists('posten_outbounddelivery')) {
     mysql_data_seek($loopres, 0);
 
     $_line_i = 1;
-    $posten_itemnumberfield = posten_field('ItemNumber');
+    $posten_itemnumberfield = logmaster_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
       // Laitetaan kappalemäärät kuntoon

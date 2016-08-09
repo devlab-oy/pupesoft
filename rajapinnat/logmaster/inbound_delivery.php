@@ -24,7 +24,7 @@ else {
   }
 
   // lis‰t‰‰n includepathiin pupe-root
-  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
   error_reporting(E_ALL);
 
   // otetaan tietokanta connect ja funktiot

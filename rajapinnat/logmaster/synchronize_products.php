@@ -120,17 +120,17 @@ else {
           $type = 'U';
         }
 
-        $posten_itemnumberfield = logmaster_field('ItemNumber');
-        $posten_prodgroup1field = logmaster_field('ProdGroup1');
-        $posten_prodgroup2field = logmaster_field('ProdGroup2');
+        $logmaster_itemnumberfield = logmaster_field('ItemNumber');
+        $logmaster_prodgroup1field = logmaster_field('ProdGroup1');
+        $logmaster_prodgroup2field = logmaster_field('ProdGroup2');
 
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);
         $line->addChild('Type',                  $type);
-        $line->addChild('ItemNumber',            xml_cleanstring($row[$posten_itemnumberfield], 20));
+        $line->addChild('ItemNumber',            xml_cleanstring($row[$logmaster_itemnumberfield], 20));
         $line->addChild('ItemName',              xml_cleanstring($row['nimitys'], 50));
-        $line->addChild('ProdGroup1',            xml_cleanstring($row[$posten_prodgroup1field], 6));
-        $line->addChild('ProdGroup2',            xml_cleanstring($row[$posten_prodgroup2field], 6));
+        $line->addChild('ProdGroup1',            xml_cleanstring($row[$logmaster_prodgroup1field], 6));
+        $line->addChild('ProdGroup2',            xml_cleanstring($row[$logmaster_prodgroup2field], 6));
         $line->addChild('SalesPrice',            '');
         $line->addChild('Unit1',                 xml_cleanstring($row['yksikko'], 10));
         $line->addChild('Unit2',                 '');

@@ -134,8 +134,8 @@ while (false !== ($file = readdir($handle))) {
       $item_number = $data['item_number'];
       $keratty     = $data['keratty'];
 
-      $posten_itemnumberfield = logmaster_field('ItemNumber');
-      $tuotelisa = "AND tuote.{$posten_itemnumberfield} = '{$item_number}'";
+      $logmaster_itemnumberfield = logmaster_field('ItemNumber');
+      $tuotelisa = "AND tuote.{$logmaster_itemnumberfield} = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi

@@ -270,15 +270,7 @@ unset($magento_api_ht_usr);
 unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
-unset($ftp_logmaster_host);
-unset($ftp_logmaster_user);
-unset($ftp_logmaster_pass);
-unset($ftp_logmaster_path);
-
-unset($ftp_posten_logistik_host);
-unset($ftp_posten_logistik_user);
-unset($ftp_posten_logistik_pass);
-unset($ftp_posten_logistik_path);
+unset($logmaster);
 
 unset($pupesoft_commandlinelog);
 

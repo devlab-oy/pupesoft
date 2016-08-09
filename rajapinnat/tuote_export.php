@@ -282,6 +282,14 @@ if (empty($verkkokauppa_asiakasnro)) {
   $verkkokauppa_asiakasnro = null;
 }
 
+// Jos halutaan siirtää vaihtoehtoisen varaston saldo tavalliseen tuotekenttään
+//  Array jonka key on haluttu tuotekenttä ja value array sisältäen varastotunnukset
+if (empty($magento_saldot_tuotekenttaan)) {
+  $magento_saldot_tuotekenttaan = array(
+    //'special_varasto' => array(117,118)
+  );
+}
+
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
 if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
   $lockfile = 'tuote_export-tilaukset-flock.lock';
@@ -373,6 +381,28 @@ if (in_array('saldot', $magento_ajolista)) {
   // Saldot
   tuote_export_echo("Päivitetään tuotteiden saldot");
   $magento_client->paivita_saldot($dnstock);
+}
+
+if (in_array('lisasaldot', $magento_ajolista) and count($magento_saldot_tuotekenttaan) > 0) {
+  tuote_export_echo("Haetaan lisäsaldot.");
+
+  $mihin_tuotekenttaan = key($magento_saldot_tuotekenttaan);
+  $lisavarastot = current($magento_saldot_tuotekenttaan);
+
+  $params = array(
+    "ajetaanko_kaikki"           => $ajetaanko_kaikki,
+    "verkkokauppa_saldo_varasto" => $lisavarastot,
+  );
+
+  $dnstock = tuote_export_hae_saldot($params);
+
+  // Erikoissaldot
+  tuote_export_echo("Päivitetään tuotteiden saldot");
+  $erikoissaldo_params = array(
+    "saldot"           => $dnstock,
+    "lisasaldo_kentta" => $mihin_tuotekenttaan,
+  );
+  $magento_client->paivita_erikoissaldot($erikoissaldo_params);
 }
 
 if (in_array('tuoteryhmat', $magento_ajolista)) {

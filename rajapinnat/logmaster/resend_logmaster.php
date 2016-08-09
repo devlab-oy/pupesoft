@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require "inc/parametrit.inc";
+require "../../inc/parametrit.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
 
 echo "<font class='head'>".t("Uudelleenl‰het‰ LogMaster-ker‰yssanoma")."</font><hr>";

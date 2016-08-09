@@ -57,7 +57,7 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
+  pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
   $node = $xml->VendPackingSlip;
 
@@ -76,7 +76,7 @@ while (false !== ($file = readdir($handle))) {
   $saapumistunnus = (int) $selectrow['tunnus'];
 
   if ($saapumistunnus == 0) {
-    pupesoft_log('inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
 
     continue;
   }
@@ -92,12 +92,12 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
-    pupesoft_log('inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
 
     continue;
   }
 
-  $tilausrivit = array();
+  $tilausrivit = $tilausrivit_error = array();
 
   # Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä aineistossa mukana
   # Joten laitetaan varastoon = 0
@@ -142,10 +142,17 @@ while (false !== ($file = readdir($handle))) {
               AND tuoteno     = '{$tuoteno}'
               AND tunnus      = '{$rivitunnus}'";
     $updres = pupe_query($query);
+
+    if (mysql_affected_rows() != 1) {
+      $tilausrivit_error[$rivitunnus] = $data;
+
+      pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} sanoman riviä {$rivitunnus} (tuoteno {$tuoteno}) ei päivitetty.");
+    }
   }
 
   if (count($tilausrivit) > 0) {
-    pupesoft_log('inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsiteltäviä rivejä yhteensä ".(count($tilausrivit) - count($tilausrivit_error))." / ".count($tilausrivit));
 
     $query = "SELECT *
               FROM lasku
@@ -187,18 +194,18 @@ while (false !== ($file = readdir($handle))) {
       );
 
       if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
       }
       else {
-        pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
       }
     }
   }
   else {
-    pupesoft_log('inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");
   }
 
-  pupesoft_log('inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
+  pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
 
   rename($full_filepath, $path."done/".$file);
 }

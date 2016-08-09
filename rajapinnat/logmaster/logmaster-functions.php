@@ -110,6 +110,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $loopres = pupe_query($query);
 
     if (mysql_num_rows($loopres) == 0) {
+      pupesoft_log('logmaster_outbound_delivery', "Yht‰‰n rivi‰ ei lˆytynyt tilaukselle {$otunnus}. Sanoman luonti ep‰onnistui.");
+
       return;
     }
 
@@ -232,6 +234,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $_line_i++;
     }
 
+    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanomalle lis‰tty ".($_line_i - 1)." rivi‰.");
+
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
@@ -250,11 +254,14 @@ if (!function_exists('logmaster_outbounddelivery')) {
       require "inc/ftp-send.inc";
 
       if ($palautus == 0) {
-        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+        pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
       }
       else {
-        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+        pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
       }
+    }
+    else {
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
     }
   }
 }

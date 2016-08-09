@@ -56,7 +56,7 @@ if ($handle === false) {
 
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = posten_message_type($full_filepath);
+  $message_type = logmaster_message_type($full_filepath);
 
   if ($message_type != 'OutboundDeliveryConfirmation') {
     continue;
@@ -134,7 +134,7 @@ while (false !== ($file = readdir($handle))) {
       $item_number = $data['item_number'];
       $keratty     = $data['keratty'];
 
-      $posten_itemnumberfield = posten_field('ItemNumber');
+      $posten_itemnumberfield = logmaster_field('ItemNumber');
       $tuotelisa = "AND tuote.{$posten_itemnumberfield} = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*

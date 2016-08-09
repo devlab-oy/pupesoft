@@ -49,7 +49,7 @@ if ($handle === false) {
 
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = posten_message_type($full_filepath);
+  $message_type = logmaster_message_type($full_filepath);
 
   if ($message_type != 'InboundDeliveryConfirmation') {
     continue;

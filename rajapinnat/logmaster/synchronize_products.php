@@ -120,9 +120,9 @@ else {
           $type = 'U';
         }
 
-        $posten_itemnumberfield = posten_field('ItemNumber');
-        $posten_prodgroup1field = posten_field('ProdGroup1');
-        $posten_prodgroup2field = posten_field('ProdGroup2');
+        $posten_itemnumberfield = logmaster_field('ItemNumber');
+        $posten_prodgroup1field = logmaster_field('ProdGroup1');
+        $posten_prodgroup2field = logmaster_field('ProdGroup2');
 
         $line = $items->addChild('Line');
         $line->addAttribute('No', $i);

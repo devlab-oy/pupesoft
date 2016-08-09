@@ -5,8 +5,8 @@ if (php_sapi_name() != 'cli') {
 
   $_cli = false;
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "saapuminen_ulkoiseen_jarjestelmaan.php") !== false) {
-    require "inc/parametrit.inc";
+  if (strpos($_SERVER['SCRIPT_NAME'], "inbound_delivery.php") !== false) {
+    require "../../inc/parametrit.inc";
   }
 }
 else {
@@ -24,7 +24,7 @@ else {
   }
 
   // lisätään includepathiin pupe-root
-  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
   error_reporting(E_ALL);
 
   // otetaan tietokanta connect ja funktiot
@@ -54,11 +54,8 @@ else {
   }
 }
 
-$ftp_chk = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user));
-$ftp_chk = ($ftp_chk and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-
-if (!$ftp_chk) {
-  die ("FTP-tiedot ovat puutteelliset!\n");
+if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S'))) {
+  die ("Saapumisen lähettäminen estetty yhtiötasolla!\n");
 }
 
 // Tarvitaan:
@@ -171,7 +168,7 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
 
-if ($xml_chk and $ftp_chk) {
+if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);
 
   $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
@@ -188,10 +185,11 @@ if ($xml_chk and $ftp_chk) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
     }
 
-    $ftphost = $ftp_logmaster_host;
-    $ftpuser = $ftp_logmaster_user;
-    $ftppass = $ftp_logmaster_pass;
-    $ftppath = $ftp_logmaster_path;
+    $ftphost = $logmaster['host'];
+    $ftpuser = $logmaster['user'];
+    $ftppass = $logmaster['pass'];
+    $ftppath = $logmaster['path'];
+
     $ftpfile = realpath($filename);
 
     require "inc/ftp-send.inc";

@@ -16,11 +16,12 @@ if (trim($argv[2]) == '') {
 }
 
 // lisätään includepathiin pupe-root
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();
@@ -73,7 +74,7 @@ while (false !== ($file = readdir($handle))) {
     }
 
     if (trim($seurantakoodi) == '') {
-      pupesoft_log('outbound_delivery', "Seurantakoodi puuttuu riviltä");
+      pupesoft_log('tracking_code', "Seurantakoodi puuttuu riviltä");
 
       continue;
     }
@@ -85,7 +86,7 @@ while (false !== ($file = readdir($handle))) {
     $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
     if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
-      pupesoft_log('outbound_delivery', "Tilausnumero puuttuu riviltä");
+      pupesoft_log('tracking_code', "Tilausnumero puuttuu riviltä");
 
       continue;
     }
@@ -98,7 +99,7 @@ while (false !== ($file = readdir($handle))) {
     pupe_query($query);
 
     if (mysql_affected_rows() == 0) {
-      pupesoft_log('outbound_delivery', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
+      pupesoft_log('tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
 
       $rahtikirja_hukassa = true;
       break;
@@ -117,11 +118,11 @@ while (false !== ($file = readdir($handle))) {
     );
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
-    pupesoft_log('outbound_delivery', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+    pupesoft_log('tracking_code', "Tilaus {$otunnus} toimituskuittaus käsitelty");
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
-      pupesoft_log('outbound_delivery', "Päivitetään toimitetuksi Magentoon");
+      pupesoft_log('tracking_code', "Päivitetään toimitetuksi Magentoon");
 
       $query = "SELECT toimitustapa
                 FROM rahtikirjat

@@ -20,11 +20,12 @@ if (trim($argv[3]) == '') {
 }
 
 // lis‰t‰‰n includepathiin pupe-root
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();

@@ -1,5 +1,7 @@
 <?php
 
+require_once "rajapinnat/logmaster/logmaster-functions.php";
+
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos     = "";
 $ohjausmerkkilisa       = "";

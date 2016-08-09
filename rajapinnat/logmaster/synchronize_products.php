@@ -1,6 +1,7 @@
 <?php
 
-require "inc/parametrit.inc";
+require "../../inc/parametrit.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 if (!isset($tee)) $tee = '';
 
@@ -28,15 +29,6 @@ if (!isset($ulkoinen_jarjestelma) or empty($ulkoinen_jarjestelma)) {
   exit;
 }
 else {
-
-  if (((empty($ftp_posten_logistik_host) or empty($ftp_posten_logistik_user) or empty($ftp_posten_logistik_pass) or empty($ftp_posten_logistik_path)) and $ulkoinen_jarjestelma == 'P') or
-    ((empty($ftp_logmaster_host) or empty($ftp_logmaster_user) or empty($ftp_logmaster_pass) or empty($ftp_logmaster_path)) and $ulkoinen_jarjestelma == 'L')) {
-
-    echo "<br /><font class='error'>", t("Tarvittavat FTP-tunnukset ovat puutteelliset"), "!</font><br>";
-
-    require "inc/footer.inc";
-    exit;
-  }
 
   if ($ulkoinen_jarjestelma == "P") {
     $wherelisa = "AND tuote.eankoodi  != ''";
@@ -223,28 +215,11 @@ else {
       if (file_put_contents($filename, $xml->asXML())) {
         echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
-        switch ($ulkoinen_jarjestelma) {
-        case 'L':
-          $ftphost = $ftp_logmaster_host;
-          $ftpuser = $ftp_logmaster_user;
-          $ftppass = $ftp_logmaster_pass;
-          $ftppath = $ftp_logmaster_path;
-          $ftpfile = realpath($filename);
-          break;
-        case 'P':
-          $ftphost = $ftp_posten_logistik_host;
-          $ftpuser = $ftp_posten_logistik_user;
-          $ftppass = $ftp_posten_logistik_pass;
-          $ftppath = $ftp_posten_logistik_path;
-          $ftpfile = realpath($filename);
-          break;
-        default:
-          echo "<br /><font class='error'>", t("Tarvittavat FTP-tunnukset ovat puutteelliset"), "!</font><br>";
-
-          require "inc/footer.inc";
-          exit;
-          break;
-        }
+        $ftphost = $logmaster['host'];
+        $ftpuser = $logmaster['user'];
+        $ftppass = $logmaster['pass'];
+        $ftppath = $logmaster['path'];
+        $ftpfile = realpath($filename);
 
         // L‰hetet‰‰n aina UTF-8 muodossa
         $ftputf8 = true;

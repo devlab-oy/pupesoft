@@ -323,7 +323,7 @@ while (false !== ($file = readdir($handle))) {
     pupesoft_sahkoposti($params);
   }
 
-  if (count($kerayspoikkeama) != 0) {
+  if (count($kerayspoikkeama) != 0 and !empty($error_email)) {
     $body = t("Tilauksen %d ker‰yksess‰ on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
     $body .= t("Tuoteno")." ".t("Ker‰tty")." ".t("Tilauksella")."<br>\n";
 
@@ -334,7 +334,7 @@ while (false !== ($file = readdir($handle))) {
     $params = array(
       'to'      => $error_email,
       'cc'      => '',
-      'subject' => t("PostNord ker‰yspoikkeama")." - {$otunnus}",
+      'subject' => t("Logmaster ker‰yspoikkeama")." - {$otunnus}",
       'ctype'   => 'html',
       'body'    => $body,
     );
@@ -342,6 +342,27 @@ while (false !== ($file = readdir($handle))) {
     pupesoft_sahkoposti($params);
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
+  }
+
+  if (count($tilausrivit_error) > 0 and !empty($error_email)) {
+    $body = t("Tilauksen %d aineistossa %s on havaittu virheellisi‰ rivej‰", "", $otunnus, $file).":<br><br>\n\n";
+    $body .= t("Rivitunnus")." ".t("Tuoteno")." ".t("Ker‰tty")."<br>\n";
+
+    foreach ($tilausrivit_error as $rivitunnus => $_arr) {
+      $body .= "{$rivitunnus} {$_arr['tuoteno']} {$_arr['keratty']}<br>\n";
+    }
+
+    $params = array(
+      'to'      => $error_email,
+      'cc'      => '',
+      'subject' => t("Logmaster ker‰yksen kuittauksessa virheellisi‰ rivej‰")." - ".t("Tilaus")." {$otunnus}",
+      'ctype'   => 'html',
+      'body'    => $body,
+    );
+
+    pupesoft_sahkoposti($params);
+
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yksen kuittauksen sanomassa {$file} virheellisi‰ rivej‰ tilauksessa {$otunnus}");
   }
 
   // siirret‰‰n tiedosto done-kansioon

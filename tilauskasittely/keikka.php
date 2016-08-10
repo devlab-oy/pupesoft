@@ -355,7 +355,7 @@ if ($toiminto == "tulosta_hintalaput") {
 if ($onkologmaster and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
   $saapumisnro = $otunnus;
 
-  require "saapuminen_ulkoiseen_jarjestelmaan.php";
+  require "rajapinnat/logmaster/inbound_delivery.php";
 
   $toiminto = "kohdista";
 }

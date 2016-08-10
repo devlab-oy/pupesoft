@@ -175,8 +175,8 @@ if ($xml_chk) {
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
-    // L‰hetet‰‰n aina UTF-8 muodossa
-    $ftputf8 = true;
+
+    logmaster_send_file($filename);
 
     pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} luonti onnistui.");
 
@@ -187,14 +187,6 @@ if ($xml_chk) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
     }
 
-    $ftphost = $logmaster['host'];
-    $ftpuser = $logmaster['user'];
-    $ftppass = $logmaster['pass'];
-    $ftppath = $logmaster['path'];
-
-    $ftpfile = realpath($filename);
-
-    require "inc/ftp-send.inc";
 
     $query = "UPDATE lasku SET
               sisviesti3  = 'ei_vie_varastoon'

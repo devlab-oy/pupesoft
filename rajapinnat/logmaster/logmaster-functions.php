@@ -1,5 +1,55 @@
 <?php
 
+if (!function_exists('logmaster_send_email')) {
+  function logmaster_send_email($params) {
+    $body        = "";
+    $email       = $params['email'];
+    $email_array = $params['email_array'];
+    $log_name    = $params['log_name'];
+    $subject     = "";
+
+    if (empty($email) or !is_array($email_array) or count($email_array) == 0) {
+      return;
+    }
+
+    switch ($log_name) {
+    case 'logmaster_outbound_delivery_confirmation':
+      $subject = t("Logmaster: Keräyksen kuittaus");
+      break;
+
+    case 'logmaster_inbound_delivery_confirmation':
+      $subject = t("Logmaster: Saapumisen kuittaus");
+      break;
+
+    case 'logmaster_stock_report':
+      $subject = t("Logmaster saldovertailu");
+      break;
+
+    default:
+      return;
+    }
+
+    foreach ($email_array as $msg) {
+      $body .= $msg."<br>\n";
+    }
+
+    $args = array(
+      'body' => $body,
+      'cc' => '',
+      'ctype' => 'html',
+      'subject' => $subject,
+      'to' => $email,
+    );
+
+    if (pupesoft_sahkoposti($args)) {
+      pupesoft_log($log_name, "Sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
+    }
+    else {
+      pupesoft_log($log_name, "Sähköpostin lähetys epäonnistui osoitteeseen {$email}");
+    }
+  }
+}
+
 if (!function_exists('logmaster_send_file')) {
   function logmaster_send_file($filename) {
     global $kukarow, $yhtiorow, $logmaster;

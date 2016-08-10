@@ -40,6 +40,8 @@ if (empty($kukarow)) {
 $path = trim($argv[2]);
 $email = isset($argv[3]) ? trim($argv[3]) : "";
 
+$email_array = array();
+
 $path = rtrim($path, '/').'/';
 $handle = opendir($path);
 
@@ -78,27 +80,7 @@ while (false !== ($file = readdir($handle))) {
   if ($saapumistunnus == 0) {
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
 
-    if (!empty($email)) {
-
-      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
-      $body .= t("Saapuminen %s", "", $saapumisnro)."<br>\n";
-      $body .= t("Sanoma siirretty virhekansioon")."<br><br>\n\n";
-
-      $params = array(
-        'to' => $email,
-        'cc' => '',
-        'subject' => t("Logmaster: kuittausta odottavaa saapumista ei löydy saapumisnumerolla %d sanomassa %s", "", $saapumisnro, $file),
-        'ctype' => 'html',
-        'body' => $body,
-      );
-
-      if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}, sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
-      }
-      else {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}, sähköpostin lähetys epäonnistui osoitteeseen {$email}");
-      }
-    }
+    $email_array[] = t("Kuittausta odottavaa saapumista ei löydy saapumisnumerolla %d", "", $saapumisnro);
 
     rename($full_filepath, $path."error/".$file);
 
@@ -118,27 +100,7 @@ while (false !== ($file = readdir($handle))) {
   if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
 
-    if (!empty($email)) {
-
-      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
-      $body .= t("Saapuminen %s", "", $saapumisnro)."<br>\n";
-      $body .= t("Sanoma siirretty virhekansioon")."<br><br>\n\n";
-
-      $params = array(
-        'to' => $email,
-        'cc' => '',
-        'subject' => t("Logmaster: saapumisen %d kuittaussanomassa %s ei ollut rivejä", "", $saapumisnro, $file),
-        'ctype' => 'html',
-        'body' => $body,
-      );
-
-      if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} kuittaussanomassa {$file} ei ollut rivejä, sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
-      }
-      else {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} kuittaussanomassa {$file} ei ollut rivejä, sähköpostin lähetys epäonnistui osoitteeseen {$email}");
-      }
-    }
+    $email_array[] = t("Saapumisen %d kuittaussanomassa ei löytynyt rivejä", "", $saapumisnro);
 
     rename($full_filepath, $path."error/".$file);
 
@@ -167,8 +129,8 @@ while (false !== ($file = readdir($handle))) {
 
     if (!isset($tilausrivit[$rivitunnus])) {
       $tilausrivit[$rivitunnus] = array(
+        'kpl'     => $kpl,
         'tuoteno' => $tuoteno,
-        'kpl'     => $kpl
       );
     }
     else {
@@ -224,61 +186,21 @@ while (false !== ($file = readdir($handle))) {
               AND tunnus  = '{$saapumistunnus}'";
     $updres = pupe_query($query);
 
-    if (!empty($email)) {
-      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br><br>\n\n";
-      $body .= t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":<br><br>\n\n";
-      $body .= t("Tuoteno")." ".t("Kappaleita")."<br>\n";
+    $email_array[] = t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":";
+    $email_array[] = t("Tuoteno")." ".t("Kappaleita");
 
-      foreach ($tilausrivit as $rivitunnus => $data) {
-        $body .= "{$data['tuoteno']} {$data['kpl']}";
+    foreach ($tilausrivit as $rivitunnus => $tuote) {
+      $email_array[] = "{$tuote['tuoteno']} {$tuote['kpl']}";
+    }
 
-        if (isset($tilausrivit_error[$rivitunnus])) {
-          $body .= " (".t("Ei viety varastoon").")";
-        }
+    if (count($tilausrivit_error) > 0) {
 
-        $body .= "<br>\n";
-      }
+      $email_array[] = t("Saapuminen %s", "", $saapumisnro);
+      $email_array[] = t("Sanomassa seuraavia virheellisiä tuotteita");
+      $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita");
 
-      $params = array(
-        'to' => $email,
-        'cc' => '',
-        'subject' => t("Logmaster: saapumisen kuittaus")." - {$saapumisnro}",
-        'ctype' => 'html',
-        'body' => $body,
-      );
-
-      if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
-      }
-      else {
-        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
-      }
-
-      if (count($tilausrivit_error) > 0) {
-
-        $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
-        $body .= t("Saapuminen %s", "", $saapumisnro)."<br><br>\n\n";
-        $body .= t("Sanomassa seuraavia virheellisiä tuotteita").":<br><br>\n\n";
-        $body .= t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita")."<br>\n";
-
-        foreach ($tilausrivit_error as $rivitunnus => $data) {
-          $body .= "{$rivitunnus} {$data['tuoteno']} {$data['kpl']}<br>\n";
-        }
-
-        $params = array(
-          'to' => $email,
-          'cc' => '',
-          'subject' => t("Logmaster: saapumisen kuittauksen yhteydessä havaitut virherivit")." - ".t("saapuminen")." {$saapumisnro}",
-          'ctype' => 'html',
-          'body' => $body,
-        );
-
-        if (pupesoft_sahkoposti($params)) {
-          pupesoft_log('logmaster_inbound_delivery_confirmation', "Virherivit saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
-        }
-        else {
-          pupesoft_log('logmaster_inbound_delivery_confirmation', "Virherivit saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
-        }
+      foreach ($tilausrivit_error as $rivitunnus => $tuote) {
+        $email_array[] = "{$rivitunnus} {$tuote['tuoteno']} {$tuote['kpl']}";
       }
     }
   }
@@ -287,6 +209,14 @@ while (false !== ($file = readdir($handle))) {
   }
 
   pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
+
+  $params = array(
+    'email' => $email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_inbound_delivery_confirmation',
+  );
+
+  logmaster_send_email($params);
 
   rename($full_filepath, $path."done/".$file);
 }

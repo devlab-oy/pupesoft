@@ -24444,6 +24444,23 @@ if (!function_exists('search_array_key_recursive')) {
   }
 }
 
+if (!function_exists('search_array_min_with_key')) {
+  // Etsii ja palauttaa kaksiulotteisesta arraystä elementin, jossa on pienin arvo annetussa "key" avaimessa
+  function search_array_min_with_key($array, $key) {
+    $min_array = array_shift($array);
+    $min_value = $min_array[$key];
+
+    foreach($array as $a) {
+      if ($a[$key] < $min_value) {
+        $min_value = $a[$key];
+        $min_array = $a;
+      }
+    }
+
+    return $min_array;
+  }
+}
+
 /**
  * Tarkistaa onko tilauksen tila muuttunut
  *

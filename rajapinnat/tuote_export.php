@@ -127,6 +127,12 @@ if (empty($magento_simple_tuote_nimityskentta)) {
   $magento_simple_tuote_nimityskentta = 'nimitys';
 }
 
+// Miltä lapsituotteelta otetaan configurable (isä) tuotteen tiedot
+// Vaihtoehdot: first tai cheapest
+if (empty($magento_configurable_tuotetiedot)) {
+  $magento_configurable_tuotetiedot = "first";
+}
+
 // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
 if (empty($magento_configurable_tuote_nimityskentta)) {
   $magento_configurable_tuote_nimityskentta = "nimitys";
@@ -302,6 +308,7 @@ $magento_client = new MagentoClient(
   $magento_debug
 );
 
+$magento_client->set_configurable_tuotetiedot($magento_configurable_tuotetiedot);
 $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
 $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
 $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);

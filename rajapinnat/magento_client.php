@@ -64,6 +64,10 @@ class MagentoClient {
   private $_configurable_tuote_nimityskentta = "nimitys";
   private $magento_simple_tuote_nimityskentta = "nimitys";
 
+  // first = otetaan isätuotteen tiedot ensimmäiseltä lapselta
+  // cheapest = otetaan isätuotteen tiedot halvimmalta lapselta
+  private $configurable_tuotetiedot = "first";
+
   // Miten configurable-tuotteen lapsituotteet näytetään verkkokaupassa
   private $_configurable_lapsituote_nakyvyys = 'NOT_VISIBLE_INDIVIDUALLY';
 
@@ -580,8 +584,14 @@ class MagentoClient {
       # valitaan lapsituote, jonka tietoja käytetään isätuotteella. oletuksena ensimmäinen lapsituote.
       $lapsituotteen_tiedot = $tuotteet[0];
 
+      # halutaan isätuotteelle halvimman lapsen tiedot
+      if ($this->configurable_tuotetiedot == 'cheapest') {
+        $lapsituotteen_tiedot = search_array_min_with_key($tuotteet, $hintakentta);
+      }
+
       $count++;
       $this->log('magento_tuotteet', "[{$count}/{$total_count}] Käsitellään tuote {$nimitys} (configurable)");
+      $this->log('magento_tuotteet', "Isätuotteen tiedot tuotteelta {$lapsituotteen_tiedot['tuoteno']}");
       $this->log('magento_tuotteet', "Asetetaan hinnaksi {$hintakentta} {$lapsituotteen_tiedot[$hintakentta]}");
 
       $category_ids = array();
@@ -1305,6 +1315,10 @@ class MagentoClient {
 
   public function set_magento_erikoiskasittely($value) {
     $this->magento_erikoiskasittely = $value;
+  }
+
+  public function set_configurable_tuotetiedot($value) {
+    $this->configurable_tuotetiedot = $value;
   }
 
   // Hakee error_countin:n

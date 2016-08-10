@@ -215,16 +215,7 @@ else {
       if (file_put_contents($filename, $xml->asXML())) {
         echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
-        $ftphost = $logmaster['host'];
-        $ftpuser = $logmaster['user'];
-        $ftppass = $logmaster['pass'];
-        $ftppath = $logmaster['path'];
-        $ftpfile = realpath($filename);
-
-        // L‰hetet‰‰n aina UTF-8 muodossa
-        $ftputf8 = true;
-
-        require "inc/ftp-send.inc";
+        logmaster_send_file($filename);
       }
       else {
         echo "<br /><font class='error'>", t("Tiedoston luonti ep‰onnistui"), "</font><br />";

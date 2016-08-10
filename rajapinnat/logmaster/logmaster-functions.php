@@ -1,5 +1,25 @@
 <?php
 
+if (!function_exists('logmaster_send_file')) {
+  function logmaster_send_file($filename) {
+    global $kukarow, $yhtiorow, $logmaster;
+
+    // L‰hetet‰‰n aina UTF-8 muodossa
+    $ftputf8 = true;
+
+    $ftphost = $logmaster['host'];
+    $ftpuser = $logmaster['user'];
+    $ftppass = $logmaster['pass'];
+    $ftppath = $logmaster['path'];
+
+    $ftpfile = realpath($filename);
+
+    require "inc/ftp-send.inc";
+
+    return $palautus;
+  }
+}
+
 if (!function_exists('logmaster_field')) {
   function logmaster_field($column_name) {
 
@@ -240,18 +260,10 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-      // L‰hetet‰‰n aina UTF-8 muodossa
-      $ftputf8 = true;
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
-      $ftphost = $logmaster['host'];
-      $ftpuser = $logmaster['user'];
-      $ftppass = $logmaster['pass'];
-      $ftppath = $logmaster['path'];
-      $ftpfile = realpath($filename);
-
-      require "inc/ftp-send.inc";
+      $palautus = logmaster_send_file($filename);
 
       if ($palautus == 0) {
         pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");

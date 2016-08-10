@@ -503,10 +503,19 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
     $kirrow  = mysql_fetch_assoc($kirres);
     $komento = $kirrow['komento'];
 
-    exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
-    system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
-    unlink($filenimi);
-    unlink($filenimi.".ps");
+    $params = array(
+      'chars'    => 94,
+      'filename' => $filenimi,
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
+
+    system("ps2pdf -sPAPERSIZE=a4 $filenimi_ps {$filenimi}.pdf");
+
+    // Poistetaan .ps-file
+    unlink($filenimi_ps);
 
     if ($komento == "email" and $kukarow["eposti"] != '') {
       // l‰hetet‰‰n meili
@@ -2350,11 +2359,19 @@ elseif ($tee != '') {
     echo "<pre>", file_get_contents($filenimi), "</pre>";
     echo "</td></tr></table>";
 
-    exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
-    system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+    $params = array(
+      'chars'    => 94,
+      'filename' => $filenimi,
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
+
+    system("ps2pdf -sPAPERSIZE=a4 $filenimi_ps {$filenimi}.pdf");
 
     // Poistetaan .ps-file
-    unlink($filenimi.".ps");
+    unlink($filenimi_ps);
 
     if (empty($printteri)) {
       $pdfnimi = $palvelin2."dataout/".basename($filenimi.".pdf");

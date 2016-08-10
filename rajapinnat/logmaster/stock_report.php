@@ -43,6 +43,7 @@ if (empty($kukarow)) {
 
 $path = trim($argv[2]);
 $error_email = trim($argv[3]);
+$email_array = array();
 
 $path = rtrim($path, '/').'/';
 $handle = opendir($path);
@@ -63,7 +64,7 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('logmaster_stock_report', "K‰sitell‰‰n sanoma {$file}");
 
-  // tuki vain yhdelle Posten-varastolle
+  // tuki vain yhdelle Logmaster-varastolle
   $query = "SELECT *
             FROM varastopaikat
             WHERE yhtio              = '{$kukarow['yhtio']}'
@@ -115,40 +116,34 @@ while (false !== ($file = readdir($handle))) {
     $b = (int) $hyllyssa * 10000;
 
     if ($a != $b) {
-      $saldoeroja[$tuoterow['tuoteno']]['posten'] = $kpl;
+      $saldoeroja[$tuoterow['tuoteno']]['logmaster'] = $kpl;
       $saldoeroja[$tuoterow['tuoteno']]['pupe'] = $hyllyssa;
       $saldoeroja[$tuoterow['tuoteno']]['nimitys'] = $tuoterow['nimitys'];
     }
   }
 
   if (count($saldoeroja) > 0) {
-    $body  = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
-    $body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
+
+    $email_array[] = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":";
+    $email_array[] = t("Tuoteno").";".t("Nimitys").";".t("Logmaster").";".t("Pupesoft");
 
     foreach ($saldoeroja as $tuoteno => $_arr) {
-      $body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
+      $email_array[] = "{$tuoteno};{$_arr['nimitys']};{$_arr['logmaster']};{$_arr['pupe']}";
     }
 
-    $params = array(
-      'to' => $error_email,
-      'cc' => '',
-      'subject' => t("Posten saldovertailu")." - {$luontiaika}",
-      'ctype' => 'html',
-      'body' => $body,
-    );
-
-    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja, l‰hetet‰‰n s‰hkˆposti {$error_email}");
-
-    if (pupesoft_sahkoposti($params)) {
-      pupesoft_log('logmaster_stock_report', "S‰hkˆpostin l‰hetys onnistui osoitteeseen {$error_email}");
-    }
-    else {
-      pupesoft_log('logmaster_stock_report', "S‰hkˆpostin l‰hetys ep‰onnistui osoitteeseen {$error_email}");
-    }
+    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja.");
   }
   else {
     pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa ei ollut eroja.");
   }
+
+  $params = array(
+    'email' => $error_email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_stock_report',
+  );
+
+  logmaster_send_email($params);
 
   // siirret‰‰n tiedosto done-kansioon
   rename($full_filepath, $path.'done/'.$file);

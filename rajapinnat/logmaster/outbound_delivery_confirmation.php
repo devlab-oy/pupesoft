@@ -45,6 +45,7 @@ $path = trim($argv[2]);
 $path = rtrim($path, '/').'/';
 
 $error_email = trim($argv[3]);
+$email_array = array();
 
 $hhv = empty($argv[4]) ? false : true;
 
@@ -71,25 +72,7 @@ while (false !== ($file = readdir($handle))) {
   if ($otunnus == 0) {
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausnumeroa ei löytynyt sanomasta {$file}");
 
-    if (!empty($error_email)) {
-      $body = t("Tilausnumeroa ei löytynyt sanomasta %s", "", $file)."<br>\n";
-      $body .= t("Sanoma siirretty virhekansioon")."<br>\n";
-
-      $params = array(
-        'to'      => $error_email,
-        'cc'      => '',
-        'subject' => t("Logmaster: tilausnumeroa ei löytynyt sanomasta %s", "", $file),
-        'ctype'   => 'html',
-        'body'    => $body,
-      );
-
-      if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('logmaster_outbound_delivery_confirmation', "Sähköposti lähetetty onnistuneesti osoitteeseen {$error_email}");
-      }
-      else {
-        pupesoft_log('logmaster_outbound_delivery_confirmation', "Sähköpostin lähetys epäonnistui osoitteeseen {$error_email}");
-      }
-    }
+    $email_array[] = t("Tilausnumeroa ei löytynyt sanomasta %s", "", $file);
 
     rename($full_filepath, $path.'error/'.$file);
 
@@ -141,7 +124,7 @@ while (false !== ($file = readdir($handle))) {
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
         $tilausrivit[$tilausrivin_tunnus] = array(
           'item_number' => mysql_real_escape_string($line->ItemNumber),
-          'keratty'     => (float) $line->DeliveredQuantity
+          'keratty'     => (float) $line->DeliveredQuantity,
         );
       }
       else {
@@ -302,15 +285,15 @@ while (false !== ($file = readdir($handle))) {
 
       // Tulostetaan lähete
       $params = array(
-        'laskurow'                 => $laskurow,
-        'sellahetetyyppi'          => "",
         'extranet_tilausvahvistus' => "",
-        'naytetaanko_rivihinta'    => "",
-        'tee'                      => "",
-        'toim'                     => "",
+        'kieli'                    => "",
         'komento'                  => "asiakasemail{$avainsanarow['selite']}",
         'lahetekpl'                => "",
-        'kieli'                    => ""
+        'laskurow'                 => $laskurow,
+        'naytetaanko_rivihinta'    => "",
+        'sellahetetyyppi'          => "",
+        'tee'                      => "",
+        'toim'                     => "",
       );
 
       pupesoft_tulosta_lahete($params);
@@ -320,72 +303,42 @@ while (false !== ($file = readdir($handle))) {
   }
   else {
     // Laitetaan sähköpostia tuplakeräyksestä - ollaan yritetty merkitä kerätyksi jo käsin kerättyä tilausta
-    // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
-    // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
-    $error_email = $yhtiorow["admin_email"];
-
-    if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
-      $error_email = $yhtiorow["talhal_email"];
-    }
-    elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
-      $error_email = $yhtiorow["alert_email"];
-    }
-
-    $body = t("Pupessa jo kerätyksi merkitty tilaus %d yritettiin merkitä kerätyksi keräyssanomalla", "", $otunnus);
+    $email_array[] = t("Pupessa jo kerätyksi merkitty tilaus %d yritettiin merkitä kerätyksi keräyssanomalla", "", $otunnus);
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Vastaanotettiin duplikaatti keräyssanoma tilaukselle {$otunnus}");
-
-    $params = array(
-      "to"      => $error_email,
-      "subject" => t("Logmaster: mahdollinen tuplakeräyksen yritys ulkoisesta järjestelmästä", "", ""),
-      "ctype"   => "text",
-      "body"    => $body
-    );
-
-    pupesoft_sahkoposti($params);
   }
 
   if (count($kerayspoikkeama) != 0 and !empty($error_email)) {
-    $body = t("Tilauksen %d keräyksessä on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
-    $body .= t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")."<br>\n";
+
+    $email_array[] = t("Tilauksen %d keräyksessä on havaittu poikkeamia", "", $otunnus).":";
+    $email_array[] = t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella");
 
     foreach ($kerayspoikkeama as $tuoteno => $_arr) {
-      $body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
+      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}";
     }
-
-    $params = array(
-      'to'      => $error_email,
-      'cc'      => '',
-      'subject' => t("Logmaster: keräyspoikkeama")." - {$otunnus}",
-      'ctype'   => 'html',
-      'body'    => $body,
-    );
-
-    pupesoft_sahkoposti($params);
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyspoikkeamia tilauksessa {$otunnus}");
   }
 
   if (count($tilausrivit_error) > 0 and !empty($error_email)) {
-    $body = t("Tilauksen %d aineistossa %s on havaittu virheellisiä rivejä", "", $otunnus, $file).":<br><br>\n\n";
-    $body .= t("Rivitunnus")." ".t("Tuoteno")." ".t("Kerätty")."<br>\n";
+
+    $email_array[] = t("Tilauksessa %d on havaittu virheellisiä rivejä", "", $otunnus).":";
+    $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Kerätty");
 
     foreach ($tilausrivit_error as $rivitunnus => $_arr) {
-      $body .= "{$rivitunnus} {$_arr['tuoteno']} {$_arr['keratty']}<br>\n";
+      $email_array[] = "{$rivitunnus} {$_arr['tuoteno']} {$_arr['keratty']}";
     }
-
-    $params = array(
-      'to'      => $error_email,
-      'cc'      => '',
-      'subject' => t("Logmaster: keräyksen kuittauksessa virheellisiä rivejä")." - ".t("Tilaus")." {$otunnus}",
-      'ctype'   => 'html',
-      'body'    => $body,
-    );
-
-    pupesoft_sahkoposti($params);
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyksen kuittauksen sanomassa {$file} virheellisiä rivejä tilauksessa {$otunnus}");
   }
+
+  $params = array(
+    'email' => $error_email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_outbound_delivery_confirmation',
+  );
+
+  logmaster_send_email($params);
 
   // siirretään tiedosto done-kansioon
   rename($full_filepath, $path.'done/'.$file);

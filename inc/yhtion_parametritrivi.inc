@@ -600,6 +600,18 @@ if ($fieldname == "laskutus_tulevaisuuteen") {
   $jatko = 0;
 }
 
+if ($fieldname == "kateiskuitin_paivays") {
+
+  $sel = $trow[$i] == "S" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Kassamyyj‰ ei voi syˆtt‰‰ poikkeavaa p‰iv‰m‰‰r‰‰ k‰teiskuitille")."</option>";
+  $ulos .= "<option value = 'S' {$sel}>".t("Kassamyyj‰ voi syˆtt‰‰ poikkeavan p‰iv‰m‰‰r‰n k‰teiskuitille")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tyomaaraystyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

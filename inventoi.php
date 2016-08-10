@@ -1115,12 +1115,19 @@ if ($tee == 'VALMIS') {
               pupe_query($query);
 
               $laji = "tulo";
+              $_kplhinta  = $otrow["ostohinta"];
+              $_kehahinta = $row["kehahin"];
+
+              $summa = round($otrow["ostohinta"] * $erotus, 2);
+
               $selite = "Tuloutus: $erotus kappaletta. Ostohinta: $otrow[ostohinta] Varastopaikka: $hyllyalue $hyllynro $hyllyvali $hyllytaso";
               $laadittuaikalisa = "now()";
             }
             else {
 
               $laji = "Inventointi";
+              $_kplhinta  = $row["kehahin"];
+              $_kehahinta = $row["kehahin"];
 
               if ($erotus > 0) {
                 $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
@@ -1141,8 +1148,8 @@ if ($tee == 'VALMIS') {
                       tuoteno   = '$tuoteno',
                       laji      = '$laji',
                       kpl       = '$erotus',
-                      kplhinta  = '$row[kehahin]',
-                      hinta     = '$row[kehahin]',
+                      kplhinta  = '$_kplhinta',
+                      hinta     = '$_kehahinta',
                       hyllyalue = '$hyllyalue',
                       hyllynro  = '$hyllynro',
                       hyllyvali = '$hyllyvali',

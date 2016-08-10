@@ -2479,7 +2479,7 @@ if ($tee == 'Z') {
     }
     echo "</td>";
     echo "<td>$tullirow1[cn] $prossat</td>";
-    echo "<td colspan='4'>".wordwrap(substr($tullirow3['dm'], 0, 20)." - ".substr($tullirow2['dm'], 0, 20)." - ".substr($tullirow1['dm'], 0, 20), 70, "<br>")."</td>";
+    echo "<td colspan='3'>".wordwrap(substr($tullirow3['dm'], 0, 20)." - ".substr($tullirow2['dm'], 0, 20)." - ".substr($tullirow1['dm'], 0, 20), 70, "<br>")."</td>";
     echo "<td>$tullirow1[su]</td>";
     echo "</tr>";
 

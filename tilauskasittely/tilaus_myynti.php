@@ -1652,7 +1652,7 @@ if ($tee == "VALMIS"
       echo "<td><input type='submit' value='".t("Ei viel‰ laskuteta, siirr‰ tilaus ker‰ykseen")."'></td>";
       echo "</form></tr>";
 
-      if ($kukarow['yhtio'] == "activ") {
+      if (!empty($yhtiorow['kateiskuitin_paivays'])) {
         echo "<tr><th>".t("Poikkeava p‰iv‰m‰‰r‰").":</th><td colspan='2'>";
         echo "<input type='text' size='3' name='poikkeava_kpvmpp' id='poikkeava_kpvmpp' class='poikkeava_kpvm_syotto'> - ";
         echo "<input type='text' size='3' name='poikkeava_kpvmkk' id='poikkeava_kpvmkk' class='poikkeava_kpvm_syotto'> - ";

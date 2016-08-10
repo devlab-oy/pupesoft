@@ -1171,7 +1171,7 @@ else {
       $laskutakaikki = "KYLLA";
       $silent = "VIENTI";
 
-      if ($kukarow['yhtio'] == "activ" and !empty($poikkeava_kpvm)) {
+      if (!empty($yhtiorow['kateiskuitin_paivays']) and !empty($poikkeava_kpvm)) {
         list($poikkeava_laskvv, $poikkeava_laskkk, $poikkeava_laskpp) = explode("-", $poikkeava_kpvm);
 
         $poikkeava_laskkk = sprintf('%02d', $poikkeava_laskkk);

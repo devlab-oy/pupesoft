@@ -100,12 +100,13 @@ if (!function_exists('logmaster_message_type')) {
 }
 
 if (!function_exists('logmaster_outbounddelivery')) {
-  function logmaster_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
+  function logmaster_outbounddelivery($otunnus) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $logmaster;
 
     $query = "SELECT lasku.*,
               tilausrivi.*,
+              lasku.varasto AS otsikon_varasto,
               tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
@@ -137,11 +138,19 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     $looprow = mysql_fetch_assoc($loopres);
 
-    if ($ulkoinen_jarjestelma == 'L') {
+    $varastorow = hae_varasto($looprow['otsikon_varasto']);
+
+    switch ($varastorow['ulkoinen_jarjestelma']) {
+    case 'L':
       $uj_nimi = "Helsingin Hyllyvarasto";
-    }
-    else {
+      break;
+    case 'P':
       $uj_nimi = "PostNord";
+      break;
+    default:
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen j‰rjestelm‰ oli virheellinen.");
+
+      return;
     }
 
     # S‰‰detaan muuttujia kuntoon

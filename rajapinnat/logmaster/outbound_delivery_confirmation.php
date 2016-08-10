@@ -71,6 +71,28 @@ while (false !== ($file = readdir($handle))) {
   if ($otunnus == 0) {
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausnumeroa ei löytynyt sanomasta {$file}");
 
+    if (!empty($error_email)) {
+      $body = t("Tilausnumeroa ei löytynyt sanomasta %s", "", $file)."<br>\n";
+      $body .= t("Sanoma siirretty virhekansioon")."<br>\n";
+
+      $params = array(
+        'to'      => $error_email,
+        'cc'      => '',
+        'subject' => t("Logmaster: tilausnumeroa ei löytynyt sanomasta %s", "", $file),
+        'ctype'   => 'html',
+        'body'    => $body,
+      );
+
+      if (pupesoft_sahkoposti($params)) {
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Sähköposti lähetetty onnistuneesti osoitteeseen {$error_email}");
+      }
+      else {
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Sähköpostin lähetys epäonnistui osoitteeseen {$error_email}");
+      }
+    }
+
+    rename($full_filepath, $path.'error/'.$file);
+
     continue;
   }
 
@@ -315,7 +337,7 @@ while (false !== ($file = readdir($handle))) {
 
     $params = array(
       "to"      => $error_email,
-      "subject" => t("Mahdollinen tuplakeräyksen yritys ulkoisesta järjestelmästä", "", ""),
+      "subject" => t("Logmaster: mahdollinen tuplakeräyksen yritys ulkoisesta järjestelmästä", "", ""),
       "ctype"   => "text",
       "body"    => $body
     );
@@ -334,7 +356,7 @@ while (false !== ($file = readdir($handle))) {
     $params = array(
       'to'      => $error_email,
       'cc'      => '',
-      'subject' => t("Logmaster keräyspoikkeama")." - {$otunnus}",
+      'subject' => t("Logmaster: keräyspoikkeama")." - {$otunnus}",
       'ctype'   => 'html',
       'body'    => $body,
     );
@@ -355,7 +377,7 @@ while (false !== ($file = readdir($handle))) {
     $params = array(
       'to'      => $error_email,
       'cc'      => '',
-      'subject' => t("Logmaster keräyksen kuittauksessa virheellisiä rivejä")." - ".t("Tilaus")." {$otunnus}",
+      'subject' => t("Logmaster: keräyksen kuittauksessa virheellisiä rivejä")." - ".t("Tilaus")." {$otunnus}",
       'ctype'   => 'html',
       'body'    => $body,
     );

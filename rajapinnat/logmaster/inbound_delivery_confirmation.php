@@ -182,7 +182,13 @@ while (false !== ($file = readdir($handle))) {
       $body .= t("Tuoteno")." ".t("Kappaleita")."<br>\n";
 
       foreach ($tilausrivit as $rivitunnus => $data) {
-        $body .= "{$data['tuoteno']} {$data['kpl']}<br>\n";
+        $body .= "{$data['tuoteno']} {$data['kpl']}";
+
+        if (isset($tilausrivit_error[$rivitunnus])) {
+          $body .= " (".t("Ei viety varastoon").")";
+        }
+
+        $body .= "<br>\n";
       }
 
       $params = array(
@@ -198,6 +204,33 @@ while (false !== ($file = readdir($handle))) {
       }
       else {
         pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
+      }
+
+      if (count($tilausrivit_error) > 0) {
+
+        $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
+        $body = t("Saapuminen %s", "", $saapumisnro)."<br><br>\n\n";
+        $body .= t("Sanomassa seuraavia virheellisiä tuotteita").":<br><br>\n\n";
+        $body .= t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita")."<br>\n";
+
+        foreach ($tilausrivit_error as $rivitunnus => $data) {
+          $body .= "{$rivitunnus} {$data['tuoteno']} {$data['kpl']}<br>\n";
+        }
+
+        $params = array(
+          'to' => $email,
+          'cc' => '',
+          'subject' => t("Saapumisen kuittauksen yhteydessä havaitut virherivit")." - ".t("saapuminen")." {$saapumisnro}",
+          'ctype' => 'html',
+          'body' => $body,
+        );
+
+        if (pupesoft_sahkoposti($params)) {
+          pupesoft_log('logmaster_inbound_delivery_confirmation', "Virherivit saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
+        }
+        else {
+          pupesoft_log('logmaster_inbound_delivery_confirmation', "Virherivit saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
+        }
       }
     }
   }

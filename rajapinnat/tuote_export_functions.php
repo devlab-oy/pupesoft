@@ -2,6 +2,7 @@
 
 function tuote_export_tee_querylisa_resultista($tyyppi, array $tulokset) {
   $poimitut = '';
+  $result = '';
 
   // $tulokset = array(
   //   [0] => array("muuttuneet_tuotenumerot" => "'3','4'"),
@@ -37,9 +38,6 @@ function tuote_export_tee_querylisa_resultista($tyyppi, array $tulokset) {
     }
     elseif ($tyyppi == 'muuttuneet_ryhmat') {
       $result = " AND tuote.aleryhma IN ($poimitut) ";
-    }
-    else {
-      $result = '';
     }
   }
 

@@ -78,6 +78,30 @@ while (false !== ($file = readdir($handle))) {
   if ($saapumistunnus == 0) {
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
 
+    if (!empty($email)) {
+
+      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
+      $body .= t("Saapuminen %s", "", $saapumisnro)."<br>\n";
+      $body .= t("Sanoma siirretty virhekansioon")."<br><br>\n\n";
+
+      $params = array(
+        'to' => $email,
+        'cc' => '',
+        'subject' => t("Logmaster: kuittausta odottavaa saapumista ei löydy saapumisnumerolla %d sanomassa %s", "", $saapumisnro, $file),
+        'ctype' => 'html',
+        'body' => $body,
+      );
+
+      if (pupesoft_sahkoposti($params)) {
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}, sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
+      }
+      else {
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}, sähköpostin lähetys epäonnistui osoitteeseen {$email}");
+      }
+    }
+
+    rename($full_filepath, $path."error/".$file);
+
     continue;
   }
 
@@ -93,6 +117,30 @@ while (false !== ($file = readdir($handle))) {
 
   if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
+
+    if (!empty($email)) {
+
+      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
+      $body .= t("Saapuminen %s", "", $saapumisnro)."<br>\n";
+      $body .= t("Sanoma siirretty virhekansioon")."<br><br>\n\n";
+
+      $params = array(
+        'to' => $email,
+        'cc' => '',
+        'subject' => t("Logmaster: saapumisen %d kuittaussanomassa %s ei ollut rivejä", "", $saapumisnro, $file),
+        'ctype' => 'html',
+        'body' => $body,
+      );
+
+      if (pupesoft_sahkoposti($params)) {
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} kuittaussanomassa {$file} ei ollut rivejä, sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
+      }
+      else {
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} kuittaussanomassa {$file} ei ollut rivejä, sähköpostin lähetys epäonnistui osoitteeseen {$email}");
+      }
+    }
+
+    rename($full_filepath, $path."error/".$file);
 
     continue;
   }
@@ -194,7 +242,7 @@ while (false !== ($file = readdir($handle))) {
       $params = array(
         'to' => $email,
         'cc' => '',
-        'subject' => t("Saapumisen kuittaus")." - {$saapumisnro}",
+        'subject' => t("Logmaster: saapumisen kuittaus")." - {$saapumisnro}",
         'ctype' => 'html',
         'body' => $body,
       );
@@ -209,7 +257,7 @@ while (false !== ($file = readdir($handle))) {
       if (count($tilausrivit_error) > 0) {
 
         $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br>\n";
-        $body = t("Saapuminen %s", "", $saapumisnro)."<br><br>\n\n";
+        $body .= t("Saapuminen %s", "", $saapumisnro)."<br><br>\n\n";
         $body .= t("Sanomassa seuraavia virheellisiä tuotteita").":<br><br>\n\n";
         $body .= t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita")."<br>\n";
 
@@ -220,7 +268,7 @@ while (false !== ($file = readdir($handle))) {
         $params = array(
           'to' => $email,
           'cc' => '',
-          'subject' => t("Saapumisen kuittauksen yhteydessä havaitut virherivit")." - ".t("saapuminen")." {$saapumisnro}",
+          'subject' => t("Logmaster: saapumisen kuittauksen yhteydessä havaitut virherivit")." - ".t("saapuminen")." {$saapumisnro}",
           'ctype' => 'html',
           'body' => $body,
         );

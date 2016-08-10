@@ -619,7 +619,7 @@ if (!function_exists("tv1dateconv")) {
     }
     else {
       if ($lyhyt == "LYHYT") return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 2, 2).$jatko;
-      else return substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
+      else return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
     }
   }
 }
@@ -6844,6 +6844,39 @@ if (!function_exists("kalenteritapahtuma")) {
   }
 }
 
+if (!function_exists('js_openPrintDialog')) {
+  function js_openPrintDialog($fileurl, $nappiteksti = "Tulosta") {
+    return "<script type=\"text/javascript\">
+            function printIframePdf(){
+              window.frames[\"printf\"].focus();
+              try {
+                window.frames[\"printf\"].print();
+              }
+              catch(e){
+                window.print();
+                console.log(e);
+              }
+            }
+
+            function printObjectPdf() {
+              try{
+                document.getElementById('idPdf').print();
+              }
+              catch(e){
+                printIframePdf();
+                console.log(e);
+              }
+            }
+    </script>
+    <form>
+    <input type='button' onClick='printIframePdf()' class='btn' value='".t($nappiteksti)."'/>
+    </form><br><br>
+    <iframe id='printf' name='printf' src='{$fileurl}' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
+    <object id='idPdf' width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf' data='{$fileurl}'>
+    </object>";
+  }
+}
+
 if (!function_exists('js_openUrlNewWindow')) {
   function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
     $width = (!empty($width)) ? $width : 700;
@@ -7783,7 +7816,13 @@ if (!function_exists("js_openFormInNewWindow")) {
           thistee = formi.elements["tee"].value;
           formi.elements["tee"].value = "NAYTATILAUS";
 
-          window.open('', name, 'top=100,left=100,resizable=yes');
+          leveys = ''
+
+          if (arguments[2] > 0) {
+            leveys = ",width="+arguments[2]+",height=800"
+          }
+
+          window.open('', name, 'top=100,left=100,resizable=yes'+leveys);
 
           formi.target=name;
 
@@ -24241,6 +24280,8 @@ if  (!function_exists('hae_chn_teksti')) {
       return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
     case '999':
       return t("Laskutuskielto, laskutusta ei tehdä", $kieli);
+    case '888':
+      return t("Laskuta heti", $kieli)." (".t("sisäinen", $kieli).")";
     default:
       return FALSE;
     }

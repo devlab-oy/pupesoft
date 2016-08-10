@@ -176,7 +176,14 @@ if ($xml_chk) {
 
   if (file_put_contents($filename, $xml->asXML())) {
 
-    logmaster_send_file($filename);
+    $palautus = logmaster_send_file($filename);
+
+    if ($palautus == 0) {
+      pupesoft_log('logmaster_inbound_delivery', "Siirretiin saapuminen {$row['laskunro']}.");
+    }
+    else {
+      pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} siirtäminen epäonnistui.");
+    }
 
     pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} luonti onnistui.");
 

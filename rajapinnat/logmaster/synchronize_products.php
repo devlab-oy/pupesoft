@@ -207,7 +207,14 @@ if (mysql_num_rows($res) > 0) {
     if (file_put_contents($filename, $xml->asXML())) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
-      logmaster_send_file($filename);
+      $palautus = logmaster_send_file($filename);
+
+      if ($palautus == 0) {
+        pupesoft_log('logmaster_synchronize_products', "Siirretiin synkronointitiedosto {$_name}.xml.");
+      }
+      else {
+        pupesoft_log('logmaster_synchronize_products', "Synkronointitiedoston {$_name}.xml siirtäminen epäonnistui.");
+      }
     }
     else {
       echo "<br /><font class='error'>", t("Tiedoston luonti epäonnistui"), "</font><br />";

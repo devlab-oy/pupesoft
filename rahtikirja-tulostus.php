@@ -30,6 +30,14 @@ if (!isset($tee)) {
   $tee = '';
 }
 
+if (empty($sel_ltun) or !is_array($sel_ltun)) {
+  $sel_ltun = array();
+}
+else {
+  # poistetaan kaikki arvot, jotka ei ole numeroita
+  $sel_ltun = array_filter($sel_ltun, 'is_numeric');
+}
+
 if (!function_exists("laheta_excel_koontilahete")) {
   function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
     $otunnukset = (array) $otunnukset;
@@ -349,7 +357,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   $ltun_querylisa = '';
 
-  if (is_array($sel_ltun) and count($sel_ltun) > 0) {
+  if (count($sel_ltun) > 0) {
     $ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
   }
 }

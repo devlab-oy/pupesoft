@@ -326,7 +326,7 @@ while (false !== ($file = readdir($handle))) {
     $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Kerätty");
 
     foreach ($tilausrivit_error as $rivitunnus => $_arr) {
-      $email_array[] = "{$rivitunnus} {$_arr['tuoteno']} {$_arr['keratty']}";
+      $email_array[] = "{$rivitunnus} {$_arr['item_number']} {$_arr['keratty']}";
     }
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyksen kuittauksen sanomassa {$file} virheellisiä rivejä tilauksessa {$otunnus}");

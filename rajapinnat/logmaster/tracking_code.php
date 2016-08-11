@@ -17,6 +17,9 @@ if (trim($argv[2]) == '') {
 
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+ini_set("display_errors", 1);
+
+error_reporting(E_ALL);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
@@ -58,7 +61,6 @@ while (false !== ($file = readdir($handle))) {
   }
 
   $filehandle = fopen($full_filepath, "r");
-  $rahtikirja_hukassa = false;
 
   while ($tietue = fgets($filehandle)) {
     // Tyhjät rivit skipataan
@@ -74,7 +76,7 @@ while (false !== ($file = readdir($handle))) {
     }
 
     if (trim($seurantakoodi) == '') {
-      pupesoft_log('tracking_code', "Seurantakoodi puuttuu riviltä");
+      pupesoft_log('logmaster_tracking_code', "Seurantakoodi puuttuu riviltä");
 
       continue;
     }
@@ -86,7 +88,7 @@ while (false !== ($file = readdir($handle))) {
     $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
 
     if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
-      pupesoft_log('tracking_code', "Tilausnumero puuttuu riviltä");
+      pupesoft_log('logmaster_tracking_code', "Tilausnumero puuttuu riviltä");
 
       continue;
     }
@@ -99,10 +101,9 @@ while (false !== ($file = readdir($handle))) {
     pupe_query($query);
 
     if (mysql_affected_rows() == 0) {
-      pupesoft_log('tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
+      pupesoft_log('logmaster_tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
 
-      $rahtikirja_hukassa = true;
-      break;
+      continue;
     }
 
     $query = "SELECT SUM(kilot) kilotyht
@@ -118,11 +119,11 @@ while (false !== ($file = readdir($handle))) {
     );
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
-    pupesoft_log('tracking_code', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+    pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
-      pupesoft_log('tracking_code', "Päivitetään toimitetuksi Magentoon");
+      pupesoft_log('logmaster_tracking_code', "Päivitetään toimitetuksi Magentoon");
 
       $query = "SELECT toimitustapa
                 FROM rahtikirjat
@@ -160,9 +161,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
-  if (!$rahtikirja_hukassa) {
-    rename($full_filepath, $path."done/".$file);
-  }
+  rename($full_filepath, $path."done/".$file);
 }
 
 closedir($handle);

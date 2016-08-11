@@ -17,6 +17,9 @@ if (trim($argv[2]) == '') {
 
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+ini_set("display_errors", 1);
+
+error_reporting(E_ALL);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
@@ -40,6 +43,8 @@ if (empty($kukarow)) {
 $path = trim($argv[2]);
 $email = isset($argv[3]) ? trim($argv[3]) : "";
 
+$email_array = array();
+
 $path = rtrim($path, '/').'/';
 $handle = opendir($path);
 
@@ -49,7 +54,7 @@ if ($handle === false) {
 
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = posten_message_type($full_filepath);
+  $message_type = logmaster_message_type($full_filepath);
 
   if ($message_type != 'InboundDeliveryConfirmation') {
     continue;
@@ -57,7 +62,7 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
+  pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
   $node = $xml->VendPackingSlip;
 
@@ -76,7 +81,11 @@ while (false !== ($file = readdir($handle))) {
   $saapumistunnus = (int) $selectrow['tunnus'];
 
   if ($saapumistunnus == 0) {
-    pupesoft_log('inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Kuittausta odottavaa saapumista ei löydy saapumisnumerolla {$saapumisnro} sanomassa {$file}");
+
+    $email_array[] = t("Kuittausta odottavaa saapumista ei löydy saapumisnumerolla %d", "", $saapumisnro);
+
+    rename($full_filepath, $path."error/".$file);
 
     continue;
   }
@@ -92,12 +101,16 @@ while (false !== ($file = readdir($handle))) {
   }
 
   if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
-    pupesoft_log('inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
+
+    $email_array[] = t("Saapumisen %d kuittaussanomassa ei löytynyt rivejä", "", $saapumisnro);
+
+    rename($full_filepath, $path."error/".$file);
 
     continue;
   }
 
-  $tilausrivit = array();
+  $tilausrivit = $tilausrivit_error = array();
 
   # Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä aineistossa mukana
   # Joten laitetaan varastoon = 0
@@ -119,8 +132,8 @@ while (false !== ($file = readdir($handle))) {
 
     if (!isset($tilausrivit[$rivitunnus])) {
       $tilausrivit[$rivitunnus] = array(
+        'kpl'     => $kpl,
         'tuoteno' => $tuoteno,
-        'kpl'     => $kpl
       );
     }
     else {
@@ -142,10 +155,17 @@ while (false !== ($file = readdir($handle))) {
               AND tuoteno     = '{$tuoteno}'
               AND tunnus      = '{$rivitunnus}'";
     $updres = pupe_query($query);
+
+    if (mysql_affected_rows() != 1) {
+      $tilausrivit_error[$rivitunnus] = $data;
+
+      pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} sanoman riviä {$rivitunnus} (tuoteno {$tuoteno}) ei päivitetty.");
+    }
   }
 
   if (count($tilausrivit) > 0) {
-    pupesoft_log('inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsiteltäviä rivejä yhteensä ".(count($tilausrivit) - count($tilausrivit_error))." / ".count($tilausrivit));
 
     $query = "SELECT *
               FROM lasku
@@ -169,36 +189,37 @@ while (false !== ($file = readdir($handle))) {
               AND tunnus  = '{$saapumistunnus}'";
     $updres = pupe_query($query);
 
-    if (!empty($email)) {
-      $body = t("Käsitellyn sanoman tiedostonimi: %s", "", $file)."<br><br>\n\n";
-      $body .= t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":<br><br>\n\n";
-      $body .= t("Tuoteno")." ".t("Kappaleita")."<br>\n";
+    $email_array[] = t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":";
+    $email_array[] = t("Tuoteno")." ".t("Kappaleita");
 
-      foreach ($tilausrivit as $rivitunnus => $data) {
-        $body .= "{$data['tuoteno']} {$data['kpl']}<br>\n";
-      }
+    foreach ($tilausrivit as $rivitunnus => $tuote) {
+      $email_array[] = "{$tuote['tuoteno']} {$tuote['kpl']}";
+    }
 
-      $params = array(
-        'to' => $email,
-        'cc' => '',
-        'subject' => t("Saapumisen kuittaus")." - {$saapumisnro}",
-        'ctype' => 'html',
-        'body' => $body,
-      );
+    if (count($tilausrivit_error) > 0) {
 
-      if (pupesoft_sahkoposti($params)) {
-        pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähetetty onnistuneesti sähköpostiin {$email}");
-      }
-      else {
-        pupesoft_log('inbound_delivery_confirmation', "Kuittaus saapumisesta {$saapumisnro} lähettäminen epäonnistui sähköpostiin {$email}");
+      $email_array[] = t("Saapuminen %s", "", $saapumisnro);
+      $email_array[] = t("Sanomassa seuraavia virheellisiä tuotteita");
+      $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita");
+
+      foreach ($tilausrivit_error as $rivitunnus => $tuote) {
+        $email_array[] = "{$rivitunnus} {$tuote['tuoteno']} {$tuote['kpl']}";
       }
     }
   }
   else {
-    pupesoft_log('inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");
+    pupesoft_log('logmaster_inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");
   }
 
-  pupesoft_log('inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
+  pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
+
+  $params = array(
+    'email' => $email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_inbound_delivery_confirmation',
+  );
+
+  logmaster_send_email($params);
 
   rename($full_filepath, $path."done/".$file);
 }

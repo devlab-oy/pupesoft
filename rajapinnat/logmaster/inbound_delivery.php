@@ -25,6 +25,8 @@ else {
 
   // lisätään includepathiin pupe-root
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+  ini_set("display_errors", 1);
+
   error_reporting(E_ALL);
 
   // otetaan tietokanta connect ja funktiot
@@ -58,6 +60,8 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S'))) {
   die ("Saapumisen lähettäminen estetty yhtiötasolla!\n");
 }
 
+require "rajapinnat/logmaster/logmaster-functions.php";
+
 // Tarvitaan:
 // $saapumisnro
 // ordercode (vapaaehtoinen) (u = new, m = change, p = delete)
@@ -76,7 +80,7 @@ $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 
 if ($row['sisviesti3'] == 'ok_vie_varastoon') {
-  pupesoft_log('inbound_delivery', "Saapuminen {$saapumisnro} on jo kuitattu");
+  pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$saapumisnro} on jo kuitattu");
   exit;
 }
 
@@ -175,8 +179,17 @@ if ($xml_chk) {
   $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
-    // Lähetetään aina UTF-8 muodossa
-    $ftputf8 = true;
+
+    $palautus = logmaster_send_file($filename);
+
+    if ($palautus == 0) {
+      pupesoft_log('logmaster_inbound_delivery', "Siirretiin saapuminen {$row['laskunro']}.");
+    }
+    else {
+      pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} siirtäminen epäonnistui.");
+    }
+
+    pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} luonti onnistui.");
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti onnistui"), "\n";
@@ -185,14 +198,6 @@ if ($xml_chk) {
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
     }
 
-    $ftphost = $logmaster['host'];
-    $ftpuser = $logmaster['user'];
-    $ftppass = $logmaster['pass'];
-    $ftppath = $logmaster['path'];
-
-    $ftpfile = realpath($filename);
-
-    require "inc/ftp-send.inc";
 
     $query = "UPDATE lasku SET
               sisviesti3  = 'ei_vie_varastoon'
@@ -201,10 +206,10 @@ if ($xml_chk) {
               AND tunnus  = '{$saapumisnro}'";
     $updres = pupe_query($query);
 
-    pupesoft_log('inbound_delivery', "Saapuminen {$row['laskunro']} lähetetty");
+    pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$row['laskunro']} lähetetty");
   }
   else {
-    pupesoft_log('inbound_delivery', "Saapumisen {$row['laskunro']} lähetys epäonnistui");
+    pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$row['laskunro']} luonti epäonnistui");
 
     if ($_cli) {
       echo "\n", t("Tiedoston luonti epäonnistui"), "\n";
@@ -213,4 +218,7 @@ if ($xml_chk) {
       echo "<br /><font class='error'>", t("Tiedoston luonti epäonnistui"), "</font><br />";
     }
   }
+}
+else {
+  pupesoft_log('logmaster_inbound_delivery', "Saapumisen {$saapumisnro} XML ei luotu, koska yhtään riviä ei löytynyt.");
 }

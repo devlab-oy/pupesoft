@@ -22,6 +22,7 @@ if (trim($argv[3]) == '') {
 // lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
 ini_set("display_errors", 1);
+ini_set("memory_limit", "2G");
 
 error_reporting(E_ALL);
 
@@ -119,19 +120,23 @@ while (false !== ($file = readdir($handle))) {
     $b = (int) $hyllyssa * 10000;
 
     if ($a != $b) {
-      $saldoeroja[$tuoterow['tuoteno']]['logmaster'] = $kpl;
-      $saldoeroja[$tuoterow['tuoteno']]['pupe'] = $hyllyssa;
-      $saldoeroja[$tuoterow['tuoteno']]['nimitys'] = $tuoterow['nimitys'];
+      $saldoeroja[] = array(
+        "item"      => $line->ItemNumber,
+        "logmaster" => $kpl,
+        "nimitys"   => $tuoterow['nimitys'],
+        "pupe"      => $hyllyssa,
+        "tuoteno"   => $tuoterow['tuoteno'],
+      );
     }
   }
 
   if (count($saldoeroja) > 0) {
 
     $email_array[] = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":";
-    $email_array[] = t("Tuoteno").";".t("Nimitys").";".t("Logmaster").";".t("Pupesoft");
+    $email_array[] = t("Logmaster-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("Logmaster-kpl").";".t("Pupesoft-kpl");
 
-    foreach ($saldoeroja as $tuoteno => $_arr) {
-      $email_array[] = "{$tuoteno};{$_arr['nimitys']};{$_arr['logmaster']};{$_arr['pupe']}";
+    foreach ($saldoeroja as $ero) {
+      $email_array[] = "{$ero['item']};{$ero['tuoteno']};{$ero['nimitys']};{$ero['logmaster']};{$ero['pupe']}";
     }
 
     pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja.");

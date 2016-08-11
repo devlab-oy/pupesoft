@@ -60,6 +60,8 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S'))) {
   die ("Saapumisen lähettäminen estetty yhtiötasolla!\n");
 }
 
+require "rajapinnat/logmaster/logmaster-functions.php";
+
 // Tarvitaan:
 // $saapumisnro
 // ordercode (vapaaehtoinen) (u = new, m = change, p = delete)

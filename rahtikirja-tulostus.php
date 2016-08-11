@@ -349,7 +349,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   $ltun_querylisa = '';
 
-  if (is_array($sel_ltun) and count($sel_ltun) > 0) {
+  if (is_array($sel_ltun) and count($sel_ltun) > 0 and !in_array("", $sel_ltun)) {
     $ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
   }
 }

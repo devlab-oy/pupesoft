@@ -1,7 +1,77 @@
 <?php
 
-if (!function_exists('posten_field')) {
-  function posten_field($column_name) {
+if (!function_exists('logmaster_send_email')) {
+  function logmaster_send_email($params) {
+    $body        = "";
+    $email       = $params['email'];
+    $email_array = $params['email_array'];
+    $log_name    = $params['log_name'];
+    $subject     = "";
+
+    if (empty($email) or !is_array($email_array) or count($email_array) == 0) {
+      return;
+    }
+
+    switch ($log_name) {
+    case 'logmaster_outbound_delivery_confirmation':
+      $subject = t("Logmaster: Ker‰yksen kuittaus");
+      break;
+
+    case 'logmaster_inbound_delivery_confirmation':
+      $subject = t("Logmaster: Saapumisen kuittaus");
+      break;
+
+    case 'logmaster_stock_report':
+      $subject = t("Logmaster saldovertailu");
+      break;
+
+    default:
+      return;
+    }
+
+    foreach ($email_array as $msg) {
+      $body .= $msg."<br>\n";
+    }
+
+    $args = array(
+      'body' => $body,
+      'cc' => '',
+      'ctype' => 'html',
+      'subject' => $subject,
+      'to' => $email,
+    );
+
+    if (pupesoft_sahkoposti($args)) {
+      pupesoft_log($log_name, "S‰hkˆposti l‰hetetty onnistuneesti osoitteeseen {$email}");
+    }
+    else {
+      pupesoft_log($log_name, "S‰hkˆpostin l‰hetys ep‰onnistui osoitteeseen {$email}");
+    }
+  }
+}
+
+if (!function_exists('logmaster_send_file')) {
+  function logmaster_send_file($filename) {
+    global $kukarow, $yhtiorow, $logmaster;
+
+    // L‰hetet‰‰n aina UTF-8 muodossa
+    $ftputf8 = true;
+
+    $ftphost = $logmaster['host'];
+    $ftpuser = $logmaster['user'];
+    $ftppass = $logmaster['pass'];
+    $ftppath = $logmaster['path'];
+
+    $ftpfile = realpath($filename);
+
+    require "inc/ftp-send.inc";
+
+    return $palautus;
+  }
+}
+
+if (!function_exists('logmaster_field')) {
+  function logmaster_field($column_name) {
 
     switch ($column_name) {
     case 'ItemNumber':
@@ -57,8 +127,8 @@ if (!function_exists('check_file_extension')) {
   }
 }
 
-if (!function_exists('posten_message_type')) {
-  function posten_message_type($file_name) {
+if (!function_exists('logmaster_message_type')) {
+  function logmaster_message_type($file_name) {
     $extension = check_file_extension($file_name, 'XML');
 
     if ($extension === false) {
@@ -79,13 +149,14 @@ if (!function_exists('posten_message_type')) {
   }
 }
 
-if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
+if (!function_exists('logmaster_outbounddelivery')) {
+  function logmaster_outbounddelivery($otunnus) {
 
     global $kukarow, $yhtiorow, $pupe_root_polku, $logmaster;
 
     $query = "SELECT lasku.*,
               tilausrivi.*,
+              lasku.varasto AS otsikon_varasto,
               tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
@@ -110,16 +181,26 @@ if (!function_exists('posten_outbounddelivery')) {
     $loopres = pupe_query($query);
 
     if (mysql_num_rows($loopres) == 0) {
+      pupesoft_log('logmaster_outbound_delivery', "Yht‰‰n rivi‰ ei lˆytynyt tilaukselle {$otunnus}. Sanoman luonti ep‰onnistui.");
+
       return;
     }
 
     $looprow = mysql_fetch_assoc($loopres);
 
-    if ($ulkoinen_jarjestelma == 'L') {
+    $varastorow = hae_varasto($looprow['otsikon_varasto']);
+
+    switch ($varastorow['ulkoinen_jarjestelma']) {
+    case 'L':
       $uj_nimi = "Helsingin Hyllyvarasto";
-    }
-    else {
+      break;
+    case 'P':
       $uj_nimi = "PostNord";
+      break;
+    default:
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen j‰rjestelm‰ oli virheellinen.");
+
+      return;
     }
 
     # S‰‰detaan muuttujia kuntoon
@@ -203,7 +284,7 @@ if (!function_exists('posten_outbounddelivery')) {
     mysql_data_seek($loopres, 0);
 
     $_line_i = 1;
-    $posten_itemnumberfield = posten_field('ItemNumber');
+    $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
       // Laitetaan kappalem‰‰r‰t kuntoon
@@ -212,7 +293,7 @@ if (!function_exists('posten_outbounddelivery')) {
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$posten_itemnumberfield], 22));
+      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
       $line->addChild('CustItemNumber',    0);
       $line->addChild('ItemName',          0);
       $line->addChild('ItemText',          0);
@@ -232,29 +313,26 @@ if (!function_exists('posten_outbounddelivery')) {
       $_line_i++;
     }
 
+    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanomalle lis‰tty ".($_line_i - 1)." rivi‰.");
+
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-      // L‰hetet‰‰n aina UTF-8 muodossa
-      $ftputf8 = true;
 
       echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
-      $ftphost = $logmaster['host'];
-      $ftpuser = $logmaster['user'];
-      $ftppass = $logmaster['pass'];
-      $ftppath = $logmaster['path'];
-      $ftpfile = realpath($filename);
-
-      require "inc/ftp-send.inc";
+      $palautus = logmaster_send_file($filename);
 
       if ($palautus == 0) {
-        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+        pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
       }
       else {
-        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+        pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
       }
+    }
+    else {
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
     }
   }
 }

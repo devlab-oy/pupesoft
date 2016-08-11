@@ -22333,7 +22333,7 @@ if (!function_exists('splittaa_tilausrivi')) {
               AND tilausrivi.tunnus  = '{$tunnus}'";
     $result = pupe_query($query);
 
-    if (mysql_num_rows($result) == 0) return false;
+    if (mysql_num_rows($result) == 0) return 0;
 
     $rivi = mysql_fetch_array($result);
 
@@ -33223,34 +33223,6 @@ if (!function_exists('url_or_text')) {
     }
 
     return $str;
-  }
-}
-
-if (!function_exists('ulkoinen_jarjestelma_varastot')) {
-  function ulkoinen_jarjestelma_varastot($otunnus) {
-    global $kukarow;
-
-    $logmaster_varasto = 0;
-    $normivarastoja = 0;
-
-    $query = "SELECT DISTINCT varasto
-              FROM tilausrivi
-              WHERE yhtio     = '{$kukarow['yhtio']}'
-              AND uusiotunnus = '{$otunnus}'";
-    $varastocheckres = pupe_query($query);
-
-    while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-      $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
-        $logmaster_varasto++;
-      }
-      else {
-        $normivarastoja++;
-      }
-    }
-
-    return array($logmaster_varasto, $normivarastoja);
   }
 }
 

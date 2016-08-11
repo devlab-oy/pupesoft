@@ -2,17 +2,8 @@
 
 $pupe_DataTables = "tyomaaraystable";
 
-if ($_REQUEST["tee"] == 'pdf_autosubmit') {
-  $nayta_pdf = 1;
-}
-
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
-}
-
-if ($nayta_pdf == 1 and !empty($_REQUEST['pdffilenimi'])) {
-  readfile("/tmp/".basename($_REQUEST['pdffilenimi']));
-  exit;
 }
 
 if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
@@ -652,7 +643,15 @@ function email_tyomaarayskopio($request) {
 
   // Avataan pdf ruudulle
   if ($request['pdf_ruudulle']) {
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}extranet_tyomaaraykset.php?tee=pdf_autosubmit&pdffilenimi=$pdffilenimi&mista=extranet_tyomaaraykset.php'>";
+
+    js_openFormInNewWindow();
+    echo "<br><form id='tulostakopioform_{$tyom_tunnus}' name='tulostakopioform_{$tyom_tunnus}' method='post' action='{$palvelin2}tulostakopio.php' autocomplete='off'>
+          <input type='hidden' name='otunnus' value='{$tyom_tunnus}'>
+          <input type='hidden' name='tyom_tunnus' value='{$tyom_tunnus}'>
+          <input type='hidden' name='pdffilenimi' value='{$pdffilenimi}'>
+          <input type='hidden' name='toim' value='HUOLTOPYYNTOKOPIO'>
+          <input type='hidden' name='tee' value='NAYTATILAUS'>
+          <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
   }
 }
 

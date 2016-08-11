@@ -61,7 +61,6 @@ while (false !== ($file = readdir($handle))) {
   }
 
   $filehandle = fopen($full_filepath, "r");
-  $rahtikirja_hukassa = false;
 
   while ($tietue = fgets($filehandle)) {
     // Tyhjät rivit skipataan
@@ -104,8 +103,7 @@ while (false !== ($file = readdir($handle))) {
     if (mysql_affected_rows() == 0) {
       pupesoft_log('logmaster_tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
 
-      $rahtikirja_hukassa = true;
-      break;
+      continue;
     }
 
     $query = "SELECT SUM(kilot) kilotyht
@@ -163,9 +161,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
-  if (!$rahtikirja_hukassa) {
-    rename($full_filepath, $path."done/".$file);
-  }
+  rename($full_filepath, $path."done/".$file);
 }
 
 closedir($handle);

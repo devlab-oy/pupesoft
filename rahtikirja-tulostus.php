@@ -349,7 +349,7 @@ if ($tee == 'tulosta' or $tee == 'close_with_printer') {
 
   $ltun_querylisa = '';
 
-  if (count($sel_ltun) > 0) {
+  if (is_array($sel_ltun) and count($sel_ltun) > 0) {
     $ltun_querylisa = " and lasku.tunnus in (".implode(",", $sel_ltun).")";
   }
 }
@@ -1686,9 +1686,8 @@ if ($tee == '') {
     echo "</form>";
   }
   else {
-    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ".</font><br><br>";
+    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ". (2)</font><br><br>";
   }
 
   require "inc/footer.inc";
 }
-

@@ -81,7 +81,7 @@ if (!function_exists("toimitustapatarkista")) {
                   toimitustapa='$toita'
                   where toimitustapa='$trow[$i]'
                   and yhtio='$kukarow[yhtio]'
-                  and tila = 'L' and alatila in ('A','C')";
+                  and tila = 'L' and alatila != 'X'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("myyntitilaus otsikkoa");
@@ -99,7 +99,7 @@ if (!function_exists("toimitustapatarkista")) {
                   toimitustapa='$toita'
                   where toimitustapa='$trow[$i]'
                   and yhtio='$kukarow[yhtio]'
-                  and tila = 'G' and alatila in ('','J','KJ','A','C','T','P')";
+                  and tila = 'G' and alatila NOT IN ('V', 'X')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("siirtolista otsikkoa");
@@ -126,7 +126,7 @@ if (!function_exists("toimitustapatarkista")) {
                   toimitustapa='$toita'
                   where toimitustapa='$trow[$i]'
                   and yhtio='$kukarow[yhtio]'
-                  and tila = 'V' and alatila in ('','K','J','A','C')";
+                  and tila = 'V' and alatila != 'V'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("valmistus otsikkoa");

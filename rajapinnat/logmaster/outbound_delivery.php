@@ -23,7 +23,6 @@ $yhtio = mysql_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
-$tunnuksetlisa = "";
 
 if (!isset($kukarow)) {
   exit("VIRHE: Admin käyttäjä ei löydy!\n");
@@ -41,8 +40,7 @@ $query = "SELECT *
             (tila = 'G' AND alatila = 'J')
           )
           AND CURTIME() >= DATE_ADD(h1time, INTERVAL 15 MINUTE)
-          AND lahetetty_ulkoiseen_varastoon = NULL
-          {$tunnuksetlisa}";
+          AND lahetetty_ulkoiseen_varastoon = NULL";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {

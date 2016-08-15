@@ -39,18 +39,18 @@ if ($tee == "laheta" and $tilaukset != "") {
 
       if ($filename === false) {
         echo t("Tilauksen %d sanoman luonti epäonnistui", '', $laskurow['tunnus'])."<br>";
+        continue;
+      }
+
+      $palautus = logmaster_send_file($filename);
+
+      if ($palautus == 0) {
+        pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
+        echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
       }
       else {
-        $palautus = logmaster_send_file($filename);
-
-        if ($palautus == 0) {
-          pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
-          echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
-        }
-        else {
-          pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
-          echo t("Tilauksen %d siirto epäonnistui", '', $laskurow['tunnus'])."<br>";
-        }
+        pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
+        echo t("Tilauksen %d siirto epäonnistui", '', $laskurow['tunnus'])."<br>";
       }
     }
   }

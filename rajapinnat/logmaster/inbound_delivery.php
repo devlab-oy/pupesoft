@@ -79,8 +79,8 @@ $query = "SELECT *
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 
-if ($row['sisviesti3'] == 'ok_vie_varastoon') {
-  pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$saapumisnro} on jo kuitattu");
+if ($row['sisviesti3'] != '') {
+  pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$saapumisnro} on jo lähetetty");
   exit;
 }
 
@@ -200,7 +200,7 @@ if ($xml_chk) {
 
 
     $query = "UPDATE lasku SET
-              sisviesti3  = 'ei_vie_varastoon'
+              sisviesti3  = 'lahetetty_ulkoiseen_jarjestelmaan'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tila    = 'K'
               AND tunnus  = '{$saapumisnro}'";

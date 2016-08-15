@@ -70,6 +70,18 @@ if (!function_exists('logmaster_send_file')) {
   }
 }
 
+if (!function_exists('logmaster_sent_timestamp')) {
+  function logmaster_sent_timestamp($tunnus) {
+    global $kukarow;
+
+    $query = "UPDATE lasku SET
+              lahetetty_ulkoiseen_varastoon = now()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tunnus}'";
+    $res = pupe_query($query);
+  }
+}
+
 if (!function_exists('logmaster_field')) {
   function logmaster_field($column_name) {
 

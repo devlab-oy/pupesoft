@@ -976,4 +976,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_sepa_pankkiyhteys &= (!empty($sepa_pankkiyhteys_token));
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
+
+  # Katsotaan onko Pupesoftissa Logmaster-rajapinta asetettuna
+  $_logmaster_rajapinta = true;
+  $_logmaster_rajapinta &= (!empty($logmaster['host']));
+  $_logmaster_rajapinta &= (!empty($logmaster['user']));
+  $_logmaster_rajapinta &= (!empty($logmaster['pass']));
+  $_logmaster_rajapinta &= (!empty($logmaster['path']));
+
+  define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
 }

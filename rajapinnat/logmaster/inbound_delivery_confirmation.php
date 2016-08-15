@@ -60,21 +60,26 @@ while (false !== ($file = readdir($handle))) {
     continue;
   }
 
-  $xml = simplexml_load_file($full_filepath);
+  $sanoman_kaikki_rivit = '';
+  $tilausrivit = $tilausrivit_error = $tilausrivit_success = array();
 
   pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
+  $xml = simplexml_load_file($full_filepath);
   $node = $xml->VendPackingSlip;
-
   $saapumisnro = (int) $node->PurchId;
+
+  $email_array[] = "";
+  $email_array[] = t("Saapuminen %s", "", $saapumisnro);
+  $email_array[] = "";
 
   $query = "SELECT tunnus
             FROM lasku
             WHERE yhtio     = '{$yhtio}'
             AND tila        = 'K'
+            AND alatila    != 'X'
             AND vanhatunnus = 0
-            AND laskunro    = '{$saapumisnro}'
-            AND sisviesti3  = 'ei_vie_varastoon'";
+            AND laskunro    = '{$saapumisnro}'";
   $selectres = pupe_query($query);
   $selectrow = mysql_fetch_assoc($selectres);
 
@@ -90,7 +95,6 @@ while (false !== ($file = readdir($handle))) {
     continue;
   }
 
-  $sanoman_kaikki_rivit = '';
   // Otetaan talteen Lines-elementti sieltä missä se on
   if (isset($xml->Lines)) {
     $sanoman_kaikki_rivit = $xml->Lines;
@@ -109,8 +113,6 @@ while (false !== ($file = readdir($handle))) {
 
     continue;
   }
-
-  $tilausrivit = $tilausrivit_error = array();
 
   # Ei haluta viedä varastoon niitä rivejä, mitkä ei ollu tässä aineistossa mukana
   # Joten laitetaan varastoon = 0
@@ -143,7 +145,75 @@ while (false !== ($file = readdir($handle))) {
 
   foreach ($tilausrivit as $rivitunnus => $data) {
     $tuoteno = $data['tuoteno'];
-    $kpl     = $data['kpl'];
+    $kpl     = (int) $data['kpl'];
+    $uusi_id = 0;
+
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio     = '{$yhtio}'
+              AND tuoteno     = '{$tuoteno}'
+              AND tyyppi      = 'O'
+              AND kpl         = 0
+              AND tunnus      = '{$rivitunnus}'
+              AND uusiotunnus = '{$saapumistunnus}'";
+    $tilausrivires = pupe_query($query);
+
+    if (mysql_num_rows($tilausrivires) != 1) {
+      $tilausrivit_error[] = array(
+        'tuoteno' => $tuoteno,
+        'logmaster_kpl' => $kpl,
+        'pupesoft_kpl' => '',
+      );
+
+       pupesoft_log('logmaster_inbound_delivery_confirmation', "Tilausriviä ei löydy rivitunnuksella {$rivitunnus} ja tuotenumerolla {$tuoteno}.");
+
+       continue;
+    }
+
+    $tilausrivirow = mysql_fetch_assoc($tilausrivires);
+
+    if ($kpl < 1) {
+      $tilausrivit_error[] = array(
+        'tuoteno' => $tuoteno,
+        'logmaster_kpl' => $kpl,
+        'pupesoft_kpl' => $tilausrivirow['varattu'],
+      );
+
+      pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanoman kpl oli pienempi kuin 1. Rivitunnus {$rivitunnus}.");
+
+      continue;
+    }
+
+    if ($kpl > $tilausrivirow['varattu']) {
+      $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalemäärä oli suurempi kuin tietokannassa. Sanomalla {$kpl}, tietokannassa {$tilausrivirow['varattu']}.");
+
+      pupesoft_log('logmaster_inbound_delivery_confirmation', "Sanoman kpl suurempi kuin tietokannassa. Rivitunnus {$rivitunnus}, sanoman kpl {$kpl}, tietokannan varattu {$tilausrivirow['varattu']}.");
+    }
+
+    # splitataan rivi
+    if ($kpl < $tilausrivirow['varattu']) {
+      $erotus = ($tilausrivirow['varattu'] - $kpl);
+      $uusi_id = splittaa_tilausrivi($rivitunnus, $kpl);
+
+      if ($uusi_id != 0) {
+        # Jätetään alkuperäiselle tilausriville jäljelle jäävä kappalemäärä
+        # Halutaan että uusi splitattu rivi menee varastoon
+        $query = "UPDATE tilausrivi SET
+                  varattu   = '{$erotus}'
+                  WHERE yhtio     = '{$yhtio}'
+                  AND tyyppi      = 'O'
+                  AND kpl         = 0
+                  AND tuoteno     = '{$tuoteno}'
+                  AND tunnus      = '{$rivitunnus}'";
+        $updres = pupe_query($query);
+
+        $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalemäärä oli pienempi kuin tietokannassa. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+
+        pupesoft_log('logmaster_inbound_delivery_confirmation', "Tilausrivi {$rivitunnus} splitattiin. Uusi käytetty tunnus on {$uusi_id}. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+
+        $rivitunnus = $uusi_id;
+      }
+    }
 
     # Päivitetään varattu ja kohdistetaan rivi
     $query = "UPDATE tilausrivi SET
@@ -156,14 +226,27 @@ while (false !== ($file = readdir($handle))) {
               AND tunnus      = '{$rivitunnus}'";
     $updres = pupe_query($query);
 
-    if (mysql_affected_rows() != 1) {
-      $tilausrivit_error[$rivitunnus] = $data;
+    if (mysql_affected_rows() == 1) {
+      $tilausrivit_success[] = array(
+        'tuoteno' => $tuoteno,
+        'logmaster_kpl' => $kpl,
+        'pupesoft_kpl' => $tilausrivirow['varattu'],
+      );
+    }
+    else {
+      $tilausrivit_error[] = array(
+        'tuoteno' => $tuoteno,
+        'logmaster_kpl' => $kpl,
+        'pupesoft_kpl' => $tilausrivirow['varattu'],
+      );
 
       pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} sanoman riviä {$rivitunnus} (tuoteno {$tuoteno}) ei päivitetty.");
     }
   }
 
-  if (count($tilausrivit) > 0) {
+  pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
+
+  if (count($tilausrivit_success) > 0) {
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Aloitetaan varastoonvienti saapumiselle {$saapumisnro}");
     pupesoft_log('logmaster_inbound_delivery_confirmation', "Käsiteltäviä rivejä yhteensä ".(count($tilausrivit) - count($tilausrivit_error))." / ".count($tilausrivit));
 
@@ -183,45 +266,44 @@ while (false !== ($file = readdir($handle))) {
     require "tilauskasittely/varastoon.inc";
 
     $query = "UPDATE lasku SET
-              sisviesti3  = 'ok_vie_varastoon'
+              sisviesti3  = 'kuittaus_saapunut_ulkoisesta_jarjestelmasta'
               WHERE yhtio = '{$yhtio}'
               AND tila    = 'K'
               AND tunnus  = '{$saapumistunnus}'";
     $updres = pupe_query($query);
 
-    $email_array[] = t("Saapumiselle %d on kuitattu seuraavia tuotteita", "", $saapumisnro).":";
-    $email_array[] = t("Tuoteno")." ".t("Kappaleita");
+    // params: filename, liitos, liitostunnus, selite, käyttötarkoitus
+    tallenna_liite($full_filepath, 'lasku', $saapumistunnus, 'Logmaster sanoma', 'XML');
 
-    foreach ($tilausrivit as $rivitunnus => $tuote) {
-      $email_array[] = "{$tuote['tuoteno']} {$tuote['kpl']}";
-    }
+    $email_array[] = "";
+    $email_array[] = t("Varastoon vietyjä rivejä").":";
+    $email_array[] = t("Tuoteno")." ".t("Varastoon")." ".t("Alkuperäinen kappalemäärä");
 
-    if (count($tilausrivit_error) > 0) {
-
-      $email_array[] = t("Saapuminen %s", "", $saapumisnro);
-      $email_array[] = t("Sanomassa seuraavia virheellisiä tuotteita");
-      $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Kappaleita");
-
-      foreach ($tilausrivit_error as $rivitunnus => $tuote) {
-        $email_array[] = "{$rivitunnus} {$tuote['tuoteno']} {$tuote['kpl']}";
-      }
+    foreach ($tilausrivit_success as $success) {
+      $email_array[] = "{$success['tuoteno']} {$success['logmaster_kpl']} {$success['pupesoft_kpl']}";
     }
   }
-  else {
-    pupesoft_log('logmaster_inbound_delivery_confirmation', "Päivitettäviä tilausrivejä ei ollut sanomalla {$file}");
+
+  if (count($tilausrivit_error) > 0) {
+    $email_array[] = "";
+    $email_array[] = t("Epäselviä/virheellisiä rivejä");
+    $email_array[] = t("Tuoteno")." ".t("Logmaster-kappalemäärä")." ".t("Pupesoft-kappalemäärä");
+
+    foreach ($tilausrivit_error as $error) {
+      $email_array[] = "{$error['tuoteno']} {$error['logmaster_kpl']} {$error['pupesoft_kpl']}";
+    }
   }
-
-  pupesoft_log('logmaster_inbound_delivery_confirmation', "Saapumiskuittaus saapumiselta {$saapumisnro} vastaanotettu");
-
-  $params = array(
-    'email' => $email,
-    'email_array' => $email_array,
-    'log_name' => 'logmaster_inbound_delivery_confirmation',
-  );
-
-  logmaster_send_email($params);
 
   rename($full_filepath, $path."done/".$file);
 }
+
+# Lähetetään sähköposti per ajo
+$params = array(
+  'email' => $email,
+  'email_array' => $email_array,
+  'log_name' => 'logmaster_inbound_delivery_confirmation',
+);
+
+logmaster_send_email($params);
 
 closedir($handle);

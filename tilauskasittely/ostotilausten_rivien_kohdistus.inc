@@ -1070,23 +1070,6 @@ if ($tila == 'tee_kohdistus') {
   }
 }
 
-$query = "SELECT DISTINCT varasto
-          FROM tilausrivi
-          WHERE yhtio     = '{$kukarow['yhtio']}'
-          AND uusiotunnus = '{$otunnus}'";
-$varastocheckres = pupe_query($query);
-
-$onkologmaster_varasto = true;
-
-while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-  $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-  if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
-    $onkologmaster_varasto = false;
-    break;
-  }
-}
-
 //n‰ytet‰‰n rivilista ja ruksataan kohdistettavia rivej‰
 if ($tila == '') {
 
@@ -1604,7 +1587,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] == '') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -2376,7 +2359,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] == '') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

@@ -165,7 +165,7 @@ if (!function_exists('logmaster_message_type')) {
 if (!function_exists('logmaster_outbounddelivery')) {
   function logmaster_outbounddelivery($otunnus) {
 
-    global $kukarow, $yhtiorow, $logmaster;
+    global $kukarow, $yhtiorow;
 
     $query = "SELECT lasku.*,
               tilausrivi.*,

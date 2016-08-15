@@ -126,7 +126,7 @@ if (!function_exists("toimitustapatarkista")) {
                   toimitustapa='$toita'
                   where toimitustapa='$trow[$i]'
                   and yhtio='$kukarow[yhtio]'
-                  and tila = 'V' and alatila in ('','K','J','A','C')";
+                  and tila = 'V' and alatila != 'V'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("valmistus otsikkoa");

@@ -16,7 +16,10 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
 
 if ($tee == "laheta" and $tilaukset != "") {
 
-  $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
+  $tilaukset = str_replace(array("\r", "\n", " "), "", $tilaukset);
+  $tilaukset = explode(",", $tilaukset);
+  $tilaukset = array_filter($tilaukset, 'is_numeric');
+  $tilaukset = implode(",", $tilaukset);
 
   $query = "SELECT DISTINCT lasku.tunnus
             FROM lasku

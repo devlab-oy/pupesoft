@@ -51,10 +51,10 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     if ($palautus == 0) {
       logmaster_sent_timestamp($laskurow['tunnus']);
-      pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+      pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
     }
     else {
-      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto ep‰onnistui.");
     }
   }
 }

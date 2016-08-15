@@ -45,15 +45,17 @@ $laskures = pupe_query($query);
 while ($laskurow = mysql_fetch_assoc($laskures)) {
   $filename = logmaster_outbounddelivery($laskurow['tunnus']);
 
-  if ($filename !== false) {
-    $palautus = logmaster_send_file($filename);
+  if ($filename === false) {
+    continue;
+  }
 
-    if ($palautus == 0) {
-      logmaster_sent_timestamp($laskurow['tunnus']);
-      pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
-    }
-    else {
-      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
-    }
+  $palautus = logmaster_send_file($filename);
+
+  if ($palautus == 0) {
+    logmaster_sent_timestamp($laskurow['tunnus']);
+    pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
+  }
+  else {
+    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
   }
 }

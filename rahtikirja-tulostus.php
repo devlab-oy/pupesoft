@@ -187,12 +187,22 @@ if ($tee == 'tulosta') {
             WHERE yhtio = '$kukarow[yhtio]'
             AND selite  = '$toimitustapa'";
   $toitares = pupe_query($query);
-  $toitarow = mysql_fetch_assoc($toitares);
 
-  // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
-  // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-  if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
-    $tee = "close_with_printer";
+  if (mysql_num_rows($toitares) == 1) {
+    $toitarow = mysql_fetch_assoc($toitares);
+
+    // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
+    // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      $tee = "close_with_printer";
+    }
+  }
+  else {
+    echo "<font class='message'>";
+    echo t("Toimitustapaa ei löytynyt");
+    echo "</font><br><br>";
+
+    $tee = "";
   }
 }
 

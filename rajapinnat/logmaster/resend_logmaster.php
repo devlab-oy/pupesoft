@@ -30,7 +30,7 @@ if ($tee == "laheta" and $tilaukset != "") {
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
-    echo t("Uudelleenl‰hetet‰‰n LogMaster-ker‰yssanoma").": {$tunnukset}<br>";
+    echo t("Uudelleenl‰hetet‰‰n LogMaster-ker‰yssanoma").": {$tilaukset}<br>";
 
     while ($laskurow = mysql_fetch_assoc($res)) {
       $filename = logmaster_outbounddelivery($laskurow['tunnus']);

@@ -1,6 +1,7 @@
 <?php
 
 require_once 'tilauskasittely/luo_myyntitilausotsikko.inc';
+require_once "rajapinnat/logmaster/logmaster-functions.php";
 
 if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
   $tvs_tila     = "V";
@@ -600,7 +601,7 @@ else {
           $varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
 
           if ($laskurow['tila'] == 'G' and in_array($laskurow['alatila'], array('', 'J')) and in_array($varaston_row['ulkoinen_jarjestelma'], array('L', 'P')) and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
-            posten_outbounddelivery($laskurow['tunnus'], $varaston_row['ulkoinen_jarjestelma']);
+            logmaster_outbounddelivery($laskurow['tunnus']);
           }
         }
 

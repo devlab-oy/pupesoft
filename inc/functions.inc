@@ -619,7 +619,7 @@ if (!function_exists("tv1dateconv")) {
     }
     else {
       if ($lyhyt == "LYHYT") return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 2, 2).$jatko;
-      else return substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
+      else return (int) substr($date, 8, 2).".". (int) substr($date, 5, 2).".".substr($date, 0, 4).$jatko;
     }
   }
 }
@@ -6844,6 +6844,39 @@ if (!function_exists("kalenteritapahtuma")) {
   }
 }
 
+if (!function_exists('js_openPrintDialog')) {
+  function js_openPrintDialog($fileurl, $nappiteksti = "Tulosta") {
+    return "<script type=\"text/javascript\">
+            function printIframePdf(){
+              window.frames[\"printf\"].focus();
+              try {
+                window.frames[\"printf\"].print();
+              }
+              catch(e){
+                window.print();
+                console.log(e);
+              }
+            }
+
+            function printObjectPdf() {
+              try{
+                document.getElementById('idPdf').print();
+              }
+              catch(e){
+                printIframePdf();
+                console.log(e);
+              }
+            }
+    </script>
+    <form>
+    <input type='button' onClick='printIframePdf()' class='btn' value='".t($nappiteksti)."'/>
+    </form><br><br>
+    <iframe id='printf' name='printf' src='{$fileurl}' frameborder='0' width='10' height='10' style='width: 10px; height: 10px; display: none;'></iframe>
+    <object id='idPdf' width='10' height='10' style='width: 10px; height: 10px; display: none;' type='application/pdf' data='{$fileurl}'>
+    </object>";
+  }
+}
+
 if (!function_exists('js_openUrlNewWindow')) {
   function js_openUrlNewWindow($url, $name, $params = "", $width="", $height="") {
     $width = (!empty($width)) ? $width : 700;
@@ -7682,12 +7715,12 @@ if (!function_exists("enable_ajax")) {
           document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
         }
         else {
-          document.haku_formi.submit();
+          document.forms[haku_formi].submit();
         }
         keyStrokeIndex=-1;
       }
       else {
-        document.haku_formi.submit();
+        document.forms[haku_formi].submit();
       }
 
       return false;
@@ -7783,7 +7816,13 @@ if (!function_exists("js_openFormInNewWindow")) {
           thistee = formi.elements["tee"].value;
           formi.elements["tee"].value = "NAYTATILAUS";
 
-          window.open('', name, 'top=100,left=100,resizable=yes');
+          leveys = ''
+
+          if (arguments[2] > 0) {
+            leveys = ",width="+arguments[2]+",height=800"
+          }
+
+          window.open('', name, 'top=100,left=100,resizable=yes'+leveys);
 
           formi.target=name;
 
@@ -8926,6 +8965,11 @@ if (!function_exists('tilauksen_liitetiedostot')) {
     global $kukarow, $yhtiorow;
 
     $tunnukset = array();
+
+    if (empty($liitostunnukset)) {
+      return $tunnukset;
+    }
+
     $kayttotarkoitus_lisa = isset($kayttotarkoitus) ? " and kayttotarkoitus = '{$kayttotarkoitus}' " : '';
 
     $query = "SELECT tunnus
@@ -13687,6 +13731,9 @@ if (!function_exists("LisaaTaso")) {
   function LisaaTaso($laji, $left, $koodi , $nimi) {
     global $kukarow;
 
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     // Funktio mahdollistaa lis‰‰m‰‰n tason mihin tahansa v‰liin.
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
     $re = pupe_query($qu);
@@ -13779,6 +13826,9 @@ if (!function_exists("LisaaPaaKat")) {
   function LisaaPaaKat($laji, $nimi) {
     global $kukarow;
 
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
+
     $qu = "INSERT INTO dynaaminen_puu
     (
       yhtio,
@@ -13806,6 +13856,9 @@ if (!function_exists("LisaaPaaKat")) {
 if (!function_exists("LisaaLapsi")) {
   function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi) {
     global $kukarow;
+
+    // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
+    $laji = strtolower($laji);
 
     if ($left == 1) {
       // mik‰li is‰ on root, niin lis‰t‰‰n sille alakat
@@ -14154,9 +14207,59 @@ if (!function_exists("paivitapuunsyvyys")) {
                   AND tunnus  = {$row["node_tunnus"]}";
         $updateres = pupe_query($updqu);
       }
+
+      $params = array(
+        'laji'   => $laji,
+        'lft'    => $row['lft'],
+        'rgt'    => $row['rgt'],
+        'tunnus' => $row['node_tunnus'],
+      );
+
+      paivita_puun_parent($params);
     }
 
     return;
+  }
+}
+
+if (!function_exists("paivita_puun_parent")) {
+  function paivita_puun_parent($params) {
+    global $yhtiorow, $kukarow;
+
+    $node_laji   = $params['laji'];
+    $node_left   = $params['lft'];
+    $node_right  = $params['rgt'];
+    $node_tunnus = $params['tunnus'];
+
+    if (empty($node_laji) or empty($node_left) or empty($node_right) or empty($node_tunnus)) {
+      die("invalid params");
+    }
+
+    // haetaan noden parentin id
+    $query = "SELECT dynaaminen_puu.tunnus AS parent_id
+              FROM dynaaminen_puu
+              WHERE dynaaminen_puu.yhtio = '{$kukarow['yhtio']}'
+              AND dynaaminen_puu.laji = '{$node_laji}'
+              AND dynaaminen_puu.lft < {$node_left}
+              AND dynaaminen_puu.rgt > {$node_right}
+              AND dynaaminen_puu.tunnus != {$node_tunnus}
+              ORDER BY dynaaminen_puu.lft DESC
+              LIMIT 1";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 1) {
+      $row = mysql_fetch_assoc($result);
+      $parent_id = $row['parent_id'];
+    }
+    else {
+      $parent_id = 'NULL';
+    }
+
+    $query = "UPDATE dynaaminen_puu SET
+              parent_id = {$parent_id}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$node_tunnus}";
+    pupe_query($query);
   }
 }
 
@@ -22230,7 +22333,7 @@ if (!function_exists('splittaa_tilausrivi')) {
               AND tilausrivi.tunnus  = '{$tunnus}'";
     $result = pupe_query($query);
 
-    if (mysql_num_rows($result) == 0) return false;
+    if (mysql_num_rows($result) == 0) return 0;
 
     $rivi = mysql_fetch_array($result);
 
@@ -24177,6 +24280,8 @@ if  (!function_exists('hae_chn_teksti')) {
       return t("Paperilasku, tulostetaan manuaalisesti", $kieli);
     case '999':
       return t("Laskutuskielto, laskutusta ei tehd‰", $kieli);
+    case '888':
+      return t("Laskuta heti", $kieli)." (".t("sis‰inen", $kieli).")";
     default:
       return FALSE;
     }
@@ -24238,7 +24343,7 @@ if  (!function_exists('verkkolaskuputkeen')) {
     }
 
     // EU-viennit eiv‰t mene verkkolaskuputkeen, paitsi jos CHN tai verkkolasku_vienti sallii verkkolaskutuksen
-    if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030") {
+    if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030" and $lasrow["chn"] != "111") {
       if ($info) {
         echo t("EU-vienti‰");
       }
@@ -24336,6 +24441,23 @@ if (!function_exists('search_array_key_recursive')) {
     }
 
     return $results;
+  }
+}
+
+if (!function_exists('search_array_min_with_key')) {
+  // Etsii ja palauttaa kaksiulotteisesta arrayst‰ elementin, jossa on pienin arvo annetussa "key" avaimessa
+  function search_array_min_with_key($array, $key) {
+    $min_array = array_shift($array);
+    $min_value = $min_array[$key];
+
+    foreach($array as $a) {
+      if ($a[$key] < $min_value) {
+        $min_value = $a[$key];
+        $min_array = $a;
+      }
+    }
+
+    return $min_array;
   }
 }
 
@@ -27846,190 +27968,6 @@ if (!function_exists('hae_asiakashinnat')) {
     }
 
     return $tuote_hinnat;
-  }
-}
-
-if (!function_exists('posten_outbounddelivery')) {
-  function posten_outbounddelivery($otunnus, $ulkoinen_jarjestelma) {
-
-    global $kukarow, $yhtiorow, $pupe_root_polku, $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
-
-    if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
-      return false;
-    }
-
-    $query = "SELECT lasku.*,
-              tilausrivi.*,
-              tilausrivi.kpl + tilausrivi.varattu AS kpl,
-              tilausrivi.tunnus AS tilausrivin_tunnus,
-              lasku.toimaika AS lasku_toimaika,
-              asiakas.email,
-              tuote.eankoodi
-              FROM lasku
-              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (
-                tilausrivi.yhtio    = lasku.yhtio AND
-                tilausrivi.otunnus  = lasku.tunnus AND
-                (tilausrivi.varattu + tilausrivi.kpl) > 0 AND
-                tilausrivi.tyyppi   IN ('L', 'G') AND
-                tilausrivi.var     != 'J'
-              )
-              JOIN tuote ON (
-                tuote.yhtio         = tilausrivi.yhtio AND
-                tuote.tuoteno       = tilausrivi.tuoteno AND
-                tuote.ei_saldoa     = ''
-              )
-              WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
-              AND lasku.tunnus      = '{$otunnus}'";
-    $loopres = pupe_query($query);
-
-    if (mysql_num_rows($loopres) == 0) {
-      return;
-    }
-
-    $looprow = mysql_fetch_assoc($loopres);
-
-    if ($ulkoinen_jarjestelma == 'L') {
-      $uj_nimi = "Helsingin Hyllyvarasto";
-    }
-    else {
-      $uj_nimi = "PostNord";
-    }
-
-    # S‰‰detaan muuttujia kuntoon
-    $query = "SELECT tunnus
-              FROM toimitustapa
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND selite  = '{$looprow['toimitustapa']}'";
-    $toimitustapa_chk_res = pupe_query($query);
-    $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-    $toim_ta = $looprow['ohjelma_moduli'] == 'MAGENTO' ? t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark') : null;
-    $transport_account = $toim_ta ? $toim_ta : substr($toimitustapa_chk_row['tunnus'], 0, 10);
-
-    $h1time = explode("-", substr($looprow['h1time'], 0, 10));
-    $pickinglistdate = "{$h1time[2]}-{$h1time[1]}-{$h1time[0]}";
-
-    $lasku_toimaika = explode("-", $looprow['lasku_toimaika']);
-    $deliverydate = "{$lasku_toimaika[2]}-{$lasku_toimaika[1]}-{$lasku_toimaika[0]}";
-
-    $cust_name         = trim($looprow['nimi'].' '.$looprow['nimitark']);
-    $rec_cust_name     = trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']);
-    $rec_cust_street   = $looprow['toim_osoite'];
-    $rec_cust_street2  = $looprow['kohde'];
-
-    if (empty($rec_cust_street2)) {
-      $rec_cust_street2 = $rec_cust_street;
-    }
-
-    # Rakennetaan XML
-    $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
-
-    $messageheader = $xml->addChild('MessageHeader');
-    $messageheader->addChild('MessageType', 'OutboundDelivery');
-    $messageheader->addChild('Sender',       xml_cleanstring($yhtiorow['nimi']));
-    $messageheader->addChild('Receiver',     $uj_nimi);
-
-    $custpickinglist = $xml->addChild('CustPickingList');
-    $custpickinglist->addChild('SalesId',             substr($otunnus, 0, 20));
-    $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
-    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($looprow['asiakkaan_tilausnumero'], 20)); // Magentosta?
-    $custpickinglist->addChild('CustReference',       xml_cleanstring($looprow['viesti'], 50));
-    $custpickinglist->addChild('OrderCode',          'U');
-    $custpickinglist->addChild('OrderType',          'SO');
-    $custpickinglist->addChild('PickingListDate',    $pickinglistdate);
-    $custpickinglist->addChild('DeliveryDate',       $deliverydate);
-    $custpickinglist->addChild('UnloadingDate',      0);
-    $custpickinglist->addChild('OrderDate',          0);
-    $custpickinglist->addChild('DlvTerm',            xml_cleanstring($looprow['toimitusehto'], 3));
-    $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
-    $custpickinglist->addChild('SalesOffice',        0);
-    $custpickinglist->addChild('SalesContact',       0);
-    $custpickinglist->addChild('Warehouse',          0);
-    $custpickinglist->addChild('InvoiceAmounth',     0);
-
-    $orderedby = $custpickinglist->addChild('OrderedBy');
-    $orderedby->addChild('CustAccount',  0);
-    $orderedby->addChild('CustName',     xml_cleanstring($cust_name, 50));
-    $orderedby->addChild('CustStreet',   xml_cleanstring($looprow['osoite'], 50));
-    $orderedby->addChild('CustStreet2',  xml_cleanstring($looprow['osoite'], 50));
-    $orderedby->addChild('CustPostCode', xml_cleanstring($looprow['postino'], 10));
-    $orderedby->addChild('CustCity',     xml_cleanstring($looprow['postitp'], 30));
-    $orderedby->addChild('CustCountry',  xml_cleanstring($looprow['maa'], 10));
-    $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
-
-    $receiver = $custpickinglist->addChild('Receiver');
-    $receiver->addChild('RecCustAccount',  0);
-    $receiver->addChild('RecCustName',     xml_cleanstring($rec_cust_name, 50));
-    $receiver->addChild('RecCustStreet',   xml_cleanstring($rec_cust_street, 50));
-    $receiver->addChild('RecCustStreet2',  xml_cleanstring($rec_cust_street2, 50));
-    $receiver->addChild('RecCustPostCode', xml_cleanstring($looprow['toim_postino'], 10));
-    $receiver->addChild('RecCustCity',     xml_cleanstring($looprow['toim_postitp'], 30));
-    $receiver->addChild('RecCustCountry',  xml_cleanstring($looprow['toim_maa'], 10));
-    $receiver->addChild('RecCustPhone',    xml_cleanstring($looprow['toim_puh'], 30));
-
-    $transport = $custpickinglist->addChild('Transport');
-    $transport->addChild('TransportAccount',      $transport_account);
-    $transport->addChild('TransportInstruction',  substr('', 0, 250));
-    $transport->addChild('FreightPayer',          'sender');
-
-    $lines = $custpickinglist->addChild('Lines');
-
-    mysql_data_seek($loopres, 0);
-
-    $_line_i = 1;
-    $posten_itemnumberfield = posten_field('ItemNumber');
-
-    while ($looprow = mysql_fetch_assoc($loopres)) {
-      // Laitetaan kappalem‰‰r‰t kuntoon
-      $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
-
-      $line = $lines->addChild('Line');
-      $line->addAttribute('No', $_line_i);
-      $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$posten_itemnumberfield], 22));
-      $line->addChild('CustItemNumber',    0);
-      $line->addChild('ItemName',          0);
-      $line->addChild('ItemText',          0);
-      $line->addChild('BatchId',           0);
-      $line->addChild('CustItemName',      0);
-      $line->addChild('Type',              1);
-      $line->addChild('BBDate',            0);
-      $line->addChild('OrderedQuantity',   $looprow['kpl']);
-      $line->addChild('DeliveredQuantity', $looprow['kpl']);
-      $line->addChild('Unit',              0);
-      $line->addChild('Price',             0);
-      $line->addChild('DiscountPercent',   0);
-      $line->addChild('CurrencyCode',      0);
-      $line->addChild('TaxCode',           0);
-      $line->addChild('LineInfo',          xml_cleanstring($looprow['kommentti'], 92));
-
-      $_line_i++;
-    }
-
-    $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
-    $filename = $pupe_root_polku."/dataout/{$_name}.xml";
-
-    if (file_put_contents($filename, $xml->asXML())) {
-      // L‰hetet‰‰n aina UTF-8 muodossa
-      $ftputf8 = true;
-
-      echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
-
-      $ftphost = $ftp_posten_logistik_host;
-      $ftpuser = $ftp_posten_logistik_user;
-      $ftppass = $ftp_posten_logistik_pass;
-      $ftppath = $ftp_posten_logistik_path;
-      $ftpfile = realpath($filename);
-
-      require "inc/ftp-send.inc";
-
-      if ($palautus == 0) {
-        pupesoft_log('outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
-      }
-      else {
-        pupesoft_log('outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
-      }
-    }
   }
 }
 
@@ -33288,34 +33226,6 @@ if (!function_exists('url_or_text')) {
   }
 }
 
-if (!function_exists('ulkoinen_jarjestelma_varastot')) {
-  function ulkoinen_jarjestelma_varastot($otunnus) {
-    global $kukarow;
-
-    $logmaster_varasto = 0;
-    $normivarastoja = 0;
-
-    $query = "SELECT DISTINCT varasto
-              FROM tilausrivi
-              WHERE yhtio     = '{$kukarow['yhtio']}'
-              AND uusiotunnus = '{$otunnus}'";
-    $varastocheckres = pupe_query($query);
-
-    while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-      $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-      if ($varastorow['ulkoinen_jarjestelma'] == 'L') {
-        $logmaster_varasto++;
-      }
-      else {
-        $normivarastoja++;
-      }
-    }
-
-    return array($logmaster_varasto, $normivarastoja);
-  }
-}
-
 if (!function_exists('poista_rivin_yhteensakommentti')) {
   function poista_rivin_yhteensakommentti($kommentti) {
 
@@ -33360,17 +33270,20 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
     $edi_varastopaikka_res = pupe_query($query);
     $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
 
-    $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+    $tulostusalue = onkotulostusalueita(
+      $edi_varastopaikka_row["hyllyalue"],
+      $edi_varastopaikka_row["hyllynro"],
+      $varasto_row['tunnus'],
+      $kukarow['yhtio']
+    );
 
-    $vielisa = "";
-    if ($til_vienti == "") $vielisa = "chn = '999', ";
-
-    // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
+    // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan,
+    // lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
     $query = "UPDATE lasku SET
               mapvm        = now(),
               tila         = 'N',
               alatila      = 'A',
-              $vielisa
+              chn          = '999',
               varasto      = '$varasto_row[tunnus]',
               sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
               tulostusalue = '$tulostusalue'
@@ -33379,24 +33292,24 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
     $magento_maksettu_res = pupe_query($query);
 
     // haetaan tilauksen tiedot
-    $query    = "SELECT *
-                 FROM lasku
-                 WHERE tunnus = '$tilausnumero'
-                 AND yhtio = '$kukarow[yhtio]'";
-    $result   = pupe_query($query);
+    $query = "SELECT *
+              FROM lasku
+              WHERE tunnus = '$tilausnumero'
+              AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 
     // pit‰‰ nollata toimitettuaika riveille
     $query = "UPDATE tilausrivi SET
-              toimitettu     = '',
+              toimitettu = '',
               toimitettuaika = ''
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND otunnus    = '$tilausnumero'";
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus = '$tilausnumero'";
     $result = pupe_query($query);
 
     // pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
     $query = "UPDATE tilausrivi SET
-              keratty      = '',
+              keratty = '',
               kerattyaika  = ''
               WHERE yhtio  = '$kukarow[yhtio]'
               AND otunnus  = '$tilausnumero'
@@ -33545,84 +33458,5 @@ if (!function_exists('pupesoft_a2ps')) {
 
     // palautetaan polku uuteen .ps tiedostoon
     return $out_file;
-  }
-}
-
-if (!function_exists('posten_field')) {
-  function posten_field($column_name) {
-
-    switch ($column_name) {
-    case 'ItemNumber':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ItemNumber' ", '', '', 'selitetark');
-
-      if (empty($key)) {
-        $key = 'tuoteno';
-      }
-
-      break;
-    case 'ProdGroup1':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
-
-      if (empty($key)) {
-        $key = 'try';
-      }
-
-      break;
-      case 'ProdGroup2':
-        $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
-
-        if (empty($key)) {
-          $key = '';
-        }
-
-        break;
-    default:
-      die(t('Annettu arvo ei ole k‰ytˆss‰'));
-    }
-
-    return mysql_real_escape_string($key);
-  }
-}
-
-if (!function_exists('check_file_extension')) {
-  function check_file_extension($file_name, $extension) {
-
-    if (!is_file($file_name) or !is_readable($file_name)) {
-      return false;
-    }
-
-    $path_parts = pathinfo($file_name);
-
-    if (empty($path_parts['extension'])) {
-      return false;
-    }
-
-    if (strtoupper($path_parts['extension']) == strtoupper($extension)) {
-      return true;
-    }
-
-    return false;
-  }
-}
-
-if (!function_exists('posten_message_type')) {
-  function posten_message_type($file_name) {
-    $extension = check_file_extension($file_name, 'XML');
-
-    if ($extension === false) {
-      return false;
-    }
-
-    $xml = simplexml_load_file($file_name);
-
-    if (!is_object($xml)) {
-      return false;
-    }
-
-    if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-      return trim($xml->MessageHeader->MessageType);
-    }
-
-    return false;
   }
 }

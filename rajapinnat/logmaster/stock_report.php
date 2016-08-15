@@ -20,11 +20,16 @@ if (trim($argv[3]) == '') {
 }
 
 // lis‰t‰‰n includepathiin pupe-root
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+ini_set("display_errors", 1);
+ini_set("memory_limit", "2G");
+
+error_reporting(E_ALL);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();
@@ -42,6 +47,7 @@ if (empty($kukarow)) {
 
 $path = trim($argv[2]);
 $error_email = trim($argv[3]);
+$email_array = array();
 
 $path = rtrim($path, '/').'/';
 $handle = opendir($path);
@@ -52,7 +58,7 @@ if ($handle === false) {
 
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = posten_message_type($full_filepath);
+  $message_type = logmaster_message_type($full_filepath);
 
   if ($message_type != 'StockReport') {
     continue;
@@ -60,9 +66,9 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  pupesoft_log('stock_report', "K‰sitell‰‰n sanoma {$file}");
+  pupesoft_log('logmaster_stock_report', "K‰sitell‰‰n sanoma {$file}");
 
-  // tuki vain yhdelle Posten-varastolle
+  // tuki vain yhdelle Logmaster-varastolle
   $query = "SELECT *
             FROM varastopaikat
             WHERE yhtio              = '{$kukarow['yhtio']}'
@@ -114,37 +120,43 @@ while (false !== ($file = readdir($handle))) {
     $b = (int) $hyllyssa * 10000;
 
     if ($a != $b) {
-      $saldoeroja[$tuoterow['tuoteno']]['posten'] = $kpl;
-      $saldoeroja[$tuoterow['tuoteno']]['pupe'] = $hyllyssa;
-      $saldoeroja[$tuoterow['tuoteno']]['nimitys'] = $tuoterow['nimitys'];
+      $saldoeroja[] = array(
+        "item"      => $line->ItemNumber,
+        "logmaster" => $kpl,
+        "nimitys"   => $tuoterow['nimitys'],
+        "pupe"      => $hyllyssa,
+        "tuoteno"   => $tuoterow['tuoteno'],
+      );
     }
   }
 
   if (count($saldoeroja) > 0) {
-    $body  = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":<br><br>\n\n";
-    $body .= t("Tuoteno").";".t("Nimitys").";".t("Posten").";".t("Pupe")."<br>\n";
 
-    foreach ($saldoeroja as $tuoteno => $_arr) {
-      $body .= "{$tuoteno};{$_arr['nimitys']};{$_arr['posten']};{$_arr['pupe']}<br>\n";
+    $email_array[] = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":";
+    $email_array[] = t("Logmaster-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("Logmaster-kpl").";".t("Pupesoft-kpl");
+
+    foreach ($saldoeroja as $ero) {
+      $email_array[] = "{$ero['item']};{$ero['tuoteno']};{$ero['nimitys']};{$ero['logmaster']};{$ero['pupe']}";
     }
 
-    $params = array(
-      'to' => $error_email,
-      'cc' => '',
-      'subject' => t("Posten saldovertailu")." - {$luontiaika}",
-      'ctype' => 'html',
-      'body' => $body,
-    );
-
-    pupesoft_sahkoposti($params);
-
-    pupesoft_log('stock_report', "Saldovertailussa eroja, l‰hetet‰‰n s‰hkˆposti {$error_email}");
+    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja.");
   }
+  else {
+    pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa ei ollut eroja.");
+  }
+
+  $params = array(
+    'email' => $error_email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_stock_report',
+  );
+
+  logmaster_send_email($params);
 
   // siirret‰‰n tiedosto done-kansioon
   rename($full_filepath, $path.'done/'.$file);
 
-  pupesoft_log('stock_report', "Saldovertailu k‰sitelty");
+  pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailu k‰sitelty");
 }
 
 closedir($handle);

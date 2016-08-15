@@ -198,7 +198,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     if (mysql_num_rows($loopres) == 0) {
       pupesoft_log('logmaster_outbound_delivery', "Yhtään riviä ei löytynyt tilaukselle {$otunnus}. Sanoman luonti epäonnistui.");
 
-      return;
+      return false;
     }
 
     $looprow = mysql_fetch_assoc($loopres);
@@ -215,7 +215,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     default:
       pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
 
-      return;
+      return false;
     }
 
     # Säädetaan muuttujia kuntoon

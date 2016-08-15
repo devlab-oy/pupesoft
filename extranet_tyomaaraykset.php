@@ -196,7 +196,7 @@ function piirra_kayttajan_tyomaaraykset() {
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table class='display dataTable' id='$pupe_DataTables'>";  
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
     echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
@@ -651,7 +651,7 @@ function email_tyomaarayskopio($request) {
           <input type='hidden' name='pdffilenimi' value='{$pdffilenimi}'>
           <input type='hidden' name='toim' value='HUOLTOPYYNTOKOPIO'>
           <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
+          <input type='submit' value='".t("Avaa huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
   }
 }
 

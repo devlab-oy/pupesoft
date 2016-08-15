@@ -53,6 +53,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
   if ($palautus == 0) {
     logmaster_sent_timestamp($laskurow['tunnus']);
+    logmaster_mark_as_sent($laskurow['tunnus']);
     pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
   }
   else {

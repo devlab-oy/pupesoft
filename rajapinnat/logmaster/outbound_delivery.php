@@ -41,6 +41,7 @@ $query = "SELECT *
             (tila = 'G' AND alatila = 'J')
           )
           AND CURTIME() >= DATE_ADD(h1time, INTERVAL 15 MINUTE)
+          AND lahetetty_ulkoiseen_varastoon = NULL
           {$tunnuksetlisa}";
 $laskures = pupe_query($query);
 

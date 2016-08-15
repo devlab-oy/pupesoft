@@ -592,19 +592,6 @@ else {
                   and tila    = '$tvs_tila'";
         $result = pupe_query($query);
 
-        if ($toim == "SIIRTOLISTA") {
-          $query = "SELECT ulkoinen_jarjestelma
-                    FROM varastopaikat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$laskurow['varasto']}'";
-          $ulkoinen_jarjestelma_res = pupe_query($query);
-          $varaston_row = mysql_fetch_assoc($ulkoinen_jarjestelma_res);
-
-          if ($laskurow['tila'] == 'G' and in_array($laskurow['alatila'], array('', 'J')) and in_array($varaston_row['ulkoinen_jarjestelma'], array('L', 'P')) and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
-            logmaster_outbounddelivery($laskurow['tunnus']);
-          }
-        }
-
         if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
           echo "<font class='message'>";
           echo t("Valmistus siirretty tulostusjonoon") . " " . $laskurow['tunnus'];

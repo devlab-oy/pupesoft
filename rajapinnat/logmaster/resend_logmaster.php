@@ -6,6 +6,8 @@ $useslave = 1;
 require "../../inc/parametrit.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
 
+$tee = empty($tee) ? '' : $tee;
+
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
 
 if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {

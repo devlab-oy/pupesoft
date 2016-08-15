@@ -31,15 +31,21 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   die ("Kerättävien tilauksien lähettäminen estetty yhtiötasolla!\n");
 }
 
-$query = "SELECT *
+$query = "SELECT lasku.*
           FROM lasku
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND (
-            (tila = 'N' AND alatila = 'A') OR
-            (tila = 'G' AND alatila = 'J' AND tilaustyyppi != 'M')
+          JOIN varastopaikat ON (
+            varastopaikat.yhtio = lasku.yhtio AND
+            varastopaikat.tunnus = lasku.varasto AND
+            varastopaikat.tyyppi != 'P' AND
+            varastopaikat.ulkoinen_jarjestelma IN ('L','P')
           )
-          AND CURTIME() >= DATE_ADD(h1time, INTERVAL 15 MINUTE)
-          AND lahetetty_ulkoiseen_varastoon IS NULL";
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          AND (
+            (lasku.tila = 'N' AND lasku.alatila = 'A') OR
+            (lasku.tila = 'G' AND lasku.alatila = 'J' AND lasku.tilaustyyppi != 'M')
+          )
+          AND CURTIME() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
+          AND lasku.lahetetty_ulkoiseen_varastoon IS NULL";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {

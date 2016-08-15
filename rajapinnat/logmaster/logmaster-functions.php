@@ -83,6 +83,28 @@ if (!function_exists('logmaster_sent_timestamp')) {
   }
 }
 
+if (!function_exists('logmaster_mark_as_sent')) {
+  function logmaster_mark_as_sent($tunnus) {
+    global $kukarow;
+
+    $query = "UPDATE lasku SET
+              tila    = 'L'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila = 'N'
+              AND alatila = 'A'
+              AND tunnus = '{$tunnus}'";
+    $res = pupe_query($query);
+
+    $query = "UPDATE lasku SET
+              alatila = 'A'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tila = 'G'
+              AND alatila = 'J'
+              AND tunnus = '{$tunnus}'";
+    $res = pupe_query($query);
+  }
+}
+
 if (!function_exists('logmaster_field')) {
   function logmaster_field($column_name) {
 

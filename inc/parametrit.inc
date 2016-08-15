@@ -270,15 +270,7 @@ unset($magento_api_ht_usr);
 unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
-unset($ftp_logmaster_host);
-unset($ftp_logmaster_user);
-unset($ftp_logmaster_pass);
-unset($ftp_logmaster_path);
-
-unset($ftp_posten_logistik_host);
-unset($ftp_posten_logistik_user);
-unset($ftp_posten_logistik_pass);
-unset($ftp_posten_logistik_path);
+unset($logmaster);
 
 unset($pupesoft_commandlinelog);
 
@@ -984,4 +976,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_sepa_pankkiyhteys &= (!empty($sepa_pankkiyhteys_token));
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
+
+  # Katsotaan onko Pupesoftissa Logmaster-rajapinta asetettuna
+  $_logmaster_rajapinta = true;
+  $_logmaster_rajapinta &= (!empty($logmaster['host']));
+  $_logmaster_rajapinta &= (!empty($logmaster['user']));
+  $_logmaster_rajapinta &= (!empty($logmaster['pass']));
+  $_logmaster_rajapinta &= (!empty($logmaster['path']));
+
+  define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
 }

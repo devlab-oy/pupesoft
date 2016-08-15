@@ -1,5 +1,7 @@
 <?php
 
+require_once "rajapinnat/logmaster/logmaster-functions.php";
+
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos     = "";
 $ohjausmerkkilisa       = "";
@@ -1164,10 +1166,30 @@ else {
       $result = pupe_query($query);
 
       //tulostetaan k‰teislasku...
-      $laskutettavat  = $laskurow["tunnus"];
-      $tee       = "TARKISTA";
-      $laskutakaikki   = "KYLLA";
-      $silent       = "VIENTI";
+      $laskutettavat = $laskurow["tunnus"];
+      $tee = "TARKISTA";
+      $laskutakaikki = "KYLLA";
+      $silent = "VIENTI";
+
+      if (!empty($yhtiorow['kateiskuitin_paivays']) and !empty($poikkeava_kpvm)) {
+        list($poikkeava_laskvv, $poikkeava_laskkk, $poikkeava_laskpp) = explode("-", $poikkeava_kpvm);
+
+        $poikkeava_laskkk = sprintf('%02d', $poikkeava_laskkk);
+        $poikkeava_laskpp = sprintf('%02d', $poikkeava_laskpp);
+
+        if (!checkdate($poikkeava_laskkk, $poikkeava_laskpp, $poikkeava_laskvv)) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")."!</font><br>";
+        }
+        elseif (strtotime($yhtiorow['tilikausi_alku']) > strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")
+          or strtotime($yhtiorow['tilikausi_loppu']) < strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")." ".t("Tilikausi on suljettu")."!</font><br>";
+        }
+        else {
+          $laskkk = $poikkeava_laskkk;
+          $laskpp = $poikkeava_laskpp;
+          $laskvv = $poikkeava_laskvv;
+        }
+      }
 
       if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
         $valittu_tulostin = $kukarow["kirjoitin"];
@@ -1181,8 +1203,6 @@ else {
       /**
        * Tulostetaan kassakuitti
        */
-
-
       require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
       $kuitin_parametrit = array("kateinen" => $kateista_annettu);
@@ -2079,7 +2099,7 @@ else {
 
       foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
         if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L', 'P'))) {
-          posten_outbounddelivery($_otunnus, $_ulkoinen_jarjestelma);
+          logmaster_outbounddelivery($_otunnus);
         }
       }
 

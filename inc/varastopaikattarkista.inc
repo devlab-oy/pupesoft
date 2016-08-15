@@ -2,7 +2,7 @@
 
 if (!function_exists("varastopaikattarkista")) {
   function varastopaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
-    global $kukarow, $yhtiorow, $alias_set;
+    global $kukarow, $yhtiorow, $alias_set, $logmaster;
 
     static $alkuhyllyalue, $alkuhyllynro, $loppuhyllyalue, $loppuhyllynro;
 
@@ -93,6 +93,18 @@ if (!function_exists("varastopaikattarkista")) {
     if (mysql_field_name($result, $i) == "printteri5") {
       if (trim($t[$i]) == '') {
         $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji‰")."!";
+      }
+    }
+
+    if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
+      $logmaster_ftp_check = is_array($logmaster);
+      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['host']));
+      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['user']));
+      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['pass']));
+      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['path']));
+
+      if (in_array($t[$i], array('L','P')) and !$logmaster_ftp_check) {
+        $virhe[$i] .= t("Valittuun ulkoiseen j‰rjestelm‰‰n vaaditut FTP-tiedot puuttuvat")."!";
       }
     }
   }

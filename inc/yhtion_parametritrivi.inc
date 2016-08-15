@@ -113,35 +113,16 @@ if ($fieldname == "verkkolasku_vienti") {
 
 if ($fieldname == "lahetteen_tulostustapa") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel1 = "";
-  $sel2 = "";
-  $sel3 = "";
-  $sel4 = "";
-  $sel5 = "";
+  $sel = array($trow[$i] => 'selected') + array('K' => '', 'L' => '', 'A' => '', 'B' => '', 'I' => '', 'X' => '');
 
-  if ($trow[$i] == 'A') {
-    $sel1 = "selected";
-  }
-  if ($trow[$i] == 'K') {
-    $sel2 = "selected";
-  }
-  if ($trow[$i] == 'B') {
-    $sel3 = "selected";
-  }
-  if ($trow[$i] == 'L') {
-    $sel4 = "selected";
-  }
-  if ($trow[$i] == 'I') {
-    $sel5 = "selected";
-  }
-
-  $ulos .= "<option value = 'K' $sel2>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa");
-  $ulos .= "<option value = 'L' $sel4>".t("Myyntitilausten ker‰yslistojen ja l‰hetteen tulostukseen k‰ytet‰‰n tulostusjonoa");
-  $ulos .= "<option value = 'A' $sel1>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti");
-  $ulos .= "<option value = 'B' $sel3>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti");
-  $ulos .= "<option value = 'I' $sel5>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi");
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilausten ker‰yslistojen tulostukseen k‰ytet‰‰n tulostusjonoa")."</option>";
+  $ulos .= "<option value = 'L' {$sel['L']}>".t("Myyntitilausten ker‰yslistojen ja l‰hetteen tulostukseen k‰ytet‰‰n tulostusjonoa")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilausten ker‰yslistat tulostetaan automaattisesti")."</option>";
+  $ulos .= "<option value = 'B' {$sel['B']}>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti")."</option>";
+  $ulos .= "<option value = 'I' {$sel['I']}>".t("Myyntitilausten ker‰yslistat ja l‰hetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi")."</option>";
+  $ulos .= "<option value = 'X' {$sel['X']}>".t("Myyntitilausten ker‰yslistojen ja l‰hetteiden tulostus ohitetaan ja tilaus laitetaan suoraan ker‰ykseen")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -595,6 +576,18 @@ if ($fieldname == "laskutus_tulevaisuuteen") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value = ''>".t("Ei sallita")."</option>";
   $ulos .= "<option value = 'S' {$sel}>".t("Saldottomia tuotteita voi laskuttaa tulevaisuuteen")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "kateiskuitin_paivays") {
+
+  $sel = $trow[$i] == "S" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Kassamyyj‰ ei voi syˆtt‰‰ poikkeavaa p‰iv‰m‰‰r‰‰ k‰teiskuitille")."</option>";
+  $ulos .= "<option value = 'S' {$sel}>".t("Kassamyyj‰ voi syˆtt‰‰ poikkeavan p‰iv‰m‰‰r‰n k‰teiskuitille")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3699,7 +3692,7 @@ if ($fieldname == "ulkoinen_jarjestelma") {
 
   $sel = array($trow[$i] => 'selected') + array('K' => '', 'S' => '');
 
-  $ulos .= "<option value = ''>".t("Varaston ulkoisen j‰rjestelm‰n toimintaa ei rajoiteta")."</option>";
+  $ulos .= "<option value = ''>".t("Varaston ulkoinen j‰rjestelm‰ toimii ker‰yksen ja saapumisen yhteydess‰")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain ker‰yksen yhteydess‰")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain saapumisen yhteydess‰")."</option>";
 
@@ -4844,7 +4837,7 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= "<option value = 'K' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰ vapaalla tekstill‰");
   $ulos .= "</option>";
-  
+
   $ulos .= "<option value = 'A' {$sel}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰ avainsanoilla");
   $ulos .= "</option>";

@@ -157,9 +157,11 @@ echo "</a></td>
 
 if (isset($usea) and $usea == 1) {
   $query = "SELECT yhtio.nimi, yhtio.yhtio
-            FROM kuka, yhtio
-            WHERE kuka='$user'
-            and yhtio.yhtio=kuka.yhtio";
+            FROM kuka
+            INNER JOIN yhtio ON (yhtio.yhtio = kuka.yhtio)
+            WHERE kuka.kuka = '$user'
+            AND kuka.extranet != ''
+            AND kuka.oletus_asiakas != ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

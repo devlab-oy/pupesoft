@@ -210,7 +210,8 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
     if ($malli == "Hintalappu PDF") {
       $tuotteet = array($trow);
       $params   = array(
-        "kpl" => $tulostakappale
+        "kpl"  => $tulostakappale,
+        "koko" => $koko,
       );
 
       require "tilauskasittely/tulosta_hintalaput.inc";
@@ -243,7 +244,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "2" : "5";
+  $colspan = $toim == 'HINTA' ? "3" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -253,7 +254,10 @@ if (!isset($nayta_pdf)) {
   echo "<th>".t("Tuotenumero")."</th>";
   echo "<th>".t("KPL")."</th>";
 
-  if ($toim != 'HINTA') {
+  if ($toim == 'HINTA') {
+    echo "<th><label for='koko'>" . t('Koko') . "</label></th>";
+  }
+  else {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
     echo "<th><label for='viivakoodityyppi_1'>" . t("Viivakoodityyppi") . "</label></th>";
@@ -267,7 +271,15 @@ if (!isset($nayta_pdf)) {
   echo "<td><input type='text' name='tuoteno' size='20' maxlength='60' value='$tuoteno'></td>";
   echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
 
-  if ($toim != "HINTA") {
+  if ($toim == 'HINTA') {
+    echo "<td>";
+    echo "<select id='koko' name='koko'>";
+    echo "<option value='4.9x3cm'>49 x 30 mm</option>";
+    echo "<option value='6.2x2.9cm'>62 x 29 mm</option>";
+    echo "</select>";
+    echo "</td>";
+  }
+  else {
     echo "<td><select name='kirjoitin'>";
     echo "<option value=''>" . t("Ei kirjoitinta") . "</option>";
 

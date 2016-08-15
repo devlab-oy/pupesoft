@@ -9,7 +9,7 @@ require "rajapinnat/logmaster/logmaster-functions.php";
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
 
 if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
-  echo "Kerättävien tilauksien lähettäminen estetty yhtiötasolla!<br>";
+  echo t("Kerättävien tilauksien lähettäminen estetty yhtiötasolla")."!<br>";
   require "inc/footer.inc";
   exit;
 }
@@ -36,18 +36,18 @@ if ($tee == "laheta" and $tilaukset != "") {
       $filename = logmaster_outbounddelivery($laskurow['tunnus']);
 
       if ($filename === false) {
-        echo "Tilauksen {$laskurow['tunnus']} sanoman luonti epäonnistui.<br>";
+        echo t("Tilauksen %d sanoman luonti epäonnistui", '', $laskurow['tunnus'])."<br>";
       }
       else {
         $palautus = logmaster_send_file($filename);
 
         if ($palautus == 0) {
           pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
-          echo "Siirretiin tilaus {$laskurow['tunnus']}.<br>";
+          echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
         }
         else {
           pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
-          echo "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.<br>";
+          echo t("Tilauksen %d siirto epäonnistui", '', $laskurow['tunnus'])."<br>";
         }
       }
     }

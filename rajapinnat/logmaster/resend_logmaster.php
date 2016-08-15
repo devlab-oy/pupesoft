@@ -8,11 +8,17 @@ require "rajapinnat/logmaster/logmaster-functions.php";
 
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
 
+if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
+  echo "Kerättävien tilauksien lähettäminen estetty yhtiötasolla!<br>";
+  require "inc/footer.inc";
+  exit;
+}
+
 if ($tee == "laheta" and $tilaukset != "") {
 
   $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
 
-  $query = "SELECT distinct lasku.tunnus
+  $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) AS tunnukset
             FROM lasku
             JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio
               AND lasku.varasto=varastopaikat.tunnus
@@ -21,16 +27,16 @@ if ($tee == "laheta" and $tilaukset != "") {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND lasku.tila    in ('L','N', 'G')
             AND lasku.tunnus  in ($tilaukset)";
-  $res  = pupe_query($query);
+  $res          = pupe_query($query);
+  $tunnuksetrow = mysql_fetch_assoc($res);
+  $tunnukset    = $tunnuksetrow['tunnukset'];
 
-  if (mysql_num_rows($result) > 0 and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
-    while ($laskurow = mysql_fetch_assoc($res)) {
-      echo t("Uudelleenlähetetään LogMaster-keräyssanoma").": $laskurow[tunnus]<br>";
-      logmaster_outbounddelivery($laskurow["tunnus"]);
-    }
+  if ($tunnukset != '') {
+    echo t("Uudelleenlähetetään LogMaster-keräyssanoma").": {$tunnukset}<br>";
+    require "rajapinnat/logmaster/outbound_delivery.php";
   }
   else {
-    echo "<font class='error'>".t("Tilauksia ei löytynyt").": $tilaukset!</font><br>";
+    echo "<font class='error'>".t("Tilauksia ei löytynyt").": {$tilaukset}!</font><br>";
   }
 }
 

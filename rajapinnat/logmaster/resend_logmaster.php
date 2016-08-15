@@ -42,12 +42,12 @@ if ($tee == "laheta" and $tilaukset != "") {
         $palautus = logmaster_send_file($filename);
 
         if ($palautus == 0) {
-          pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
-          echo "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.<br>";
+          pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
+          echo "Siirretiin tilaus {$laskurow['tunnus']}.<br>";
         }
         else {
-          pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
-          echo "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.<br>";
+          pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto ep‰onnistui.");
+          echo "Tilauksen {$laskurow['tunnus']} siirto ep‰onnistui.<br>";
         }
       }
     }

@@ -36,7 +36,7 @@ $query = "SELECT *
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND (
             (tila = 'N' AND alatila = 'A') OR
-            (tila = 'G' AND alatila = 'J')
+            (tila = 'G' AND alatila = 'J' AND tilaustyyppi != 'M')
           )
           AND CURTIME() >= DATE_ADD(h1time, INTERVAL 15 MINUTE)
           AND lahetetty_ulkoiseen_varastoon IS NULL";

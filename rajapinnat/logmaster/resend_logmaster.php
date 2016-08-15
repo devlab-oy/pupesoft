@@ -10,8 +10,7 @@ echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><
 
 if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   echo t("Kerättävien tilauksien lähettäminen estetty yhtiötasolla")."!<br>";
-  require "inc/footer.inc";
-  exit;
+  $tee = '';
 }
 
 if ($tee == "laheta" and $tilaukset != "") {

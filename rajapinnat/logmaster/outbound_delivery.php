@@ -28,7 +28,7 @@ if (!isset($kukarow)) {
 }
 
 if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
-  die ("Saapumisen lähettäminen estetty yhtiötasolla!\n");
+  die ("Kerättävien tilauksien lähettäminen estetty yhtiötasolla!\n");
 }
 
 $query = "SELECT *

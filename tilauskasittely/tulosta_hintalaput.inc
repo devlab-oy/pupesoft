@@ -9,7 +9,8 @@ require_once "barcode/c128cobject.php";
  * @param array   $tuotteet Array tuotteista, joiden hintalaput tulostetaan
  * @param array   $params   Configuraation array. Esimerkki:
  *   array(
- *     "kpl" => 1
+ *     "kpl"  => 1,
+ *     "koko" => '4.9x3cm',
  *   );
  *
  * @return array Tiedostonimi ja kaunisnimi
@@ -17,7 +18,8 @@ require_once "barcode/c128cobject.php";
 
 
 function tulosta_hintalaput($tuotteet, $params = array()) {
-  $kpl = isset($params["kpl"]) ? $params["kpl"] : false;
+  $kpl  = isset($params["kpl"]) ? $params["kpl"] : false;
+  $koko = isset($params["koko"]) ? $params["koko"] :'4.9x3cm';
 
   $pdf = new pdffile();
 
@@ -64,7 +66,7 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
     }
 
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
-      $page = $pdf->new_page('4.9x3cm');
+      $page = $pdf->new_page($koko);
 
       // Kuva ensin, jotta ei mene tekstin päälle
       $pdf->image_place($kuva, 15, $viivakoodi_vasen, $page, $viivakoodin_asetukset);

@@ -31,18 +31,47 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   die ("Kerättävien tilauksien lähettäminen estetty yhtiötasolla!\n");
 }
 
+# Haetaan myyntitilauksia ja siirtolistoja
+# Varaston täytyy käyttää ulkoista varastoa
+# Varasto ei saa olla poistettu
+# Maksuehto ei saa olla jälkivaatimus
+# Tilausrivi ei saa olla jälkitoimitus eikä hyvitysrivejä (kappaleet miinusmerkkisiä)
+# Tuote ei saa olla saldoton eikä poistettu
 $query = "SELECT lasku.*
           FROM lasku
           JOIN varastopaikat ON (
-            varastopaikat.yhtio = lasku.yhtio AND
-            varastopaikat.tunnus = lasku.varasto AND
+            varastopaikat.yhtio   = lasku.yhtio AND
+            varastopaikat.tunnus  = lasku.varasto AND
             varastopaikat.tyyppi != 'P' AND
             varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+          )
+          JOIN maksuehto ON (
+            maksuehto.yhtio = lasku.yhtio AND
+            maksuehto.tunnus = lasku.maksuehto AND
+            maksuehto.jv = ''
+          )
+          JOIN tilausrivi ON (
+            tilausrivi.yhtio    = lasku.yhtio AND
+            tilausrivi.otunnus  = lasku.tunnus AND
+            (tilausrivi.varattu + tilausrivi.kpl) > 0 AND
+            tilausrivi.tyyppi   IN ('L', 'G') AND
+            tilausrivi.var     != 'J'
+          )
+          JOIN tuote ON (
+            tuote.yhtio         = tilausrivi.yhtio AND
+            tuote.tuoteno       = tilausrivi.tuoteno AND
+            tuote.ei_saldoa     = '' AND
+            tuote.status       != 'P'
           )
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND (
             (lasku.tila = 'N' AND lasku.alatila = 'A') OR
-            (lasku.tila = 'G' AND lasku.alatila = 'J' AND lasku.tilaustyyppi != 'M')
+            (
+              lasku.tila = 'G' AND
+              lasku.alatila = 'J' AND
+              lasku.tilaustyyppi != 'M' AND
+              lasku.toimitustavan_lahto = 0
+            )
           )
           AND CURTIME() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
           AND lasku.lahetetty_ulkoiseen_varastoon IS NULL";

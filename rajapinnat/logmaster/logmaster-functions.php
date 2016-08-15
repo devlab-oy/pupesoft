@@ -167,6 +167,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     global $kukarow, $yhtiorow;
 
+    $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
+
     $query = "SELECT lasku.*,
               tilausrivi.*,
               lasku.varasto AS otsikon_varasto,
@@ -329,7 +331,6 @@ if (!function_exists('logmaster_outbounddelivery')) {
     pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty ".($_line_i - 1)." riviä.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
-    $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {

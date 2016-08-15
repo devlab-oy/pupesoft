@@ -39,7 +39,7 @@ $query = "SELECT *
             (tila = 'G' AND alatila = 'J')
           )
           AND CURTIME() >= DATE_ADD(h1time, INTERVAL 15 MINUTE)
-          AND lahetetty_ulkoiseen_varastoon = NULL";
+          AND lahetetty_ulkoiseen_varastoon IS NULL";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {

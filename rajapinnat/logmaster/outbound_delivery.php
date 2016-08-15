@@ -22,7 +22,6 @@ pupesoft_flock();
 $yhtio = mysql_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
-$pupe_root_polku = dirname(dirname(dirname(__FILE__)));
 
 if (!isset($kukarow)) {
   exit("VIRHE: Admin käyttäjä ei löydy!\n");

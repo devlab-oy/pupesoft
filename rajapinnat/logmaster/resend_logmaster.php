@@ -18,7 +18,7 @@ if ($tee == "laheta" and $tilaukset != "") {
 
   $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
 
-  $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus) AS tunnukset
+  $query = "SELECT DISTINCT lasku.tunnus
             FROM lasku
             JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio
               AND lasku.varasto=varastopaikat.tunnus
@@ -27,13 +27,30 @@ if ($tee == "laheta" and $tilaukset != "") {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND lasku.tila    in ('L','N', 'G')
             AND lasku.tunnus  in ($tilaukset)";
-  $res          = pupe_query($query);
-  $tunnuksetrow = mysql_fetch_assoc($res);
-  $tunnukset    = $tunnuksetrow['tunnukset'];
+  $res = pupe_query($query);
 
-  if ($tunnukset != '') {
+  if (mysql_num_rows($res) > 0) {
     echo t("Uudelleenl‰hetet‰‰n LogMaster-ker‰yssanoma").": {$tunnukset}<br>";
-    require "rajapinnat/logmaster/outbound_delivery.php";
+
+    while ($laskurow = mysql_fetch_assoc($res)) {
+      $filename = logmaster_outbounddelivery($laskurow['tunnus']);
+
+      if ($filename === false) {
+        echo "Tilauksen {$laskurow['tunnus']} sanoman luonti ep‰onnistui.<br>";
+      }
+      else {
+        $palautus = logmaster_send_file($filename);
+
+        if ($palautus == 0) {
+          pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.");
+          echo "Siirretiin tilaus {$otunnus} {$uj_nimi} -j‰rjestelm‰‰n.<br>";
+        }
+        else {
+          pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.");
+          echo "Tilauksen {$otunnus} siirto {$uj_nimi} -j‰rjestelm‰‰n ep‰onnistui.<br>";
+        }
+      }
+    }
   }
   else {
     echo "<font class='error'>".t("Tilauksia ei lˆytynyt").": {$tilaukset}!</font><br>";

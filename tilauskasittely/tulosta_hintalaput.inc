@@ -38,22 +38,32 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
     "font"   => "Helvetica-Bold"
   );
 
-  foreach ($tuotteet as $tuote) {
-    $nimitys = explode("\n", wordwrap($tuote['nimitys'], 28));
-    $hinta   = hintapyoristys($tuote['myyntihinta']);
-
-    $viivakoodi              = viivakoodi($tuote['tuoteno'], "code128", 360, 60);
-    $viivakoodin_teksti      = $tuote['tuoteno'];
-    $viivakoodi_teksti_vasen = 50;
+  switch ($koko) {
+  case '6.2x2.9cm':
+    $viivakoodi_leveys       = 600;
+    $viivakoodi_vasen        = 2;
+    $viivakoodi_teksti_vasen = 2;
+    $viivakoodin_asetukset   = array("scale" => array("x" => 0.1, "y" => 0.1));
+    $kompensaatio            = -2;
+    $hinta_x                 = 140;
+    $yksikko_x               = 168;
+    break;
+  default:
+    $viivakoodi_leveys       = 360;
     $viivakoodi_vasen        = 17;
+    $viivakoodi_teksti_vasen = 50;
+    $viivakoodin_asetukset   = array("scale" => array("x" => 0.1, "y" => 0.1));
+    $kompensaatio            = 0;
+    $hinta_x                 = 100;
+    $yksikko_x               = 129;
+  }
 
-    $viivakoodin_asetukset = array(
-      "scale" => array(
-        "x" => 0.1,
-        "y" => 0.1
-      )
-    );
-    $kuva                  = $pdf->jfif_embed($viivakoodi);
+  foreach ($tuotteet as $tuote) {
+    $nimitys            = explode("\n", wordwrap($tuote['nimitys'], 28));
+    $hinta              = hintapyoristys($tuote['myyntihinta']);
+    $viivakoodi         = viivakoodi($tuote['tuoteno'], "code128", $viivakoodi_leveys, 60);
+    $viivakoodin_teksti = $tuote['tuoteno'];
+    $kuva               = $pdf->jfif_embed($viivakoodi);
 
     if ($kpl) {
       $montako_tulostetaan = $kpl;
@@ -70,16 +80,16 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
 
       // Kuva ensin, jotta ei mene tekstin päälle
       $pdf->image_place($kuva, 15, $viivakoodi_vasen, $page, $viivakoodin_asetukset);
-      $pdf->draw_text(0, 77, $nimitys[0], $page, $text_normal);
-      $pdf->draw_text(0, 68, $nimitys[1], $page, $text_normal);
-      $pdf->draw_text(0, 59, $nimitys[2], $page, $text_normal);
+      $pdf->draw_text(0, 77 + $kompensaatio, $nimitys[0], $page, $text_normal);
+      $pdf->draw_text(0, 68 + $kompensaatio, $nimitys[1], $page, $text_normal);
+      $pdf->draw_text(0, 59 + $kompensaatio, $nimitys[2], $page, $text_normal);
 
       $hinta         = str_replace(".", ",", $hinta);
       $hinnan_leveys = $pdf->strlen($hinta, $text_normal);
-      $pdf->draw_text(100 - $hinnan_leveys, 50, $hinta . " EUR", $page, $text_bold);
+      $pdf->draw_text($hinta_x - $hinnan_leveys, 50, $hinta . " EUR", $page, $text_bold);
 
       $yksikon_leveys = $pdf->strlen($tuote['yksikko'], $text_normal);
-      $pdf->draw_text(129 - $yksikon_leveys, 40, $tuote['yksikko'], $page, $text_normal);
+      $pdf->draw_text($yksikko_x - $yksikon_leveys, 40, $tuote['yksikko'], $page, $text_normal);
       $pdf->draw_text($viivakoodi_teksti_vasen, 8, $viivakoodin_teksti, $page, $text_normal);
     }
   }

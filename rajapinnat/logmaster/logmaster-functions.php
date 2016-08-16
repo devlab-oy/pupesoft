@@ -120,7 +120,9 @@ if (!function_exists('logmaster_mark_as_sent')) {
     case 'G':
       $tee          = "valmis";
       $toim         = "SIIRTOLISTA";
-      $tulostetaan  = "";
+      $tulostetaan  = "OK";
+      # Tällä yhtiön parametrilla pystytään ohittamaan keräyslistan tulostus
+      $yhtiorow['tulosta_valmistus_tulosteet'] = 'foobar';
 
       require "tilauskasittely/tilaus-valmis-siirtolista.inc";
       break;

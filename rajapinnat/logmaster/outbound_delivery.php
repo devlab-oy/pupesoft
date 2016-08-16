@@ -15,11 +15,12 @@ error_reporting(E_ALL);
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
-$yhtio = mysql_escape_string(trim($argv[1]));
+$yhtio = mysql_real_escape_string(trim($argv[1]));
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 

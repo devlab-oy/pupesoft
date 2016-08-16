@@ -97,13 +97,7 @@ if (!function_exists("varastopaikattarkista")) {
     }
 
     if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
-      $logmaster_ftp_check = is_array($logmaster);
-      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['host']));
-      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['user']));
-      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['pass']));
-      $logmaster_ftp_check = ($logmaster_ftp_check and !empty($logmaster['path']));
-
-      if (in_array($t[$i], array('L','P')) and !$logmaster_ftp_check) {
+      if (in_array($t[$i], array('L','P')) and !LOGMASTER_RAJAPINTA) {
         $virhe[$i] .= t("Valittuun ulkoiseen j‰rjestelm‰‰n vaaditut FTP-tiedot puuttuvat")."!";
       }
     }

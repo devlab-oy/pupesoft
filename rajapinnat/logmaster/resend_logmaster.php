@@ -47,7 +47,6 @@ if ($tee == "laheta" and $tilaukset != "") {
       $palautus = logmaster_send_file($filename);
 
       if ($palautus == 0) {
-        logmaster_mark_as_sent($laskurow['tunnus']);
         pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
         echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
       }

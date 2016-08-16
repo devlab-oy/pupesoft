@@ -57,6 +57,9 @@ if (!function_exists('logmaster_send_file')) {
     // L‰hetet‰‰n aina UTF-8 muodossa
     $ftputf8 = true;
 
+    # Ei haluta ett‰ tulostetaan mit‰‰n ruudulle
+    $tulos_ulos = "foobar";
+
     $ftphost = $logmaster['host'];
     $ftpuser = $logmaster['user'];
     $ftppass = $logmaster['pass'];

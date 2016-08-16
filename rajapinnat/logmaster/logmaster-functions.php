@@ -101,6 +101,11 @@ if (!function_exists('logmaster_mark_as_sent')) {
               )
               AND tunnus = '{$tunnus}'";
     $res = pupe_query($query);
+
+    if (mysql_num_rows($res) == 0) {
+      return false;
+    }
+
     $laskurow = mysql_fetch_assoc($res);
 
     switch ($laskurow['tila']) {

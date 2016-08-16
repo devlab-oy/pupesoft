@@ -4287,10 +4287,12 @@ if ($fieldname == "maventa_aikaleima") {
 if ($fieldname == 'maksukehotuksen_osoitetiedot') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'K' ? ' selected' : '';
+  $sel = array_fill_keys(array('K', 'C'), '');
+  $sel[$trow[$i]] = " SELECTED";
 
   $ulos .= "<option value = ''>".t("K‰ytet‰‰n asiakkaan virallista osoitetta")."</option>";
-  $ulos .= "<option value = 'K' $sel>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
+  $ulos .= "<option value = 'K' {$sel["K"]}>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
+  $ulos .= "<option value = 'C' {$sel["C"]}>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta ja n‰ytet‰‰n myˆs asiakkaan virallinen osoite")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

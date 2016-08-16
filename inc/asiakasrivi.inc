@@ -1223,6 +1223,7 @@ if ($fieldname == 'maksukehotuksen_osoitetiedot') {
   $ulos .= "<option value = ''>".t("Käytetään yhtiön oletuksia")."</option>";
   $ulos .= "<option value = 'A' $sel[A]>".t("Käytetään asiakkaan virallista osoitetta")."</option>";
   $ulos .= "<option value = 'B' $sel[B]>".t("Käytetään asiakkaan laskutusosoitetta")."</option>";
+  $ulos .= "<option value = 'C' $sel[C]>".t("Käytetään asiakkaan laskutusosoitetta ja näytetään myös asiakkaan virallinen osoite")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

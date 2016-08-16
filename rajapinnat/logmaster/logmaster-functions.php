@@ -115,17 +115,28 @@ if (!function_exists('logmaster_mark_as_sent')) {
       $tilausnumeroita = $laskurow['tunnus'];
       $toim = "";
 
+      ob_start();
+
       require "tilauskasittely/tilaus-valmis-tulostus.inc";
-      break;
+
+      $viestit = ob_get_contents();
+      ob_end_clean();
+
+      return $viestit;
     case 'G':
       $toim         = "SIIRTOLISTA";
       $tulostetaan  = "OK";
       # Tällä yhtiön parametrilla pystytään ohittamaan keräyslistan tulostus
       $yhtiorow['tulosta_valmistus_tulosteet'] = 'foobar';
 
-      require "tilauskasittely/tilaus-valmis-siirtolista.inc";
-      break;
+      ob_start();
 
+      require "tilauskasittely/tilaus-valmis-siirtolista.inc";
+
+      $viestit = ob_get_contents();
+      ob_end_clean();
+
+      return $viestit;
     default:
       return false;
     }

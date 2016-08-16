@@ -1335,10 +1335,11 @@ if ($tee2 == '') {
           echo t("Ulkoisen varaston tilaus");
         }
         else {
-          echo "<input type='submit' value='".t("Tulosta")."'></form>";
+          echo "<input type='submit' value='".t("Tulosta")."'>";
         }
 
-        echo "</$ero>";
+
+        echo "</$ero></form>";
 
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim'       value='$toim'>";

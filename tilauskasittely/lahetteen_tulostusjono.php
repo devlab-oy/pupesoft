@@ -335,7 +335,6 @@ if ($tee2 == 'VALITSE') {
 
   //Haetaan sopivat tilaukset
   $query = "SELECT lasku.tunnus, lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto,
-            lasku.lahetetty_ulkoiseen_varastoon,
             if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
             if (min(lasku.clearing)='','N',if (min(lasku.clearing)='JT-TILAUS','J',if (min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
             left(min(lasku.kerayspvm),10) kerayspvm,
@@ -590,12 +589,7 @@ if ($tee2 == 'VALITSE') {
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 
       if ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
-        if (is_null($tilrow['lahetetty_ulkoiseen_varastoon'])) {
-          echo t("Ulkoisen varaston tilaus");
-        }
-        else {
-          echo t("Ulkoisen varaston tilaus keräyksessä");
-        }
+        echo t("Ulkoisen varaston tilaus");
       }
       else {
         echo "<input type='submit' name='tila' value='".t("Tulosta")."'>";
@@ -998,7 +992,7 @@ if ($tee2 == '') {
   }
 
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
-            lasku.yhtio_toimipaikka, lasku.lahetetty_ulkoiseen_varastoon,
+            lasku.yhtio_toimipaikka,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
             if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -1338,12 +1332,7 @@ if ($tee2 == '') {
         echo "<$ero valign='top'>";
 
         if ($onkologmaster_varasto) {
-          if (is_null($tilrow['lahetetty_ulkoiseen_varastoon'])) {
-            echo t("Ulkoisen varaston tilaus");
-          }
-          else {
-            echo t("Ulkoisen varaston tilaus keräyksessä");
-          }
+          echo t("Ulkoisen varaston tilaus");
         }
         else {
           echo "<input type='submit' value='".t("Tulosta")."'></form>";

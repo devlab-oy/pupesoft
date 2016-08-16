@@ -31,6 +31,10 @@ if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   die ("Ker‰tt‰vien tilauksien l‰hett‰minen estetty yhtiˆtasolla!\n");
 }
 
+if ($yhtiorow['lahetteen_tulostustapa'] != 'K') {
+  die ("Ker‰tt‰vien tilauksien l‰hett‰minen edellytt‰‰ ett‰ ker‰yslistojen tulostuksessa k‰ytet‰‰n tulostusjonoa!\n");
+}
+
 # Haetaan myyntitilauksia ja siirtolistoja
 # Varaston t‰ytyy k‰ytt‰‰ ulkoista varastoa
 # Varasto ei saa olla poistettu

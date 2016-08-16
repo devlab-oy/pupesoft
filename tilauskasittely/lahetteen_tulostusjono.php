@@ -1338,7 +1338,6 @@ if ($tee2 == '') {
           echo "<input type='submit' value='".t("Tulosta")."'>";
         }
 
-
         echo "</$ero></form>";
 
         echo "<form method='post'>";

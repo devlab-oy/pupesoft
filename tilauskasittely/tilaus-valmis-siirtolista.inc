@@ -1,7 +1,6 @@
 <?php
 
 require_once 'tilauskasittely/luo_myyntitilausotsikko.inc';
-require_once "rajapinnat/logmaster/logmaster-functions.php";
 
 if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
   $tvs_tila     = "V";

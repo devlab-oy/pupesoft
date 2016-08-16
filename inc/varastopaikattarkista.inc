@@ -2,7 +2,7 @@
 
 if (!function_exists("varastopaikattarkista")) {
   function varastopaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
-    global $kukarow, $yhtiorow, $alias_set, $logmaster;
+    global $kukarow, $yhtiorow, $alias_set;
 
     static $alkuhyllyalue, $alkuhyllynro, $loppuhyllyalue, $loppuhyllynro;
 

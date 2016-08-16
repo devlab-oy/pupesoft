@@ -46,7 +46,7 @@ if ($yhtiorow['siirtolistan_tulostustapa'] != 'K') {
 # Maksuehto ei saa olla jälkivaatimus
 # Tilausrivi ei saa olla jälkitoimitus eikä hyvitysrivejä (kappaleet miinusmerkkisiä)
 # Tuote ei saa olla saldoton eikä poistettu
-$query = "SELECT lasku.*
+$query = "SELECT DISTINCT lasku.tunnus
           FROM lasku
           JOIN varastopaikat ON (
             varastopaikat.yhtio   = lasku.yhtio AND

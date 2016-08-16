@@ -1363,7 +1363,7 @@ while ($tietue = fgets($fd)) {
             $editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
           }
           else {
-            $edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
+            $edi_kommentti .= t("Asiakas pyysi toimitustapaa", $arow["kieli"]).": $editilaus_toimitustapa \n";
             $editilaus_toimitustapa = '';
           }
         }
@@ -2314,7 +2314,7 @@ while ($tietue = fgets($fd)) {
                 $laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
 
                 // Tilausrivin systeemikommentti
-                $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
+                $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!", $arow["kieli"]);
               }
               else {
                 $var = $verkkokauppa_oletus_loppuneet;

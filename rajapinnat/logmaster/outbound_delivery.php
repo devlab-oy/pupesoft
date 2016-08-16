@@ -49,11 +49,6 @@ $query = "SELECT lasku.*
             varastopaikat.tyyppi != 'P' AND
             varastopaikat.ulkoinen_jarjestelma IN ('L','P')
           )
-          JOIN maksuehto ON (
-            maksuehto.yhtio = lasku.yhtio AND
-            maksuehto.tunnus = lasku.maksuehto AND
-            maksuehto.jv = ''
-          )
           JOIN tilausrivi ON (
             tilausrivi.yhtio    = lasku.yhtio AND
             tilausrivi.otunnus  = lasku.tunnus AND
@@ -67,6 +62,10 @@ $query = "SELECT lasku.*
             tuote.ei_saldoa     = '' AND
             tuote.status       != 'P'
           )
+          LEFT JOIN maksuehto ON (
+            maksuehto.yhtio = lasku.yhtio AND
+            maksuehto.tunnus = lasku.maksuehto
+          )
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND (
             (lasku.tila = 'N' AND lasku.alatila = 'A') OR
@@ -78,7 +77,8 @@ $query = "SELECT lasku.*
             )
           )
           AND CURTIME() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
-          AND lasku.lahetetty_ulkoiseen_varastoon IS NULL";
+          AND lasku.lahetetty_ulkoiseen_varastoon IS NULL
+          AND (maksuehto.jv IS NULL OR maksuehto.jv = '')";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {

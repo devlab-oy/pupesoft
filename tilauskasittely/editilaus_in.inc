@@ -2367,12 +2367,12 @@ while ($tietue = fgets($fd)) {
 
         if ($tuoteerror == 2) {
           // Tilausrivin systeemikommentti
-          $kommentti   .= t("Yritettiin tilata pelkk‰‰ runkoa").$tuoteerrortxt;
+          $kommentti   .= t("Yritettiin tilata pelkk‰‰ runkoa", $arow["kieli"]).$tuoteerrortxt;
           $virhetuoteno = $tuoteno;
         }
         else {
           // Tilausrivin systeemikommentti
-          $kommentti   .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+          $kommentti   .= t("Yritettiin tilata tuntematonta tuotetta", $arow["kieli"]).$tuoteerrortxt;
           $virhetuoteno = "TUNTEMATON";
         }
 

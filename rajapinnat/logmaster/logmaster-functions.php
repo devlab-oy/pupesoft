@@ -103,12 +103,11 @@ if (!function_exists('logmaster_mark_as_sent')) {
     $res = pupe_query($query);
     $laskurow = mysql_fetch_assoc($res);
 
-    $tilausnumeroita = $laskurow['tunnus'];
-
     switch ($laskurow['tila']) {
     case 'N':
       # Tällä yhtiön parametrilla pystytään ohittamaan tulostus
       $yhtiorow["lahetteen_tulostustapa"] = "X";
+      $tilausnumeroita = $laskurow['tunnus'];
       $toim = "";
 
       require "tilauskasittely/tilaus-valmis-tulostus.inc";

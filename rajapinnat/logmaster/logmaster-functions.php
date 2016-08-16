@@ -118,7 +118,6 @@ if (!function_exists('logmaster_mark_as_sent')) {
       require "tilauskasittely/tilaus-valmis-tulostus.inc";
       break;
     case 'G':
-      $tee          = "valmis";
       $toim         = "SIIRTOLISTA";
       $tulostetaan  = "OK";
       # Tällä yhtiön parametrilla pystytään ohittamaan keräyslistan tulostus

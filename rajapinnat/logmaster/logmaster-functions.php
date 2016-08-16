@@ -85,23 +85,45 @@ if (!function_exists('logmaster_sent_timestamp')) {
 
 if (!function_exists('logmaster_mark_as_sent')) {
   function logmaster_mark_as_sent($tunnus) {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
-    $query = "UPDATE lasku SET
-              tila    = 'L'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tila = 'N'
-              AND alatila = 'A'
+    $tunnus = (int) $tunnus;
+
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}' AND
+              (tila = 'N' AND alatila = 'A') OR
+              (
+                tila                = 'G' AND
+                alatila             = 'J' AND
+                tilaustyyppi       != 'M' AND
+                toimitustavan_lahto = 0
+              )
               AND tunnus = '{$tunnus}'";
     $res = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($res);
 
-    $query = "UPDATE lasku SET
-              alatila = 'A'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tila = 'G'
-              AND alatila = 'J'
-              AND tunnus = '{$tunnus}'";
-    $res = pupe_query($query);
+    $tilausnumeroita = $laskurow['tunnus'];
+
+    switch ($laskurow['tila']) {
+    case 'N':
+      # Tällä yhtiön parametrilla pystytään ohittamaan tulostus
+      $yhtiorow["lahetteen_tulostustapa"] = "X";
+      $toim = "";
+
+      require "tilauskasittely/tilaus-valmis-tulostus.inc";
+      break;
+    case 'G':
+      $tee          = "valmis";
+      $toim         = "SIIRTOLISTA";
+      $tulostetaan  = "";
+
+      require "tilauskasittely/tilaus-valmis-siirtolista.inc";
+      break;
+
+    default:
+      return false;
+    }
   }
 }
 

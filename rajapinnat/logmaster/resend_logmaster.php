@@ -10,7 +10,7 @@ $tee = empty($tee) ? '' : $tee;
 
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
 
-if (!in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
+if (!LOGMASTER_RAJAPINTA or !in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   echo t("Kerättävien tilauksien lähettäminen estetty yhtiötasolla")."!<br>";
   $tee = '';
 }

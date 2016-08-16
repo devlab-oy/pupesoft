@@ -644,7 +644,16 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "</tr>";
     echo "<tr>";
-    echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax").": $yfax</td>";
+    echo "<td>";
+
+    $gurl = utf8_encode($asiakasrow["osoite"].", ".$asiakasrow["postitp"]);
+    echo js_openUrlNewWindow("http://maps.google.com/?q=$gurl", $asiakasrow["osoite"], "", 1200);
+    echo "</td><td>";
+
+    $gurl = utf8_encode($asiakasrow["toim_osoite"].", ".$asiakasrow["toim_postitp"]);
+    echo js_openUrlNewWindow("http://maps.google.com/?q=$gurl", $asiakasrow["toim_osoite"], "", 1200);
+
+    echo "</td><td>".t("Fax").": $yfax</td>";
 
     // P‰iv‰m‰‰r‰t rappareita varten
     $kka = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));

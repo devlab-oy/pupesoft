@@ -33226,6 +33226,39 @@ if (!function_exists('url_or_text')) {
   }
 }
 
+if (!function_exists('keraa')) {
+  function keraa($id, $params) {
+    global $kukarow, $yhtiorow;
+
+    $keraajalist             = $kukarow['kuka'];
+    $keraajanro              = "";
+    $kerivi                  = $params['kerivi'];
+    $lahetekpl               = $yhtiorow["oletus_lahetekpl"];
+    $lasku_yhtio             = "";
+    $maara                   = $params['maara'];
+    $oslappkpl               = $yhtiorow["oletus_oslappkpl"];
+    $real_submit             = "Merkkaa kerätyksi";
+    $rivin_puhdas_tuoteno    = $params['rivin_puhdas_tuoteno'];
+    $rivin_tuoteno           = $params['rivin_tuoteno'];
+    $rivin_varattu           = $params['rivin_varattu'];
+    $tee                     = "P";
+    $toim                    = "";
+    $vakadr_tulostin         = $params['laheteprintteri']; # aina sama kuin lähete-tulostin
+    $vakadrkpl               = $yhtiorow["oletus_lahetekpl"];
+    $valittu_oslapp_tulostin = $params['osoitelappuprintteri'];
+    $valittu_tulostin        = $params['laheteprintteri'];
+    $vertaus_hylly           = $params['vertaus_hylly'];
+
+    require 'tilauskasittely/keraa.php';
+
+    return array(
+      'lahete_tulostus_paperille'     => $lahete_tulostus_paperille,
+      'lahete_tulostus_paperille_vak' => $lahete_tulostus_paperille_vak,
+      'laheteprintterinimi'           => $laheteprintterinimi,
+    );
+  }
+}
+
 if (!function_exists('poista_rivin_yhteensakommentti')) {
   function poista_rivin_yhteensakommentti($kommentti) {
 

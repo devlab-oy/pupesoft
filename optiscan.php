@@ -705,24 +705,22 @@ elseif ($sanoma == "StopAssignment") {
       $printteri_res = pupe_query($query);
       $printteri_row = mysql_fetch_assoc($printteri_res);
 
-      // setataan muuttujat keraa.php:ta varten
-      $tee         = "P";
-      $toim        = "";
-      $id          = $nro;
-      $keraajanro  = "";
-      $keraajalist = $kukarow['kuka'];
+      $params = array(
+        'kerivi' => $kerivi,
+        'maara' => $maara,
+        'rivin_varattu' => $rivin_varattu,
+        'rivin_puhdas_tuoteno' => $rivin_puhdas_tuoteno,
+        'rivin_tuoteno' => $rivin_tuoteno,
+        'vertaus_hylly' => $vertaus_hylly,
+        'laheteprintteri' => $printteri_row['printteri1'],
+        'osoitelappuprintteri' => $printteri_row['printteri3'],
+      );
 
-      // vakadr-tulostin on aina sama kuin lähete-tulostin
-      $valittu_tulostin = $vakadr_tulostin = $printteri_row['printteri1'];
-      $valittu_oslapp_tulostin = $printteri_row['printteri3'];
+      $return_values = keraa($nro, $params);
 
-      $lahetekpl = $vakadrkpl = $yhtiorow["oletus_lahetekpl"];
-      $oslappkpl = $yhtiorow["oletus_oslappkpl"];
-
-      $lasku_yhtio = "";
-      $real_submit = "Merkkaa kerätyksi";
-
-      require 'tilauskasittely/keraa.php';
+      $lahete_tulostus_paperille     = $return_values['lahete_tulostus_paperille'];
+      $lahete_tulostus_paperille_vak = $return_values['lahete_tulostus_paperille_vak'];
+      $laheteprintterinimi           = $return_values['laheteprintterinimi'];
 
       $laheteprintterinimi = (isset($laheteprintterinimi) and $laheteprintterinimi != "") ? " ".preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $laheteprintterinimi) : "";
       $dokumenttiteksti = (isset($lahete_tulostus_paperille_vak) and $lahete_tulostus_paperille_vak > 1) ? "dokumenttia" : "dokumentti";

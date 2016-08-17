@@ -139,6 +139,9 @@ while (false !== ($file = readdir($handle))) {
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
 
+    # Tarvitaan keraa.php:ta varten
+    $maara = $kerivi = $rivin_varattu = $rivin_puhdas_tuoteno = $rivin_tuoteno = $vertaus_hylly = array();
+
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
       $item_number = $data['item_number'];
@@ -147,7 +150,9 @@ while (false !== ($file = readdir($handle))) {
       $logmaster_itemnumberfield = logmaster_field('ItemNumber');
       $tuotelisa = "AND tuote.{$logmaster_itemnumberfield} = '{$item_number}'";
 
-      $query = "SELECT tilausrivi.*
+      $query = "SELECT tilausrivi.*,
+                CONCAT_WS(' ',tilausrivi.tuoteno, tilausrivi.nimitys) concat_tuoteno,
+                CONCAT_WS('###',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka_rekla
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
@@ -184,6 +189,13 @@ while (false !== ($file = readdir($handle))) {
         $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
       }
 
+      $kerivi[]                                  = $tilausrivin_tunnus;
+      $maara[$tilausrivin_tunnus]                = $keratty;
+      $rivin_puhdas_tuoteno[$tilausrivin_tunnus] = $tilausrivi_row['tuoteno'];
+      $rivin_tuoteno[$tilausrivin_tunnus]        = $tilausrivi_row['concat_tuoteno'];
+      $rivin_varattu[$tilausrivin_tunnus]        = $tilausrivi_row['varattu'];
+      $vertaus_hylly[$tilausrivin_tunnus]        = $tilausrivi_row['varastopaikka_rekla'];
+
       if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or ($laskurow["tila"] == "G" and $laskurow["tilaustyyppi"] != 'M')) {
         $toimitettu_lisa = "";
       }
@@ -214,6 +226,19 @@ while (false !== ($file = readdir($handle))) {
 
       $tuotteiden_paino += $painorow['paino'];
     }
+
+    $params = array(
+      'kerivi' => $kerivi,
+      'maara' => $maara,
+      'rivin_varattu' => $rivin_varattu,
+      'rivin_puhdas_tuoteno' => $rivin_puhdas_tuoteno,
+      'rivin_tuoteno' => $rivin_tuoteno,
+      'vertaus_hylly' => $vertaus_hylly,
+      'laheteprintteri' => $printteri_row['printteri1'],
+      'osoitelappuprintteri' => $printteri_row['printteri3'],
+    );
+
+    $return_values = keraa($laskurow['tunnus'], $params);
 
     // Päivitetään saldottomat tuotteet myös toimitetuksi
     $query = "UPDATE tilausrivi

@@ -33133,6 +33133,21 @@ if (!function_exists('pupesoft_log')) {
   }
 }
 
+if (!function_exists('tilaus_aktiivinen_kayttajalla')) {
+  function tilaus_aktiivinen_kayttajalla($tunnus) {
+    global $kukarow;
+
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND kesken   = '{$tunnus}'
+              AND kesken  != 0";
+    $result = pupe_query($query);
+
+    return $result;
+  }
+}
+
 if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
   function tuoteperheen_lapsien_kertoimet($params) {
     global $yhtiorow, $kukarow;

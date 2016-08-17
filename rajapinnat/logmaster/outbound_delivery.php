@@ -87,6 +87,15 @@ $query = "SELECT DISTINCT lasku.tunnus
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {
+
+  // katsotaan onko muilla aktiivisena
+  $result = tilaus_aktiivinen_kayttajalla($laskurow['tunnus']);
+
+  if (mysql_num_rows($result) != 0) {
+    pupesoft_log('logmaster_outbound_delivery', "Tilaus on aktiivisena k‰ytt‰j‰ll‰ {$row['nimi']} ({$row['kuka']}). Tilausta ei voi t‰ll‰ hetkell‰ l‰hett‰‰.");
+    continue;
+  }
+
   $filename = logmaster_outbounddelivery($laskurow['tunnus']);
 
   if ($filename === false) {

@@ -511,12 +511,7 @@ elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO", "TARJOUS", "PI
 if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 
   // katsotaan onko muilla aktiivisena
-  $query = "SELECT *
-            FROM kuka
-            WHERE yhtio  = '$kukarow[yhtio]'
-            AND kesken   = '$tilausnumero'
-            AND kesken  != 0";
-  $result = pupe_query($query);
+  $result = tilaus_aktiivinen_kayttajalla($tunnus);
 
   if (mysql_num_rows($result) != 0) {
     $row = mysql_fetch_assoc($result);

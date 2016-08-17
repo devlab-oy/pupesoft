@@ -983,6 +983,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_logmaster_rajapinta &= (!empty($logmaster['user']));
   $_logmaster_rajapinta &= (!empty($logmaster['pass']));
   $_logmaster_rajapinta &= (!empty($logmaster['path']));
+  $_logmaster_rajapinta &= ($yhtiorow['lahetteen_tulostustapa'] == 'K');
+  $_logmaster_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
 
   define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
 }

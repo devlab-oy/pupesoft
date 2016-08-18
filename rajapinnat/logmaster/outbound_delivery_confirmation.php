@@ -114,14 +114,13 @@ while (false !== ($file = readdir($handle))) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     if ($hhv) {
-      $lines = $xml->Lines;
+      $lines = $xml->Lines->Line;
+    }
+    elseif (!empty($xml->CustPackingSlip->Lines->Line)) {
+      $lines = $xml->CustPackingSlip->Lines->Line;
     }
     else {
       $lines = $xml->CustPackingSlip->Lines;
-    }
-
-    if (count($lines->Line) > 1) {
-      $lines = $lines->Line;
     }
 
     foreach ($lines as $line) {

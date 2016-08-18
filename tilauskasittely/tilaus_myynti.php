@@ -5627,8 +5627,8 @@ if ($tee == '') {
   }
   elseif ($_mika_toim and $_kat_jv) {
 
-    if (!empty($laskurow['luottoraja'])) {
-      if (!empty($asiakasrow['luottoraja'])) {
+    if ((float) $laskurow['luottoraja'] != 0) {
+      if ((float) $asiakasrow['luottoraja'] != 0) {
 
         $query_ale_lisa = generoi_alekentta('M');
 

@@ -120,7 +120,11 @@ while (false !== ($file = readdir($handle))) {
       $lines = $xml->CustPackingSlip->Lines;
     }
 
-    foreach ($lines->Line as $line) {
+    if (count($lines->Line) > 1) {
+      $lines = $lines->Line;
+    }
+
+    foreach ($lines as $line) {
 
       $tilausrivin_tunnus = (int) $line->TransId;
 

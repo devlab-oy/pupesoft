@@ -511,7 +511,7 @@ elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO", "TARJOUS", "PI
 if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 
   // katsotaan onko muilla aktiivisena
-  $result = tilaus_aktiivinen_kayttajalla($tunnus);
+  $result = tilaus_aktiivinen_kayttajalla($tilausnumero);
 
   if (mysql_num_rows($result) != 0) {
     $row = mysql_fetch_assoc($result);
@@ -2530,6 +2530,13 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   }
   $result = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
+
+  $a_qry = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
+  $a_res = pupe_query($a_qry);
+  $asiakasrow = mysql_fetch_assoc($a_res);
 
   $kaytiin_otsikolla = "NOJOO!";
 }

@@ -33262,6 +33262,53 @@ if (!function_exists('poista_rivin_yhteensakommentti')) {
   }
 }
 
+if (!function_exists('osaluettelo_hinta_tarkistus')) {
+  function osaluettelo_hinta_tarkistus($tilausnumero, $rivitunnus = 0) {
+    global $kukarow, $yhtiorow;
+
+    $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
+    $query_ale_lisa = generoi_alekentta('M');
+
+    $rivilisa = "";
+
+    if (!empty($rivitunnus)) {
+      $rivilisa = " and tilausrivi.tunnus = $rivitunnus ";
+    }
+
+    $osaluettelovirhe = "";
+
+    $query = "SELECT *,
+              $ale_query_select_lisa aleyhteensa,
+              (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) kpl,
+              round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys]) rivihinta
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tilausnumero'
+              {$rivilisa}
+              and tyyppi  != 'D'";
+    $osare = pupe_query($query);
+
+    while ($osarow = mysql_fetch_assoc($osare)) {
+      $query = "SELECT sum(round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$osarow['alv']} < 500, (1+{$osarow['alv']}/100), 1) * tuoteperhe.kerroin * {$osarow['kpl']} * (1-{$osarow['aleyhteensa']}/100), $yhtiorow[hintapyoristys])) rivihinta
+                FROM tuoteperhe
+                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.isatuoteno = '$osarow[tuoteno]'
+                AND tuoteperhe.tyyppi     = 'O'
+                ORDER BY tuote.tuoteno";
+      $tuoteperhe_result = pupe_query($query);
+
+      if ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+        if ($osarow["rivihinta"] != $tuoteperhe_row["rivihinta"]) {
+          $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Osaluettelon hinta (%s) on eri kuin osien summa (%s)!", "", $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
+        }
+      }
+    }
+
+    return $osaluettelovirhe;
+  }
+}
+
 if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
   function laskutettu_myyntitilaus_tulostusjonoon($tilausnumero) {
     global $kukarow, $yhtiorow, $pupe_root_polku;

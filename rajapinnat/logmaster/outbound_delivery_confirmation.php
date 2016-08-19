@@ -50,8 +50,6 @@ $path = rtrim($path, '/').'/';
 $error_email = trim($argv[3]);
 $email_array = array();
 
-$hhv = empty($argv[4]) ? false : true;
-
 $handle = opendir($path);
 
 if ($handle === false) {
@@ -113,14 +111,30 @@ while (false !== ($file = readdir($handle))) {
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($hhv) {
-      $lines = $xml->Lines->Line;
+    # katsotaan missä rivit ovat
+    if (isset($xml->Lines)) {
+      $lines = $xml->Lines;
     }
-    elseif (!empty($xml->CustPackingSlip->Lines->Line)) {
-      $lines = $xml->CustPackingSlip->Lines->Line;
+    elseif (isset($xml->CustPackingSlip->Lines)) {
+      $lines = $xml->CustPackingSlip->Lines;
     }
     else {
-      $lines = $xml->CustPackingSlip->Lines;
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivit-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
+
+      continue;
+    }
+
+    # katsotaan missä yksittäinen rivi sijaitsee
+    if (isset($lines->Line->TransId)) {
+      $lines = $lines->Line;
+    }
+    elseif (isset($lines->TransId)) {
+      # rivit onkin suoraan lines elementtejä
+    }
+    else {
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivin TransId-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
+
+      continue;
     }
 
     foreach ($lines as $line) {

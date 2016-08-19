@@ -157,7 +157,7 @@ if ($tee == 'aja') {
               sum(tilausrivi.kpl) kpl_varastossa,
               sum((tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*{$query_ale_lisa}) arvo,
               lasku.tunnus ltunnus,
-              lasku.lahetepvm,
+              lasku.h1time,
               sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
               sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok,
               lasku.comments,
@@ -168,25 +168,25 @@ if ($tee == 'aja') {
               WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
               AND lasku.tila         = 'O'
               AND lasku.liitostunnus = '{$toimittajarow['tunnus']}'
-              and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
-              and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'
+              and lasku.h1time >='{$vva}-{$kka}-{$ppa} 00:00:00'
+              and lasku.h1time <='{$vvl}-{$kkl}-{$ppl} 23:59:59'
               GROUP BY lasku.tunnus
-              ORDER BY lasku.ytunnus, lasku.lahetepvm";
+              ORDER BY lasku.ytunnus, lasku.h1time";
     $tilrivi_res = pupe_query($query);
 
     if (mysql_num_rows($tilrivi_res) > 0) {
 
-      $ed_tunn         = "";
-      $yht_paino         = 0;
-      $yht_kpl         = 0;
-      $yht_varastossa_kpl   = 0;
-      $yht_rivit         = 0;
-      $yht_varastossa_rivit  = 0;
-      $yht_arvo         = 0;
+      $ed_tunn              = "";
+      $tilrivi_laskuri      = 0;
+      $yht_arvo             = 0;
+      $yht_eturahti         = array();
+      $yht_kpl              = 0;
+      $yht_kulu_summa       = array();
+      $yht_paino            = 0;
+      $yht_rivit            = 0;
       $yht_tavara_summa     = array();
-      $yht_kulu_summa     = array();
-      $yht_eturahti       = array();
-      $tilrivi_laskuri     = 0;
+      $yht_varastossa_kpl   = 0;
+      $yht_varastossa_rivit = 0;
 
       while ($tilrivi_row = mysql_fetch_assoc($tilrivi_res)) {
 
@@ -285,8 +285,8 @@ if ($tee == 'aja') {
         }
         echo "</td>";
 
-        echo "<td style='vertical-align: top;' rowspan='$x'>".date("W", strtotime($tilrivi_row['lahetepvm']))."/".substr($tilrivi_row['lahetepvm'], 2, 2)."</td>";
-        echo "<td style='vertical-align: top;' rowspan='$x'>".tv1dateconv($tilrivi_row['lahetepvm'])."</td>";
+        echo "<td style='vertical-align: top;' rowspan='$x'>".date("W", strtotime($tilrivi_row['h1time']))."/".substr($tilrivi_row['h1time'], 2, 2)."</td>";
+        echo "<td style='vertical-align: top;' rowspan='$x'>".tv1dateconv($tilrivi_row['h1time'])."</td>";
 
         $osumapros = '';
 

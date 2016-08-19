@@ -121,6 +121,10 @@ while (false !== ($file = readdir($handle))) {
     else {
       pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivit-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
 
+      $email_array[] = t("Rivit-elementtiä ei löytynyt sanomasta %s", "", $file);
+
+      rename($full_filepath, $path.'error/'.$file);
+
       continue;
     }
 
@@ -133,6 +137,10 @@ while (false !== ($file = readdir($handle))) {
     }
     else {
       pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivin TransId-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
+
+      $email_array[] = t("Rivin TransId-elementtiä ei löytynyt sanomasta %s", "", $file);
+
+      rename($full_filepath, $path.'error/'.$file);
 
       continue;
     }

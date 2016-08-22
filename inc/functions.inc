@@ -33297,11 +33297,10 @@ if (!function_exists('osaluettelo_hinta_tarkistus')) {
                 AND tuoteperhe.tyyppi     = 'O'
                 ORDER BY tuote.tuoteno";
       $tuoteperhe_result = pupe_query($query);
+      $tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result);
 
-      if ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-        if ($osarow["rivihinta"] != $tuoteperhe_row["rivihinta"]) {
-          $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Osaluettelon hinta (%s) on eri kuin osien summa (%s)!", "", $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
-        }
+      if ($tuoteperhe_row["rivihinta"] !== NULL and $osarow["rivihinta"] != $tuoteperhe_row["rivihinta"]) {
+        $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Osaluettelon hinta (%s) on eri kuin osien summa (%s)!", "", $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
       }
     }
 

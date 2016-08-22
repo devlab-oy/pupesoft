@@ -549,10 +549,7 @@ if ($tee == "VALITSE") {
       if ($row["kateinen"] != "") $kateinen = "X";
       if ($row["maa"] != "") $maa = $row["maa"];
 
-      $query = "SELECT
-                sum(if(varattu>0,1,0)) veloitus,
-                sum(if(varattu<0,1,0)) hyvitys,
-                sum(if(hinta*varattu*{$query_ale_lisa}=0 and var!='P' and var!='J',1,0)) nollarivi
+      $query = "SELECT sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*{$query_ale_lisa}=0 and var!='P' and var!='J',1,0)) nollarivi
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
                 and otunnus = '$row[tunnus]'

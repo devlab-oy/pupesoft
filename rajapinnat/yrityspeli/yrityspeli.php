@@ -11,12 +11,14 @@ if (empty($loppuaika))          $loppuaika = date("Y-m-d", strtotime('sunday thi
 if (empty($response))           $response = array();
 if (empty($tee))                $tee = '';
 if (empty($tilausmaara))        $tilausmaara = 3;
+if (empty($valitut_tryt))       $valitut_tryt = array();
 
 if ($tee == 'GENEROI') {
   $params = array(
     "asiakkaat"         => $valitut,
     "kokonaiskustannus" => $kokonaiskustannus,
     "tilausmaara"       => $tilausmaara,
+    "valitut_tryt"      => $valitut_tryt,
   );
 
   $response = yrityspeli_generoi_ostotilauksia($params);
@@ -29,6 +31,7 @@ $params = array(
   "messages"              => $response,
   "tilauksettomat_yhtiot" => yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika),
   "tilausmaara"           => $tilausmaara,
+  "valitut_tryt"          => $valitut_tryt,
 );
 
 yrityspeli_kayttoliittyma($params);

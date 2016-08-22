@@ -33646,13 +33646,13 @@ if (!function_exists('piirra_kalenteripaiva')) {
 
             // Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
             if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
-              echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
+              echo "<td class='tumma ptop' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
             }
             elseif ($row['tyyppi'] == 'asennuskalenteri') {
-              echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>", t("Asennustyö"), " $row[liitostunnus] ";
+              echo "<td class='tumma ptop' rowspan='$kesto' style='$varilisa border:1px solid #00FF00;'>", t("Asennustyö"), " $row[liitostunnus] ";
             }
             else {
-              echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi $row[tapa] ";
+              echo "<td class='tumma ptop' rowspan='$kesto' style='$varilisa border:1px solid #00FF00;'>$kukanimi $row[tapa] ";
             }
 
             if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {

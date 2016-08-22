@@ -504,12 +504,12 @@ if ($tee == "SYOTA") {
 
 //Paivan tapahtumat
 //t‰st‰ alkaa main table
-echo "<table>";
+echo "<table class='pnopad'>";
 echo "<tr>";
 
 if ($toim != 'TYOMAARAYS_ASENTAJA') {
 
-  echo "<td class='back ptop' nowrap>";
+  echo "<td class='back ptop pnopad' nowrap>";
 
   //listataan paivan muistutukset
   $query = "SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
@@ -558,11 +558,11 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
   echo "</td>";
 }
 else {
-  echo "<td class='back'>&nbsp;</td>";
+  echo "<td class='back pnopad'>&nbsp;</td>";
 }
 
 //oikean yl‰laidan pikkukalenteri..
-echo "<td class='back ptop' rowspan='3' align='left'>";
+echo "<td class='back ptop pnopad' rowspan='3' align='left'>";
 
 echo "<table width='100%'>
     <tr><td class='back' align='center' colspan='8'>
@@ -710,7 +710,7 @@ echo "</tr>";
 
 //listataan whole-day eventit
 echo "<tr>";
-echo "<td class='back ptop' nowrap>";
+echo "<td class='back ptop pnopad' nowrap>";
 
 $query = "SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio
           FROM kalenteri, kuka
@@ -780,14 +780,14 @@ echo "<table width='100%'>
     </table>";
 
 // N‰ytet‰‰n p‰iv‰n kalenteritapahtumat //
-echo  "<table width='100%'><tr>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 22), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 23, FALSE), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 24, FALSE), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 25, FALSE), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 26, FALSE), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 27, FALSE), "</td>";
-echo "<td class='back' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 28, FALSE), "</td>";
+echo  "<table width='100%' class='pnopad'><tr>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 22), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 23, FALSE), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 24, FALSE), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 25, FALSE), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 26, FALSE), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 27, FALSE), "</td>";
+echo "<td class='back pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, 28, FALSE), "</td>";
 echo "</tr></table>";
 
 //main tablen oikea yl‰laita

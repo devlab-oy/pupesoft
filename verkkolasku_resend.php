@@ -376,6 +376,46 @@ if ($handle = opendir($kansio)) {
   closedir($handle);
 }
 
+// PPG
+$kansio = "{$pupe_root_polku}/dataout/ppg_error/";
+
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
+
+    // Ei k‰sitell‰ kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
+
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
+      continue;
+    }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+    $ftphost = "ftp.ppg.fi";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    //$ftppath = "test/invoice/finvoice/";
+    $ftppath = "invoice/finvoice/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
+
+    $tulos_ulos = "";
+
+    require "inc/sftp-send.inc";
+  }
+
+  closedir($handle);
+}
+
+
 
 function onko_lasku_liian_vanha($filename) {
   global $kukarow, $yhtiorow;

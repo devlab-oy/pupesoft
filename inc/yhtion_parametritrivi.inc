@@ -34,6 +34,7 @@ if ($fieldname == "verkkolasku_lah") {
   $sel5 = "";
   $sel6 = "";
   $sel7 = "";
+  $sel8 = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -53,6 +54,9 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'trustpoint') {
     $sel7 = "selected";
   }
+  elseif ($trow[$i] == 'ppg') {
+    $sel8 = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -64,6 +68,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
   $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");
   $ulos .= "<option value = 'trustpoint' $sel7>".t("Trustpoint-verkkolaskut");
+  $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "</select></td>";
 
   $jatko = 0;

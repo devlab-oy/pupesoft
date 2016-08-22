@@ -10,6 +10,7 @@ function yrityspeli_kayttoliittyma(Array $params) {
   $tilauksettomat_yhtiot = $params['tilauksettomat_yhtiot'];
   $tilausmaara           = $params['tilausmaara'];
   $valitut_tryt          = $params['valitut_tryt'];
+  $toimipaikat           = $params['toimipaikat'];
 
   echo "<font class='head'>";
   echo t("Lähetä ostotilauksia yrityksille");
@@ -87,10 +88,11 @@ function yrityspeli_kayttoliittyma(Array $params) {
     echo "</td>";
 
     echo "<td>";
-    echo "<select name='toimipaikka'>";
+    echo "<select name='toimipaikat[{$yhtio["asiakas_tunnus"]}]'>";
     echo "<option>Ei toimipaikkaa</option>";
     foreach (hae_toimipaikat() as $toimipaikka) {
-      echo "<option value='{$toimipaikka["tunnus"]}'>{$toimipaikka["nimi"]}</option>";
+      $sel = $toimipaikka["tunnus"] == $toimipaikat[$yhtio["asiakas_tunnus"]] ? " selected" : "";
+      echo "<option value='{$toimipaikka["tunnus"]}'{$sel}>{$toimipaikka["nimi"]}</option>";
     }
     echo "</select>";
     echo "</td>";
@@ -169,7 +171,7 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   $kokonaiskustannus = $params['kokonaiskustannus'];
   $tilausmaara       = $params['tilausmaara'];
   $valitut_tryt      = $params['valitut_tryt'];
-  $toimipaikka       = $params['toimipaikka'];
+  $toimipaikat       = $params['toimipaikat'];
 
   $response = array();
 
@@ -180,8 +182,8 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   }
 
   foreach ($asiakkaat as $asiakas) {
-    $try = $valitut_tryt[$asiakas];
-
+    $try         = $valitut_tryt[$asiakas];
+    $toimipaikka = $toimipaikat[$asiakas];
     for ($i = 0; $i < $tilausmaara; $i++) {
       $params = array(
         "asiakas"           => $asiakas,

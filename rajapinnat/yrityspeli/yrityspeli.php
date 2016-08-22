@@ -12,7 +12,7 @@ if (empty($response))          $response = array();
 if (empty($tee))               $tee = '';
 if (empty($tilausmaara))       $tilausmaara = 3;
 if (empty($valitut_tryt))      $valitut_tryt = array();
-if (empty($toimipaikka))       $toimipaikka = null;
+if (empty($toimipaikat))       $toimipaikat = array();
 
 if ($tee == 'GENEROI') {
   $params = array(
@@ -20,7 +20,7 @@ if ($tee == 'GENEROI') {
     "kokonaiskustannus" => $kokonaiskustannus,
     "tilausmaara"       => $tilausmaara,
     "valitut_tryt"      => $valitut_tryt,
-    "toimipaikka"       => (int) $toimipaikka,
+    "toimipaikat"       => (array) $toimipaikat,
   );
 
   $response = yrityspeli_generoi_ostotilauksia($params);
@@ -34,6 +34,7 @@ $params = array(
   "tilauksettomat_yhtiot" => yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika),
   "tilausmaara"           => $tilausmaara,
   "valitut_tryt"          => $valitut_tryt,
+  "toimipaikat"           => $toimipaikat,
 );
 
 yrityspeli_kayttoliittyma($params);

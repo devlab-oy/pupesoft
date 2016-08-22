@@ -1152,7 +1152,7 @@ if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] !
   }
 }
 
-if ($_onko_isatuote and $yhtiorow["pura_osaluettelot"] != "") {
+if ($yhtiorow["pura_osaluettelot"] != "") {
   $varaosakommentti .= osaluettelo_hinta_tarkistus($laskurow["tunnus"], $row["tunnus"]);
 }
 

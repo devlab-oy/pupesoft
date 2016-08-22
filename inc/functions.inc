@@ -33300,7 +33300,7 @@ if (!function_exists('osaluettelo_hinta_tarkistus')) {
       $tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result);
 
       if ($tuoteperhe_row["rivihinta"] !== NULL and $osarow["rivihinta"] != $tuoteperhe_row["rivihinta"]) {
-        $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Osaluettelon hinta (%s) on eri kuin osien summa (%s)!", "", $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
+        $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Tuotteen %s hinta (%s) on eri kuin osaluettelon summa (%s)!", "", $osarow["tuoteno"], $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
       }
     }
 

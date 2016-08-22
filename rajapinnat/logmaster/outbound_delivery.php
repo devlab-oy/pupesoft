@@ -81,7 +81,7 @@ $query = "SELECT DISTINCT lasku.tunnus
               lasku.toimitustavan_lahto = 0
             )
           )
-          AND CURTIME() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
+          AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
           AND lasku.lahetetty_ulkoiseen_varastoon IS NULL
           AND (maksuehto.jv IS NULL OR maksuehto.jv = '')";
 $laskures = pupe_query($query);

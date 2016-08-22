@@ -85,20 +85,7 @@ else {
   $kons = 0;
 }
 
-$query = "SELECT yhtio
-          FROM oikeu
-          WHERE yhtio = '$kukarow[yhtio]'
-          and kuka    = '$kukarow[kuka]'
-          and nimi    like '%asiakasmemo.php'
-          and alanimi = ''";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) > 0) {
-  $asmemolinkki = TRUE;
-}
-else {
-  $asmemolinkki = FALSE;
-}
+$asmemolinkki = tarkista_oikeus("asiakasmemo.php");
 
 // Poistetaan liitetiedosto kalenterimerkinnästä
 // mikäli GET-parametreistä löytyy poista_liite
@@ -454,19 +441,19 @@ if ($tee == "SYOTA") {
     $lisays .= "</td></tr>";
   }
 
-  $lisays .= "<tr><td valign='top'>".t("Kommentti").":</td>";
+  $lisays .= "<tr><td class='ptop'>".t("Kommentti").":</td>";
   $lisays .= "<td>
           <textarea name='viesti' cols='50' rows='5'>$viesti</textarea><br>
           </td>
           </tr>";
 
-  $lisays .= "<tr><td valign='top'>".t("Kilometrit").":</td>";
+  $lisays .= "<tr><td class='ptop'>".t("Kilometrit").":</td>";
   $lisays .= "<td>
           <input name='kilometrit' value='$kilometrit'><br>
           </td>
           </tr>";
 
-  $lisays .= "<tr><td valign='top'>".t("Päivärahat").":</td>";
+  $lisays .= "<tr><td class='ptop'>".t("Päivärahat").":</td>";
   $lisays .= "<td>
           <input name='paivarahat' value='$paivarahat'><br>
           </td>
@@ -480,7 +467,7 @@ if ($tee == "SYOTA") {
   $liiteres = pupe_query($query);
 
   if (mysql_num_rows($liiteres) > 0) {
-    $lisays .= "<tr><td valign='top'>".t("Liitetiedostot").":</td>";
+    $lisays .= "<tr><td class='ptop'>".t("Liitetiedostot").":</td>";
     $lisays .= "<td><table><tbody>";
 
     while ($liiterow = mysql_fetch_assoc($liiteres)) {
@@ -493,7 +480,7 @@ if ($tee == "SYOTA") {
     $lisays .= "</tbody></table></td></tr>";
   }
 
-  $lisays .= "<tr><td valign='top'>".t("Lisää uusi Liitetiedosto").":</td>";
+  $lisays .= "<tr><td class='ptop'>".t("Lisää uusi Liitetiedosto").":</td>";
   $lisays .= "<td>
           <input name='liitetiedosto' type='file'><br>
           </td>
@@ -522,7 +509,7 @@ echo "<tr>";
 
 if ($toim != 'TYOMAARAYS_ASENTAJA') {
 
-  echo "<td class='back' valign='top' nowrap>";
+  echo "<td class='back ptop' nowrap>";
 
   //listataan paivan muistutukset
   $query = "SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa, kuka.nimi Nimi, kalenteri.yhtio
@@ -575,7 +562,7 @@ else {
 }
 
 //oikean ylälaidan pikkukalenteri..
-echo "<td class='back' valign='top' rowspan='3' align='left'>";
+echo "<td class='back ptop' rowspan='3' align='left'>";
 
 echo "<table width='100%'>
     <tr><td class='back' align='center' colspan='8'>
@@ -598,7 +585,6 @@ foreach ($MONTH_ARRAY as $val) {
 }
 
 echo "</select></form></td></tr>";
-
 
 echo "<tr><th>".t("Vk.")."</th><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th></tr>";
 echo "<tr><th>".date("W", mktime(0, 0, 0, $kuu, 1, $year))."</th>";
@@ -637,7 +623,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
   }
 
   //jos on valittu joku tietty päivä, tehdään solusta tumma
-  if ($paiva==$i) {
+  if ($paiva == $i) {
     $style="border:1px solid #FF0000;";
   }
 
@@ -724,7 +710,7 @@ echo "</tr>";
 
 //listataan whole-day eventit
 echo "<tr>";
-echo "<td class='back' valign='top' nowrap>";
+echo "<td class='back ptop' nowrap>";
 
 $query = "SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio
           FROM kalenteri, kuka
@@ -783,7 +769,7 @@ if (mysql_num_rows($result) > 0) {
 echo "</td></tr>";
 
 echo "<tr>";
-echo "<td class='back' valign='top' nowrap width='100%'>";
+echo "<td class='back ptop' nowrap width='100%'>";
 
 echo "<table width='100%'>
     <tr>

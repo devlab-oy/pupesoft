@@ -9,6 +9,7 @@ function yrityspeli_kayttoliittyma(Array $params) {
   $messages              = $params['messages'];
   $tilauksettomat_yhtiot = $params['tilauksettomat_yhtiot'];
   $tilausmaara           = $params['tilausmaara'];
+  $valitut_tryt          = $params['valitut_tryt'];
 
   echo "<font class='head'>";
   echo t("Lähetä ostotilauksia yrityksille");
@@ -53,6 +54,7 @@ function yrityspeli_kayttoliittyma(Array $params) {
   echo "<th>email</td>";
   echo "<th>tilauksia</td>";
   echo "<th>summa</td>";
+  echo "<th>Tuoteryhmä</th>";
   echo "<th></td>";
   echo "</tr>";
 
@@ -72,6 +74,15 @@ function yrityspeli_kayttoliittyma(Array $params) {
     echo "<td>{$yhtio['asiakas_email']}</td>";
     echo "<td class='text-right'>{$yhtio['tilauksia']}</td>";
     echo "<td class='text-right'>{$yhtio['summa']}</td>";
+    echo "<td>";
+    echo "<select name='valitut_tryt[{$yhtio["asiakas_tunnus"]}]'>";
+    $result = t_avainsana('TRY', '', 'ORDER BY selite + 0');
+    while ($tryrow = mysql_fetch_assoc($result)) {
+      $sel = $valitut_tryt[$yhtio['asiakas_tunnus']] == $tryrow["selite"] ? " selected" : "";
+      echo "<option value='{$tryrow["selite"]}'{$sel}>{$tryrow["selite"]} - {$tryrow["selitetark"]}</option>";
+    }
+    echo "</select>";
+    echo "</td>";
     echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['asiakas_tunnus']}' {$checked} {$disabled}></td>";
     echo "</tr>";
   }
@@ -145,6 +156,7 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   $asiakkaat          = $params['asiakkaat'];
   $kokonaiskustannus  = $params['kokonaiskustannus'];
   $tilausmaara        = $params['tilausmaara'];
+  $valitut_tryt       = $params['valitut_tryt'];
 
   $response = array();
 
@@ -155,8 +167,15 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   }
 
   foreach ($asiakkaat as $asiakas) {
+    $try = $valitut_tryt[$asiakas];
+
     for ($i = 0; $i < $tilausmaara; $i++) {
-      $generate = yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus);
+      $params = array(
+        "asiakas"           => $asiakas,
+        "kokonaiskustannus" => $kokonaiskustannus,
+        "try"               => $try,
+      );
+      $generate = yrityspeli_generoi_ostotilaus($params);
       $response = array_merge($response, $generate);
     }
   }
@@ -164,8 +183,12 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   return $response;
 }
 
-function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
+function yrityspeli_generoi_ostotilaus(Array $params) {
   global $yhtiorow, $kukarow;
+
+  $asiakas           = $params["asiakas"];
+  $kokonaiskustannus = $params["kokonaiskustannus"];
+  $try               = $params["try"];
 
   require_once 'inc/luo_ostotilausotsikko.inc';
 
@@ -194,7 +217,7 @@ function yrityspeli_generoi_ostotilaus($asiakas, $kokonaiskustannus) {
   $kukarow['kesken'] = $ostotilaus['tunnus'];
 
   while ($hintacounter < $kokonaiskustannus) {
-    $trow = yrityspeli_tuotearvonta($toimittaja['tunnus']);
+    $trow = yrityspeli_tuotearvonta($toimittaja['tunnus'], $try);
 
     if ($trow === false) {
       $response[] = "Yrityksellä {$yhtiorow['nimi']} ei ole sopivia tuotteita, jota voi tilata toimittajalta {$toimittaja['nimi']}.";
@@ -245,8 +268,15 @@ function yrityspeli_hae_toimittaja() {
   return $row;
 }
 
-function yrityspeli_tuotearvonta($toimittaja) {
+function yrityspeli_tuotearvonta($toimittaja, $try = null) {
   global $kukarow, $yhtiorow;
+
+  if ($try) {
+    $trylisa = "AND tuote.try = '{$try}'";
+  }
+  else {
+    $trylisa = "";
+  }
 
   // katsotaan mitä tuotteita tältä toimittajalta voi tilata, ja arvotaan yksi
   $query = "SELECT tuote.*
@@ -258,6 +288,7 @@ function yrityspeli_tuotearvonta($toimittaja) {
             AND tuote.status != 'P'
             AND tuote.myyntihinta  > 0
             AND tuote.tuotetyyppi NOT in ('A','B')
+            {$trylisa}
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
 

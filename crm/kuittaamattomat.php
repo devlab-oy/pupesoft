@@ -29,6 +29,7 @@ if ($tee == 'B') {
                kentta01     = '$viesti',
                kuittaus     = '',
                pvmalku      = now(),
+               pvmloppu     = now(),
                perheid      = '$kaletunnus'";
     $result = pupe_query($kysely);
 

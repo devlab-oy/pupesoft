@@ -250,7 +250,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
                     toim_osoite   = '{$toimipaikkarow["osoite"]}',
                     toim_postino  = '{$toimipaikkarow["postino"]}',
                     toim_postitp  = '{$toimipaikkarow["postitp"]}',
-                    toim_maa      = '{$toimipaikkarow["postitp"]}'
+                    toim_maa      = '{$toimipaikkarow["maa"]}'
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND tunnus = {$ostotilaus["tunnus"]}";
       pupe_query($query);

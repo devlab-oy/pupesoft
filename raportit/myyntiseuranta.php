@@ -29,6 +29,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
   require 'validation/Validation.php';
 }
 
+echo "<script type='text/javascript'>
+        $(function() {
+          $('#kampanja_ja_samplerajaus').on('change', function() {
+            if ($('#kampanja_ja_samplerajaus').val() === 'nayta_kamp') {
+              $('#campaign_id_div').show();
+            }
+            else {
+              $('#campaign_id_div').hide();
+            }
+          });
+        });
+      </script>";
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -649,7 +662,7 @@ else {
     echo "<tr>";
     echo "<th>".t('Kampanja ja sample-tuoterajaus')."</th>";
     echo "<td colspan='3'>";
-    echo "<select name='kampanja_ja_samplerajaus'>";
+    echo "<select id='kampanja_ja_samplerajaus' name='kampanja_ja_samplerajaus'>";
     echo "<option value=''>".t('Ei rajausta')."</option>";
     echo "<option value='nayta_kamp' {$ks_sel["nayta_kamp"]}>", t("Näytä vain kampanja-tuotteita"), "</option>";
     echo "<option value='nayta_samp' {$ks_sel["nayta_samp"]}>", t("Näytä vain sample-tuotteita"), "</option>";
@@ -657,7 +670,32 @@ else {
     echo "<option value='alanayta_samp' {$ks_sel["alanayta_samp"]}>", t("Älä näytä sample-tuotteita"), "</option>";
     echo "<option value='alanayta_kamp_samp' {$ks_sel["alanayta_kamp_samp"]}>", t("Älä näytä kampanja tai sample-tuotteita"), "</option>";
     echo "</select>";
-    echo "</td>";
+
+    $piilotettu_vai_ei = (isset($kampanja_ja_samplerajaus) and $kampanja_ja_samplerajaus == 'nayta_kamp') ? "" : "style='display:none;'";
+    echo "<div id='campaign_id_div' class='campaign_id_div' $piilotettu_vai_ei>";
+    $cquery = "SELECT campaigns.*
+               FROM campaigns
+               JOIN yhtio ON (campaigns.company_id = yhtio.tunnus
+                 AND yhtio.yhtio = '{$kukarow['yhtio']}')
+               WHERE campaigns.active = 1";
+    $cresult = pupe_query($cquery);
+
+    if (mysql_num_rows($cresult) > 0) {
+
+      echo "<select id='campaign_id' name='campaign_id' >";
+      echo "<option value = ''>".t("Kaikki kampanjat")."</option>";
+      while ($krow = mysql_fetch_assoc($cresult)) {
+        $sel = '';
+        if (strtoupper($campaign_id) == strtoupper($krow["id"])) {
+          $sel = "selected";
+        }
+        echo "<option value='{$krow['id']}' $sel>{$krow['name']}</option>";
+      }
+
+      echo "</select>";
+    }
+    echo "</div>";
+    echo "</td>"; 
 
     if (isset($vertailubu)) {
       switch ($vertailubu) {
@@ -1698,7 +1736,12 @@ else {
       if (isset($kampanja_ja_samplerajaus) and !empty($kampanja_ja_samplerajaus)) {
         switch ($kampanja_ja_samplerajaus) {
           case "nayta_kamp" :
-            $lisa .= " and tilausrivi.campaign_id IS NOT NULL ";
+            $campaign_value = "IS NOT NULL";
+            if (!empty($campaign_id)) {
+              $campaign_value = "= {$campaign_id}";
+            }
+
+            $lisa .= " and tilausrivi.campaign_id {$campaign_value} ";
             break;
           case "nayta_samp" :
             $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ";

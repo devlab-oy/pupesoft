@@ -17,7 +17,11 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
             JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas AND asiakas.laji != 'P')
             WHERE kuka.kuka          = '$user'
             AND kuka.extranet       != ''
-            AND kuka.oletus_asiakas != ''";
+            AND kuka.oletus_asiakas != ''
+            AND EXISTS(SELECT 1
+                       FROM oikeu
+                       WHERE oikeu.yhtio = kuka.yhtio
+                       AND oikeu.kuka = kuka.kuka)";
   $result = pupe_query($query);
   $krow = mysql_fetch_array($result);
 
@@ -46,7 +50,11 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
         $query = "UPDATE kuka
                   SET session = '$session',
                   lastlogin  = now()
-                  WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
+                  WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''
+                  AND EXISTS(SELECT 1
+                             FROM oikeu
+                             WHERE oikeu.yhtio = kuka.yhtio
+                             AND oikeu.kuka = kuka.kuka)";
         if (strlen($yhtio) > 0) {
           $query .= " and yhtio = '$yhtio'";
         }
@@ -161,7 +169,11 @@ if (isset($usea) and $usea == 1) {
             INNER JOIN yhtio ON (yhtio.yhtio = kuka.yhtio)
             WHERE kuka.kuka = '$user'
             AND kuka.extranet != ''
-            AND kuka.oletus_asiakas != ''";
+            AND kuka.oletus_asiakas != ''
+            AND EXISTS(SELECT 1
+                       FROM oikeu
+                       WHERE oikeu.yhtio = kuka.yhtio
+                       AND oikeu.kuka = kuka.kuka)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

@@ -595,10 +595,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
     require 'tulosta_ostotilaus.inc';
 
-    // p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
-    $query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
-    $result = pupe_query($query);
-
     if ($toim == "HAAMU") {
       $query = "UPDATE lasku SET tila='D', tilaustyyppi = 'O' WHERE tunnus='$kukarow[kesken]'";
       $result = pupe_query($query);

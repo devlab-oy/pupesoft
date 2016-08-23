@@ -10,6 +10,7 @@ function yrityspeli_kayttoliittyma(Array $params) {
   $tilauksettomat_yhtiot = $params['tilauksettomat_yhtiot'];
   $tilausmaara           = $params['tilausmaara'];
   $valitut_tryt          = $params['valitut_tryt'];
+  $toimipaikat           = $params['toimipaikat'];
 
   echo "<font class='head'>";
   echo t("Lähetä ostotilauksia yrityksille");
@@ -48,14 +49,15 @@ function yrityspeli_kayttoliittyma(Array $params) {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>yhtiö</td>";
-  echo "<th>asiakas</td>";
-  echo "<th>ytunnus</td>";
-  echo "<th>email</td>";
-  echo "<th>tilauksia</td>";
-  echo "<th>summa</td>";
+  echo "<th>yhtiö</th>";
+  echo "<th>asiakas</th>";
+  echo "<th>ytunnus</th>";
+  echo "<th>email</th>";
+  echo "<th>tilauksia</th>";
+  echo "<th>summa</th>";
   echo "<th>Tuoteryhmä</th>";
-  echo "<th></td>";
+  echo "<th>toimipaikka</th>";
+  echo "<th></th>";
   echo "</tr>";
 
   foreach ($tilauksettomat_yhtiot as $yhtio) {
@@ -74,6 +76,7 @@ function yrityspeli_kayttoliittyma(Array $params) {
     echo "<td>{$yhtio['asiakas_email']}</td>";
     echo "<td class='text-right'>{$yhtio['tilauksia']}</td>";
     echo "<td class='text-right'>{$yhtio['summa']}</td>";
+
     echo "<td>";
     echo "<select name='valitut_tryt[{$yhtio["asiakas_tunnus"]}]'>";
     $result = t_avainsana('TRY', '', 'ORDER BY selite + 0');
@@ -83,6 +86,17 @@ function yrityspeli_kayttoliittyma(Array $params) {
     }
     echo "</select>";
     echo "</td>";
+
+    echo "<td>";
+    echo "<select name='toimipaikat[{$yhtio["asiakas_tunnus"]}]'>";
+    echo "<option>Ei toimipaikkaa</option>";
+    foreach (hae_toimipaikat() as $toimipaikka) {
+      $sel = $toimipaikka["tunnus"] == $toimipaikat[$yhtio["asiakas_tunnus"]] ? " selected" : "";
+      echo "<option value='{$toimipaikka["tunnus"]}'{$sel}>{$toimipaikka["nimi"]}</option>";
+    }
+    echo "</select>";
+    echo "</td>";
+
     echo "<td><input type='checkbox' name='valitut[]' value='{$yhtio['asiakas_tunnus']}' {$checked} {$disabled}></td>";
     echo "</tr>";
   }
@@ -153,10 +167,11 @@ function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
 }
 
 function yrityspeli_generoi_ostotilauksia(Array $params) {
-  $asiakkaat          = $params['asiakkaat'];
-  $kokonaiskustannus  = $params['kokonaiskustannus'];
-  $tilausmaara        = $params['tilausmaara'];
-  $valitut_tryt       = $params['valitut_tryt'];
+  $asiakkaat         = $params['asiakkaat'];
+  $kokonaiskustannus = $params['kokonaiskustannus'];
+  $tilausmaara       = $params['tilausmaara'];
+  $valitut_tryt      = $params['valitut_tryt'];
+  $toimipaikat       = $params['toimipaikat'];
 
   $response = array();
 
@@ -167,13 +182,14 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   }
 
   foreach ($asiakkaat as $asiakas) {
-    $try = $valitut_tryt[$asiakas];
-
+    $try         = $valitut_tryt[$asiakas];
+    $toimipaikka = $toimipaikat[$asiakas];
     for ($i = 0; $i < $tilausmaara; $i++) {
       $params = array(
         "asiakas"           => $asiakas,
         "kokonaiskustannus" => $kokonaiskustannus,
         "try"               => $try,
+        "toimipaikka"       => $toimipaikka,
       );
       $generate = yrityspeli_generoi_ostotilaus($params);
       $response = array_merge($response, $generate);
@@ -189,6 +205,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
   $asiakas           = $params["asiakas"];
   $kokonaiskustannus = $params["kokonaiskustannus"];
   $try               = $params["try"];
+  $toimipaikka       = $params["toimipaikka"];
 
   require_once 'inc/luo_ostotilausotsikko.inc';
 
@@ -214,6 +231,32 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
   );
 
   $ostotilaus = luo_ostotilausotsikko($params);
+
+
+  if ($toimipaikka && $toimipaikka > 0) {
+    $query = "SELECT *
+              FROM yhtion_toimipaikat
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = {$toimipaikka}
+              LIMIT 1";
+    $result = pupe_query($query);
+    $toimipaikkarow = mysql_fetch_assoc($result);
+
+    if (!empty($toimipaikkarow)) {
+      $query = "UPDATE lasku
+                SET vanhatunnus   = {$toimipaikkarow["tunnus"]},
+                    toim_nimi     = '{$toimipaikkarow["nimi"]}',
+                    toim_nimitark = '{$toimipaikkarow["nimitark"]}',
+                    toim_osoite   = '{$toimipaikkarow["osoite"]}',
+                    toim_postino  = '{$toimipaikkarow["postino"]}',
+                    toim_postitp  = '{$toimipaikkarow["postitp"]}',
+                    toim_maa      = '{$toimipaikkarow["maa"]}'
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = {$ostotilaus["tunnus"]}";
+      pupe_query($query);
+    }
+  }
+
   $kukarow['kesken'] = $ostotilaus['tunnus'];
 
   while ($hintacounter < $kokonaiskustannus) {

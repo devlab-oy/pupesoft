@@ -95,13 +95,13 @@ if (!function_exists('logmaster_mark_as_sent')) {
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}' AND
-              (tila = 'N' AND alatila = 'A') OR
+              ((tila = 'N' AND alatila = 'A') OR
               (
                 tila                = 'G' AND
                 alatila             = 'J' AND
                 tilaustyyppi       != 'M' AND
                 toimitustavan_lahto = 0
-              )
+              ))
               AND tunnus = '{$tunnus}'";
     $res = pupe_query($query);
 
@@ -115,6 +115,7 @@ if (!function_exists('logmaster_mark_as_sent')) {
     case 'N':
       # Tällä yhtiön parametrilla pystytään ohittamaan tulostus
       $yhtiorow["lahetteen_tulostustapa"] = "X";
+      $laskuja = 1;
       $tilausnumeroita = $laskurow['tunnus'];
       $toim = "";
 

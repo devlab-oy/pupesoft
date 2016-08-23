@@ -9,6 +9,8 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
   require "parametrit.inc";
 
+  $yhtio = empty($yhtio) ? '' : $yhtio;
+
   $session = "";
   srand((double) microtime() * 1000000);
 
@@ -26,7 +28,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $result = pupe_query($query);
   $krow = mysql_fetch_array($result);
 
-  if ($salamd5!='')
+  if (!empty($salamd5))
     $vertaa=$salamd5;
   elseif ($salasana == '')
     $vertaa=$salasana;
@@ -39,38 +41,40 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
     if (mysql_num_rows($result) > 1) {
       $usea = 1;
     }
+    else {
+      $usea = 0;
+    }
 
-    // Kaikki ok!
-    if ($err != 1) {
-      // Pitääkö vielä kysyä yritystä???
-      if (($usea != 1) or (strlen($yhtio) > 0)) {
-        for ($i=0; $i<25; $i++) {
-          $session = $session . chr(rand(65, 90)) ;
-        }
-
-        $query = "UPDATE kuka
-                  SET session = '$session',
-                  lastlogin  = now()
-                  WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
-        if (strlen($yhtio) > 0) {
-          $query .= " and yhtio = '$yhtio'";
-        }
-        $result = pupe_query($query);
-
-        $bool = setcookie("pupesoft_session", $session, time()+43200, "/");
-
-        if ($location != "") {
-          echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
-        }
-        elseif (file_exists(basename($_SERVER["SCRIPT_URI"]))) {
-          echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=".basename($_SERVER["SCRIPT_URI"])."'>";
-        }
-        else {
-          echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
-        }
-
-        exit;
+    // Pitääkö vielä kysyä yritystä???
+    if (($usea != 1) or (strlen($yhtio) > 0)) {
+      for ($i=0; $i<25; $i++) {
+        $session = $session . chr(rand(65, 90)) ;
       }
+
+      $query = "UPDATE kuka
+                SET session = '$session',
+                lastlogin  = now()
+                WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
+      if (strlen($yhtio) > 0) {
+        $query .= " and yhtio = '$yhtio'";
+      }
+      $result = pupe_query($query);
+
+      $bool = setcookie("pupesoft_session", $session, time()+43200, "/");
+
+      $script_uri = empty($_SERVER["SCRIPT_URI"]) ? '' : basename($_SERVER["SCRIPT_URI"]);
+
+      if ($location != "") {
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
+      }
+      elseif (file_exists($script_uri)) {
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$script_uri'>";
+      }
+      else {
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+      }
+
+      exit;
     }
   }
   else {

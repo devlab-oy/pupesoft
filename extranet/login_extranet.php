@@ -62,7 +62,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
                 AND kuka.extranet != ''
                 AND kuka.oletus_asiakas != ''";
       if (strlen($yhtio) > 0) {
-        $query .= " and yhtio = '$yhtio'";
+        $query .= " and kuka.yhtio = '$yhtio'";
       }
       $result = pupe_query($query);
 

@@ -52,9 +52,15 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
       }
 
       $query = "UPDATE kuka
-                SET session = '$session',
-                lastlogin  = now()
-                WHERE kuka = '$user' and extranet != '' and oletus_asiakas != ''";
+                JOIN asiakas ON (asiakas.yhtio = kuka.yhtio
+                  AND asiakas.tunnus = kuka.oletus_asiakas
+                  AND asiakas.laji != 'P')
+                JOIN oikeu ON (oikeu.yhtio = kuka.yhtio
+                  AND oikeu.kuka = kuka.kuka)
+                SET kuka.session = '$session', kuka.lastlogin = now()
+                WHERE kuka.kuka = '$user'
+                AND kuka.extranet != ''
+                AND kuka.oletus_asiakas != ''";
       if (strlen($yhtio) > 0) {
         $query .= " and yhtio = '$yhtio'";
       }

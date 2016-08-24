@@ -436,7 +436,7 @@ if (!function_exists('logmaster_verify_order')) {
     $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
 
     if ($onkologmaster === false) {
-      return false;
+      return array();
     }
 
     # Tarkistetaan onko Logmasteriin meneviä tilausrivejä
@@ -446,7 +446,7 @@ if (!function_exists('logmaster_verify_order')) {
     $varastotunnukset = logmaster_warehouses();
 
     if ($varastotunnukset === false) {
-      return false;
+      return array();
     }
 
     $query = "SELECT lasku.*, maksuehto.jv

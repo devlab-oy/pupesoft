@@ -3488,7 +3488,7 @@ if ($tee == '') {
 
   $logmaster_errors = logmaster_verify_order($tunnus, $toim);
 
-  if (is_array($logmaster_errors) and count($logmaster_errors) > 0) {
+  if (count($logmaster_errors) > 0) {
     echo "<font class='error'>";
 
     foreach ($logmaster_errors as $error) {

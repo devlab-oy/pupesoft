@@ -477,18 +477,15 @@ if (!function_exists('logmaster_verify_order')) {
               AND tilausrivi.varasto IN ({$varastotunnukset})";
     $logmaster_rivi_res = pupe_query($query);
 
-    if (mysql_num_rows($logmaster_rivi_res) > 0) {
+    while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
+      if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
+        $errors[] = t("VIRHE: Sarjanumeroseurannassa olevia tuotteita ei sallita ulkoisessa varastossa")."!";
+      }
 
-      while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
-        if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
-          $errors[] = t("VIRHE: Sarjanumeroseurannassa olevia tuotteita ei sallita ulkoisessa varastossa")."!";
-        }
+      $logmaster_kpl = $logmaster_rivi_row['varattu'] + $logmaster_rivi_row['kpl'];
 
-        $logmaster_kpl = $logmaster_rivi_row['varattu'] + $logmaster_rivi_row['kpl'];
-
-        if (fmod($logmaster_kpl, 1) != 0) {
-          $errors[] = t("VIRHE: Ulkoinen varasto tukee vain kokonaislukuja")."!";
-        }
+      if (fmod($logmaster_kpl, 1) != 0) {
+        $errors[] = t("VIRHE: Ulkoinen varasto tukee vain kokonaislukuja")."!";
       }
     }
 

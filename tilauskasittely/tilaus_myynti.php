@@ -3486,7 +3486,17 @@ if ($tee == '') {
     }
   }
 
-  if (!logmaster_verify_order($tunnus, $toim)) {
+  $logmaster_errors = logmaster_verify_order($tunnus, $toim);
+
+  if (is_array($logmaster_errors) and count($logmaster_errors) > 0) {
+    echo "<font class='error'>";
+
+    foreach ($logmaster_errors as $error) {
+      echo "{$error}<br><br>";
+    }
+
+    echo "</font>";
+
     $tilausok++;
   }
 

@@ -29,7 +29,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
   require 'validation/Validation.php';
 }
 
-echo "<script type='text/javascript'>
+if (isset($tee) and $tee == "lataa_tiedosto") {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
+else {
+  echo "<script type='text/javascript'>
         $(function() {
           $('#kampanja_ja_samplerajaus').on('change', function() {
             if ($('#kampanja_ja_samplerajaus').val() === 'nayta_kamp') {
@@ -42,11 +47,6 @@ echo "<script type='text/javascript'>
         });
       </script>";
 
-if (isset($tee) and $tee == "lataa_tiedosto") {
-  readfile("/tmp/".$tmpfilenimi);
-  exit;
-}
-else {
   echo "<font class='head'>", t("Myynninseuranta"), "</font><hr>";
 
   // tehd‰‰n kaikista raportin parametreist‰ yksi muuttuja serialisoimista varten
@@ -695,7 +695,7 @@ else {
       echo "</select>";
     }
     echo "</div>";
-    echo "</td>"; 
+    echo "</td>";
 
     if (isset($vertailubu)) {
       switch ($vertailubu) {

@@ -3486,6 +3486,10 @@ if ($tee == '') {
     }
   }
 
+  if (!logmaster_verify_order($tunnus, $toim)) {
+    $tilausok++;
+  }
+
   $_tm_saldoaikalisa = "";
 
   if (!empty($yhtiorow["saldo_kasittely"])) {

@@ -30872,8 +30872,11 @@ if (!function_exists("tallenna_tiliote_viite")) {
           // eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
           // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois
           // tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
+          //
+          // Sama tsekki toteutettu nyt myös viiteaineistolle, sillä Nordealta tulee silloin tällöin näitä
+          // useassa osassa
           if (in_array($xtyyppi, array(2, 3))) {
-            // Group concatissa tulee kaikki tän päivän LMP:t
+            // Group concatissa tulee kaikki tän päivän tiliotedata
             $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
@@ -30884,6 +30887,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
             switch ($xtyyppi) {
+            // LMP
             case 2:
               // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
               $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
@@ -30923,6 +30927,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                 $virhe++;
               }
               break;
+            // Viiteaineisto
             case 3:
               $_aineisto      = trim(str_replace($serc, $repl, $kokoaineisto));
               $kanta_aineisto = trim($tiliotedatarow["kanta_aineisto"]);

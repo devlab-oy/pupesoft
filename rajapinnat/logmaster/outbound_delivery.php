@@ -64,8 +64,7 @@ $query = "SELECT DISTINCT lasku.tunnus
           JOIN tuote ON (
             tuote.yhtio         = tilausrivi.yhtio AND
             tuote.tuoteno       = tilausrivi.tuoteno AND
-            tuote.ei_saldoa     = '' AND
-            tuote.status       != 'P'
+            tuote.ei_saldoa     = ''
           )
           LEFT JOIN maksuehto ON (
             maksuehto.yhtio = lasku.yhtio AND

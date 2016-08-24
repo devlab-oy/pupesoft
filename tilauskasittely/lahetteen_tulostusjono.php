@@ -1333,6 +1333,17 @@ if ($tee2 == '') {
 
         if ($onkologmaster_varasto) {
           echo t("Ulkoisen varaston tilaus");
+
+          $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
+
+          if (mysql_num_rows($keskenres) != 0) {
+            $keskenrow = mysql_fetch_assoc($keskenres);
+
+            echo "<br>";
+            echo "<font class='error'>";
+            echo t("Tilaus on kesken käyttäjällä %s (%s)", "", $keskenrow['nimi'], $keskenrow['kuka']);
+            echo "</font>";
+          }
         }
         else {
           echo "<input type='submit' value='".t("Tulosta")."'>";

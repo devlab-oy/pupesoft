@@ -419,7 +419,7 @@ if (!function_exists('logmaster_warehouses')) {
     $varastores = pupe_query($query);
     $varastorow = mysql_fetch_assoc($varastores);
 
-    return !empty($varastorow['tunnukset']) ? $varastorow['tunnukset'] : false;
+    return empty($varastorow['tunnukset']) ? false : $varastorow['tunnukset'];
   }
 }
 

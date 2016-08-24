@@ -3845,5 +3845,5 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-  require "../inc/footer.inc";
+  require "inc/footer.inc";
 }

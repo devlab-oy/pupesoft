@@ -30872,7 +30872,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           // eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
           // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois
           // tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
-          if ($xtyyppi == 2) {
+          if (in_array($xtyyppi, array(2, 3))) {
             // Group concatissa tulee kaikki tän päivän LMP:t
             $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
                       FROM tiliotedata
@@ -30883,70 +30883,64 @@ if (!function_exists("tallenna_tiliote_viite")) {
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
-            // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
-            $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
-            $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
+            switch ($xtyyppi) {
+            case 2:
+              // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
+              $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
+              $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
 
-            if ($_to_aineitso != "") {
-              for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
+              if ($_to_aineitso != "") {
+                for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
 
-                $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
+                  $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
 
-                if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
-                  echo "<font class='error'>";
-                  echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
-                  echo "<br>";
-                  echo "Tili: $tilino<br>";
-                  echo "Ajalta: $alkupvm - $loppupvm<br>";
-                  echo "Yritys: $yritirow[yhtio]";
-                  echo "</font>";
-                  echo "<br>";
+                  if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
+                    echo "<font class='error'>";
+                    echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                    echo "<br>";
+                    echo "Tili: $tilino<br>";
+                    echo "Ajalta: $alkupvm - $loppupvm<br>";
+                    echo "Yritys: $yritirow[yhtio]";
+                    echo "</font>";
+                    echo "<br>";
 
-                  $xtyyppi=0;
-                  $virhe++;
+                    $xtyyppi=0;
+                    $virhe++;
+                  }
                 }
               }
-            }
 
-            // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
-            if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
-              echo "<font class='error'>";
-              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
-              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
-              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
-              echo "</font>";
-              echo "<br>";
+              // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
+              if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
+                echo "<font class='error'>";
+                echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+                echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+                echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+                echo "</font>";
+                echo "<br>";
 
-              $xtyyppi=0;
-              $virhe++;
-            }
-          }
-          // Sama kuin ylemmässä iffissä, mutta viiteaineistolle ja tuetaan vain yhtä aineistoa per tiedosto.
-          elseif ($xtyyppi == 3) {
-            $query = "SELECT group_concat(tieto SEPARATOR '') AS kanta_aineisto
-                      FROM tiliotedata
-                      WHERE tilino = '$tilino'
-                      AND alku     = '$alkupvm'
-                      AND loppu    = '$loppupvm'
-                      AND tyyppi   = '$xtyyppi'";
-            $tiliotedatares = pupe_query($query);
-            $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
+                $xtyyppi=0;
+                $virhe++;
+              }
+              break;
+            case 3:
+              $_aineisto      = trim(str_replace($serc, $repl, $kokoaineisto));
+              $kanta_aineisto = trim($tiliotedatarow["kanta_aineisto"]);
 
-            $_aineisto      = trim(str_replace($serc, $repl, $kokoaineisto));
-            $kanta_aineisto = trim($tiliotedatarow["kanta_aineisto"]);
+              if ($kanta_aineisto != "" && $_aineisto != "" && strpos($kanta_aineisto, $_aineisto) !== false) {
+                echo "<font class='error'>";
+                echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                echo "<br>";
+                echo "Tili: $tilino<br>";
+                echo "Ajalta: $alkupvm - $loppupvm<br>";
+                echo "Yritys: $yritirow[yhtio]";
+                echo "</font>";
+                echo "<br>";
 
-            if ($kanta_aineisto != "" && $_aineisto != "" && strpos($kanta_aineisto, $_aineisto) !== false) {
-              echo "<font class='error'>";
-              echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
-              echo "<br>";
-              echo "Tili: $tilino<br>";
-              echo "Ajalta: $alkupvm - $loppupvm<br>";
-              echo "Yritys: $yritirow[yhtio]";
-              echo "</font>";
-              echo "<br>";
-
-              $xtyyppi = 0;
-              $virhe++;
+                $xtyyppi = 0;
+                $virhe++;
+              }
+              break;
             }
           }
           else {

@@ -37,6 +37,8 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+require "rajapinnat/logmaster/logmaster-functions.php";
+
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $lquery = "SELECT *
@@ -3488,15 +3490,10 @@ if ($tee == '') {
 
   $logmaster_errors = logmaster_verify_order($tunnus, $toim);
 
-  if (count($logmaster_errors) > 0) {
+  foreach ($logmaster_errors as $error) {
     echo "<font class='error'>";
-
-    foreach ($logmaster_errors as $error) {
-      echo "{$error}<br><br>";
-    }
-
+    echo "{$error}<br><br>";
     echo "</font>";
-
     $tilausok++;
   }
 

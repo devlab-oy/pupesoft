@@ -407,6 +407,26 @@ if (!function_exists('logmaster_outbounddelivery')) {
   }
 }
 
+if (!function_exists('logmaster_check_params')) {
+  function logmaster_check_params($toim) {
+    $onkologmaster  = LOGMASTER_RAJAPINTA;
+    $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+    $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
+
+    if ($onkologmaster === false) {
+      return false;
+    }
+
+    $varastotunnukset = logmaster_warehouses();
+
+    if ($varastotunnukset === false) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
 if (!function_exists('logmaster_warehouses')) {
   function logmaster_warehouses() {
     global $kukarow;
@@ -429,20 +449,12 @@ if (!function_exists('logmaster_verify_row')) {
 
     $errors = array();
 
-    $onkologmaster  = LOGMASTER_RAJAPINTA;
-    $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
-    $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
-
-    if ($onkologmaster === false) {
+    if (logmaster_check_params($toim) === false) {
       return array();
     }
 
-    $varastotunnukset = logmaster_warehouses();
-
-    if ($varastotunnukset === false) {
-      return array();
-    }
-
+    # Sarjanumerollisia tuotteita ei tueta
+    # Tilausrivien t‰ytyy sis‰lt‰‰ vain kokonaislukuja
     $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
               FROM tilausrivi
               JOIN tuote ON (
@@ -479,24 +491,11 @@ if (!function_exists('logmaster_verify_order')) {
     $errors = array();
     $tunnus = (int) $tunnus;
 
-    $onkologmaster  = LOGMASTER_RAJAPINTA;
-    $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
-    $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
-
-    if ($onkologmaster === false) {
+    if (logmaster_check_params($toim) === false) {
       return array();
     }
 
-    # Tarkistetaan onko Logmasteriin menevi‰ tilausrivej‰
     # Maksuehto ei saa olla j‰lkivaatimus
-    # Sarjanumerollisia tuotteita ei tueta
-    # Tilausrivien t‰ytyy sis‰lt‰‰ vain kokonaislukuja
-    $varastotunnukset = logmaster_warehouses();
-
-    if ($varastotunnukset === false) {
-      return array();
-    }
-
     $query = "SELECT lasku.*, maksuehto.jv
               FROM lasku
               LEFT JOIN maksuehto ON (
@@ -508,6 +507,7 @@ if (!function_exists('logmaster_verify_order')) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
+    # Tarkistetaan onko Logmasteriin menevi‰ tilausrivej‰
     $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
               FROM tilausrivi
               JOIN tuote ON (

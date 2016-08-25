@@ -277,6 +277,9 @@ if ($tee != "" and isset($painoinnappia)) {
     if ($nayta_vapaa_saldo == "on") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"));
       $worksheet->writeString($excelrivi, $excelsarake++, t("Varattu saldo"));
+      if ($yhtiorow["varaako_jt_saldoa"] == "") {
+         $worksheet->writeString($excelrivi, $excelsarake++, t("Jälkitoimituksessa"));
+      }
     }
 
     if ($toim == "") {
@@ -422,24 +425,28 @@ if ($tee != "" and isset($painoinnappia)) {
 
         $jalkitoimituksessa = 0;
 
-        // Jos jälkitoimitukset eivät varaa saldoa, pitää ne ottaa mukaan
-        if ($yhtiorow["varaako_jt_saldoa"] == "") {
-          $query = "SELECT ifnull(round(sum(jt)), 0) jt
-                    FROM tilausrivi
-                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                    AND tuoteno = '{$row["tuoteno"]}'
-                    AND tyyppi  = 'L'
-                    AND var     = 'J'
-                    AND jt      > 0
-                    {$varasto_tilausrivi_filter}";
-          $jt_result = pupe_query($query);
-          $jt_rivi = mysql_fetch_assoc($jt_result);
-          $jalkitoimituksessa = $jt_rivi["jt"];
-        }
+        // Jos jälkitoimitukset varaavat saldoa, lasketaan ne varattu lukuun
+        // muuten jälkitoimituksessa -lukuun
+        $query = "SELECT ifnull(round(sum(jt)), 0) jt
+                  FROM tilausrivi
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tuoteno = '{$row["tuoteno"]}'
+                  AND tyyppi  = 'L'
+                  AND var     = 'J'
+                  AND jt      > 0
+                  {$varasto_tilausrivi_filter}";
+        $jt_result = pupe_query($query);
+        $jt_rivi = mysql_fetch_assoc($jt_result);
+        $jalkitoimituksessa = $jt_rivi["jt"];
 
         $valitut_varastot = isset($valitut_varastot) ? $valitut_varastot : "";
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", $valitut_varastot);
-        $varattu = $saldo - $myytavissa + $jalkitoimituksessa;
+        if ($yhtiorow["varaako_jt_saldoa"] != "") {
+          $varattu = $saldo - $myytavissa + $jalkitoimituksessa;
+        }
+        else {
+          $varattu = $saldo - $myytavissa;
+        }
       }
 
       if ($osastot[$row["osasto"]] != "") {
@@ -466,6 +473,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $vapaa_saldo = empty($myytavissa) ? "" : (float) $myytavissa;
       $saldo = empty($row['saldo']) ? "" : (float) $row['saldo'];
       $row["varmuus_varasto"] = empty($row["varmuus_varasto"]) ? "" : $row["varmuus_varasto"];
+      $jalkitoimituksessa = empty($jalkitoimituksessa) ? "" : (float) $jalkitoimituksessa;
 
       if ($toim == "") {
         if     ($row["epakurantti100pvm"] != '0000-00-00') $kehahin = 0;
@@ -505,6 +513,9 @@ if ($tee != "" and isset($painoinnappia)) {
         if ($nayta_vapaa_saldo == "on") {
           $varastotilasto_table .= "<td align='right'>{$vapaa_saldo}</td>";
           $varastotilasto_table .= "<td align='right'>{$varattu}</td>";
+          if ($yhtiorow["varaako_jt_saldoa"] == "") {
+            $varastotilasto_table .= "<td align='right'>{$jalkitoimituksessa}</td>";
+          }
         }
 
         if ($toim == "") {
@@ -551,6 +562,9 @@ if ($tee != "" and isset($painoinnappia)) {
       if ($nayta_vapaa_saldo == "on") {
         $worksheet->writeNumber($excelrivi, $excelsarake++, $vapaa_saldo);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $varattu);
+        if ($yhtiorow["varaako_jt_saldoa"] == "") {
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $jalkitoimituksessa);
+        }
       }
 
       if ($toim == "") {
@@ -620,6 +634,10 @@ if ($tee != "" and isset($painoinnappia)) {
         echo "<th>".t("Vapaa saldo")."</th>";
         echo "<th>".t("Varattu saldo")."</th>";
         $sarakkeet += 2;
+        if ($yhtiorow["varaako_jt_saldoa"] == "") {
+          echo "<th>".t("Jälkitoimituksessa")."</th>";
+          $sarakkeet += 1;
+        }
       }
 
       if ($toim == "") {
@@ -670,6 +688,9 @@ if ($tee != "" and isset($painoinnappia)) {
       if ($nayta_vapaa_saldo == "on") {
         echo "<td><input type='text' class='search_field' name='search_Vapaasaldo'/></td>";
         echo "<td><input type='text' class='search_field' name='search_Varattusal'></td>";
+        if ($yhtiorow["varaako_jt_saldoa"] == "") {
+          echo "<td><input type='text' class='search_field' name='search_Jalkkari'></td>";
+        }
       }
 
       if ($toim == "") {

@@ -423,6 +423,55 @@ if (!function_exists('logmaster_warehouses')) {
   }
 }
 
+if (!function_exists('logmaster_verify_row')) {
+  function logmaster_verify_row($tunnus, $toim) {
+    global $yhtiorow, $kukarow;
+
+    $errors = array();
+
+    $onkologmaster  = LOGMASTER_RAJAPINTA;
+    $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+    $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
+
+    if ($onkologmaster === false) {
+      return array();
+    }
+
+    $varastotunnukset = logmaster_warehouses();
+
+    if ($varastotunnukset === false) {
+      return array();
+    }
+
+    $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+              FROM tilausrivi
+              JOIN tuote ON (
+                tuote.yhtio     = tilausrivi.yhtio AND
+                tuote.tuoteno   = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
+              )
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.tunnus  = '{$tunnus}'
+              AND tilausrivi.var     != 'J'
+              AND tilausrivi.varasto IN ({$varastotunnukset})";
+    $logmaster_rivi_res = pupe_query($query);
+
+    while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
+      if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
+        $errors[] = t("VIRHE: Sarjanumeroseurannassa olevia tuotteita ei sallita ulkoisessa varastossa")."!";
+      }
+
+      $logmaster_kpl = $logmaster_rivi_row['varattu'] + $logmaster_rivi_row['kpl'];
+
+      if (fmod($logmaster_kpl, 1) != 0) {
+        $errors[] = t("VIRHE: Ulkoinen varasto tukee vain kokonaislukuja")."!";
+      }
+    }
+
+    return $errors;
+  }
+}
+
 if (!function_exists('logmaster_verify_order')) {
   function logmaster_verify_order($tunnus, $toim) {
     global $yhtiorow, $kukarow;
@@ -432,7 +481,6 @@ if (!function_exists('logmaster_verify_order')) {
 
     $onkologmaster  = LOGMASTER_RAJAPINTA;
     $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
-    $onkologmaster &= ($kukarow["extranet"] == "");
     $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
 
     if ($onkologmaster === false) {
@@ -460,10 +508,6 @@ if (!function_exists('logmaster_verify_order')) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($laskurow['jv'] != '') {
-      $errors[] = t("VIRHE: Jälkivaatimuksia ei sallita ulkoisessa varastossa")."!";
-    }
-
     $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
               FROM tilausrivi
               JOIN tuote ON (
@@ -472,21 +516,13 @@ if (!function_exists('logmaster_verify_order')) {
                 tuote.ei_saldoa = ''
               )
               WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
+              AND tilausrivi.otunnus  = '{$tunnus}'
               AND tilausrivi.var     != 'J'
               AND tilausrivi.varasto IN ({$varastotunnukset})";
     $logmaster_rivi_res = pupe_query($query);
 
-    while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
-      if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
-        $errors[] = t("VIRHE: Sarjanumeroseurannassa olevia tuotteita ei sallita ulkoisessa varastossa")."!";
-      }
-
-      $logmaster_kpl = $logmaster_rivi_row['varattu'] + $logmaster_rivi_row['kpl'];
-
-      if (fmod($logmaster_kpl, 1) != 0) {
-        $errors[] = t("VIRHE: Ulkoinen varasto tukee vain kokonaislukuja")."!";
-      }
+    if (mysql_num_rows($logmaster_rivi_res) > 0 and $laskurow['jv'] != '') {
+      $errors[] = t("VIRHE: Jälkivaatimuksia ei sallita ulkoisessa varastossa")."!";
     }
 
     return $errors;

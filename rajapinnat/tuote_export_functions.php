@@ -369,12 +369,19 @@ function tuote_export_hae_saldot($params) {
 
   $ajetaanko_kaikki           = $params['ajetaanko_kaikki'];
   $datetime_checkpoint        = tuote_export_checkpoint('TEX_SALDOT');
+  $vaihtoehtoiset_saldot      = $params['vaihtoehtoiset_saldot'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
   $dnstock = array();
 
   if (!is_array($verkkokauppa_saldo_varasto)) {
      echo "Virhe! verkkokauppa_saldo_varasto pitää olla array!";
+
+     return $dnstock;
+  }
+
+  if (!is_array($vaihtoehtoiset_saldot)) {
+     echo "Virhe! vaihtoehtoiset_saldot pitää olla array!";
 
      return $dnstock;
   }
@@ -433,16 +440,34 @@ function tuote_export_hae_saldot($params) {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
+    // jos halutaan vaihtoehtoisia saldoja omiin kenttiin, lasketaan ne tässä
+    $vaihtoehtoiset_kentat = array();
+
+    foreach($vaihtoehtoiset_saldot as $varasto_kentta => $varasto_tunnukset) {
+      $vaihtoehto_myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $varasto_tunnukset);
+
+      $vaihtoehtoiset_kentat[$varasto_kentta] = $vaihtoehto_myytavissa;
+    }
+
+    $myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $verkkokauppa_saldo_varasto);
 
     $dnstock[] = array(
-      'tuoteno'     => $row["tuoteno"],
-      'ean'         => $row["eankoodi"],
-      'myytavissa'  => $myytavissa,
+      'ean'                   => $row["eankoodi"],
+      'myytavissa'            => $myytavissa,
+      'tuoteno'               => $row["tuoteno"],
+      'vaihtoehtoiset_saldot' => $vaihtoehtoiset_kentat,
     );
   }
 
   return $dnstock;
+}
+
+function tuote_export_saldo_myytavissa($tuoteno, Array $varastot) {
+  global $kukarow, $yhtiorow;
+
+  list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $varastot);
+
+  return $myytavissa;
 }
 
 function tuote_export_hae_tuoteryhmat($params) {

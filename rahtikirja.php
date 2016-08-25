@@ -124,7 +124,7 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $tutkimus++;
     }
   }
@@ -414,7 +414,7 @@ if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
       $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
       $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
@@ -478,7 +478,7 @@ if ($tee == 'add') {
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $tutkimus++;
     }
   }

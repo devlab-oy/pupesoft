@@ -60,7 +60,8 @@ while (false !== ($file = readdir($handle))) {
     continue;
   }
 
-  $filehandle = fopen($full_filepath, "r");
+  $filehandle     = fopen($full_filepath, "r");
+  $seurantakoodit = array();
 
   while ($tietue = fgets($filehandle)) {
     // Tyhjät rivit skipataan
@@ -93,6 +94,14 @@ while (false !== ($file = readdir($handle))) {
       continue;
     }
 
+    $seurantakoodit[$tilausnumero][] = $seurantakoodi;
+  }
+
+  foreach ($seurantakoodit as $tilausnumero => $koodit) {
+
+    $koodit        = array_unique($koodit);
+    $seurantakoodi = implode(' ', $koodit);
+
     $query = "UPDATE rahtikirjat SET
               rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
               tulostettu     = now()
@@ -117,6 +126,7 @@ while (false !== ($file = readdir($handle))) {
       'otunnukset' => $tilausnumero,
       'kilotyht' => $kilotrow['kilotyht']
     );
+
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
     pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");

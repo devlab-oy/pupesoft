@@ -928,6 +928,9 @@ class MagentoClient {
         $this->_error_count++;
         $this->log('magento_saldot', "Virhe! Saldopäivitys epäonnistui!", $e);
       }
+
+      // Jos meillä on "erikoissaldoja" tuotteelle, pitää nämä tiedot päivittää tuotetietoihin
+      $this->paivita_erikoissaldot($tuote['tuoteno'], $tuote['vaihtoehtoiset_saldot']);
     }
 
     $this->log('magento_saldot', "$count saldoa päivitetty");
@@ -936,48 +939,34 @@ class MagentoClient {
   }
 
   // Päivitetään erikoissaldot
-  public function paivita_erikoissaldot(array $params) {
-    $dnstock = $params['saldot'];
-    $saldokentta = $params['lisasaldo_kentta'];
-
-    $this->log('magento_erikoissaldot', "Päivitetään erikoissaldot tuotekenttään '{$saldokentta}'");
-
-    $count = 0;
-    $total_count = count($dnstock);
-
-    // Loopataan päivitettävät erikoissaldot läpi
-    foreach ($dnstock as $tuote) {
-      if (is_numeric($tuote['tuoteno'])) $tuote['tuoteno'] = "SKU_".$tuote['tuoteno'];
-
-      // $tuote muuttuja sisältää tuotenumeron ja myytävissä määrän
-      $product_sku = $tuote['tuoteno'];
-      $qty         = $tuote['myytavissa'];
-
-      $count++;
-      $this->log('magento_erikoissaldot', "[{$count}/{$total_count}] Päivitetään tuotteen {$product_sku} erikoissaldo {$qty}");
-
-      $tuote_data = array(
-        "{$saldokentta}" => $qty,
-      );
-
-      // Päivitetään erikoissaldo tuotteen kenttään
-      try {
-        // Päivitetään tuote
-        $result = $this->_proxy->call(
-          $this->_session,
-          'catalog_product.update',
-          array($tuote['tuoteno'], $tuote_data)
-        ); 
-      }
-      catch (Exception $e) {
-        $this->_error_count++;
-        $this->log('magento_erikoissaldot', "Virhe! Erikoissaldopäivitys epäonnistui!", $e);
-      }
+  public function paivita_erikoissaldot($tuoteno, Array $erikoissaldot) {
+    // ei tehdä mitään, jos ei ole erikoissaldoja
+    if (count($erikoissaldot) == 0) {
+      return false;
     }
 
-    $this->log('magento_erikoissaldot', "$count erikoissaldoa päivitetty");
+    $log_keys   = implode(', ', array_keys($erikoissaldot));
+    $log_values = implode(', ', array_values($erikoissaldot));
+    $log_info   = "Kentät {$log_keys}. Arvot {$log_values}.";
 
-    return $count;
+    try {
+      // Päivitetään tuote
+      $result = $this->_proxy->call(
+        $this->_session,
+        'catalog_product.update',
+        array($tuoteno, $erikoissaldot)
+      );
+
+      $this->log('magento_saldot', "Erikoissaldot lisätty. {$log_info}");
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_saldot', "Virhe! Erikoissaldopäivitys epäonnistui! {$log_info}", $e);
+
+      return false;
+    }
+
+    return true;
   }
 
   // Poistaa magentosta tuotteita

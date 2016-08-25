@@ -282,11 +282,12 @@ if (empty($verkkokauppa_asiakasnro)) {
   $verkkokauppa_asiakasnro = null;
 }
 
-// Jos halutaan siirtää vaihtoehtoisen varaston saldo tavalliseen tuotekenttään
-//  Array jonka key on haluttu tuotekenttä ja value array sisältäen varastotunnukset
+// Vaihtoehtoinen varastosaldo Magenton tuotekenttään
+// Array jossa avaimena Magenton tuotekentän nimi, arvona Array jossa varastojen tunnukset
 if (empty($magento_saldot_tuotekenttaan)) {
   $magento_saldot_tuotekenttaan = array(
-    //'special_varasto' => array(117,118)
+    // 'hki_myymala' => array(117,118),
+    // 'tku_myymala' => array(10),
   );
 }
 
@@ -374,6 +375,7 @@ if (in_array('saldot', $magento_ajolista)) {
   $params = array(
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
+    "vaihtoehtoiset_saldot"      => $magento_saldot_tuotekenttaan,
   );
 
   $dnstock = tuote_export_hae_saldot($params);
@@ -381,28 +383,6 @@ if (in_array('saldot', $magento_ajolista)) {
   // Saldot
   tuote_export_echo("Päivitetään tuotteiden saldot");
   $magento_client->paivita_saldot($dnstock);
-}
-
-if (in_array('lisasaldot', $magento_ajolista) and count($magento_saldot_tuotekenttaan) > 0) {
-  tuote_export_echo("Haetaan lisäsaldot.");
-
-  $mihin_tuotekenttaan = key($magento_saldot_tuotekenttaan);
-  $lisavarastot = current($magento_saldot_tuotekenttaan);
-
-  $params = array(
-    "ajetaanko_kaikki"           => $ajetaanko_kaikki,
-    "verkkokauppa_saldo_varasto" => $lisavarastot,
-  );
-
-  $dnstock = tuote_export_hae_saldot($params);
-
-  // Erikoissaldot
-  tuote_export_echo("Päivitetään tuotteiden saldot");
-  $erikoissaldo_params = array(
-    "saldot"           => $dnstock,
-    "lisasaldo_kentta" => $mihin_tuotekenttaan,
-  );
-  $magento_client->paivita_erikoissaldot($erikoissaldo_params);
 }
 
 if (in_array('tuoteryhmat', $magento_ajolista)) {

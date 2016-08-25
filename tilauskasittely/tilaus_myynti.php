@@ -37,7 +37,9 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-require "rajapinnat/logmaster/logmaster-functions.php";
+if (@include "rajapinnat/logmaster/logmaster-functions.php");
+elseif (@include "logmaster-functions.php");
+else exit;
 
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
@@ -3488,15 +3490,6 @@ if ($tee == '') {
     }
   }
 
-  $logmaster_errors = logmaster_verify_order($tunnus, $toim);
-
-  foreach ($logmaster_errors as $error) {
-    echo "<font class='error'>";
-    echo "{$error}<br><br>";
-    echo "</font>";
-    $tilausok++;
-  }
-
   $_tm_saldoaikalisa = "";
 
   if (!empty($yhtiorow["saldo_kasittely"])) {
@@ -5488,6 +5481,15 @@ if ($tee == '') {
     $toimaika       = "";
     $tuoteno       = "";
     $var = "";
+  }
+
+  $logmaster_errors = logmaster_verify_order($laskurow['tunnus'], $toim);
+
+  foreach ($logmaster_errors as $error) {
+    echo "<font class='error'>";
+    echo "{$error}<br><br>";
+    echo "</font>";
+    $tilausok++;
   }
 
   $numres_saatavt  = 0;

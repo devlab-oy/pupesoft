@@ -1069,6 +1069,19 @@ if (!function_exists("maventa_invoice_put_file")) {
   }
 }
 
+if (!function_exists("ppg_queue")) {
+  function ppg_queue($invoice_number, $xmlstring, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    $ppgtmpfile = tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_PPG", "", "", "", "");
+
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/ppg_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    rename($ppgtmpfile, "{$pupe_root_polku}/dataout/ppg_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.pdf");
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
 if (!function_exists("apix_queue")) {
   function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;

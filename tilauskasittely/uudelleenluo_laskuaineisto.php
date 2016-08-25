@@ -51,9 +51,21 @@ if (isset($tee) and $tee == "trustpoint_siirto") {
 }
 
 if (isset($tee) and $tee == "ppg_siirto") {
-  // Siirret‰‰n l‰hetysjonoon
-  rename("{$pupe_root_polku}/dataout/".basename($filenimi), "{$pupe_root_polku}/dataout/ppg_error/".basename($filenimi));
-  echo "Lasku siirretty l‰hetysjonoon";
+  // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+  $ppg_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
+  $ppg_laskumaara = count($ppg_laskuarray);
+
+  if ($ppg_laskumaara > 0) {
+    require_once "tilauskasittely/tulosta_lasku.inc";
+
+    for ($a = 1; $a < $ppg_laskumaara; $a++) {
+      preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $ppg_laskuarray[$a], $invoice_number);
+
+      $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
+
+      echo "PPG-lasku $invoice_number[1]: $status<br>\n";
+    }
+  }
 }
 
 if (isset($tee) and $tee == "edi_siirto") {

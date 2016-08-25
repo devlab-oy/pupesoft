@@ -396,14 +396,20 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Nimet‰‰n tiedostot yksinkertaisemmin:
+    // LASKUNUMERO.xml ja LASKUNUMERO.pdf
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    rename($kansio.$lasku, $kansio.$vainlaskunumero);
+    $lasku = $vainlaskunumero;
+
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $ftphost = "ftp.ppg.fi";
+    $ftphost = "213.214.148.38";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
     //$ftppath = "test/invoice/finvoice/";
-    $ftppath = "invoice/finvoice/";
+    $ftppath = "/";
     $ftpfile = $kansio.$lasku;
     $ftpsucc = "{$pupe_root_polku}/dataout/";
 

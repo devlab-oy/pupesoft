@@ -222,16 +222,20 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
 
   $params = array(
     'liitostunnus' => $toimittaja['tunnus'],
-    'nimi'         => $asiakas['nimi'],
-    'nimitark'     => $asiakas['nimitark'],
-    'osoite'       => $asiakas['osoite'],
-    'postino'      => $asiakas['postino'],
-    'postitp'      => $asiakas['postitp'],
-    'maa'          => $asiakas['maa'],
   );
 
   $ostotilaus = luo_ostotilausotsikko($params);
 
+  $query = "UPDATE lasku
+            SET nimi     = '{$asiakas["nimi"]}',
+                nimitark = '{$asiakas["nimitark"]}',
+                osoite   = '{$asiakas["osoite"]}',
+                postino  = '{$asiakas["postino"]}',
+                postitp  = '{$asiakas["postitp"]}',
+                maa      = '{$asiakas["maa"]}'
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = {$ostotilaus["tunnus"]}";
+  pupe_query($query);
 
   if ($toimipaikka && $toimipaikka > 0) {
     $query = "SELECT *
@@ -287,7 +291,13 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
 
   $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
-  $response[] = yrityspeli_tulosta_ostotilaus($ostotilaus['tunnus'], $asiakas['email']);
+  $params = array(
+    'otunnus'        => $ostotilaus['tunnus'],
+    'email'          => $asiakas['email'],
+    'toimipaikkarow' => $toimipaikkarow,
+  );
+
+  $response[] = yrityspeli_tulosta_ostotilaus($params);
 
   return $response;
 }
@@ -342,13 +352,19 @@ function yrityspeli_tuotearvonta($toimittaja, $try = null) {
   return mysql_fetch_assoc($result);
 }
 
-function yrityspeli_tulosta_ostotilaus($otunnus, $email) {
+function yrityspeli_tulosta_ostotilaus(Array $params) {
   // komento pitää olla global, jotta tulosta_ostotilaus funkkarit saa siitä kiinni
   global $kukarow, $yhtiorow, $komento;
+
+  $otunnus        = $params['otunnus'];
+  $email          = $params['email'];
+  $toimipaikkarow = $params['toimipaikkarow'];
 
   $kieli = 'fi';
   $komento = array('Ostotilaus' => "toimittajaemail{$email}");
   $silent = 'kyllä';
+  $kukarow['toimipaikka'] = $toimipaikkarow['tunnus'];
+  $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 
   require 'tilauskasittely/tulosta_ostotilaus.inc';
 

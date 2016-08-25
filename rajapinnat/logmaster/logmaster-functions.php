@@ -409,6 +409,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
 if (!function_exists('logmaster_check_params')) {
   function logmaster_check_params($toim) {
+    global $kukarow, $yhtiorow;
+
     $onkologmaster  = LOGMASTER_RAJAPINTA;
     $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
     $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));

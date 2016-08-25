@@ -467,7 +467,10 @@ function tuote_export_saldo_myytavissa($tuoteno, Array $varastot) {
 
   list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $varastot);
 
-  return $myytavissa;
+  // saldo myytävissä palautta false, jos tuotteella ei ole paikkaa kysytyssä varastossa
+  $saldo = ($myytavissa === false) ? 0 : $myytavissa;
+
+  return $saldo;
 }
 
 function tuote_export_hae_tuoteryhmat($params) {

@@ -2937,9 +2937,21 @@ else {
         $tulos_ulos .= t("Lasku siirretty l‰hetysjonoon");
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "ppg" and file_exists(realpath($nimifinvoice))) {
-        // Siirret‰‰n l‰hetysjonoon
-        rename($nimifinvoice, "{$pupe_root_polku}/dataout/ppg_error/".basename($nimifinvoice));
-        $tulos_ulos .= t("Lasku siirretty l‰hetysjonoon");
+        // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+        $ppg_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
+        $ppg_laskumaara = count($ppg_laskuarray);
+
+        if ($ppg_laskumaara > 0) {
+          require_once "tilauskasittely/tulosta_lasku.inc";
+
+          for ($a = 1; $a < $ppg_laskumaara; $a++) {
+            preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $ppg_laskuarray[$a], $invoice_number);
+
+            $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "PPG-lasku $invoice_number[1]: $status<br>\n";
+          }
+        }
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
         // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin ja lasku ei mene automaattiseen verkkolaskuputkeen

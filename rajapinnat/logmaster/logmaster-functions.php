@@ -446,13 +446,29 @@ if (!function_exists('logmaster_warehouses')) {
 }
 
 if (!function_exists('logmaster_fetch_rows')) {
-  function logmaster_fetch_rows($tunnus) {
+  function logmaster_fetch_rows($tunnus, $otunnus = 0) {
     global $kukarow;
 
     $varastotunnukset = logmaster_warehouses();
 
     if ($varastotunnukset === false) {
       return false;
+    }
+
+    $wherelisa = '';
+    $tunnus    = (int) $tunnus;
+    $otunnus   = (int) $otunnus;
+
+    if (empty($tunnus) and empty($otunnus)) {
+      return false;
+    }
+
+    if (!empty($tunnus)) {
+      $wherelisa = " AND tilausrivi.tunnus  = '{$tunnus}' ";
+    }
+
+    if (!empty($otunnus)) {
+      $wherelisa = " AND tilausrivi.otunnus  = '{$otunnus}' ";
     }
 
     $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
@@ -463,7 +479,7 @@ if (!function_exists('logmaster_fetch_rows')) {
                 tuote.ei_saldoa = ''
               )
               WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus  = '{$tunnus}'
+              {$wherelisa}
               AND tilausrivi.var     != 'J'
               AND tilausrivi.varasto IN ({$varastotunnukset})";
     $logmaster_res = pupe_query($query);
@@ -530,7 +546,7 @@ if (!function_exists('logmaster_verify_order')) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     # Tarkistetaan onko Logmasteriin meneviä tilausrivejä
-    $logmaster_rivi_res = logmaster_fetch_rows($tunnus);
+    $logmaster_rivi_res = logmaster_fetch_rows(0, $tunnus);
 
     if ($logmaster_rivi_res === false) {
       return array();

@@ -445,6 +445,33 @@ if (!function_exists('logmaster_warehouses')) {
   }
 }
 
+if (!function_exists('logmaster_fetch_rows')) {
+  function logmaster_fetch_rows($tunnus) {
+    global $kukarow;
+
+    $varastotunnukset = logmaster_warehouses();
+
+    if ($varastotunnukset === false) {
+      return false;
+    }
+
+    $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+              FROM tilausrivi
+              JOIN tuote ON (
+                tuote.yhtio     = tilausrivi.yhtio AND
+                tuote.tuoteno   = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
+              )
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.tunnus  = '{$tunnus}'
+              AND tilausrivi.var     != 'J'
+              AND tilausrivi.varasto IN ({$varastotunnukset})";
+    $logmaster_res = pupe_query($query);
+
+    return $logmaster_res;
+  }
+}
+
 if (!function_exists('logmaster_verify_row')) {
   function logmaster_verify_row($tunnus, $toim) {
     global $yhtiorow, $kukarow;
@@ -457,18 +484,11 @@ if (!function_exists('logmaster_verify_row')) {
 
     # Sarjanumerollisia tuotteita ei tueta
     # Tilausrivien täytyy sisältää vain kokonaislukuja
-    $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
-              FROM tilausrivi
-              JOIN tuote ON (
-                tuote.yhtio     = tilausrivi.yhtio AND
-                tuote.tuoteno   = tilausrivi.tuoteno AND
-                tuote.ei_saldoa = ''
-              )
-              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus  = '{$tunnus}'
-              AND tilausrivi.var     != 'J'
-              AND tilausrivi.varasto IN ({$varastotunnukset})";
-    $logmaster_rivi_res = pupe_query($query);
+    $logmaster_rivi_res = logmaster_fetch_rows($tunnus);
+
+    if ($logmaster_rivi_res === false) {
+      return array();
+    }
 
     while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
       if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
@@ -510,18 +530,11 @@ if (!function_exists('logmaster_verify_order')) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     # Tarkistetaan onko Logmasteriin meneviä tilausrivejä
-    $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
-              FROM tilausrivi
-              JOIN tuote ON (
-                tuote.yhtio     = tilausrivi.yhtio AND
-                tuote.tuoteno   = tilausrivi.tuoteno AND
-                tuote.ei_saldoa = ''
-              )
-              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus  = '{$tunnus}'
-              AND tilausrivi.var     != 'J'
-              AND tilausrivi.varasto IN ({$varastotunnukset})";
-    $logmaster_rivi_res = pupe_query($query);
+    $logmaster_rivi_res = logmaster_fetch_rows($tunnus);
+
+    if ($logmaster_rivi_res === false) {
+      return array();
+    }
 
     if (mysql_num_rows($logmaster_rivi_res) > 0 and $laskurow['jv'] != '') {
       $errors[] = t("VIRHE: Jälkivaatimuksia ei sallita ulkoisessa varastossa")."!";

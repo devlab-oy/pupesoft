@@ -2449,7 +2449,7 @@ if ($kasitellaan_tiedosto) {
 
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' or $taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
                 $syncrow = array();
               }
               else {

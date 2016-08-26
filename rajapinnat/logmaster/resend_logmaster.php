@@ -22,15 +22,17 @@ if ($tee == "laheta" and $tilaukset != "") {
   $tilaukset = array_filter($tilaukset, 'is_numeric');
   $tilaukset = implode(",", $tilaukset);
 
+  # Tilaus pitää olla jo lähetetty ulkoiseen varastoon, jotta se voidaan lähettää uudestaan
   $query = "SELECT DISTINCT lasku.tunnus
             FROM lasku
-            JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio
-              AND lasku.varasto=varastopaikat.tunnus
+            JOIN varastopaikat ON (lasku.yhtio = varastopaikat.yhtio
+              AND lasku.varasto = varastopaikat.tunnus
               AND varastopaikat.ulkoinen_jarjestelma IN ('L','P')
             )
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila    in ('L','N', 'G')
-            AND lasku.tunnus  in ($tilaukset)";
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.lahetetty_ulkoiseen_varastoon IS NOT NULL
+            AND lasku.tila IN ('L','G')
+            AND lasku.tunnus IN ({$tilaukset})";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) > 0) {
@@ -47,8 +49,6 @@ if ($tee == "laheta" and $tilaukset != "") {
       $palautus = logmaster_send_file($filename);
 
       if ($palautus == 0) {
-        logmaster_sent_timestamp($laskurow['tunnus']);
-
         pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
         echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
       }

@@ -125,7 +125,7 @@ if ($tee == "NAYTA" and $til != "") {
 js_popup();
 enable_ajax();
 
-if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
+if ($tee != 'NAYTATILAUS' and empty($vaihda) and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
   $query = "SELECT ytunnus, liitostunnus
             FROM lasku

@@ -833,7 +833,7 @@ else {
   echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='lopetus' value='$lopetus'>";
-  echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+  echo "<br><input name='vaihda' type='submit' value='".t("Tee uusi haku")."'>";
   echo "</form>";
 }
 

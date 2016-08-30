@@ -3137,6 +3137,18 @@ if ($fieldname == "livetuotehaku_tilauksella_minimi") {
   $jatko = 0;
 }
 
+if ($fieldname == "kerayslista_kerayspaikka") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("N‰ytet‰‰n ker‰yslistan rivill‰ yksi paikka")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("N‰ytet‰‰n ker‰yslistan rivill‰ saman varaston toinen paikka jolla on eniten saldoa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "livetuotehaku_poistetut") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

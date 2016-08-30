@@ -53,9 +53,9 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   }
 
   if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate) {
-    echo "<th align='left'>", t("Kate"), "</th>";
     echo "<th align='left'>", t("Yks.hinta"), "</th>";
     echo "<th align='left'>", t("Rivihinta"), "</th>";
+    echo "<th align='left'>", t("Kate"), "</th>";
   }
 
   echo "  <td valign='top' class='back'></td>
@@ -140,9 +140,9 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
   }
 
   if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate) {
-    echo "<td><span id='kate_rivi_laskenta'></span></td>";
     echo "<td><span id='ykshinta_rivi_laskenta'></span></td>";
     echo "<td><span id='rivihinta_rivi_laskenta'></span></td>";
+    echo "<td><span id='kate_rivi_laskenta'></span></td>";
   }
 
   echo "  <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>
@@ -307,9 +307,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
-    echo "<th align='left'>", t("Kate"), "</th>";
     echo "<th align='left'>", t("Yks.hinta"), "</th>";
     echo "<th align='left'>", t("Rivihinta"), "</th>";
+    echo "<th align='left'>", t("Kate"), "</th>";
   }
 
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
@@ -458,9 +458,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
-    echo "<td><span id='kate_rivi_laskenta'></span></td>";
     echo "<td><span id='ykshinta_rivi_laskenta'></span></td>";
     echo "<td><span id='rivihinta_rivi_laskenta'></span></td>";
+    echo "<td><span id='kate_rivi_laskenta'></span></td>";
   }
 
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {

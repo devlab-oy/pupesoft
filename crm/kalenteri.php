@@ -557,7 +557,7 @@ echo "</table>";
 echo "</td>";
 
 //oikean ylälaidan pikkukalenteri..
-echo "<td class='back ptop pnopad' rowspan='2'>";
+echo "<td class='back ptop pnopad' style='padding-right:5px;' rowspan='2'>";
 
 echo "<table width='100%'>
     <tr><td class='back' align='center' colspan='8'>

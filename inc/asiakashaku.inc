@@ -41,12 +41,12 @@ else {
   $toimipaikkalisa = " and asiakas.toimipaikka = {$tp} ";
 }
 
-$ytunnus     = addslashes(trim($ytunnus));
+$ytunnus = addslashes(trim($ytunnus));
 $ytunnus_talteen = $ytunnus;
 
-$limit      = 1000; // montako riviä on maksimi
-$monta       = 0;
-$asiakasrajaus   = "";
+$limit = 1000; // montako riviä on maksimi
+$monta = 0;
+$asiakasrajaus = "";
 
 if (in_array($kutsuja, array("asiakasemo.php", "kalenteri.php"))) {
   // Tässä haarassa myös prospektit näytetään
@@ -382,9 +382,24 @@ elseif ($ytunnus != '') {
                 $osoitelisa
                 $postitplisa
                 $postinolisa
-                $lajilisa $asiakasrajaus)";
+                $lajilisa $asiakasrajaus
+                UNION
+                (SELECT asiakas.*, concat(asiakas.nimi, '/', yhteyshenkilo.nimi) nimi, yhtio.nimi yhtionimi,
+                if (asiakas.ovttunnus = '{$ytunnus2}', 1, if(left(asiakas.ovttunnus, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '7' apujarjestys2
+                FROM asiakas
+                JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+                JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A'
+                WHERE asiakas.$konsyhtiot
+                and yhteyshenkilo.nimi like '%$ytunnus2%'
+                and yhteyshenkilo.nimi != ''
+                $toimipaikkalisa
+                $osoitelisa
+                $postitplisa
+                $postinolisa
+                $lajilisa $asiakasrajaus) ";
 
-    if (trim($postitplisa) == '') {
+    if (trim($postitplisa) == 'KAAL') {
       $query .= "  UNION
             (SELECT asiakas.*, yhtio.nimi yhtionimi,
               if (asiakas.postitp = '{$ytunnus2}', 1, if(left(asiakas.postitp, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,

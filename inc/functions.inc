@@ -9364,7 +9364,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
     }
 
-    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+    if (strlen($haku) > $yhtiorow['livetuotehaku_minimi'] and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
       echo "
       <script TYPE='text/javascript' LANGUAGE='JavaScript'>

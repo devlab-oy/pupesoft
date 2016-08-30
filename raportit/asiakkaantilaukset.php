@@ -777,6 +777,19 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
+      if ($row['tila'] == "U" and tarkista_oikeus("tilauskasittely/tulostakopio.php", "LASKU")) {
+        echo "<td class='back'>";
+        echo "<form id='tulostakopioform_$row[tilaus]' name='tulostakopioform_$row[tilaus]' action='../tilauskasittely/tulostakopio.php?toim=LASKU' method='post' autocomplete='off'>
+            <input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='otunnus' value='$row[tilaus]'>
+            <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
+            <input type='hidden' name='toim' value='LASKU'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='mista' value='tulostakopio'>
+            <input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tilaus]', 'tulostakopio_$row[tilaus]'); return false;\"></form>";
+        echo "</td>";
+      }
+
       echo "</tr>";
 
       $edlaskunro = $row["laskunro"];

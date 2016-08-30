@@ -1775,7 +1775,8 @@ else {
       }
 
       if ($eiOstSarjanumeroita != "" and empty($kampanja_ja_samplerajaus)) {
-        $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'\n";
+        $lisatiedot_join = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'\n
+                             JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus)\n";
       }
 
       // Jos ei olla valittu mit‰‰n
@@ -2558,8 +2559,8 @@ else {
         // ja sitten ajetaan itte query
         if ($query != "") {
 
-          //echo "<pre>".str_replace("\t", "", str_replace("and", "\nand", $query))."</pre><br>";
-
+          echo "<pre>".str_replace("\t", "", str_replace("and", "\nand", $query))."</pre><br>";
+exit;
           $result = pupe_query($query);
 
           $rivimaara   = mysql_num_rows($result);

@@ -233,6 +233,27 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
+  $unionlisa = "";
+
+  if ($listaustyyppi == "ostoryhma") {
+    $unionlisa = "UNION
+                  SELECT
+                  'XXX' tuoteno,
+                  'XXX' nimitys,
+                  'XXX' osasto,
+                  'XXX' try,
+                  'XXX' malli,
+                  'XXX' myyntihinta,
+                  'XXX' varmuus_varasto,
+                  'XXX' kehahin,
+                  'XXX' epakurantti25pvm,
+                  'XXX' epakurantti50pvm,
+                  'XXX' epakurantti75pvm,
+                  'XXX' epakurantti100pvm,
+                  'XXX' eankoodi,
+                  'XXX' saldo ";
+  }
+
   $query = "SELECT
             tuote.tuoteno,
             tuote.nimitys,
@@ -256,25 +277,7 @@ if ($tee != "" and isset($painoinnappia)) {
             {$varasto_tp_filter}
             {$saldolisa}
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
-
-            UNION
-
-            SELECT
-            'XXX' tuoteno,
-            'XXX' nimitys,
-            'XXX' osasto,
-            'XXX' try,
-            'XXX' malli,
-            'XXX' myyntihinta,
-            'XXX' varmuus_varasto,
-            'XXX' kehahin,
-            'XXX' epakurantti25pvm,
-            'XXX' epakurantti50pvm,
-            'XXX' epakurantti75pvm,
-            'XXX' epakurantti100pvm,
-            'XXX' eankoodi,
-            'XXX' saldo
-
+            {$unionlisa}
             ORDER BY osasto, try, malli, tuoteno";
   $eresult = pupe_query($query);
   $total_rows = mysql_num_rows($eresult);
@@ -596,14 +599,20 @@ if ($tee != "" and isset($painoinnappia)) {
       $edrow = $row;
 
       // Jos kaikki luvut on nollaa, niin skipataan rivi
-      if ($nollapiilo == 'einollia'
+      if (($nollapiilo == 'einollia'
         and (float) $varastonarvo == 0
         and (float) $saldo == 0
         and (float) $ostorivi["tulossa"] == 0
         and (float) $varattu == 0
         and (float) $myyntirivi["myynti12kk"] == 0
         and (float) $kulutusrivi["kulutus12kk"] == 0
-        and (float) $tulorivi["tulotVA"] == 0
+        and (float) $tulorivi["tulotVA"] == 0)
+        or (
+          $listaustyyppi == "ostoryhma"
+          and $row["osasto"] == "XXX"
+          and $row["try"] == "XXX"
+          and $row["tuoteno"] == "XXX"
+        )
       ) {
         continue;
       }

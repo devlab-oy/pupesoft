@@ -2363,7 +2363,6 @@ if ($kasitellaan_tiedosto) {
         }
         else {
           $tarkrow = mysql_fetch_array($result);
-          mysql_data_seek($syncres,0);
           $tunnus = $tarkrow["tunnus"];
 
           // Tehd‰‰n pari injektiota tarkrow-arrayseen

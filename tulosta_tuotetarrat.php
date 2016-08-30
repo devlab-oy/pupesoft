@@ -1,5 +1,7 @@
 <?php
 
+$_REQUEST['malli'] = isset($_REQUEST['malli']) ? $_REQUEST['malli'] : null;
+
 if ($_REQUEST['malli'] == 'PDF24' or
   $_REQUEST['malli'] == 'PDF40' or
   $_REQUEST['malli'] == 'PDF' or

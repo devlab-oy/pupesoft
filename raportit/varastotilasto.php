@@ -521,7 +521,7 @@ if ($tee != "" and isset($painoinnappia)) {
         $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       }
 
-      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['malli'] != $edrow["malli"]) {
+      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['malli'] != $edrow["malli"] and $excelrivi >= $mallisummarivi) {
         $excelsarake = 0;
         $worksheet->writeString($excelrivi, $excelsarake++, $edrow["osasto"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $edrow["try"], $format_bold);
@@ -542,15 +542,11 @@ if ($tee != "" and isset($painoinnappia)) {
         $mallisummarivi = $excelrivi+1;
       }
 
-      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['try'] != $edrow["try"]) {
+      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['try'] != $edrow["try"] and count($mallisummat) > 0) {
         $excelsarake = 0;
         $worksheet->writeString($excelrivi, $excelsarake++, $edrow["osasto"], $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, $edrow["try"], $format_bold);
         $excelsarake += 5;
-
-        if (count($mallisummat) == 0) {
-          $mallisummat = array("$mallisummarivi:$excelrivi");
-        }
 
         $trysummat[] = $excelrivi+1;
 
@@ -567,18 +563,11 @@ if ($tee != "" and isset($painoinnappia)) {
         $mallisummat = array();
       }
 
-      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['osasto'] != $edrow["osasto"]) {
+      if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['osasto'] != $edrow["osasto"] and count($trysummat) > 0) {
 
         $excelsarake = 0;
         $worksheet->writeString($excelrivi, $excelsarake++, $edrow["osasto"], $format_bold);
         $excelsarake += 6;
-
-        if (count($trysummat) == 0 and count($mallisummat) > 0) {
-          $trysummat = $mallisummat;
-        }
-        elseif (count($trysummat) == 0 and count($mallisummat) == 0) {
-          $trysummat = array("$mallisummarivi:$excelrivi");
-        }
 
         $osastosummat[] = $excelrivi+1;
 
@@ -713,20 +702,10 @@ if ($tee != "" and isset($painoinnappia)) {
       $excelrivi++;
     }
 
-    if (!empty($edrow)) {
+    if ($listaustyyppi == "ostoryhma" and !empty($edrow) and count($osastosummat) > 0) {
       $excelsarake = 0;
       $worksheet->writeString($excelrivi, $excelsarake++, "Kaikki yhteensä", $format_bold);
       $excelsarake += 6;
-
-      if (count($osastosummat) == 0 and count($trysummat) > 0) {
-        $osastosummat = $trysummat;
-      }
-      elseif (count($osastosummat) == 0 and count($trysummat) == 0 and count($mallisummat) > 0) {
-        $osastosummat = $mallisummat;
-      }
-      elseif (count($osastosummat) == 0 and count($trysummat) == 0 and count($mallisummat) == 0) {
-        $osastosummat = array("$mallisummarivi:$excelrivi");
-      }
 
       $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(H".implode(", H", $osastosummat).")", $format_bold);
       $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(I".implode(", I", $osastosummat).")", $format_bold);

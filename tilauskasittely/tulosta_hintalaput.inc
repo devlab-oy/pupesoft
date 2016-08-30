@@ -18,8 +18,14 @@ require_once "barcode/c128cobject.php";
 
 
 function tulosta_hintalaput($tuotteet, $params = array()) {
-  $kpl  = isset($params["kpl"]) ? $params["kpl"] : false;
-  $koko = isset($params["koko"]) ? $params["koko"] :'4.9x3cm';
+  $kpl           = isset($params["kpl"])           ? $params["kpl"]           : false;
+  $koko          = isset($params["koko"])          ? $params["koko"]          :'4.9x3cm';
+  $barcode_field = isset($params["barcode_field"]) ? $params["barcode_field"] :'tuoteno';
+
+  $barcode_map = array(
+    'tuoteno'  => 'code128',
+    'eankoodi' => 'ean',
+  );
 
   $pdf = new pdffile();
 
@@ -40,13 +46,20 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
 
   switch ($koko) {
   case '6.2x2.9cm':
-    $viivakoodi_leveys       = 600;
-    $viivakoodi_vasen        = 2;
-    $viivakoodi_teksti_vasen = 2;
-    $viivakoodin_asetukset   = array("scale" => array("x" => 0.1, "y" => 0.1));
-    $kompensaatio            = -2;
-    $hinta_x                 = 140;
-    $yksikko_x               = 168;
+    if ($barcode_field == 'tuoteno') {
+      $viivakoodi_vasen        = 2;
+      $viivakoodi_teksti_vasen = 2;
+    }
+    else {
+      $viivakoodi_vasen        = -5;
+      $viivakoodi_teksti_vasen = 60;
+    }
+
+    $viivakoodi_leveys     = 600;
+    $viivakoodin_asetukset = array("scale" => array("x" => 0.1, "y" => 0.1));
+    $kompensaatio          = -2;
+    $hinta_x               = 140;
+    $yksikko_x             = 168;
     break;
   default:
     $viivakoodi_leveys       = 360;
@@ -61,8 +74,8 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
   foreach ($tuotteet as $tuote) {
     $nimitys            = explode("\n", wordwrap($tuote['nimitys'], 28));
     $hinta              = hintapyoristys($tuote['myyntihinta']);
-    $viivakoodi         = viivakoodi($tuote['tuoteno'], "code128", $viivakoodi_leveys, 60);
-    $viivakoodin_teksti = $tuote['tuoteno'];
+    $viivakoodi         = viivakoodi($tuote[$barcode_field], $barcode_map[$barcode_field], $viivakoodi_leveys, 60);
+    $viivakoodin_teksti = $tuote[$barcode_field];
     $kuva               = $pdf->jfif_embed($viivakoodi);
 
     if ($kpl) {

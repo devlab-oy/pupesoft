@@ -211,9 +211,11 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
     if ($malli == "Hintalappu PDF") {
       $tuotteet = array($trow);
-      $params   = array(
-        "kpl"  => $tulostakappale,
-        "koko" => $koko,
+
+      $params = array(
+        "kpl"           => $tulostakappale,
+        "koko"          => $koko,
+        "barcode_field" => $barcode_field,
       );
 
       require "tilauskasittely/tulosta_hintalaput.inc";
@@ -246,7 +248,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "3" : "5";
+  $colspan = $toim == 'HINTA' ? "4" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -258,6 +260,7 @@ if (!isset($nayta_pdf)) {
 
   if ($toim == 'HINTA') {
     echo "<th><label for='koko'>" . t('Koko') . "</label></th>";
+    echo "<th><label for='barcode_field'>" . t('Viivakoodikenttä') . "</label></th>";
   }
   else {
     echo "<th>" . t("Kirjoitin") . "</th>";
@@ -278,6 +281,13 @@ if (!isset($nayta_pdf)) {
     echo "<select id='koko' name='koko'>";
     echo "<option value='4.9x3cm'>49 x 30 mm</option>";
     echo "<option value='6.2x2.9cm'>62 x 29 mm</option>";
+    echo "</select>";
+    echo "</td>";
+
+    echo "<td>";
+    echo "<select id='barcode_field' name='barcode_field'>";
+    echo "<option value='tuoteno'>Tuoteno</option>";
+    echo "<option value='eankoodi'>Eankoodi</option>";
     echo "</select>";
     echo "</td>";
   }

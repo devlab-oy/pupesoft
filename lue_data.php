@@ -2363,6 +2363,7 @@ if ($kasitellaan_tiedosto) {
         }
         else {
           $tarkrow = mysql_fetch_array($result);
+          mysql_data_seek($syncres,0);
           $tunnus = $tarkrow["tunnus"];
 
           // Tehd‰‰n pari injektiota tarkrow-arrayseen
@@ -2449,7 +2450,7 @@ if ($kasitellaan_tiedosto) {
 
             // Synkronoidaan
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
-              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' or $taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
+              if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
                 $syncrow = array();
               }
               else {

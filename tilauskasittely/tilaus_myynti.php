@@ -89,7 +89,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
       'ale' => $ale,
-      'kate' => $kate
+      'kate' => $kate,
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -111,8 +112,12 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $aresult = pupe_query($query);
   $tuoterow = mysql_fetch_assoc($aresult);
 
+  $hinta_ajax = $hinta;
+
   // Tutkitaan onko tämä myyty ulkomaan alvilla
   list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
 
   $ale_arr = $ale;
   $ale_arr['netto'] = $netto;
@@ -138,7 +143,9 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
       'ale' => $ale,
-      'kate' => $kate
+      'kate' => $kate,
+      'ykshinta' => round($tuoterow['myyntihinta'], $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;

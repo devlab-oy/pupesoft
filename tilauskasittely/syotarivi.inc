@@ -52,8 +52,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "") {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate) {
     echo "<th align='left'>", t("Kate"), "</th>";
+    echo "<th align='left'>", t("Yks.hinta"), "</th>";
+    echo "<th align='left'>", t("Rivihinta"), "</th>";
   }
 
   echo "  <td valign='top' class='back'></td>
@@ -137,8 +139,10 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "</select></td>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "") {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate) {
     echo "<td><span id='kate_rivi_laskenta'></span></td>";
+    echo "<td><span id='ykshinta_rivi_laskenta'></span></td>";
+    echo "<td><span id='rivihinta_rivi_laskenta'></span></td>";
   }
 
   echo "  <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>
@@ -167,8 +171,8 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       $nrospanni++;
     }
 
-    if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "") {
-      $nrospanni++;
+    if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate) {
+      $nrospanni += 3;
     }
 
     // Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
@@ -302,8 +306,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
     echo "<th align='left'>", t("Kate"), "</th>";
+    echo "<th align='left'>", t("Yks.hinta"), "</th>";
+    echo "<th align='left'>", t("Rivihinta"), "</th>";
   }
 
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
@@ -451,8 +457,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "</select></td>";
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
     echo "<td><span id='kate_rivi_laskenta'></span></td>";
+    echo "<td><span id='ykshinta_rivi_laskenta'></span></td>";
+    echo "<td><span id='rivihinta_rivi_laskenta'></span></td>";
   }
 
   if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
@@ -501,8 +509,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     $nrospanni++;
   }
 
-  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and $rivitunnus == "" and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
-    $nrospanni++;
+  if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and $naytetaanko_kate and in_array($toim, array('RIVISYOTTO', 'TARJOUS'))) {
+    $nrospanni += 3;
   }
 
   if ($yhtiorow['rivinumero_syotto'] != '') {

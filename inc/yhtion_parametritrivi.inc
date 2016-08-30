@@ -3125,6 +3125,18 @@ if ($fieldname == "livetuotehaku_tilauksella") {
   $jatko = 0;
 }
 
+if ($fieldname == "livetuotehaku_tilauksella_minimi") {
+
+  $sel = $trow[$i] == 2 ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = '3'>".t("V‰hint‰‰n 3 merkki‰")."</option>";
+  $ulos .= "<option value = '2' {$sel}>".t("V‰hint‰‰n 2 merkki‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "livetuotehaku_poistetut") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

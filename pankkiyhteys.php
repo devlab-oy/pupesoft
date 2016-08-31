@@ -113,6 +113,11 @@ if ($toim == "palaute") {
   require 'inc/pankkiyhteys_palautteet.inc';
 }
 
+// Jos toim on "laheta", tehdâ€°â€°n lâ€°hetyshommia
+if ($toim == "laheta") {
+  require 'inc/pankkiyhteys_send.inc';
+}
+
 // Sisäänkirjautumisen käyttöliittymä
 if ($tee == "") {
   $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();

@@ -90,6 +90,10 @@ $(document).ready(function() {
             $('#kate_rivi_laskenta').html(data.kate+'%');
           }
 
+          if (data.ykshinta != '') {
+            $('#ykshinta_rivi_laskenta').html(data.ykshinta);
+          }
+
           if (data.rivihinta != '') {
             $('#rivihinta_rivi_laskenta').html(data.rivihinta);
           }
@@ -125,6 +129,9 @@ $(document).ready(function() {
               tuoteno: $("input[name='tuoteno']").val(),
               kpl: $("input[name='kpl']").val(),
               hinta: $("input[name='hinta']").val(),
+              ale1: $("input[name='ale1']").val(),
+              ale2: $("input[name='ale2']").val(),
+              ale3: $("input[name='ale3']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
               toim: toim,
               ajax_toiminto: 'esisyotto',
@@ -177,7 +184,7 @@ $(document).ready(function() {
   }
 
   if (rivitunnus_chk.val() != '' && rivitunnus_chk.length != 0) {
-    $("input[name='kpl']").trigger('keyup');
+    $("input[name='hinta']").trigger('keyup');
   }
 
   $('#hintojen_vaihto').on('change', function() {

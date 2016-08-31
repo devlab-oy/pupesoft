@@ -33707,8 +33707,22 @@ if (!function_exists('posten_message_type')) {
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
     $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+
+    // jos avainsanaan on syštetty useita rahtituotteita pilkulla eroteltuna niin wrapataan tuotteet hipsuihin
+    if (strpos($vaihtoehtoinenrahti, ',') !== false) {
+      $rahdit = explode(",", $vaihtoehtoinenrahti);
+      $rahtistringi = '';
+
+      foreach ($rahdit as $vaihtoehtoinen_rahtituote) {
+        $vaihtoehtoinen_rahtituote = trim($vaihtoehtoinen_rahtituote);
+        $rahtistringi .= " '{$vaihtoehtoinen_rahtituote}',";
+      }
+      $rahtistringi = substr($rahtistringi, 0, -1); // Viimeinen pilkku poistetaan
+      $vaihtoehtoinenrahti = $rahtistringi;
+    }
+
     if (!empty($vaihtoehtoinenrahti)) {
-      $merkkijono .= ", '{$vaihtoehtoinenrahti}'";
+      $merkkijono .= ", {$vaihtoehtoinenrahti}";
     }
     return $merkkijono;
   }

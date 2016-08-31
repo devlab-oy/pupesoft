@@ -26,6 +26,7 @@ $tee = empty($tee) ? '' : $tee;
 $toim = empty($toim) ? '' : $toim;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
+$hae_laskut = empty($hae_laskut) ? '' : $hae_laskut;
 $hae_palautteet = empty($hae_palautteet) ? '' : $hae_palautteet;
 
 $pankkitiedostot = array();

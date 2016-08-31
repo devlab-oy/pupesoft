@@ -382,17 +382,17 @@ elseif ($ytunnus != '') {
                 $osoitelisa
                 $postitplisa
                 $postinolisa
-                $lajilisa $asiakasrajaus
+                $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, concat(asiakas.nimi, '/', yhteyshenkilo.nimi) nimi, yhtio.nimi yhtionimi,
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.ovttunnus = '{$ytunnus2}', 1, if(left(asiakas.ovttunnus, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '7' apujarjestys2
+                '6' apujarjestys2
                 FROM asiakas
-                JOIN yhtio on asiakas.yhtio=yhtio.yhtio
-                JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A'
+                JOIN yhtio on (asiakas.yhtio=yhtio.yhtio)
+                JOIN yhteyshenkilo yht ON (yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A')
                 WHERE asiakas.$konsyhtiot
-                and yhteyshenkilo.nimi like '%$ytunnus2%'
-                and yhteyshenkilo.nimi != ''
+                and yht.nimi like '%$ytunnus2%'
+                and yht.nimi != ''
                 $toimipaikkalisa
                 $osoitelisa
                 $postitplisa

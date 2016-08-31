@@ -1400,7 +1400,12 @@ if ($tee2 == '') {
     echo t("Rivejä yhteensä")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    $spanni = 4;
+    if (show_ohjelma_moduli_for(basename(__FILE__, '.php'))) {
+      $spanni = 5;
+    }
+    else {
+      $spanni = 4;
+    }
 
     if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;

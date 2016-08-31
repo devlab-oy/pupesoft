@@ -86,7 +86,7 @@ $(document).ready(function() {
 
           var data = jQuery.parseJSON(data);
 
-          if (data.kate != '') {
+          if (data.kate && data.kate != '') {
             $('#kate_rivi_laskenta').html(data.kate+'%');
           }
 
@@ -163,7 +163,7 @@ $(document).ready(function() {
               }
             });
 
-            if (data.kate != '') {
+            if (data.kate && data.kate != '') {
               $('#kate_rivi_laskenta').html(data.kate+'%');
             }
 

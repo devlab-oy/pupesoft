@@ -2,6 +2,35 @@
 
 echo "<h2>" . t('Aineistojen lähetys pankkiin') . "</h2>";
 
+if ($tee == 'laheta') {
+  $pankkiyhteys  = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $tuetut_pankit = tuetut_pankit();
+  $pankki        = $tuetut_pankit[$pankkiyhteys['pankki']];
+  $polku         = "{$pupe_root_polku}/dataout/{$pankki['lyhyt_nimi']}_error";
+  $files         = scandir($polku);
+  $files         = array_diff($files, array('.', '..'));
+
+  $onnistuneet = 0;
+  foreach ($files as $file) {
+    $data = base64_encode(file_get_contents("{$polku}/{$file}"));
+
+    $params = array(
+      "pankkiyhteys_tunnus"   => $_COOKIE[$cookie_tunnus],
+      "pankkiyhteys_salasana" => $_COOKIE[$cookie_secret],
+      "file_type"             => $file_type,
+      "maksuaineisto"         => $data,
+    );
+
+    $response = sepa_upload_file($params);
+
+    if ($response) $onnistuneet++;
+  }
+
+  echo "<div class='ok'>";
+  echo t("%s/%s tiedostoa lähetetty onnistuneesti pankkiin", '', $onnistuneet, count($files));
+  echo "</div>";
+}
+
 if ($tee == 'valitse') {
   $pankkiyhteys  = hae_pankkiyhteys($pankkiyhteys_tunnus);
   $tuetut_pankit = tuetut_pankit();
@@ -10,6 +39,16 @@ if ($tee == 'valitse') {
   $files         = array_diff($files, array('.', '..'));
 
   echo "<div>";
-  echo t("Pankkiin lähetettäviä tiedostoja on %s kappaletta", '', count($files));
+  echo t("Pankkiin lähetettäviä laskuja on %s kappaletta", '', count($files));
+  echo "</div>";
+
+  echo "<div>";
+  echo "<form>";
+  echo "<input type='hidden' name='toim' value='{$toim}'>";
+  echo "<input type='hidden' name='tee' value='laheta'>";
+  echo "<input type='hidden' name='file_type' value='LAHLASKUT'>";
+  echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'>";
+  echo "<input type='submit' value='" . t("Lähetä") . "'>";
+  echo "</form>";
   echo "</div>";
 }

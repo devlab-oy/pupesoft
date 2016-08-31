@@ -45,6 +45,18 @@ if ($tee == 'paivita_hae_factoring') {
   $tee = "";
 }
 
+if ($tee == 'paivita_hae_laskut') {
+  $hae_laskut = isset($hae_laskut) ? 1 : 0;
+
+  $query = "UPDATE pankkiyhteys SET
+            hae_laskut    = {$hae_laskut}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
+  pupe_query($query);
+
+  $tee = "";
+}
+
 // Poistetaan pankkiyhteys
 if ($tee == "poista") {
   $query = "DELETE
@@ -629,11 +641,8 @@ if ($tee == "") {
     echo "<tr>";
     echo "<th>" . t("Pankki") . "</th>";
     echo "<th>" . t("Asiakastunnus") . "</th>";
-    echo "<th>" . t("Hae saldo") . "</th>";
-    echo "<th>" . t("Hae factoring-aineistot") . "</th>";
+    echo "<th>" . t("Toiminnot") . "</th>";
     echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
-    echo "<th></th>";
-    echo "<th></th>";
     echo "<td class='back'></td>";
     echo "</tr>";
 
@@ -650,23 +659,38 @@ if ($tee == "") {
       echo "<td>{$pankkiyhteys["customer_id"]}</td>";
 
       echo "<td>";
-      echo "<form>";
-      echo "<input type='hidden' name='tee' value='paivita_hae_saldo'>";
-      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      $checked = $pankkiyhteys['hae_saldo'] == 1 ? ' checked' : '';
-      $disabled = $pankkiyhteys['pankki'] != 'OKOYFIHH' ? ' disabled' : '';
-      echo "<input type='checkbox' name='hae_saldo' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
-      echo "</form>";
-      echo "</td>";
+      echo "<ul class='list-unstyled'>";
 
-      echo "<td>";
-      echo "<form>";
-      echo "<input type='hidden' name='tee' value='paivita_hae_factoring'>";
-      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      $checked = $pankkiyhteys['hae_factoring'] == 1 ? ' checked' : '';
-      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH', 'NDEAFIHH')) ? ' disabled' : '';
-      echo "<input type='checkbox' name='hae_factoring' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
-      echo "</form>";
+      $toiminnot = array(
+        'hae_saldo' => array(
+          'nimi'        => 'Hae saldo',
+          'disable_for' => array('NDEAFIHH', 'DABAFIHH')
+        ),
+        'hae_factoring' => array(
+          'nimi'        => 'Hae factoring',
+          'disable_for' => array('OKOYFIHH')
+        ),
+        'hae_laskut' => array(
+          'nimi' =>'Hae laskut',
+        ),
+      );
+
+      foreach ($toiminnot as $toiminto => $options) {
+        echo "<li class='nowrap'>";
+        echo "<form>";
+        echo "<input type='hidden' name='tee' value='paivita_{$toiminto}'>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+
+        $checked  = $pankkiyhteys[$toiminto] == 1 ? ' checked' : '';
+        $disabled = isset($options['disable_for']) && in_array($pankkiyhteys['pankki'], $options['disable_for']) ? ' disabled' : '';
+
+        echo "<input type='checkbox' id='{$toiminto}' name='{$toiminto}' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
+        echo "<label for='{$toiminto}'>{$options['nimi']}</label>";
+        echo "</form>";
+        echo "</li>";
+      }
+
+      echo "</ul>";
       echo "</td>";
 
       echo "<td>";

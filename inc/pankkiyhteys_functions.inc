@@ -513,6 +513,7 @@ function sepa_download_files($params) {
 
     if (vastaus_kunnossa($code)) {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "OK",
         "data" => $response["data"]
@@ -520,6 +521,7 @@ function sepa_download_files($params) {
     }
     else {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "Virhe",
         "data" => null

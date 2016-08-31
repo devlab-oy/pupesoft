@@ -233,3 +233,7 @@ table.responsive td input[type=text] {
 .del {
   text-decoration: line-through;
 }
+
+.nowrap {
+  white-space: nowrap;
+}

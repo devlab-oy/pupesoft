@@ -3125,7 +3125,7 @@ if ($fieldname == "livetuotehaku_tilauksella") {
   $jatko = 0;
 }
 
-if ($fieldname == "livetuotehaku_tilauksella_minimi") {
+if ($fieldname == "livetuotehaku_minimi") {
 
   $sel = $trow[$i] == 2 ? 'selected' : '';
 

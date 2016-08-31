@@ -181,47 +181,64 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
       continue;
     }
 
-    // Kirjotetaan tiedosto levylle
-    $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
-    $data = base64_decode($aineisto['data']);
-    $status = file_put_contents($filenimi, $data);
+    if ($aineisto['file_type'] == 'HAELASKUT') {
+      // Kirjotetaan tiedosto levylle
+      $filenimi = tempnam($verkkolaskut_in, "finvoice");
+      $data     = base64_decode($aineisto['data']);
+      $status   = file_put_contents($filenimi, $data);
 
-    if ($status === false) {
-      echo "<font class='error'>";
-      echo t("Tiedoston kirjoitus epäonnistui");
-      echo ": {$filenimi}";
-      echo "</font>";
-      echo "<br/>";
-      continue;
-    }
-
-    $aineistotunnus = false;
-
-    // Jos aineistot pitää käsitellä
-    if ($kasittele_aineistot != "ei") {
-      // Käsitellään aineisto
-      $aineistotunnus = tallenna_tiliote_viite($filenimi);
+      if ($status === false) {
+        echo "<font class='error'>";
+        echo t("Tiedoston kirjoitus epäonnistui");
+        echo ": {$filenimi}";
+        echo "</font>";
+        echo "<br/>";
+        continue;
+      }
     }
     else {
-      echo "<font class='error'>";
-      echo t("Aineistoa ei käsitelty.");
-      echo "</font>";
-      echo "<br/>";
-    }
+      // Kirjotetaan tiedosto levylle
+      $filenimi = tempnam("{$pupe_root_polku}/datain", "pankkiaineisto");
+      $data = base64_decode($aineisto['data']);
+      $status = file_put_contents($filenimi, $data);
 
-    if ($aineistotunnus !== false) {
-      kasittele_tiliote_viite($aineistotunnus);
-      unlink($filenimi);
-    }
-    else {
-      echo "<font class='error'>";
-      echo t("Aineisto löytyy hakemistosta");
-      echo ": {$filenimi}";
-      echo "</font>";
-      echo "<br/>";
-    }
+      if ($status === false) {
+        echo "<font class='error'>";
+        echo t("Tiedoston kirjoitus epäonnistui");
+        echo ": {$filenimi}";
+        echo "</font>";
+        echo "<br/>";
+        continue;
+      }
 
-    echo "<br><hr><br>";
+      $aineistotunnus = false;
+
+      // Jos aineistot pitää käsitellä
+      if ($kasittele_aineistot != "ei") {
+        // Käsitellään aineisto
+        $aineistotunnus = tallenna_tiliote_viite($filenimi);
+      }
+      else {
+        echo "<font class='error'>";
+        echo t("Aineistoa ei käsitelty.");
+        echo "</font>";
+        echo "<br/>";
+      }
+
+      if ($aineistotunnus !== false) {
+        kasittele_tiliote_viite($aineistotunnus);
+        unlink($filenimi);
+      }
+      else {
+        echo "<font class='error'>";
+        echo t("Aineisto löytyy hakemistosta");
+        echo ": {$filenimi}";
+        echo "</font>";
+        echo "<br/>";
+      }
+
+      echo "<br><hr><br>";
+    }
   }
 }
 

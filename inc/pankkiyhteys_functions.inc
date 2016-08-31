@@ -893,7 +893,7 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == 'HAELASKUT') {
       $file_type = 'XR';
     }
-    // Saapuvat verkkolaskut
+    // Lähtevät verkkolaskut
     if ($file_type == 'LAHLASKUT') {
       $file_type = 'XS';
     }

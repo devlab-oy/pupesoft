@@ -122,7 +122,7 @@ function filelist_table($array, $type) {
   // Sortataan by date desc
   array_multisort($sort_by, SORT_DESC, $tiedostot);
 
-  echo "<table>";
+  echo "<table class='full-width'>";
 
   echo "<thead>";
   echo "<tr>";

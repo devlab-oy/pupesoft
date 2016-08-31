@@ -431,6 +431,7 @@ if ($tee == "valitse") {
   }
 
   if ($pankkiyhteysrow["hae_laskut"] == 1) {
+    echo "<tr>";
     echo "<td class='back' style='vertical-align:top;'>";
 
     echo "<font class='message'>";

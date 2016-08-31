@@ -907,18 +907,9 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $tuetut_pankit = tuetut_pankit();
   $pankkiyhteys_tunnus = (int) $pankkiyhteys_tunnus;
 
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
-  $result = pupe_query($query);
+  $pankki = hae_pankkiyhteys($pankkiyhteys_tunnus);
 
-  // Jos pankkiyhteyttä ei löydy
-  if (mysql_num_rows($result) != 1) {
-    return false;
-  }
-
-  $pankki = mysql_fetch_assoc($result);
+  if (empty($pankki)) return false;
 
   // Tarkistetaan salasana
   $_pk = pura_salaus($pankki["signing_private_key"], $salasana);
@@ -967,6 +958,18 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   }
 
   return $pankki;
+}
+
+function hae_pankkiyhteys($tunnus) {
+  if ($tunnus < 0) return array();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE tunnus = {$tunnus}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }
 
 function pankkiyhteyden_paivamaarat($pankkiyhteys) {

@@ -837,6 +837,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == 'FILN') {
       $file_type = 'HAELASKUT';
     }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'FILL') {
+      $file_type = 'LAHLASKUT';
+    }
   }
 
   // Danskemuunnokset
@@ -861,6 +865,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == 'HAELASKUT') {
       $file_type = 'FILN';
     }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'FILL';
+    }
   }
 
   // OP-muunnokset
@@ -884,6 +892,10 @@ function sepa_file_type_check($bank, $file_type) {
     // Saapuvat verkkolaskut
     if ($file_type == 'HAELASKUT') {
       $file_type = 'XR';
+    }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'XS';
     }
   }
 

@@ -6,7 +6,8 @@ if ($tee == 'laheta') {
   $pankkiyhteys  = hae_pankkiyhteys($pankkiyhteys_tunnus);
   $tuetut_pankit = tuetut_pankit();
   $pankki        = $tuetut_pankit[$pankkiyhteys['pankki']];
-  $polku         = "{$pupe_root_polku}/dataout/{$pankki['lyhyt_nimi']}_error";
+  $dataout       = "{$pupe_root_polku}/dataout";
+  $polku         = "{$dataout}/{$pankki['lyhyt_nimi']}_error";
   $files         = scandir($polku);
   $files         = array_diff($files, array('.', '..'));
 
@@ -22,11 +23,21 @@ if ($tee == 'laheta') {
     );
 
     $response = sepa_upload_file($params);
+    $response = false;
 
-    if ($response) $onnistuneet++;
+    if ($response) {
+      $onnistuneet++;
+
+      rename("{$polku}/{$file}", "{$dataout}/{$file}");
+    }
+    else {
+      echo "<div class='error'>";
+      echo t("Tiedoston %s käsittelyssä tapahtui virhe", '', "{$polku}/{$file}");
+      echo "</div>";
+    }
   }
 
-  echo "<div class='ok'>";
+  echo "<div>";
   echo t("%s/%s tiedostoa lähetetty onnistuneesti pankkiin", '', $onnistuneet, count($files));
   echo "</div>";
 }

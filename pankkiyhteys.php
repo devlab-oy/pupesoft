@@ -6,9 +6,6 @@ ob_start();
 require "inc/parametrit.inc";
 require "inc/pankkiyhteys_functions.inc";
 
-$formi  = 'pankkiyhteys';
-$kentta = 'salasana';
-
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
@@ -120,6 +117,9 @@ if ($toim == "laheta") {
 
 // Sisäänkirjautumisen käyttöliittymä
 if ($tee == "") {
+  $formi  = 'pankkiyhteys';
+  $kentta = 'salasana';
+
   $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
 
   if ($kaytossa_olevat_pankkiyhteydet) {

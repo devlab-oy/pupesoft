@@ -1,53 +1,63 @@
 <?php
 
+$tuetut_pankit = tuetut_pankit();
+$dataout       = "{$pupe_root_polku}/dataout";
+
 echo "<h2>" . t('Aineistojen lähetys pankkiin') . "</h2>";
 
 if ($tee == 'laheta') {
-  $pankkiyhteys  = hae_pankkiyhteys($pankkiyhteys_tunnus);
-  $tuetut_pankit = tuetut_pankit();
-  $pankki        = $tuetut_pankit[$pankkiyhteys['pankki']];
-  $dataout       = "{$pupe_root_polku}/dataout";
-  $polku         = "{$dataout}/{$pankki['lyhyt_nimi']}_error";
-  $files         = scandir($polku);
-  $files         = array_diff($files, array('.', '..'));
+  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $pankki       = $tuetut_pankit[$pankkiyhteys['pankki']];
 
-  $onnistuneet = 0;
-  foreach ($files as $file) {
-    $data = base64_encode(file_get_contents("{$polku}/{$file}"));
+  switch ($file_type) {
+  case 'LAHLASKUT':
+    $polku = "{$dataout}/{$pankki['lyhyt_nimi']}_error";
+    $files = scandir($polku);
+    $files = array_diff($files, array('.', '..'));
 
-    $params = array(
-      "pankkiyhteys_tunnus"   => $_COOKIE[$cookie_tunnus],
-      "pankkiyhteys_salasana" => $_COOKIE[$cookie_secret],
-      "file_type"             => $file_type,
-      "maksuaineisto"         => $data,
-    );
+    $onnistuneet = 0;
+    foreach ($files as $file) {
+      $data = base64_encode(file_get_contents("{$polku}/{$file}"));
 
-    $response = sepa_upload_file($params);
-    $response = false;
+      $params = array(
+        "pankkiyhteys_tunnus"   => $_COOKIE[$cookie_tunnus],
+        "pankkiyhteys_salasana" => $_COOKIE[$cookie_secret],
+        "file_type"             => $file_type,
+        "maksuaineisto"         => $data,
+      );
 
-    if ($response) {
-      $onnistuneet++;
+      $response = sepa_upload_file($params);
 
-      rename("{$polku}/{$file}", "{$dataout}/{$file}");
+      if ($response) {
+        $onnistuneet++;
+
+        rename("{$polku}/{$file}", "{$dataout}/{$file}");
+      }
+      else {
+        echo "<div class='error'>";
+        echo t("Tiedoston %s käsittelyssä tapahtui virhe", '', "{$polku}/{$file}");
+        echo "</div>";
+      }
     }
-    else {
-      echo "<div class='error'>";
-      echo t("Tiedoston %s käsittelyssä tapahtui virhe", '', "{$polku}/{$file}");
-      echo "</div>";
-    }
+
+    echo "<div>";
+    echo t("%s/%s tiedostoa lähetetty onnistuneesti pankkiin", '', $onnistuneet, count($files));
+    echo "</div>";
+
+    break;
+  default:
+    echo "<div class='error'>";
+    echo t("Tuntematon tiedostotyyppi");
+    echo "</div>";
+    break;
   }
-
-  echo "<div>";
-  echo t("%s/%s tiedostoa lähetetty onnistuneesti pankkiin", '', $onnistuneet, count($files));
-  echo "</div>";
 }
 
 if ($tee == 'valitse') {
-  $pankkiyhteys  = hae_pankkiyhteys($pankkiyhteys_tunnus);
-  $tuetut_pankit = tuetut_pankit();
-  $pankki        = $tuetut_pankit[$pankkiyhteys['pankki']];
-  $files         = scandir("{$pupe_root_polku}/dataout/{$pankki['lyhyt_nimi']}_error");
-  $files         = array_diff($files, array('.', '..'));
+  $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
+  $pankki       = $tuetut_pankit[$pankkiyhteys['pankki']];
+  $files        = scandir("{$dataout}/{$pankki['lyhyt_nimi']}_error");
+  $files        = array_diff($files, array('.', '..'));
 
   echo "<div>";
   echo t("Pankkiin lähetettäviä laskuja on %s kappaletta", '', count($files));

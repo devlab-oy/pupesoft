@@ -60,7 +60,8 @@ while (false !== ($file = readdir($handle))) {
     continue;
   }
 
-  $filehandle = fopen($full_filepath, "r");
+  $filehandle     = fopen($full_filepath, "r");
+  $seurantakoodit = array();
 
   while ($tietue = fgets($filehandle)) {
     // Tyhjät rivit skipataan
@@ -75,28 +76,40 @@ while (false !== ($file = readdir($handle))) {
       list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
     }
 
-    if (trim($seurantakoodi) == '') {
+    $seurantakoodi = trim(preg_replace("/\r\n|\r|\n/", '', $seurantakoodi));
+
+    if ($seurantakoodi == '') {
       pupesoft_log('logmaster_tracking_code', "Seurantakoodi puuttuu riviltä");
 
       continue;
     }
 
-    // Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
-    list($tilausnumero) = explode(' ', $tilausnumero);
+    // Tilausnumerot voi olla eroteltuna spacella
+    $tilausnumerot = explode(' ', $tilausnumero);
+    $tilausnumerot = array_unique($tilausnumerot);
 
-    $tilausnumero = (int) $tilausnumero;
-    $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
+    foreach ($tilausnumerot as $tilausnumero) {
+      $tilausnumero = (int) $tilausnumero;
 
-    if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
-      pupesoft_log('logmaster_tracking_code', "Tilausnumero puuttuu riviltä");
+      if ($tilausnumero == 0) {
+        pupesoft_log('logmaster_tracking_code', "Tilausnumero puuttuu riviltä");
 
-      continue;
+        continue;
+      }
+
+      $seurantakoodit[$tilausnumero][] = $seurantakoodi;
     }
+  }
+
+  foreach ($seurantakoodit as $tilausnumero => $koodit) {
+    $koodit        = array_unique($koodit);
+    $seurantakoodi = implode(' ', $koodit);
 
     $query = "UPDATE rahtikirjat SET
               rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
               tulostettu     = now()
               WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tulostettu = '0000-00-00 00:00:00'
               AND otsikkonro = '{$tilausnumero}'";
     pupe_query($query);
 
@@ -117,6 +130,7 @@ while (false !== ($file = readdir($handle))) {
       'otunnukset' => $tilausnumero,
       'kilotyht' => $kilotrow['kilotyht']
     );
+
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
     pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");

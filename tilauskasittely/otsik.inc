@@ -1358,23 +1358,24 @@ if ($tila == "" and !isset($jatka)) {
   }
   else {
     echo "  <input type='hidden' name='asiakasid' value='$asiakasid'>
-        <input type='hidden' name='ylatila'              value = '$ylatila'>
-        <input type='hidden' name='alatila'              value = '$alatila'>
-        <input type='hidden' name='otsikolta'              value = 'YES'>
-        <input type='hidden' name='laskutusvkopv'            value = '$srow[laskutusvkopv]'>
-        <input type='hidden' name='ovttunnus'              value = '$srow[ovttunnus]'>
-        <input type='hidden' name='toim_ovttunnus'            value = '$srow[toim_ovttunnus]'>
-        <input type='hidden' name='kolm_ovttunnus'            value = '$srow[kolm_ovttunnus]'>
-        <input type='hidden' name='chn'                value = '$srow[chn]'>
+        <input type='hidden' name='ylatila'                 value = '$ylatila'>
+        <input type='hidden' name='alatila'                 value = '$alatila'>
+        <input type='hidden' name='otsikolta'               value = 'YES'>
+        <input type='hidden' name='laskutusvkopv'           value = '$srow[laskutusvkopv]'>
+        <input type='hidden' name='ovttunnus'               value = '$srow[ovttunnus]'>
+        <input type='hidden' name='toim_ovttunnus'          value = '$srow[toim_ovttunnus]'>
+        <input type='hidden' name='kolm_ovttunnus'          value = '$srow[kolm_ovttunnus]'>
+        <input type='hidden' name='chn'                     value = '$srow[chn]'>
         <input type='hidden' name='verkkotunnus'            value = '$srow[verkkotunnus]'>
-        <input type='hidden' name='kolm_maa'              value = '$srow[kolm_maa]'>
-        <input type='hidden' name='tunnusnippu'            value = '$srow[tunnusnippu]'>
-        <input type='hidden' name='projekti'             value = '$srow[projekti]'>
+        <input type='hidden' name='kolm_maa'                value = '$srow[kolm_maa]'>
+        <input type='hidden' name='tunnusnippu'             value = '$srow[tunnusnippu]'>
+        <input type='hidden' name='projekti'                value = '$srow[projekti]'>
         <input type='hidden' name='jaksotettu'              value = '$srow[jaksotettu]'>
-        <input type='hidden' name='tunnusnippu_tarjous'        value = '$srow[tunnusnippu_tarjous]'>
-        <input type='hidden' name='kauppatapahtuman_luonne'      value = '$srow[kauppatapahtuman_luonne]'>
-        <input type='hidden' name='asentaja'              value = '$asentaja'>
-        <input type='hidden' name='tyojono'              value = '$tyojono'>
+        <input type='hidden' name='tunnusnippu_tarjous'     value = '$srow[tunnusnippu_tarjous]'>
+        <input type='hidden' name='kauppatapahtuman_luonne' value = '$srow[kauppatapahtuman_luonne]'>
+        <input type='hidden' name='kuljetusmuoto'           value = '$srow[kuljetusmuoto]'>
+        <input type='hidden' name='asentaja'                value = '$asentaja'>
+        <input type='hidden' name='tyojono'                 value = '$tyojono'>
         <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == '' or $asiarow['laji'] == 'H') {
@@ -4358,7 +4359,7 @@ if (isset($jatka)) {
         kohdistettu             = '$maksaja',
         kolmikantakauppa        = '{$kolmikantakauppa}',
         kuljetus                = '$kuljetus',
-        kuljetusmuoto           = '',
+        kuljetusmuoto           = '$kuljetusmuoto',
         label                   = '{$label}',
         laskutusvkopv           = '$laskutusvkopv',
         liitostunnus            = '$liitostunnus',

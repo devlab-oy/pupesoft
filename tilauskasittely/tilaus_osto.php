@@ -415,6 +415,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='$kukarow[kesken]'";
       $result = pupe_query($query);
 
+      if ($laskurow['h1time'] == '0000-00-00 00:00:00') {
+        $query = "UPDATE lasku SET
+                  h1time      = now(),
+                  hyvak1      = '{$kukarow['kuka']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$kukarow['kesken']}'";
+        $result = pupe_query($query);
+
+        $laskurow['h1time'] = date('Y-m-d H:i:s');
+        $laskurow['hyvak1'] = $kukarow["kuka"];
+      }
+
       // katotaan ollaanko haluttu optimoida johonki varastoon
       // ja tilausrivillä ei ole hyllypaikkaa
       if ($laskurow["varasto"] != 0) {

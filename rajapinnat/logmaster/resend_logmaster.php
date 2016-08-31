@@ -6,31 +6,60 @@ $useslave = 1;
 require "../../inc/parametrit.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
 
+$tee = empty($tee) ? '' : $tee;
+
 echo "<font class='head'>".t("Uudelleenlähetä LogMaster-keräyssanoma")."</font><hr>";
+
+if (!LOGMASTER_RAJAPINTA or !in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
+  echo t("Kerättävien tilauksien lähettäminen estetty yhtiötasolla")."!<br>";
+  $tee = '';
+}
 
 if ($tee == "laheta" and $tilaukset != "") {
 
-  $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
+  $tilaukset = str_replace(array("\r", "\n", " "), "", $tilaukset);
+  $tilaukset = explode(",", $tilaukset);
+  $tilaukset = array_filter($tilaukset, 'is_numeric');
+  $tilaukset = implode(",", $tilaukset);
 
-  $query = "SELECT distinct lasku.tunnus
+  # Tilaus pitää olla jo lähetetty ulkoiseen varastoon, jotta se voidaan lähettää uudestaan
+  $query = "SELECT DISTINCT lasku.tunnus
             FROM lasku
-            JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio
-              AND lasku.varasto=varastopaikat.tunnus
+            JOIN varastopaikat ON (lasku.yhtio = varastopaikat.yhtio
+              AND lasku.varasto = varastopaikat.tunnus
               AND varastopaikat.ulkoinen_jarjestelma IN ('L','P')
             )
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila    in ('L','N', 'G')
-            AND lasku.tunnus  in ($tilaukset)";
-  $res  = pupe_query($query);
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.lahetetty_ulkoiseen_varastoon IS NOT NULL
+            AND lasku.tila IN ('L','G')
+            AND lasku.tunnus IN ({$tilaukset})";
+  $res = pupe_query($query);
 
-  if (mysql_num_rows($result) > 0 and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
+  if (mysql_num_rows($res) > 0) {
+    echo t("Uudelleenlähetetään LogMaster-keräyssanoma").": {$tilaukset}<br>";
+
     while ($laskurow = mysql_fetch_assoc($res)) {
-      echo t("Uudelleenlähetetään LogMaster-keräyssanoma").": $laskurow[tunnus]<br>";
-      logmaster_outbounddelivery($laskurow["tunnus"]);
+      $filename = logmaster_outbounddelivery($laskurow['tunnus']);
+
+      if ($filename === false) {
+        echo t("Tilauksen %d sanoman luonti epäonnistui", '', $laskurow['tunnus'])."<br>";
+        continue;
+      }
+
+      $palautus = logmaster_send_file($filename);
+
+      if ($palautus == 0) {
+        pupesoft_log('logmaster_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
+        echo t("Siirretiin tilaus %d", '', $laskurow['tunnus'])."<br>";
+      }
+      else {
+        pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");
+        echo t("Tilauksen %d siirto epäonnistui", '', $laskurow['tunnus'])."<br>";
+      }
     }
   }
   else {
-    echo "<font class='error'>".t("Tilauksia ei löytynyt").": $tilaukset!</font><br>";
+    echo "<font class='error'>".t("Tilauksia ei löytynyt").": {$tilaukset}!</font><br>";
   }
 }
 

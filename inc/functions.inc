@@ -33133,6 +33133,21 @@ if (!function_exists('pupesoft_log')) {
   }
 }
 
+if (!function_exists('tilaus_aktiivinen_kayttajalla')) {
+  function tilaus_aktiivinen_kayttajalla($tunnus) {
+    global $kukarow;
+
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND kesken   = '{$tunnus}'
+              AND kesken  != 0";
+    $result = pupe_query($query);
+
+    return $result;
+  }
+}
+
 if (!function_exists('tuoteperheen_lapsien_kertoimet')) {
   function tuoteperheen_lapsien_kertoimet($params) {
     global $yhtiorow, $kukarow;
@@ -33244,6 +33259,52 @@ if (!function_exists('poista_rivin_yhteensakommentti')) {
     }
 
     return $kommentti;
+  }
+}
+
+if (!function_exists('osaluettelo_hinta_tarkistus')) {
+  function osaluettelo_hinta_tarkistus($tilausnumero, $rivitunnus = 0) {
+    global $kukarow, $yhtiorow;
+
+    $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
+    $query_ale_lisa = generoi_alekentta('M');
+
+    $rivilisa = "";
+
+    if (!empty($rivitunnus)) {
+      $rivilisa = " and tilausrivi.tunnus = $rivitunnus ";
+    }
+
+    $osaluettelovirhe = "";
+
+    $query = "SELECT *,
+              $ale_query_select_lisa aleyhteensa,
+              (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) kpl,
+              round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys]) rivihinta
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              and otunnus = '$tilausnumero'
+              {$rivilisa}
+              and tyyppi  != 'D'";
+    $osare = pupe_query($query);
+
+    while ($osarow = mysql_fetch_assoc($osare)) {
+      $query = "SELECT sum(round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$osarow['alv']} < 500, (1+{$osarow['alv']}/100), 1) * tuoteperhe.kerroin * {$osarow['kpl']} * (1-{$osarow['aleyhteensa']}/100), $yhtiorow[hintapyoristys])) rivihinta
+                FROM tuoteperhe
+                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.isatuoteno = '$osarow[tuoteno]'
+                AND tuoteperhe.tyyppi     = 'O'
+                ORDER BY tuote.tuoteno";
+      $tuoteperhe_result = pupe_query($query);
+      $tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result);
+
+      if ($tuoteperhe_row["rivihinta"] !== NULL and $osarow["rivihinta"] != $tuoteperhe_row["rivihinta"]) {
+        $osaluettelovirhe .= "&nbsp;<font class='error'>".t("HUOM: Tuotteen %s hinta (%s) on eri kuin osaluettelon summa (%s)!", "", $osarow["tuoteno"], $osarow["rivihinta"], $tuoteperhe_row["rivihinta"])."</font><br>";
+      }
+    }
+
+    return $osaluettelovirhe;
   }
 }
 

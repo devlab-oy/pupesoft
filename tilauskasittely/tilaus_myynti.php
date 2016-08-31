@@ -37,6 +37,10 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (@include "rajapinnat/logmaster/logmaster-functions.php");
+elseif (@include "logmaster-functions.php");
+else exit;
+
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $lquery = "SELECT *
@@ -511,12 +515,7 @@ elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO", "TARJOUS", "PI
 if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 
   // katsotaan onko muilla aktiivisena
-  $query = "SELECT *
-            FROM kuka
-            WHERE yhtio  = '$kukarow[yhtio]'
-            AND kesken   = '$tilausnumero'
-            AND kesken  != 0";
-  $result = pupe_query($query);
+  $result = tilaus_aktiivinen_kayttajalla($tilausnumero);
 
   if (mysql_num_rows($result) != 0) {
     $row = mysql_fetch_assoc($result);
@@ -2535,6 +2534,13 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   }
   $result = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
+
+  $a_qry = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
+  $a_res = pupe_query($a_qry);
+  $asiakasrow = mysql_fetch_assoc($a_res);
 
   $kaytiin_otsikolla = "NOJOO!";
 }
@@ -5477,6 +5483,15 @@ if ($tee == '') {
     $var = "";
   }
 
+  $logmaster_errors = logmaster_verify_order($laskurow['tunnus'], $toim);
+
+  foreach ($logmaster_errors as $error) {
+    echo "<font class='error'>";
+    echo "{$error}<br><br>";
+    echo "</font>";
+    $tilausok++;
+  }
+
   $numres_saatavt  = 0;
 
   if ((int) $kukarow["kesken"] > 0) {
@@ -5632,8 +5647,8 @@ if ($tee == '') {
   }
   elseif ($_mika_toim and $_kat_jv) {
 
-    if (!empty($laskurow['luottoraja'])) {
-      if (!empty($asiakasrow['luottoraja'])) {
+    if ((float) $laskurow['luottoraja'] != 0) {
+      if ((float) $asiakasrow['luottoraja'] != 0) {
 
         $query_ale_lisa = generoi_alekentta('M');
 

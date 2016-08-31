@@ -833,6 +833,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "C2BN") {
       $file_type = "NDCORPAYL";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'FILN') {
+      $file_type = 'HAELASKUT';
+    }
   }
 
   // Danskemuunnokset
@@ -853,6 +857,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "NDCORPAYL") {
       $file_type = "C2BN";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'FILN';
+    }
   }
 
   // OP-muunnokset
@@ -872,6 +880,10 @@ function sepa_file_type_check($bank, $file_type) {
     // Maksuaineiston palautesanoma
     if ($file_type == "C2BN") {
       $file_type = "pain.002.001.02";
+    }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'XR';
     }
   }
 

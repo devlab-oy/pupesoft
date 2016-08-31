@@ -6,11 +6,13 @@ if ($tee == "hae_aineistot") {
   $tiliote_references = isset($tiliote_references) ? $tiliote_references : array();
   $factoring_tiliote_references = isset($factoring_tiliote_references) ? $factoring_tiliote_references : array();
   $factoring_viite_references = isset($factoring_viite_references) ? $factoring_viite_references : array();
+  $finvoice_references = isset($finvoice_references) ? $finvoice_references : array();
 
   if (count($tiliote_references) +
     count($viite_references) +
     count($factoring_tiliote_references) +
-    count($factoring_viite_references) == 0) {
+    count($factoring_viite_references) +
+    count($finvoice_references) == 0) {
     virhe("Et valinnut yht‰‰n aineistoa");
     $tee = "valitse";
   }
@@ -139,6 +141,29 @@ if ($tee == "hae_aineistot") {
     }
   }
 
+  if (count($finvoice_references) > 0) {
+    $params = array(
+      "file_type"             => "HAELASKUT",
+      "viitteet"              => $finvoice_references,
+      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+      "pankkiyhteys_salasana" => $salasana,
+    );
+
+    $tiedostot = sepa_download_files($params);
+
+    if ($tiedostot) {
+      viesti("Ladatut laskut:");
+
+      $_l = unserialize(base64_decode($finvoice_tiedostot));
+      tiedostot_table($tiedostot, $_l);
+
+      // ker‰t‰‰n t‰h‰n kaikki filet
+      $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
+    }
+    else {
+      viesti("Ladattavia laskuja ei ollut saatavilla");
+    }
+  }
 }
 
 // K‰sitell‰‰n haetut tiedostot
@@ -268,6 +293,18 @@ if ($tee == "valitse") {
     $factoring_viite_tiedostot = sepa_download_file_list($params);
   }
 
+  if ($pankkiyhteysrow["hae_laskut"] == 1) {
+    // Haetaan finvoice-lista
+    $params = array(
+      "file_type"             => "HAELASKUT",
+      "status"                => "ALL",
+      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+      "pankkiyhteys_salasana" => $salasana
+    );
+
+    $finvoice_tiedostot = sepa_download_file_list($params);
+  }
+
   // Piirret‰‰n formi
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='toim' value='$toim'/>";
@@ -283,12 +320,20 @@ if ($tee == "valitse") {
     $_f_v = base64_encode(serialize($factoring_viite_tiedostot));
   }
 
+  if ($pankkiyhteysrow["hae_laskut"] == 1) {
+    $_l = base64_encode(serialize($finvoice_tiedostot));
+  }
+
   echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
   echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
   if ($pankkiyhteysrow["hae_factoring"] == 1) {
     echo "<input type='hidden' name='factoring_tiliote_tiedostot' value='{$_f_t}'>";
     echo "<input type='hidden' name='factoring_viite_tiedostot' value='{$_f_v}'>";
+  }
+
+  if ($pankkiyhteysrow["hae_laskut"] == 1) {
+    echo "<input type='hidden' name='finvoice_tiedostot' value='{$_l}'>";
   }
 
   echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
@@ -339,11 +384,12 @@ if ($tee == "valitse") {
 
   filelist_table($viite_tiedostot, "viite");
 
+  echo "</td>";
+  echo "</tr>";
+
   if ($pankkiyhteysrow["hae_factoring"] == 1) {
-    echo "</tr>";
     echo "<tr>";
 
-    echo "</td>";
     echo "<td class='back' style='vertical-align:top;'>";
 
     echo "<font class='message'>";
@@ -362,10 +408,25 @@ if ($tee == "valitse") {
     echo "<hr>";
 
     filelist_table($factoring_viite_tiedostot, "factoring_viite");
+
+    echo "</td>";
+    echo "</tr>";
   }
 
-  echo "</td>";
-  echo "</tr>";
+  if ($pankkiyhteysrow["hae_laskut"] == 1) {
+    echo "<td class='back' style='vertical-align:top;'>";
+
+    echo "<font class='message'>";
+    echo t("Laskut");
+    echo "</font>";
+    echo "<hr>";
+
+    filelist_table($finvoice_tiedostot, "finvoice");
+
+    echo "</td>";
+    echo "</tr>";
+  }
+
   echo "</table>";
 
   echo "<br>";

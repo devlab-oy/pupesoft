@@ -69,7 +69,10 @@ if ($tee == 'valitse') {
   echo "<input type='hidden' name='tee' value='laheta'>";
   echo "<input type='hidden' name='file_type' value='LAHLASKUT'>";
   echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'>";
-  echo "<input type='submit' value='" . t("Lähetä") . "'>";
+
+  $disabled = count($files) < 1 ? ' disabled' : '';
+  echo "<input type='submit' value='" . t("Lähetä") . "'{$disabled}>";
+
   echo "</form>";
   echo "</div>";
 }

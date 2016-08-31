@@ -15,6 +15,7 @@ $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
 $virheet_count = 0;
+$pankki = isset($pankki) ? $pankki : null;
 
 // Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
 $debug = empty($debug) ? 0 : 1;

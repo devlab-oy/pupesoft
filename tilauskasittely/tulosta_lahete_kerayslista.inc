@@ -1040,7 +1040,7 @@ if (!function_exists('rivi_kerayslista')) {
                     AND tuoteno      = '{$row['tuoteno']}'
                     AND varasto      = '{$row['varasto']}'
                     AND hyllypaikka != CONCAT('{$row['hyllyalue']}', '{$row['hyllynro']}', '{$row['hyllyvali']}', '{$row['hyllytaso']}')
-                    ORDER BY saldo";
+                    ORDER BY saldo DESC";
           $paikkaresult = pupe_query($query);
           $paikkarow = mysql_fetch_assoc($paikkaresult);
 

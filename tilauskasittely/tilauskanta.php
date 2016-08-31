@@ -90,7 +90,7 @@ if ($tee == 'aja') {
              ORDER BY 1, 3 ";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 7, 7, false, false)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, 8, false, false)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'><thead><tr>";
 

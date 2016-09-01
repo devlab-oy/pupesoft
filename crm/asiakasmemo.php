@@ -683,6 +683,10 @@ if ($ytunnus != '' and $tee == '') {
     echo "</table><br>";
   }
 
+  $out = js_openUrlNewWindow("{$palvelin2}raportit/sarjanumerohistoria.php?tee=hae_tilaukset&indexvas=1&asiakastunnus={$asiakasrow["tunnus"]}", t('Asiakkaan laitteet'), NULL, 1000, 800);
+
+  echo "<br>$out<br>";
+
   ///* Syötä memo-tietoa *///
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "<table width='620'>";

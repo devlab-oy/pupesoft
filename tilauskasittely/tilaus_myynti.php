@@ -1925,7 +1925,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
 
     if (tarkista_oikeus("crm/kuittaamattomat.php")) {
-
       $mkk = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
       $mhh = " 10:00:00";
 

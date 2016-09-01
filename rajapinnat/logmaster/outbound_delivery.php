@@ -64,12 +64,15 @@ $query = "SELECT DISTINCT lasku.tunnus
           JOIN tuote ON (
             tuote.yhtio         = tilausrivi.yhtio AND
             tuote.tuoteno       = tilausrivi.tuoteno AND
-            tuote.ei_saldoa     = '' AND
-            tuote.status       != 'P'
+            tuote.ei_saldoa     = ''
           )
           LEFT JOIN maksuehto ON (
             maksuehto.yhtio = lasku.yhtio AND
             maksuehto.tunnus = lasku.maksuehto
+          )
+          LEFT JOIN kuka ON (
+            kuka.yhtio = lasku.yhtio AND
+            kuka.kesken = lasku.tunnus
           )
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND (
@@ -83,19 +86,11 @@ $query = "SELECT DISTINCT lasku.tunnus
           )
           AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
           AND lasku.lahetetty_ulkoiseen_varastoon IS NULL
-          AND (maksuehto.jv IS NULL OR maksuehto.jv = '')";
+          AND (maksuehto.jv IS NULL OR maksuehto.jv = '')
+          AND kuka.kesken IS NULL";
 $laskures = pupe_query($query);
 
 while ($laskurow = mysql_fetch_assoc($laskures)) {
-
-  // katsotaan onko muilla aktiivisena
-  $result = tilaus_aktiivinen_kayttajalla($laskurow['tunnus']);
-
-  if (mysql_num_rows($result) != 0) {
-    pupesoft_log('logmaster_outbound_delivery', "Tilaus on aktiivisena k‰ytt‰j‰ll‰ {$row['nimi']} ({$row['kuka']}). Tilausta ei voi t‰ll‰ hetkell‰ l‰hett‰‰.");
-    continue;
-  }
-
   $filename = logmaster_outbounddelivery($laskurow['tunnus']);
 
   if ($filename === false) {

@@ -170,12 +170,16 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
 
   // Käsitellään haetut tiedostot
   foreach ($pankkitiedostot as $aineisto) {
+    $oli_laskuja = false;
+
     // Jos aineisto ei ollut ok, ei tehä mitään
     if ($aineisto['status'] != "OK") {
       continue;
     }
 
     if ($aineisto['file_type'] == 'HAELASKUT') {
+      $oli_laskuja = true;
+
       // Kirjotetaan tiedosto levylle
       $filenimi = tempnam($verkkolaskut_in, "finvoice");
       $data     = base64_decode($aineisto['data']);
@@ -233,6 +237,10 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
 
       echo "<br><hr><br>";
     }
+  }
+
+  if ($oli_laskuja) {
+    require 'verkkolasku-in.php';
   }
 }
 

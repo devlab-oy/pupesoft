@@ -30,7 +30,7 @@ if ($tee == "laheta" and $tilaukset != "") {
               AND varastopaikat.ulkoinen_jarjestelma IN ('L','P')
             )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.lahetetty_ulkoiseen_varastoon IS NOT NULL
+            AND lasku.lahetetty_ulkoiseen_varastoon > 0
             AND lasku.tila IN ('L','G')
             AND lasku.tunnus IN ({$tilaukset})";
   $res = pupe_query($query);

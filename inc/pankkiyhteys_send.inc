@@ -12,12 +12,11 @@ if ($tee == 'laheta') {
   switch ($file_type) {
   case 'LAHLASKUT':
     $polku = "{$dataout}/{$pankki['lyhyt_nimi']}_error";
-    $files = scandir($polku);
-    $files = array_diff($files, array('.', '..'));
+    $files = glob("{$polku}/laskutus*");
 
     $onnistuneet = 0;
     foreach ($files as $file) {
-      $data = base64_encode(file_get_contents("{$polku}/{$file}"));
+      $data = base64_encode(file_get_contents($file));
 
       $params = array(
         "pankkiyhteys_tunnus"   => $_COOKIE[$cookie_tunnus],
@@ -31,7 +30,7 @@ if ($tee == 'laheta') {
       if ($response) {
         $onnistuneet++;
 
-        rename("{$polku}/{$file}", "{$dataout}/{$file}");
+        rename($file, "{$dataout}/" . basename($file));
       }
       else {
         echo "<div class='error'>";
@@ -56,8 +55,7 @@ if ($tee == 'laheta') {
 if ($tee == 'valitse') {
   $pankkiyhteys = hae_pankkiyhteys($pankkiyhteys_tunnus);
   $pankki       = $tuetut_pankit[$pankkiyhteys['pankki']];
-  $files        = scandir("{$dataout}/{$pankki['lyhyt_nimi']}_error");
-  $files        = array_diff($files, array('.', '..'));
+  $files        = glob("{$dataout}/{$pankki['lyhyt_nimi']}_error/laskutus*");
 
   echo "<div>";
   echo t("Pankkiin lähetettäviä laskuja on %s kappaletta", '', count($files));

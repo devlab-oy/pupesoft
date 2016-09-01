@@ -80,7 +80,7 @@ if (!function_exists('logmaster_sent_timestamp')) {
     $query = "UPDATE lasku SET
               lahetetty_ulkoiseen_varastoon = now()
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND lahetetty_ulkoiseen_varastoon IS NULL
+              AND (lahetetty_ulkoiseen_varastoon IS NULL or lahetetty_ulkoiseen_varastoon = 0)
               AND tunnus = '{$tunnus}'";
     $res = pupe_query($query);
   }

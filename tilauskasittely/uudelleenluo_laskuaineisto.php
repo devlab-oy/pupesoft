@@ -68,6 +68,16 @@ if (isset($tee) and $tee == "ppg_siirto") {
   }
 }
 
+if (!empty($pankki) && isset($tee) && $tee == 'sepa_siirto') {
+  $data = file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi));
+
+  preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $data, $invoice_number);
+
+  $status = sepa_queue($invoice_number[1], $data, $pankki);
+
+  echo "SEPA-lasku $invoice_number[1]: $status<br>\n";
+}
+
 if (isset($tee) and $tee == "edi_siirto") {
   $ftphost = $edi_ftphost;
   $ftpuser = $edi_ftpuser;
@@ -1157,22 +1167,44 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "</table>";
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "sepa" and file_exists(realpath($nimifinvoice))) {
+      echo "<form method='post' class='multisubmit'>";
       echo "<table>";
       echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
-      echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
       echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
       echo "</table><br><br>";
+      echo "</form>";
 
-      echo "<table>";
-      echo "<tr><th>".t("L‰het‰ aineisto uudestaan pankkiin").":</th>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='sepa_siirto'>";
       echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
-      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
-      echo "</table>";
+      echo "<table>";
+      echo "<tr><th colspan='2'>".t("L‰het‰ aineisto uudestaan pankkiin").":</th>";
+
+      require_once 'inc/pankkiyhteys_functions.inc';
+
+      echo "<tr>";
+      echo "<th><label for='pankki'>";
+      echo t("Pankki, johon laskut l‰hetet‰‰n");
+      echo "</label></th>";
+      echo "<td>";
+      echo "<select name='pankki' id='pankki' class='full-width'>";
+
+      $pankkiyhteydet = hae_pankkiyhteydet();
+
+      foreach ($pankkiyhteydet as $pankkiyhteys) {
+        echo "<option value='" . strtolower($pankkiyhteys["pankin_nimi"]) . "'>";
+        echo $pankkiyhteys["pankin_nimi"];
+        echo "</option>";
+      }
+
+      echo "</select>";
+      echo "</td>";
+      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr>";
+      echo "</tr>";
+      echo "</table></form>";
     }
     elseif (in_array($yhtiorow["verkkolasku_lah"], array("trustpoint", "ppg", "sepa")) and !file_exists(realpath($nimifinvoice))) {
       echo "<br>".t("Tallenna finvoice-aineisto").":<br>";

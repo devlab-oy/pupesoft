@@ -424,4 +424,5 @@ function echo_kayttoliittyma($request) {
   echo "<input type='submit' value='".t('Hae')."' />";
   echo "</form>";
 }
+
 require 'inc/footer.inc';

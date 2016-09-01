@@ -18,7 +18,7 @@ if (!isset($nayta_kaikki_merkinnat)) {
 }
 
 if (!isset($haas_call_type))        $haas_call_type = '';
-if (!isset($haas_call_type_ed))    $haas_call_type_ed = '';
+if (!isset($haas_call_type_ed))     $haas_call_type_ed = '';
 if (!isset($haas_opportunity))      $haas_opportunity = '';
 if (!isset($haas_qty))              $haas_qty = '';
 if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = '';
@@ -612,6 +612,7 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     $asylloik = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
+    $yhylloik = tarkista_oikeus("yllapito.php", "yhteyshenkilo%", "X");
 
     echo "<tr>";
     echo "<td>$asiakasrow[nimi]";
@@ -623,8 +624,8 @@ if ($ytunnus != '' and $tee == '') {
     echo "</td>";
     echo "<td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
 
-    if ($asylloik and tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
-      echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
+    if ($asylloik and $yhylloik) {
+      echo "<td><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
     }
     else {
       echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
@@ -664,7 +665,7 @@ if ($ytunnus != '' and $tee == '') {
     $ppl = date("d");
 
     if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
-      echo "<td><a href='{$palvelin2}crm/kalenteri.php?lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
+      echo "<td><a href='{$palvelin2}crm/kalenteri.php?viikkonakyma=".date("W")."&lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
     }
     else {
       echo "<td>".t("Kalenteri")."</td>";
@@ -1106,17 +1107,32 @@ if ($ytunnus != '' and $tee == '') {
             WHERE kalenteri.liitostunnus = '$asiakasid'
             $lisadel
             {$kayttajalisa}
-            and kalenteri.yhtio          = '$kukarow[yhtio]' ";
+            and kalenteri.yhtio = '$kukarow[yhtio]' ";
 
   if ($yhtunnus > 0) {
     $query .= " and henkilo='$yhtunnus'";
   }
 
-  $query .= "  ORDER by sorttauskentta desc, kalenteri.tunnus";
+  $query .= " UNION ";
+
+  $query .= "SELECT lasku.tila tyyppi, lasku.alatila tapa, lasku.ytunnus ytunnus, lasku.tilausyhteyshenkilo yhteyshenkilo,
+            if(kuka.nimi!='',kuka.nimi, lasku.laatija) laatija, lasku.viesti viesti, left(lasku.luontiaika,10) paivamaara,
+            '' kentta02, '' kentta03, '' kentta04, '' kentta05, '' kentta06, '' kentta07, '' kentta08,
+            lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
+            '' tunnus, '' perheid, lasku.tunnus sorttauskentta
+            FROM lasku
+            LEFT JOIN kuka ON (lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka)
+            LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tila in ('N','L','T','0') ";
+
+
+  $query .= "ORDER by sorttauskentta desc, tunnus";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {
     $query .= "  LIMIT 5 ";
   }
+
   $res = pupe_query($query);
 
   while ($memorow = mysql_fetch_array($res)) {
@@ -1151,12 +1167,14 @@ if ($ytunnus != '' and $tee == '') {
 
       if ($memorow["laskutunnus"] > 0) {
         $laskutyyppi = $memorow["laskutila"];
-        $alatila   = $memorow["laskualatila"];
+        $alatila = $memorow["laskualatila"];
 
         //tehdään selväkielinen tila/alatila
         require "inc/laskutyyppi.inc";
 
-        echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]&lopetus=$asmemo_lopetus'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
+        $url = js_openUrlNewWindow("{$palvelin2}tilauskasittely/tulostakopio.php?toim=TARJOUS&tee=NAYTATILAUS&otunnus=$memorow[laskutunnus]", "$memorow[laskutunnus]");
+
+        echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").": $url / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
       }
 
       if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {

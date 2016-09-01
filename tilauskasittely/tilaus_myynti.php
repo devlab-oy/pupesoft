@@ -3973,7 +3973,7 @@ if ($tee == '') {
         echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
 
         while ($liiterow = mysql_fetch_array($liiteres)) {
-          echo "<a href='{$palvelin2}view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
+          echo js_openUrlNewWindow("{$palvelin2}view.php?id=$liiterow[tunnus]", t('Liite')." $liitemaara", NULL, 1000, 800)." $liiterow[selite]</a> ";
           $liitemaara++;
         }
         echo "</td></tr>";

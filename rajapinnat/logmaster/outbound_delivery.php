@@ -85,7 +85,7 @@ $query = "SELECT DISTINCT lasku.tunnus
             )
           )
           AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 15 MINUTE)
-          AND lasku.lahetetty_ulkoiseen_varastoon IS NULL
+          AND (lasku.lahetetty_ulkoiseen_varastoon IS NULL or lasku.lahetetty_ulkoiseen_varastoon = 0)
           AND (maksuehto.jv IS NULL OR maksuehto.jv = '')
           AND kuka.kesken IS NULL";
 $laskures = pupe_query($query);

@@ -84,13 +84,14 @@ while (false !== ($file = readdir($handle))) {
   $saldoeroja = array();
 
   foreach ($xml->InvCounting->Line as $line) {
-    $eankoodi = $line->ItemNumber;
-    $kpl = (float) $line->Quantity;
+    $item_number               = $line->ItemNumber;
+    $kpl                       = (float) $line->Quantity;
+    $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 
     $query = "SELECT tuoteno, nimitys
               FROM tuote
               WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND eankoodi = '{$eankoodi}'";
+              AND {$logmaster_itemnumberfield} = '{$item_number}'";
     $tuoteres = pupe_query($query);
     $tuoterow = mysql_fetch_assoc($tuoteres);
 
@@ -121,7 +122,7 @@ while (false !== ($file = readdir($handle))) {
 
     if ($a != $b) {
       $saldoeroja[] = array(
-        "item"      => $line->ItemNumber,
+        "item"      => $item_number,
         "logmaster" => $kpl,
         "nimitys"   => $tuoterow['nimitys'],
         "pupe"      => $hyllyssa,

@@ -80,7 +80,7 @@ if (!function_exists('logmaster_sent_timestamp')) {
     $query = "UPDATE lasku SET
               lahetetty_ulkoiseen_varastoon = now()
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND lahetetty_ulkoiseen_varastoon IS NULL
+              AND (lahetetty_ulkoiseen_varastoon IS NULL or lahetetty_ulkoiseen_varastoon = 0)
               AND tunnus = '{$tunnus}'";
     $res = pupe_query($query);
   }
@@ -404,5 +404,158 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -järjestelmään epäonnistui.");
     return false;
+  }
+}
+
+if (!function_exists('logmaster_check_params')) {
+  function logmaster_check_params($toim) {
+    global $kukarow, $yhtiorow;
+
+    $onkologmaster  = LOGMASTER_RAJAPINTA;
+    $onkologmaster &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+    $onkologmaster &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
+
+    if ($onkologmaster === false) {
+      return false;
+    }
+
+    $varastotunnukset = logmaster_warehouses();
+
+    if ($varastotunnukset === false) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+if (!function_exists('logmaster_warehouses')) {
+  function logmaster_warehouses() {
+    global $kukarow;
+
+    $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tyyppi != 'P'
+              AND ulkoinen_jarjestelma IN ('L','P')";
+    $varastores = pupe_query($query);
+    $varastorow = mysql_fetch_assoc($varastores);
+
+    return empty($varastorow['tunnukset']) ? false : $varastorow['tunnukset'];
+  }
+}
+
+if (!function_exists('logmaster_fetch_rows')) {
+  function logmaster_fetch_rows($tunnus, $otunnus = 0) {
+    global $kukarow;
+
+    $varastotunnukset = logmaster_warehouses();
+
+    if ($varastotunnukset === false) {
+      return false;
+    }
+
+    $wherelisa = '';
+    $tunnus    = (int) $tunnus;
+    $otunnus   = (int) $otunnus;
+
+    if (empty($tunnus) and empty($otunnus)) {
+      return false;
+    }
+
+    if (!empty($tunnus)) {
+      $wherelisa = " AND tilausrivi.tunnus  = '{$tunnus}' ";
+    }
+
+    if (!empty($otunnus)) {
+      $wherelisa = " AND tilausrivi.otunnus  = '{$otunnus}' ";
+    }
+
+    $query = "SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+              FROM tilausrivi
+              JOIN tuote ON (
+                tuote.yhtio     = tilausrivi.yhtio AND
+                tuote.tuoteno   = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
+              )
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              {$wherelisa}
+              AND tilausrivi.var     != 'J'
+              AND tilausrivi.varasto IN ({$varastotunnukset})";
+    $logmaster_res = pupe_query($query);
+
+    return $logmaster_res;
+  }
+}
+
+if (!function_exists('logmaster_verify_row')) {
+  function logmaster_verify_row($tunnus, $toim) {
+    global $yhtiorow, $kukarow;
+
+    $errors = array();
+
+    if (logmaster_check_params($toim) === false) {
+      return array();
+    }
+
+    # Sarjanumerollisia tuotteita ei tueta
+    # Tilausrivien täytyy sisältää vain kokonaislukuja
+    $logmaster_rivi_res = logmaster_fetch_rows($tunnus);
+
+    if ($logmaster_rivi_res === false) {
+      return array();
+    }
+
+    while ($logmaster_rivi_row = mysql_fetch_assoc($logmaster_rivi_res)) {
+      if ($logmaster_rivi_row['sarjanumeroseuranta'] != '') {
+        $errors[] = t("VIRHE: Sarjanumeroseurannassa olevia tuotteita ei sallita ulkoisessa varastossa")."!";
+      }
+
+      $logmaster_kpl = $logmaster_rivi_row['varattu'] + $logmaster_rivi_row['kpl'];
+
+      if (fmod($logmaster_kpl, 1) != 0) {
+        $errors[] = t("VIRHE: Ulkoinen varasto tukee vain kokonaislukuja")."!";
+      }
+    }
+
+    return $errors;
+  }
+}
+
+if (!function_exists('logmaster_verify_order')) {
+  function logmaster_verify_order($tunnus, $toim) {
+    global $yhtiorow, $kukarow;
+
+    $errors = array();
+    $tunnus = (int) $tunnus;
+
+    if (logmaster_check_params($toim) === false) {
+      return array();
+    }
+
+    # Maksuehto ei saa olla jälkivaatimus
+    $query = "SELECT lasku.*, maksuehto.jv
+              FROM lasku
+              LEFT JOIN maksuehto ON (
+                maksuehto.yhtio = lasku.yhtio AND
+                maksuehto.tunnus = lasku.maksuehto
+              )
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tunnus = '{$tunnus}'";
+    $laskures = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($laskures);
+
+    # Tarkistetaan onko Logmasteriin meneviä tilausrivejä
+    $logmaster_rivi_res = logmaster_fetch_rows(0, $tunnus);
+
+    if ($logmaster_rivi_res === false) {
+      return array();
+    }
+
+    if (mysql_num_rows($logmaster_rivi_res) > 0 and $laskurow['jv'] != '') {
+      $errors[] = t("VIRHE: Jälkivaatimuksia ei sallita ulkoisessa varastossa")."!";
+    }
+
+    return $errors;
   }
 }

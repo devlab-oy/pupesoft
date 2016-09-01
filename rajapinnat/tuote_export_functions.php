@@ -629,20 +629,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
 
   $dnslajitelma = array();
 
-  // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
-  $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
-            FROM tuotteen_avainsanat
-            JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuote.status != 'P'
-              AND tuote.tuotetyyppi NOT IN ('A','B')
-              AND tuote.tuoteno != ''
-              AND tuote.nakyvyys != '')
-            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-            AND trim(tuotteen_avainsanat.selite) != ''";
-  $resselite = pupe_query($query);
-
   if ($ajetaanko_kaikki === false) {
     $muutoslisa = " AND (
       tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
@@ -654,9 +640,28 @@ function tuote_export_hae_lajitelmatuotteet($params) {
     $muutoslisa = "";
   }
 
+  // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan ja on muuttunut
+  $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
+            FROM tuotteen_avainsanat
+            JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
+              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+              AND tuote.status != 'P'
+              AND tuote.tuotetyyppi NOT in ('A','B')
+              AND tuote.tuoteno != ''
+              AND tuote.nakyvyys != '')
+            LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+              and try_fi.selite = tuote.try
+              and try_fi.laji = 'try'
+              and try_fi.kieli = 'fi')
+            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+            {$muutoslisa}
+            AND trim(tuotteen_avainsanat.selite) != ''";
+  $resselite = pupe_query($query);
+
   // loopataan variaatio-nimitykset
   while ($rowselite = mysql_fetch_assoc($resselite)) {
-    // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
+    // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon
     $aliselect = "SELECT
                   tuote.*,
                   tuotteen_avainsanat.tuoteno,
@@ -679,7 +684,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                   WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                   AND tuotteen_avainsanat.laji = 'parametri_variaatio'
                   AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
-                  {$muutoslisa}
                   ORDER BY tuote.tuoteno";
     $alires = pupe_query($aliselect);
 

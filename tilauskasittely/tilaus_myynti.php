@@ -10204,7 +10204,7 @@ if ($tee == '') {
 
         if ($laskurow["tunnusnippu"] > 0 and (tarkista_oikeus("tilaus_myynti.php", "PROJEKTI") or tarkista_oikeus("tilaus_myynti.php", "TYOMAARAYS"))) {
 
-          $tarjouslisa = "<select name='perusta_tilaustyyppi'>";
+          $tarjouslisa = " & <select name='perusta_tilaustyyppi'>";
 
           $tarjouslisa_normi = $tarjouslisa_projekti = $tarjouslisa_tyomaarays = "";
 
@@ -10245,7 +10245,7 @@ if ($tee == '') {
               <input type='hidden' name='mista' value = '$mista'>
               <input type='hidden' name='orig_tila' value='$orig_tila'>
               <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-              <input type='submit' value='".t("Hyväksy tarjous")."'> & $tarjouslisa
+              <input type='submit' value='".t("Hyväksy tarjous")."'>$tarjouslisa
               </form>";
         }
       }

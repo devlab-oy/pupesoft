@@ -1333,6 +1333,17 @@ if ($tee2 == '') {
 
         if ($onkologmaster_varasto) {
           echo t("Ulkoisen varaston tilaus");
+
+          $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
+
+          if (mysql_num_rows($keskenres) != 0) {
+            $keskenrow = mysql_fetch_assoc($keskenres);
+
+            echo "<br>";
+            echo "<font class='error'>";
+            echo t("Tilaus on kesken käyttäjällä %s (%s)", "", $keskenrow['nimi'], $keskenrow['kuka']);
+            echo "</font>";
+          }
         }
         else {
           echo "<input type='submit' value='".t("Tulosta")."'>";
@@ -1380,7 +1391,7 @@ if ($tee2 == '') {
     echo t("Rivejä yhteensä")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
+    $spanni = 4;
 
     if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;

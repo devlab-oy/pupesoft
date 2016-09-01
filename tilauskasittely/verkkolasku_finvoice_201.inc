@@ -464,9 +464,11 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("SellerReferenceIdentifier", $lasrow['tunnus'], $tootfinvoice);
 
       if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+        xml_add("SellersBuyerIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
         xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
       }
       else {
+        xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
         xml_add("OrderIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
       }
 

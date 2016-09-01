@@ -282,6 +282,15 @@ if (empty($verkkokauppa_asiakasnro)) {
   $verkkokauppa_asiakasnro = null;
 }
 
+// Vaihtoehtoinen varastosaldo Magenton tuotekenttään
+// Array jossa avaimena Magenton tuotekentän nimi, arvona Array jossa varastojen tunnukset
+if (empty($magento_saldot_tuotekenttaan)) {
+  $magento_saldot_tuotekenttaan = array(
+    // 'hki_myymala' => array(117,118),
+    // 'tku_myymala' => array(10),
+  );
+}
+
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
 if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
   $lockfile = 'tuote_export-tilaukset-flock.lock';
@@ -366,6 +375,7 @@ if (in_array('saldot', $magento_ajolista)) {
   $params = array(
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
+    "vaihtoehtoiset_saldot"      => $magento_saldot_tuotekenttaan,
   );
 
   $dnstock = tuote_export_hae_saldot($params);

@@ -716,6 +716,14 @@ if ($tee == "VALITSE") {
         echo "<td class='back'>&nbsp;<font class='error'>".t("HUOM: Tilauksella on nollahintaisia rivej‰!")."</font></td>";
       }
 
+      if ($yhtiorow["pura_osaluettelot"] != "") {
+        $osaluettelovirhe = osaluettelo_hinta_tarkistus($row["tunnus"]);
+
+        if (!empty($osaluettelovirhe)) {
+          echo "<td class='back'>$osaluettelovirhe</td>";
+        }
+      }
+
       //Varmistetaan, ett‰ meill‰ on verkkotunnus laskulla jos pit‰isi l‰hett‰‰ verkkolaskuja!
       if ($row["chn"] == "010" and $yhtiorow['verkkolasku_lah'] != 'apix') {
         $query = "SELECT verkkotunnus

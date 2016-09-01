@@ -928,11 +928,45 @@ class MagentoClient {
         $this->_error_count++;
         $this->log('magento_saldot', "Virhe! Saldopäivitys epäonnistui!", $e);
       }
+
+      // Jos meillä on "erikoissaldoja" tuotteelle, pitää nämä tiedot päivittää tuotetietoihin
+      $this->paivita_erikoissaldot($tuote['tuoteno'], $tuote['vaihtoehtoiset_saldot']);
     }
 
     $this->log('magento_saldot', "$count saldoa päivitetty");
 
     return $count;
+  }
+
+  // Päivitetään erikoissaldot
+  public function paivita_erikoissaldot($tuoteno, Array $erikoissaldot) {
+    // ei tehdä mitään, jos ei ole erikoissaldoja
+    if (count($erikoissaldot) == 0) {
+      return false;
+    }
+
+    $log_keys   = implode(', ', array_keys($erikoissaldot));
+    $log_values = implode(', ', array_values($erikoissaldot));
+    $log_info   = "Kentät {$log_keys}. Arvot {$log_values}.";
+
+    try {
+      // Päivitetään tuote
+      $result = $this->_proxy->call(
+        $this->_session,
+        'catalog_product.update',
+        array($tuoteno, $erikoissaldot)
+      );
+
+      $this->log('magento_saldot', "Erikoissaldot lisätty. {$log_info}");
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_saldot', "Virhe! Erikoissaldopäivitys epäonnistui! {$log_info}", $e);
+
+      return false;
+    }
+
+    return true;
   }
 
   // Poistaa magentosta tuotteita

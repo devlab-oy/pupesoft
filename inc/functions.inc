@@ -1260,6 +1260,13 @@ if (!function_exists("apix_edi_put_file")) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
+    $apix_ulos .= "real_url: $real_url<br>";
+    $apix_ulos .= "apixfilesize: $apixfilesize<br>";
+
+    curl_close($ch);
+    fclose($apix_fh);
+    return $apix_ulos;
+
     $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
     $response = curl_exec($ch);
 

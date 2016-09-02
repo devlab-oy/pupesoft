@@ -264,7 +264,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     $edi_order .= "*ME\n";
     $edi_order .= "*IE\n";
 
-    $dir = "/tmp/";
+    $dir = "{$pupe_root_polku}/dataout/apix_error/";
     $filename = "out_apix_{$laskurow['tunnus']}.dat";
 
     file_put_contents($dir.$filename, $edi_order);

@@ -169,6 +169,10 @@ table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[ty
   display: none;
 }
 
+ul {
+  padding-left: 15px;
+}
+
 ul.list-unstyled {
   list-style: none;
   padding-left: 20px;

@@ -33706,24 +33706,19 @@ if (!function_exists('posten_message_type')) {
 
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
-    $vaihtoehtoinenrahti = t_avainsana("VEHT_RAHTI", "", "", "", "", "selite");
+    global $kukarow;
 
-    // jos avainsanaan on syštetty useita rahtituotteita pilkulla eroteltuna niin wrapataan tuotteet hipsuihin
-    if (strpos($vaihtoehtoinenrahti, ',') !== false) {
-      $rahdit = explode(",", $vaihtoehtoinenrahti);
-      $rahtistringi = '';
+    $query = "SELECT group_concat(distinct concat('\'',selite,'\'')) vaihtoehtoinenrahti
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'VEHT_RAHTI'";
+    $res = pupe_query($query);
+    $vaihtoehtoinenrahtirow = mysql_fetch_assoc($res);
 
-      foreach ($rahdit as $vaihtoehtoinen_rahtituote) {
-        $vaihtoehtoinen_rahtituote = trim($vaihtoehtoinen_rahtituote);
-        $rahtistringi .= " '{$vaihtoehtoinen_rahtituote}',";
-      }
-      $rahtistringi = substr($rahtistringi, 0, -1); // Viimeinen pilkku poistetaan
-      $vaihtoehtoinenrahti = $rahtistringi;
+    if (!empty($vaihtoehtoinenrahtirow)) {
+      $merkkijono .= ", {$vaihtoehtoinenrahtirow}";
     }
 
-    if (!empty($vaihtoehtoinenrahti)) {
-      $merkkijono .= ", {$vaihtoehtoinenrahti}";
-    }
     return $merkkijono;
   }
 }

@@ -30,6 +30,14 @@ if (!isset($tee)) {
   $tee = '';
 }
 
+if (empty($sel_ltun) or !is_array($sel_ltun)) {
+  $sel_ltun = array();
+}
+else {
+  # poistetaan kaikki arvot, jotka ei ole numeroita
+  $sel_ltun = array_filter($sel_ltun, 'is_numeric');
+}
+
 if (!function_exists("laheta_excel_koontilahete")) {
   function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
     $otunnukset = (array) $otunnukset;
@@ -179,12 +187,22 @@ if ($tee == 'tulosta') {
             WHERE yhtio = '$kukarow[yhtio]'
             AND selite  = '$toimitustapa'";
   $toitares = pupe_query($query);
-  $toitarow = mysql_fetch_assoc($toitares);
 
-  // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
-  // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-  if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
-    $tee = "close_with_printer";
+  if (mysql_num_rows($toitares) == 1) {
+    $toitarow = mysql_fetch_assoc($toitares);
+
+    // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
+    // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      $tee = "close_with_printer";
+    }
+  }
+  else {
+    echo "<font class='message'>";
+    echo t("Toimitustapaa ei löytynyt");
+    echo "</font><br><br>";
+
+    $tee = "";
   }
 }
 
@@ -1654,9 +1672,8 @@ if ($tee == '') {
     echo "</form>";
   }
   else {
-    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ".</font><br><br>";
+    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ". (2)</font><br><br>";
   }
 
   require "inc/footer.inc";
 }
-

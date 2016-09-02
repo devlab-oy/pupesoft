@@ -238,7 +238,6 @@ if (!function_exists("onkokaikkivalmistettu")) {
     else {
       $tee = "VALMISTA";
     }
-
   }
 }
 
@@ -968,11 +967,11 @@ if (!isset($from_kaikkikorj)) {
               GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
               GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
               GROUP_CONCAT(DISTINCT lasku.tilaustyyppi SEPARATOR ', ') 'Tilaustyyppi'
-              FROM tilausrivi, lasku
+              FROM tilausrivi
+              JOIN lasku ON (lasku.tunnus = tilausrivi.otunnus and lasku.yhtio = tilausrivi.yhtio)
               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-              and  tilausrivi.tunnus in ($valmistettavat)
-              and lasku.tunnus       = tilausrivi.otunnus
-              and lasku.yhtio        = tilausrivi.yhtio";
+              and tilausrivi.tunnus in ($valmistettavat)
+              and tilausrivi.tyyppi != 'D'";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
 

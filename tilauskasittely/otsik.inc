@@ -1306,23 +1306,24 @@ if ($tila == "" and !isset($jatka)) {
   }
   else {
     echo "  <input type='hidden' name='asiakasid' value='$asiakasid'>
-        <input type='hidden' name='ylatila'              value = '$ylatila'>
-        <input type='hidden' name='alatila'              value = '$alatila'>
-        <input type='hidden' name='otsikolta'              value = 'YES'>
-        <input type='hidden' name='laskutusvkopv'            value = '$srow[laskutusvkopv]'>
-        <input type='hidden' name='ovttunnus'              value = '$srow[ovttunnus]'>
-        <input type='hidden' name='toim_ovttunnus'            value = '$srow[toim_ovttunnus]'>
-        <input type='hidden' name='kolm_ovttunnus'            value = '$srow[kolm_ovttunnus]'>
-        <input type='hidden' name='chn'                value = '$srow[chn]'>
+        <input type='hidden' name='ylatila'                 value = '$ylatila'>
+        <input type='hidden' name='alatila'                 value = '$alatila'>
+        <input type='hidden' name='otsikolta'               value = 'YES'>
+        <input type='hidden' name='laskutusvkopv'           value = '$srow[laskutusvkopv]'>
+        <input type='hidden' name='ovttunnus'               value = '$srow[ovttunnus]'>
+        <input type='hidden' name='toim_ovttunnus'          value = '$srow[toim_ovttunnus]'>
+        <input type='hidden' name='kolm_ovttunnus'          value = '$srow[kolm_ovttunnus]'>
+        <input type='hidden' name='chn'                     value = '$srow[chn]'>
         <input type='hidden' name='verkkotunnus'            value = '$srow[verkkotunnus]'>
-        <input type='hidden' name='kolm_maa'              value = '$srow[kolm_maa]'>
-        <input type='hidden' name='tunnusnippu'            value = '$srow[tunnusnippu]'>
-        <input type='hidden' name='projekti'             value = '$srow[projekti]'>
+        <input type='hidden' name='kolm_maa'                value = '$srow[kolm_maa]'>
+        <input type='hidden' name='tunnusnippu'             value = '$srow[tunnusnippu]'>
+        <input type='hidden' name='projekti'                value = '$srow[projekti]'>
         <input type='hidden' name='jaksotettu'              value = '$srow[jaksotettu]'>
-        <input type='hidden' name='tunnusnippu_tarjous'        value = '$srow[tunnusnippu_tarjous]'>
-        <input type='hidden' name='kauppatapahtuman_luonne'      value = '$srow[kauppatapahtuman_luonne]'>
-        <input type='hidden' name='asentaja'              value = '$asentaja'>
-        <input type='hidden' name='tyojono'              value = '$tyojono'>
+        <input type='hidden' name='tunnusnippu_tarjous'     value = '$srow[tunnusnippu_tarjous]'>
+        <input type='hidden' name='kauppatapahtuman_luonne' value = '$srow[kauppatapahtuman_luonne]'>
+        <input type='hidden' name='kuljetusmuoto'           value = '$srow[kuljetusmuoto]'>
+        <input type='hidden' name='asentaja'                value = '$asentaja'>
+        <input type='hidden' name='tyojono'                 value = '$tyojono'>
         <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == '' or $asiarow['laji'] == 'H') {
@@ -2366,6 +2367,12 @@ if ($tila == "" and !isset($jatka)) {
         tarkista_oikeus("valitse_laskutettavat_tilaukset.php", "VIENTI") or
         tarkista_oikeus("verkkolasku.php"))
     ) {
+
+      // Luodaan suoraan sisäinen lasku, jos asiakkaan taakse on näin valittu
+      if (!isset($laskurow["sisainen"]) and $srow['chn'] == "888") {
+        $sisah = 'CHECKED';
+      }
+
       $oikea_sarake[$oikea] = "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
       $oikea++;
     }
@@ -3179,6 +3186,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<option value='666' {$sel['666']}>" . hae_chn_teksti('666') . "</option>";
         echo "<option value='667' {$sel['667']}>" . hae_chn_teksti('667') . "</option>";
         echo "<option value='999' {$sel['999']}>" . hae_chn_teksti('999') . "</option>";
+        echo "<option value='888' {$sel['888']}>" . hae_chn_teksti('888') . "</option>";
         echo "</select></td>";
         echo "</tr>";
       }
@@ -3528,7 +3536,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
       echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
     }
 
@@ -4266,7 +4274,7 @@ if (isset($jatka)) {
         kohdistettu             = '$maksaja',
         kolmikantakauppa        = '{$kolmikantakauppa}',
         kuljetus                = '$kuljetus',
-        kuljetusmuoto           = '',
+        kuljetusmuoto           = '$kuljetusmuoto',
         label                   = '{$label}',
         laskutusvkopv           = '$laskutusvkopv',
         liitostunnus            = '$liitostunnus',

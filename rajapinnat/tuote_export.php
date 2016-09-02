@@ -127,6 +127,12 @@ if (empty($magento_simple_tuote_nimityskentta)) {
   $magento_simple_tuote_nimityskentta = 'nimitys';
 }
 
+// Miltä lapsituotteelta otetaan configurable (isä) tuotteen tiedot
+// Vaihtoehdot: first tai cheapest
+if (empty($magento_configurable_tuotetiedot)) {
+  $magento_configurable_tuotetiedot = "first";
+}
+
 // Mitä tuotteen kenttää käytetään configurable-tuotteen nimityksenä
 if (empty($magento_configurable_tuote_nimityskentta)) {
   $magento_configurable_tuote_nimityskentta = "nimitys";
@@ -276,6 +282,15 @@ if (empty($verkkokauppa_asiakasnro)) {
   $verkkokauppa_asiakasnro = null;
 }
 
+// Vaihtoehtoinen varastosaldo Magenton tuotekenttään
+// Array jossa avaimena Magenton tuotekentän nimi, arvona Array jossa varastojen tunnukset
+if (empty($magento_saldot_tuotekenttaan)) {
+  $magento_saldot_tuotekenttaan = array(
+    // 'hki_myymala' => array(117,118),
+    // 'tku_myymala' => array(10),
+  );
+}
+
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
 if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
   $lockfile = 'tuote_export-tilaukset-flock.lock';
@@ -302,6 +317,7 @@ $magento_client = new MagentoClient(
   $magento_debug
 );
 
+$magento_client->set_configurable_tuotetiedot($magento_configurable_tuotetiedot);
 $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
 $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
 $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
@@ -359,6 +375,7 @@ if (in_array('saldot', $magento_ajolista)) {
   $params = array(
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
+    "vaihtoehtoiset_saldot"      => $magento_saldot_tuotekenttaan,
   );
 
   $dnstock = tuote_export_hae_saldot($params);

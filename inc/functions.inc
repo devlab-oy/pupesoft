@@ -1262,6 +1262,7 @@ if (!function_exists("apix_edi_put_file")) {
 
     $apix_ulos .= "real_url: $real_url<br>";
     $apix_ulos .= "apixfilesize: $apixfilesize<br>";
+    $apix_ulos .= "path: {$pupe_root_polku}/dataout/apix_error/$apixzipfile<br>";
 
     curl_close($ch);
     fclose($apix_fh);

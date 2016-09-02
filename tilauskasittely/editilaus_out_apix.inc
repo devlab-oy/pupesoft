@@ -269,7 +269,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     file_put_contents($dir.$filename, $edi_order);
 
-    $status = apix_edi_put_file($filename, $laskurow['tunnus'], "PupesoftEdi");
+    $status = apix_edi_put_file($filename, $laskurow['tunnus']);
     echo "APIX-lähetys {$status}<br>\n";
   }
 }

@@ -16,11 +16,15 @@ if (trim($argv[2]) == '') {
 }
 
 // lisätään includepathiin pupe-root
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+ini_set("display_errors", 1);
+
+error_reporting(E_ALL);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();
@@ -56,8 +60,8 @@ while (false !== ($file = readdir($handle))) {
     continue;
   }
 
-  $filehandle = fopen($full_filepath, "r");
-  $rahtikirja_hukassa = false;
+  $filehandle     = fopen($full_filepath, "r");
+  $seurantakoodit = array();
 
   while ($tietue = fgets($filehandle)) {
     // Tyhjät rivit skipataan
@@ -72,36 +76,47 @@ while (false !== ($file = readdir($handle))) {
       list($posten_lahetenumero, $tilausnumero, $seurantakoodi) = explode(';', $tietue);
     }
 
-    if (trim($seurantakoodi) == '') {
-      pupesoft_log('outbound_delivery', "Seurantakoodi puuttuu riviltä");
+    $seurantakoodi = trim(preg_replace("/\r\n|\r|\n/", '', $seurantakoodi));
+
+    if ($seurantakoodi == '') {
+      pupesoft_log('logmaster_tracking_code', "Seurantakoodi puuttuu riviltä");
 
       continue;
     }
 
-    // Otetaan vain eka ilmentymä tilausnumerosta jos sattuu olemaan monta eroteltuna spacella
-    list($tilausnumero) = explode(' ', $tilausnumero);
+    // Tilausnumerot voi olla eroteltuna spacella
+    $tilausnumerot = explode(' ', $tilausnumero);
+    $tilausnumerot = array_unique($tilausnumerot);
 
-    $tilausnumero = (int) $tilausnumero;
-    $seurantakoodi = preg_replace("/\r\n|\r|\n/", '', $seurantakoodi);
+    foreach ($tilausnumerot as $tilausnumero) {
+      $tilausnumero = (int) $tilausnumero;
 
-    if ($tilausnumero == 0 or trim($seurantakoodi) == '') {
-      pupesoft_log('outbound_delivery', "Tilausnumero puuttuu riviltä");
+      if ($tilausnumero == 0) {
+        pupesoft_log('logmaster_tracking_code', "Tilausnumero puuttuu riviltä");
 
-      continue;
+        continue;
+      }
+
+      $seurantakoodit[$tilausnumero][] = $seurantakoodi;
     }
+  }
+
+  foreach ($seurantakoodit as $tilausnumero => $koodit) {
+    $koodit        = array_unique($koodit);
+    $seurantakoodi = implode(' ', $koodit);
 
     $query = "UPDATE rahtikirjat SET
               rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
               tulostettu     = now()
               WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND tulostettu = '0000-00-00 00:00:00'
               AND otsikkonro = '{$tilausnumero}'";
     pupe_query($query);
 
     if (mysql_affected_rows() == 0) {
-      pupesoft_log('outbound_delivery', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
+      pupesoft_log('logmaster_tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
 
-      $rahtikirja_hukassa = true;
-      break;
+      continue;
     }
 
     $query = "SELECT SUM(kilot) kilotyht
@@ -115,13 +130,14 @@ while (false !== ($file = readdir($handle))) {
       'otunnukset' => $tilausnumero,
       'kilotyht' => $kilotrow['kilotyht']
     );
+
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
-    pupesoft_log('outbound_delivery', "Tilaus {$otunnus} toimituskuittaus käsitelty");
+    pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
-      pupesoft_log('outbound_delivery', "Päivitetään toimitetuksi Magentoon");
+      pupesoft_log('logmaster_tracking_code', "Päivitetään toimitetuksi Magentoon");
 
       $query = "SELECT toimitustapa
                 FROM rahtikirjat
@@ -159,9 +175,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
-  if (!$rahtikirja_hukassa) {
-    rename($full_filepath, $path."done/".$file);
-  }
+  rename($full_filepath, $path."done/".$file);
 }
 
 closedir($handle);

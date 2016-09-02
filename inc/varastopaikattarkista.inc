@@ -95,5 +95,11 @@ if (!function_exists("varastopaikattarkista")) {
         $virhe[$i] .= t("Rahtikirjatulostimet ei saa olla tyhji‰")."!";
       }
     }
+
+    if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
+      if (in_array($t[$i], array('L','P')) and !LOGMASTER_RAJAPINTA) {
+        $virhe[$i] .= t("Valittuun ulkoiseen j‰rjestelm‰‰n vaaditut FTP-tiedot puuttuvat")."!";
+      }
+    }
   }
 }

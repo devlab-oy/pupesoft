@@ -46,6 +46,7 @@ $ytunnus_talteen = $ytunnus;
 
 $limit = 1000; // montako riviä on maksimi
 $monta = 0;
+$force_selaus = FALSE;
 $asiakasrajaus = "";
 
 if (in_array($kutsuja, array("asiakasemo.php", "kalenteri.php"))) {
@@ -135,7 +136,10 @@ elseif ($ytunnus != '') {
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
 
-    if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    if ($monta > 0) {
+      $force_selaus = TRUE;
+    }
   }
 
   if ($monta == 0  and substr($ytunnus, 0, 1) == "#") {
@@ -158,7 +162,10 @@ elseif ($ytunnus != '') {
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
 
-    if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    if ($monta > 0) {
+      $force_selaus = TRUE;
+    }
   }
 
   if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
@@ -430,6 +437,9 @@ elseif ($asiakasnro != '') {
   $monta  = mysql_num_rows($result);
 }
 
+// Putsattu resultti
+$_asiakas_tunnukset = array();
+
 if ($monta == 0) {
   if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
     echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
@@ -445,10 +455,21 @@ if ($monta == 0) {
   $ytunnus = "";
   $asiakasnro = "";
 }
+else {
+  // talteen tunnukset, näytetään asiakas vain kerran
+  // UNIONista saataa tulla sama asiakas monta kertaa resultiin...
+  while ($asiakas_loop = mysql_fetch_array($result)) {
+    if (!isset($_asiakas_tunnukset[$asiakas_loop['tunnus']])) {
+      $_asiakas_tunnukset[$asiakas_loop['tunnus']] = $asiakas_loop;
+    }
+  }
 
-if ($monta == 1) {
-  $asiakasrow  = mysql_fetch_array($result);
-  $ytunnus  = $asiakasrow['ytunnus'];
+  $monta = count($_asiakas_tunnukset);
+}
+
+if ($monta == 1 and !$force_selaus) {
+  $asiakasrow = array_shift($_asiakas_tunnukset);
+  $ytunnus = $asiakasrow['ytunnus'];
 
   if ($asiakasnro != "") {
     $asiakasnro  = $asiakasrow['asiakasnro'];
@@ -468,8 +489,7 @@ if ($monta == 1) {
     $kantaasiakastunnus = $kantaasiakastunnus_row['avainsana'];
   }
 }
-
-if ($monta > 1 and $monta <= $limit) {
+elseif ($monta > 1 and $monta <= $limit) {
 
   if ($kutsuja != "yllapito.php") {
     $piiri_result = t_avainsana('PIIRI');
@@ -569,17 +589,7 @@ if ($monta > 1 and $monta <= $limit) {
     echo "<td class='back'></td></tr>";
   }
 
-  // talteen tunnukset, näytetään asiakas vain kerran
-  $_asiakas_tunnukset = array();
-
-  while ($asiakas = mysql_fetch_array($result)) {
-
-    if (isset($_asiakas_tunnukset[$asiakas['tunnus']])) {
-      continue;
-    }
-
-    $_asiakas_tunnukset[$asiakas['tunnus']] = TRUE;
-
+  foreach ($_asiakas_tunnukset as $asiakas) {
     if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
     elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);
 

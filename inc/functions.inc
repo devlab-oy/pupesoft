@@ -528,7 +528,7 @@ if (!function_exists("pupesoft_rest")) {
     if (!isset($parameters['timeout'])) $timeout = 10;
     else $timeout = (int) $parameters['timeout'];
 
-    $parameters['posttype'] = isset($parameters['posttype']) ? $parameters['posttype'] : null;
+    if (!isset($parameters['posttype'])) $parameters['posttype'] = null;
 
     $handle = curl_init();
     curl_setopt($handle, CURLOPT_URL, $parameters["url"]);

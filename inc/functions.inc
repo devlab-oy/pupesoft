@@ -33713,10 +33713,10 @@ if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND laji    = 'VEHT_RAHTI'";
     $res = pupe_query($query);
-    $vaihtoehtoinenrahtirow = mysql_fetch_assoc($res);
+    $row = mysql_fetch_assoc($res);
 
-    if (!empty($vaihtoehtoinenrahtirow)) {
-      $merkkijono .= ", {$vaihtoehtoinenrahtirow}";
+    if (!empty($row['vaihtoehtoinenrahti'])) {
+      $merkkijono .= ", {$row['vaihtoehtoinenrahti']}";
     }
 
     return $merkkijono;

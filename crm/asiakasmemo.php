@@ -574,25 +574,41 @@ if ($ytunnus != '' and $tee == '') {
     echo "</td>";
     echo "<td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
 
+    echo "<td rowspan='6' class='ptop'><ul>";
+
     if ($asylloik and $yhylloik) {
-      echo "<td><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
-    }
-    else {
-      echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
+      echo "<li><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></li>";
     }
 
+    if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
+      echo "<li><a href='{$palvelin2}crm/kalenteri.php?viikkonakyma=".date("W")."&lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/myyntiseuranta.php")) {
+      echo "<li><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/asiakasinfo.php")) {
+      echo "<li><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></li>";
+    }
+
+    if (tarkista_oikeus("budjetinyllapito_tat.php", "ASIAKAS")) {
+      echo "<li><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/sarjanumerohistoria.php")) {
+      $out = js_openUrlNewWindow("{$palvelin2}raportit/sarjanumerohistoria.php?tee=hae_tilaukset&indexvas=1&asiakastunnus={$asiakasrow["tunnus"]}", t('Asiakkaan laitteet'), NULL, 1000, 800);
+      echo "<li>$out</li>";
+    }
+
+    if ($asylloik and $yhylloik) {
+      echo "<li><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilön tietoja")."</a></li>";
+    }
+
+    echo "</td>";
     echo "</tr>";
     echo "<tr>";
     echo "<td>$asiakasrow[nimitark]</td><td>$asiakasrow[toim_nimitark]</td><td>".t("Puh").": $ypuh</td>";
-
-
-    if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-      echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
-    }
-    else {
-      echo "<td></td>";
-    }
-
     echo "</tr>";
     echo "<tr>";
     echo "<td>";
@@ -614,24 +630,10 @@ if ($ytunnus != '' and $tee == '') {
     $vvl = date("Y");
     $ppl = date("d");
 
-    if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
-      echo "<td><a href='{$palvelin2}crm/kalenteri.php?viikkonakyma=".date("W")."&lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
-    }
-    else {
-      echo "<td>".t("Kalenteri")."</td>";
-    }
-
     echo "</tr>";
+
     echo "<tr>";
     echo "<td>$asiakasrow[postino] $asiakasrow[postitp]</td><td>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td><td>".t("Gsm").": $ygsm</td>";
-
-    if (tarkista_oikeus("raportit/myyntiseuranta.php")) {
-      echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></td>";
-    }
-    else {
-      echo "<td>".t("Myynninseuranta")."</td>";
-    }
-
     echo "</tr>";
     echo "<tr>";
     echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email").": $yemail";
@@ -641,15 +643,8 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "</td>";
-
-    if (tarkista_oikeus("raportit/asiakasinfo.php")) {
-      echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></td>";
-    }
-    else {
-      echo "<td><u>".t("Alennustaulukko")."</u></td>";
-    }
-
     echo "</tr>";
+
     echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
     echo "<form action='{$palvelin2}crm/asiakasmemo.php' method='POST'>";
     echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -658,7 +653,6 @@ if ($ytunnus != '' and $tee == '') {
         <input type='hidden' name='tee' value='paivita_tila'>";
     echo "<select name='astila' Onchange='submit();'>";
     echo "<option value=''>".t("Ei tilaa")."</option>";
-
 
     $asosresult = t_avainsana("ASIAKASTILA");
 
@@ -674,7 +668,8 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "</select></form>";
-    echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
+    echo "</td>";
+    echo "</tr>";
 
     if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
       echo "<tr><td colspan='2'><b>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</b></td><td colspan='2'>$yfakta</td></tr>";
@@ -682,10 +677,6 @@ if ($ytunnus != '' and $tee == '') {
 
     echo "</table><br>";
   }
-
-  $out = js_openUrlNewWindow("{$palvelin2}raportit/sarjanumerohistoria.php?tee=hae_tilaukset&indexvas=1&asiakastunnus={$asiakasrow["tunnus"]}", t('Asiakkaan laitteet'), NULL, 1000, 800);
-
-  echo "<br>$out<br>";
 
   ///* Syötä memo-tietoa *///
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
@@ -1121,6 +1112,9 @@ if ($ytunnus != '' and $tee == '') {
 
       if ($memorow["laskutila"] == "T") {
         $koptoim = "TARJOUS";
+      }
+      elseif ($memorow["laskualatila"] == "X") {
+        $koptoim = "LASKU";
       }
       else {
         $koptoim = "TILAUSVAHVISTUS";

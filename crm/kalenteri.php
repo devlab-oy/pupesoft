@@ -357,10 +357,6 @@ if ($tee == "SYOTA") {
     <input type='hidden' name='valitut' value='".urlencode($valitut)."'>
     <input type='hidden' name='kenelle' value='".urlencode($kenelle)."'>
     <input type='hidden' name='asyhtio' value='$asyhtio'>
-    <input type='hidden' name='kello' value='$kello'>
-    <input type='hidden' name='year'  value='$year'>
-    <input type='hidden' name='kuu'   value='$kuu'>
-    <input type='hidden' name='paiva' value='$paiva'>
     <input type='hidden' name='tunnus'   value='$tunnus'>
     <input type='hidden' name='konserni' value='$konserni'>
     <input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -372,54 +368,82 @@ if ($tee == "SYOTA") {
   $lisays .= "<tr><th colspan='2'>".t("Lis‰‰ tapahtuma").":</th></tr>";
 
   $lisays .= "<tr>
-    <td nowrap>".t("Kesto").":</td>
-    <td>$kello -
-    <input type='text' size='3' name='lpaiva' value='$lpaiva'>
-    <input type='text' size='3' name='lkuu'   value='$lkuu'>
-    <input type='text' size='5' name='lyear'  value='$lyear'>
-    <select name='lkello'>";
+    <td nowrap>".t("Alku").":</td>
+    <td><input type='text' size='3' name='paiva' value='$paiva'>
+    <input type='text' size='3' name='kuu'   value='$kuu'>
+    <input type='text' size='5' name='year'  value='$year'>";
 
-  if ($lkello == '') {
-    $lophh = substr($kello, 0, 2);
-    $lopmm = substr($kello, 3, 2)-30;
-  }
-  else {
-    if ($lkello == "23:59:59") {
-      $lkello = "24:00:00";
-    }
+  $lisays .= " - <select name='kello'>";
 
-    $lophh=substr($lkello, 0, 2);
-    $lopmm=substr($lkello, 3, 2)-30;
+  if ($kello == "") {
+    $kello = "08:00";
   }
+
+  $loophh = substr($kello, 0, 2);
+  $loopmm = substr($kello, 3, 2)-30;
 
   list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
   $whileloppu = sprintf("%02d", $whlopt+1);
 
-  if ($whileloppu >= 24) $whileloppu= sprintf("%02d", $whileloppu-24);
+  if ($whileloppu >= 24) $whileloppu = sprintf("%02d", $whileloppu-24);
 
   $whileloppu = $whileloppu.":".$whlopm;
-  $lopdate = "";
+  $loopdate = "";
 
-  while ($lopdate != $whileloppu) {
-    $lophh   = date("H", mktime($lophh, $lopmm+30, 0));
-    $lopmm   = date("i", mktime($lophh, $lopmm+30, 0));
-    $lopdate = date("H:i", mktime($lophh, $lopmm+30, 0));
+  while ($loopdate != $whileloppu) {
+    $loopdate = date("H:i", mktime($loophh, $loopmm+30, 0));
+    $loophh   = date("H",   mktime($loophh, $loopmm+30, 0));
+    $loopmm   = date("i",   mktime($loophh, $loopmm+30, 0));
 
     $sel = '';
-    if ($lopdate == substr($aikaloppu, 0, 5)) {
+    if ($loopdate == substr($aikaloppu, 0, 5)) {
       $sel = "SELECTED";
     }
 
-    $lisays .= "<option value='$lopdate' $sel>$lopdate</option>";
+    $lisays .= "<option value='$loopdate' $sel>$loopdate</option>";
+  }
+
+  $lisays .= "</select> ";
+  $lisays .= "</td></tr>";
+
+  $lisays .= "<tr><td nowrap>".t("Loppu").":</td>";
+  $lisays .= "<td><input type='text' size='3' name='lpaiva' value='$lpaiva'>
+              <input type='text' size='3' name='lkuu'   value='$lkuu'>
+              <input type='text' size='5' name='lyear'  value='$lyear'>";
+
+  $lisays .= " - <select name='lkello'>";
+
+  if ($lkello == '') {
+    $lkello = $kello;
+  }
+
+  if ($lkello == "23:59:59") {
+    $lkello = "24:00:00";
+  }
+
+  $loophh = substr($lkello, 0, 2);
+  $loopmm = substr($lkello, 3, 2)-30;
+
+  $loopdate = "";
+
+  while ($loopdate != $whileloppu) {
+    $loophh   = date("H", mktime($loophh, $loopmm+30, 0));
+    $loopmm   = date("i", mktime($loophh, $loopmm+30, 0));
+    $loopdate = date("H:i", mktime($loophh, $loopmm+30, 0));
+
+    $sel = '';
+    if ($loopdate == substr($aikaloppu, 0, 5)) {
+      $sel = "SELECTED";
+    }
+
+    $lisays .= "<option value='$loopdate' $sel>$loopdate</option>";
   }
 
   $sel = (!empty($kokopaiva)) ? "SELECTED" : "";
   $lisays .= "<option value='KOKOPAIVA' $sel>".t("Kokop‰iv‰")."</option>";
-
-  $lisays .= "</select></td>";
+  $lisays .= "</select></td></tr>";
 
   $vresult = t_avainsana("KALETAPA");
-
   $lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 
   while ($vrow=mysql_fetch_assoc($vresult)) {
@@ -767,8 +791,11 @@ if (!empty($viikkonakyma)) {
   echo "<tr>";
 
   for ($vpaiva = 0; $vpaiva < 7; $vpaiva++) {
-    $vpdate = date("j.n", mktime(0, 0, 0, $kuu, $paiva+$vpaiva, $year));
-    echo "<td style='text-align: center;' colspan='$max'>".substr($DAY_ARRAY[$vpaiva+1], 0, 2)." $vpdate</td>";
+    $vppaiva = $paiva+$vpaiva;
+    $vpdate = date("j.n", mktime(0, 0, 0, $kuu, $vppaiva, $year));
+    $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&year=$year&kuu=$kuu&paiva=$vppaiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays", substr($DAY_ARRAY[$vpaiva+1], 0, 2)." $vpdate", NULL, 550, 550);
+
+    echo "<td style='text-align: center;' colspan='$max'>$url</td>";
   }
 
   echo "</tr>";
@@ -795,5 +822,345 @@ echo "</td></tr>";
 
 //kalenterivalinta end
 echo "</table>";
+
+// Tarvittavat funktiot
+function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
+  global $MONTH_ARRAY, $AIKA_ARRAY, $DAY_ARRAY, $konsernit, $vertaa, $valitut, $kenelle, $konserni, $toim, $tyomaarays, $palvelin2, $lopetus,
+        $lisays, $lyear, $lkuu, $lpaiva, $kukarow, $yhtiorow, $kons, $viikkonakyma, $maxkokopaivamaara;
+
+  $date = '';
+  $max  = 1;
+
+  list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
+  $hh   = $whalkt-1;
+  $mm   = $whalkm;
+
+  list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
+
+  $whlopm+=30;
+
+  if ($whlopm >= 60) {
+    $whlopt++;
+    $whlopm = 0;
+  }
+
+  if ($whlopt >= 24) {
+    $whileloppu = sprintf("%02d", $whlopt-24).":".$whlopm;
+  }
+  else {
+    $whileloppu = sprintf("%02d", $whlopt).":".$whlopm;
+  }
+
+  if ($whlopt >= 23) {
+    $vikaloppu = "23:59";
+  }
+  else {
+    $vikaloppu = sprintf("%02d", $whlopt+2).":00";
+  }
+
+  while ($date != $whileloppu) {
+    $hh    = date("H", mktime($hh, $mm+30, 0));
+    $mm    = date("i", mktime($hh, $mm+30, 0));
+    $date  = date("H:i", mktime($hh, $mm+30, 0));
+    $paiva = sprintf("%02d", $paiva);
+    $kuu   = sprintf("%02d", $kuu);
+
+    $query = "SELECT
+              if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku  > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+              if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
+              FROM kalenteri
+              LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+              WHERE kalenteri.kuka in ($vertaa)
+              $konsernit
+              and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
+              and pvmalku          <= '$year-$kuu-$paiva $date:00'
+              and pvmloppu         >= '$year-$kuu-$paiva $date:00'
+              and kokopaiva        = ''";
+    $result = pupe_query($query);
+
+    while ($row = mysql_fetch_assoc($result)) {
+      //tutkitaan kuinka monta p‰‰llekk‰ist‰ on parhaimmillaan...
+      if (mysql_num_rows($result)>$max) {
+        $max = mysql_num_rows($result);
+      }
+    }
+  }
+
+  // kalenterin taulukko alkaa t‰st‰
+  echo "<table class='pnopad' width='100%'>";
+
+  $tyyppi = $toim == 'TYOMAARAYS_ASENTAJA' ? "'kalenteri'" : "'kalenteri', 'asennuskalenteri'";
+
+  $kello_nyt  = '';
+  list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
+  $hh   = $whalkt-1;
+  $mm   = $whalkm;
+
+  while ($kello_nyt != $whileloppu) {
+    $hh        = date("H", mktime($hh, $mm+30, 0));
+    $mm        = date("i", mktime($hh, $mm+30, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+
+    $paiva     = sprintf("%02d", $paiva);
+    $kuu       = sprintf("%02d", $kuu);
+
+    $query = "SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.kuka, kalenteri.tunnus,
+              if((pvmalku  < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+              if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'),  '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu,
+              TIME_TO_SEC(if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00') or (pvmloppu = '$year-$kuu-$paiva 00:00:00'),'$vikaloppu:59', right(pvmloppu,8))) - TIME_TO_SEC(if(right(pvmalku,8) < '".$AIKA_ARRAY[0].":00' or pvmalku < '$year-$kuu-$paiva 00:00:00','".$AIKA_ARRAY[0].":00', right(pvmalku,8))) kesto,
+              kalenteri.yhtio yhtio,
+              kalenteri.kuka kuka,
+              kalenteri.laatija laatija,
+              kalenteri.kuittaus,
+              kalenteri.tyyppi
+              FROM kalenteri
+              LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+              WHERE kalenteri.kuka in ($vertaa)
+              and kalenteri.tyyppi in ($tyyppi)
+              and kokopaiva        = ''
+              $konsernit
+              HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
+              order by kesto desc, pvmalku";
+    $result = pupe_query($query);
+
+    //lasketaan montako p‰‰llekk‰ist‰ on t‰h‰n kellonaikaan
+    $aquery = "SELECT
+               if((pvmalku < '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or (pvmalku < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva ".$AIKA_ARRAY[0].":00', pvmalku) pvmalku,
+               if((pvmloppu > '$year-$kuu-$paiva $vikaloppu:00' and pvmloppu <= '$year-$kuu-$paiva 23:59:59') or (pvmloppu = '$year-$kuu-$paiva 00:00:00') or (pvmalku  < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 23:59:59'), '$year-$kuu-$paiva $vikaloppu:00', pvmloppu) pvmloppu
+               FROM kalenteri
+               LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
+               WHERE kalenteri.kuka in ($vertaa)
+               $konsernit
+               and kalenteri.tyyppi in ($tyyppi)
+               and kokopaiva        = ''
+               HAVING
+               pvmalku              <= '$year-$kuu-$paiva $kello_nyt:00'
+               and pvmalku          > '$year-$kuu-$paiva 00:00:00'
+               and pvmloppu         >  '$year-$kuu-$paiva $kello_nyt:00'";
+    $aresult = pupe_query($aquery);
+
+    $nyt = mysql_num_rows($aresult);
+    $tyhjaa = $max-$nyt;
+
+    echo "<tr>";
+
+    if ($aikasarake) {
+      $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", t('Lis‰‰'), NULL, 550, 550);
+      echo "<td nowrap class='kalepad' style='width: 5%; height: 30px;'>$kello_nyt $url</td>";
+    }
+
+    while ($row = mysql_fetch_assoc($result)) {
+
+      $kesto=round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+
+      //haetaan asiakkaan tiedot
+      if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {
+        $query = "SELECT *
+                  from asiakas
+                  where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
+        $asres = pupe_query($query);
+        $asiak = mysql_fetch_assoc($asres);
+      }
+
+      if ($kons == 1) {
+        $ko = "(".$row["yhtio"]."), ";
+      }
+
+      if ($row['nimi'] != '') {
+        $kukanimi  = $ko." ".$row['nimi']." ";
+      }
+      elseif ($row['kuka'] != '') {
+        $kukanimi  = $ko." ".$row['kuka']." ";
+      }
+      else {
+        $kukanimi = '';
+      }
+
+      //Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
+      list($rvv, $rkk, $rpp) = explode("-", substr($row["pvmloppu"], 0, 10));
+
+      $kaleloppu  = (int) date('Ymd', mktime(0, 0, 0, $rkk, $rpp, $rvv));
+      $aikanyt   = (int) date('Ymd', mktime(0, 0, 0, date('m'), date('d'), date('Y')));
+
+      $varilisa = "";
+
+      if ($row['tyyppi'] == 'kalenteri') {
+        $query = "SELECT selitetark_2
+                  FROM avainsana
+                  WHERE laji = 'KALETAPA'
+                  and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
+                  ORDER BY selite+0, laji, jarjestys, selite";
+        $varires = pupe_query($query);
+        $varirow = mysql_fetch_assoc($varires);
+
+        if ($varirow["selitetark_2"] != "") {
+          $varilisa = "background-color: $varirow[selitetark_2];";
+        }
+      }
+
+      if ($kukarow["kuka"] == $row["kuka"]) {
+        $reunavari = "#FF0000";
+      }
+      else {
+        $reunavari = "#00FF00";
+      }
+
+      $korkeus = (30*$kesto)-2;
+
+      if ($kesto > 1) {
+        $korkeus += ($kesto-1)*3;
+      }
+
+      // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
+      if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
+        echo "<td class='tumma ptop kalepad' nowrap rowspan='$kesto' style='$varilisa border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px; height: {$korkeus}px; max-width:100px; word-wrap: break-word; overflow: hidden;'>";
+
+        $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", "$kukanimi $row[tapa]");
+
+        echo "$url ";
+      }
+      elseif ($row['tyyppi'] == 'asennuskalenteri') {
+        echo "<td class='tumma ptop kalepad' nowrap rowspan='$kesto' style='$varilisa border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px; height: {$korkeus}px; max-width:100px; word-wrap: break-word; overflow: hidden;'>", t("Asennustyˆ"), " $row[liitostunnus] ";
+      }
+      else {
+        echo "<td class='tumma ptop kalepad' nowrap rowspan='$kesto' style='$varilisa border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px; height: {$korkeus}px; max-width:100px; word-wrap: break-word; overflow: hidden;'>$kukanimi $row[tapa] ";
+      }
+
+      if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {
+        if ($asmemolinkki and $kukarow["yhtio"] == $row["yhtio"]) {
+          echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
+        }
+        else {
+          echo " - $asiak[nimi]";
+        }
+      }
+
+      echo " $row[kentta01] ";
+
+      $query = "SELECT *
+                from liitetiedostot
+                where yhtio      = '$kukarow[yhtio]'
+                and liitos       = 'kalenterimerkint‰'
+                and liitostunnus = '$row[tunnus]'";
+      $liiteres = pupe_query($query);
+
+      if (mysql_num_rows($liiteres) > 0) {
+        echo "<br />";
+
+        while ($liiterow = mysql_fetch_assoc($liiteres)) {
+          echo "<a href=\"#\" onclick=\"window.open('".$palvelin2."view.php?id=$liiterow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=800,height=600'); return false;\">$liiterow[filename]</a>&nbsp;";
+        }
+      }
+
+      echo "</td>";
+    }
+
+    if ($tyhjaa > 0) {
+      echo "<td class='kalepad' style='height: 30px;' colspan='$tyhjaa'>&nbsp;</td>";
+    }
+
+    echo "</tr>";
+  }
+
+  //kalenterin table loppuu
+  echo "</table>";
+}
+
+function piirra_kokopaivantapahtumat($kuu, $paiva, $year) {
+  global $MONTH_ARRAY, $AIKA_ARRAY, $DAY_ARRAY, $konsernit, $vertaa, $valitut, $kenelle, $konserni, $toim, $tyomaarays, $palvelin2, $lopetus,
+        $lisays, $lyear, $lkuu, $lpaiva, $kukarow, $yhtiorow, $kons, $viikkonakyma, $maxkokopaivamaara;
+
+
+  if (!empty($viikkonakyma)) {
+    $ekapaiva = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva, $year));
+    $vikapaiva = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva+7, $year));
+    $paivat = 7;
+  }
+  else {
+    $ekapaiva = $vikapaiva = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva, $year));
+    $paivat = 1;
+  }
+
+  $muikkarilisa = "";
+
+  if ($toim != 'TYOMAARAYS_ASENTAJA') {
+    $muikkarilisa = " or (kalenteri.tyyppi = 'Muistutus' and kalenteri.kuittaus = 'K') ";
+  }
+
+  $query = "SELECT kalenteri.*,
+            datediff(left(pvmloppu,10), '$ekapaiva') kesto,
+            if (pvmalku < '$ekapaiva', '$ekapaiva', left(pvmalku, 10)) korjattualku,
+            kuka.nimi
+            FROM kalenteri
+            JOIN kuka ON (kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio)
+            WHERE kalenteri.kuka  in ($vertaa)
+            and kalenteri.pvmloppu >= '$ekapaiva 00:00:00'
+            and kalenteri.pvmalku <= '$vikapaiva 23:59:00'
+            and ((kalenteri.tyyppi = 'kalenteri' and kalenteri.kokopaiva != '') {$muikkarilisa})
+            $konsernit
+            order by korjattualku, kesto desc, tunnus";
+  $result = pupe_query($query);
+
+  $kokopaivat = array();
+
+  while ($prow = mysql_fetch_assoc($result)) {
+    $kokopaivat[$prow['korjattualku']][] = $prow;
+  }
+
+  // loopataan viikko l‰pi
+  for ($vpaiva = 0; $vpaiva < $paivat; $vpaiva++) {
+    $vpdate = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva+$vpaiva, $year));
+    $looppaiva = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva+$vpaiva, $year));
+
+    foreach ($kokopaivat[$looppaiva] as $indeksi => $kpe) {
+      if ($kpe["kesto"]+$vpaiva > $paivat) {
+        $kpe["kesto"] = $paivat - $vpaiva;
+      }
+      if ($kpe["kesto"] == 0) {
+        $kpe["kesto"] = 1;
+      }
+
+      echo "<tr>";
+
+      // tyhji‰ alkuun
+      for ($tap = 0; $tap < $vpaiva; $tap++) {
+        echo "<td class='back'></td>";
+      }
+
+      echo "<td colspan='$kpe[kesto]' style='border:1px solid #333333; -webkit-border-radius: 3px; border-radius: 3px;'>";
+
+      if ($kpe["tyyppi"] == "Muistutus") {
+        echo "<img src='{$palvelin2}pics/lullacons/alert.png'>";
+      }
+
+      echo "$kpe[kentta01] $kpe[kesto]</td>";
+
+      // tyhji‰ loppuun
+      for ($tap = $kpe["kesto"]+$vpaiva; $tap < $paivat; $tap++) {
+        $looppaiva2 = date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva+$tap, $year));
+
+        if (count($kokopaivat[$looppaiva2]) > 0) {
+          $kala = array_shift($kokopaivat[$looppaiva2]);
+          $kesto = ($tap+$kala["kesto"]) > $paivat ? $paivat - $tap : $kala["kesto"];
+
+          echo "<td colspan='$kesto' style='border:1px solid #333333; -webkit-border-radius: 3px; border-radius: 3px;'>";
+
+          if ($kala["tyyppi"] == "Muistutus") {
+            echo "<img src='{$palvelin2}pics/lullacons/alert.png'>";
+          }
+
+          echo "$kala[kentta01] $kala[kesto]</td>";
+          $tap += $kesto-1;
+        }
+        else {
+          echo "<td></td>";
+        }
+      }
+
+      echo "</tr>";
+    }
+  }
+}
+
 
 require "inc/footer.inc";

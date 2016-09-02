@@ -725,7 +725,7 @@ if ($tee == "") {
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='vaihda_salasana_form'/>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      echo "<input type='submit' value='" . t("Vaihda salasana") . "'/>";
+      echo "<input type='submit' value='" . t("Vaihda salasana") . "' class='full-width'/>";
       echo "</form>";
       echo "</div>";
 
@@ -733,7 +733,7 @@ if ($tee == "") {
       echo "<form method='post' class='multisubmit' onsubmit='return confirm(\"{$_confirm}\");'>";
       echo "<input type='hidden' name='tee' value='poista'/>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "'/>";
+      echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "' class='full-width'/>";
       echo "</form>";
       echo "</div>";
 
@@ -742,7 +742,7 @@ if ($tee == "") {
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='pankin_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-        echo "<input type='submit' value='" . t("Päivitä pankin sertifikaatit") . "'/>";
+        echo "<input type='submit' value='" . t("Päivitä pankin sertifikaatit") . "' class='full-width'/>";
         echo "</form>";
         echo "</div>";
       }
@@ -752,7 +752,7 @@ if ($tee == "") {
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='uusi_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "'/>";
+        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "' class='full-width'/>";
         echo "</form>";
         echo "</div>";
       }

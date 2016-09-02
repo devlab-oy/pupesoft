@@ -429,14 +429,23 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      if ($browkieli == 'sv') {
+      $oletus_kieli = 'fi';
+      $oletus_yliajo = t_avainsana("LOGIN_KIELI", "", "", "", "", "selite");
+      if (!empty($oletus_yliajo)) {
+        $oletus_kieli = $oletus_yliajo;
+      }
+
+      if ($browkieli == 'fi') {
+        $browkieli = 'fi';
+      }
+      elseif ($browkieli == 'sv') {
         $browkieli = 'se';
       }
       elseif ($browkieli == 'ee') {
         $browkieli = 'ee';
       }
       else {
-        $browkieli = 'fi';
+        $browkieli = $oletus_kieli;
       }
     }
 

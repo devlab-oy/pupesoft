@@ -70,7 +70,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -89,7 +90,9 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
       'ale' => $ale,
-      'kate' => $kate
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -111,15 +114,27 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $aresult = pupe_query($query);
   $tuoterow = mysql_fetch_assoc($aresult);
 
+  $hinta_ajax = $hinta;
+
   // Tutkitaan onko tämä myyty ulkomaan alvilla
   list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
+
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    $alename = 'ale'.$alepostfix;
+    if (!empty($$alename)) {
+      $ale[$alename] = str_replace(',', '.', $$alename);
+    }
+  }
 
   $ale_arr = $ale;
   $ale_arr['netto'] = $netto;
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -137,8 +152,10 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   echo json_encode(array(
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
-      'ale' => $ale,
-      'kate' => $kate
+      'ale' => $ale_arr,
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;

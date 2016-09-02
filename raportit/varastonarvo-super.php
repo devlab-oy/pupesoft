@@ -179,7 +179,7 @@ if (!$php_cli) {
     <td><input type='checkbox' name='valitut_varastot_rajaus' value='valitut' $rukVchk></td>
     </tr>
     <tr>
-    <th>".t("Listaa osto ja myyntitiedot vain konsernitoimittajien tuotteilta")."</th>
+    <th>".t("Näytä vain konsernitoimittajien tuotteita")."</th>
     <td><input type='checkbox' name='konsernitoimittajat_rajaus' value='valitut' $rukKon></td>
     </tr></table>";
 

@@ -176,7 +176,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             IF(asiakas.gsm != '', asiakas.gsm,
             IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
             IF(asiakas.puhelin != '', asiakas.puhelin, ''))) puhelin,
-            kuka.myyja
+            kuka.myyja,
+            kalenteri.luontiaika AS luontiaika
             FROM kalenteri
             JOIN asiakas ON (
               asiakas.yhtio               = kalenteri.yhtio AND

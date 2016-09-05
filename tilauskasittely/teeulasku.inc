@@ -182,6 +182,10 @@ $maksaja    = "''";
 if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
   $maksaja    = "$kukarow[kuka]";
   $maksupaiva = "now()";
+
+  if ($mehtorow['kateinen'] != '' and $poikkeava_pvm != "") {
+    $maksupaiva = "'$laskvv-$laskkk-$laskpp'";
+  }
 }
 
 ///* Lasketaan Kassa-alennus *///

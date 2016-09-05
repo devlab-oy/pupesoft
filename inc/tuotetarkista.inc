@@ -3,15 +3,10 @@
 if (!function_exists("tuotetarkista")) {
   function tuotetarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;
-    global $ftp_logmaster_host, $ftp_logmaster_user, $ftp_logmaster_pass, $ftp_logmaster_path;
-    global $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
     static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind;
     static $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
     static $tem_eankoodi, $tem_yksikko, $tem_nimitys, $tem_tuotemassa;
-
-    $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-    $onkoposten    = (!empty($ftp_posten_logistik_host) and !empty($ftp_posten_logistik_user) and !empty($ftp_posten_logistik_pass) and !empty($ftp_posten_logistik_path));
 
     $fieldname = mysql_field_name($result, $i);
 
@@ -464,8 +459,11 @@ if (!function_exists("tuotetarkista")) {
         $chkressires = pupe_query($query);
       }
 
+      # Kun n‰m‰ tiedot muuttuvat, tuote t‰ytyy siirt‰‰ uudestaan ulkoiseen j‰rjestelm‰‰n
+      # Tuotteen avainsana "synkronointi" kertoo milloin tuote t‰ytyy siirt‰‰
+      # Jos avainsanaa ei ole olemassa tuotteella tai selite on tyhj‰‰, siirret‰‰n tuote seuraavalla
+      # synkronointiajolla ulkoiseen j‰rjestelm‰‰n
       if (count($virhe) == 0 and
-        ($onkologmaster or $onkoposten) and
         ($tem_status     != $trow['status']     or
           $tem_eankoodi   != $trow['eankoodi']   or
           $tem_yksikko    != $trow['yksikko']    or

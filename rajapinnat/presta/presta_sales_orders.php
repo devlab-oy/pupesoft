@@ -266,6 +266,9 @@ class PrestaSalesOrders extends PrestaClient {
       }
     }
 
+    $invoice_name = $this->clean_name($invoice_address['firstname'], $invoice_address['lastname']);
+    $delivery_name = $this->clean_name($delivery_address['firstname'], $delivery_address['lastname']);
+
     // empty edi_order
     $this->edi_order = '';
     $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
@@ -300,7 +303,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_FAKSI:");
     $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer_id}");
     $this->add_row("OSTOTIL.OT_YRITYS:");
-    $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$invoice_address['lastname']} {$invoice_address['firstname']}");
+    $this->add_row("OSTOTIL.OT_YHTEYSHENKILO:{$invoice_name}");
     $this->add_row("OSTOTIL.OT_KATUOSOITE:{$invoice_address['address1']}");
     $this->add_row("OSTOTIL.OT_POSTITOIMIPAIKKA:{$invoice_address['city']}");
     $this->add_row("OSTOTIL.OT_POSTINRO:{$invoice_address['postcode']}");
@@ -315,7 +318,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:");
     $this->add_row("OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:");
     $this->add_row("OSTOTIL.OT_TOIMITUS_YRITYS:");
-    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI:{$delivery_address['lastname']} {$delivery_address['firstname']}");
+    $this->add_row("OSTOTIL.OT_TOIMITUS_NIMI:{$delivery_name}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$delivery_address['address1']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$delivery_address['city']}");
     $this->add_row("OSTOTIL.OT_TOIMITUS_POSTINRO:{$delivery_address['postcode']}");
@@ -446,5 +449,16 @@ class PrestaSalesOrders extends PrestaClient {
     }
 
     return "{$this->edi_filepath_base}/liitetiedostot";
+  }
+
+  private function clean_name($firstname, $lastname) {
+    $firstname = trim($firstname);
+    $lastname = trim($lastname);
+
+    if (empty($firstname) or $firstname == '-') {
+      return $lastname;
+    }
+
+    return "${lastname} ${firstname}";
   }
 }

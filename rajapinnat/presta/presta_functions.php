@@ -17,7 +17,8 @@ function presta_hae_asiakkaat() {
     $muutoslisa = "";
   }
 
-  $query = "SELECT yhteyshenkilo.*,
+  $query = "SELECT asiakas.*,
+            yhteyshenkilo.*,
             avainsana.selitetark_5 AS presta_customergroup_id
             FROM yhteyshenkilo
             INNER JOIN asiakas

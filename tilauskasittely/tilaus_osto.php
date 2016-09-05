@@ -415,6 +415,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='$kukarow[kesken]'";
       $result = pupe_query($query);
 
+      if ($laskurow['h1time'] == '0000-00-00 00:00:00') {
+        $query = "UPDATE lasku SET
+                  h1time      = now(),
+                  hyvak1      = '{$kukarow['kuka']}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$kukarow['kesken']}'";
+        $result = pupe_query($query);
+
+        $laskurow['h1time'] = date('Y-m-d H:i:s');
+        $laskurow['hyvak1'] = $kukarow["kuka"];
+      }
+
       // katotaan ollaanko haluttu optimoida johonki varastoon
       // ja tilausrivill‰ ei ole hyllypaikkaa
       if ($laskurow["varasto"] != 0) {
@@ -547,26 +559,26 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                           AND uusiotunnus = 0";
           pupe_query($kohdistus_q);
 
-          $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-          $onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+          $onkologmaster = in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S'));
           $ulkoinen_varasto = false;
+
           // L‰hetet‰‰n sanoma vain, jos valitulla varastolla on ulkoinen jarjestelma
           if ($laskurow['varasto'] > 0) {
             $v_query = "SELECT *
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus = '{$laskurow['varasto']}'
-                        AND ulkoinen_jarjestelma != ''";
+                        AND ulkoinen_jarjestelma IN ('L','P')";
             $v_result = pupe_query($v_query);
+
             if (mysql_num_rows($v_result) == 1) {
               $ulkoinen_varasto = true;
-             }
+            }
           }
-          $onkologmaster = ($onkologmaster and $ulkoinen_varasto);
 
-          if ($onkologmaster) {
+          if ($onkologmaster and $ulkoinen_varasto) {
             // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
-            require "saapuminen_ulkoiseen_jarjestelmaan.php";
+            require "rajapinnat/logmaster/inbound_delivery.php";
           }
         }
         else {

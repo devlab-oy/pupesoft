@@ -48,10 +48,12 @@ if ($tee == 'aja') {
   }
 
   $query = "(SELECT lasku.toimaika as 'Toimitusaika',
-             concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
+             concat(concat(lasku.nimi,'<br>'),if(lasku.nimitark!='',concat(lasku.nimitark,'<br>'),''),if(lasku.toim_nimi!='',if(lasku.toim_nimi!=lasku.nimi,concat(lasku.toim_nimi,'<br>'),''),''),if(lasku.toim_nimitark!='',if(lasku.toim_nimitark!=lasku.nimitark,concat(lasku.toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
+             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti,
+             if (kuka.kuka IS NOT NULL, kuka.nimi, '') AS myyja
              from lasku use index (tila_index)
              $tuotelisa
+             LEFT JOIN kuka ON (lasku.yhtio = kuka.yhtio AND lasku.myyja = kuka.tunnus)
              where lasku.yhtio  = '$kukarow[yhtio]'
              and lasku.tila     in ('L','N','V')
              and lasku.alatila  not in ('X','V')
@@ -60,10 +62,12 @@ if ($tee == 'aja') {
              UNION
 
              (SELECT lasku.toimaika as 'Toimitusaika',
-             concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
+             concat(concat(lasku.nimi,'<br>'),if(lasku.nimitark!='',concat(lasku.nimitark,'<br>'),''),if(lasku.toim_nimi!='',if(lasku.toim_nimi!=lasku.nimi,concat(lasku.toim_nimi,'<br>'),''),''),if(lasku.toim_nimitark!='',if(lasku.toim_nimitark!=lasku.nimitark,concat(lasku.toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
+             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti,
+             if (kuka.kuka IS NOT NULL, kuka.nimi, '') AS myyja
              from lasku use index (yhtio_tila_tapvm)
              $tuotelisa
+             LEFT JOIN kuka ON (lasku.yhtio = kuka.yhtio AND lasku.myyja = kuka.tunnus)
              where lasku.yhtio  = '$kukarow[yhtio]'
              and lasku.tila     = 'N'
              and tapvm          = '0000-00-00'
@@ -72,10 +76,12 @@ if ($tee == 'aja') {
              UNION
 
              (SELECT lasku.toimaika as 'Toimitusaika',
-             concat(concat(nimi,'<br>'),if(nimitark!='',concat(nimitark,'<br>'),''),if(toim_nimi!='',if(toim_nimi!=nimi,concat(toim_nimi,'<br>'),''),''),if(toim_nimitark!='',if(toim_nimitark!=nimitark,concat(toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
-             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti
+             concat(concat(lasku.nimi,'<br>'),if(lasku.nimitark!='',concat(lasku.nimitark,'<br>'),''),if(lasku.toim_nimi!='',if(lasku.toim_nimi!=lasku.nimi,concat(lasku.toim_nimi,'<br>'),''),''),if(lasku.toim_nimitark!='',if(lasku.toim_nimitark!=lasku.nimitark,concat(lasku.toim_nimitark,'<br>'),''),'')) as 'Nimi/Toim. nimi',
+             lasku.tunnus as 'Tilausnro', lasku.tila, lasku.alatila, lasku.tilaustyyppi, lasku.viesti as viesti,
+             if (kuka.kuka IS NOT NULL, kuka.nimi, '') AS myyja
              from lasku use index (yhtio_tila_tapvm)
              $tuotelisa
+             LEFT JOIN kuka ON (lasku.yhtio = kuka.yhtio AND lasku.myyja = kuka.tunnus)
              where lasku.yhtio  = '$kukarow[yhtio]'
              and lasku.tila     = 'E'
              and tapvm          = '0000-00-00'
@@ -84,17 +90,18 @@ if ($tee == 'aja') {
              ORDER BY 1, 3 ";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 7, 7, false, false)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, 8, false, false)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'><thead><tr>";
 
-  for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
+  for ($i = 0; $i < mysql_num_fields($result)-4; $i++) {
     echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
   }
 
   echo "<th align='left'>".t("Tyyppi")."</th>";
   echo "<th align='left'>".t("Viesti")."</th>";
   echo "<th align='left'>".t("Summa")."</th>";
+  echo "<th align='left'>".t("Myyjä")."</th>";
   echo "</tr></thead>";
 
   $summat = 0;
@@ -109,7 +116,7 @@ if ($tee == 'aja') {
 
     echo "<tr class='aktiivi'>";
 
-    for ($i=0; $i < mysql_num_fields($result)-3; $i++) {
+    for ($i=0; $i < mysql_num_fields($result)-4; $i++) {
       if (mysql_field_name($result, $i) == 'Nimi/Toim. nimi' and substr($prow[$i], -4) == '<br>') {
         echo "<$ero valign='top'>".substr($prow[$i], 0, -4)."</$ero>";
       }
@@ -167,6 +174,8 @@ if ($tee == 'aja') {
     else {
       echo "<$ero align='right' valign='top'>0<br>0</$ero>";
     }
+
+    echo "<{$ero} valign='top'>{$prow['myyja']}</{$ero}>";
 
     echo "</tr>";
 

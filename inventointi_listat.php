@@ -14,6 +14,11 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
+if ($tee == "NAYTATILAUS") {
+  readfile($filenimi);
+  exit;
+}
+
 if (strtolower($toim) == 'oletusvarasto') {
 
   if ($kukarow['oletus_varasto'] == 0) {
@@ -1480,7 +1485,18 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       // konveroidaan postscriptiksi
       $filenimi_ps = pupesoft_a2ps($params);
 
-      if ($komento["Inventointi"] == 'email') {
+      if ($komento["Inventointi"] == "-88") {
+        system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
+
+        js_openFormInNewWindow();
+
+        echo "<br><form id='inventointi_listat_{$listanro}' name='inventointi_listat_{$listanro}' method='post' action='{$palvelin2}inventointi_listat.php' autocomplete='off'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
+              <input type='hidden' name='nayta_pdf' value='1'>
+              <input type='hidden' name='filenimi' value='{$filenimi}.pdf'>
+              <input type='submit' value='".t("Inventointilista").": {$listanro}' onClick=\"js_openFormInNewWindow('inventointi_listat_{$listanro}', ''); return false;\"></form><br>";
+      }
+      elseif ($komento["Inventointi"] == 'email') {
 
         system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
 

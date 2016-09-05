@@ -69,13 +69,11 @@ if (isset($tee) and $tee == "ppg_siirto") {
 }
 
 if (!empty($pankki) && isset($tee) && $tee == 'sepa_siirto') {
-  $data = file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi));
+  $file = "{$pupe_root_polku}/dataout/".basename($filenimi);
 
-  preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $data, $invoice_number);
+  rename($file, "{$pupe_root_polku}/dataout/{$pankki}_error/" . basename($filenimi));
 
-  $status = sepa_queue($invoice_number[1], $data, $pankki);
-
-  echo "SEPA-lasku $invoice_number[1]: $status<br>\n";
+  echo "SEPA-lasku siirretty lähetysjonoon";
 }
 
 if (isset($tee) and $tee == "edi_siirto") {

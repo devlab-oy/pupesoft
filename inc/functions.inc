@@ -33540,3 +33540,26 @@ if (!function_exists('pupesoft_a2ps')) {
     return $out_file;
   }
 }
+
+if (!function_exists('finvoice_pankki')) {
+  function finvoice_pankki() {
+    global $kukarow, $yhtiorow;
+
+    switch ($yhtiorow["finvoice_senderintermediator"]) {
+    case 'NDEAFIHH':
+      $pankki = 'nordea';
+      break;
+    case 'DABAFIHH':
+      $pankki = 'danske';
+      break;
+    case 'OKOYFIHH':
+      $pankki = 'op';
+      break;
+    default:
+      $pankki = null;
+      break;
+    }
+
+    return $pankki;
+  }
+}

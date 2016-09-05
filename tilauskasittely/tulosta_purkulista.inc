@@ -62,6 +62,8 @@ if (!function_exists('alku_purku')) {
     $pdf->draw_text(440, $kala-10, t("Ajoaika", $kieli),         $firstpage, $pieni);
     $pdf->draw_text(440, $kala-20, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
 
+    $looppeja = 0;
+
     if ($mista != 'vastaanota') {
       $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli), $firstpage, $pieni);
 

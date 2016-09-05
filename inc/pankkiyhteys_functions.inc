@@ -122,7 +122,7 @@ function filelist_table($array, $type) {
   // Sortataan by date desc
   array_multisort($sort_by, SORT_DESC, $tiedostot);
 
-  echo "<table>";
+  echo "<table class='full-width'>";
 
   echo "<thead>";
   echo "<tr>";
@@ -513,6 +513,7 @@ function sepa_download_files($params) {
 
     if (vastaus_kunnossa($code)) {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "OK",
         "data" => $response["data"]
@@ -520,6 +521,7 @@ function sepa_download_files($params) {
     }
     else {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "Virhe",
         "data" => null
@@ -831,6 +833,14 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "C2BN") {
       $file_type = "NDCORPAYL";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'FILN') {
+      $file_type = 'HAELASKUT';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'FILL') {
+      $file_type = 'LAHLASKUT';
+    }
   }
 
   // Danskemuunnokset
@@ -851,6 +861,14 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "NDCORPAYL") {
       $file_type = "C2BN";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'FILN';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'FILL';
+    }
   }
 
   // OP-muunnokset
@@ -870,6 +888,14 @@ function sepa_file_type_check($bank, $file_type) {
     // Maksuaineiston palautesanoma
     if ($file_type == "C2BN") {
       $file_type = "pain.002.001.02";
+    }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'XR';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'XS';
     }
   }
 
@@ -893,18 +919,9 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $tuetut_pankit = tuetut_pankit();
   $pankkiyhteys_tunnus = (int) $pankkiyhteys_tunnus;
 
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
-  $result = pupe_query($query);
+  $pankki = hae_pankkiyhteys($pankkiyhteys_tunnus);
 
-  // Jos pankkiyhteyttä ei löydy
-  if (mysql_num_rows($result) != 1) {
-    return false;
-  }
-
-  $pankki = mysql_fetch_assoc($result);
+  if (empty($pankki)) return false;
 
   // Tarkistetaan salasana
   $_pk = pura_salaus($pankki["signing_private_key"], $salasana);
@@ -953,6 +970,18 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   }
 
   return $pankki;
+}
+
+function hae_pankkiyhteys($tunnus) {
+  if ($tunnus < 0) return array();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE tunnus = {$tunnus}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }
 
 function pankkiyhteyden_paivamaarat($pankkiyhteys) {

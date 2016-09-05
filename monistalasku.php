@@ -2101,7 +2101,10 @@ if ($tee == 'MONISTA') {
       if ($toim == '' and $kumpi == 'MONISTA' and $korjrahdit == 'on' and $monistarow['laskunro'] > 0 and $yhtiorow['rahti_hinnoittelu'] == '') {
 
         // Poistetaan virheelliset rahdit
-        $query  = " UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus='$utunnus' AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+        $rahtituotelisa = "'$yhtiorow[rahti_tuotenumero]'";
+        $rahtituotelisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotelisa);
+
+        $query  = " UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus='$utunnus' AND tuoteno IN ({$rahtituotelisa})";
         $addtil = pupe_query($query);
 
         $query   = "SELECT date_format(rahtikirjat.tulostettu, '%Y-%m-%d') tulostettu, group_concat(distinct lasku.tunnus) tunnukset

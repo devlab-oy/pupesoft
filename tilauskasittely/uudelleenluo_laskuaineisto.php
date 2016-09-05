@@ -68,7 +68,7 @@ if (isset($tee) and $tee == "ppg_siirto") {
   }
 }
 
-if (!empty($pankki) && isset($tee) && $tee == 'sepa_siirto') {
+if (finvoice_pankki() && isset($tee) && $tee == 'sepa_siirto') {
   $file = "{$pupe_root_polku}/dataout/".basename($filenimi);
 
   rename($file, "{$pupe_root_polku}/dataout/" . finvoice_pankki() . "_error/" . basename($filenimi));
@@ -1180,28 +1180,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
       echo "<table>";
       echo "<tr><th colspan='2'>".t("L‰het‰ aineisto uudestaan pankkiin").":</th>";
-
-      require_once 'inc/pankkiyhteys_functions.inc';
-
-      echo "<tr>";
-      echo "<th><label for='pankki'>";
-      echo t("Pankki, johon laskut l‰hetet‰‰n");
-      echo "</label></th>";
-      echo "<td>";
-      echo "<select name='pankki' id='pankki' class='full-width'>";
-
-      $pankkiyhteydet = hae_pankkiyhteydet();
-
-      foreach ($pankkiyhteydet as $pankkiyhteys) {
-        echo "<option value='" . strtolower($pankkiyhteys["pankin_nimi"]) . "'>";
-        echo $pankkiyhteys["pankin_nimi"];
-        echo "</option>";
-      }
-
-      echo "</select>";
-      echo "</td>";
       echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr>";
-      echo "</tr>";
       echo "</table></form>";
     }
     elseif (in_array($yhtiorow["verkkolasku_lah"], array("trustpoint", "ppg", "sepa")) and !file_exists(realpath($nimifinvoice))) {

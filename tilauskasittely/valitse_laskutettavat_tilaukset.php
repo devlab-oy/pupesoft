@@ -969,29 +969,6 @@ if ($tee == "VALITSE") {
         echo "</select></td></tr>";
       }
 
-      if ($yhtiorow['verkkolasku_lah'] == 'sepa') {
-        require_once 'inc/pankkiyhteys_functions.inc';
-
-        echo "<tr>";
-        echo "<th><label for='pankki'>";
-        echo t("Pankki, johon laskut l‰hetet‰‰n");
-        echo "</label></th>";
-        echo "<td colspan='3'>";
-        echo "<select name='pankki' id='pankki' class='full-width'>";
-
-        $pankkiyhteydet = hae_pankkiyhteydet();
-
-        foreach ($pankkiyhteydet as $pankkiyhteys) {
-          echo "<option value='" . strtolower($pankkiyhteys["pankin_nimi"]) . "'>";
-          echo $pankkiyhteys["pankin_nimi"];
-          echo "</option>";
-        }
-
-        echo "</select>";
-        echo "</td>";
-        echo "</tr>";
-      }
-
       echo "</table>";
     }
     if (!$kaytetaan_maksupaatetta) {

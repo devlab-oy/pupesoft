@@ -171,6 +171,7 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
   }
   else {
     $toim = 'lisaa';
+    echo "<font class='error'>".t("Kollien m‰‰r‰ on pakollinen")."</font><br>";
   }
 }
 
@@ -483,6 +484,11 @@ if ($tee == 'add') {
     }
   }
 
+  if ($tutkimus == 0 and $kollit[$i] == '' and strpos($kilot[$i], "/") === FALSE) {
+    $toim = 'lisaa';
+    echo "<font class='error'>".t("Kollien m‰‰r‰ on pakollinen")."</font><br>";
+  }
+
   // jos ollaan muokkaamassa rivej‰ poistetaan eka vanhat rahtikirjatiedot..
   if ($tutkimus > 0 and $tunnukset != "") {
 
@@ -622,7 +628,7 @@ if ($tee == 'add') {
 
       if ($k_rahtikulut > 0) {
 
-        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'"; 
+        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
         $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
 
         $query = "UPDATE tilausrivi
@@ -3020,7 +3026,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
         $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
         $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
-        
+
         $query = "SELECT
                   round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
                   round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa

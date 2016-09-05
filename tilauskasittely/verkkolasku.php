@@ -2954,13 +2954,9 @@ else {
         }
       }
       elseif (!empty($pankki) && $yhtiorow["verkkolasku_lah"] == "sepa" and file_exists(realpath($nimifinvoice))) {
-        $data = file_get_contents($nimifinvoice);
+        rename($nimifinvoice, "{$pupe_root_polku}/dataout/{$pankki}_error/" . basename($nimifinvoice));
 
-        preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $data, $invoice_number);
-
-        $status = sepa_queue($invoice_number[1], $data, $pankki);
-
-        $tulos_ulos .= "SEPA-lasku $invoice_number[1]: $status<br>\n";
+        $tulos_ulos .= "SEPA-lasku siirretty l‰hetysjonoon";
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "trustpoint" and !file_exists(realpath($nimifinvoice))) {
         // T‰m‰ n‰ytet‰‰n vain kun laskutetaan k‰sin ja lasku ei mene automaattiseen verkkolaskuputkeen

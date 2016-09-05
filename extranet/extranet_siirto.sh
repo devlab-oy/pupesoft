@@ -84,6 +84,7 @@ index.php
 ylaframe.php
 pikavalinnat.php
 korvaavat.class.php
+rajapinnat/logmaster/logmaster-functions.php
 raportit/asiakasinfo.php
 raportit/naytatilaus.inc
 raportit/osasto_tuotemerkeittain.php

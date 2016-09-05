@@ -131,6 +131,20 @@ if (!isset($presta_dynaamiset_tuoteparametrit)) {
     // ),
   );
 }
+if (!isset($presta_dynaamiset_asiakasparametrit)) {
+  // Jos halutaan poikkeavan kentän arvo prestan asiakkaalle
+  // nimi = prestan asiakkaan kentän nimi, arvo = yhteyshenkilö taulun kentän nimi
+  $presta_dynaamiset_asiakasparametrit = array(
+    // array(
+    //   'nimi' => 'website',
+    //   'arvo' => 'www'
+    // ),
+    // array(
+    //   'nimi' => 'firstname',
+    //   'arvo' => 'titteli'
+    // ),
+  );
+}
 if (!isset($presta_ohita_tuoteparametrit)) {
   // Lista Prestan tuotteen kentistä, joita ei tule päivittää rajapinnassa
   $presta_ohita_tuoteparametrit = array(
@@ -292,6 +306,7 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');
 
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
+  $presta_customer->set_dynamic_fields($presta_dynaamiset_asiakasparametrit);
   $presta_customer->sync_customers($asiakkaat);
 }
 

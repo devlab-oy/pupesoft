@@ -16,7 +16,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 // Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
 // koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 if ($tee == 'I' and isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-  $retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
+  $retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF", "XLS"));
 
   if ($retval === true) {
     $kuva = tallenna_liite("userfile", "lasku", 0, "");

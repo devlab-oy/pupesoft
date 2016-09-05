@@ -528,6 +528,8 @@ if (!function_exists("pupesoft_rest")) {
     if (!isset($parameters['timeout'])) $timeout = 10;
     else $timeout = (int) $parameters['timeout'];
 
+    if (!isset($parameters['posttype'])) $parameters['posttype'] = null;
+
     $handle = curl_init();
     curl_setopt($handle, CURLOPT_URL, $parameters["url"]);
     curl_setopt($handle, CURLOPT_HTTPHEADER, $parameters["headers"]);
@@ -535,7 +537,7 @@ if (!function_exists("pupesoft_rest")) {
     curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
 
-    if (isset($parameters["posttype"]) and $parameters['posttype'] == 'xml') {
+    if ($parameters['posttype'] == 'xml') {
       curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
     }
 

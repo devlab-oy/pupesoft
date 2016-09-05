@@ -6913,8 +6913,15 @@ if (!function_exists('ebid')) {
   function ebid($lasku_tunnus, $url_only = false) {
     global $kukarow, $yhtiorow, $palvelin2;
 
-    $query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='$kukarow[yhtio]'";
+    $lasku_tunnus = (int) $lasku_tunnus;
+
+    $query = "SELECT * from lasku where tunnus = {$lasku_tunnus} and yhtio = '{$kukarow['yhtio']}'";
     $res = pupe_query($query);
+
+    if (mysql_num_rows($res) != 1) {
+      return;
+    }
+
     $laskurow = mysql_fetch_assoc($res);
 
     if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "MAVENTAXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
@@ -6979,12 +6986,11 @@ if (!function_exists('ebid')) {
       return $out;
     }
     else {
-
       $query = "SELECT tunnus, filename, selite
                 from liitetiedostot
                 where liitostunnus = '$laskurow[tunnus]'
-                and liitos         = 'lasku'
-                and yhtio          = '$kukarow[yhtio]'";
+                and liitos = 'lasku'
+                and yhtio = '$kukarow[yhtio]'";
       $res = pupe_query($query);
 
       if ($url_only) {
@@ -9387,7 +9393,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
     }
 
-    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+    if (strlen($haku) >= $yhtiorow['livetuotehaku_minimi'] and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
       echo "
       <script TYPE='text/javascript' LANGUAGE='JavaScript'>

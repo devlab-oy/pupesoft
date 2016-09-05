@@ -6272,6 +6272,8 @@ if ($tee == '') {
     if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $asiakasrow['rahtivapaa'] == '' and ($asiakasrow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
 
       $query_ale_lisa = generoi_alekentta('M');
+      $poisrajatut_tuotteet = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+      $poisrajatut_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajatut_tuotteet);
 
       $query = "SELECT SUM(
                 (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
@@ -6282,7 +6284,7 @@ if ($tee == '') {
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.otunnus = '{$kukarow['kesken']}'
-                AND tilausrivi.tuoteno NOT IN ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')";
+                AND tilausrivi.tuoteno NOT IN ({$poisrajatut_tuotteet})";
       $tilriv_chk_res = pupe_query($query);
       $tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res);
 

@@ -2953,7 +2953,7 @@ else {
           }
         }
       }
-      elseif (!empty($pankki) && $yhtiorow["verkkolasku_lah"] == "sepa" and file_exists(realpath($nimifinvoice))) {
+      elseif (finvoice_pankki() && $yhtiorow["verkkolasku_lah"] == "sepa" and file_exists(realpath($nimifinvoice))) {
         rename($nimifinvoice, "{$pupe_root_polku}/dataout/" . finvoice_pankki() . "_error/" . basename($nimifinvoice));
 
         $tulos_ulos .= "SEPA-lasku siirretty lähetysjonoon";

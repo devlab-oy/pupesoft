@@ -67,7 +67,7 @@ if (!function_exists('alku_purku')) {
     if ($mista != 'vastaanota') {
       $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli), $firstpage, $pieni);
 
-      if ($yhtiorow['purkulistan_asettelu'] == 'K') {
+      if (in_array($yhtiorow['purkulistan_asettelu'], array('K','P'))) {
         $kommentti = wordwrap($laskurow["comments"], 85, "\n");
 
         $kalaloop = $kala - 20;
@@ -113,7 +113,7 @@ if (!function_exists('alku_purku')) {
       $pdf->draw_text(280, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
 
-    if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+    if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
       if ($mista == 'vastaanota') {
         $pdf->draw_text(130, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
         $pdf->draw_text(130, $kala-45, t("Paikalle", $kieli),    $firstpage, $pieni);
@@ -717,7 +717,7 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
 
       if ($mista == "vastaanota") {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $tekstiosa = hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"];
 
@@ -758,7 +758,7 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ";
 
@@ -799,7 +799,7 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ";
 
@@ -815,7 +815,7 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
       }
       else {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
           if ($yhtiorow['suuntalavat'] == 'S') {
 
             $tekstiosa = hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ";
@@ -963,7 +963,7 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
 
       if (trim($row["kommentti"]) != '') {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $_row_height = $kala+25;
 

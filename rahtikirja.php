@@ -171,7 +171,13 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
   }
   else {
     $toim = 'lisaa';
-    echo "<font class='error'>".t("Kollien määrä on pakollinen")."</font><br>";
+
+    if ($kollit[$i] == '' and strpos($kilot[$i], "/") === FALSE) {
+      echo "<font class='error'>".t("Kollien määrä on pakollinen")."</font><br>";
+    }
+    else {
+      echo "<font class='error'>".t("Syötä kilot, kuutiot tai lavametrit")."</font><br>";
+    }
   }
 }
 

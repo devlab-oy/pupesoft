@@ -233,12 +233,12 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "<tr><td colspan='4' class='back'><br></td></tr>";
     echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
 
-    if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
+    if ($kukarow['kesken'] == 0 and (!in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3")) or empty($srow["oletus_toimaika"]))) {
       $toimpp = $kerpp = date("j");
       $toimkk = $kerkk = date("n");
       $toimvv = $kervv = date("Y");
     }
-    elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
+    elseif ($kukarow['kesken'] == 0 and in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3"))) {
       $toimittajan_toimaika = date('Y-m-d', time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
 
       list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
@@ -250,7 +250,6 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
       $kerpp = substr($kerpp, 0, 2);
       $toimpp = substr($toimpp, 0, 2);
-
     }
 
     //voidaan tarvita

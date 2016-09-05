@@ -37,6 +37,10 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (@include "rajapinnat/logmaster/logmaster-functions.php");
+elseif (@include "logmaster-functions.php");
+else exit;
+
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $lquery = "SELECT *
@@ -66,7 +70,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -85,7 +90,9 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
       'ale' => $ale,
-      'kate' => $kate
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -107,15 +114,27 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $aresult = pupe_query($query);
   $tuoterow = mysql_fetch_assoc($aresult);
 
+  $hinta_ajax = $hinta;
+
   // Tutkitaan onko tämä myyty ulkomaan alvilla
   list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
+
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    $alename = 'ale'.$alepostfix;
+    if (!empty($$alename)) {
+      $ale[$alename] = str_replace(',', '.', $$alename);
+    }
+  }
 
   $ale_arr = $ale;
   $ale_arr['netto'] = $netto;
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -133,8 +152,10 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   echo json_encode(array(
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
-      'ale' => $ale,
-      'kate' => $kate
+      'ale' => $ale_arr,
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -5479,6 +5500,15 @@ if ($tee == '') {
     $var = "";
   }
 
+  $logmaster_errors = logmaster_verify_order($laskurow['tunnus'], $toim);
+
+  foreach ($logmaster_errors as $error) {
+    echo "<font class='error'>";
+    echo "{$error}<br><br>";
+    echo "</font>";
+    $tilausok++;
+  }
+
   $numres_saatavt  = 0;
 
   if ((int) $kukarow["kesken"] > 0) {
@@ -6242,6 +6272,8 @@ if ($tee == '') {
     if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $asiakasrow['rahtivapaa'] == '' and ($asiakasrow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
 
       $query_ale_lisa = generoi_alekentta('M');
+      $poisrajatut_tuotteet = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+      $poisrajatut_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajatut_tuotteet);
 
       $query = "SELECT SUM(
                 (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
@@ -6252,7 +6284,7 @@ if ($tee == '') {
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.otunnus = '{$kukarow['kesken']}'
-                AND tilausrivi.tuoteno NOT IN ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')";
+                AND tilausrivi.tuoteno NOT IN ({$poisrajatut_tuotteet})";
       $tilriv_chk_res = pupe_query($query);
       $tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res);
 

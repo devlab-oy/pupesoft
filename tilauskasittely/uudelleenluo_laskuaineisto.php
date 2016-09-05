@@ -71,7 +71,7 @@ if (isset($tee) and $tee == "ppg_siirto") {
 if (!empty($pankki) && isset($tee) && $tee == 'sepa_siirto') {
   $file = "{$pupe_root_polku}/dataout/".basename($filenimi);
 
-  rename($file, "{$pupe_root_polku}/dataout/{$pankki}_error/" . basename($filenimi));
+  rename($file, "{$pupe_root_polku}/dataout/" . finvoice_pankki() . "_error/" . basename($filenimi));
 
   echo "SEPA-lasku siirretty lähetysjonoon";
 }

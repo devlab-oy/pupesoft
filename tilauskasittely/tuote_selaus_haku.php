@@ -164,8 +164,11 @@ elseif ($kukarow["extranet"] != "") {
 
 // Katsotaan t‰ss‰, ett‰ vied‰‰n k‰ytt‰j‰ oikeaan paikaan sen mukaan millainen tilaus h‰nell‰ on kesken
 if (isset($vierow)) {
-  if ($vierow["tila"] == "G") {
+  if ($vierow["tila"] == "G" and $vierow['tilaustyyppi'] != 'M') {
     $toim_kutsu = "SIIRTOLISTA";
+  }
+  elseif ($vierow["tila"] == "G" and $vierow['tilaustyyppi'] == 'M') {
+    $toim_kutsu = "MYYNTITILI";
   }
   elseif ($vierow["tila"] == "V") {
     if ($vierow["liitostunnus"] == "999999999") {

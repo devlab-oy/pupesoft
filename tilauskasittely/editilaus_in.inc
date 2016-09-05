@@ -136,6 +136,9 @@ if (!function_exists('hae_yhtiotiedot')) {
       // Häkki Örumia varten
       if ((int) $tieto == 0) $tieto = "20428100";
 
+      // Toinen häkki
+      if ((int) $tieto == 6270618) $tieto = "24955530";
+
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
       $result = pupe_query($query);
     }

@@ -168,6 +168,30 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
+      if ($tem_laji == "VEHT_RAHTI") {
+        $query = "SELECT avainsana.*
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND avainsana.laji = '{$tem_laji}'
+                  AND avainsana.selite = '{$tem_selite}'
+                  AND avainsana.tunnus != '{$tunnus}'";
+        $result = pupe_query($query);
+        
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron pitää olla uniikki");
+        }
+
+        $query = "SELECT tuote.*
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  AND tuote.tuoteno = '{$tem_selite}'";
+        $result = pupe_query($query);
+        
+        if (mysql_num_rows($result) == 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron tulee löytyä järjestelmästä");
+        }
+      }
+
       if ($tem_laji == "ASIAKASHINNASTO") {
         $query = "SELECT *
                   FROM avainsana

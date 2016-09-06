@@ -165,6 +165,45 @@ $noautosubmit = TRUE;
 require "tilauskasittely/monivalintalaatikot.inc";
 echo "</td></tr>";
 
+if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
+  echo "<tr>";
+  echo "<th>", t("Toimipaikka"), "</th>";
+
+  echo "<td colspan='3'><select name='toimipaikka' onchange='submit();'>";
+  echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+
+  $sel = "";
+  $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka != "kaikki" and $toimipaikka == 0);
+  $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
+  if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
+    $sel = "selected";
+    $toimipaikka = 0;
+  }
+
+  echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
+
+  $sel = "";
+
+  while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+    if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
+      $sel = ' selected';
+      $toimipaikka = $kukarow['toimipaikka'];
+    }
+    elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
+      $sel = ' selected';
+    }
+    else {
+      $sel = '';
+    }
+
+    echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+  }
+
+  echo "</select></td>";
+  echo "</tr>";
+}
+
+
 if ($naytetaankokommentit != "") $komsel = "CHECKED";
 else $komsel = "";
 
@@ -347,7 +386,7 @@ if ($tee != '' and isset($ajaraportti)) {
 
   if (substr($laji, 0, 1) == 'O') {
 
-    $av_lisa = '';
+    $av_lisa = $toimipaikkalisa = '';
 
     if ($toimittajaid != '') {
       $av_lisa = " and lasku.liitostunnus='$toimittajaid'";
@@ -355,6 +394,11 @@ if ($tee != '' and isset($ajaraportti)) {
     }
     else {
       $indeksi = " use index (yhtio_tila_tapvm)";
+    }
+
+    if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+      $toimipaikka = (int) $toimipaikka;
+      $toimipaikkalisa = " and lasku.vanhatunnus = '{$toimipaikka}' ";
     }
 
     if ($laji == 'OOK')   $tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -411,6 +455,7 @@ if ($tee != '' and isset($ajaraportti)) {
           and lasku.tapvm <= '$pvm'
           and lasku.tapvm > '0000-00-00'
           and tila in ('H','Y','M','P','Q')
+          {$toimipaikkalisa}
           $maalisa
           $av_lisa
           $valkoodi1
@@ -618,6 +663,7 @@ if ($tee != '' and isset($ajaraportti)) {
     $av_lisa1 = ""; // lasku rajauksia
     $av_lisa2 = ""; // suoritus rajauksia
     $av_lisa3 = ""; // asiakas rajauksia
+    $toimipaikkalisa = '';
 
     if ($asiakasid != '') {
       $av_lisa1 .= " and lasku.liitostunnus='$asiakasid' ";
@@ -630,6 +676,11 @@ if ($tee != '' and isset($ajaraportti)) {
 
     if ($maksuehto != '') {
       $av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
+    }
+
+    if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+      $toimipaikka = (int) $toimipaikka;
+      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
     }
 
     $tili = 0;
@@ -729,6 +780,7 @@ if ($tee != '' and isset($ajaraportti)) {
           and lasku.tapvm     > '0000-00-00'
           and lasku.tila      = 'U'
           and lasku.alatila    = 'X'
+          {$toimipaikkalisa}
           $lisa
           $av_lisa1
           $valkoodi

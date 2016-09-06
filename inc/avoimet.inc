@@ -169,7 +169,7 @@ if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_to
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";
 
-  echo "<td colspan='3'><select name='toimipaikka' onchange='submit();'>";
+  echo "<td colspan='3'><select name='toimipaikka'>";
   echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
 
   $sel = "";

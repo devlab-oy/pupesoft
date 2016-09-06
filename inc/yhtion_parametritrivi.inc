@@ -4861,7 +4861,7 @@ if ($fieldname == "muokkaatilaus_pv_rajaus") {
 }
 
 if ($fieldname == "tilausrivin_korvamerkinta") {
-  $sel = $trow[$i] == "K" ? "selected" : "";
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'K' => '', 'A' => '');
 
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -4869,11 +4869,11 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= t("Ei sallita tilausrivien korvamerkint‰‰");
   $ulos .= "</option>";
 
-  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= "<option value = 'K' {$sel['K']}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰ vapaalla tekstill‰");
   $ulos .= "</option>";
 
-  $ulos .= "<option value = 'A' {$sel}>";
+  $ulos .= "<option value = 'A' {$sel['A']}>";
   $ulos .= t("Sallitaan tilausrivien korvamerkint‰ avainsanoilla");
   $ulos .= "</option>";
 

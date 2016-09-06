@@ -179,7 +179,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
     $query  = "DELETE FROM tilausrivi
                WHERE otunnus = '$laskurow[tunnus]'
                AND yhtio     = '$kukarow[yhtio]'
-               AND tuoteno IN {$rajattavat_tuotteet}";
+               AND tuoteno IN ({$rajattavat_tuotteet})";
     $result = pupe_query($query);
 
     $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
@@ -200,7 +200,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno IN {$rajattavat_tuotteet}";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 
@@ -220,7 +220,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno IN {$rajattavat_tuotteet}";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 

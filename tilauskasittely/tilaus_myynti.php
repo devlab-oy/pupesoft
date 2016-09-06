@@ -479,6 +479,7 @@ if ($tila == "KORVAMERKITSE") {
   }
 
   $tila = '';
+  $rivitunnus = '';
 }
 
 if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {

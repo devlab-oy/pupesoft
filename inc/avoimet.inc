@@ -165,7 +165,7 @@ $noautosubmit = TRUE;
 require "tilauskasittely/monivalintalaatikot.inc";
 echo "</td></tr>";
 
-if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
+if ($toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";
 

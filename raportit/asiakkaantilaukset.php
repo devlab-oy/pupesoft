@@ -124,7 +124,7 @@ enable_ajax();
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
-if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
+if ($tee != 'NAYTATILAUS' and empty($vaihda) and $ytunnus == '' and $tilausviite == '' and $astilnro == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
   $query = "SELECT ytunnus, liitostunnus
             FROM lasku
@@ -847,7 +847,7 @@ else {
   echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='lopetus' value='$lopetus'>";
-  echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+  echo "<br><input name='vaihda' type='submit' value='".t("Tee uusi haku")."'>";
   echo "</form>";
 }
 

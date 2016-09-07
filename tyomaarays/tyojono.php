@@ -27,6 +27,10 @@ if (!function_exists("tunnit_minuutit")) {
   }
 }
 
+$kieli = $kukarow['kieli'];
+if ($kieli == '')
+  $kieli = $yhtiorow["kieli"];
+
 // Tyostatuksen muutos dropdownilla
 if ($tyostatus_muutos != '' and $tyomaarayksen_tunnus != '') {
   $tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
@@ -274,12 +278,12 @@ $query = "SELECT
           JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
           LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
           LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
-          LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono)
-          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+          LEFT JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono and a1.kieli = '{$kieli}')
+          LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus and a2.kieli = '{$kieli}')
           LEFT JOIN kuka a3 ON (a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja)
           LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
-          LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
-          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+          LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka  and a4.kieli = '{$kieli}')
+          LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti  and a5.kieli = '{$kieli}')
           {$laitejoini}
           WHERE $konsernit
           and lasku.tila     in ('A','L','N','S','C')
@@ -422,7 +426,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
               sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu)) sekunnit,
               SEC_TO_TIME(sum(timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) aika
               FROM kalenteri
-              LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka
+              LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA' and a4.selitetark=kalenteri.kuka and a4.kieli = '{$kieli}'
               WHERE kalenteri.yhtio  = '$kukarow[yhtio]'
               AND kalenteri.tyyppi   = 'kalenteri'
               AND kalenteri.kentta02 = '$vrow[tunnus]'
@@ -537,6 +541,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
                    LEFT JOIN avainsana ON avainsana.yhtio = tyomaarayksen_tapahtumat.yhtio
                     AND avainsana.laji                            = 'TYOM_TYOSTATUS'
                     AND avainsana.selite                          = tyomaarayksen_tapahtumat.tyostatus_selite
+                    AND avainsana.kieli                           = '{$kieli}'
                    WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                    AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '{$vrow['tunnus']}'
                    ORDER BY tyomaarayksen_tapahtumat.luontiaika DESC

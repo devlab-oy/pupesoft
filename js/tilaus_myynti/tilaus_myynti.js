@@ -181,10 +181,10 @@ $(document).ready(function() {
         }
       }
     });
-  }
 
-  if (rivitunnus_chk.val() != '' && rivitunnus_chk.length != 0) {
-    $("input[name='hinta']").trigger('keyup');
+    if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
+      $("input[name='hinta']").trigger('keyup');
+    }
   }
 
   $('#hintojen_vaihto').on('change', function() {

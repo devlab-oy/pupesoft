@@ -36,7 +36,14 @@ if (mysql_field_name($result, $i) == "toimipaikka_tunnus") {
 }
 
 if (mysql_field_name($result, $i) == "toimitustapa_tunnus") {
-  $trow['toimitustapa_tunnus'] = $lukitse_avaimeen;
-  $trow[$i] = $lukitse_avaimeen;
-  $tyyppi = 4;
+
+  $trow[$i] = empty($lukitse_avaimeen) ? $trow[$i] : $lukitse_avaimeen;
+  $trow['toimitustapa_tunnus'] = empty($lukitse_avaimeen) ? $trow[$i] : $lukitse_avaimeen;
+
+  $toimitustapa = hae_toimitustapa($trow[$i]);
+  $ulos  = "<td>";
+  $ulos .= $toimitustapa['selite'];
+  $ulos .= "<input type='hidden' name='{$nimi}' value='{$trow[$i]}' />";
+  $ulos .= "</td>";
+  $jatko = 0;
 }

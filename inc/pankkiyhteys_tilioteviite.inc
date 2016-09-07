@@ -162,6 +162,9 @@ if ($tee == "hae_aineistot") {
 
 // Käsitellään haetut tiedostot
 if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
+  $tuetut_pankit     = tuetut_pankit();
+  $pankin_lyhyt_nimi = $tuetut_pankit[$pankkiyhteysrow['pankki']]['lyhyt_nimi'];
+
   echo "<hr><br>";
 
   // Pankkitiedostot on laskevassa päivämääräjärjestyksessä
@@ -177,7 +180,7 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
       continue;
     }
 
-    if ($aineisto['file_type'] == 'HAELASKUT') {
+    if ($aineisto['file_type'] == sepa_file_type_check($pankin_lyhyt_nimi, 'HAELASKUT')) {
       $oli_laskuja = true;
 
       // Kirjotetaan tiedosto levylle

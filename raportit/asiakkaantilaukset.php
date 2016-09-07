@@ -124,7 +124,6 @@ enable_ajax();
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
-<<<<<<< HEAD
 if ($tee == "POISTA_TILAUS") {
   require "peru_laskutus.inc";
 
@@ -133,10 +132,7 @@ if ($tee == "POISTA_TILAUS") {
   $tee = "TULOSTA";
 }
 
-if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
-=======
 if ($tee != 'NAYTATILAUS' and empty($vaihda) and $ytunnus == '' and $tilausviite == '' and $astilnro == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
->>>>>>> master
 
   $query = "SELECT ytunnus, liitostunnus
             FROM lasku
@@ -805,7 +801,6 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
-<<<<<<< HEAD
       $poista_tilaus_whiteliset = array("tarja", "heidi", "virpi", "admin", "seija");
 
       if ($row["tila"] != "U" and in_array($kukarow['kuka'], $poista_tilaus_whiteliset)) {
@@ -831,7 +826,6 @@ if ($ytunnus != '') {
               </td>";
       }
 
-=======
       echo "<td class='back'>";
 
       if ($row['tila'] == "U" and tarkista_oikeus("tilauskasittely/tulostakopio.php", "LASKU")) {
@@ -845,8 +839,6 @@ if ($ytunnus != '') {
       }
 
       echo "</td>";
-
->>>>>>> master
       echo "</tr>";
 
       $edlaskunro = $row["laskunro"];

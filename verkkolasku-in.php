@@ -46,7 +46,7 @@ $oklaskut   = $verkkolaskut_ok;
 $origlaskut = $verkkolaskut_orig;
 $errlaskut  = $verkkolaskut_error;
 
-if ($php_cli) {
+if ($php_cli || strpos($_SERVER['SCRIPT_NAME'], "pankkiyhteys.php") !== FALSE) {
   // Ei tehd‰ mit‰‰n. T‰ll‰set iffit on sit‰ parasta koodia.
 }
 elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {

@@ -1,22 +1,35 @@
 <?php
+
 /**
  * Varastoryhmien saldojenlukuscripti
  *
  */
-
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-$kukarow = array();
-
-$kukarow['yhtio'] = isset($argv[1]) ? $argv[1] : die("Et antanut yhtiota!\n");
-$kukarow['kuka'] = 'admin';
+// lisätään includepathiin pupe-root
+$pupe_root_path = dirname(dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_path);
+ini_set("display_errors", 1);
+error_reporting(E_ALL);
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+if (empty($argv[1])) {
+  die("Parametrit puuttuu: yhtio\n");
+}
+
+$yhtio = mysql_real_escape_string(trim($argv[1]));
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow = hae_kukarow('admin', $yhtio);
+
+if (!isset($kukarow)) {
+  exit("VIRHE: Admin käyttäjä ei löydy!\n");
+}
 
 // Logitetaan ajo
 cron_log();

@@ -1,7 +1,5 @@
 <?php
 
-require_once "rajapinnat/logmaster/logmaster-functions.php";
-
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 $tilaus_valmis_ulos     = "";
 $ohjausmerkkilisa       = "";
@@ -936,6 +934,7 @@ else {
       $torow = mysql_fetch_assoc($result);
 
       $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+      $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       // jos kyseessä on JT-tilaus, katsotaan pitääkö lisätä rahtikulua usealle tilaukselle
       if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
@@ -1682,7 +1681,6 @@ else {
       //jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimmäisen tilauksen tunnus vanhaksitunnukseksi
       $temp_laskutunnus = $laskurow['tunnus'];
 
-      $varasto_chk_array = array();
       $varasto_kpl_array = array();
       $tulalue_kpl_array = array();
 
@@ -1848,9 +1846,6 @@ else {
 
           $laskurow['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
 
-          // Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
-          $varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
-
           // Tallennetaan kaikki splitit
           $tilausnumerot[] = $laskurow["tunnus"];
 
@@ -1962,9 +1957,6 @@ else {
 
       // Intrastat-tiedot
       $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-
-      // Laitetaan alkuperäisen tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
-      $varasto_chk_array[$temp_laskutunnus] = $varaston_row['ulkoinen_jarjestelma'];
 
       // Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
       $toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
@@ -2094,12 +2086,6 @@ else {
                       AND tunnus  = '$tilausnumero'";
             $upresult = pupe_query($query);
           }
-        }
-      }
-
-      foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
-        if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L', 'P'))) {
-          logmaster_outbounddelivery($_otunnus);
         }
       }
 

@@ -4,6 +4,8 @@ require "../inc/parametrit.inc";
 require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
 
+$onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+
 if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
 }
@@ -585,7 +587,15 @@ if ($tee2 == 'VALITSE') {
       echo "</select></td></tr>";
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
-      echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
+
+      if ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
+        echo t("Ulkoisen varaston tilaus");
+      }
+      else {
+        echo "<input type='submit' name='tila' value='".t("Tulosta")."'>";
+      }
+
+      echo "</form>";
 
       echo "<br>";
       echo "<form action = 'lahetteen_tulostusjono.php' method = 'post'>
@@ -1189,6 +1199,16 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
       echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
+      //haetaan ker‰yslistan oletustulostin
+      $query = "SELECT *
+                from varastopaikat
+                where yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tilrow[varasto]'";
+      $prires = pupe_query($query);
+      $prirow = mysql_fetch_array($prires);
+
+      $onkologmaster_varasto = ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P')));
+
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";
 
@@ -1225,13 +1245,6 @@ if ($tee2 == '') {
         echo "</tr>";
       }
       else {
-        //haetaan ker‰yslistan oletustulostin
-        $query = "SELECT *
-                  from varastopaikat
-                  where yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$tilrow[varasto]'";
-        $prires = pupe_query($query);
-        $prirow = mysql_fetch_array($prires);
         $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
         $varasto = $tilrow["varasto"];
@@ -1316,7 +1329,27 @@ if ($tee2 == '') {
         echo "<input type='hidden' name='tee2'       value='TULOSTA'>";
         echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
         echo "<input type='hidden' name='lasku_yhtio'   value='$tilrow[yhtio]'>";
-        echo "<$ero valign='top'><input type='submit'   value='".t("Tulosta")."'></form></$ero>";
+        echo "<$ero valign='top'>";
+
+        if ($onkologmaster_varasto) {
+          echo t("Ulkoisen varaston tilaus");
+
+          $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
+
+          if (mysql_num_rows($keskenres) != 0) {
+            $keskenrow = mysql_fetch_assoc($keskenres);
+
+            echo "<br>";
+            echo "<font class='error'>";
+            echo t("Tilaus on kesken k‰ytt‰j‰ll‰ %s (%s)", "", $keskenrow['nimi'], $keskenrow['kuka']);
+            echo "</font>";
+          }
+        }
+        else {
+          echo "<input type='submit' value='".t("Tulosta")."'>";
+        }
+
+        echo "</$ero></form>";
 
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim'       value='$toim'>";
@@ -1343,7 +1376,10 @@ if ($tee2 == '') {
       }
 
       // Ker‰t‰‰n tunnukset tulosta kaikki-toimintoa varten
-      $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
+      if (!$onkologmaster_varasto) {
+        $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
+      }
+
       $riveja_yht += $tilrow["riveja"];
     }
 
@@ -1355,7 +1391,7 @@ if ($tee2 == '') {
     echo t("Rivej‰ yhteens‰")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
+    $spanni = 4;
 
     if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;

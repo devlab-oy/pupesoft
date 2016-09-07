@@ -37,6 +37,10 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if (@include "rajapinnat/logmaster/logmaster-functions.php");
+elseif (@include "logmaster-functions.php");
+else exit;
+
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $lquery = "SELECT *
@@ -66,7 +70,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -85,7 +90,9 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
       'ale' => $ale,
-      'kate' => $kate
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -107,15 +114,27 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $aresult = pupe_query($query);
   $tuoterow = mysql_fetch_assoc($aresult);
 
+  $hinta_ajax = $hinta;
+
   // Tutkitaan onko tämä myyty ulkomaan alvilla
   list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
+
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    $alename = 'ale'.$alepostfix;
+    if (!empty($$alename)) {
+      $ale[$alename] = str_replace(',', '.', $$alename);
+    }
+  }
 
   $ale_arr = $ale;
   $ale_arr['netto'] = $netto;
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma  = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -133,8 +152,10 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   echo json_encode(array(
       'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
       'netto' => $netto,
-      'ale' => $ale,
-      'kate' => $kate
+      'ale' => $ale_arr,
+      'kate' => $kate,
+      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -511,12 +532,7 @@ elseif (in_array($valitsetoimitus, array("ENNAKKO", "EXTENNAKKO", "TARJOUS", "PI
 if (!aktivoi_tilaus($tilausnumero, $session, $orig_tila, $orig_alatila)) {
 
   // katsotaan onko muilla aktiivisena
-  $query = "SELECT *
-            FROM kuka
-            WHERE yhtio  = '$kukarow[yhtio]'
-            AND kesken   = '$tilausnumero'
-            AND kesken  != 0";
-  $result = pupe_query($query);
+  $result = tilaus_aktiivinen_kayttajalla($tilausnumero);
 
   if (mysql_num_rows($result) != 0) {
     $row = mysql_fetch_assoc($result);
@@ -2535,6 +2551,13 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   }
   $result = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
+
+  $a_qry = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
+  $a_res = pupe_query($a_qry);
+  $asiakasrow = mysql_fetch_assoc($a_res);
 
   $kaytiin_otsikolla = "NOJOO!";
 }
@@ -5477,6 +5500,15 @@ if ($tee == '') {
     $var = "";
   }
 
+  $logmaster_errors = logmaster_verify_order($laskurow['tunnus'], $toim);
+
+  foreach ($logmaster_errors as $error) {
+    echo "<font class='error'>";
+    echo "{$error}<br><br>";
+    echo "</font>";
+    $tilausok++;
+  }
+
   $numres_saatavt  = 0;
 
   if ((int) $kukarow["kesken"] > 0) {
@@ -5632,8 +5664,8 @@ if ($tee == '') {
   }
   elseif ($_mika_toim and $_kat_jv) {
 
-    if (!empty($laskurow['luottoraja'])) {
-      if (!empty($asiakasrow['luottoraja'])) {
+    if ((float) $laskurow['luottoraja'] != 0) {
+      if ((float) $asiakasrow['luottoraja'] != 0) {
 
         $query_ale_lisa = generoi_alekentta('M');
 
@@ -6240,6 +6272,8 @@ if ($tee == '') {
     if ($kukarow['extranet'] != '' and $laskurow['rahtivapaa'] == '' and $asiakasrow['rahtivapaa'] == '' and ($asiakasrow['rahtivapaa_alarajasumma'] != 0 or $yhtiorow['rahtivapaa_alarajasumma'] != 0)) {
 
       $query_ale_lisa = generoi_alekentta('M');
+      $poisrajatut_tuotteet = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+      $poisrajatut_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajatut_tuotteet);
 
       $query = "SELECT SUM(
                 (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
@@ -6250,7 +6284,7 @@ if ($tee == '') {
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.otunnus = '{$kukarow['kesken']}'
-                AND tilausrivi.tuoteno NOT IN ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')";
+                AND tilausrivi.tuoteno NOT IN ({$poisrajatut_tuotteet})";
       $tilriv_chk_res = pupe_query($query);
       $tilriv_chk_row = mysql_fetch_assoc($tilriv_chk_res);
 
@@ -6403,6 +6437,7 @@ if ($tee == '') {
                $kehahin_select kehahin,
                tuote.sarjanumeroseuranta,
                tuote.yksikko,
+               tilausrivi.yksikko AS tilausrivin_yksikko,
                tuote.status,
                tuote.ei_saldoa,
                tuote.vakkoodi,
@@ -8126,7 +8161,7 @@ if ($tee == '') {
           }
           elseif (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE', 'RIVISYOTTO', 'PIKATILAUS'))) {
             echo "<td {$class} align='right' nowrap>";
-            echo "{$kpl_ruudulle} ".strtolower($row["yksikko"]);
+            echo "{$kpl_ruudulle} ".strtolower($row["tilausrivin_yksikko"]);
 
             if ($sahkoinen_tilausliitanta and isset($vastaavat_html) and trim($vastaavat_html) != '' and isset($vastaavat_table2) and trim($vastaavat_table2) != '' and isset($paarivin_saldokysely) and $paarivin_saldokysely and in_array($row['var'], array('U', 'T'))) {
               echo "<br />", $vastaavat_table2;

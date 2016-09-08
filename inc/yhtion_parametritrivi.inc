@@ -2585,7 +2585,7 @@ if ($fieldname == "myyntitilauksen_toimipaikka") {
   $jatko = 0;
 }
 
-if ($fieldname == "logo" or $fieldname == "lasku_logo") {
+if ($fieldname == "logo" or $fieldname == "lasku_logo" or $fieldname == "extranet_logo") {
   $tyyppi = 5;
 }
 

@@ -172,6 +172,10 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $tiedostopaate = array("JPG", "PNG", "GIF");
     }
 
+    if ($fieldname == "extranet_logo") {
+      $tiedostopaate = array("JPG", "PNG", "GIF");
+    }
+
     if ($fieldname == "maventa_api_avain") {
       if ($verkkolasku_lah_talteen == "maventa" and trim($t[$i]) == "") {
         $virhe[$i] = t("Pakollinen: maventa_api_avain ja maventa_ohjelmisto_api_avain!!");

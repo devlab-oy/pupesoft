@@ -41,6 +41,45 @@ if (@include "rajapinnat/logmaster/logmaster-functions.php");
 elseif (@include "logmaster-functions.php");
 else exit;
 
+if ($tila == "KORVAMERKITSE" or $tila == "KORVAMERKITSE_AJAX") {
+
+  $query = "SELECT otunnus
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$rivitunnus}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0 and mysql_result($result, 0) == $tilausnumero) {
+
+    $korvamerkinta = mysql_real_escape_string($korvamerkinta);
+
+    if (empty($korvamerkinta)) {
+      $korvamerkinta = '.';
+    }
+
+    $query = "UPDATE tilausrivin_lisatiedot
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus                     = tilausrivin_lisatiedot.tilausrivitunnus
+              JOIN lasku
+                ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
+                AND lasku.tunnus                          = tilausrivi.otunnus
+              SET tilausrivin_lisatiedot.korvamerkinta = '{$korvamerkinta}'
+              WHERE tilausrivin_lisatiedot.yhtio          = '{$kukarow['yhtio']}'
+              AND tilausrivin_lisatiedot.tilausrivitunnus = '{$rivitunnus}'
+              AND lasku.tunnus                            = '{$kukarow['kesken']}'";
+    pupe_query($query);
+  }
+
+  if ($tila == "KORVAMERKITSE_AJAX") {
+    echo json_encode("OK");
+    exit;
+  }
+
+  $tila = '';
+  $rivitunnus = '';
+}
+
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
 
   $lquery = "SELECT *
@@ -445,40 +484,6 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) 
   $result = pupe_query($query);
 
   $valitsetoimitus = $toim;
-}
-
-if ($tila == "KORVAMERKITSE") {
-
-  $query = "SELECT otunnus
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$rivitunnus}'";
-  $result = pupe_query($query);
-
-  if (mysql_num_rows($result) > 0 and mysql_result($result, 0) == $tilausnumero) {
-
-    $korvamerkinta = mysql_real_escape_string($korvamerkinta);
-
-    if (empty($korvamerkinta)) {
-      $korvamerkinta = '.';
-    }
-
-    $query = "UPDATE tilausrivin_lisatiedot
-              JOIN tilausrivi
-                ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-                AND tilausrivi.tunnus                     = tilausrivin_lisatiedot.tilausrivitunnus
-              JOIN lasku
-                ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
-                AND lasku.tunnus                          = tilausrivi.otunnus
-              SET tilausrivin_lisatiedot.korvamerkinta = '{$korvamerkinta}'
-              WHERE tilausrivin_lisatiedot.yhtio          = '{$kukarow['yhtio']}'
-              AND tilausrivin_lisatiedot.tilausrivitunnus = '{$rivitunnus}'
-              AND lasku.tunnus                            = '{$kukarow['kesken']}'";
-    pupe_query($query);
-
-  }
-
-  $tila = '';
 }
 
 if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
@@ -3538,7 +3543,7 @@ if ($tee == '') {
 
   // t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
   echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
-      <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+      <input type='hidden' id='tilausnumero' name='tilausnumero' value='$tilausnumero'>
       <input type='hidden' name='mista' value='$mista'>
       <input type='hidden' id='toim' name='toim' value='$toim'>
       <input type='hidden' name='lopetus' value='$lopetus'>
@@ -6437,6 +6442,7 @@ if ($tee == '') {
                $kehahin_select kehahin,
                tuote.sarjanumeroseuranta,
                tuote.yksikko,
+               tilausrivi.yksikko AS tilausrivin_yksikko,
                tuote.status,
                tuote.ei_saldoa,
                tuote.vakkoodi,
@@ -6628,19 +6634,22 @@ if ($tee == '') {
 
     if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
-      $headerit .= "<th>".t("Netto")."</th>";
-      $sarakkeet++;
-
       if ($kukarow['hinnat'] >= 0) {
         $headerit .= "<th style='text-align:right;'>".t("Svh")."</th>";
         $sarakkeet++;
       }
 
       if ($kukarow['hinnat'] == 0) {
+
+        $headerit .= "<th style='text-align:right;' nowrap>".t("Ale")." ";
+
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          $headerit .= "<th style='text-align:right;'>".t("Ale{$alepostfix}")."%</th>";
-          $sarakkeet++;
+          $headerit .= "$alepostfix + ";
         }
+
+        $headerit = substr($headerit, 0, -3);
+        $headerit .= "</th>";
+        $sarakkeet++;
 
         $headerit .= "<th style='text-align:right;'>".t("Hinta")."</th>";
         $sarakkeet++;
@@ -7189,7 +7198,7 @@ if ($tee == '') {
         }
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          if ($row["ale{$alepostfix}"] == 0.00) $row["ale{$alepostfix}"] = '';
+          $row["ale{$alepostfix}"] = (float) $row["ale{$alepostfix}"];
         }
 
         if ($row["hyllyalue"] == "") {
@@ -8160,7 +8169,7 @@ if ($tee == '') {
           }
           elseif (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE', 'RIVISYOTTO', 'PIKATILAUS'))) {
             echo "<td {$class} align='right' nowrap>";
-            echo "{$kpl_ruudulle} ".strtolower($row["yksikko"]);
+            echo "{$kpl_ruudulle} ".strtolower($row["tilausrivin_yksikko"]);
 
             if ($sahkoinen_tilausliitanta and isset($vastaavat_html) and trim($vastaavat_html) != '' and isset($vastaavat_table2) and trim($vastaavat_table2) != '' and isset($paarivin_saldokysely) and $paarivin_saldokysely and in_array($row['var'], array('U', 'T'))) {
               echo "<br />", $vastaavat_table2;
@@ -8202,7 +8211,7 @@ if ($tee == '') {
 
         echo "<td $classvar>$var_temp";
 
-        if (!empty($row['korvamerkinta'])) {
+        if ($yhtiorow['tilausrivin_korvamerkinta'] == 'K' and !empty($row['korvamerkinta'])) {
 
           if ($row['korvamerkinta'] == '.') {
             $luokka = '';
@@ -8264,8 +8273,6 @@ if ($tee == '') {
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
-          echo "<td $class align='center'>$row[netto]&nbsp;</td>";
-
           $hinta = $row["hinta"];
           $netto = $row["netto"];
           $kpl   = $row["varattu"]+$row["jt"];
@@ -8313,8 +8320,18 @@ if ($tee == '') {
 
             echo "<td $class align='right'>$myyntihinta</td>";
 
-            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-              echo "<td {$class} align='right'>", ($row["ale{$alepostfix}"] * 1), "</td>";
+            if (!empty($row["netto"])) {
+              echo "<td $class align='right'>".t("NETTO")."</td>";
+            }
+            else {
+              echo "<td {$class} align='right'>";
+              $ale_echo = "";
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                $ale_echo .= $row["ale{$alepostfix}"]." + ";
+              }
+
+              $ale_echo = substr($ale_echo, 0, -3);
+              echo "$ale_echo %</td>";
             }
 
             echo "<td $class align='right'>".hintapyoristys($kplhinta, 2)."</td>";
@@ -8524,7 +8541,6 @@ if ($tee == '') {
           }
 
           if ($yhtiorow['tilausrivin_korvamerkinta'] == 'K') {
-
             echo "<br>
                   <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='korvamerkitse'>
                   <input type='hidden' name='toim'       value = '$toim'>
@@ -8564,50 +8580,9 @@ if ($tee == '') {
                     $('#korvaspan_{$row['tunnus']}').show();
                   });
 
-                  </script>
-                  ";
-
-          }
-          elseif($yhtiorow['tilausrivin_korvamerkinta'] == 'A') {
-
-            echo "<br>
-                  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='korvamerkitse'>
-                  <input type='hidden' name='toim'       value = '$toim'>
-                  <input type='hidden' name='lopetus'     value = '$lopetus'>
-                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
-                  <input type='hidden' name='projektilla'   value = '$projektilla'>
-                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
-                  <input type='hidden' name='mista'       value = '$mista'>
-                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
-                  <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
-                  <input type='hidden' name='rivilaadittu'   value = '$row[laadittu]'>
-                  <input type='hidden' name='menutila'     value = '$menutila'>
-                  <input type='hidden' name='tila'       value = 'KORVAMERKITSE'>
-                  <input type='hidden' name='orig_tila'     value = '$orig_tila'>
-                  <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                  <span class='korvaspan' id='korvaspan_{$row['tunnus']}' style='display:none'>";
-
-            $kresult = t_avainsana("KORVAMERKKI");
-            echo "<select name='korvamerkinta' onchange='submit();'>";
-            echo "<option value = ''>".t('Ei korvamerkint‰‰')."</option>";
-
-            while ($krow = mysql_fetch_assoc($kresult)) {
-              $sel = $row['korvamerkinta'] == $krow['selite'] ? 'SELECTED' : '';
-              echo "<option value='$krow[selite]' $sel>$krow[selitetark]</option>";
-            }
-            echo "</select>";
-            echo "</span>
-                  </form>
-                  <input type='Submit' class='korvabutton' style='margin:5px 0' id='korvabutton_{$row['tunnus']}' value='".t("Korvamerkitse")."'>
-                  <script type='text/javascript' language='javascript'>
-                  $('#korvabutton_{$row['tunnus']}').click(function() {
-                    $('.korvabutton').show();
-                    $(this).hide();
-                    $('.korvaspan').hide();
-                    $('#korvaspan_{$row['tunnus']}').show();
-                  });
                   </script>";
           }
+
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
             $napinnimi = t("J‰lkitoim, heti");
@@ -8943,7 +8918,7 @@ if ($tee == '') {
           $row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
         }
 
-        if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
+        if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or $yhtiorow['tilausrivin_korvamerkinta'] == 'A' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
 
           echo "<tr>";
 
@@ -8962,6 +8937,21 @@ if ($tee == '') {
 
           echo "<td $kommclass1 colspan='".($sarakkeet-1)."' class='ptop'>";
 
+          if ($yhtiorow['tilausrivin_korvamerkinta'] == 'A') {
+            $kresult = t_avainsana("KORVAMERKKI");
+
+            echo "<div style='float: right;'>";
+            echo "<select name='korvamerkinta' class='korva_dd' id='korva_dd_$row[tunnus]'>";
+            echo "<option value = ''> *** </option>";
+
+            while ($krow = mysql_fetch_assoc($kresult)) {
+              $sel = $row['korvamerkinta'] == $krow['selite'] ? 'SELECTED' : '';
+              echo "<option value='$krow[selite]' $sel>$krow[selitetark]</option>";
+            }
+            echo "</select>";
+            echo "</div>";
+          }
+
           $font_color = "";
           if ($row['kommentti'] != '') {
 
@@ -8969,12 +8959,10 @@ if ($tee == '') {
               $font_color = "color='green'";
             }
 
-            echo t("Kommentti").":<br><font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
+            echo t("Kommentti").": <font {$font_color} style='font-weight: bold;'>".str_replace("\n", "<br>", $row["kommentti"])."</font><br>";
           }
 
           if ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') {
-            if ($row['kommentti'] != '') echo "<br>";
-
             $ap_font = "<font>";
             $ap_text = "";
 

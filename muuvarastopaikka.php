@@ -584,8 +584,7 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-
-      if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii]) {
+      if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii] and strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php") !== false) {
         $siirretaan_varattua = true;
       }
       elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
@@ -641,6 +640,7 @@ if ($tee == 'N') {
           $siirretaan[$iii] = $lisavartprow["tunnus"];
         }
       }
+
       // Päivitetään uusi paikka varatuille tilausriveille
       if ($siirretaan_varattua) {
         $query = "UPDATE tilausrivi

@@ -255,6 +255,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     }
   }
 
+  $osoitelappurow['viitelah'] = $data['viitelah'][0];
+  $osoitelappurow['viitevas'] = $data['viitevas'][0];
+
   // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
   $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
             FROM varastopaikat
@@ -932,6 +935,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     'kollityht'      => 0,
     'kuutiotyht'    => 0,
     'lavametriyht'    => 0,
+    'viitelah' => '',
+    'viitevas' => '',
     'tyhjanrahtikirjan_otsikkotiedot' => array(),
   );
 
@@ -952,6 +957,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     $data['kuutiot'][$i]       = $rahtikirja['kuutiot'];
     $data['lavametri'][$i]     = $rahtikirja['lavametri'];
     $data['toimitustapa'][$i]   = $rahtikirja['toimitustapa'];
+    $data['viitelah'][$i] = $rahtikirja['viitelah'];
+    $data['viitevas'][$i] = $rahtikirja['viitevas'];
     $data['tyhjanrahtikirjan_otsikkotiedot'][$i] = $rahtikirja['tyhjanrahtikirjan_otsikkotiedot'];
 
     // lis‰t‰‰n totaaleja

@@ -174,8 +174,7 @@ if ($toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_ro
 
   $sel = "";
   $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka != "kaikki" and $toimipaikka == 0);
-  $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
-  if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
+  if ($toimipaikka_requestista) {
     $sel = "selected";
     $toimipaikka = 0;
   }

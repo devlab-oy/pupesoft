@@ -2017,7 +2017,8 @@ if ($tila == '') {
     echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
     echo "</ul>";
     echo "</div>";
-    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "class='tooltip' id='rivi_$rivirow[rivitunnus]'", 1000, 1000);
+    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "", 1000, 1000);
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/alert.png' class='tooltip' id='rivi_{$rivirow['rivitunnus']}' />";
     echo "<br>$rivirow[toim_tuoteno]";
 
     echo "&nbsp;";

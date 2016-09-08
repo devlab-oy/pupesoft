@@ -637,15 +637,13 @@ if ($fieldname == "viivakoodi_purkulistaan") {
 }
 
 if ($fieldname == "purkulistan_asettelu") {
+  $sel = array($trow[$i] => 'selected') + array('A' => '', 'K' => '', 'P' => '');
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel = $trow[$i] == 'A' ? "selected" : "";
-
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value = ''>".t("Tuoteno, nimitys, paikka -asettelu")."</option>";
-  $ulos .= "<option value = 'A' {$sel}>".t("Tuoteno, paikka, nimitys -asettelu")."</option>";
-
-
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Tuoteno, nimitys, paikka, pitkä kommentti -asettelu")."</option>";
+  $ulos .= "<option value = 'A' {$sel['A']}>".t("Tuoteno, paikka, nimitys -asettelu")."</option>";
+  $ulos .= "<option value = 'P' {$sel['P']}>".t("Tuoteno, paikka, nimitys, pitkä kommentti -asettelu")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

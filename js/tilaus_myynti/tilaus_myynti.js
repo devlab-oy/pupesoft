@@ -182,7 +182,7 @@ $(document).ready(function() {
       }
     });
 
-    if (rivitunnus_chk.val() != '' && rivitunnus_chk.length != 0) {
+    if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
       $("input[name='hinta']").trigger('keyup');
     }
   }

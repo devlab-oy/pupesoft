@@ -6644,10 +6644,10 @@ if ($tee == '') {
         $headerit .= "<th style='text-align:right;' nowrap>".t("Ale")." ";
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          $headerit .= "$alepostfix/";
+          $headerit .= "$alepostfix + ";
         }
 
-        $headerit = substr($headerit, 0, -1);
+        $headerit = substr($headerit, 0, -3);
         $headerit .= "</th>";
         $sarakkeet++;
 
@@ -8327,10 +8327,10 @@ if ($tee == '') {
               echo "<td {$class} align='right'>";
               $ale_echo = "";
               for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-                $ale_echo .= $row["ale{$alepostfix}"]."/";
+                $ale_echo .= $row["ale{$alepostfix}"]." + ";
               }
 
-              $ale_echo = substr($ale_echo, 0, -1);
+              $ale_echo = substr($ale_echo, 0, -3);
               echo "$ale_echo %</td>";
             }
 

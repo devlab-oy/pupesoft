@@ -899,6 +899,10 @@ else {
             $komento=$kirrow['komento'];
           }
 
+          if ($valittu_tulostin == "-88") {
+            $komento = "-88";
+          }
+
           //tulostetaan sivu
           $params_kerayslista["komento"] = $komento;
           print_pdf_kerayslista($params_kerayslista);

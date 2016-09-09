@@ -124,6 +124,14 @@ enable_ajax();
 // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
 js_openFormInNewWindow();
 
+if ($tee == "POISTA_TILAUS") {
+  require "peru_laskutus.inc";
+
+  poista_tilaus_ja_laskutus($tunnus);
+
+  $tee = "TULOSTA";
+}
+
 if ($tee != 'NAYTATILAUS' and empty($vaihda) and $ytunnus == '' and $tilausviite == '' and $astilnro == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
   $query = "SELECT ytunnus, liitostunnus
@@ -522,7 +530,23 @@ if ($ytunnus != '') {
     $query .=  "$jarj";
   }
   else {
-    $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+    $query = "SELECT
+                $yhtioekolisa
+                lasku.tunnus tilaus,
+                lasku.laskunro,
+                concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas,
+                lasku.ytunnus,
+                lasku.toimaika,
+                lasku.laatija,
+                $summaselli
+                lasku.tila,
+                lasku.alatila,
+                lasku.hyvak1,
+                lasku.hyvak2,
+                lasku.h1time,
+                lasku.h2time,
+                lasku.luontiaika,
+                lasku.yhtio
               FROM lasku use index (yhtio_tila_luontiaika)
               $yhtioekojoin
               WHERE lasku.$logistiikka_yhtiolisa ";
@@ -777,6 +801,31 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
+      $poista_tilaus_whiteliset = array("tarja", "heidi", "virpi", "admin", "seija");
+
+      if ($row["tila"] != "U" and in_array($kukarow['kuka'], $poista_tilaus_whiteliset)) {
+        echo "<td class='back'>
+                <form>
+                  <input type='hidden' name='tee' value='POISTA_TILAUS'>
+                  <input type='hidden' name='toim' value='{$toim}'>
+                  <input type='hidden' name='asiakasid' value='{$asiakasid}'>
+                  <input type='hidden' name='ytunnus' value='{$ytunnus}'>
+                  <input type='hidden' name='ppa' value='{$ppa}'>
+                  <input type='hidden' name='kka' value='{$kka}'>
+                  <input type='hidden' name='vva' value='{$vva}'>
+                  <input type='hidden' name='ppl' value='{$ppl}'>
+                  <input type='hidden' name='kkl' value='{$kkl}'>
+                  <input type='hidden' name='vvl' value='{$vvl}'>
+                  <input type='hidden' name='tunnus' value='{$row["tilaus"]}'>
+
+                  <input type='submit'
+                         value='" . t("Poista") . "'
+                         style='background:#FF4200;'
+                         onclick='return confirm(\"" . t("Oletko varma?") . "\");'>
+                </form>
+              </td>";
+      }
+
       echo "<td class='back'>";
 
       if ($row['tila'] == "U" and tarkista_oikeus("tilauskasittely/tulostakopio.php", "LASKU")) {
@@ -790,7 +839,6 @@ if ($ytunnus != '') {
       }
 
       echo "</td>";
-
       echo "</tr>";
 
       $edlaskunro = $row["laskunro"];

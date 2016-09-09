@@ -684,6 +684,24 @@ if (!function_exists('finvoice_rivi')) {
       xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // veron m‰‰r‰
       xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // veroton rivihinta
       xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow["rivihinta_verollinen"], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // verollinen rivihinta
+
+      if (!empty($tilrow['tiliointirivitunnus'])) {
+        $query = "SELECT tiliointi.tilino,
+                  kustp.nimi kustannuspaikka,
+                  projekti.nimi projekti,
+                  kohde.nimi kohde
+                  FROM tiliointi
+                  LEFT JOIN kustannuspaikka kustp ON (tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus)
+                  LEFT JOIN kustannuspaikka projekti ON (tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus)
+                  LEFT JOIN kustannuspaikka kohde ON (tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus)
+                  WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+                  AND tiliointi.tunnus = {$tilrow['tiliointirivitunnus']}";
+        $tilires = pupe_query($query);
+        $tilirow = mysql_fetch_assoc($tilires);
+
+        xml_add("RowAccountNumber", $tilirow['tilino'], $tootfinvoice);
+      }
+
       fputs($tootfinvoice, "</InvoiceRow>\r\n");
     }
   }

@@ -618,6 +618,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 min(tilausrivi.kommentti) kommentti,
                 min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
                 min(tilausrivi.laadittu) laadittu,
+                min(tilausrivin_lisatiedot.tiliointirivitunnus) tiliointirivitunnus,
                 sum(tilausrivi.tilkpl) tilkpl,
                 sum(tilausrivi.kpl) kpl,
                 sum(tilausrivi.rivihinta) rivihinta,

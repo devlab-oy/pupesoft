@@ -3093,6 +3093,7 @@ if (!function_exists("tulosta_lasku")) {
               min(tilausrivi.kommentti) kommentti,
               min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
               min(tilausrivi.laadittu) laadittu,
+              min(tilausrivin_lisatiedot.tiliointirivitunnus) tiliointirivitunnus,
               sum(tilausrivi.tilkpl) tilkpl,
               sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
               sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,

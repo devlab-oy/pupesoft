@@ -437,7 +437,7 @@ if ($ytunnus != '') {
       $jarj = "ORDER BY $jarj";
     }
     else {
-      $jarj = "ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 2 desc, 1 asc";
+      $jarj = "ORDER BY abs(jaksotettu), jaksotettu, 2 desc, 1 asc";
     }
   }
 
@@ -451,7 +451,7 @@ if ($ytunnus != '') {
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
 
     if ($sopimus > 0) {
-      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -459,7 +459,7 @@ if ($ytunnus != '') {
                  and $til
                  and lasku.tunnus='$sopimus')
                  UNION
-                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -467,7 +467,7 @@ if ($ytunnus != '') {
                  and $til
                  and lasku.vanhatunnus='$sopimus')
                  UNION
-                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -476,7 +476,7 @@ if ($ytunnus != '') {
                  and lasku.clearing='sopimus'
                  and lasku.swift='$sopimus')
                  UNION
-                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -485,7 +485,7 @@ if ($ytunnus != '') {
                  and (lasku.jaksotettu='{$sopimus}' or lasku.jaksotettu='-{$sopimus}'))";
     }
     elseif ($laskunro > 0) {
-      $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+      $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                 FROM lasku
                 $yhtioekojoin
                 WHERE lasku.$logistiikka_yhtiolisa
@@ -494,7 +494,7 @@ if ($ytunnus != '') {
                 and lasku.laskunro='$laskunro'";
     }
     else {
-      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+      $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -502,7 +502,7 @@ if ($ytunnus != '') {
                  and $til
                  and lasku.tunnus='$otunnus')
                  UNION
-                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -510,7 +510,7 @@ if ($ytunnus != '') {
                  and $til
                  and lasku.vanhatunnus='$otunnus')
                  UNION
-                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+                 (SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
                  FROM lasku
                  $yhtioekojoin
                  WHERE lasku.$logistiikka_yhtiolisa
@@ -522,7 +522,7 @@ if ($ytunnus != '') {
     $query .=  "$jarj";
   }
   else {
-    $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
+    $query = "SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio, lasku.jaksotettu
               FROM lasku use index (yhtio_tila_luontiaika)
               $yhtioekojoin
               WHERE lasku.$logistiikka_yhtiolisa ";
@@ -580,18 +580,18 @@ if ($ytunnus != '') {
 
     if ($kukarow["hinnat"] == 0) {
       if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 12, 13)));
+        pupe_DataTables(array(array($pupe_DataTables, 12, 14)));
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+        pupe_DataTables(array(array($pupe_DataTables, 11, 13)));
       }
     }
     else {
       if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+        pupe_DataTables(array(array($pupe_DataTables, 11, 13)));
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+        pupe_DataTables(array(array($pupe_DataTables, 10, 12)));
       }
     }
 

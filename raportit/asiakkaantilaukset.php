@@ -434,7 +434,7 @@ if ($ytunnus != '') {
       $jarj = "ORDER BY $jarj";
     }
     else {
-      $jarj = "ORDER BY 3 desc, 2 asc";
+      $jarj = "ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 3 desc, 2 asc";
     }
   }
   else {
@@ -445,7 +445,7 @@ if ($ytunnus != '') {
       $jarj = "ORDER BY $jarj";
     }
     else {
-      $jarj = "ORDER BY 2 desc, 1 asc";
+      $jarj = "ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 2 desc, 1 asc";
     }
   }
 
@@ -565,7 +565,7 @@ if ($ytunnus != '') {
     $query .= "  and $til
           and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
           and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-          ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 2 DESC, 1 ASC";
+          $jarj";
   }
 
   if ($kaikki == "") {

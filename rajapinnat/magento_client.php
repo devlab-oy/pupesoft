@@ -771,6 +771,7 @@ class MagentoClient {
         // Päivitetään olemassa olevaa configurablea
         else {
           $sticky_kategoriat = $this->_sticky_kategoriat;
+          $tuoteryhmayliajo = $this->_universal_tuoteryhma;
 
           // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
           $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
@@ -784,6 +785,11 @@ class MagentoClient {
                 $configurable['categories'][] = $stick;
               }
             }
+          }
+
+          // Ei muuteta tuoteryhmiä jos yliajo on päällä
+          if (!empty($tuoteryhmayliajo)) {
+            $configurable['categories'] = $current_categories;
           }
 
           $this->_proxy->call($this->_session, 'catalog_product.update',

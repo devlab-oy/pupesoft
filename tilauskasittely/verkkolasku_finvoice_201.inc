@@ -699,7 +699,7 @@ if (!function_exists('finvoice_rivi')) {
         $tilires = pupe_query($query);
         $tilirow = mysql_fetch_assoc($tilires);
 
-        xml_add("RowAccountNumber", $tilirow['tilino'], $tootfinvoice);
+        xml_add("SalesAccountNumber", $tilirow['tilino'], $tootfinvoice);
       }
 
       fputs($tootfinvoice, "</InvoiceRow>\r\n");

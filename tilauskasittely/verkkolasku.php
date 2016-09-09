@@ -2309,7 +2309,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             else {
@@ -2364,7 +2364,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
                 finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
               }
               else {
@@ -2379,7 +2379,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
               finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
             }
 
@@ -2687,7 +2687,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
@@ -2712,7 +2712,7 @@ else {
               //N‰m‰ menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
@@ -2951,6 +2951,23 @@ else {
             $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
 
             $tulos_ulos .= "PPG-lasku $invoice_number[1]: $status<br>\n";
+          }
+        }
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "talenom" and file_exists(realpath($nimifinvoice))) {
+        // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+        $talenom_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
+        $talenom_laskumaara = count($talenom_laskuarray);
+
+        if ($talenom_laskumaara > 0) {
+          require_once "tilauskasittely/tulosta_lasku.inc";
+
+          for ($a = 1; $a < $talenom_laskumaara; $a++) {
+            preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $talenom_laskuarray[$a], $invoice_number);
+
+            $status = talenom_queue($invoice_number[1], "<SOAP-ENV:Envelope".$talenom_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "Talenom-lasku $invoice_number[1]: $status<br>\n";
           }
         }
       }

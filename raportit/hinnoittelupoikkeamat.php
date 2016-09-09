@@ -158,7 +158,7 @@ else {
 
       $x = 1;
 
-      $rahtinro_tuoteno_lisa = "'{$yhtiorow['rahti_tuotenumero']}', ";
+      $rahtinro_tuoteno_lisa = "'{$yhtiorow['rahti_tuotenumero']}'";
       $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       $query = "SELECT *

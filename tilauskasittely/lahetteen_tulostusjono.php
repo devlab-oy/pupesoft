@@ -22,6 +22,7 @@ if (!isset($jarj)) $jarj = '';
 if (!isset($etsi)) $etsi = '';
 if (!isset($tumaa)) $tumaa = '';
 if (!isset($tee2)) $tee2 = '';
+if (!isset($show_ohjelma_moduli)) $show_ohjelma_moduli = false;
 
 $valmistuslinjat = hae_valmistuslinjat();
 
@@ -1074,7 +1075,7 @@ if ($tee2 == '') {
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tilauksen_paino'; document.forms['find'].submit();\">".t("Paino")."</a></th>";
 
-    if (show_ohjelma_moduli_for(basename(__FILE__, '.php'))) {
+    if ($show_ohjelma_moduli) {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ohjelma_moduli'; document.forms['find'].submit();\">".t("Lähde")."</a></th>";
     }
 
@@ -1204,7 +1205,7 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
       echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
-      if (show_ohjelma_moduli_for(basename(__FILE__, '.php'))) {
+      if ($show_ohjelma_moduli) {
         echo "<{$ero} valign='top'>" . humanize_ohjelma_moduli($tilrow['ohjelma_moduli']) . "</{$ero}>";
       }
 
@@ -1400,7 +1401,7 @@ if ($tee2 == '') {
     echo t("Rivejä yhteensä")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    if (show_ohjelma_moduli_for(basename(__FILE__, '.php'))) {
+    if ($show_ohjelma_moduli) {
       $spanni = 5;
     }
     else {

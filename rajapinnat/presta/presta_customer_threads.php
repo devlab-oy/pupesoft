@@ -19,6 +19,8 @@ class PrestaCustomerThreads extends PrestaClient {
       $customer_threads = $this->all($display, $filters, null, $id_group_shop);
     }
     catch (Exception $e) {
+      $this->logger->log('Thread fetch failed!');
+
       return $thread_ids;
     }
 
@@ -27,6 +29,38 @@ class PrestaCustomerThreads extends PrestaClient {
     }
 
     return $thread_ids;
+  }
+
+  public function messages_by_thread($thread_id) {
+    $this->logger->log('Fetching messages for thread');
+
+    $message_ids = array();
+
+    try {
+      $thread = $this->get($thread_id);
+    }
+    catch (Exception $e) {
+      $this->logger->log('Message fetch failed!');
+
+      return $message_ids;
+    }
+
+    if (empty($thread['associations']) or empty($thread['associations']['customer_messages'])) {
+      return $message_ids;
+    }
+
+    $messages = $thread['associations']['customer_messages'];
+
+    foreach ($messages as $key => $message) {
+      // read only messages
+      if ($key != 'customer_message') {
+        continue;
+      }
+
+      $message_ids[] = $message['id'];
+    }
+
+    return $message_ids;
   }
 
   protected function resource_name() {

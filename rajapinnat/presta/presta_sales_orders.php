@@ -272,9 +272,10 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_name = $this->clean_name($invoice_address['firstname'], $invoice_address['lastname']);
     $delivery_name = $this->clean_name($delivery_address['firstname'], $delivery_address['lastname']);
 
-    // fetch order messages, separate them with two newlines
+    // fetch order messages, implode into one string, and remove newlines.
     $order_messages = $this->presta_customer_messages->messages_by_order($order['id']);
-    $order_message = implode("\n\n", $order_messages);
+    $order_message  = implode(' ', $order_messages);
+    $order_message  = trim(preg_replace('/\s+/', ' ', $order_message));
 
     // empty edi_order
     $this->edi_order = '';

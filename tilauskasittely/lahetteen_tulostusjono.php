@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 require "../inc/parametrit.inc";
 require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
@@ -23,6 +25,16 @@ if (!isset($etsi)) $etsi = '';
 if (!isset($tumaa)) $tumaa = '';
 if (!isset($tee2)) $tee2 = '';
 if (!isset($show_ohjelma_moduli)) $show_ohjelma_moduli = false;
+
+
+if ($show_ohjelma_moduli) {
+  setcookie('show_ohjelma_moduli', true, strtotime('+1 year'));
+}
+
+
+ob_end_flush();
+
+$show_ohjelma_moduli = ($show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true);
 
 $valmistuslinjat = hae_valmistuslinjat();
 

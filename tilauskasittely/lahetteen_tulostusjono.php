@@ -34,7 +34,7 @@ if ($show_ohjelma_moduli) {
 
 ob_end_flush();
 
-$show_ohjelma_moduli = ($show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true);
+$show_ohjelma_moduli = $show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true;
 
 $valmistuslinjat = hae_valmistuslinjat();
 

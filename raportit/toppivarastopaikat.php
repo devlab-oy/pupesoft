@@ -500,8 +500,14 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
   }
 
   if ($tyyppi == "TUOTE") {
+    $tuote_statukset = array(
+      'A' => 'Aktiivi',
+      'E' => 'Ehdokastuote',
+      'T' => 'Tilaustuote',
+      'P' => 'Poistettu',
+    );
+
     $vresult = t_avainsana("S");
-    $tuote_statukset = array();
 
     while ($status = mysql_fetch_assoc($vresult)) {
       $tuote_statukset[$status['selite']] = $status['selitetark'];

@@ -1676,9 +1676,32 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
 function hae_tuote_statukset($request = array()) {
   global $kukarow, $yhtiorow;
 
+  $statukset = array(
+    array(
+      'selite'   => 'A',
+      'selected'   => $request['valittu_status'] == 'A' ? 'selected' : '',
+      'selitetark' => t('Aktiivi')
+    ),
+    array(
+      'selite'   => 'E',
+      'selected'   => $request['valittu_status'] == 'E' ? 'selected' : '',
+      'selitetark' => t('Ehdokastuote')
+    ),
+    array(
+      'selite'   => 'T',
+      'selected'   => $request['valittu_status'] == 'T' ? 'selected' : '',
+      'selitetark' => t('Tilaustuote')
+    ),
+    array(
+      'selite'   => 'P',
+      'selected'   => $request['valittu_status'] == 'P' ? 'selected' : '',
+      'selitetark' => t('Poistettu')
+    ),
+  );
+
   $result = t_avainsana("S");
-  $statukset = array();
-  while ($status = mysql_fetch_array($result)) {
+
+  while ($status = mysql_fetch_assoc($result)) {
     $status['selected'] = '';
     if (!empty($request['valittu_status']) and $request['valittu_status'] == $status['selite']) {
       $status['selected'] = 'selected';

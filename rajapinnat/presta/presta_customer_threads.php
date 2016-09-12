@@ -7,6 +7,28 @@ class PrestaCustomerThreads extends PrestaClient {
     parent::__construct($url, $api_key, $log_file);
   }
 
+  public function find_by_order($order_id) {
+    $this->logger->log('Fetching message threads for order');
+
+    $display = array('id');
+    $filters = array('id_order' => $order_id);
+    $id_group_shop = $this->shop_group_id();
+    $thread_ids = array();
+
+    try {
+      $customer_threads = $this->all($display, $filters, null, $id_group_shop);
+    }
+    catch (Exception $e) {
+      return $thread_ids;
+    }
+
+    foreach ($customer_threads as $thread) {
+      $thread_ids[] = $thread['id'];
+    }
+
+    return $thread_ids;
+  }
+
   protected function resource_name() {
     return 'customer_threads';
   }

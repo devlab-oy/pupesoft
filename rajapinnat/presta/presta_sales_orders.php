@@ -1,11 +1,12 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_addresses.php';
-require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_carrier_files.php';
+require_once 'rajapinnat/presta/presta_carriers.php';
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 require_once 'rajapinnat/presta/presta_currencies.php';
+require_once 'rajapinnat/presta/presta_customer_messages.php';
 require_once 'rajapinnat/presta/presta_order_histories.php';
 
 class PrestaSalesOrders extends PrestaClient {
@@ -20,6 +21,7 @@ class PrestaSalesOrders extends PrestaClient {
   private $presta_changeable_invoice_address = true;
   private $presta_countries = null;
   private $presta_currencies = null;
+  private $presta_customer_messages = null;
   private $presta_order_histories = null;
   private $verkkokauppa_customer = null;
   private $yhtiorow = array();
@@ -30,6 +32,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->presta_carriers = new PrestaCarriers($url, $api_key, $log_file);
     $this->presta_countries = new PrestaCountries($url, $api_key, $log_file);
     $this->presta_currencies = new PrestaCurrencies($url, $api_key, $log_file);
+    $this->presta_customer_messages = new PrestaCustomerMessages($url, $api_key, $log_file);
     $this->presta_order_histories = new PrestaOrderHistories($url, $api_key, $log_file);
 
     parent::__construct($url, $api_key, $log_file);
@@ -269,6 +272,11 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_name = $this->clean_name($invoice_address['firstname'], $invoice_address['lastname']);
     $delivery_name = $this->clean_name($delivery_address['firstname'], $delivery_address['lastname']);
 
+    // fetch order messages, implode into one string, and remove newlines.
+    $order_messages = $this->presta_customer_messages->messages_by_order($order['id']);
+    $order_message  = implode(' ', $order_messages);
+    $order_message  = trim(preg_replace('/\s+/', ' ', $order_message));
+
     // empty edi_order
     $this->edi_order = '';
     $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
@@ -300,6 +308,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_KULJETUSOHJE:");
     $this->add_row("OSTOTIL.OT_LAHETYSTAPA:");
     $this->add_row("OSTOTIL.OT_VAHVISTUS_FAKSILLA:");
+    $this->add_row("OSTOTIL.OT_TILAUSVIESTI:{$order_message}");
     $this->add_row("OSTOTIL.OT_FAKSI:");
     $this->add_row("OSTOTIL.OT_ASIAKASNRO:{$pupesoft_customer_id}");
     $this->add_row("OSTOTIL.OT_YRITYS:");

@@ -104,6 +104,7 @@ if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
 if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
+if (!isset($status))                 $status = '';
 
 // setataan
 $lisa = "";
@@ -307,13 +308,18 @@ if (!$php_cli) {
 
   $result = t_avainsana("S");
 
-  echo "<td><select name='status'><option value=''>", t("Kaikki"), "</option>";
+  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '', 'A' => '');
+
+  echo "<td><select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
+  echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
+  echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+  echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
 
   while ($statusrow = mysql_fetch_assoc($result)) {
-    $sel = '';
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
-    echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
+    $sel = $status == $statusrow['selite'] ? 'selected' : '';
+    echo "<option value='{$statusrow['selite']}' {$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
   }
 
   echo "</select></td></tr>";

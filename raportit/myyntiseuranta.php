@@ -49,6 +49,8 @@ echo "<script type='text/javascript'>
 
 echo "<font class='head'>", t("Myynninseuranta"), "</font><hr>";
 
+$status = isset($status) ? $status : '';
+
 // tehd‰‰n kaikista raportin parametreist‰ yksi muuttuja serialisoimista varten
 $kaikki_muuttujat_array = array();
 
@@ -621,14 +623,18 @@ if ($lopetus == "") {
 
   $status_result = t_avainsana("S");
 
-  echo "<td colspan='3'><select name='status'><option value=''>", t("Kaikki"), "</option>";
+  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '');
+
+  echo "<td colspan='3'>";
+  echo "<select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo "<option value = 'A'>A - ".t("Aktiivi")."</option>";
+  echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
+  echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+  echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
 
   while ($statusrow = mysql_fetch_assoc($status_result)) {
-
-    $sel = '';
-
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
+    $sel = $status == $statusrow['selite'] ? 'selected' : '';
     echo "<option value='{$statusrow['selite']}'{$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
   }
 

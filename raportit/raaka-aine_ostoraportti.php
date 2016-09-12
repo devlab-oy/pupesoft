@@ -684,11 +684,17 @@ if (!isset($tee) or $tee == "") {
   echo "</td>";
   echo "</tr>";
 
+  $sel = array_fill_keys($multi_status, 'selected');
+
   echo "<tr>";
   echo "<th>".t("Valmisteen status")."</th>";
   echo "<td>";
   echo "<select multiple='multiple' class='multipleselect' name='multi_status[]' onchange='submit();'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
+  echo "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
+  echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
+  echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+  echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
 
   $result = t_avainsana("S");
 

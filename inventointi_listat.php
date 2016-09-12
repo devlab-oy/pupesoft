@@ -39,6 +39,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+$status = isset($status) ? $status : '';
+
 echo "<font class='head'>", t("Tulosta inventointilista"), "</font><hr>";
 
 echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
@@ -302,7 +304,7 @@ else {
   echo "<input type='hidden' name='vapaa_teksti' value='' />";
 }
 
-$sel = (!empty($status) and $status == 'EI') ? "selected" : "";
+$sel = array($status => 'selected') + array('EI' => '', 'A' => '', 'T' => '', 'P' => '', 'E' => '');
 
 $result = t_avainsana("S");
 
@@ -310,10 +312,17 @@ echo "<tr><th>", t("Tuotteen status:"), "</th>";
 echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
-echo "<option value='EI' {$sel}>", t("Ei listata poistettuja tuotteita"), "</option>";
+echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
+echo "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
+echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
+echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
+
 while ($_status = mysql_fetch_assoc($result)) {
-  echo "<option value='{$_status['selite']}'>{$_status['selitetark']}</option>";
+  $sel = $status == $_status['selite'] ? 'selected' : '';
+  echo "<option value='{$_status['selite']}' {$sel}>{$_status['selitetark']}</option>";
 }
+
 echo "</select>";
 echo "</td>";
 echo "</tr>";

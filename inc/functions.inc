@@ -33614,15 +33614,3 @@ if (!function_exists('humanize_ohjelma_moduli')) {
     return $map[strtolower($ohjelma_moduli)];
   }
 }
-
-if (!function_exists('show_ohjelma_moduli_for')) {
-  function show_ohjelma_moduli_for($ohjelma) {
-    $ohjelmat = t_avainsana('OMODULI_SHOW', '', "", '', '', 'selitetark');
-
-    if (!$ohjelmat) return false;
-
-    $ohjelmat = explode(',', $ohjelmat);
-
-    return in_array($ohjelma, $ohjelmat);
-  }
-}

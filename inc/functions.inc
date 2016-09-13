@@ -33723,6 +33723,17 @@ if (!function_exists('hae_toimitustapa')) {
   }
 }
 
+if (!function_exists('product_status_options')) {
+  function product_status_options(array $sel) {
+    $options  = "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
+    $options .= "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
+    $options .= "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
+    $options .= "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+
+    return $options;
+  }
+}
+
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
     global $kukarow;

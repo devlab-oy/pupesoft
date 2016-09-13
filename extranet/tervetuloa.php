@@ -216,12 +216,7 @@ if ($tee == '') {
         $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='180'>";
       }
 
-      if ((int) $yhtiorow["extranet_logo"] > 0 and $kuva == '') {
-        $liite = hae_liite($yhtiorow["extranet_logo"], "Yllapito", "array");
-
-        $kuva = "<img src='view.php?id=$liite[tunnus]' width='180'>";
-      }
-      elseif ((int) $yhtiorow["logo"] > 0 and $kuva == '') {
+      if ((int) $yhtiorow["logo"] > 0 and $kuva == '') {
         $liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
 
         $kuva = "<img src='view.php?id=$liite[tunnus]' width='180'>";

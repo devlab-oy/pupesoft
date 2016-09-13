@@ -623,15 +623,12 @@ if ($lopetus == "") {
 
   $status_result = t_avainsana("S");
 
-  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '');
+  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '', 'A' => '');
 
   echo "<td colspan='3'>";
   echo "<select name='status'>";
   echo "<option value=''>", t("Kaikki"), "</option>";
-  echo "<option value = 'A'>A - ".t("Aktiivi")."</option>";
-  echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
-  echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
-  echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
+  echo product_status_options($sel);
 
   while ($statusrow = mysql_fetch_assoc($status_result)) {
     $sel = $status == $statusrow['selite'] ? 'selected' : '';

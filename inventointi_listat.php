@@ -313,10 +313,8 @@ echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
 echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
-echo "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
-echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
-echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
-echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
+
+echo product_status_options($sel);
 
 while ($_status = mysql_fetch_assoc($result)) {
   $sel = $status == $_status['selite'] ? 'selected' : '';

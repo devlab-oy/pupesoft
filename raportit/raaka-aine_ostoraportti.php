@@ -691,10 +691,7 @@ if (!isset($tee) or $tee == "") {
   echo "<td>";
   echo "<select multiple='multiple' class='multipleselect' name='multi_status[]' onchange='submit();'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
-  echo "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
-  echo "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
-  echo "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
-  echo "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
+  echo product_status_options($sel);
 
   $result = t_avainsana("S");
 

@@ -313,7 +313,6 @@ echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
 echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
-
 echo product_status_options($sel);
 
 while ($_status = mysql_fetch_assoc($result)) {

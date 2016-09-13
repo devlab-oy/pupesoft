@@ -1269,6 +1269,7 @@ if ($tee == 'MONISTA') {
           $values .= ", ''";
           break;
         case 'kate_korjattu':
+        case 'lahetetty_ulkoiseen_varastoon':
           $values .= ", NULL";
           break;
         case 'toimitustavan_lahto':
@@ -1422,9 +1423,6 @@ if ($tee == 'MONISTA') {
             $valrow = mysql_fetch_assoc($vresult);
             $values .= ", '{$valrow['kurssi']}'";
           }
-          break;
-        case 'lahetetty_ulkoiseen_varastoon':
-          $values .= ", NULL";
           break;
         default:
           $values .= ", '".$monistarow[$fieldname]."'";

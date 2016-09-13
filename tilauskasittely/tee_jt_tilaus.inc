@@ -417,7 +417,8 @@ if (!function_exists("tee_jt_tilaus")) {
             $fieldname == 'poistumistoimipaikka_koodi') {
             $query .= $fieldname."='',";
           }
-          elseif ($fieldname == 'kate_korjattu') {
+          elseif ($fieldname == 'kate_korjattu' or
+            $fieldname == 'lahetetty_ulkoiseen_varastoon') {
             $query .= $fieldname." = NULL,";
           }
           elseif ($fieldname == 'tilausvahvistus') {

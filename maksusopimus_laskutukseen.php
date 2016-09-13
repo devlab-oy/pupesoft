@@ -148,7 +148,8 @@ if (!function_exists("ennakkolaskuta")) {
         $fieldname == 'poistumistoimipaikka_koodi') {
         $query .= $fieldname."='',";
       }
-      elseif ($fieldname == 'kate_korjattu') {
+      elseif ($fieldname == 'kate_korjattu' or
+        $fieldname == 'lahetetty_ulkoiseen_varastoon') {
         $query .= $fieldname." = NULL,";
       }
       // maksuehto tulee tältä positiolta

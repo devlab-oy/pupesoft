@@ -1834,6 +1834,7 @@ else {
               $values .= ", '$split_toimitustapa'";
               break;
             case 'kate_korjattu':
+            case 'lahetetty_ulkoiseen_varastoon':
               $values .= ", NULL";
               break;
             default:

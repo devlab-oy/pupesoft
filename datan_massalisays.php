@@ -452,6 +452,10 @@ if ($tee == 'GO') {
             $kuvaselite = $apuselite;
           }
 
+          if (trim($kayttotarkoitus_custom) != '') {
+            $kayttotarkoitus = $kayttotarkoitus_custom;
+          }
+
           // poistetaan vanhat kuvat ja ...
           $query = "DELETE FROM liitetiedostot
                     WHERE yhtio         = '$kukarow[yhtio]'
@@ -460,10 +464,6 @@ if ($tee == 'GO') {
                     and kayttotarkoitus = '$kayttotarkoitus'
                     and filename        = '$apukuva'";
           $delresult = pupe_query($query);
-
-          if (trim($kayttotarkoitus_custom) != '') {
-            $kayttotarkoitus = $kayttotarkoitus_custom;
-          }
 
           // lis‰t‰‰n uusi
           $query = "INSERT INTO liitetiedostot SET

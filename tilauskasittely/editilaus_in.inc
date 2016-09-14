@@ -591,6 +591,13 @@ while ($tietue = fgets($fd)) {
     }
     break;
 
+  case 'OSTOTIL.OT_RAHTIVAPAA' :
+    // halutaanko tilaus rahtivapaana
+    if ($tieto == "1") {
+      $editilaus_rahtivapaa = "o";
+    }
+    break;
+
   case 'OFTXGENTX' :
     //Kommentti
     $edi_kommentti .= $tieto." \n";

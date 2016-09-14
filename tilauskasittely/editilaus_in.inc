@@ -593,7 +593,7 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_RAHTIVAPAA' :
     // halutaanko tilaus rahtivapaana
-    if ($tieto == "1") {
+    if ($edi_tyyppi == "magento" and $tieto == "1") {
       $editilaus_rahtivapaa = "o";
     }
     break;

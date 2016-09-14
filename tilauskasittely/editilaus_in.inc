@@ -31,11 +31,15 @@ if ($php_cli) {
   $edi_tyyppi  = trim($argv[2]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
-  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
-  if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^magento\-order/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'magento';
+  }
+
+  // tunnistetaan presta -tyyppinen käsittely tiedostonimestä
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^presta\-order/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'presta';
   }
 
   // Pupeasennuksen root

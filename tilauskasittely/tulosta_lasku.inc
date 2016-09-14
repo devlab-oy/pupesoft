@@ -3136,54 +3136,7 @@ if (!function_exists("tulosta_lasku")) {
 
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
-        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
-                  tuoteperhe.kerroin,
-                  tuoteperhe.hintakerroin myyntihinta,
-                  tuoteperhe.hintakerroin hinta,
-                  round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
-                  round(tuoteperhe.hintakerroin * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa,
-                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa_verollinen
-                  FROM tuoteperhe
-                  JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
-                  WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                  AND tuoteperhe.isatuoteno = '$row[tuoteno]'
-                  AND tuoteperhe.tyyppi     = 'O'
-                  ORDER BY tuote.tuoteno";
-        $tuoteperhe_result = pupe_query($query);
-
-        if (mysql_num_rows($tuoteperhe_result) > 0) {
-          while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-
-            $lisarow = $row;
-
-            $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
-            $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
-            $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
-
-            $lisarow["hinta"] = $tuoteperhe_row["hinta"];
-            $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
-            $lisarow["rivihinta"] = $tuoteperhe_row["rivihinta"];
-            $lisarow["rivihinta_verollinen"] = $tuoteperhe_row["rivihinta_verollinen"];
-            $lisarow["rivihinta_valuutassa"] = $tuoteperhe_row["rivihinta_valuutassa"];
-            $lisarow["rivihinta_valuutassa_verollinen"] = $tuoteperhe_row["rivihinta_valuutassa_verollinen"];
-
-            $lisarow["tilkpl"] = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
-            $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
-            $lisarow["jt"] = $tuoteperhe_row["kerroin"]*$row["jt"];
-            $lisarow["kpl"] = $tuoteperhe_row["kerroin"]*$row["kpl"];
-
-            if ($laskutyyppi == 21 or $laskutyyppi == 22) {
-              $lisarow['kpl'] = $lisarow['kpl'] * 1;
-              $lisarow['tilkpl'] = $lisarow['tilkpl'] * 1;
-            }
-
-            $laskurows[] = $lisarow;
-          }
-        }
-        else {
-          $laskurows[] = $row;
-        }
+        $laskurows = array_merge($laskurows, pura_osaluettelot($laskurow, $row, $laskutyyppi));
       }
       else {
         $laskurows[] = $row;

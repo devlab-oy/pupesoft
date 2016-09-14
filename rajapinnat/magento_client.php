@@ -388,9 +388,11 @@ class MagentoClient {
       }
 
       // Lisätään tai päivitetään tuote
-
+      $toiminto = '';
       // Jos tuotetta ei ole olemassa niin lisätään se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {
+        $toiminto = 'create';
+
         try {
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
@@ -433,6 +435,7 @@ class MagentoClient {
       }
       // Tuote on jo olemassa, päivitetään
       else {
+        $toiminto = 'update';
         try {
 
           $sticky_kategoriat = $this->_sticky_kategoriat;
@@ -540,7 +543,7 @@ class MagentoClient {
       $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
       // Lisätään kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+      $this->lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if ($this->_asiakaskohtaiset_tuotehinnat) {
@@ -747,8 +750,10 @@ class MagentoClient {
           $this->debug('magento_tuotteet', $simple_tuote_data);
         }
 
+        $toiminto = '';
         // Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
         if (!in_array($nimitys, $skus_in_store)) {
+          $toiminto = 'create';
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
             $configurable['status'] = self::DISABLED;
@@ -770,6 +775,7 @@ class MagentoClient {
         }
         // Päivitetään olemassa olevaa configurablea
         else {
+          $toiminto = 'update';
           $sticky_kategoriat = $this->_sticky_kategoriat;
           $tuoteryhmayliajo = $this->_universal_tuoteryhma;
 
@@ -842,7 +848,7 @@ class MagentoClient {
         $tuotekuvat = $this->hae_tuotekuvat($lapsituotteen_tiedot['tunnus']);
 
         // Lisätään kuvat Magentoon
-        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+        $this->lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto);
       }
       catch (Exception $e) {
         $this->_error_count++;
@@ -2127,8 +2133,16 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
-  private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
-    if (count($tuotekuvat) == 0 or empty($product_id)) {
+  private function lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto) {
+    if (count($tuotekuvat) == 0 or empty($product_id) or (($toiminto == 'update' or $toiminto == '') and $this->magento_lisaa_tuotekuvat == 'create_only')) {
+      $this->log('magento_tuotteet', "Tuotekuvia ei käsitellä");
+      $debug_data = array (
+        'tuotekoodi'               => $product_id,
+        'toiminto'                 => $toiminto,
+        'tuotekuvien_lkm'          => count($tuotekuvat),
+        'magento_tuotekuva_asetus' => $this->magento_lisaa_tuotekuvat,
+      );
+      $this->debug('magento_tuotteet', $debug_data);
       return;
     }
 
@@ -2205,7 +2219,7 @@ class MagentoClient {
   // Poistaa tuotteen tuotekuvan Magentosta
   private function poista_tuotekuva($product_id, $filename) {
     // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
-    if ($this->magento_lisaa_tuotekuvat === false) {
+    if ($this->magento_lisaa_tuotekuvat === false or $this->magento_lisaa_tuotekuvat == 'create_only') {
       return;
     }
 
@@ -2240,7 +2254,7 @@ class MagentoClient {
 
     // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
     if ($this->magento_lisaa_tuotekuvat === false) {
-      $this->log('magento_tuotteet', 'Tuotekuvia ei käsitellä.');
+      $this->log('magento_tuotteet', 'Tuotekuvia ei haeta.');
 
       return array();
     }

@@ -1629,7 +1629,7 @@ while ($tietue = fgets($fd)) {
         $insertvarasto = $varasto;
       }
 
-      // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
+      // Jos toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
       }

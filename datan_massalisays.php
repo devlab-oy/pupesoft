@@ -14,6 +14,18 @@ if ($yhtiorow['kuvapankki_polku'] == '') {
   exit;
 }
 
+ini_set("memory_limit", "5G");
+ini_set("post_max_size", "100M");
+ini_set("upload_max_filesize", "100M");
+ini_set("mysql.connect_timeout", 600);
+ini_set("max_execution_time", 18000);
+
+// Ei k‰ytet‰ pakkausta
+$compression = FALSE;
+
+$kasitellaan_tiedosto = false;
+$filearray = array();
+
 function listdir($start_dir = '.') {
 
   $files = array();
@@ -202,6 +214,40 @@ if ($tee == 'GO') {
 
   echo "<font class='message'>".t("P‰ivitet‰‰n tuotekuvat j‰rjestelm‰‰n").":</font>";
   echo "<br><br>";
+
+  if (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
+
+    $kasitellaan_tiedosto = true;
+
+    if ($_FILES['userfile']['size'] == 0) {
+      echo "<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>";
+      $kasitellaan_tiedosto = false;
+    }
+
+    echo "<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>";
+
+    $retval = tarkasta_liite("userfile", array("CSV","TXT"));
+
+    if ($retval !== true) {
+      echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
+      $kasitellaan_tiedosto = false;
+    }
+
+    if ($kasitellaan_tiedosto) {
+      $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+
+      $filerivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+      foreach ($filerivit as $rivi) {
+        list($filetuoteno, $filename) = explode(";", $rivi[0]);
+
+        $filetuoteno = pupesoft_cleanstring($filetuoteno);
+        $filename    = pupesoft_cleanstring($filename);
+
+        $filearray[$filename] = $filetuoteno;
+      }
+    }
+  }
 
   // k‰yd‰‰n l‰pi dirikka nyt uudestaan
   $files = listdir($dirri);
@@ -449,6 +495,16 @@ if ($tee == 'GO') {
         $mihin   = strpos($kuva, ".$ext");
         $tuoteno = substr($kuva, 0, "$mihin");
 
+        # Tiedostossa voi olla tuotenumeron k‰‰ntˆ
+        if (count($filearray) > 0) {
+          if (!empty($filearray[$kuva])) {
+            $tuoteno = $filearray[$kuva];
+          }
+          else {
+            continue;
+          }
+        }
+
         $query = "SELECT tuoteno, tunnus
                   FROM tuote
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -676,7 +732,7 @@ foreach ($files as $file) {
 }
 
 // k‰yttˆliittym‰
-echo "<form name='uliuli' method='post'>";
+echo "<form name='uliuli' method='post' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee' value='GO'>";
 
 echo "<table>";
@@ -710,6 +766,11 @@ echo "<tr>";
 echo "<td>".t("K‰sittele")."</td>";
 echo "<td>{$lukutconvertit} ".t("kpl")."</td>";
 echo "<td><input type='checkbox' name='kasittele_kuvat' value='1'></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Vapaavalintaiset kuvien nimet tiedostosta").":</th>";
+echo "<td colspan='2'><input name='userfile' type='file'></td>";
 echo "</tr>";
 
 echo "</table>";

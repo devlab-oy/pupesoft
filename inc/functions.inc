@@ -2523,7 +2523,7 @@ if (!function_exists("synkronoi")) {
       return false;
     }
 
-    //  Haetaan master
+    // Haetaan master
     $query = "SELECT *
               FROM $table
               WHERE yhtio = '$yhtio'
@@ -2642,7 +2642,7 @@ if (!function_exists("synkronoi")) {
       Aloitetaan itse synkronointii
     */
 
-    //  haetaan konserniyhtiˆt joita voidaan synkronoida
+    // haetaan konserniyhtiˆt joita voidaan synkronoida
     $query = "SELECT yhtio.yhtio
               from yhtio
               JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
@@ -2655,7 +2655,7 @@ if (!function_exists("synkronoi")) {
       while ($kohderow = mysql_fetch_assoc($kohderes)) {
 
         $vanhatunnus = $utunnus="";
-        $override   = array();
+        $override = array();
 
         //  Jos master on poistettu haetaan tiedot siit‰ vanhasta!
         if (!isset($masterrow)) {
@@ -2732,7 +2732,7 @@ if (!function_exists("synkronoi")) {
           }
         }
 
-        //  Poistetaan tietue jos masteria ei lˆydetty mutta originaali on tallessa.. olisiko t‰ss‰ selvempi tapa?
+        // Poistetaan tietue jos masteria ei lˆydetty mutta originaali on tallessa.. olisiko t‰ss‰ selvempi tapa?
         if (!isset($masterrow) and is_array($orig) and count($orig) > 0) {
 
           //  Tarkastetaan ettei t‰ll‰ kriteerill‰ lˆydy useita poistettavia..
@@ -2765,143 +2765,205 @@ if (!function_exists("synkronoi")) {
         }
         else {
 
-          if ($table == "toimi") {
-
-            //  Hyv‰ksyji‰, kustannuspaikkoja ja tili‰ ei synkata
-            foreach (array("oletus_hyvak1", "oletus_hyvak2", "oletus_hyvak3", "oletus_hyvak4", "oletus_hyvak5", "tilino", "kustp", "kohde", "projekti") as $value) {
-              $override[$value] = "";
-            }
-          }
-
-          if ($table == "tuote") {
-            //  Oletetaan, ett‰ meill‰ on avainsanat sycronoituna (osasto/try)
-            foreach (array("myyjanro", "ostajanro", "tilino", "tilino_eu", "tilino_ei_eu", "kustp", "kohde", "projekti", "kehahin", "vihahin", "vihapvm", "epakurantti25pvm", "epakurantti50pvm", "epakurantti75pvm", "epakurantti100pvm") as $value) {
-              $override[$value] = "";
-            }
-
-            // Tarkastetaan ett‰ hinnat eiv‰t mene aivan p‰in mets‰‰..
-            $query = "SELECT tunnus FROM yhtion_parametrit WHERE yhtio='$kohderow[yhtio]' AND alv_kasittely!='$yhtiorow[alv_kasittely]'";
-            $abures = pupe_query($query);
-
-            if (mysql_num_rows($abures)!=0 and $masterrow["alv"] > 0) {
-
-              // yhtiolla on verolliset hinnat kohteella verottomat
-              if ($yhtiorow["alv_kasittely"] == "") {
-                $override["myyntihinta"] = round(($masterrow["myyntihinta"]*(1+$masterrow["alv"]/100)), 2);
-                $override["nettohinta"]  = round(($masterrow["nettohinta"]*(1+$masterrow["alv"]/100)), 2);
-              }
-              else {
-                $override["myyntihinta"] = round(($masterrow["myyntihinta"]/(1+$masterrow["alv"]/100)), 2);
-                $override["nettohinta"]  = round(($masterrow["nettohinta"]/(1+$masterrow["alv"]/100)), 2);
-              }
-            }
-          }
-
-          if ($table == "asiakas") {
-            foreach (array("myyjanro", "tilino", "kustp", "kohde", "projekti") as $value) {
-              $override[$value] = "";
-            }
-
-            //  koitetaan hakea oikean maksuehdon tunnus..
-            $query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
-            $abures = pupe_query($query);
-            $aburow = mysql_fetch_assoc($abures);
-
-            //  Melkein kaikki tiedot pit‰‰ stemmata!
-            $query = "SELECT tunnus
-                      from maksuehto
-                      where yhtio       = '$kohderow[yhtio]'
-                      and abs_pvm       = '$aburow[abs_pvm]'
-                      and erapvmkasin   = '$aburow[erapvmkasin]'
-                      and factoring_id  = '$aburow[factoring_id]'
-                      and jaksotettu    = '$aburow[jaksotettu]'
-                      and jv            = '$aburow[jv]'
-                      and kassa_abspvm  = '$aburow[kassa_abspvm]'
-                      and kassa_alepros = '$aburow[kassa_alepros]'
-                      and kassa_relpvm  = '$aburow[kassa_relpvm]'
-                      and kateinen      = '$aburow[kateinen]'
-                      and rel_pvm       = '$aburow[rel_pvm]'
-                      and sallitut_maat = '$aburow[sallitut_maat]'
-                      LIMIT 1";
-            $tarkres = pupe_query($query);
-
-            if (mysql_num_rows($tarkres) == 1) {
-              $tarkrow = mysql_fetch_assoc($tarkres);
-              $override["maksuehto"] = $tarkrow["tunnus"];
-            }
-            else {
-              $override["maksuehto"] = "";
-            }
-
-            //  koitetaan hakea oikean toimitustavan tunnus..
-            $query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
-            $abures = pupe_query($query);
-            $aburow = mysql_fetch_assoc($abures);
-
-            //  Melkein kaikki tiedot pit‰‰ stemmata!
-            $query = "SELECT tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
-                      and selite        = '$aburow[selite]'
-                      and jvkulu        = '$aburow[jvkulu]'
-                      and lauantai      = '$aburow[lauantai]'
-                      and maa_maara     = '$aburow[maa_maara]'
-                      and merahti       = '$aburow[merahti]'
-                      and nouto         = '$aburow[nouto]'
-                      and sallitut_maat = '$aburow[sallitut_maat]'";
-            $tarkres=pupe_query($query);
-
-            if (mysql_num_rows($tarkres) == 1) {
-              $tarkrow = mysql_fetch_assoc($tarkres);
-              $override["toimitustapa"] = $tarkrow["tunnus"];
-            }
-            else {
-              $override["toimitustapa"] = "";
-            }
-          }
-
           //  P‰ivitet‰‰n vai tehd‰‰n uutta?
           $query = "SELECT tunnus
                     FROM $table
-                    WHERE yhtio ='$kohderow[yhtio]' $where";
-          $abures=pupe_query($query);
+                    WHERE yhtio ='$kohderow[yhtio]'
+                    $where";
+          $abures = pupe_query($query);
 
-          $ok = 1;
+          $update_insert = "";
 
-          if (mysql_num_rows($abures)==0) {
-            $query   = "INSERT into $table SET yhtio='$kohderow[yhtio]', laatija='$yhtio', luontiaika=now() ";
-            $query2  = "";
+          if (mysql_num_rows($abures) == 0) {
+            $syncquery = "INSERT into $table
+                          SET yhtio = '$kohderow[yhtio]',
+                          laatija = '$yhtio',
+                          luontiaika = now(),
+                          muuttaja = '$yhtio',
+                          muutospvm = now() ";
+            $syncquery2 = "";
+            $update_insert = "INSERT";
           }
-          elseif (mysql_num_rows($abures)==1) {
+          elseif (mysql_num_rows($abures) == 1) {
             $aburow = mysql_fetch_assoc($abures);
             $vanhatunnus = $aburow["tunnus"];
 
-            $query = "UPDATE $table SET yhtio='$kohderow[yhtio]'";
-            $query2  =" WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
-          }
-          else {
-            $ok=0;
+            $syncquery = "UPDATE $table
+                          SET yhtio = '$kohderow[yhtio]',
+                          muuttaja = '$yhtio',
+                          muutospvm = now() ";
+            $syncquery2 = " WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
+            $update_insert = "UPDATE";
           }
 
-          if ($ok == 1) {
-            //  Duunataan itse p‰ivitys/insert kysely!!!
-            for ($i=1; $i < mysql_num_fields($masterres); $i++) {
-              if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio", "tunnus", "muuttaja", "muutospvm", "laatija", "luontiaika"))) {
-                if (isset($synkronoi_kiellot[$table]) and in_array(mysql_field_name($masterres, $i), $synkronoi_kiellot[$table])) {
-                  // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+          if (!empty($update_insert)) {
+            if ($table == "toimi") {
+              //  Hyv‰ksyji‰, kustannuspaikkoja ja tili‰ ei synkata
+              foreach (array("oletus_hyvak1", "oletus_hyvak2", "oletus_hyvak3", "oletus_hyvak4", "oletus_hyvak5", "tilino", "kustp", "kohde", "projekti") as $value) {
+                $override[$value] = "";
+              }
+            }
+            elseif ($table == "tuote") {
+              //  Oletetaan, ett‰ meill‰ on avainsanat sycronoituna (osasto/try)
+              foreach (array("myyjanro", "ostajanro", "tuotepaallikko", "tilino", "tilino_eu", "tilino_ei_eu", "kustp", "kohde", "projekti", "kehahin", "vihahin", "vihapvm", "epakurantti25pvm", "epakurantti50pvm", "epakurantti75pvm", "epakurantti100pvm") as $value) {
+                $override[$value] = "";
+              }
+
+              // Tarkastetaan ett‰ hintojen verot ja valuutat menev‰t oikein
+              $kohde_yhtiorow = hae_yhtion_parametrit($kohderow['yhtio']);
+
+              $override["myyntihinta"]  = $masterrow["myyntihinta"];
+              $override["nettohinta"]   = $masterrow["nettohinta"];
+              $override["myymalahinta"] = $masterrow["myymalahinta"];
+
+              if ($yhtiorow["valkoodi"] != $kohde_yhtiorow["valkoodi"]) {
+                $query  = " SELECT kurssi
+                            FROM valuu
+                            WHERE nimi = '{$kohde_yhtiorow["valkoodi"]}'
+                            AND yhtio = '$kukarow[yhtio]'";
+                $valres = pupe_query($query);
+
+                if ($valrow = mysql_fetch_assoc($valres)) {
+                  $override["myyntihinta"]  = $override["myyntihinta"] / $valrow['kurssi'];
+                  $override["nettohinta"]   = $override["nettohinta"] / $valrow['kurssi'];
+                  $override["myymalahinta"] = $override["myymalahinta"] / $valrow['kurssi'];
                 }
-                elseif (isset($override[mysql_field_name($masterres, $i)]) and $override[mysql_field_name($masterres, $i)] != "") {
-                  $query .= ", ". mysql_field_name($masterres, $i)."='".$override[mysql_field_name($masterres, $i)]."' ";
+              }
+
+              if ($yhtiorow["alv_kasittely"] != $kohde_yhtiorow["alv_kasittely"] and $masterrow["alv"] > 0) {
+                // yhtiolla on verolliset hinnat kohteella verottomat
+                if ($yhtiorow["alv_kasittely"] == "") {
+                  $override["myyntihinta"]  = $override["myyntihinta"] * (1+$masterrow["alv"]/100);
+                  $override["nettohinta"]   = $override["nettohinta"] * (1+$masterrow["alv"]/100);
+                  $override["myymalahinta"] = $override["myymalahinta"] * (1+$masterrow["alv"]/100);
                 }
                 else {
-                  $query .= ", ". mysql_field_name($masterres, $i)."='".$masterrow[mysql_field_name($masterres, $i)]."' ";
+                  $override["myyntihinta"]  = $override["myyntihinta"] / (1+$masterrow["alv"]/100);
+                  $override["nettohinta"]   = $override["nettohinta"] / (1+$masterrow["alv"]/100);
+                  $override["myymalahinta"] = $override["myymalahinta"] / (1+$masterrow["alv"]/100);
                 }
+              }
+
+              if ($override["myyntihinta"] != $masterrow["myyntihinta"]) {
+                $override["myyntihinta"]  = round($override["myyntihinta"], $kohde_yhtiorow['hintapyoristys']);
+                $override["nettohinta"]   = round($override["nettohinta"],  $kohde_yhtiorow['hintapyoristys']);
+                $override["myymalahinta"] = round($override["myymalahinta"],  $kohde_yhtiorow['hintapyoristys']);
+              }
+
+              // Jos tuotteen verokanta on eri kuin kohdeyhtiˆn oletus, niin laitetaan oletus.
+              $query = "SELECT selite
+                        FROM avainsana
+                        WHERE yhtio = '{$kohderow['yhtio']}'
+                        and laji = 'ALV'
+                        and selitetark != ''";
+              $alvres = pupe_query($query);
+              $alvrow = mysql_fetch_assoc($alvres);
+
+              if ($masterrow["alv"] != $alvrow['selite']) {
+                $override["alv"] = $alvrow['selite'];
+              }
+
+              // Ei p‰ivitet‰ n‰it‰ kentti‰ kun tehd‰‰n p‰ivitys
+              if ($update_insert == "UPDATE") {
+                $override["sarjanumeroseuranta"] = "";
+                $override["tuotetyyppi"] = "";
+                $override["ei_saldoa"] = "";
+              }
+            }
+            elseif ($table == "asiakas") {
+              foreach (array("myyjanro", "tilino", "kustp", "kohde", "projekti") as $value) {
+                $override[$value] = "";
+              }
+
+              //  koitetaan hakea oikean maksuehdon tunnus..
+              $query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
+              $abures = pupe_query($query);
+              $aburow = mysql_fetch_assoc($abures);
+
+              //  Melkein kaikki tiedot pit‰‰ stemmata!
+              $query = "SELECT tunnus
+                        from maksuehto
+                        where yhtio       = '$kohderow[yhtio]'
+                        and abs_pvm       = '$aburow[abs_pvm]'
+                        and erapvmkasin   = '$aburow[erapvmkasin]'
+                        and factoring_id  = '$aburow[factoring_id]'
+                        and jaksotettu    = '$aburow[jaksotettu]'
+                        and jv            = '$aburow[jv]'
+                        and kassa_abspvm  = '$aburow[kassa_abspvm]'
+                        and kassa_alepros = '$aburow[kassa_alepros]'
+                        and kassa_relpvm  = '$aburow[kassa_relpvm]'
+                        and kateinen      = '$aburow[kateinen]'
+                        and rel_pvm       = '$aburow[rel_pvm]'
+                        and sallitut_maat = '$aburow[sallitut_maat]'
+                        LIMIT 1";
+              $tarkres = pupe_query($query);
+
+              if (mysql_num_rows($tarkres) == 1) {
+                $tarkrow = mysql_fetch_assoc($tarkres);
+                $override["maksuehto"] = $tarkrow["tunnus"];
+              }
+              else {
+                $override["maksuehto"] = "";
+              }
+
+              //  koitetaan hakea oikean toimitustavan tunnus..
+              $query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
+              $abures = pupe_query($query);
+              $aburow = mysql_fetch_assoc($abures);
+
+              //  Melkein kaikki tiedot pit‰‰ stemmata!
+              $query = "SELECT tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
+                        and selite        = '$aburow[selite]'
+                        and jvkulu        = '$aburow[jvkulu]'
+                        and lauantai      = '$aburow[lauantai]'
+                        and maa_maara     = '$aburow[maa_maara]'
+                        and merahti       = '$aburow[merahti]'
+                        and nouto         = '$aburow[nouto]'
+                        and sallitut_maat = '$aburow[sallitut_maat]'";
+              $tarkres=pupe_query($query);
+
+              if (mysql_num_rows($tarkres) == 1) {
+                $tarkrow = mysql_fetch_assoc($tarkres);
+                $override["toimitustapa"] = $tarkrow["tunnus"];
+              }
+              else {
+                $override["toimitustapa"] = "";
               }
             }
 
-            $query = $query." ".$query2;
-            $updres = pupe_query($query);
+            //  Duunataan itse p‰ivitys/insert kysely!!!
+            for ($i = 1; $i < mysql_num_fields($masterres); $i++) {
+              $kennimi = mysql_field_name($masterres, $i);
+
+              // N‰m‰ ohitetaan aina
+              if (isset($masterrow[$kennimi]) and in_array($kennimi, array("yhtio", "tunnus", "muuttaja", "muutospvm", "laatija", "luontiaika"))) {
+                continue;
+              }
+
+              // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+              if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
+                continue;
+              }
+
+              // Ohitetaan tyhj‰ "override"-muuttuja
+              if (isset($override[$kennimi]) and empty($override[$kennimi])) {
+                continue;
+              }
+
+              // Korvataanko p‰ivitett‰v‰ arvo?
+              if (!empty($override[$kennimi])) {
+                $updvalue = $override[$kennimi];
+              }
+              else {
+                $updvalue = $masterrow[$kennimi];
+              }
+
+              $syncquery .= ", ". $kennimi." = '$updvalue' \n";
+            }
+
+            $updres = pupe_query($syncquery." ".$syncquery2);
 
             if (mysql_affected_rows() > 0) {
-
               $erot = "";
 
               if (count($override) > 0) {
@@ -2912,17 +2974,13 @@ if (!function_exists("synkronoi")) {
                 }
               }
 
-              if (mysql_num_rows($abures) == 0) {
+              if ($update_insert == "INSERT") {
                 $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
                 $synclog .= "Yhtiˆlle '$kohderow[yhtio]' lis‰ttiin tietue ($utunnus)\n";
 
                 synclog($kohderow["yhtio"], $table, "Uusi $table lis‰tty.$erot", $utunnus);
               }
               else {
-                //  Annetaan aikaleima t‰ss‰, koska muuten affected row ei koskaan toimi oikein!
-                $query = "UPDATE $table SET yhtio='$kohderow[yhtio]', muuttaja='$yhtio', muutospvm=now() WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
-                $updres = pupe_query($query);
-
                 synclog($kohderow["yhtio"], $table, "Tietue ($vanhatunnus) p‰ivitetty.".$muutos.$erot, $utunnus);
                 $synclog .= "Yhtiˆlle '$kohderow[yhtio]' p‰ivitettiin tietue ($vanhatunnus)\n";
               }
@@ -33598,5 +33656,19 @@ if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
     }
 
     return $merkkijono;
+  }
+}
+
+if (!function_exists('humanize_ohjelma_moduli')) {
+  function humanize_ohjelma_moduli($ohjelma_moduli) {
+    $map = array(
+      'pupesoft' => '',
+      'magento'  => 'Verkkokauppa',
+      'extranet' => 'Extranet',
+    );
+
+    if (!isset($map[strtolower($ohjelma_moduli)])) return '';
+
+    return $map[strtolower($ohjelma_moduli)];
   }
 }

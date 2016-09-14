@@ -769,7 +769,7 @@ echo "<td><input type='checkbox' name='kasittele_kuvat' value='1'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Kohdista tuotekuvat tiedostosta (tuoteno, tiedostonimi)").":</th>";
+echo "<th>".t("Kohdista tuotekuvat tiedostosta (tuoteno;tiedostonimi)").":</th>";
 echo "<td colspan='2'><input name='userfile' type='file'></td>";
 echo "</tr>";
 

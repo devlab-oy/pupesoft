@@ -412,9 +412,15 @@ if ($tee == 'GO') {
         continue;
       }
 
+      $kayttotarkoitus_custom = '';
+
       if (!isset($apuresult)) {
         $mihin = strpos($kuva, ".$ext");
         $tuoteno = substr($kuva, 0, "$mihin");
+
+        if (strpos($tuoteno, "=") !== false) {
+          list($tuoteno, $kayttotarkoitus_custom) = explode("=", $tuoteno);
+        }
 
         $query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno' LIMIT 1";
         $apuresult = pupe_query($query);
@@ -454,6 +460,10 @@ if ($tee == 'GO') {
                     and kayttotarkoitus = '$kayttotarkoitus'
                     and filename        = '$apukuva'";
           $delresult = pupe_query($query);
+
+          if (trim($kayttotarkoitus_custom) != '') {
+            $kayttotarkoitus = $kayttotarkoitus_custom;
+          }
 
           // lis‰t‰‰n uusi
           $query = "INSERT INTO liitetiedostot SET

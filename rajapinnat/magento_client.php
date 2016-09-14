@@ -852,7 +852,7 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$toiminto} epäonnistui", $e);
         $this->debug('magento_tuotteet', $configurable);
       }
     }

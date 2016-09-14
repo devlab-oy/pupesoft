@@ -1087,11 +1087,8 @@ if (!function_exists("talenom_queue")) {
   function talenom_queue($invoice_number, $xmlstring, $kieli) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
-    #$talenomtmpfile = tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_TALENOM", "", "", "", "");
-
     // Siirret‰‰n l‰hetysjonoon
     file_put_contents("{$pupe_root_polku}/dataout/talenom_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
-    #rename($ppgtmpfile, "{$pupe_root_polku}/dataout/talenom_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.pdf");
     return "Lasku siirretty l‰hetysjonoon";
   }
 }
@@ -24400,6 +24397,14 @@ if  (!function_exists('verkkolaskuputkeen')) {
     global $yhtiorow;
 
     // T‰ss‰ pohditaan laitetaanko verkkolaskuputkeen...
+
+    // Talenomiin laitetaan KAIKKI laskut
+    if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+      if ($info) {
+        echo t("Talenom-siirto");
+      }
+      return TRUE;
+    }
 
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {

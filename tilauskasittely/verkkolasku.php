@@ -401,6 +401,9 @@ else {
               tilausrivin_lisatiedot WRITE,
               tili READ,
               tiliointi WRITE,
+              kustannuspaikka as kustp READ,
+              kustannuspaikka as kohde READ,
+              kustannuspaikka as projekti READ,
               toimitustapa READ,
               tullinimike READ,
               tuote READ,
@@ -2960,8 +2963,6 @@ else {
         $talenom_laskumaara = count($talenom_laskuarray);
 
         if ($talenom_laskumaara > 0) {
-          require_once "tilauskasittely/tulosta_lasku.inc";
-
           for ($a = 1; $a < $talenom_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $talenom_laskuarray[$a], $invoice_number);
 

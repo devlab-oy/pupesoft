@@ -1150,32 +1150,6 @@ if ($tee == 'tulosta') {
         }
       }
 
-      // Katsotaan onko anvia-verkkokauppa käytössä, silloin lähetetään toimituskuittaus Ftp:llä kun rahtikirja tulostetaan
-      if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
-        $ftphost = $anvia_ftphost;
-        $ftpuser = $anvia_ftpuser;
-        $ftppass = $anvia_ftppass;
-        $ftppath = $anvia_ftppath;
-
-        $query = "SELECT asiakkaan_tilausnumero, tunnus
-                  FROM lasku
-                  WHERE yhtio                 = '$kukarow[yhtio]'
-                  AND tunnus                  IN ($otunnukset)
-                  AND laatija                 = 'FuturSoft'
-                  AND asiakkaan_tilausnumero != ''";
-        $anviares = pupe_query($query);
-
-        while ($anviarow = mysql_fetch_assoc($anviares)) {
-
-          $anvia_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
-          $anvia_api_rak = $rahtikirjanro;
-          $anvia_api_ord = $anviarow['asiakkaan_tilausnumero'];
-          $anvia_api_til = $anviarow['tunnus'];
-
-          require "anvia_toimita_tilaus.php";
-        }
-      }
-
       // Tulostetaan DGD
       if ((strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or $tultiin == 'koonti_eratulostus_pakkaustiedot') and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 

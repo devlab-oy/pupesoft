@@ -599,6 +599,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       else $pjat_sortlisa = "";
 
       $query_ale_lisa = generoi_alekentta('M');
+      $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
 
       // Haetaan laskun kaikki rivit
       $query = "SELECT
@@ -606,6 +607,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 tilausrivi.ale1,
                 tilausrivi.ale2,
                 tilausrivi.ale3,
+                $ale_query_select_lisa aleyhteensa,
                 tilausrivi.alv,
                 tuote.eankoodi,
                 tuote.ei_saldoa,
@@ -654,18 +656,29 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
                 and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
                 and tilausrivi.kpl         != 0
-                and tilausrivi.uusiotunnus  = '$lasrow[tunnus]'
-                GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+                and tilausrivi.tyyppi      = 'L'
+                and tilausrivi.uusiotunnus = '$lasrow[tunnus]'
+                GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
                 ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $tilres = pupe_query($query);
 
-      $rivinumerot = array(0 => 0);
-      $rivilaskuri = 1;
-      $rivimaara   = mysql_num_rows($tilres);
-      $rivigrouppaus   = FALSE;
+      $rivinumerot   = array(0 => 0);
+      $rivilaskuri   = 1;
+      $rivimaara     = mysql_num_rows($tilres);
+      $rivigrouppaus = FALSE;
+      $tilrows       = array();
 
       while ($tilrow = mysql_fetch_assoc($tilres)) {
+        if ($yhtiorow["pura_osaluettelot"] != "") {
+          // Korvataanko tilauksella oleva rivi osaluettelolla
+          $tilrows = array_merge($tilrows, pura_osaluettelot($lasrow, $tilrow, $laskutyyppi));
+        }
+        else {
+          $tilrows[] = $tilrow;
+        }
+      }
 
+      foreach ($tilrows as $tilrow) {
         // N‰ytet‰‰n vain perheen is‰ ja summataan lasten hinnat is‰riville
         if ($laskutyyppi == 2 or $laskutyyppi == 12) {
           if ($tilrow["perheid"] > 0) {
@@ -708,7 +721,6 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
             }
           }
         }
-
 
         if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
           //K‰‰nnet‰‰n nimitys

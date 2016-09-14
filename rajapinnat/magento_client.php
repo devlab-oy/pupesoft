@@ -413,10 +413,12 @@ class MagentoClient {
           $this->log('magento_tuotteet', "Tuote lisätty");
           $this->debug('magento_tuotteet', $tuote_data);
 
+          $is_in_stock = $this->tuote_aina_varastossa === true ? 1 : 0;
+
           // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
           $stock_data = array(
             'qty'          => 0,
-            'is_in_stock'  => $this->tuote_aina_varastossa,
+            'is_in_stock'  => $is_in_stock,
             'manage_stock' => 1
           );
 

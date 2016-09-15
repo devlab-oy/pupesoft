@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 require "../inc/parametrit.inc";
 require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
@@ -22,6 +24,17 @@ if (!isset($jarj)) $jarj = '';
 if (!isset($etsi)) $etsi = '';
 if (!isset($tumaa)) $tumaa = '';
 if (!isset($tee2)) $tee2 = '';
+if (!isset($show_ohjelma_moduli)) $show_ohjelma_moduli = false;
+
+
+if ($show_ohjelma_moduli) {
+  setcookie('show_ohjelma_moduli', true, strtotime('+1 year'));
+}
+
+
+ob_end_flush();
+
+$show_ohjelma_moduli = $show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true;
 
 $valmistuslinjat = hae_valmistuslinjat();
 
@@ -993,6 +1006,7 @@ if ($tee2 == '') {
 
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
             lasku.yhtio_toimipaikka,
+            lasku.ohjelma_moduli,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
             if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -1072,6 +1086,10 @@ if ($tee2 == '') {
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tilauksen_paino'; document.forms['find'].submit();\">".t("Paino")."</a></th>";
+
+    if ($show_ohjelma_moduli) {
+      echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ohjelma_moduli'; document.forms['find'].submit();\">".t("Lähde")."</a></th>";
+    }
 
     if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</a></th>";
@@ -1198,6 +1216,10 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
       echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
+
+      if ($show_ohjelma_moduli) {
+        echo "<{$ero} valign='top'>" . humanize_ohjelma_moduli($tilrow['ohjelma_moduli']) . "</{$ero}>";
+      }
 
       //haetaan keräyslistan oletustulostin
       $query = "SELECT *
@@ -1391,7 +1413,12 @@ if ($tee2 == '') {
     echo t("Rivejä yhteensä")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    $spanni = 4;
+    if ($show_ohjelma_moduli) {
+      $spanni = 5;
+    }
+    else {
+      $spanni = 4;
+    }
 
     if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;

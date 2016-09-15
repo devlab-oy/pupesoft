@@ -174,12 +174,7 @@ if (mysql_num_rows($toimipaikkares) > 0) {
   echo "<td colspan='3'><select name='toimipaikka'>";
   echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
 
-  $sel = "";
-  $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka != "kaikki" and $toimipaikka == 0);
-  if ($toimipaikka_requestista) {
-    $sel = "selected";
-    $toimipaikka = 0;
-  }
+  $sel = (isset($toimipaikka) and $toimipaikka == 0) ? 'selected' : '';
 
   echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
 
@@ -400,7 +395,7 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     if (isset($toimipaikka)) {
-      $toimipaikkalisa = " and lasku.vanhatunnus = '{$toimipaikka}' ";
+      $toimipaikkalisa = " and lasku.vanhatunnus = {$toimipaikka} ";
     }
 
     if ($laji == 'OOK')   $tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -681,7 +676,7 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     if (isset($toimipaikka)) {
-      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
+      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 
     $tili = 0;

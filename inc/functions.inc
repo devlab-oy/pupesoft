@@ -9621,8 +9621,8 @@ if (!function_exists("livesearch_tuotehaku")) {
         if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M'))) {
 
           if (!empty($laskurow['varasto'])) {
-            $laskurow['varasto'] = (int) $laskurow['varasto'];
-            $varastolisa = " AND tunnus IN ({$laskurow["varasto"]})";
+            $laskun_varasto = (int) $laskurow['varasto'];
+            $varastolisa = " AND tunnus = {$laskun_varasto}";
           }
           else {
             $varastolisa = " AND tyyppi  = '' ";

@@ -33667,6 +33667,26 @@ if (!function_exists('finvoice_pankki')) {
   }
 }
 
+if (!function_exists('hae_toimitustapa')) {
+  function hae_toimitustapa($toimitustapa_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $toimitustapa_tunnus = (int) $toimitustapa_tunnus;
+
+    if (empty($toimitustapa_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$toimitustapa_tunnus}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
     global $kukarow;

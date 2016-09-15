@@ -9434,7 +9434,7 @@ if (!function_exists("livesearch_tilihaku")) {
 
 if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
-    global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
+    global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa, $laskurow;
 
     pupeslave_start();
 
@@ -9620,19 +9620,26 @@ if (!function_exists("livesearch_tuotehaku")) {
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
         if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M'))) {
 
-          $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
+          if (!empty($laskurow['varasto'])) {
+            $laskun_varasto = (int) $laskurow['varasto'];
+            $varastolisa = " AND tunnus = {$laskun_varasto}";
+          }
+          else {
+            $varastolisa = " AND tyyppi  = '' ";
+            $varastolisa .= $kukarow['varasto'] != '' ? " AND tunnus IN ({$kukarow['varasto']}) " : "";
+          }
 
           $query = "SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
                     FROM varastopaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tyyppi  = ''
                     {$varastolisa}";
           $varasto_chk_res = pupe_query($query);
           $varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
-          if ($varasto_chk_row['varastotunnukset'] != '') $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+          if ($varasto_chk_row['varastotunnukset'] != '') {
+            $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+          }
         }
-
 
         while ($row = mysql_fetch_assoc($result)) {
 
@@ -9672,7 +9679,7 @@ if (!function_exists("livesearch_tuotehaku")) {
             $saldo_yht = 0;
 
             foreach ($varastot_mista_saa_myyda as $varaston_tunnus) {
-              list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "", $varaston_tunnus);
+              list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varaston_tunnus);
               $saldo_yht += $saldo;
             }
 

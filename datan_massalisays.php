@@ -513,7 +513,7 @@ if ($tee == 'GO') {
                     AND filename        = '{$apukuva}'";
           $delresult = pupe_query($query);
 
-          tallenna_liite($kuva, $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, 0, $mikakieli);
+          tallenna_liite("{$dirri}/{$polku}", $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, 0, $mikakieli);
 
           $query = "UPDATE {$taulu} SET
                     muutospvm   = now(),

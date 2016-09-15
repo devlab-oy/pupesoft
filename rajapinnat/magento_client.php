@@ -2138,7 +2138,7 @@ class MagentoClient {
       return;
     }
 
-    if ($toiminto == 'update' and $this->magento_lisaa_tuotekuvat == 'create_only') {
+    if ($toiminto == 'update' and $this->magento_lisaa_tuotekuvat === 'create_only') {
       $this->log('magento_tuotteet', "Tuotekuvia ei käsitellä päivityksen yhteydessä");
 
       return;

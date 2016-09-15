@@ -7,7 +7,7 @@ $otsikko = "$yhtiorow[nimi] Extranet";
 $otsikko_avainsanasta = t_avainsana("EXTRANET_H", "", "", "", "", "selite");
 
 if (!empty($otsikko_avainsanasta)) {
-  $otsikko = t($otsikko_avainsanasta);
+  $otsikko = $otsikko_avainsanasta;
 }
 
 echo "<font class='head'>{$otsikko}</font><hr>";

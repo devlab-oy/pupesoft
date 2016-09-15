@@ -1423,6 +1423,9 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$valrow['kurssi']}'";
           }
           break;
+        case 'lahetetty_ulkoiseen_varastoon':
+          $values .= ", NULL";
+          break;
         default:
           $values .= ", '".$monistarow[$fieldname]."'";
         }

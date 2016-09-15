@@ -33658,3 +33658,17 @@ if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
     return $merkkijono;
   }
 }
+
+if (!function_exists('humanize_ohjelma_moduli')) {
+  function humanize_ohjelma_moduli($ohjelma_moduli) {
+    $map = array(
+      'pupesoft' => '',
+      'magento'  => 'Verkkokauppa',
+      'extranet' => 'Extranet',
+    );
+
+    if (!isset($map[strtolower($ohjelma_moduli)])) return '';
+
+    return $map[strtolower($ohjelma_moduli)];
+  }
+}

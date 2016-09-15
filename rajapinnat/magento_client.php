@@ -387,8 +387,6 @@ class MagentoClient {
         unset($tuote_data[$poistettava_key]);
       }
 
-      // Lisätään tai päivitetään tuote
-      $toiminto = '';
       // Jos tuotetta ei ole olemassa niin lisätään se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {
         $toiminto = 'create';
@@ -436,6 +434,7 @@ class MagentoClient {
       // Tuote on jo olemassa, päivitetään
       else {
         $toiminto = 'update';
+
         try {
 
           $sticky_kategoriat = $this->_sticky_kategoriat;
@@ -750,10 +749,10 @@ class MagentoClient {
           $this->debug('magento_tuotteet', $simple_tuote_data);
         }
 
-        $toiminto = '';
         // Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
         if (!in_array($nimitys, $skus_in_store)) {
           $toiminto = 'create';
+
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
             $configurable['status'] = self::DISABLED;
@@ -2134,15 +2133,22 @@ class MagentoClient {
 
   // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
   private function lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto) {
-    if (count($tuotekuvat) == 0 or empty($product_id) or (($toiminto == 'update' or $toiminto == '') and $this->magento_lisaa_tuotekuvat == 'create_only')) {
-      $this->log('magento_tuotteet', "Tuotekuvia ei käsitellä");
-      $debug_data = array (
+    if (count($tuotekuvat) == 0 or empty($product_id)) {
+      return;
+    }
+
+    if ($toiminto == 'update' and $this->magento_lisaa_tuotekuvat == 'create_only') {
+      $this->log('magento_tuotteet', "Tuotekuvia ei käsitellä päivityksen yhteydessä");
+
+      $debug_data = array(
         'tuotekoodi'               => $product_id,
         'toiminto'                 => $toiminto,
         'tuotekuvien_lkm'          => count($tuotekuvat),
         'magento_tuotekuva_asetus' => $this->magento_lisaa_tuotekuvat,
       );
+
       $this->debug('magento_tuotteet', $debug_data);
+
       return;
     }
 

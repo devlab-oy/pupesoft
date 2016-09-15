@@ -295,27 +295,6 @@ if ($tee == 'GO') {
     $ext = $path_parts['extension'];
 
     $koko = getimagesize($file);
-    $filetype = $koko["mime"];
-
-    // Jos ei olla saatu filetyyppiä niin arvotaan se vaikka filen nimestä
-    if ($filetype == "") {
-      if ($ext == "jpg" or $ext == "jpeg") {
-        $filetype = "image/jpeg";
-      }
-      elseif ($ext == "pdf" ) {
-        $filetype = "application/pdf";
-      }
-      elseif (substr($ext, 0, 3) == "xls" ) {
-        $filetype = "application/vnd.ms-excel";
-      }
-      elseif (substr($ext, 0, 3) == "doc" ) {
-        $filetype = "application/msword";
-      }
-      else {
-        $filetype = "application/octet-stream";
-      }
-    }
-
     $leve = $koko[0];
     $kork = $koko[1];
     $apukuva = $kuva;

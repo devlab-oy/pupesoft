@@ -5,6 +5,11 @@ require "../inc/parametrit.inc";
 if (!isset($tee)) $tee = "";
 if (!isset($tyojono)) $tyojono = "";
 
+if ($indexvas == "1" and empty($viikkonakyma)) {
+  $viikkonakyma = date("W");
+  list($year, $kuu, $paiva) = explode("-", date("Y-m-d"));
+}
+
 // otetaan oletukseksi tämä kuukausi, vuosi ja päivä
 if ($paiva=='') $paiva = date("j");
 if ($kuu=='')   $kuu   = date("n");

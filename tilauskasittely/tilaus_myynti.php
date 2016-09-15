@@ -9700,7 +9700,14 @@ if ($tee == '') {
           }
 
           if ($naytetaan_tilausvahvistusnappi or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
-            echo "<td colspan='3' style='text-align: center;' nowrap>
+
+            $tulcspani = "3";
+
+            if ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
+              $tulcspani = "4";
+            }
+
+            echo "<td colspan='$tulcspani' style='text-align: center;' nowrap>
                 <form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
                 <input type='hidden' name='otunnus' value='$tilausnumero'>
                 <input type='hidden' name='projektilla' value='$projektilla'>

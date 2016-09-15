@@ -9632,7 +9632,6 @@ if (!function_exists("livesearch_tuotehaku")) {
           $query = "SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
                     FROM varastopaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tyyppi != 'P'
                     {$varastolisa}";
           $varasto_chk_res = pupe_query($query);
           $varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);

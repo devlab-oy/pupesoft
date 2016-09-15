@@ -2132,8 +2132,8 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen kaikki kuvat ja lis‰‰ ne takaisin
-  private function lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto) {
-    if (count($tuotekuvat) == 0 or empty($product_id)) {
+  private function lisaa_tuotekuvat($product_id, Array $tuotekuvat, $toiminto) {
+    if (count($tuotekuvat) == 0 or empty($product_id) or empty($toiminto)) {
       return;
     }
 

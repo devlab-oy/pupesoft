@@ -182,17 +182,17 @@ if (mysql_num_rows($toimipaikkares) > 0) {
 
   while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
     if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
-      $sel = ' selected';
+      $sel = 'selected';
       $toimipaikka = $kukarow['toimipaikka'];
     }
     elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
-      $sel = ' selected';
+      $sel = 'selected';
     }
     else {
       $sel = '';
     }
 
-    echo "<option value='{$toimipaikkarow['tunnus']}'{$sel}>{$toimipaikkarow['nimi']}</option>";
+    echo "<option value='{$toimipaikkarow['tunnus']}' {$sel}>{$toimipaikkarow['nimi']}</option>";
   }
 
   echo "</select></td>";

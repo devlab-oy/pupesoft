@@ -165,7 +165,9 @@ $noautosubmit = TRUE;
 require "tilauskasittely/monivalintalaatikot.inc";
 echo "</td></tr>";
 
-if ($toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
+$toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+if (mysql_num_rows($toimipaikkares) > 0) {
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";
 
@@ -334,6 +336,8 @@ $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
 
+  $toimipaikka = ($toimipaikka == 'kaikki') ? null : (int) $toimipaikka;
+
   switch ($laji) {
   case 'M' :
     $lista = t("myyntisaamiset");
@@ -395,8 +399,7 @@ if ($tee != '' and isset($ajaraportti)) {
       $indeksi = " use index (yhtio_tila_tapvm)";
     }
 
-    if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
-      $toimipaikka = (int) $toimipaikka;
+    if (isset($toimipaikka)) {
       $toimipaikkalisa = " and lasku.vanhatunnus = '{$toimipaikka}' ";
     }
 
@@ -677,8 +680,7 @@ if ($tee != '' and isset($ajaraportti)) {
       $av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
     }
 
-    if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
-      $toimipaikka = (int) $toimipaikka;
+    if (isset($toimipaikka)) {
       $toimipaikkalisa = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
     }
 

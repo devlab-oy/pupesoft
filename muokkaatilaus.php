@@ -2139,12 +2139,12 @@ else {
             $seurantalisa
             $kohdelisa
             WHERE lasku.yhtio  = '$kukarow[yhtio]'
-            and lasku.tila     in ('L','N')
-            and lasku.alatila  in ('A','','T','U','G')
+            AND ((lasku.tila IN ('L','N')
+              AND lasku.alatila IN ('A','T','U','G'))
+            OR ((kuka1.extranet = '' OR kuka1.extranet is NULL) AND lasku.tila = 'N' AND lasku.alatila = ''))
             and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
             $haku
             $tepalisa
-            HAVING extra = '' or extra is null
             $mt_order_by
             $rajaus";
 

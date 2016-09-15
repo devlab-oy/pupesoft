@@ -273,7 +273,6 @@ if ($tee == 'TI' and isset($tyhjenna)) {
 //tarkastetaan tilausrivi
 if ($tee == 'TI' or $tee == "Y") {
   // Parametreja joita tarkistarivi tarvitsee
-  $laskurow["tila"]   = "O";
   $toim_tarkistus   = "EI";
   $prow["tuoteno"]   = $tuoteno;
   $prow["var"]    = $rivinvar;
@@ -342,8 +341,6 @@ if ($tee == 'TI' or $tee == "Y") {
 
 //rivi on tarkistettu ja se lisataan tietokantaan
 if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
-
-  $laskurow["tila"] = "O";
   $kukarow["kesken"] = $rivinotunnus;
 
   if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
@@ -2013,14 +2010,15 @@ if ($tila == '') {
     // tehd‰‰n pop-up divi jos keikalla on kommentti...
     $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
 
-    echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
+    echo "<div id='div_rivi_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
     echo "<ul>";
     echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
     echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
     echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
     echo "</ul>";
     echo "</div>";
-    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "class='tooltip' id='$rivirow[rivitunnus]'", 1000, 1000);
+    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "", 1000, 1000);
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/alert.png' class='tooltip' id='rivi_{$rivirow['rivitunnus']}' />";
     echo "<br>$rivirow[toim_tuoteno]";
 
     echo "&nbsp;";

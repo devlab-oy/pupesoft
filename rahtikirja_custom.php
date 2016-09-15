@@ -99,6 +99,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   // kerrotaan ett‰ t‰m‰ on custom rahtikirja == ei haeta laskulta mit‰‰n
   $GLOBALS['tyhja'] = 1;
 
+  $osoitelappurow = array();
+
   if ($data['merahti'] == 'K') {
     $rahdinmaksaja = 'L‰hett‰j‰';
     $toitarow = array(
@@ -113,9 +115,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       'selite'           => $data['toimitustapa'],
       'rahdinkuljettaja' => '',
     );
-  }
 
-  $osoitelappurow = array();
+    if (!empty($data["rahtisopimus"])) {
+      $osoitelappurow["rahtisopimus"] = $data["rahtisopimus"];
+    }
+  }
 
   if (isset($tulostakopio)) {
     $osoitelappurow = unserialize($data['tyhjanrahtikirjan_otsikkotiedot'][0]);
@@ -250,6 +254,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow['yhtio_toimipaikka'] = $apualvrow["tunnus"];
     }
   }
+
+  $osoitelappurow['viitelah'] = $data['viitelah'][0];
+  $osoitelappurow['viitevas'] = $data['viitevas'][0];
 
   // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
   $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
@@ -928,6 +935,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     'kollityht'      => 0,
     'kuutiotyht'    => 0,
     'lavametriyht'    => 0,
+    'viitelah' => '',
+    'viitevas' => '',
     'tyhjanrahtikirjan_otsikkotiedot' => array(),
   );
 
@@ -948,6 +957,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     $data['kuutiot'][$i]       = $rahtikirja['kuutiot'];
     $data['lavametri'][$i]     = $rahtikirja['lavametri'];
     $data['toimitustapa'][$i]   = $rahtikirja['toimitustapa'];
+    $data['viitelah'][$i] = $rahtikirja['viitelah'];
+    $data['viitevas'][$i] = $rahtikirja['viitevas'];
     $data['tyhjanrahtikirjan_otsikkotiedot'][$i] = $rahtikirja['tyhjanrahtikirjan_otsikkotiedot'];
 
     // lis‰t‰‰n totaaleja

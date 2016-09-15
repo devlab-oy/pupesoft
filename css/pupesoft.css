@@ -175,7 +175,7 @@ ul {
 
 ul.list-unstyled {
   list-style: none;
-  padding-left: 20px;
+  padding-left: 0;
 }
 
 .text-large {
@@ -243,6 +243,10 @@ table.responsive td input[type=text] {
 
 .del {
   text-decoration: line-through;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .kalepad {

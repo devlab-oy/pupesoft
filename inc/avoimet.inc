@@ -19,6 +19,7 @@ if (!isset($savalkoodi))      $savalkoodi = "";
 if (!isset($maa))          $maa = "";
 if (!isset($karhuja))        $karhuja = "";
 if (!isset($luottovakuutettu))    $luottovakuutettu = "";
+if (!isset($toimipaikka)) $toimipaikka = null;
 
 if ($muutparametrit != '') list($tee, $vv, $kk, $pp, $laji, $naytetaankokommentit, $savalkoodi, $valuutassako, $maa, $maksuehto, $excel) = explode("/", $muutparametrit);
 
@@ -168,6 +169,9 @@ echo "</td></tr>";
 $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 if (mysql_num_rows($toimipaikkares) > 0) {
+
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
+
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";
 
@@ -331,7 +335,7 @@ $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
 
-  $toimipaikka = ($toimipaikka == 'kaikki') ? null : (int) $toimipaikka;
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
 
   switch ($laji) {
   case 'M' :

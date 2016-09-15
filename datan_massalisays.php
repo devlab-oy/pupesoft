@@ -550,26 +550,7 @@ if ($tee == 'GO') {
                     AND filename        = '{$apukuva}'";
           $delresult = pupe_query($query);
 
-          // lis‰t‰‰n uusi
-          $query = "INSERT INTO liitetiedostot SET
-                    yhtio           = '{$kukarow['yhtio']}',
-                    liitos          = '{$taulu}',
-                    liitostunnus    = '{$apurow['tunnus']}',
-                    data            = '{$data}',
-                    selite          = '{$kuvaselite}',
-                    kieli           = '{$mikakieli}',
-                    filename        = '{$apukuva}',
-                    filesize        = '{$filesize}',
-                    filetype        = '{$filetype}',
-                    image_width     = '{$image_width}',
-                    image_height    = '{$image_height}',
-                    image_bits      = '{$image_bits}',
-                    image_channels  = '{$image_channels}',
-                    kayttotarkoitus = '{$kayttotarkoitus}',
-                    jarjestys       = '{$jarjestys}',
-                    laatija         = '{$kukarow['kuka']}',
-                    luontiaika      = now()";
-          $insre = pupe_query($query);
+          tallenna_liite($kuva, $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, 0, $mikakieli);
 
           $query = "UPDATE {$taulu} SET
                     muutospvm   = now(),

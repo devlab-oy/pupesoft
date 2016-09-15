@@ -118,7 +118,8 @@ class PrestaSalesOrders extends PrestaClient {
         }
         else {
           $carrier = array(
-            "name" => ''
+            "is_free" => 0,
+            "name" => '',
           );
         }
 
@@ -295,6 +296,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_KASITTELIJA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSAIKA:");
     $this->add_row("OSTOTIL.OT_TOIMITUSTAPA:{$carrier['name']}");
+    $this->add_row("OSTOTIL.OT_RAHTIVAPAA:{$carrier['is_free']}");
     $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
     $this->add_row("OSTOTIL.OT_MAKSETTU:"); // complete tarkoittaa, että on jo maksettu
     $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");

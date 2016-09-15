@@ -316,8 +316,8 @@ if ($tee == "SYOTA") {
     $query = "SELECT *,
               if(asiakas='0','',asiakas) asiakas,
               if(liitostunnus=0,'',liitostunnus) liitostunnus,
-              substr(pvmalku, 12, 5) kello,
-              substr(pvmloppu, 12, 5) lkello
+              substring(pvmalku, 12, 5) kello,
+              substring(pvmloppu, 12, 5) lkello
               FROM kalenteri
               WHERE tunnus = '$tunnus'
               $konsernit
@@ -356,6 +356,13 @@ if ($tee == "SYOTA") {
   }
 
   $lisays =  "
+    <script type='text/javascript'>
+      function paivita_loppukello () {
+        alku = $('#alkukello option:selected').val();
+        $('#loppukello').val(alku).change();
+      }
+    </script>
+
     <form method='POST' enctype='multipart/form-data'>
     <input type='hidden' name='tee' value='LISAA'>
     <input type='hidden' name='lopetus' value='$lopetus'>
@@ -378,7 +385,12 @@ if ($tee == "SYOTA") {
     <input type='text' size='3' name='kuu'   value='$kuu'>
     <input type='text' size='5' name='year'  value='$year'>";
 
-  $lisays .= " - <select name='kello'>";
+  $paivitaloppu = "";
+  if (empty($tunnus)) {
+    $paivitaloppu = "onchange='paivita_loppukello();'";
+  }
+
+  $lisays .= " - <select name='kello' id='alkukello' $paivitaloppu>";
 
   if ($kello == "") {
     $kello = "08:00";
@@ -416,7 +428,7 @@ if ($tee == "SYOTA") {
               <input type='text' size='3' name='lkuu'   value='$lkuu'>
               <input type='text' size='5' name='lyear'  value='$lyear'>";
 
-  $lisays .= " - <select name='lkello'>";
+  $lisays .= " - <select name='lkello' id='loppukello'>";
 
   if ($lkello == '') {
     $lkello = $kello;
@@ -497,6 +509,7 @@ if ($tee == "SYOTA") {
           </td>
           </tr>";
 
+  /*
   $lisays .= "<tr><td class='ptop'>".t("Kilometrit").":</td>";
   $lisays .= "<td>
           <input name='kilometrit' value='$kilometrit'><br>
@@ -508,6 +521,7 @@ if ($tee == "SYOTA") {
           <input name='paivarahat' value='$paivarahat'><br>
           </td>
           </tr>";
+  */
 
   $query = "SELECT *
             from liitetiedostot
@@ -972,10 +986,11 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
       }
 
       if ($row['nimi'] != '') {
-        $kukanimi  = $ko." ".$row['nimi']." ";
+        list($enim, $snim) = explode(" ", $row['nimi']);
+        $kukanimi  = $ko.$enim." ".substr($snim, 0, 1).".";
       }
       elseif ($row['kuka'] != '') {
-        $kukanimi  = $ko." ".$row['kuka']." ";
+        $kukanimi  = $ko.$row['kuka']." ";
       }
       else {
         $kukanimi = '';
@@ -1007,7 +1022,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         $reunavari = "#FF0000";
       }
       else {
-        $reunavari = "#00FF00";
+        $reunavari = "#9FDCFF";
       }
 
       $korkeus = (30*$kesto)-2;

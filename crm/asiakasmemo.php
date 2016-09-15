@@ -1049,7 +1049,7 @@ if ($ytunnus != '' and $tee == '') {
     $query .= " and henkilo='$yhtunnus'";
   }
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
+  if (1 == 2 and strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     $query .= " UNION ";
     $query .= "SELECT 'TILAUS' tyyppi, '' tapa, lasku.ytunnus ytunnus, lasku.tilausyhteyshenkilo yhteyshenkilo,
                if(kuka.nimi!='',kuka.nimi, lasku.laatija) laatija, lasku.viesti viesti, left(lasku.luontiaika,10) paivamaara,

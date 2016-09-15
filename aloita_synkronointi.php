@@ -88,8 +88,17 @@ if ($tee == "SYNK") {
       $lisa = ", tuote READ, toimi READ";
     }
 
-    $query = "LOCK TABLES yhtio READ, yhtion_parametrit READ, 
-              avainsana READ, synclog WRITE, $table WRITE $lisa";
+    if ($table == "tuote") {
+      $lisa = ", valuu READ";
+    }
+
+    if ($table != "avainsana") {
+      $lisa .= ", avainsana READ";
+    }
+
+
+    $query = "LOCK TABLES yhtio READ, yhtion_parametrit READ,
+              synclog WRITE, $table WRITE $lisa";
     $abures = pupe_query($query);
 
     $query = "SELECT group_concat(tunnus) tunnukset

@@ -31,11 +31,15 @@ if ($php_cli) {
   $edi_tyyppi  = trim($argv[2]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
-  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
-  if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^magento\-order/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'magento';
+  }
+
+  // tunnistetaan presta -tyyppinen käsittely tiedostonimestä
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^presta\-order/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'presta';
   }
 
   // Pupeasennuksen root
@@ -135,6 +139,9 @@ if (!function_exists('hae_yhtiotiedot')) {
 
       // Häkki Örumia varten
       if ((int) $tieto == 0) $tieto = "20428100";
+
+      // Toinen häkki
+      if ((int) $tieto == 6270618) $tieto = "24955530";
 
       $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
       $result = pupe_query($query);
@@ -581,6 +588,13 @@ while ($tietue = fgets($fd)) {
     //Toimitustapa
     if (trim($tieto) != '') {
       $editilaus_toimitustapa = $tieto;
+    }
+    break;
+
+  case 'OSTOTIL.OT_RAHTIVAPAA' :
+    // halutaanko tilaus rahtivapaana
+    if ($edi_tyyppi == "magento" and $tieto == "1") {
+      $editilaus_rahtivapaa = "o";
     }
     break;
 
@@ -1622,7 +1636,7 @@ while ($tietue = fgets($fd)) {
         $insertvarasto = $varasto;
       }
 
-      // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
+      // Jos toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
       }

@@ -4509,12 +4509,15 @@ if (isset($jatka)) {
   // Jos erikoisalennus muuttuu
   if ($laskurow["erikoisale"] != $erikoisale) {
     // p‰ivitet‰‰n erikoisale tilausriveille
+    $poisrajattavat = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+    $poisrajattavat = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajattavat);
+
     $erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
     $query_erikoisale = "UPDATE tilausrivi
                          SET erikoisale = '{$erikoisale}'
                          WHERE yhtio  = '{$kukarow['yhtio']}'
                          AND otunnus  = '{$erikoisale_query_otunnus}'
-                         AND tuoteno  not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')
+                         AND tuoteno  not in ({$poisrajattavat})
                          AND netto   != 'N'
                          AND tyyppi  != 'D'";
     $upd_erikoisale_res = pupe_query($query_erikoisale);

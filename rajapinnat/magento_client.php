@@ -143,6 +143,9 @@ class MagentoClient {
   // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
   private $magento_erikoiskasittely = array();
 
+  // Merkataanko tuote tilaan 'varastossa' saldosta riippumatta
+  private $tuote_aina_varastossa = null;
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -410,10 +413,12 @@ class MagentoClient {
           $this->log('magento_tuotteet', "Tuote lisätty");
           $this->debug('magento_tuotteet', $tuote_data);
 
+          $is_in_stock = $this->tuote_aina_varastossa === true ? 1 : 0;
+
           // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
           $stock_data = array(
             'qty'          => 0,
-            'is_in_stock'  => 0,
+            'is_in_stock'  => $is_in_stock,
             'manage_stock' => 1
           );
 
@@ -910,8 +915,8 @@ class MagentoClient {
       $count++;
       $this->log('magento_saldot', "[{$count}/{$total_count}] Päivitetään tuotteen {$product_sku} saldo {$qty}");
 
-      // Out of stock jos määrä on tuotteella ei ole myytavissa saldoa
-      $is_in_stock = ($qty > 0) ? 1 : 0;
+      // Out of stock jos määrä on tuotteella ei ole myytavissa saldoa ja jos tuotteet aina varastossa parametri ei ole päällä
+      $is_in_stock = ($qty > 0 or $this->tuote_aina_varastossa === true) ? 1 : 0;
 
       // Päivitetään saldo
       try {
@@ -1359,6 +1364,10 @@ class MagentoClient {
 
   public function set_configurable_tuotetiedot($value) {
     $this->configurable_tuotetiedot = $value;
+  }
+
+  public function set_magento_tuote_aina_varastossa($value) {
+    $this->tuote_aina_varastossa = $value;
   }
 
   // Hakee error_countin:n

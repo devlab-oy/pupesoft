@@ -172,8 +172,8 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
   $pankkitiedostot = array_reverse($pankkitiedostot);
 
   // K‰sitell‰‰n haetut tiedostot
+  $oli_laskuja = false;
   foreach ($pankkitiedostot as $aineisto) {
-    $oli_laskuja = false;
 
     // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n
     if ($aineisto['status'] != "OK") {

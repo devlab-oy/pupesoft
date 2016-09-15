@@ -67,7 +67,7 @@ if ($lopetus != "") {
   $sarjalopetus .= "$lopetus/SPLIT/";
 }
 
-$sarjalopetus .= "{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?ostorivitunnus=$ostorivitunnus//from=$from//aputoim=$aputoim//muut_siirrettavat=$muut_siirrettavat//toiminto=//sarjatunnus=$sarjatunnus//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku";
+$sarjalopetus .= "{$palvelin2}tilauskasittely/sarjanumeroseuranta.php?ostorivitunnus=$ostorivitunnus//myyntirivitunnus=$myyntirivitunnus//from=$from//aputoim=$aputoim//muut_siirrettavat=$muut_siirrettavat//toiminto=//sarjatunnus=$sarjatunnus//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku";
 
 if ($toiminto == "sarjanumeronlisatiedot_popup") {
   @include 'sarjanumeron_lisatiedot_popup.inc';

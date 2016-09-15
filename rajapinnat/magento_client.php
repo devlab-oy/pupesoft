@@ -538,11 +538,8 @@ class MagentoClient {
         }
       }
 
-      // Haetaan tuotekuvat Pupesoftista
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
       // Lisätään kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto);
+      $this->lisaa_ja_poista_tuotekuvat($product_id, $tuote['tunnus'], $toiminto);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if ($this->_asiakaskohtaiset_tuotehinnat) {
@@ -843,11 +840,8 @@ class MagentoClient {
           }
         }
 
-        // Haetaan tuotekuvat Pupesoftista
-        $tuotekuvat = $this->hae_tuotekuvat($lapsituotteen_tiedot['tunnus']);
-
         // Lisätään kuvat Magentoon
-        $this->lisaa_tuotekuvat($product_id, $tuotekuvat, $toiminto);
+        $this->lisaa_ja_poista_tuotekuvat($product_id, $lapsituotteen_tiedot['tunnus'], $toiminto);
       }
       catch (Exception $e) {
         $this->_error_count++;
@@ -2132,8 +2126,15 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
-  private function lisaa_tuotekuvat($product_id, Array $tuotekuvat, $toiminto) {
-    if (count($tuotekuvat) == 0 or empty($product_id) or empty($toiminto)) {
+  private function lisaa_ja_poista_tuotekuvat($product_id, $pupesoft_tuote_id, $toiminto) {
+    if (empty($product_id) or empty($pupesoft_tuote_id) or empty($toiminto)) {
+      return;
+    }
+
+    // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      $this->log('magento_tuotteet', 'Tuotekuvia ei käsitellä.');
+
       return;
     }
 
@@ -2161,6 +2162,9 @@ class MagentoClient {
     foreach ($magento_pictures as $file) {
       $this->poista_tuotekuva($product_id, $file);
     }
+
+    // Haetaan tuotekuvat Pupesoftista
+    $tuotekuvat = $this->hae_tuotekuvat($pupesoft_tuote_id);
 
     // Loopataan tuotteen kaikki kuvat
     foreach ($tuotekuvat as $kuva) {
@@ -2224,11 +2228,6 @@ class MagentoClient {
 
   // Poistaa tuotteen tuotekuvan Magentosta
   private function poista_tuotekuva($product_id, $filename) {
-    // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
-    if ($this->magento_lisaa_tuotekuvat === false or $this->magento_lisaa_tuotekuvat == 'create_only') {
-      return;
-    }
-
     $return = false;
 
     // Poistetaan tuotteen kuva
@@ -2257,13 +2256,6 @@ class MagentoClient {
   // Hakee tuotteen tuotekuvat Pupesoftista
   private function hae_tuotekuvat($tunnus) {
     global $kukarow;
-
-    // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
-    if ($this->magento_lisaa_tuotekuvat === false) {
-      $this->log('magento_tuotteet', 'Tuotekuvia ei haeta.');
-
-      return array();
-    }
 
     // Populoidaan tuotekuvat array
     $tuotekuvat = array();

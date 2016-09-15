@@ -117,9 +117,8 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
             var varasto = $('#'+id+'_varasto').val(),
                 tuoteno = $('#'+id+'_tuoteno').val();
 
-
-            if ($('.saldo_'+id).is(':visible')) {
-              $('.saldo_'+id).hide();
+            if ($('#div_'+id).is(':visible')) {
+              $('#div_'+id).hide();
             }
             else {
               $.post('{$_SERVER['SCRIPT_NAME']}',
@@ -131,13 +130,14 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
                 function(return_value) {
                   var data = jQuery.parseJSON(return_value);
 
-                  $('.saldo_'+id).html(
+                  $('#span_'+id).html(
                     '<br />' +
-                    '<table>' +
-                    '<tr><th class=\"tumma\">".t("Saldo")."</th><td>' + data.saldo + '</td></tr>' +
-                    '<tr><th class=\"tumma\">".t("Hyllyssä")."</th><td>' + data.hyllyssa + '</td></tr>' +
-                    '<tr><th class=\"tumma\">".t("Myytävissä")."</th><td>' + data.myytavissa + '</td></tr>'
-                  ).show();
+                    '<li>".t("Saldo").": ' + data.saldo + '</li>' +
+                    '<li>".t("Hyllyssä").": ' + data.hyllyssa + '</li>' +
+                    '<li>".t("Myytävissä").": ' + data.myytavissa + '</li>'
+                  );
+
+                  $('#div_'+id).show();
                 });
             }
           });

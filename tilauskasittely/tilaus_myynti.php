@@ -461,6 +461,18 @@ if (isset($tulosta_maksusopimus) and is_numeric(trim($tulosta_maksusopimus))) {
 }
 
 if ($livesearch_tee == "TUOTEHAKU") {
+  $query   = "SELECT laskun_lisatiedot.*, lasku.*
+              FROM lasku
+              LEFT JOIN laskun_lisatiedot ON (
+                laskun_lisatiedot.yhtio = lasku.yhtio AND
+                laskun_lisatiedot.otunnus = lasku.tunnus
+              )
+              WHERE lasku.tunnus = '{$kukarow['kesken']}'
+              AND lasku.yhtio    = '{$kukarow['yhtio']}'
+              AND lasku.tila     != 'D'";
+  $result = pupe_query($query);
+  $laskurow = mysql_fetch_assoc($result);
+
   livesearch_tuotehaku();
   exit;
 }

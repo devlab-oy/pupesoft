@@ -1276,6 +1276,9 @@ for ($i=0; $i<=$count; $i++) {
         $lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
       }
     }
+    elseif ($toim == 'toimitustavat_toimipaikat' and $i == 1) {
+      $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+    }
     elseif (strpos($array[$i], "/") !== FALSE) {
       $lisa .= " and (";
 
@@ -1392,6 +1395,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             ORDER BY $jarjestys
             $limiitti";
   $result = pupe_query($query);
+
 
   if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 

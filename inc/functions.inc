@@ -33521,3 +33521,23 @@ if (!function_exists('pupesoft_a2ps')) {
     return $out_file;
   }
 }
+
+if (!function_exists('onko_avainsana_duplikaatti')) {
+  function onko_avainsana_duplikaatti($tunnus, $laji) {
+    global $kukarow;
+
+    $palautus = false;
+    $query = "SELECT *
+              FROM avainsana
+              WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+              AND avainsana.laji    = '{$laji}'
+              AND tunnus           != '{$tunnus}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $palautus = true;
+    }
+
+    return $palautus;
+  }
+}

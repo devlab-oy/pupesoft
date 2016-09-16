@@ -28,7 +28,6 @@ $(document).ready(function() {
         $("input[name='ale1']").val('');
         $("input[name='ale2']").val('');
         $("input[name='ale3']").val('');
-        $("select[name='alv']").val('');
         $('#kate_rivi_laskenta').html('');
         $('#ykshinta_rivi_laskenta').html('');
         $('#rivihinta_rivi_laskenta').html('');
@@ -112,7 +111,6 @@ $(document).ready(function() {
           $("input[name='ale1']").val('');
           $("input[name='ale2']").val('');
           $("input[name='ale3']").val('');
-          $("select[name='alv']").val('');
           $('#kate_rivi_laskenta').html('');
           $('#ykshinta_rivi_laskenta').html('');
           $('#rivihinta_rivi_laskenta').html('');

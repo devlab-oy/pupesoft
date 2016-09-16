@@ -1291,6 +1291,9 @@ for ($i=0; $i<=$count; $i++) {
 
           $lisa .= " AND toimipaikka_tunnus = '{$toimipaikkarow['tunnus']}' ";
         }
+        else {
+          $lisa .= " AND toimipaikka_tunnus {$hakuehto} ";
+        }
       }
     }
     elseif (strpos($array[$i], "/") !== FALSE) {

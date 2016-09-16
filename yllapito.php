@@ -1276,8 +1276,22 @@ for ($i=0; $i<=$count; $i++) {
         $lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
       }
     }
-    elseif ($toim == 'toimitustavat_toimipaikat' and $i == 1) {
-      $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+    elseif ($toim == 'toimitustavat_toimipaikat' and ($i == 1 or $i == 2)) {
+      if ($i == 1) {
+        $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+      }
+      else {
+        if (!is_numeric($haku[$i])) {
+          $query = "SELECT tunnus
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND nimi LIKE '%{$haku[$i]}%'";
+          $toimipaikkares = pupe_query($query);
+          $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+          $lisa .= " AND toimipaikka_tunnus = '{$toimipaikkarow['tunnus']}' ";
+        }
+      }
     }
     elseif (strpos($array[$i], "/") !== FALSE) {
       $lisa .= " and (";
@@ -1394,6 +1408,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             $ryhma
             ORDER BY $jarjestys
             $limiitti";
+  query_dump($query);
   $result = pupe_query($query);
 
 

@@ -112,6 +112,23 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
   $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
+  // Tän rivin alviton rivihinta
+  if ($yhtiorow["alv_kasittely"] == '') {
+
+    // Jos meillä on marginaalimyyntiä/käänteinen alv
+    if ($alv >= 500) {
+      $alvkapu = 0;
+    }
+    else {
+      $alvkapu = $alv;
+    }
+
+    $kotisumma_alviton   = $kotisumma / (1+$alvkapu/100);
+  }
+  else {
+    $kotisumma_alviton   = $kotisumma;
+  }
+
   $arr = array(
     'sarjanumeroseuranta' => '',
     'tuoteno' => $tuoteno,
@@ -119,7 +136,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma_alviton, $tuoterow['kehahin']);
 
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
     $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
@@ -131,7 +148,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'ale' => $ale,
       'kate' => $kate,
       'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
+      'rivihinta' => round($kotisumma_alviton, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -175,6 +192,23 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
   $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
+  // Tän rivin alviton rivihinta
+  if ($yhtiorow["alv_kasittely"] == '') {
+
+    // Jos meillä on marginaalimyyntiä/käänteinen alv
+    if ($alv >= 500) {
+      $alvkapu = 0;
+    }
+    else {
+      $alvkapu = $alv;
+    }
+
+    $kotisumma_alviton   = $kotisumma / (1+$alvkapu/100);
+  }
+  else {
+    $kotisumma_alviton   = $kotisumma;
+  }
+
   $arr = array(
     'sarjanumeroseuranta' => '',
     'tuoteno' => $tuoteno,
@@ -182,7 +216,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma_alviton, $tuoterow['kehahin']);
 
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
     $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
@@ -194,7 +228,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'ale' => $ale_arr,
       'kate' => $kate,
       'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
+      'rivihinta' => round($kotisumma_alviton, $yhtiorow['hintapyoristys'])
     ));
 
   exit;

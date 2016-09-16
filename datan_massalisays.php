@@ -244,7 +244,7 @@ if ($tee == 'GO') {
         $filetuoteno = pupesoft_cleanstring($filetuoteno);
         $filename    = pupesoft_cleanstring($filename);
 
-        $filearray[$filename] = $filetuoteno;
+        $filearray[$filename][] = $filetuoteno;
       }
     }
   }
@@ -464,10 +464,12 @@ if ($tee == 'GO') {
           list($tuoteno, $kayttotarkoitus_custom) = explode("=", $tuoteno);
         }
 
+        $tuotenolisa = "AND tuoteno = '{$tuoteno}'";
+
         # Tiedostossa voi olla tuotenumeron kääntö
         if (count($filearray) > 0) {
-          if (!empty($filearray[$kuva])) {
-            $tuoteno = $filearray[$kuva];
+          if (isset($filearray[$kuva])) {
+            $tuotenolisa = "AND tuoteno IN ('".implode("','", $filearray[$kuva])."')";
           }
           else {
             continue;
@@ -477,8 +479,7 @@ if ($tee == 'GO') {
         $query = "SELECT tuoteno, tunnus
                   FROM tuote
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$tuoteno}'
-                  LIMIT 1";
+                  {$tuotenolisa}";
         $apuresult = pupe_query($query);
       }
 

@@ -1411,7 +1411,6 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             $ryhma
             ORDER BY $jarjestys
             $limiitti";
-  query_dump($query);
   $result = pupe_query($query);
 
 

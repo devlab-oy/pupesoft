@@ -28,6 +28,7 @@ $(document).ready(function() {
         $("input[name='ale1']").val('');
         $("input[name='ale2']").val('');
         $("input[name='ale3']").val('');
+        $("select[name='alv']").val('');
         $('#kate_rivi_laskenta').html('');
         $('#ykshinta_rivi_laskenta').html('');
         $('#rivihinta_rivi_laskenta').html('');
@@ -74,6 +75,7 @@ $(document).ready(function() {
             ale1: $("input[name='ale1']").val(),
             ale2: $("input[name='ale2']").val(),
             ale3: $("input[name='ale3']").val(),
+            alv: $("select[name='alv']").val(),
             netto: netto,
             toim: toim,
             tilausnumero: $("input[name='tilausnumero']").val(),
@@ -110,6 +112,7 @@ $(document).ready(function() {
           $("input[name='ale1']").val('');
           $("input[name='ale2']").val('');
           $("input[name='ale3']").val('');
+          $("select[name='alv']").val('');
           $('#kate_rivi_laskenta').html('');
           $('#ykshinta_rivi_laskenta').html('');
           $('#rivihinta_rivi_laskenta').html('');
@@ -132,6 +135,7 @@ $(document).ready(function() {
               ale1: $("input[name='ale1']").val(),
               ale2: $("input[name='ale2']").val(),
               ale3: $("input[name='ale3']").val(),
+              alv: $("select[name='alv']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
               toim: toim,
               ajax_toiminto: 'esisyotto',

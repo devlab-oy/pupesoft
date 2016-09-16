@@ -109,25 +109,16 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  // Tän rivin alviton rivihinta
-  if ($yhtiorow["alv_kasittely"] == '') {
-
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    if ($alv >= 500) {
-      $alvkapu = 0;
-    }
-    else {
-      $alvkapu = $alv;
-    }
-
-    $kotisumma_alviton   = $kotisumma / (1+$alvkapu/100);
+  if ($yhtiorow['alv_kasittely'] == '') {
+    $alvillisuus = $hinta / (1 + $alv / 100);
   }
   else {
-    $kotisumma_alviton   = $kotisumma;
+    $alvillisuus = $hinta;
   }
+
+  $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -136,7 +127,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma_alviton, $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
 
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
     $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
@@ -148,7 +139,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'ale' => $ale,
       'kate' => $kate,
       'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma_alviton, $yhtiorow['hintapyoristys'])
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;
@@ -189,25 +180,16 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale'] = 0;
   $ale_arr['erikoisale_saapuminen'] = 0;
 
-  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  // Tän rivin alviton rivihinta
-  if ($yhtiorow["alv_kasittely"] == '') {
-
-    // Jos meillä on marginaalimyyntiä/käänteinen alv
-    if ($alv >= 500) {
-      $alvkapu = 0;
-    }
-    else {
-      $alvkapu = $alv;
-    }
-
-    $kotisumma_alviton   = $kotisumma / (1+$alvkapu/100);
+  if ($yhtiorow['alv_kasittely'] == '') {
+    $alvillisuus = $hinta / (1 + $alv / 100);
   }
   else {
-    $kotisumma_alviton   = $kotisumma;
+    $alvillisuus = $hinta;
   }
+
+  $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+  $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
 
   $arr = array(
     'sarjanumeroseuranta' => '',
@@ -216,7 +198,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'jt' => 0,
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma_alviton, $tuoterow['kehahin']);
+  $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
 
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
     $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
@@ -228,7 +210,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
       'ale' => $ale_arr,
       'kate' => $kate,
       'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma_alviton, $yhtiorow['hintapyoristys'])
+      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
     ));
 
   exit;

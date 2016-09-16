@@ -53,6 +53,10 @@ $(document).ready(function() {
       $("input[name='hinta']").trigger('keyup');
     });
 
+    $("select[name='alv']").on('change', function() {
+      $("input[name='hinta']").trigger('keyup');
+    });
+
     $("input[name='hinta']").on('keyup', function() {
 
       if ($(this).val() != '') {

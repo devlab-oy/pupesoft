@@ -472,6 +472,12 @@ if ($tee == 'GO') {
             $tuotenolisa = "AND tuoteno IN ('".implode("','", $filearray[$kuva])."')";
           }
           else {
+            echo " &raquo; ";
+            echo "<font class='error'>";
+            echo t("Ohitetaan kuva, koska ei löytynyt sisäänluettavasta tiedostosta!");
+            echo "</font>";
+            echo "<br>";
+
             continue;
           }
         }

@@ -885,7 +885,7 @@ if ($tee != '' and isset($ajaraportti)) {
 
         if (!empty($karhutieto)) {
 
-          $query = "SELECT max(lasku.luontiaika) as karhupvm,
+          $query = "SELECT max(karhukierros.pvm) as karhupvm,
                     count(karhu_lasku.ltunnus) as karhukerrat
                     FROM lasku
                     JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)

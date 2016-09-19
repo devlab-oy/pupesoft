@@ -429,7 +429,14 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      $oletus_yliajo = t_avainsana("LOGIN_KIELI", "", "", "", "", "selite");
+      // Katsotaan onko avainsanaan annettu vaihtoehtoinen login kieli
+      $query = "SELECT selite
+                FROM avainsana
+                WHERE laji = 'LOGIN_KIELI'
+                LIMIT 1";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+      $oletus_yliajo = $row['selite'];
 
       if (!empty($oletus_yliajo)) {
         $browkieli = $oletus_yliajo;

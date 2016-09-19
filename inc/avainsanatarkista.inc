@@ -346,9 +346,13 @@ if (!function_exists("avainsanatarkista")) {
           $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
         }
       }
+      $sallitut_kielet = array ('fi', 'se', 'no', 'en', 'de', 'ru', 'dk', 'ee');
 
       if ((mysql_field_name($result, $i) == "selite") and trim($t[$i]) == '') {
         $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
+      }
+      elseif ((mysql_field_name($result, $i) == "selite") and !in_array(trim($t[$i]), $sallitut_kielet)) {
+        $virhe[$i] = t("Ole hyvä ja valitse joku seuraavista tunnisteista").": ".implode(',', $sallitut_kielet);
       }
     }
   }

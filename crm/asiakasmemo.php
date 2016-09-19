@@ -274,6 +274,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                    yhtio = '$kukarow[yhtio]',
                    tyyppi = '$tyyppi',
                    pvmalku = $pvmalku,
+                   pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE),
                    kentta01 = '$viesti',
                    {$crm_haas_lisa}
                    kuittaus = '$kuittaus',
@@ -337,6 +338,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                  yhtio = '$kukarow[yhtio]',
                  tyyppi = '$tyyppi',
                  pvmalku = $pvmalku,
+                 pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE),
                  kentta01 = '$viesti',
                  {$crm_haas_lisa}
                  kuittaus = '$kuittaus',
@@ -415,7 +417,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $query = "SELECT *
               FROM kalenteri
               WHERE liitostunnus = '$asiakasid'
-              and tyyppi          in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
+              and tyyppi in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
               and yhtio = '$kukarow[yhtio]'
               and (perheid=0 or tunnus=perheid)
               ORDER BY tunnus desc

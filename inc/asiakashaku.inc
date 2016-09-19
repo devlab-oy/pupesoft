@@ -916,41 +916,27 @@ if ($monta != 1) {
   echo "</form>";
 
   if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kalenteri.php") {
-    $query = "SELECT yhtio
-              FROM oikeu
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and kuka      = '$kukarow[kuka]'
-              and nimi      = 'yllapito.php'
-              and alanimi   = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
-              and paivitys != ''";
-    $oikeuresult1 = pupe_query($query);
 
-    $query = "SELECT yhtio
-              FROM oikeu
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and kuka      = '$kukarow[kuka]'
-              and nimi      = 'yllapito.php'
-              and alanimi   = 'asiakas'
-              and paivitys != ''";
-    $oikeuresult2 = pupe_query($query);
+    $asylloik1 = tarkista_oikeus("yllapito.php", "asiakas!!!VAHITTAISMYYNTI!!!true&laji=H", "X", TRUE);
+    $asylloik2 = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
 
-    if ($monta != 1 and (mysql_num_rows($oikeuresult1) > 0 or mysql_num_rows($oikeuresult2) > 0)) {
+    if ($monta != 1 and ($asylloik1 or $asylloik2)) {
 
       //Annetaan mahdollisuus perustaa uusi asiakas
-      if (mysql_num_rows($oikeuresult1) > 0) {
+      if ($asylloik1) {
         echo "<form action='{$palvelin2}yllapito.php' method='post'>";
         echo "<input type='hidden' name='lopetus'   value='$ahlopetus'>";
-        echo "<input type='hidden' name='toim'    value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
+        echo "<input type='hidden' name='toim'    value='{$asylloik2["alanimi"]}'>";
         echo "<input type='hidden' name='laji'    value='H'>";
         echo "<input type='hidden' name='uusi'    value='1'>";
         echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
         echo "</form>";
       }
 
-      if (mysql_num_rows($oikeuresult2) > 0) {
+      if ($asylloik2) {
         echo "<form action='{$palvelin2}yllapito.php' method='post'>";
         echo "<input type='hidden' name='lopetus'   value='$ahlopetus'>";
-        echo "<input type='hidden' name='toim'    value='asiakas'>";
+        echo "<input type='hidden' name='toim'    value='{$asylloik2["alanimi"]}'>";
         echo "<input type='hidden' name='laji'    value='Y'>";
         echo "<input type='hidden' name='uusi'    value='1'>";
         echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";

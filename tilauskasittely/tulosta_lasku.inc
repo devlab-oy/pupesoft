@@ -2355,6 +2355,10 @@ if (!function_exists('loppu')) {
       $onko_tili1_iban = tarkista_iban($pankkitiedot["pankkitili1"]);
       $onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
 
+      # tv1dateconv k‰ytt‰‰ int typecastausta ja halutaan s‰ilytt‰‰ nollat
+      $date = $laskurow['erpcm'];
+      $erapaiva = substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4);
+
       if ($onko_tili1_iban != "") {
         $code = PalautaPankkiviivakoodi($onko_tili1_iban, $laskurow['summa'], $erapaiva, $laskurow["viite"], 4);
       }

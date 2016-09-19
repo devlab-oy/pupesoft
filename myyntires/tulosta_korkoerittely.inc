@@ -207,13 +207,13 @@ $lask = 1;
 $sivu = 1;
 
 // aloitellaan laskun teko
-$xquery='';
+$tunnukset='';
 for ($i=0; $i < count($lasku_tunnus); $i++) {
   if ($i != 0) {
-    $xquery=$xquery . ",";
+    $tunnukset=$tunnukset . ",";
   }
 
-  $xquery=$xquery . "$lasku_tunnus[$i]";
+  $tunnukset=$tunnukset . "$lasku_tunnus[$i]";
 }
 
 if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
@@ -228,7 +228,7 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
   $korkorivit = laske_korko('', $trow['liitostunnus'], $trow['tapvm'], 'muutosite.php');
 }
 else { 
-  $korkorivit = laske_korko($xquery);  
+  $korkorivit = laske_korko($tunnukset);  
 }
 #var_dump($korkorivit);
 //otetaan asiakastiedot ekalta laskulta

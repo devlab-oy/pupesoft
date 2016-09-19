@@ -978,7 +978,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
     echo "<tr>";
 
     if ($aikasarake) {
-      echo "<td nowrap class='kalepad' style='width: 5%; height: 30px;'>$kello_nyt</td>";
+      echo "<td nowrap class='kalepad' style='width: 35px; height: 30px;'>$kello_nyt</td>";
     }
 
     while ($row = mysql_fetch_assoc($result)) {

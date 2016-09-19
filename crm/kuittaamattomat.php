@@ -120,7 +120,8 @@ if ($tee == "LISAAMUISTUTUS") {
                tapa     = '$tapa',
                kentta01 = '$viesti',
                kuittaus = '$kuittaus',
-               pvmalku  = $pvmalku";
+               pvmalku  = $pvmalku,
+               pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE)";
     $result = pupe_query($kysely);
     $muist = mysql_insert_id($GLOBALS["masterlink"]);
 

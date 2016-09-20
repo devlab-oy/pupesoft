@@ -858,7 +858,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
         }
         else {
-          pupevoice_rivi($tootxml, $tilrow, $vatamount);
+          pupevoice_rivi($tootxml, $tilrow, $vatamount, $lasrow);
         }
 
         $rivilaskuri++;

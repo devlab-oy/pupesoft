@@ -974,16 +974,18 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
     $tyhjaa = $max-$nyt;
     $tanaan = mysql_num_rows($result);
 
-    if ($aikasarake or $tanaan or $tyhjaa) {
     echo "<tr>";
 
     if ($aikasarake) {
       echo "<td nowrap class='kalepad' style='width: 35px; height: 30px;'>$kello_nyt</td>";
     }
+    else {
+      echo "<td class='kalepad' style='width: 0px; height: 32px;'></td>";
+    }
 
     while ($row = mysql_fetch_assoc($result)) {
 
-      $kesto=ceil(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+      $kesto = ceil(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
 
       //haetaan asiakkaan tiedot
       if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {
@@ -1042,13 +1044,9 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         $reunavari = "#9FDCFF";
       }
 
-      $korkeus = 32*$kesto - ($tanaan*2);
+      $korkeus = 32 * $kesto - ($tanaan * 2);
 
-      if ($kesto > 1) {
-        $korkeus += ($kesto-1)*3;
-      }
-
-      echo "<td class='ptop kalepad' style='height: {$korkeus}px; max-width:100px; $varilisa border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;'>
+      echo "<td class='ptop kalepad' rowspan='$kesto' style='height: {$korkeus}px; max-width:100px; $varilisa border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;'>
             <div style='height: {$korkeus}px; width:100%; display:block; overflow: hidden;'>";
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
@@ -1099,7 +1097,6 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
     }
 
     echo "</tr>";
-    }
   }
 
   //kalenterin table loppuu

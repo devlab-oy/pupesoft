@@ -429,22 +429,13 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      // Katsotaan onko avainsanaan annettu vaihtoehtoinen login kieli
-      $query = "SELECT selite
-                FROM avainsana
-                WHERE laji = 'LOGIN_KIELI'
-                LIMIT 1";
-      $result = pupe_query($query);
-      $row = mysql_fetch_assoc($result);
-      $oletus_yliajo = $row['selite'];
+      // Sanakirjan sallitut kielet suomen lisäksi
+      $kielet = array ('no', 'en', 'de', 'ru', 'dk', 'ee');
 
-      if (!empty($oletus_yliajo)) {
-        $browkieli = $oletus_yliajo;
-      }
-      elseif ($browkieli == 'sv') {
+      if ($browkieli == 'sv') {
         $browkieli = 'se';
       }
-      else {
+      elseif (!in_array($browkieli, $kielet))  {
         $browkieli = 'fi';
       }
     }

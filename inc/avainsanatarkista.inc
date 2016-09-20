@@ -338,22 +338,5 @@ if (!function_exists("avainsanatarkista")) {
         $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
       }
     }
-
-    if ($tem_laji == 'LOGIN_KIELI') {
-      if (mysql_field_name($result, $i) == "laji") {
-        $onko_avainsana_jo_olemassa = onko_avainsana_duplikaatti($tunnus, $tem_laji);
-        if ($onko_avainsana_jo_olemassa) {
-          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
-        }
-      }
-      $sallitut_kielet = array ('fi', 'se', 'no', 'en', 'de', 'ru', 'dk', 'ee');
-
-      if ((mysql_field_name($result, $i) == "selite") and trim($t[$i]) == '') {
-        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
-      }
-      elseif ((mysql_field_name($result, $i) == "selite") and !in_array(trim($t[$i]), $sallitut_kielet)) {
-        $virhe[$i] = t("Ole hyvä ja valitse joku seuraavista tunnisteista").": ".implode(',', $sallitut_kielet);
-      }
-    }
   }
 }

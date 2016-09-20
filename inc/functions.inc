@@ -6911,6 +6911,9 @@ if (!function_exists("kalenteritapahtuma")) {
     if (trim($asentaja) != '') {
       $kysely .= ", kentta02 = '$liitostunnus', pvmloppu = $pvmloppu ";
     }
+    else {
+      $kysely .= ", pvmloppu = $pvmalku ";
+    }
 
     $result = pupe_query($kysely);
   }

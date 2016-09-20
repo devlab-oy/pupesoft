@@ -1170,11 +1170,15 @@ function generoi_private_key_ja_csr($params = array()) {
   case "op":
     $csr_info[] = "CN={$customer_id}";
     break;
-  default:
+  case "danske":
     $csr_info[] = "CN={$yhtiorow['nimi']}";
     $csr_info[] = "emailAddress={$yhtiorow["email"]}";
     $csr_info[] = "L={$yhtiorow["kotipaikka"]}";
     $csr_info[] = "O={$yhtiorow['nimi']}";
+  default:
+    $csr_info[] = "SN={$customer_id}";
+    $csr_info[] = "CN={$company_name}";
+    $csr_info[] = "O=Aineistopalvelut-Samlink";
   }
 
   $csr_dir    = "/tmp/" . uniqid('csr-', true);

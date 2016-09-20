@@ -170,7 +170,7 @@ $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 if (mysql_num_rows($toimipaikkares) > 0) {
 
-  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : $toimipaikka;
 
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";

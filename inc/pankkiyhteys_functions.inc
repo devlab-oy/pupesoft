@@ -1275,6 +1275,22 @@ function tuetut_pankit() {
       "nimi"       => "OP",
       "lyhyt_nimi" => "op",
     ),
+    "HELSFIHH" => array(
+      "nimi"       => "Aktia",
+      "lyhyt_nimi" => "aktia",
+    ),
+    "ITELFIHH" => array(
+      "nimi"       => "Säästöpankki",
+      "lyhyt_nimi" => "sp",
+    ),
+    "POPFFI22" => array(
+      "nimi"       => "POP Pankki",
+      "lyhyt_nimi" => "pop",
+    ),
+    "HANDFIHH" => array(
+      "nimi"       => "Handelsbanken",
+      "lyhyt_nimi" => "shb",
+    ),
   );
 }
 

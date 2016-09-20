@@ -381,6 +381,25 @@ if ($id != 0) {
         echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n tilausrivi takaisin tilaan ennen valmistusta")."<br>";
 
         echo "<br><br>";
+
+        $query = "SELECT tunnus
+                  FROM tilausrivi
+                  WHERE yhtio        = '$kukarow[yhtio]'
+                  and otunnus        = $laskurow[tunnus]
+                  and toimitettuaika = '0000-00-00 00:00:00'";
+        $chkresult1 = pupe_query($query);
+
+        //Eli tilaus on osittain valmistamaton
+        if (mysql_num_rows($chkresult1) != 0) {
+          //Jos kyseess‰ on varastovalmistus
+          $query = "UPDATE lasku
+                    SET tila = 'V', alatila  = 'C'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                   and tunnus  = $laskurow[tunnus]";
+          $chkresult2 = pupe_query($query);
+
+          echo t("P‰ivitet‰‰n valmistus takaisin avoimeksi")."!<br>";
+        }
       }
       $vientikerta++;
     }
@@ -391,29 +410,6 @@ if ($id != 0) {
     }
   }
   echo "</table><br><br>";
-
-
-  if ($tee == 'KORJAA') {
-    $query = "SELECT tunnus
-              FROM tilausrivi
-              WHERE yhtio        = '$kukarow[yhtio]'
-              and otunnus        = $laskurow[tunnus]
-              and toimitettuaika = '0000-00-00 00:00:00'";
-    $chkresult1 = pupe_query($query);
-
-    //Eli tilaus on osittain valmistamaton
-    if (mysql_num_rows($chkresult1) != 0) {
-      //Jos kyseess‰ on varastovalmistus
-      $query = "UPDATE lasku
-                SET tila = 'V', alatila  = 'C'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = $laskurow[tunnus]";
-      $chkresult2 = pupe_query($query);
-
-      echo t("P‰ivitet‰‰n valmistus takaisin avoimeksi")."!<br>";
-    }
-  }
-
 
   if ($tee != 'KORJAA') {
 

@@ -433,7 +433,7 @@ function sepa_download_file_list($params) {
       "status"                      => $status,
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/download_file_list",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -502,7 +502,7 @@ function sepa_download_files($params) {
         "environment"                 => SEPA_ENVIRONMENT,
         "status"                      => 'NEW',
       ),
-      "url" => SEPA_ADDRESS . "/{$bank}/download_file",
+      "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -578,7 +578,7 @@ function sepa_upload_file($params) {
       "content"                     => $maksuaineisto,
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url"     => SEPA_ADDRESS . "/{$bank}/upload_file",
+    "url"     => SEPA_ADDRESS . "/" . bank_provider($bank) . "/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -619,7 +619,7 @@ function sepa_get_certificate($params) {
       "signing_csr" => base64_encode($signing_csr),
       "encryption_csr" => base64_encode($encryption_csr),
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/get_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -685,7 +685,7 @@ function sepa_renew_certificate($params) {
       "signing_private_key"         => $pankkiyhteys['signing_private_key'],
       "encryption_private_key"      => $pankkiyhteys['encryption_private_key'],
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/renew_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/renew_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -723,7 +723,7 @@ function sepa_get_bank_certificate($params) {
       "customer_id" => $customer_id,
       "environment" => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/get_bank_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/get_bank_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -765,7 +765,7 @@ function sepa_get_user_info($params) {
       "customer_id"                 => $pankkiyhteys["customer_id"],
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$pankkiyhteys['bank']}/get_user_info",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($pankkiyhteys["bank"]) . "/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -1413,4 +1413,16 @@ function hae_tilin_saldo($params) {
     "saldo"    => (float) ($saldo_kentat["saldo"] / 100),
     "valuutta" => $saldo_kentat["rahayksikon_koodi"] == 1 ? "EUR" : null
   );
+}
+
+function bank_provider($bank) {
+  switch ($bank) {
+  case 'aktia':
+  case 'sp':
+  case 'pop':
+  case 'shb':
+    return 'samlink';
+  default:
+    return $bank;
+  }
 }

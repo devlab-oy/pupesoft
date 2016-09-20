@@ -110,6 +110,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale_saapuminen'] = 0;
 
   if ($yhtiorow['alv_kasittely'] == '') {
+    $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
+
     $alvillisuus = $hinta / (1 + $alv / 100);
   }
   else {
@@ -181,6 +183,8 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   $ale_arr['erikoisale_saapuminen'] = 0;
 
   if ($yhtiorow['alv_kasittely'] == '') {
+    $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
+
     $alvillisuus = $hinta / (1 + $alv / 100);
   }
   else {

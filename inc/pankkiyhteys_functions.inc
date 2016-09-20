@@ -899,6 +899,54 @@ function sepa_file_type_check($bank, $file_type) {
     }
   }
 
+  // Aktia, Säästöpankki & POP Pankki-muunnokset
+  if (in_array($bank, array("aktia", "sp", "pop"))) {
+    switch ($file_type) {
+    // Konekielinen tiliote
+    case 'TITO':
+      return "TO";
+    // Konekielinen viiteaineisto
+    case 'KTL':
+      return "OP";
+    // XML maksuaineisto
+    case 'NDCORPAYS':
+      return "XL";
+    // Maksuaineiston palautesanoma
+    case 'C2BN':
+      return "XP";
+    // Saapuvat verkkolaskut
+    case 'HAELASKUT':
+      return "VN";
+    // Lähtevät verkkolaskut
+    case 'LAHLASKUT':
+      return "VL";
+    }
+  }
+
+  // Handelsbanken-muunnokset
+  if ($bank == "shb") {
+    switch ($file_type) {
+    // Konekielinen tiliote
+    case 'TITO':
+      return "0700";
+    // Konekielinen viiteaineisto
+    case 'KTL':
+      return "0250";
+    // XML maksuaineisto
+    case 'NDCORPAYS':
+      return "0900";
+    // Maksuaineiston palautesanoma
+    case 'C2BN':
+      return "0910";
+    // Saapuvat verkkolaskut
+    case 'HAELASKUT':
+      return "0820";
+    // Lähtevät verkkolaskut
+    case 'LAHLASKUT':
+      return "0800";
+    }
+  }
+
   return $file_type;
 }
 // Sertifikaatti / salausfunktiot

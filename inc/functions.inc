@@ -6912,7 +6912,7 @@ if (!function_exists("kalenteritapahtuma")) {
       $kysely .= ", kentta02 = '$liitostunnus', pvmloppu = $pvmloppu ";
     }
     else {
-      $kysely .= ", pvmloppu = $pvmalku ";
+      $kysely .= ", pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE)  ";
     }
 
     $result = pupe_query($kysely);

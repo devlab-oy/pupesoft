@@ -325,7 +325,7 @@ if ($tee == "SYOTA") {
               WHERE tunnus = '$tunnus'
               $konsernit
               $kukalisa
-              and tyyppi   = 'kalenteri'";
+              and tyyppi in ('muistutus','kalenteri')";
     $res  = pupe_query($query);
     $irow = mysql_fetch_assoc($res);
 
@@ -463,7 +463,11 @@ if ($tee == "SYOTA") {
   $vresult = t_avainsana("KALETAPA");
   $lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 
-  while ($vrow=mysql_fetch_assoc($vresult)) {
+  if (!empty($tapa)) {
+    $lisays .= "<option value = '$tapa'>$tapa</option>";
+  }
+
+  while ($vrow = mysql_fetch_assoc($vresult)) {
     $sel="";
     if ($tapa == $vrow["selitetark"]) {
       $sel = "selected";
@@ -562,7 +566,7 @@ if ($tee == "SYOTA") {
           </td>
           </tr>";
 
-  $lisays .= "<tr><td><input type='submit' value='".t("Lis‰‰")."'></td></form>
+  $lisays .= "<tr><td><input type='submit' value='".t("Tallenna")."'></td></form>
         <form method='POST'>
         <input type='hidden' name='tee' value='POISTA'>
         <input type='hidden' name='lopetus' value='$lopetus'>
@@ -889,7 +893,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
     $vikaloppu = sprintf("%02d", $whlopt+2).":00";
   }
 
-  $tyyppi = $toim == 'TYOMAARAYS_ASENTAJA' ? "'kalenteri'" : "'kalenteri', 'asennuskalenteri'";
+  $tyyppi = $toim == 'TYOMAARAYS_ASENTAJA' ? "'kalenteri'" : "'kalenteri', 'asennuskalenteri', 'muistutus'";
 
   while ($date != $whileloppu) {
     $hh    = date("H", mktime($hh, $mm+30, 0));
@@ -922,10 +926,10 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   // kalenterin taulukko alkaa t‰st‰
   echo "<table class='pnopad' style='table-layout:fixed;' width='100%'>";
 
-  $kello_nyt  = '';
+  $kello_nyt = '';
   list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
-  $hh   = $whalkt-1;
-  $mm   = $whalkm;
+  $hh = $whalkt-1;
+  $mm = $whalkm;
 
   while ($kello_nyt != $whileloppu) {
     $hh        = date("H", mktime($hh, $mm+30, 0));
@@ -964,8 +968,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
                and kalenteri.tyyppi in ($tyyppi)
                $konsernit
                and kokopaiva = ''
-               HAVING
-               pvmalku <= '$year-$kuu-$paiva $kello_nyt:00'
+               HAVING pvmalku <= '$year-$kuu-$paiva $kello_nyt:00'
                and pvmalku > '$year-$kuu-$paiva 00:00:00'
                and pvmloppu >  '$year-$kuu-$paiva $kello_nyt:00'";
     $aresult = pupe_query($aquery);
@@ -1050,7 +1053,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
             <div style='height: {$korkeus}px; width:100%; display:block; overflow: hidden;'>";
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
-      if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row['tyyppi'] == 'kalenteri') {
+      if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"])) {
         $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", "$row[tapa]");
 
         echo "$url";
@@ -1062,9 +1065,9 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         echo "$kukanimi $row[tapa] ";
       }
 
-      if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {
+      if (in_array($row['tyyppi'], array('kalenteri','Muistutus')) and $row["liitostunnus"] != 0) {
         if ($asmemolinkki and $kukarow["yhtio"] == $row["yhtio"]) {
-          echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
+          echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]&lopetus=$lopetus'>$asiak[nimi]</a>";
         }
         else {
           echo " - $asiak[nimi]";
@@ -1117,12 +1120,6 @@ function piirra_kokopaivantapahtumat($kuu, $paiva, $year) {
     $paivat = 1;
   }
 
-  $muikkarilisa = "";
-
-  if ($toim != 'TYOMAARAYS_ASENTAJA') {
-    $muikkarilisa = " or (kalenteri.tyyppi = 'Muistutus' and kalenteri.kuittaus = 'K') ";
-  }
-
   $query = "SELECT kalenteri.*,
             datediff(left(pvmloppu,10), if(left(pvmalku, 10) < '$ekapaiva', '$ekapaiva', pvmalku)) kesto,
             if (pvmalku < '$ekapaiva', '$ekapaiva', left(pvmalku, 10)) korjattualku,
@@ -1132,7 +1129,7 @@ function piirra_kokopaivantapahtumat($kuu, $paiva, $year) {
             WHERE kalenteri.kuka  in ($vertaa)
             and kalenteri.pvmloppu >= '$ekapaiva 00:00:00'
             and kalenteri.pvmalku <= '$vikapaiva 23:59:00'
-            and ((kalenteri.tyyppi = 'kalenteri' and kalenteri.kokopaiva != '') {$muikkarilisa})
+            and ((kalenteri.tyyppi = 'kalenteri' and kalenteri.kokopaiva != ''))
             $konsernit
             order by korjattualku, kesto desc, tunnus";
   $result = pupe_query($query);

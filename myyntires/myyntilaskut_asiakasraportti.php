@@ -866,7 +866,7 @@ if ($tee == "") {
             $avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
           }
 
-          if ($korkosumma > 0) $korkoja = $korkosumma;
+          if ($korkosumma > 0) $korkoja += $korkosumma;
         }
 
         echo "</tbody>";

@@ -2355,18 +2355,14 @@ if (!function_exists('loppu')) {
       $onko_tili1_iban = tarkista_iban($pankkitiedot["pankkitili1"]);
       $onko_iban1_iban = tarkista_iban($pankkitiedot["pankkiiban1"]);
 
-      # tv1dateconv k‰ytt‰‰ int typecastausta ja halutaan s‰ilytt‰‰ nollat
-      $date = $laskurow['erpcm'];
-      $erapaiva = substr($date, 8, 2).".".substr($date, 5, 2).".".substr($date, 0, 4);
-
       if ($onko_tili1_iban != "") {
-        $code = PalautaPankkiviivakoodi($onko_tili1_iban, $laskurow['summa'], $erapaiva, $laskurow["viite"], 4);
+        $code = PalautaPankkiviivakoodi($onko_tili1_iban, $laskurow['summa'], $laskurow['erpcm'], $laskurow["viite"], 4);
       }
       elseif ($onko_iban1_iban != "") {
-        $code = PalautaPankkiviivakoodi($onko_iban1_iban, $laskurow['summa'], $erapaiva, $laskurow["viite"], 4);
+        $code = PalautaPankkiviivakoodi($onko_iban1_iban, $laskurow['summa'], $laskurow['erpcm'], $laskurow["viite"], 4);
       }
       else {
-        $code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $laskurow['summa'], $erapaiva, $laskurow["viite"], 2);
+        $code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $laskurow['summa'], $laskurow['erpcm'], $laskurow["viite"], 2);
       }
 
       $font = 5;
@@ -2839,9 +2835,9 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
     }
 
     // Erapaiva
-    $pp = substr($erapv, 0, 2);
-    $kk = substr($erapv, 3, 2);
-    $vv = substr($erapv, 8, 2);
+    $pp = substr($erapv, 8, 2);
+    $kk = substr($erapv, 5, 2);
+    $vv = substr($erapv, 0, 4);
 
     $konekielinen_erapv = $vv.$kk.$pp;
 

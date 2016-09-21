@@ -822,7 +822,11 @@ if ($tee == "") {
 
           echo "<td align='right'>$maksurow[ika]</td>";
 
-          $korkorivit = laske_korko($maksurow['tunnus']); 
+          $params = array(
+            'tunnukset' => $maksurow['tunnus'],
+          );
+
+          $korkorivit = laske_korko($params);
 
           $korkosumma = 0;
           foreach ($korkorivit as $korkorow) {

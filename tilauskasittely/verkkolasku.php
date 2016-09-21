@@ -2690,7 +2690,7 @@ else {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
-                pupevoice_rivi($tootxml, $tilrow, $vatamount, $lasrow);
+                pupevoice_rivi($tootxml, $tilrow, $vatamount);
               }
 
               $rivilaskuri++;

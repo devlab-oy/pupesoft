@@ -220,10 +220,18 @@ if (!function_exists('pupevoice_alvierittely')) {
 }
 
 if (!function_exists('pupevoice_rivi')) {
-  function pupevoice_rivi($tootxml, $tilrow, $vatamount, $lasrow) {
+  function pupevoice_rivi($tootxml, $tilrow, $vatamount) {
     global $yhtiorow, $kukarow;
 
-    $tilaustunnus = empty($lasrow['asiakkaan_tilausnumero']) ? $tilrow['otunnus'] : substr($lasrow['asiakkaan_tilausnumero'], 0, 35);
+    // haetaan asiakkaan tilausnumero
+    $astilno_query = "SELECT asiakkaan_tilausnumero
+                      FROM lasku
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus = '{$tilrow['otunnus']}'";
+    $astilno_res = pupe_query($astilno_query);
+    $astilno_row = mysql_fetch_assoc($astilno_res);
+
+    $tilaustunnus = empty($astilno_row['asiakkaan_tilausnumero']) ? $tilrow['otunnus'] : substr($astilno_row['asiakkaan_tilausnumero'], 0, 35);
     fputs($tootxml, "<Row>\n");
     xml_add("OrderIdentifier",          $tilaustunnus,             $tootxml); // tämä on tilauksen numero meillä, ei kuulu standardiin mutta se on pakko lisätä
     xml_add("RowDeliveryIdentifier",      $tilrow['otunnus'],             $tootxml); // tämä on tilauksen numero meillä, tämä taas kuuluu standardiin

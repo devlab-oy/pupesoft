@@ -243,6 +243,9 @@ if ($taulu != "") {
 
     if (empty($pupenext_yllapitonakymat[$taulu])) {
       require "inc/$taulu"."rivi.inc";
+
+      // T‰ss‰ n‰ytet‰‰n kaikki kent‰t
+      $tyyppi = 1;
     }
     else {
       $jatko = 1; // oletetaan normaali k‰sittely

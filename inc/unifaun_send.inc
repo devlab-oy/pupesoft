@@ -246,8 +246,9 @@ class Unifaun {
     $uni_meta_val = $uni_meta->addChild('val', "{$this->kirjoitin}"); // Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val->addAttribute('n', 'printer');
 
-    //$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
-    //$uni_meta_val->addAttribute('n', 'favorite');
+    // Kovakoodataan tähän VAK. Unifaun Onlinessä tule perustaa tämän niminen Tulostussuosikki (nimiketaso) jos halutaan käyttää VAK -koodeja.
+    $uni_meta_val = $uni_meta->addChild('val', 'VAK'); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
+    $uni_meta_val->addAttribute('n', 'favorite');
 
     //$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the profile group where the shipment should be stored in the online system.
     //$uni_meta_val->addAttribute('n', 'partition');

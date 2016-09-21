@@ -33756,20 +33756,16 @@ if (!function_exists("laske_korko")) {
               l.laskunro,
               t.tapvm as mapvm,
               l.tapvm as tapvm,
-              l.tunnus,
               l.viikorkopros,
               to_days(t.tapvm) - to_days(l.erpcm) as ika,
               round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm) - to_days(l.erpcm)) / 36500, 2) as korkosumma,
               l.maksuehto
               FROM lasku l
-              JOIN tiliointi t on (t.yhtio = l.yhtio
-                AND t.tilino in ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}')
-                AND t.tapvm > l.erpcm
-                AND l.tunnus = t.ltunnus)
-              LEFT JOIN maksuehto me on (me.yhtio = l.yhtio
-               AND me.tunnus = l.maksuehto)
+              JOIN tiliointi t on (t.yhtio = l.yhtio AND t.ltunnus = l.tunnus)
               WHERE l.yhtio = '{$kukarow['yhtio']}'
               AND l.tila = 'U'
+              AND t.tilino in ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}')
+              AND t.tapvm > l.erpcm
               {$where_lisa}
               ORDER BY l.laskunro, t.tapvm";
     $result = pupe_query($query);

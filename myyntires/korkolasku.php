@@ -37,7 +37,7 @@ if ($tee == 'LAHETA') {
   //p‰ivitet‰‰n laskut l‰hetetyiksi
   $query = "UPDATE lasku
             SET olmapvm = now()
-            WHERE tunnus in ($tunnukset)
+            WHERE tunnus in ($xquery)
             and yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 

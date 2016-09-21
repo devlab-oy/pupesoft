@@ -207,13 +207,13 @@ $lask = 1;
 $sivu = 1;
 
 // aloitellaan laskun teko
-$tunnukset='';
+$xquery='';
 for ($i=0; $i < count($lasku_tunnus); $i++) {
   if ($i != 0) {
-    $tunnukset=$tunnukset . ",";
+    $xquery=$xquery . ",";
   }
 
-  $tunnukset=$tunnukset . "$lasku_tunnus[$i]";
+  $xquery=$xquery . "$lasku_tunnus[$i]";
 }
 
 if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
@@ -232,7 +232,7 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
 }
 else {
   $params = array(
-    'tunnukset' => $tunnukset,
+    'tunnukset' => $xquery,
   );
 }
 

@@ -3,22 +3,22 @@
 if (!function_exists("paperi_alku")) {
   function paperi_alku() {
     global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $bold, $kaatosumma, $kieli, $vmehto, $trow;
-  
+
     $firstpage = $pdf->new_page("a4");
-  
+
     //Haetaan yhteyshenkilon tiedot
     $apuqu = "SELECT *
               from kuka
               where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
     $yres = pupe_query($apuqu);
     $yrow = mysql_fetch_assoc($yres);
-  
+
     //Otsikko
     //$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
     $pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
     $pdf->draw_text(280, 815, t("Korkoerittely", $kieli), $firstpage, $bold);
     $pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, $firstpage, $norm);
-  
+
     //Vasen sarake
     //$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
     $pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), $firstpage, $pieni);
@@ -27,25 +27,25 @@ if (!function_exists("paperi_alku")) {
     $pdf->draw_text(50, 697, $asiakastiedot["osoite"], $firstpage, $norm);
     $pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
     $pdf->draw_text(50, 677, $asiakastiedot["maa"], $firstpage, $norm);
-  
+
     //Oikea sarake
     $pdf->draw_rectangle(800, 300, 779, 580, $firstpage, $rectparam);
     $pdf->draw_rectangle(800, 420, 779, 580, $firstpage, $rectparam);
     $pdf->draw_text(310, 792, t("Päivämäärä", $kieli), $firstpage, $pieni);
-  
+
     if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php')
       $pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), $firstpage, $norm);
     else
       $pdf->draw_text(310, 782, tv1dateconv($trow['tapvm']), $firstpage, $norm);
-  
+
     $pdf->draw_text(430, 792, t("Asiaa hoitaa", $kieli), $firstpage, $pieni);
     $pdf->draw_text(430, 782, $yrow["nimi"], $firstpage, $norm);
-  
+
     $pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
     $pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
     $pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
-  
-  
+
+
     if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
       // Etsitään maksuehto
       $query = "SELECT *
@@ -53,13 +53,13 @@ if (!function_exists("paperi_alku")) {
                 WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
       $presult = pupe_query($query);
       $xrow = mysql_fetch_assoc($presult);
-  
+
       if ($xrow['abs_pvm'] === null) {
-  
+
         $seurday   = sprintf('%02d', date("j", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
         $seurmonth = sprintf('%02d', date("n", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
         $seuryear  = sprintf('%02d', date("Y", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
-  
+
         $erapvm = $seuryear."-".$seurmonth."-".$seurday;
       }
       else {
@@ -69,22 +69,22 @@ if (!function_exists("paperi_alku")) {
     else {
       $erapvm = $trow['erpcm'];
     }
-  
+
     $pdf->draw_text(310, 761, tv1dateconv($erapvm), $firstpage, $norm);
-  
+
     $pdf->draw_text(430, 771, t("Puhelin", $kieli),  $firstpage, $pieni);
     $pdf->draw_text(430, 761, $yrow["puhno"],     $firstpage, $norm);
-  
+
     $pdf->draw_rectangle(758, 300, 737, 580, $firstpage, $rectparam);
     $pdf->draw_rectangle(758, 420, 737, 580, $firstpage, $rectparam);
     $pdf->draw_text(310, 750, t("Ytunnus/Asiakasnumero", $kieli),   $firstpage, $pieni);
     $pdf->draw_text(310, 740, $asiakastiedot["ytunnus"],       $firstpage, $norm);
-  
+
     $pdf->draw_text(430, 750, t("Sähköposti", $kieli),   $firstpage, $pieni);
     $pdf->draw_text(430, 740, $yrow["eposti"],       $firstpage, $norm);
-  
+
     $kala = 620;
-  
+
     //Laskurivien otsikkotiedot
     //eka rivi
     $pdf->draw_text(30,  $kala, t("Laskunumero", $kieli),    $firstpage, $pieni);
@@ -95,9 +95,9 @@ if (!function_exists("paperi_alku")) {
     $pdf->draw_text(340, $kala, t("Viivästykorko-%", $kieli),  $firstpage, $pieni);
     $pdf->draw_text(425, $kala, t("Laskun summa", $kieli),    $firstpage, $pieni);
     $pdf->draw_text(520, $kala, t("Korko", $kieli),        $firstpage, $pieni);
-  
+
     $kala -= 15;
-  
+
     return $firstpage;
   }
 }
@@ -105,7 +105,7 @@ if (!function_exists("paperi_alku")) {
 if (!function_exists("paperi_rivi")) {
   function paperi_rivi($firstpage, $summa) {
     global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
-  
+
     if ($lask >= 37) {
       $sivu++;
       paperi_loppu($firstpage, '');
@@ -113,23 +113,23 @@ if (!function_exists("paperi_rivi")) {
       $kala = 605;
       $lask = 1;
     }
-  
+
     $pdf->draw_text(30,  $kala, $row["laskunro"],      $firstpage, $norm);
     $pdf->draw_text(100, $kala, tv1dateconv($row["tapvm"]), $firstpage, $norm);
     $pdf->draw_text(160, $kala, tv1dateconv($row["erpcm"]), $firstpage, $norm);
     $pdf->draw_text(220, $kala, tv1dateconv($row["mapvm"]), $firstpage, $norm);
     $pdf->draw_text(285, $kala, $row["ika"],        $firstpage, $norm);
     $pdf->draw_text(340, $kala, $row["viikorkopros"],    $firstpage, $norm);
-  
-  
+
+
     $oikpos = $pdf->strlen($row["summa"], $norm);
     $pdf->draw_text(475-$oikpos, $kala, $row["summa"], $firstpage, $norm);
-  
+
     $oikpos = $pdf->strlen($row["korkosumma"], $norm);
     $pdf->draw_text(540-$oikpos, $kala, $row["korkosumma"], $firstpage, $norm);
-  
+
     $kala = $kala - 13;
-  
+
     $lask++;
     $summa+=$row["korkosumma"];
     return $summa;
@@ -138,45 +138,45 @@ if (!function_exists("paperi_rivi")) {
 
 if (!function_exists("paperi_loppu")) {
   function paperi_loppu($firstpage, $summa, $masrow = "") {
-  
+
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $toimipaikkarow;
-  
+
     //yhteensärivi
     if ($summa == '') {
       $pdf->draw_text(420, 75, t('Jatkuu...', $kieli), $firstpage, $norm);
     }
     else {
       $pdf->draw_text(420, 75, t('Yhteensä', $kieli).":", $firstpage, $norm);
-  
+
       $oikpos = $pdf->strlen($summa, $norm);
       $pdf->draw_text(540-$oikpos, 75, $summa, $firstpage, $norm);
       $pdf->draw_text(545, 75, $yhtiorow['valkoodi'], $firstpage, $norm);
     }
-  
+
     //Alimmat kolme laatikkoa, yhtiötietoja
     $pdf->draw_rectangle(70, 20, 20, 580,  $firstpage, $rectparam);
     $pdf->draw_rectangle(70, 207, 20, 580,  $firstpage, $rectparam);
     $pdf->draw_rectangle(70, 394, 20, 580,  $firstpage, $rectparam);
-  
+
     $pdf->draw_text(30, 55, $toimipaikkarow["nimi"],    $firstpage, $pieni);
     $pdf->draw_text(30, 45, $toimipaikkarow["osoite"],  $firstpage, $pieni);
     $pdf->draw_text(30, 35, $toimipaikkarow["postino"]."  ".$toimipaikkarow["postitp"],  $firstpage, $pieni);
     $pdf->draw_text(30, 25, $toimipaikkarow["maa"],    $firstpage, $pieni);
-  
+
     $pdf->draw_text(217, 55, t("Puhelin", $kieli).":",    $firstpage, $pieni);
     $pdf->draw_text(247, 55, $toimipaikkarow["puhelin"],      $firstpage, $pieni);
     $pdf->draw_text(217, 45, t("Fax", $kieli).":",      $firstpage, $pieni);
     $pdf->draw_text(247, 45, $toimipaikkarow["fax"],        $firstpage, $pieni);
     $pdf->draw_text(217, 35, t("Email", $kieli).":",    $firstpage, $pieni);
     $pdf->draw_text(247, 35, $toimipaikkarow["email"],      $firstpage, $pieni);
-  
+
     $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",    $firstpage, $pieni);
     $pdf->draw_text(444, 55, $toimipaikkarow["vat_numero"],      $firstpage, $pieni);
     $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",  $firstpage, $pieni);
     $pdf->draw_text(444, 45, $toimipaikkarow["kotipaikka"],    $firstpage, $pieni);
     $pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),    $firstpage, $pieni);
     $pdf->draw_text(404, 25, t("Alv.rek", $kieli),      $firstpage, $pieni);
-  
+
   }
 }
 
@@ -225,15 +225,21 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
   $yrow = mysql_fetch_assoc($result);
   $yhteyshenkilo = $yrow['tunnus'];
 
-  $korkorivit = laske_korko('', $trow['liitostunnus'], $trow['tapvm'], 'muutosite.php');
+  $params = array(
+    'liitostunnus' => $trow['liitostunnus'],
+    'tapvm' => $trow['tapvm'],
+  );
 }
-else { 
-  $korkorivit = laske_korko($tunnukset);  
+else {
+  $params = array(
+    'tunnukset' => $tunnukset,
+  );
 }
-#var_dump($korkorivit);
+
+$korkorivit = laske_korko($params);
+
 //otetaan asiakastiedot ekalta laskulta
 $asiakastiedot = $korkorivit[0];
-
 
 if ($asiakastiedot["yhtio_toimipaikka"] != '' and $asiakastiedot["yhtio_toimipaikka"] != 0) {
   $toimipaikkaquery = "SELECT *
@@ -275,9 +281,6 @@ $kieli = $asiakastiedot["kieli"];
 
 //Liitostunnusta tarvitaan tee_korkolasku.inc failissa
 $liitostunnus  = $asiakastiedot["tunnus"];
-
-//ja kelataan akuun
-#mysql_data_seek($result, 0);
 
 $firstpage = paperi_alku();
 

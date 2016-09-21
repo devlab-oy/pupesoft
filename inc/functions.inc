@@ -33728,48 +33728,58 @@ if (!function_exists('humanize_ohjelma_moduli')) {
 }
 
 if (!function_exists("laske_korko")) {
-  function laske_korko($tunnukset = '', $liitostunnus = 0, $tapvm = '', $muutosite = '') {
+  function laske_korko(Array $params) {
     global $kukarow, $yhtiorow;
-    
-    $korkorivit = array();
-    $liitostunnus = (int) $liitostunnus;
-    
-    if ($tunnukset == '' and  $liitostunnus == 0 and $tapvm == '' and $muutosite == '') {
-      return array();
+
+    $tunnukset    = empty($params['tunnukset'])    ? null : $params['tunnukset'];
+    $liitostunnus = empty($params['liitostunnus']) ? null : $params['liitostunnus'];
+    $tapvm        = empty($params['tapvm'])        ? null : $params['tapvm'];
+
+    if (isset($liitostunnus) and isset($tapvm)) {
+      $where_lisa = "AND l.liitostunnus in ({$liitostunnus})
+                     AND t.tapvm <= '{$tapvm}'
+                     AND l.olmapvm = '{$tapvm}'
+                     AND l.mapvm > '0000-00-00'";
     }
-    
-    if ($muutosite != '' and $liitostunnus != 0 and $tapvm != '') {
-      $query = "SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
-                l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
-                round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
-                FROM lasku l
-                join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and t.tapvm <= '$tapvm' and l.tunnus = t.ltunnus)
-                LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
-                WHERE l.liitostunnus in ($liitostunnus)
-                and l.yhtio          = '$kukarow[yhtio]'
-                and l.tila           = 'U'
-                and l.mapvm          > '0000-00-00'
-                and l.olmapvm        = '$tapvm'
-                ORDER BY l.laskunro, t.tapvm";
+    elseif (isset($tunnukset)) {
+      $where_lisa = "AND l.tunnus in ({$tunnukset})";
     }
     else {
-      $query = "SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
-                l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
-                round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
-                FROM lasku l use index (PRIMARY)
-                join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
-                LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
-                WHERE l.tunnus in ($tunnukset)
-                and l.yhtio    = '$kukarow[yhtio]'
-                and l.tila     = 'U'
-                ORDER BY l.laskunro, t.tapvm";
+      return array();
     }
+
+    $query = "SELECT l.tunnus,
+              l.liitostunnus,
+              t.summa * -1 as summa,
+              l.erpcm,
+              l.yhtio_toimipaikka,
+              l.laskunro,
+              t.tapvm as mapvm,
+              l.tapvm as tapvm,
+              l.tunnus,
+              l.viikorkopros,
+              to_days(t.tapvm) - to_days(l.erpcm) as ika,
+              round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm) - to_days(l.erpcm)) / 36500, 2) as korkosumma,
+              l.maksuehto
+              FROM lasku l
+              JOIN tiliointi t on (t.yhtio = l.yhtio
+                AND t.tilino in ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}')
+                AND t.tapvm > l.erpcm
+                AND l.tunnus = t.ltunnus)
+              LEFT JOIN maksuehto me on (me.yhtio = l.yhtio
+               AND me.tunnus = l.maksuehto)
+              WHERE l.yhtio = '{$kukarow['yhtio']}'
+              AND l.tila = 'U'
+              {$where_lisa}
+              ORDER BY l.laskunro, t.tapvm";
     $result = pupe_query($query);
-    
+
+    $korkorivit = array();
+
     while ($korkorow = mysql_fetch_assoc($result)) {
       $korkorivit[] = $korkorow;
     }
-          
+
     return $korkorivit;
-  }   
+  }
 }

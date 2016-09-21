@@ -489,6 +489,26 @@ else {
         $lask++;
       }
 
+      if (!empty($asiakkaiden_nimet)) {
+        $query = "SELECT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
+                  FROM lasku AS l
+                  JOIN tilausrivi AS t ON (
+                    t.yhtio = l.yhtio AND
+                    t.otunnus = l.tunnus AND
+                    t.tyyppi != 'D'
+                  )
+                  WHERE l.yhtio = '{$kukarow['yhtio']}'
+                  AND (l.tila = 'N' OR l.tila = 'L')
+                  AND l.alatila = 'A'
+                  AND t.tuoteno = '{$row['tuoteno']}'
+                  GROUP BY l.tunnus";
+        $nimetres = pupe_query($query);
+
+        while ($nimetrow = mysql_fetch_assoc($nimetres)) {
+          $row['kommentti'] .= "\n{$nimetrow['nimi']}";
+        }
+      }
+
       if (trim($row["kommentti"]) != '') {
         foreach (explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
           $kala = $kala - 15;
@@ -752,6 +772,7 @@ else {
     'sivu'                      => 1,
     'tee'                       => $tee,
     'nimitykset'                => $nimitykset,
+    'asiakkaiden_nimet'         => $asiakkaiden_nimet,
     'thispage'                  => NULL,
     'toim'                      => $toim,
     'rivinumerot'               => $rivinumerot,

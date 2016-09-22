@@ -1276,8 +1276,25 @@ for ($i=0; $i<=$count; $i++) {
         $lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
       }
     }
-    elseif ($toim == 'toimitustavat_toimipaikat' and $i == 1) {
-      $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+    elseif ($toim == 'toimitustavat_toimipaikat' and ($i == 1 or $i == 2)) {
+      if ($i == 1) {
+        $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+      }
+      else {
+        if (!is_numeric($haku[$i])) {
+          $query = "SELECT tunnus
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND nimi LIKE '%{$haku[$i]}%'";
+          $toimipaikkares = pupe_query($query);
+          $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+          $lisa .= " AND toimipaikka_tunnus = '{$toimipaikkarow['tunnus']}' ";
+        }
+        else {
+          $lisa .= " AND toimipaikka_tunnus {$hakuehto} ";
+        }
+      }
     }
     elseif (strpos($array[$i], "/") !== FALSE) {
       $lisa .= " and (";
@@ -2225,7 +2242,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $laji = "T";
       }
 
-      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[2]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

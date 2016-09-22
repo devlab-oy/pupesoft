@@ -601,6 +601,11 @@ if (!function_exists("tv1dateconv")) {
   function tv1dateconv($date, $pitka = "", $lyhyt = "") {
     global $laskurow;
 
+    // jos p‰iv‰m‰‰r‰ on virheellinen, palauettaan sellaisenaan
+    if (strtotime($date) === false) {
+      return $date;
+    }
+
     //k‰‰nt‰‰ mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
     //2007-05-09 12:18:18
 

@@ -498,7 +498,7 @@ if ($tee == 'GO') {
         // lis‰t‰‰n file
         while ($apurow = mysql_fetch_array($apuresult)) {
 
-          $kuvaselite = "Tuotekuva";
+          $kuvaselite = strtolower($ext) == 'pdf' ? 'Liitetiedosto' : 'Tuotekuva';
           $kayttotarkoitus = "MU";
 
           if ($toiminto == 'thumb' and $apuselite == "") {

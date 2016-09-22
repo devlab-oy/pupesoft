@@ -1,5 +1,7 @@
 <?php
 
+require_once 'rajapinnat/unifaun/unifaun-functions.php';
+
 // Pupesoft -> Unifaun Online datasiirto
 
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
@@ -50,6 +52,8 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     //$lavametri[]
     //$shipment_idt[]
 
+    $vak_tiedot = unifaun_tilauksen_vak_koodit($postirow['tunnus']);
+
     $unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
 
     $postirow['shipment_unique_id'] = $postirow['tunnus'];
@@ -95,16 +99,16 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       }
 
       $kollitiedot = array(
-        'maara'     => $kollit[$indeksi],
-        'paino'     => $kilot[$indeksi],
+        'maara'         => $kollit[$indeksi],
+        'paino'         => $kilot[$indeksi],
         'pakkauskuvaus' => $pakkaus_row['pakkauskuvaus'],
-        'pakkauskoodi'   => $pakkaus_row['koodi'],
-        'leveys'     => $pakkaus_row['leveys'],
-        'korkeus'     => $pakkaus_row['korkeus'],
-        'syvyys'     => $pakkaus_row['syvyys'],
-        'vakkoodi'     => array(),
-        'kuutiot'     => $kuutiot[$indeksi],
-        'lavametri'    => $lavametri[$indeksi]
+        'pakkauskoodi'  => $pakkaus_row['koodi'],
+        'leveys'        => $pakkaus_row['leveys'],
+        'korkeus'       => $pakkaus_row['korkeus'],
+        'syvyys'        => $pakkaus_row['syvyys'],
+        'vakkoodi'      => $vak_tiedot,
+        'kuutiot'       => $kuutiot[$indeksi],
+        'lavametri'     => $lavametri[$indeksi]
       );
 
       /* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */

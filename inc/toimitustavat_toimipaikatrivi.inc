@@ -45,7 +45,7 @@ if (mysql_field_name($result, $i) == "toimitustapa_tunnus") {
 
     foreach ($toimitustavat as $toimitustapa) {
       $sel = $toimitustapa['tunnus'] == $trow[$i] ? 'selected' : '';
-      $ulos .= "<option value='{$toimitustapa['tunnus']}'>{$toimitustapa['selite']}</option>";
+      $ulos .= "<option value='{$toimitustapa['tunnus']}' {$sel}>{$toimitustapa['selite']}</option>";
     }
 
     $ulos .= "</select>";

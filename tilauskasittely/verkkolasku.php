@@ -2443,6 +2443,7 @@ else {
                       lasku.viesti laskuviesti,
                       lasku.asiakkaan_tilausnumero,
                       lasku.luontiaika tilauspaiva,
+                      CONCAT(tuote.tullinimike1, IF(tuote.tullinimike2 NOT IN ('', '00', '0'), tuote.tullinimike2, '')) AS tullinimike,
                       if (tuote.tuotetyyppi = 'K','2 Työt','1 Muut') tuotetyyppi,
                       if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
                       if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -2477,7 +2478,7 @@ else {
                       and tilausrivi.kpl     != 0
                       and tilausrivi.tyyppi   = 'L'
                       and tilausrivi.otunnus  in ($tunnukset)
-                      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+                      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25
                       ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
             $tilres = pupe_query($query);
 

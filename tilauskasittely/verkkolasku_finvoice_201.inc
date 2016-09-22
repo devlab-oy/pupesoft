@@ -463,12 +463,21 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
       xml_add("SellerReferenceIdentifier", $lasrow['tunnus'], $tootfinvoice);
 
-      if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+      if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+        xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
+      }
+      elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {
         xml_add("SellersBuyerIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
-        xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
       }
       else {
         xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
+      }
+
+
+      if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+        xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
+      }
+      else {
         xml_add("OrderIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
       }
 
@@ -498,7 +507,8 @@ if (!function_exists('finvoice_otsik')) {
 
 if (!function_exists('finvoice_alvierittely')) {
   function finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow) {
-    global $err_finvoice;
+    global $err_finvoice, $kieli;
+
     if ($err_finvoice == 0) {
       fputs($tootfinvoice, "<VatSpecificationDetails>\r\n");
       xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($alvrow['rivihinta']), $tootfinvoice);
@@ -514,7 +524,7 @@ if (!function_exists('finvoice_alvierittely')) {
 
 if (!function_exists('finvoice_otsikko_loput')) {
   function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
-    global $err_finvoice, $yhtiorow;
+    global $err_finvoice, $yhtiorow, $kieli;
 
     if ($err_finvoice == 0) {
 
@@ -545,7 +555,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
       }
 
       fputs($tootfinvoice, "<PaymentOverDueFineDetails>\r\n");
-      xml_add("PaymentOverDueFineFreeText", "Viivästyskorko ".pp($lasrow['viikorkopros'])."%", $tootfinvoice, 512);
+      xml_add("PaymentOverDueFineFreeText", t("Viivästyskorko", $kieli)." ".pp($lasrow['viikorkopros'])."%", $tootfinvoice, 512);
       xml_add("PaymentOverDueFinePercent", pp($lasrow['viikorkopros'], 2), $tootfinvoice);
       fputs($tootfinvoice, "</PaymentOverDueFineDetails>\r\n");
       fputs($tootfinvoice, "</PaymentTermsDetails>\r\n");
@@ -560,7 +570,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 
 if (!function_exists('finvoice_rivi')) {
   function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi = 0) {
-    global $err_finvoice, $yhtiorow, $kukarow;
+    global $err_finvoice, $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa, $kieli;
 
     if ($laskutyyppi == 10 or $laskutyyppi == 12) {
       $tilrow['hinta'] = 0;
@@ -687,6 +697,46 @@ if (!function_exists('finvoice_rivi')) {
       // Lisätään asiakkaan tilausnumero kommenttikenttään
       if ($tilrow['asiakkaan_tilausnumero'] != "") {
         $tilrow["kommentti"] .= "|"."Asiakkaan tilausnumero: ".$tilrow['asiakkaan_tilausnumero'];
+      }
+
+      if (!empty($tullinimike_ja_alkuperamaa) and $tullinimike_ja_alkuperamaa != "") {
+
+        // Haetaan tullinimike ja alkuperämaa
+        $query = "SELECT alkuperamaa,
+                  if (jarjestys = 0, 9999, jarjestys) sorttaus
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tilrow['tuoteno']}'
+                  ORDER BY sorttaus
+                  LIMIT 1";
+        $alkuperamaa_res = pupe_query($query);
+        $alkuperamaa_row = mysql_fetch_assoc($alkuperamaa_res);
+
+        $tullinimike_ja_alkuperamaa_text = t("Tullinimike", $kieli).": {$tilrow["tullinimike"]}";
+
+        if ($tullinimike_ja_alkuperamaa == "A") {
+          // Tsekataan onko tämä valmiste
+          $query = "SELECT tunnus
+                    FROM tuoteperhe
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND isatuoteno = '{$tilrow['tuoteno']}'
+                    LIMIT 1";
+          $alkuperamaa_res = pupe_query($query);
+
+          if (mysql_num_rows($alkuperamaa_res)) {
+            // Valmisteet ovat kotimaan tuotantoa
+            $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$yhtiorow['maa']}";
+          }
+          elseif ($alkuperamaa_row['alkuperamaa'] != '') {
+            $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$alkuperamaa_row['alkuperamaa']}";
+          }
+        }
+        elseif ($tullinimike_ja_alkuperamaa == "C") {
+          // Kaikki tuotteet ovat kotimaan tuotantoa
+          $tullinimike_ja_alkuperamaa_text .= " ".t("Alkuperämaa", $kieli).":  {$yhtiorow['maa']}";
+        }
+
+        $tilrow["kommentti"] .= "|$tullinimike_ja_alkuperamaa_text";
       }
 
       // Siivotaan myös lisäkommentti

@@ -1680,6 +1680,12 @@ if ($tee == "") {
     echo "</table>";
   }
 
+  $super_kuka = "and lasku.toim_ovttunnus = '$kukarow[kuka]'";
+
+  if ($toim == "SUPER") {
+    $super_kuka = "and (lasku.toim_ovttunnus = '$kukarow[kuka]' or lasku.laatija = '$kukarow[kuka]')";
+  }
+
   $query = "SELECT lasku.*,
             laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
             FROM lasku
@@ -1687,7 +1693,7 @@ if ($tee == "") {
             WHERE lasku.yhtio        = '$kukarow[yhtio]'
             and lasku.tila           = 'H'
             and lasku.mapvm          = '0000-00-00'
-            and lasku.toim_ovttunnus = '$kukarow[kuka]'
+            $super_kuka
             and lasku.h1time         = '0000-00-00 00:00:00'
             and lasku.tilaustyyppi   = 'M'";
   $result = pupe_query($query);

@@ -2139,12 +2139,12 @@ else {
             $seurantalisa
             $kohdelisa
             WHERE lasku.yhtio  = '$kukarow[yhtio]'
-            and lasku.tila     in ('L','N')
-            and lasku.alatila  in ('A','','T','U','G')
+            AND ((lasku.tila IN ('L','N')
+              AND lasku.alatila IN ('A','T','U','G'))
+            OR ((kuka1.extranet = '' OR kuka1.extranet is NULL) AND lasku.tila = 'N' AND lasku.alatila = ''))
             and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
             $haku
             $tepalisa
-            HAVING extra = '' or extra is null
             $mt_order_by
             $rajaus";
 
@@ -2156,9 +2156,11 @@ else {
                  count(distinct lasku.tunnus) kpl
                  FROM lasku use index (tila_index)
                  JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+                 JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija)
                  WHERE lasku.yhtio  = '$kukarow[yhtio]'
-                 and lasku.tila     in ('L','N')
-                 and lasku.alatila  in ('A','','T','U','G')
+                 AND ((lasku.tila IN ('L','N')
+                  AND lasku.alatila IN ('A','T','U','G'))
+                 OR ((kuka.extranet = '' OR kuka.extranet is NULL) AND lasku.tila = 'N' AND lasku.alatila = ''))
                  and lasku.clearing not in ('EXTENNAKKO','EXTTARJOUS')
                  $tepalisa";
     $sumresult = pupe_query($sumquery);

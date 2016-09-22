@@ -291,6 +291,11 @@ if (empty($magento_saldot_tuotekenttaan)) {
   );
 }
 
+// Näytetäänkö Magentossa tuotteet aina tilassa "varastossa" saldosta riippumatta
+if (empty($magento_tuote_aina_varastossa)) {
+  $magento_tuote_aina_varastossa = false;
+}
+
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
 if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
   $lockfile = 'tuote_export-tilaukset-flock.lock';
@@ -322,6 +327,7 @@ $magento_client->set_magento_lisaa_tuotekuvat($magento_lisaa_tuotekuvat);
 $magento_client->set_magento_nimitykseen_parametrien_arvot($magento_nimitykseen_parametrien_arvot);
 $magento_client->set_magento_perusta_disabled($magento_perusta_disabled);
 $magento_client->set_magento_simple_tuote_nimityskentta($magento_simple_tuote_nimityskentta);
+$magento_client->set_magento_tuote_aina_varastossa($magento_tuote_aina_varastossa);
 $magento_client->setAsiakasAktivointi($magento_asiakas_aktivointi);
 $magento_client->setAsiakaskohtaisetTuotehinnat($magento_asiakaskohtaiset_tuotehinnat);
 $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);

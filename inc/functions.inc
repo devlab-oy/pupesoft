@@ -9444,7 +9444,7 @@ if (!function_exists("livesearch_tilihaku")) {
 
 if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
-    global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
+    global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa, $laskurow;
 
     pupeslave_start();
 
@@ -9630,19 +9630,26 @@ if (!function_exists("livesearch_tuotehaku")) {
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
         if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M'))) {
 
-          $varastolisa = $kukarow['varasto'] != '' ? "AND tunnus IN ({$kukarow['varasto']})" : "";
+          if (!empty($laskurow['varasto'])) {
+            $laskun_varasto = (int) $laskurow['varasto'];
+            $varastolisa = " AND tunnus = {$laskun_varasto}";
+          }
+          else {
+            $varastolisa = " AND tyyppi  = '' ";
+            $varastolisa .= $kukarow['varasto'] != '' ? " AND tunnus IN ({$kukarow['varasto']}) " : "";
+          }
 
           $query = "SELECT GROUP_CONCAT(DISTINCT tunnus) AS varastotunnukset
                     FROM varastopaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tyyppi  = ''
                     {$varastolisa}";
           $varasto_chk_res = pupe_query($query);
           $varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
-          if ($varasto_chk_row['varastotunnukset'] != '') $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+          if ($varasto_chk_row['varastotunnukset'] != '') {
+            $varastot_mista_saa_myyda = explode(",", $varasto_chk_row['varastotunnukset']);
+          }
         }
-
 
         while ($row = mysql_fetch_assoc($result)) {
 
@@ -9682,7 +9689,7 @@ if (!function_exists("livesearch_tuotehaku")) {
             $saldo_yht = 0;
 
             foreach ($varastot_mista_saa_myyda as $varaston_tunnus) {
-              list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "", $varaston_tunnus);
+              list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varaston_tunnus);
               $saldo_yht += $saldo;
             }
 
@@ -30911,8 +30918,11 @@ if (!function_exists("tallenna_tiliote_viite")) {
           // eli tarkistetaan onko juuri tämä aineisto ajettu koneelle
           // Koodataan tässä vaiheessa vain LMP:lle, mutta mikään ei estä etteikö saman tsekin vois
           // tehdä myös vaikka tiliotteille jos joku pankki toimittaisi yhden päivän otteet useassa osassa.
-          if ($xtyyppi == 2) {
-            // Group concatissa tulee kaikki tän päivän LMP:t
+          //
+          // Sama tsekki toteutettu nyt myös viiteaineistolle, sillä Nordealta tulee silloin tällöin näitä
+          // useassa osassa
+          if (in_array($xtyyppi, array(2, 3))) {
+            // Group concatissa tulee kaikki tän päivän tiliotedata
             $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
@@ -30922,42 +30932,66 @@ if (!function_exists("tallenna_tiliote_viite")) {
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
-            // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
-            $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
-            $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
+            switch ($xtyyppi) {
+            // LMP
+            case 2:
+              // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksissä tyhjää...)
+              $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
+              $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
 
-            if ($_to_aineitso != "") {
-              for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
+              if ($_to_aineitso != "") {
+                for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {
 
-                $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
+                  $_aineisto = trim($distinct_aineistot[$xlmpmaa_i]);
 
-                if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
-                  echo "<font class='error'>";
-                  echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
-                  echo "<br>";
-                  echo "Tili: $tilino<br>";
-                  echo "Ajalta: $alkupvm - $loppupvm<br>";
-                  echo "Yritys: $yritirow[yhtio]";
-                  echo "</font>";
-                  echo "<br>";
+                  if ($_aineisto != "" and strpos($_to_aineitso, $_aineisto) !== false) {
+                    echo "<font class='error'>";
+                    echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                    echo "<br>";
+                    echo "Tili: $tilino<br>";
+                    echo "Ajalta: $alkupvm - $loppupvm<br>";
+                    echo "Yritys: $yritirow[yhtio]";
+                    echo "</font>";
+                    echo "<br>";
 
-                  $xtyyppi=0;
-                  $virhe++;
+                    $xtyyppi=0;
+                    $virhe++;
+                  }
                 }
               }
-            }
 
-            // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
-            if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
-              echo "<font class='error'>";
-              echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
-              echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
-              echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
-              echo "</font>";
-              echo "<br>";
+              // Tutkitaan, ettei sama aineisto ole montaa kertaa tässä failissa
+              if (count($distinct_aineistot) != count(array_unique($distinct_aineistot))) {
+                echo "<font class='error'>";
+                echo "VIRHE: Aineisto esiintyy tiedostossa moneen kertaan.<br>";
+                echo "Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>";
+                echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
+                echo "</font>";
+                echo "<br>";
 
-              $xtyyppi=0;
-              $virhe++;
+                $xtyyppi=0;
+                $virhe++;
+              }
+              break;
+            // Viiteaineisto
+            case 3:
+              $_aineisto      = trim(str_replace($serc, $repl, $kokoaineisto));
+              $kanta_aineisto = trim($tiliotedatarow["kanta_aineisto"]);
+
+              if ($kanta_aineisto != "" && $_aineisto != "" && strpos($kanta_aineisto, $_aineisto) !== false) {
+                echo "<font class='error'>";
+                echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!";
+                echo "<br>";
+                echo "Tili: $tilino<br>";
+                echo "Ajalta: $alkupvm - $loppupvm<br>";
+                echo "Yritys: $yritirow[yhtio]";
+                echo "</font>";
+                echo "<br>";
+
+                $xtyyppi = 0;
+                $virhe++;
+              }
+              break;
             }
           }
           else {
@@ -33618,6 +33652,26 @@ if (!function_exists('finvoice_pankki')) {
     }
 
     return $pankki;
+  }
+}
+
+if (!function_exists('hae_toimitustapa')) {
+  function hae_toimitustapa($toimitustapa_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $toimitustapa_tunnus = (int) $toimitustapa_tunnus;
+
+    if (empty($toimitustapa_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$toimitustapa_tunnus}'";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
   }
 }
 

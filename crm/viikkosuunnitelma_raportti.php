@@ -154,7 +154,7 @@ if ($tee == '') {
   echo "<th>".t("Valitse listattavat kalenteritapahtuman lajit")."<br><br><input type='checkbox' class='check_all' value='kaletapa'>".t("Valitse kaikki")."</th>";
   echo "<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
       <table width='100%'>";
-  
+
   if ($kukarow['kieli'] == '') {
       $kukarow['kieli'] = $yhtiorow['kieli'];
   }
@@ -277,7 +277,7 @@ if ($tee == '') {
               avainsana.perhe
               FROM kalenteri
               JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-              JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa}) 
+              JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ({$kale_querylisa})
               AND avainsana.kieli  = 'fi')
               {$asiakasjoini}
               WHERE kalenteri.yhtio = '{$yhtio}'
@@ -348,7 +348,7 @@ if ($tee == '') {
                     IF(RIGHT(pvmalku,8) = '00:00:00','',RIGHT(pvmalku,8)) aikaalku, IF(RIGHT(pvmloppu,8) = '00:00:00','',RIGHT(pvmloppu,8)) aikaloppu
                     FROM kalenteri
                     JOIN kuka ON (kuka.kuka = kalenteri.kuka AND kuka.yhtio = kalenteri.yhtio)
-                    JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['tunnus']}') AND avainsana.kieli  = 'fi')    
+                    JOIN avainsana ON (avainsana.yhtio = kalenteri.yhtio AND avainsana.perhe IN ('{$rivi['perhe']}') AND avainsana.kieli  = 'fi')
                     LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = '{$yhtio}' )
                     WHERE kalenteri.yhtio = '{$yhtio}'
                     AND kalenteri.kuka    IN ('{$rivi['kuka']}')
@@ -480,7 +480,7 @@ if ($tee == '') {
       $ressu = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($ressu)) {
-        
+
         $asquery = "SELECT tunnus,selitetark, perhe
                   FROM avainsana
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -493,7 +493,7 @@ if ($tee == '') {
           $asrow = mysql_fetch_assoc($asresult);
           $row["aselitetark"] = $asrow["selitetark"];
         }
-        
+
         $excelsarake = 0;
 
         $worksheet->write($excelrivi, $excelsarake++, $row["kukanimi"]);

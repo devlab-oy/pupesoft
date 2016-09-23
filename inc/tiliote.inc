@@ -375,6 +375,62 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $result = pupe_query($query);
             }
           }
+
+          // Siivotaan nimestä pois tuplavälilyönnit NIMI haku
+          if (mysql_num_rows($result) != 1) {
+            $maksaatemp = preg_replace("/ {2,}/", " ", pupesoft_cleanstring($maksaa));
+
+            $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                      FROM lasku
+                      WHERE left(concat_ws(' ', nimi), 35) = left('$maksaatemp', 35)
+                      and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+                      and yhtio   = '$yritirow[yhtio]'
+                      and tila    = 'Q'
+                      and alatila = 'K'
+                      $kohdm_valkoodilisa";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) != 1) {
+              // tarkka 35 merkkiä <-> 35 merkkiä NIMI haku käteisalennusta
+              $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+                        FROM lasku
+                        WHERE left(concat_ws(' ', nimi), 35) = left('$maksaatemp', 35)
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
+                        and yhtio   = '$yritirow[yhtio]'
+                        and tila    = 'Q'
+                        and alatila = ''
+                        $kohdm_valkoodilisa";
+              $result = pupe_query($query);
+            }
+          }
+
+          // Siivotaan nimestä pois tuplavälilyönnit NIMI & NIMITARK haku
+          if (mysql_num_rows($result) != 1) {
+            $maksaatemp = preg_replace("/ {2,}/", " ", pupesoft_cleanstring($maksaa));
+
+            $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                      FROM lasku
+                      WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaatemp', 35)
+                      and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+                      and yhtio   = '$yritirow[yhtio]'
+                      and tila    = 'Q'
+                      and alatila = 'K'
+                      $kohdm_valkoodilisa";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) != 1) {
+              // tarkka 35 merkkiä <-> 35 merkkiä NIMI ja NIMITARK haku ilman käteisalennusta
+              $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+                        FROM lasku
+                        WHERE left(concat_ws(' ', nimi, nimitark), 35) = left('$maksaa', 35)
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
+                        and yhtio   = '$yritirow[yhtio]'
+                        and tila    = 'Q'
+                        and alatila = ''
+                        $kohdm_valkoodilisa";
+              $result = pupe_query($query);
+            }
+          }
         }
 
         if (isset($result) and mysql_num_rows($result) == 1) {

@@ -143,6 +143,9 @@ class MagentoClient {
   // Vaihoehtoisia OVT-tunnuksia EDI-tilaukselle
   private $magento_erikoiskasittely = array();
 
+  // Merkataanko tuote tilaan 'varastossa' saldosta riippumatta
+  private $tuote_aina_varastossa = null;
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -387,10 +390,10 @@ class MagentoClient {
         unset($tuote_data[$poistettava_key]);
       }
 
-      // Lisätään tai päivitetään tuote
-
       // Jos tuotetta ei ole olemassa niin lisätään se
       if (!in_array($tuote['tuoteno'], $skus_in_store)) {
+        $toiminto = 'create';
+
         try {
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
@@ -410,10 +413,12 @@ class MagentoClient {
           $this->log('magento_tuotteet', "Tuote lisätty");
           $this->debug('magento_tuotteet', $tuote_data);
 
+          $is_in_stock = $this->tuote_aina_varastossa === true ? 1 : 0;
+
           // Pitää käydä tekemässä vielä stock.update kutsu, että saadaan Manage Stock: YES
           $stock_data = array(
             'qty'          => 0,
-            'is_in_stock'  => 0,
+            'is_in_stock'  => $is_in_stock,
             'manage_stock' => 1
           );
 
@@ -433,6 +438,8 @@ class MagentoClient {
       }
       // Tuote on jo olemassa, päivitetään
       else {
+        $toiminto = 'update';
+
         try {
 
           $sticky_kategoriat = $this->_sticky_kategoriat;
@@ -536,11 +543,8 @@ class MagentoClient {
         }
       }
 
-      // Haetaan tuotekuvat Pupesoftista
-      $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
-
       // Lisätään kuvat Magentoon
-      $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+      $this->lisaa_ja_poista_tuotekuvat($product_id, $tuote['tunnus'], $toiminto);
 
       // Lisätään tuotteen asiakaskohtaiset tuotehinnat
       if ($this->_asiakaskohtaiset_tuotehinnat) {
@@ -749,6 +753,8 @@ class MagentoClient {
 
         // Jos configurable tuotetta ei löydy, niin lisätään uusi tuote.
         if (!in_array($nimitys, $skus_in_store)) {
+          $toiminto = 'create';
+
           // jos halutaan perustaa tuote disabled tilassa, muutetaan status
           if ($this->magento_perusta_disabled === true) {
             $configurable['status'] = self::DISABLED;
@@ -770,7 +776,9 @@ class MagentoClient {
         }
         // Päivitetään olemassa olevaa configurablea
         else {
+          $toiminto = 'update';
           $sticky_kategoriat = $this->_sticky_kategoriat;
+          $tuoteryhmayliajo = $this->_universal_tuoteryhma;
 
           // Haetaan tuotteen Magenton ID ja nykyiset kategoriat
           $result = $this->_proxy->call($this->_session, 'catalog_product.info', $nimitys);
@@ -784,6 +792,11 @@ class MagentoClient {
                 $configurable['categories'][] = $stick;
               }
             }
+          }
+
+          // Ei muuteta tuoteryhmiä jos yliajo on päällä
+          if (!empty($tuoteryhmayliajo)) {
+            $configurable['categories'] = $current_categories;
           }
 
           $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -832,15 +845,12 @@ class MagentoClient {
           }
         }
 
-        // Haetaan tuotekuvat Pupesoftista
-        $tuotekuvat = $this->hae_tuotekuvat($lapsituotteen_tiedot['tunnus']);
-
         // Lisätään kuvat Magentoon
-        $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
+        $this->lisaa_ja_poista_tuotekuvat($product_id, $lapsituotteen_tiedot['tunnus'], $toiminto);
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys/päivitys epäonnistui", $e);
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$toiminto} epäonnistui", $e);
         $this->debug('magento_tuotteet', $configurable);
       }
     }
@@ -904,8 +914,8 @@ class MagentoClient {
       $count++;
       $this->log('magento_saldot', "[{$count}/{$total_count}] Päivitetään tuotteen {$product_sku} saldo {$qty}");
 
-      // Out of stock jos määrä on tuotteella ei ole myytavissa saldoa
-      $is_in_stock = ($qty > 0) ? 1 : 0;
+      // Out of stock jos määrä on tuotteella ei ole myytavissa saldoa ja jos tuotteet aina varastossa parametri ei ole päällä
+      $is_in_stock = ($qty > 0 or $this->tuote_aina_varastossa === true) ? 1 : 0;
 
       // Päivitetään saldo
       try {
@@ -1353,6 +1363,10 @@ class MagentoClient {
 
   public function set_configurable_tuotetiedot($value) {
     $this->configurable_tuotetiedot = $value;
+  }
+
+  public function set_magento_tuote_aina_varastossa($value) {
+    $this->tuote_aina_varastossa = $value;
   }
 
   // Hakee error_countin:n
@@ -2121,8 +2135,21 @@ class MagentoClient {
   }
 
   // Poistaa tuotteen kaikki kuvat ja lisää ne takaisin
-  private function lisaa_tuotekuvat($product_id, $tuotekuvat) {
-    if (count($tuotekuvat) == 0 or empty($product_id)) {
+  private function lisaa_ja_poista_tuotekuvat($product_id, $pupesoft_tuote_id, $toiminto) {
+    if (empty($product_id) or empty($pupesoft_tuote_id) or empty($toiminto)) {
+      return;
+    }
+
+    // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
+    if ($this->magento_lisaa_tuotekuvat === false) {
+      $this->log('magento_tuotteet', 'Tuotekuvia ei käsitellä.');
+
+      return;
+    }
+
+    if ($toiminto == 'update' and $this->magento_lisaa_tuotekuvat === 'create_only') {
+      $this->log('magento_tuotteet', "Tuotekuvia ei käsitellä päivityksen yhteydessä");
+
       return;
     }
 
@@ -2135,6 +2162,9 @@ class MagentoClient {
     foreach ($magento_pictures as $file) {
       $this->poista_tuotekuva($product_id, $file);
     }
+
+    // Haetaan tuotekuvat Pupesoftista
+    $tuotekuvat = $this->hae_tuotekuvat($pupesoft_tuote_id);
 
     // Loopataan tuotteen kaikki kuvat
     foreach ($tuotekuvat as $kuva) {
@@ -2198,11 +2228,6 @@ class MagentoClient {
 
   // Poistaa tuotteen tuotekuvan Magentosta
   private function poista_tuotekuva($product_id, $filename) {
-    // Jos ei haluta käsitellä tuotekuvia, ei poisteta niitä magentosta
-    if ($this->magento_lisaa_tuotekuvat === false) {
-      return;
-    }
-
     $return = false;
 
     // Poistetaan tuotteen kuva
@@ -2231,13 +2256,6 @@ class MagentoClient {
   // Hakee tuotteen tuotekuvat Pupesoftista
   private function hae_tuotekuvat($tunnus) {
     global $kukarow;
-
-    // Jos ei haluta käsitellä tuotekuvia, palautetaan tyhjä array
-    if ($this->magento_lisaa_tuotekuvat === false) {
-      $this->log('magento_tuotteet', 'Tuotekuvia ei käsitellä.');
-
-      return array();
-    }
 
     // Populoidaan tuotekuvat array
     $tuotekuvat = array();

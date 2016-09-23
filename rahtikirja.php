@@ -124,7 +124,7 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $tutkimus++;
     }
   }
@@ -171,6 +171,13 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
   }
   else {
     $toim = 'lisaa';
+
+    if ($kollit[$i] == '' and strpos($kilot[$i], "/") === FALSE) {
+      echo "<font class='error'>".t("Kollien määrä on pakollinen")."</font><br>";
+    }
+    else {
+      echo "<font class='error'>".t("Syötä kilot, kuutiot tai lavametrit")."</font><br>";
+    }
   }
 }
 
@@ -414,7 +421,7 @@ if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $kilot[$i]    = str_replace(',', '.', $kilot[$i]);
       $kollit[$i]     = str_replace(',', '.', $kollit[$i]);
       $kuutiot[$i]  = str_replace(',', '.', $kuutiot[$i]);
@@ -478,8 +485,19 @@ if ($tee == 'add') {
 
   // katotaan ollaanko syötetty jotain
   for ($i = 0; $i < count($pakkaus); $i++) {
-    if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+    if (($kollit[$i] != '' or strpos($kilot[$i], "/") !== FALSE) and ($kilot[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
       $tutkimus++;
+    }
+  }
+
+  if ($tutkimus == 0) {
+    $toim = 'lisaa';
+
+    if ($kollit[$i] == '' and strpos($kilot[$i], "/") === FALSE) {
+      echo "<font class='error'>".t("Kollien määrä on pakollinen")."</font><br>";
+    }
+    else {
+      echo "<font class='error'>".t("Syötä kilot, kuutiot tai lavametrit")."</font><br>";
     }
   }
 
@@ -622,7 +640,7 @@ if ($tee == 'add') {
 
       if ($k_rahtikulut > 0) {
 
-        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'"; 
+        $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
         $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
 
         $query = "UPDATE tilausrivi
@@ -3020,7 +3038,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
         $rahtituotenumerot = "'{$yhtiorow['rahti_tuotenumero']}'";
         $rahtituotenumerot = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotenumerot);
-        
+
         $query = "SELECT
                   round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
                   round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa

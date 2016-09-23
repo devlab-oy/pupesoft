@@ -181,10 +181,10 @@ $(document).ready(function() {
         }
       }
     });
-  }
 
-  if (rivitunnus_chk.val() != '' && rivitunnus_chk.length != 0) {
-    $("input[name='hinta']").trigger('keyup');
+    if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
+      $("input[name='hinta']").trigger('keyup');
+    }
   }
 
   $('#hintojen_vaihto').on('change', function() {
@@ -236,6 +236,36 @@ $(document).ready(function() {
       new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
     });
   }
+
+  var korvamerkitse_ajax = function() {
+
+    var korva_dd_id = $(this).attr("id");
+    var rivitunnus = korva_dd_id.replace("korva_dd_", "");
+
+    $.post("",
+      {
+        tila: 'KORVAMERKITSE_AJAX',
+        toim: $('#toim').val(),
+        tilausnumero: $('#tilausnumero').val(),
+        rivitunnus: rivitunnus,
+        korvamerkinta: $('#'+korva_dd_id).find('option:selected').val(),
+        async: false,
+        no_head: 'yes',
+        ohje: 'off'
+      },
+      function(json) {
+        var message = JSON && JSON.parse(json) || $.parseJSON(json);
+
+        if (message != "OK") {
+          $('#'+korva_dd_id).replaceWith("<font class='error'>FATAL ERROR!</font>");
+        }
+      }
+    );
+
+    return false;
+  }
+
+  $('.korva_dd').on("change", korvamerkitse_ajax);
 });
 
 function bind_valitut_rivit_checkbox_click() {

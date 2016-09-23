@@ -498,8 +498,10 @@ else {
                     t.tyyppi != 'D'
                   )
                   WHERE l.yhtio = '{$kukarow['yhtio']}'
-                  AND (l.tila = 'N' OR l.tila = 'L')
-                  AND l.alatila = 'A'
+                  AND (
+                    (l.tila = 'N' AND l.alatila IN ('A','T')) OR
+                    (l.tila = 'L' AND l.alatila = 'A')
+                  )
                   AND t.tuoteno = '{$row['tuoteno']}'
                   GROUP BY l.tunnus";
         $nimetres = pupe_query($query);

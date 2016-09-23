@@ -431,7 +431,8 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     mysql_data_seek($vares, 0);
 
     while ($varow = mysql_fetch_array($vares)) {
-      if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
+
+      if (($varow["tyyppi"] == '') or (strpos($kukarow["varasto"], $varow["tunnus"]) !== FALSE) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
 
         $sel = '';
 

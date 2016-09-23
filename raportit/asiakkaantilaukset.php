@@ -565,7 +565,7 @@ if ($ytunnus != '') {
     $query .= "  and $til
           and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
           and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
-          ORDER BY abs(lasku.jaksotettu), lasku.jaksotettu, 2 DESC, 1 ASC";
+          $jarj";
   }
 
   if ($kaikki == "") {
@@ -801,7 +801,7 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
-      $poista_tilaus_whiteliset = array("tarja", "heidi", "virpi", "admin", "seija");
+      $poista_tilaus_whiteliset = array("sari", "admin");
 
       if ($row["tila"] != "U" and in_array($kukarow['kuka'], $poista_tilaus_whiteliset)) {
         echo "<td class='back'>

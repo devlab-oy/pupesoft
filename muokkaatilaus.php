@@ -166,8 +166,9 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and in_array($yhtiorow["ennakkotil
                FROM lasku
                WHERE yhtio      = '$kukarow[yhtio]'
                AND tunnus       = '$tilausnro'
-               AND tila         = 'E'
-               AND tilaustyyppi = 'E'";
+               and tila         IN ('E', 'N')
+               and alatila      IN ('','A','J')
+               and tilaustyyppi = 'E'";
     $jtrest = pupe_query($query);
 
     while ($laskurow = mysql_fetch_assoc($jtrest)) {

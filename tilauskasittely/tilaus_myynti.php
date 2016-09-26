@@ -1119,6 +1119,11 @@ else {
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";
 
+# Laitetaan tilaus lukkoon, jos tilaus on lähetetty ulkoiseen varastoon
+if (!empty($laskurow['lahetetty_ulkoiseen_varastoon'])) {
+  $muokkauslukko = 'LUKOSSA';
+}
+
 //  Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 if (isset($laskurow["tunnusnippu"]) and $laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
   $query   = "SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";

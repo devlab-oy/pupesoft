@@ -330,6 +330,25 @@ if (!function_exists("avainsanatarkista")) {
       }
     }
 
+    if ($tem_laji == 'EXTRANET_H') {
+      if (mysql_field_name($result, $i) == "laji") {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                  AND avainsana.laji    = '{$tem_laji}'
+                  AND tunnus           != '{$tunnus}'";
+        $result = pupe_query($query);
+     
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
+        }
+      }
+
+      if ((mysql_field_name($result, $i) == "selite") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
+      }
+    }
+
     $_arr = array("RAJATOIMIPAIKAT", "MAARATOIMPAIKKA");
 
     if (in_array(strtoupper($tem_laji), $_arr)) {

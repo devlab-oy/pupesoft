@@ -296,6 +296,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY") $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>".t("Puuterivin kommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>".t("Extranet ulkoasuteema")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_H") $ulos .= "<option value='EXTRANET_H' $avain_sel[EXTRANET_H]>".t("Extranet etusivun otsikkoteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>".t("Ylläpitosopimuksen rivien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LABEL") $ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>".t("Myyntitilauksen luokitus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>".t("Ostotilauksen tilaustyyppi")."</option>";

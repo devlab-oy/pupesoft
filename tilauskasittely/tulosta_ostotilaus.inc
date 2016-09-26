@@ -490,7 +490,7 @@ else {
       }
 
       if (!empty($asiakkaiden_nimet)) {
-        $query = "SELECT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
+        $query = "SELECT DISTINCT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
                   FROM lasku AS l
                   JOIN tilausrivi AS t ON (
                     t.yhtio = l.yhtio AND
@@ -502,8 +502,7 @@ else {
                     (l.tila = 'N' AND l.alatila IN ('A','T')) OR
                     (l.tila = 'L' AND l.alatila = 'A')
                   )
-                  AND t.tuoteno = '{$row['tuoteno']}'
-                  GROUP BY l.tunnus";
+                  AND t.tuoteno = '{$row['tuoteno']}'";
         $nimetres = pupe_query($query);
 
         while ($nimetrow = mysql_fetch_assoc($nimetres)) {

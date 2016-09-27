@@ -1120,7 +1120,7 @@ else {
 $muokkauslukko = $state = "";
 
 # Laitetaan tilaus lukkoon, jos tilaus on lähetetty ulkoiseen varastoon
-if (!empty($laskurow['lahetetty_ulkoiseen_varastoon'])) {
+if (!empty($laskurow['lahetetty_ulkoiseen_varastoon']) and $laskurow['lahetetty_ulkoiseen_varastoon'] != "0000-00-00 00:00:00") {
   $muokkauslukko = 'LUKOSSA';
 }
 

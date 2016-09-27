@@ -30,8 +30,8 @@ if (!function_exists('elmaedi_otsik')) {
     if ($yhtiorow["pankkitili2"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili2]\n");
     if ($yhtiorow["pankkitili3"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili3]\n");
     fputs($tootedi, "IRFFCO_NU:$lasrow[asiakkaan_tilausnumero]\n");
-    fputs($tootedi, "IFTXAAITX:\n");
-    fputs($tootedi, "IFTXAAITX:\n");
+    fputs($tootedi, "IFTXAAITX:$lasrow[ytunnus]\n");
+    fputs($tootedi, "IFTXAAITX:$lasrow[ovttunnus]\n");
     fputs($tootedi, "IFTXAAITX:\n");
     fputs($tootedi, "IFTXAAITX:\n");
     fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s", $yhtiorow["ovttunnus"])."@100\n");

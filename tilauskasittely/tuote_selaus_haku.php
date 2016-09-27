@@ -19,6 +19,13 @@ elseif (@include "ostoskori.inc") {
 }
 else exit;
 
+enable_ajax();
+
+if ($livesearch_tee == "TUOTEHAKU") {
+  livesearch_tuotehaku();
+  exit;
+}
+
 // Liitetiedostot popup
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);
@@ -648,7 +655,7 @@ if ($verkkokauppa == "") {
     echo "<div>";
   }
 
-  echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
+  echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post' name='hakuformi'>";
   echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
   echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
   echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
@@ -670,8 +677,11 @@ if ($verkkokauppa == "") {
 
   echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 
+  echo "<tr>";
+  echo "<th>".t("Tuotenumero")."</th>";
+  echo "<td>".livesearch_kentta("hakuformi", "TUOTEHAKU", "tuotenumero", 200, $tuotenumero)."</td>";
+
   if ($hae_ja_selaa_row['selite'] == 'B') {
-    echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td>";
     echo "<th>".t("Toim tuoteno")."</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td>";
 
     if ($kukarow["extranet"] != "") {
@@ -701,7 +711,7 @@ if ($verkkokauppa == "") {
     echo "</tr>";
   }
   else {
-    echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
+    echo "</tr>";
     echo "<tr><th>".t("Toim tuoteno")."</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
 
     if ($orginaaalit) {

@@ -558,6 +558,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
+    if ($phpnimi == 'raportit.php') {
+      setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+    }
+
     if ($phpnimi == 'generoi_siirtolista.php') {
       setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
       setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");

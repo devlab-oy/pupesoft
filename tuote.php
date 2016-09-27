@@ -2327,7 +2327,7 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[hinnastoon]<br>";
 
     if ($tuoterow["status"] == "P") echo "<font class='error'>";
-    echo t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark");
+    echo product_statuses()[$tuoterow["status"]];
     if ($tuoterow["status"] == "P") echo "</font>";
 
     echo "</td>";

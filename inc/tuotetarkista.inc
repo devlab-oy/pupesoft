@@ -362,12 +362,15 @@ if (!function_exists("tuotetarkista")) {
     }
 
     if ($fieldname == 'status') {
-      if (trim($t[$i]) == '') {
-        $virhe[$i] = t("Status ei saa olla tyhjä");
-      }
+      // trim ja upcase statukselle
+      $t[$i] = strtoupper(trim($t[$i]));
 
       $tem_status = $t[$i];
       $tem_status_vanha = $trow[$i];
+
+      if (!in_array($tem_status, array('A', 'P', 'E', 'T'))) {
+        $virhe[$i] = t("Status tulee olla A, P, E, tai T");
+      }
 
       if (empty($virhe) and !empty($trow) and $tem_status_vanha != $tem_status) {
         //jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,

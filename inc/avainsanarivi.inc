@@ -179,7 +179,6 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI") $ulos .= "<option value='TUOTEMERKKI' $avain_sel[TUOTEMERKKI]>".t("Tuotemerkki")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MALLI") $ulos .= "<option value='MALLI' $avain_sel[MALLI]>".t("Tuotemalli")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MALLITARKENNE") $ulos .= "<option value='MALLITARKENNE' $avain_sel[MALLITARKENNE]>".t("Tuotemallitarkenne")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "S") $ulos .= "<option value='S' $avain_sel[S]>".t("Tuotteen status")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") $ulos .= "<option value='TUOTEULK' $avain_sel[TUOTEULK]>".t("Tuotteiden avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") $ulos .= "<option value='VARASTOLUOKKA' $avain_sel[VARASTOLUOKKA]>".t("Varastoluokka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VARASTORYHMA") $ulos .= "<option value='VARASTORYHMA' $avain_sel[VARASTORYHMA]>".t("Varastoryhmä")."</option>";

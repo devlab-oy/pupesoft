@@ -2,7 +2,15 @@
 
 require "parametrit.inc";
 
-echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
+// extranetin otsikko
+$otsikko = "$yhtiorow[nimi] Extranet";
+$otsikko_avainsanasta = t_avainsana("EXTRANET_H", "", "", "", "", "selite");
+
+if (!empty($otsikko_avainsanasta)) {
+  $otsikko = $otsikko_avainsanasta;
+}
+
+echo "<font class='head'>{$otsikko}</font><hr>";
 
 if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 

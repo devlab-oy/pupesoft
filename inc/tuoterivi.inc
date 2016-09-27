@@ -411,10 +411,8 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
 if (mysql_field_name($result, $i) == "status") {
   $vresult = t_avainsana("S");
 
-  $sel = array($trow[$i] => 'selected') + array('T' => '', 'P' => '', 'E' => '', 'A' => '');
-
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= product_status_options($sel);
+  $ulos .= product_status_options($trow[$i]);
 
   while ($vrow = mysql_fetch_assoc($vresult)) {
     $sel = strtoupper($trow[$i]) == strtoupper($vrow["selite"]) ? 'selected' : '';

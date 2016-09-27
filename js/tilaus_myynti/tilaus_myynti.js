@@ -19,7 +19,8 @@ $(document).ready(function() {
   if ($('#tilausrivin_esisyotto_parametri').val() == 'K') {
 
     var toim = $('#toim').val(),
-        rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
+        rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']"),
+        tilausrivi_alvillisuus = $("input[name='tilausrivi_alvillisuus']:checked").val();
 
     if (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '') {
       $("input[name='tuoteno']").on('keyup', function() {
@@ -79,6 +80,7 @@ $(document).ready(function() {
             ale2: $("input[name='ale2']").val(),
             ale3: $("input[name='ale3']").val(),
             alv: $("select[name='alv']").val(),
+            tilausrivi_alvillisuus: tilausrivi_alvillisuus,
             netto: netto,
             toim: toim,
             tilausnumero: $("input[name='tilausnumero']").val(),
@@ -139,6 +141,7 @@ $(document).ready(function() {
               ale3: $("input[name='ale3']").val(),
               alv: $("select[name='alv']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
+              tilausrivi_alvillisuus: tilausrivi_alvillisuus,
               toim: toim,
               ajax_toiminto: 'esisyotto',
               no_head: 'yes',

@@ -621,20 +621,10 @@ if ($lopetus == "") {
     <tr>
     <th>", t("Näytä tuotteet statuksella"), "</th>";
 
-  $status_result = t_avainsana("S");
-
-  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '', 'A' => '');
-
   echo "<td colspan='3'>";
   echo "<select name='status'>";
   echo "<option value=''>", t("Kaikki"), "</option>";
-  echo product_status_options($sel);
-
-  while ($statusrow = mysql_fetch_assoc($status_result)) {
-    $sel = $status == $statusrow['selite'] ? 'selected' : '';
-    echo "<option value='{$statusrow['selite']}'{$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
-  }
-
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $vsel[$verkkokaupat] = "SELECTED";

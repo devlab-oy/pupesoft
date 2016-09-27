@@ -306,19 +306,9 @@ if (!$php_cli) {
 
   echo "<tr><th>", t("Statusrajaus"), ":</th>";
 
-  $result = t_avainsana("S");
-
-  $sel = array($status => 'selected') + array('T' => '', 'P' => '', 'E' => '', 'A' => '');
-
   echo "<td><select name='status'>";
   echo "<option value=''>", t("Kaikki"), "</option>";
-  echo product_status_options($sel);
-
-  while ($statusrow = mysql_fetch_assoc($result)) {
-    $sel = $status == $statusrow['selite'] ? 'selected' : '';
-    echo "<option value='{$statusrow['selite']}' {$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
-  }
-
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";

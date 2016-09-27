@@ -304,22 +304,14 @@ else {
   echo "<input type='hidden' name='vapaa_teksti' value='' />";
 }
 
-$sel = array($status => 'selected') + array('EI' => '', 'A' => '', 'T' => '', 'P' => '', 'E' => '');
-
-$result = t_avainsana("S");
+$sel = $status == 'EI' ? 'selected' : '';
 
 echo "<tr><th>", t("Tuotteen status:"), "</th>";
 echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
 echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
-echo product_status_options($sel);
-
-while ($_status = mysql_fetch_assoc($result)) {
-  $sel = $status == $_status['selite'] ? 'selected' : '';
-  echo "<option value='{$_status['selite']}' {$sel}>{$_status['selitetark']}</option>";
-}
-
+echo product_status_options($status);
 echo "</select>";
 echo "</td>";
 echo "</tr>";

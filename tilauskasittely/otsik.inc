@@ -788,6 +788,10 @@ if ($tila == "" and !isset($jatka)) {
       $tiedot_laskulta = "YES";
     }
 
+    if (strtolower($from) == 'asiakasyllapito' and $asiakasid != '') {
+      $tiedot_laskulta = "YES";
+    }
+
     if (substr($asiakasid, 0, 1) == "£") {
 
       $asiakasid = substr($asiakasid, 1);

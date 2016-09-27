@@ -33559,7 +33559,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
 
-      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
+      $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n,
       // jos asetusta ei ole yliajettu parametreiss‰

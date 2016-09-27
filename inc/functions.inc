@@ -33724,7 +33724,17 @@ if (!function_exists('hae_toimitustapa')) {
 }
 
 if (!function_exists('product_status_options')) {
-  function product_status_options(array $sel) {
+  function product_status_options($select) {
+    $defaults = array('T' => '', 'P' => '', 'E' => '', 'A' => '');
+
+    // jos käytetään multiple-selectiä, voidaan passata array, jossa esivalitut optionit
+    if (is_array($select)) {
+      $sel = $select + $defaults;
+    }
+    else {
+      $sel = array($select => 'selected') + $defaults;
+    }
+
     $options  = "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
     $options .= "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
     $options .= "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";

@@ -383,6 +383,7 @@ for ($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulas
     $values .= ", '$kate'";
     break;
   case 'kate_korjattu':
+  case 'lahetetty_ulkoiseen_varastoon':
     $values .= ", NULL";
     break;
   case 'kohde':

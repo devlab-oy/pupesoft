@@ -2327,7 +2327,8 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[hinnastoon]<br>";
 
     if ($tuoterow["status"] == "P") echo "<font class='error'>";
-    echo product_statuses()[$tuoterow["status"]];
+    $product_statuses = product_statuses();
+    echo $product_statuses[$tuoterow["status"]];
     if ($tuoterow["status"] == "P") echo "</font>";
 
     echo "</td>";

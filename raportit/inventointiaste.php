@@ -1676,28 +1676,14 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
 function hae_tuote_statukset($request = array()) {
   global $kukarow, $yhtiorow;
 
-  $statukset = array(
-    array(
-      'selite'   => 'A',
-      'selected'   => $request['valittu_status'] == 'A' ? 'selected' : '',
-      'selitetark' => t('Aktiivi')
-    ),
-    array(
-      'selite'   => 'E',
-      'selected'   => $request['valittu_status'] == 'E' ? 'selected' : '',
-      'selitetark' => t('Ehdokastuote')
-    ),
-    array(
-      'selite'   => 'T',
-      'selected'   => $request['valittu_status'] == 'T' ? 'selected' : '',
-      'selitetark' => t('Tilaustuote')
-    ),
-    array(
-      'selite'   => 'P',
-      'selected'   => $request['valittu_status'] == 'P' ? 'selected' : '',
-      'selitetark' => t('Poistettu')
-    ),
-  );
+  $statukset = array();
+  foreach (product_statuses() as $key => $value) {
+    $statukset[] = array(
+      "selite"     => $key,
+      "selected"   => $request["valittu_status"] == $key ? 'selected' : '',
+      "selitetark" => $value,
+    );
+  }
 
   $selected = "";
   if (!empty($request['valittu_status']) and $request['valittu_status'] == 'EIPOISTETTUJA') {

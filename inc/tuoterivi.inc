@@ -409,16 +409,8 @@ if (mysql_field_name($result, $i) == "alkuperamaa") {
 }
 
 if (mysql_field_name($result, $i) == "status") {
-  $vresult = t_avainsana("S");
-
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= product_status_options($trow[$i]);
-
-  while ($vrow = mysql_fetch_assoc($vresult)) {
-    $sel = strtoupper($trow[$i]) == strtoupper($vrow["selite"]) ? 'selected' : '';
-    $ulos .= "<option value='{$vrow['selite']}' {$sel}>{$vrow['selite']} - {$vrow['selitetark']}</option>";
-  }
-
   $ulos .= "</select></td>";
   $jatko = 0;
 }

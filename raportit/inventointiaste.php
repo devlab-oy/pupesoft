@@ -1699,16 +1699,6 @@ function hae_tuote_statukset($request = array()) {
     ),
   );
 
-  $result = t_avainsana("S");
-
-  while ($status = mysql_fetch_assoc($result)) {
-    $status['selected'] = '';
-    if (!empty($request['valittu_status']) and $request['valittu_status'] == $status['selite']) {
-      $status['selected'] = 'selected';
-    }
-    $statukset[] = $status;
-  }
-
   $selected = "";
   if (!empty($request['valittu_status']) and $request['valittu_status'] == 'EIPOISTETTUJA') {
     $selected = "selected";

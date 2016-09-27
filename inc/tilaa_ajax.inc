@@ -190,7 +190,7 @@ if ($maara > 0) {
   }
 
   if ($toimaika == "" or $toimaika == "0000-00-00") {
-    $toimaika = $laskurow["toimaika"];
+    $toimaika = $otstoimaika;
   }
 
   // lis‰t‰‰n ostotilausrivi

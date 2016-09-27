@@ -721,6 +721,7 @@ if (isset($jatka)) {
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
+    $otstoimaika = $toimvv."-".$toimkk."-".$toimpp;
   }
 
   //menn‰‰n tilaukselle

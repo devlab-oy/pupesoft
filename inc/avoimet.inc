@@ -5,20 +5,22 @@ echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
 // scripti balloonien tekemiseen
 js_popup();
 
-if (!isset($maksuehto))        $maksuehto = "";
-if (!isset($asiakasid))        $asiakasid = "";
-if (!isset($toimittajaid))      $toimittajaid = "";
-if (!isset($tee))          $tee = "";
-if (!isset($valuutassako))      $valuutassako = "";
-if (!isset($ytunnus))        $ytunnus = "";
-if (!isset($asitoimittain))      $asitoimittain = "";
-if (!isset($laji))          $laji = "";
-if (!isset($muutparametrit))    $muutparametrit = "";
-if (!isset($naytetaankokommentit))  $naytetaankokommentit = "";
-if (!isset($savalkoodi))      $savalkoodi = "";
-if (!isset($maa))          $maa = "";
-if (!isset($karhuja))        $karhuja = "";
-if (!isset($luottovakuutettu))    $luottovakuutettu = "";
+if (!isset($asiakasid))            $asiakasid = "";
+if (!isset($asitoimittain))        $asitoimittain = "";
+if (!isset($karhuja))              $karhuja = "";
+if (!isset($karhutieto))           $karhutieto = isset($_COOKIE["karhutieto"]) ? $_COOKIE["karhutieto"] : "";
+if (!isset($laji))                 $laji = "";
+if (!isset($luottovakuutettu))     $luottovakuutettu = "";
+if (!isset($maa))                  $maa = "";
+if (!isset($maksuehto))            $maksuehto = "";
+if (!isset($muutparametrit))       $muutparametrit = "";
+if (!isset($naytetaankokommentit)) $naytetaankokommentit = "";
+if (!isset($savalkoodi))           $savalkoodi = "";
+if (!isset($tee))                  $tee = "";
+if (!isset($toimipaikka))          $toimipaikka = null;
+if (!isset($toimittajaid))         $toimittajaid = "";
+if (!isset($valuutassako))         $valuutassako = "";
+if (!isset($ytunnus))              $ytunnus = "";
 
 if ($muutparametrit != '') list($tee, $vv, $kk, $pp, $laji, $naytetaankokommentit, $savalkoodi, $valuutassako, $maa, $maksuehto, $excel) = explode("/", $muutparametrit);
 
@@ -165,6 +167,44 @@ $noautosubmit = TRUE;
 require "tilauskasittely/monivalintalaatikot.inc";
 echo "</td></tr>";
 
+$toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
+
+if (mysql_num_rows($toimipaikkares) > 0) {
+
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : $toimipaikka;
+
+  echo "<tr>";
+  echo "<th>", t("Toimipaikka"), "</th>";
+
+  echo "<td colspan='3'><select name='toimipaikka'>";
+  echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+
+  $sel = (isset($toimipaikka) and $toimipaikka == 0) ? 'selected' : '';
+
+  echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
+
+  $sel = "";
+
+  while ($toimipaikkarow = mysql_fetch_assoc($toimipaikkares)) {
+    if (!isset($toimipaikka) and $kukarow['toimipaikka'] == $toimipaikkarow['tunnus']) {
+      $sel = 'selected';
+      $toimipaikka = $kukarow['toimipaikka'];
+    }
+    elseif (isset($toimipaikka) and $toimipaikka == $toimipaikkarow['tunnus']) {
+      $sel = 'selected';
+    }
+    else {
+      $sel = '';
+    }
+
+    echo "<option value='{$toimipaikkarow['tunnus']}' {$sel}>{$toimipaikkarow['nimi']}</option>";
+  }
+
+  echo "</select></td>";
+  echo "</tr>";
+}
+
+
 if ($naytetaankokommentit != "") $komsel = "CHECKED";
 else $komsel = "";
 
@@ -271,6 +311,15 @@ if (substr($laji, 0, 1) != 'O') {
   echo "</td>";
   echo "</tr>";
 
+  $chk = empty($karhutieto) ? '' : 'checked';
+
+  echo "<tr>";
+  echo "<th>".t("Näytä maksukehotuksien tietoja listalla")."</th>";
+  echo "<td colspan='3'>";
+  echo "<input type='checkbox' name='karhutieto' {$chk}>";
+  echo "</td>";
+  echo "</tr>";
+
   // luottovakuutettu
   echo "<tr>";
   echo "<th>".t("Näytä vain luottovakuutetut asiakkaat")."</th>";
@@ -295,6 +344,8 @@ $formi = 'valinta';
 $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
+
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
 
   switch ($laji) {
   case 'M' :
@@ -347,7 +398,7 @@ if ($tee != '' and isset($ajaraportti)) {
 
   if (substr($laji, 0, 1) == 'O') {
 
-    $av_lisa = '';
+    $av_lisa = $toimipaikkalisa = '';
 
     if ($toimittajaid != '') {
       $av_lisa = " and lasku.liitostunnus='$toimittajaid'";
@@ -355,6 +406,10 @@ if ($tee != '' and isset($ajaraportti)) {
     }
     else {
       $indeksi = " use index (yhtio_tila_tapvm)";
+    }
+
+    if (isset($toimipaikka)) {
+      $toimipaikkalisa = " and lasku.vanhatunnus = {$toimipaikka} ";
     }
 
     if ($laji == 'OOK')   $tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -411,6 +466,7 @@ if ($tee != '' and isset($ajaraportti)) {
           and lasku.tapvm <= '$pvm'
           and lasku.tapvm > '0000-00-00'
           and tila in ('H','Y','M','P','Q')
+          {$toimipaikkalisa}
           $maalisa
           $av_lisa
           $valkoodi1
@@ -618,6 +674,7 @@ if ($tee != '' and isset($ajaraportti)) {
     $av_lisa1 = ""; // lasku rajauksia
     $av_lisa2 = ""; // suoritus rajauksia
     $av_lisa3 = ""; // asiakas rajauksia
+    $toimipaikkalisa = '';
 
     if ($asiakasid != '') {
       $av_lisa1 .= " and lasku.liitostunnus='$asiakasid' ";
@@ -630,6 +687,10 @@ if ($tee != '' and isset($ajaraportti)) {
 
     if ($maksuehto != '') {
       $av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
+    }
+
+    if (isset($toimipaikka)) {
+      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 
     $tili = 0;
@@ -690,7 +751,8 @@ if ($tee != '' and isset($ajaraportti)) {
                 sum(lasku.summa-lasku.saldo_maksettu) laskuavoinsaldo,
                 sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
                 sum(lasku.summa) laskusumma,
-                sum(lasku.summa_valuutassa) laskusumma_valuutassa,";
+                sum(lasku.summa_valuutassa) laskusumma_valuutassa,
+                group_concat(lasku.tunnus) tunnukset";
 
       $groupby = "GROUP BY 1,2,3,4,5";
     }
@@ -718,7 +780,8 @@ if ($tee != '' and isset($ajaraportti)) {
     $query .= "  sum(tiliointi.summa) tiliointiavoinsaldo,
           sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
           sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
-          sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
+          sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa,
+          group_concat(lasku.tunnus) tunnukset
           FROM lasku $indeksi
           JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus {$luottovakuutuslisa})
           JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$pvm')
@@ -729,6 +792,7 @@ if ($tee != '' and isset($ajaraportti)) {
           and lasku.tapvm     > '0000-00-00'
           and lasku.tila      = 'U'
           and lasku.alatila    = 'X'
+          {$toimipaikkalisa}
           $lisa
           $av_lisa1
           $valkoodi
@@ -747,7 +811,12 @@ if ($tee != '' and isset($ajaraportti)) {
       echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
     }
 
-    pupe_DataTables(array(array($pupe_DataTables[1], 11, 12)));
+    if (!empty($karhutieto)) {
+      pupe_DataTables(array(array($pupe_DataTables[1], 13, 14)));
+    }
+    else {
+      pupe_DataTables(array(array($pupe_DataTables[1], 11, 12)));
+    }
 
     echo "<table class='display dataTable' id='$pupe_DataTables[1]'>";
 
@@ -763,8 +832,14 @@ if ($tee != '' and isset($ajaraportti)) {
         <th>".t("Eräpäivä")."</th>
         <th>".t("Laskun summa")."</th>
         <th>".t("Avoin saldo")."</th>
-        <th>".t("Val")."</th>
-        <th style='visibility:hidden;'></th>
+        <th>".t("Val")."</th>";
+
+    if (!empty($karhutieto)) {
+      echo "<th>".t("Maksukehotuksia")."</th>";
+      echo "<th>".t("Viimeisin maksukehotus")."</th>";
+    }
+
+    echo "<th style='visibility:hidden;'></th>
         </tr>
         <tr>
         <td><input type='text' class='search_field' name='search_ytunnus'></td>
@@ -777,8 +852,14 @@ if ($tee != '' and isset($ajaraportti)) {
         <td><input type='text' class='search_field' name='search_erapvm'></td>
         <td><input type='text' class='search_field' name='search_summa'></td>
         <td><input type='text' class='search_field' name='search_avoinsaldo'></td>
-        <td><input type='text' class='search_field' name='search_val'></td>
-        <td style='visibility:hidden;'></td>
+        <td><input type='text' class='search_field' name='search_val'></td>";
+
+    if (!empty($karhutieto)) {
+      echo "<td><input type='text' class='search_field' name='search_maksukehotuksia'></td>";
+      echo "<td><input type='text' class='search_field' name='search_viim_maksukehotus'></td>";
+    }
+
+    echo "<td style='visibility:hidden;'></td>
       </tr>";
 
     echo "</thead>";
@@ -796,6 +877,12 @@ if ($tee != '' and isset($ajaraportti)) {
       $worksheet->write($excelrivi,  8, t("Laskun summa"), $format_bold);
       $worksheet->write($excelrivi,  9, t("Avoin saldo"), $format_bold);
       $worksheet->write($excelrivi, 10, t("Val"), $format_bold);
+
+      if (!empty($karhutieto)) {
+        $worksheet->write($excelrivi, 11, t("Maksukehotuksia"), $format_bold);
+        $worksheet->write($excelrivi, 12, t("Viimeisin maksukehotus"), $format_bold);
+      }
+
       $excelrivi++;
     }
 
@@ -803,6 +890,8 @@ if ($tee != '' and isset($ajaraportti)) {
     $summatotal = 0;  // ässä koko höskä kotivaluutassa
 
     while ($trow = mysql_fetch_assoc($result)) {
+
+      $karhutieto_array = array();
 
       if ($trow['tiliointiavoinsaldo'] != 0) {
 
@@ -846,6 +935,27 @@ if ($tee != '' and isset($ajaraportti)) {
           else $summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];  // paljo kirjanpidossa avoimena
         }
 
+        if (!empty($karhutieto)) {
+
+          $query = "SELECT max(karhukierros.pvm) as karhupvm,
+                    count(karhu_lasku.ltunnus) as karhukerrat
+                    FROM lasku
+                    JOIN karhu_lasku ON (lasku.tunnus = karhu_lasku.ltunnus)
+                    JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '')
+                    WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+                    AND lasku.tila    = 'U'
+                    AND lasku.alatila = 'X'
+                    AND lasku.mapvm   = '0000-00-00'
+                    AND lasku.tunnus IN ({$trow['tunnukset']})";
+          $karhures = pupe_query($query);
+          $karhurow = mysql_fetch_assoc($karhures);
+
+          echo "<td>{$karhurow['karhukerrat']}</td>";
+          echo "<td>{$karhurow['karhupvm']}</td>";
+
+          $karhutieto_array = $karhurow;
+        }
+
         // jos ollaan ajettu tälle päivälle laskuittain voidaan echota errori avoimesta saldosta
         if ($asitoimittain == "" and $onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >= 0.05) {
           echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito heittää!</font> $trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[tiliointiavoinsaldo]</a></td>";
@@ -878,6 +988,11 @@ if ($tee != '' and isset($ajaraportti)) {
             $worksheet->writeNumber($excelrivi, 8, (float) $trow["tiliointisumma"]);
             $worksheet->writeNumber($excelrivi, 9, (float) $trow["tiliointiavoinsaldo"]);
             $worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
+          }
+
+          if (!empty($karhutieto) and !empty($karhutieto_array)) {
+            $worksheet->writeNumber($excelrivi, 11, (int) $karhutieto_array["karhukerrat"]);
+            $worksheet->write($excelrivi, 12, $karhutieto_array["karhupvm"]);
           }
 
           $excelrivi++;
@@ -1004,6 +1119,11 @@ if ($tee != '' and isset($ajaraportti)) {
       echo "<th colspan='9'>".t("Avoimet yhteensä").":</th>";
       echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_yhteensa_$val'>".sprintf("%.2f", $sum)."</td>";        // tässä kirjanpidosta osasuoritukset poistettuna
       echo "<td class='tumma' align='right' nowrap>$val</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
 
       if (!in_array($val, $kaikkival)) $kaikkival[] = $val;
@@ -1014,6 +1134,11 @@ if ($tee != '' and isset($ajaraportti)) {
       echo "<th colspan='9'>".t("Kohdistamattomat suoritukset yhteensä").":</th>";
       echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_suoriyhteensa_$val'>".sprintf("%.2f", $sum)."</td>";
       echo "<td class='tumma' align='right' nowrap>$val</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
 
       if (!in_array($val, $kaikkival)) $kaikkival[] = $val;
@@ -1024,6 +1149,11 @@ if ($tee != '' and isset($ajaraportti)) {
       echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat").":</th>";
       echo "<td class='tumma' align='right' nowrap name='avoimet_yhteensa' id='avoimet_yseroyhteensa_$val'>".sprintf("%.2f", ($summa[$val] + $suoritussumma[$val]))."</td>"; // tässä kirjanpidosta osasuoritukset poistettuna
       echo "<td class='tumma' align='right' nowrap>$val</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
     }
 
@@ -1051,18 +1181,33 @@ if ($tee != '' and isset($ajaraportti)) {
       echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat", "", $tili).":</th>";
       echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $summatotal + $suoritussummatotal)."</td>";
       echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
 
       echo "<tr>";
       echo "<th colspan='9'>".t("Kirjanpidon tili %s yhteensä", "", $tili).":</th>";
       echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $trow["saldo"])."</td>";
       echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
 
       echo "<tr>";
       echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat - kirjanpito").":</th>";
       echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $erotus)."</td>";
       echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
+
+      if (!empty($karhutieto)) {
+        echo "<th colspan='2'></th>";
+      }
+
       echo "</tr>";
     }
 

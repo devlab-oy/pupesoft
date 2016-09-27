@@ -4091,12 +4091,13 @@ if ($fieldname == 'tuotteiden_jarjestys_raportoinnissa') {
 }
 
 if ($fieldname == 'ennakkotilausten_toimitus') {
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'M' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('K' => '', 'M' => '');
 
-  $ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
-  $ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+  $ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Ennakkotilauksista luodut myyntitilaukset j‰tet‰‰n kesken-tilaan")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Ennakkotilaukset toimitetaan tilauksittain ja/tai Ennakko-selaus ohjelmalla")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

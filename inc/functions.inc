@@ -33723,22 +33723,36 @@ if (!function_exists('hae_toimitustapa')) {
   }
 }
 
+if (!function_exists('product_statuses')) {
+  function product_statuses() {
+    return array(
+      "A" => t("Aktiivi"),
+      "E" => t("Ehdokastuote"),
+      "P" => t("Poistettu"),
+      "T" => t("Tilaustuote"),
+    );
+  }
+}
+
 if (!function_exists('product_status_options')) {
-  function product_status_options($select) {
-    $defaults = array('T' => '', 'P' => '', 'E' => '', 'A' => '');
+  function product_status_options($select = null) {
+    $defaults = array();
+    foreach (product_statuses() as $key => $value) {
+      $defaults[$key] = "";
+    }
 
     // jos käytetään multiple-selectiä, voidaan passata array, jossa esivalitut optionit
     if (is_array($select)) {
       $sel = $select + $defaults;
     }
     else {
-      $sel = array($select => 'selected') + $defaults;
+      $sel = array($select => ' selected') + $defaults;
     }
 
-    $options  = "<option value = 'A' {$sel['A']}>A - ".t("Aktiivi")."</option>";
-    $options .= "<option value = 'E' {$sel['E']}>E - ".t("Ehdokastuote")."</option>";
-    $options .= "<option value = 'P' {$sel['P']}>P - ".t("Poistettu")."</option>";
-    $options .= "<option value = 'T' {$sel['T']}>T - ".t("Tilaustuote")."</option>";
+    $options = "";
+    foreach (product_statuses() as $key => $value) {
+      $options .= "<option value='{$key}'{$sel[$key]}>{$value}</option>";
+    }
 
     return $options;
   }

@@ -29936,6 +29936,29 @@ if (!function_exists('sallitut_varastot')) {
     $toim               = isset($params['toim']) ? $params['toim'] : '';
     $tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
+    if ($toim == "OSTO") {
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tyyppi <> 'P'
+                ORDER BY tyyppi, nimitys";
+      $varastoresult = pupe_query($query);
+
+      while ($varastorow = mysql_fetch_array($varastoresult)) {
+        if (
+          $varastorow["tyyppi"] == '' or
+          $kukarow["varasto"] == $varastorow["tunnus"] or
+          $varastorow['tunnus'] == $srow["varasto"] or
+          $kukarow['oletus_ostovarasto'] == $varastorow['tunnus'] or
+          in_array($varastorow["tunnus"], explode(',', $kukarow["varasto"]))
+        ) {
+          $kukarow_varasto[] = $varastorow;
+        }
+      }
+
+      return $kukarow_varasto;
+    }
+
     if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
       return array($yhtiorow['takuuvarasto']);
     }

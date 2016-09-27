@@ -314,7 +314,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi != 8) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 
@@ -431,7 +431,7 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi == 8) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiakkaan Y-tunnus", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"], true), $page_lasku[$sivu], $norm);
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $page_lasku[$sivu], $norm);
       $rivi_ind++;
     }
 

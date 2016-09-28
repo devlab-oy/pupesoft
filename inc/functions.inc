@@ -33730,6 +33730,7 @@ if (!function_exists('product_statuses')) {
       "E" => t("Ehdokastuote"),
       "P" => t("Poistettu"),
       "T" => t("Tilaustuote"),
+      "X" => t("Poistuva tuote"),
     );
   }
 }

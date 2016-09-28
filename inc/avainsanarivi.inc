@@ -611,21 +611,8 @@ if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
   }
 
   if ($_selitetark) {
-    $sel = array();
-    $sel[$trow[$i]] = "SELECTED";
-
-    $query = "SELECT selite,
-              selitetark
-              FROM avainsana
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji    = 'S'";
-    $tuote_status_result = pupe_query($query);
-
-    $ulos = "<td><select name = '$nimi'>";
-    $ulos .= "<option value = 'X'>".t("Mikä vain")."</option>";
-    while ($tuote_status = mysql_fetch_assoc($tuote_status_result)) {
-      $ulos .= "<option value = '{$tuote_status['selite']}' {$sel[$tuote_status['selite']]}>".t($tuote_status['selitetark'])."</option>";
-    }
+    $ulos  = "<td><select name='{$nimi}'>";
+    $ulos .= product_status_options($trow[$i]);
     $ulos .= "</select></td>";
 
     $jatko = 0;

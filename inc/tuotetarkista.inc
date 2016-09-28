@@ -368,8 +368,8 @@ if (!function_exists("tuotetarkista")) {
       $tem_status = $t[$i];
       $tem_status_vanha = $trow[$i];
 
-      if (!in_array($tem_status, array('A', 'P', 'E', 'T'))) {
-        $virhe[$i] = t("Status tulee olla A, P, E, tai T");
+      if (!in_array($tem_status, array('A', 'P', 'E', 'T', 'X'))) {
+        $virhe[$i] = t("Status tulee olla A, P, E, T tai X");
       }
 
       if (empty($virhe) and !empty($trow) and $tem_status_vanha != $tem_status) {

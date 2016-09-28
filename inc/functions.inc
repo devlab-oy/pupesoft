@@ -7804,12 +7804,12 @@ if (!function_exists("enable_ajax")) {
           document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
         }
         else {
-          document.forms[haku_formi].submit();
+          document.getElementByName(haku_formi).submit();
         }
         keyStrokeIndex=-1;
       }
       else {
-        document.forms[haku_formi].submit();
+        document.getElementByName(haku_formi).submit();
       }
 
       return false;

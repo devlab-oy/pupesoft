@@ -2150,24 +2150,34 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $nimi = t("Päivitä $otsikko_nappi");
   }
 
-  echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
+  echo "<br><input type = 'submit' name='yllapitonappi' value = '{$nimi}'>";
 
   if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
-    echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+    echo "<br><br>";
+
+    $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille tilauksille");
+    echo "<input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
 
     if ($toim == "asiakas") {
-      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> ".t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
+      $chktxt = t("Päivitä myös toimitustapa avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> {$chktxt}";
+
+      $chktxt = t("Päivitä myös maksuehto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> {$chktxt}";
+
+      $chktxt = t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> {$chktxt}";
     }
   }
   if ($toim == "toimi" and $uusi != 1) {
-    echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille laskuille")."'>";
+    $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille laskuille");
+    echo "<br><input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
   }
 
   if ($lukossa == "ON") {
-    echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
-    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
+    echo "<input type='hidden' name='lukossa' value = '{$lukossa}'>";
+    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    echo "<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
   }
 
   echo "</td>";

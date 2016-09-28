@@ -33723,6 +33723,42 @@ if (!function_exists('hae_toimitustapa')) {
   }
 }
 
+if (!function_exists('product_statuses')) {
+  function product_statuses() {
+    return array(
+      "A" => t("Aktiivi"),
+      "E" => t("Ehdokastuote"),
+      "P" => t("Poistettu"),
+      "T" => t("Tilaustuote"),
+      "X" => t("Poistuva tuote"),
+    );
+  }
+}
+
+if (!function_exists('product_status_options')) {
+  function product_status_options($select = null) {
+    $defaults = array();
+    foreach (product_statuses() as $key => $value) {
+      $defaults[$key] = "";
+    }
+
+    // jos käytetään multiple-selectiä, voidaan passata array, jossa esivalitut optionit
+    if (is_array($select)) {
+      $sel = $select + $defaults;
+    }
+    else {
+      $sel = array($select => ' selected') + $defaults;
+    }
+
+    $options = "";
+    foreach (product_statuses() as $key => $value) {
+      $options .= "<option value='{$key}'{$sel[$key]}>{$value}</option>";
+    }
+
+    return $options;
+  }
+}
+
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
     global $kukarow;

@@ -11,6 +11,7 @@ if ($tee == '') {
 
     $kukarow['kesken']   = 0;
     $tilausnumero     = 0;
+    $otstoimaika      = '';
   }
 }
 

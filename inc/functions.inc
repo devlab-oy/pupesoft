@@ -7804,12 +7804,12 @@ if (!function_exists("enable_ajax")) {
           document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
         }
         else {
-          document.forms[haku_formi].submit();
+          document.getElementByName(haku_formi).submit();
         }
         keyStrokeIndex=-1;
       }
       else {
-        document.forms[haku_formi].submit();
+        document.getElementByName(haku_formi).submit();
       }
 
       return false;
@@ -29936,6 +29936,29 @@ if (!function_exists('sallitut_varastot')) {
     $toim               = isset($params['toim']) ? $params['toim'] : '';
     $tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
+    if ($toim == "OSTO") {
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tyyppi <> 'P'
+                ORDER BY tyyppi, nimitys";
+      $varastoresult = pupe_query($query);
+
+      while ($varastorow = mysql_fetch_array($varastoresult)) {
+        if (
+          $varastorow["tyyppi"] == '' or
+          $kukarow["varasto"] == $varastorow["tunnus"] or
+          $varastorow['tunnus'] == $srow["varasto"] or
+          $kukarow['oletus_ostovarasto'] == $varastorow['tunnus'] or
+          in_array($varastorow["tunnus"], explode(',', $kukarow["varasto"]))
+        ) {
+          $kukarow_varasto[] = $varastorow;
+        }
+      }
+
+      return $kukarow_varasto;
+    }
+
     if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
       return array($yhtiorow['takuuvarasto']);
     }
@@ -33697,6 +33720,42 @@ if (!function_exists('hae_toimitustapa')) {
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('product_statuses')) {
+  function product_statuses() {
+    return array(
+      "A" => t("Aktiivi"),
+      "E" => t("Ehdokastuote"),
+      "P" => t("Poistettu"),
+      "T" => t("Tilaustuote"),
+      "X" => t("Poistuva tuote"),
+    );
+  }
+}
+
+if (!function_exists('product_status_options')) {
+  function product_status_options($select = null) {
+    $defaults = array();
+    foreach (product_statuses() as $key => $value) {
+      $defaults[$key] = "";
+    }
+
+    // jos käytetään multiple-selectiä, voidaan passata array, jossa esivalitut optionit
+    if (is_array($select)) {
+      $sel = $select + $defaults;
+    }
+    else {
+      $sel = array($select => ' selected') + $defaults;
+    }
+
+    $options = "";
+    foreach (product_statuses() as $key => $value) {
+      $options .= "<option value='{$key}'{$sel[$key]}>{$value}</option>";
+    }
+
+    return $options;
   }
 }
 

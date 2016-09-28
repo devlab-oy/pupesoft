@@ -87,20 +87,10 @@ echo "</td>";
 echo "</tr>";
 
 if (!$asiakasanalyysi) {
-  $result = t_avainsana("S");
-
   echo "<tr>";
   echo "<th>", t("Tuotteen status"), "</th>";
   echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
-
-  while ($lajirow = mysql_fetch_assoc($result)) {
-    $selli = '';
-    if ($lajirow['selite'] == $status) {
-      $selli = 'SELECTED';
-    }
-    echo "<option value='$lajirow[selite]' $selli>$lajirow[selite] - $lajirow[selitetark]</option>";
-  }
-
+  echo product_status_options($status);
   echo "</select></td>";
   echo "</tr>";
   echo "<tr>";

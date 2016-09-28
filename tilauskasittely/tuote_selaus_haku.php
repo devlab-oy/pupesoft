@@ -781,7 +781,7 @@ if ($verkkokauppa == "") {
     echo "</fieldset>";
   }
 
-  echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '".t("Etsi")."'></form>";
+  echo "<input type='submit' name='submit_button' class='hae_btn' value = '".t("Etsi")."'></form>";
   echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
       <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
       <input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>

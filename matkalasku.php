@@ -30,6 +30,10 @@ if ($tee == "VALMIS") {
     $tee = "";
     $tunnus = 0;
     $tilausnumero = 0;
+
+    # Refreshataan
+    echo "<script>setTimeout(\"window.location.href='{$palvelin2}matkalasku.php?toim=$toim'\", 0);</script>";
+    exit;
   }
 }
 

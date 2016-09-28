@@ -2094,14 +2094,19 @@ class MagentoClient {
 
       $orders[] = $temp_order;
 
-      // Päivitetään tilauksen tila että se on noudettu pupesoftiin
-      $_data = array(
-        'orderIncrementId' => $order['increment_id'],
-        'status' => 'processing_pupesoft',
-        'Tilaus noudettu Pupesoftiin',
-      );
+      try {
+        // Päivitetään tilauksen tila että se on noudettu pupesoftiin
+        $_data = array(
+          'orderIncrementId' => $order['increment_id'],
+          'status' => 'processing_pupesoft',
+          'Tilaus noudettu Pupesoftiin',
+        );
 
-      $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
+        $this->_proxy->call($this->_session, 'sales_order.addComment', $_data);
+      }
+      catch(Exception $e) {
+        $this->log('magento_tilaukset', "Kommentin lisäys tilaukselle {$order['increment_id']} epäonnistui", $e);
+      }
     }
 
     // Kirjataan kumpaankin logiin

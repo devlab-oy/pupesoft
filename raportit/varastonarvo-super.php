@@ -104,6 +104,7 @@ if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
 if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
+if (!isset($status))                 $status = '';
 
 // setataan
 $lisa = "";
@@ -305,17 +306,9 @@ if (!$php_cli) {
 
   echo "<tr><th>", t("Statusrajaus"), ":</th>";
 
-  $result = t_avainsana("S");
-
-  echo "<td><select name='status'><option value=''>", t("Kaikki"), "</option>";
-
-  while ($statusrow = mysql_fetch_assoc($result)) {
-    $sel = '';
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
-    echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
-  }
-
+  echo "<td><select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";

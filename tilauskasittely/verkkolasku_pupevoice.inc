@@ -333,7 +333,7 @@ if (!function_exists('pupevoice_rivi')) {
 
       if (trim($lisakomm) != "") {
         // Siivotaan myös lisäkommentti
-        $lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+        $lisakomm = pupesoft_invoicestring($lisakomm);
 
         $tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
       }

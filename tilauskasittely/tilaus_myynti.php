@@ -461,6 +461,18 @@ if (isset($tulosta_maksusopimus) and is_numeric(trim($tulosta_maksusopimus))) {
 }
 
 if ($livesearch_tee == "TUOTEHAKU") {
+  $query   = "SELECT laskun_lisatiedot.*, lasku.*
+              FROM lasku
+              LEFT JOIN laskun_lisatiedot ON (
+                laskun_lisatiedot.yhtio = lasku.yhtio AND
+                laskun_lisatiedot.otunnus = lasku.tunnus
+              )
+              WHERE lasku.tunnus = '{$kukarow['kesken']}'
+              AND lasku.yhtio    = '{$kukarow['yhtio']}'
+              AND lasku.tila     != 'D'";
+  $result = pupe_query($query);
+  $laskurow = mysql_fetch_assoc($result);
+
   livesearch_tuotehaku();
   exit;
 }
@@ -1106,6 +1118,11 @@ else {
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";
+
+# Laitetaan tilaus lukkoon, jos tilaus on lähetetty ulkoiseen varastoon
+if (!empty($laskurow['lahetetty_ulkoiseen_varastoon']) and $laskurow['lahetetty_ulkoiseen_varastoon'] != "0000-00-00 00:00:00") {
+  $muokkauslukko = 'LUKOSSA';
+}
 
 //  Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 if (isset($laskurow["tunnusnippu"]) and $laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
@@ -2209,7 +2226,10 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
               }
             -->
             </script>";
-        echo "<table class='laskuri'><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+
+        echo "<form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+        echo "<input type='hidden' name='toim' value='{$toim}'>";
+        echo "<table class='laskuri'>";
 
         if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
           $yhteensa_teksti = t("Yhteensä");
@@ -2222,7 +2242,9 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>$yhteensa_teksti</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
-        echo "</table><br>";
+        echo "</table>";
+        echo "</form>";
+        echo "<br>";
 
         require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 

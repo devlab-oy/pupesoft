@@ -14,23 +14,23 @@ if ($kieli == '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
-$norm["height"]      = 10;
-$norm["font"]        = "Times-Roman";
+$norm["height"] = 10;
+$norm["font"] = "Times-Roman";
 
-$pieni["height"]      = 8;
-$pieni["font"]        = "Times-Roman";
+$pieni["height"] = 8;
+$pieni["font"] = "Times-Roman";
 
-$boldi["height"]      = 10;
-$boldi["font"]        = "Times-Bold";
+$boldi["height"] = 10;
+$boldi["font"] = "Times-Bold";
 
 $pieni_boldi["height"] = 8;
-$pieni_boldi["font"]   = "Times-Bold";
+$pieni_boldi["font"] = "Times-Bold";
 
-$iso["height"]        = 14;
-$iso["font"]        = "Helvetica-Bold";
+$iso["height"] = 14;
+$iso["font"] = "Helvetica-Bold";
 
-$rectparam["width"]    = 0.3;
-$rivinkorkeus       = 15;
+$rectparam["width"] = 0.3;
+$rivinkorkeus = 15;
 
 //muutamat funktiot...
 if (!function_exists('alku_lahete')) {
@@ -3498,33 +3498,33 @@ if (!function_exists('loppu_lahete')) {
 
     if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc") {
       // etäyhtiön yhtiötiedot
-      $y_puhelin    = $GLOBALS['eta_yhtio_puhelin'];
-      $y_fax      = $GLOBALS['eta_yhtio_fax'];
-      $y_email    = $GLOBALS['eta_yhtio_email'];
-      $y_www      = $GLOBALS['eta_yhtio_email'];
-      $y_nimi     = $GLOBALS['eta_yhtio_nimi'];
-      $y_osoite     = $GLOBALS['eta_yhtio_osoite'];
-      $y_postino     = $GLOBALS['eta_yhtio_postino'];
-      $y_postitp     = $GLOBALS['eta_yhtio_postitp'];
-      $y_maa       = $GLOBALS['eta_yhtio_maa'];
-      $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
-      $y_vatnumero  = preg_replace("/^0037/", "", $GLOBALS['eta_yhtio_ovttunnus']);
-      $y_kotipaikka  = $GLOBALS['eta_yhtio_kotipaikka'];
-      $y_iban     = "";
-      $y_swift     = "";
+      $y_puhelin = $GLOBALS['eta_yhtio_puhelin'];
+      $y_fax = $GLOBALS['eta_yhtio_fax'];
+      $y_email = $GLOBALS['eta_yhtio_email'];
+      $y_www = $GLOBALS['eta_yhtio_email'];
+      $y_nimi = $GLOBALS['eta_yhtio_nimi'];
+      $y_osoite = $GLOBALS['eta_yhtio_osoite'];
+      $y_postino = $GLOBALS['eta_yhtio_postino'];
+      $y_postitp = $GLOBALS['eta_yhtio_postitp'];
+      $y_maa = $GLOBALS['eta_yhtio_maa'];
+      $y_kotipaikka = $GLOBALS['eta_yhtio_kotipaikka'];
+      $y_vatnumero = preg_replace("/^0037/", "", $GLOBALS['eta_yhtio_ovttunnus']);
+      $y_kotipaikka = $GLOBALS['eta_yhtio_kotipaikka'];
+      $y_iban = "";
+      $y_swift = "";
     }
     else {
       // yhtiötiedot
-      $y_tiedot_ok  = FALSE;
-      $y_nimi     = $laskurow["yhtio_nimi"];
-      $y_osoite     = $laskurow["yhtio_osoite"];
-      $y_postino     = $laskurow["yhtio_postino"];
-      $y_postitp     = $laskurow["yhtio_postitp"];
-      $y_maa       = $laskurow["yhtio_maa"];
-      $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
-      $y_iban     = $yhtiorow['pankkiiban1'];
-      $y_swift     = $yhtiorow['pankkiswift1'];
+      $y_tiedot_ok = FALSE;
+      $y_nimi = $laskurow["yhtio_nimi"];
+      $y_osoite = $laskurow["yhtio_osoite"];
+      $y_postino = $laskurow["yhtio_postino"];
+      $y_postitp = $laskurow["yhtio_postitp"];
+      $y_maa = $laskurow["yhtio_maa"];
+      $y_kotipaikka = $laskurow["yhtio_kotipaikka"];
+      $y_vatnumero = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
+      $y_iban = $yhtiorow['pankkiiban1'];
+      $y_swift = $yhtiorow['pankkiswift1'];
 
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
@@ -3542,11 +3542,11 @@ if (!function_exists('loppu_lahete')) {
         if (mysql_num_rows($alhire) == 1) {
           $alhiro = mysql_fetch_assoc($alhire);
 
-          $y_tiedot_ok  = TRUE;
-          $y_puhelin    = $alhiro['puhelin'];
-          $y_fax      = $alhiro['fax'];
-          $y_email    = $alhiro['email'];
-          $y_www      = $alhiro['www'];
+          $y_tiedot_ok = TRUE;
+          $y_puhelin = $alhiro['puhelin'];
+          $y_fax = $alhiro['fax'];
+          $y_email = $alhiro['email'];
+          $y_www = $alhiro['www'];
 
           if (!empty($alhiro['vat_numero'])) {
             $y_vatnumero = $alhiro['vat_numero'];
@@ -3563,11 +3563,11 @@ if (!function_exists('loppu_lahete')) {
         if (mysql_num_rows($alhire) == 1) {
           $alhiro = mysql_fetch_assoc($alhire);
 
-          $y_tiedot_ok  = TRUE;
-          $y_puhelin    = $alhiro['puhelin'];
-          $y_fax      = $alhiro['fax'];
-          $y_email    = $alhiro['email'];
-          $y_www      = $alhiro['www'];
+          $y_tiedot_ok = TRUE;
+          $y_puhelin = $alhiro['puhelin'];
+          $y_fax = $alhiro['fax'];
+          $y_email = $alhiro['email'];
+          $y_www = $alhiro['www'];
         }
       }
 
@@ -3580,10 +3580,10 @@ if (!function_exists('loppu_lahete')) {
         if (mysql_num_rows($alhire) == 1) {
           $alhiro = mysql_fetch_assoc($alhire);
 
-          $y_puhelin    = $alhiro['puhelin'];
-          $y_fax      = $alhiro['fax'];
-          $y_email    = $alhiro['email'];
-          $y_www      = $alhiro['www'];
+          $y_puhelin = $alhiro['puhelin'];
+          $y_fax = $alhiro['fax'];
+          $y_email = $alhiro['email'];
+          $y_www = $alhiro['www'];
         }
       }
     }
@@ -3630,26 +3630,23 @@ if (!function_exists('loppu_lahete')) {
       $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
 
-      $pdf->draw_text(30, 55, $y_nimi,    $thispage, $pieni);
-      $pdf->draw_text(30, 45, $y_osoite,    $thispage, $pieni);
-      $pdf->draw_text(30, 35, "{$y_postino}  {$y_postitp}",  $thispage, $pieni);
-      $pdf->draw_text(30, 25, $maan_tiedot['nimi'],      $thispage, $pieni);
+      $pdf->draw_text(30, 55, $y_nimi, $thispage, $pieni);
+      $pdf->draw_text(30, 45, $y_osoite, $thispage, $pieni);
+      $pdf->draw_text(30, 35, "{$y_postino}  {$y_postitp}", $thispage, $pieni);
+      $pdf->draw_text(30, 25, $maan_tiedot['nimi'], $thispage, $pieni);
 
-      $pdf->draw_text(217, 55, t("Puhelin", $kieli).":",      $thispage, $pieni);
-      $pdf->draw_text(257, 55, $y_puhelin,            $thispage, $pieni);
-      $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
-      $pdf->draw_text(257, 45, $y_fax,              $thispage, $pieni);
-      $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",    $thispage, $pieni);
-      $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);
-      $pdf->draw_text(217, 25, t("Web", $kieli).":",        $thispage, $pieni);
-      $pdf->draw_text(257, 25, $y_www,              $thispage, $pieni);
+      $pdf->draw_text(217, 55, t("Puhelin", $kieli).":", $thispage, $pieni);
+      $pdf->draw_text(257, 55, $y_puhelin, $thispage, $pieni);
+      $pdf->draw_text(217, 45, t("Sähköposti", $kieli).":", $thispage, $pieni);
+      $pdf->draw_text(257, 45, $y_email, $thispage, $pieni);
+      $pdf->draw_text(217, 35, t("Web", $kieli).":", $thispage, $pieni);
+      $pdf->draw_text(257, 35, $y_www, $thispage, $pieni);
 
-      $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",      $thispage, $pieni);
+      $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
-      $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",    $thispage, $pieni);
-      $pdf->draw_text(444, 45, $y_kotipaikka,            $thispage, $pieni);
-      $pdf->draw_text(404, 35, t("Alv.rek", $kieli),        $thispage, $pieni);
-      $pdf->draw_text(404, 25, $y_iban." / ".$y_swift,      $thispage, $pieni);
+      $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
+      $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
+      $pdf->draw_text(404, 35, t("Alv.rek", $kieli), $thispage, $pieni);
     }
 
     if ($tots == 1 and $summa != 0) {

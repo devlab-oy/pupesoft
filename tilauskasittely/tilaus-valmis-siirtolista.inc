@@ -337,6 +337,7 @@ else {
             }
             break;
           case 'kate_korjattu':
+          case 'lahetetty_ulkoiseen_varastoon':
             $values .= ", NULL";
             break;
           default:
@@ -897,6 +898,10 @@ else {
             $kirres= pupe_query($query);
             $kirrow= mysql_fetch_array($kirres);
             $komento=$kirrow['komento'];
+          }
+
+          if ($valittu_tulostin == "-88") {
+            $komento = "-88";
           }
 
           //tulostetaan sivu

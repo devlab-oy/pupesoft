@@ -1264,7 +1264,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
-      echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+      echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//ylatila=$ylatila//alatila=$alatila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
     }
   }
 
@@ -4424,12 +4424,15 @@ if (isset($jatka)) {
   // Jos erikoisalennus muuttuu
   if ($laskurow["erikoisale"] != $erikoisale) {
     // p‰ivitet‰‰n erikoisale tilausriveille
+    $poisrajattavat = "'{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}'";
+    $poisrajattavat = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajattavat);
+
     $erikoisale_query_otunnus = (int) $kukarow['kesken'] != 0 ? $kukarow['kesken'] : $id;
     $query_erikoisale = "UPDATE tilausrivi
                          SET erikoisale = '{$erikoisale}'
                          WHERE yhtio  = '{$kukarow['yhtio']}'
                          AND otunnus  = '{$erikoisale_query_otunnus}'
-                         AND tuoteno  not in ('{$yhtiorow["rahti_tuotenumero"]}','{$yhtiorow["jalkivaatimus_tuotenumero"]}','{$yhtiorow["erilliskasiteltava_tuotenumero"]}')
+                         AND tuoteno  not in ({$poisrajattavat})
                          AND netto   != 'N'
                          AND tyyppi  != 'D'";
     $upd_erikoisale_res = pupe_query($query_erikoisale);

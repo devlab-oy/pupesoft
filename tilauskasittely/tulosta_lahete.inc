@@ -4042,7 +4042,7 @@ if (!function_exists('alvierittely_lahete')) {
 
     $kala -= 15;
 
-    $pdf->draw_text($vasen1, $kala, t("Lasku yhteensä", $kieli).":",            $thispage, $boldi);
+    $pdf->draw_text($vasen1, $kala, t("Yhteensä", $kieli).":", $thispage, $boldi);
 
     $oikpos = $pdf->strlen(sprintf('%.2f', $summa), $boldi);
     $pdf->draw_text($vasen2-$oikpos, $kala, sprintf('%.2f', $summa),             $thispage, $boldi);

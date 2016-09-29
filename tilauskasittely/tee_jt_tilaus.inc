@@ -417,7 +417,8 @@ if (!function_exists("tee_jt_tilaus")) {
             $fieldname == 'poistumistoimipaikka_koodi') {
             $query .= $fieldname."='',";
           }
-          elseif ($fieldname == 'kate_korjattu') {
+          elseif ($fieldname == 'kate_korjattu' or
+            $fieldname == 'lahetetty_ulkoiseen_varastoon') {
             $query .= $fieldname." = NULL,";
           }
           elseif ($fieldname == 'tilausvahvistus') {
@@ -790,12 +791,15 @@ if (!function_exists("tee_jt_tilaus")) {
 
               // Katotaan onko alkuperäisellä tilauksella käsinsyötetty rahti joka tulisi nyt laskuttaa
               if ($yhtiorow["rahti_hinnoittelu"] == 'K' and $laskurow["rahtivapaa"] == "" and $laskurow["osatoimitus"] == "") {
+                $rahtituotelisa = "'$yhtiorow[rahti_tuotenumero]'";
+                $rahtituotelisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotelisa);
+
                 $query = "SELECT tunnus
                           FROM tilausrivi
                           WHERE yhtio  = '$kukarow[yhtio]'
                           AND otunnus  = '$alkupotunnus'
                           AND tyyppi  != 'D'
-                          AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+                          AND tuoteno IN ({$rahtituotelisa})
                           AND varattu != 0
                           AND kpl      = 0
                           AND var      in ('','H')";
@@ -809,7 +813,7 @@ if (!function_exists("tee_jt_tilaus")) {
                             WHERE yhtio  = '$kukarow[yhtio]'
                             AND otunnus  = '$alkupotunnus'
                             AND tyyppi  != 'D'
-                            AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+                            AND tuoteno  IN ({$rahtituotelisa})
                             AND varattu != 0
                             AND kpl      = 0
                             AND var      in ('','H')";

@@ -179,7 +179,6 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI") $ulos .= "<option value='TUOTEMERKKI' $avain_sel[TUOTEMERKKI]>".t("Tuotemerkki")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MALLI") $ulos .= "<option value='MALLI' $avain_sel[MALLI]>".t("Tuotemalli")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MALLITARKENNE") $ulos .= "<option value='MALLITARKENNE' $avain_sel[MALLITARKENNE]>".t("Tuotemallitarkenne")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "S") $ulos .= "<option value='S' $avain_sel[S]>".t("Tuotteen status")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") $ulos .= "<option value='TUOTEULK' $avain_sel[TUOTEULK]>".t("Tuotteiden avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") $ulos .= "<option value='VARASTOLUOKKA' $avain_sel[VARASTOLUOKKA]>".t("Varastoluokka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VARASTORYHMA") $ulos .= "<option value='VARASTORYHMA' $avain_sel[VARASTORYHMA]>".t("Varastoryhmä")."</option>";
@@ -221,6 +220,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") $ulos .= "<option value='KVERITTELY' $avain_sel[KVERITTELY]>".t("Kulunvalvonnan erittely")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA") $ulos .= "<option value='KONEENOSA' $avain_sel[KONEENOSA]>".t("Koneenosa")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SAHKTILTUN") $ulos .= "<option value='SAHKTILTUN' {$avain_sel['SAHKTILTUN']}>".t("Sähköisen tilausliitännän tunnukset")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VEHT_RAHTI") $ulos .= "<option value='VEHT_RAHTI' {$avain_sel['VEHT_RAHTI']}>".t("Vaihtoehtoinen rahtituotenumero")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";
@@ -295,6 +295,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "INVLISTA_OSTRY") $ulos .= "<option value='INVLISTA_OSTRY' $avain_sel[INVLISTA_OSTRY]>".t("Inventointilista -ohjelman monivalintalaatikot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM") $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>".t("Puuterivin kommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA") $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>".t("Extranet ulkoasuteema")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_H") $ulos .= "<option value='EXTRANET_H' $avain_sel[EXTRANET_H]>".t("Extranet etusivun otsikkoteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA") $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>".t("Ylläpitosopimuksen rivien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LABEL") $ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>".t("Myyntitilauksen luokitus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>".t("Ostotilauksen tilaustyyppi")."</option>";
@@ -610,21 +611,8 @@ if ($avain_sel['OLETUSPAIKKA'] == 'SELECTED') {
   }
 
   if ($_selitetark) {
-    $sel = array();
-    $sel[$trow[$i]] = "SELECTED";
-
-    $query = "SELECT selite,
-              selitetark
-              FROM avainsana
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji    = 'S'";
-    $tuote_status_result = pupe_query($query);
-
-    $ulos = "<td><select name = '$nimi'>";
-    $ulos .= "<option value = 'X'>".t("Mikä vain")."</option>";
-    while ($tuote_status = mysql_fetch_assoc($tuote_status_result)) {
-      $ulos .= "<option value = '{$tuote_status['selite']}' {$sel[$tuote_status['selite']]}>".t($tuote_status['selitetark'])."</option>";
-    }
+    $ulos  = "<td><select name='{$nimi}'>";
+    $ulos .= product_status_options($trow[$i]);
     $ulos .= "</select></td>";
 
     $jatko = 0;

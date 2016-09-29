@@ -29,6 +29,7 @@ $toimittajan_ostotilaus = array();
 
 $_asiakkaantilaus = (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE);
 $_tulostakopio = (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE);
+$lahetteen_tulostusjono = (strpos($_SERVER['SCRIPT_NAME'], "lahetteen_tulostusjono.php") !== FALSE);
 
 $query = "SELECT lasku.*,
           laskun_lisatiedot.laskutus_nimi,
@@ -843,6 +844,28 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
       $lopetus = $_lopetus_talteen;
     }
   }
+  elseif ($lahetteen_tulostusjono) {
+    $lopetus .= $palvelin2;
+    $lopetus .= "tilauskasittely/lahetteen_tulostusjono.php";
+    $lopetus .= "////tee2=NAYTATILAUS";
+    $lopetus .= "//toim=";
+    $lopetus .= "//toim=";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//jarj=$jarj";
+    $lopetus .= "//tuvarasto=$tuvarasto";
+    $lopetus .= "//tumaa=$tumaa";
+    $lopetus .= "//tutyyppi=$tutyyppi";
+    $lopetus .= "//tutoimtapa=$tutoimtapa";
+    $lopetus .= "//karajaus=$karajaus";
+  }
   else {
     $lopetus .= $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
@@ -1189,6 +1212,28 @@ else {
     else {
       $lopetus .= $lopetus_apu;
     }
+  }
+  elseif ($lahetteen_tulostusjono) {
+    $lopetus .= $palvelin2;
+    $lopetus .= "tilauskasittely/lahetteen_tulostusjono.php";
+    $lopetus .= "////tee2=NAYTATILAUS";
+    $lopetus .= "//toim=";
+    $lopetus .= "//toim=";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//jarj=$jarj";
+    $lopetus .= "//tuvarasto=$tuvarasto";
+    $lopetus .= "//tumaa=$tumaa";
+    $lopetus .= "//tutyyppi=$tutyyppi";
+    $lopetus .= "//tutoimtapa=$tutoimtapa";
+    $lopetus .= "//karajaus=$karajaus";
   }
   else {
     $lopetus_apu .= $palvelin2;
@@ -2166,7 +2211,7 @@ if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K") {
       // Pyöristetään tilattava määrä ylöspäin seuraavaan ostoerään
       $tilattava_maara = ceil($tarve / $ostoera) * $ostoera;
 
-      // mikäli muutat näiden nimityksiä, niin nimitykset pitää korjata myös lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin.
+      // mikäli muutat näiden nimityksiä, niin nimitykset pitää korjata myös lahetteen_tulostusjono.php kohdan "NAYTATILAUS" javascriptiin.
       echo "<td>";
       echo "<input type='text' size='6' id='maara_$toimittajan_ostotilaus_indeksi' name='maara' value='$tilattava_maara'>";
       echo "<input type='hidden' id='tuoteno_$toimittajan_ostotilaus_indeksi' name='tuoteno' value='$tuotenumero'>";

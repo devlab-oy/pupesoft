@@ -1420,18 +1420,14 @@ if (!isset($tee) or $tee == "") {
   echo "</td>";
   echo "</tr>";
 
+  $sel = array_fill_keys($multi_status, 'selected');
+
   echo "<tr>";
   echo "<th>".t("Tuotteen status")."</th>";
   echo "<td>";
   echo "<select multiple='multiple' class='multipleselect' name='multi_status[]' onchange='submit();'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
-
-  $result = t_avainsana("S");
-
-  while ($srow = mysql_fetch_array($result)) {
-    $sel = in_array($srow["selite"], $multi_status) ? " SELECTED" : "";
-    echo "<option value = '$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
-  }
+  echo product_status_options($sel);
   echo "</select>";
 
   echo "</td>";

@@ -8,9 +8,17 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+// lisätään includepathiin pupe-root
+$pupe_root_path = dirname(dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_path);
+ini_set("display_errors", 1);
+error_reporting(E_ALL);
+
 // otetaan tietokanta connect
-require "../inc/connect.inc";
-require "../inc/functions.inc";
+require "inc/connect.inc";
+require "inc/functions.inc";
+require "pdflib/phppdflib.class.php";
+require "raportit/jt-raportti_pdf.inc";
 
 // Logitetaan ajo
 cron_log();
@@ -18,28 +26,14 @@ cron_log();
 $query = "SELECT DISTINCT yhtio FROM yhtio";
 $yhtio_result = pupe_query($query);
 
-//$laskuri = 1;
-
 while ($yrow = mysql_fetch_array($yhtio_result)) {
-  $query = "SELECT * FROM yhtio WHERE yhtio='$yrow[yhtio]'";
-  $result = pupe_query($query);
+  $yhtio = $yrow['yhtio'];
+  $yhtiorow = hae_yhtion_parametrit($yhtio);
+  $kukarow = hae_kukarow('admin', $yhtio);
 
-  if (mysql_num_rows($result) == 1) {
-    $yhtiorow = mysql_fetch_array($result);
-
-    $query = "SELECT *
-              FROM yhtion_parametrit
-              WHERE yhtio='$yhtiorow[yhtio]'";
-    $result = pupe_query($query)
-      or die ("Kysely ei onnistu yhtio $query");
-
-    if (mysql_num_rows($result) == 1) {
-      $yhtion_parametritrow = mysql_fetch_array($result);
-      // lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
-      foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-        $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-      }
-    }
+  if (!isset($kukarow)) {
+    echo "VIRHE: Admin käyttäjä ei löydy yrityksestä {$yhtio}!\n";
+    continue;
   }
 
   $toimquery = "SELECT *
@@ -100,9 +94,9 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
       $asiakasquery = "SELECT nimi, osoite, postino, postitp, maa, ytunnus, email, kieli, tunnus FROM asiakas WHERE yhtio='{$yhtiorow['yhtio']}' AND tunnus=$liitostunnus_row[liitostunnus]";
       $asiakasresult = pupe_query($asiakasquery);
       $asiakasrow = mysql_fetch_array($asiakasresult);
+      $kukarow["kieli"] = strtolower($asiakasrow["kieli"]);
 
       if ($asiakasrow["email"] != "") {
-
         $jtquery = "SELECT tilausrivi.nimitys, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.laadittu, tilausrivi.tilkpl
                     FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
                     JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.yhtio_toimipaikka = $toimrow[tunnus] and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' AND lasku.liitostunnus = '{$asiakasrow['tunnus']}')
@@ -114,14 +108,9 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
                     AND tilausrivi.kpl         = 0
                     AND tilausrivi.jt $lisavarattu  > 0
                     ORDER BY tilausrivi.otunnus";
-
         $jtresult = pupe_query($jtquery);
 
         if (mysql_num_rows($jtresult) > 0) {
-
-          require_once '../pdflib/phppdflib.class.php';
-          require "jt-raportti_pdf.inc";
-
           $pdf = new pdffile();
 
           $pdf->set_default('margin-top',    0);
@@ -129,14 +118,13 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
           $pdf->set_default('margin-left',   0);
           $pdf->set_default('margin-right',  0);
 
-          list($page[$sivu], $kalakorkeus) = alku($pdf);
+          list($page, $kalakorkeus) = alku($pdf);
 
           while ($jtrow = mysql_fetch_array($jtresult)) {
-            list($page[$sivu], $kalakorkeus) = rivi($pdf, $page[$sivu], $kalakorkeus, $jtrow);
+            list($page, $kalakorkeus) = rivi($pdf, $page, $kalakorkeus, $jtrow);
           }
-          //            echo "$laskuri ";
+
           print_pdf($pdf, 1);
-          //            $laskuri++;
         }
       }
     }

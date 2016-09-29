@@ -934,6 +934,7 @@ else {
       $torow = mysql_fetch_assoc($result);
 
       $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+      $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       // jos kyseessä on JT-tilaus, katsotaan pitääkö lisätä rahtikulua usealle tilaukselle
       if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
@@ -1833,6 +1834,7 @@ else {
               $values .= ", '$split_toimitustapa'";
               break;
             case 'kate_korjattu':
+            case 'lahetetty_ulkoiseen_varastoon':
               $values .= ", NULL";
               break;
             default:

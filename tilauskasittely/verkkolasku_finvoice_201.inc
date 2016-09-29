@@ -41,10 +41,18 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "EKIRJE";
       break;
     case '003723327487':
-      $tulostuspalvelu  = "TULOSTUS";
+      if ($yhtiorow['verkkolasku_lah'] == 'trustpoint') {
+        $tulostuspalvelu  = "TULOSTUSPALVELU";
+      }
+      else {
+        $tulostuspalvelu  = "TULOSTUS";
+      }
       break;
     case '003721291126':
       $tulostuspalvelu  = "PRINT";
+      break;
+    case '003709227412':
+      $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
@@ -53,10 +61,7 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "";
       break;
     }
-    // Trustkapitalilla pit‰ olla TULOSTUSPALVELU
-    if ($senderintermediator == '003723327487' and $yhtiorow['verkkolasku_lah'] == 'trustpoint') {
-      $tulostuspalvelu  = "TULOSTUSPALVELU";
-    }
+
     //  Aloitellaan aineiston luontia. Kaikki tiedot pit‰‰ olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
     if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
 
@@ -660,7 +665,7 @@ if (!function_exists('finvoice_rivi')) {
       }
 
       // Siivotaan myˆs lis‰kommentti
-      $lisakomm = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+      $lisakomm = pupesoft_invoicestring($lisakomm);
 
       $RowFreeTexts = explode("|", trim(trim($lisakomm)."|".trim($tilrow["kommentti"]), "|"));
 

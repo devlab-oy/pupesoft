@@ -72,7 +72,7 @@ if ($tee == "TULOSTA") {
   $selectilisa = "";
 
   if ($as_yht_tiedot == 'on') {
-    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
+    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin ";
     $joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
   }
 
@@ -83,7 +83,7 @@ if ($tee == "TULOSTA") {
       $mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
     }
 
-    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
+    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin";
     $joinilisa = "  JOIN yhteyshenkilo yht
             ON ( yht.yhtio = asiakas.yhtio
               AND yht.liitostunnus = asiakas.tunnus
@@ -156,6 +156,12 @@ if ($tee == "TULOSTA") {
 
     $worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
     $excelsarake++;
+
+    if ($as_yht_tiedot == 'on') {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
+      $excelsarake++;
+    }
+
     $excelrivi++;
   }
 
@@ -227,6 +233,9 @@ if ($tee == "TULOSTA") {
 
       if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
         $worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
+        $excelsarake++;
+
+        $worksheet->writeString($excelrivi, $excelsarake, $row["yht_puhelin"]);
         $excelsarake++;
       }
       else {

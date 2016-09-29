@@ -1033,6 +1033,22 @@ if (!function_exists('rivi_kerayslista')) {
 
         $kala = $kala - $rivinkorkeus + 5;
 
+        if ($yhtiorow['kerayslista_kerayspaikka'] == 'K') {
+          $query = "SELECT *
+                    FROM tuotepaikat
+                    WHERE yhtio      = '{$kukarow['yhtio']}'
+                    AND tuoteno      = '{$row['tuoteno']}'
+                    AND varasto      = '{$row['varasto']}'
+                    AND hyllypaikka != CONCAT('{$row['hyllyalue']}', '{$row['hyllynro']}', '{$row['hyllyvali']}', '{$row['hyllytaso']}')
+                    ORDER BY saldo DESC";
+          $paikkaresult = pupe_query($query);
+          $paikkarow = mysql_fetch_assoc($paikkaresult);
+
+          $varastopaikka_vara = hyllyalue('', $paikkarow['hyllyalue'], 'riisuttu') . " " . $paikkarow["hyllynro"] . " " . $paikkarow["hyllyvali"] . " " . $paikkarow["hyllytaso"];
+          list($ff_string, $ff_font) = pdf_fontfit($varastopaikka_vara, 88, $pdf, $norm);
+          $pdf->draw_text(42,  $kala, $ff_string, $thispage, $ff_font);
+        }
+
         list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 350, $pdf, $norm);
         $pdf->draw_text(125, $kala, $ff_string, $thispage, $ff_font);
 

@@ -410,12 +410,15 @@ if ($tee == "") {
     $pp = date("d");
   }
 
-  echo "<tr><th>".t("Toimitusaika").":</th>
-      <td>".t("pp")." <input type='text' name='pp' value='$pp' size='3'></td>
-      <td>".t("kk")." <input type='text' name='kk' value='$kk' size='3'></td>
-      <td>".t("vvvv")." <input type='text' name='vv' value='$vv' size='5'></td></tr>";
+  echo "<tr><th>".t("Toimitusaika").":</th>";
+  echo "<td colspan='3'>";
+  echo t("pp")." <input type='text' name='pp' value='{$pp}' size='3'> ";
+  echo t("kk")." <input type='text' name='kk' value='{$kk}' size='3'> ";
+  echo t("vvvv")." <input type='text' name='vv' value='{$vv}' size='5'></td></tr>";
 
-  echo "<tr><th>".t("Kommentti").":</th><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
+  echo "<tr><th>".t("Kommentti").":</th><td colspan='3'>";
+  echo "<textarea name='kommentti' cols='50' rows='5'>{$laskurow['comments']}</textarea>";
+  echo "</td></tr>";
 
   echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 

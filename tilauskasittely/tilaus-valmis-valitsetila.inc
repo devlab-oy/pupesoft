@@ -26,6 +26,9 @@ else {
   $lisavarattu = "";
 }
 
+$rajattavat_tuotteet = "'{$yhtiorow['rahti_tuotenumero']}'";
+$rajattavat_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rajattavat_tuotteet);
+
 $query = "SELECT count(*) riveja,
           sum(if (tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
           sum(if (tilausrivi.var = 'J' and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
@@ -38,7 +41,7 @@ $query = "SELECT count(*) riveja,
           WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
           and tilausrivi.otunnus  = '$laskurow[tunnus]'
           and tilausrivi.tyyppi   = 'L'
-          and tilausrivi.tuoteno != '$yhtiorow[rahti_tuotenumero]'";
+          and tilausrivi.tuoteno NOT IN ({$rajattavat_tuotteet})";
 $tresult = pupe_query($query);
 $rivirow = mysql_fetch_array($tresult);
 
@@ -167,6 +170,9 @@ elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
   $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 }
 elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
+  // Rahtikulurivien rajaus
+  $rajattavat_tuotteet = "'{$yhtiorow['rahti_tuotenumero']}'";
+  $rajattavat_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rajattavat_tuotteet);
   // Tilauskella on pelkästään puuterivejä joita ei kerätä
   // merkataan otsikko mitätöidyksi, mutta jätetään PUUTE rivit analyysejä varten...
   if ($rivirow["riveja"] == $rivirow["puutteet"]) {
@@ -174,7 +180,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
     $query  = "DELETE FROM tilausrivi
                WHERE otunnus = '$laskurow[tunnus]'
                AND yhtio     = '$kukarow[yhtio]'
-               AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+               AND tuoteno IN ({$rajattavat_tuotteet})";
     $result = pupe_query($query);
 
     $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
@@ -195,7 +201,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 
@@ -215,7 +221,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 

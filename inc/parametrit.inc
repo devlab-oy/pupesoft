@@ -429,13 +429,12 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
+      // Sanakirjan sallitut kielet suomen lisäksi
+      $kielet = array ('no', 'en', 'de', 'ru', 'dk', 'ee');
       if ($browkieli == 'sv') {
         $browkieli = 'se';
       }
-      elseif ($browkieli == 'ee') {
-        $browkieli = 'ee';
-      }
-      else {
+      elseif (!in_array($browkieli, $kielet))  {
         $browkieli = 'fi';
       }
     }
@@ -556,6 +555,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         setcookie('valmiste_vai_raakaaine', $valmiste_vai_raakaaine, time()+60*60*24*90, "/");
         $_COOKIE["valmiste_vai_raakaaine"] = urlencode(serialize($valmiste_vai_raakaaine));
       }
+    }
+
+    if ($phpnimi == 'raportit.php') {
+      setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {

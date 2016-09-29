@@ -1111,6 +1111,13 @@ if ($ytunnus != '' and $tee == '') {
   $res = pupe_query($query);
 
   while ($memorow = mysql_fetch_array($res)) {
+
+    $liitetiedostot = listaaliitetiedostot($memorow['tunnus'], $memorow['tyyppi']);
+
+    if ($liitetiedostot != '') {
+      echo "<tr><th colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
+    }
+
     if ($memorow["tapa"] == "asiakasanalyysi") {
       echo "<tr>
         <th>$memorow[tyyppi]</th><th>$memorow[laatija]</th><th>$memorow[laatija]@$memorow[paivamaara]
@@ -1223,12 +1230,6 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "</td></tr>";
-
-    $liitetiedostot = listaaliitetiedostot($memorow['tunnus'], $memorow['tyyppi']);
-
-    if ($liitetiedostot != '') {
-      echo "<tr><th colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
-    }
   }
 
   echo "</table>";

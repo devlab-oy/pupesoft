@@ -146,6 +146,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
           $values .= ", '$kukarow[kuka]'";
           break;
         case 'kate_korjattu':
+        case 'lahetetty_ulkoiseen_varastoon':
           $values .= ", NULL";
           break;
         case 'kerayspvm':

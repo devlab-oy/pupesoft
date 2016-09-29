@@ -12565,6 +12565,16 @@ if (!function_exists("pupesoft_csvstring")) {
   }
 }
 
+if (!function_exists("pupesoft_invoicestring")) {
+  function pupesoft_invoicestring($string, $extrachars="") {
+    // Muutetaan X -merkiksi kaikki non-printable characterit
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÜüÕõ
+    // Sallitaan välilyönti sekä merkit: !#$%()*+,-./:;=?@_|§
+
+    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
+  }
+}
+
 if (!function_exists("pupesoft_cleanstring")) {
   function pupesoft_cleanstring($string, array $exclude = array()) {
 

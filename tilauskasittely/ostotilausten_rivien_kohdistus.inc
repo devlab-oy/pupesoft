@@ -2006,20 +2006,8 @@ if ($tila == '') {
       echo "$rivirow[otunnus]</$td>";
     }
     echo "<$td $class nowrap>";
-
-    // tehd‰‰n pop-up divi jos keikalla on kommentti...
-    $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
-
-    echo "<div id='div_rivi_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
-    echo "<ul>";
-    echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
-    echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
-    echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
-    echo "</ul>";
-    echo "</div>";
-    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "class='tooltip' id='rivi_$rivirow[rivitunnus]'", 1000, 1000);
+    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "", 1000, 1000);
     echo "<br>$rivirow[toim_tuoteno]";
-
     echo "&nbsp;";
 
     $_src = "{$palvelin2}pics/lullacons/info.png";
@@ -2028,9 +2016,23 @@ if ($tila == '') {
     $id = md5(uniqid());
 
     echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$id}' />";
+
+    // tehd‰‰n pop-up divi jos keikalla on kommentti...
+    $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
+
+    echo "<div id='div_{$id}' style='display:none;'>";
+    echo "<ul>";
+    echo "<li>".t("Tilattu").": ".(float) $rivirow["tilattu"]." $pop_yks</li>";
+    echo "<li>".t("Varattu").": ".(float) $rivirow["varattu"]." $pop_yks</li>";
+    echo "<li>".t("Keskihinta").": ".(float) $rivirow["keskihinta"]." $rivirow[valuutta]</li>";
+    echo "<li>".t("Ostohinta").": ".(float) $rivirow["ostohinta"]." $rivirow[valuutta]</li>";
+    echo "<li>".t("Kuluprosentti").": ".(float) $rivirow["kuluprosentti"]." %</li>";
+
     echo "<input type='hidden' id='{$id}_tuoteno' value='{$rivirow['tuoteno']}' />";
     echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
-    echo "<span class='saldo_{$id}' style='display:none;'></span>";
+    echo "<span id='span_{$id}'></span>";
+    echo "</ul>";
+    echo "</div>";
 
     if ($rivirow["sarjanumeroseuranta"] != "" and $rivirow["sarjanumeroseuranta"] != "T") {
       if ($rivirow["siskpl"] < 0) {

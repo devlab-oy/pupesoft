@@ -148,6 +148,35 @@ while ($vrow=mysql_fetch_assoc($vresult)) {
 }
 echo "</select></td>";
 echo "</tr>";
+
+$sel = "";
+$selv = "";
+$selk = "";
+if ($ryhmittely == 'E') $sel = 'selected';
+if ($ryhmittely == 'V') $selv = 'selected';
+if ($ryhmittely == 'K') $selk = 'selected';
+
+echo "<tr><th valign='top'>".t("Ajanjakson ryhmittely")."</th>";
+echo "<td><select name='ryhmittely'>";
+echo "<option value = 'E'  $sel>".t("Ei ryhmittelyä")."</option>";
+echo "<option value = 'V' $selv>".t("Vuosittain")."</option>";
+echo "<option value = 'K' $selk>".t("Kuukausittain")."</option>";
+echo "</select></td>";
+
+$query = "SELECT *
+          FROM kustannuspaikka
+          WHERE yhtio = '$kukarow[yhtio]'
+          AND tyyppi = 'P'
+          LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+  $sel = "";
+  if ($projekti != '') $sel = 'checked';
+  echo "<tr><th valign='top'>".t("Kustannuspaikan lisäksi huomioidaan myös projektit")."</th>";
+  echo "<td><input type='checkbox' name='projekti' $sel></td></tr>";
+}
+
 echo "</table>";
 
 echo "<br><input type='submit' value='".t("Luo aineisto")."'></form><br><br>";
@@ -207,32 +236,86 @@ if ($tee == "TEEAINEISTO") {
     </tr>\n";
   echo "</table><br>";
 
-  $query = "SELECT tiliointi.tilino, kustannuspaikka.koodi, sum(tiliointi.summa) summa
+  if ($ryhmittely == 'V') {
+    $selectlisa = "year(tiliointi.tapvm) year, '' month,";
+    $grouplisa = "year, month, ";
+    $orderlisa = "year, month, ";
+  }
+  elseif ($ryhmittely == 'K') {
+    $selectlisa = "year(tiliointi.tapvm) year, month(tiliointi.tapvm) month,";
+    $grouplisa = "year, month, ";
+    $orderlisa = "year, month, ";
+  }
+  elseif ($ryhmittely == 'E') {
+    $selectlisa = "";
+    $grouplisa = "";
+    $orderlisa = "";
+  }
+
+  if ($projekti) {
+    $selectlisa2 = "kustannuspaikka2.koodi as koodi2,";
+    $joinlisa = "LEFT JOIN kustannuspaikka AS kustannuspaikka2 ON tiliointi.yhtio = kustannuspaikka2.yhtio and tiliointi.projekti = kustannuspaikka2.tunnus";
+    $grouplisa2 = ",koodi2";
+    $orderlisa2 = ",koodi2";
+    $otsikkolisa = t("Projekti")."</th><th>";
+    $otsikkolisa_excel = t("Projekti").";";
+  }
+  else {
+    $selectlisa2 = "";
+    $joinlisa = "";
+    $grouplisa2 = "";
+    $orderlisa2 = "";
+    $otsikkolisa = "";
+    $otsikkolisa_excel = "";
+  }
+
+  $query = "SELECT $selectlisa
+            tiliointi.tilino,
+            kustannuspaikka.koodi,
+            $selectlisa2
+            sum(tiliointi.summa) summa
             FROM tiliointi
             LEFT JOIN kustannuspaikka ON tiliointi.yhtio = kustannuspaikka.yhtio and tiliointi.kustp = kustannuspaikka.tunnus
+            $joinlisa
             WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
             and tiliointi.korjattu = ''
             and tiliointi.tapvm    >= '$plvv-$plvk-$plvp'
             and tiliointi.tapvm    <= '$alvv-$alvk-$alvp'
-            GROUP BY 1,2
-            ORDER BY 1,2";
+            GROUP BY $grouplisa tilino, koodi $grouplisa2
+            ORDER BY $orderlisa tilino, koodi $orderlisa2";
   $result = pupe_query($query);
 
   echo "<table>";
 
-  echo "<tr><th>$yhtiorow[nimi]</th><th>".t("Konsernikirjanpidon yhteenveto")."</th><th>".date("j.n.Y")."</th><th>".date("H:i:s")."</th><th>".t("Sivu")." 1</th><th></th></tr>";
-  echo "<tr><th>".t("Vuosi")."</th><th>".t("Kausi")."</th><th>".t("Tili")."</th><th>".t("Kustannuspaikka")."</th><th>".t("Konsernitunnus")."</th><th>".t("Summa")."</th></tr>";
+  echo "<tr><th>$yhtiorow[nimi]</th><th>".t("Konsernikirjanpidon yhteenveto")."</th><th>".date("j.n.Y")."</th><th>".date("H:i:s")."</th><th>".t("Sivu")." 1</th><th></th><th></th></tr>";
+  echo "<tr><th>".t("Vuosi")."</th><th>".t("Kausi")."</th><th>".t("Tili")."</th><th>".t("Kustannuspaikka")."</th><th>$otsikkolisa".t("Konsernitunnus")."</th><th>".t("Summa")."</th></tr>";
 
   fwrite($toot, $yhtiorow["nimi"].";".t("Konsernikirjanpidon yhteenveto").";".date("j.n.Y").";".date("H:i:s").";".t("Sivu")." 1;\r\n");
-  fwrite($toot, t("Vuosi").";".t("Kausi").";".t("Tili").";".t("Kustannuspaikka").";".t("Konsernitunnus").";".t("Summa").";\r\n");
+  fwrite($toot, t("Alkupäivämäärä"). ";".$plvp.".".$plvk.".".$plvv.";\r\n");
+  fwrite($toot, t("Loppupäivämäärä"). ";".$alvp.".".$alvk.".".$alvv.";\r\n");
+  fwrite($toot, t("Vuosi").";".t("Kausi").";".t("Tili").";".t("Kustannuspaikka").";$otsikkolisa_excel".t("Konsernitunnus").";".t("Summa").";\r\n");
 
   while ($trow = mysql_fetch_assoc($result)) {
 
+    if ($projekti) {
+      $rivilisa = "<td>$trow[koodi2]</td>";
+      $rivilisa_excel = "$trow[koodi2];";
+    }
+    else {
+      $rivilisa = "";
+      $rivilisa_excel = "";
+    }
+
+    if ($ryhmittely == 'E') {
+      $trow['year'] = $alvv;
+      $trow['month'] = $alvk;
+    }
+
     $trow["summa"] = str_replace(".", ",", $trow["summa"]);
 
-    echo "<tr><td>$alvv</td><td>$alvk</td><td>$trow[tilino]</td><td>$trow[koodi]</td><td></td><td align='right'>$trow[summa]</td></tr>";
+    echo "<tr><td>$trow[year]</td><td>$trow[month]</td><td>$trow[tilino]</td><td>$trow[koodi]</td>$rivilisa<td></td><td align='right'>$trow[summa]</td></tr>";
 
-    fwrite($toot, "$alvv;$alvk;$trow[tilino];$trow[koodi];;$trow[summa];\r\n");
+    fwrite($toot, "$trow[year];$trow[month];$trow[tilino];$trow[koodi];$rivilisa_excel;$trow[summa];\r\n");
   }
 
   echo "</table>";

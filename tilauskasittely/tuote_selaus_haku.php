@@ -1875,12 +1875,12 @@ function piirra_ostoskoriin_lisays($row) {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
       echo "<table>";
-      echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
+      echo "<tr><td>".t('Kpl')."</td><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lisää") . "'></a>";
       echo "</td></tr>";
 
       if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
-        echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+        echo "<tr><td>".t('Ale1')."</td><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
       }
 
       echo "</table>";
@@ -2394,6 +2394,14 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
 
       foreach ($tulossalisat as $tulossalisa) {
         list($o, $v) = explode("!¡!", $tulossalisa);
+        $o = strip_tags($o);
+        $v = strip_tags($v);
+        $t = t('TILAUSTUOTE');
+
+        if ($o == $t) {
+          $o = "<font color='orange'>{$t}</font>";
+        }
+
         echo "<tr><td>$o</td><td>$v</td></tr>";
       }
 
@@ -2532,14 +2540,12 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
       $myyntihinta         = hintapyoristys($myyntihinta_echotus / $laskurow["vienti_kurssi"]) . " $laskurow[valkoodi]";
     }
     else {
-      $query = "SELECT DISTINCT valkoodi,
-                maa
+      $query = "SELECT DISTINCT valkoodi, maa
                 FROM hinnasto
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
                 AND laji    = ''
                 ORDER BY maa, valkoodi";
-
       $hintavalresult = pupe_query($query);
 
       while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
@@ -2558,13 +2564,19 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
                     or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
                   ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
                   LIMIT 1";
-
         $hintaresult = pupe_query($query);
 
         while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-          $myyntihinta .= "<br>$hintarow[maa]: " .
-            hintapyoristys($hintarow["hinta"]) .
-            " $hintarow[valkoodi]";
+          $maa      = $hintarow['maa'];
+          $hinta    = hintapyoristys($hintarow['hinta']);
+          $valkoodi = $hintarow['valkoodi'];
+
+          if (empty($maa)) {
+            $myyntihinta .= "<br>{$hinta} {$valkoodi}";
+          }
+          else {
+            $myyntihinta .= "<br>{$maa}: {$hinta} {$valkoodi}";
+          }
         }
       }
     }
@@ -2591,9 +2603,16 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
       $hintaresult = pupe_query($query);
 
       while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-        $as_myymalahinta .= "<br>$hintarow[maa]: " .
-          hintapyoristys($hintarow["hinta"]) .
-          " $hintarow[valkoodi]";
+        $maa      = $hintarow['maa'];
+        $hinta    = hintapyoristys($hintarow['hinta']);
+        $valkoodi = $hintarow['valkoodi'];
+
+        if (empty($maa)) {
+          $as_myymalahinta .= "<br>{$hinta} {$valkoodi}";
+        }
+        else {
+          $as_myymalahinta .= "<br>{$maa}: {$hinta} {$valkoodi}";
+        }
       }
 
       if ($laskurow["valkoodi"] != $yhtiorow["valkoodi"]) {

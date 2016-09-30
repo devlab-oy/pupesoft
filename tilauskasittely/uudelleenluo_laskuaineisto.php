@@ -405,6 +405,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $myyresult = pupe_query($mquery);
       $myyrow = mysql_fetch_assoc($myyresult);
 
+      $lasrow['chn_orig'] = $lasrow['chn'];
+
       //HUOM: Tässä kaikki sallitut verkkopuolen chn:ät
       if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
         //Paperi by default

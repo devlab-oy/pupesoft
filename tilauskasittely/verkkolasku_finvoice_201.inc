@@ -38,7 +38,12 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     case '003710948874':
-      $tulostuspalvelu  = "EKIRJE";
+      if ($yhtiorow['verkkolasku_lah'] == 'talenom') {
+        $tulostuspalvelu  = "Tulostukseen";
+      }
+      else {
+        $tulostuspalvelu  = "EKIRJE";
+      }
       break;
     case '003723327487':
       if ($yhtiorow['verkkolasku_lah'] == 'trustpoint') {
@@ -83,14 +88,20 @@ if (!function_exists('finvoice_otsik')) {
         $receiverintermediator = "003723327487";
       }
 
-      // Jos vastaanottajan operaattori puuttuu laitetaan l‰hett‰j‰n operaattori. Maventalla t‰m‰ saa olla tyhj‰‰.
-      if ($receiverintermediator == "" and $yhtiorow["verkkolasku_lah"] != "maventa") {
+      // Jos vastaanottajan operaattori puuttuu laitetaan l‰hett‰j‰n operaattori.
+      // Maventalla ja Talenomilla t‰m‰ saa olla tyhj‰‰.
+      if ($receiverintermediator == "" and !in_array($yhtiorow["verkkolasku_lah"], array("maventa", "talenom"))) {
         $receiverintermediator = $senderintermediator;
       }
 
       // Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
       if (($receiverpartyid == "" and $yhtiorow["verkkolasku_lah"] != "apix") or $lasrow["chn"] == "100") {
         $receiverpartyid = $tulostuspalvelu;
+      }
+
+      // Talenomiin l‰hetet‰‰n kaikki laskut, joten t‰g‰t‰‰n itse l‰heteyt s‰hkˆpostilaskut n‰in
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666") {
+        $receiverpartyid = "Email";
       }
 
       // Tulostetaan virhe jos pakotettiin lasku tulostuspalveluun
@@ -472,7 +483,6 @@ if (!function_exists('finvoice_otsik')) {
       else {
         xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
       }
-
 
       if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
         xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);

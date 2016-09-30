@@ -4,8 +4,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
-// Enaboidaan ajax kikkare
-enable_ajax();
+if (php_sapi_name() != 'cli') {
+  // Enaboidaan ajax kikkare
+  enable_ajax();
+}
 
 if ($tee != '') {
   $query  = "LOCK TABLE tuotepaikat WRITE,

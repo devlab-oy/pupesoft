@@ -568,7 +568,7 @@ if (!function_exists('finvoice_alvierittely')) {
 }
 
 if (!function_exists('finvoice_otsikko_loput')) {
-  function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
+  function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot) {
     global $err_finvoice, $yhtiorow;
 
     if ($err_finvoice == 0) {

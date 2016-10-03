@@ -172,6 +172,11 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $tiedostopaate = array("JPG", "PNG", "GIF");
     }
 
+    // Talenom, SEPA ja PPG aina v‰hint‰‰n Finvoice 2.01-veriota
+    if ($fieldname == "finvoice_versio" and empty($t[$i]) and in_array($verkkolasku_lah_talteen, array("ppg","sepa","talenom"))) {
+      $t[$i] = "2";
+    }
+
     if ($fieldname == "maventa_api_avain") {
       if ($verkkolasku_lah_talteen == "maventa" and trim($t[$i]) == "") {
         $virhe[$i] = t("Pakollinen: maventa_api_avain ja maventa_ohjelmisto_api_avain!!");

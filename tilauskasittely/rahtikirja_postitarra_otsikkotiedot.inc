@@ -1,6 +1,6 @@
 <?php
 
-//Luodaan tarvittavat muuttujat rahtikirja_postitarra.inc ja rahtikirja_postitarra_pdf.inc
+//Luodaan tarvittavat muuttujat rahtikirja_postitarra_pdf.inc
 
 if ($phpnimi == "rahtikirja_custom.php") {
   $postirow = $osoitelappurow;
@@ -144,20 +144,20 @@ if ($toitarow['kuljyksikko'] != '') {
 
 $selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
 
-// Oletuksena: Postipaketti 14
-$keltainen   = "Postipaketti";
+// Oletuksena: Posti Express-paketti 14
+$keltainen   = "Express-paketti";
 $kuljetus    = "";
 $keku     = "14";
 
-if (strpos($selite_chk, "09")     !== FALSE)         $keku = "9";
-if (strpos($selite_chk, "00")    !== FALSE)         $keku = "00";
-if (strpos($selite_chk, "Postipaketti")    !== FALSE)         $keku = "14";
-if (strpos($selite_chk, "21")    !== FALSE)         $keku = "21";
+if (strpos($selite_chk, "Aamuksi")     !== FALSE)         $keku = "9";
+if (strpos($selite_chk, "Samana")    !== FALSE)         $keku = "00";
+if (strpos($selite_chk, "Postipaketti")    !== FALSE)         $keku = "16";
+if (strpos($selite_chk, "Kotipaketti")    !== FALSE)         $keku = "21";
+if (strpos($selite_chk, "Illaksi")    !== FALSE)         $keku = "21";
 if (strpos($selite_chk, "00/16") !== FALSE)         $keku = "00/16";
-if (strpos($selite_chk, "Customer Return") !== FALSE)     $keku = "ASIAKASPALAUTUS 14";
 if (strpos($selite_chk, "Undelivered Shipment") !== FALSE)   $keku = "UNDELIVERED SHIPMENT";
 if (strpos($selite_chk, "Lisäarvokuljetus") !== FALSE)     $keku = "LISÄARVOKULJETUS";
-if (strpos($selite_chk, "Priority Ulkomaa") !== FALSE)     $keku = "PRIORITY ULKOMAA";
+if (strpos($selite_chk, "Priority") !== FALSE)     $keku = "PRIORITY";
 
 // Jos on vaarallisia aineita, niin tulostetaan aina VAK/ADR-kortti
 if (count($vakit) > 0) {
@@ -193,10 +193,10 @@ if ($selite_chk != '') {
 //Priority  2W2015
 
 switch ($keku) {
-case "00":
+case "Samana":
   $tuoteviiva1="2W2124";
   break;
-case "09":
+case "Aamuksi":
   $tuoteviiva1="2W2101";
   break;
 case "Express-paketti":
@@ -209,7 +209,7 @@ case "Express-paketti":
 case "Postipaketti":
   $tuoteviiva1="2W2103";
   break;
-case "21":
+case "Kotipaketti":
   $tuoteviiva1="2W2104";
   break;
 case "VV":
@@ -224,7 +224,7 @@ case "Palautus":
 case "UNDELIVERED SHIPMENT":
   $tuoteviiva1="2W2108";
   break;
-case "PRIORITY ULKOMAA":
+case "PRIORITY":
   $tuoteviiva1="2W2015";
   break;
 }

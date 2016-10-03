@@ -694,6 +694,7 @@ function jaa_valmistus($tunnus, $params) {
 
         unset($copy['luontiaika']); // now() ilman hipsukoita, setataan viimeisenä
         unset($copy['kate_korjattu']); // NULL ilman hipsukoita, setataan viimeisenä
+        unset($copy['lahetetty_ulkoiseen_varastoon']); // NULL ilman hipsukoita, setataan viimeisenä
         unset($copy['tunnus']);
 
         if ((isset($copy['muutospvm']) and $copy['muutospvm'] == '') or !isset($copy['muutospvm'])) {
@@ -702,8 +703,8 @@ function jaa_valmistus($tunnus, $params) {
 
         // Luodaan otsikon kopio
         $copy_query = "INSERT INTO
-                       lasku (".implode(", ", array_keys($copy)).", luontiaika, kate_korjattu)
-                       VALUES('".implode("', '", array_values($copy))."', now(), NULL)";
+                       lasku (".implode(", ", array_keys($copy)).", luontiaika, kate_korjattu, lahetetty_ulkoiseen_varastoon)
+                       VALUES('".implode("', '", array_values($copy))."', now(), NULL, NULL)";
 
         if (!pupe_query($copy_query)) {
           exit("Virhe laskun kopioinnissa, uutta laskua ei luotu");

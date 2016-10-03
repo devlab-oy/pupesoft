@@ -1109,6 +1109,7 @@ if ($tee == 'P') {
                       $values .= ", 'N'";
                       break;
                     case 'kate_korjattu':
+                    case 'lahetetty_ulkoiseen_varastoon':
                       $values .= ", NULL";
                       break;
                     default:

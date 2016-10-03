@@ -855,8 +855,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
         $vatamount = hintapyoristys($vatamount);
 
-        $tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-        $tilrow['nimitys']    = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+        $tilrow['kommentti'] = pupesoft_invoicestring($tilrow['kommentti']);
+        $tilrow['nimitys'] = pupesoft_invoicestring($tilrow['nimitys']);
 
         // Otetaan seuraavan rivin otunnus
         if ($rivilaskuri < $rivimaara) {

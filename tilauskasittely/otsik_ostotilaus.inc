@@ -11,6 +11,7 @@ if ($tee == '') {
 
     $kukarow['kesken']   = 0;
     $tilausnumero     = 0;
+    $otstoimaika      = '';
   }
 }
 
@@ -428,20 +429,21 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "<td>".t("Tilaa Varastoon").":</td>";
     echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-    mysql_data_seek($vares, 0);
+    foreach (sallitut_varastot(array("toim" => "OSTO")) as $varasto) {
+      $sel = '';
 
-    while ($varow = mysql_fetch_array($vares)) {
-      if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
-
-        $sel = '';
-
-        // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-        if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
-          $sel = 'selected';
-        }
-
-        echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+      // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+      if (
+        $varasto['tunnus'] == $srow["varasto"] or
+        ($kukarow['oletus_ostovarasto'] == $varasto['tunnus'] and $srow['varasto'] == '') or
+        ($varasto['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)
+      ) {
+        $sel = ' selected';
       }
+
+      $tyyppi = $varasto['tyyppi'] != '' ? " ({$varasto['tyyppi']})" : '';
+
+      echo "<option value='{$varasto[tunnus]}'{$sel}>{$varasto[nimitys]}{$tyyppi}</option>";
     }
 
     echo "</select></td></tr>";
@@ -721,6 +723,7 @@ if (isset($jatka)) {
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
+    $otstoimaika = $toimvv."-".$toimkk."-".$toimpp;
   }
 
   //menn‰‰n tilaukselle

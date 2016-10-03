@@ -453,7 +453,7 @@ if ($handle = opendir($kansio)) {
     $ftphost = "ftp.talenom.fi";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
-    $ftppath = "/in/ML/";
+    $ftppath = "/In/ML/Muunto/";
     $ftpfile = $kansio.$lasku;
     $ftpsucc = "{$pupe_root_polku}/dataout/";
 

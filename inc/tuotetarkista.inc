@@ -362,10 +362,17 @@ if (!function_exists("tuotetarkista")) {
     }
 
     if ($fieldname == 'status') {
+      // trim ja upcase statukselle
+      $t[$i] = strtoupper(trim($t[$i]));
+
       $tem_status = $t[$i];
       $tem_status_vanha = $trow[$i];
 
-      if (!empty($trow) and $tem_status_vanha != $tem_status) {
+      if (!in_array($tem_status, array('A', 'P', 'E', 'T', 'X'))) {
+        $virhe[$i] = t("Status tulee olla A, P, E, T tai X");
+      }
+
+      if (empty($virhe) and !empty($trow) and $tem_status_vanha != $tem_status) {
         //jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,
         //niin tuotteen muokkauksen yhteydessä mitätöidään nykyinen tuotepaikka + tapahtumiin jälki ja perustetaan määritellyin ehdoin uudet tuotepaikat.
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
@@ -393,7 +400,7 @@ if (!function_exists("tuotetarkista")) {
         }
       }
       // Jos kyseessä tuotteen poisto, tarkistetaan löytyykö tuotetta avoimilta ostotilauksilta, jos löytyy niin poistoa ei sallita.
-      if ($tem_status == 'P') {
+      if (empty($virhe) and $tem_status == 'P') {
         $query = "SELECT tuoteno
                   FROM tilausrivi
                   WHERE yhtio  = '$kukarow[yhtio]'

@@ -601,6 +601,11 @@ if (!function_exists("tv1dateconv")) {
   function tv1dateconv($date, $pitka = "", $lyhyt = "") {
     global $laskurow;
 
+    // jos p‰iv‰m‰‰r‰ on virheellinen, palauettaan sellaisenaan
+    if (strtotime($date) === false) {
+      return $date;
+    }
+
     //k‰‰nt‰‰ mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
     //2007-05-09 12:18:18
 
@@ -7809,12 +7814,12 @@ if (!function_exists("enable_ajax")) {
           document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
         }
         else {
-          document.forms[haku_formi].submit();
+          document.getElementByName(haku_formi).submit();
         }
         keyStrokeIndex=-1;
       }
       else {
-        document.forms[haku_formi].submit();
+        document.getElementByName(haku_formi).submit();
       }
 
       return false;
@@ -12567,6 +12572,16 @@ if (!function_exists("pupesoft_csvstring")) {
     // Sallitaan merkit ja numerot: a-z A-Z 0-9
     // Sallitaan v‰lilyˆnti sek‰ merkit: ‰ˆÂƒ÷≈#%&,:<>@=!-^$.,|?*+()[]{}/
     return preg_replace("/([^a-zA-Z0-9 ‰ˆÂƒ÷≈#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", " ", $string);
+  }
+}
+
+if (!function_exists("pupesoft_invoicestring")) {
+  function pupesoft_invoicestring($string, $extrachars="") {
+    // Muutetaan X -merkiksi kaikki non-printable characterit
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÷ˆƒ‰≈Â‹¸’ı
+    // Sallitaan v‰lilyˆnti sek‰ merkit: !#$%()*+,-./:;=?@_|ß
+
+    return preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸’ı ".preg_quote("!#$%()*+,-./:;=?@_|ß", "/")."{$extrachars}]/", " ", $string);
   }
 }
 
@@ -17767,6 +17782,7 @@ if (!function_exists("splittaa_tilaus")) {
 
         switch ($fieldname) {
         case "kate_korjattu":
+        case "lahetetty_ulkoiseen_varastoon":
           $values .= ", NULL";
           break;
         default:
@@ -20811,11 +20827,11 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
         $laheterows = array_merge($laheterows, pura_osaluettelot($laskurow, $row));
+          }
+        else {
+          $laheterows[] = $row;
+        }
       }
-      else {
-        $laheterows[] = $row;
-      }
-    }
 
     foreach ($laheterows as $row) {
 
@@ -29911,6 +29927,29 @@ if (!function_exists('sallitut_varastot')) {
     $toim               = isset($params['toim']) ? $params['toim'] : '';
     $tilaustyyppi       = isset($params['tilaustyyppi']) ? $params['tilaustyyppi'] : '';
 
+    if ($toim == "OSTO") {
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tyyppi <> 'P'
+                ORDER BY tyyppi, nimitys";
+      $varastoresult = pupe_query($query);
+
+      while ($varastorow = mysql_fetch_array($varastoresult)) {
+        if (
+          $varastorow["tyyppi"] == '' or
+          $kukarow["varasto"] == $varastorow["tunnus"] or
+          $varastorow['tunnus'] == $srow["varasto"] or
+          $kukarow['oletus_ostovarasto'] == $varastorow['tunnus'] or
+          in_array($varastorow["tunnus"], explode(',', $kukarow["varasto"]))
+        ) {
+          $kukarow_varasto[] = $varastorow;
+        }
+      }
+
+      return $kukarow_varasto;
+    }
+
     if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
       return array($yhtiorow['takuuvarasto']);
     }
@@ -33534,7 +33573,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
 
-      $hinnoittelu_isatuotteella = ($kertoimet[0]['hintatyyppi'] == "I");
+      $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n,
       // jos asetusta ei ole yliajettu parametreiss‰
@@ -33742,6 +33781,42 @@ if (!function_exists("pura_osaluettelot")) {
   }
 }
 
+if (!function_exists('product_statuses')) {
+  function product_statuses() {
+    return array(
+      "A" => t("Aktiivi"),
+      "E" => t("Ehdokastuote"),
+      "P" => t("Poistettu"),
+      "T" => t("Tilaustuote"),
+      "X" => t("Poistuva tuote"),
+    );
+  }
+}
+
+if (!function_exists('product_status_options')) {
+  function product_status_options($select = null) {
+    $defaults = array();
+    foreach (product_statuses() as $key => $value) {
+      $defaults[$key] = "";
+    }
+
+    // jos k‰ytet‰‰n multiple-selecti‰, voidaan passata array, jossa esivalitut optionit
+    if (is_array($select)) {
+      $sel = $select + $defaults;
+    }
+    else {
+      $sel = array($select => ' selected') + $defaults;
+    }
+
+    $options = "";
+    foreach (product_statuses() as $key => $value) {
+      $options .= "<option value='{$key}'{$sel[$key]}>{$value}</option>";
+    }
+
+    return $options;
+  }
+}
+
 if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   function lisaa_vaihtoehtoinen_rahti_merkkijonoon($merkkijono) {
     global $kukarow;
@@ -33772,5 +33847,58 @@ if (!function_exists('humanize_ohjelma_moduli')) {
     if (!isset($map[strtolower($ohjelma_moduli)])) return '';
 
     return $map[strtolower($ohjelma_moduli)];
+  }
+}
+
+if (!function_exists("laske_korko")) {
+  function laske_korko(Array $params) {
+    global $kukarow, $yhtiorow;
+
+    $tunnukset    = empty($params['tunnukset'])    ? null : $params['tunnukset'];
+    $liitostunnus = empty($params['liitostunnus']) ? null : $params['liitostunnus'];
+    $tapvm        = empty($params['tapvm'])        ? null : $params['tapvm'];
+
+    if (isset($liitostunnus) and isset($tapvm)) {
+      $where_lisa = "AND l.liitostunnus in ({$liitostunnus})
+                     AND t.tapvm <= '{$tapvm}'
+                     AND l.olmapvm = '{$tapvm}'
+                     AND l.mapvm > '0000-00-00'";
+    }
+    elseif (isset($tunnukset)) {
+      $where_lisa = "AND l.tunnus in ({$tunnukset})";
+    }
+    else {
+      return array();
+    }
+
+    $query = "SELECT l.tunnus,
+              l.liitostunnus,
+              t.summa * -1 as summa,
+              l.erpcm,
+              l.yhtio_toimipaikka,
+              l.laskunro,
+              t.tapvm as mapvm,
+              l.tapvm as tapvm,
+              l.viikorkopros,
+              to_days(t.tapvm) - to_days(l.erpcm) as ika,
+              round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm) - to_days(l.erpcm)) / 36500, 2) as korkosumma,
+              l.maksuehto
+              FROM lasku l
+              JOIN tiliointi t on (t.yhtio = l.yhtio AND t.ltunnus = l.tunnus)
+              WHERE l.yhtio = '{$kukarow['yhtio']}'
+              AND l.tila = 'U'
+              AND t.tilino in ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}')
+              AND t.tapvm > l.erpcm
+              {$where_lisa}
+              ORDER BY l.laskunro, t.tapvm";
+    $result = pupe_query($query);
+
+    $korkorivit = array();
+
+    while ($korkorow = mysql_fetch_assoc($result)) {
+      $korkorivit[] = $korkorow;
+    }
+
+    return $korkorivit;
   }
 }

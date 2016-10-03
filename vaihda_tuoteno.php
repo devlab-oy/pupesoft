@@ -778,19 +778,7 @@ if ($tee == "" and $php_cli === false) {
       <tr>
         <th>".t("Valitse vanhan tuotteen status")."</th>
         <td><select name='status'>";
-
-  $vresult = t_avainsana("S");
-  while ($vrow = mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($vrow["selite"] == 'P') {
-      $sel="SELECTED";
-      echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
-    }
-    if ($vrow["selite"] == 'A') {
-      echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
-    }
-
-  }
+  echo product_status_options($vrow["selite"]);
   echo "</select></td>";
   echo "</tr>";
 

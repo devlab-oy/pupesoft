@@ -2383,10 +2383,10 @@ else {
               elmaedi_otsikko_loput($tootedi, $lasrow);
             }
             elseif ($lasrow["chn"] == "112") {
-              finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
+              finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
             elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
-              finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
+              finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
 
             // katotaan miten halutaan sortattavan

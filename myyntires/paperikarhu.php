@@ -933,7 +933,7 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
 
   finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent);
   finvoice_alvierittely($tootfinvoice, $laskurow, $alvrow);
-  finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow);
+  finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow, $pankkitiedot);
 
   $tilrow = array(
     'tuoteno'      => 1,

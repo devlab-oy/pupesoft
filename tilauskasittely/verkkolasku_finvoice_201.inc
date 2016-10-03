@@ -533,7 +533,7 @@ if (!function_exists('finvoice_alvierittely')) {
 }
 
 if (!function_exists('finvoice_otsikko_loput')) {
-  function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
+  function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot) {
     global $err_finvoice, $yhtiorow, $kieli;
 
     if ($err_finvoice == 0) {
@@ -574,6 +574,13 @@ if (!function_exists('finvoice_otsikko_loput')) {
       fputs($tootfinvoice, "<PaymentStatusDetails>\r\n");
       xml_add("PaymentStatusCode", "NOTPAID", $tootfinvoice);
       fputs($tootfinvoice, "</PaymentStatusDetails>\r\n");
+
+      if ($yhtiorow['verkkolasku_lah'] == 'talenom' and isset($masrow["factoring_id"])) {
+        fputs($tootfinvoice, "<FactoringAgreementDetails>\r\n");
+        xml_add("FactoringAgreementIdentifier", $pankkitiedot["pankkinimi1"], $tootfinvoice, 35);
+        xml_add("FactoringTypeCode", "3", $tootfinvoice, 35);
+        fputs($tootfinvoice, "</FactoringAgreementDetails>\r\n");
+      }
     }
   }
 }

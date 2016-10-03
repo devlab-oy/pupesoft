@@ -99,7 +99,7 @@ else {
 // 11)  Vaihtoehtoinen noutopiste palvelussa lähettäjän tulostusohjelmistossa tulee olla asiaan liittyvä noutopaikkarekisteri.
 //    Osoitekortilla vaihtoehtoinen noutopiste näkyy vain osoitemerkinnöissä , katso malli.
 //     Vaihtoehtoinen noutopiste palvelussa EDI-sanomassa ilmoitetaan lisäpalvelukoodi 3140, se poistaa Sähköinen saapumisilmoitus palveluun kuuluvan iPost ominaisuuden.
-// 12)  Itella Green kuuluu palvelujemme ominaisuuteen. "Itella Green - ilmastoystävällinen kuljetus" tai "Itella Green - climate friendly delivery" nimen voi tulostaa
+// 12)  Posti Green kuuluu palvelujemme ominaisuuteen. "Posti Green - ilmastoystävällinen kuljetus" tai "Posti Green - climate friendly delivery" nimen voi tulostaa
 //    12 pisteen lihavoidun kirjaimin osoitekortin alaosan Lisätiedot -kenttään.
 // 13)  Postiennakkolähetyserän (edellyttää EDI-tietoja) jokaiseen lähetykseen kiinnitetään osoitekortti täydellisenä yksilöivää lähetystunnusta lukuun ottamatta samansisältöisenä.
 //    Postiennakkoerän kokonaissumma ja kokonaiskappalemäärä (kpl st. kenttään)
@@ -144,14 +144,14 @@ if ($toitarow['kuljyksikko'] != '') {
 
 $selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
 
-// Oletuksena: Economy 16
-$keltainen   = "Economy";
+// Oletuksena: Postipaketti 14
+$keltainen   = "Postipaketti";
 $kuljetus    = "";
-$keku     = "16";
+$keku     = "14";
 
-if (strpos($selite_chk, "9")     !== FALSE)         $keku = "9";
+if (strpos($selite_chk, "09")     !== FALSE)         $keku = "9";
 if (strpos($selite_chk, "00")    !== FALSE)         $keku = "00";
-if (strpos($selite_chk, "14")    !== FALSE)         $keku = "14";
+if (strpos($selite_chk, "Postipaketti")    !== FALSE)         $keku = "14";
 if (strpos($selite_chk, "21")    !== FALSE)         $keku = "21";
 if (strpos($selite_chk, "00/16") !== FALSE)         $keku = "00/16";
 if (strpos($selite_chk, "Customer Return") !== FALSE)     $keku = "ASIAKASPALAUTUS 14";
@@ -181,50 +181,51 @@ if ($selite_chk != '') {
 //Asiakaspalautus 14      2W2108
 //Priority Ulkomaa      2W2015
 
+// UUDET
+//Pikkupaketti  2W2461
+//Postipaketti  2W2103
+//Kotipaketti 2W2104
+//Palautus  2W2108
+//Express-paketti 2W102
+//Express-paketti Aamuksi 09  2W101
+//Express-paketti Samana Päivänä 00 2W2124
+
+//Priority  2W2015
+
 switch ($keku) {
 case "00":
   $tuoteviiva1="2W2124";
-  $tuoteviiva2=">62W>52124";
   break;
-case "9":
+case "09":
   $tuoteviiva1="2W2101";
-  $tuoteviiva2=">62W>52101";
   break;
-case "14":
+case "Express-paketti":
   $tuoteviiva1="2W2102";
-  $tuoteviiva2=">62W>52102";
   break;
-case "00/16":
-  $tuoteviiva1="2W2105";
-  $tuoteviiva2=">62W>52105";
-  break;
-case "16":
+//case "00/16":
+//  $tuoteviiva1="2W2105";
+//  $tuoteviiva2=">62W>52105";
+//  break;
+case "Postipaketti":
   $tuoteviiva1="2W2103";
-  $tuoteviiva2=">62W>52103";
   break;
 case "21":
   $tuoteviiva1="2W2104";
-  $tuoteviiva2=">62W>52104";
   break;
 case "VV":
   $tuoteviiva1="2W2116";
-  $tuoteviiva2=">62W>52116";
   break;
 case "LISÄARVOKULJETUS":
   $tuoteviiva1="2W2150";
-  $tuoteviiva2=">62W>52150";
   break;
-case "ASIAKASPALAUTUS 14":
+case "Palautus":
   $tuoteviiva1="2W2108";
-  $tuoteviiva2=">62W>52108";
   break;
 case "UNDELIVERED SHIPMENT":
   $tuoteviiva1="2W2108";
-  $tuoteviiva2=">62W>52108";
   break;
 case "PRIORITY ULKOMAA":
   $tuoteviiva1="2W2015";
-  $tuoteviiva2=">62W>52015";
   break;
 }
 
@@ -239,42 +240,39 @@ if ($toitarow['kuljyksikko'] != '') {
   //Lisäarvokuljetus kuljetusyksikkö      2W2149
   //Asiakaspalautus 14 kuljetusyksikkö     2W2147
 
+  //Uudet
+  //Express-rahti 2W2144
+  //Express-rahti Aamuksi 09  2W2143
+  //Express-rahti Illaksi 21  2W2145
+  //Express-rahti Samana Päivänä 00  2W2142
+
   switch ($keku) {
   case "00":
     $tuoteviiva1="2W2124";
-    $tuoteviiva2=">62W>52124";
     break;
   case "9":
     $tuoteviiva1="2W2143";
-    $tuoteviiva2=">62W>52143";
     break;
   case "14":
     $tuoteviiva1="2W2144";
-    $tuoteviiva2=">62W>52144";
     break;
   case "21":
     $tuoteviiva1="2W2145";
-    $tuoteviiva2=">62W>52145";
     break;
   case "VV":
     $tuoteviiva1="2W2146";
-    $tuoteviiva2=">62W>52146";
     break;
   case "LISÄARVOKULJETUS":
     $tuoteviiva1="2W2149";
-    $tuoteviiva2=">62W>52149";
     break;
   case "ASIAKASPALAUTUS 14":
     $tuoteviiva1="2W2147";
-    $tuoteviiva2=">62W>52147";
     break;
   case "UNDELIVERED SHIPMENT":
     $tuoteviiva1="2W2147";
-    $tuoteviiva2=">62W>52147";
     break;
   case "PRIORITY ULKOMAA":
     $tuoteviiva1="2W2015";
-    $tuoteviiva2=">62W>52015";
     break;
   }
 }

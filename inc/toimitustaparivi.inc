@@ -28,7 +28,7 @@ if (mysql_field_name($result, $i) == "lauantai") {
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Lauantaijakelu")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Posti lisäpalvelu: Lauantaijakelu")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -40,7 +40,7 @@ if (mysql_field_name($result, $i) == "kuljyksikko") {
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei kuljetusyksikkökuljetusta")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Kuljetusyksikkökuljetus")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Posti lisäpalvelu: Kuljetusyksikkökuljetus")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -53,17 +53,29 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei valintaa")."</option>";
 
-  $ulos .= "<optgroup label='Pupesoft / Itella'>";
-  $ulos .= "<option value='Express City 00' {$sel["Express City 00"]}>Itella Express City 00</option>";
-  $ulos .= "<option value='Express Morning 9' {$sel["Express Morning 9"]}>Itella Express Morning 9</option>";
-  $ulos .= "<option value='Express Business Day 14' {$sel["Express Business Day 14"]}>Itella Express Business Day 14</option>";
-  $ulos .= "<option value='Express Point 00/16' {$sel["Express Point 00/16"]}>Itella Express Point 00/16</option>";
-  $ulos .= "<option value='Express Flex 21' {$sel["Express Flex 21"]}>Itella Express Flex 21</option>";
-  $ulos .= "<option value='Economy 16' {$sel["Economy 16"]}>Itella Economy 16</option>";
-  $ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
-  $ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
-  $ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
-  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan lähetys</option>";
+  $ulos .= "<optgroup label='Pupesoft / Posti'>";
+  // $ulos .= "<option value='Pikkupaketti' {$sel["Pikkupaketti"]}>Posti Pikkupaketti</option>";
+  $ulos .= "<option value='Postipaketti' {$sel["Postipaketti"]}>Posti Postipaketti</option>";
+  $ulos .= "<option value='Kotipaketti' {$sel["Kotipaketti"]}>Posti Kotipaketti</option>";
+  $ulos .= "<option value='Palautus' {$sel["Palautus"]}>Posti Palautus</option>";
+  $ulos .= "<option value='Express-paketti' {$sel["Express-paketti"]}>Posti Express-paketti</option>";
+  $ulos .= "<option value='Express-paketti Aamuksi 09' {$sel["Express-paketti Aamuksi 09"]}>Posti Express-paketti Aamuksi 09</option>";
+  $ulos .= "<option value='Express-paketti Samana Päivänä 00' {$sel["Express-paketti Samana Päivänä 00"]}>Posti Express-paketti Samana Päivänä 00</option>";
+  $ulos .= "<option value='Express-rahti' {$sel["Express-rahti"]}>Posti Express-rahti</option>";
+  $ulos .= "<option value='Express-rahti Aamuksi 09' {$sel["Express-rahti Aamuksi 09"]}>Posti Express-rahti Aamuksi 09</option>";
+  $ulos .= "<option value='Express-rahti Illaksi 21' {$sel["Express-rahti Illaksi 21"]}>Posti Express-rahti Illaksi 21</option>";
+  // $ulos .= "<option value='Express-rahti Samana Päivänä 00' {$sel["Express-rahti Samana Päivänä 00"]}>Posti Express-rahti Samana Päivänä 00</option>";
+  $ulos .= "<option value='Priority' {$sel["Priority"]}>Posti Priority Ulkomaan lähetys</option>";
+
+
+  // $ulos .= "<option value='Express Point 00/16' {$sel["Express Point 00/16"]}>Itella Express Point 00/16</option>";
+  // $ulos .= "<option value='Express Flex 21' {$sel["Express Flex 21"]}>Itella Express Flex 21</option>";  NYT KOTIPAKETTI
+  // $ulos .= "<option value='Economy 16' {$sel["Economy 16"]}>Itella Economy 16</option>"; NYT POSTIPAKETTI
+  // asiakaspalautus 14 NYT PALAUTUS
+  // express business day 14 NYT EXPRESS PAKETTI
+  // Express-rahti Illaksi 21 2W2145 ???  NYT EXPRESS-RAHTI  illaksi 21
+  // Express-rahti Samana Päivänä 00 2W2142 ???? NYT EXPRESS-RAHTI SAMANA PÄIVÄVNÄ 00
+
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Itella'>";

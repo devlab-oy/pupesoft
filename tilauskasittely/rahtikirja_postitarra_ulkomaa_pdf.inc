@@ -4,11 +4,11 @@
 //
 // arrayt:
 // toitarow, otsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
+// $rakir_row:sta lÃ¶ytyy asiakkaan tiedot ja $rivi:stÃ¤ ytunnus
 //
 // muuttujat:
 // otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kollityht, kilotyht, kuutiotyht, kirjoitin
-// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
+// jv tapauksissa on myÃ¶s yhteensa, summa, jvhinta, lasno ja viite muuttujat
 //
 // tulostetaan rahtikirja
 
@@ -114,7 +114,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   }
 
   if (substr($juokseva, 0, 2) != "CE" or substr($juokseva, -2, 2) != "FI") {
-    // Lähetystunnuksen tarkistenumeron laskentakaava (modulus 11):
+    // LÃ¤hetystunnuksen tarkistenumeron laskentakaava (modulus 11):
     $viiva = mod11_tarkiste($toitarow['tunhalnro'].$juokseva);
   }
   else {
@@ -145,7 +145,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // erotellaan spacella jokainen rahtikirjanumero
   $rahtikirjanro .= "$viiva1 ";
 
-  // tehdään pdf:n uusi sivu
+  // tehdÃ¤Ã¤n pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
   if ($toitarow['virallinen_selite'] == "Priority Ulkomaa") {
@@ -159,7 +159,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   }
 
   if (class_exists("Image_Barcode")) {
-    // Lähetystunnus
+    // LÃ¤hetystunnus
     $data = viivakoodi($viiva1, "code39", 280, 70, "");
     $image = $pdf->jfif_embed($data);
     $logoparam['scale'] = 122/282;
@@ -196,8 +196,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     system("rm -f $nimi");
   }
 
-  // sitten aletaan piirtämään itse PDF sisältöä
-  $pdf->draw_text(18,  550,  "Sender (name and address) / Expéditeur (nom et adresse)",           $firstpage, $pieni);
+  // sitten aletaan piirtÃ¤mÃ¤Ã¤n itse PDF sisÃ¤ltÃ¶Ã¤
+  $pdf->draw_text(18,  550,  "Sender (name and address) / ExpÃ©diteur (nom et adresse)",           $firstpage, $pieni);
   $pdf->draw_text(18,  540, $postirow["yhtio_nimi"],             $firstpage, $norm);
   $pdf->draw_text(18,  530, $postirow["yhtio_osoite"],          $firstpage, $norm);
   $pdf->draw_text(18,  520, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"], $firstpage, $norm);
@@ -210,7 +210,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(35, 495,  $yhtiorow["puhelin"],             $firstpage, $iso);
 
   $pdf->draw_text(115,  500,  "Sender's business ID /",    $firstpage, $pieni);
-  $pdf->draw_text(115,  495,  "No de T.V.A. de l'expéditeur",    $firstpage, $pieni);
+  $pdf->draw_text(115,  495,  "No de T.V.A. de l'expÃ©diteur",    $firstpage, $pieni);
   $pdf->draw_text(185,  500,  $postirow["yhtio_maa"]."-".preg_replace("/^0037/", "", $postirow["yhtio_ovttunnus"]),    $firstpage, $norm);
 
 
@@ -239,12 +239,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tuoteviivakoodin alle
   $pdf->draw_text(310, 532,  $tuoteviiva1,                 $firstpage, $viivacourier);
 
-  // jos käytetään ediä
+  // jos kÃ¤ytetÃ¤Ã¤n ediÃ¤
   if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
     $pdf->draw_text(345, 510,  "EDI",                   $firstpage, $huge);
   }
 
-  $pdf->draw_text(250, 490,  "Date of posting / Date du dépôt", $firstpage, $pieni);
+  $pdf->draw_text(250, 490,  "Date of posting / Date du dÃ©pÃ´t", $firstpage, $pieni);
   $pdf->draw_text(250, 479,  date("d.m.Y"),                 $firstpage, $norm);
 
   $pdf->draw_rectangle(495, 245, 450, 245,                   $firstpage, $rectparam);
@@ -270,7 +270,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(330, 453,  $kuutiotyht,                 $firstpage, $norm);
   $pdf->draw_text(390, 453,  "m3",                     $firstpage, $pieni);
 
-  $pdf->draw_text(250, 444,  "Pieces Pièces", $firstpage, $pieni);
+  $pdf->draw_text(250, 444,  "Pieces PiÃ¨ces", $firstpage, $pieni);
   $pdf->draw_text(255, 435,  $kollityht,                  $firstpage, $iso);
 
 
@@ -288,11 +288,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $pdf->draw_rectangle(385, 18, 375, 28,                   $firstpage, $rectparam);
   $pdf->draw_text(30,  380,  "treat item as abandoned",          $firstpage, $pieni);
-  $pdf->draw_text(30,  375,  "traiter l'envoi comme abandonné",      $firstpage, $pieni);
+  $pdf->draw_text(30,  375,  "traiter l'envoi comme abandonnÃ©",      $firstpage, $pieni);
 
   $pdf->draw_rectangle(385, 128, 375, 138,                   $firstpage, $rectparam);
   $pdf->draw_text(140,  380,  "return to the sender immediately",      $firstpage, $pieni);
-  $pdf->draw_text(140,  375,  "renvoyer à l'expéditeur immédiatement",  $firstpage, $pieni);
+  $pdf->draw_text(140,  375,  "renvoyer Ã  l'expÃ©diteur immÃ©diatement",  $firstpage, $pieni);
 
   $pdf->draw_rectangle(385, 250, 375, 260,                   $firstpage, $rectparam);
   $pdf->draw_text(263,  380,  "by air",    $firstpage, $pieni);
@@ -300,17 +300,17 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   $pdf->draw_rectangle(385, 300, 375, 310,                   $firstpage, $rectparam);
   $pdf->draw_text(313,  380,  "the most economical route",  $firstpage, $pieni);
-  $pdf->draw_text(313,  375,  "par la route la plus économique",  $firstpage, $pieni);
+  $pdf->draw_text(313,  375,  "par la route la plus Ã©conomique",  $firstpage, $pieni);
   $pdf->draw_text(302,  376,  "X",  $firstpage, $isobold);
 
-  // viiva viivakooditekstin ylä ja alapuolelle
+  // viiva viivakooditekstin ylÃ¤ ja alapuolelle
   $pdf->draw_rectangle(260, 18, 260, 400,                   $firstpage, $rectparam);
   $pdf->draw_rectangle(370, 18, 370, 400,                   $firstpage, $rectparam);
   $pdf->draw_text(140, 262,  $viiva2,                    $firstpage, $viivacourier);
   $pdf->draw_text(140, 362,  $viiva2,                    $firstpage, $viivacourier);
 
   // viivakoodin alapuolella
-  $pdf->draw_text(18,  250,  "Sender / Expéditeur",             $firstpage, $pieni);
+  $pdf->draw_text(18,  250,  "Sender / ExpÃ©diteur",             $firstpage, $pieni);
   $pdf->draw_text(80,  250, $postirow["yhtio_nimi"]." ".$postirow["yhtio_osoite"]." ".$postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"]." ".$postirow["yhtio_maa"], $firstpage, $norm);
   $pdf->draw_rectangle(245, 18, 245, 400,                   $firstpage, $rectparam);
 
@@ -321,7 +321,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_rectangle(225, 18, 225, 400,                   $firstpage, $rectparam);
 
   $pdf->draw_text(18,  218,  "Description of contents",   $firstpage, $pieni);
-  $pdf->draw_text(18,  212,  "Description détaillée du contenu",   $firstpage, $pieni);
+  $pdf->draw_text(18,  212,  "Description dÃ©taillÃ©e du contenu",   $firstpage, $pieni);
 
   $pdf->draw_text(120,  218,  "Number",   $firstpage, $pieni);
   $pdf->draw_text(120,  212,  "Nombre",   $firstpage, $pieni);
@@ -339,17 +339,17 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(320,  212,  "Valeur / Monnaie",   $firstpage, $pieni);
   $pdf->draw_rectangle(208, 18, 208, 400,                   $firstpage, $rectparam);
 
-  // Lisätiedot
+  // LisÃ¤tiedot
   $pdf->draw_rectangle(118, 18, 118, 400,                   $firstpage, $rectparam);
   $pdf->draw_text(18, 110,  "Date",  $firstpage, $pieni);
   $pdf->draw_text(70, 110,  "Time/Heure",  $firstpage, $pieni);
   $pdf->draw_text(130, 110,  "Recipient's signature Signature du destinataire",  $firstpage, $pieni);
 
-  $pdf->draw_text(18, 20,   t("Itella Green - Carbon neutral delivery"),          $firstpage, $iso);
+  $pdf->draw_text(18, 20,   t("Posti Green - ilmastoystaÌˆvaÌˆllinen kuljetus"),          $firstpage, $iso);
 
   $pdf->draw_text(270, 20,  "9V".$toitarow['sopimusnro'],    $firstpage, $viivacourier);
 
-  //lähetetään postin edisanoma
+  //lÃ¤hetetÃ¤Ã¤n postin edisanoma
   if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
     require "postiedi.inc";
   }
@@ -369,12 +369,12 @@ if ($tulostakolli > 0) {
           <input type='submit' value='".t("Pakettikortti").": {$postirow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_postitarra_{$postirow['tunnus']}', ''); return false;\"></form><br>";
   }
   else {
-    //keksitään uudelle failille joku varmasti uniikki nimi:
+    //keksitÃ¤Ã¤n uudelle failille joku varmasti uniikki nimi:
     $pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(), true)).".pdf";
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
-    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epÃ¤onnistui $pdffilenimi");
     fclose($fh);
 
     //tulostetaan PDF
@@ -385,7 +385,7 @@ if ($tulostakolli > 0) {
       require "inc/sahkoposti.inc";
     }
     elseif ($kirjoitin == 'PDF_RUUDULLE') {
-      //Työnnetään tuo pdf vaan putkeen!
+      //TyÃ¶nnetÃ¤Ã¤n tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }
     else {

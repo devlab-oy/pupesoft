@@ -4936,3 +4936,17 @@ if ($fieldname == "laskun_kanavointitiedon_syotto") {
 
   $jatko = 0;
 }
+
+if ($fieldname == "yhteyshenkiloiden_sidos") {
+  $apu = $trow[$i];
+  $sel = array($apu => " selected");
+
+  $ulos = "<td>
+             <select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+               <option value=''>".t("Yhteyshenkilöt ovat asiakaskohtaisia")."
+               <option value='Y' {$sel["Y"]}>".t("Yhteyshenkilöt ovat y-tunnukseen sidottuja")."
+             </select>
+           </td>";
+
+  $jatko = 0;
+}

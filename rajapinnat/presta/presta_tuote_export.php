@@ -308,7 +308,7 @@ if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
-  $asiakkaat = presta_hae_asiakkaat();
+  $asiakkaat = presta_hae_asiakkaat($presta_asiakaskasittely);
 
   presta_echo("Siirret‰‰n asiakkaat.");
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');

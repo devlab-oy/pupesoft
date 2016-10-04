@@ -544,10 +544,16 @@ if (!function_exists('finvoice_otsikko_loput')) {
 
       $InvoiceFreeTexts = explode("|", trim($lasrow["sisviesti1"]));
 
+      $kommpituus = 512;
+
+      if ($yhtiorow['verkkolasku_lah'] == 'talenom') {
+        $kommpituus = 70;
+      }
+
       foreach ($InvoiceFreeTexts as $InvoiceFreeText) {
         if (trim($InvoiceFreeText) != "") {
 
-          foreach (explode("|", wordwrap($InvoiceFreeText, 512, "|")) as $InvFreeT) {
+          foreach (explode("|", wordwrap($InvoiceFreeText, $kommpituus, "|")) as $InvFreeT) {
             xml_add("InvoiceFreeText", $InvFreeT, $tootfinvoice);
           }
         }

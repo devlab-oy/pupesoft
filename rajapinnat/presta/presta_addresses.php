@@ -22,8 +22,6 @@ class PrestaAddresses extends PrestaClient {
    * @param SimpleXMLElement $existing_address
    * @return \SimpleXMLElement
    */
-
-
   protected function generate_xml($address, SimpleXMLElement $existing_address = null) {
     if (is_null($existing_address)) {
       $xml = $this->empty_xml();
@@ -47,43 +45,60 @@ class PrestaAddresses extends PrestaClient {
       $country = $this->presta_countries->first_country();
     }
 
-    // Mandatory fields
-    $_osoite = empty($address['osoite']) ? "-" : $address['osoite'];
-    $_postitp = empty($address['postitp']) ? "-" : $address['postitp'];
-    $_puh = empty($address['puh']) ? "-" : $address['puh'];
-
-    // max 32, numbers and special characters not allowed
-    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($address['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : $_nimi;
-
-    $xml->address->id_country = $country;
-    $xml->address->id_customer = $address['presta_customer_id'];
-    $xml->address->alias = 'Home';
-    $xml->address->lastname = $this->xml_value($_nimi);
-    $xml->address->firstname = '-';
-    $xml->address->address1 = $this->xml_value($_osoite);
-    $xml->address->postcode = $this->xml_value($address['postino']);
-    $xml->address->city = $this->xml_value($_postitp);
-    $xml->address->phone = $this->xml_value($_puh);
-    $xml->address->phone_mobile = $this->xml_value($address['gsm']);
+    $xml->address->address1     = $this->clean_field($address['osoite']);
+    $xml->address->alias        = 'Home';
+    $xml->address->city         = $this->clean_field($address['postitp']);
+    $xml->address->dni          = $address['asiakas_id'];
+    $xml->address->firstname    = '-';
+    $xml->address->id_country   = $country;
+    $xml->address->id_customer  = $address['id_customer'];
+    $xml->address->lastname     = $this->clean_name($address['nimi']);
+    $xml->address->phone        = $this->clean_field($address['puh']);
+    $xml->address->phone_mobile = $this->clean_field($address['gsm']);
+    $xml->address->postcode     = $this->clean_field($address['postino']);
 
     return $xml;
   }
 
-  public function update_with_customer_id(array $customer, $id_shop = null) {
-    $presta_address = $this->find_address_by_customer_id($customer['presta_customer_id'], $id_shop);
+  public function add_addresses_for_customer($presta_customer_id, Array $addresses, $id_shop = null) {
+    $added_addresses = array();
 
-    if (is_null($presta_address)) {
-      parent::create($customer, $id_shop);
-    }
-    else {
-      parent::update($presta_address['id'], $customer, $id_shop);
+    // loop all given addresses
+    foreach ($addresses as $address) {
+      // we need to add customer id to address -array since we don't know it in pupesoft
+      $address['id_customer'] = $presta_customer_id;
+
+      // add or update address
+      $added_addresses[] = $this->address_with_customer_id($presta_customer_id, $address, $id_shop);
     }
   }
 
-  private function find_address_by_customer_id($customer_id, $id_shop = null) {
-    $display = $filter = array();
-    $filter['id_customer'] = $customer_id;
+  private function address_with_customer_id($presta_customer_id, array $address, $id_shop = null) {
+    $presta_address = $this->find_addresses_for_customer_id($presta_customer_id, $address, $id_shop);
+
+    if (is_null($presta_address)) {
+      $response = $this->create($address, $id_shop);
+      $id = (string) $response['address']['id'];
+    }
+    else {
+      $this->update($presta_address['id'], $address, $id_shop);
+      $id = $presta_address['id'];
+    }
+
+    return $id;
+  }
+
+  private function find_addresses_for_customer_id($customer_id, $address, $id_shop = null) {
+    $display = array();
+
+    // we must find the exact address, otherwise create new
+    $filter = array(
+      'address1'     => $this->clean_field($address['osoite']),
+      'city'         => $this->clean_field($address['postitp']),
+      'dni'          => $address['asiakas_id'],
+      'id_customer'  => $customer_id,
+      'postcode'     => $this->clean_field($address['postino']),
+    );
 
     $addresses = $this->all($display, $filter, $id_shop);
 

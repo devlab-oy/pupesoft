@@ -330,6 +330,10 @@ if ($upd == 1) {
       $errori = 1;
     }
 
+    if ($toim == 'tuote' and mysql_field_name($result, $i) == 'status' and empty($t[$i]) and $pakollisuuden_tarkistus_rivi['selitetark_4'] != '') {
+      $t[$i] = $pakollisuuden_tarkistus_rivi['selitetark_4'];
+    }
+
     $tiedostopaate = "";
 
     $funktio = $toim."tarkista";

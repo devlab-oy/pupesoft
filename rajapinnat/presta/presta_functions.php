@@ -20,6 +20,7 @@ function presta_hae_asiakkaat_asiakkaittain() {
   global $kukarow, $yhtiorow, $ajetaanko_kaikki;
 
   $asiakkaat = array();
+
   $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
 
   if ($ajetaanko_kaikki == "NO") {
@@ -35,6 +36,7 @@ function presta_hae_asiakkaat_asiakkaittain() {
   }
 
   $query = "SELECT
+            asiakas.tunnus as asiakas_tunnus,
             avainsana.selitetark_5,
             yhteyshenkilo.email,
             yhteyshenkilo.gsm,
@@ -44,7 +46,7 @@ function presta_hae_asiakkaat_asiakkaittain() {
             yhteyshenkilo.postino,
             yhteyshenkilo.postitp,
             yhteyshenkilo.puh,
-            yhteyshenkilo.tunnus,
+            yhteyshenkilo.tunnus as yhteyshenkilo_tunnus,
             yhteyshenkilo.ulkoinen_asiakasnumero,
             yhteyshenkilo.verkkokauppa_nakyvyys,
             yhteyshenkilo.verkkokauppa_salasana,
@@ -63,21 +65,27 @@ function presta_hae_asiakkaat_asiakkaittain() {
   $result = pupe_query($query);
 
   while ($asiakas = mysql_fetch_assoc($result)) {
+    $osoitteet = array();
+    $osoitteet[] = array(
+      "asiakas_id" => $asiakas['asiakas_tunnus'],
+      "osoite"     => $asiakas['osoite'],
+      "postino"    => $asiakas['postino'],
+      "postitp"    => $asiakas['postitp'],
+      "maa"        => $asiakas['maa'],
+    );
+
     $asiakkaat[] = array(
       "email"                   => $asiakas['email'],
       "gsm"                     => $asiakas['gsm'],
-      "maa"                     => $asiakas['maa'],
       "nimi"                    => $asiakas['nimi'],
-      "osoite"                  => $asiakas['osoite'],
-      "postino"                 => $asiakas['postino'],
-      "postitp"                 => $asiakas['postitp'],
       "presta_customergroup_id" => $asiakas['selitetark_5'],
       "puh"                     => $asiakas['puh'],
-      "tunnus"                  => $asiakas['tunnus'],
+      "tunnus"                  => $asiakas['yhteyshenkilo_tunnus'],
       "ulkoinen_asiakasnumero"  => $asiakas['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $asiakas['verkkokauppa_nakyvyys'],
       "verkkokauppa_salasana"   => $asiakas['verkkokauppa_salasana'],
       "yhtio"                   => $asiakas['yhtio'],
+      "osoitteet"               => $osoitteet,
     );
   }
 
@@ -119,7 +127,7 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
     // haetaan kaikki osoitteet asiakkailta
     $query = "SELECT distinct
-              asiakas.tunnus as asiakas_id,
+              asiakas.tunnus,
               asiakas.osoite,
               asiakas.postino,
               asiakas.postitp,
@@ -131,16 +139,22 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     $osoite_result = pupe_query($query);
 
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
-      $osoitteet[] = $osoite;
+      $osoitteet[] = array(
+        "asiakas_id" => $osoite['tunnus'],
+        "osoite"     => $osoite['osoite'],
+        "postino"    => $osoite['postino'],
+        "postitp"    => $osoite['postitp'],
+        "maa"        => $osoite['maa'],
+      );
     }
 
     // haetaan kaikki toimitusosoitteet asiakkailta
     $query = "SELECT distinct
-              asiakas.tunnus as asiakas_id,
-              asiakas.toim_osoite as osoite,
-              asiakas.toim_postino as postino,
-              asiakas.toim_postitp as postitp,
-              asiakas.toim_maa as maa
+              asiakas.tunnus,
+              asiakas.toim_osoite,
+              asiakas.toim_postino,
+              asiakas.toim_postitp,
+              asiakas.toim_maa
               FROM asiakas
               WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
               AND asiakas.tunnus in ($asiakas_tunnukset)
@@ -148,7 +162,13 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     $osoite_result = pupe_query($query);
 
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
-      $osoitteet[] = $osoite;
+      $osoitteet[] = array(
+        "asiakas_id" => $osoite['tunnus'],
+        "osoite"     => $osoite['toim_osoite'],
+        "postino"    => $osoite['toim_postino'],
+        "postitp"    => $osoite['toim_postitp'],
+        "maa"        => $osoite['toim_maa'],
+      );
     }
 
     // lis‰t‰‰n asiakas array

@@ -91,14 +91,15 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
   // Haetaan kaikki yhteyshenkilöt ja niiden asiakkaat
   $query = "SELECT yhteyshenkilo.email,
-            max(yhteyshenkilo.nimi) as nimi,
+            max(avainsana.selitetark_5) as selitetark_5,
             max(yhteyshenkilo.gsm) as gsm,
+            max(yhteyshenkilo.nimi) as nimi,
             max(yhteyshenkilo.puh) as puh,
+            max(yhteyshenkilo.tunnus) as tunnus,
             max(yhteyshenkilo.ulkoinen_asiakasnumero) as ulkoinen_asiakasnumero,
             max(yhteyshenkilo.verkkokauppa_nakyvyys) as verkkokauppa_nakyvyys,
-            max(yhteyshenkilo.yhtio) as yhtio,
             max(yhteyshenkilo.verkkokauppa_salasana) as verkkokauppa_salasana,
-            max(avainsana.selitetark_5) as selitetark_5,
+            max(yhteyshenkilo.yhtio) as yhtio,
             group_concat(yhteyshenkilo.liitostunnus) as asiakkaat
             FROM yhteyshenkilo
             INNER JOIN asiakas ON (asiakas.yhtio = yhteyshenkilo.yhtio
@@ -118,11 +119,11 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
     // haetaan kaikki osoitteet asiakkailta
     $query = "SELECT distinct
-              tunnus,
-              osoite,
-              postino,
-              postitp,
-              maa
+              asiakas.tunnus as asiakas_id,
+              asiakas.osoite,
+              asiakas.postino,
+              asiakas.postitp,
+              asiakas.maa
               FROM asiakas
               WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
               AND asiakas.tunnus in ($asiakas_tunnukset)
@@ -135,11 +136,11 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
     // haetaan kaikki toimitusosoitteet asiakkailta
     $query = "SELECT distinct
-              tunnus,
-              toim_osoite as osoite,
-              toim_postino as postino,
-              toim_postitp as postitp,
-              toim_maa as maa
+              asiakas.tunnus as asiakas_id,
+              asiakas.toim_osoite as osoite,
+              asiakas.toim_postino as postino,
+              asiakas.toim_postitp as postitp,
+              asiakas.toim_maa as maa
               FROM asiakas
               WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
               AND asiakas.tunnus in ($asiakas_tunnukset)
@@ -155,9 +156,10 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
       "email"                   => $yhteyshenkilo['email'],
       "gsm"                     => $yhteyshenkilo['gsm'],
       "nimi"                    => $yhteyshenkilo['nimi'],
-      "presta_customer_id"      => $yhteyshenkilo['ulkoinen_asiakasnumero'],
       "presta_customergroup_id" => $yhteyshenkilo['selitetark_5'],
       "puh"                     => $yhteyshenkilo['puh'],
+      "tunnus"                  => $yhteyshenkilo['tunnus'],
+      "ulkoinen_asiakasnumero"  => $yhteyshenkilo['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $yhteyshenkilo['verkkokauppa_nakyvyys'],
       "verkkokauppa_salasana"   => $yhteyshenkilo['verkkokauppa_salasana'],
       "yhtio"                   => $yhteyshenkilo['yhtio'],

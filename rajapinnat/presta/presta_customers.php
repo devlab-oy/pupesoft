@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
+  private $customer_handling = null;
   private $default_groups = array();
   private $presta_addresses = null;
 
@@ -196,5 +197,9 @@ class PrestaCustomers extends PrestaClient {
     if (is_array($value)) {
       $this->default_groups = $value;
     }
+  }
+
+  public function set_customer_handling($value) {
+    $this->customer_handling = $value;
   }
 }

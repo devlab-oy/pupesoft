@@ -19,6 +19,7 @@ function presta_hae_asiakkaat($asiakaskasittely) {
 function presta_hae_asiakkaat_asiakkaittain() {
   global $kukarow, $yhtiorow, $ajetaanko_kaikki;
 
+  $asiakkaat = array();
   $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
 
   if ($ajetaanko_kaikki == "NO") {
@@ -33,9 +34,21 @@ function presta_hae_asiakkaat_asiakkaittain() {
     $muutoslisa = "";
   }
 
-  $query = "SELECT asiakas.*,
-            yhteyshenkilo.*,
-            avainsana.selitetark_5 AS presta_customergroup_id
+  $query = "SELECT
+            avainsana.selitetark_5,
+            yhteyshenkilo.email,
+            yhteyshenkilo.gsm,
+            yhteyshenkilo.maa,
+            yhteyshenkilo.nimi,
+            yhteyshenkilo.osoite,
+            yhteyshenkilo.postino,
+            yhteyshenkilo.postitp,
+            yhteyshenkilo.puh,
+            yhteyshenkilo.tunnus,
+            yhteyshenkilo.ulkoinen_asiakasnumero,
+            yhteyshenkilo.verkkokauppa_nakyvyys,
+            yhteyshenkilo.verkkokauppa_salasana,
+            yhteyshenkilo.yhtio
             FROM yhteyshenkilo
             INNER JOIN asiakas
             ON (asiakas.yhtio = yhteyshenkilo.yhtio
@@ -49,9 +62,23 @@ function presta_hae_asiakkaat_asiakkaittain() {
             {$muutoslisa}";
   $result = pupe_query($query);
 
-  $asiakkaat = array();
   while ($asiakas = mysql_fetch_assoc($result)) {
-    $asiakkaat[] = $asiakas;
+    $asiakkaat[] = array(
+      "email"                   => $asiakas['email'],
+      "gsm"                     => $asiakas['gsm'],
+      "maa"                     => $asiakas['maa'],
+      "nimi"                    => $asiakas['nimi'],
+      "osoite"                  => $asiakas['osoite'],
+      "postino"                 => $asiakas['postino'],
+      "postitp"                 => $asiakas['postitp'],
+      "presta_customergroup_id" => $asiakas['selitetark_5'],
+      "puh"                     => $asiakas['puh'],
+      "tunnus"                  => $asiakas['tunnus'],
+      "ulkoinen_asiakasnumero"  => $asiakas['ulkoinen_asiakasnumero'],
+      "verkkokauppa_nakyvyys"   => $asiakas['verkkokauppa_nakyvyys'],
+      "verkkokauppa_salasana"   => $asiakas['verkkokauppa_salasana'],
+      "yhtio"                   => $asiakas['yhtio'],
+    );
   }
 
   return $asiakkaat;

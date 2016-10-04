@@ -1323,6 +1323,43 @@ for ($i=0; $i<=$count; $i++) {
   }
 }
 
+// Jos lisätään/päivitetään yhteyshenkilöitä jotka on sidottu y-tunnukseen
+if ($toim == "yhteyshenkilo" and $upd == '1' and $yhtiorow['yhteyshenkiloiden_sidos'] == 'Y') {
+
+  // Onko lisätty uusi yhteyshenkilö vai päivitetäänkö vanhaa
+  if ($lukitse_avaimeen > 0 and empty($_REQUEST['tunnus'])) {
+    $_REQUEST['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
+  }
+
+  if (!empty($_REQUEST['tunnus']) and $_REQUEST['tunnus'] > 0) {    
+    // haetaan yhteyshenkilön tiedot
+    $query = "SELECT *
+              FROM yhteyshenkilo
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$_REQUEST['tunnus']}'";
+    $result = pupe_query($query);
+    $yhenkrow = mysql_fetch_assoc($result);
+
+    // haetaan asiakkaan y-tunnus
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$yhenkrow['liitostunnus']}'";
+    $result = pupe_query($query);
+    $asiakasrow = mysql_fetch_assoc($result);
+
+    if ($yhenkrow['tunnus'] > 0 and $asiakasrow['tunnus']) {
+      $parametrit = array(
+        'yhteyshenkilo_tunnus' => $yhenkrow['tunnus'],
+        'ytunnus' => $asiakasrow['ytunnus'],
+      );
+
+      // lisätään tai päivitetään yhteyshenkilö kaikille asiakkuuksille   
+      lisaa_tai_paivita_yhteyshenkilo($parametrit);
+    }
+  }
+}
+
 //  Säilytetään ohjeen tila
 if ($from != "") {
   $ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";

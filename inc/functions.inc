@@ -33902,3 +33902,67 @@ if (!function_exists("laske_korko")) {
     return $korkorivit;
   }
 }
+
+if (!function_exists("lisaa_tai_paivita_yhteyshenkilo")) {
+  function lisaa_tai_paivita_yhteyshenkilo($parametrit) {
+    global $kukarow, $yhtiorow;
+
+    $ytunnus = $parametrit['ytunnus'];
+    $yhteyshenkilo_tunnus = $parametrit['yhteyshenkilo_tunnus'];
+
+    // haetaan yhteyshenkilön tiedot
+    $yhenkquery = "SELECT *
+                   FROM yhteyshenkilo
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus = {$yhteyshenkilo_tunnus}";
+    $yhenkresult = pupe_query($yhenkquery);
+    $yhenkrow = mysql_fetch_array($yhenkresult);
+
+    // haetaan asiakkuudet joilla on sama y-tunnus
+    $asquery = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND ytunnus = '{$ytunnus}'";
+    $asresult = pupe_query($asquery);
+
+    $laskuri = 0;
+    // käydään läpi kaikki asiakkuudet
+    while ($asiakasrow = mysql_fetch_assoc($asresult)) {
+      // onko yhteyshenkilö jo olemassa tällä asiakkuudella?
+      $yhquery = "SELECT *
+                  FROM yhteyshenkilo
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND nimi = '{$yhenkrow['nimi']}'
+                  AND liitostunnus = '{$asiakasrow['tunnus']}'";
+      $yhresult = pupe_query($yhquery);
+
+      if (mysql_num_rows($yhresult) == 0) {
+        // lisätään yhteyshenkilö asiakkuudelle
+        $query = "INSERT into yhteyshenkilo SET yhtio = '{$kukarow['yhtio']}' ";
+        $endi = '';
+      }
+      else {
+        // päivitetään yhteyshenkilö
+        $yh_update_rivi = mysql_fetch_assoc($yhresult);
+        $query = "UPDATE yhteyshenkilo SET yhtio = '{$kukarow['yhtio']}' ";
+        $endi = " WHERE tunnus = '{$yh_update_rivi['tunnus']}'";
+      }
+
+      for ($i=1; $i < mysql_num_fields($yhenkresult); $i++) {
+        if (mysql_field_name($yhenkresult, $i) == 'tunnus' or mysql_field_name($yhenkresult, $i) == 'yhtio') {
+          continue;
+        }
+        elseif (mysql_field_name($yhenkresult, $i) == 'liitostunnus') {
+          $query .= ", ". mysql_field_name($yhenkresult, $i)." = '".trim($asiakasrow['tunnus'])."' ";
+        } 
+        else {
+          $query .= ", ". mysql_field_name($yhenkresult, $i)." = '".trim($yhenkrow[$i])."' ";
+        }
+      }
+
+      $query .= $endi;
+      pupe_query($query);
+      $laskuri++;
+    }
+  }
+}

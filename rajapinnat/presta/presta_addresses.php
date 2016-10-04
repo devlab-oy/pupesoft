@@ -71,9 +71,11 @@ class PrestaAddresses extends PrestaClient {
       // add or update address
       $added_addresses[] = $this->address_with_customer_id($presta_customer_id, $address, $id_shop);
     }
+
+    $this->remove_unused_addresses($presta_customer_id, $added_addresses, $id_shop);
   }
 
-  private function address_with_customer_id($presta_customer_id, array $address, $id_shop = null) {
+  private function address_with_customer_id($presta_customer_id, array $address, $id_shop) {
     $presta_address = $this->find_addresses_for_customer_id($presta_customer_id, $address, $id_shop);
 
     if (is_null($presta_address)) {
@@ -88,7 +90,7 @@ class PrestaAddresses extends PrestaClient {
     return $id;
   }
 
-  private function find_addresses_for_customer_id($customer_id, $address, $id_shop = null) {
+  private function find_addresses_for_customer_id($customer_id, $address, $id_shop) {
     $display = array();
 
     // we must find the exact address, otherwise create new
@@ -105,5 +107,33 @@ class PrestaAddresses extends PrestaClient {
     $address = isset($addresses[0]) ? $addresses[0] : null;
 
     return $address;
+  }
+
+  private function remove_unused_addresses($customer_id, $added_addresses, $id_shop) {
+    $display = array('id');
+    $filter = array('id_customer' => $customer_id);
+
+    // fetch all customer addresses
+    $all_addresses = $this->all($display, $filter, $id_shop);
+    $address_ids = array_column($all_addresses, 'id');
+
+    // check which we need to remove
+    $remove_ids = array_diff($address_ids, $added_addresses);
+
+    // counters
+    $current = 0;
+    $total = count($remove_ids);
+
+    // delete addresses from presta
+    foreach ($remove_ids as $presta_id) {
+      $current++;
+      $this->logger->log("[{$current}/{$total}] Poistetaan osoite {$presta_id}");
+
+      try {
+        $this->delete($presta_id);
+      }
+      catch (Exception $e) {
+      }
+    }
   }
 }

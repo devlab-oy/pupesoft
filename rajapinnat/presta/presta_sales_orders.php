@@ -270,8 +270,8 @@ class PrestaSalesOrders extends PrestaClient {
       }
     }
 
-    $invoice_name = $this->clean_name($invoice_address['firstname'], $invoice_address['lastname']);
-    $delivery_name = $this->clean_name($delivery_address['firstname'], $delivery_address['lastname']);
+    $invoice_name = $this->cleanup_name($invoice_address['firstname'], $invoice_address['lastname']);
+    $delivery_name = $this->cleanup_name($delivery_address['firstname'], $delivery_address['lastname']);
 
     // fetch order messages, implode into one string, and remove newlines.
     $order_messages = $this->presta_customer_messages->messages_by_order($order['id']);
@@ -462,7 +462,7 @@ class PrestaSalesOrders extends PrestaClient {
     return "{$this->edi_filepath_base}/liitetiedostot";
   }
 
-  private function clean_name($firstname, $lastname) {
+  private function cleanup_name($firstname, $lastname) {
     $firstname = trim($firstname);
     $lastname = trim($lastname);
 

@@ -1,6 +1,22 @@
 <?php
 
-function presta_hae_asiakkaat() {
+function presta_hae_asiakkaat($asiakaskasittely) {
+  if ($asiakaskasittely == 'asiakkaittain') {
+    $asiakkaat = presta_hae_asiakkaat_asiakkaittain();
+  }
+  elseif ($asiakaskasittely == 'yhteyshenkiloittain') {
+    $asiakkaat = presta_hae_asiakkaat_yhteyshenkiloittain();
+  }
+  else {
+    presta_echo("Virheellinen asiakaskäsittely.");
+
+    $asiakkaat = array();
+  }
+
+  return $asiakkaat;
+}
+
+function presta_hae_asiakkaat_asiakkaittain() {
   global $kukarow, $yhtiorow, $ajetaanko_kaikki;
 
   $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
@@ -36,6 +52,90 @@ function presta_hae_asiakkaat() {
   $asiakkaat = array();
   while ($asiakas = mysql_fetch_assoc($result)) {
     $asiakkaat[] = $asiakas;
+  }
+
+  return $asiakkaat;
+}
+
+function presta_hae_asiakkaat_yhteyshenkiloittain() {
+  global $kukarow, $yhtiorow;
+
+  $asiakkaat = array();
+
+  // Haetaan kaikki yhteyshenkilöt ja niiden asiakkaat
+  $query = "SELECT yhteyshenkilo.email,
+            max(yhteyshenkilo.nimi) as nimi,
+            max(yhteyshenkilo.gsm) as gsm,
+            max(yhteyshenkilo.puh) as puh,
+            max(yhteyshenkilo.ulkoinen_asiakasnumero) as ulkoinen_asiakasnumero,
+            max(yhteyshenkilo.verkkokauppa_nakyvyys) as verkkokauppa_nakyvyys,
+            max(yhteyshenkilo.yhtio) as yhtio,
+            max(yhteyshenkilo.verkkokauppa_salasana) as verkkokauppa_salasana,
+            max(avainsana.selitetark_5) as selitetark_5,
+            group_concat(yhteyshenkilo.liitostunnus) as asiakkaat
+            FROM yhteyshenkilo
+            INNER JOIN asiakas ON (asiakas.yhtio = yhteyshenkilo.yhtio
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
+              AND avainsana.selite = asiakas.ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+            AND yhteyshenkilo.rooli = 'Presta'
+            AND yhteyshenkilo.email != ''
+            GROUP BY yhteyshenkilo.email";
+  $result = pupe_query($query);
+
+  while ($yhteyshenkilo = mysql_fetch_assoc($result)) {
+    $asiakas_tunnukset = $yhteyshenkilo['asiakkaat'];
+    $osoitteet = array();
+
+    // haetaan kaikki osoitteet asiakkailta
+    $query = "SELECT distinct
+              tunnus,
+              osoite,
+              postino,
+              postitp,
+              maa
+              FROM asiakas
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus in ($asiakas_tunnukset)
+              AND asiakas.osoite != ''";
+    $osoite_result = pupe_query($query);
+
+    while ($osoite = mysql_fetch_assoc($osoite_result)) {
+      $osoitteet[] = $osoite;
+    }
+
+    // haetaan kaikki toimitusosoitteet asiakkailta
+    $query = "SELECT distinct
+              tunnus,
+              toim_osoite as osoite,
+              toim_postino as postino,
+              toim_postitp as postitp,
+              toim_maa as maa
+              FROM asiakas
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus in ($asiakas_tunnukset)
+              AND asiakas.toim_osoite != ''";
+    $osoite_result = pupe_query($query);
+
+    while ($osoite = mysql_fetch_assoc($osoite_result)) {
+      $osoitteet[] = $osoite;
+    }
+
+    // lisätään asiakas array
+    $asiakkaat[] = array(
+      "email"                   => $yhteyshenkilo['email'],
+      "gsm"                     => $yhteyshenkilo['gsm'],
+      "nimi"                    => $yhteyshenkilo['nimi'],
+      "presta_customer_id"      => $yhteyshenkilo['ulkoinen_asiakasnumero'],
+      "presta_customergroup_id" => $yhteyshenkilo['selitetark_5'],
+      "puh"                     => $yhteyshenkilo['puh'],
+      "verkkokauppa_nakyvyys"   => $yhteyshenkilo['verkkokauppa_nakyvyys'],
+      "verkkokauppa_salasana"   => $yhteyshenkilo['verkkokauppa_salasana'],
+      "yhtio"                   => $yhteyshenkilo['yhtio'],
+      "osoitteet"               => $osoitteet,
+    );
   }
 
   return $asiakkaat;

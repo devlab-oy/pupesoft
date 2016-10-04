@@ -68,18 +68,19 @@ function presta_hae_asiakkaat_asiakkaittain() {
     $osoitteet = array();
     $osoitteet[] = array(
       "asiakas_id" => $asiakas['asiakas_tunnus'],
+      "gsm"        => $asiakas['gsm'],
+      "maa"        => $asiakas['maa'],
+      "nimi"       => $asiakas['nimi'],
       "osoite"     => $asiakas['osoite'],
       "postino"    => $asiakas['postino'],
       "postitp"    => $asiakas['postitp'],
-      "maa"        => $asiakas['maa'],
+      "puh"        => $asiakas['puh'],
     );
 
     $asiakkaat[] = array(
       "email"                   => $asiakas['email'],
-      "gsm"                     => $asiakas['gsm'],
       "nimi"                    => $asiakas['nimi'],
       "presta_customergroup_id" => $asiakas['selitetark_5'],
-      "puh"                     => $asiakas['puh'],
       "tunnus"                  => $asiakas['yhteyshenkilo_tunnus'],
       "ulkoinen_asiakasnumero"  => $asiakas['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $asiakas['verkkokauppa_nakyvyys'],
@@ -118,6 +119,7 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
             WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
             AND yhteyshenkilo.rooli = 'Presta'
             AND yhteyshenkilo.email != ''
+            AND yhteyshenkilo.nimi != ''
             GROUP BY yhteyshenkilo.email";
   $result = pupe_query($query);
 
@@ -141,10 +143,13 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
       $osoitteet[] = array(
         "asiakas_id" => $osoite['tunnus'],
+        "gsm"        => $yhteyshenkilo['gsm'],
+        "maa"        => $osoite['maa'],
+        "nimi"       => $yhteyshenkilo['nimi'],
         "osoite"     => $osoite['osoite'],
         "postino"    => $osoite['postino'],
         "postitp"    => $osoite['postitp'],
-        "maa"        => $osoite['maa'],
+        "puh"        => $yhteyshenkilo['puh'],
       );
     }
 
@@ -164,20 +169,21 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
       $osoitteet[] = array(
         "asiakas_id" => $osoite['tunnus'],
+        "gsm"        => $yhteyshenkilo['gsm'],
+        "maa"        => $osoite['toim_maa'],
+        "nimi"       => $yhteyshenkilo['nimi'],
         "osoite"     => $osoite['toim_osoite'],
         "postino"    => $osoite['toim_postino'],
         "postitp"    => $osoite['toim_postitp'],
-        "maa"        => $osoite['toim_maa'],
+        "puh"        => $yhteyshenkilo['puh'],
       );
     }
 
     // lisätään asiakas array
     $asiakkaat[] = array(
       "email"                   => $yhteyshenkilo['email'],
-      "gsm"                     => $yhteyshenkilo['gsm'],
       "nimi"                    => $yhteyshenkilo['nimi'],
       "presta_customergroup_id" => $yhteyshenkilo['selitetark_5'],
-      "puh"                     => $yhteyshenkilo['puh'],
       "tunnus"                  => $yhteyshenkilo['tunnus'],
       "ulkoinen_asiakasnumero"  => $yhteyshenkilo['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $yhteyshenkilo['verkkokauppa_nakyvyys'],

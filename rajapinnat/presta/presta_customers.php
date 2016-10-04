@@ -36,12 +36,8 @@ class PrestaCustomers extends PrestaClient {
 
     $_email = empty($customer['email']) ? 'test@example.com' : $customer['email'];
 
-    // max 32, numbers and special characters not allowed
-    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : $_nimi;
-
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = $this->xml_value($_nimi);
+    $xml->customer->lastname = $this->clean_name($customer['nimi']);
     $xml->customer->email = $this->xml_value($_email);
 
     if (!empty($customer['verkkokauppa_salasana'])) {
@@ -118,18 +114,13 @@ class PrestaCustomers extends PrestaClient {
 
           if (in_array($id, $existing_customers)) {
             $this->update($id, $customer, $id_shop);
-
-            $customer['presta_customer_id'] = $id;
-            $this->presta_addresses->update_with_customer_id($customer, $id_shop);
           }
           else {
             $response = $this->create($customer, $id_shop);
             $id = (string) $response['customer']['id'];
-
-            $customer['presta_customer_id'] = $id;
-            $this->presta_addresses->create($customer, $id_shop);
           }
 
+          $this->presta_addresses->add_addresses_for_customer($id, $customer['osoitteet'], $id_shop);
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);
         }
         catch (Exception $e) {

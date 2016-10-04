@@ -96,11 +96,11 @@ if (!isset($presta_laskutusosoitteen_muutos)) {
   $presta_laskutusosoitteen_muutos = true;
 }
 if (!isset($presta_asiakaskasittely)) {
-  // Prestan asiakkaan määrittely, joko "asiakkaittain" tai "yhteyshenkiloittain".
-  // asiakkaittain = Pupesoftin yhteyshenkilöstä tehdään Prestan asiakas. Prestan asiakkaalla on yksi
-  // osoite, joka tulee Pupesoftin yhteyshenkiloltä.
-  // yhteyshenkiloittain = Pupesoftin asiakkaat groupataan yhteyshenkilon mukaan ja Prestan asiakkaalle
-  // tulee useampi osoitetieto Pupesoftin eri asiakkailta. Yksi osoite per Pupesoftin asiakas.
+  // PrestaShopin asiakkaan määrittely joko "asiakkaittain" tai "yhteyshenkiloittain".
+  // "asiakkaittain" = Pupesoftin yhteyshenkilöstä tehdään PrestaShopin asiakas. PrestaShopin
+  // asiakkaalla on yksi osoite, joka tulee Pupesoftin yhteyshenkiloltä.
+  // "yhteyshenkiloittain" = Pupesoftin asiakkaat yhdistetään yhteyshenkilön mukaan. PrestaShopin
+  // asiakkaalle tulee useampi osoitetieto, jotka tulevat Pupesoftin eri asiakkailta.
   $presta_asiakaskasittely = 'asiakkaittain';
 }
 if (!isset($presta_haettavat_tilaus_statukset)) {

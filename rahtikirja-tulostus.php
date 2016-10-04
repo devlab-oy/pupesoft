@@ -405,7 +405,6 @@ if ($tee == 'close_with_printer') {
   $mergeid_arr = array();
 
   while ($row = mysql_fetch_assoc($rakir_res)) {
-
     $mergeid = md5(date("Ymd").$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
     $mergeid_arr[$mergeid] = $mergeid;
 

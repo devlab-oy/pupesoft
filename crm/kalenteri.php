@@ -2,51 +2,6 @@
 
 require "../inc/parametrit.inc";
 
-/* TOGGL-tietokanta
-
-$toggl_dbhost     = '10.0.1.2';
-$toggl_dbuser     = 'pupesoft';
-$toggl_dbpass     = 'pupe1';
-$toggl_dbkanta    = "toggl";
-
-$toggl_link = mysql_connect($toggl_dbhost, $toggl_dbuser, $toggl_dbpass) or die ("Ongelma tietokantapalvelimessa $toggl_dbhost");
-mysql_select_db($toggl_dbkanta) or die ("Tietokantaa $toggl_dbkanta ei lˆydy palvelimelta $toggl_dbhost!");
-
-$query = "SELECT user,
-          left(start, 10) startdate,
-          left(end, 10) enddate,
-          sec_to_time(round(time_to_sec(start)/1800)*1800) starttime,
-          sec_to_time(round(time_to_sec(end)/1800)*1800) endtime,
-          sec_to_time((round(time_to_sec(end)/1800)*1800)+1800) endtime_plus30,
-          client,
-          project,
-          task,
-          description
-          FROM time_entry";
-$result = pupe_query($query, $toggl_link);
-
-while ($row = mysql_fetch_assoc($result)) {
-  $row["user"] = strtolower($row["user"]);
-
-  if ($row["starttime"] == $row["endtime"]) {
-    $row["endtime"] = $row["endtime_plus30"];
-  }
-
-  $query = "INSERT INTO kalenteri SET
-            yhtio        = '$kukarow[yhtio]',
-            laatija      = '$row[user]',
-            kuka         = '$row[user]',
-            pvmalku      = '$row[startdate] $row[starttime]',
-            pvmloppu     = '$row[enddate] $row[endtime]',
-            kentta01     = '$row[client] $row[project] $row[task] $row[description]',
-            kuittaus     = '',
-            tapa         = 'Toggl',
-            tyyppi       = 'kalenteri'";
-  pupe_query($query, $link);
-}
-
-exit;*/
-
 if (!isset($tee)) $tee = "";
 if (!isset($tyojono)) $tyojono = "";
 
@@ -56,9 +11,9 @@ if ($indexvas == "1" and empty($viikkonakyma)) {
 }
 
 // otetaan oletukseksi t‰m‰ kuukausi, vuosi ja p‰iv‰
-if ($paiva=='') $paiva = date("j");
-if ($kuu=='')   $kuu   = date("n");
-if ($year=='')  $year  = date("Y");
+if (empty($paiva)) $paiva = date("j");
+if (empty($kuu))   $kuu   = date("n");
+if (empty($year))  $year  = date("Y");
 
 //lasketaan edellinen ja seuraava kuukausi/vuosi
 $backmonth= date("n", mktime(0, 0, 0, $kuu-1, 1,  $year));
@@ -883,13 +838,27 @@ if (!empty($viikkonakyma)) {
   piirra_kokopaivantapahtumat($kuu, $paiva, $year);
 
   echo "<tr>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($year, $kuu, $paiva++, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+
+  list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
   echo "</tr>";
 }
 else {
@@ -902,36 +871,6 @@ echo "</td></tr>";
 
 //kalenterivalinta end
 echo "</table>";
-
-// Laitetaan p‰iv‰n tapahtumat sopiville paikoille
-function mahtuuko($max, $row, $varatut, $tapahtumat, $rivi, $kesto, $sarake = 0) {
-  $mahtuu = true;
-
-  for ($i = $rivi; $i < $rivi+$kesto; $i++) {
-    if (!empty($varatut[$i][$sarake])) {
-      $mahtuu = false;
-    }
-  }
-
-  if ($mahtuu) {
-    $tapahtumat[$rivi][$sarake] = $row;
-
-    for ($i = $rivi; $i < $rivi+$kesto; $i++) {
-      $varatut[$i][$sarake] = $row['tunnus'];
-    }
-  }
-  else {
-    $sarake++;
-
-    if ($sarake+1 > $max) {
-      $max = $sarake+1;
-    }
-
-    list($max, $varatut, $tapahtumat) = mahtuuko($max, $row, $varatut, $tapahtumat, $rivi, $kesto, $sarake);
-  }
-
-  return array($max, $varatut, $tapahtumat);
-}
 
 // Tarvittavat funktiot
 function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
@@ -992,7 +931,11 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
             kalenteri.kuka kuka,
             kalenteri.laatija laatija,
             kalenteri.kuittaus,
-            kalenteri.tyyppi
+            kalenteri.tyyppi,
+            kentta03,
+            kentta04,
+            kentta05,
+            kentta06
             FROM kalenteri
             LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
             WHERE kalenteri.kuka in ($vertaa)
@@ -1007,6 +950,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   $paivantapahtumat = array();
 
   while ($row = mysql_fetch_assoc($result)) {
+    $row['paallekkaiset'] = 0;
     $paivantapahtumat[$row["pvmalku"]][] = $row;
   }
 
@@ -1014,43 +958,86 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
   $hh = $whalkt-1;
   $mm = $whalkm;
-  $varatut = array();
-  $tapahtumat = array();
-  $kellonajat = array();
-  $rivi = 0;
+  $paallekkaiset = array();
+  $vasenpad = array();
+  $aikalask = 0;
 
   while ($kello_nyt != $whileloppu) {
     $hh        = date("H", mktime($hh, $mm+30, 0));
     $mm        = date("i", mktime($hh, $mm+30, 0));
     $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
 
-    $kellonajat[$rivi] = $kello_nyt;
-
     foreach ($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $ind => $row) {
-      $kesto = ceil(($row['kesto']/60)/30);
+      $kesto = round(($row['kesto']/60)/30);
 
-      list($max, $varatut, $tapahtumat) = mahtuuko($max, $row, $varatut, $tapahtumat, $rivi, $kesto);
+      for ($i = $aikalask; $i < $aikalask+$kesto; $i++) {
+        $paallekkaiset[$i]++;
+
+        if ($i > $aikalask) {
+          $vasenpad[$i]++;
+        }
+      }
     }
 
-    $rivi++;
+    $aikalask++;
   }
 
-  foreach ($kellonajat as $rivi => $kello_nyt) {
+  $kello_nyt = '';
+  list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
+  $hh = $whalkt-1;
+  $mm = $whalkm;
+  $aikalask = 0;
+
+  while ($kello_nyt != $whileloppu) {
+    $hh        = date("H", mktime($hh, $mm+30, 0));
+    $mm        = date("i", mktime($hh, $mm+30, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+
+    foreach ($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $ind => $row) {
+      $kesto = round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+
+      // Suurin p‰‰llekk‰ism‰‰r‰ t‰n tapahtuman aikana?
+      for ($i = $aikalask; $i < $aikalask+$kesto; $i++) {
+        if ($paallekkaiset[$i] > $paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"][$ind]["paallekkaiset"]) {
+          $paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"][$ind]["paallekkaiset"] = $paallekkaiset[$i];
+        }
+      }
+    }
+
+    $aikalask++;
+  }
+
+  $max = max($paallekkaiset);
+
+  $kello_nyt = '';
+  list($whalkt, $whalkm) = explode(":", $AIKA_ARRAY[0]);
+  $hh = $whalkt-1;
+  $mm = $whalkm;
+  $aikalask = 0;
+
+  while ($kello_nyt != $whileloppu) {
+    $hh        = date("H", mktime($hh, $mm+30, 0));
+    $mm        = date("i", mktime($hh, $mm+30, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+
+    // lasketaan montako p‰‰llekk‰ist‰ on t‰h‰n kellonaikaan
+    $nyt    = $paallekkaiset[$aikalask];
+    $tyhjaa = $max - $nyt;
+    $tanaan = count($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"]);
 
     echo "<tr>";
 
     if ($aikasarake) {
-      echo "<td nowrap class='kalepad' style='width: 35px; height: 32px;'>$kello_nyt</td>";
-    }
-    else {
-      echo "<td class='kalepad' style='width: 0px; height: 32px;'></td>";
+      echo "<td class='ptop kalepad' style='width: 35px; height: 32px;'>$kello_nyt</td>";
     }
 
-    echo "<td class='ptop kalepad' style='position:relative; display:block;'>";
+    echo "<td class='ptop kalepad' style='position:relative; display:block; height: 32px;'>";
 
-    foreach ($tapahtumat[$rivi] as $sarake => $row) {
+    $nyklask = 0;
 
-      $kesto = ceil(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+    foreach($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $row) {
+
+      $kesto = round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
 
       //haetaan asiakkaan tiedot
       if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {
@@ -1076,7 +1063,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         $kukanimi = '';
       }
 
-      //Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
+      // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa
       list($rvv, $rkk, $rpp) = explode("-", substr($row["pvmloppu"], 0, 10));
 
       $kaleloppu  = (int) date('Ymd', mktime(0, 0, 0, $rkk, $rpp, $rvv));
@@ -1101,10 +1088,19 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
 
       $korkeus = 34 * $kesto;
 
-      $divwidth = floor(100 / $max) - 3;
-      $left = floor(100 / $max) * $sarake;
+      if ($kesto > 1) {
+        $korkeus += $kesto - 2;
+      }
+      else {
+        $korkeus -= 1;
+      }
 
-      echo "<div style='background-color: #00DD00; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; padding-left: 3px; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>";
+      $divwidth = floor(100 / $row['paallekkaiset']) - 0.5;
+      $left = floor(100 / $max) * ($nyklask + $vasenpad[$aikalask]);
+      $nyklask++;
+
+      echo "<div style='background-color: #00FF00; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>
+            <div style='padding: 3px;'>";
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
       if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"])) {
@@ -1124,11 +1120,11 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
           echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]&lopetus=$lopetus'>$asiak[nimi]</a>";
         }
         else {
-          echo " - $row[nimi]";
+          echo " - $asiak[nimi]";
         }
       }
 
-      echo " $row[kentta01]";
+      echo " $row[paallekkaiset] $row[kentta01]";
 
       $query = "SELECT *
                 from liitetiedostot
@@ -1145,7 +1141,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         }
       }
 
-      echo "</div>";
+      echo "</div></div>";
     }
 
     if ($tyhjaa > 0) {

@@ -538,6 +538,19 @@ abstract class PrestaClient {
     }
   }
 
+  protected function clean_field($value) {
+    $field = empty($value) ? "-" : trim($value);
+
+    return $this->xml_value($field);
+  }
+
+  protected function clean_name($value) {
+    // max 32, numbers and special characters not allowed
+    $name = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, 32));
+
+    return $this->clean_field($name);
+  }
+
   public function set_dynamic_fields($fields) {
     $this->dynamic_fields = $fields;
   }

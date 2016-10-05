@@ -401,10 +401,14 @@ else {
               tilausrivin_lisatiedot WRITE,
               tili READ,
               tiliointi WRITE,
+              kustannuspaikka as kustp READ,
+              kustannuspaikka as kohde READ,
+              kustannuspaikka as projekti READ,
               toimitustapa READ,
               tullinimike READ,
               tuote READ,
               tuotepaikat WRITE,
+              tuoteperhe READ,
               tuotteen_alv READ,
               tuotteen_avainsanat READ,
               tuotteen_toimittajat READ,
@@ -2208,6 +2212,8 @@ else {
             $myyresult = pupe_query($mquery);
             $myyrow = mysql_fetch_assoc($myyresult);
 
+            $lasrow['chn_orig'] = $lasrow['chn'];
+
             //HUOM: T‰ss‰ kaikki sallitut verkkopuolen chn:‰t
             if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
               //Paperi by default
@@ -2309,7 +2315,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             else {
@@ -2364,7 +2370,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
                 finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
               }
               else {
@@ -2377,10 +2383,10 @@ else {
               elmaedi_otsikko_loput($tootedi, $lasrow);
             }
             elseif ($lasrow["chn"] == "112") {
-              finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
+              finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
-              finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+              finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
 
             // katotaan miten halutaan sortattavan
@@ -2414,6 +2420,7 @@ else {
             else $pjat_sortlisa = "";
 
             $query_ale_lisa = generoi_alekentta('M');
+            $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
 
             // Haetaan laskun kaikki rivit
             $query = "SELECT
@@ -2421,6 +2428,7 @@ else {
                       tilausrivi.ale1,
                       tilausrivi.ale2,
                       tilausrivi.ale3,
+                      $ale_query_select_lisa aleyhteensa,
                       tilausrivi.alv,
                       tuote.eankoodi,
                       tuote.ei_saldoa,
@@ -2437,6 +2445,7 @@ else {
                       lasku.viesti laskuviesti,
                       lasku.asiakkaan_tilausnumero,
                       lasku.luontiaika tilauspaiva,
+                      CONCAT(tuote.tullinimike1, IF(tuote.tullinimike2 NOT IN ('', '00', '0'), tuote.tullinimike2, '')) AS tullinimike,
                       if (tuote.tuotetyyppi = 'K','2 Tyˆt','1 Muut') tuotetyyppi,
                       if (tilausrivi.var2 = 'EIOST', 'EIOST', '') var2,
                       if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
@@ -2451,6 +2460,7 @@ else {
                       min(tilausrivi.kommentti) kommentti,
                       min(tilausrivi.tilaajanrivinro) tilaajanrivinro,
                       min(tilausrivi.laadittu) laadittu,
+                      min(tilausrivin_lisatiedot.tiliointirivitunnus) tiliointirivitunnus,
                       sum(tilausrivi.tilkpl) tilkpl,
                       sum(tilausrivi.kpl) kpl,
                       sum(tilausrivi.rivihinta) rivihinta,
@@ -2468,18 +2478,29 @@ else {
                       WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
                       and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
                       and tilausrivi.kpl     != 0
+                      and tilausrivi.tyyppi   = 'L'
                       and tilausrivi.otunnus  in ($tunnukset)
-                      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+                      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25
                       ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
             $tilres = pupe_query($query);
 
             $rivinumerot   = array(0 => 0);
             $rivilaskuri   = 1;
             $rivimaara     = mysql_num_rows($tilres);
-            $rivigrouppaus   = FALSE;
+            $rivigrouppaus = FALSE;
+            $tilrows       = array();
 
             while ($tilrow = mysql_fetch_assoc($tilres)) {
+              if ($yhtiorow["pura_osaluettelot"] != "") {
+                // Korvataanko tilauksella oleva rivi osaluettelolla
+                $tilrows = array_merge($tilrows, pura_osaluettelot($lasrow, $tilrow, $laskutyyppi));
+              }
+              else {
+                $tilrows[] = $tilrow;
+              }
+            }
 
+            foreach ($tilrows as $tilrow) {
               // N‰ytet‰‰n vain perheen is‰ ja summataan lasten hinnat is‰riville
               if ($laskutyyppi == 2 or $laskutyyppi == 12) {
                 if ($tilrow["perheid"] > 0) {
@@ -2653,8 +2674,8 @@ else {
               $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
               $vatamount = hintapyoristys($vatamount);
 
-              $tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['kommentti']);
-              $tilrow['nimitys']   = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â‹¸ ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $tilrow['nimitys']);
+              $tilrow['kommentti'] = pupesoft_invoicestring($tilrow['kommentti']);
+              $tilrow['nimitys']   = pupesoft_invoicestring($tilrow['nimitys']);
 
               // Otetaan seuraavan rivin otunnus
               if ($rivilaskuri < $rivimaara) {
@@ -2686,7 +2707,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
@@ -2711,7 +2732,7 @@ else {
               //N‰m‰ menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
@@ -2950,6 +2971,21 @@ else {
             $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
 
             $tulos_ulos .= "PPG-lasku $invoice_number[1]: $status<br>\n";
+          }
+        }
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "talenom" and file_exists(realpath($nimifinvoice))) {
+        // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+        $talenom_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
+        $talenom_laskumaara = count($talenom_laskuarray);
+
+        if ($talenom_laskumaara > 0) {
+          for ($a = 1; $a < $talenom_laskumaara; $a++) {
+            preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $talenom_laskuarray[$a], $invoice_number);
+
+            $status = talenom_queue($invoice_number[1], "<SOAP-ENV:Envelope".$talenom_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "Talenom-lasku $invoice_number[1]: $status<br>\n";
           }
         }
       }

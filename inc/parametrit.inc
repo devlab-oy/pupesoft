@@ -429,12 +429,13 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      // Sanakirjan sallitut kielet suomen lisäksi
-      $kielet = array ('no', 'en', 'de', 'ru', 'dk', 'ee');
       if ($browkieli == 'sv') {
         $browkieli = 'se';
       }
-      elseif (!in_array($browkieli, $kielet))  {
+      elseif ($browkieli == 'ee') {
+        $browkieli = 'ee';
+      }
+      else {
         $browkieli = 'fi';
       }
     }

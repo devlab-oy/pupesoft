@@ -11,6 +11,7 @@ if ($tee == '') {
 
     $kukarow['kesken']   = 0;
     $tilausnumero     = 0;
+    $otstoimaika      = '';
   }
 }
 
@@ -722,6 +723,7 @@ if (isset($jatka)) {
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
+    $otstoimaika = $toimvv."-".$toimkk."-".$toimpp;
   }
 
   //menn‰‰n tilaukselle

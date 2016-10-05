@@ -39,6 +39,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+$status = isset($status) ? $status : '';
+
 echo "<font class='head'>", t("Tulosta inventointilista"), "</font><hr>";
 
 echo "<form name='inve' method='post' enctype='multipart/form-data' autocomplete='off'>";
@@ -302,18 +304,14 @@ else {
   echo "<input type='hidden' name='vapaa_teksti' value='' />";
 }
 
-$sel = (!empty($status) and $status == 'EI') ? "selected" : "";
-
-$result = t_avainsana("S");
+$sel = $status == 'EI' ? 'selected' : '';
 
 echo "<tr><th>", t("Tuotteen status:"), "</th>";
 echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
-echo "<option value='EI' {$sel}>", t("Ei listata poistettuja tuotteita"), "</option>";
-while ($_status = mysql_fetch_assoc($result)) {
-  echo "<option value='{$_status['selite']}'>{$_status['selitetark']}</option>";
-}
+echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
+echo product_status_options($status);
 echo "</select>";
 echo "</td>";
 echo "</tr>";

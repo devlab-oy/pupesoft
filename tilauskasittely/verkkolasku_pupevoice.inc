@@ -131,7 +131,7 @@ if (!function_exists('pupevoice_otsik')) {
     fputs($tootxml, "<InvoiceDetails>\n");
 
     xml_add("InvoiceType",              $tyyppi,                       $tootxml);
-    xml_add("InvoicedPartyIdentifier",        $lasrow['ytunnus'],                 $tootxml);
+    xml_add("InvoicedPartyIdentifier",        tulosta_ytunnus($lasrow['ytunnus']),                 $tootxml);
     xml_add("InvoicedPartyOVT",            $lasrow['ovttunnus'],                $tootxml);
     xml_add("InvoicedPartyEBA",            $lasrow['verkkotunnus'],               $tootxml);
     xml_add("InvoicedCustNumber",          $asiakasrow['asiakasnro'],               $tootxml);
@@ -333,7 +333,7 @@ if (!function_exists('pupevoice_rivi')) {
 
       if (trim($lisakomm) != "") {
         // Siivotaan myös lisäkommentti
-        $lisakomm = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜü ".preg_quote(".,-/!+()%#|:", "/")."]/", " ", $lisakomm);
+        $lisakomm = pupesoft_invoicestring($lisakomm);
 
         $tilrow["kommentti"] = trim($lisakomm)."|".trim($tilrow["kommentti"]);
       }

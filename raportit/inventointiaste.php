@@ -1676,14 +1676,13 @@ function hae_inventointilajit($request = array(), $yhtio = '') {
 function hae_tuote_statukset($request = array()) {
   global $kukarow, $yhtiorow;
 
-  $result = t_avainsana("S");
   $statukset = array();
-  while ($status = mysql_fetch_array($result)) {
-    $status['selected'] = '';
-    if (!empty($request['valittu_status']) and $request['valittu_status'] == $status['selite']) {
-      $status['selected'] = 'selected';
-    }
-    $statukset[] = $status;
+  foreach (product_statuses() as $key => $value) {
+    $statukset[] = array(
+      "selite"     => $key,
+      "selected"   => $request["valittu_status"] == $key ? 'selected' : '',
+      "selitetark" => $value,
+    );
   }
 
   $selected = "";

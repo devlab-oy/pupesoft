@@ -2033,7 +2033,6 @@ if ($tee == 'Z') {
   echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 
   $query = "SELECT tuote.*,
-            if (tuote.status = '', 'A', tuote.status) status,
             date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti
             FROM tuote
             WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -2328,7 +2327,8 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[hinnastoon]<br>";
 
     if ($tuoterow["status"] == "P") echo "<font class='error'>";
-    echo t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark");
+    $product_statuses = product_statuses();
+    echo $product_statuses[$tuoterow["status"]];
     if ($tuoterow["status"] == "P") echo "</font>";
 
     echo "</td>";

@@ -405,7 +405,7 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     if (isset($toimipaikka)) {
-      $toimipaikkalisa = " and lasku.vanhatunnus = {$toimipaikka} ";
+      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 
     if ($laji == 'OOK')   $tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";

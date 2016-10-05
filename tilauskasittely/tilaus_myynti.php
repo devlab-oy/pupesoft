@@ -118,6 +118,15 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     $alvillisuus = $hinta;
   }
 
+  // lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+    $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
+  }
+  // poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+    $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
+  }
+
   $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
   $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
   $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
@@ -189,6 +198,15 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
   }
   else {
     $alvillisuus = $hinta;
+  }
+
+  // lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+    $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
+  }
+  // poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+    $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
   }
 
   $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');

@@ -569,7 +569,14 @@ if ($upd == 1) {
       generoi_hinnastot($tunnus);
     }
 
-    if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
+    $array_chk = array(
+      $paivita_myos_avoimet_tilaukset,
+      $paivita_myos_toimitustapa,
+      $paivita_myos_maksuehto,
+      $paivita_myos_kanavointitieto
+    );
+
+    if ($tunnus > 0 and count(array_filter($array_chk, 'strlen')) > 0 and $toim == "asiakas") {
 
       $query = "SELECT *
                 FROM asiakas
@@ -631,11 +638,19 @@ if ($upd == 1) {
 
           // Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
           if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
-            $paivita_myos_lisa .= ", toimitustapa = '$otsikrow[toimitustapa]' ";
+            $query = "UPDATE lasku SET
+                      toimitustapa = '{$otsikrow['toimitustapa']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
+            $updaresult = pupe_query($query);
           }
 
           if ($paivita_myos_maksuehto != "") {
-            $paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
+            $query = "UPDATE lasku SET
+                      maksuehto = '{$otsikrow['maksuehto']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
+            $updaresult = pupe_query($query);
           }
 
           if ($paivita_myos_kanavointitieto != "") {
@@ -646,9 +661,10 @@ if ($upd == 1) {
                       and tunnus   = '{$laskuorow['tunnus']}'";
             $updaresult = pupe_query($query);
           }
-          else {
+
+          if ($paivita_myos_avoimet_tilaukset) {
             $query = "UPDATE lasku
-                      SET ytunnus      = '$otsikrow[ytunnus]',
+                      SET ytunnus    = '$otsikrow[ytunnus]',
                       ovttunnus      = '$otsikrow[ovttunnus]',
                       nimi           = '$otsikrow[nimi]',
                       nimitark       = '$otsikrow[nimitark]',
@@ -667,7 +683,6 @@ if ($upd == 1) {
                       toim_postitp   = '$otsikrow[toim_postitp]',
                       toim_maa       = '$otsikrow[toim_maa]',
                       laskutusvkopv  = '$otsikrow[laskutusvkopv]'
-                      $paivita_myos_lisa
                       $paivita_sisviesti1
                       WHERE yhtio    = '$kukarow[yhtio]'
                       and tunnus     = '$laskuorow[tunnus]'";
@@ -2157,6 +2172,53 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille tilauksille");
     echo "<input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
+    echo "<div id='div_paivita_myos_avoimet_tilaukset_popup' class='popup' style='width: 400px;'>";
+    echo t("Päivitettävät kentät");
+    echo "<ul>";
+
+    $paivitettavat_kentat = array(
+      'ytunnus',
+      'ovttunnus',
+      'nimi',
+      'nimitark',
+      'osoite',
+      'postino',
+      'postitp',
+      'maa',
+      'chn',
+      'verkkotunnus',
+      'vienti',
+      'toim_ovttunnu',
+      'toim_nimi',
+      'toim_nimitark',
+      'toim_osoite',
+      'toim_postino',
+      'toim_postitp',
+      'toim_maa',
+      'laskutusvkopv',
+      'kolm_ovttunnus',
+      'kolm_nimi',
+      'kolm_nimitark',
+      'kolm_osoite',
+      'kolm_postino',
+      'kolm_postitp',
+      'kolm_maa',
+      'laskutus_nimi',
+      'laskutus_nimitark',
+      'laskutus_osoite',
+      'laskutus_postino',
+      'laskutus_postitp',
+      'laskutus_maa',
+    );
+
+    foreach ($paivitettavat_kentat as $kentta) {
+      echo "<li>".ucfirst($kentta)."</li>";
+    }
+
+    echo "</ul>";
+    echo "</div>";
+
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='paivita_myos_avoimet_tilaukset_popup' />";
 
     if ($toim == "asiakas") {
       $chktxt = t("Päivitä myös toimitustapa avoimille tilauksille");
@@ -2172,6 +2234,58 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   if ($toim == "toimi" and $uusi != 1) {
     $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille laskuille");
     echo "<br><input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
+    echo "<div id='div_paivita_myos_avoimet_tilaukset_popup' class='popup' style='width: 400px;'>";
+    echo t("Päivitettävät kentät");
+    echo "<ul>";
+
+    $paivitettavat_kentat = array(
+      'erpcm',
+      'kapvm',
+      'kasumma',
+      'olmapvm',
+      'hyvak1',
+      'hyvak2',
+      'hyvak3',
+      'hyvak4',
+      'hyvak5',
+      'h1time',
+      'h2time',
+      'h3time',
+      'h4time',
+      'h5time',
+      'hyvaksyja_nyt',
+      'ytunnus',
+      'tilinumero',
+      'nimi',
+      'nimitark',
+      'osoite',
+      'osoitetark',
+      'postino',
+      'postitp',
+      'maa',
+      'tila',
+      'ultilno',
+      'pankki_haltija',
+      'swift',
+      'pankki1',
+      'pankki2',
+      'pankki3',
+      'pankki4',
+      'comments',
+      'hyvaksynnanmuutos',
+      'suoraveloitus',
+      'sisviesti1',
+    );
+
+    foreach ($paivitettavat_kentat as $kentta) {
+      echo "<li>".ucfirst($kentta)."</li>";
+    }
+
+    echo "</ul>";
+    echo "</div>";
+
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='paivita_myos_avoimet_tilaukset_popup' />";
+
   }
 
   if ($lukossa == "ON") {

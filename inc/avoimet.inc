@@ -166,7 +166,7 @@ else $monivalintalaatikot = array("KUSTP");
 $noautosubmit = TRUE;
 require "tilauskasittely/monivalintalaatikot.inc";
 echo "</td></tr>";
-
+echo "169: $toimipaikka <br><br>";
 $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 if (mysql_num_rows($toimipaikkares) > 0) {
@@ -203,7 +203,7 @@ if (mysql_num_rows($toimipaikkares) > 0) {
   echo "</select></td>";
   echo "</tr>";
 }
-
+echo "206: $toimipaikka <br><br>";
 
 if ($naytetaankokommentit != "") $komsel = "CHECKED";
 else $komsel = "";
@@ -344,9 +344,11 @@ $formi = 'valinta';
 $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
-
-  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
-
+var_dump($toimipaikka);
+  #if ($toimipaikka  != "") {
+   # $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
+    #}  
+var_dump($toimipaikka);
   switch ($laji) {
   case 'M' :
     $lista = t("myyntisaamiset");
@@ -688,7 +690,7 @@ if ($tee != '' and isset($ajaraportti)) {
     if ($maksuehto != '') {
       $av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
     }
-
+echo "691: $toimipaikka <br><br>";
     if (isset($toimipaikka)) {
       $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
@@ -800,6 +802,7 @@ if ($tee != '' and isset($ajaraportti)) {
           $tunnuslisa
           $groupby
           ORDER BY lasku.ytunnus, lasku.laskunro";
+query_dump($query);
     $result = pupe_query($query);
 
     // poimitaan kuluva päivä, raportin timestampille

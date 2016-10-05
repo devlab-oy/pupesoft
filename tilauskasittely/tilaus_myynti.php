@@ -1120,7 +1120,14 @@ else {
 $muokkauslukko = $state = "";
 
 # Laitetaan tilaus lukkoon, jos tilaus on lähetetty ulkoiseen varastoon
-if (!empty($laskurow['lahetetty_ulkoiseen_varastoon']) and $laskurow['lahetetty_ulkoiseen_varastoon'] != "0000-00-00 00:00:00") {
+$check  = true;
+$check &= (!empty($laskurow['lahetetty_ulkoiseen_varastoon']));
+$check &= ($laskurow['lahetetty_ulkoiseen_varastoon'] != "0000-00-00 00:00:00");
+$check &= ($laskurow['tila'] == 'N' or
+          ($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('A','B','BD','C'))) or
+          ($laskurow['tila'] == 'G' and in_array($laskurow['alatila'], array('','J','KJ','A','B'))));
+
+if ($check) {
   $muokkauslukko = 'LUKOSSA';
 }
 

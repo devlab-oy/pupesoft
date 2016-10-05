@@ -343,7 +343,10 @@ $formi = 'valinta';
 $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
- switch ($laji) {
+
+  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
+
+  switch ($laji) {
   case 'M' :
     $lista = t("myyntisaamiset");
     break;

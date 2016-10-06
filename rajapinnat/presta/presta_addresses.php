@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_countries.php';
 
 class PrestaAddresses extends PrestaClient {
+  private $customer_handling = null;
   private $presta_countries = null;
 
   public function __construct($url, $api_key, $log_file) {
@@ -60,6 +61,10 @@ class PrestaAddresses extends PrestaClient {
     return $xml;
   }
 
+  public function set_customer_handling($value) {
+    $this->customer_handling = $value;
+  }
+
   public function add_addresses_for_customer($presta_customer_id, Array $addresses, $id_shop = null) {
     $added_addresses = array();
 
@@ -93,14 +98,27 @@ class PrestaAddresses extends PrestaClient {
   private function find_addresses_for_customer_id($customer_id, $address, $id_shop) {
     $display = array();
 
-    // we must find the exact address, otherwise create new
-    $filter = array(
-      'address1'     => $this->clean_field($address['osoite']),
-      'city'         => $this->clean_field($address['postitp']),
-      'dni'          => $address['asiakas_id'],
-      'id_customer'  => $customer_id,
-      'postcode'     => $this->clean_field($address['postino']),
-    );
+    if ($this->customer_handling == 'yhteyshenkiloittain') {
+      // if customer handling is "multiple Pupesoft customers per Prestashop user"
+      // we must find the exact address, otherwise create new
+      $filter = array(
+        'address1'     => $this->clean_field($address['osoite']),
+        'city'         => $this->clean_field($address['postitp']),
+        'dni'          => $address['asiakas_id'],
+        'id_customer'  => $customer_id,
+        'postcode'     => $this->clean_field($address['postino']),
+      );
+
+      $this->logger->log("Etsitään osoitteet osoitetietojen mukaan");
+    }
+    else {
+      // otherwise we search only with customer id
+      $filter = array(
+        'id_customer' => $customer_id,
+      );
+
+      $this->logger->log("Etsitään osoite asiakkaalle customer_id {$customer_id}");
+    }
 
     $addresses = $this->all($display, $filter, $id_shop);
 

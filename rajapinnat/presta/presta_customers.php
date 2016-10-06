@@ -12,6 +12,7 @@ class PrestaCustomers extends PrestaClient {
     parent::__construct($url, $api_key, $log_file);
 
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
+    $this->presta_addresses->set_customer_handling($this->customer_handling);
   }
 
   protected function resource_name() {

@@ -12,7 +12,6 @@ class PrestaCustomers extends PrestaClient {
     parent::__construct($url, $api_key, $log_file);
 
     $this->presta_addresses = new PrestaAddresses($url, $api_key, $log_file);
-    $this->presta_addresses->set_customer_handling($this->customer_handling);
   }
 
   protected function resource_name() {
@@ -121,7 +120,11 @@ class PrestaCustomers extends PrestaClient {
             $id = (string) $response['customer']['id'];
           }
 
+          // set customer handling here, and add addresses
+          $this->presta_addresses->set_customer_handling($this->customer_handling);
           $this->presta_addresses->add_addresses_for_customer($id, $customer['osoitteet'], $id_shop);
+
+          // update presta customer id to pupesoft
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);
         }
         catch (Exception $e) {

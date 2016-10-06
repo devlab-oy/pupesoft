@@ -748,7 +748,7 @@ if ($tee != '' and isset($ajaraportti)) {
                 sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
                 sum(lasku.summa) laskusumma,
                 sum(lasku.summa_valuutassa) laskusumma_valuutassa,
-                group_concat(lasku.tunnus) tunnukset";
+                group_concat(lasku.tunnus) tunnukset,";
 
       $groupby = "GROUP BY 1,2,3,4,5";
     }

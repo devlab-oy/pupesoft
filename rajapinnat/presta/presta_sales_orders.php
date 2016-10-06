@@ -207,7 +207,18 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_country  = $params["invoice_country"];
     $order            = $params["order"];
 
-    $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
+    // if we have pupesoft customer id in delivery address DNI
+    $pupesoft_customer = presta_hae_asiakas_tunnuksella($delivery_address['dni']);
+
+    // if we have pupesoft customer id in invoice address DNI
+    if (empty($pupesoft_customer)) {
+      $pupesoft_customer = presta_hae_asiakas_tunnuksella($invoice_address['dni']);
+    }
+
+    // find customer with ulkoinen asiakasnumero
+    if (empty($pupesoft_customer)) {
+      $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
+    }
 
     if (empty($pupesoft_customer)) {
       $msg = "Asiakasta {$order['id_customer']} ei löytynyt Pupesoftista! ";

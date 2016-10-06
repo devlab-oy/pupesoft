@@ -635,7 +635,7 @@ if (!function_exists('finvoice_rivi')) {
       xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // veroton rivihinta
       xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow["rivihinta_verollinen"], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // verollinen rivihinta
 
-      if (!empty($tilrow['tiliointirivitunnus'])) {
+      if (['verkkolasku_lah'] == 'talenom' and !empty($tilrow['tiliointirivitunnus'])) {
         $query = "SELECT tiliointi.tilino,
                   kustp.nimi kustannuspaikka,
                   projekti.nimi projekti,

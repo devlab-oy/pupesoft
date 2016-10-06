@@ -67,9 +67,14 @@ class PrestaAddresses extends PrestaClient {
 
   public function add_addresses_for_customer($presta_customer_id, Array $addresses, $id_shop = null) {
     $added_addresses = array();
+    $count = count($addresses);
+    $current = 0;
 
     // loop all given addresses
     foreach ($addresses as $address) {
+      $current++;
+      $this->logger->log("[{$current}/{$count}] K‰sitell‰‰n osoite");
+
       // we need to add customer id to address -array since we don't know it in pupesoft
       $address['id_customer'] = $presta_customer_id;
 
@@ -109,7 +114,7 @@ class PrestaAddresses extends PrestaClient {
         'postcode'     => $this->clean_field($address['postino']),
       );
 
-      $this->logger->log("Etsit‰‰n osoitteet osoitetietojen mukaan");
+      $this->logger->log("Etsit‰‰n osoitteet osoitetietojen mukaan ({$filter['address1']})");
     }
     else {
       // otherwise we search only with customer id

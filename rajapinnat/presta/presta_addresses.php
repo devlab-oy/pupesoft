@@ -73,7 +73,7 @@ class PrestaAddresses extends PrestaClient {
     // loop all given addresses
     foreach ($addresses as $address) {
       $current++;
-      $this->logger->log("[{$current}/{$count}] Käsitellään osoite");
+      $this->logger->log("Käsitellään osoite ({$current}/{$count})");
 
       // we need to add customer id to address -array since we don't know it in pupesoft
       $address['id_customer'] = $presta_customer_id;
@@ -150,7 +150,7 @@ class PrestaAddresses extends PrestaClient {
     // delete addresses from presta
     foreach ($remove_ids as $presta_id) {
       $current++;
-      $this->logger->log("[{$current}/{$total}] Poistetaan osoite {$presta_id}");
+      $this->logger->log("Poistetaan osoite {$presta_id} ({$current}/{$total})");
 
       try {
         $this->delete($presta_id);

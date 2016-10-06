@@ -237,8 +237,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18, 130, strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $isobold);
 
   // viivakoodin alapuolella vasen laita
-  $oikpos = $pdf->strlen("$keltainen $kuljetus $keku", $pienibold);
-  $pdf->draw_text(400-$oikpos, 250, "$keltainen $kuljetus $keku", $firstpage, $pienibold);
+  $oikpos = $pdf->strlen("$keltainen $kuljetus", $pienibold);
+  $pdf->draw_text(400-$oikpos, 250, "$keltainen $kuljetus", $firstpage, $pienibold);
   $pdf->draw_text(250, 225, "Lisätiedot Tilläggsuppgifter", $firstpage, $pieni);
 
   $apkal = 216;

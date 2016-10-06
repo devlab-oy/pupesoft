@@ -60,12 +60,12 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='Kotipaketti' {$sel["Kotipaketti"]}>Posti Kotipaketti</option>";
   $ulos .= "<option value='Palautus' {$sel["Palautus"]}>Posti Palautus</option>";
   $ulos .= "<option value='Express-paketti' {$sel["Express-paketti"]}>Posti Express-paketti</option>";
-  $ulos .= "<option value='Express-paketti Aamuksi' {$sel["Express-paketti Aamuksi 09"]}>Posti Express-paketti Aamuksi 09</option>";
-  $ulos .= "<option value='Express-paketti Samana Päivänä' {$sel["Express-paketti Samana Päivänä 00"]}>Posti Express-paketti Samana Päivänä 00</option>";
+  $ulos .= "<option value='Express-paketti Aamuksi 09' {$sel["Express-paketti Aamuksi 09"]}>Posti Express-paketti Aamuksi 09</option>";
+  $ulos .= "<option value='Express-paketti Samana Päivänä 00' {$sel["Express-paketti Samana Päivänä 00"]}>Posti Express-paketti Samana Päivänä 00</option>";
   // Kuljetusyksikkö palvelut:
   $ulos .= "<option value='Express-rahti' {$sel["Express-rahti"]}>Posti Express-rahti</option>";
-  $ulos .= "<option value='Express-rahti Aamuksi' {$sel["Express-rahti Aamuksi 09"]}>Posti Express-rahti Aamuksi 09</option>";
-  $ulos .= "<option value='Express-rahti Illaksi' {$sel["Express-rahti Illaksi 21"]}>Posti Express-rahti Illaksi 21</option>";
+  $ulos .= "<option value='Express-rahti Aamuksi 09' {$sel["Express-rahti Aamuksi 09"]}>Posti Express-rahti Aamuksi 09</option>";
+  $ulos .= "<option value='Express-rahti Illaksi 21' {$sel["Express-rahti Illaksi 21"]}>Posti Express-rahti Illaksi 21</option>";
   // $ulos .= "<option value='Express-rahti Samana Päivänä 00' {$sel["Express-rahti Samana Päivänä 00"]}>Posti Express-rahti Samana Päivänä 00</option>";
   $ulos .= "<option value='Priority' {$sel["Priority"]}>Posti Priority Ulkomaan lähetys</option>";
   $ulos .= "</optgroup>";

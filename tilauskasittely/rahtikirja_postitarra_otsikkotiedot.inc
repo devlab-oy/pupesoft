@@ -193,23 +193,23 @@ if ($selite_chk != '') {
 //Priority  2W2015
 
 switch ($keku) {
-case "Samana":
+case "00":
   $tuoteviiva1="2W2124";
   break;
-case "Aamuksi":
+case "09":
   $tuoteviiva1="2W2101";
   break;
-case "Express-paketti":
+case "14":
   $tuoteviiva1="2W2102";
   break;
 //case "00/16":
 //  $tuoteviiva1="2W2105";
 //  $tuoteviiva2=">62W>52105";
 //  break;
-case "Postipaketti":
+case "16":
   $tuoteviiva1="2W2103";
   break;
-case "Kotipaketti":
+case "21":
   $tuoteviiva1="2W2104";
   break;
 case "VV":
@@ -247,34 +247,34 @@ if ($toitarow['kuljyksikko'] != '') {
   //Express-rahti Samana Päivänä 00  2W2142
 
   switch ($keku) {
-  case "00":
-    $tuoteviiva1="2W2124";
-    break;
-  case "9":
-    $tuoteviiva1="2W2143";
-    break;
-  case "14":
-    $tuoteviiva1="2W2144";
-    break;
-  case "21":
-    $tuoteviiva1="2W2145";
-    break;
-  case "VV":
-    $tuoteviiva1="2W2146";
-    break;
-  case "LISÄARVOKULJETUS":
-    $tuoteviiva1="2W2149";
-    break;
-  case "ASIAKASPALAUTUS 14":
-    $tuoteviiva1="2W2147";
-    break;
-  case "UNDELIVERED SHIPMENT":
-    $tuoteviiva1="2W2147";
-    break;
-  case "PRIORITY ULKOMAA":
-    $tuoteviiva1="2W2015";
-    break;
-  }
+    case "00":
+      $tuoteviiva1="2W2124";
+      break;
+    case "09":
+      $tuoteviiva1="2W2143";
+      break;
+    case "14":
+      $tuoteviiva1="2W2144";
+      break;
+    case "21":
+      $tuoteviiva1="2W2145";
+      break;
+    case "VV":
+      $tuoteviiva1="2W2146";
+      break;
+    case "LISÄARVOKULJETUS":
+      $tuoteviiva1="2W2149";
+      break;
+    case "ASIAKASPALAUTUS 14":
+      $tuoteviiva1="2W2147";
+      break;
+    case "UNDELIVERED SHIPMENT":
+      $tuoteviiva1="2W2147";
+      break;
+    case "PRIORITY":
+      $tuoteviiva1="2W2015";
+      break;
+    }
 }
 
 if (count($vakit) > 0) {

@@ -1154,7 +1154,8 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     // ei rajauksia, voidaan n‰ytt‰‰ erotus kirjanpitoon
-    if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
+    if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0
+      and $toimipaikkalisa == "") {
 
       $query = "SELECT sum(summa) saldo
                 FROM tiliointi

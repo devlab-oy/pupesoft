@@ -196,6 +196,27 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
   return $asiakkaat;
 }
 
+function presta_hae_asiakas_tunnuksella($tunnus) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($tunnus)) {
+    return null;
+  }
+
+  $query = "SELECT asiakas.*
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$asiakasnumero}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
+
+  return mysql_fetch_assoc($result);
+}
+
 function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) {
   global $kukarow, $yhtiorow;
 
@@ -207,8 +228,8 @@ function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasn
             FROM yhteyshenkilo
             INNER JOIN asiakas
             ON (asiakas.yhtio = yhteyshenkilo.yhtio
-              AND asiakas.tunnus                     = yhteyshenkilo.liitostunnus)
-            WHERE yhteyshenkilo.yhtio                = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
             AND yhteyshenkilo.ulkoinen_asiakasnumero = {$asiakasnumero}
             LIMIT 1";
   $result = pupe_query($query);

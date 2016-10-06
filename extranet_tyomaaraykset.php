@@ -1,10 +1,19 @@
 <?php
 
+$pupe_DataTables = "tyomaaraystable";
+
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+
 enable_ajax();
+
+if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
+  livesearch_laitehaku();
+  exit;
+}
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -42,13 +51,6 @@ $request = array(
   'tyom_parametrit' => $tyom_parametrit,
   'osoite_parametrit' => $osoite_parametrit
 );
-
-if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
-
-if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
-  livesearch_laitehaku();
-  exit;
-}
 
 ?>
 <style>
@@ -122,6 +124,10 @@ echo t("Haluatko silti avata huoltopyynnön?");
 </script>
 <?php
 
+if ($request['tyom_toiminto'] == '' and $_REQUEST["tee"] != 'NAYTATILAUS') {
+  pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
+}
+
 $avataanko_tyomaarays = false;
 $virheviesti1 = '';
 $virheviesti2 = '';
@@ -183,15 +189,23 @@ elseif ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
 }
 
 function piirra_kayttajan_tyomaaraykset() {
+  global $pupe_DataTables, $request;
+
   echo "<font class='head'>".t("Huoltopyynnöt")."</font><hr>";
   piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
     echo "</tr>";
+
+    echo "<tr>";
+    piirra_hakuboksit();
+    echo "</tr>";
+    echo "</thead>";
 
     foreach ($naytettavat_tyomaaraykset as $tyomaarays) {
       piirra_tyomaaraysrivi($tyomaarays);
@@ -201,7 +215,7 @@ function piirra_kayttajan_tyomaaraykset() {
     echo "</form>";
   }
   else {
-    echo "<br><font class='error'>".t('Työmääräyksiä ei löydy järjestelmästä')."!</font><br/>";
+    echo "<br><font class='message'>".t('Ei avoimia huoltopyyntöjä')."!</font><br/>";
   }
 
   piirra_luo_tyomaarays();
@@ -302,8 +316,27 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
 
   foreach ($headers as $header => $rajataan) {
     if ($rajattu and $rajataan) continue;
+
     echo "<th>$header</th>";
   }
+}
+
+function piirra_hakuboksit() {
+  $headers = array(
+    'tunnus',
+    'luontiaika',
+    'valmistaja',
+    'mallivari',
+    'valmnro',
+    'tyostatus',
+    'komm1',
+    'komm2'
+   );
+  foreach ($headers as $header) {
+    echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
+  }
+  // Huoltpyyntökopi hidden search
+  echo "<td style ='display:none'><input type='hidden' class='search_field' name='search_hidden'/></td>";
 }
 
 function piirra_tyomaaraysrivi($tyomaarays) {
@@ -322,8 +355,8 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   $valmistajatieto = !empty($tyomaarays['valmistaja']) ? $tyomaarays['valmistaja'] : $tyomaarays['merkki'];
   echo "<td>{$valmistajatieto}</td>";
-  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['mallivari']}</td>";
+  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['tyostatus']}</td>";
   echo "<td>{$tyomaarays['komm1']}</td>";
   echo "<td>{$tyomaarays['komm2']}</td>";
@@ -334,7 +367,7 @@ function piirra_tyomaaraysrivi($tyomaarays) {
 }
 
 function piirra_luo_tyomaarays() {
-  echo "<br>";
+  echo "<br><br>";
   echo "<form name='uusi_tyomaarays_button'>";
   echo "<input type='hidden' name='tyom_toiminto' value='UUSI'>";
   echo "<input type='submit' value='".t('Uusi huoltopyyntö')."'>";
@@ -392,6 +425,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<input type='hidden' id='viesti1' name='viesti1' value='{$virhe1}'>";
   echo "<input type='hidden' id='viesti2' name='viesti2' value='{$virhe2}'>";
   echo "<input type='hidden' id='tarkistusmuuttuja' name='tarkistusmuuttuja' value=''>";
+  echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
   echo "<div style='display: none;'>";
   echo "<input type='submit'>";
   echo "</div>";
@@ -583,9 +617,18 @@ function email_tyomaarayskopio($request) {
 
   require_once "huoltopyynto_pdf.inc";
 
+  $huolto_email = t_avainsana("HUOLTOP_EMAIL", '', '', '', '', "selite");
+
+  if ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
+    $mihin_maili_lahetetaan = $kukarow['eposti'];
+  }
+  else {
+    $mihin_maili_lahetetaan = $huolto_email;
+  }
+
   // Sähköpostin lähetykseen parametrit
   $parametrit = array(
-    "to"       => $kukarow['eposti'],
+    "to"       => $mihin_maili_lahetetaan,
     "cc"       => "",
     "subject"    => t('Huoltopyyntö')." {$tyom_tunnus}",
     "ctype"      => "text",
@@ -598,17 +641,17 @@ function email_tyomaarayskopio($request) {
 
   pupesoft_sahkoposti($parametrit);
 
-  // Näytä pdf nappi
+  // Avataan pdf ruudulle
   if ($request['pdf_ruudulle']) {
-    js_openFormInNewWindow();
 
+    js_openFormInNewWindow();
     echo "<br><form id='tulostakopioform_{$tyom_tunnus}' name='tulostakopioform_{$tyom_tunnus}' method='post' action='{$palvelin2}tulostakopio.php' autocomplete='off'>
           <input type='hidden' name='otunnus' value='{$tyom_tunnus}'>
           <input type='hidden' name='tyom_tunnus' value='{$tyom_tunnus}'>
           <input type='hidden' name='pdffilenimi' value='{$pdffilenimi}'>
           <input type='hidden' name='toim' value='HUOLTOPYYNTOKOPIO'>
           <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
+          <input type='submit' value='".t("Avaa huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
   }
 }
 

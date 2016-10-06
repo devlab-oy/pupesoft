@@ -77,10 +77,17 @@ if (!$enarimatch) {
     if (substr($tuoteno, 0, 1) == '?') {
       // Toimittajan tuotenumero
 
+      $tuotteen_toimittajat_liitostunnus = "";
+
+      if (isset($laskurow) and $laskurow['tila'] == 'O') {
+        $tuotteen_toimittajat_liitostunnus = "  and liitostunnus = '{$laskurow['liitostunnus']}'";
+      }
+
       $query = "SELECT *
                 from tuotteen_toimittajat
                 where yhtio      = '$kukarow[yhtio]'
-                and toim_tuoteno = '".substr($tuoteno, 1)."'";
+                and toim_tuoteno like '%".substr($tuoteno, 1)."%'
+                {$tuotteen_toimittajat_liitostunnus}";
       $tresult = pupe_query($query);
 
       while ($toimirivi = mysql_fetch_assoc($tresult)) {

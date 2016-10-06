@@ -575,7 +575,12 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
           if (isset($luodaan_aineisto) and $luodaan_aineisto) {
             // p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
-            $query = "UPDATE lasku SET lahetepvm = now(), alatila = 'A' WHERE tunnus='{$otunnus}'";
+            $query = "UPDATE lasku SET
+                      h1time    = now(),
+                      hyvak1    = '{$kukarow['kuka']}',
+                      lahetepvm = now(),
+                      alatila   = 'A'
+                      WHERE tunnus = '{$otunnus}'";
             $result = pupe_query($query);
           }
         }

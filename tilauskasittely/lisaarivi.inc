@@ -312,6 +312,21 @@ if (isset($olpaikalta) and $olpaikalta != '') {
   $paikka  = $olparow["olpaikka"];
 }
 
+if (empty($rivitunnus) and $laskurow['tila'] == 'O' and $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '3') {
+  $ttquery = "SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimaika
+              FROM tuotteen_toimittajat
+              JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+              WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+              AND tuotteen_toimittajat.tuoteno = '{$trow[tuoteno]}'
+              AND tuotteen_toimittajat.liitostunnus = {$laskurow['liitostunnus']}
+              AND (tuotteen_toimittajat.toimitusaika > 0 or toimi.oletus_toimaika > 0)";
+  $ttres = pupe_query($ttquery);
+
+  if ($ttrow = mysql_fetch_assoc($ttres)) {
+    $toimaika = date('Y-m-d', time() + $ttrow["toimaika"] * 24 * 60 * 60);
+  }
+}
+
 // P‰iv‰m‰‰rien oikeellisuustsekki
 list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
 
@@ -353,11 +368,11 @@ $hinta  = str_replace(',', '.', $hinta);
 
 // lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
 if ($trow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
-  $hinta = round($hinta * (1+$trow['alv']/100), $yhtiorow['hintapyoristys']);
+  $hinta = round($hinta * (1+$trow['alv']/100), 6);
 }
 // poistetaan alvit (jos hintamuunnos p‰‰ll‰)
 if ($trow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
-  $hinta = round($hinta / (1+$trow['alv']/100), $yhtiorow['hintapyoristys']);
+  $hinta = round($hinta / (1+$trow['alv']/100), 6);
 }
 
 if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
@@ -470,7 +485,7 @@ else {
 }
 
 $sallitaanko_rivikommentti_osto   = ($rivityyppi == 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'O')));
-$sallitaanko_rivikommentti_myynti = ($rivityyppi == 'L' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
+$sallitaanko_rivikommentti_myynti = ($rivityyppi != 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
 $sallitaanko_rivikommentti = ($sallitaanko_rivikommentti_osto or $sallitaanko_rivikommentti_myynti);
 
 // Onko p‰‰ss‰tty varasto josta myyd‰‰n
@@ -1966,6 +1981,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
 
+              $kampanjatunnus = 'NULL';
+              if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+                $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+              }
+
               $query = "INSERT into tilausrivi set
                         hyllyalue       = '$myy_hyllyalue[$indeksi]',
                         hyllynro        = '$myy_hyllynro[$indeksi]',
@@ -1992,6 +2012,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         toimaika        = '$toimaika',
                         kommentti       = '$kommentti',
                         ale_peruste     = '{$GLOBALS['ale_peruste']}',
+                        campaign_id     = {$kampanjatunnus},
                         var             = '',
                         var2            = '{$var2}',
                         try             = '$trow[try]',
@@ -2945,10 +2966,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       //K‰ytt‰j‰n syˆtt‰m‰ paikka
       $paikat = explode('#!°!#', $paikka);
 
-      $p_hyllyalue  = $paikat[0];
-      $p_hyllynro    = $paikat[1];
-      $p_hyllyvali  = $paikat[2];
-      $p_hyllytaso  = $paikat[3];
+      $p_hyllyalue = $paikat[0];
+      $p_hyllynro  = $paikat[1];
+      $p_hyllyvali = $paikat[2];
+      $p_hyllytaso = $paikat[3];
     }
     else {
       // haetaan viel‰ tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
@@ -3239,10 +3260,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
       }
 
-      if (isset($hinta_alkuperainen) and trim($hinta_alkuperainen) != '' and $laskurow['tila'] == 'O' and ($laskurow['alatila'] != '' or ($laskurow['alatila'] == '' and $laskurow['laskunro'] != 0))) {
+      if (isset($hinta_alkuperainen) and trim($hinta_alkuperainen) != '' and (($laskurow['tila'] == 'O' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'K' and $laskurow['alatila'] == ''))) {
         $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$hinta_alkuperainen}',";
       }
-      elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '' and $laskurow['laskunro'] == 0)) {
+      elseif ($rivitunnus == 0 or ($laskurow['tila'] == 'O' and $laskurow['alatila'] == '')) {
 
         $query = "SELECT tuotekerroin
                   FROM tuotteen_toimittajat
@@ -3291,6 +3312,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllyvali = $myy_hyllyvali_temp;
     }
 
+    $kampanjatunnus = 'NULL';
+    if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
+      $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+    }
+
     // lis‰t‰‰n puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',
@@ -3320,6 +3346,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               toimaika        = '$toimaika',
               kommentti       = '$kommentti',
               ale_peruste     = '{$GLOBALS['ale_peruste']}',
+              campaign_id     = {$kampanjatunnus},
               var             = '$var',
               var2            = '{$var2}',
               try             = '$trow[try]',
@@ -3331,7 +3358,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               jaksotettu      = '$jaksotettu'";
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
-      $query .= ", kerattyaika = now()";
+      $query .= ", keratty = 'saldoton', kerattyaika = now()";
     }
 
     $result = pupe_query($query);

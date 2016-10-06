@@ -20,11 +20,15 @@ if (trim($argv[3]) == '') {
 }
 
 // lis‰t‰‰n includepathiin pupe-root
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))));
+ini_set("display_errors", 1);
+
+error_reporting(E_ALL);
 
 // otetaan tietokanta connect ja funktiot
 require "inc/connect.inc";
 require "inc/functions.inc";
+require "rajapinnat/logmaster/logmaster-functions.php";
 
 // Logitetaan ajo
 cron_log();
@@ -44,8 +48,7 @@ $path = trim($argv[2]);
 $path = rtrim($path, '/').'/';
 
 $error_email = trim($argv[3]);
-
-$hhv = empty($argv[4]) ? false : true;
+$email_array = array();
 
 $handle = opendir($path);
 
@@ -54,47 +57,25 @@ if ($handle === false) {
 }
 
 while (false !== ($file = readdir($handle))) {
-  if (is_dir($path.$file)) {
-    continue;
-  }
-
-  $path_parts = pathinfo($file);
-
-  if (empty($path_parts['extension']) or strtoupper($path_parts['extension']) != 'XML') {
-    continue;
-  }
-
-  $xml = simplexml_load_file($path.$file);
-
-  pupesoft_log('outbound_delivery', "K‰sitell‰‰n sanoma {$file}");
-
-  if (!is_object($xml)) {
-    pupesoft_log('outbound_delivery', "Virheellinen XML sanoma {$file}");
-
-    continue;
-  }
-
-  $message_type = "";
-
-  if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-    $message_type = trim($xml->MessageHeader->MessageType);
-  }
+  $full_filepath = $path.$file;
+  $message_type = logmaster_message_type($full_filepath);
 
   if ($message_type != 'OutboundDeliveryConfirmation') {
-    pupesoft_log('outbound_delivery', "Tuntematon sanomatyyppi {$message_type} sanomassa {$file}");
-
     continue;
   }
 
-  $otunnus = (int) $xml->CustPackingSlip->SalesId;
+  $xml = simplexml_load_file($full_filepath);
 
-  // Fallback to pickinglist id
-  if ($otunnus == 0) {
-    $otunnus = (int) $xml->CustPackingSlip->PickingListId;
-  }
+  pupesoft_log('logmaster_outbound_delivery_confirmation', "K‰sitell‰‰n sanoma {$file}");
+
+  $otunnus = (int) $xml->CustPackingSlip->PickingListId;
 
   if ($otunnus == 0) {
-    pupesoft_log('outbound_delivery', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausnumeroa ei lˆytynyt sanomasta {$file}");
+
+    $email_array[] = t("Tilausnumeroa ei lˆytynyt sanomasta %s", "", $file);
+
+    rename($full_filepath, $path.'error/'.$file);
 
     continue;
   }
@@ -121,29 +102,57 @@ while (false !== ($file = readdir($handle))) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
             AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila = 'A'";
+            AND alatila IN ('A', 'E')";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
-  $kerayspoikkeama = $tilausrivit = array();
+  $kerayspoikkeama = $tilausrivit = $tilausrivit_error = array();
 
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($hhv) {
-      $lines = $xml->Lines->Line;
+    # katsotaan miss‰ rivit ovat
+    if (isset($xml->Lines)) {
+      $lines = $xml->Lines;
+    }
+    elseif (isset($xml->CustPackingSlip->Lines)) {
+      $lines = $xml->CustPackingSlip->Lines;
     }
     else {
-      $lines = $xml->CustPackingSlip->Lines;
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivit-elementti‰ ei lˆytynyt sanomasta {$file}. Skipataan sanoma.");
+
+      $email_array[] = t("Rivit-elementti‰ ei lˆytynyt sanomasta %s", "", $file);
+
+      rename($full_filepath, $path.'error/'.$file);
+
+      continue;
+    }
+
+    # katsotaan miss‰ yksitt‰inen rivi sijaitsee
+    if (isset($lines->Line->TransId)) {
+      $lines = $lines->Line;
+    }
+    elseif (isset($lines->TransId)) {
+      # rivit onkin suoraan lines elementtej‰
+    }
+    else {
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Rivin TransId-elementti‰ ei lˆytynyt sanomasta {$file}. Skipataan sanoma.");
+
+      $email_array[] = t("Rivin TransId-elementti‰ ei lˆytynyt sanomasta %s", "", $file);
+
+      rename($full_filepath, $path.'error/'.$file);
+
+      continue;
     }
 
     foreach ($lines as $line) {
+
       $tilausrivin_tunnus = (int) $line->TransId;
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
         $tilausrivit[$tilausrivin_tunnus] = array(
-          'eankoodi' => mysql_real_escape_string($line->ItemNumber),
-          'keratty'  => (float) $line->DeliveredQuantity
+          'item_number' => mysql_real_escape_string($line->ItemNumber),
+          'keratty'     => (float) $line->DeliveredQuantity,
         );
       }
       else {
@@ -151,19 +160,17 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausrivi‰.");
+
     $paivitettiin_tilausrivi_onnistuneesti = false;
 
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
-      $eankoodi = $data['eankoodi'];
-      $keratty  = $data['keratty'];
+      $item_number = $data['item_number'];
+      $keratty     = $data['keratty'];
 
-      if ($hhv) {
-        $tuotelisa = "AND tuote.tuoteno = '{$eankoodi}'";
-      }
-      else {
-        $tuotelisa = "AND tuote.eankoodi = '{$eankoodi}'";
-      }
+      $logmaster_itemnumberfield = logmaster_field('ItemNumber');
+      $tuotelisa = "AND tuote.{$logmaster_itemnumberfield} = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi
@@ -177,8 +184,9 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_res = pupe_query($query);
 
       if (mysql_num_rows($tilausrivi_res) != 1) {
-        pupesoft_log('outbound_delivery', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Tilausrivi‰ {$tilausrivin_tunnus} ei lˆytynyt. Sanoma {$file}");
 
+        $tilausrivit_error[$tilausrivin_tunnus] = $data;
         continue;
       }
 
@@ -289,10 +297,14 @@ while (false !== ($file = readdir($handle))) {
 
       paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-      pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} p‰ivitettiin toimitetuksi");
     }
 
-    pupesoft_log('outbound_delivery', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
+    if (count($tilausrivit_error) > 0) {
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} oli ".count($tilausrivit_error)." virheellist‰ tilausrivi‰.");
+    }
+
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yskuittaus tilauksesta {$otunnus} vastaanotettu");
 
     $avainsanaresult = t_avainsana("ULKJARJLAHETE");
     $avainsanarow = mysql_fetch_assoc($avainsanaresult);
@@ -301,72 +313,63 @@ while (false !== ($file = readdir($handle))) {
 
       // Tulostetaan l‰hete
       $params = array(
-        'laskurow'                 => $laskurow,
-        'sellahetetyyppi'          => "",
         'extranet_tilausvahvistus' => "",
-        'naytetaanko_rivihinta'    => "",
-        'tee'                      => "",
-        'toim'                     => "",
+        'kieli'                    => "",
         'komento'                  => "asiakasemail{$avainsanarow['selite']}",
         'lahetekpl'                => "",
-        'kieli'                    => ""
+        'laskurow'                 => $laskurow,
+        'naytetaanko_rivihinta'    => "",
+        'sellahetetyyppi'          => "",
+        'tee'                      => "",
+        'toim'                     => "",
       );
 
       pupesoft_tulosta_lahete($params);
 
-      pupesoft_log('outbound_delivery', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "L‰hetettiin l‰hete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
     }
   }
   else {
     // Laitetaan s‰hkˆpostia tuplaker‰yksest‰ - ollaan yritetty merkit‰ ker‰tyksi jo k‰sin ker‰tty‰ tilausta
-    // Laitetaan s‰hkˆposti admin osoitteeseen siin‰ tapauksessa,
-    // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
-    $error_email = $yhtiorow["admin_email"];
+    $email_array[] = t("Pupessa jo ker‰tyksi merkitty tilaus %d yritettiin merkit‰ ker‰tyksi ker‰yssanomalla", "", $otunnus);
 
-    if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
-      $error_email = $yhtiorow["talhal_email"];
-    }
-    elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
-      $error_email = $yhtiorow["alert_email"];
-    }
-
-    $body = t("Pupessa jo ker‰tyksi merkitty tilaus %d yritettiin merkit‰ ker‰tyksi ker‰yssanomalla", "", $otunnus);
-
-    pupesoft_log('outbound_delivery', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
-
-    $params = array(
-      "to"      => $error_email,
-      "subject" => t("Mahdollinen tuplaker‰yksen yritys ulkoisesta j‰rjestelm‰st‰", "", ""),
-      "ctype"   => "text",
-      "body"    => $body
-    );
-
-    pupesoft_sahkoposti($params);
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Vastaanotettiin duplikaatti ker‰yssanoma tilaukselle {$otunnus}");
   }
 
-  if (count($kerayspoikkeama) != 0) {
-    $body = t("Tilauksen %d ker‰yksess‰ on havaittu poikkeamia", "", $otunnus).":<br><br>\n\n";
-    $body .= t("Tuoteno")." ".t("Ker‰tty")." ".t("Tilauksella")."<br>\n";
+  if (count($kerayspoikkeama) != 0 and !empty($error_email)) {
+
+    $email_array[] = t("Tilauksen %d ker‰yksess‰ on havaittu poikkeamia", "", $otunnus).":";
+    $email_array[] = t("Tuoteno")." ".t("Ker‰tty")." ".t("Tilauksella");
 
     foreach ($kerayspoikkeama as $tuoteno => $_arr) {
-      $body .= "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}<br>\n";
+      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}";
     }
 
-    $params = array(
-      'to'      => $error_email,
-      'cc'      => '',
-      'subject' => t("Posten ker‰yspoikkeama")." - {$otunnus}",
-      'ctype'   => 'html',
-      'body'    => $body,
-    );
-
-    pupesoft_sahkoposti($params);
-
-    pupesoft_log('outbound_delivery', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yspoikkeamia tilauksessa {$otunnus}");
   }
 
+  if (count($tilausrivit_error) > 0 and !empty($error_email)) {
+
+    $email_array[] = t("Tilauksessa %d on havaittu virheellisi‰ rivej‰", "", $otunnus).":";
+    $email_array[] = t("Rivitunnus")." ".t("Tuoteno")." ".t("Ker‰tty");
+
+    foreach ($tilausrivit_error as $rivitunnus => $_arr) {
+      $email_array[] = "{$rivitunnus} {$_arr['item_number']} {$_arr['keratty']}";
+    }
+
+    pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yksen kuittauksen sanomassa {$file} virheellisi‰ rivej‰ tilauksessa {$otunnus}");
+  }
+
+  $params = array(
+    'email' => $error_email,
+    'email_array' => $email_array,
+    'log_name' => 'logmaster_outbound_delivery_confirmation',
+  );
+
+  logmaster_send_email($params);
+
   // siirret‰‰n tiedosto done-kansioon
-  rename($path.$file, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

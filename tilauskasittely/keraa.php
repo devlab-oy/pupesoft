@@ -1109,6 +1109,7 @@ if ($tee == 'P') {
                       $values .= ", 'N'";
                       break;
                     case 'kate_korjattu':
+                    case 'lahetetty_ulkoiseen_varastoon':
                       $values .= ", NULL";
                       break;
                     default:
@@ -4087,6 +4088,22 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
   if (isset($rahtikirjaan) and $rahtikirjaan == 'mennaan') {
     if ($valittu_tulostin == "-88" or $valittu_oslapp_tulostin == "-88") {
+      // Jos ollaan valittu PDF ruudulle, ja pysähdytään näyttämään tulostusnapit,
+      // piirretään samalla napit verkkokaupan liite -liitetiedostojen näyttöä varten.
+      $liitetiedostot = tilauksen_liitetiedostot($tilausnumeroita, 'VK');
+
+      foreach ($liitetiedostot as $key => $tunnus) {
+        $key++;
+        $submit_value = t('Liite') . ": {$key}";
+
+        echo "<form target='_blank' class='multisubmit' method='get' action='{$palvelin2}view.php'>";
+        echo "<input type='hidden' name='id' value='{$tunnus}'>";
+        echo "<input type='submit' value='{$submit_value}'>";
+        echo "</form>";
+
+        echo "<br><br>";
+      }
+
       echo "<a href={$palvelin2}rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>".t("Siirry rahtikirjan syöttöön")."</a>";
     }
     else {

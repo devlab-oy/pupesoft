@@ -374,7 +374,7 @@ while ($trow = mysql_fetch_assoc($result)) {
   }
 
   echo "<tr class='aktiivi'>";
-  echo "<td valign='top' class='$class' nowrap>$trow[tilino] &raquo; $trow[tilinimi]</td>";
+  echo "<td valign='top' class='$class'>$trow[tilino] &raquo; $trow[tilinimi]</td>";
   echo "<td valign='top' class='$class'>$trow[tarkenne]</td>";
   echo "<td valign='top' class='$class' align='right' nowrap>$trow[summa]</td>";
   echo "<td valign='top' class='$class' align='right'>". (float) $trow["vero"]. "</td>";

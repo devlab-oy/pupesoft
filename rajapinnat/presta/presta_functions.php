@@ -17,7 +17,8 @@ function presta_hae_asiakkaat() {
     $muutoslisa = "";
   }
 
-  $query = "SELECT yhteyshenkilo.*,
+  $query = "SELECT asiakas.*,
+            yhteyshenkilo.*,
             avainsana.selitetark_5 AS presta_customergroup_id
             FROM yhteyshenkilo
             INNER JOIN asiakas
@@ -627,6 +628,10 @@ function presta_export_checkpoint($checkpoint) {
 }
 
 function presta_echo($string) {
+  if ($GLOBALS['presta_debug'] !== true) {
+    return;
+  }
+
   echo date("d.m.Y @ G:i:s")." - {$string}\n";
 }
 
@@ -730,27 +735,29 @@ function presta_poista_ylimaaraiset_kuvat($sku, array $all_ids) {
 }
 
 function presta_hae_tilaustuote() {
-  $kukarow  = $GLOBALS["kukarow"];
-  $yhtiorow = $GLOBALS["yhtiorow"];
+  global $kukarow, $yhtiorow;
 
   if (empty($kukarow) or empty($yhtiorow)) {
     die("ERROR!");
   }
 
-  // Haetaan tilaustuotteen käännökset
-  $query = "SELECT kieli, selite, selitetark
-            FROM avainsana
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji    = 'S'
-            AND selite  = 'T'";
-  $tr_result = pupe_query($query);
-  $tuotteen_statukset = array();
+  $kielet = array('fi', 'se', 'no', 'en', 'de', 'dk', 'ru', 'ee');
 
-  while ($tr_row = mysql_fetch_assoc($tr_result)) {
+  $query = "SELECT " . implode(',', $kielet) . "
+            FROM sanakirja
+            WHERE fi = 'Tilaustuote'
+            LIMIT 1";
+  $result = pupe_query($query);
+  $sanakirjarow = mysql_fetch_assoc($result);
+
+  $tuotteen_statukset = array();
+  foreach ($kielet as $kieli) {
+    if ($sanakirjarow[$kieli] == "") continue;
+
     $tuotteen_statukset[] = array(
-      "kieli"  => $tr_row['kieli'],
-      "kentta" => 'tilaustuote',
-      "teksti" => $tr_row['selitetark']
+      "kieli"  => $kieli,
+      "kentta" => "tilaustuote",
+      "teksti" => $sanakirjarow[$kieli],
     );
   }
 

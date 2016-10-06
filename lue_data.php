@@ -2442,6 +2442,7 @@ if ($kasitellaan_tiedosto) {
                 $syncrow = array();
               }
               else {
+                mysql_data_seek($syncres,0);
                 $syncrow = mysql_fetch_array($syncres);
                 $tunnus = $syncrow["tunnus"];
               }

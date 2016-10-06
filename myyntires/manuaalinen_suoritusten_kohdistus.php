@@ -2027,6 +2027,7 @@ if ($tila == '') {
             WHERE suoritus.yhtio = '$kukarow[yhtio]'
             AND suoritus.kohdpvm = '0000-00-00'
             AND suoritus.ltunnus > 0
+            AND suoritus.tilino != ''
             ORDER BY yriti.nimi";
   $result = pupe_query($query);
 

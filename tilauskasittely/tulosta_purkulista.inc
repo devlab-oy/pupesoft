@@ -17,14 +17,14 @@ if (in_array("gd", get_loaded_extensions())) {
 }
 
 if (!function_exists('alku_purku')) {
-  function alku_purku($kala = 0, $firstpage = null) {
+  function alku_purku($kala = 555, $firstpage = null) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
 
     if (empty($firstpage)) {
       $firstpage = $pdf->new_page("842x595");
     }
 
-    if ($kala == 0) $kala = 555;
+    $returnkala = 500;
 
     $p["height"]     = 10;
     $p["font"]       = "Times-Roman";
@@ -44,102 +44,109 @@ if (!function_exists('alku_purku')) {
 
     $pdf->draw_text(440, $kala, $laskurow["nimi"],           $firstpage);
 
-    $kala -= 10;
-
-    $pdf->draw_text(155, $kala, t("Sivu", $kieli),           $firstpage, $pieni);
-    $pdf->draw_text(155, $kala-10, $sivu,                 $firstpage, $p);
+    $pdf->draw_text(155, $kala-10, t("Sivu", $kieli),           $firstpage, $pieni);
+    $pdf->draw_text(155, $kala-20, $sivu,                 $firstpage, $p);
 
     if ($mista == 'vastaanota') {
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] != 'K') {
-        $pdf->draw_text(280,  $kala, t("Tilaus", $kieli),        $firstpage, $pieni);
-        $pdf->draw_text(280,  $kala-10, $laskurow["tunnus"],        $firstpage, $p);
+        $pdf->draw_text(280,  $kala-10, t("Tilaus", $kieli),        $firstpage, $pieni);
+        $pdf->draw_text(280,  $kala-20, $laskurow["tunnus"],        $firstpage, $p);
       }
     }
     else {
-      $pdf->draw_text(280,  $kala, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
-      $pdf->draw_text(280,  $kala-10, $laskurow["laskunro"],      $firstpage, $p);
+      $pdf->draw_text(280,  $kala-10, t("Saapumisnumero", $kieli),    $firstpage, $pieni);
+      $pdf->draw_text(280,  $kala-20, $laskurow["laskunro"],      $firstpage, $p);
     }
 
-    $pdf->draw_text(440, $kala, t("Ajoaika", $kieli),         $firstpage, $pieni);
-    $pdf->draw_text(440, $kala-10, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
+    $pdf->draw_text(440, $kala-10, t("Ajoaika", $kieli),         $firstpage, $pieni);
+    $pdf->draw_text(440, $kala-20, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
+
+    $looppeja = 0;
 
     if ($mista != 'vastaanota') {
-      $pdf->draw_text(520, $kala, t("Kommentti", $kieli),       $firstpage, $pieni);
+      $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli), $firstpage, $pieni);
 
-      $laskurow["comments"] = wordwrap($laskurow["comments"], 65, "\n");
+      if (in_array($yhtiorow['purkulistan_asettelu'], array('K','P'))) {
+        $kommentti = wordwrap($laskurow["comments"], 85, "\n");
 
-      $kala_comment = $kala;
+        $kalaloop = $kala - 20;
+        $looppeja = 0;
 
-      foreach (explode("\n", $laskurow["comments"]) as $komm) {
-        $pdf->draw_text(520, $kala_comment-10, $komm, $firstpage, $p);
-        $kala_comment = $kala_comment - 10;
+        foreach (explode("\n", $kommentti) as $komm) {
+          list($ff_string, $ff_font) = pdf_fontfit($komm, 320, $pdf, $pieni);
+
+          $pdf->draw_text(520, $kalaloop, $ff_string, $firstpage, $ff_font);
+
+          $kalaloop -= 10;
+          $looppeja++;
+        }
+
+        $kala = $kalaloop + 25;
+        $returnkala = $kalaloop - 10 - 25;
+      }
+      else {
+        $pdf->draw_text(520, $kala-20, $laskurow["comments"], $firstpage, $p);
+        $looppeja = 1;
       }
     }
 
-    $kala_comment -= 5;
-
-    $pdf->draw_rectangle($kala+25, 20,  $kala_comment, 808, $firstpage,       $rectparam);
-
-    $kala = $kala_comment - 15;
-
-    $pdf->draw_rectangle($kala, 20,  $kala-35, 808, $firstpage, $rectparam);
+    $pdf->draw_rectangle($kala+15+($looppeja * 10), 20,  $kala-25, 808, $firstpage,       $rectparam);
+    $pdf->draw_rectangle($kala-25, 20,  $kala-45, 808, $firstpage, $rectparam);
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(30, $kala-10, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(30, $kala-35, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
 
       if ($yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
-        $pdf->draw_text(30, $kala-17, t("Tilaus", $kieli),      $firstpage, $pieni);
+        $pdf->draw_text(30, $kala-42, t("Tilaus", $kieli),      $firstpage, $pieni);
       }
     }
     else {
-      $pdf->draw_text(30,  $kala-10, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
-      $pdf->draw_text(30, $kala-17, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(30,  $kala-35, t("Toimittajan koodi /", $kieli),  $firstpage, $pieni);
+      $pdf->draw_text(30, $kala-42, t("Tuotekoodi", $kieli),      $firstpage, $pieni);
     }
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(155, $kala-10, t("Nimitys", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(155, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
     else {
-      $pdf->draw_text(280, $kala-10, t("Nimitys", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(280, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
 
-    if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+    if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
       if ($mista == 'vastaanota') {
-        $pdf->draw_text(130, $kala-10, t("Paikasta", $kieli),    $firstpage, $pieni);
-        $pdf->draw_text(130, $kala-20, t("Paikalle", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(130, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(130, $kala-45, t("Paikalle", $kieli),    $firstpage, $pieni);
       }
       else {
-        $pdf->draw_text(170, $kala-10, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(170, $kala-35, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
       }
     }
     else {
       if ($mista == 'vastaanota') {
-        $pdf->draw_text(315, $kala-10, t("Paikasta", $kieli),    $firstpage, $pieni);
-        $pdf->draw_text(475, $kala-10, t("Paikalle", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(315, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(475, $kala-35, t("Paikalle", $kieli),    $firstpage, $pieni);
       }
       else {
-        $pdf->draw_text(440, $kala-10, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
+        $pdf->draw_text(440, $kala-35, t("Paikka(o.saldo)", $kieli),    $firstpage, $pieni);
       }
     }
 
     if ($mista == 'vastaanota') {
-      $pdf->draw_text(725, $kala-10, t("Määrä", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(725, $kala-35, t("Määrä", $kieli),        $firstpage, $pieni);
 
     }
     else {
-      $pdf->draw_text(600, $kala-10, t("Määrä", $kieli),        $firstpage, $pieni);
-      $pdf->draw_text(650, $kala-10, t("Kerroin", $kieli),        $firstpage, $pieni);
-      $pdf->draw_text(705, $kala-10, t("Toim.Määrä", $kieli),      $firstpage, $pieni);
+      $pdf->draw_text(600, $kala-35, t("Määrä", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(650, $kala-35, t("Kerroin", $kieli),        $firstpage, $pieni);
+      $pdf->draw_text(705, $kala-35, t("Toim.Määrä", $kieli),      $firstpage, $pieni);
     }
 
-    $pdf->draw_text(770, $kala-10, t("Yksikkö", $kieli),        $firstpage, $pieni);
+    $pdf->draw_text(770, $kala-35, t("Yksikkö", $kieli),        $firstpage, $pieni);
 
-    $pdf->draw_rectangle($kala, 20, 20, 808, $firstpage, $rectparam);
+    $pdf->draw_rectangle($kala-25, 20, 20, 808, $firstpage, $rectparam);
 
-    $kala -= 60;
-
-    return array($firstpage, $kala);
+    return array($firstpage, $returnkala);
   }
 }
 
@@ -206,6 +213,8 @@ elseif ($sorttaus == 'tuote') {
 else {
   $sorttauskentta = generoi_sorttauskentta("10", $laskurow["liitostunnus"]);
 }
+
+$eanlisa = "";
 
 if ($mitkarivit == "viematta") {
   $mitkalisa = " and tilausrivi.varattu != 0 ";
@@ -423,6 +432,7 @@ if (!empty($tee_excel)) {
     echo "<tr><th>".t("Tallenna tulos").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
     echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
     echo "<input type='hidden' name='kaunisnimi' value='".t('Tullinimikkeet').".xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$tiedosto}'>";
@@ -434,7 +444,7 @@ if (!empty($tee_excel)) {
   }
 }
 
-if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
+if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["Vastaanotetut"])) {
 
   list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
 
@@ -445,6 +455,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
   $pdf->set_default('margin-right',   0);
   $rectparam["width"] = 0.3;
 
+  $kala     = 500;
   $total     = 0;
   $sivu     = 1;
   $sumarum  = 0;
@@ -706,7 +717,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if ($mista == "vastaanota") {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $tekstiosa = hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"];
 
@@ -747,7 +758,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ";
 
@@ -788,7 +799,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ";
 
@@ -804,7 +815,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       }
       else {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
           if ($yhtiorow['suuntalavat'] == 'S') {
 
             $tekstiosa = hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ";
@@ -952,7 +963,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if (trim($row["kommentti"]) != '') {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $_row_height = $kala+25;
 
@@ -999,7 +1010,9 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       }
 
       $sumarum = sprintf('%.2f', $sumarum);
-      $pdf->draw_text(520,  $kala, t("Yhteensä", $kieli)." {$sumarum}",  $firstpage, $p);
+      $pdf->draw_text(520,  $kala, t("Yhteensä", $kieli),  $firstpage, $p);
+      $pdf->draw_text(570,  $kala, $sumarum,  $firstpage, $p);
+
 
       $pdf->draw_rectangle(40, 20,  20, 200, $firstpage, $rectparam);
       $pdf->draw_rectangle(40, 200, 20, 808, $firstpage, $rectparam);

@@ -78,6 +78,7 @@ if (!function_exists("toimitarkista")) {
     if ($fieldname == "ultilno") {
 
       if ($t[$i] == '') $t[$i] = $tmp_iban;
+      if ($tmp_iban == '') $tmp_iban = $t[$i];
 
       // Vaaditaan isot kirjaimet
       $t[$i] = strtoupper(trim($t[$i]));
@@ -120,9 +121,23 @@ if (!function_exists("toimitarkista")) {
       if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
       else $ibanmaa = $tmp_maakoodi;
 
+      $swift_virhe = FALSE;
+      if (strtoupper($ibanmaa) == "FI" or substr($tmp_iban, 0, 2) == "FI") {
+        // Haetaan swift tarkistusta varten
+        include "inc/pankkitiedot.inc";
+        $vastaus = pankkitiedot($tmp_iban, '');
+
+        if ($t[$i] != $vastaus['swift'] and $vastaus['swift'] != '' and $vastaus['rahalaitos'] != '') {
+          $swift_virhe = TRUE;
+        }
+        elseif ($t[$i] != '' and $vastaus['swift'] == '' and $vastaus['rahalaitos'] == '') {
+          $swift_virhe = TRUE;
+        }
+      }
+
       if ($t[$i] != '') {
         // Jos SEPA-maa, tarkistetaan BIC
-        if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
+        if ($swift_virhe or (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE)) {
           $virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
         }
       }

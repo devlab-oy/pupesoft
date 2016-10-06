@@ -273,7 +273,6 @@ if ($tee == 'TI' and isset($tyhjenna)) {
 //tarkastetaan tilausrivi
 if ($tee == 'TI' or $tee == "Y") {
   // Parametreja joita tarkistarivi tarvitsee
-  $laskurow["tila"]   = "O";
   $toim_tarkistus   = "EI";
   $prow["tuoteno"]   = $tuoteno;
   $prow["var"]    = $rivinvar;
@@ -342,8 +341,6 @@ if ($tee == 'TI' or $tee == "Y") {
 
 //rivi on tarkistettu ja se lisataan tietokantaan
 if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
-
-  $laskurow["tila"] = "O";
   $kukarow["kesken"] = $rivinotunnus;
 
   if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
@@ -1070,23 +1067,6 @@ if ($tila == 'tee_kohdistus') {
   }
 }
 
-$query = "SELECT DISTINCT varasto
-          FROM tilausrivi
-          WHERE yhtio     = '{$kukarow['yhtio']}'
-          AND uusiotunnus = '{$otunnus}'";
-$varastocheckres = pupe_query($query);
-
-$onkologmaster_varasto = true;
-
-while ($varastocheckrow = mysql_fetch_assoc($varastocheckres)) {
-  $varastorow = hae_varasto($varastocheckrow['varasto']);
-
-  if ($varastorow['ulkoinen_jarjestelma'] != 'L') {
-    $onkologmaster_varasto = false;
-    break;
-  }
-}
-
 //n‰ytet‰‰n rivilista ja ruksataan kohdistettavia rivej‰
 if ($tila == '') {
 
@@ -1604,7 +1584,7 @@ if ($tila == '') {
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
     echo "<input type='submit' value='".t("Tee uusi rivi")."'></form>";
 
-    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] == '') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>
@@ -2026,20 +2006,8 @@ if ($tila == '') {
       echo "$rivirow[otunnus]</$td>";
     }
     echo "<$td $class nowrap>";
-
-    // tehd‰‰n pop-up divi jos keikalla on kommentti...
-    $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
-
-    echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
-    echo "<ul>";
-    echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
-    echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
-    echo "<li>".t("Kuluprosentti").": $rivirow[kuluprosentti]</li>";
-    echo "</ul>";
-    echo "</div>";
-    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "class='tooltip' id='$rivirow[rivitunnus]'", 1000, 1000);
+    echo js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"]), $rivirow["tuoteno"], "", 1000, 1000);
     echo "<br>$rivirow[toim_tuoteno]";
-
     echo "&nbsp;";
 
     $_src = "{$palvelin2}pics/lullacons/info.png";
@@ -2048,9 +2016,23 @@ if ($tila == '') {
     $id = md5(uniqid());
 
     echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$id}' />";
+
+    // tehd‰‰n pop-up divi jos keikalla on kommentti...
+    $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
+
+    echo "<div id='div_{$id}' style='display:none;'>";
+    echo "<ul>";
+    echo "<li>".t("Tilattu").": ".(float) $rivirow["tilattu"]." $pop_yks</li>";
+    echo "<li>".t("Varattu").": ".(float) $rivirow["varattu"]." $pop_yks</li>";
+    echo "<li>".t("Keskihinta").": ".(float) $rivirow["keskihinta"]." $rivirow[valuutta]</li>";
+    echo "<li>".t("Ostohinta").": ".(float) $rivirow["ostohinta"]." $rivirow[valuutta]</li>";
+    echo "<li>".t("Kuluprosentti").": ".(float) $rivirow["kuluprosentti"]." %</li>";
+
     echo "<input type='hidden' id='{$id}_tuoteno' value='{$rivirow['tuoteno']}' />";
     echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
-    echo "<span class='saldo_{$id}' style='display:none;'></span>";
+    echo "<span id='span_{$id}'></span>";
+    echo "</ul>";
+    echo "</div>";
 
     if ($rivirow["sarjanumeroseuranta"] != "" and $rivirow["sarjanumeroseuranta"] != "T") {
       if ($rivirow["siskpl"] < 0) {
@@ -2376,7 +2358,7 @@ if ($tila == '') {
         <input type='submit' value='".t("Tee uusi rivi")."'>
         </form>";
 
-    if ($onkologmaster and $onkologmaster_varasto and $laskurow['sisviesti3'] != 'ok_vie_varastoon') {
+    if ($onkologmaster and $laskurow['sisviesti3'] == '') {
       echo "<form method='post'>
           <input type='hidden' name='toimittajaid' value='$toimittajaid'>
           <input type='hidden' name='toiminto' value='saapuminen_ulkoiseen_jarjestelmaan'>

@@ -77,6 +77,18 @@ echo t("Asiakasryhmät");
 echo ": <input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
 echo "</td>";
 echo "</tr>";
+
+echo "<tr><th>".t('Asiakkaat')."</th>";
+
+echo "<td colspan='4'><select name='asumvalinta'>";
+
+$y_sel = $asumvalinta == '' ? 'selected' : '';
+$a_sel = $asumvalinta == 'A' ? 'selected' : '';
+
+echo "<option value='' $y_sel>".t("Summataan per Y-tunnus")."</option>";
+echo "<option value='A' $a_sel>".t("Jokainen asiakas omalla rivillä")."</option>";
+echo "</select></td>";
+echo "</tr>";
 echo "</table><br>";
 
 $monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
@@ -98,19 +110,19 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
 
   echo "<table>";
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -178,7 +190,12 @@ function piirra_taulukko($data) {
   echo "</table>";
 }
 
-function hae_data($tyyppi, $limitit, $rajaukset) {
+function palautaYhteinenOsa($array, $occurance = 3) {
+  $array = array_reduce($array, function($a,$b) { $a = array_merge($a,explode(" ", $b)); return $a; },array());
+  return implode(" ",array_keys(array_filter(array_count_values($array),function($var)use($occurance) {return $var > $occurance ;})));
+}
+
+function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $tuoterajaus = '';
@@ -228,8 +245,16 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
     break;
   case "asiakkaat":
     $haettu_data['otsikko'] = t('Asiakkaat');
-    $nimikentta = " asiakas.nimi ";
-    $grouppauskentta = " asiakas.tunnus ";
+
+    if ($asumvalinta == "A") {
+      $nimikentta = "asiakas.nimi ";
+      $grouppauskentta = " asiakas.tunnus ";
+    }
+    else {
+      $nimikentta = " group_concat(DISTINCT asiakas.nimi SEPARATOR '!¡!') ";
+      $grouppauskentta = " asiakas.ytunnus ";
+    }
+
     $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
     break;
   case "asiakasryhmat":
@@ -283,6 +308,18 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
 
   // Haetaan rivit
   while ($row = mysql_fetch_assoc($result)) {
+
+    if (strpos($row['nimi'], "!¡!") !== FALSE) {
+      $nimet = explode("!¡!", $row['nimi']);
+      $nimi = palautaYhteinenOsa($nimet);
+
+      if (empty($nimi)) {
+        $nimi = $nimet[0];
+      }
+
+      $row['nimi'] = $nimi. " <span class='ok'>(".t("Useita").")</span>";
+    }
+
     $haettu_data['rivit'][] = $row;
     $summayhteensa += $row['myyntinyt'];
   }

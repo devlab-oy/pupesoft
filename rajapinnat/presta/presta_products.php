@@ -8,7 +8,6 @@ require_once 'rajapinnat/presta/presta_product_features.php';
 
 class PrestaProducts extends PrestaClient {
   private $_category_sync = true;
-  private $_dynamic_fields = array();
   private $_removable_fields = array();
   private $features_table = null;
   private $image_fetch = false;
@@ -198,20 +197,8 @@ class PrestaProducts extends PrestaClient {
       }
     }
 
-    // Dynamic product parameters
-    $product_parameters = $this->_dynamic_fields;
-
-    if (isset($product_parameters) and count($product_parameters) > 0) {
-      foreach ($product_parameters as $parameter) {
-        $_key = $parameter['arvo'];
-        $_attribute = $parameter['nimi'];
-        $_value = $this->xml_value($product[$_key]);
-
-        $this->logger->log("Poikkeava arvo product.{$_attribute} -kenttään. Asetetaan {$_key} kentän arvo {$_value}");
-
-        $xml->product->$_attribute = $_value;
-      }
-    }
+    // Assign dynamic product parameters
+    $this->assign_dynamic_fields($xml->product, $product);
 
     // Removed product parameters
     $removables = $this->_removable_fields;
@@ -631,10 +618,6 @@ class PrestaProducts extends PrestaClient {
 
   public function set_removable_fields($fields) {
     $this->_removable_fields = $fields;
-  }
-
-  public function set_dynamic_fields($fields) {
-    $this->_dynamic_fields = $fields;
   }
 
   public function set_category_sync($value) {

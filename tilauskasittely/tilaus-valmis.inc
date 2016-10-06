@@ -934,6 +934,7 @@ else {
       $torow = mysql_fetch_assoc($result);
 
       $rahtinro_tuoteno_lisa = trim($torow['rahti_tuotenumero']) != '' ? "'{$yhtiorow['rahti_tuotenumero']}', '{$torow['rahti_tuotenumero']}'" : "'{$yhtiorow['rahti_tuotenumero']}'";
+      $rahtinro_tuoteno_lisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtinro_tuoteno_lisa);
 
       // jos kyseess‰ on JT-tilaus, katsotaan pit‰‰kˆ lis‰t‰ rahtikulua usealle tilaukselle
       if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
@@ -1164,10 +1165,30 @@ else {
       $result = pupe_query($query);
 
       //tulostetaan k‰teislasku...
-      $laskutettavat  = $laskurow["tunnus"];
-      $tee       = "TARKISTA";
-      $laskutakaikki   = "KYLLA";
-      $silent       = "VIENTI";
+      $laskutettavat = $laskurow["tunnus"];
+      $tee = "TARKISTA";
+      $laskutakaikki = "KYLLA";
+      $silent = "VIENTI";
+
+      if (!empty($yhtiorow['kateiskuitin_paivays']) and !empty($poikkeava_kpvm)) {
+        list($poikkeava_laskvv, $poikkeava_laskkk, $poikkeava_laskpp) = explode("-", $poikkeava_kpvm);
+
+        $poikkeava_laskkk = sprintf('%02d', $poikkeava_laskkk);
+        $poikkeava_laskpp = sprintf('%02d', $poikkeava_laskpp);
+
+        if (!checkdate($poikkeava_laskkk, $poikkeava_laskpp, $poikkeava_laskvv)) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")."!</font><br>";
+        }
+        elseif (strtotime($yhtiorow['tilikausi_alku']) > strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")
+          or strtotime($yhtiorow['tilikausi_loppu']) < strtotime("$poikkeava_laskvv-$poikkeava_laskkk-$poikkeava_laskpp")) {
+          echo "<font class='error'>".t("Poikkeava laskunp‰iv‰m‰‰r‰ virheellinen")." ".t("Tilikausi on suljettu")."!</font><br>";
+        }
+        else {
+          $laskkk = $poikkeava_laskkk;
+          $laskpp = $poikkeava_laskpp;
+          $laskvv = $poikkeava_laskvv;
+        }
+      }
 
       if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
         $valittu_tulostin = $kukarow["kirjoitin"];
@@ -1181,8 +1202,6 @@ else {
       /**
        * Tulostetaan kassakuitti
        */
-
-
       require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
       $kuitin_parametrit = array("kateinen" => $kateista_annettu);
@@ -1662,7 +1681,6 @@ else {
       //jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimm‰isen tilauksen tunnus vanhaksitunnukseksi
       $temp_laskutunnus = $laskurow['tunnus'];
 
-      $varasto_chk_array = array();
       $varasto_kpl_array = array();
       $tulalue_kpl_array = array();
 
@@ -1816,6 +1834,7 @@ else {
               $values .= ", '$split_toimitustapa'";
               break;
             case 'kate_korjattu':
+            case 'lahetetty_ulkoiseen_varastoon':
               $values .= ", NULL";
               break;
             default:
@@ -1827,9 +1846,6 @@ else {
           $uusires = pupe_query($kysely);
 
           $laskurow['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
-
-          // Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
-          $varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];
 
           // Tallennetaan kaikki splitit
           $tilausnumerot[] = $laskurow["tunnus"];
@@ -1942,9 +1958,6 @@ else {
 
       // Intrastat-tiedot
       $laskurow = palauta_intrastat_tiedot($laskurow, $varasto);
-
-      // Laitetaan alkuper‰isen tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
-      $varasto_chk_array[$temp_laskutunnus] = $varaston_row['ulkoinen_jarjestelma'];
 
       // Rahtivapaat tilaukset l‰hetet‰‰n aina l‰hett‰j‰n rahtisopimuksella
       $toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o', kohdistettu = 'K' " : '';
@@ -2074,12 +2087,6 @@ else {
                       AND tunnus  = '$tilausnumero'";
             $upresult = pupe_query($query);
           }
-        }
-      }
-
-      foreach ($varasto_chk_array as $_otunnus => $_ulkoinen_jarjestelma) {
-        if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')) and $laskurow['tila'] == 'N' and ($laskurow['alatila'] == '' or ($laskurow['alatila'] == 'A' and isset($tilausvalmiskutsuja) and $tilausvalmiskutsuja == "EDITILAUS")) and in_array($_ulkoinen_jarjestelma, array('L', 'P'))) {
-          posten_outbounddelivery($_otunnus, $_ulkoinen_jarjestelma);
         }
       }
 

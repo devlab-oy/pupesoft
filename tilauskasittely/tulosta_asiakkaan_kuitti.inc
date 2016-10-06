@@ -19,11 +19,15 @@
  * @return bool
  */
 
+function draw_center_aligned($pdf, $firstpage, $text, $font, $y) {
+  $lpos = (204-$pdf->strlen($text, $font)) / 2;
+  $pdf->draw_text($lpos, $y, $text, $firstpage, $font);
+}
 
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
-  global $yhtiorow;
+  global $kukarow, $yhtiorow, $pupe_root_polku, $palvelin2;
 
-  if (tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin" or empty($laskunro)) {
+  if ((tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin" and empty($params['pdf_kuitti'])) or empty($laskunro)) {
     return false;
   }
 
@@ -43,15 +47,6 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $takaisin = $kateinen - $loppusumma + $maksupaatesumma;
     $takaisin = hintapyoristys($takaisin);
   }
-
-  // Escape sequencejä printterille
-  $logo           = "\x1C\x70\x01\x10";
-  $katkaisu       = "\x1B\x69";
-  $align_left     = "\x1B\x61\x00";
-  $align_center   = "\x1B\x61\x01";
-  $emphasized_on  = "\x1B\x45\x01";
-  $emphasized_off = "\x1B\x45\x00";
-  $avaa_lipas     = "\x1B\x70\x00\n\n";
 
   // Yhtiön ja tapahtuman tiedot
   $yhtion_nimi          = $lasku['yhtio_nimi'];
@@ -85,7 +80,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     }
   }
   elseif ($maksupaatesumma_num < $yhteensa_num) {
-    $kateinen = sprintf("%34.34s", number_format($yhteensa_num - $maksupaatesumma_num, 2));
+    $kateinen = sprintf("%34.34s", sprintf("%.2f", $yhteensa_num - $maksupaatesumma_num));
   }
 
   $verorivit = array();
@@ -99,117 +94,311 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
 
-  // Printattavan stringin luominen
-  $kuitin_teksti = "";
+  if (!empty($params['pdf_kuitti'])) {
+    require_once 'pdflib/phppdflib.class.php';
 
-  if ($avaa_lipas_lopuksi) {
-    $kuitin_teksti .= $avaa_lipas;
-  }
+    $norm["height"] = 10;
+    $norm["font"] = "Helvetica";
 
-  $kuitin_teksti .= "{$logo}\n\n";
+    $pieni["height"] = 8;
+    $pieni["font"] = "Helvetica";
 
-  $kuitin_teksti .= "{$align_center}";
+    $pdf = new pdffile;
+    $pdf->set_default('margin-top', 0);
+    $pdf->set_default('margin-bottom', 0);
+    $pdf->set_default('margin-left', 0);
+    $pdf->set_default('margin-right', 0);
 
-  $kuitin_teksti .= "{$yhtion_nimi}\n";
-  $kuitin_teksti .= "{$yhtion_osoite}\n";
-  $kuitin_teksti .= "{$yhtion_postino} {$yhtion_postitp}\n";
-  $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n";
-  $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}";
+    $korkeus = "404";
 
-  if ($header_teksti) {
-    $kuitin_teksti .= "\n{$header_teksti}";
-  }
+    $korkeus += count($tilausrivit) * 30;
 
-  $kuitin_teksti .= "\n\n{$align_left}";
+    $firstpage = $pdf->new_page("204x$korkeus");
 
-  foreach ($tilausrivit as $tilausrivi) {
-    $kappalehinta = hintapyoristys($tilausrivi["yksikkohinta"]);
-    $kappalehinta = sprintf("%14.14s", "a {$kappalehinta}");
-    $bruttohinta  = $tilausrivi['rivihinta_verollinen'];
-    $bruttohinta  = sprintf("%14.14s", $bruttohinta);
-    $tuoteno      = sprintf("%-42.42s", $tilausrivi['tuoteno']);
-    $nimitys      = sprintf("%-42.42s", $tilausrivi['nimitys']);
-    $kpl          = sprintf("%-14.14s", "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}");
+    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, 42, 40, 120);
 
-    $kuitin_teksti .= "\n{$tuoteno}\n";
-    $kuitin_teksti .= "{$nimitys}\n";
-    $kuitin_teksti .= "{$kpl}";
-    $kuitin_teksti .= "{$kappalehinta}";
-    $kuitin_teksti .= "{$bruttohinta}\n";
-  }
+    $kala = $korkeus-60;
 
-  // Hinta yhteensä
-  $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ, {$lasku["valkoodi"]}{$yhteensa}{$emphasized_off}\n";
+    draw_center_aligned($pdf, $firstpage, "{$yhtion_nimi}", $norm, $kala);
+    $kala-=10;
 
-  if ($pyoristys) {
-    $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";
-    $kuitin_teksti .= "{$emphasized_on}LOPPUSUMMA{$loppusumma}{$emphasized_off}\n";
-  }
+    draw_center_aligned($pdf, $firstpage, "{$yhtion_osoite}", $norm, $kala);
+    $kala-=10;
 
-  // Maksutapaerottelu
-  if ($maksupaatesumma != 0) {
-    $kuitin_teksti .= t("KORTTI") . "{$maksupaatesumma}\n";
-  }
+    draw_center_aligned($pdf, $firstpage, "{$yhtion_postino} {$yhtion_postitp}", $norm, $kala);
+    $kala-=10;
 
-  if ($kateinen != 0) {
-    $kuitin_teksti .= t("KÄTEINEN") . "{$kateinen}\n";
+    draw_center_aligned($pdf, $firstpage, "Y-tunnus: {$yhtion_ytunnus}", $norm, $kala);
+    $kala-=10;
 
-    if (isset($takaisin)) {
-      $kuitin_teksti .= t("TAKAISIN") . "{$takaisin}\n";
+    draw_center_aligned($pdf, $firstpage, "Puh. {$yhtion_puhelinnumero}", $norm, $kala);
+    $kala-=10;
+
+    if ($header_teksti) {
+      draw_center_aligned($pdf, $firstpage, "{$header_teksti}", $norm, $kala);
+      $kala-=10;
+    }
+
+    $kala-=30;
+
+    foreach ($tilausrivit as $tilausrivi) {
+      $pdf->draw_text(0, $kala, $tilausrivi['tuoteno'], $firstpage, $pieni);
+      $kala-=10;
+
+      $pdf->draw_text(0, $kala, $tilausrivi['nimitys'], $firstpage, $norm);
+      $kala-=10;
+
+      $pdf->draw_text(0, $kala, "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}", $firstpage, $norm);
+
+      $pdf->draw_text(60, $kala, "á ".hintapyoristys($tilausrivi["yksikkohinta"]), $firstpage, $norm);
+
+      if ((float) $tilausrivi['aleyhteensa']) {
+        $pdf->draw_text(110, $kala, "-".(float) $tilausrivi['aleyhteensa']."%", $firstpage, $norm);
+      }
+
+      $oikpos = $pdf->strlen($tilausrivi['rivihinta_verollinen'], $norm);
+      $pdf->draw_text(200-$oikpos, $kala, $tilausrivi['rivihinta_verollinen'], $firstpage, $norm);
+      $kala-=15;
+    }
+
+    // Hinta yhteensä
+    $pdf->draw_text(0, $kala, "====================================", $firstpage, $norm);
+    $kala-=10;
+
+    $pdf->draw_text(0, $kala, "YHTEENSÄ, {$lasku["valkoodi"]}", $firstpage, $norm);
+
+    $oikpos = $pdf->strlen(trim($yhteensa), $norm);
+    $pdf->draw_text(200-$oikpos, $kala, trim($yhteensa), $firstpage, $norm);
+    $kala-=10;
+
+    if ($pyoristys) {
+      $pdf->draw_text(0, $kala, "PYÖRISTYS", $firstpage, $norm);
+      $oikpos = $pdf->strlen(trim($pyoristys), $norm);
+      $pdf->draw_text(200-$oikpos, $kala, trim($pyoristys), $firstpage, $norm);
+      $kala-=10;
+
+      $pdf->draw_text(0, $kala, "LOPPUSUMMA", $firstpage, $norm);
+      $oikpos = $pdf->strlen(trim($loppusumma), $norm);
+      $pdf->draw_text(200-$oikpos, $kala, trim($loppusumma), $firstpage, $norm);
+      $kala-=10;
+    }
+
+    // Maksutapaerottelu
+    if ($maksupaatesumma != 0) {
+      $pdf->draw_text(0, $kala, t("KORTTI"), $firstpage, $norm);
+      $oikpos = $pdf->strlen(trim($maksupaatesumma), $norm);
+      $pdf->draw_text(200-$oikpos, $kala, trim($maksupaatesumma), $firstpage, $norm);
+      $kala-=10;
+    }
+
+    if ($kateinen != 0) {
+      $pdf->draw_text(0, $kala, t("KÄTEINEN"), $firstpage, $norm);
+      $oikpos = $pdf->strlen(trim($kateinen), $norm);
+      $pdf->draw_text(200-$oikpos, $kala, trim($kateinen), $firstpage, $norm);
+      $kala-=10;
+
+      if (isset($takaisin)) {
+        $pdf->draw_text(0, $kala, t("TAKAISIN"), $firstpage, $norm);
+        $oikpos = $pdf->strlen(trim($takaisin), $norm);
+        $pdf->draw_text(200-$oikpos, $kala, trim($takaisin), $firstpage, $norm);
+        $kala-=10;
+      }
+    }
+
+    $kala-=20;
+
+    // Verotiedot
+    $pdf->draw_text(0, $kala, t("ALV") . "{$takaisin}", $firstpage, $norm);
+    $pdf->draw_text(60, $kala, t("NETTO") . "{$takaisin}", $firstpage, $norm);
+    $pdf->draw_text(110, $kala, t("VERO") . "{$takaisin}", $firstpage, $norm);
+    $pdf->draw_text(160, $kala, t("BRUTTO") . "{$takaisin}", $firstpage, $norm);
+    $kala-=10;
+
+    foreach ($verorivit as $verorivi) {
+      $pdf->draw_text(0, $kala, trim($verorivi['veroprosentti']), $firstpage, $norm);
+      $pdf->draw_text(60, $kala, trim($verorivi['netto']), $firstpage, $norm);
+      $pdf->draw_text(110, $kala, trim($verorivi['vero']), $firstpage, $norm);
+
+      $oikpos = $pdf->strlen(trim($verorivi['brutto']), $norm);
+      $pdf->draw_text(200-$oikpos, $kala, trim($verorivi['brutto']), $firstpage, $norm);
+      $kala-=10;
+    }
+
+    $kala-=20;
+
+    // Maksupäätetapahtumat
+    foreach ($maksupaatetapahtumat as $tapahtuma) {
+      if ($tapahtuma['asiakkaan_kuitti']) {
+        $pdf->draw_text(0, $kala, "{$tapahtuma['asiakkaan_kuitti']}", $firstpage, $norm);
+        $kala-=10;
+      }
+    }
+
+    // Footer
+    draw_center_aligned($pdf, $firstpage, t("Kuittinumero", $asiakkaan_kieli).": {$lasku['laskunro']}", $norm, $kala);
+    $kala-=15;
+
+    draw_center_aligned($pdf, $firstpage, date("d.m.Y H:i:s"), $norm, $kala);
+    $kala-=15;
+
+    draw_center_aligned($pdf, $firstpage, "{$yhtiorow['www']}", $norm, $kala);
+    $kala-=15;
+
+    $comments = explode("\n", wordwrap($lasku["sisviesti1"], 40));
+
+    foreach ($comments as $comment) {
+      draw_center_aligned($pdf, $firstpage, $comment, $norm, $kala);
+      $kala -= 10;
+    }
+
+    $kala-=10;
+
+    if ($myyjan_nimi) {
+      draw_center_aligned($pdf, $firstpage, t("Teitä palveli", $asiakkaan_kieli) . " {$myyjan_nimi}", $norm, $kala);
+      $kala-=10;
+    }
+
+    //keksitään uudelle failille joku varmasti uniikki nimi:
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    $pdffilenimi = "{$pupe_root_polku}/dataout/Kuitti-{$lasku['laskunro']}.pdf";
+
+    //kirjoitetaan pdf faili levylle..
+    $fh = fopen($pdffilenimi, "w");
+    if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+    fclose($fh);
+
+    if (!empty($params['pdf_kuitti_printdialog'])) {
+      return "{$palvelin2}dataout/Kuitti-{$lasku['laskunro']}.pdf";
+    }
+
+    if (!empty($params['pdf_kuitti_ruudulle'])) {
+      echo file_get_contents($pdffilenimi);
     }
   }
+  else {
 
-  // Verotiedot
-  $kuitin_teksti .= "\nALV         NETTO        VERO       BRUTTO\n";
+    // Escape sequencejä printterille
+    $logo           = "\x1C\x70\x01\x10";
+    $katkaisu       = "\x1B\x69";
+    $align_left     = "\x1B\x61\x00";
+    $align_center   = "\x1B\x61\x01";
+    $emphasized_on  = "\x1B\x45\x01";
+    $emphasized_off = "\x1B\x45\x00";
+    $avaa_lipas     = "\x1B\x70\x00\n\n";
 
-  foreach ($verorivit as $verorivi) {
-    $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
-      "{$verorivi['netto']}" .
-      "{$verorivi['vero']}" .
-      "{$verorivi['brutto']}\n";
-  }
+    // Printattavan stringin luominen
+    $kuitin_teksti = "";
 
-  $kuitin_teksti .= "\n";
-
-  // Maksupäätetapahtumat
-  foreach ($maksupaatetapahtumat as $tapahtuma) {
-    if ($tapahtuma['asiakkaan_kuitti']) {
-      $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n";
+    if ($avaa_lipas_lopuksi) {
+      $kuitin_teksti .= $avaa_lipas;
     }
+
+    $kuitin_teksti .= "{$logo}\n\n";
+
+    $kuitin_teksti .= "{$align_center}";
+
+    $kuitin_teksti .= "{$yhtion_nimi}\n";
+    $kuitin_teksti .= "{$yhtion_osoite}\n";
+    $kuitin_teksti .= "{$yhtion_postino} {$yhtion_postitp}\n";
+    $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n";
+    $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}";
+
+    if ($header_teksti) {
+      $kuitin_teksti .= "\n{$header_teksti}";
+    }
+
+    $kuitin_teksti .= "\n\n{$align_left}";
+
+    foreach ($tilausrivit as $tilausrivi) {
+      $kappalehinta = hintapyoristys($tilausrivi["yksikkohinta"]);
+      $kappalehinta = sprintf("%14.14s", "a {$kappalehinta}");
+      $bruttohinta  = $tilausrivi['rivihinta_verollinen'];
+      $bruttohinta  = sprintf("%14.14s", $bruttohinta);
+      $tuoteno      = sprintf("%-42.42s", $tilausrivi['tuoteno']);
+      $nimitys      = sprintf("%-42.42s", $tilausrivi['nimitys']);
+      $kpl          = sprintf("%-14.14s", "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}");
+
+      $kuitin_teksti .= "\n{$tuoteno}\n";
+      $kuitin_teksti .= "{$nimitys}\n";
+      $kuitin_teksti .= "{$kpl}";
+      $kuitin_teksti .= "{$kappalehinta}";
+      $kuitin_teksti .= "{$bruttohinta}\n";
+    }
+
+    // Hinta yhteensä
+    $kuitin_teksti .= "==========================================\n";
+    $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ, {$lasku["valkoodi"]}{$yhteensa}{$emphasized_off}\n";
+
+    if ($pyoristys) {
+      $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";
+      $kuitin_teksti .= "{$emphasized_on}LOPPUSUMMA{$loppusumma}{$emphasized_off}\n";
+    }
+
+    // Maksutapaerottelu
+    if ($maksupaatesumma != 0) {
+      $kuitin_teksti .= t("KORTTI") . "{$maksupaatesumma}\n";
+    }
+
+    if ($kateinen != 0) {
+      $kuitin_teksti .= t("KÄTEINEN") . "{$kateinen}\n";
+
+      if (isset($takaisin)) {
+        $kuitin_teksti .= t("TAKAISIN") . "{$takaisin}\n";
+      }
+    }
+
+    // Verotiedot
+    $kuitin_teksti .= "\nALV         NETTO        VERO       BRUTTO\n";
+
+    foreach ($verorivit as $verorivi) {
+      $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
+        "{$verorivi['netto']}" .
+        "{$verorivi['vero']}" .
+        "{$verorivi['brutto']}\n";
+    }
+
+    $kuitin_teksti .= "\n";
+
+    // Maksupäätetapahtumat
+    foreach ($maksupaatetapahtumat as $tapahtuma) {
+      if ($tapahtuma['asiakkaan_kuitti']) {
+        $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n";
+      }
+    }
+
+    // Footer
+    $kuitin_teksti .= "{$align_center}";
+    $kuitin_teksti .= t("Kuittinumero", $asiakkaan_kieli) . ": {$lasku['laskunro']}\n\n";
+
+    $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
+      ": " .
+      implode(", ", $tilausnumerot) .
+      "\n\n";
+
+    $kuitin_teksti .= date("d.m.Y H:i:s");
+
+    $kuitin_teksti .= "\n\n\n";
+
+    $kuitin_teksti .= "{$emphasized_on}";
+    $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
+    $kuitin_teksti .= "{$emphasized_off}";
+
+    if ($footer_teksti) {
+      $kuitin_teksti .= $footer_teksti;
+    }
+
+    $kuitin_teksti .= "\n\n";
+
+    if ($myyjan_nimi) {
+      $kuitin_teksti .= t("Teitä palveli", $asiakkaan_kieli) . " {$myyjan_nimi}";
+    }
+
+    $kuitin_teksti .= "\n\n\n\n\n\n";
+    $kuitin_teksti .= $katkaisu;
+
+    lpr($kuitin_teksti, $tulostimen_tunnus);
   }
-
-  // Footer
-  $kuitin_teksti .= "{$align_center}";
-  $kuitin_teksti .= t("Kuittinumero", $asiakkaan_kieli) . ": {$lasku['laskunro']}\n\n";
-
-  $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
-    ": " .
-    implode(", ", $tilausnumerot) .
-    "\n\n";
-
-  $kuitin_teksti .= date("d.m.Y H:i:s");
-
-  $kuitin_teksti .= "\n\n\n";
-
-  $kuitin_teksti .= "{$emphasized_on}";
-  $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
-  $kuitin_teksti .= "{$emphasized_off}";
-
-  if ($footer_teksti) {
-    $kuitin_teksti .= $footer_teksti;
-  }
-
-  $kuitin_teksti .= "\n\n";
-
-  if ($myyjan_nimi) {
-    $kuitin_teksti .= t("Teitä palveli", $asiakkaan_kieli) . " {$myyjan_nimi}";
-  }
-
-  $kuitin_teksti .= "\n\n\n\n\n\n";
-  $kuitin_teksti .= $katkaisu;
-
-  lpr($kuitin_teksti, $tulostimen_tunnus);
 
   return true;
 }
@@ -217,17 +406,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 function hae_myyntilasku($laskunro) {
   global $kukarow;
 
-  $query = "SELECT lasku.yhtio_nimi,
-            lasku.yhtio_osoite,
-            lasku.yhtio_postino,
-            lasku.yhtio_postitp,
-            lasku.yhtio_ovttunnus,
-            lasku.yhtio_maa,
-            lasku.laskunro,
-            lasku.valkoodi,
-            lasku.summa_valuutassa,
-            lasku.pyoristys_valuutassa,
-            lasku.pyoristys,
+  $query = "SELECT lasku.*,
             kuka.nimi AS myyjan_nimi,
             asiakas.kieli AS asiakkaan_kieli
             FROM lasku
@@ -272,12 +451,14 @@ function hae_tilausrivit($laskunro) {
   global $kukarow, $yhtiorow;
 
   $query_ale_lisa = generoi_alekentta('M');
+  $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
 
   $query = "SELECT tilausrivi.rivihinta_valuutassa,
             tilausrivi.hinta,
             tilausrivi.kpl,
             tilausrivi.alv,
             tilausrivi.rivihinta,
+            $ale_query_select_lisa aleyhteensa,
             round(tilausrivi.hinta * if ('{$yhtiorow['alv_kasittely']}' != '' and
               tilausrivi.alv         < 500,(1+tilausrivi.alv/100), 1) *
               (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},{$yhtiorow['hintapyoristys']})

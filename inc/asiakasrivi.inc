@@ -136,7 +136,7 @@ if ($fieldname == "projekti") { //projektit
 
 if ($fieldname == "chn") {
 
-  $sel = array($trow[$i] => ' selected') + array_fill_keys(array('100', '010', '020', '030', '111', '112', '666', '667', '999'), '');
+  $sel = array($trow[$i] => ' selected') + array_fill_keys(array('100', '010', '020', '030', '111', '112', '666', '667', '999', '888'), '');
 
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value='100' {$sel['100']}>".hae_chn_teksti('100')."</option>";
@@ -148,6 +148,7 @@ if ($fieldname == "chn") {
   $ulos .= "<option value='666' {$sel['666']}>".hae_chn_teksti('666')."</option>";
   $ulos .= "<option value='667' {$sel['667']}>".hae_chn_teksti('667')."</option>";
   $ulos .= "<option value='999' {$sel['999']}>".hae_chn_teksti('999')."</option>";
+  $ulos .= "<option value='888' {$sel['888']}>".hae_chn_teksti('888')."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -1222,6 +1223,7 @@ if ($fieldname == 'maksukehotuksen_osoitetiedot') {
   $ulos .= "<option value = ''>".t("K‰ytet‰‰n yhtiˆn oletuksia")."</option>";
   $ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n asiakkaan virallista osoitetta")."</option>";
   $ulos .= "<option value = 'B' $sel[B]>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta")."</option>";
+  $ulos .= "<option value = 'C' $sel[C]>".t("K‰ytet‰‰n asiakkaan laskutusosoitetta ja n‰ytet‰‰n myˆs asiakkaan virallinen osoite")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

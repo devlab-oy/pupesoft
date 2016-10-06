@@ -16,12 +16,14 @@ toggle_all("viite_toggler", "viite_boxes");
 toggle_all("tiliote_toggler", "tiliote_boxes");
 toggle_all("factoring_tiliote_toggler", "factoring_tiliote_boxes");
 toggle_all("factoring_viite_toggler", "factoring_viite_boxes");
+toggle_all("finvoice_toggler", "finvoice_boxes");
 toggle_all("palaute_toggler", "palaute_boxes");
 
 $tee = empty($tee) ? '' : $tee;
 $toim = empty($toim) ? '' : $toim;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
+$hae_laskut = empty($hae_laskut) ? '' : $hae_laskut;
 $hae_palautteet = empty($hae_palautteet) ? '' : $hae_palautteet;
 
 $pankkitiedostot = array();
@@ -108,13 +110,21 @@ if ($toim == "palaute") {
   require 'inc/pankkiyhteys_palautteet.inc';
 }
 
+// Jos toim on "laheta", tehdâ€°â€°n lâ€°hetyshommia
+if ($toim == "laheta") {
+  require 'inc/pankkiyhteys_send.inc';
+}
+
 // Sisäänkirjautumisen käyttöliittymä
 if ($tee == "") {
+  $formi  = 'pankkiyhteys';
+  $kentta = 'salasana';
+
   $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
 
   if ($kaytossa_olevat_pankkiyhteydet) {
 
-    echo "<form method='post' action='pankkiyhteys.php'>";
+    echo "<form name='pankkiyhteys' method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='kirjaudu'/>";
     echo "<input type='hidden' name='toim' value='$toim'/>";
     echo "<table>";

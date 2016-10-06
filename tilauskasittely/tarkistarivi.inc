@@ -132,6 +132,16 @@ if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and $alkup
   $saako_hyvaksya++;
 }
 
+$logmaster_errors = logmaster_verify_row($row['tunnus'], $toim);
+
+foreach ($logmaster_errors as $error) {
+  echo "<font class='error'>";
+  echo "{$error}<br><br>";
+  echo "</font>";
+  $tilausok++;
+  $riviok++;
+}
+
 if ($kukarow['extranet'] != '' and $trow['sarjanumeroseuranta'] != '' and $row['varattu'] != 1) {
   $varaosavirhe .= t("HUOM: T‰m‰ on sarjanumeroseurannallinen tuote. Kappalem‰‰r‰ pit‰‰ olla 1")."!<br>";
   $riviok++;
@@ -1150,6 +1160,10 @@ if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] !
     }
     $varaosakommentti .= "<br>";
   }
+}
+
+if ($yhtiorow["pura_osaluettelot"] != "") {
+  $varaosakommentti .= osaluettelo_hinta_tarkistus($laskurow["tunnus"], $row["tunnus"]);
 }
 
 //  Onko t‰t‰ ostotilauksella?

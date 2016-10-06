@@ -24,9 +24,149 @@ else {
 if (!isset($nayta_pdf)) echo "<font class='head'>", t("Rahtikirjojen tulostus"), "</font><hr>";
 
 $laskutettu = "";
+$otunnukset = "";
 
 if (!isset($tee)) {
   $tee = '';
+}
+
+if (empty($sel_ltun) or !is_array($sel_ltun)) {
+  $sel_ltun = array();
+}
+else {
+  # poistetaan kaikki arvot, jotka ei ole numeroita
+  $sel_ltun = array_filter($sel_ltun, 'is_numeric');
+}
+
+if (!function_exists("laheta_excel_koontilahete")) {
+  function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
+    $otunnukset = (array) $otunnukset;
+
+    if (empty($otunnukset)) return false;
+
+    require_once 'inc/pupeExcel.inc';
+
+    global $kukarow;
+
+    $_otunnukset = implode(',', $otunnukset);
+
+    $query = "SELECT lasku.asiakkaan_tilausnumero,
+                     lasku.nimi,
+                     lasku.toim_nimi,
+                     asiakaskommentti.kommentti,
+                     tilausrivi.tuoteno,
+                     tilausrivi.varattu,
+                     tuote.eankoodi,
+                     tuote.myynti_era,
+                     IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
+              FROM lasku
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+                AND tilausrivi.keratty <> ''
+              JOIN tuote
+                ON tuote.yhtio = tilausrivi.yhtio
+                AND tuote.tuoteno = tilausrivi.tuoteno
+              JOIN asiakas
+                ON asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus = lasku.liitostunnus
+              LEFT JOIN asiakaskommentti
+                ON asiakaskommentti.yhtio = tilausrivi.yhtio
+                AND asiakaskommentti.ytunnus = lasku.ytunnus
+                AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+              LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
+                ON avainsana_nimitys.yhtio = tuote.yhtio
+                AND avainsana_nimitys.kieli = asiakas.kieli
+                AND avainsana_nimitys.laji = 'nimitys'
+                AND avainsana_nimitys.tuoteno = tuote.tuoteno
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tila = 'L'
+                AND lasku.alatila = 'B'
+                AND lasku.tunnus IN ($_otunnukset)";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) return false;
+
+    $laskurow = mysql_fetch_assoc($result);
+
+    $worksheet   = new pupeExcel();
+    $format_bold = array("bold" => true);
+    $excelrivi   = 0;
+    $excelsarake = 0;
+
+    if (count($otunnukset) > 1) {
+      $header_nimi = $toimitustaparow["toim_postitp"];
+      $subject     = t("Excel-koontilähete");
+      $filename    = "Koontilahete.xlsx";
+    }
+    else {
+      $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
+      $subject     = t("Excel-lähete");
+      $filename    = "Lahete.xlsx";
+    }
+
+  if (!empty($header_nimi)) {
+    $worksheet->writeString($excelrivi,
+      $excelsarake,
+      "Deliveries to {$header_nimi}",
+      $format_bold);
+
+      for ($i=0; $i < 3; $i++) $excelrivi++;
+    }
+
+    $headerit = array(
+      'Customer order number',
+      'Company Product number',
+      'Customer Product number',
+      'EAN Code',
+      'Product Description',
+      'Pack',
+      'delivered QTY'
+    );
+
+    foreach ($headerit as $header) {
+      $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
+      $excelsarake++;
+    }
+
+    mysql_data_seek($result, 0);
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $excelsarake = 0;
+      $fields = array(
+        $row['asiakkaan_tilausnumero'],
+        $row['tuoteno'],
+        $row['kommentti'],
+        $row['eankoodi'],
+        $row['nimitys'],
+        $row['myynti_era'],
+        $row['varattu']
+      );
+
+      $excelrivi++;
+
+      foreach ($fields as $field) {
+        $worksheet->writeString($excelrivi, $excelsarake, $field);
+        $excelsarake++;
+      }
+    }
+
+    $excelnimi = $worksheet->close();
+
+    $email_params = array(
+      "to"      => $kukarow['eposti'],
+      "subject" => $subject,
+      "attachements" => array(
+        0 => array(
+          "filename"    => "/tmp/{$excelnimi}",
+          "newfilename" => $filename,
+          "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+      )
+    );
+
+    return pupesoft_sahkoposti($email_params);
+  }
 }
 
 // Katostaan kuuluuko tulostaa rahtikirja vai kutsua Unifaunin _closeWithPrinter-metodia
@@ -47,12 +187,22 @@ if ($tee == 'tulosta') {
             WHERE yhtio = '$kukarow[yhtio]'
             AND selite  = '$toimitustapa'";
   $toitares = pupe_query($query);
-  $toitarow = mysql_fetch_assoc($toitares);
 
-  // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
-  // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-  if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
-    $tee = "close_with_printer";
+  if (mysql_num_rows($toitares) == 1) {
+    $toitarow = mysql_fetch_assoc($toitares);
+
+    // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
+    // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      $tee = "close_with_printer";
+    }
+  }
+  else {
+    echo "<font class='message'>";
+    echo t("Toimitustapaa ei löytynyt");
+    echo "</font><br><br>";
+
+    $tee = "";
   }
 }
 
@@ -1000,32 +1150,6 @@ if ($tee == 'tulosta') {
         }
       }
 
-      // Katsotaan onko anvia-verkkokauppa käytössä, silloin lähetetään toimituskuittaus Ftp:llä kun rahtikirja tulostetaan
-      if (isset($anvia_ftphost, $anvia_ftpuser, $anvia_ftppass, $anvia_ftppath)) {
-        $ftphost = $anvia_ftphost;
-        $ftpuser = $anvia_ftpuser;
-        $ftppass = $anvia_ftppass;
-        $ftppath = $anvia_ftppath;
-
-        $query = "SELECT asiakkaan_tilausnumero, tunnus
-                  FROM lasku
-                  WHERE yhtio                 = '$kukarow[yhtio]'
-                  AND tunnus                  IN ($otunnukset)
-                  AND laatija                 = 'FuturSoft'
-                  AND asiakkaan_tilausnumero != ''";
-        $anviares = pupe_query($query);
-
-        while ($anviarow = mysql_fetch_assoc($anviares)) {
-
-          $anvia_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
-          $anvia_api_rak = $rahtikirjanro;
-          $anvia_api_ord = $anviarow['asiakkaan_tilausnumero'];
-          $anvia_api_til = $anviarow['tunnus'];
-
-          require "anvia_toimita_tilaus.php";
-        }
-      }
-
       // Tulostetaan DGD
       if ((strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or $tultiin == 'koonti_eratulostus_pakkaustiedot') and $rakirsyotto_dgd_tulostin != "" and $dgdkomento != '' and $dgdkpl > 0) {
 
@@ -1554,139 +1678,8 @@ if ($tee == '') {
     echo "</form>";
   }
   else {
-    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ".</font><br><br>";
+    echo "<br><br><br><font class='message'>", t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"), ". (2)</font><br><br>";
   }
 
   require "inc/footer.inc";
-}
-
-if (!function_exists("laheta_excel_koontilahete")) {
-  function laheta_excel_koontilahete($otunnukset, $toimitustaparow) {
-    $otunnukset = (array) $otunnukset;
-
-    if (empty($otunnukset)) return false;
-
-    require_once 'inc/pupeExcel.inc';
-
-    global $kukarow;
-
-    $_otunnukset = implode(',', $otunnukset);
-
-    $query = "SELECT lasku.asiakkaan_tilausnumero,
-                     lasku.nimi,
-                     lasku.toim_nimi,
-                     asiakaskommentti.kommentti,
-                     tilausrivi.tuoteno,
-                     tilausrivi.tilkpl,
-                     tuote.eankoodi,
-                     tuote.myynti_era,
-                     IFNULL(avainsana_nimitys.selite, tuote.nimitys) AS nimitys
-              FROM lasku
-              JOIN tilausrivi
-                ON tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-                AND tilausrivi.keratty <> ''
-              JOIN tuote
-                ON tuote.yhtio = tilausrivi.yhtio
-                AND tuote.tuoteno = tilausrivi.tuoteno
-              JOIN asiakas
-                ON asiakas.yhtio = lasku.yhtio
-                AND asiakas.tunnus = lasku.liitostunnus
-              LEFT JOIN asiakaskommentti
-                ON asiakaskommentti.yhtio = tilausrivi.yhtio
-                AND asiakaskommentti.ytunnus = lasku.ytunnus
-                AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
-              LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
-                ON avainsana_nimitys.yhtio = tuote.yhtio
-                AND avainsana_nimitys.kieli = asiakas.kieli
-                AND avainsana_nimitys.laji = 'nimitys'
-                AND avainsana_nimitys.tuoteno = tuote.tuoteno
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.tila = 'L'
-                AND lasku.alatila = 'B'
-                AND lasku.tunnus IN ($_otunnukset)";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) return false;
-
-    $laskurow = mysql_fetch_assoc($result);
-
-    $worksheet   = new pupeExcel();
-    $format_bold = array("bold" => true);
-    $excelrivi   = 0;
-    $excelsarake = 0;
-
-    if (count($otunnukset) > 1) {
-      $header_nimi = $toimitustaparow["toim_postitp"];
-      $subject     = t("Excel-koontilähete");
-      $filename    = "Koontilahete.xlsx";
-    }
-    else {
-      $header_nimi = empty($laskurow['toim_nimi']) ? $laskurow['nimi'] : $laskurow['toim_nimi'];
-      $subject     = t("Excel-lähete");
-      $filename    = "Lahete.xlsx";
-    }
-
-  if (!empty($header_nimi)) {
-    $worksheet->writeString($excelrivi,
-      $excelsarake,
-      "Deliveries to {$header_nimi}",
-      $format_bold);
-
-      for ($i=0; $i < 3; $i++) $excelrivi++;
-    }
-
-    $headerit = array(
-      'Customer order number',
-      'Company Product number',
-      'Customer Product number',
-      'EAN Code',
-      'Product Description',
-      'Pack',
-      'QTY'
-    );
-
-    foreach ($headerit as $header) {
-      $worksheet->writeString($excelrivi, $excelsarake, $header, $format_bold);
-      $excelsarake++;
-    }
-
-    mysql_data_seek($result, 0);
-
-    while ($row = mysql_fetch_assoc($result)) {
-      $excelsarake = 0;
-      $fields = array(
-        $row['asiakkaan_tilausnumero'],
-        $row['tuoteno'],
-        $row['kommentti'],
-        $row['eankoodi'],
-        $row['nimitys'],
-        $row['myynti_era'],
-        $row['tilkpl']
-      );
-
-      $excelrivi++;
-
-      foreach ($fields as $field) {
-        $worksheet->writeString($excelrivi, $excelsarake, $field);
-        $excelsarake++;
-      }
-    }
-
-    $excelnimi = $worksheet->close();
-
-    $email_params = array(
-      "to"      => $kukarow['eposti'],
-      "subject" => $subject,
-      "attachements" => array(
-        0 => array(
-          "filename"    => "/tmp/{$excelnimi}",
-          "newfilename" => $filename,
-          "ctype"       => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-      )
-    );
-
-    return pupesoft_sahkoposti($email_params);
-  }
 }

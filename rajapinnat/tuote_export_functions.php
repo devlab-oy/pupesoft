@@ -2,6 +2,7 @@
 
 function tuote_export_tee_querylisa_resultista($tyyppi, array $tulokset) {
   $poimitut = '';
+  $result = '';
 
   // $tulokset = array(
   //   [0] => array("muuttuneet_tuotenumerot" => "'3','4'"),
@@ -37,9 +38,6 @@ function tuote_export_tee_querylisa_resultista($tyyppi, array $tulokset) {
     }
     elseif ($tyyppi == 'muuttuneet_ryhmat') {
       $result = " AND tuote.aleryhma IN ($poimitut) ";
-    }
-    else {
-      $result = '';
     }
   }
 
@@ -371,12 +369,19 @@ function tuote_export_hae_saldot($params) {
 
   $ajetaanko_kaikki           = $params['ajetaanko_kaikki'];
   $datetime_checkpoint        = tuote_export_checkpoint('TEX_SALDOT');
+  $vaihtoehtoiset_saldot      = $params['vaihtoehtoiset_saldot'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
 
   $dnstock = array();
 
   if (!is_array($verkkokauppa_saldo_varasto)) {
      echo "Virhe! verkkokauppa_saldo_varasto pitää olla array!";
+
+     return $dnstock;
+  }
+
+  if (!is_array($vaihtoehtoiset_saldot)) {
+     echo "Virhe! vaihtoehtoiset_saldot pitää olla array!";
 
      return $dnstock;
   }
@@ -435,16 +440,37 @@ function tuote_export_hae_saldot($params) {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    list(, , $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
+    // jos halutaan vaihtoehtoisia saldoja omiin kenttiin, lasketaan ne tässä
+    $vaihtoehtoiset_kentat = array();
+
+    foreach($vaihtoehtoiset_saldot as $varasto_kentta => $varasto_tunnukset) {
+      $vaihtoehto_myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $varasto_tunnukset);
+
+      $vaihtoehtoiset_kentat[$varasto_kentta] = $vaihtoehto_myytavissa;
+    }
+
+    $myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $verkkokauppa_saldo_varasto);
 
     $dnstock[] = array(
-      'tuoteno'     => $row["tuoteno"],
-      'ean'         => $row["eankoodi"],
-      'myytavissa'  => $myytavissa,
+      'ean'                   => $row["eankoodi"],
+      'myytavissa'            => $myytavissa,
+      'tuoteno'               => $row["tuoteno"],
+      'vaihtoehtoiset_saldot' => $vaihtoehtoiset_kentat,
     );
   }
 
   return $dnstock;
+}
+
+function tuote_export_saldo_myytavissa($tuoteno, Array $varastot) {
+  global $kukarow, $yhtiorow;
+
+  list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $varastot);
+
+  // saldo myytävissä palautta false, jos tuotteella ei ole paikkaa kysytyssä varastossa
+  $saldo = ($myytavissa === false) ? 0 : $myytavissa;
+
+  return $saldo;
 }
 
 function tuote_export_hae_tuoteryhmat($params) {
@@ -603,20 +629,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
 
   $dnslajitelma = array();
 
-  // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan
-  $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
-            FROM tuotteen_avainsanat
-            JOIN tuote ON (tuote.yhtio = tuotteen_avainsanat.yhtio
-              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuote.status != 'P'
-              AND tuote.tuotetyyppi NOT IN ('A','B')
-              AND tuote.tuoteno != ''
-              AND tuote.nakyvyys != '')
-            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
-            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-            AND trim(tuotteen_avainsanat.selite) != ''";
-  $resselite = pupe_query($query);
-
   if ($ajetaanko_kaikki === false) {
     $muutoslisa = " AND (
       tuotteen_avainsanat.muutospvm >= '{$datetime_checkpoint}'
@@ -628,9 +640,28 @@ function tuote_export_hae_lajitelmatuotteet($params) {
     $muutoslisa = "";
   }
 
+  // haetaan kaikki tuotteen variaatiot, jotka on menossa verkkokauppaan ja on muuttunut
+  $query = "SELECT DISTINCT tuotteen_avainsanat.selite selite
+            FROM tuotteen_avainsanat
+            JOIN tuote on (tuote.yhtio = tuotteen_avainsanat.yhtio
+              AND tuote.tuoteno = tuotteen_avainsanat.tuoteno
+              AND tuote.status != 'P'
+              AND tuote.tuotetyyppi NOT in ('A','B')
+              AND tuote.tuoteno != ''
+              AND tuote.nakyvyys != '')
+            LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+              and try_fi.selite = tuote.try
+              and try_fi.laji = 'try'
+              and try_fi.kieli = 'fi')
+            WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
+            AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+            {$muutoslisa}
+            AND trim(tuotteen_avainsanat.selite) != ''";
+  $resselite = pupe_query($query);
+
   // loopataan variaatio-nimitykset
   while ($rowselite = mysql_fetch_assoc($resselite)) {
-    // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon ja on muuttunut
+    // Haetaan kaikki tuotteet, jotka kuuluu tähän variaatioon
     $aliselect = "SELECT
                   tuote.*,
                   tuotteen_avainsanat.tuoteno,
@@ -653,7 +684,6 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                   WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                   AND tuotteen_avainsanat.laji = 'parametri_variaatio'
                   AND tuotteen_avainsanat.selite = '{$rowselite['selite']}'
-                  {$muutoslisa}
                   ORDER BY tuote.tuoteno";
     $alires = pupe_query($aliselect);
 

@@ -104,6 +104,7 @@ if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
 if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
+if (!isset($status))                 $status = '';
 
 // setataan
 $lisa = "";
@@ -158,6 +159,13 @@ if (!$php_cli) {
     $rukVchk = "";
   }
 
+  if (isset($konsernitoimittajat_rajaus) and $konsernitoimittajat_rajaus != "") {
+    $rukKon = "CHECKED";
+  }
+  else {
+    $rukKon = "";
+  }
+
   echo "<br><table>
     <tr>
     <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n osastoon")."</th>
@@ -170,6 +178,10 @@ if (!$php_cli) {
     <tr>
     <th>".t("Listaa osto ja myyntitiedot vain valituista varastoista")."</th>
     <td><input type='checkbox' name='valitut_varastot_rajaus' value='valitut' $rukVchk></td>
+    </tr>
+    <tr>
+    <th>".t("N‰yt‰ vain konsernitoimittajien tuotteita")."</th>
+    <td><input type='checkbox' name='konsernitoimittajat_rajaus' value='valitut' $rukKon></td>
     </tr></table>";
 
   echo "<br><table>";
@@ -294,17 +306,9 @@ if (!$php_cli) {
 
   echo "<tr><th>", t("Statusrajaus"), ":</th>";
 
-  $result = t_avainsana("S");
-
-  echo "<td><select name='status'><option value=''>", t("Kaikki"), "</option>";
-
-  while ($statusrow = mysql_fetch_assoc($result)) {
-    $sel = '';
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
-    echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
-  }
-
+  echo "<td><select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";
@@ -572,6 +576,13 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $where_lisa .= "AND try = '0' ";
   }
 
+  $konsernitoimittajarajausjoini = '';
+
+  if (isset($konsernitoimittajat_rajaus) and $konsernitoimittajat_rajaus != '') {
+    $konsernitoimittajarajausjoini = " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+    JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus AND toimi.konserniyhtio != '') ";
+  }
+
   //################# Varaston tiedot ##################
   $varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 
@@ -612,6 +623,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
                JOIN varastopaikat ON  (varastopaikat.yhtio = tapahtuma.yhtio
                  AND varastopaikat.tunnus = tapahtuma.varasto)
                $jarjestys_join
+               $konsernitoimittajarajausjoini
                WHERE tapahtuma.yhtio      = '$kukarow[yhtio]'
                AND tapahtuma.laadittu     > '$vv-$kk-$pp 23:59:59'
                $varastontunnukset1
@@ -651,6 +663,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         JOIN varastopaikat ON  (varastopaikat.yhtio = tuotepaikat.yhtio
           AND varastopaikat.tunnus = tuotepaikat.varasto)
         $jarjestys_join
+        $konsernitoimittajarajausjoini
         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
         $varastontunnukset2
         $where_lisa

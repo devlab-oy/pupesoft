@@ -40,7 +40,7 @@ if (! -d $dirri3) {
 }
 
 sysopen("tmpfaili", $tmpfile, O_CREAT) or die("Failin $tmpfile avaus epäonnistui!");
-flock("tmpfaili", LOCK_EX) or die("Lukkoa ei saatu fileen: $tmpfile");
+flock("tmpfaili", LOCK_EX | LOCK_NB) or die("Lukkoa ei saatu fileen: $tmpfile");
 
 opendir($hakemisto, $dirri1);
 

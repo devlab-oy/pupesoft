@@ -78,6 +78,10 @@ if (!isset($presta_edi_folderpath)) {
   // Mihin hakemistoon tehdään Prestan tilauksista EDI tiedosto
   die('Presta edi folder path puuttuu');
 }
+if (!isset($presta_debug)) {
+  // debug mode echottaa ruudulle ajon statusta
+  $presta_debug = false;
+}
 if (!isset($presta_home_category_id)) {
   // Prestan "home" kategorian tunnus, jonka alle kaikki Pupesoftin kategoriat siirretään
   $presta_home_category_id = 2;
@@ -85,6 +89,11 @@ if (!isset($presta_home_category_id)) {
 if (!isset($presta_verkkokauppa_asiakas)) {
   // verkkokauppa_asiakas on fallback, mikäli oikeaa asiakasta ei löydetä pupesoftista
   $presta_verkkokauppa_asiakas = null;
+}
+if (!isset($presta_laskutusosoitteen_muutos)) {
+  // voidaanko verkkokaupassa vaihtaa laskutusosoitetta
+  // jos false, otetaan aina pupesoftin asiakkaan laskutusosoite
+  $presta_laskutusosoitteen_muutos = true;
 }
 if (!isset($presta_haettavat_tilaus_statukset)) {
   // Missä tilassa olevia tilauksia haetaan Prestasta
@@ -119,6 +128,20 @@ if (!isset($presta_dynaamiset_tuoteparametrit)) {
     // array(
     //   'nimi' => 'wholesale_price',
     //   'arvo' => 'myymalahinta_verot_pois'
+    // ),
+  );
+}
+if (!isset($presta_dynaamiset_asiakasparametrit)) {
+  // Jos halutaan poikkeavan kentän arvo prestan asiakkaalle
+  // nimi = prestan asiakkaan kentän nimi, arvo = yhteyshenkilö taulun kentän nimi
+  $presta_dynaamiset_asiakasparametrit = array(
+    // array(
+    //   'nimi' => 'website',
+    //   'arvo' => 'www'
+    // ),
+    // array(
+    //   'nimi' => 'firstname',
+    //   'arvo' => 'titteli'
     // ),
   );
 }
@@ -197,6 +220,10 @@ if (!isset($presta_varastot)) {
 if (!isset($presta_tuotekuvien_nouto)) {
   // Siirretäänkö Prestashopin tuotekuvat Pupesoftiin
   $presta_tuotekuvien_nouto = false;
+}
+if (!isset($presta_tilauksen_liitetiedostojen_nouto)) {
+  // Haetaan tilauksen liitetiedostot. HUOM! Vaatii custom muutoksia Prestaan.
+  $presta_tilauksen_liitetiedostojen_nouto = false;
 }
 if (!isset($presta_siirrettavat_hinnat)) {
   // Mitä hintoja siirretään Prestan Specific Prices hinnoiksi
@@ -279,6 +306,7 @@ if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');
 
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
+  $presta_customer->set_dynamic_fields($presta_dynaamiset_asiakasparametrit);
   $presta_customer->sync_customers($asiakkaat);
 }
 
@@ -297,11 +325,13 @@ if (presta_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   presta_echo("Haetaan tilaukset.");
   $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key, 'presta_tilaukset');
 
+  $presta_orders->set_changeable_invoice_address($presta_laskutusosoitteen_muutos);
   $presta_orders->set_edi_filepath($presta_edi_folderpath);
-  $presta_orders->set_yhtiorow($yhtiorow);
-  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_fetch_carrier_files($presta_tilauksen_liitetiedostojen_nouto);
   $presta_orders->set_fetch_statuses($presta_haettavat_tilaus_statukset);
   $presta_orders->set_fetched_status($presta_haettu_tilaus_status);
+  $presta_orders->set_verkkokauppa_customer($presta_verkkokauppa_asiakas);
+  $presta_orders->set_yhtiorow($yhtiorow);
   $presta_orders->transfer_orders_to_pupesoft();
 }
 

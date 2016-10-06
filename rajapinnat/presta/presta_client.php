@@ -15,12 +15,10 @@ abstract class PrestaClient {
   // ids of installed languages
   protected $languages_table = null;
 
-  /**
-   *
-   * @var PrestaShopWebservice REST-client
-   */
+  // dynamic fields for xml
+  protected $dynamic_fields = array();
 
-
+  // PrestaShopWebservice REST-client
   protected $ws = null;
 
   /**
@@ -520,6 +518,28 @@ abstract class PrestaClient {
     $value = htmlspecialchars($value, ENT_IGNORE);
 
     return $value;
+  }
+
+  protected function assign_dynamic_fields(SimpleXMLElement &$xml_node, $value_array) {
+    $parameters = $this->dynamic_fields;
+
+    if (empty($parameters)) {
+      return;
+    }
+
+    foreach ($parameters as $parameter) {
+      $key       = $parameter['arvo'];
+      $attribute = $parameter['nimi'];
+      $value     = $this->xml_value($value_array[$key]);
+
+      $xml_node->$attribute = $value;
+
+      $this->logger->log("Poikkeava arvo {$attribute} -kenttään. Asetetaan {$key} kentän arvo {$value}");
+    }
+  }
+
+  public function set_dynamic_fields($fields) {
+    $this->dynamic_fields = $fields;
   }
 
   public function set_languages_table($value) {

@@ -162,6 +162,7 @@ if ($variaaritorivi === FALSE) {
 
   echo "$varaosavirhe</td>";
   echo "<td class='back'>
+        <input type='hidden' name='rivilaadittu' value='$rivilaadittu'>
         <input type='submit' class='lisaa_btn' name= 'kumpi' value = '".t("Lisää")."'>
         <input type='submit' class='poista_btn' name= 'tyhjenna' value = '".t("Tyhjennä")."'></td>";
 

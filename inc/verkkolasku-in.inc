@@ -1253,6 +1253,18 @@ if (!function_exists("verkkolasku_in")) {
         array_shift($ealvi);
       }
 
+      // Halutaan kirjata verkkolaskut aina verottomina
+      if ($yhtiorow['alv_velvollinen'] == 'E') {
+        $ealvi = array(0);   // Riveiltä löytyneet verokannat nollaksi
+        $lisavat = array(0); // Veroerittelyn verokannat nollaksi
+        $oletusalvi = 0;     // Oletusverokanta nollaksi
+
+        // Rivikohtaiset verot nollaksi
+        foreach ($rtuoteno as $rivi_key => $_) {
+          $rtuoteno[$rivi_key]['alv'] = 0;
+        }
+      }
+
       // Tehdän pelkät oletustiliöinnit
       if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
 

@@ -85,6 +85,28 @@ if (mysql_field_name($result, $i) == "ryhma") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "campaign_id") {
+
+  $query = "SELECT campaigns.*
+            FROM campaigns
+            JOIN yhtio ON (campaigns.company_id = yhtio.tunnus and yhtio.yhtio = '{$kukarow['yhtio']}')
+            WHERE campaigns.active = 1";
+  $kresult = pupe_query($query);
+
+  $ulos = "<td><select id='campaign_id' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = 'NULL'>".t("Ei kampanjaa")."</option>";
+  while ($krow = mysql_fetch_assoc($kresult)) {
+    $sel = '';
+    if (strtoupper($trow[$i]) == strtoupper($krow["id"])) {
+      $sel = "selected";
+    }
+    $ulos .= "<option value='{$krow['id']}' $sel>{$krow['name']}</option>";
+  }
+
+  $ulos .= "</select></td>\n";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "asiakas_ryhma" and $lukitse_avaimeen != "") {
   $tyyppi = 4;
 }

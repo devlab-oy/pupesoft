@@ -1,5 +1,7 @@
 <?php
 
+require_once "inc/functions.inc";
+
 class Logger {
   private $log_file = null;
 

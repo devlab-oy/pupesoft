@@ -50,6 +50,9 @@ class PrestaCustomers extends PrestaClient {
 
     $xml->customer->active = 1;
 
+    // Assign dynamic customer parameters
+    $this->assign_dynamic_fields($xml->customer, $customer);
+
     $group_id = $customer['presta_customergroup_id'];
     $xml->customer->id_default_group = $group_id;
 

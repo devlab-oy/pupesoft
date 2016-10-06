@@ -104,6 +104,7 @@ if (!isset($alias_set))           $alias_set = "";
 if (!isset($rajattu_nakyma))      $rajattu_nakyma = "";
 if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
+if (!isset($mista))               $mista = "";
 
 // Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
@@ -404,6 +405,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
           }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
+          }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
           }
@@ -481,6 +485,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
+          }
+          elseif (mysql_field_type($result, $i) == 'int' and $t[$i] == "NULL") {
+            $query .= ", ". mysql_field_name($result, $i)." = NULL ";
           }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
@@ -1269,6 +1276,26 @@ for ($i=0; $i<=$count; $i++) {
         $lisa .= " AND varaston_hyllypaikat.keraysvyohyke {$hakuehto} ";
       }
     }
+    elseif ($toim == 'toimitustavat_toimipaikat' and ($i == 1 or $i == 2)) {
+      if ($i == 1) {
+        $lisa .= " AND toimitustapa_tunnus {$hakuehto}";
+      }
+      else {
+        if (!is_numeric($haku[$i])) {
+          $query = "SELECT tunnus
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND nimi LIKE '%{$haku[$i]}%'";
+          $toimipaikkares = pupe_query($query);
+          $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
+
+          $lisa .= " AND toimipaikka_tunnus = '{$toimipaikkarow['tunnus']}' ";
+        }
+        else {
+          $lisa .= " AND toimipaikka_tunnus {$hakuehto} ";
+        }
+      }
+    }
     elseif (strpos($array[$i], "/") !== FALSE) {
       $lisa .= " and (";
 
@@ -1385,6 +1412,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             ORDER BY $jarjestys
             $limiitti";
   $result = pupe_query($query);
+
 
   if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 
@@ -2214,7 +2242,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $laji = "T";
       }
 
-      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[2]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 

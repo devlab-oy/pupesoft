@@ -1288,20 +1288,14 @@ if ($tee == 'MUUTA') {
                 </td>
               </tr>";
 
-        $sel0 = $sel1 = "";
-
-        if ($krow["saatavat"] == "0") {
-          $sel0 = "SELECTED";
-        }
-        if ($krow["saatavat"] == "1") {
-          $sel1 = "SELECTED";
-        }
+        $sel = array($krow["saatavat"] => 'selected') + array(0 => '', 1 => '', 2 => '');
 
         echo "<tr><th align='left'>", t("Saatavat"), ":</th>";
 
         echo "<td><select name='saatavat'>";
-        echo "<option value='0' {$sel0}>", t("Ei n‰ytet‰ saatavia kassak‰ytt‰j‰n‰"), "</option>";
-        echo "<option value='1' {$sel1}>", t("N‰ytet‰‰n saatavat kassak‰ytt‰j‰n‰"), "</option>";
+        echo "<option value='0' {$sel[0]}>", t("Ei n‰ytet‰ saatavia kassak‰ytt‰j‰n‰"), "</option>";
+        echo "<option value='1' {$sel[1]}>", t("N‰ytet‰‰n saatavat kassak‰ytt‰j‰n‰"), "</option>";
+        echo "<option value='2' {$sel[2]}>", t("Ei n‰ytet‰ saatavia myyntitilauksella"), "</option>";
         echo "</select></td></tr>";
       }
       else {

@@ -205,7 +205,8 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  eilahetetta  = 'o',
                  clearing     = 'sopimus',
                  swift        = '$tilausnumero',
-                 tilaustyyppi = ''
+                 tilaustyyppi = '',
+                 luontiaika  = '$tapahtumapvm'
                  {$laskutuskausilisa}
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and tunnus   = '$ok'
@@ -275,8 +276,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       // p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
       $query  = "UPDATE lasku
                  SET tila   = 'L',
-                 alatila     = 'D',
-                 luontiaika  = '$tapahtumapvm'
+                 alatila     = 'D'
                  WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$ok'
                  and tila    = 'L'";

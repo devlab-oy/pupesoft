@@ -55,18 +55,16 @@ if ($maara > 0) {
   $yhrow   = mysql_fetch_array($result);
 
   $tilausyhteyshenkilo = $yhrow['nimi'];
-
-  $verkkotunnus  = $srow["ovttunnus"];
-
-  $valkoodi     = $srow["oletus_valkoodi"];
+  $verkkotunnus = $srow["ovttunnus"];
+  $valkoodi = $srow["oletus_valkoodi"];
 
   //keräyspvm pitäisi olla -
-  if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
+  if ($kukarow['kesken'] == 0 and (!in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3")) or empty($srow["oletus_toimaika"]))) {
     $toimpp = date("j");
     $toimkk = date("n");
     $toimvv = date("Y");
   }
-  elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
+  elseif ($kukarow['kesken'] == 0 and in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3"))) {
     $toimittajan_toimaika = date('Y-m-d', time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
     list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
   }
@@ -88,13 +86,15 @@ if ($maara > 0) {
 
   $jatka = "jatka";
 
-  $query = "SELECT max(tunnus) tunnus
+  $query = "SELECT tunnus, toimaika
             FROM lasku
             WHERE yhtio      = '$kukarow[yhtio]'
             AND tila         = 'O'
             AND alatila      = ''
             AND liitostunnus = '$toimittaja'
-            AND myyja        = '$kukarow[tunnus]'";
+            AND myyja        = '$kukarow[tunnus]'
+            ORDER BY tunnus DESC
+            LIMIT 1";
   $lasres = pupe_query($query);
   $lasrow = mysql_fetch_array($lasres);
 
@@ -104,6 +104,7 @@ if ($maara > 0) {
   }
   else {
     $tilausnumero = $lasrow['tunnus'];
+    $otstoimaika  = $lasrow['toimaika'];
 
     $query = "SELECT max(tilaajanrivinro) tilaajanrivinro
               FROM tilausrivi
@@ -165,6 +166,36 @@ if ($maara > 0) {
     $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
   }
 
+  $toimaika = "";
+  $toimvva  = "";
+  $toimkka  = "";
+  $toimppa  = "";
+
+  if ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '3') {
+    $ttquery = "SELECT if (tuotteen_toimittajat.toimitusaika > 0, tuotteen_toimittajat.toimitusaika, toimi.oletus_toimaika) toimaika
+                FROM tuotteen_toimittajat
+                JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+                AND tuotteen_toimittajat.tuoteno = '{$tuoteno}'
+                AND tuotteen_toimittajat.liitostunnus = {$lasrow['liitostunnus']}
+                AND (tuotteen_toimittajat.toimitusaika > 0 or toimi.oletus_toimaika > 0)";
+    $ttres = pupe_query($ttquery);
+
+    if ($ttrow = mysql_fetch_assoc($ttres)) {
+      $toimittajan_toimaika = date('Y-m-d', time() + $ttrow["toimaika"] * 24 * 60 * 60);
+
+      list($toimvva, $toimkka, $toimppa) = explode('-', $toimittajan_toimaika);
+    }
+  }
+
+  if (checkdate($toimkka, $toimppa, $toimvva)) {
+    $toimaika = $toimvva."-".$toimkka."-".$toimppa;
+  }
+
+  if ($toimaika == "" or $toimaika == "0000-00-00") {
+    $toimaika = $otstoimaika;
+  }
+
   // lisätään ostotilausrivi
   $query = "INSERT into tilausrivi SET
             hinta           = '$lis_hinta',
@@ -179,8 +210,8 @@ if ($maara > 0) {
             otunnus         = '$tilausnumero',
             yhtio           = '$kukarow[yhtio]',
             tyyppi          = 'O',
-            kommentti ='',
-            toimaika        = now(),
+            kommentti       = '',
+            toimaika        = '$toimaika',
             kerayspvm       = now(),
             hyllyalue       = '$jtstu[hyllyalue]',
             hyllynro        = '$jtstu[hyllynro]',

@@ -357,11 +357,19 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
 
   fclose($fh);
 
-  system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
+  $params = array(
+    'chars'    => $rivinleveys,
+    'filename' => $filenimi,
+    'margin'   => 0,
+    'mode'     => 'landscape',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi_ps = pupesoft_a2ps($params);
 
   if ($komento["Inventointierolista"] == 'email') {
 
-    system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+    system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
 
     $liite = $filenimi.".pdf";
     $kutsu = t("Inventointierolista")."_$lista";
@@ -370,14 +378,14 @@ if ($tee == "EROLISTA" and $lista != '' and $komento["Inventointierolista"] != '
   }
   else {
     // itse print komento...
-    $line = exec("{$komento['Inventointierolista']} ".$filenimi.".ps");
+    $line = exec("{$komento['Inventointierolista']} {$filenimi_ps}");
   }
 
   echo "<font class='message'>", t("Inventointierolista tulostuu!"), "</font><br><br>";
 
   //poistetaan tmp file samantien kuleksimasta...
   unlink($filenimi);
-  unlink($filenimi.".ps");
+  unlink($filenimi_ps);
 
   $tee = "INVENTOI";
 }
@@ -1107,12 +1115,19 @@ if ($tee == 'VALMIS') {
               pupe_query($query);
 
               $laji = "tulo";
+              $_kplhinta  = $otrow["ostohinta"];
+              $_kehahinta = $row["kehahin"];
+
+              $summa = round($otrow["ostohinta"] * $erotus, 2);
+
               $selite = "Tuloutus: $erotus kappaletta. Ostohinta: $otrow[ostohinta] Varastopaikka: $hyllyalue $hyllynro $hyllyvali $hyllytaso";
               $laadittuaikalisa = "now()";
             }
             else {
 
               $laji = "Inventointi";
+              $_kplhinta  = $row["kehahin"];
+              $_kehahinta = $row["kehahin"];
 
               if ($erotus > 0) {
                 $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
@@ -1133,8 +1148,8 @@ if ($tee == 'VALMIS') {
                       tuoteno   = '$tuoteno',
                       laji      = '$laji',
                       kpl       = '$erotus',
-                      kplhinta  = '$row[kehahin]',
-                      hinta     = '$row[kehahin]',
+                      kplhinta  = '$_kplhinta',
+                      hinta     = '$_kehahinta',
                       hyllyalue = '$hyllyalue',
                       hyllynro  = '$hyllynro',
                       hyllyvali = '$hyllyvali',

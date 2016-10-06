@@ -442,64 +442,66 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
-  $params_kerayslista = array(
-    'asrow'             => $asrow,
-    'boldi'             => $boldi,
-    'iso'               => $iso,
-    'iso_boldi'         => $iso_boldi,
-    'kala'              => 0,
-    'kieli'             => $kieli,
-    'komento'           => '',
-    'laskurow'          => $laskurow,
-    'norm'              => $norm,
-    'page'              => '',
-    'paino'             => 0,
-    'pdf'               => NULL,
-    'perheid'           => 0,
-    'perheid2'          => 0,
-    'pieni'             => $pieni,
-    'pieni_boldi'       => $pieni_boldi,
-    'rectparam'         => $rectparam,
-    'rivinkorkeus'      => $rivinkorkeus,
-    'rivinumerot'       => $rivinumerot,
-    'row'               => NULL,
-    'sivu'              => 1,
-    'tee'               => $tee,
-    'thispage'          => NULL,
-    'tilausnumeroita'   => $tilausnumeroita,
-    'toim'              => $toim,
-    'tots'              => 0,
-    'tyyppi'            => $tyyppi,
-    'kerayseran_numero' => $kerayseran_numero,
-    'kerayslistatyyppi' => $kerayslistatyyppi,
-  );
-
-  // Aloitellaan keräyslistan teko
-  $params_kerayslista = alku_kerayslista($params_kerayslista);
-
-  while ($row = mysql_fetch_assoc($riresult)) {
-    $params_kerayslista["row"] = $row;
-    $params_kerayslista = rivi_kerayslista($params_kerayslista);
-  }
-
-  $params_kerayslista["tots"] = 1;
-  $params_kerayslista = loppu_kerayslista($params_kerayslista);
-
-  $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
-
-  if ($valittu_tulostin == "-88") {
-    $komento = "-88";
-  }
-  else {
-    $komento = hae_lahete_printteri(
-      $laskurow['varasto'],
-      $laskurow['yhtio_toimipaikka'],
-      $tilausnumeroita,
-      $valittu_tulostin
+  if ($yhtiorow["lahetteen_tulostustapa"] != "X") {
+    $params_kerayslista = array(
+      'asrow'             => $asrow,
+      'boldi'             => $boldi,
+      'iso'               => $iso,
+      'iso_boldi'         => $iso_boldi,
+      'kala'              => 0,
+      'kieli'             => $kieli,
+      'komento'           => '',
+      'laskurow'          => $laskurow,
+      'norm'              => $norm,
+      'page'              => '',
+      'paino'             => 0,
+      'pdf'               => NULL,
+      'perheid'           => 0,
+      'perheid2'          => 0,
+      'pieni'             => $pieni,
+      'pieni_boldi'       => $pieni_boldi,
+      'rectparam'         => $rectparam,
+      'rivinkorkeus'      => $rivinkorkeus,
+      'rivinumerot'       => $rivinumerot,
+      'row'               => NULL,
+      'sivu'              => 1,
+      'tee'               => $tee,
+      'thispage'          => NULL,
+      'tilausnumeroita'   => $tilausnumeroita,
+      'toim'              => $toim,
+      'tots'              => 0,
+      'tyyppi'            => $tyyppi,
+      'kerayseran_numero' => $kerayseran_numero,
+      'kerayslistatyyppi' => $kerayslistatyyppi,
     );
+
+    // Aloitellaan keräyslistan teko
+    $params_kerayslista = alku_kerayslista($params_kerayslista);
+
+    while ($row = mysql_fetch_assoc($riresult)) {
+      $params_kerayslista["row"] = $row;
+      $params_kerayslista = rivi_kerayslista($params_kerayslista);
+    }
+
+    $params_kerayslista["tots"] = 1;
+    $params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+    $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
+
+    if ($valittu_tulostin == "-88") {
+      $komento = "-88";
+    }
+    else {
+      $komento = hae_lahete_printteri(
+        $laskurow['varasto'],
+        $laskurow['yhtio_toimipaikka'],
+        $tilausnumeroita,
+        $valittu_tulostin
+      );
+    }
   }
 
-  if ($komento != "") {
+  if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
     //tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 
@@ -531,6 +533,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       }
     }
 
+    $returnvalue = 0;
+  }
+  elseif ($yhtiorow["lahetteen_tulostustapa"] == "X") {
     $returnvalue = 0;
   }
   else {

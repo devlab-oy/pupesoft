@@ -518,6 +518,34 @@ if (isset($ajax)) {
               $maara";
     $qresult = pupe_query($query);
 
+    $yhteensa_maara = 0.0;
+    $yhteensa_arvo  = 0.0;
+
+    if (!empty($tapahtumalaji)) {
+      while ($prow = mysql_fetch_assoc($qresult)) {
+        if ($prow["laji"] != $tapahtumalaji) continue;
+
+        $yhteensa_maara += $prow["kpl"];
+        $yhteensa_arvo  += $prow["arvo"];
+      }
+
+      $_return .= "<tr class='aktiivi'>";
+      $_return .= "<th>" . t("Yhteensä") . ":</th>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_maara) . "</td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td nowrap align='right' valign='top'>" . sprintf('%.2f', $yhteensa_arvo) . "</td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "<td></td>";
+      $_return .= "</tr>";
+
+      mysql_data_seek($qresult, 0);
+    }
+
     // jos jsarjanumeroseuranta S ja inout varastonarvo
     if ($sarjanumeroseuranta == "S") {
       $kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
@@ -2005,7 +2033,6 @@ if ($tee == 'Z') {
   echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 
   $query = "SELECT tuote.*,
-            if (tuote.status = '', 'A', tuote.status) status,
             date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti
             FROM tuote
             WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -2300,7 +2327,8 @@ if ($tee == 'Z') {
     echo "<td>$tuoterow[hinnastoon]<br>";
 
     if ($tuoterow["status"] == "P") echo "<font class='error'>";
-    echo t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark");
+    $product_statuses = product_statuses();
+    echo $product_statuses[$tuoterow["status"]];
     if ($tuoterow["status"] == "P") echo "</font>";
 
     echo "</td>";
@@ -2479,7 +2507,7 @@ if ($tee == 'Z') {
     }
     echo "</td>";
     echo "<td>$tullirow1[cn] $prossat</td>";
-    echo "<td colspan='4'>".wordwrap(substr($tullirow3['dm'], 0, 20)." - ".substr($tullirow2['dm'], 0, 20)." - ".substr($tullirow1['dm'], 0, 20), 70, "<br>")."</td>";
+    echo "<td colspan='3'>".wordwrap(substr($tullirow3['dm'], 0, 20)." - ".substr($tullirow2['dm'], 0, 20)." - ".substr($tullirow1['dm'], 0, 20), 70, "<br>")."</td>";
     echo "<td>$tullirow1[su]</td>";
     echo "</tr>";
 

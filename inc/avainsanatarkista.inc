@@ -135,6 +135,10 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
+      if (strtoupper($tem_laji) == "HUOLTOP_EMAIL" and trim($tem_selite) == '') {
+        $virhe[$i] = t("Selite on pakollinen");
+      }
+
       if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI' or $tem_laji == 'LITETY_TKIRJAST')) {
         $query = "SELECT tunnus
                   FROM avainsana
@@ -161,6 +165,30 @@ if (!function_exists("avainsanatarkista")) {
 
         if (mysql_num_rows($result) > 0) {
           $virhe[$i] = t("Saldovahvistuksen nimi pitää olla uniikki");
+        }
+      }
+
+      if ($tem_laji == "VEHT_RAHTI") {
+        $query = "SELECT avainsana.*
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND avainsana.laji = '{$tem_laji}'
+                  AND avainsana.selite = '{$tem_selite}'
+                  AND avainsana.tunnus != '{$tunnus}'";
+        $result = pupe_query($query);
+        
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron pitää olla uniikki");
+        }
+
+        $query = "SELECT tuote.*
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  AND tuote.tuoteno = '{$tem_selite}'";
+        $result = pupe_query($query);
+        
+        if (mysql_num_rows($result) == 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron tulee löytyä järjestelmästä");
         }
       }
 
@@ -299,6 +327,25 @@ if (!function_exists("avainsanatarkista")) {
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND vienti  = '{$trow['selite']}'";
         $updres = pupe_query($query);
+      }
+    }
+
+    if ($tem_laji == 'EXTRANET_H') {
+      if (mysql_field_name($result, $i) == "laji") {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                  AND avainsana.laji    = '{$tem_laji}'
+                  AND tunnus           != '{$tunnus}'";
+        $result = pupe_query($query);
+     
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
+        }
+      }
+
+      if ((mysql_field_name($result, $i) == "selite") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
       }
     }
 

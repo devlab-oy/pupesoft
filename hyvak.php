@@ -202,7 +202,7 @@ if ($keikalla == "on") {
 if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
 
 # Halutaan n‰hd‰ laskun kuva oikealla puolella joten tehd‰‰n table
-echo "<table><tr><td class='back'>";
+echo "<table><tr><td class='back ptop'>";
 
 $onko_eka_hyvaksyja = FALSE;
 

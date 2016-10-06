@@ -79,11 +79,6 @@ if (!function_exists("pankkitiedot")) {
         $pankki["pankkilaitos"] = "Danske Bank";
         $pankki["swift"] = "DABAFIHX";
         break;
-      case (6) : // Tapiola Pankki
-        $pankki["rahalaitos"] = '  ';
-        $pankki["pankkilaitos"] = "Tapiola Pankki";
-        $pankki["swift"] = "TAPIFI22";
-        break;
       case (7) : // DNB Bank ASA
         $pankki["rahalaitos"] = '  ';
         $pankki["pankkilaitos"] = "DNB Bank ASA";
@@ -94,6 +89,7 @@ if (!function_exists("pankkitiedot")) {
         $pankki["pankkilaitos"] = "Swedbank";
         $pankki["swift"] = "SWEDFIHH";
         break;
+      case (6) : // S-Pankki
       case (9) : // S-Pankki
         $pankki["rahalaitos"] = '  ';
         $pankki["pankkilaitos"] = "S-Pankki";

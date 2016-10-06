@@ -55,6 +55,9 @@ elseif ($osoitelappurow["toim_nimi"] != '') {
   // tänne tullaan, jos ollaan oltu rahtikirja_custom.phpssä
   $postirow = $osoitelappurow;
   $rakir_row = $osoitelappurow;
+
+  $viitelah = $osoitelappurow['viitelah'];
+  $viitevas = $osoitelappurow['viitevas'];
 }
 else {
   $query = "SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus

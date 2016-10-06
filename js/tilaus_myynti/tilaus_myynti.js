@@ -18,23 +18,28 @@ $(document).ready(function() {
 
   if ($('#tilausrivin_esisyotto_parametri').val() == 'K') {
 
-    var toim = $('#toim').val();
+    var toim = $('#toim').val(),
+        rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
 
-    $("input[name='tuoteno']").on('keyup', function() {
-      $("input[name='kpl']").val('');
-      $("input[name='hinta']").val('');
-      $("input[name='ale1']").val('');
-      $("input[name='ale2']").val('');
-      $("input[name='ale3']").val('');
-      $('#kate_rivi_laskenta').html('');
+    if (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '') {
+      $("input[name='tuoteno']").on('keyup', function() {
+        $("input[name='kpl']").val('');
+        $("input[name='hinta']").val('');
+        $("input[name='ale1']").val('');
+        $("input[name='ale2']").val('');
+        $("input[name='ale3']").val('');
+        $('#kate_rivi_laskenta').html('');
+        $('#ykshinta_rivi_laskenta').html('');
+        $('#rivihinta_rivi_laskenta').html('');
 
-      if (toim == 'PIKATILAUS') {
-        $("input[name='netto']").val('');
-      }
-      else {
-        $("select[name='netto']").val('');
-      }
-    });
+        if (toim == 'PIKATILAUS') {
+          $("input[name='netto']").val('');
+        }
+        else {
+          $("select[name='netto']").val('');
+        }
+      });
+    }
 
     $("input[name='ale1']").on('keyup', function() {
       $("input[name='hinta']").trigger('keyup');
@@ -50,9 +55,7 @@ $(document).ready(function() {
 
     $("input[name='hinta']").on('keyup', function() {
 
-      var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
-
-      if ($(this).val() != '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
+      if ($(this).val() != '') {
 
         if (toim == 'PIKATILAUS') {
           var netto = $("input[name='netto']").val();
@@ -83,27 +86,33 @@ $(document).ready(function() {
 
           var data = jQuery.parseJSON(data);
 
-          if (data.kate != '') {
+          if (data.kate && data.kate != '') {
             $('#kate_rivi_laskenta').html(data.kate+'%');
           }
 
+          if (data.ykshinta != '') {
+            $('#ykshinta_rivi_laskenta').html(data.ykshinta);
+          }
+
+          if (data.rivihinta != '') {
+            $('#rivihinta_rivi_laskenta').html(data.rivihinta);
+          }
         });
       }
     });
 
     $("input[name='kpl']").on('keyup', function() {
 
-      var rivitunnus_chk = $("form[name='tilaus']").find("input[name='rivitunnus']");
+      if ($("input[name='tuoteno']").val() != '') {
 
-      if ($("input[name='tuoteno']").val() != '' &&
-          (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
-
-        if ($(this).val() == '') {
+        if ($(this).val() == '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
           $("input[name='hinta']").val('');
           $("input[name='ale1']").val('');
           $("input[name='ale2']").val('');
           $("input[name='ale3']").val('');
           $('#kate_rivi_laskenta').html('');
+          $('#ykshinta_rivi_laskenta').html('');
+          $('#rivihinta_rivi_laskenta').html('');
 
           if (toim == 'PIKATILAUS') {
             $("input[name='netto']").val('');
@@ -119,6 +128,10 @@ $(document).ready(function() {
             data: {
               tuoteno: $("input[name='tuoteno']").val(),
               kpl: $("input[name='kpl']").val(),
+              hinta: $("input[name='hinta']").val(),
+              ale1: $("input[name='ale1']").val(),
+              ale2: $("input[name='ale2']").val(),
+              ale3: $("input[name='ale3']").val(),
               tilausnumero: $("input[name='tilausnumero']").val(),
               toim: toim,
               ajax_toiminto: 'esisyotto',
@@ -130,7 +143,7 @@ $(document).ready(function() {
 
             var data = jQuery.parseJSON(data);
 
-            if (data.hinta != '') {
+            if (data.hinta != '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '' || $("input[name='hinta']").val() == '')) {
               $("input[name='hinta']").val(data.hinta);
             }
 
@@ -150,8 +163,16 @@ $(document).ready(function() {
               }
             });
 
-            if (data.kate != '') {
+            if (data.kate && data.kate != '') {
               $('#kate_rivi_laskenta').html(data.kate+'%');
+            }
+
+            if (data.ykshinta != '') {
+              $('#ykshinta_rivi_laskenta').html(data.ykshinta);
+            }
+
+            if (data.rivihinta != '') {
+              $('#rivihinta_rivi_laskenta').html(data.rivihinta);
             }
 
           }).fail(function(data) {
@@ -160,6 +181,10 @@ $(document).ready(function() {
         }
       }
     });
+
+    if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
+      $("input[name='hinta']").trigger('keyup');
+    }
   }
 
   $('#hintojen_vaihto').on('change', function() {
@@ -211,6 +236,36 @@ $(document).ready(function() {
       new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
     });
   }
+
+  var korvamerkitse_ajax = function() {
+
+    var korva_dd_id = $(this).attr("id");
+    var rivitunnus = korva_dd_id.replace("korva_dd_", "");
+
+    $.post("",
+      {
+        tila: 'KORVAMERKITSE_AJAX',
+        toim: $('#toim').val(),
+        tilausnumero: $('#tilausnumero').val(),
+        rivitunnus: rivitunnus,
+        korvamerkinta: $('#'+korva_dd_id).find('option:selected').val(),
+        async: false,
+        no_head: 'yes',
+        ohje: 'off'
+      },
+      function(json) {
+        var message = JSON && JSON.parse(json) || $.parseJSON(json);
+
+        if (message != "OK") {
+          $('#'+korva_dd_id).replaceWith("<font class='error'>FATAL ERROR!</font>");
+        }
+      }
+    );
+
+    return false;
+  }
+
+  $('.korva_dd').on("change", korvamerkitse_ajax);
 });
 
 function bind_valitut_rivit_checkbox_click() {

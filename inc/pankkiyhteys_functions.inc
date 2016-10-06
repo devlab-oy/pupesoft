@@ -122,7 +122,7 @@ function filelist_table($array, $type) {
   // Sortataan by date desc
   array_multisort($sort_by, SORT_DESC, $tiedostot);
 
-  echo "<table>";
+  echo "<table class='full-width'>";
 
   echo "<thead>";
   echo "<tr>";
@@ -513,6 +513,7 @@ function sepa_download_files($params) {
 
     if (vastaus_kunnossa($code)) {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "OK",
         "data" => $response["data"]
@@ -520,6 +521,7 @@ function sepa_download_files($params) {
     }
     else {
       $tiedosto = array(
+        "file_type" => $file_type,
         "viite"  => $viite,
         "status" => "Virhe",
         "data" => null
@@ -655,21 +657,33 @@ function sepa_renew_certificate($params) {
   $old_cert_info = openssl_x509_parse(base64_decode($pankkiyhteys['signing_certificate']));
 
   $csr_params = array(
-    'pankki'       => $bank,
-    'customer_id'  => $old_cert_info['subject']['serialNumber'],
-    'company_name' => $old_cert_info['subject']['CN'],
+    'pankki' => $bank,
   );
 
-  $generoidut_tunnukset = generoi_private_key_ja_csr($csr_params);
+  switch ($bank) {
+  case 'nordea':
+    $customer_id = $old_cert_info['subject']['serialNumber'];
+
+    $csr_params['customer_id']  = $customer_id;
+    $csr_params['company_name'] = $old_cert_info['subject']['CN'];
+  case 'danske':
+    $customer_id = $pankkiyhteys['customer_id'];
+  }
+
+  $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
+  $generoidut_tunnukset2 = generoi_private_key_ja_csr($csr_params);
 
   $parameters = array(
     "method" => "POST",
     "data" => array(
-      "customer_id"             => $old_cert_info['subject']['serialNumber'],
-      "environment"             => SEPA_ENVIRONMENT,
-      "signing_csr"             => base64_encode($generoidut_tunnukset['csr']),
-      "own_signing_certificate" => $pankkiyhteys['signing_certificate'],
-      "signing_private_key"     => $pankkiyhteys['signing_private_key'],
+      "customer_id"                 => $customer_id,
+      "environment"                 => SEPA_ENVIRONMENT,
+      "signing_csr"                 => base64_encode($generoidut_tunnukset1['csr']),
+      "encryption_csr"              => base64_encode($generoidut_tunnukset2['csr']),
+      "own_signing_certificate"     => $pankkiyhteys['signing_certificate'],
+      "bank_encryption_certificate" => $pankkiyhteys['bank_encryption_certificate'],
+      "signing_private_key"         => $pankkiyhteys['signing_private_key'],
+      "encryption_private_key"      => $pankkiyhteys['encryption_private_key'],
     ),
     "url" => SEPA_ADDRESS . "/{$bank}/renew_certificate",
     "headers" => array(
@@ -683,8 +697,13 @@ function sepa_renew_certificate($params) {
   if (!vastaus_kunnossa($code)) return false;
 
   return array(
-    "own_signing_certificate" => base64_decode($response["ownSigningCertificate"]),
-    "signing_private_key"     => $generoidut_tunnukset['private_key'],
+    "own_signing_certificate"     => base64_decode($response["ownSigningCertificate"]),
+    "own_encryption_certificate"  => base64_decode($response["ownEncryptionCertificate"]),
+    "ca_certificate"              => base64_decode($response["caCertificate"]),
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"]),
+    "signing_private_key"         => $generoidut_tunnukset1['private_key'],
+    "encryption_private_key"      => $generoidut_tunnukset2['private_key'],
   );
 }
 
@@ -814,6 +833,14 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "C2BN") {
       $file_type = "NDCORPAYL";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'FILN') {
+      $file_type = 'HAELASKUT';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'FILL') {
+      $file_type = 'LAHLASKUT';
+    }
   }
 
   // Danskemuunnokset
@@ -834,6 +861,14 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "NDCORPAYL") {
       $file_type = "C2BN";
     }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'FILN';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'FILL';
+    }
   }
 
   // OP-muunnokset
@@ -853,6 +888,14 @@ function sepa_file_type_check($bank, $file_type) {
     // Maksuaineiston palautesanoma
     if ($file_type == "C2BN") {
       $file_type = "pain.002.001.02";
+    }
+    // Saapuvat verkkolaskut
+    if ($file_type == 'HAELASKUT') {
+      $file_type = 'XR';
+    }
+    // Lähtevät verkkolaskut
+    if ($file_type == 'LAHLASKUT') {
+      $file_type = 'XS';
     }
   }
 
@@ -876,18 +919,9 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   $tuetut_pankit = tuetut_pankit();
   $pankkiyhteys_tunnus = (int) $pankkiyhteys_tunnus;
 
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
-  $result = pupe_query($query);
+  $pankki = hae_pankkiyhteys($pankkiyhteys_tunnus);
 
-  // Jos pankkiyhteyttä ei löydy
-  if (mysql_num_rows($result) != 1) {
-    return false;
-  }
-
-  $pankki = mysql_fetch_assoc($result);
+  if (empty($pankki)) return false;
 
   // Tarkistetaan salasana
   $_pk = pura_salaus($pankki["signing_private_key"], $salasana);
@@ -936,6 +970,18 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   }
 
   return $pankki;
+}
+
+function hae_pankkiyhteys($tunnus) {
+  if ($tunnus < 0) return array();
+
+  $query = "SELECT *
+            FROM pankkiyhteys
+            WHERE tunnus = {$tunnus}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }
 
 function pankkiyhteyden_paivamaarat($pankkiyhteys) {

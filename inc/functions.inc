@@ -8848,7 +8848,7 @@ if (!function_exists('tallenna_liite')) {
     }
 
     $data     = mysql_real_escape_string(file_get_contents($file["tmp_name"]));
-    $filename   = preg_replace("/[^A-Z0-9\._\-%]/i", "", $file["name"]);
+    $filename   = preg_replace("/[^A-Z0-9\.#_\-%]/i", "", $file["name"]);
     $filetype  = mysql_real_escape_string($file["type"]);
     $filesize  = mysql_real_escape_string($file["size"]);
     $selite    = mysql_real_escape_string($selite);

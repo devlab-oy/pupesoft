@@ -2279,11 +2279,6 @@ else {
               $lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
             }
 
-            // Ulkomaisen ytunnuksen korjaus
-            if (substr(trim(strtoupper($lasrow["ytunnus"])), 0, 2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
-              $lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
-            }
-
             if (strtoupper($laskun_kieli) != strtoupper($yhtiorow['kieli'])) {
               //K‰‰nnet‰‰n maksuehto
               $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);

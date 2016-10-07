@@ -634,8 +634,6 @@ if ($upd == 1) {
             $paivita_sisviesti1 = ", sisviesti1 = trim(concat(sisviesti1,' ', '{$otsikrow["sisviesti1"]}')) ";
           }
 
-          $paivita_myos_lisa = "";
-
           // Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
           if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
             $query = "UPDATE lasku SET

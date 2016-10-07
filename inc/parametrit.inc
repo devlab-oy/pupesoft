@@ -559,7 +559,14 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ($phpnimi == 'raportit.php') {
-      setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+      if (!empty($_POST['karhutieto'])) {
+        setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+        $_COOKIE["karhutieto"] = $karhutieto;
+      }
+      else {
+        setcookie('karhutieto', '', 1, "/");
+        $_COOKIE["karhutieto"] = '';
+      }
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {

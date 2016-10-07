@@ -931,7 +931,7 @@ if ($tee != '' and isset($ajaraportti)) {
           else $summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];  // paljo kirjanpidossa avoimena
         }
 
-        if (!empty($karhutieto)) {
+        if (!empty($karhutieto) and $trow['tunnukset'] != '') {
 
           $query = "SELECT max(karhukierros.pvm) as karhupvm,
                     count(karhu_lasku.ltunnus) as karhukerrat

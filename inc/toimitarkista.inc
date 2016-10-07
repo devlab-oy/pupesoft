@@ -127,7 +127,10 @@ if (!function_exists("toimitarkista")) {
         include "inc/pankkitiedot.inc";
         $vastaus = pankkitiedot($tmp_iban, '');
 
-        if ($t[$i] != $vastaus['swift']) {
+        if ($t[$i] != $vastaus['swift'] and $vastaus['swift'] != '' and $vastaus['rahalaitos'] != '') {
+          $swift_virhe = TRUE;
+        }
+        elseif ($t[$i] != '' and $vastaus['swift'] == '' and $vastaus['rahalaitos'] == '') {
           $swift_virhe = TRUE;
         }
       }

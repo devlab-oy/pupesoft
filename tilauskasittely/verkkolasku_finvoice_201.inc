@@ -374,11 +374,19 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
       xml_add("BuyerPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
 
+
+      // Nimikentän pituus
+      $nimikenpit = 70;
+
+      if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+        $nimikenpit = 35;
+      }
+
       $asiakas_nimitieto = trim($lasrow['nimi']." ".$lasrow['nimitark']);
-      $asiakas_nimitieto_array = mb_str_split($asiakas_nimitieto, 70, 2);
+      $asiakas_nimitieto_array = mb_str_split($asiakas_nimitieto, $nimikenpit, 2);
 
       foreach ($asiakas_nimitieto_array as $asiakas_nimi_osa) {
-        xml_add("BuyerOrganisationName", $asiakas_nimi_osa, $tootfinvoice, 70, 2);
+        xml_add("BuyerOrganisationName", $asiakas_nimi_osa, $tootfinvoice, $nimikenpit, 2);
       }
 
       xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"), $tootfinvoice, 35);
@@ -428,7 +436,14 @@ if (!function_exists('finvoice_otsik')) {
 
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
-      xml_add("DeliveryOrganisationName", trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35, 2);
+
+      $asiakas_toimnimitieto = trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']);
+      $asiakas_toimnimitieto_array = mb_str_split($asiakas_toimnimitieto, 35, 2);
+
+      foreach ($asiakas_toimnimitieto_array as $asiakas_toimnimi_osa) {
+        xml_add("DeliveryOrganisationName", $asiakas_toimnimi_osa, $tootfinvoice, 35, 2);
+      }
+
       xml_add("DeliveryOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"), $tootfinvoice, 35);
 
       fputs($tootfinvoice, "<DeliveryPostalAddressDetails>\r\n");

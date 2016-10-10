@@ -2173,40 +2173,54 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     echo t("Päivitettävät kentät");
     echo "<ul>";
 
-    $paivitettavat_kentat = array(
-      'ytunnus',
-      'ovttunnus',
-      'nimi',
-      'nimitark',
-      'osoite',
-      'postino',
-      'postitp',
-      'maa',
-      'chn',
-      'verkkotunnus',
-      'vienti',
-      'toim_ovttunnu',
-      'toim_nimi',
-      'toim_nimitark',
-      'toim_osoite',
-      'toim_postino',
-      'toim_postitp',
-      'toim_maa',
-      'laskutusvkopv',
-      'kolm_ovttunnus',
-      'kolm_nimi',
-      'kolm_nimitark',
-      'kolm_osoite',
-      'kolm_postino',
-      'kolm_postitp',
-      'kolm_maa',
-      'laskutus_nimi',
-      'laskutus_nimitark',
-      'laskutus_osoite',
-      'laskutus_postino',
-      'laskutus_postitp',
-      'laskutus_maa',
-    );
+    if ($toim == "yhtio") {
+      $paivitettavat_kentat = array(
+        'yhtio_nimi',
+        'yhtio_osoite',
+        'yhtio_postino',
+        'yhtio_postitp',
+        'yhtio_maa',
+        'yhtio_ovttunnus',
+        'yhtio_kotipaikka',
+        'alv_tili',
+      );
+    }
+    else {
+      $paivitettavat_kentat = array(
+        'ytunnus',
+        'ovttunnus',
+        'nimi',
+        'nimitark',
+        'osoite',
+        'postino',
+        'postitp',
+        'maa',
+        'chn',
+        'verkkotunnus',
+        'vienti',
+        'toim_ovttunnu',
+        'toim_nimi',
+        'toim_nimitark',
+        'toim_osoite',
+        'toim_postino',
+        'toim_postitp',
+        'toim_maa',
+        'laskutusvkopv',
+        'kolm_ovttunnus',
+        'kolm_nimi',
+        'kolm_nimitark',
+        'kolm_osoite',
+        'kolm_postino',
+        'kolm_postitp',
+        'kolm_maa',
+        'laskutus_nimi',
+        'laskutus_nimitark',
+        'laskutus_osoite',
+        'laskutus_postino',
+        'laskutus_postitp',
+        'laskutus_maa',
+      );
+    }
 
     foreach ($paivitettavat_kentat as $kentta) {
       echo "<li>".ucfirst($kentta)."</li>";

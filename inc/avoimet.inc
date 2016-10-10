@@ -204,7 +204,6 @@ if (mysql_num_rows($toimipaikkares) > 0) {
   echo "</tr>";
 }
 
-
 if ($naytetaankokommentit != "") $komsel = "CHECKED";
 else $komsel = "";
 
@@ -344,10 +343,7 @@ $formi = 'valinta';
 $kentta = 'pp';
 
 if ($tee != '' and isset($ajaraportti)) {
-
-  $toimipaikka = ($toimipaikka === 'kaikki') ? null : (int) $toimipaikka;
-
-  switch ($laji) {
+ switch ($laji) {
   case 'M' :
     $lista = t("myyntisaamiset");
     break;
@@ -409,7 +405,7 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     if (isset($toimipaikka)) {
-      $toimipaikkalisa = " and lasku.vanhatunnus = {$toimipaikka} ";
+      $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 
     if ($laji == 'OOK')   $tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
@@ -752,7 +748,7 @@ if ($tee != '' and isset($ajaraportti)) {
                 sum(lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa) laskuavoinsaldo_valuutassa,
                 sum(lasku.summa) laskusumma,
                 sum(lasku.summa_valuutassa) laskusumma_valuutassa,
-                group_concat(lasku.tunnus) tunnukset";
+                group_concat(lasku.tunnus) tunnukset,";
 
       $groupby = "GROUP BY 1,2,3,4,5";
     }
@@ -1158,7 +1154,8 @@ if ($tee != '' and isset($ajaraportti)) {
     }
 
     // ei rajauksia, voidaan n‰ytt‰‰ erotus kirjanpitoon
-    if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0) {
+    if ($av_lisa1 == "" and $av_lisa3 == "" and $valkoodi == "" and $maa == "" and $karhuja == 0
+      and $toimipaikkalisa == "") {
 
       $query = "SELECT sum(summa) saldo
                 FROM tiliointi

@@ -598,8 +598,7 @@ if ($upd == 1) {
                       (tila IN ('A','0'))
                     )
                   and liitostunnus  = '$otsikrow[tunnus]'
-                  and tapvm         = '0000-00-00'
-                  and chn          != 999";
+                  and tapvm         = '0000-00-00'";
         $laskuores = pupe_query($query);
 
         while ($laskuorow = mysql_fetch_array($laskuores)) {

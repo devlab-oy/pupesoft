@@ -98,7 +98,7 @@ if ($tee == 'add' and $id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
   }
 
   // haetaan kaikki distinct rahtikirjat..
-  $query = "SELECT group_concat(DISTINCT rahtikirjat.otsikkonro) tunnukset, max(rahtikirjat.otsikkonro)+1 rahtikirjanro
+  $query = "SELECT group_concat(DISTINCT rahtikirjat.otsikkonro) tunnukset, max(rahtikirjat.otsikkonro) rahtikirjanro
             FROM rahtikirjat
             JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' $ltun_querylisa)
             $vainvakilliset

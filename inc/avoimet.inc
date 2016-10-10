@@ -316,6 +316,7 @@ if (substr($laji, 0, 1) != 'O') {
   echo "<th>".t("Näytä maksukehotuksien tietoja listalla")."</th>";
   echo "<td colspan='3'>";
   echo "<input type='checkbox' name='karhutieto' {$chk}>";
+  echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
   echo "</td>";
   echo "</tr>";
 

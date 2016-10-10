@@ -559,13 +559,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ($phpnimi == 'raportit.php' and $toim == 'avoimet') {
-      if (!empty($_POST['karhutieto'])) {
-        setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
-        $_COOKIE["karhutieto"] = $karhutieto;
-      }
-      else {
-        setcookie('karhutieto', '', 1, "/");
-        $_COOKIE["karhutieto"] = '';
+      if (isset($tallenna_keksiin)) {
+        if (!empty($_POST['karhutieto'])) {
+          setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+          $_COOKIE["karhutieto"] = $karhutieto;
+        }
+        else {
+          setcookie('karhutieto', '', 1, "/");
+          $_COOKIE["karhutieto"] = '';
+        }
       }
     }
 

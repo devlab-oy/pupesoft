@@ -37,6 +37,7 @@ function presta_hae_asiakkaat_asiakkaittain() {
 
   $query = "SELECT
             asiakas.tunnus as asiakas_tunnus,
+            asiakas.kuljetusohje,
             avainsana.selitetark_5,
             yhteyshenkilo.email,
             yhteyshenkilo.gsm,
@@ -79,14 +80,15 @@ function presta_hae_asiakkaat_asiakkaittain() {
 
     $asiakkaat[] = array(
       "email"                   => $asiakas['email'],
+      "kuljetusohje"            => $asiakas['kuljetusohje'],
       "nimi"                    => $asiakas['nimi'],
+      "osoitteet"               => $osoitteet,
       "presta_customergroup_id" => $asiakas['selitetark_5'],
       "tunnus"                  => $asiakas['yhteyshenkilo_tunnus'],
       "ulkoinen_asiakasnumero"  => $asiakas['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $asiakas['verkkokauppa_nakyvyys'],
       "verkkokauppa_salasana"   => $asiakas['verkkokauppa_salasana'],
       "yhtio"                   => $asiakas['yhtio'],
-      "osoitteet"               => $osoitteet,
     );
   }
 
@@ -109,6 +111,7 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
             max(yhteyshenkilo.verkkokauppa_nakyvyys) as verkkokauppa_nakyvyys,
             max(yhteyshenkilo.verkkokauppa_salasana) as verkkokauppa_salasana,
             max(yhteyshenkilo.yhtio) as yhtio,
+            max(asiakas.kuljetusohje) as kuljetusohje,
             group_concat(yhteyshenkilo.liitostunnus) as asiakkaat
             FROM yhteyshenkilo
             INNER JOIN asiakas ON (asiakas.yhtio = yhteyshenkilo.yhtio
@@ -182,14 +185,15 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     // lisätään asiakas array
     $asiakkaat[] = array(
       "email"                   => $yhteyshenkilo['email'],
+      "kuljetusohje"            => $yhteyshenkilo['kuljetusohje'],
       "nimi"                    => $yhteyshenkilo['nimi'],
+      "osoitteet"               => $osoitteet,
       "presta_customergroup_id" => $yhteyshenkilo['selitetark_5'],
       "tunnus"                  => $yhteyshenkilo['tunnus'],
       "ulkoinen_asiakasnumero"  => $yhteyshenkilo['ulkoinen_asiakasnumero'],
       "verkkokauppa_nakyvyys"   => $yhteyshenkilo['verkkokauppa_nakyvyys'],
       "verkkokauppa_salasana"   => $yhteyshenkilo['verkkokauppa_salasana'],
       "yhtio"                   => $yhteyshenkilo['yhtio'],
-      "osoitteet"               => $osoitteet,
     );
   }
 

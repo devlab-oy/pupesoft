@@ -490,6 +490,8 @@ else {
       }
 
       if (!empty($asiakkaiden_nimet)) {
+        $nimetarray = array();
+
         $query = "SELECT DISTINCT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
                   FROM lasku AS l
                   JOIN tilausrivi AS t ON (
@@ -506,7 +508,28 @@ else {
         $nimetres = pupe_query($query);
 
         while ($nimetrow = mysql_fetch_assoc($nimetres)) {
-          $row['kommentti'] .= "\n{$nimetrow['nimi']}";
+          $nimetarray[] = $nimetrow['nimi'];
+        }
+
+        # Haetaan JT-rivit
+        # Voi olla esim. case jossa otsikko on L X mutta osa riveistä on JT:ssä
+        $query = "SELECT DISTINCT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
+                  FROM tilausrivi AS t
+                  JOIN lasku AS l ON (l.yhtio = t.yhtio AND l.tunnus = t.otunnus)
+                  WHERE t.yhtio = '{$kukarow['yhtio']}'
+                  AND t.tuoteno = '{$row['tuoteno']}'
+                  AND t.jt != 0
+                  AND t.tyyppi = 'L'";
+        $nimetres = pupe_query($query);
+
+        while ($nimetrow = mysql_fetch_assoc($nimetres)) {
+          $nimetarray[] = $nimetrow['nimi'];
+        }
+
+        $nimetarray = array_unique($nimetarray);
+
+        foreach ($nimetarray as $nimi) {
+          $row['kommentti'] .= "\n{$nimi}";
         }
       }
 

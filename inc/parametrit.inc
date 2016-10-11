@@ -255,6 +255,7 @@ unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
 unset($tee_keraysera_debugdir);
 
+unset($default_login_language);
 unset($loginkieli);
 
 unset($magento_api_tt_url);
@@ -429,7 +430,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      if ($browkieli == 'sv') {
+      if (isset($default_login_language) and $browkieli != 'fi') {
+        $browkieli = $default_login_language;
+      }
+      elseif ($browkieli == 'sv') {
         $browkieli = 'se';
       }
       elseif ($browkieli == 'ee') {

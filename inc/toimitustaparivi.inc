@@ -53,36 +53,28 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei valintaa")."</option>";
 
+  $pupesoft_posti = array(
+    // Pakettipalvelut
+    'Postipaketti'                      => 'Posti Postipaketti',
+    'Kotipaketti'                       => 'Posti Kotipaketti',
+    'Palautus'                          => 'Posti Palautus',
+    'Express-paketti'                   => 'Posti Express-paketti',
+    'Express-paketti Aamuksi 09'        => 'Posti Express-paketti Aamuksi 09',
+    'Express-paketti Samana Päivänä 00' => 'Posti Express-paketti Samana Päivänä 00',
+    // Kuljetusyksikkö palvelut
+    'Express-rahti'                     => 'Posti Express-rahti',
+    'Express-rahti Aamuksi 09'          => 'Posti Express-rahti Aamuksi 09',
+    'Express-rahti Illaksi 21'          => 'Posti Express-rahti Illaksi 21',
+    'Priority'                          => 'Posti Priority Ulkomaan lähetys',
+  );
+
   $ulos .= "<optgroup label='Pupesoft / Posti'>";
-  // Pakettipalvelut
-  // $ulos .= "<option value='Pikkupaketti' {$sel["Pikkupaketti"]}>Posti Pikkupaketti</option>";
-  $ulos .= "<option value='Postipaketti' {$sel["Postipaketti"]}>Posti Postipaketti</option>";
-  $ulos .= "<option value='Kotipaketti' {$sel["Kotipaketti"]}>Posti Kotipaketti</option>";
-  $ulos .= "<option value='Palautus' {$sel["Palautus"]}>Posti Palautus</option>";
-  $ulos .= "<option value='Express-paketti' {$sel["Express-paketti"]}>Posti Express-paketti</option>";
-  $ulos .= "<option value='Express-paketti Aamuksi 09' {$sel["Express-paketti Aamuksi 09"]}>Posti Express-paketti Aamuksi 09</option>";
-  $ulos .= "<option value='Express-paketti Samana Päivänä 00' {$sel["Express-paketti Samana Päivänä 00"]}>Posti Express-paketti Samana Päivänä 00</option>";
-  // Kuljetusyksikkö palvelut:
-  $ulos .= "<option value='Express-rahti' {$sel["Express-rahti"]}>Posti Express-rahti</option>";
-  $ulos .= "<option value='Express-rahti Aamuksi 09' {$sel["Express-rahti Aamuksi 09"]}>Posti Express-rahti Aamuksi 09</option>";
-  $ulos .= "<option value='Express-rahti Illaksi 21' {$sel["Express-rahti Illaksi 21"]}>Posti Express-rahti Illaksi 21</option>";
-  // $ulos .= "<option value='Express-rahti Samana Päivänä 00' {$sel["Express-rahti Samana Päivänä 00"]}>Posti Express-rahti Samana Päivänä 00</option>";
-  $ulos .= "<option value='Priority' {$sel["Priority"]}>Posti Priority Ulkomaan lähetys</option>";
+
+  foreach ($pupesoft_posti as $key => $value) {
+    $ulos .= "<option value='{$key}' {$sel[$key]}>{$value}</option>";
+  }
+
   $ulos .= "</optgroup>";
-
-  // Nämä konvertoitava
-  // $ulos .= "<optgroup label='Pupesoft / Itella'>";
-  // $ulos .= "'Express City 00' -> 'Express-paketti Samana Päivänä 00' 2W2124
-  // $ulos .= "'Express Morning 9' -> 'Express-paketti Aamuksi 09' 2W2101
-  // $ulos .= "'Express Business Day 14' -> 'Posti Express-paketti' 2W2102
-  // $ulos .= "'Express Point 00/16' -> ???
-  // $ulos .= "'Express Flex 21' -> 'Kotipaketti'
-  // $ulos .= "'Economy 16' -> 'Postipaketti' 2W2103
-  // $ulos .= "'Customer Return' -> 'Palautus' 2W2108
-  // $ulos .= "'Undelivered Shipment' -> 'Palautus' 2W2108 (postin sivuilla "Posti Noutamaton" mutta ei koodia..)
-  // $ulos .= "'Lisäarvokuljetus' Lisäarvokuljetus-lisäpalvelut ovat jatkossa Express-rahdin lisäpalveluja.Lisäarvokuljetus (kuljetusyksikkö ja paketti) päätuotteena loppuu ja kuljetusyksiköissä palvelu ostetaan jatkossa Express-rahtina.
-  // $ulos .= "'Priority Ulkomaa' -> 'Priority' 2W2015
-
 
   $ulos .= "<optgroup label='Unifaun / Itella'>";
   $ulos .= "<option value='ITELLAMAILEC' {$sel["ITELLAMAILEC"]}>Itella Economy Letter</option>";

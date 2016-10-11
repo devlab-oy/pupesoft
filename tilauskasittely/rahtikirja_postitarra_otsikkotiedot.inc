@@ -145,19 +145,19 @@ if ($toitarow['kuljyksikko'] != '') {
 $selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
 
 // Oletuksena: Posti Express-paketti 14
-$keltainen   = "Express-paketti";
-$kuljetus    = "";
-$keku     = "14";
+$keltainen = "Express-paketti";
+$kuljetus  = "";
+$keku      = "14";
 
-if (strpos($selite_chk, "Aamuksi")     !== FALSE)         $keku = "9";
-if (strpos($selite_chk, "Samana")    !== FALSE)         $keku = "00";
-if (strpos($selite_chk, "Postipaketti")    !== FALSE)         $keku = "16";
-if (strpos($selite_chk, "Kotipaketti")    !== FALSE)         $keku = "21";
-if (strpos($selite_chk, "Illaksi")    !== FALSE)         $keku = "21";
-if (strpos($selite_chk, "00/16") !== FALSE)         $keku = "00/16";
-if (strpos($selite_chk, "Undelivered Shipment") !== FALSE)   $keku = "UNDELIVERED SHIPMENT";
-if (strpos($selite_chk, "Lisäarvokuljetus") !== FALSE)     $keku = "LISÄARVOKULJETUS";
-if (strpos($selite_chk, "Priority") !== FALSE)     $keku = "PRIORITY";
+if (strpos($selite_chk, "Aamuksi") !== false)              $keku = "9";
+if (strpos($selite_chk, "Samana") !== false)               $keku = "00";
+if (strpos($selite_chk, "Postipaketti") !== false)         $keku = "16";
+if (strpos($selite_chk, "Kotipaketti") !== false)          $keku = "21";
+if (strpos($selite_chk, "Illaksi") !== false)              $keku = "21";
+if (strpos($selite_chk, "00/16") !== false)                $keku = "00/16";
+if (strpos($selite_chk, "Undelivered Shipment") !== false) $keku = "UNDELIVERED SHIPMENT";
+if (strpos($selite_chk, "Lisäarvokuljetus") !== false)     $keku = "LISÄARVOKULJETUS";
+if (strpos($selite_chk, "Priority") !== false)             $keku = "PRIORITY";
 
 // Jos on vaarallisia aineita, niin tulostetaan aina VAK/ADR-kortti
 if (count($vakit) > 0) {
@@ -196,16 +196,15 @@ switch ($keku) {
 case "00":
   $tuoteviiva1="2W2124";
   break;
-case "09":
+case "9":
   $tuoteviiva1="2W2101";
   break;
 case "14":
   $tuoteviiva1="2W2102";
   break;
-//case "00/16":
-//  $tuoteviiva1="2W2105";
-//  $tuoteviiva2=">62W>52105";
-//  break;
+case "00/16":
+ $tuoteviiva1="2W2105";
+ break;
 case "16":
   $tuoteviiva1="2W2103";
   break;
@@ -247,34 +246,34 @@ if ($toitarow['kuljyksikko'] != '') {
   //Express-rahti Samana Päivänä 00  2W2142
 
   switch ($keku) {
-    case "00":
-      $tuoteviiva1="2W2124";
-      break;
-    case "09":
-      $tuoteviiva1="2W2143";
-      break;
-    case "14":
-      $tuoteviiva1="2W2144";
-      break;
-    case "21":
-      $tuoteviiva1="2W2145";
-      break;
-    case "VV":
-      $tuoteviiva1="2W2146";
-      break;
-    case "LISÄARVOKULJETUS":
-      $tuoteviiva1="2W2149";
-      break;
-    case "ASIAKASPALAUTUS 14":
-      $tuoteviiva1="2W2147";
-      break;
-    case "UNDELIVERED SHIPMENT":
-      $tuoteviiva1="2W2147";
-      break;
-    case "PRIORITY":
-      $tuoteviiva1="2W2015";
-      break;
-    }
+  case "00":
+    $tuoteviiva1="2W2124";
+    break;
+  case "9":
+    $tuoteviiva1="2W2143";
+    break;
+  case "14":
+    $tuoteviiva1="2W2144";
+    break;
+  case "21":
+    $tuoteviiva1="2W2145";
+    break;
+  case "VV":
+    $tuoteviiva1="2W2146";
+    break;
+  case "LISÄARVOKULJETUS":
+    $tuoteviiva1="2W2149";
+    break;
+  case "ASIAKASPALAUTUS 14":
+    $tuoteviiva1="2W2147";
+    break;
+  case "UNDELIVERED SHIPMENT":
+    $tuoteviiva1="2W2147";
+    break;
+  case "PRIORITY":
+    $tuoteviiva1="2W2015";
+    break;
+  }
 }
 
 if (count($vakit) > 0) {

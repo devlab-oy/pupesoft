@@ -187,6 +187,11 @@ if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
     $maksupaiva = "'$laskvv-$laskkk-$laskpp'";
   }
 }
+elseif ($yhtiorow["verkkolasku_lah"] == "talenom") {
+  // Talenom hoitaa myyntireskontraa, joten ei jätetä laskuja auki Pupen reskontraan
+  $maksaja    = "$kukarow[kuka]";
+  $maksupaiva = "'$lasrow[erpcm]'";
+}
 
 ///* Lasketaan Kassa-alennus *///
 $kassaale         = round($summa*$mehtorow['kassa_alepros']/100, 2);

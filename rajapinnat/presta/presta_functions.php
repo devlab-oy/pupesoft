@@ -210,7 +210,7 @@ function presta_hae_asiakas_tunnuksella($tunnus) {
   $query = "SELECT asiakas.*
             FROM asiakas
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$asiakasnumero}
+            AND tunnus = {$tunnus}
             LIMIT 1";
   $result = pupe_query($query);
 

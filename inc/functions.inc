@@ -24384,8 +24384,8 @@ if  (!function_exists('verkkolaskuputkeen')) {
 
     // Tässä pohditaan laitetaanko verkkolaskuputkeen...
 
-    // Talenomiin laitetaan KAIKKI laskut
-    if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+    // Talenomiin laitetaan KAIKKI laskut (paitsi käteiskuitit)
+    if ($yhtiorow["verkkolasku_lah"] == "talenom" and $masrow["kateinen"] == "") {
       if ($info) {
         echo t("Talenom-siirto");
       }

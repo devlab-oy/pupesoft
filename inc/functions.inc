@@ -33950,14 +33950,14 @@ if (!function_exists('tilausrivin_esisyotto')) {
       $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
     }
 
-    echo json_encode(array(
+    return array(
         'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
         'netto' => $netto,
         'ale' => $ale_arr,
         'kate' => $kate,
         'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
         'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
-    ));
+    );
   }
 }
 

@@ -94,7 +94,9 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'alv' => $alv
   );
 
-  tilausrivin_esisyotto($params);
+  $result = tilausrivin_esisyotto($params);
+
+  echo json_encode($result);
   exit;
 }
 

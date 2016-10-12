@@ -150,7 +150,14 @@ $(document).ready(function() {
     });
 
     $("input[name='hinta']").on('keyup', function() {
-      $("input[name='kpl']").trigger('keyup');
+      if ($("input[name='hinta']").val() != '') {
+        $("input[name='kpl']").trigger('keyup');
+      }
+      else {
+        $('#kate_rivi_laskenta').html('');
+        $('#ykshinta_rivi_laskenta').html('');
+        $('#rivihinta_rivi_laskenta').html('');
+      }
     });
 
     if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {

@@ -3347,10 +3347,14 @@ if (!function_exists("jalkilaske_valmistus")) {
           $query = "SELECT sum(kpl) valmistetut
                     FROM tilausrivi
                     WHERE yhtio        = '$kukarow[yhtio]'
-                    AND otunnus        = '$prow[otunnus]'
-                    AND perheid        = '$prow[perheid]'
-                    AND tuoteno        = '$prow[tuoteno]'
-                    AND tyyppi         IN ('D', 'O')";
+                    and otunnus        = '$prow[otunnus]'
+                    and perheid        = '$prow[perheid]'
+                    and tuoteno        = '$prow[tuoteno]'
+                    and (
+                      (tyyppi = 'D' and toimitettuaika = '0000-00-00 00:00:00')
+                      OR
+                      (tyyppi = 'O')
+                    )";
           $sumres = pupe_query($query);
           $sumrow = mysql_fetch_array($sumres);
 

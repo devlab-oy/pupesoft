@@ -80,161 +80,21 @@ if ($tila == "KORVAMERKITSE" or $tila == "KORVAMERKITSE_AJAX") {
   $rivitunnus = '';
 }
 
-if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
-
-  $lquery = "SELECT *
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus  = '{$tilausnumero}'";
-  $lresult  = pupe_query($lquery);
-  $laskurow = mysql_fetch_assoc($lresult);
-
-  $query = "SELECT *
-            FROM tuote
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            and  tuoteno = '{$tuoteno}'";
-  $aresult = pupe_query($query);
-  $tuoterow = mysql_fetch_assoc($aresult);
-
-  $ale_arr = array();
-
-  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-    $alename = 'ale'.$alepostfix;
-    if (!empty($$alename)) {
-      $ale_arr[$alename] = str_replace(',', '.', $$alename);
-    }
-  }
-
-  $ale_arr['netto'] = $netto;
-  $ale_arr['erikoisale'] = 0;
-  $ale_arr['erikoisale_saapuminen'] = 0;
-
-  if ($yhtiorow['alv_kasittely'] == '') {
-    $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
-
-    $alvillisuus = $hinta / (1 + $alv / 100);
-  }
-  else {
-    $alvillisuus = $hinta;
-  }
-
-  // lisätään alvit (jos hintamuunnos päällä)
-  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-    $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
-  }
-  // poistetaan alvit (jos hintamuunnos päällä)
-  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-    $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
-  }
-
-  $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  $arr = array(
-    'sarjanumeroseuranta' => '',
-    'tuoteno' => $tuoteno,
-    'varattu' => $kpl,
-    'jt' => 0,
-  );
-
-  $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
-
-  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
-  }
-
-  echo json_encode(array(
-      'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
-      'netto' => $netto,
-      'ale' => $ale,
-      'kate' => $kate,
-      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
-    ));
-
-  exit;
-}
-
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
-
-  $lquery = "SELECT *
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus  = '{$tilausnumero}'";
-  $lresult  = pupe_query($lquery);
-  $laskurow = mysql_fetch_assoc($lresult);
-
-  $query = "SELECT *
-            FROM tuote
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            and  tuoteno = '{$tuoteno}'";
-  $aresult = pupe_query($query);
-  $tuoterow = mysql_fetch_assoc($aresult);
-
-  $hinta_ajax = $hinta;
-
-  // Tutkitaan onko tämä myyty ulkomaan alvilla
-  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
-
-  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
-
-  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-    $alename = 'ale'.$alepostfix;
-    if (!empty($$alename)) {
-      $ale[$alename] = str_replace(',', '.', $$alename);
-    }
-  }
-
-  $ale_arr = $ale;
-  $ale_arr['netto'] = $netto;
-  $ale_arr['erikoisale'] = 0;
-  $ale_arr['erikoisale_saapuminen'] = 0;
-
-  if ($yhtiorow['alv_kasittely'] == '') {
-    $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
-
-    $alvillisuus = $hinta / (1 + $alv / 100);
-  }
-  else {
-    $alvillisuus = $hinta;
-  }
-
-  // lisätään alvit (jos hintamuunnos päällä)
-  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-    $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
-  }
-  // poistetaan alvit (jos hintamuunnos päällä)
-  if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
-    $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
-  }
-
-  $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  $arr = array(
-    'sarjanumeroseuranta' => '',
+  $params = array(
+    'tilausnumero' => $tilausnumero,
     'tuoteno' => $tuoteno,
-    'varattu' => $kpl,
-    'jt' => 0,
+    'hinta_ajax' => $hinta,
+    'kpl' => $kpl,
+    'ale1' => $ale1,
+    'ale2' => $ale2,
+    'ale3' => $ale3,
+    'tilausrivi_alvillisuus' => $tilausrivi_alvillisuus,
+    'netto' => $netto,
+    'alv' => $alv
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
-
-  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
-  }
-
-  echo json_encode(array(
-      'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
-      'netto' => $netto,
-      'ale' => $ale_arr,
-      'kate' => $kate,
-      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
-    ));
-
+  tilausrivin_esisyotto($params);
   exit;
 }
 

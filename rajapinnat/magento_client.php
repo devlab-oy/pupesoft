@@ -1494,29 +1494,28 @@ class MagentoClient {
   private function poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
     // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
     $toiminto = false;
-    try {
-      $asiakashinnat = array();
+    $asiakashinnat = array();
 
-      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
-        $asiakashinnat[] = array(
-          'customerEmail' => $asiakas['asiakas_email'],
-          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-          'delete' => 1
-        );
-      }
-
-      $toiminto = $this->_proxy->call(
-        $this->_session,
-        'price_per_customer.setPriceForCustomersPerProduct',
-        array($magento_tuotenumero, $asiakashinnat)
+    foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+      $asiakashinnat = array(
+        'customerEmail' => $asiakas['asiakas_email'],
+        'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+        'delete' => 1
       );
 
-      $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu");
-      $this->debug('magento_tuotteet', $asiakaskohtainenhintadata);
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa!", $e);
+      try {
+        $toiminto = $this->_proxy->call(
+          $this->_session,
+          'price_per_customer.setPriceForCustomersPerProduct',
+          array($magento_tuotenumero, $asiakashinnat)
+        );
+
+        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu");
+      }
+      catch(Exception $e) {
+        $this->_error_count++;
+        $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakas['asiakas_email']}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+      }
     }
 
     return $toiminto;

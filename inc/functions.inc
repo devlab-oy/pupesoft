@@ -33850,6 +33850,117 @@ if (!function_exists('humanize_ohjelma_moduli')) {
   }
 }
 
+if (!function_exists('tilausrivin_esisyotto')) {
+  function tilausrivin_esisyotto($params) {
+    global $kukarow, $yhtiorow;
+    /*
+    ###PARAMS###
+    $tilausnumero
+    $tuoteno
+    $hinta_ajax
+    $kpl
+    $ale1
+    $ale2
+    $ale3
+    $tilausrivi_alvillisuus
+    netto
+    alv
+    */
+
+    if (!isset($params['tilausnumero'])) return false;
+    if (!isset($params['tuoteno'])) return false;
+    if (!isset($params['hinta_ajax'])) return false;
+    if (!isset($params['kpl'])) return false;
+
+    $tilausnumero           = $params['tilausnumero'];
+    $tuoteno                = $params['tuoteno'];
+    $hinta_ajax             = $params['hinta_ajax'];
+    $kpl                    = $params['kpl'];
+    $ale1                   = $params['ale1'];
+    $ale2                   = $params['ale2'];
+    $ale3                   = $params['ale3'];
+    $netto                  = $params['netto'];
+    $alv                    = $params['alv'];
+    $tilausrivi_alvillisuus = $params['tilausrivi_alvillisuus'];
+
+    $lquery = "SELECT *
+               FROM lasku
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$tilausnumero}'";
+    $lresult  = pupe_query($lquery);
+    $laskurow = mysql_fetch_assoc($lresult);
+
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              and  tuoteno = '{$tuoteno}'";
+    $aresult = pupe_query($query);
+    $tuoterow = mysql_fetch_assoc($aresult);
+
+    // Tutkitaan onko tämä myyty ulkomaan alvilla
+    list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+    $hinta = trim($hinta_ajax) != '' ? $hinta_ajax : $hinta;
+
+    $ale_arr = array();
+
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+      $alename = 'ale'.$alepostfix;
+      if (!empty($$alename)) {
+        $ale_arr[$alename] = str_replace(',', '.', $$alename);
+      }
+    }
+
+    $ale_arr['netto'] = $netto;
+    $ale_arr['erikoisale'] = 0;
+    $ale_arr['erikoisale_saapuminen'] = 0;
+
+    if ($yhtiorow['alv_kasittely'] == '') {
+      $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
+
+      $alvillisuus = $hinta / (1 + $alv / 100);
+    }
+    else {
+      $alvillisuus = $hinta;
+    }
+
+    // lisätään alvit (jos hintamuunnos päällä)
+    if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+      $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
+    }
+    // poistetaan alvit (jos hintamuunnos päällä)
+    if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+      $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
+    }
+
+    $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+    $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+    $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+
+    $arr = array(
+      'sarjanumeroseuranta' => '',
+      'tuoteno' => $tuoteno,
+      'varattu' => $kpl,
+      'jt' => 0,
+    );
+
+    $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
+
+    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+    }
+
+    return array(
+        'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+        'netto' => $netto,
+        'ale' => $ale_arr,
+        'kate' => $kate,
+        'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+        'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
+    );
+  }
+}
+
 if (!function_exists("laske_korko")) {
   function laske_korko(Array $params) {
     global $kukarow, $yhtiorow;

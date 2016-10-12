@@ -1510,7 +1510,7 @@ class MagentoClient {
           array($magento_tuotenumero, $asiakashinnat)
         );
 
-        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu");
+        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
       }
       catch(Exception $e) {
         $this->_error_count++;

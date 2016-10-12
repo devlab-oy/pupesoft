@@ -90,7 +90,7 @@ function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
     $use_index = "yhtio_tila_tapvm";
   }
   elseif ($toim == "ASIAKASMYYJA") {
-    $liitostunnuslisa = " and asiakas.myyja in ({$tunnukset})";
+    $liitostunnuslisa = " and asiakas.myyjanro in ({$tunnukset})";
     $use_index = "yhtio_tila_tapvm";
   }
   else {
@@ -102,7 +102,7 @@ function asiakkaanmyynti($tunnukset, $try, $osasto, $vaintamavuosi=FALSE) {
             ROUND(SUM(IF(tapvm > '{$edellinen_vuosi_loppu}', tilausrivi.rivihinta, 0))) tanvuodenalustamyynti
             FROM lasku USE INDEX ({$use_index})
             JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus {$rivilisa})
-            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.asiakas)
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tila    = 'U'
             and lasku.alatila = 'X'

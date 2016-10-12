@@ -316,6 +316,7 @@ if (substr($laji, 0, 1) != 'O') {
   echo "<th>".t("Näytä maksukehotuksien tietoja listalla")."</th>";
   echo "<td colspan='3'>";
   echo "<input type='checkbox' name='karhutieto' {$chk}>";
+  echo "<input type='hidden' name='tallenna_keksiin' value='joo'>";
   echo "</td>";
   echo "</tr>";
 
@@ -931,7 +932,7 @@ if ($tee != '' and isset($ajaraportti)) {
           else $summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];  // paljo kirjanpidossa avoimena
         }
 
-        if (!empty($karhutieto)) {
+        if (!empty($karhutieto) and $trow['tunnukset'] != '') {
 
           $query = "SELECT max(karhukierros.pvm) as karhupvm,
                     count(karhu_lasku.ltunnus) as karhukerrat
@@ -947,7 +948,7 @@ if ($tee != '' and isset($ajaraportti)) {
           $karhurow = mysql_fetch_assoc($karhures);
 
           echo "<td>{$karhurow['karhukerrat']}</td>";
-          echo "<td>{$karhurow['karhupvm']}</td>";
+          echo "<td>".pupe_DataTablesEchoSort($karhurow['karhupvm']).tv1dateconv($karhurow['karhupvm'])."</td>";
 
           $karhutieto_array = $karhurow;
         }
@@ -1066,6 +1067,11 @@ if ($tee != '' and isset($ajaraportti)) {
           $suoritussumma[$yhtiorow["valkoodi"]] += $trow["suoritussumma"];
         }
 
+        if (!empty($karhutieto)) {
+          echo "<td></td>";
+          echo "<td></td>";
+        }
+
         echo "<td class='back' nowrap>";
 
         if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["summa"] != $trow["tiliointisumma_valuutassa"] and $trow["tiliointisumma"] != NULL and $trow["tiliointisumma_valuutassa"] != NULL) {
@@ -1172,7 +1178,9 @@ if ($tee != '' and isset($ajaraportti)) {
       $erotus     = $summatotal + $suoritussummatotal - $trow["saldo"];
       $erotus     = sprintf("%.2f", $erotus);
 
-      echo "<tr><td class='back' colspan='11'><br></td></tr>";
+      $colspan = empty($karhutieto) ? 11 : 13;
+
+      echo "<tr><td class='back' colspan='{$colspan}'><br></td></tr>";
 
       echo "<tr>";
       echo "<th colspan='9'>".t("Erotus avoimet - kohdistamattomat", "", $tili).":</th>";

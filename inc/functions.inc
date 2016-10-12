@@ -3360,8 +3360,11 @@ if (!function_exists("jalkilaske_valmistus")) {
                     and otunnus        = '$prow[otunnus]'
                     and perheid        = '$prow[perheid]'
                     and tuoteno        = '$prow[tuoteno]'
-                    and tyyppi         = 'D'
-                    and toimitettuaika = '0000-00-00 00:00:00'";
+                    and (
+                      (tyyppi = 'D' and toimitettuaika = '0000-00-00 00:00:00')
+                      OR
+                      (tyyppi = 'O')
+                    )";
           $sumres = pupe_query($query);
           $sumrow = mysql_fetch_array($sumres);
 

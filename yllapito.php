@@ -108,15 +108,20 @@ if (!isset($mista))               $mista = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
+$al_lisa_defaultit = " and selitetark_2 = 'Default'";
 
 if ($alias_set != '') {
   if ($rajattu_nakyma != '') {
-    $al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
+    $al_lisa = " and selitetark_2 = '{$alias_set}' and nakyvyys != '' ";
+    $al_lisa_defaultit = " and selitetark_2 = '{$alias_set}'";
   }
   else {
-    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = 'Default') and nakyvyys != '' ";
+    $al_lisa = " and (selitetark_2 = '{$alias_set}' or selitetark_2 = 'Default') and nakyvyys != '' ";
+    $al_lisa_defaultit = " and (selitetark_2 = '{$alias_set}' or selitetark_2 = 'Default')";
   }
 }
+
+$al_lisa_defaultit .= $tunnus == '' ? " and (nakyvyys != '' or selitetark_4 != '') " : " and nakyvyys != '' ";
 
 // pikkuhäkki, ettei rikota css kenttää
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
@@ -318,16 +323,20 @@ if ($upd == 1) {
 
     $query = "SELECT *
               FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               and laji    = 'MYSQLALIAS'
-              and selite  = '$toim.$al_nimi'
-              $al_lisa";
+              and selite  = '{$toim}.{$al_nimi}'
+              {$al_lisa_defaultit}";
     $al_res = pupe_query($query);
     $pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
     if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
       $virhe[$i] = t("Sinulla ei ole oikeutta päivittää tätä kenttää");
       $errori = 1;
+    }
+
+    if ($tunnus == '' and $t[$i] == '' and $pakollisuuden_tarkistus_rivi['selitetark_4'] != '') {
+      $t[$i] = $pakollisuuden_tarkistus_rivi['selitetark_4'];
     }
 
     $tiedostopaate = "";

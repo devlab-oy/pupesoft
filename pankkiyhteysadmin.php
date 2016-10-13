@@ -665,11 +665,11 @@ if ($tee == "") {
       $toiminnot = array(
         'hae_saldo' => array(
           'nimi'        => 'Hae saldo',
-          'disable_for' => array('NDEAFIHH', 'DABAFIHH')
+          'disable_for' => array('NDEAFIHH', 'DABAFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'),
         ),
         'hae_factoring' => array(
           'nimi'        => 'Hae factoring',
-          'disable_for' => array('OKOYFIHH')
+          'disable_for' => array('OKOYFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'),
         ),
         'hae_laskut' => array(
           'nimi' =>'Hae laskut',

@@ -33,18 +33,6 @@ if (mysql_field_name($result, $i) == "lauantai") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "kuljyksikko") {
-
-  $sel='';
-  if ($trow[$i]!='') $sel = 'SELECTED';
-
-  $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value=''>".t("Ei kuljetusyksikkökuljetusta")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Posti lisäpalvelu: Kuljetusyksikkökuljetus")."</option>";
-  $ulos .= "</select></td>";
-  $jatko = 0;
-}
-
 if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $sel = '';

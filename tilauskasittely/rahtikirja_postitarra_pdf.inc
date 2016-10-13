@@ -215,7 +215,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // viivakoodin alapuolella vasen laita
   $pdf->draw_text(18, 250, "SAAPUMISILMOITUS ANKOMSTAVI", $firstpage, $pienibold);
 
-  if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
+  if (count($vakit) > 0) {
     $pdf->draw_text(18, 242, "Lisätietoja 0200 77000, www.posti.fi * Mera information 0200 75000, www.posti.fi.", $firstpage, $pieni);
     $pdf->draw_text(18, 234, "Säilytysaika on yksi (1) täysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.", $firstpage, $pieni);
   }

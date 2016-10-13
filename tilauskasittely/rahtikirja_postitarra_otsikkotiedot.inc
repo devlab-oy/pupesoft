@@ -142,138 +142,90 @@ if ($toitarow['kuljyksikko'] != '') {
   $x_tekstit[7] = $x_tekstit_koko[7] = 'KULJETUSYKSIKKÖ';
 }
 
-$selite_chk = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
+// Asetetaan rahtikirjan tiedot tulostettavaan muotoon
+// tuoteviiva1 = postin palvelukoodi, joka tulostetaan viivakoodina rahtikirjaan
+// $keltainen  = toimitustavan nimi ilman numeroa, joka tulostetaan rahtikirjaan
+// $keku       = toimitustavan numero, joka tulostetaan isolla fontilla rahtikirjaan
+// $kuljetus   = jos kuljetusyksikkö, tässä tulee lukea kuljetusyksikkö, joka tulostetaan erikseen
+switch ($toitarow['virallinen_selite']) {
+  case 'Postipaketti':
+    $tuoteviiva1 = '2W2103';
+    $keltainen   = 'Postipaketti';
+    $kuljetus    = '';
+    $keku        = '16';
 
-// Oletuksena: Posti Express-paketti 14
-$keltainen = "Express-paketti";
-$kuljetus  = "";
-$keku      = "14";
-
-if (strpos($selite_chk, "Aamuksi") !== false)              $keku = "9";
-if (strpos($selite_chk, "Samana") !== false)               $keku = "00";
-if (strpos($selite_chk, "Postipaketti") !== false)         $keku = "16";
-if (strpos($selite_chk, "Kotipaketti") !== false)          $keku = "21";
-if (strpos($selite_chk, "Illaksi") !== false)              $keku = "21";
-if (strpos($selite_chk, "00/16") !== false)                $keku = "00/16";
-if (strpos($selite_chk, "Undelivered Shipment") !== false) $keku = "UNDELIVERED SHIPMENT";
-if (strpos($selite_chk, "Lisäarvokuljetus") !== false)     $keku = "LISÄARVOKULJETUS";
-if (strpos($selite_chk, "Priority") !== false)             $keku = "PRIORITY";
-
-// Jos on vaarallisia aineita, niin tulostetaan aina VAK/ADR-kortti
-if (count($vakit) > 0) {
-  $keku    = "VV";
-  $selite_chk  = "VAK/ADR";
-}
-
-if ($selite_chk != '') {
-  $keltainen = str_replace($keku, '', $selite_chk);
-  $kuljetus  = '';
-}
-
-//Express City 00      2W2124
-//Express Morning 9      2W2101
-//Express Business Day 14  2W2102
-//Express Point 00/16    2W2105
-//Economy 16          2W2103
-//Express Flex 21      2W2104
-//VAK/ADR           2W2116
-//Lisäarvokuljetus        2W2150
-//Asiakaspalautus 14      2W2108
-//Priority Ulkomaa      2W2015
-
-// UUDET
-//Pikkupaketti  2W2461
-//Postipaketti  2W2103
-//Kotipaketti 2W2104
-//Palautus  2W2108
-//Express-paketti 2W102
-//Express-paketti Aamuksi 09  2W101
-//Express-paketti Samana Päivänä 00 2W2124
-
-//Priority  2W2015
-
-switch ($keku) {
-case "00":
-  $tuoteviiva1="2W2124";
-  break;
-case "9":
-  $tuoteviiva1="2W2101";
-  break;
-case "14":
-  $tuoteviiva1="2W2102";
-  break;
-case "00/16":
- $tuoteviiva1="2W2105";
- break;
-case "16":
-  $tuoteviiva1="2W2103";
-  break;
-case "21":
-  $tuoteviiva1="2W2104";
-  break;
-case "VV":
-  $tuoteviiva1="2W2116";
-  break;
-case "LISÄARVOKULJETUS":
-  $tuoteviiva1="2W2150";
-  break;
-case "Palautus":
-  $tuoteviiva1="2W2108";
-  break;
-case "UNDELIVERED SHIPMENT":
-  $tuoteviiva1="2W2108";
-  break;
-case "PRIORITY":
-  $tuoteviiva1="2W2015";
-  break;
-}
-
-if ($toitarow['kuljyksikko'] != '') {
-  $kuljetus  = "Kuljetusyksikkö";
-
-  //Express City 00 kuljetusyksikkö      2W2124
-  //Express Morning 9 kuljetusyksikkö      2W2143
-  //Express Business Day 14 kuljetusyksikkö  2W2144
-  //Express Flex 21 kuljetusyksikkö      2W2145
-  //VAK/ADR kuljetusyksikkö            2W2146
-  //Lisäarvokuljetus kuljetusyksikkö      2W2149
-  //Asiakaspalautus 14 kuljetusyksikkö     2W2147
-
-  //Uudet
-  //Express-rahti 2W2144
-  //Express-rahti Aamuksi 09  2W2143
-  //Express-rahti Illaksi 21  2W2145
-  //Express-rahti Samana Päivänä 00  2W2142
-
-  switch ($keku) {
-  case "00":
-    $tuoteviiva1="2W2124";
     break;
-  case "9":
-    $tuoteviiva1="2W2143";
+  case 'Kotipaketti':
+    $tuoteviiva1 = '2W2104';
+    $keltainen   = 'Kotipaketti';
+    $kuljetus    = '';
+    $keku        = '21';
+
     break;
-  case "14":
-    $tuoteviiva1="2W2144";
+  case 'Express-paketti':
+    $tuoteviiva1 = '2W2102';
+    $keltainen   = 'Express-paketti';
+    $kuljetus    = '';
+    $keku        = '14';
+
     break;
-  case "21":
-    $tuoteviiva1="2W2145";
+  case 'Express-paketti Aamuksi 09':
+    $tuoteviiva1 = '2W2101';
+    $keltainen   = 'Express-paketti Aamuksi';
+    $kuljetus    = '';
+    $keku        = '09';
+
     break;
-  case "VV":
-    $tuoteviiva1="2W2146";
+  case 'Express-paketti Samana Päivänä 00':
+    $tuoteviiva1 = '2W2124';
+    $keltainen   = 'Express-paketti Samana Päivänä';
+    $kuljetus    = '';
+    $keku        = '00';
+
     break;
-  case "LISÄARVOKULJETUS":
-    $tuoteviiva1="2W2149";
+  case 'Express-rahti':
+    $tuoteviiva1 = '2W2144';
+    $keltainen   = 'Express-rahti';
+    $kuljetus    = 'Kuljetusyksikkö';
+    $keku        = '14';
+
     break;
-  case "ASIAKASPALAUTUS 14":
-    $tuoteviiva1="2W2147";
+  case 'Express-rahti Aamuksi 09':
+    $tuoteviiva1 = '2W2143';
+    $keltainen   = 'Express-rahti Aamuksi';
+    $kuljetus    = 'Kuljetusyksikkö';
+    $keku        = '09';
+
     break;
-  case "UNDELIVERED SHIPMENT":
-    $tuoteviiva1="2W2147";
+  case 'Express-rahti Illaksi 21':
+    $tuoteviiva1 = '2W2145';
+    $keltainen   = 'Express-rahti Illaksi';
+    $kuljetus    = 'Kuljetusyksikkö';
+    $keku        = '21';
+
     break;
-  case "PRIORITY":
-    $tuoteviiva1="2W2015";
+  case 'Express-rahti Samana Päivänä 00':
+    $tuoteviiva1 = '2W2142';
+    $keltainen   = 'Express-rahti Samana Päivänä';
+    $kuljetus    = 'Kuljetusyksikkö';
+    $keku        = '00';
+
     break;
-  }
+  case 'Priority':
+    $tuoteviiva1 = '2W2015';
+    $keltainen   = '';
+    $kuljetus    = 'Kuljetusyksikkö';
+    $keku        = 'PRIORITY';
+
+    break;
+  default:
+    // Oletuksena: Posti Express-paketti 14
+    $tuoteviiva1 = '2W2102';
+    $keltainen   = 'Express-paketti';
+    $kuljetus    = '';
+    $keku        = '14';
+
+    break;
 }
 
 if (count($vakit) > 0) {

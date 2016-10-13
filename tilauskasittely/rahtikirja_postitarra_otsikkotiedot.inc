@@ -98,72 +98,84 @@ if ($toitarow['lauantai'] != '') {
 
 // Asetetaan rahtikirjan tiedot tulostettavaan muotoon
 // tuoteviiva1 = postin palvelukoodi, joka tulostetaan viivakoodina rahtikirjaan
-// $keltainen  = toimitustavan nimi ilman numeroa, joka tulostetaan rahtikirjaan
-// $keku       = toimitustavan numero, joka tulostetaan isolla fontilla rahtikirjaan
+// $keltainen  = toimitustavan nimi, joka tulostetaan ensimmäiselle riville
+// $kuljetus   = toimitustavan nimen lisätieto, joka tulostetaan toiselle riville
+// $keku       = toimitustavan numero, joka tulostetaan isolla fontilla nimen viereen
 switch ($toitarow['virallinen_selite']) {
   case 'Pikkupaketti':
     $tuoteviiva1 = '2W2461';
     $keltainen   = 'Pikkupaketti';
+    $kuljetus    = '';
     $keku        = 'P';
 
     break;
   case 'Postipaketti':
     $tuoteviiva1 = '2W2103';
     $keltainen   = 'Postipaketti';
+    $kuljetus    = '';
     $keku        = '16';
 
     break;
   case 'Kotipaketti':
     $tuoteviiva1 = '2W2104';
     $keltainen   = 'Kotipaketti';
+    $kuljetus    = '';
     $keku        = '21';
 
     break;
   case 'Express-paketti':
     $tuoteviiva1 = '2W2102';
     $keltainen   = 'Express-paketti';
+    $kuljetus    = '';
     $keku        = '14';
 
     break;
   case 'Express-paketti Aamuksi 09':
     $tuoteviiva1 = '2W2101';
-    $keltainen   = 'Express-paketti Aamuksi';
+    $keltainen   = 'Express-paketti';
+    $kuljetus    = 'Aamuksi';
     $keku        = '9';
 
     break;
   case 'Express-paketti Samana Päivänä 00':
     $tuoteviiva1 = '2W2124';
-    $keltainen   = 'Express-paketti Samana Päivänä';
+    $keltainen   = 'Express-paketti';
+    $kuljetus    = 'Samana Päivänä';
     $keku        = '00';
 
     break;
   case 'Express-rahti':
     $tuoteviiva1 = '2W2144';
     $keltainen   = 'Express-rahti';
+    $kuljetus    = '';
     $keku        = '14';
 
     break;
   case 'Express-rahti Aamuksi 09':
     $tuoteviiva1 = '2W2143';
-    $keltainen   = 'Express-rahti Aamuksi';
+    $keltainen   = 'Express-rahti';
+    $kuljetus    = 'Aamuksi';
     $keku        = '9';
 
     break;
   case 'Express-rahti Illaksi 21':
     $tuoteviiva1 = '2W2145';
-    $keltainen   = 'Express-rahti Illaksi';
+    $keltainen   = 'Express-rahti';
+    $kuljetus    = 'Illaksi';
     $keku        = '21';
 
     break;
   case 'Express-rahti Samana Päivänä 00':
     $tuoteviiva1 = '2W2142';
-    $keltainen   = 'Express-rahti Samana Päivänä';
+    $keltainen   = 'Express-rahti';
+    $kuljetus    = 'Samana Päivänä';
     $keku        = '00';
 
     break;
   case 'Priority':
     $tuoteviiva1 = '2W2015';
     $keltainen   = 'Priority';
+    $kuljetus    = '';
     $keku        = '';
 
     break;
@@ -171,6 +183,7 @@ switch ($toitarow['virallinen_selite']) {
     // Oletuksena: Posti Express-paketti 14
     $tuoteviiva1 = '2W2102';
     $keltainen   = 'Express-paketti';
+    $kuljetus    = '';
     $keku        = '14';
 
     break;

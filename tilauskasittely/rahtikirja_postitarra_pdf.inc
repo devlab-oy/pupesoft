@@ -130,6 +130,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   // sitten aletaan piirtämään itse PDF sisältöä
   $pdf->draw_text(50, 570, $keltainen, $firstpage, $isobold);
+  $pdf->draw_text(50, 560, $kuljetus, $firstpage, $isobold);
   $pdf->draw_text(220, 570, $keku, $firstpage, $huge);
 
   $pdf->draw_text(18, 540, "Lähettäjä Avsändare From", $firstpage, $pieni);

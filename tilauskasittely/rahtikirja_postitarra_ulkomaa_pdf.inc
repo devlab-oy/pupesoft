@@ -345,7 +345,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(70, 110,  "Time/Heure",  $firstpage, $pieni);
   $pdf->draw_text(130, 110,  "Recipient's signature Signature du destinataire",  $firstpage, $pieni);
 
-  $pdf->draw_text(18, 20,   t("Posti Green - ilmastoystävällinen kuljetus"),          $firstpage, $iso);
+  $pdf->draw_text(18, 20,   t("Posti Green - Carbon neutral delivery"),          $firstpage, $iso);
 
   $pdf->draw_text(270, 20,  "9V".$toitarow['sopimusnro'],    $firstpage, $viivacourier);
 

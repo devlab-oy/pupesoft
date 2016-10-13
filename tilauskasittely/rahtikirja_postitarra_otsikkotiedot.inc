@@ -104,7 +104,7 @@ switch ($toitarow['virallinen_selite']) {
   case 'Pikkupaketti':
     $tuoteviiva1 = '2W2461';
     $keltainen   = 'Pikkupaketti';
-    $keku        = '';
+    $keku        = 'P';
 
     break;
   case 'Postipaketti':
@@ -128,7 +128,7 @@ switch ($toitarow['virallinen_selite']) {
   case 'Express-paketti Aamuksi 09':
     $tuoteviiva1 = '2W2101';
     $keltainen   = 'Express-paketti Aamuksi';
-    $keku        = '09';
+    $keku        = '9';
 
     break;
   case 'Express-paketti Samana Päivänä 00':
@@ -146,7 +146,7 @@ switch ($toitarow['virallinen_selite']) {
   case 'Express-rahti Aamuksi 09':
     $tuoteviiva1 = '2W2143';
     $keltainen   = 'Express-rahti Aamuksi';
-    $keku        = '09';
+    $keku        = '9';
 
     break;
   case 'Express-rahti Illaksi 21':

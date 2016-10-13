@@ -43,6 +43,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $pupesoft_posti = array(
     // Pakettipalvelut
+    'Pikkupaketti',
     'Postipaketti',
     'Kotipaketti',
     'Palautus',
@@ -53,6 +54,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
     'Express-rahti',
     'Express-rahti Aamuksi 09',
     'Express-rahti Illaksi 21',
+    'Express-rahti Samana Päivänä 00',
     'Priority',
   );
 

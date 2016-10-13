@@ -101,6 +101,12 @@ if ($toitarow['lauantai'] != '') {
 // $keltainen  = toimitustavan nimi ilman numeroa, joka tulostetaan rahtikirjaan
 // $keku       = toimitustavan numero, joka tulostetaan isolla fontilla rahtikirjaan
 switch ($toitarow['virallinen_selite']) {
+  case 'Pikkupaketti':
+    $tuoteviiva1 = '2W2461';
+    $keltainen   = 'Pikkupaketti';
+    $keku        = '';
+
+    break;
   case 'Postipaketti':
     $tuoteviiva1 = '2W2103';
     $keltainen   = 'Postipaketti';
@@ -157,8 +163,8 @@ switch ($toitarow['virallinen_selite']) {
     break;
   case 'Priority':
     $tuoteviiva1 = '2W2015';
-    $keltainen   = '';
-    $keku        = 'PRIORITY';
+    $keltainen   = 'Priority';
+    $keku        = '';
 
     break;
   default:

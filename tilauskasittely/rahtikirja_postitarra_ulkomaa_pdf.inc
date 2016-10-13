@@ -148,14 +148,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
-  if ($toitarow['virallinen_selite'] == "Priority") {
+  if ($keltainen == "Priority") {
     $data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
     $image = $pdf->jfif_embed($data);
     $logoparam['scale'] = 0.105;
     $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
   }
   else {
-    $pdf->draw_text(65, 570,  $selite_chk, $firstpage, $norm);
+    $pdf->draw_text(65, 570, $keltainen, $firstpage, $norm);
   }
 
   if (class_exists("Image_Barcode")) {

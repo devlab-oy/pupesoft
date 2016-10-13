@@ -130,7 +130,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   // sitten aletaan piirtämään itse PDF sisältöä
   $pdf->draw_text(50, 570, $keltainen, $firstpage, $isobold);
-  $pdf->draw_text(50, 560, $kuljetus, $firstpage, $isobold);
   $pdf->draw_text(220, 570, $keku, $firstpage, $huge);
 
   $pdf->draw_text(18, 540, "Lähettäjä Avsändare From", $firstpage, $pieni);
@@ -237,8 +236,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18, 130, strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $isobold);
 
   // viivakoodin alapuolella vasen laita
-  $oikpos = $pdf->strlen("$keltainen $kuljetus", $pienibold);
-  $pdf->draw_text(400-$oikpos, 250, "$keltainen $kuljetus", $firstpage, $pienibold);
+  $oikpos = $pdf->strlen($keltainen, $pienibold);
+  $pdf->draw_text(400-$oikpos, 250, $keltainen, $firstpage, $pienibold);
   $pdf->draw_text(250, 225, "Lisätiedot Tilläggsuppgifter", $firstpage, $pieni);
 
   $apkal = 216;

@@ -55,23 +55,23 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $pupesoft_posti = array(
     // Pakettipalvelut
-    'Postipaketti'                      => 'Posti Postipaketti',
-    'Kotipaketti'                       => 'Posti Kotipaketti',
-    'Palautus'                          => 'Posti Palautus',
-    'Express-paketti'                   => 'Posti Express-paketti',
-    'Express-paketti Aamuksi 09'        => 'Posti Express-paketti Aamuksi 09',
-    'Express-paketti Samana Päivänä 00' => 'Posti Express-paketti Samana Päivänä 00',
+    'Postipaketti',
+    'Kotipaketti',
+    'Palautus',
+    'Express-paketti',
+    'Express-paketti Aamuksi 09',
+    'Express-paketti Samana Päivänä 00',
     // Kuljetusyksikkö palvelut
-    'Express-rahti'                     => 'Posti Express-rahti',
-    'Express-rahti Aamuksi 09'          => 'Posti Express-rahti Aamuksi 09',
-    'Express-rahti Illaksi 21'          => 'Posti Express-rahti Illaksi 21',
-    'Priority'                          => 'Posti Priority Ulkomaan lähetys',
+    'Express-rahti',
+    'Express-rahti Aamuksi 09',
+    'Express-rahti Illaksi 21',
+    'Priority',
   );
 
-  $ulos .= "<optgroup label='Pupesoft / Posti'>";
+  $ulos .= "<optgroup label='Posti'>";
 
-  foreach ($pupesoft_posti as $key => $value) {
-    $ulos .= "<option value='{$key}' {$sel[$key]}>{$value}</option>";
+  foreach ($pupesoft_posti as $value) {
+    $ulos .= "<option value='{$value}' {$sel[$value]}>{$value}</option>";
   }
 
   $ulos .= "</optgroup>";

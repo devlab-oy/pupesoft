@@ -1086,6 +1086,8 @@ if ($tee == 'tulosta') {
         }
       }
 
+      pupesoft_log('toimitusvahvistus_email', "Ollaan menossa toimitusvahvistuksen l‰hetykseen? ({$rakir_row["toimitusvahvistus"]})");
+
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
 
       if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
@@ -1102,7 +1104,11 @@ if ($tee == 'tulosta') {
           $desadv_version = "";
         }
 
+        pupesoft_log('toimitusvahvistus_email', "Ollaan menossa require-iffiin ({$rakir_row["toimitusvahvistus"]})");
+
         if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
+
+          pupesoft_log('toimitusvahvistus_email', "P‰‰stiin reuire-iffist‰ l‰pi ({$rakir_row["toimitusvahvistus"]})");
 
           if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
 
@@ -1115,6 +1121,8 @@ if ($tee == 'tulosta') {
 
             $myynti_vai_osto = 'M';
           }
+
+          pupesoft_log('toimitusvahvistus_email', "Itse require ({$rakir_row["toimitusvahvistus"]})");
 
           require "tilauskasittely/$rakir_row[toimitusvahvistus]";
 

@@ -1446,7 +1446,12 @@ class MagentoClient {
       return false;
     }
 
+    $current = 0;
+    $total = count($asiakaskohtainenhintadata);
+
     foreach($asiakaskohtainenhintadata as $hintadata) {
+      $current++;
+
       try {
         $reply = $this->_proxy->call(
           $this->_session,
@@ -1454,7 +1459,7 @@ class MagentoClient {
           array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
         $this->debug('magento_tuotteet', $hintadata);
       }
       catch (Exception $e) {
@@ -1503,8 +1508,13 @@ class MagentoClient {
   }
 
   private function poista_tuotteen_asiakaskohtaiset_hinnat(Array $asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
+    $current = 0;
+    $total = count($asiakkaat_per_yhteyshenkilo);
+
     // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
     foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+      $current++;
+
       $asiakashinnat = array(
         'customerEmail' => $asiakas['asiakas_email'],
         'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
@@ -1518,7 +1528,7 @@ class MagentoClient {
           array($magento_tuotenumero, $asiakashinnat)
         );
 
-        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
       }
       catch(Exception $e) {
         $this->_error_count++;

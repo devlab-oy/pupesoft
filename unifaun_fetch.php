@@ -356,6 +356,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // sscc_ulkoinen magentoa varten
         $sscc_ulkoinen = $sscc_ulk_arr[$key];
 
+        pupesoft_log('toimitusvahvistus_email', "Ollaan menossa toimitusvahvistuksen l‰hetykseen? ({$laskurow['toimitusvahvistus']})");
+
         $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
 
         if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
@@ -372,7 +374,11 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $desadv_version = "";
           }
 
+          pupesoft_log('toimitusvahvistus_email', "Ollaan menossa require-iffiin ({$laskurow['toimitusvahvistus']})");
+
           if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
+
+            pupesoft_log('toimitusvahvistus_email', "P‰‰stiin reuire-iffist‰ l‰pi ({$laskurow['toimitusvahvistus']})");
 
             $rakir_row = $laskurow;
 
@@ -382,6 +388,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
               $myynti_vai_osto = 'M';
             }
+
+            pupesoft_log('toimitusvahvistus_email', "Itse require ({$laskurow['toimitusvahvistus']})");
 
             require "tilauskasittely/{$laskurow['toimitusvahvistus']}";
 
